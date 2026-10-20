@@ -33,7 +33,7 @@ export const AUDIT_WRITE_FAILED_AFTER_COMMIT = "AUDIT_WRITE_FAILED_AFTER_COMMIT"
 // failures are the common cause) and, if the record is still lost, a distinct `critical: true` marker in the
 // error log so alerting can page on it. Everything else keeps the single attempt of Stage 4. The mutation has
 // committed either way; this helper never claims otherwise and never reports atomicity.
-export const CRITICAL_AUDIT_ACTION = /kill-switch|system recovered|dealer verification|onboarding policy|dealer decision|listing decision|user (deleted|deactivated|reactivated)|referral|subdomain|bulk_car_delete|seller settings|staff governance/i;
+export const CRITICAL_AUDIT_ACTION = /kill-switch|system recovered|dealer verification|onboarding policy|dealer decision|listing decision|user (deleted|deactivated|reactivated)|referral|subdomain|bulk_car_delete|seller settings/i;
 export const isCriticalAuditAction = (entry) => CRITICAL_AUDIT_ACTION.test(String(entry?.action ?? ""));
 
 export async function auditAfterCommit(entry) {

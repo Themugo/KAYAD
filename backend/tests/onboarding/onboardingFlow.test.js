@@ -216,6 +216,9 @@ describe("STAGE 5 requireDealerVerification follows the owner's dealer mode", ()
   test.each(["approval_required", "self_onboarding", "closed"])("an APPROVED dealer is unaffected by mode %s", async (mode) => {
     __setOnboardingPolicyForTests({ dealerOnboardingMode: mode });
     dealerModel.findOne.mockResolvedValue({ approved: true });
+    // Stage 5F.16: set the verification state explicitly. The check used to inherit whatever verification mock the
+    // previous test left behind (a leaked "pending"), which Stage 5F.12 correctly stopped treating as approved.
+    verificationModel.findOne.mockResolvedValue(mode === "closed" ? { verificationStatus: "approved" } : null);
     const { next } = await run({ id: U, role: "dealer" });
     expect(next).toHaveBeenCalled();
   });

@@ -92,10 +92,13 @@ describe("dealer approval is NOT listing approval", () => {
     expect(tables.cars.find((c) => c.id === "c1").status).toBe("pending");
     expect(tables.cars.find((c) => c.id === "c1").isVerifiedDealer).toBe(true);
   });
-  test("auto_publish: approving the dealer publishes pending listings; sold listings are untouched", async () => {
+  test("auto_publish: approving the dealer does NOT bulk-publish pending listings; sold listings are untouched", async () => {
+    // Stage 5F.12 / 5F.16 invariant: dealer approval and listing approval are separate decisions. The owner's
+    // auto_publish setting governs listings at the point a listing is submitted, never a bulk side effect of approving
+    // the business. (This test previously asserted the opposite; the stated requirement changed.)
     __setOnboardingPolicyForTests({ listingModeration: "auto_publish" });
     await decide(approveVerification);
-    expect(tables.cars.find((c) => c.id === "c1").status).toBe("available");
+    expect(tables.cars.find((c) => c.id === "c1").status).toBe("pending");
     expect(tables.cars.find((c) => c.id === "c2").status).toBe("sold");
   });
   test("untrusted policy never bulk-publishes", async () => {

@@ -1,8 +1,4 @@
 import { getSupabase } from "./supabase.js";
-import { isGateRefusal, toGateConflict } from "../services/privateSellerAuctionEligibility.service.js";
-
-// Stage 5F.10: the DB gate raises PRIVATE_SELLER_AUCTION_NOT_ELIGIBLE inside the transaction; surface it as a 409.
-const throwMapped = (error) => { throw isGateRefusal(error) ? toGateConflict(error) : error; };
 
 /**
  * Database-level atomic operations for financial and auction-critical paths.
@@ -40,7 +36,7 @@ export async function atomicPlaceBid({
     p_status: status,
     p_checkout_request_id: checkoutRequestId,
   });
-  if (error) throwMapped(error);
+  if (error) throw error;
   return data;
 }
 
@@ -49,7 +45,7 @@ export async function atomicConfirmBidPayment(checkoutRequestId, receipt = null)
     p_checkout_request_id: checkoutRequestId,
     p_receipt: receipt,
   });
-  if (error) throwMapped(error);
+  if (error) throw error;
   return data;
 }
 
@@ -58,7 +54,7 @@ export async function atomicAutoBid(carId) {
   const { data, error } = await getSupabase().rpc("kayad_auto_bid_atomic", {
     p_car_id: carId,
   });
-  if (error) throwMapped(error);
+  if (error) throw error;
   return data;
 }
 
@@ -76,7 +72,7 @@ export async function atomicSettleBidPayment(paymentId, receipt = null) {
     p_payment_id: paymentId,
     p_receipt: receipt,
   });
-  if (error) throwMapped(error);
+  if (error) throw error;
   return data;
 }
 
@@ -132,7 +128,7 @@ export async function atomicTransitionEscrow({
 
 export async function atomicStartAuction({ carId, durationMs, startingBid, reservePrice = null, reserveMode = "none" }) {
   const { data, error } = await getSupabase().rpc("kayad_start_auction_atomic", { p_car_id: carId, p_duration_ms: durationMs, p_starting_bid: startingBid, p_reserve_price: reservePrice, p_reserve_mode: reserveMode });
-  if (error) throwMapped(error);
+  if (error) throw error;
   return data;
 }
 
@@ -144,7 +140,7 @@ export async function atomicStartScheduledAuction({ carId, scheduledEndAt, start
     p_reserve_price: reservePrice,
     p_reserve_mode: reserveMode,
   });
-  if (error) throwMapped(error);
+  if (error) throw error;
   return data;
 }
 

@@ -5,7 +5,6 @@
 // ─────────────────────────────────────────────────────────────
 
 import { addTimelineEvent, getLeadTimeline } from "./leadTimelineService.js";
-import { evaluateEligibilityBatch } from "./privateSellerAuctionEligibility.service.js";
 import { logInfo, logError } from "../utils/logger.js";
 import { findAll, findById, findOne, create, update, updateMany, count, aggregate } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
@@ -364,11 +363,6 @@ export const findOrCreateLeadFromAuction = async (auctionId, buyerId) => {
     const vehicle = await findById("cars", auctionId);
     if (!vehicle || !["live", "ended"].includes(vehicle.auctionStatus)) {
       throw new Error("Auction not found");
-    }
-    // Stage 5F.10: no new buyer lead on a live auction that fails the PostgreSQL private-seller gate.
-    if (vehicle.auctionStatus === "live") {
-      const verdict = (await evaluateEligibilityBatch([vehicle.id])).get(String(vehicle.id));
-      if (verdict?.eligible !== true) throw new Error("Auction not found");
     }
     if (!vehicle) {
       throw new Error("Vehicle not found");

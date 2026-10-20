@@ -2,23 +2,6 @@ import Car from "../models/Car.js";
 import Bid from "../models/Bid.js";
 import { findAll } from "../db/index.js";
 import { getEffectiveEscrowForCar } from "../services/escrowCapability.service.js";
-import { evaluateEligibilityBatch } from "../services/privateSellerAuctionEligibility.service.js";
-
-// Stage 5F.10: public exposure goes through the PostgreSQL private-seller gate. Non-ended auctions of a
-// vehicle that fails the gate are not shown (fail-closed: if the gate cannot be evaluated, nothing
-// unverified is shown and the caller gets a 503). Ended auctions stay visible so winners keep their record.
-const gateOpenAuctions = async (cars) => {
-  const rows = Array.isArray(cars) ? cars : [];
-  const open = rows.filter((c) => c && c.auctionStatus !== "ended");
-  if (!open.length) return rows;
-  const verdicts = await evaluateEligibilityBatch(open.map((c) => c.id ?? c._id));
-  return rows.filter((c) => c && (c.auctionStatus === "ended" || verdicts.get(String(c.id ?? c._id))?.eligible === true));
-};
-const isCarPubliclyEligible = async (car) => (await gateOpenAuctions([car])).length === 1;
-const sendGateError = (res, err) => {
-  if (err?.status === 503) return res.status(503).json({ success: false, code: err.code, message: err.message });
-  throw err;
-};
 
 // KAYAD canonical auction model: auction lifecycle state is stored on the
 // cars row (auctionStatus, auctionStartTime, auctionEnd, currentBid, etc.).
@@ -142,11 +125,7 @@ export const listAuctions = async (req, res) => {
     const ids = pageRows.map((setup) => setup.car_id).filter(Boolean);
     const cars = ids.length ? await Car.find({ deletedAt: { $exists: false }, status: { $ne: "rejected" }, id: { $in: ids } }).lean() : [];
     const byId = new Map(cars.map((car) => [String(car.id), car]));
-    let gatedCars;
-    try { gatedCars = await gateOpenAuctions(cars); } catch (err) { return sendGateError(res, err); }
-    const gatedIds = new Set(gatedCars.map((c) => String(c.id)));
     const auctions = pageRows.map((setup) => {
-      if (!gatedIds.has(String(setup.car_id))) return null;
       const car = byId.get(String(setup.car_id));
       if (!car) return null;
       const config = setup.config || {};
@@ -177,9 +156,7 @@ export const listAuctions = async (req, res) => {
     Car.countDocuments(filter),
   ]);
 
-  let gated;
-  try { gated = await gateOpenAuctions(cars); } catch (err) { return sendGateError(res, err); }
-  const auctions = gated.map(toAuctionResponse);
+  const auctions = cars.map(toAuctionResponse);
   res.json({
     success: true,
     auctions,
@@ -192,10 +169,6 @@ export const getAuction = async (req, res) => {
   if (!car || car.deletedAt || car.status === "rejected") {
     return res.status(404).json({ success: false, message: "Auction not found" });
   }
-
-  try {
-    if (!(await isCarPubliclyEligible(car))) return res.status(404).json({ success: false, message: "Auction not published" });
-  } catch (err) { return sendGateError(res, err); }
 
   const setup = await findAll("auction_setups", {
     filters: { car_id: car.id, publication_status: "published" },
@@ -227,7 +200,7 @@ export const getAuction = async (req, res) => {
   // cars.escrow_enabled column.
   const effectiveEscrowEnabled = await getEffectiveEscrowForCar({
     carEscrowEnabled: car.escrowEnabled,
-    sellerId: car.dealer?.id ?? car.dealer?._id ?? car.dealer,
+    sellerId: car.dealer?._id || car.dealer,
   });
 
   // Public auction activity must never expose bidder PII. Only confirmed
@@ -269,9 +242,6 @@ export const getPublicAuctionBids = async (req, res) => {
   if (!car || car.deletedAt || car.status === "rejected") {
     return res.status(404).json({ success: false, message: "Auction not found" });
   }
-  try {
-    if (!(await isCarPubliclyEligible(car))) return res.status(404).json({ success: false, message: "Auction not published" });
-  } catch (err) { return sendGateError(res, err); }
   const setup = await findAll("auction_setups", {
     filters: { car_id: car.id, publication_status: "published" },
     limit: 1,
@@ -364,11 +334,9 @@ export const getActiveAuctions = async (req, res) => {
     Car.countDocuments(filter),
   ]);
 
-  let gated;
-  try { gated = await gateOpenAuctions(cars); } catch (err) { return sendGateError(res, err); }
   res.json({
     success: true,
-    auctions: gated.map(toAuctionResponse),
+    auctions: cars.map(toAuctionResponse),
     pagination: { page, limit, total, pages: Math.ceil(total / limit) },
   });
 };

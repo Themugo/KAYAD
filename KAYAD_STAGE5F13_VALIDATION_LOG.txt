@@ -1,0 +1,19 @@
+Stage 5F.13 source-level verification log
+Foundation SHA-256: cfe3d3fd81fa9436d93d30ecd0282ab9c80114cd5fb1eb98ec79e383b06133e5
+ZIP integrity: PASS
+Node version: v22.16.0 (below package engine >=22.22.2)
+Docker: unavailable
+psql: unavailable
+postgres/initdb: unavailable
+Local PG environment variables: none configured
+
+PASS node scripts/validate-stage5f12-dealer-workflow.mjs — 13/13
+PASS node scripts/validate-transaction-integrity.mjs — 14/14
+PASS node scripts/validate-inspection-marketplace.mjs — 37/37
+PASS node scripts/validate-registration-onboarding.mjs — 47/47
+PASS node scripts/validate-system-owner-staff-governance.mjs — source-contract checks
+PASS node scripts/validate-stage5f5-private-seller-dashboard.mjs — 11/11
+PASS node scripts/validate-admin-control-plane-e2e.mjs — 11/11 source-contract checks only
+BLOCKED npm test -- --run backend/tests/regression/stage5DealerDecisions.test.js — exit 127: vitest not found
+
+No real DB/API/browser tests executed. No hosted mutations.

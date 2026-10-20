@@ -1,11 +1,11 @@
 import type React from 'react';
-import { createContext, useContext, useState, useMemo, useEffect, useRef } from 'react';
+import { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Vehicle, BodyStyle } from '../types';
 import { useOptionalAuth } from './AuthContext';
 import { useVehicleCollections } from '../hooks/useVehicleCollections';
 import { getCars, mapBackendCarToVehicle } from '../services/vehicleApi';
-import { fetchMyBids, placeBid as placeBidApi, BidApiError } from '../services/bidApi';
+import { fetchMyBids, placeBid as placeBidApi } from '../services/bidApi';
 import type { FC } from 'react';
 
 // Local type definitions for context state
@@ -153,8 +153,6 @@ interface MarketplaceContextType {
   resetFilters: () => void;
   bids: BidLocal[];
   placeBid: (vehicleId: string, amount: number, bidderName: string, bidderId: string) => Promise<boolean>;
-  /** Why the backend refused the most recent bid (e.g. private-seller verification/custody not complete). Null after a success. */
-  getLastBidRefusal: () => { code?: string; status?: number; message: string } | null;
   escrowContracts: EscrowContractLocal[];
   initiateEscrow: (vehicle: Vehicle, buyerId: string, buyerName: string) => EscrowContractLocal;
   updateEscrowStep: (contractId: string, nextStep: number) => void;
@@ -328,20 +326,14 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
   // (POST /api/bids/:id/bid) accepts it — the frontend never decides
   // the current bid, the minimum bid, or the winner. Local bid history
   // is updated only after server confirmation.
-  const lastBidRefusalRef = useRef<{ code?: string; status?: number; message: string } | null>(null);
-  const getLastBidRefusal = () => lastBidRefusalRef.current;
   const placeBid = async (vehicleId: string, amount: number, bidderName: string, bidderId: string): Promise<boolean> => {
     const target = vehicles.find(v => v.id === vehicleId);
-    lastBidRefusalRef.current = null;
     if (!target) return false;
 
     try {
       const res = await placeBidApi(vehicleId, amount);
       if (!res?.success) return false;
-    } catch (err) {
-      // The backend (and, inside the same transaction, PostgreSQL) is the only authority on whether a bid may be placed;
-      // keep its reason so the page can state it honestly instead of a generic failure.
-      if (err instanceof BidApiError) lastBidRefusalRef.current = { code: err.code, status: err.status, message: err.message };
+    } catch {
       return false;
     }
 
@@ -566,7 +558,6 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
         resetFilters,
         bids,
         placeBid,
-        getLastBidRefusal,
         escrowContracts,
         initiateEscrow,
         updateEscrowStep,

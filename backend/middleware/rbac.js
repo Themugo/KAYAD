@@ -32,14 +32,6 @@ export const PERMISSIONS = Object.freeze({
   ESCROW_OPERATIONS: PERM.MANAGE_ESCROW,
   MODERATE_CONTENT: PERM.MANAGE_MODERATION,
   GHOST_CHECK: PERM.MANAGE_INSPECTIONS,
-  // STAGE 5F.5 (D-6): the admin path-layer guard referenced these four names but they were never exported, so the
-  // lookup yielded `undefined` and the guard silently let every staff role through for the audit-log, support/chat,
-  // inspection and staff path families.
-  MANAGE_STAFF: PERM.MANAGE_STAFF,
-  MANAGE_INSPECTIONS: PERM.MANAGE_INSPECTIONS,
-  MANAGE_SUPPORT: PERM.MANAGE_SUPPORT,
-  VIEW_LOGS: PERM.VIEW_LOGS,
-  MANAGE_MODERATION: PERM.MANAGE_MODERATION,
 });
 
 // Merge centralized permissions into rbac's expected format,

@@ -8,7 +8,6 @@
 import { logInfo, logError, logWarn } from "../utils/logger.js";
 import { findAll, findById, update, create } from "../db/index.js";
 import { emitCommunication, COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
-import { evaluateEligibilityBatch } from "./privateSellerAuctionEligibility.service.js";
 
 /**
  * Reminder types and their configurations
@@ -229,10 +228,7 @@ const checkEndingAuctions = async () => {
       },
     });
 
-    // Stage 5F.10: no "auction ending" reminder for an auction whose bidding is blocked by the private-seller gate (fail-closed).
-    const endingVerdicts = auctions.length ? await evaluateEligibilityBatch(auctions.map((a) => a.id)) : new Map();
-
-    for (const auction of auctions.filter((a) => endingVerdicts.get(String(a.id))?.eligible === true)) {
+    for (const auction of auctions) {
       const existing = await findAll("reminders", {
         filters: {
           relatedId: auction.id,

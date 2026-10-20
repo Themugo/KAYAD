@@ -49,47 +49,13 @@ async function operationalSnapshot() {
 }
 
 
-// STAGE 5F.5 (D-7): the snapshot used to (a) derive queue sizes by filtering a 1000-row sample client-side, so any queue
-// larger than 1000 rows was silently under-reported, and (b) report 0 whenever a table could not be read. Every figure is
-// now an exact server-side count; a figure that cannot be read is `null` and named in `unavailable` so the UI can say so.
-// It also carries the three operator queues the Command Centre links to (pending dealers, pending vehicles, support).
-export async function getControlPlaneSnapshot(req, res) {
+export async function getControlPlaneSnapshot(req,res){
   ensureOperator(req);
-  const plan = {
-    // totals
-    users: () => count("users", {}),
-    cars: () => count("cars", { deletedAt: null }),
-    payments: () => count("payments", {}),
-    escrows: () => count("escrows", {}),
-    dealers: () => count("dealers", {}),
-    inspections: () => count("vehicle_inspections", {}),
-    incidents: () => count("incidents", {}),
-    alerts: () => count("alerts", {}),
-    // actionable queues
-    pendingDealers: () => count("users", { role: "dealer", status: "pending" }),
-    pendingVehicles: () => count("cars", { status: "pending", deletedAt: null }),
-    openSupport: () => count("support_tickets", { status: { $in: ["open", "pending", "in_progress"] } }),
-    disputedEscrows: () => count("escrows", { status: "disputed" }),
-    pendingPayments: () => count("payments", { status: "pending" }),
-    openIncidents: () => count("incidents", { status: { $in: ["open", "investigating", "mitigated"] } }),
-    openAlerts: () => count("alerts", { status: { $in: ["open", "acknowledged"] } }),
-  };
-  const names = Object.keys(plan);
-  const settled = await Promise.allSettled(names.map((n) => plan[n]()));
-  const value = {};
-  const unavailable = [];
-  settled.forEach((r, i) => {
-    const ok = r.status === "fulfilled" && Number.isFinite(r.value);
-    value[names[i]] = ok ? r.value : null;
-    if (!ok) unavailable.push(names[i]);
-  });
-  const pick = (keys) => Object.fromEntries(keys.map((k) => [k, value[k]]));
-  return ok(res, {
-    generatedAt: new Date().toISOString(),
-    counts: pick(["users", "cars", "payments", "escrows", "dealers", "inspections", "incidents", "alerts"]),
-    queues: pick(["pendingDealers", "pendingVehicles", "openSupport", "disputedEscrows", "pendingPayments", "openIncidents", "openAlerts"]),
-    unavailable,
-  });
+  const sb = (await import("../utils/supabase.js")).getSupabase();
+  const q = async (table, select="id") => { const {data,error,count}=await sb.from(table).select(select,{count:"exact",head:false}).limit(1000); if(error) throw error; return {rows:data||[],count:count||0}; };
+  const [users,cars,payments,escrows,dealers,inspections,disputes,incidents,alerts] = await Promise.all([q("users"),q("cars"),q("payments"),q("escrows"),q("dealers"),q("vehicle_inspections"),q("escrows","id,status"),q("incidents","id,status,severity"),q("alerts","id,status,severity")]);
+  const snapshot={generatedAt:new Date().toISOString(),counts:{users:users.count,cars:cars.count,payments:payments.count,escrows:escrows.count,dealers:dealers.count,inspections:inspections.count,incidents:incidents.count,alerts:alerts.count},queues:{disputedEscrows:disputes.rows.filter(x=>x.status==='disputed').length,pendingPayments:payments.rows.filter(x=>x.status==='pending').length,openIncidents:incidents.rows.filter(x=>['open','investigating','mitigated'].includes(x.status)).length,openAlerts:alerts.rows.filter(x=>['open','acknowledged'].includes(x.status)).length}};
+  return ok(res,snapshot);
 }
 
 export async function getMissionControl(req, res) {

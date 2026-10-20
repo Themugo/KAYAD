@@ -11,6 +11,7 @@
 // (entity_type/entity_id) in addition to the admin router's automatic audit log.
 // ============================================================
 
+import { accessRoleForTitle, normaliseTitle, setMemberStatus, acceptInvitation, confirmMember } from './organizationService.js';
 import { getSupabase } from '../../utils/supabase.js';
 import { AppError } from '../../utils/AppError.js';
 import { logInfo } from '../../utils/logger.js';
@@ -264,6 +265,7 @@ async function finalise(row, actorId, note) {
 
 /** A mechanic/inspector asks to be affiliated with a business. Not trusted until the business confirms. */
 export async function requestAffiliation(userId, providerId, role) {
+  const title = normaliseTitle(role);   // STAGE 5F.16: the previous 'mechanic' default violated the table's role CHECK (a 500 whenever the client sent no role)
   const provider = await getProviderRow(providerId);
   if (provider.lifecycle_stage !== 'ACTIVE') throw new AppError('That business is not currently accepting affiliations', 409);
   if (String(provider.user_id) === String(userId)) throw new AppError('You own this business', 409);
@@ -273,8 +275,9 @@ export async function requestAffiliation(userId, providerId, role) {
   if (live) return live;
   const [first, ...rest] = String(user.name || '').split(' ');
   const created = must(await sb().from('inspection_staff').insert({
-    provider_id: providerId, user_id: userId, first_name: first || null, last_name: rest.join(' ') || null, role: text(role, 60) || 'mechanic',
+    provider_id: providerId, user_id: userId, first_name: first || null, last_name: rest.join(' ') || null, role: title, access_role: accessRoleForTitle(title), branch_id: null,
     is_active: false, affiliation_status: 'pending', user_confirmed_at: new Date().toISOString(),
+    invitation_expires_at: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
   }).select('*').single());
   await audit('staff', created.id, null, 'pending', userId, 'affiliation requested by the individual');
   return created;
@@ -282,6 +285,7 @@ export async function requestAffiliation(userId, providerId, role) {
 
 /** The business invites a registered user by email. Not trusted until the person accepts. */
 export async function inviteStaff(ownerId, providerId, email, role) {
+  const title = normaliseTitle(role);
   const provider = await getProviderRow(providerId);
   if (provider.lifecycle_stage !== 'ACTIVE') throw new AppError('Only an active, verified business can add staff', 409);
   const clean = text(email, 254).toLowerCase();
@@ -292,49 +296,35 @@ export async function inviteStaff(ownerId, providerId, email, role) {
   if (live) return live;
   const [first, ...rest] = String(user.name || '').split(' ');
   const created = must(await sb().from('inspection_staff').insert({
-    provider_id: providerId, user_id: user.id, first_name: first || null, last_name: rest.join(' ') || null, role: text(role, 60) || 'mechanic',
-    is_active: false, affiliation_status: 'pending', provider_confirmed_at: new Date().toISOString(),
+    provider_id: providerId, user_id: user.id, first_name: first || null, last_name: rest.join(' ') || null, role: title, access_role: accessRoleForTitle(title), branch_id: null,
+    is_active: false, affiliation_status: 'pending', provider_confirmed_at: new Date().toISOString(), invited_by: ownerId,
+    invitation_expires_at: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString(),
   }).select('*').single());
   await audit('staff', created.id, null, 'pending', ownerId, 'invited by the business');
   return created;
 }
 
+/** Accept is bound to the invited user, single-use and time-limited inside the database (kayad_org_member_accept). */
 export async function acceptAffiliation(userId, staffId) {
-  const row = must(await sb().from('inspection_staff').select('*').eq('id', staffId).maybeSingle());
-  if (!row || String(row.user_id) !== String(userId)) throw new AppError('Affiliation not found', 404);
-  if (row.affiliation_status !== 'pending') throw new AppError(`Affiliation is ${row.affiliation_status}`, 409);
-  const stamped = must(await sb().from('inspection_staff').update({ user_confirmed_at: row.user_confirmed_at || new Date().toISOString() }).eq('id', staffId).select('*').single());
-  return finalise(stamped, userId, 'accepted by the individual');
+  return acceptInvitation(userId, staffId);
 }
 
+/** A person asked to join; the business confirms. The database verifies the confirmer's authority over THIS membership. */
 export async function confirmAffiliationByBusiness(ownerId, providerId, staffId) {
-  const row = must(await sb().from('inspection_staff').select('*').eq('id', staffId).maybeSingle());
+  const row = must(await sb().from('inspection_staff').select('id,provider_id').eq('id', staffId).maybeSingle());
   if (!row || String(row.provider_id) !== String(providerId)) throw new AppError('Affiliation not found', 404);
-  if (row.affiliation_status !== 'pending') throw new AppError(`Affiliation is ${row.affiliation_status}`, 409);
-  const provider = await getProviderRow(providerId);
-  if (provider.lifecycle_stage !== 'ACTIVE') throw new AppError('Only an active, verified business can confirm staff', 409);
-  const stamped = must(await sb().from('inspection_staff').update({ provider_confirmed_at: row.provider_confirmed_at || new Date().toISOString() }).eq('id', staffId).select('*').single());
-  return finalise(stamped, ownerId, 'confirmed by the business');
+  return confirmMember(ownerId, staffId);
 }
 
-/** Ends an affiliation. Their staff-bound capabilities are revoked so the old relationship is never shown as current. */
+/** Ends an affiliation (immediate loss of standing, assignments released, staff-bound capabilities revoked) — all in one DB transaction. */
 export async function endAffiliation(actorId, staffId, { providerId } = {}) {
-  const row = must(await sb().from('inspection_staff').select('*').eq('id', staffId).maybeSingle());
+  const row = must(await sb().from('inspection_staff').select('id,provider_id,user_id').eq('id', staffId).maybeSingle());
   if (!row || (providerId && String(row.provider_id) !== String(providerId))) throw new AppError('Affiliation not found', 404);
-  if (row.affiliation_status === 'ended') return row;
-  const now = new Date().toISOString();
-  const updated = must(await sb().from('inspection_staff')
-    .update({ affiliation_status: 'ended', is_active: false, affiliation_ended_at: now, affiliation_ended_by: actorId, updated_at: now })
-    .eq('id', staffId).neq('affiliation_status', 'ended').select('*'));
-  must(await sb().from('provider_service_capabilities')
-    .update({ status: 'revoked', reviewed_by: actorId, reviewed_at: now, review_notes: 'Affiliation ended', updated_at: now })
-    .eq('staff_id', staffId).neq('status', 'revoked'));
-  await audit('staff', staffId, row.affiliation_status, 'ended', actorId, 'affiliation ended');
-  return updated?.[0] || row;
+  return setMemberStatus(actorId, staffId, 'revoke', 'affiliation ended', String(row.user_id) === String(actorId) ? 'self' : 'org');
 }
 
 export async function listStaff(providerId) {
-  return must(await sb().from('inspection_staff').select('id,user_id,first_name,last_name,role,is_active,is_available,affiliation_status,user_confirmed_at,provider_confirmed_at,affiliation_ended_at').eq('provider_id', providerId)) || [];
+  return must(await sb().from('inspection_staff').select('id,user_id,first_name,last_name,role,access_role,branch_id,is_active,is_available,affiliation_status,user_confirmed_at,provider_confirmed_at,affiliation_ended_at').eq('provider_id', providerId)) || [];
 }
 
 export async function listMyAffiliations(userId) {

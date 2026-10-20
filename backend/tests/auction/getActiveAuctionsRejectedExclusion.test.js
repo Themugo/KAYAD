@@ -37,15 +37,6 @@ jest.unstable_mockModule("../../services/escrowCapability.service.js", () => ({
   getEffectiveEscrowForCar: jest.fn().mockResolvedValue(false),
 }));
 
-// Stage 5F.10: these suites cover soft-delete/serialization behaviour; the DB-backed private-seller gate is
-// stubbed as "eligible" here and is exercised by privateSellerEligibilityService.test.js and the PG harness.
-jest.unstable_mockModule("../../services/privateSellerAuctionEligibility.service.js", () => ({
-  evaluateEligibilityBatch: async (ids) => new Map((ids || []).map((id) => [String(id), { eligible: true }])),
-  evaluatePrivateSellerAuctionEligibility: async () => ({ eligible: true }),
-  assertPrivateSellerAuctionEligible: async () => ({ eligible: true }),
-  isGateRefusal: () => false,
-  toGateConflict: (e) => e,
-}));
 const { getActiveAuctions } = await import("../../controllers/auctionController.js");
 
 const chainableFind = (cars) => ({

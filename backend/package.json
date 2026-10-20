@@ -22,7 +22,7 @@
     "test:jest": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit --passWithNoTests",
     "test:dealer-schema-regression": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand tests/regression/dealerOnboardingSuspendSchemaReconciliation.test.js",
     "test:vitest": "vitest run --config vitest.config.js",
-    "test:node": "node --test tests/response-lifecycle.test.js",
+    "test:node": "node --test --test-force-exit tests/response-lifecycle.test.js",
     "test:chat-integrity": "node --test tests/integration/chat-message-integrity.integration.test.js",
     "test:phase39-mpesa-proxy-regression": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand tests/regression/phase39MpesaTrustedProxy.test.js tests/regression/phase38DeploymentRuntimeReconciliation.test.js"
   },

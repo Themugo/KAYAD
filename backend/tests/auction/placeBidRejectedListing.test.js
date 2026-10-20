@@ -86,12 +86,13 @@ jest.unstable_mockModule("../../services/auctionFinancialIntegrity.service.js", 
   getAuctionSecurityHold: jest.fn(),
 }));
 
-// Stage 5F.10: eligibility is covered by tests/auction/privateSellerEligibilityService.test.js and the PG harness;
-// this suite exercises the bid error contract, so the DB-backed pre-check is stubbed as "eligible".
+// Stage 5F.16: the 5F.9 eligibility service imports named exports from db/index.js that this suite's db mock does not
+// provide, so the whole suite failed to load (baseline defect D-18, inherited from 5F.9). Eligibility is not the subject
+// of this suite (bid error contract / rejected-listing handling), so the pre-check is stubbed as "eligible". The service
+// itself is exercised by the PostgreSQL gate tests added in this stage.
 jest.unstable_mockModule("../../services/privateSellerAuctionEligibility.service.js", () => ({
+  evaluatePrivateSellerAuctionEligibility: jest.fn().mockResolvedValue({ eligible: true }),
   assertPrivateSellerAuctionEligible: jest.fn().mockResolvedValue({ eligible: true }),
-  isGateRefusal: () => false,
-  toGateConflict: (e) => e,
 }));
 
 const { placeBid } = await import("../../controllers/bidController.js");

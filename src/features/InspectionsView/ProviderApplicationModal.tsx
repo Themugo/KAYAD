@@ -23,6 +23,7 @@ const fieldClass =
 export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, onClose, onOpenAuth, onOpenRegister }) => {
   const uid = useId();
   const [form, setForm] = useState({ companyName: '', phone: '', county: '', town: '', address: '' });
+  const [businessType, setBusinessType] = useState<'individual_inspector' | 'garage_business'>('individual_inspector');
   const [hasWorkshop, setHasWorkshop] = useState(false);
   const [offersMobile, setOffersMobile] = useState(false);
   const [chosen, setChosen] = useState<string[]>([]);
@@ -49,6 +50,7 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
     e.preventDefault();
     if (inFlight.current) return;
     setTouched(true);
+    if (businessType === 'garage_business' && !form.companyName.trim()) { setError('Enter the registered business or trading name for a garage application.'); return; }
     if (!isPlausiblePhone(form.phone)) return;
     inFlight.current = true;
     setSubmitting(true);
@@ -56,6 +58,7 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
     try {
       const result = (await inspectionApi.registerProvider({
         companyName: form.companyName.trim() || undefined,
+        businessType,
         phone: form.phone.trim(),
         country: 'Kenya',
         county: form.county.trim() || undefined,
@@ -94,7 +97,7 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={() => { if (!submitting) onClose(); }} title="Apply to list your automotive business" size="lg">
+    <Modal isOpen={isOpen} onClose={() => { if (!submitting) onClose(); }} title="Apply as an inspection provider" size="lg">
       {!signedIn ? (
         <div className="kayad-provider-onboarding py-4 text-center space-y-4">
           <BriefcaseBusiness className="w-8 h-8 mx-auto text-[#176B87]" aria-hidden="true" />
@@ -117,9 +120,23 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
       ) : (
         <form onSubmit={submit} noValidate className="kayad-provider-application-form space-y-4" aria-busy={submitting}>
           <ol className="kayad-onboarding-steps grid grid-cols-3 gap-2 text-left" aria-label="Application progress"><li className="is-current"><span>1</span><strong>Business details</strong><small>Contact and location</small></li><li><span>2</span><strong>Services</strong><small>What you offer</small></li><li><span>3</span><strong>Review</strong><small>Checked by KAYAD</small></li></ol>
-          <p className="rounded-xl bg-[#F5F8F8] border border-[#D7E7E4] p-3.5 text-xs text-[#64748B]">Share the business details you are comfortable providing. Submitting an application does not grant provider access; KAYAD reviews it and decides.</p>
+          <p className="rounded-xl bg-[#F5F8F8] border border-[#D7E7E4] p-3.5 text-xs text-[#64748B]">Choose the provider account that fits how you operate. A garage application represents the business; branch and staff access must be configured through authorized business controls. Submitting an application does not grant provider access; KAYAD reviews it and decides.</p>
+          <fieldset className="space-y-2" disabled={submitting}>
+            <legend className="text-xs font-bold text-[#64748B]">Provider account type</legend>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${businessType === 'individual_inspector' ? 'border-[#176B87] bg-[#EAF5F7] ring-1 ring-[#176B87]' : 'border-[#D7E7E4] bg-white'}`}>
+                <input type="radio" name="providerBusinessType" value="individual_inspector" className="mt-1 accent-[#176B87]" checked={businessType === 'individual_inspector'} onChange={() => setBusinessType('individual_inspector')} />
+                <span><strong className="block text-sm text-[#0A3340]">Independent inspector</strong><span className="mt-1 block text-xs text-[#64748B]">For an individual inspector operating under their own provider profile.</span></span>
+              </label>
+              <label className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${businessType === 'garage_business' ? 'border-[#176B87] bg-[#EAF5F7] ring-1 ring-[#176B87]' : 'border-[#D7E7E4] bg-white'}`}>
+                <input type="radio" name="providerBusinessType" value="garage_business" className="mt-1 accent-[#176B87]" checked={businessType === 'garage_business'} onChange={() => setBusinessType('garage_business')} />
+                <span><strong className="block text-sm text-[#0A3340]">Registered garage / workshop</strong><span className="mt-1 block text-xs text-[#64748B]">For a business that needs centralized ownership and may operate multiple locations.</span></span>
+              </label>
+            </div>
+            {businessType === 'garage_business' && <p className="rounded-lg border border-[#B8E3DC] bg-[#F0FBF8] p-3 text-xs text-[#12576D]">Apply once for the business identity. Branches, staff memberships and branch-specific permissions require authorized setup; this application does not create extra accounts or grant staff access.</p>}
+          </fieldset>
           <div className="grid sm:grid-cols-2 gap-3">
-            {text('companyName', 'Business / trading name', { autoComplete: 'organization' })}
+            {text('companyName', businessType === 'garage_business' ? 'Registered business / trading name' : 'Your name / trading name', { autoComplete: 'organization', required: businessType === 'garage_business' })}
             <div className="space-y-1.5">
               <label htmlFor={`${uid}-phone`} className="text-xs font-bold text-[#64748B] block">Contact phone</label>
               <input
@@ -150,7 +167,7 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
             <legend className="text-xs font-bold text-[#64748B]">How you work</legend>
             <label className="flex items-center gap-2 text-sm min-h-[44px]"><input type="checkbox" className="w-4 h-4 accent-[#176B87]" checked={hasWorkshop} onChange={(e) => setHasWorkshop(e.target.checked)} /> I have a workshop or premises customers can visit</label>
             <label className="flex items-center gap-2 text-sm min-h-[44px]"><input type="checkbox" className="w-4 h-4 accent-[#176B87]" checked={offersMobile} onChange={(e) => setOffersMobile(e.target.checked)} /> I travel to the vehicle</label>
-            {!hasWorkshop && <p className="text-xs text-[#64748B]">No premises? That is fine. KAYAD has an evidence-based route for legitimate businesses without customer-facing premises; you will be asked for a registration or tax number and supporting documents.</p>}
+            {businessType === 'individual_inspector' && !hasWorkshop && <p className="text-xs text-[#64748B]">No premises? That is fine. KAYAD has an evidence-based route for legitimate businesses without customer-facing premises; you will be asked for a registration or tax number and supporting documents.</p>}
           </fieldset>
           {error && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2 border-t border-[#D7E7E4]">

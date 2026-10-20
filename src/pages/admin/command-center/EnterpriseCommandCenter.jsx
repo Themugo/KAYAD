@@ -41,14 +41,13 @@ export default function EnterpriseCommandCenter() {
   useEffect(() => { const ch=socket.joinControlPlane?.({onUpdate:()=>{void load();}}); return () => { if(ch) socket.leaveChannel(ch); }; }, [socket]);
 
   const metrics = useMemo(() => {
+    const overall = {};
     const business = data?.counts || {};
-    const missing = Array.isArray(data?.unavailable) ? data.unavailable.length : 0;
-    // Truthful states: a figure the server could not read is shown as "—", never as 0, and the header says how many are missing.
     return [
-      { icon: Activity, label: 'Data coverage', value: !data ? '—' : missing ? 'Partial' : 'Complete', hint: !data ? 'No snapshot received' : missing ? `${missing} figure${missing === 1 ? '' : 's'} unavailable` : 'Every figure was read from the database' },
-      { icon: TrendingUp, label: 'Registered users', value: business.users ?? '—', hint: 'All accounts, including inactive' },
-      { icon: Siren, label: 'Open incidents', value: data?.queues?.openIncidents ?? '—', hint: 'Active operational incidents' },
-      { icon: AlertTriangle, label: 'Open alerts', value: data?.queues?.openAlerts ?? '—', hint: 'Alerts requiring attention' },
+      { icon: Activity, label: 'Platform health', value: data ? 'Live' : '—', hint: overall.riskLevel ? `Risk: ${overall.riskLevel}` : 'Live system assessment' },
+      { icon: TrendingUp, label: 'Active users', value: business.users ?? '—', hint: 'Current platform population' },
+      { icon: Siren, label: 'Open incidents', value: data?.queues?.openIncidents ?? 0, hint: 'Active operational incidents' },
+      { icon: AlertTriangle, label: 'Open alerts', value: data?.queues?.openAlerts ?? 0, hint: 'Alerts requiring attention' },
     ];
   }, [data]);
 
@@ -68,15 +67,15 @@ export default function EnterpriseCommandCenter() {
       <div className="rounded-2xl border border-[#D7E7E4] bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-[#D7E7E4] p-5"><div><h2 className="font-semibold text-[#0A3340]">Control-plane state</h2><p className="text-xs text-[#64748B]">Authoritative Supabase-backed queues</p></div><CheckCircle2 size={18} className="text-[#94A3B8]" /></div>
         <div className="grid grid-cols-2 gap-3 p-5 text-sm">
-          <div className="rounded-xl bg-[#F6FAF9] p-4">Users <strong className="float-right">{data?.counts?.users ?? '—'}</strong></div>
-          <div className="rounded-xl bg-[#F6FAF9] p-4">Listings <strong className="float-right">{data?.counts?.cars ?? '—'}</strong></div>
-          <div className="rounded-xl bg-[#F6FAF9] p-4">Dealers <strong className="float-right">{data?.counts?.dealers ?? '—'}</strong></div>
-          <div className="rounded-xl bg-[#F6FAF9] p-4">Escrows <strong className="float-right">{data?.counts?.escrows ?? '—'}</strong></div>
+          <div className="rounded-xl bg-[#F6FAF9] p-4">Users <strong className="float-right">{data?.counts?.users ?? 0}</strong></div>
+          <div className="rounded-xl bg-[#F6FAF9] p-4">Listings <strong className="float-right">{data?.counts?.cars ?? 0}</strong></div>
+          <div className="rounded-xl bg-[#F6FAF9] p-4">Dealers <strong className="float-right">{data?.counts?.dealers ?? 0}</strong></div>
+          <div className="rounded-xl bg-[#F6FAF9] p-4">Escrows <strong className="float-right">{data?.counts?.escrows ?? 0}</strong></div>
         </div>
       </div>
 
       <div className="rounded-2xl border border-[#D7E7E4] bg-white shadow-sm"><div className="border-b border-[#D7E7E4] p-5"><h2 className="font-semibold text-[#0A3340]">Priority queues</h2><p className="text-xs text-[#64748B]">Current actionable state</p></div><div className="divide-y divide-[#D7E7E4]">
-        {[['Open incidents',data?.queues?.openIncidents],['Open alerts',data?.queues?.openAlerts],['Disputed escrows',data?.queues?.disputedEscrows],['Pending payments',data?.queues?.pendingPayments]].map(([label,value])=><div key={label} className="flex justify-between p-4 text-sm"><span>{label}</span><strong>{value ?? '—'}</strong></div>)}
+        {[['Open incidents',data?.queues?.openIncidents],['Open alerts',data?.queues?.openAlerts],['Disputed escrows',data?.queues?.disputedEscrows],['Pending payments',data?.queues?.pendingPayments]].map(([label,value])=><div key={label} className="flex justify-between p-4 text-sm"><span>{label}</span><strong>{value ?? 0}</strong></div>)}
       </div></div>
     </div>
 

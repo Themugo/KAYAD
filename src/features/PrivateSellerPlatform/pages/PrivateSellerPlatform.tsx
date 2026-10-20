@@ -11,7 +11,6 @@ import { createCar, getMyListings, VehicleApiError, BackendCar } from '../../../
 import { getMyEscrows, BackendEscrow } from '../../../services/escrowApi';
 import { calculateListingQualityScore } from '../../../utils/listingQualityScore';
 import PhoneVerification from '../../../components/PhoneVerification';
-import { AuctionVerificationSection } from '../components/AuctionVerificationSection';
 import type { UserProfile } from '../../../types';
 import {
   Home, Warehouse, Heart, ShoppingCart, ClipboardCheck, DollarSign, FileText, Clock,
@@ -207,7 +206,6 @@ const KAYAD_THEME = {
 type PlatformSection =
   | 'home'
   | 'listing-wizard'
-  | 'auction-verification'
   | 'trust-center'
   | 'listing-quality'
   | 'escrow'
@@ -402,7 +400,6 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: 
             >
               {activeSection === 'home' && <SellerHomeSection listings={myListings} escrows={myEscrows} loading={dataLoading} listingsError={listingsError} escrowsError={escrowsError} lastRefreshedAt={lastRefreshedAt} onRefresh={loadSellerData} userName={user?.name} onNavigate={handleSectionChange} />}
               {activeSection === 'listing-wizard' && <ListingWizardSection draft={listingDraft} setDraft={setListingDraft} onNavigate={handleSectionChange} />}
-              {activeSection === 'auction-verification' && <AuctionVerificationSection listings={myListings} />}
               {activeSection === 'trust-center' && <TrustCenterSection />}
               {activeSection === 'listing-quality' && <ListingQualitySection listings={myListings} loading={dataLoading} />}
               {activeSection === 'escrow' && <EscrowCenterSection transactions={myEscrows} loading={dataLoading} />}
@@ -430,7 +427,6 @@ function SidebarContent({
     { id: 'home', label: 'Seller Home', icon: <Home size={20} /> },
     { id: 'listing-wizard', label: 'Create Listing', icon: <PlusCircleIcon size={20} /> },
     { id: 'escrow', label: 'Escrow & Deals', icon: <CreditCard size={20} /> },
-    { id: 'auction-verification', label: 'Auction verification', icon: <ShieldCheck size={20} /> },
     { id: 'trust-center', label: 'Trust Center', icon: <BadgeCheck size={20} /> },
     { id: 'listing-quality', label: 'My Listings', icon: <Car size={20} /> },
     { id: 'help', label: 'Help', icon: <HelpCircle size={20} /> },
@@ -460,7 +456,7 @@ function SidebarContent({
               onClick={() => onSectionChange(item.id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors relative ${
                 activeSection === item.id
-                  ? 'bg-[#13B8A6]/20 text-[#A7F0E6]'
+                  ? 'bg-[#13B8A6]/20 text-[#5AAFA4]'
                   : 'text-white/70 hover:bg-white/5 hover:text-white'
               }`}
             >

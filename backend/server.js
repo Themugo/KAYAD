@@ -44,7 +44,6 @@ import bidRoutes from "./routes/bidRoutes.js";
 import dealerRoutes from "./routes/dealerRoutes.js";
 import auctionSetupRoutes from "./routes/auctionSetupRoutes.js";
 import auctionRegistrationRoutes from "./routes/auctionRegistrationRoutes.js";
-import privateSellerAuctionRoutes from "./routes/privateSellerAuctionRoutes.js";
 import auctionRoutes from "./routes/auctionRoutes.js";
 import auctionSettlementRoutes from "./routes/auctionSettlementRoutes.js";
 import auctionFulfilmentRoutes from "./routes/auctionFulfilmentRoutes.js";
@@ -829,7 +828,6 @@ app.use("/api/dealer", dealerRoutes);
 app.use("/api/dealer", auctionSetupRoutes);
 app.use("/api/auctions", auctionRoutes);
 app.use("/api/auctions", auctionRegistrationRoutes);
-app.use("/api/private-seller-auctions", privateSellerAuctionRoutes); // Stage 5F.10: proposal / verification / custody lifecycle
 app.use("/api/auctions", auctionSettlementRoutes);
 app.use("/api/auctions", auctionFulfilmentRoutes);
 app.use("/api/admin", adminLimiter, adminRoutes);

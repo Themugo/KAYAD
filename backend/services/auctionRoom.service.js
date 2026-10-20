@@ -1,5 +1,4 @@
 import { findById, findOne } from "../db/index.js";
-import { evaluatePrivateSellerAuctionEligibility } from "./privateSellerAuctionEligibility.service.js";
 
 /**
  * Canonical public room-state contract.
@@ -15,13 +14,6 @@ export async function getAuctionRoomState(auctionId) {
 
   if (!car || !setup || setup.publication_status !== "published") {
     return null;
-  }
-
-  // Stage 5F.10: the room never opens bidding unless the PostgreSQL private-seller gate currently passes.
-  // Gate failures (including "cannot verify") propagate: the route must answer 409/503, not "bidding open".
-  const gate = await evaluatePrivateSellerAuctionEligibility(car);
-  if (!gate.eligible) {
-    return { auctionId: String(auctionId), publicationStatus: setup.publication_status, auctionStatus: "blocked", biddingOpen: false, registrationOpen: false, biddingRoomClosed: true, viewerOnlyBeforeRegistration: false, blocked: true, blockReason: "VERIFICATION_OR_CUSTODY_PENDING", startsAt: null, endsAt: null, registrationDeadline: null, bidIncrement: 0 };
   }
 
   const config = setup.config || {};

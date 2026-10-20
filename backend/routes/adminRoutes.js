@@ -2,7 +2,7 @@ import { parseBonusAmount } from "../utils/referralGuards.js"; // STAGE 4A (G9)
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import protectAccount from "../middleware/protectAccount.js";
-import { authorize, requirePermission, hasPermission, PERMISSIONS } from "../middleware/role.js";
+import { authorize, requirePermission, PERMISSIONS } from "../middleware/role.js";
 import { ASSIGNABLE_PERMISSIONS, PERM_LABELS, ROLE_PERMISSIONS, getEffectivePermissions } from "../config/roles.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validate, validateObjectId, validateQuery, userListQuerySchema, carListQuerySchema, paymentListQuerySchema, reviewListQuerySchema, chatListQuerySchema, messageListQuerySchema } from "../middleware/validate.js";
@@ -148,13 +148,7 @@ router.use(protect, adminOnly);
 // staff role from reaching unrelated finance, platform, user, or data
 // mutation surfaces merely because it is a member of STAFF_ROLES.
 router.use((req, res, next) => {
-  // STAGE 5F.5 (D-14): infer the permission from the route shape only. Dynamic ids used to take part in the match, so a UUID
-  // group beginning "ad" (about 1 id in 50) was read as the "ads" family and a finance user was refused with
-  // "Missing permission: manage_ads" on /dealers/<id>/package.
-  const path = String(req.path || "")
-    .toLowerCase()
-    .replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g, ":id")
-    .replace(/\/\d+(?=\/|$)/g, "/:id");
+  const path = String(req.path || "").toLowerCase();
   let permission = null;
 
   if (/\bescrow\b/.test(path)) {
@@ -167,14 +161,12 @@ router.use((req, res, next) => {
       : PERMISSIONS.MANAGE_CARS;
   } else if (/\b(staff|users?|dealer-verifications?)/.test(path)) {
     permission = path.includes("staff") ? PERMISSIONS.MANAGE_STAFF : PERMISSIONS.MANAGE_USERS;
-  } else if (/\b(ads?|campaigns?)\b/.test(path)) {
+  } else if (/\b(ads?|campaigns?)/.test(path)) {
     permission = PERMISSIONS.MANAGE_ADS;
   } else if (/\b(inspection|ntsa|inspector)/.test(path)) {
     permission = PERMISSIONS.MANAGE_INSPECTIONS;
   } else if (/\b(support|chat)/.test(path)) {
-    // The admin UI maps the chat-moderation page to MANAGE_MODERATION (src/utils/permissions.ts "/admin/chats"); support staff
-    // hold MANAGE_SUPPORT. Either is sufficient (any-of) so the guard and the UI agree.
-    permission = [PERMISSIONS.MANAGE_SUPPORT, PERMISSIONS.MANAGE_MODERATION];
+    permission = PERMISSIONS.MANAGE_SUPPORT;
   } else if (/\b(security|audit|logs?)/.test(path)) {
     permission = PERMISSIONS.VIEW_LOGS;
   } else if (/\b(analytics|reports?|market-data)/.test(path)) {
@@ -184,13 +176,7 @@ router.use((req, res, next) => {
   }
 
   if (!permission) return next();
-  // STAGE 5F.5 (D-6): fail CLOSED. A matched path family whose permission name did not resolve used to fall through to "allow".
-  const anyOf = Array.isArray(permission) ? permission : [permission];
-  if (!anyOf.length || anyOf.some((p) => typeof p !== "string")) {
-    return res.status(403).json({ success: false, code: "PERMISSION_NOT_CONFIGURED", message: "Access denied" });
-  }
-  if (anyOf.length > 1 && anyOf.some((p) => hasPermission(req.user, p))) return next();
-  return requirePermission(anyOf[0])(req, res, next);
+  return requirePermission(permission)(req, res, next);
 });
 
 // Provider-network governance (path contains "inspection" => MANAGE_INSPECTIONS applies above).
@@ -217,11 +203,32 @@ router.get(
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // STAGE 5F.5 (D-8): one unreadable source used to reject Promise.all and blank EVERY dashboard tile (the hosted-database
-    // symptom). Each metric is now settled on its own: a source that cannot be read is `null` and named in `unavailable`;
-    // a real zero stays 0. Nothing is defaulted to 0.
-    const metricNames = ["totalUsers", "totalCars", "activeAuctions", "totalEscrows", "totalDealers", "verifiedDealers", "bidsTodayCount", "totalPayments", "pendingDealers", "pendingCars", "openEscrows", "disputedEscrows", "revenueAgg", "totalBidsAll", "totalFavorites", "pendingReviews", "activeAlerts", "individualSellers", "carsSold", "pendingReports", "verificationQueue", "supportQueue", "fraudAlerts", "activeListings"];
-    const settledMetrics = await Promise.allSettled([
+    const [
+      totalUsers,
+      totalCars,
+      activeAuctions,
+      totalEscrows,
+      totalDealers,
+      verifiedDealers,
+      bidsTodayCount,
+      totalPayments,
+      pendingDealers,
+      pendingCars,
+      openEscrows,
+      disputedEscrows,
+      revenueAgg,
+      totalBidsAll,
+      totalFavorites,
+      pendingReviews,
+      activeAlerts,
+      individualSellers,
+      carsSold,
+      pendingReports,
+      verificationQueue,
+      supportQueue,
+      fraudAlerts,
+      activeListings,
+    ] = await Promise.all([
       User.countDocuments(),                                                          // totalUsers
       Car.countDocuments(),                                                           // totalCars
       Car.countDocuments({ auctionStatus: "live" }),                                  // activeAuctions
@@ -254,11 +261,9 @@ router.get(
       FraudDetection.countDocuments({ severity: { $in: ["critical", "high"] }, status: { $nin: ["dismissed", "action_taken"] } }), // fraudAlerts
       Car.countDocuments({ status: "available" }),                                    // activeListings
     ]);
-    const unavailable = metricNames.filter((_, i) => settledMetrics[i].status !== "fulfilled");
-    const [totalUsers, totalCars, activeAuctions, totalEscrows, totalDealers, verifiedDealers, bidsTodayCount, totalPayments, pendingDealers, pendingCars, openEscrows, disputedEscrows, revenueAgg, totalBidsAll, totalFavorites, pendingReviews, activeAlerts, individualSellers, carsSold, pendingReports, verificationQueue, supportQueue, fraudAlerts, activeListings] = settledMetrics.map((r) => (r.status === "fulfilled" ? r.value : null));
 
-    const totalRevenue = revenueAgg === null ? null : (revenueAgg[0]?.total || 0);
-    const totalFavs = totalFavorites === null ? null : (totalFavorites[0]?.total || 0);
+    const totalRevenue = revenueAgg[0]?.total || 0;
+    const totalFavs = totalFavorites[0]?.total || 0;
 
     res.json({
       success: true,
@@ -275,7 +280,7 @@ router.get(
         pendingDealers,
         pendingCars,
         openEscrows,
-        alerts: disputedEscrows,
+        alerts: disputedEscrows || 0,
         totalBids: totalBidsAll,
         totalFavorites: totalFavs,
         pendingReviews,
@@ -288,7 +293,6 @@ router.get(
         fraudAlerts,
         activeListings,
       },
-      unavailable,
     });
   }),
 );
@@ -311,9 +315,7 @@ router.get(
       filter.role = { $in: ["dealer", "individual_seller"] };
     }
     if (req.query.pendingApproval === "true") {
-      // STAGE 5F.5 (D-9): the "Pending dealers" tile counts role=dealer, so a dealer-scoped queue link must list exactly those rows;
-      // without an explicit role the queue still covers both seller kinds, as before.
-      if (!(req.query.role === "dealer" || req.query.role === "individual_seller")) filter.role = { $in: ["dealer", "individual_seller"] };
+      filter.role = { $in: ["dealer", "individual_seller"] };
       filter.status = "pending"; // STAGE 5A: users.approved does not exist; status is the account gate
     }
 
@@ -849,23 +851,15 @@ router.post(
   "/audit-log",
   adminOrSuper,
   asyncHandler(async (req, res) => {
-    const { action, details } = req.body || {};
+    const { action, details } = req.body;
 
     if (!action) {
       return res.status(400).json({ success: false, message: "Action is required" });
     }
-    // STAGE 5F.5 (D-3): manual entries must be recognisable as manual and cannot impersonate system actions
-    // (e.g. "update_staff_permissions"); action/details are bounded so the trail cannot be flooded or padded.
-    if (typeof action !== "string" || !/^[A-Za-z0-9_.:-]{1,64}$/.test(action)) {
-      return res.status(400).json({ success: false, message: "Action must be 1-64 characters: letters, digits, _ . : -" });
-    }
-    if (details != null && (typeof details !== "object" || Array.isArray(details) || JSON.stringify(details).length > 4096)) {
-      return res.status(400).json({ success: false, message: "Details must be an object of at most 4096 characters" });
-    }
 
     const entry = await AuditLog.create({
-      action: `manual.${action}`,
-      details: { ...(details || {}), manualEntry: true },
+      action,
+      details: details || {},
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
     });
@@ -1247,15 +1241,12 @@ router.get(
       "moderator",
     ];
     const staff = await User.find({ role: { $in: staffRoles } })
-      // STAGE 5F.5 (D-13): users has `last_login_at`, not `last_login`, and no `permissions_updated_at` column — selecting either
-      // made this endpoint (and the whole Staff page) fail with a 500 on a database built from the repository migrations.
-      .select("name email role isBanned lastLoginAt createdAt grantedPermissions revokedPermissions")
+      .select("name email role isBanned lastLogin createdAt grantedPermissions revokedPermissions permissionsUpdatedAt")
       .sort({ createdAt: -1 })
       .lean();
     // Attach computed effective permissions for the UI
     const enriched = staff.map((s) => ({
       ...s,
-      lastLogin: s.lastLoginAt ?? null, // UI field name (AdminStaffList) kept stable
       effectivePermissions: getEffectivePermissions(s),
       rolePermissions: ROLE_PERMISSIONS[s.role] || [],
     }));
@@ -1287,7 +1278,7 @@ router.get(
   validateObjectId,
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id)
-      .select("name email role grantedPermissions revokedPermissions")
+      .select("name email role grantedPermissions revokedPermissions permissionsUpdatedAt")
       .lean();
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
     res.json({
@@ -1298,7 +1289,7 @@ router.get(
         grantedPermissions: user.grantedPermissions || [],
         revokedPermissions: user.revokedPermissions || [],
         effectivePermissions: getEffectivePermissions(user),
-        updatedAt: null, // no persisted timestamp column exists; the change time is in the audit trail (update_staff_permissions)
+        updatedAt: user.permissionsUpdatedAt,
       },
     });
   }),
@@ -1331,18 +1322,11 @@ router.put(
       return res.status(403).json({ success: false, message: "Cannot modify a superadmin's permissions" });
     }
 
-    const beforePerms = { granted: user.grantedPermissions || [], revoked: user.revokedPermissions || [] };
     user.grantedPermissions = grantedPermissions;
     user.revokedPermissions = revokedPermissions;
-    // STAGE 5F.5 (D-12): `permissions_updated_at/by` do not exist in the schema; writing them made every grant fail with a 500.
-    // Who/when is recorded by auditLog("update_staff_permissions") above; the before/after delta is recorded below.
+    user.permissionsUpdatedAt = new Date();
+    user.permissionsUpdatedBy = req.user.id;
     await user.save();
-    await auditAfterCommit({
-      action: "Staff governance: permissions changed",
-      admin: req.user.name || req.user.email,
-      adminId: req.user.id,
-      details: { targetUserId: String(user.id ?? req.params.id), targetRole: user.role, before: beforePerms, after: { granted: grantedPermissions, revoked: revokedPermissions } },
-    });
 
     res.json({
       success: true,
@@ -1391,12 +1375,6 @@ router.post(
     }
     const user = await User.create({ name, email, role });
     await UserAuth.create({ user: user.id, password: await bcrypt.hash(password, 12) });
-    await auditAfterCommit({
-      action: "Staff governance: account created",
-      admin: req.user.name || req.user.email,
-      adminId: req.user.id,
-      details: { targetUserId: String(user.id), role },
-    });
     res.json({
       success: true,
       message: `Staff account created: ${email}`,
@@ -1415,7 +1393,6 @@ router.put(
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-    const beforeState = { role: user.role, isBanned: user.isBanned === true };
     if (req.body.role) {
       // Only known staff roles may be assigned — never "superadmin" itself
       // (superadmin elevation goes through the webhoist owner flow only).
@@ -1437,22 +1414,9 @@ router.put(
       }
       user.role = req.body.role;
     }
-    // STAGE 5F.5 (D-4): isBanned must be a real boolean — a string such as "false" is truthy and would suspend the account.
-    if (req.body.isBanned !== undefined && typeof req.body.isBanned !== "boolean") {
-      return res.status(400).json({ success: false, message: "isBanned must be true or false" });
-    }
-    if (req.body.name !== undefined && (typeof req.body.name !== "string" || !req.body.name.trim() || req.body.name.length > 120)) {
-      return res.status(400).json({ success: false, message: "name must be a non-empty string of at most 120 characters" });
-    }
-    if (req.body.name) user.name = req.body.name.trim();
+    if (req.body.name) user.name = req.body.name;
     if (req.body.isBanned !== undefined) user.isBanned = req.body.isBanned;
     await user.save();
-    await auditAfterCommit({
-      action: "Staff governance: staff record updated",
-      admin: req.user.name || req.user.email,
-      adminId: req.user.id,
-      details: { targetUserId: String(user.id ?? req.params.id), before: beforeState, after: { role: user.role, isBanned: user.isBanned === true } },
-    });
     res.json({
       success: true,
       message: "Staff updated",
@@ -1474,12 +1438,6 @@ router.delete(
     if (user.role === "superadmin")
       return res.status(400).json({ success: false, message: "Cannot delete superadmin" });
     await User.softDelete(req.params.id, req.user.id);
-    await auditAfterCommit({
-      action: "Staff governance: account deleted",
-      admin: req.user.name || req.user.email,
-      adminId: req.user.id,
-      details: { targetUserId: String(req.params.id), role: user.role },
-    });
     res.json({ success: true, message: "Staff account deleted" });
   }),
 );
@@ -1663,9 +1621,6 @@ router.patch(
   "/dealers/:id/package",
   protect,
   adminOnly,
-  // STAGE 5F.5 (D-1): the path-layer guess does not match "/dealers/…", so any staff role (marketing, hr,
-  // ghost_checker…) could grant or revoke a paid subscription. Granting entitlements is a finance action.
-  requirePermission(PERMISSIONS.MANAGE_PAYMENTS),
   asyncHandler(async (req, res) => {
     const { dealerPackage, durationDays = 30 } = req.body || {};
     const dealerId = req.params.id;
@@ -1718,9 +1673,6 @@ router.post(
   "/zero-cost-onboarding",
   protect,
   adminOnly,
-  // STAGE 5F.5 (D-2): bulk free-plan grant to every approved dealer — admin/superadmin AND finance permission.
-  adminOrSuper,
-  requirePermission(PERMISSIONS.MANAGE_PAYMENTS),
   asyncHandler(async (req, res) => {
     const { dealerIds, durationDays = 90 } = req.body || {};
     const days = Number(durationDays);
