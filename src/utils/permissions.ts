@@ -49,7 +49,10 @@ export const ROLE_PERMISSIONS: Record<string, Permission[]> = {
   escrow_officer:     [PERM.VIEW_ESCROW, PERM.OPERATE_ESCROW, PERM.VIEW_ESCROW_AUDIT, PERM.VIEW_LOGS],
   technical_support:  [PERM.MANAGE_SUPPORT, PERM.SUPPORT_AGENT, PERM.VIEW_LOGS, PERM.MANAGE_USERS],
   hr:                 [PERM.MANAGE_STAFF, PERM.MANAGE_USERS],
-  accounts:           [PERM.MANAGE_FINANCE, PERM.VIEW_ANALYTICS, PERM.VIEW_LOGS],
+  // STAGE 5F.5 (D-16): mirrors backend/config/roles.js — accounts also holds the escrow finance permissions (view, settle payout,
+  // reconcile, audit view). The mirror had drifted and hid the Escrows entry from the accounts role.
+  accounts:           [PERM.MANAGE_FINANCE, PERM.VIEW_ANALYTICS, PERM.VIEW_LOGS, PERM.VIEW_ESCROW,
+                       PERM.SETTLE_ESCROW_PAYOUT, PERM.RECONCILE_ESCROW, PERM.VIEW_ESCROW_AUDIT],
   admin:              [PERM.MANAGE_CARS, PERM.MANAGE_AUCTIONS, PERM.MANAGE_USERS,
                        PERM.MANAGE_ESCROW, PERM.VIEW_ESCROW, PERM.OPERATE_ESCROW,
                        PERM.APPROVE_ESCROW_RELEASE, PERM.APPROVE_ESCROW_REFUND,

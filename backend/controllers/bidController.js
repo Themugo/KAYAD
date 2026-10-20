@@ -19,6 +19,7 @@ import { logAuctionBidPlaced } from "../services/auditService.js";
 import { assertBidderAuthorized } from "../services/auctionRegistration.service.js";
 import { findOne } from "../db/index.js";
 import { getAuctionFinancialPolicy, getAuctionSecurityHold } from "../services/auctionFinancialIntegrity.service.js";
+import { assertPrivateSellerAuctionEligible } from "../services/privateSellerAuctionEligibility.service.js";
 
 // =============================
 // 🆔 PSEUDONYM GENERATOR
@@ -205,6 +206,13 @@ export const placeBid = async (req, res) => {
     // =============================
     // 🔐 WALLET-LOCK: Bids > KES 5M require KES 50K pre-authorized escrow
     // =============================
+    try {
+      await assertPrivateSellerAuctionEligible(car.toObject ? car.toObject() : car);
+    } catch (eligibilityError) {
+      if (eligibilityError.status === 409) return res.status(409).json({ success: false, code: eligibilityError.code, message: eligibilityError.message, eligibility: eligibilityError.details });
+      throw eligibilityError;
+    }
+
     if (car.auctionStatus !== "live") {
       return res.status(400).json({
         success: false,

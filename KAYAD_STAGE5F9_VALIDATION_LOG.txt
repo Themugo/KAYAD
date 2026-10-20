@@ -1,0 +1,10 @@
+PASS shared evaluator exists
+PASS publish setup imports gate
+PASS canonical lifecycle imports gate
+PASS manual bid controller imports gate
+PASS persistence contract migration exists
+FOUND atomic RPC source kayad_place_bid_atomic; enforcement body not verified by this validator
+FOUND atomic RPC source kayad_auto_bid_atomic; enforcement body not verified by this validator
+FOUND atomic RPC source kayad_start_auction_atomic; enforcement body not verified by this validator
+FOUND atomic RPC source kayad_start_scheduled_auction_atomic; enforcement body not verified by this validator
+5/5 source integration checks passed

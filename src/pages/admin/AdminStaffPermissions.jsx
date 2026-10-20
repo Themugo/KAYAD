@@ -34,7 +34,7 @@ export default function AdminStaffPermissions() {
     }
   }, [toast]);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { if (me?.isOwner === true) load(); else setLoading(false); }, [load, me?.isOwner]);
 
   const groups = useMemo(() => {
     const g = {};
@@ -63,7 +63,7 @@ export default function AdminStaffPermissions() {
       const desired = draftPerms;
       // granted = desired perms NOT already in the role defaults
       const grantedPermissions = [...desired].filter(p => !rolePerms.has(p));
-      // revoked = role defaults the superadmin turned OFF
+      // revoked = role defaults the System Owner turned OFF
       const revokedPermissions = [...rolePerms].filter(p => !desired.has(p));
 
       const res = await adminAPI.setStaffPerms(editing._id, { grantedPermissions, revokedPermissions });
@@ -84,12 +84,12 @@ export default function AdminStaffPermissions() {
   const filtered = staff.filter(s =>
     !query || s.name?.toLowerCase().includes(query.toLowerCase()) || s.email?.toLowerCase().includes(query.toLowerCase()));
 
-  if (me?.role !== 'superadmin') {
+  if (me?.isOwner !== true) {
     return (
       <div style={{ textAlign: 'center', padding: '4rem 1rem' }}>
         <Lock size={48} style={{ color: 'var(--brand)', marginBottom: 16 }} />
-        <h2 style={{ color: '#0a3340' }}>Superadmin Only</h2>
-        <p style={{ color: '#64748b' }}>Only the platform superadmin can assign staff duties.</p>
+        <h2 style={{ color: '#0a3340' }}>System Owner governance</h2>
+        <p style={{ color: '#64748b' }}>Only a verified active System Owner can assign staff duties and permissions. Your current account does not have this authority.</p>
       </div>
     );
   }
@@ -97,7 +97,7 @@ export default function AdminStaffPermissions() {
   return (
     <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 4px' }}>
       <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 9, color: 'var(--brand)', fontWeight: 800, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 6 }}>Superadmin</div>
+        <div style={{ fontSize: 9, color: 'var(--brand)', fontWeight: 800, letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: 6 }}>System Owner</div>
         <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.5rem,2.5vw,2rem)', color: '#0a3340', margin: '0 0 6px' }}>Staff Duties & Permissions</h2>
         <p style={{ color: 'var(--text-muted)', fontSize: 14, margin: 0 }}>Assign exactly which duties each admin can access. Changes take effect on their next request.</p>
       </div>

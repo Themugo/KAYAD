@@ -1,4 +1,5 @@
 import { findAll } from "../db/index.js";
+import { evaluateEligibilityBatch } from "./privateSellerAuctionEligibility.service.js";
 
 const BASE_URL = "https://www.kayad.space";
 
@@ -51,7 +52,13 @@ export const generateAuctionSitemap = async () => {
       select: "id,updatedAt,auctionStatus",
     });
 
-    const urls = auctions.map((auction) => ({
+    // Stage 5F.10: never advertise a live auction that fails the PostgreSQL private-seller gate (fail-closed: on error, list only ended auctions).
+    const liveRows = auctions.filter((a) => a.auctionStatus === "live");
+    let verdicts = new Map();
+    if (liveRows.length) { try { verdicts = await evaluateEligibilityBatch(liveRows.map((a) => a.id)); } catch { verdicts = new Map(); } }
+    const visible = auctions.filter((a) => a.auctionStatus !== "live" || verdicts.get(String(a.id))?.eligible === true);
+
+    const urls = visible.map((auction) => ({
       loc: `${BASE_URL}/auctions/${auction.id}`,
       lastmod: auction.updatedAt
         ? new Date(auction.updatedAt).toISOString().split("T")[0]

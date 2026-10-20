@@ -196,6 +196,22 @@ describe("GET /api/admin/public/config — public read path", () => {
       expect(body.config.navigation).toEqual({ items: [] });
     }
   });
+  test("missing config returns safe defaults without writing during a public GET", async () => {
+    platformConfigModel.findOne.mockImplementationOnce(() => {
+      const q = {
+        select: jest.fn(() => q),
+        lean: jest.fn(() => q),
+        then: (resolve, reject) => Promise.resolve(null).then(resolve, reject),
+      };
+      return q;
+    });
+    platformConfigModel.create.mockClear();
+    const response = await call("GET", "/api/admin/public/config");
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.config.navigation).toEqual({ items: [] });
+    expect(platformConfigModel.create).not.toHaveBeenCalled();
+  });
   test("admin config GET (full config) is not public", async () => {
     expect((await call("GET", "/api/admin/config")).status).toBe(401);
     expect((await call("GET", "/api/admin/config", { role: "user" })).status).toBe(403);

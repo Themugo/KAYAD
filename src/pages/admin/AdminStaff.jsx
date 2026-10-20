@@ -10,7 +10,8 @@ import AdminStaffCreateModal from './components/AdminStaffCreateModal';
 import AdminStaffEditModal from './components/AdminStaffEditModal';
 
 export default function AdminStaff() {
-  const { user: me, isSuperAdmin } = useAuth();
+  const { user: me } = useAuth();
+  const isSystemOwner = me?.isOwner === true;
   const { toast } = useToast();
   const [staff,   setStaff]   = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,8 +24,9 @@ export default function AdminStaff() {
   const set = (k, v) => setForm(p => ({...p, [k]:v}));
 
   useEffect(() => {
+    if (!isSystemOwner) { setLoading(false); return; }
     adminAPI.getStaff?.().then(d => setStaff(d.staff || [])).catch(() => {}).finally(() => setLoading(false));
-  }, []);
+  }, [isSystemOwner]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -76,7 +78,7 @@ export default function AdminStaff() {
                 Manage platform staff, roles and access levels · {staff.length} active staff
               </p>
             </div>
-            {isSuperAdmin && (
+            {isSystemOwner && (
               <button onClick={() => setShowAdd(true)} style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 20px', background:'var(--brand)', border:'none', borderRadius:10, color:'#0a3340', fontSize:13, fontWeight:900, cursor:'pointer', textTransform:'uppercase', letterSpacing:'0.06em' }}>
                 <Plus size={14}/> Add Staff
               </button>
@@ -92,15 +94,21 @@ export default function AdminStaff() {
         </div>
       </div>
 
+      {!isSystemOwner ? (
+        <div role="status" style={{ maxWidth:900, margin:'32px auto', padding:24, border:'1px solid #cbd5e1', borderRadius:14, background:'#fff', color:'#334155' }}>
+          <h2 style={{ margin:'0 0 8px', color:'#0a3340' }}>System Owner governance</h2>
+          <p style={{ margin:0, fontSize:14, lineHeight:1.6 }}>Staff creation, role assignment and permission changes are reserved for a verified active System Owner. Your current account does not have owner-governance authority.</p>
+        </div>
+      ) : (
       <div style={{ maxWidth:1300, margin:'0 auto', padding:'32px 32px' }}>
 
         {tab === 'hierarchy' && (
-          <AdminStaffOrgChart staff={staff} isSuperAdmin={isSuperAdmin}
+          <AdminStaffOrgChart staff={staff} isSuperAdmin={isSystemOwner}
             onAddStaff={(role) => { setForm(p => ({...p, role})); setShowAdd(true); }} />
         )}
 
         {tab === 'staff' && (
-          <AdminStaffList staff={staff} loading={loading} isSuperAdmin={isSuperAdmin}
+          <AdminStaffList staff={staff} loading={loading} isSuperAdmin={isSystemOwner}
             onEdit={(m) => setEditMember(m)}
             onToggleBan={(id, isBanned) => handleUpdate(id, { isBanned: !isBanned })}
             onDelete={(id, name) => handleDelete(id, name)}
@@ -108,9 +116,8 @@ export default function AdminStaff() {
         )}
 
         {tab === 'permissions' && <AdminStaffPermMatrix />}
-      </div>
 
-      {showAdd && isSuperAdmin && (
+      {showAdd && isSystemOwner && (
         <AdminStaffCreateModal form={form} set={set} saving={saving}
           onSubmit={handleCreate} onClose={() => setShowAdd(false)} />
       )}
@@ -119,6 +126,8 @@ export default function AdminStaff() {
         <AdminStaffEditModal member={editMember} setMember={setEditMember}
           onSave={() => handleUpdate(editMember._id, { role: editMember.role })}
           onClose={() => setEditMember(null)} />
+      )}
+      </div>
       )}
     </div>
   );

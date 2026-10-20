@@ -1,0 +1,17 @@
+typecheck exit=0 secs=23
+build exit=0 secs=1
+frontend_vitest exit=0 secs=100
+backend_jest exit=1 secs=106
+backend_vitest exit=0 secs=9
+backend_node exit=0 secs=1
+validate:supabase-migrations exit=0 secs=0
+validate:foundation-integrity exit=0 secs=0
+validate:owner-identity-convergence exit=0 secs=0
+validate:master-identity-authz-corrections exit=0 secs=0
+validate:stage5f2-dashboard-data-workflow exit=0 secs=1
+validate:stage5f6-buyer-convergence exit=0 secs=0
+validate:stage5f7-private-auction-contract exit=0 secs=0
+v5f5seller exit=0 secs=0
+v5f8 exit=0 secs=0
+v5f9 exit=0 secs=0
+BASE_DONE

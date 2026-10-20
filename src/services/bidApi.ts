@@ -38,10 +38,13 @@ export type BidApiErrorKind = 'network' | 'unauthenticated' | 'validation' | 'se
 export class BidApiError extends Error {
   kind: BidApiErrorKind;
   status?: number;
-  constructor(message: string, kind: BidApiErrorKind, status?: number) {
+  /** Machine-readable backend code, e.g. PRIVATE_SELLER_AUCTION_NOT_ELIGIBLE (409) or ELIGIBILITY_UNAVAILABLE (503). */
+  code?: string;
+  constructor(message: string, kind: BidApiErrorKind, status?: number, code?: string) {
     super(message);
     this.kind = kind;
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -83,7 +86,8 @@ export async function placeBid(carId: string, amount: number, phone?: string): P
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
     const kind: BidApiErrorKind = error.status === 401 ? 'unauthenticated' : error.status === 400 ? 'validation' : error.status ? 'server' : 'network';
-    throw new BidApiError(error.message, kind, error.status);
+    const code = (error.responseData as { code?: unknown } | undefined)?.code;
+    throw new BidApiError(error.message, kind, error.status, typeof code === 'string' ? code : undefined);
   }
 
 }

@@ -50,6 +50,7 @@ export const VehicleDetailPage: FC = () => {
   const {
     selectedVehicle,
     placeBid,
+    getLastBidRefusal,
     navigateTo,
     openChat,
     savedVehicleIds,
@@ -269,7 +270,14 @@ export const VehicleDetailPage: FC = () => {
         showToast(`Bid recorded for KSh ${val.toLocaleString()}`);
         setBidInput('');
       } else {
-        setBidError('Failed to record bid. Please try again.');
+        const refusal = getLastBidRefusal();
+        setBidError(
+          refusal?.code === 'PRIVATE_SELLER_AUCTION_NOT_ELIGIBLE'
+            ? 'Bidding is paused on this vehicle until KAYAD finishes verifying it and confirming it is in approved custody. No bid or payment was taken.'
+            : refusal?.code === 'ELIGIBILITY_UNAVAILABLE'
+              ? 'We could not confirm that bidding is open right now. No bid or payment was taken — please try again shortly.'
+              : 'Failed to record bid. Please try again.',
+        );
       }
     } catch {
       setBidError('Failed to record bid. Please try again.');

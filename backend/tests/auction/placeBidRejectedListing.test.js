@@ -86,6 +86,14 @@ jest.unstable_mockModule("../../services/auctionFinancialIntegrity.service.js", 
   getAuctionSecurityHold: jest.fn(),
 }));
 
+// Stage 5F.10: eligibility is covered by tests/auction/privateSellerEligibilityService.test.js and the PG harness;
+// this suite exercises the bid error contract, so the DB-backed pre-check is stubbed as "eligible".
+jest.unstable_mockModule("../../services/privateSellerAuctionEligibility.service.js", () => ({
+  assertPrivateSellerAuctionEligible: jest.fn().mockResolvedValue({ eligible: true }),
+  isGateRefusal: () => false,
+  toGateConflict: (e) => e,
+}));
+
 const { placeBid } = await import("../../controllers/bidController.js");
 
 const mockReqRes = () => {
