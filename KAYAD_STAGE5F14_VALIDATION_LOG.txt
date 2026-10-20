@@ -1,0 +1,11 @@
+KAYAD Stage 5F.14 validation log
+Foundation: Stage 5F.13 SHA-256 28c18af282c517ed7dbe4ebbd10fbebdbe824b34df960860f4bb0240c51c6387
+Node: v22.16.0 (below declared >=22.22.2)
+
+PASS node scripts/validate-stage5f14-provider-business-center.mjs — 9/9
+PASS node scripts/validate-inspection-marketplace.mjs — 37/37
+NOT RUN npm run typecheck — dependencies absent; Node engine below required minimum
+NOT RUN npm run build — dependencies absent; Node engine below required minimum
+NOT RUN npm test — dependencies absent; Node engine below required minimum
+NOT RUN real PostgreSQL/RLS, API, Playwright — isolated runtime unavailable
+No hosted database changes, deployment, payment, commit or push.

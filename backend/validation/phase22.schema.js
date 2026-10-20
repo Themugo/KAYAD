@@ -97,5 +97,6 @@ export const inspectionBookingSchema = z.object({
   scheduledDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   scheduledTime: z.string().regex(/^\d{2}:\d{2}(?::\d{2})?$/),
   staffId: uuid.optional(),
+  branchId: uuid.optional(),
   notes: z.string().trim().max(4000).optional(),
 });

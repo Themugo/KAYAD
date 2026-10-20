@@ -63,15 +63,38 @@ export const requireDealerVerification = async (req, res, next) => {
       });
     }
 
-    // Check legacy approval (backwards compatibility)
-    if (dealer.approved === true) {
-      // Legacy approved dealers are grandfathered in
-      req.dealer = dealer;
-      return next();
+    // A legacy approved flag must never override a current suspension or rejection.
+    // Resolve the verification record before applying backward-compatible approval.
+    const verification = await DealerVerification.findOne({ user: userId });
+
+    if (verification?.verificationStatus === "suspended") {
+      return res.status(403).json({
+        success: false,
+        code: "DEALER_ACCOUNT_SUSPENDED",
+        message: "Dealer account is suspended and requires an explicit admin reinstatement.",
+        verificationStatus: "suspended",
+        suspensionReason: verification.suspensionReason || dealer.suspensionReason || null,
+        suspensionExpiresAt: verification.suspensionExpiresAt || null,
+      });
     }
 
-    // Check verification record
-    const verification = await DealerVerification.findOne({ user: userId });
+    if (verification?.verificationStatus === "rejected") {
+      return res.status(403).json({
+        success: false,
+        code: "DEALER_VERIFICATION_REJECTED",
+        message: "Dealer verification was rejected. Update the application and resubmit it.",
+        verificationStatus: "rejected",
+        requiresAction: "resubmit_verification",
+        rejectionReason: verification.rejectionReason || null,
+      });
+    }
+
+    // Backward compatibility applies only when there is no newer blocking decision.
+    if (dealer.approved === true && (!verification || verification.verificationStatus === "approved")) {
+      req.dealer = dealer;
+      req.verification = verification || null;
+      return next();
+    }
 
     if (!verification) {
       return res.status(403).json({
@@ -117,28 +140,6 @@ export const requireDealerVerification = async (req, res, next) => {
         progressiveLimit: 3,
         progressiveUsed: verification.verificationStatus === "pending" || verification.verificationStatus === "under_review",
       });
-    }
-
-    // Check if suspended
-    if (verification.verificationStatus === "suspended") {
-      const isExpired = verification.suspensionExpiresAt && new Date() > verification.suspensionExpiresAt;
-
-      if (!isExpired) {
-        return res.status(403).json({
-          success: false,
-          message: "Dealer account suspended",
-          verificationStatus: "suspended",
-          suspensionReason: verification.suspensionReason,
-          suspensionExpiresAt: verification.suspensionExpiresAt,
-        });
-      } else {
-        // Suspension expired, auto-approve
-        verification.verificationStatus = "approved";
-        verification.suspensionReason = null;
-        verification.suspensionExpiresAt = null;
-        await verification.save();
-        logInfo("Suspension expired, auto-approved dealer", { userId, dealerId: dealer._id });
-      }
     }
 
     // Verification passed
@@ -240,28 +241,24 @@ export const checkDealerVerificationStatus = async (userId) => {
     const dealer = await Dealer.findOne({ user: userId });
     if (!dealer) return { verified: false, reason: "no_dealer_profile" };
 
-    // Legacy approval
-    if (dealer.approved === true) {
-      return { verified: true, reason: "legacy_approval" };
+    const verification = await DealerVerification.findOne({ user: userId });
+
+    if (verification?.verificationStatus === "suspended") {
+      return { verified: false, reason: "suspended", suspensionReason: verification.suspensionReason || dealer.suspensionReason || null };
+    }
+    if (verification?.verificationStatus === "rejected") {
+      return { verified: false, reason: "rejected", rejectionReason: verification.rejectionReason || null };
     }
 
-    const verification = await DealerVerification.findOne({ user: userId });
+    // Legacy approval is only a fallback when no newer blocking decision exists.
+    if (dealer.approved === true && (!verification || verification.verificationStatus === "approved")) {
+      return { verified: true, reason: verification ? "approved" : "legacy_approval" };
+    }
+
     if (!verification) return { verified: false, reason: "no_verification" };
 
     if (verification.verificationStatus === "approved") {
       return { verified: true, reason: "approved" };
-    }
-
-    if (verification.verificationStatus === "suspended") {
-      const isExpired = verification.suspensionExpiresAt && new Date() > verification.suspensionExpiresAt;
-      if (isExpired) {
-        verification.verificationStatus = "approved";
-        verification.suspensionReason = null;
-        verification.suspensionExpiresAt = null;
-        await verification.save();
-        return { verified: true, reason: "suspension_expired" };
-      }
-      return { verified: false, reason: "suspended", suspensionReason: verification.suspensionReason };
     }
 
     return {

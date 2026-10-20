@@ -3,8 +3,9 @@ import { Button } from '../../components/ui';
 import { Modal } from '../../components/ui/Modal';
 import { automotiveApi } from '../InspectionMarketplace/services/api';
 import type { ServiceTaxonomy } from '../InspectionMarketplace/types/inspection';
+import { MyMembershipsPanel } from '../InspectionMarketplace/organization/MyMembershipsPanel';
 
-interface Props { isOpen: boolean; onClose: () => void }
+interface Props { isOpen: boolean; onClose: () => void; /** Opens the organization workspace (branches, team, bookings, report) for a business the person owns or works for. */ onOpenWorkspace?: (organizationId: string) => void }
 
 const field = 'w-full px-3 py-2.5 bg-white border border-[#BDE5DE] rounded-lg text-sm min-h-[44px]';
 const reason = (e: any) => e?.response?.data?.message || e?.message || 'The request could not be completed.';
@@ -16,15 +17,13 @@ type MyProvider = NonNullable<Awaited<ReturnType<typeof automotiveApi.getMyProvi
  * declare services (verified later by KAYAD), submit evidence and manage the team; and for any signed-in
  * person to accept an invitation or leave a business. Nothing here can verify anything.
  */
-export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose }) => {
+export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose, onOpenWorkspace }) => {
   const uid = useId();
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [provider, setProvider] = useState<MyProvider | null>(null);
   const [taxonomy, setTaxonomy] = useState<ServiceTaxonomy | null>(null);
   const [caps, setCaps] = useState<any[]>([]);
-  const [staff, setStaff] = useState<any[]>([]);
-  const [affs, setAffs] = useState<any[]>([]);
   const [msg, setMsg] = useState<{ kind: 'ok' | 'error'; text: string } | null>(null);
   const [busy, setBusy] = useState(false);
   const [cap, setCap] = useState({ category: '', makes: '', all: true, powertrains: [] as string[], travels: false, evidence: '' });
@@ -32,18 +31,17 @@ export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose }) => {
   const [ev, setEv] = useState({ type: 'business_registration', name: '', issuer: '', number: '', expiry: '' });
   const [evFile, setEvFile] = useState<File | null>(null);
   const [regNo, setRegNo] = useState('');
-  const [inviteEmail, setInviteEmail] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true); setLoadError(null);
     try {
-      const [mine, tax, a] = await Promise.all([automotiveApi.getMyProvider(), automotiveApi.getServiceTaxonomy(), automotiveApi.myAffiliations()]);
-      setTaxonomy(tax); setAffs(a.affiliations || []);
+      const [mine, tax] = await Promise.all([automotiveApi.getMyProvider(), automotiveApi.getServiceTaxonomy()]);
+      setTaxonomy(tax);
       setProvider(mine.provider);
       if (mine.provider) {
-        const [c, s] = await Promise.all([automotiveApi.listCapabilities(mine.provider.id), automotiveApi.listStaff(mine.provider.id)]);
-        setCaps(c.capabilities || []); setStaff(s.staff || []);
-      } else { setCaps([]); setStaff([]); }
+        const c = await automotiveApi.listCapabilities(mine.provider.id);
+        setCaps(c.capabilities || []);
+      } else { setCaps([]); }
     } catch (e) { setLoadError(reason(e)); }
     finally { setLoading(false); }
   }, []);
@@ -70,21 +68,7 @@ export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
         {!loading && !loadError && (
           <>
-            <section aria-labelledby={`${uid}-aff`}>
-              <h3 id={`${uid}-aff`} className="font-bold text-[#0A3340]">Businesses you work with</h3>
-              <p className="text-xs text-[#64748B]">A business and the person must both confirm an affiliation. A name typed on a profile is not proof.</p>
-              {affs.length === 0 && <p className="text-sm text-[#64748B] mt-2">None yet. Open a business in the finder and choose “I work here” to ask it to confirm you.</p>}
-              <ul className="space-y-2 mt-2">
-                {affs.map((a) => (
-                  <li key={a.id} className="rounded-lg border border-[#D7E7E4] p-3 text-sm flex flex-wrap items-center gap-2">
-                    <span className="flex-1 min-w-[160px]"><strong>{a.businessName || 'Business'}</strong> · {a.role || 'role not stated'} · {a.affiliation_status}
-                      {a.affiliation_status === 'pending' && (a.provider_confirmed_at && !a.user_confirmed_at ? ' · invited by the business' : ' · waiting for the business')}</span>
-                    {a.affiliation_status === 'pending' && a.provider_confirmed_at && !a.user_confirmed_at && <Button size="sm" disabled={busy} onClick={() => void run(() => automotiveApi.acceptAffiliation(a.id), 'Affiliation accepted.')}>Accept</Button>}
-                    {a.affiliation_status !== 'ended' && <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(() => automotiveApi.leaveAffiliation(a.id), 'You left this business.')}>{a.affiliation_status === 'pending' ? 'Decline' : 'Leave'}</Button>}
-                  </li>
-                ))}
-              </ul>
-            </section>
+            <MyMembershipsPanel onOpenWorkspace={onOpenWorkspace ? (id) => { onClose(); onOpenWorkspace(id); } : undefined} />
 
             {!provider && <p className="text-sm text-[#64748B]">You have not applied to list a business. Use “Apply to list your business” first.</p>}
 
@@ -177,27 +161,11 @@ export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose }) => {
                   )}
                 </section>
 
-                <section aria-labelledby={`${uid}-team`}>
-                  <h3 id={`${uid}-team`} className="font-bold text-[#0A3340]">Team</h3>
-                  {!live && <p className="text-xs text-[#64748B]">You can add staff once your business is approved.</p>}
-                  <ul className="space-y-2 mt-1">
-                    {staff.map((s) => (
-                      <li key={s.id} className="rounded-lg border border-[#D7E7E4] p-3 text-sm flex flex-wrap items-center gap-2">
-                        <span className="flex-1 min-w-[160px]">{[s.first_name, s.last_name].filter(Boolean).join(' ') || 'Team member'} · {s.role || 'role not stated'} · <strong>{s.affiliation_status}</strong>
-                          {s.affiliation_status === 'pending' && (s.user_confirmed_at && !s.provider_confirmed_at ? ' · asked to join' : ' · invited, waiting for them')}</span>
-                        {s.affiliation_status === 'pending' && s.user_confirmed_at && !s.provider_confirmed_at && <Button size="sm" disabled={busy || !live} onClick={() => void run(() => automotiveApi.confirmStaff(provider.id, s.id), 'Team member confirmed.')}>Confirm</Button>}
-                        {s.affiliation_status !== 'ended' && <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(() => automotiveApi.endStaff(provider.id, s.id), 'Affiliation ended. Their services were removed.')}>{s.affiliation_status === 'pending' ? 'Decline' : 'Remove'}</Button>}
-                      </li>
-                    ))}
-                  </ul>
-                  {live && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <label htmlFor={`${uid}-inv`} className="sr-only">Email of a KAYAD account to invite</label>
-                      <input id={`${uid}-inv`} type="email" className={`${field} sm:w-72`} placeholder="Email of their KAYAD account" value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} />
-                      <Button size="sm" disabled={busy || !inviteEmail.trim()} onClick={() => void run(async () => { await automotiveApi.inviteStaff(provider.id, inviteEmail.trim(), 'mechanic'); setInviteEmail(''); }, 'Invitation sent. They must accept before they count as part of your team.')}>Invite</Button>
-                    </div>
-                  )}
-                  <p className="text-xs text-[#64748B] mt-2">Confirming someone proves a working relationship. It does not certify their qualifications; qualifications are verified separately.</p>
+                <section aria-labelledby={`${uid}-ws`} className="rounded-xl border border-[#D7E7E4] p-4 space-y-2">
+                  <h3 id={`${uid}-ws`} className="font-bold text-[#0A3340]">Branches, team and bookings</h3>
+                  <p className="text-sm text-[#64748B]">{live ? 'Add branches, invite staff with a role, route and assign bookings, and see one consolidated report.' : 'Branches, staff and bookings open once KAYAD approves the business.'}</p>
+                  {onOpenWorkspace && <Button size="sm" disabled={!live} onClick={() => { onClose(); onOpenWorkspace(provider.id); }}>Open organization workspace</Button>}
+                  <p className="text-xs text-[#64748B]">Confirming someone proves a working relationship. It does not certify their qualifications; qualifications are verified separately.</p>
                 </section>
               </>
             )}

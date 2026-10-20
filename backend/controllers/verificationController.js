@@ -13,7 +13,6 @@ import {
 } from "../services/dealerVerificationService.js";
 import { sendNotification } from "../services/notification.service.js";
 import { logInfo, logError } from "../utils/logger.js";
-import { getOnboardingPolicy, isPolicyTrusted } from "../services/onboardingPolicy.service.js"; // STAGE 5
 
 const maskPhone = (phone) => String(phone || "").replace(/(\d{3})\d{6}(\d{2})/, "$1******$2");
 
@@ -108,16 +107,10 @@ const transition = async (req, res, status, message) => {
       if (userStatus) await updateMany("users", { id: targetUserId }, { status: userStatus });
       await sendNotification({ userId: targetUserId, title: message.title, message: message.body(verification), type: "verification" }).catch((e) => logError("Verification notification failed", e));
       if (status === "approved") {
-        // STAGE 5: dealer approval is NOT listing approval. Pending listings are published in bulk only when
-        // the owner chose auto_publish (and the setting is trustworthy); under hold_for_review they stay
-        // pending for explicit listing review. The verified-dealer flag is always applied.
-        const policy = await getOnboardingPolicy();
-        const publish = isPolicyTrusted(policy) && policy.policy.listingModeration === "auto_publish";
-        if (publish) {
-          await updateMany("cars", { dealer: targetUserId, status: "pending" }, { status: "available", isVerifiedDealer: true });
-        } else {
-          await updateMany("cars", { dealer: targetUserId }, { isVerifiedDealer: true });
-        }
+        // Dealer approval and listing approval are separate decisions.
+        // Mark the dealer trust attribute, but never publish pending inventory as a side effect
+        // of approving the business. Each listing must pass its own moderation/readiness workflow.
+        await updateMany("cars", { dealer: targetUserId }, { isVerifiedDealer: true });
       }
     }
     return res.json({ success: true, message: message.success, verification });

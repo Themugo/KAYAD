@@ -10,6 +10,11 @@ import { declareCapabilitySchema, inviteStaffSchema, requestAffiliationSchema, a
 import { requireAuth, optionalAuth } from '../../middleware/auth.js';
 import { requireRole } from '../../middleware/auth.js';
 import requireProviderOwnership from '../middleware/requireProviderOwnership.js';
+import organizationRoutes from './organizationRoutes.js';
+import { requireUuidParams } from '../middleware/requireOrgAccess.js';
+import asyncHandler from '../../middleware/asyncHandler.js';
+import { response } from '../../utils/response.js';
+import { listPublicBranches } from '../services/organizationService.js';
 import { validate, validateObjectId } from '../../middleware/validate.js';
 import { inspectionPaymentSchema, inspectionPaymentInitiateSchema, inspectionBookingSchema } from '../../validation/phase22.schema.js';
 import { csrfProtection } from '../../middleware/csrf.js';
@@ -32,6 +37,9 @@ router.get('/providers/:providerId', controller.getProviderProfile);
 
 // Get provider reviews (public)
 router.get('/providers/:providerId/reviews', controller.getProviderReviews);
+
+// Active branches a customer may pick when booking (public, non-sensitive fields only)
+router.get('/providers/:providerId/branches', requireUuidParams('providerId'), asyncHandler(async (req, res) => response.success(res, { branches: await listPublicBranches(req.params.providerId) })));
 
 // Get available time slots (public)
 router.get('/providers/:providerId/slots', controller.getAvailableSlots);
@@ -66,6 +74,9 @@ router.post('/bookings/:bookingId/cancel', requireAuth, controller.cancelBooking
 // Submit review
 router.post('/reviews', requireAuth, controller.submitReview);
 
+
+// Stage 5F.16: organization -> branches -> staff memberships (capability-gated per request; see organizationRoutes.js)
+router.use('/org', organizationRoutes);
 
 /**
  * ============================================================

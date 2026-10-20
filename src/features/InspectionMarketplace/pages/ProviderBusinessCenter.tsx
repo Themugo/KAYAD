@@ -10,15 +10,15 @@ import {
   Star,
   Clock,
   FileText,
-  Users,
+  Building2,
+  ArrowUpRight,
   TrendingUp,
   AlertCircle,
   CheckCircle,
-  MessageSquare,
   Settings,
-  Plus,
 } from 'lucide-react';
 import { inspectionApi } from '../services/api';
+import { OrganizationWorkspace } from '../organization/OrganizationWorkspace';
 import type { ProviderDashboard, Booking, EarningsSummary, BookingStatus } from '../types/inspection';
 
 const KAYAD_COLORS = {
@@ -34,13 +34,15 @@ interface ProviderBusinessCenterProps {
   providerId: string;
 }
 
-type TabType = 'dashboard' | 'bookings' | 'reports' | 'earnings' | 'settings';
+type TabType = 'dashboard' | 'bookings' | 'organization' | 'reports' | 'earnings' | 'settings';
 
 export default function ProviderBusinessCenter({ providerId }: ProviderBusinessCenterProps) {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
   const [dashboard, setDashboard] = useState<ProviderDashboard | null>(null);
   const [earnings, setEarnings] = useState<EarningsSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
+  const [earningsError, setEarningsError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchDashboard();
@@ -48,28 +50,38 @@ export default function ProviderBusinessCenter({ providerId }: ProviderBusinessC
   }, [providerId]);
 
   const fetchDashboard = async () => {
+    setLoading(true);
+    setDashboardError(null);
     try {
       const data = await inspectionApi.getProviderDashboard(providerId);
       setDashboard(data);
     } catch (error) {
       console.error('Failed to fetch dashboard:', error);
+      setDashboardError('We could not load your inspection business overview. Your data has not been replaced with placeholder values.');
     } finally {
       setLoading(false);
     }
   };
 
   const fetchEarnings = async () => {
+    setEarningsError(null);
     try {
       const data = await inspectionApi.getProviderEarnings(providerId);
       setEarnings(data);
     } catch (error) {
       console.error('Failed to fetch earnings:', error);
+      setEarningsError('Earnings are temporarily unavailable.');
     }
+  };
+
+  const refreshWorkspace = async () => {
+    await Promise.all([fetchDashboard(), fetchEarnings()]);
   };
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: TrendingUp },
     { id: 'bookings', label: 'Bookings', icon: Calendar },
+    { id: 'organization', label: 'Branches & team', icon: Building2 },
     { id: 'reports', label: 'Reports', icon: FileText },
     { id: 'earnings', label: 'Earnings', icon: DollarSign },
     { id: 'settings', label: 'Settings', icon: Settings },
@@ -102,26 +114,29 @@ export default function ProviderBusinessCenter({ providerId }: ProviderBusinessC
               Manage your inspection business
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <button
-              className="px-4 py-2 rounded-lg font-medium flex items-center gap-2"
-              style={{ backgroundColor: KAYAD_COLORS.emerald, color: KAYAD_COLORS.white }}
-            >
-              <Plus size={16} />
-              New Booking
+          <div className="flex items-center gap-3">
+            <button type="button" onClick={refreshWorkspace} disabled={loading} className="px-3 py-2 rounded-lg border border-white/30 text-white text-sm font-medium disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+              {loading ? 'Refreshing…' : 'Refresh data'}
+            </button>
+            <button type="button" onClick={() => setActiveTab('bookings')} className="px-4 py-2 rounded-lg font-medium flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" style={{ backgroundColor: KAYAD_COLORS.emerald, color: KAYAD_COLORS.white }}>
+              <Calendar size={16} />
+              View bookings
             </button>
           </div>
         </div>
       </header>
 
       {/* Navigation Tabs */}
-      <nav className="max-w-7xl mx-auto px-6 py-4">
+      <nav aria-label="Inspection business workspace" className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
         <div className="flex gap-2 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}
-              className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6] ${
                 activeTab === tab.id ? 'text-white' : ''
               }`}
               style={{
@@ -137,18 +152,42 @@ export default function ProviderBusinessCenter({ providerId }: ProviderBusinessC
       </nav>
 
       {/* Content */}
-      <main className="max-w-7xl mx-auto px-6 pb-12">
-        {activeTab === 'dashboard' && (
-          <DashboardTab dashboard={dashboard} earnings={earnings} />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
+        {activeTab === 'dashboard' && !dashboardError && (
+          <section className="mb-6 overflow-hidden rounded-2xl bg-gradient-to-r from-[#0B2D43] via-[#12576D] to-[#147C82] p-5 sm:p-7 text-white shadow-lg">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="max-w-2xl">
+                <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-semibold tracking-wide text-[#C8F4EC]"><Building2 size={14} /> PROVIDER WORKSPACE</p>
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Your inspection business, at a glance</h2>
+                <p className="mt-2 text-sm leading-6 text-white/75">Track bookings, complete reports on time, and keep your provider operations moving from one workspace.</p>
+              </div>
+              <button type="button" onClick={() => setActiveTab('bookings')} className="inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-xl bg-[#13B8A6] px-4 py-2.5 text-sm font-bold text-[#062E3A] shadow-sm transition hover:bg-[#5BE0CF] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">Open booking queue <ArrowUpRight size={16} /></button>
+            </div>
+          </section>
+        )}
+        {dashboardError && activeTab === 'dashboard' && (
+          <div role="alert" className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <span>{dashboardError}</span>
+            <button type="button" onClick={refreshWorkspace} className="self-start rounded-lg border border-rose-300 px-3 py-2 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">Retry</button>
+          </div>
+        )}
+        {earningsError && activeTab === 'dashboard' && (
+          <div role="status" className="mb-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{earningsError}</div>
+        )}
+        {activeTab === 'dashboard' && !dashboardError && (
+          <DashboardTab dashboard={dashboard} earnings={earnings} earningsError={earningsError} onOpen={setActiveTab} />
         )}
         {activeTab === 'bookings' && (
           <BookingsTab providerId={providerId} />
+        )}
+        {activeTab === 'organization' && (
+          <OrganizationWorkspace organizationId={providerId} />
         )}
         {activeTab === 'reports' && (
           <ReportsTab providerId={providerId} />
         )}
         {activeTab === 'earnings' && (
-          <EarningsTab earnings={earnings} providerId={providerId} />
+          <EarningsTab earnings={earnings} earningsError={earningsError} providerId={providerId} />
         )}
         {activeTab === 'settings' && (
           <SettingsTab providerId={providerId} />
@@ -159,8 +198,8 @@ export default function ProviderBusinessCenter({ providerId }: ProviderBusinessC
 }
 
 // Dashboard Tab
-function DashboardTab({ dashboard, earnings }: { dashboard: ProviderDashboard | null; earnings: EarningsSummary | null }) {
-  if (!dashboard) return null;
+function DashboardTab({ dashboard, earnings, earningsError, onOpen }: { dashboard: ProviderDashboard | null; earnings: EarningsSummary | null; earningsError: string | null; onOpen: (tab: TabType) => void }) {
+  if (!dashboard) return <div className="rounded-xl border border-[#D7E7E4] bg-white p-8 text-center text-[#64748B]">Business overview is unavailable. Use Refresh data to try again.</div>;
 
   return (
     <div className="space-y-6">
@@ -181,7 +220,7 @@ function DashboardTab({ dashboard, earnings }: { dashboard: ProviderDashboard | 
         <StatCard
           icon={<Star className="text-[#2F8F87]" />}
           label="Average Rating"
-          value={dashboard.overview.averageRating.toFixed(1)}
+          value={Number.isFinite(dashboard.overview.averageRating) && dashboard.overview.totalReviews > 0 ? dashboard.overview.averageRating.toFixed(1) : 'No reviews'}
           trend={null}
         />
         <StatCard
@@ -225,13 +264,13 @@ function DashboardTab({ dashboard, earnings }: { dashboard: ProviderDashboard | 
               Earnings Summary
             </h2>
             <div className="space-y-3">
-              <EarningsRow label="Total Earnings" value={`KES ${earnings?.totalEarnings.toLocaleString() || '0'}`} />
-              <EarningsRow label="Commission" value={`KES ${earnings?.totalCommission.toLocaleString() || '0'}`} isNegative />
-              <EarningsRow label="Net Earnings" value={`KES ${earnings?.netEarnings.toLocaleString() || '0'}`} isBold />
+              <EarningsRow label="Total Earnings" value={earningsError || !earnings ? '—' : `KES ${earnings.totalEarnings.toLocaleString()}`} />
+              <EarningsRow label="Commission" value={earningsError || !earnings ? '—' : `KES ${earnings.totalCommission.toLocaleString()}`} isNegative />
+              <EarningsRow label="Net Earnings" value={earningsError || !earnings ? '—' : `KES ${earnings.netEarnings.toLocaleString()}`} isBold />
               <div className="pt-3 border-t" style={{ borderColor: KAYAD_COLORS.warmBeige }}>
                 <EarningsRow
                   label="Pending Payout"
-                  value={`KES ${earnings?.totalPending.toLocaleString() || '0'}`}
+                  value={earningsError || !earnings ? '—' : `KES ${earnings.totalPending.toLocaleString()}`}
                   highlight
                 />
               </div>
@@ -244,9 +283,9 @@ function DashboardTab({ dashboard, earnings }: { dashboard: ProviderDashboard | 
               Quick Actions
             </h2>
             <div className="space-y-2">
-              <QuickAction icon={<Plus size={16} />} label="Add Package" />
-              <QuickAction icon={<Users size={16} />} label="Manage Staff" />
-              <QuickAction icon={<MessageSquare size={16} />} label="Messages" badge={dashboard.unreadMessages} />
+              <QuickAction icon={<Calendar size={16} />} label="Open the booking queue" onClick={() => onOpen('bookings')} />
+              <QuickAction icon={<Building2 size={16} />} label="Branches and team" onClick={() => onOpen('organization')} />
+              <QuickAction icon={<TrendingUp size={16} />} label="Consolidated report" onClick={() => onOpen('organization')} />
             </div>
           </div>
         </div>
@@ -259,6 +298,8 @@ function DashboardTab({ dashboard, earnings }: { dashboard: ProviderDashboard | 
 function BookingsTab({ providerId }: { providerId: string }) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
+  const [earningsError, setEarningsError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>('all');
 
   useEffect(() => {
@@ -320,7 +361,7 @@ function BookingsTab({ providerId }: { providerId: string }) {
           </div>
         ) : (
           bookings.map((booking) => (
-            <BookingCard key={booking.id} booking={booking} showActions />
+            <BookingCard key={booking.id} booking={booking} />
           ))
         )}
       </div>
@@ -337,14 +378,14 @@ function ReportsTab({ providerId }: { providerId: string }) {
       </h2>
       <div className="text-center py-12" style={{ color: KAYAD_COLORS.softBlue }}>
         <FileText size={48} className="mx-auto mb-4" />
-        <p>Reports will be generated after inspections are completed.</p>
+        <p>Report records are not connected to this tab yet. Completed reports remain available through the existing report workflow.</p>
       </div>
     </div>
   );
 }
 
 // Earnings Tab
-function EarningsTab({ earnings, providerId }: { earnings: EarningsSummary | null; providerId: string }) {
+function EarningsTab({ earnings, earningsError, providerId }: { earnings: EarningsSummary | null; earningsError: string | null; providerId: string }) {
   const [period, setPeriod] = useState('monthly');
 
   return (
@@ -373,29 +414,30 @@ function EarningsTab({ earnings, providerId }: { earnings: EarningsSummary | nul
         <div className="rounded-xl p-6" style={{ backgroundColor: KAYAD_COLORS.white }}>
           <p className="text-sm mb-1" style={{ color: KAYAD_COLORS.softBlue }}>Total Earnings</p>
           <p className="text-2xl font-bold" style={{ color: KAYAD_COLORS.lightNavy }}>
-            KES {earnings?.totalEarnings.toLocaleString() || '0'}
+            {earningsError || !earnings ? '—' : `KES ${earnings.totalEarnings.toLocaleString()}`}
           </p>
         </div>
         <div className="rounded-xl p-6" style={{ backgroundColor: KAYAD_COLORS.white }}>
           <p className="text-sm mb-1" style={{ color: KAYAD_COLORS.softBlue }}>Commission Paid</p>
           <p className="text-2xl font-bold" style={{ color: KAYAD_COLORS.mutedTerracotta }}>
-            KES {earnings?.totalCommission.toLocaleString() || '0'}
+            {earningsError || !earnings ? '—' : `KES ${earnings.totalCommission.toLocaleString()}`}
           </p>
         </div>
         <div className="rounded-xl p-6" style={{ backgroundColor: KAYAD_COLORS.white }}>
           <p className="text-sm mb-1" style={{ color: KAYAD_COLORS.softBlue }}>Net Earnings</p>
           <p className="text-2xl font-bold" style={{ color: KAYAD_COLORS.emerald }}>
-            KES {earnings?.netEarnings.toLocaleString() || '0'}
+            {earningsError || !earnings ? '—' : `KES ${earnings.netEarnings.toLocaleString()}`}
           </p>
         </div>
         <div className="rounded-xl p-6" style={{ backgroundColor: KAYAD_COLORS.white }}>
           <p className="text-sm mb-1" style={{ color: KAYAD_COLORS.softBlue }}>Pending Payout</p>
           <p className="text-2xl font-bold" style={{ color: KAYAD_COLORS.lightNavy }}>
-            KES {earnings?.totalPending.toLocaleString() || '0'}
+            {earningsError || !earnings ? '—' : `KES ${earnings.totalPending.toLocaleString()}`}
           </p>
         </div>
       </div>
 
+      {earningsError && <div role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-800">{earningsError} Retry from Refresh data in the dashboard.</div>}
       {/* Settlements */}
       <div className="rounded-xl p-6" style={{ backgroundColor: KAYAD_COLORS.white }}>
         <h2 className="text-lg font-bold mb-4" style={{ color: KAYAD_COLORS.lightNavy }}>
@@ -419,7 +461,7 @@ function SettingsTab({ providerId }: { providerId: string }) {
       </h2>
       <div className="text-center py-12" style={{ color: KAYAD_COLORS.softBlue }}>
         <Settings size={48} className="mx-auto mb-4" />
-        <p>Configure your business profile, packages, and team.</p>
+        <p>Business profile and package editing are managed from “My business” on the Inspections screen. Branches, team roles and invitations are in the Branches &amp; team tab.</p>
       </div>
     </div>
   );
@@ -438,7 +480,7 @@ function StatCard({ icon, label, value, trend }: { icon: React.ReactNode; label:
   );
 }
 
-function BookingCard({ booking, showActions = false }: { booking: Booking; showActions?: boolean }) {
+function BookingCard({ booking }: { booking: Booking }) {
   const statusColors: Record<string, string> = {
     booked: '#176B87',
     confirmed: '#2F8F87',
@@ -491,14 +533,11 @@ function BookingCard({ booking, showActions = false }: { booking: Booking; showA
         </p>
         <span
           className="text-xs px-2 py-1 rounded-full capitalize"
-          style={{ backgroundColor: statusColors[booking.status] + '20', color: statusColors[booking.status] }}
+          style={{ backgroundColor: `${statusColors[booking.status] || KAYAD_COLORS.softBlue}20`, color: statusColors[booking.status] || KAYAD_COLORS.softBlue }}
         >
           {booking.status.replace('_', ' ')}
         </span>
 
-        {showActions && (
-          <span className="text-[10px] font-medium text-[#94A3B8] mt-2 block">Actions are available in the provider workflow when returned by the backend.</span>
-        )}
       </div>
     </div>
   );
@@ -524,24 +563,19 @@ function EarningsRow({ label, value, isBold = false, isNegative = false, highlig
   );
 }
 
-function QuickAction({ icon, label, badge }: { icon: React.ReactNode; label: string; badge?: number }) {
+function QuickAction({ icon, label, onClick }: { icon: React.ReactNode; label: string; onClick: () => void }) {
   return (
-    <div
-      className="flex items-center justify-between p-3 rounded-lg border border-[#D7E7E4] bg-[#F6FAF9]"
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full min-h-[44px] items-center justify-between rounded-lg border border-[#D7E7E4] bg-[#F6FAF9] p-3 text-left hover:bg-[#EAF5F2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]"
       style={{ color: KAYAD_COLORS.lightNavy }}
     >
       <span className="flex items-center gap-2">
         {icon}
         {label}
       </span>
-      {badge && (
-        <span
-          className="px-2 py-0.5 rounded-full text-xs text-white"
-          style={{ backgroundColor: KAYAD_COLORS.emerald }}
-        >
-          {badge}
-        </span>
-      )}
-    </div>
+      <ArrowUpRight size={14} aria-hidden="true" />
+    </button>
   );
 }

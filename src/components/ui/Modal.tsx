@@ -85,14 +85,14 @@ export const Modal: React.FC<ModalProps> = ({
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 'var(--z-modal-backdrop)',
+    zIndex: 'var(--z-modal-backdrop, 1000)',
     padding: 'var(--space-6)',
     animation: 'fadeIn var(--duration-normal) var(--ease-out)',
   };
 
   const modalStyle: React.CSSProperties = {
     position: 'relative',
-    background: 'var(--color-bg-elevated)',
+    background: 'var(--color-bg-elevated, #ffffff)',
     borderRadius: 'var(--radius-xl)',
     boxShadow: 'var(--shadow-2xl)',
     width: '100%',
@@ -100,7 +100,7 @@ export const Modal: React.FC<ModalProps> = ({
     overflow: 'hidden',
     display: 'flex',
     flexDirection: 'column',
-    zIndex: 'var(--z-modal)',
+    zIndex: 'var(--z-modal, 1001)',
     animation: 'scaleIn var(--duration-normal) var(--ease-spring)',
     ...sizes[size],
   };
@@ -116,13 +116,13 @@ export const Modal: React.FC<ModalProps> = ({
   const titleStyle: React.CSSProperties = {
     fontSize: 'var(--text-h3)',
     fontWeight: 600,
-    color: 'var(--color-text-primary)',
+    color: 'var(--color-text-primary, #0A3340)',
     margin: 0,
   };
 
   const descriptionStyle: React.CSSProperties = {
     fontSize: 'var(--text-body-sm)',
-    color: 'var(--color-text-muted)',
+    color: 'var(--color-text-muted, #64748B)',
     margin: 'var(--space-2) 0 0 0',
   };
 
@@ -133,10 +133,10 @@ export const Modal: React.FC<ModalProps> = ({
     width: 32,
     height: 32,
     padding: 0,
-    background: 'var(--color-bg-secondary)',
+    background: 'var(--color-bg-secondary, #f4f8f8)',
     border: '1px solid var(--color-border)',
     borderRadius: 'var(--radius-md)',
-    color: 'var(--color-text-muted)',
+    color: 'var(--color-text-muted, #64748B)',
     cursor: 'pointer',
     transition: 'all var(--transition-fast)',
   };
@@ -154,7 +154,7 @@ export const Modal: React.FC<ModalProps> = ({
     gap: 'var(--space-3)',
     padding: 'var(--space-4) var(--space-6)',
     borderTop: '1px solid var(--color-border-soft)',
-    background: 'var(--color-bg-secondary)',
+    background: 'var(--color-bg-secondary, #f4f8f8)',
   };
 
   return (

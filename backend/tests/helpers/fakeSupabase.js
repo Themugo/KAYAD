@@ -4,7 +4,7 @@
 let seq = 0;
 const uid = () => `00000000-0000-4000-8000-${String(++seq).padStart(12, '0')}`;
 
-export function createFakeSupabase(seed = {}) {
+export function createFakeSupabase(seed = {}, { rpc } = {}) {
   const tables = {};
   for (const [name, rows] of Object.entries(seed)) tables[name] = rows.map((r) => ({ id: uid(), ...r }));
   const tbl = (n) => (tables[n] ||= []);
@@ -58,5 +58,8 @@ export function createFakeSupabase(seed = {}) {
     }
     return api;
   }
-  return { from, tables, _uid: uid };
+  const self = { from, tables, _uid: uid };
+  // Optional in-memory stand-in for SECURITY DEFINER database functions (evidence tier M). Real behaviour is certified on PostgreSQL.
+  self.rpc = async (name, args) => (rpc ? rpc(self, name, args) : { data: null, error: { message: `rpc ${name} not available in this fake` } });
+  return self;
 }

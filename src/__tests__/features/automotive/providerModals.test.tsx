@@ -13,6 +13,12 @@ vi.mock('../../../features/InspectionMarketplace/services/api', () => ({
   },
 }));
 
+const myMem = vi.fn(); const myWork = vi.fn(); const acceptInv = vi.fn(); const leaveMem = vi.fn();
+vi.mock('../../../features/InspectionMarketplace/services/organizationApi', () => {
+  const organizationApi = { myMemberships: () => myMem(), myWorklist: () => myWork(), acceptInvitation: (...a: unknown[]) => acceptInv(...a), leave: (...a: unknown[]) => leaveMem(...a), transition: vi.fn() };
+  return { organizationApi, default: organizationApi };
+});
+
 import { ProviderApplicationModal } from '../../../features/InspectionsView/ProviderApplicationModal';
 import { ProviderServicesModal } from '../../../features/InspectionsView/ProviderServicesModal';
 import { businessNameOf, kayadOrderToRecord } from '../../../features/InspectionsView/inspectionJourney';
@@ -25,7 +31,7 @@ const TAX = {
   powertrains: [{ code: 'hybrid', label: 'Hybrid' }], symptoms: [],
 };
 
-beforeEach(() => { [register, getTax, declare, getMy, listCaps, listStaff, myAff, accept, confirm, invite].forEach((m) => m.mockReset()); getTax.mockResolvedValue(TAX); });
+beforeEach(() => { [register, getTax, declare, getMy, listCaps, listStaff, myAff, accept, confirm, invite, myMem, myWork, acceptInv, leaveMem].forEach((m) => m.mockReset()); getTax.mockResolvedValue(TAX); myMem.mockResolvedValue({ memberships: [] }); myWork.mockResolvedValue({ items: [], memberships: 0 }); });
 
 describe('Provider application', () => {
   it('offers services from the canonical taxonomy (no free-text list) and records them as declared after the application', async () => {
@@ -71,43 +77,49 @@ describe('My business and affiliations', () => {
     expect(screen.getByText('declared, not verified')).toBeTruthy();
     expect(screen.getByText('verified by KAYAD')).toBeTruthy();
     expect(screen.queryByRole('button', { name: /^verify/i })).toBeNull();
-    expect(screen.getByText(/You can add staff once your business is approved/)).toBeTruthy();
+    expect(screen.getByText(/open once KAYAD approves the business/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Open organization workspace' })).toBeNull();
     expect(screen.queryByPlaceholderText('Email of their KAYAD account')).toBeNull();
   });
 
-  it('a person can accept an invitation, but a request they made themselves shows as waiting for the business', async () => {
+  it('a person can accept an invitation addressed to them (via the organization API) and sees where they work', async () => {
     getMy.mockResolvedValue({ provider: null });
-    myAff.mockResolvedValue({ affiliations: [
-      { id: 'a1', businessName: 'Acme', role: 'mechanic', affiliation_status: 'pending', provider_confirmed_at: '2026-10-01', user_confirmed_at: null },
-      { id: 'a2', businessName: 'Beta', role: 'mechanic', affiliation_status: 'pending', provider_confirmed_at: null, user_confirmed_at: '2026-10-01' },
+    myMem.mockResolvedValue({ memberships: [
+      { id: 'a1', organizationId: 'o1', organizationName: 'Acme', accessRole: 'inspector', title: 'junior_inspector', branchId: null, branchName: null, status: 'pending', isActive: false, invitationExpired: false, invitationExpiresAt: '2099-01-01T00:00:00Z' },
+      { id: 'a2', organizationId: 'o2', organizationName: 'Beta', accessRole: 'finance', title: 'junior_inspector', branchId: null, branchName: null, status: 'confirmed', isActive: true, invitationExpired: false },
     ] });
-    accept.mockResolvedValue({});
-    render(<ProviderServicesModal isOpen onClose={vi.fn()} />);
-    expect(await screen.findByText(/invited by the business/)).toBeTruthy();
-    expect(screen.getByText(/waiting for the business/)).toBeTruthy();
+    acceptInv.mockResolvedValue({}); const open = vi.fn();
+    render(<ProviderServicesModal isOpen onClose={vi.fn()} onOpenWorkspace={open} />);
+    expect((await screen.findAllByText(/Acme/)).length).toBeGreaterThan(0);
     expect(screen.getAllByRole('button', { name: 'Accept' })).toHaveLength(1);
     fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
-    await waitFor(() => expect(accept).toHaveBeenCalledWith('a1'));
-    expect(document.body.textContent).toMatch(/A name typed on a profile is not proof/);
+    await waitFor(() => expect(acceptInv).toHaveBeenCalledWith('a1'));
+    fireEvent.click(screen.getByRole('button', { name: 'Open workspace' }));
+    expect(open).toHaveBeenCalledWith('o2');
   });
 
-  it('an active business can confirm a mechanic who asked to join, and invite by email', async () => {
-    getMy.mockResolvedValue({ provider: active });
-    listCaps.mockResolvedValue({ capabilities: [] });
-    listStaff.mockResolvedValue({ staff: [{ id: 's1', first_name: 'Jane', role: 'mechanic', affiliation_status: 'pending', user_confirmed_at: '2026-10-01', provider_confirmed_at: null }] });
-    myAff.mockResolvedValue({ affiliations: [] }); confirm.mockResolvedValue({}); invite.mockResolvedValue({});
+  it('an expired invitation is not offered for acceptance', async () => {
+    getMy.mockResolvedValue({ provider: null });
+    myMem.mockResolvedValue({ memberships: [{ id: 'a1', organizationId: 'o1', organizationName: 'Acme', accessRole: 'inspector', title: 'junior_inspector', branchId: null, branchName: null, status: 'pending', isActive: false, invitationExpired: true }] });
     render(<ProviderServicesModal isOpen onClose={vi.fn()} />);
-    fireEvent.click(await screen.findByRole('button', { name: 'Confirm' }));
-    await waitFor(() => expect(confirm).toHaveBeenCalledWith('p1', 's1'));
-    fireEvent.change(screen.getByPlaceholderText('Email of their KAYAD account'), { target: { value: 'bob@x.co' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Invite' }));
-    await waitFor(() => expect(invite).toHaveBeenCalledWith('p1', 'bob@x.co', 'mechanic'));
+    await screen.findByText(/You are not on any team yet/);
+    expect(screen.queryByRole('button', { name: 'Accept' })).toBeNull();
+  });
+
+  it('an active business is pointed to the organization workspace; the modal no longer invites with the invalid "mechanic" role', async () => {
+    getMy.mockResolvedValue({ provider: active });
+    listCaps.mockResolvedValue({ capabilities: [] }); const open = vi.fn();
+    render(<ProviderServicesModal isOpen onClose={vi.fn()} onOpenWorkspace={open} />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Open organization workspace' }));
+    expect(open).toHaveBeenCalledWith('p1');
+    expect(invite).not.toHaveBeenCalled();
+    expect(screen.queryByPlaceholderText('Email of their KAYAD account')).toBeNull();
     expect(document.body.textContent).toMatch(/does not certify their qualifications/);
   });
 
   it('a suspended business is told it is not listed and cannot edit services', async () => {
     getMy.mockResolvedValue({ provider: { ...active, lifecycle_stage: 'SUSPENDED', suspended_reason: 'complaints' } });
-    listCaps.mockResolvedValue({ capabilities: [] }); listStaff.mockResolvedValue({ staff: [] }); myAff.mockResolvedValue({ affiliations: [] });
+    listCaps.mockResolvedValue({ capabilities: [] });
     render(<ProviderServicesModal isOpen onClose={vi.fn()} />);
     expect(await screen.findByText(/You are not listed and cannot take new jobs/)).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Save service' })).toBeNull();

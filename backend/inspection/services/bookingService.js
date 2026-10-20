@@ -7,6 +7,7 @@ import { AppError } from '../../utils/AppError.js';
 import { logInfo, logError } from '../../utils/logger.js';
 import { incrementCounter } from '../../config/metrics.js';
 import { assertStaffAssignable } from './workforceService.js';
+import { assignBooking as assignBookingAuthoritative } from './organizationService.js';
 
 /**
  * Generate booking reference
@@ -50,6 +51,15 @@ class BookingService {
     }
     if (bookingData.isMobile === false && !provider.has_workshop) {
       throw new AppError('Workshop inspection is not available from this provider', 400);
+    }
+
+    // Stage 5F.16: an optional branch choice must be an ACTIVE branch of THIS provider (the composite FK makes any other value
+    // impossible at the database; this check turns it into a clear 400 instead of a constraint failure).
+    let branchId = null;
+    if (bookingData.branchId) {
+      const branch = await db.findOne('inspection_branches', { id: bookingData.branchId, provider_id: provider.id });
+      if (!branch || branch.status !== 'active') throw new AppError('Selected branch is not available', 400);
+      branchId = branch.id;
     }
 
     // Check availability
@@ -97,6 +107,7 @@ class BookingService {
     const booking = {
       booking_reference: generateBookingReference(),
       provider_id: pkg.provider_id,
+      branch_id: branchId,
       package_id: pkg.id,
       inspection_type: pkg.inspection_type,
       customer_id: customerId,
@@ -317,6 +328,12 @@ class BookingService {
       throw new AppError('Booking does not belong to this provider', 403);
     }
 
+    // Stage 5F.16: assignment is NOT a generic status change. It carries eligibility, branch-scope, payment and concurrency rules
+    // that live in kayad_org_booking_assign, so it is only reachable through assignInspector().
+    if (newStatus === 'inspector_assigned') {
+      throw new AppError('Use the assignment endpoint to assign an inspector', 400);
+    }
+
     const validTransitions = {
       'booked': ['confirmed', 'cancelled'],
       'confirmed': ['inspector_assigned', 'cancelled'],
@@ -350,11 +367,6 @@ class BookingService {
       case 'cancelled':
         updates.cancelled_at = new Date();
         break;
-    }
-
-    // If assigning inspector
-    if (newStatus === 'inspector_assigned' && staffId) {
-      updates.assigned_staff_id = staffId;
     }
 
     if (notes) {
@@ -397,23 +409,9 @@ class BookingService {
     if (providerId && String(booking.provider_id) !== String(providerId)) {
       throw new AppError('Booking does not belong to this provider', 403);
     }
-
-    if (!['booked', 'confirmed'].includes(booking.status)) {
-      throw new AppError('Cannot assign inspector at this stage', 400);
-    }
-
-    // The inspector must be a confirmed, active member of an eligible business.
-    await assertStaffAssignable(booking.provider_id, staffId);
-
-    await db.update('inspection_bookings', bookingId, {
-      assigned_staff_id: staffId,
-      status: 'inspector_assigned',
-      status_changed_at: new Date(),
-      updated_at: new Date(),
-    });
-
-    await this.addStatusHistory(bookingId, booking.status, 'inspector_assigned', userId, staffId);
-
+    // Stage 5F.16: one transactional, DB-authorised path (actor standing + branch scope + inspector eligibility + payment gate +
+    // row lock + audit). The legacy in-app status check and two-step write are replaced by it.
+    await assignBookingAuthoritative(userId, bookingId, staffId);
     return this.getBookingById(bookingId);
   }
 
@@ -486,10 +484,16 @@ class BookingService {
    * Get provider bookings
    */
   async getInspectorBookings(userId, filters = {}) {
-    const staff = await db.findOne('inspection_staff', { user_id: userId, is_active: true });
-    if (!staff) return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
+    // Stage 5F.16: only LIVE memberships count (confirmed + active, on an active branch). An ended, suspended or pending
+    // membership no longer exposes work, and a person with memberships in several organizations sees all of their own assignments.
+    const memberships = await db.find('inspection_staff', { user_id: userId, is_active: true, affiliation_status: 'confirmed' }, { limit: 50 });
+    const branchIds = [...new Set(memberships.filter((m) => m.branch_id).map((m) => m.branch_id))];
+    const liveBranches = new Set();
+    for (const id of branchIds) { const br = await db.findById('inspection_branches', id); if (br && br.status === 'active') liveBranches.add(id); }
+    const staff = memberships.filter((m) => !m.branch_id || liveBranches.has(m.branch_id));
+    if (!staff.length) return { items: [], total: 0, page: 1, limit: 20, totalPages: 0 };
 
-    const query = { assigned_staff_id: staff.id };
+    const query = { assigned_staff_id: { $in: staff.map((m) => m.id) } };
     if (filters.status) query.status = filters.status;
     if (filters.date) query.scheduled_date = filters.date;
 
@@ -504,7 +508,7 @@ class BookingService {
     return {
       items: await Promise.all(bookings.map((booking) => this.getBookingDetails(booking.id, 'provider'))),
       total, page, limit, totalPages: Math.ceil(total / limit),
-      staff: { id: staff.id, role: staff.role, firstName: staff.first_name, lastName: staff.last_name },
+      staff: { id: staff[0].id, role: staff[0].role, firstName: staff[0].first_name, lastName: staff[0].last_name },
     };
   }
 

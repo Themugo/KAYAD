@@ -1,0 +1,120 @@
+up
+PASS H1 unauthenticated organization read -> 401
+PASS H2 owner reads own organization
+PASS H3 stranger gets 404 (not 403) -> no existence oracle
+PASS H4 owner of ANOTHER organization gets the same 404
+PASS H5 an organization that does not exist gets the identical 404
+PASS H6 malformed organization id -> 404
+PASS H7 status and message for 'exists but not yours' and 'does not exist' are identical
+PASS H10 CSRF is required on mutations
+PASS H11 owner creates head-office branch
+PASS H12 second branch
+PASS H13 org B branch
+PASS H14 duplicate name -> 409
+PASS H15 body cannot carry organizationId (strict) -> 400
+PASS H16 body cannot carry provider_id -> 400
+PASS H17 stranger cannot create a branch (404)
+PASS H18 org B owner cannot create a branch in A (404)
+PASS H19 PATCH a branch of org B through org A's URL -> 404
+PASS H20 ... and org B's branch is unchanged
+PASS H21 unknown email -> 404
+PASS H22 role 'owner' is not assignable -> 400
+PASS H23 unknown field (isOwner) -> 400
+PASS H24 owner invites an org admin
+PASS H25 the OWNER cannot accept on the invitee's behalf (404)
+PASS H26 an unrelated user cannot accept (404)
+PASS H27 the invitee accepts
+PASS H28 replaying the acceptance -> 409
+PASS H29 the new admin can now read the organization
+PASS H30 every role onboarded through invite → accept (incl. delegated invites by admin/branch managers)
+PASS H31 operations manager cannot invite (403)
+PASS H32 branch manager cannot invite into another branch (403)
+PASS H33 branch manager cannot invite a finance user (403)
+PASS H34 org_admin cannot create another org_admin (403)
+PASS H35 inspector cannot invite (403)
+PASS H36 org B's branch id is rejected for an org A invitation (404)
+PASS H37 inviting an existing member -> 409
+PASS H40 owner lists the whole team
+PASS H41 branch manager lists ONLY their branch
+PASS H42 finance cannot list the team (403)
+PASS H43 inspector cannot list the team (403)
+PASS H44 org B manager cannot list org A's team (404)
+PASS H45 nobody changes their own role (403)
+PASS H46 org_admin cannot demote... another org_admin does not exist; admin cannot promote ops -> org_admin (403)
+PASS H47 branch manager cannot promote their inspector (403)
+PASS H48 branch manager cannot move an inspector to another branch (403)
+PASS H49 a member of org B cannot be changed through org A's URL (404)
+PASS H50 PATCH with a privilege field outside the schema -> 400
+PASS H51 owner moves an inspector between branches (allowed)
+PASS H52 ... and back
+PASS H60 branch manager A1 sees only A1 bookings
+PASS H61 owner sees all of A (incl. unrouted) and none of B
+PASS H62 'unrouted' filter lists only the org-level queue
+PASS H63 finance has no booking access (403)
+PASS H64 invalid query field -> 400
+PASS H65 a branch manager asking for another branch still only gets their own
+PASS H66 org B's booking cannot be routed through org A's URL (404)
+PASS H67 org B owner cannot route org A's booking via B's URL (404)
+PASS H68 org B owner cannot reach org A's booking via A's URL (404)
+PASS H69 operations manager routes the unrouted booking into branch A2
+PASS H70 branch manager cannot re-route between branches (403)
+PASS H71 assign: manager of A2 cannot touch an A1 booking (404)
+PASS H72 assign: inspector cannot assign (403)
+PASS H73 assign: staff of another organization is not eligible
+PASS H74 assign: inspector of branch A2 cannot take an A1 booking (409)
+PASS H75 branch manager A1 assigns their inspector
+PASS H76 the inspector's own worklist shows exactly the assignment
+PASS H77 inspector's booking list is limited to assigned work
+PASS H78 inspector cannot cancel (management action) -> 404
+PASS H79 unassigned inspector cannot travel -> 404
+PASS H80 illegal jump assigned → start -> 409
+PASS H81 travel
+PASS H82 start
+PASS H83 complete
+PASS H84 unknown action -> 400
+PASS H85 an in-flight booking cannot be re-routed (409)
+PASS H90 before removal the inspector can read org bookings
+PASS H91 a branch manager revokes an inspector in their branch
+PASS H92 SAME token, next request: org access is gone (404)
+PASS H93 ... the worklist is empty
+PASS H94 ... transition is refused (404)
+PASS H95 revoke without a reason on suspend -> database refuses (400)
+PASS H96 suspend an inspector
+PASS H97 suspended member has no standing
+PASS H98 reactivate restores standing
+PASS H99 ... immediately
+PASS H100 a suspended BRANCH removes standing of its branch-scoped staff
+PASS H101 ... reactivating the branch restores it
+PASS H102 a person can leave their own membership (self)
+PASS H103 ... and then has no standing
+PASS H104 a person cannot 'leave' someone else's membership (404)
+PASS H105 ... the membership is untouched
+PASS H110 owner reads the consolidated report
+PASS H111 org B's 99999 never appears in org A's report
+PASS H112 branch manager's report is scoped to their branch and has no org-level money sections
+PASS H113 branch manager cannot ask for another branch (403)
+PASS H114 finance sees earnings but no operations
+PASS H115 operations manager sees operations but no money
+PASS H116 inspector cannot read reports (403)
+PASS H117 org B owner cannot read org A's report (404)
+PASS H118 inverted dates -> 400
+PASS H119 branch filter from another org -> 404
+PASS H120 report period is capped (>366 days) -> 400
+PASS H130 public branch list shows ACTIVE branches only, no sensitive fields
+PASS H131 a suspended branch is hidden from customers
+PASS H132 customer books into a chosen branch
+PASS H133 customer cannot book into another organization's branch
+PASS H134 customer cannot book into a suspended branch
+PASS H135 booking without a branch stays valid (org-level queue)
+PASS H140 legacy invite without a role no longer 500s (was: 'mechanic' violated the CHECK)
+PASS H141 legacy invite with an unknown title -> 400
+PASS H142 legacy accept is bound to the invitee (404 for others)
+PASS H143 legacy accept by invitee
+PASS H144 legacy end by the owner -> immediate loss of standing
+PASS H145 legacy owner assign path uses the DB authority (revoked inspector refused)
+PASS H146 legacy status endpoint can no longer assign inspectors (400)
+PASS H147 legacy endpoints still reject strangers
+PASS H150 org operations produced audit rows with the actor
+PASS H151 no organization A row is attributed to organization B actors
+
+stage5f16_http_e2e: pass=117 fail=0
