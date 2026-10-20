@@ -7,8 +7,11 @@ import { logActionFromReq } from "../utils/securityLogger.js";
 import { closeAuction } from "./auctionClose.service.js";
 import { emitCommunication, COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
 import Car from "../models/Car.js";
+import { assertPrivateSellerAuctionEligible } from "./privateSellerAuctionEligibility.service.js";
 
 export const startAuction = async ({ carId, durationMs, scheduledEndAt = null, startingBid, reservePrice = null, reserveMode = "none", req }) => {
+  const carForEligibility = await Car.findById(carId).lean();
+  await assertPrivateSellerAuctionEligible(carForEligibility || carId);
   const result = scheduledEndAt
     ? await atomicStartScheduledAuction({ carId, scheduledEndAt, startingBid, reservePrice, reserveMode })
     : await atomicStartAuction({ carId, durationMs, startingBid, reservePrice, reserveMode });

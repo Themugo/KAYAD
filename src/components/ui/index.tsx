@@ -248,7 +248,7 @@ export const Table: React.FC<React.TableHTMLAttributes<HTMLTableElement>> = ({ c
 );
 
 export const TableHeader: React.FC<React.HTMLAttributes<HTMLTableSectionElement>> = ({ children, className = '', ...props }) => (
-  <thead className={`border-b border-[#D7E7E4] text-[#94A3B8] uppercase font-bold text-[10px] bg-[#F6FAF9]/50 ${className}`} {...props}>
+  <thead className={`border-b border-[#D7E7E4] text-[#64748B] uppercase font-bold text-[10px] bg-[#F6FAF9]/50 ${className}`} {...props}>
     {children}
   </thead>
 );
@@ -420,7 +420,7 @@ export const StatWidget: React.FC<StatWidgetProps> = ({ label, value, icon, subt
 
   return (
     <div className="bg-white p-5 rounded-2xl border border-[#D7E7E4] shadow-card space-y-1">
-      <div className="flex items-center justify-between text-[#94A3B8]">
+      <div className="flex items-center justify-between text-[#64748B]">
         <span className="text-[10px] uppercase font-bold tracking-wider">{label}</span>
         <div className="w-5 h-5 flex items-center justify-center">{icon}</div>
       </div>

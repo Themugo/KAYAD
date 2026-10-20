@@ -1,0 +1,13 @@
+PASS proposal persistence table
+PASS versioned proposal and evidence
+PASS failed and inconclusive verification states
+PASS custody states include received and incident hold
+PASS appeal lifecycle
+PASS separate audit events
+PASS explicit garage/dealer custody capability
+PASS capability can be suspended/revoked
+PASS RLS enabled on all new tables
+PASS migration explicitly local/not applied
+PASS runtime limitation documented
+PASS next stage requires bid RPC enforcement
+RESULT 12/12

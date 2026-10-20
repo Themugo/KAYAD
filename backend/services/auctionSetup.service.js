@@ -2,6 +2,7 @@ import { findById, findOne, create, update } from '../db/index.js';
 import { logActionFromReq } from '../utils/securityLogger.js';
 import { normalizeAuctionSetup, validateConfig, vehicleReadiness } from './auctionSetup.contract.js';
 import { getAuctionPlatformPolicy, enforceAuctionPlatformPolicy, getDealerAuctionCapabilities } from './auctionPlatformPolicy.service.js';
+import { assertPrivateSellerAuctionEligible } from './privateSellerAuctionEligibility.service.js';
 
 export async function getAuctionSetup(carId, userId) {
   const car = await findById("cars", carId);
@@ -41,6 +42,7 @@ export async function publishAuctionSetup({ carId, userId, req }) {
   const car = await findById("cars", carId);
   if (!car) throw Object.assign(new Error("Vehicle not found"), { status: 404 });
   if (String(car.dealer) !== String(userId) && String(car.dealer_id) !== String(userId)) throw Object.assign(new Error("Not authorized for this vehicle"), { status: 403 });
+  await assertPrivateSellerAuctionEligible(car);
   const setup = await findOne("auction_setups", { car_id: carId });
   if (!setup) throw Object.assign(new Error("Auction setup has not been created"), { status: 400 });
   if (setup.publication_status === "published") return { setup, alreadyPublished: true };

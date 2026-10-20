@@ -1,0 +1,1377 @@
+file	line	mount	method	path	mountGuards	guards
+routes/adSlotRoutes.js	19	/api/ads	GET	/		
+routes/adSlotRoutes.js	23	/api/ads	GET	/all		protect | adminOnly
+routes/adSlotRoutes.js	24	/api/ads	GET	/stats		protect | adminOnly
+routes/adSlotRoutes.js	25	/api/ads	POST	/:id/events		
+routes/adSlotRoutes.js	26	/api/ads	POST	/		protect | adminOnly
+routes/adSlotRoutes.js	27	/api/ads	PUT	/:id		protect | adminOnly | validateObjectId
+routes/adSlotRoutes.js	28	/api/ads	DELETE	/:id		protect | adminOnly | validateObjectId
+routes/adminInspectionGovernanceRoutes.js	12	(unmounted-in-server.js)	GET	/providers		
+routes/adminInspectionGovernanceRoutes.js	13	(unmounted-in-server.js)	GET	/providers/:id		
+routes/adminInspectionGovernanceRoutes.js	14	(unmounted-in-server.js)	POST	/providers/:id/decision		validate(adminProviderDecisionSchema)
+routes/adminInspectionGovernanceRoutes.js	15	(unmounted-in-server.js)	POST	/credentials/:id/decision		validate(adminCredentialDecisionSchema)
+routes/adminInspectionGovernanceRoutes.js	16	(unmounted-in-server.js)	POST	/capabilities/:id/decision		validate(adminCapabilityDecisionSchema)
+routes/adminInspectionGovernanceRoutes.js	17	(unmounted-in-server.js)	POST	/staff/:id/end		
+routes/adminRoutes.js	89	/api/admin	USE	(all)	adminLimiter	(req, res, next) => { if (["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) { return auditLog(`admin.${req.method.toLowerCase()}`)(re
+routes/adminRoutes.js	105	/api/admin	GET	/public/config	adminLimiter	
+routes/adminRoutes.js	131	/api/admin	GET	/public/onboarding-policy	adminLimiter	
+routes/adminRoutes.js	143	/api/admin	USE	(all)	adminLimiter	protect | adminOnly
+routes/adminRoutes.js	150	/api/admin	USE	(all)	adminLimiter	(req, res, next) => { const path = String(req.path || "").toLowerCase(); let permission = null; if (/\bescrow\b/.test(path)) { permission = 
+routes/adminRoutes.js	183	/api/admin	USE	/inspection-governance	adminLimiter	inspectionGovernanceRoutes
+routes/adminRoutes.js	199	/api/admin	GET	/stats	adminLimiter	cacheMiddleware(CACHE_TTL.STATS, () => "cache:GET:/api/admin/stats")
+routes/adminRoutes.js	303	/api/admin	GET	/users	adminLimiter	validateQuery(userListQuerySchema)
+routes/adminRoutes.js	365	/api/admin	POST	/users/:id/toggle-ban	adminLimiter	adminOrSuper | validateObjectId | protectAccount
+routes/adminRoutes.js	401	/api/admin	POST	/users/:id/approve-dealer	adminLimiter	adminOrSuper | requireDecisionAuthority("dealer") | validateObjectId
+routes/adminRoutes.js	466	/api/admin	PUT	/users/:id/seller-settings	adminLimiter	adminOrSuper | validateObjectId
+routes/adminRoutes.js	518	/api/admin	GET	/cars	adminLimiter	
+routes/adminRoutes.js	560	/api/admin	DELETE	/cars/:id	adminLimiter	adminOrSuper | validateObjectId
+routes/adminRoutes.js	598	/api/admin	POST	/cars/:id/verify	adminLimiter	adminOrSuper | validateObjectId
+routes/adminRoutes.js	618	/api/admin	POST	/cars/:id/moderate	adminLimiter	adminOrSuper | requireDecisionAuthority("listing") | validateObjectId
+routes/adminRoutes.js	697	/api/admin	GET	/config	adminLimiter	
+routes/adminRoutes.js	709	/api/admin	PUT	/config	adminLimiter	adminOrSuper
+routes/adminRoutes.js	801	/api/admin	PUT	/config/packages	adminLimiter	adminOrSuper
+routes/adminRoutes.js	829	/api/admin	GET	/audit-log	adminLimiter	
+routes/adminRoutes.js	850	/api/admin	POST	/audit-log	adminLimiter	adminOrSuper
+routes/adminRoutes.js	889	/api/admin	GET	/settings/onboarding	adminLimiter	adminOrSuper
+routes/adminRoutes.js	905	/api/admin	PUT	/settings/onboarding	adminLimiter	adminOrSuper | ownerOnly
+routes/adminRoutes.js	947	/api/admin	POST	/system/kill-switch	adminLimiter	authorize("superadmin")
+routes/adminRoutes.js	1000	/api/admin	POST	/system/recover	adminLimiter	authorize("superadmin")
+routes/adminRoutes.js	1057	/api/admin	PUT	/dealers/:id/subdomain	adminLimiter	adminOrSuper | validateObjectId
+routes/adminRoutes.js	1084	/api/admin	POST	/users/:id/verify-dealer	adminLimiter	adminOrSuper | requireDecisionAuthority("dealer") | validateObjectId
+routes/adminRoutes.js	1122	/api/admin	POST	/daraja/test	adminLimiter	authorize("superadmin")
+routes/adminRoutes.js	1155	/api/admin	DELETE	/users/:id	adminLimiter	authorize("superadmin") | validateObjectId | protectAccount
+routes/adminRoutes.js	1188	/api/admin	PUT	/users/:id/deactivate	adminLimiter	authorize("superadmin") | validateObjectId | protectAccount
+routes/adminRoutes.js	1227	/api/admin	GET	/staff	adminLimiter	authorize("superadmin") | systemOwnerOnly
+routes/adminRoutes.js	1258	/api/admin	GET	/staff/permissions/catalog	adminLimiter	authorize("superadmin") | systemOwnerOnly
+routes/adminRoutes.js	1274	/api/admin	GET	/staff/:id/permissions	adminLimiter	authorize("superadmin") | systemOwnerOnly | validateObjectId
+routes/adminRoutes.js	1299	/api/admin	PUT	/staff/:id/permissions	adminLimiter	authorize("superadmin") | systemOwnerOnly | validateObjectId | protectAccount | auditLog("update_staff_permissions")
+routes/adminRoutes.js	1344	/api/admin	POST	/staff	adminLimiter	authorize("superadmin") | systemOwnerOnly
+routes/adminRoutes.js	1387	/api/admin	PUT	/staff/:id	adminLimiter	authorize("superadmin") | systemOwnerOnly | validateObjectId | protectAccount
+routes/adminRoutes.js	1429	/api/admin	DELETE	/staff/:id	adminLimiter	authorize("superadmin") | systemOwnerOnly | validateObjectId | protectAccount
+routes/adminRoutes.js	1449	/api/admin	POST	/seed-departments	adminLimiter	authorize("superadmin") | systemOwnerOnly
+routes/adminRoutes.js	1517	/api/admin	GET	/ads	adminLimiter	
+routes/adminRoutes.js	1535	/api/admin	POST	/ads	adminLimiter	adminOrSuper
+routes/adminRoutes.js	1550	/api/admin	PUT	/ads/:id	adminLimiter	adminOrSuper | validateObjectId
+routes/adminRoutes.js	1565	/api/admin	DELETE	/ads/:id	adminLimiter	adminOrSuper | validateObjectId
+routes/adminRoutes.js	1579	/api/admin	GET	/payments	adminLimiter	validateQuery(paymentListQuerySchema)
+routes/adminRoutes.js	1620	/api/admin	PATCH	/dealers/:id/package	adminLimiter	protect | adminOnly
+routes/adminRoutes.js	1672	/api/admin	POST	/zero-cost-onboarding	adminLimiter	protect | adminOnly
+routes/adminRoutes.js	1715	/api/admin	POST	/upload-logo	adminLimiter	protect | adminOnly | uploadMemory.single("logo") | handleUploadError
+routes/adminRoutes.js	1739	/api/admin	GET	/reviews	adminLimiter	staffRole | validateQuery(reviewListQuerySchema)
+routes/adminRoutes.js	1749	/api/admin	PATCH	/reviews/:id/status	adminLimiter	adminOrSuper
+routes/adminRoutes.js	1758	/api/admin	DELETE	/reviews/:id	adminLimiter	adminOrSuper
+routes/adminRoutes.js	1771	/api/admin	GET	/referrals/stats	adminLimiter	adminOrSuper | cacheMiddleware(CACHE_TTL.STATS, () => "cache:GET:/api/admin/referrals/stats")
+routes/adminRoutes.js	1791	/api/admin	GET	/referrals	adminLimiter	staffRole
+routes/adminRoutes.js	1826	/api/admin	GET	/referrals/:id	adminLimiter	staffRole
+routes/adminRoutes.js	1839	/api/admin	POST	/referrals/:id/credit	adminLimiter	adminOrSuper
+routes/adminRoutes.js	1887	/api/admin	POST	/referrals/:id/expire	adminLimiter	adminOrSuper
+routes/adminRoutes.js	1910	/api/admin	GET	/users/:id/referrals	adminLimiter	adminOrSuper
+routes/adminRoutes.js	1935	/api/admin	GET	/chats	adminLimiter	staffRole
+routes/adminRoutes.js	1988	/api/admin	GET	/chats/:chatId/messages	adminLimiter	adminOrSuper | validateQuery(messageListQuerySchema)
+routes/adminRoutes.js	2012	/api/admin	DELETE	/chats/:chatId/messages/:messageId	adminLimiter	adminOrSuper
+routes/adminRoutes.js	2037	/api/admin	POST	/chats/:chatId/block	adminLimiter	adminOrSuper
+routes/adminRoutes.js	2054	/api/admin	POST	/chats/:chatId/unblock	adminLimiter	adminOrSuper
+routes/adminRoutes.js	2075	/api/admin	GET	/market-data	adminLimiter	staffRole
+routes/adminRoutes.js	2109	/api/admin	GET	/market-data/:id	adminLimiter	staffRole
+routes/adminRoutes.js	2119	/api/admin	POST	/market-data	adminLimiter	adminOrSuper
+routes/adminRoutes.js	2168	/api/admin	PUT	/market-data/:id	adminLimiter	adminOrSuper
+routes/adminRoutes.js	2205	/api/admin	DELETE	/market-data/:id	adminLimiter	adminOrSuper
+routes/adminRoutes.js	2222	/api/admin	POST	/market-data/bulk	adminLimiter	adminOrSuper
+routes/adminRoutes.js	2271	/api/admin	GET	/alerts	adminLimiter	
+routes/adminRoutes.js	2292	/api/admin	POST	/alerts/:id/read	adminLimiter	validateObjectId
+routes/adminRoutes.js	2305	/api/admin	POST	/alerts/read-all	adminLimiter	
+routes/adminRoutes.js	2316	/api/admin	GET	/system/health	adminLimiter	
+routes/adminRoutes.js	2378	/api/admin	GET	/escrow/config	adminLimiter	requirePermission(PERMISSIONS.VIEW_ESCROW)
+routes/adminRoutes.js	2382	/api/admin	GET	/escrow/accounts	adminLimiter	requirePermission(PERMISSIONS.CONFIGURE_ESCROW)
+routes/adminRoutes.js	2387	/api/admin	POST	/escrow/accounts	adminLimiter	requirePermission(PERMISSIONS.CONFIGURE_ESCROW)
+routes/adminRoutes.js	2391	/api/admin	PATCH	/escrow/accounts/:id	adminLimiter	requirePermission(PERMISSIONS.CONFIGURE_ESCROW) | validateObjectId
+routes/adminRoutes.js	2395	/api/admin	DELETE	/escrow/accounts/:id	adminLimiter	requirePermission(PERMISSIONS.CONFIGURE_ESCROW) | validateObjectId
+routes/adminRoutes.js	2418	/api/admin	GET	/escrow/sellers/:userId/capability	adminLimiter	requirePermission(PERMISSIONS.VIEW_ESCROW) | validateObjectId
+routes/adminRoutes.js	2423	/api/admin	PATCH	/escrow/sellers/:userId/capability	adminLimiter	requirePermission(PERMISSIONS.CONFIGURE_ESCROW) | validateObjectId | validate(setEscrowCapabilitySchema)
+routes/aiDecisionRoutes.js	7	/api/ai/decision	USE	(all)		protect
+routes/aiDecisionRoutes.js	9	/api/ai/decision	GET	/recommendations		
+routes/aiDecisionRoutes.js	16	/api/ai/decision	GET	/vehicles/:vehicleId/explain		
+routes/aiDecisionRoutes.js	22	/api/ai/decision	GET	/market-signals		
+routes/aiPlatformRoutes.js	48	/api/ai	USE	(all)		protect
+routes/aiPlatformRoutes.js	51	/api/ai	GET	/dashboard		
+routes/aiPlatformRoutes.js	52	/api/ai	GET	/analytics		
+routes/aiPlatformRoutes.js	53	/api/ai	GET	/suggestions		
+routes/aiPlatformRoutes.js	54	/api/ai	GET	/health		
+routes/aiPlatformRoutes.js	55	/api/ai	GET	/templates		
+routes/aiPlatformRoutes.js	61	/api/ai	POST	/command		
+routes/aiPlatformRoutes.js	62	/api/ai	POST	/command/:commandId/approve		allowRoles("admin", "superadmin")
+routes/aiPlatformRoutes.js	63	/api/ai	POST	/command/:commandId/reject		allowRoles("admin", "superadmin")
+routes/aiPlatformRoutes.js	64	/api/ai	GET	/history		
+routes/aiPlatformRoutes.js	65	/api/ai	POST	/history/:commandId/rollback		allowRoles("admin", "superadmin")
+routes/aiPlatformRoutes.js	71	/api/ai	GET	/conversations		
+routes/aiPlatformRoutes.js	72	/api/ai	GET	/conversations/:id		
+routes/aiPlatformRoutes.js	73	/api/ai	POST	/conversations/:conversationId/message		
+routes/aiPlatformRoutes.js	79	/api/ai	GET	/prompts		
+routes/aiPlatformRoutes.js	80	/api/ai	POST	/prompts		allowRoles("admin", "superadmin")
+routes/aiPlatformRoutes.js	81	/api/ai	PUT	/prompts/:id		allowRoles("admin", "superadmin")
+routes/aiPlatformRoutes.js	82	/api/ai	DELETE	/prompts/:id		allowRoles("admin", "superadmin")
+routes/aiPlatformRoutes.js	83	/api/ai	POST	/prompts/execute		
+routes/aiPlatformRoutes.js	89	/api/ai	GET	/knowledge		
+routes/aiPlatformRoutes.js	90	/api/ai	POST	/knowledge		allowRoles("admin", "superadmin")
+routes/aiPlatformRoutes.js	91	/api/ai	PUT	/knowledge/:id		allowRoles("admin", "superadmin")
+routes/aiPlatformRoutes.js	92	/api/ai	DELETE	/knowledge/:id		allowRoles("admin", "superadmin")
+routes/aiPlatformRoutes.js	98	/api/ai	GET	/workspaces		
+routes/aiPlatformRoutes.js	99	/api/ai	POST	/workspaces		allowRoles("admin", "superadmin")
+routes/aiPlatformRoutes.js	100	/api/ai	PUT	/workspaces/:id		allowRoles("admin", "superadmin")
+routes/aiPlatformRoutes.js	101	/api/ai	DELETE	/workspaces/:id		allowRoles("admin", "superadmin")
+routes/announcementRoutes.js	16	/api/announcements	USE	(all)		protect | allowRoles("admin", "superadmin")
+routes/announcementRoutes.js	18	/api/announcements	POST	/		
+routes/announcementRoutes.js	20	/api/announcements	POST	/:id/send		validateObjectId
+routes/announcementRoutes.js	22	/api/announcements	GET	/		
+routes/announcementRoutes.js	24	/api/announcements	GET	/:id		validateObjectId
+routes/announcementRoutes.js	26	/api/announcements	DELETE	/:id		validateObjectId
+routes/auctionAdminRoutes.js	24	/api/auction-admin	USE	(all)		protect | adminOnly
+routes/auctionAdminRoutes.js	29	/api/auction-admin	POST	/:carId/start		requirePermission(PERM.MANAGE_AUCTIONS) | validateObjectId
+routes/auctionAdminRoutes.js	92	/api/auction-admin	POST	/:carId/end		requirePermission(PERM.MANAGE_AUCTIONS) | validateObjectId
+routes/auctionAdminRoutes.js	117	/api/auction-admin	POST	/:carId/extend		requirePermission(PERM.MANAGE_AUCTIONS) | validateObjectId
+routes/auctionAdminRoutes.js	159	/api/auction-admin	GET	/:carId/bids		validateObjectId
+routes/auctionAdminRoutes.js	176	/api/auction-admin	POST	/:carId/set-winner		requirePermission(PERM.MANAGE_AUCTIONS) | validateObjectId
+routes/auctionFulfilmentRoutes.js	24	/api/auctions	GET	/operations		protect
+routes/auctionFulfilmentRoutes.js	34	/api/auctions	GET	/:id/operations		protect | validateObjectId
+routes/auctionFulfilmentRoutes.js	43	/api/auctions	POST	/:id/collection		protect | requireDealerVerification | validateObjectId
+routes/auctionFulfilmentRoutes.js	50	/api/auctions	POST	/:id/transfer		protect | validateObjectId
+routes/auctionFulfilmentRoutes.js	55	/api/auctions	POST	/:id/escrow/release		protect | requireDealerVerification | validateObjectId
+routes/auctionFulfilmentRoutes.js	60	/api/auctions	POST	/:id/cancel		protect | requireDealerVerification | validateObjectId
+routes/auctionFulfilmentRoutes.js	65	/api/auctions	POST	/:id/dispute		protect | validateObjectId
+routes/auctionFulfilmentRoutes.js	70	/api/auctions	POST	/:id/reaward		protect | requireDealerVerification | validateObjectId
+routes/auctionIntegrityRoutes.js	17	/api/new-admin/auction-integrity	USE	(all)		protect | adminOnly
+routes/auctionIntegrityRoutes.js	19	/api/new-admin/auction-integrity	GET	/dashboard		
+routes/auctionIntegrityRoutes.js	21	/api/new-admin/auction-integrity	GET	/		
+routes/auctionIntegrityRoutes.js	23	/api/new-admin/auction-integrity	GET	/risk-profiles		
+routes/auctionIntegrityRoutes.js	25	/api/new-admin/auction-integrity	GET	/:id		
+routes/auctionIntegrityRoutes.js	27	/api/new-admin/auction-integrity	PATCH	/:id/status		idempotencyCheck
+routes/auctionIntegrityRoutes.js	29	/api/new-admin/auction-integrity	POST	/scan		idempotencyCheck
+routes/auctionIntegrityRoutes.js	31	/api/new-admin/auction-integrity	USE	(all)		(req, res) => { res.status(404).json({ success: false, message: "Auction integrity route not found" }); }
+routes/auctionRegistrationRoutes.js	13	/api/auctions	GET	/:id/room		validateObjectId
+routes/auctionRegistrationRoutes.js	19	/api/auctions	GET	/:id/registration		protect | validateObjectId
+routes/auctionRegistrationRoutes.js	25	/api/auctions	POST	/:id/registration		protect | validateObjectId
+routes/auctionRegistrationRoutes.js	30	/api/auctions	POST	/:id/registration/commitment		protect | validateObjectId
+routes/auctionRegistrationRoutes.js	35	/api/auctions	GET	/:id/registration/security-policy		protect | validateObjectId
+routes/auctionRegistrationRoutes.js	41	/api/auctions	POST	/:id/registration/high-value-deposit		protect | validateObjectId
+routes/auctionRegistrationRoutes.js	49	/api/auctions	GET	/:id/registration/authorization		protect | validateObjectId
+routes/auctionRoutes.js	15	/api/auctions	GET	/		
+routes/auctionRoutes.js	16	/api/auctions	GET	/active		
+routes/auctionRoutes.js	17	/api/auctions	GET	/my		protect
+routes/auctionRoutes.js	18	/api/auctions	GET	/:id/bids		validateObjectId
+routes/auctionRoutes.js	19	/api/auctions	GET	/:id		validateObjectId
+routes/auctionSettlementRoutes.js	14	/api/auctions	GET	/:id/outcome		protect | validateObjectId
+routes/auctionSettlementRoutes.js	23	/api/auctions	GET	/:id/settlement-capabilities		protect | requireDealerVerification
+routes/auctionSettlementRoutes.js	29	/api/auctions	POST	/:id/outcome/payment		protect | validateObjectId
+routes/auctionSettlementRoutes.js	48	/api/auctions	POST	/:id/outcome/escrow		protect | requireDealerVerification | validateObjectId
+routes/auctionSettlementRoutes.js	57	/api/auctions	POST	/:id/outcome/default		protect | requireDealerVerification | validateObjectId
+routes/auctionSettlementRoutes.js	66	/api/auctions	GET	/platform/policy		protect | adminOnly
+routes/auctionSettlementRoutes.js	70	/api/auctions	PUT	/platform/policy		protect | adminOnly
+routes/auctionSetupRoutes.js	10	/api/dealer	GET	/cars/:id/auction/setup		...dealerGuard
+routes/auctionSetupRoutes.js	17	/api/dealer	PUT	/cars/:id/auction/setup		...dealerGuard
+routes/auctionSetupRoutes.js	22	/api/dealer	POST	/cars/:id/auction/publish		...dealerGuard
+routes/auctionSetupRoutes.js	32	/api/dealer	POST	/cars/:id/auction/amendments		...dealerGuard
+routes/auditRoutes.js	37	/api/audit	USE	(all)		protect
+routes/auditRoutes.js	38	/api/audit	USE	(all)		allowRoles("admin", "superadmin")
+routes/auditRoutes.js	39	/api/audit	USE	(all)		requirePermission(PERMISSIONS.VIEW_ESCROW_AUDIT)
+routes/auditRoutes.js	46	/api/audit	GET	/all		
+routes/auditRoutes.js	49	/api/audit	GET	/escrow/:id		validateObjectId
+routes/auditRoutes.js	52	/api/audit	GET	/user/:userId		validateObjectId
+routes/auditRoutes.js	55	/api/audit	GET	/action/:action		
+routes/auditRoutes.js	58	/api/audit	GET	/date-range		
+routes/auditRoutes.js	61	/api/audit	GET	/export/:escrowId		validateObjectId
+routes/auditRoutes.js	75	/api/audit	GET	/statistics		
+routes/auditRoutes.js	78	/api/audit	GET	/:id		validateObjectId
+routes/auditRoutes.js	85	/api/audit	GET	/logs		
+routes/auditRoutes.js	88	/api/audit	GET	/logs/:id		validateObjectId
+routes/auditRoutes.js	91	/api/audit	GET	/logs/action/:action		
+routes/auditRoutes.js	94	/api/audit	GET	/logs/actor/:actorId		validateObjectId
+routes/auditRoutes.js	97	/api/audit	GET	/logs/target/:targetId/:targetModel		validateObjectId
+routes/auditRoutes.js	100	/api/audit	GET	/logs/statistics		
+routes/auditRoutes.js	103	/api/audit	GET	/logs/export		
+routes/auditRoutes.js	116	/api/audit	USE	(all)		(req, res) => { res.status(404).json({ success: false, message: "Audit route not found", }); }
+routes/authRoutes.js	38	/api/auth	GET	/csrf	authLimiter	
+routes/authRoutes.js	127	/api/auth	POST	/register	authLimiter	registrationLimiter | validateAuth | validateResponse(authResponseSchema)
+routes/authRoutes.js	184	/api/auth	POST	/login	authLimiter	accountLockout | validateAuth | validateResponse(authResponseSchema)
+routes/authRoutes.js	188	/api/auth	POST	/refresh	authLimiter	validateResponse(authResponseSchema)
+routes/authRoutes.js	226	/api/auth	GET	/profile	authLimiter	protect
+routes/authRoutes.js	263	/api/auth	GET	/me	authLimiter	protect
+routes/authRoutes.js	301	/api/auth	POST	/logout	authLimiter	protect
+routes/authRoutes.js	354	/api/auth	PUT	/profile	authLimiter	protect
+routes/authRoutes.js	407	/api/auth	PUT	/change-password	authLimiter	protect
+routes/authRoutes.js	464	/api/auth	GET	/verify-email/:token	authLimiter	verificationLimiter | authLimiter
+routes/authRoutes.js	465	/api/auth	POST	/resend-verification	authLimiter	verificationLimiter | authLimiter
+routes/authRoutes.js	545	/api/auth	POST	/forgot-password	authLimiter	recoveryLimiter | authLimiter
+routes/authRoutes.js	546	/api/auth	POST	/reset-password	authLimiter	recoveryLimiter | authLimiter
+routes/authRoutes.js	653	/api/auth	GET	/sessions	authLimiter	protect
+routes/authRoutes.js	654	/api/auth	DELETE	/sessions/:tokenId	authLimiter	protect
+routes/authRoutes.js	655	/api/auth	POST	/sessions/revoke-all	authLimiter	protect
+routes/authRoutes.js	663	/api/auth	POST	/send-otp	authLimiter	protect | otpLimiter
+routes/authRoutes.js	664	/api/auth	POST	/verify-phone	authLimiter	protect | otpLimiter
+routes/authRoutes.js	665	/api/auth	GET	/phone-status	authLimiter	protect
+routes/automationRoutes.js	64	/api/automation	USE	(all)		protect
+routes/automationRoutes.js	67	/api/automation	GET	/stats		
+routes/automationRoutes.js	68	/api/automation	GET	/logs		
+routes/automationRoutes.js	69	/api/automation	GET	/ai-suggestions		
+routes/automationRoutes.js	72	/api/automation	GET	/templates		
+routes/automationRoutes.js	73	/api/automation	GET	/trigger-types		
+routes/automationRoutes.js	74	/api/automation	GET	/action-types		
+routes/automationRoutes.js	80	/api/automation	GET	/workflows		
+routes/automationRoutes.js	81	/api/automation	GET	/workflows/:id		validateObjectId
+routes/automationRoutes.js	82	/api/automation	POST	/workflows		allowRoles("admin", "superadmin", "editor")
+routes/automationRoutes.js	83	/api/automation	PUT	/workflows/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/automationRoutes.js	84	/api/automation	DELETE	/workflows/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/automationRoutes.js	85	/api/automation	POST	/workflows/:id/publish		validateObjectId | allowRoles("admin", "superadmin")
+routes/automationRoutes.js	86	/api/automation	POST	/workflows/:id/pause		validateObjectId | allowRoles("admin", "superadmin")
+routes/automationRoutes.js	87	/api/automation	POST	/workflows/:id/simulate		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/automationRoutes.js	93	/api/automation	GET	/rules		
+routes/automationRoutes.js	94	/api/automation	GET	/rules/:id		validateObjectId
+routes/automationRoutes.js	95	/api/automation	POST	/rules		allowRoles("admin", "superadmin")
+routes/automationRoutes.js	96	/api/automation	PUT	/rules/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/automationRoutes.js	97	/api/automation	DELETE	/rules/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/automationRoutes.js	98	/api/automation	POST	/rules/evaluate		
+routes/automationRoutes.js	104	/api/automation	GET	/approvals		
+routes/automationRoutes.js	105	/api/automation	GET	/approvals/:id		validateObjectId
+routes/automationRoutes.js	106	/api/automation	POST	/approvals		allowRoles("admin", "superadmin")
+routes/automationRoutes.js	107	/api/automation	PUT	/approvals/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/automationRoutes.js	108	/api/automation	DELETE	/approvals/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/automationRoutes.js	109	/api/automation	POST	/approvals/initiate		
+routes/automationRoutes.js	115	/api/automation	GET	/tasks		
+routes/automationRoutes.js	116	/api/automation	GET	/tasks/:id		validateObjectId
+routes/automationRoutes.js	117	/api/automation	POST	/tasks		
+routes/automationRoutes.js	118	/api/automation	PUT	/tasks/:id		validateObjectId
+routes/automationRoutes.js	119	/api/automation	POST	/tasks/:id/complete		validateObjectId
+routes/automationRoutes.js	120	/api/automation	POST	/tasks/:id/escalate		validateObjectId
+routes/automationRoutes.js	126	/api/automation	GET	/templates/notifications		
+routes/automationRoutes.js	127	/api/automation	GET	/templates/notifications/:id		validateObjectId
+routes/automationRoutes.js	128	/api/automation	POST	/templates/notifications		allowRoles("admin", "superadmin", "editor")
+routes/automationRoutes.js	129	/api/automation	PUT	/templates/notifications/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/automationRoutes.js	130	/api/automation	DELETE	/templates/notifications/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/automationRoutes.js	131	/api/automation	POST	/templates/notifications/preview		
+routes/automationRoutes.js	137	/api/automation	GET	/scheduled		
+routes/automationRoutes.js	138	/api/automation	POST	/scheduled		allowRoles("admin", "superadmin")
+routes/automationRoutes.js	139	/api/automation	PUT	/scheduled/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/automationRoutes.js	140	/api/automation	DELETE	/scheduled/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/automationRoutes.js	141	/api/automation	POST	/scheduled/:id/run		validateObjectId | allowRoles("admin", "superadmin")
+routes/bidLogRoutes.js	21	(unmounted-in-server.js)	GET	/my		protect
+routes/bidLogRoutes.js	24	(unmounted-in-server.js)	GET	/:logId		protect
+routes/bidLogRoutes.js	31	(unmounted-in-server.js)	GET	/car/:carId		
+routes/bidLogRoutes.js	34	(unmounted-in-server.js)	GET	/car/:carId/winning		
+routes/bidLogRoutes.js	37	(unmounted-in-server.js)	GET	/car/:carId/stats		
+routes/bidLogRoutes.js	44	(unmounted-in-server.js)	GET	/admin/all		protect | adminOnly
+routes/bidLogRoutes.js	47	(unmounted-in-server.js)	GET	/admin/stats		protect | adminOnly
+routes/bidRoutes.js	30	/api/bids	GET	/my	idempotencyCheck | csrfProtection	protect | validateQuery(bidListQuerySchema)
+routes/bidRoutes.js	35	/api/bids	POST	/:id/bid	idempotencyCheck | csrfProtection	protect | bidLimiter | idempotencyCheck | validateObjectId | validateBid
+routes/bidRoutes.js	48	/api/bids	GET	/:id/bids	idempotencyCheck | csrfProtection	protect | validateObjectId | validateQuery(bidListQuerySchema)
+routes/bidRoutes.js	53	/api/bids	POST	/mpesa/callback	idempotencyCheck | csrfProtection	mpesaIpWhitelist | idempotencyCheck | validateMpesaCallback
+routes/bidRoutes.js	64	/api/bids	POST	/:id/end	idempotencyCheck | csrfProtection	protect | adminOnly | idempotencyCheck | validateObjectId
+routes/bidRoutes.js	69	/api/bids	GET	/admin/all	idempotencyCheck | csrfProtection	protect | adminOnly
+routes/bidRoutes.js	118	/api/bids	GET	/admin/suspicious	idempotencyCheck | csrfProtection	protect | adminOnly
+routes/bidRoutes.js	140	/api/bids	POST	/admin/:bidId/set-winner	idempotencyCheck | csrfProtection	protect | adminOnly | validateObjectId
+routes/bulkAdminRoutes.js	15	/api/admin/bulk	USE	(all)		protect | allowRoles("admin", "superadmin")
+routes/bulkAdminRoutes.js	17	/api/admin/bulk	POST	/cars/moderate		requireDecisionAuthority("listing")
+routes/bulkAdminRoutes.js	19	/api/admin/bulk	POST	/cars/delete		
+routes/bulkAdminRoutes.js	21	/api/admin/bulk	GET	/export/cars		
+routes/bulkAdminRoutes.js	23	/api/admin/bulk	GET	/export/users		
+routes/carRoutes.js	40	/api/cars	GET	/dealer/my-cars		protect | dealerOnly
+routes/carRoutes.js	62	/api/cars	GET	/dealer/analytics		protect | dealerOnly
+routes/carRoutes.js	149	/api/cars	GET	/my-listings		protect
+routes/carRoutes.js	168	/api/cars	GET	/		requireCarsDatabase | validateQuery(carListQuerySchema) | validateResponse(carListResponseSchema) | cacheVehicleSearch | trackVehicleSearchLatency | trackCarSearch
+routes/carRoutes.js	215	/api/cars	GET	/:id		optionalAuth | validateObjectId | cacheResponse(600)
+routes/carRoutes.js	228	/api/cars	POST	/:id/click		optionalAuth | createLimiter | validateObjectId
+routes/carRoutes.js	242	/api/cars	POST	/:id/favorite		optionalAuth | createLimiter | validateObjectId
+routes/carRoutes.js	260	/api/cars	POST	/		protect | dealerOnly | requireDealerVerification | uploadLimiter | cleanupUploadsOnError | upload.array("images", 10) | handleUploadError | validateCar | invalidateCache("cache:*")
+routes/carRoutes.js	275	/api/cars	PUT	/:id		protect | dealerOnly | createLimiter | validateObjectId | validateCar | invalidateCache("cache:*")
+routes/carRoutes.js	287	/api/cars	DELETE	/:id		protect | dealerOnly | createLimiter | validateObjectId | invalidateCache("cache:*")
+routes/carRoutes.js	298	/api/cars	DELETE	/:id/images/:imageIndex		protect | dealerOnly | validateObjectId | invalidateCache("cache:*")
+routes/carRoutes.js	308	/api/cars	POST	/:id/images		protect | dealerOnly | uploadLimiter | cleanupUploadsOnError | upload.array("images", 10) | handleUploadError | invalidateCache("cache:*")
+routes/carRoutes.js	323	/api/cars	GET	/:id/price-history		validateObjectId | cacheResponse(600)
+routes/carRoutes.js	346	/api/cars	GET	/:id/insights		validateObjectId | cacheResponse(600)
+routes/carRoutes.js	390	/api/cars	GET	/:id/valuation		cacheResponse(600)
+routes/carRoutes.js	403	/api/cars	GET	/admin/:id/fraud		protect | adminOnly | validateObjectId
+routes/carRoutes.js	433	/api/cars	POST	/admin/:id/start		protect | adminOnly | requirePermission(PERM.MANAGE_AUCTIONS) | validateObjectId
+routes/carRoutes.js	472	/api/cars	POST	/admin/:id/end		protect | adminOnly | requirePermission(PERM.MANAGE_AUCTIONS) | validateObjectId
+routes/carRoutes.js	500	/api/cars	POST	/batch		protect | createLimiter
+routes/carRoutes.js	519	/api/cars	PATCH	/:id/promote		protect | validateObjectId | invalidateCache("cache:*")
+routes/chatRoutes.js	20	/api/chat	POST	/		protect | createLimiter | validate(createChatSchema)
+routes/chatRoutes.js	22	/api/chat	GET	/		protect | validateQuery(chatListQuerySchema)
+routes/chatRoutes.js	24	/api/chat	GET	/unread		protect
+routes/chatRoutes.js	26	/api/chat	GET	/:chatId/messages		protect | validateObjectId | validateQuery(messageListQuerySchema)
+routes/chatRoutes.js	28	/api/chat	GET	/:chatId/attachments/:uploadId		protect | validateObjectId
+routes/chatRoutes.js	30	/api/chat	POST	/:chatId/message		protect | chatLimiter | validateObjectId | validate(sendMessageSchema)
+routes/chatRoutes.js	39	/api/chat	POST	/:chatId/seen		protect | validateObjectId
+routes/chatRoutes.js	41	/api/chat	DELETE	/:chatId		protect | validateObjectId
+routes/cmsRoutes.js	77	/api/cms	GET	/pages/s/:slug		
+routes/cmsRoutes.js	78	/api/cms	GET	/content/s/:slug		
+routes/cmsRoutes.js	79	/api/cms	GET	/content/:id		
+routes/cmsRoutes.js	80	/api/cms	GET	/content		
+routes/cmsRoutes.js	81	/api/cms	GET	/search		
+routes/cmsRoutes.js	82	/api/cms	POST	/analytics/track		
+routes/cmsRoutes.js	84	/api/cms	GET	/faqs		
+routes/cmsRoutes.js	85	/api/cms	GET	/faqs/:id		validateObjectId
+routes/cmsRoutes.js	86	/api/cms	POST	/faqs/:id/popularity		faqPopularityLimiter | validateObjectId
+routes/cmsRoutes.js	89	/api/cms	USE	(all)		protect
+routes/cmsRoutes.js	92	/api/cms	GET	/dashboard/stats		
+routes/cmsRoutes.js	95	/api/cms	GET	/pages		
+routes/cmsRoutes.js	96	/api/cms	GET	/pages/:id		validateObjectId
+routes/cmsRoutes.js	97	/api/cms	POST	/pages		allowRoles("admin", "superadmin", "editor", "publisher")
+routes/cmsRoutes.js	98	/api/cms	PUT	/pages/:id		validateObjectId | allowRoles("admin", "superadmin", "editor", "publisher")
+routes/cmsRoutes.js	99	/api/cms	DELETE	/pages/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/cmsRoutes.js	100	/api/cms	POST	/pages/:id/publish		validateObjectId | allowRoles("admin", "superadmin", "publisher")
+routes/cmsRoutes.js	101	/api/cms	POST	/pages/:id/unpublish		validateObjectId | allowRoles("admin", "superadmin", "publisher")
+routes/cmsRoutes.js	102	/api/cms	POST	/pages/:id/schedule		validateObjectId | allowRoles("admin", "superadmin", "publisher")
+routes/cmsRoutes.js	103	/api/cms	POST	/pages/:id/rollback		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/cmsRoutes.js	106	/api/cms	POST	/content		allowRoles("admin", "superadmin", "editor", "publisher")
+routes/cmsRoutes.js	107	/api/cms	PUT	/content/:id		validateObjectId | allowRoles("admin", "superadmin", "editor", "publisher")
+routes/cmsRoutes.js	108	/api/cms	DELETE	/content/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/cmsRoutes.js	111	/api/cms	POST	/faqs		allowRoles("admin", "superadmin", "editor")
+routes/cmsRoutes.js	112	/api/cms	PUT	/faqs/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/cmsRoutes.js	113	/api/cms	DELETE	/faqs/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/cmsRoutes.js	116	/api/cms	GET	/campaigns		
+routes/cmsRoutes.js	117	/api/cms	GET	/campaigns/:id		validateObjectId
+routes/cmsRoutes.js	118	/api/cms	POST	/campaigns		allowRoles("admin", "superadmin", "editor", "publisher")
+routes/cmsRoutes.js	119	/api/cms	PUT	/campaigns/:id		validateObjectId | allowRoles("admin", "superadmin", "editor", "publisher")
+routes/cmsRoutes.js	120	/api/cms	DELETE	/campaigns/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/cmsRoutes.js	123	/api/cms	GET	/banners		
+routes/cmsRoutes.js	124	/api/cms	GET	/banners/:id		validateObjectId
+routes/cmsRoutes.js	125	/api/cms	POST	/banners		allowRoles("admin", "superadmin", "editor", "publisher")
+routes/cmsRoutes.js	126	/api/cms	PUT	/banners/:id		validateObjectId | allowRoles("admin", "superadmin", "editor", "publisher")
+routes/cmsRoutes.js	127	/api/cms	DELETE	/banners/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/cmsRoutes.js	128	/api/cms	POST	/banners/reorder		allowRoles("admin", "superadmin", "editor")
+routes/cmsRoutes.js	131	/api/cms	GET	/media		
+routes/cmsRoutes.js	132	/api/cms	GET	/media/:id		validateObjectId
+routes/cmsRoutes.js	133	/api/cms	POST	/media		allowRoles("admin", "superadmin", "editor", "publisher", "creator")
+routes/cmsRoutes.js	134	/api/cms	PUT	/media/:id		validateObjectId | allowRoles("admin", "superadmin", "editor", "publisher", "creator")
+routes/cmsRoutes.js	135	/api/cms	DELETE	/media/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/cmsRoutes.js	138	/api/cms	GET	/taxonomies		
+routes/cmsRoutes.js	139	/api/cms	POST	/taxonomies		allowRoles("admin", "superadmin", "editor")
+routes/cmsRoutes.js	140	/api/cms	PUT	/taxonomies/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/cmsRoutes.js	141	/api/cms	DELETE	/taxonomies/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/cmsRoutes.js	144	/api/cms	GET	/revisions		
+routes/cmsRoutes.js	145	/api/cms	GET	/revisions/:id		validateObjectId
+routes/cmsRoutes.js	148	/api/cms	GET	/ab-tests		
+routes/cmsRoutes.js	149	/api/cms	POST	/ab-tests		allowRoles("admin", "superadmin", "editor")
+routes/cmsRoutes.js	150	/api/cms	PUT	/ab-tests/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/cmsRoutes.js	151	/api/cms	DELETE	/ab-tests/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/cmsRoutes.js	154	/api/cms	GET	/analytics		
+routes/cmsRoutes.js	155	/api/cms	GET	/analytics/content/:contentId		
+routes/cmsRoutes.js	158	/api/cms	GET	/calendar		
+routes/commandCenterRoutes.js	51	/api/command-center	USE	(all)		protect | allowRoles("admin", "superadmin", "executive", "engineer", "manager")
+routes/commandCenterRoutes.js	54	/api/command-center	GET	/snapshot		
+routes/commandCenterRoutes.js	57	/api/command-center	GET	/mission-control		
+routes/commandCenterRoutes.js	58	/api/command-center	GET	/live-activity		
+routes/commandCenterRoutes.js	61	/api/command-center	GET	/operations		
+routes/commandCenterRoutes.js	62	/api/command-center	GET	/marketplace		
+routes/commandCenterRoutes.js	63	/api/command-center	GET	/dealers		
+routes/commandCenterRoutes.js	64	/api/command-center	GET	/auctions		
+routes/commandCenterRoutes.js	65	/api/command-center	GET	/inspections		
+routes/commandCenterRoutes.js	66	/api/command-center	GET	/finance		
+routes/commandCenterRoutes.js	67	/api/command-center	GET	/support		
+routes/commandCenterRoutes.js	68	/api/command-center	GET	/security		
+routes/commandCenterRoutes.js	69	/api/command-center	GET	/infrastructure		
+routes/commandCenterRoutes.js	70	/api/command-center	GET	/ai		
+routes/commandCenterRoutes.js	73	/api/command-center	GET	/actions		
+routes/commandCenterRoutes.js	74	/api/command-center	POST	/actions/execute		allowRoles("admin", "superadmin", "manager")
+routes/commandCenterRoutes.js	77	/api/command-center	GET	/notifications		
+routes/commandCenterRoutes.js	78	/api/command-center	PUT	/notifications/:notificationId/read		
+routes/commandCenterRoutes.js	81	/api/command-center	GET	/decisions		
+routes/commandCenterRoutes.js	84	/api/command-center	GET	/commands		
+routes/commandCenterRoutes.js	85	/api/command-center	POST	/commands/execute		allowRoles("admin", "superadmin", "executive", "engineer", "manager")
+routes/commandCenterRoutes.js	88	/api/command-center	GET	/war-room		
+routes/commandCenterRoutes.js	89	/api/command-center	POST	/war-room/activate		allowRoles("admin", "superadmin", "executive")
+routes/commandCenterRoutes.js	90	/api/command-center	POST	/war-room/deactivate		allowRoles("admin", "superadmin", "executive")
+routes/commandCenterRoutes.js	93	/api/command-center	GET	/timeline		
+routes/commandCenterRoutes.js	96	/api/command-center	GET	/briefing		
+routes/commandCenterRoutes.js	99	/api/command-center	GET	/search		
+routes/commandCenterRoutes.js	102	/api/command-center	GET	/widgets		
+routes/commandCenterRoutes.js	103	/api/command-center	POST	/widgets/layout		allowRoles("admin", "superadmin")
+routes/commandCenterRoutes.js	106	/api/command-center	GET	/map		
+routes/communicationControlRoutes.js	7	/api/communications	GET	/history		protect
+routes/communicationControlRoutes.js	8	/api/communications	GET	/preferences		protect
+routes/communicationControlRoutes.js	9	/api/communications	PATCH	/preferences		protect
+routes/communicationControlRoutes.js	10	/api/communications	GET	/admin/rollout		protect | adminOnly
+routes/communicationControlRoutes.js	11	/api/communications	PATCH	/admin/rollout/channels/:channel		protect | adminOnly
+routes/communicationControlRoutes.js	12	/api/communications	PATCH	/admin/rollout/events/:eventType/:channel		protect | adminOnly
+routes/communicationControlRoutes.js	13	/api/communications	GET	/admin/templates		protect | adminOnly
+routes/communicationControlRoutes.js	14	/api/communications	POST	/admin/templates		protect | adminOnly
+routes/communicationControlRoutes.js	15	/api/communications	PATCH	/admin/templates/:id		protect | adminOnly
+routes/communicationControlRoutes.js	16	/api/communications	GET	/admin/analytics		protect | adminOnly
+routes/communicationControlRoutes.js	17	/api/communications	GET	/admin/provider-health		protect | adminOnly
+routes/communicationControlRoutes.js	18	/api/communications	GET	/admin/history		protect | adminOnly
+routes/communicationControlRoutes.js	19	/api/communications	POST	/admin/deliveries/:id/retry		protect | adminOnly
+routes/communicationWebhookRoutes.js	30	/api/communications/webhooks	POST	/brevo/events		
+routes/communicationWebhookRoutes.js	64	/api/communications/webhooks	POST	/status		requireWebhookSecret
+routes/communicationWebhookRoutes.js	70	/api/communications/webhooks	POST	/twilio/status		
+routes/communicationWebhookRoutes.js	84	/api/communications/webhooks	POST	/africastalking/status		requireWebhookSecret
+routes/configurationRoutes.js	64	/api/config	USE	(all)		protect
+routes/configurationRoutes.js	70	/api/config	GET	/stats		allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	77	/api/config	GET	/entries		allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	78	/api/config	GET	/entries/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	79	/api/config	POST	/entries		allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	80	/api/config	PUT	/entries/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	81	/api/config	DELETE	/entries/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	82	/api/config	POST	/entries/bulk		allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	89	/api/config	GET	/features		allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	90	/api/config	GET	/features/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	91	/api/config	POST	/features		allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	92	/api/config	PUT	/features/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	93	/api/config	DELETE	/features/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	94	/api/config	POST	/features/:id/toggle		validateObjectId | allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	95	/api/config	GET	/features/check/:key		
+routes/configurationRoutes.js	101	/api/config	GET	/reference		
+routes/configurationRoutes.js	102	/api/config	GET	/reference/types		
+routes/configurationRoutes.js	103	/api/config	GET	/reference/:id		validateObjectId
+routes/configurationRoutes.js	104	/api/config	POST	/reference		allowRoles("admin", "superadmin", "editor")
+routes/configurationRoutes.js	105	/api/config	PUT	/reference/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/configurationRoutes.js	106	/api/config	DELETE	/reference/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	112	/api/config	GET	/vehicle		
+routes/configurationRoutes.js	113	/api/config	GET	/vehicle/types		
+routes/configurationRoutes.js	114	/api/config	GET	/vehicle/makes		
+routes/configurationRoutes.js	115	/api/config	GET	/vehicle/models		
+routes/configurationRoutes.js	116	/api/config	GET	/vehicle/:id		validateObjectId
+routes/configurationRoutes.js	117	/api/config	POST	/vehicle		allowRoles("admin", "superadmin", "editor")
+routes/configurationRoutes.js	118	/api/config	PUT	/vehicle/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/configurationRoutes.js	119	/api/config	DELETE	/vehicle/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	125	/api/config	GET	/location		
+routes/configurationRoutes.js	126	/api/config	GET	/location/types		
+routes/configurationRoutes.js	127	/api/config	GET	/location/countries		
+routes/configurationRoutes.js	128	/api/config	GET	/location/regions		
+routes/configurationRoutes.js	129	/api/config	GET	/location/cities		
+routes/configurationRoutes.js	130	/api/config	POST	/location		allowRoles("admin", "superadmin", "editor")
+routes/configurationRoutes.js	131	/api/config	PUT	/location/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/configurationRoutes.js	132	/api/config	DELETE	/location/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	138	/api/config	GET	/countries		
+routes/configurationRoutes.js	139	/api/config	GET	/countries/:id		validateObjectId
+routes/configurationRoutes.js	140	/api/config	POST	/countries		allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	141	/api/config	PUT	/countries/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	142	/api/config	DELETE	/countries/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	148	/api/config	GET	/audit		allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	149	/api/config	POST	/audit/:logId/rollback		allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	155	/api/config	GET	/export		allowRoles("admin", "superadmin")
+routes/configurationRoutes.js	156	/api/config	POST	/import		allowRoles("admin", "superadmin")
+routes/contactRoutes.js	15	/api/contact	POST	/		contactLimiter
+routes/contactRoutes.js	16	/api/contact	GET	/		protect | adminOnly | validateQuery(analyticsQuerySchema)
+routes/contactRoutes.js	17	/api/contact	PATCH	/:id/read		protect | adminOnly | validateObjectId
+routes/conversionFunnelRoutes.js	23	/api/funnel	POST	/cars/:carId/view		validateObjectId
+routes/conversionFunnelRoutes.js	26	/api/funnel	POST	/cars/:carId/favorite		protect | validateObjectId
+routes/conversionFunnelRoutes.js	29	/api/funnel	POST	/cars/:carId/chat		protect | validateObjectId
+routes/conversionFunnelRoutes.js	32	/api/funnel	POST	/cars/:carId/offer		protect | validateObjectId
+routes/conversionFunnelRoutes.js	35	/api/funnel	POST	/cars/:carId/escrow		protect | validateObjectId
+routes/conversionFunnelRoutes.js	38	/api/funnel	POST	/cars/:carId/sale		protect | validateObjectId
+routes/conversionFunnelRoutes.js	45	/api/funnel	GET	/cars/:carId/analytics		protect | validateObjectId
+routes/conversionFunnelRoutes.js	48	/api/funnel	GET	/dealer/analytics		protect
+routes/dealerHealthScoreRoutes.js	31	/api/dealer-health-score	GET	/:dealerId		
+routes/dealerHealthScoreRoutes.js	34	/api/dealer-health-score	GET	/:dealerId/details		
+routes/dealerHealthScoreRoutes.js	37	/api/dealer-health-score	GET	/ranking/list		
+routes/dealerHealthScoreRoutes.js	40	/api/dealer-health-score	GET	/top/:category		
+routes/dealerHealthScoreRoutes.js	43	/api/dealer-health-score	GET	/:dealerId/trends		
+routes/dealerHealthScoreRoutes.js	50	/api/dealer-health-score	POST	/admin/recalculate/:dealerId		protect | adminOnly | validateObjectId
+routes/dealerHealthScoreRoutes.js	53	/api/dealer-health-score	POST	/admin/recalculate-all		protect | adminOnly
+routes/dealerHealthScoreRoutes.js	56	/api/dealer-health-score	PUT	/admin/override/:dealerId		protect | adminOnly | validateObjectId
+routes/dealerHealthScoreRoutes.js	59	/api/dealer-health-score	GET	/admin/distribution		protect | adminOnly
+routes/dealerHealthScoreRoutes.js	62	/api/dealer-health-score	GET	/admin/alerts		protect | adminOnly
+routes/dealerPlatformRoutes.js	61	/api/dealer-platform	GET	/dashboard		protect | dealerOnly
+routes/dealerPlatformRoutes.js	64	/api/dealer-platform	GET	/profile/:dealerId		
+routes/dealerPlatformRoutes.js	65	/api/dealer-platform	PUT	/profile/:dealerId		protect
+routes/dealerPlatformRoutes.js	68	/api/dealer-platform	GET	/inventory		protect | dealerOnly
+routes/dealerPlatformRoutes.js	69	/api/dealer-platform	POST	/inventory		protect | dealerOnly | requireDealerVerification | uploadLimiter | cleanupUploadsOnError | upload.array("images", 10) | handleUploadError | createLimiter
+routes/dealerPlatformRoutes.js	70	/api/dealer-platform	PUT	/inventory/:listingId		protect | dealerOnly | createLimiter
+routes/dealerPlatformRoutes.js	71	/api/dealer-platform	DELETE	/inventory/:listingId		protect | dealerOnly | createLimiter
+routes/dealerPlatformRoutes.js	72	/api/dealer-platform	POST	/inventory/bulk		protect | dealerOnly | createLimiter
+routes/dealerPlatformRoutes.js	75	/api/dealer-platform	GET	/leads		protect | dealerOnly
+routes/dealerPlatformRoutes.js	76	/api/dealer-platform	PUT	/leads/:leadId		protect | dealerOnly
+routes/dealerPlatformRoutes.js	77	/api/dealer-platform	GET	/leads/:leadId/activities		protect | dealerOnly
+routes/dealerPlatformRoutes.js	78	/api/dealer-platform	POST	/leads/:leadId/notes		protect | dealerOnly | createLimiter
+routes/dealerPlatformRoutes.js	79	/api/dealer-platform	POST	/leads/:leadId/tasks		protect | dealerOnly
+routes/dealerPlatformRoutes.js	82	/api/dealer-platform	GET	/pipeline		protect | dealerOnly
+routes/dealerPlatformRoutes.js	85	/api/dealer-platform	GET	/marketing		protect | dealerOnly
+routes/dealerPlatformRoutes.js	86	/api/dealer-platform	POST	/marketing		protect | dealerOnly | createLimiter
+routes/dealerPlatformRoutes.js	87	/api/dealer-platform	PUT	/marketing/:campaignId		protect | dealerOnly | createLimiter
+routes/dealerPlatformRoutes.js	90	/api/dealer-platform	GET	/analytics		protect | dealerOnly
+routes/dealerPlatformRoutes.js	91	/api/dealer-platform	GET	/analytics/recommendations		protect | dealerOnly
+routes/dealerPlatformRoutes.js	94	/api/dealer-platform	GET	/team		protect | dealerOrgAccess()
+routes/dealerPlatformRoutes.js	95	/api/dealer-platform	POST	/team/invite		protect | dealerOrgAccess("canManageTeam")
+routes/dealerPlatformRoutes.js	96	/api/dealer-platform	PUT	/team/:memberId		protect | dealerOrgAccess("canManageTeam") | createLimiter
+routes/dealerPlatformRoutes.js	97	/api/dealer-platform	DELETE	/team/:memberId		protect | dealerOrgAccess("canManageTeam") | createLimiter
+routes/dealerPlatformRoutes.js	98	/api/dealer-platform	POST	/team/accept		protect
+routes/dealerPlatformRoutes.js	101	/api/dealer-platform	GET	/subscription		protect | dealerOnly
+routes/dealerPlatformRoutes.js	104	/api/dealer-platform	POST	/copilot		protect | dealerOnly
+routes/dealerPlatformRoutes.js	107	/api/dealer-platform	GET	/customers		protect | dealerOnly
+routes/dealerPlatformRoutes.js	108	/api/dealer-platform	GET	/customers/:customerId/timeline		protect | dealerOnly
+routes/dealerPlatformRoutes.js	111	/api/dealer-platform	GET	/auctions		protect | dealerOnly
+routes/dealerPlatformRoutes.js	114	/api/dealer-platform	GET	/finance		protect | dealerOnly
+routes/dealerPlatformRoutes.js	117	/api/dealer-platform	GET	/inspections		protect | dealerOnly
+routes/dealerPlatformRoutes.js	120	/api/dealer-platform	GET	/reputation		protect | dealerOnly
+routes/dealerRoutes.js	37	/api/dealer	GET	/onboarding		protect | allowRoles("dealer")
+routes/dealerRoutes.js	45	/api/dealer	PUT	/onboarding		protect | allowRoles("dealer")
+routes/dealerRoutes.js	109	/api/dealer	USE	(all)		protect | dealerOnly | requireApproved
+routes/dealerRoutes.js	114	/api/dealer	GET	/earnings		validateQuery(analyticsQuerySchema) | cacheAnalytics
+routes/dealerRoutes.js	176	/api/dealer	GET	/cars		cacheDealerData
+routes/dealerRoutes.js	209	/api/dealer	GET	/analytics		cacheAnalytics
+routes/dealerRoutes.js	321	/api/dealer	GET	/summary		cacheAnalytics
+routes/dealerRoutes.js	403	/api/dealer	GET	/quick-stats		cacheDealerData
+routes/dealerRoutes.js	427	/api/dealer	GET	/milestones		
+routes/dealerRoutes.js	493	/api/dealer	GET	/bids		
+routes/dealerRoutes.js	543	/api/dealer	GET	/escrows		cacheDealerData
+routes/dealerRoutes.js	584	/api/dealer	GET	/settlement		cacheDealerData
+routes/dealerRoutes.js	593	/api/dealer	PUT	/settlement		invalidateCache("dealer")
+routes/dealerRoutes.js	637	/api/dealer	GET	/profile		cacheDealerData
+routes/dealerRoutes.js	646	/api/dealer	PUT	/profile		invalidateCache("dealer")
+routes/dealerRoutes.js	670	/api/dealer	GET	/team		cacheDealerData
+routes/dealerRoutes.js	693	/api/dealer	POST	/team/invite		invalidateCache("dealer")
+routes/dealerRoutes.js	754	/api/dealer	PATCH	/team/:memberId		invalidateCache("dealer")
+routes/dealerRoutes.js	777	/api/dealer	DELETE	/team/:memberId		invalidateCache("dealer")
+routes/dealerRoutes.js	796	/api/dealer	POST	/cars/:id/duplicate		invalidateCache("dealer")
+routes/dealerRoutes.js	836	/api/dealer	POST	/cars/bulk-delete		invalidateCache("dealer")
+routes/dealerRoutes.js	863	/api/dealer	PATCH	/cars/:id/mark-sold		invalidateCache("dealer")
+routes/dealerRoutes.js	890	/api/dealer	PATCH	/cars/bulk-status		invalidateCache("dealer")
+routes/dealerRoutes.js	941	/api/dealer	POST	/cars/:id/accept-bid		invalidateCache("dealer")
+routes/dealerRoutes.js	991	/api/dealer	POST	/cars/:id/reject-bid		invalidateCache("dealer")
+routes/dealerRoutes.js	1035	/api/dealer	POST	/cars/:id/auction/start		requireDealerVerification | invalidateCache("dealer")
+routes/dealerRoutes.js	1098	/api/dealer	POST	/cars/:id/auction/end		invalidateCache("dealer")
+routes/dealerRoutes.js	1122	/api/dealer	POST	/cars/:id/auction/extend		invalidateCache("dealer")
+routes/dealerRoutes.js	1167	/api/dealer	POST	/payouts/:escrowId/initiate		
+routes/dealerRoutes.js	1210	/api/dealer	POST	/upgrade		
+routes/dealerRoutes.js	1240	/api/dealer	PATCH	/cars/:id/wholesale		
+routes/dealerRoutes.js	1259	/api/dealer	GET	/trade-listings		
+routes/dealerRoutes.js	1283	/api/dealer	POST	/pricing-recommendations		
+routes/dealerRoutes.js	1294	/api/dealer	USE	(all)		(req, res) => { res.status(404).json({ success: false, message: "Dealer route not found", }); }
+routes/digitalTwinRoutes.js	34	/api/digital-twin	USE	(all)		protect
+routes/digitalTwinRoutes.js	37	/api/digital-twin	GET	/dashboard		
+routes/digitalTwinRoutes.js	43	/api/digital-twin	GET	/simulations		
+routes/digitalTwinRoutes.js	44	/api/digital-twin	GET	/simulations/:id		validateObjectId
+routes/digitalTwinRoutes.js	45	/api/digital-twin	POST	/simulations		allowRoles("admin", "superadmin")
+routes/digitalTwinRoutes.js	46	/api/digital-twin	POST	/simulations/:id/run		validateObjectId | allowRoles("admin", "superadmin")
+routes/digitalTwinRoutes.js	47	/api/digital-twin	DELETE	/simulations/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/digitalTwinRoutes.js	48	/api/digital-twin	GET	/simulations/history		
+routes/digitalTwinRoutes.js	49	/api/digital-twin	POST	/simulations/compare		
+routes/digitalTwinRoutes.js	55	/api/digital-twin	GET	/scenarios		
+routes/digitalTwinRoutes.js	56	/api/digital-twin	GET	/scenarios/templates		
+routes/digitalTwinRoutes.js	57	/api/digital-twin	GET	/scenarios/:id		validateObjectId
+routes/digitalTwinRoutes.js	58	/api/digital-twin	POST	/scenarios		allowRoles("admin", "superadmin")
+routes/digitalTwinRoutes.js	59	/api/digital-twin	PUT	/scenarios/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/digitalTwinRoutes.js	60	/api/digital-twin	DELETE	/scenarios/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/digitalTwinRoutes.js	61	/api/digital-twin	POST	/scenarios/:id/run		validateObjectId | allowRoles("admin", "superadmin")
+routes/digitalTwinRoutes.js	67	/api/digital-twin	GET	/predictions		
+routes/digitalTwinRoutes.js	68	/api/digital-twin	POST	/predictions		
+routes/digitalTwinRoutes.js	74	/api/digital-twin	POST	/what-if		
+routes/disputeRoutes.js	53	/api/disputes	GET	/stats	idempotencyCheck | csrfProtection	protect | adminOnly
+routes/disputeRoutes.js	58	/api/disputes	GET	/my	idempotencyCheck | csrfProtection	protect
+routes/disputeRoutes.js	63	/api/disputes	GET	/	idempotencyCheck | csrfProtection	protect | adminOnly
+routes/disputeRoutes.js	68	/api/disputes	POST	/	idempotencyCheck | csrfProtection	protect | idempotencyCheck | validate(createDisputeSchema)
+routes/disputeRoutes.js	73	/api/disputes	GET	/:id	idempotencyCheck | csrfProtection	protect
+routes/disputeRoutes.js	78	/api/disputes	PATCH	/:id/status	idempotencyCheck | csrfProtection	protect | adminOnly | validate(transitionDisputeSchema)
+routes/disputeRoutes.js	83	/api/disputes	POST	/:id/assign	idempotencyCheck | csrfProtection	protect | adminOnly | validate(assignDisputeSchema)
+routes/disputeRoutes.js	88	/api/disputes	GET	/:id/evidence	idempotencyCheck | csrfProtection	protect
+routes/disputeRoutes.js	89	/api/disputes	POST	/:id/evidence	idempotencyCheck | csrfProtection	protect | uploadEvidenceSingle | handleEvidenceUploadError | validate(evidenceUploadSchema)
+routes/disputeRoutes.js	97	/api/disputes	GET	/:id/evidence/:evidenceId	idempotencyCheck | csrfProtection	protect
+routes/disputeRoutes.js	98	/api/disputes	DELETE	/:id/evidence/:evidenceId	idempotencyCheck | csrfProtection	protect
+routes/disputeRoutes.js	99	/api/disputes	POST	/:id/evidence/:evidenceId/verify	idempotencyCheck | csrfProtection	protect | adminOnly
+routes/disputeRoutes.js	104	/api/disputes	POST	/:id/notes	idempotencyCheck | csrfProtection	protect | adminOnly | validate(internalNoteSchema)
+routes/disputeRoutes.js	109	/api/disputes	POST	/:id/mediation/start	idempotencyCheck | csrfProtection	protect | adminOnly | validate(mediationStartSchema)
+routes/disputeRoutes.js	110	/api/disputes	POST	/:id/mediation/complete	idempotencyCheck | csrfProtection	protect | adminOnly | validate(mediationCompleteSchema)
+routes/disputeRoutes.js	115	/api/disputes	POST	/:id/resolve	idempotencyCheck | csrfProtection	protect | adminOnly | createLimiter | idempotencyCheck | validate(resolveDisputeSchema)
+routes/disputeRoutes.js	120	/api/disputes	POST	/:id/appeal	idempotencyCheck | csrfProtection	protect | idempotencyCheck | validate(submitAppealSchema)
+routes/disputeRoutes.js	121	/api/disputes	POST	/:id/appeal/review	idempotencyCheck | csrfProtection	protect | adminOnly | validate(reviewAppealSchema)
+routes/disputeRoutes.js	126	/api/disputes	USE	(all)	idempotencyCheck | csrfProtection	(req, res) => { res.status(404).json({ success: false, message: "Dispute route not found" }); }
+routes/duplicateRoutes.js	28	/api/duplicates	USE	(all)		protect
+routes/duplicateRoutes.js	29	/api/duplicates	USE	(all)		allowRoles("admin", "superadmin")
+routes/duplicateRoutes.js	36	/api/duplicates	GET	/all		
+routes/duplicateRoutes.js	39	/api/duplicates	GET	/:id		validateObjectId
+routes/duplicateRoutes.js	42	/api/duplicates	POST	/:id/false-positive		validateObjectId
+routes/duplicateRoutes.js	56	/api/duplicates	POST	/:id/confirm		validateObjectId
+routes/duplicateRoutes.js	70	/api/duplicates	POST	/:id/under-review		validateObjectId
+routes/duplicateRoutes.js	84	/api/duplicates	GET	/statistics		
+routes/duplicateRoutes.js	87	/api/duplicates	GET	/search		
+routes/duplicateRoutes.js	92	/api/duplicates	USE	(all)		(req, res) => { res.status(404).json({ success: false, message: "Duplicate route not found", }); }
+routes/ecpRoutes.js	52	/api/ecp	USE	(all)		protect | allowRoles("admin", "superadmin", "engineer", "manager")
+routes/ecpRoutes.js	55	/api/ecp	GET	/dashboard		
+routes/ecpRoutes.js	56	/api/ecp	GET	/executive		
+routes/ecpRoutes.js	59	/api/ecp	GET	/health		
+routes/ecpRoutes.js	60	/api/ecp	GET	/health/:serviceId		
+routes/ecpRoutes.js	63	/api/ecp	GET	/business		
+routes/ecpRoutes.js	66	/api/ecp	GET	/incidents		
+routes/ecpRoutes.js	67	/api/ecp	GET	/incidents/:id		validateObjectId
+routes/ecpRoutes.js	68	/api/ecp	POST	/incidents		createLimiter | allowRoles("admin", "superadmin", "engineer")
+routes/ecpRoutes.js	69	/api/ecp	PUT	/incidents/:id		validateObjectId | createLimiter | allowRoles("admin", "superadmin", "engineer")
+routes/ecpRoutes.js	70	/api/ecp	DELETE	/incidents/:id		validateObjectId | createLimiter | allowRoles("admin", "superadmin")
+routes/ecpRoutes.js	73	/api/ecp	GET	/alerts		
+routes/ecpRoutes.js	74	/api/ecp	POST	/alerts		createLimiter | allowRoles("admin", "superadmin", "engineer")
+routes/ecpRoutes.js	75	/api/ecp	POST	/alerts/:id/acknowledge		validateObjectId | createLimiter | allowRoles("admin", "superadmin", "engineer")
+routes/ecpRoutes.js	76	/api/ecp	POST	/alerts/:id/resolve		validateObjectId | createLimiter | allowRoles("admin", "superadmin", "engineer")
+routes/ecpRoutes.js	79	/api/ecp	GET	/self-healing		
+routes/ecpRoutes.js	80	/api/ecp	GET	/self-healing/rules		
+routes/ecpRoutes.js	81	/api/ecp	POST	/self-healing/execute		createLimiter | allowRoles("admin", "superadmin")
+routes/ecpRoutes.js	84	/api/ecp	GET	/analysis/:incidentId		
+routes/ecpRoutes.js	85	/api/ecp	POST	/ask		
+routes/ecpRoutes.js	88	/api/ecp	GET	/performance		
+routes/ecpRoutes.js	91	/api/ecp	GET	/security		
+routes/ecpRoutes.js	94	/api/ecp	GET	/capacity		
+routes/ecpRoutes.js	97	/api/ecp	GET	/compliance		
+routes/ecpRoutes.js	100	/api/ecp	GET	/audit		
+routes/ecpRoutes.js	103	/api/ecp	GET	/deployments		
+routes/ecpRoutes.js	106	/api/ecp	GET	/disaster-recovery		
+routes/eipRoutes.js	59	/api/integration	USE	(all)		protect | allowRoles("admin", "superadmin")
+routes/eipRoutes.js	62	/api/integration	GET	/dashboard		
+routes/eipRoutes.js	65	/api/integration	GET	/apis		
+routes/eipRoutes.js	66	/api/integration	GET	/apis/:apiId		
+routes/eipRoutes.js	69	/api/integration	GET	/partners		
+routes/eipRoutes.js	70	/api/integration	GET	/partners/:id		
+routes/eipRoutes.js	71	/api/integration	POST	/partners		allowRoles("admin", "superadmin")
+routes/eipRoutes.js	72	/api/integration	PUT	/partners/:id		allowRoles("admin", "superadmin")
+routes/eipRoutes.js	73	/api/integration	DELETE	/partners/:id		allowRoles("admin", "superadmin")
+routes/eipRoutes.js	76	/api/integration	GET	/api-keys		
+routes/eipRoutes.js	77	/api/integration	POST	/api-keys		allowRoles("admin", "superadmin")
+routes/eipRoutes.js	78	/api/integration	POST	/api-keys/:id/revoke		allowRoles("admin", "superadmin")
+routes/eipRoutes.js	81	/api/integration	GET	/webhooks		
+routes/eipRoutes.js	82	/api/integration	GET	/webhooks/:id		
+routes/eipRoutes.js	83	/api/integration	POST	/webhooks		allowRoles("admin", "superadmin")
+routes/eipRoutes.js	84	/api/integration	PUT	/webhooks/:id		allowRoles("admin", "superadmin")
+routes/eipRoutes.js	85	/api/integration	DELETE	/webhooks/:id		allowRoles("admin", "superadmin")
+routes/eipRoutes.js	86	/api/integration	POST	/webhooks/:id/test		
+routes/eipRoutes.js	87	/api/integration	GET	/webhooks/:webhookId/logs		
+routes/eipRoutes.js	90	/api/integration	GET	/plugins		
+routes/eipRoutes.js	91	/api/integration	GET	/plugins/:id		
+routes/eipRoutes.js	92	/api/integration	POST	/plugins		allowRoles("admin", "superadmin")
+routes/eipRoutes.js	93	/api/integration	PUT	/plugins/:id		allowRoles("admin", "superadmin")
+routes/eipRoutes.js	94	/api/integration	DELETE	/plugins/:id		allowRoles("admin", "superadmin")
+routes/eipRoutes.js	97	/api/integration	GET	/templates		
+routes/eipRoutes.js	98	/api/integration	GET	/templates/:id		
+routes/eipRoutes.js	101	/api/integration	GET	/analytics		
+routes/eipRoutes.js	104	/api/integration	GET	/sdks		
+routes/eipRoutes.js	107	/api/integration	GET	/oauth/config		
+routes/eipRoutes.js	108	/api/integration	POST	/oauth/clients		
+routes/eipRoutes.js	111	/api/integration	GET	/events		
+routes/eipRoutes.js	114	/api/integration	GET	/gateway		
+routes/eipRoutes.js	117	/api/integration	GET	/sandbox		
+routes/eipRoutes.js	120	/api/integration	GET	/certification		
+routes/eipRoutes.js	123	/api/integration	POST	/help		
+routes/escrowRoutes.js	44	/api/escrow	GET	/program	idempotencyCheck | csrfProtection	
+routes/escrowRoutes.js	64	/api/escrow	GET	/operations/dashboard	idempotencyCheck | csrfProtection	protect | escrowViewOnly
+routes/escrowRoutes.js	65	/api/escrow	GET	/operations/case/:id	idempotencyCheck | csrfProtection	protect | escrowViewOnly | validateObjectId
+routes/escrowRoutes.js	66	/api/escrow	POST	/operations/reconcile	idempotencyCheck | csrfProtection	protect | escrowReconcileOnly | idempotencyCheck
+routes/escrowRoutes.js	67	/api/escrow	POST	/operations/anomaly-scan	idempotencyCheck | csrfProtection	protect | escrowOperateOnly | idempotencyCheck
+routes/escrowRoutes.js	68	/api/escrow	POST	/operations/case/:id/payout	idempotencyCheck | csrfProtection	protect | escrowSettlementOnly | idempotencyCheck | validateObjectId
+routes/escrowRoutes.js	73	/api/escrow	GET	/my	idempotencyCheck | csrfProtection	protect
+routes/escrowRoutes.js	78	/api/escrow	GET	/	idempotencyCheck | csrfProtection	protect | escrowViewOnly
+routes/escrowRoutes.js	83	/api/escrow	GET	/:id	idempotencyCheck | csrfProtection	protect | validateObjectId | validateResponse(escrowResponseSchema)
+routes/escrowRoutes.js	136	/api/escrow	GET	/:id/state	idempotencyCheck | csrfProtection	protect | validateObjectId | validateResponse(escrowStateResponseSchema)
+routes/escrowRoutes.js	178	/api/escrow	POST	/:id/confirm-vehicle	idempotencyCheck | csrfProtection	protect | idempotencyCheck | validateObjectId
+routes/escrowRoutes.js	189	/api/escrow	POST	/:id/confirm-delivery	idempotencyCheck | csrfProtection	protect | idempotencyCheck | validateObjectId
+routes/escrowRoutes.js	200	/api/escrow	POST	/:id/request-release	idempotencyCheck | csrfProtection	protect | idempotencyCheck | validateObjectId
+routes/escrowRoutes.js	211	/api/escrow	POST	/:id/dispute	idempotencyCheck | csrfProtection	protect | idempotencyCheck | validateObjectId
+routes/escrowRoutes.js	222	/api/escrow	POST	/:id/release	idempotencyCheck | csrfProtection	protect | escrowAdminOnly | escrowReleaseOnly | createLimiter | idempotencyCheck | validateObjectId
+routes/escrowRoutes.js	236	/api/escrow	POST	/:id/refund	idempotencyCheck | csrfProtection	protect | escrowAdminOnly | escrowRefundOnly | createLimiter | idempotencyCheck | validateObjectId
+routes/escrowRoutes.js	247	/api/escrow	POST	/:id/refund/:refundId/complete	idempotencyCheck | csrfProtection	protect | escrowAdminOnly | escrowSettlementOnly | createLimiter | idempotencyCheck | validateObjectId
+routes/escrowRoutes.js	298	/api/escrow	POST	/:id/close	idempotencyCheck | csrfProtection	protect | escrowAdminOnly | requireEscrowPermission("emergency_escrow_control") | createLimiter | idempotencyCheck | validateObjectId
+routes/escrowRoutes.js	312	/api/escrow	GET	/:id/funding-instructions	idempotencyCheck | csrfProtection	protect | validateObjectId
+routes/escrowRoutes.js	321	/api/escrow	POST	/:id/verify-funding	idempotencyCheck | csrfProtection	protect | escrowReconcileOnly | idempotencyCheck | validateObjectId
+routes/escrowRoutes.js	331	/api/escrow	USE	(all)	idempotencyCheck | csrfProtection	(req, res) => { res.status(404).json({ success: false, message: "Escrow route not found" }); }
+routes/eventRoutes.js	57	/api/events	POST	/track		protect | validate(eventSchema)
+routes/eventRoutes.js	60	/api/events	POST	/search		protect | validate(searchEventSchema)
+routes/eventRoutes.js	63	/api/events	POST	/vehicle-view		protect | validate(vehicleViewSchema)
+routes/eventRoutes.js	66	/api/events	POST	/offer		protect | validate(offerEventSchema)
+routes/eventRoutes.js	69	/api/events	POST	/bid		protect | validate(bidEventSchema)
+routes/eventRoutes.js	72	/api/events	POST	/escrow		protect | validate(escrowEventSchema)
+routes/eventRoutes.js	79	/api/events	GET	/analytics		protect | validateQuery(analyticsQuerySchema)
+routes/eventRoutes.js	82	/api/events	GET	/my-events		protect | validateQuery(analyticsQuerySchema)
+routes/executiveAnalyticsRoutes.js	18	/api/executive-analytics	GET	/dashboard		protect | adminOnly | validateQuery(analyticsQuerySchema)
+routes/executiveAnalyticsRoutes.js	21	/api/executive-analytics	GET	/revenue		protect | adminOnly | validateQuery(analyticsQuerySchema)
+routes/executiveAnalyticsRoutes.js	24	/api/executive-analytics	GET	/user-growth		protect | adminOnly | validateQuery(analyticsQuerySchema)
+routes/favoriteRoutes.js	15	/api/favorites	USE	(all)	csrfProtection	protect
+routes/favoriteRoutes.js	17	/api/favorites	GET	/	csrfProtection	validateQuery(carListQuerySchema)
+routes/favoriteRoutes.js	18	/api/favorites	POST	/:carId	csrfProtection	
+routes/favoriteRoutes.js	19	/api/favorites	DELETE	/:carId	csrfProtection	
+routes/favoriteRoutes.js	20	/api/favorites	POST	/:carId/toggle	csrfProtection	
+routes/favoriteRoutes.js	21	/api/favorites	PUT	/:carId/price-alert	csrfProtection	
+routes/featureFlagRoutes.js	35	/api/feature-flags	GET	/user		protect
+routes/featureFlagRoutes.js	38	/api/feature-flags	GET	/evaluate/:key		protect
+routes/featureFlagRoutes.js	45	/api/feature-flags	GET	/		protect | adminOnly
+routes/featureFlagRoutes.js	48	/api/feature-flags	GET	/:key		protect | adminOnly
+routes/featureFlagRoutes.js	51	/api/feature-flags	POST	/		protect | adminOnly
+routes/featureFlagRoutes.js	54	/api/feature-flags	PUT	/:key		protect | adminOnly
+routes/featureFlagRoutes.js	57	/api/feature-flags	DELETE	/:key		protect | adminOnly
+routes/featureFlagRoutes.js	60	/api/feature-flags	POST	/:key/toggle		protect | adminOnly
+routes/featureFlagRoutes.js	63	/api/feature-flags	GET	/:key/stats		protect | adminOnly
+routes/featureFlagRoutes.js	66	/api/feature-flags	GET	/category/:category		protect | adminOnly | validateQuery(analyticsQuerySchema)
+routes/featureFlagRoutes.js	69	/api/feature-flags	GET	/environment/:environment		protect | adminOnly | validateQuery(analyticsQuerySchema)
+routes/featureFlagRoutes.js	72	/api/feature-flags	GET	/role/:role		protect | adminOnly | validateQuery(analyticsQuerySchema)
+routes/featureFlagRoutes.js	75	/api/feature-flags	GET	/meta/categories		protect | adminOnly
+routes/featureFlagRoutes.js	78	/api/feature-flags	POST	/batch/evaluate		protect | adminOnly
+routes/feedbackRoutes.js	24	/api/feedback	POST	/submit		(req, res, next) => { // Attempt to authenticate but don't block if not authenticated if (req.headers.authorization) { return protect(req, r
+routes/feedbackRoutes.js	44	/api/feedback	GET	/admin/all		protect | allowRoles("admin", "superadmin")
+routes/feedbackRoutes.js	52	/api/feedback	PATCH	/admin/:id/status		protect | allowRoles("admin", "superadmin") | validateObjectId
+routes/feedbackRoutes.js	63	/api/feedback	USE	(all)		(req, res) => { res.status(404).json({ success: false, message: "Feedback route not found", }); }
+routes/financeRoutes.js	29	/api/finance	USE	(all)		protect
+routes/financeRoutes.js	30	/api/finance	USE	(all)		allowRoles("admin", "superadmin")
+routes/financeRoutes.js	37	/api/finance	GET	/reports		
+routes/financeRoutes.js	40	/api/finance	GET	/reports/:id		validateObjectId
+routes/financeRoutes.js	43	/api/finance	GET	/issues		
+routes/financeRoutes.js	46	/api/finance	POST	/reports/:reportId/issues/:issueIndex/resolve		validateObjectId
+routes/financeRoutes.js	60	/api/finance	POST	/reconcile		
+routes/financeRoutes.js	71	/api/finance	GET	/statistics		
+routes/financeRoutes.js	74	/api/finance	GET	/cron-status		
+routes/financeRoutes.js	77	/api/finance	GET	/export/:reportId		
+routes/financeRoutes.js	82	/api/finance	USE	(all)		(req, res) => { res.status(404).json({ success: false, message: "Finance route not found", }); }
+routes/fraudRoutes.js	26	/api/fraud	GET	/analytics		protect | adminOnly
+routes/fraudRoutes.js	29	/api/fraud	GET	/all		protect | adminOnly
+routes/fraudRoutes.js	36	/api/fraud	POST	/check		protect | adminOnly
+routes/fraudRoutes.js	39	/api/fraud	GET	/check/user/:userId		protect | adminOnly | validateObjectId
+routes/fraudRoutes.js	42	/api/fraud	GET	/check/auction/:carId		protect | adminOnly | validateObjectId
+routes/fraudRoutes.js	45	/api/fraud	GET	/check/escrow/:escrowId		protect | adminOnly | validateObjectId
+routes/fraudRoutes.js	48	/api/fraud	GET	/check/dealer/:dealerId		protect | adminOnly | validateObjectId
+routes/fraudRoutes.js	51	/api/fraud	GET	/check/price-manipulation/:carId		protect | adminOnly | validateObjectId
+routes/fraudRoutes.js	54	/api/fraud	GET	/check/account-farms/:dealerId		protect | adminOnly | validateObjectId
+routes/fraudRoutes.js	57	/api/fraud	GET	/check/duplicate-photos/:carId		protect | adminOnly | validateObjectId
+routes/fraudRoutes.js	64	/api/fraud	PUT	/:fraudId/status		protect | adminOnly | validateObjectId
+routes/governanceRoutes.js	63	/api/governance	USE	(all)		protect
+routes/governanceRoutes.js	64	/api/governance	USE	(all)		allowRoles("admin", "superadmin", "executive", "manager")
+routes/governanceRoutes.js	67	/api/governance	GET	/dashboard		
+routes/governanceRoutes.js	70	/api/governance	GET	/policies		
+routes/governanceRoutes.js	71	/api/governance	GET	/policies/:id		validateObjectId
+routes/governanceRoutes.js	72	/api/governance	POST	/policies		allowRoles("admin", "superadmin")
+routes/governanceRoutes.js	73	/api/governance	PUT	/policies/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/governanceRoutes.js	76	/api/governance	GET	/changes		
+routes/governanceRoutes.js	77	/api/governance	GET	/changes/:id		validateObjectId
+routes/governanceRoutes.js	78	/api/governance	POST	/changes		allowRoles("admin", "superadmin", "manager")
+routes/governanceRoutes.js	79	/api/governance	POST	/changes/:id/submit		validateObjectId
+routes/governanceRoutes.js	80	/api/governance	POST	/changes/:id/approve		validateObjectId | allowRoles("admin", "superadmin", "executive")
+routes/governanceRoutes.js	81	/api/governance	POST	/changes/:id/reject		validateObjectId | allowRoles("admin", "superadmin", "executive")
+routes/governanceRoutes.js	84	/api/governance	GET	/approvals		
+routes/governanceRoutes.js	85	/api/governance	POST	/approvals		allowRoles("admin", "superadmin")
+routes/governanceRoutes.js	86	/api/governance	PUT	/approvals/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/governanceRoutes.js	89	/api/governance	GET	/features		
+routes/governanceRoutes.js	90	/api/governance	POST	/features		allowRoles("admin", "superadmin", "manager")
+routes/governanceRoutes.js	91	/api/governance	PUT	/features/:id/stage		validateObjectId | allowRoles("admin", "superadmin", "manager")
+routes/governanceRoutes.js	94	/api/governance	GET	/risks		
+routes/governanceRoutes.js	95	/api/governance	POST	/risks		allowRoles("admin", "superadmin", "executive")
+routes/governanceRoutes.js	96	/api/governance	PUT	/risks/:id		validateObjectId | allowRoles("admin", "superadmin", "executive")
+routes/governanceRoutes.js	99	/api/governance	GET	/standards		
+routes/governanceRoutes.js	100	/api/governance	POST	/standards		allowRoles("admin", "superadmin")
+routes/governanceRoutes.js	103	/api/governance	GET	/countries		
+routes/governanceRoutes.js	104	/api/governance	POST	/countries		allowRoles("admin", "superadmin")
+routes/governanceRoutes.js	107	/api/governance	GET	/partners		
+routes/governanceRoutes.js	108	/api/governance	POST	/partners		allowRoles("admin", "superadmin")
+routes/governanceRoutes.js	111	/api/governance	GET	/releases		
+routes/governanceRoutes.js	112	/api/governance	POST	/releases		allowRoles("admin", "superadmin")
+routes/governanceRoutes.js	113	/api/governance	PUT	/releases/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/governanceRoutes.js	116	/api/governance	GET	/decisions		
+routes/governanceRoutes.js	117	/api/governance	POST	/decisions		allowRoles("admin", "superadmin", "executive")
+routes/governanceRoutes.js	120	/api/governance	GET	/audit		
+routes/governanceRoutes.js	123	/api/governance	GET	/compliance		
+routes/governanceRoutes.js	126	/api/governance	POST	/help		
+routes/governanceRoutes.js	129	/api/governance	GET	/reports		
+routes/healthRoutes.js	18	/health	GET	/	fastTimeout	
+routes/healthRoutes.js	112	/health	GET	/detailed	fastTimeout	protect | adminOnly
+routes/healthRoutes.js	187	/health	GET	/cache	fastTimeout	protect | adminOnly | validateQuery(analyticsQuerySchema)
+routes/healthRoutes.js	197	/health	POST	/cache/flush	fastTimeout	protect | adminOnly
+routes/heroPlacementRoutes.js	7	(unmounted-in-server.js)	GET	/public-config		
+routes/heroPlacementRoutes.js	8	(unmounted-in-server.js)	GET	/public-active		
+routes/heroPlacementRoutes.js	9	(unmounted-in-server.js)	GET	/mine		protect
+routes/heroPlacementRoutes.js	10	(unmounted-in-server.js)	POST	/		protect
+routes/heroPlacementRoutes.js	11	(unmounted-in-server.js)	GET	/admin/all		protect | adminOnly
+routes/heroPlacementRoutes.js	12	(unmounted-in-server.js)	PUT	/admin/:id/schedule		protect | adminOnly
+routes/heroSlideRoutes.js	16	/api/hero	GET	/		
+routes/heroSlideRoutes.js	19	/api/hero	GET	/all		protect | adminOnly
+routes/heroSlideRoutes.js	20	/api/hero	POST	/		protect | adminOnly
+routes/heroSlideRoutes.js	21	/api/hero	PUT	/:id		protect | adminOnly | validateObjectId
+routes/heroSlideRoutes.js	22	/api/hero	DELETE	/:id		protect | adminOnly | validateObjectId
+routes/improvementRoutes.js	50	/api/improvement	USE	(all)		protect
+routes/improvementRoutes.js	53	/api/improvement	GET	/dashboard		
+routes/improvementRoutes.js	56	/api/improvement	GET	/opportunities		
+routes/improvementRoutes.js	57	/api/improvement	POST	/improvements		createLimiter | allowRoles("admin", "superadmin", "manager")
+routes/improvementRoutes.js	58	/api/improvement	PUT	/improvements/:improvementId		allowRoles("admin", "superadmin")
+routes/improvementRoutes.js	61	/api/improvement	GET	/recommendations		
+routes/improvementRoutes.js	64	/api/improvement	GET	/customer-experience		
+routes/improvementRoutes.js	67	/api/improvement	GET	/ux-analytics		
+routes/improvementRoutes.js	70	/api/improvement	GET	/performance		
+routes/improvementRoutes.js	73	/api/improvement	GET	/experiments		
+routes/improvementRoutes.js	74	/api/improvement	POST	/experiments		createLimiter | allowRoles("admin", "superadmin", "manager")
+routes/improvementRoutes.js	75	/api/improvement	PUT	/experiments/:experimentId		allowRoles("admin", "superadmin")
+routes/improvementRoutes.js	76	/api/improvement	POST	/experiments/:experimentId/start		allowRoles("admin", "superadmin")
+routes/improvementRoutes.js	77	/api/improvement	POST	/experiments/:experimentId/stop		allowRoles("admin", "superadmin")
+routes/improvementRoutes.js	80	/api/improvement	GET	/health		
+routes/improvementRoutes.js	83	/api/improvement	GET	/ideas		
+routes/improvementRoutes.js	84	/api/improvement	POST	/ideas		createLimiter
+routes/improvementRoutes.js	85	/api/improvement	POST	/ideas/:ideaId/vote		createLimiter
+routes/improvementRoutes.js	86	/api/improvement	PUT	/ideas/:ideaId/status		allowRoles("admin", "superadmin", "manager")
+routes/improvementRoutes.js	89	/api/improvement	GET	/roadmap		
+routes/improvementRoutes.js	92	/api/improvement	GET	/optimization/marketplace		
+routes/improvementRoutes.js	93	/api/improvement	GET	/optimization/search		
+routes/improvementRoutes.js	94	/api/improvement	GET	/optimization/revenue		
+routes/improvementRoutes.js	97	/api/improvement	GET	/report		
+routes/improvementRoutes.js	100	/api/improvement	GET	/technical-debt		
+routes/improvementRoutes.js	103	/api/improvement	POST	/assistant		
+routes/inspectorApplicationRoutes.js	37	/api/inspector-applications	GET	/active		
+routes/inspectorApplicationRoutes.js	38	/api/inspector-applications	POST	/apply		optionalAuth | createLimiter | validateBody(submitApplicationSchema)
+routes/inspectorApplicationRoutes.js	40	/api/inspector-applications	GET	/my		protect
+routes/inspectorApplicationRoutes.js	49	/api/inspector-applications	GET	/		protect | reviewerOnly
+routes/inspectorApplicationRoutes.js	50	/api/inspector-applications	GET	/:id		protect | reviewerOnly | validateObjectId
+routes/inspectorApplicationRoutes.js	51	/api/inspector-applications	POST	/:id/approve		protect | reviewerOnly | validateObjectId | validateBody(approveApplicationSchema)
+routes/inspectorApplicationRoutes.js	52	/api/inspector-applications	POST	/:id/reject		protect | reviewerOnly | validateObjectId | validateBody(rejectApplicationSchema)
+routes/intelligenceRoutes.js	39	/api/intelligence	USE	(all)		protect
+routes/intelligenceRoutes.js	40	/api/intelligence	USE	(all)		allowRoles("admin", "superadmin", "executive")
+routes/intelligenceRoutes.js	43	/api/intelligence	GET	/dashboard		
+routes/intelligenceRoutes.js	46	/api/intelligence	GET	/marketplace		
+routes/intelligenceRoutes.js	47	/api/intelligence	GET	/dealers		
+routes/intelligenceRoutes.js	48	/api/intelligence	GET	/auctions		
+routes/intelligenceRoutes.js	49	/api/intelligence	GET	/finance		
+routes/intelligenceRoutes.js	50	/api/intelligence	GET	/inspections		
+routes/intelligenceRoutes.js	51	/api/intelligence	GET	/marketing		
+routes/intelligenceRoutes.js	52	/api/intelligence	GET	/customers		
+routes/intelligenceRoutes.js	53	/api/intelligence	GET	/countries		
+routes/intelligenceRoutes.js	54	/api/intelligence	GET	/revenue		
+routes/intelligenceRoutes.js	57	/api/intelligence	GET	/forecasts		
+routes/intelligenceRoutes.js	60	/api/intelligence	GET	/insights		
+routes/intelligenceRoutes.js	63	/api/intelligence	GET	/benchmarks		
+routes/intelligenceRoutes.js	66	/api/intelligence	GET	/reports		
+routes/intelligenceRoutes.js	67	/api/intelligence	POST	/reports/generate		
+routes/intelligenceRoutes.js	68	/api/intelligence	GET	/reports/download/:reportId		
+routes/intelligenceRoutes.js	71	/api/intelligence	POST	/query		
+routes/intelligenceRoutes.js	74	/api/intelligence	POST	/exports		
+routes/intelligenceRoutes.js	77	/api/intelligence	GET	/scheduled		
+routes/intelligenceRoutes.js	78	/api/intelligence	POST	/scheduled		allowRoles("admin", "superadmin", "executive")
+routes/leadRoutes.js	33	/api/leads	GET	/		protect | validateQuery(analyticsQuerySchema)
+routes/leadRoutes.js	36	/api/leads	GET	/:leadId		protect | validateObjectId
+routes/leadRoutes.js	40	/api/leads	POST	/		protect | dealerOnly | validate(createLeadSchema)
+routes/leadRoutes.js	43	/api/leads	PUT	/:leadId/stage		protect
+routes/leadRoutes.js	46	/api/leads	PUT	/:leadId/archive		protect
+routes/leadRoutes.js	49	/api/leads	PUT	/:leadId/hot		protect
+routes/leadRoutes.js	52	/api/leads	POST	/:leadId/notes		protect | validate(leadNoteSchema)
+routes/leadRoutes.js	55	/api/leads	GET	/:leadId/timeline		protect | validateObjectId
+routes/leadRoutes.js	58	/api/leads	GET	/analytics/summary		protect | validateQuery(analyticsQuerySchema)
+routes/leadRoutes.js	61	/api/leads	GET	/pipeline/view		protect | validateQuery(analyticsQuerySchema)
+routes/leadRoutes.js	64	/api/leads	GET	/conversion/report		protect | validateQuery(analyticsQuerySchema)
+routes/ledgerRoutes.js	18	/api/ledger	GET	/balance-sheet		protect | adminOnly
+routes/ledgerRoutes.js	19	/api/ledger	GET	/trial-balance		protect | adminOnly
+routes/ledgerRoutes.js	20	/api/ledger	GET	/reconciliation		protect | adminOnly | validateQuery(reconciliationQuerySchema)
+routes/ledgerRoutes.js	21	/api/ledger	GET	/		protect | adminOnly | validateQuery(ledgerQuerySchema)
+routes/ledgerRoutes.js	22	/api/ledger	POST	/		protect | adminOnly | financeWrite | validate(recordEntrySchema)
+routes/ledgerRoutes.js	27	/api/ledger	POST	/seed		protect | adminOnly | financeWrite
+routes/ledgerRoutes.js	28	/api/ledger	GET	/seed		protect | adminOnly
+routes/ledgerRoutes.js	32	/api/ledger	GET	/:id		protect | adminOnly | validateObjectId
+routes/ledgerRoutes.js	33	/api/ledger	POST	/:id/reverse		protect | adminOnly | financeWrite | validateObjectId | validate(reverseEntrySchema)
+routes/listingAssistantRoutes.js	14	/api/listing-assistant	GET	/analyze/:carId		protect | validateObjectId
+routes/listingAssistantRoutes.js	17	/api/listing-assistant	POST	/batch-analyze		protect | adminOnly
+routes/listingAssistantRoutes.js	20	/api/listing-assistant	GET	/dealer-stats		protect
+routes/listingQualityRoutes.js	30	/api/listing-quality	GET	/car/:carId		optionalAuth | validateObjectId
+routes/listingQualityRoutes.js	37	/api/listing-quality	GET	/dealer/:dealerId/stats		protect | dealerOnly | validateObjectId
+routes/listingQualityRoutes.js	40	/api/listing-quality	GET	/dealer/:dealerId/report		protect | dealerOnly | validateObjectId
+routes/listingQualityRoutes.js	43	/api/listing-quality	POST	/dealer/:dealerId/bulk-recalculate		protect | dealerOnly | validateObjectId
+routes/listingQualityRoutes.js	56	/api/listing-quality	POST	/car/:carId/recalculate		protect | adminOnly | validateObjectId
+routes/listingQualityRoutes.js	59	/api/listing-quality	GET	/platform/stats		protect | adminOnly
+routes/listingQualityRoutes.js	62	/api/listing-quality	GET	/platform/trends		protect | adminOnly
+routes/listingQualityRoutes.js	65	/api/listing-quality	GET	/platform/low-quality		protect | adminOnly
+routes/listingQualityRoutes.js	68	/api/listing-quality	GET	/platform/benchmarks		protect | adminOnly
+routes/loanApplicationRoutes.js	14	/api/loans	POST	/		protect
+routes/loanApplicationRoutes.js	15	/api/loans	GET	/my		protect
+routes/loanApplicationRoutes.js	16	/api/loans	GET	/all		protect | adminOnly
+routes/loanApplicationRoutes.js	17	/api/loans	PUT	/:id/status		protect | adminOnly | validateObjectId
+routes/localizationRoutes.js	25	(unmounted-in-server.js)	GET	/		
+routes/localizationRoutes.js	28	(unmounted-in-server.js)	GET	/namespaces		
+routes/localizationRoutes.js	31	(unmounted-in-server.js)	GET	/all		
+routes/localizationRoutes.js	34	(unmounted-in-server.js)	GET	/search		
+routes/localizationRoutes.js	37	(unmounted-in-server.js)	GET	/stats		protect | adminOnly
+routes/localizationRoutes.js	40	(unmounted-in-server.js)	GET	/key/:key		
+routes/localizationRoutes.js	43	(unmounted-in-server.js)	GET	/export		protect | adminOnly
+routes/localizationRoutes.js	50	(unmounted-in-server.js)	POST	/		protect | adminOnly
+routes/localizationRoutes.js	53	(unmounted-in-server.js)	PATCH	/:translationId		protect | adminOnly
+routes/localizationRoutes.js	56	(unmounted-in-server.js)	DELETE	/:translationId		protect | adminOnly
+routes/localizationRoutes.js	59	(unmounted-in-server.js)	POST	/import		protect | adminOnly
+routes/lowCodeRoutes.js	59	/api/lowcode	USE	(all)		protect
+routes/lowCodeRoutes.js	62	/api/lowcode	GET	/stats		
+routes/lowCodeRoutes.js	63	/api/lowcode	GET	/field-types		
+routes/lowCodeRoutes.js	69	/api/lowcode	GET	/objects		
+routes/lowCodeRoutes.js	70	/api/lowcode	GET	/objects/:id		validateObjectId
+routes/lowCodeRoutes.js	71	/api/lowcode	POST	/objects		allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	72	/api/lowcode	PUT	/objects/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	73	/api/lowcode	DELETE	/objects/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	74	/api/lowcode	POST	/objects/:id/publish		validateObjectId | allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	75	/api/lowcode	POST	/objects/:id/clone		validateObjectId | allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	76	/api/lowcode	GET	/objects/:id/api		validateObjectId
+routes/lowCodeRoutes.js	82	/api/lowcode	GET	/objects/:objectId/fields		
+routes/lowCodeRoutes.js	83	/api/lowcode	POST	/objects/:objectId/fields		validateObjectId | allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	84	/api/lowcode	PUT	/fields/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	85	/api/lowcode	DELETE	/fields/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	86	/api/lowcode	POST	/objects/:objectId/fields/reorder		allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	92	/api/lowcode	GET	/objects/:objectId/relationships		
+routes/lowCodeRoutes.js	93	/api/lowcode	POST	/relationships		allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	94	/api/lowcode	PUT	/relationships/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	95	/api/lowcode	DELETE	/relationships/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	101	/api/lowcode	GET	/objects/:objectId/forms		
+routes/lowCodeRoutes.js	102	/api/lowcode	POST	/forms		allowRoles("admin", "superadmin", "editor")
+routes/lowCodeRoutes.js	103	/api/lowcode	PUT	/forms/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/lowCodeRoutes.js	104	/api/lowcode	DELETE	/forms/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	110	/api/lowcode	GET	/objects/:objectId/views		
+routes/lowCodeRoutes.js	111	/api/lowcode	POST	/views		allowRoles("admin", "superadmin", "editor")
+routes/lowCodeRoutes.js	112	/api/lowcode	PUT	/views/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/lowCodeRoutes.js	113	/api/lowcode	DELETE	/views/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	119	/api/lowcode	GET	/objects/:objectId/permissions		
+routes/lowCodeRoutes.js	120	/api/lowcode	PUT	/objects/:objectId/permissions		validateObjectId | allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	126	/api/lowcode	GET	/dashboards		
+routes/lowCodeRoutes.js	127	/api/lowcode	POST	/dashboards		allowRoles("admin", "superadmin", "editor")
+routes/lowCodeRoutes.js	128	/api/lowcode	PUT	/dashboards/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/lowCodeRoutes.js	129	/api/lowcode	DELETE	/dashboards/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	135	/api/lowcode	GET	/objects/:objectId/versions		
+routes/lowCodeRoutes.js	136	/api/lowcode	POST	/versions/:versionId/rollback		allowRoles("admin", "superadmin")
+routes/lowCodeRoutes.js	142	/api/lowcode	POST	/ai/suggest		
+routes/marketRoutes.js	11	/api/market	GET	/pulse/:carId		validateObjectId
+routes/marketRoutes.js	26	/api/market	GET	/trends		validateQuery(analyticsQuerySchema)
+routes/marketRoutes.js	50	/api/market	GET	/dealer/insights		authenticate | requireRole("dealer", "admin", "superadmin") | validateQuery(analyticsQuerySchema)
+routes/marketplaceFulfilmentRoutes.js	10	/api/marketplace/purchases	GET	/operations		protect
+routes/marketplaceFulfilmentRoutes.js	11	/api/marketplace/purchases	GET	/:id/operations		protect | validateObjectId
+routes/marketplaceFulfilmentRoutes.js	12	/api/marketplace/purchases	POST	/:id/collection		protect | idempotencyCheck | csrfProtection | validateObjectId
+routes/marketplaceFulfilmentRoutes.js	13	/api/marketplace/purchases	POST	/:id/transfer		protect | idempotencyCheck | csrfProtection | validateObjectId
+routes/marketplaceFulfilmentRoutes.js	14	/api/marketplace/purchases	POST	/:id/dispute		protect | idempotencyCheck | csrfProtection | validateObjectId
+routes/marketplaceHealthRoutes.js	33	/api/marketplace-health	GET	/summary		protect | healthViewers
+routes/marketplaceHealthRoutes.js	36	/api/marketplace-health	GET	/trends		protect | healthViewers
+routes/marketplaceHealthRoutes.js	39	/api/marketplace-health	GET	/alerts		protect | healthViewers
+routes/marketplaceHealthRoutes.js	46	/api/marketplace-health	POST	/alerts/:alertId/resolve		protect | adminOnly | validateObjectId
+routes/marketplaceHealthRoutes.js	49	/api/marketplace-health	GET	/metrics		protect | adminOnly
+routes/marketplaceHealthRoutes.js	52	/api/marketplace-health	POST	/regenerate		protect | adminOnly
+routes/marketplaceHealthRoutes.js	55	/api/marketplace-health	GET	/admin/all		protect | adminOnly
+routes/mediaEventRoutes.js	12	(unmounted-in-server.js)	GET	/dashboard		
+routes/mediaEventRoutes.js	13	(unmounted-in-server.js)	GET	/overview		
+routes/mediaEventRoutes.js	14	(unmounted-in-server.js)	GET	/channels		
+routes/mediaEventRoutes.js	15	(unmounted-in-server.js)	GET	/events		
+routes/mediaEventRoutes.js	16	(unmounted-in-server.js)	GET	/replay		
+routes/mediaEventRoutes.js	17	(unmounted-in-server.js)	GET	/commentary		
+routes/mediaEventRoutes.js	18	(unmounted-in-server.js)	GET	/audit		
+routes/mediaEventRoutes.js	19	(unmounted-in-server.js)	GET	/adapters		
+routes/mediaEventRoutes.js	20	(unmounted-in-server.js)	GET	/failover		
+routes/mediaEventRoutes.js	21	(unmounted-in-server.js)	GET	/health		
+routes/mediaEventRoutes.js	22	(unmounted-in-server.js)	GET	/metrics		
+routes/mediaEventRoutes.js	23	(unmounted-in-server.js)	GET	/supported-events		
+routes/mediaEventRoutes.js	26	(unmounted-in-server.js)	GET	/auction/:auctionId/replay		
+routes/mediaEventRoutes.js	27	(unmounted-in-server.js)	GET	/auction/:auctionId/commentary		
+routes/mediaEventRoutes.js	28	(unmounted-in-server.js)	GET	/auction/:auctionId/audit		
+routes/mediaEventRoutes.js	31	(unmounted-in-server.js)	POST	/publish		requireRole(['organizer', 'admin'])
+routes/mediaEventRoutes.js	34	(unmounted-in-server.js)	POST	/commentary		requireRole(['announcer', 'organizer', 'admin'])
+routes/metricsRoutes.js	20	/metrics	USE	(all)	fastTimeout	protect | adminOnly
+routes/metricsRoutes.js	23	/metrics	GET	/	fastTimeout	
+routes/metricsRoutes.js	65	/metrics	GET	/http	fastTimeout	validateQuery(analyticsQuerySchema)
+routes/metricsRoutes.js	97	/metrics	GET	/database	fastTimeout	
+routes/metricsRoutes.js	149	/metrics	GET	/cache	fastTimeout	
+routes/metricsRoutes.js	190	/metrics	GET	/replica-set	fastTimeout	
+routes/metricsRoutes.js	225	/metrics	GET	/system	fastTimeout	
+routes/metricsRoutes.js	263	/metrics	GET	/errors	fastTimeout	
+routes/metricsRoutes.js	289	/metrics	POST	/reset	fastTimeout	protect | adminOnly
+routes/notificationAnalyticsRoutes.js	34	/api/notification-analytics	GET	/delivery-stats		protect | adminOnly
+routes/notificationAnalyticsRoutes.js	37	/api/notification-analytics	GET	/channel-stats		protect | adminOnly
+routes/notificationAnalyticsRoutes.js	40	/api/notification-analytics	GET	/failure-analysis		protect | adminOnly
+routes/notificationAnalyticsRoutes.js	43	/api/notification-analytics	GET	/engagement-metrics		protect | adminOnly
+routes/notificationAnalyticsRoutes.js	46	/api/notification-analytics	GET	/retry-stats		protect | adminOnly
+routes/notificationAnalyticsRoutes.js	49	/api/notification-analytics	GET	/user/:userId/stats		protect | adminOnly
+routes/notificationAnalyticsRoutes.js	52	/api/notification-analytics	GET	/platform-stats		protect | adminOnly
+routes/notificationAnalyticsRoutes.js	55	/api/notification-analytics	GET	/delivery-report		protect | adminOnly
+routes/notificationAnalyticsRoutes.js	58	/api/notification-analytics	GET	/trends		protect | adminOnly
+routes/notificationAnalyticsRoutes.js	61	/api/notification-analytics	POST	/retry/:auditId		protect | adminOnly
+routes/notificationAnalyticsRoutes.js	64	/api/notification-analytics	POST	/bulk-retry		protect | adminOnly
+routes/notificationAnalyticsRoutes.js	67	/api/notification-analytics	GET	/retry-queue		protect | adminOnly
+routes/notificationAnalyticsRoutes.js	70	/api/notification-analytics	POST	/process-retry-queue		protect | adminOnly
+routes/notificationRoutes.js	16	/api/notifications	USE	(all)		protect
+routes/notificationRoutes.js	18	/api/notifications	GET	/		validateQuery(notificationListQuerySchema)
+routes/notificationRoutes.js	19	/api/notifications	POST	/reminders		idempotencyCheck
+routes/notificationRoutes.js	20	/api/notifications	POST	/read-all		idempotencyCheck
+routes/notificationRoutes.js	21	/api/notifications	POST	/:id/read		idempotencyCheck | validateObjectId
+routes/notificationRoutes.js	22	/api/notifications	DELETE	/:id		idempotencyCheck | validateObjectId
+routes/ntsaVerificationRoutes.js	10	/api/ntsa-verification	USE	(all)		protect
+routes/ntsaVerificationRoutes.js	13	/api/ntsa-verification	GET	/		adminOnly | validate(queueNtsaVerificationSchema)
+routes/ntsaVerificationRoutes.js	32	/api/ntsa-verification	GET	/car/:carId/status		validateObjectId
+routes/ntsaVerificationRoutes.js	54	/api/ntsa-verification	POST	/		validate(queueNtsaVerificationSchema)
+routes/ntsaVerificationRoutes.js	85	/api/ntsa-verification	POST	/:id/process		adminOnly | validateObjectId | validate(processNtsaVerificationSchema)
+routes/ntsaVerificationRoutes.js	123	/api/ntsa-verification	POST	/:id/documents		validateObjectId | validate(addNtsaDocumentSchema)
+routes/operationsDashboardRoutes.js	20	/api/v1/analytics/operations	USE	(all)		protect
+routes/operationsDashboardRoutes.js	20	/api/operations-dashboard	USE	(all)	adminLimiter	protect
+routes/operationsDashboardRoutes.js	21	/api/v1/analytics/operations	USE	(all)		adminOnly
+routes/operationsDashboardRoutes.js	21	/api/operations-dashboard	USE	(all)	adminLimiter	adminOnly
+routes/operationsDashboardRoutes.js	26	/api/v1/analytics/operations	GET	/overview		validateQuery(analyticsQuerySchema)
+routes/operationsDashboardRoutes.js	26	/api/operations-dashboard	GET	/overview	adminLimiter	validateQuery(analyticsQuerySchema)
+routes/operationsDashboardRoutes.js	31	/api/v1/analytics/operations	GET	/system-health		
+routes/operationsDashboardRoutes.js	31	/api/operations-dashboard	GET	/system-health	adminLimiter	
+routes/operationsDashboardRoutes.js	36	/api/v1/analytics/operations	GET	/payment-failures		
+routes/operationsDashboardRoutes.js	36	/api/operations-dashboard	GET	/payment-failures	adminLimiter	
+routes/operationsDashboardRoutes.js	41	/api/v1/analytics/operations	GET	/escrow-disputes		
+routes/operationsDashboardRoutes.js	41	/api/operations-dashboard	GET	/escrow-disputes	adminLimiter	
+routes/operationsDashboardRoutes.js	46	/api/v1/analytics/operations	GET	/dealer-onboarding		
+routes/operationsDashboardRoutes.js	46	/api/operations-dashboard	GET	/dealer-onboarding	adminLimiter	
+routes/operationsDashboardRoutes.js	51	/api/v1/analytics/operations	GET	/listing-moderation		
+routes/operationsDashboardRoutes.js	51	/api/operations-dashboard	GET	/listing-moderation	adminLimiter	
+routes/operationsDashboardRoutes.js	56	/api/v1/analytics/operations	GET	/queue-health		
+routes/operationsDashboardRoutes.js	56	/api/operations-dashboard	GET	/queue-health	adminLimiter	
+routes/operationsDashboardRoutes.js	61	/api/v1/analytics/operations	GET	/notifications		
+routes/operationsDashboardRoutes.js	61	/api/operations-dashboard	GET	/notifications	adminLimiter	
+routes/operationsDashboardRoutes.js	66	/api/v1/analytics/operations	GET	/fraud-alerts		
+routes/operationsDashboardRoutes.js	66	/api/operations-dashboard	GET	/fraud-alerts	adminLimiter	
+routes/operationsRoutes.js	14	/api/operations	GET	/dashboard		protect | adminOnly | validateQuery(analyticsQuerySchema)
+routes/operationsRoutes.js	21	/api/operations	GET	/escrow-queue		protect | adminOnly
+routes/operationsRoutes.js	28	/api/operations	GET	/inspection-queue		protect | adminOnly
+routes/operationsRoutes.js	35	/api/operations	GET	/dealer-queue		protect | adminOnly
+routes/operationsRoutes.js	42	/api/operations	GET	/support-queue		protect | adminOnly
+routes/operationsRoutes.js	49	/api/operations	GET	/payment-queue		protect | adminOnly
+routes/organizationRoutes.js	32	/api/organizations	GET	/platform-stats		protect | adminOnly
+routes/organizationRoutes.js	35	/api/organizations	POST	/		protect | adminOnly
+routes/organizationRoutes.js	38	/api/organizations	GET	/		validateQuery(analyticsQuerySchema) | protect | adminOnly
+routes/organizationRoutes.js	54	/api/organizations	GET	/:id		authenticate | validateObjectId
+routes/organizationRoutes.js	57	/api/organizations	PUT	/:id		authenticate | validateObjectId
+routes/organizationRoutes.js	60	/api/organizations	DELETE	/:id		protect | adminOnly | validateObjectId
+routes/organizationRoutes.js	63	/api/organizations	GET	/:id/users		authenticate | validateObjectId
+routes/organizationRoutes.js	66	/api/organizations	POST	/:id/admins		authenticate | validateObjectId
+routes/organizationRoutes.js	69	/api/organizations	DELETE	/:id/admins/:userId		authenticate | validateObjectId
+routes/organizationRoutes.js	72	/api/organizations	POST	/:id/branches		authenticate | validateObjectId
+routes/organizationRoutes.js	75	/api/organizations	GET	/:id/branches		authenticate | validateObjectId | validateQuery(analyticsQuerySchema)
+routes/organizationRoutes.js	78	/api/organizations	GET	/:id/stats		authenticate | validateObjectId | validateQuery(analyticsQuerySchema)
+routes/ownershipRoutes.js	10	/api/ownership	GET	/dashboard		protect
+routes/ownershipRoutes.js	11	/api/ownership	POST	/vehicles		protect
+routes/ownershipRoutes.js	12	/api/ownership	GET	/vehicles/:vehicleId		protect
+routes/ownershipRoutes.js	13	/api/ownership	POST	/vehicles/:vehicleId/services		protect
+routes/ownershipRoutes.js	14	/api/ownership	POST	/vehicles/:vehicleId/expenses		protect
+routes/ownershipRoutes.js	15	/api/ownership	POST	/vehicles/:vehicleId/documents		protect
+routes/ownershipRoutes.js	16	/api/ownership	POST	/vehicles/:vehicleId/trips		protect
+routes/ownershipRoutes.js	17	/api/ownership	PATCH	/reminders/:reminderId/complete		protect
+routes/ownershipRoutes.js	18	/api/ownership	PATCH	/vehicles/:vehicleId/sold		protect
+routes/ownershipRoutes.js	20	/api/ownership	POST	/passports		protect | allowRoles('admin', 'superadmin', 'dealer', 'individual_seller')
+routes/ownershipRoutes.js	22	/api/ownership	GET	/passports/:passportId		protect
+routes/ownershipRoutes.js	23	/api/ownership	GET	/passports/:passportId/public		
+routes/ownershipRoutes.js	24	/api/ownership	GET	/passports/vin/:vin		
+routes/paymentRoutes.js	85	/api/payments	POST	/initiate	externalTimeout	protect | paymentLimiter | csrfProtection | idempotencyCheck | validate(initiatePaymentSchema)
+routes/paymentRoutes.js	143	/api/payments	GET	/status/:id	externalTimeout	protect
+routes/paymentRoutes.js	186	/api/payments	GET	/my	externalTimeout	protect | validateQuery(paymentListQuerySchema) | validateResponse(paymentResponseSchema)
+routes/paymentRoutes.js	224	/api/payments	POST	/callback	externalTimeout	mpesaIpWhitelist | validateMpesaCallback | idempotencyCheck
+routes/paymentRoutes.js	270	/api/payments	GET	/checkout/:checkoutRequestId	externalTimeout	protect
+routes/paymentRoutes.js	336	/api/payments	POST	/b2c/callback	externalTimeout	mpesaIpWhitelist | idempotencyCheck
+routes/paymentRoutes.js	379	/api/payments	POST	/b2c/timeout	externalTimeout	mpesaIpWhitelist | idempotencyCheck
+routes/paymentRoutes.js	384	/api/payments	USE	(all)	externalTimeout	(req, res) => { res.status(404).json({ success: false, message: "Payment route not found", }); }
+routes/platformFactoryRoutes.js	50	/api/platform-factory	USE	(all)		protect
+routes/platformFactoryRoutes.js	53	/api/platform-factory	GET	/dashboard		
+routes/platformFactoryRoutes.js	56	/api/platform-factory	GET	/templates		
+routes/platformFactoryRoutes.js	57	/api/platform-factory	GET	/templates/:templateId		
+routes/platformFactoryRoutes.js	60	/api/platform-factory	POST	/generate		allowRoles("admin", "superadmin")
+routes/platformFactoryRoutes.js	61	/api/platform-factory	GET	/generate/:productId/status		
+routes/platformFactoryRoutes.js	64	/api/platform-factory	GET	/products		
+routes/platformFactoryRoutes.js	65	/api/platform-factory	GET	/products/:productId		
+routes/platformFactoryRoutes.js	66	/api/platform-factory	PUT	/products/:productId		allowRoles("admin", "superadmin")
+routes/platformFactoryRoutes.js	67	/api/platform-factory	DELETE	/products/:productId		allowRoles("superadmin")
+routes/platformFactoryRoutes.js	70	/api/platform-factory	GET	/components		
+routes/platformFactoryRoutes.js	73	/api/platform-factory	GET	/domain-models		
+routes/platformFactoryRoutes.js	76	/api/platform-factory	GET	/services		
+routes/platformFactoryRoutes.js	79	/api/platform-factory	GET	/brands		
+routes/platformFactoryRoutes.js	80	/api/platform-factory	GET	/brands/:brandId		
+routes/platformFactoryRoutes.js	81	/api/platform-factory	PUT	/brands/:brandId		allowRoles("admin", "superadmin")
+routes/platformFactoryRoutes.js	84	/api/platform-factory	GET	/deployments		
+routes/platformFactoryRoutes.js	85	/api/platform-factory	POST	/deploy		allowRoles("admin", "superadmin")
+routes/platformFactoryRoutes.js	86	/api/platform-factory	POST	/deployments/:deploymentId/rollback		allowRoles("admin", "superadmin")
+routes/platformFactoryRoutes.js	89	/api/platform-factory	GET	/store		
+routes/platformFactoryRoutes.js	90	/api/platform-factory	POST	/store/install		allowRoles("admin", "superadmin")
+routes/platformFactoryRoutes.js	93	/api/platform-factory	POST	/design		
+routes/platformFactoryRoutes.js	94	/api/platform-factory	GET	/design/:designId/status		
+routes/platformFactoryRoutes.js	97	/api/platform-factory	GET	/monetization		
+routes/platformFactoryRoutes.js	98	/api/platform-factory	POST	/monetization/configure		allowRoles("admin", "superadmin")
+routes/platformFactoryRoutes.js	101	/api/platform-factory	GET	/health		
+routes/platformFactoryRoutes.js	104	/api/platform-factory	GET	/workflows		
+routes/prometheusMetrics.js	68	/prometheus	GET	/	fastTimeout	protect | adminOnly
+routes/queueRoutes.js	33	/api/admin/queue	GET	/metrics	adminLimiter	protect | adminOnly
+routes/queueRoutes.js	36	/api/admin/queue	GET	/statistics	adminLimiter	protect | adminOnly
+routes/queueRoutes.js	39	/api/admin/queue	GET	/health	adminLimiter	protect | adminOnly
+routes/queueRoutes.js	42	/api/admin/queue	GET	/aggregated	adminLimiter	protect | adminOnly
+routes/queueRoutes.js	49	/api/admin/queue	GET	/circuit-breakers	adminLimiter	protect | adminOnly
+routes/queueRoutes.js	56	/api/admin/queue	GET	/dlq/statistics	adminLimiter	protect | adminOnly
+routes/queueRoutes.js	59	/api/admin/queue	GET	/dlq/jobs	adminLimiter	protect | adminOnly
+routes/queueRoutes.js	62	/api/admin/queue	POST	/dlq/retry/:jobId	adminLimiter	protect | adminOnly | validateObjectId
+routes/queueRoutes.js	65	/api/admin/queue	DELETE	/dlq/delete/:jobId	adminLimiter	protect | adminOnly | validateObjectId
+routes/queueRoutes.js	72	/api/admin/queue	GET	/failures	adminLimiter	protect | adminOnly
+routes/queueRoutes.js	75	/api/admin/queue	GET	/failures/:failureId	adminLimiter	protect | adminOnly | validateObjectId
+routes/queueRoutes.js	78	/api/admin/queue	POST	/failures/:failureId/resolve	adminLimiter	protect | adminOnly | validateObjectId
+routes/realtimeRoutes.js	12	/api/realtime	POST	/socket-ticket		protect | socketTicketLimiter
+routes/recommendationRoutes.js	14	/api/recommendations	GET	/		protect | validateQuery(analyticsQuerySchema)
+routes/reconciliationRoutes.js	34	/api/reconciliation	USE	(all)		protect
+routes/reconciliationRoutes.js	35	/api/reconciliation	USE	(all)		allowRoles("admin", "superadmin", "finance", "accounts")
+routes/reconciliationRoutes.js	40	/api/reconciliation	GET	/dashboard		
+routes/reconciliationRoutes.js	41	/api/reconciliation	GET	/integrity-score		
+routes/reconciliationRoutes.js	42	/api/reconciliation	GET	/negative-balances		
+routes/reconciliationRoutes.js	43	/api/reconciliation	GET	/unreleased-escrows		
+routes/reconciliationRoutes.js	74	/api/reconciliation	GET	/directional-breakdown		
+routes/reconciliationRoutes.js	79	/api/reconciliation	POST	/run		
+routes/reconciliationRoutes.js	84	/api/reconciliation	GET	/reports		
+routes/reconciliationRoutes.js	85	/api/reconciliation	GET	/reports/:id		validateObjectId
+routes/reconciliationRoutes.js	127	/api/reconciliation	GET	/reports/:reportId/records		
+routes/reconciliationRoutes.js	132	/api/reconciliation	POST	/reports/:reportId/resolve		
+routes/reconciliationRoutes.js	165	/api/reconciliation	GET	/alerts		
+routes/reconciliationRoutes.js	202	/api/reconciliation	POST	/alerts/:id/read		
+routes/reconciliationRoutes.js	230	/api/reconciliation	POST	/alerts/read-all		
+routes/reconciliationRoutes.js	235	/api/reconciliation	GET	/export/:reportId/:format		
+routes/reconciliationRoutes.js	240	/api/reconciliation	USE	(all)		(req, res) => { res.status(404).json({ success: false, message: "Reconciliation route not found" }); }
+routes/referralRoutes.js	11	/api/referral	GET	/stats		protect | validateQuery(analyticsQuerySchema)
+routes/referralRoutes.js	53	/api/referral	GET	/code		protect
+routes/regionalConfigurationRoutes.js	7	/api/countries	GET	/		
+routes/regionalConfigurationRoutes.js	8	/api/countries	GET	/currency-rate		
+routes/regionalConfigurationRoutes.js	9	/api/countries	POST	/currency-convert		protect
+routes/regionalConfigurationRoutes.js	10	/api/countries	GET	/currency-rates		protect | adminOnly
+routes/regionalConfigurationRoutes.js	11	/api/countries	PUT	/currency-rates		protect | adminOnly
+routes/regionalConfigurationRoutes.js	12	/api/countries	GET	/:countryCode		
+routes/regionalConfigurationRoutes.js	13	/api/countries	PATCH	/:countryCode/status		protect | adminOnly
+routes/reliabilityRoutes.js	22	/api/reliability	GET	/slis		protect | adminOnly
+routes/reliabilityRoutes.js	37	/api/reliability	GET	/slis/:sliId		protect | adminOnly
+routes/reliabilityRoutes.js	47	/api/reliability	GET	/slos		protect | adminOnly
+routes/reliabilityRoutes.js	54	/api/reliability	GET	/slos/:sloId		protect | adminOnly
+routes/reliabilityRoutes.js	65	/api/reliability	GET	/error-budgets		protect | adminOnly
+routes/reliabilityRoutes.js	71	/api/reliability	GET	/error-budgets/:sloId		protect | adminOnly
+routes/reliabilityRoutes.js	80	/api/reliability	POST	/error-budgets/refresh		protect | adminOnly
+routes/reliabilityRoutes.js	87	/api/reliability	POST	/alerts/evaluate		protect | adminOnly
+routes/reliabilityRoutes.js	93	/api/reliability	GET	/report		protect | adminOnly
+routes/reliabilityRoutes.js	99	/api/reliability	GET	/health		protect | adminOnly
+routes/reportRoutes.js	26	/api/reports	USE	(all)		protect
+routes/reportRoutes.js	33	/api/reports	POST	/submit		idempotencyCheck
+routes/reportRoutes.js	46	/api/reports	GET	/my		
+routes/reportRoutes.js	53	/api/reports	GET	/admin/all		allowRoles("admin", "superadmin", "moderator")
+routes/reportRoutes.js	60	/api/reports	GET	/admin/:id		allowRoles("admin", "superadmin", "moderator") | validateObjectId
+routes/reportRoutes.js	68	/api/reports	PATCH	/admin/:id/status		allowRoles("admin", "superadmin", "moderator") | validateObjectId | idempotencyCheck
+routes/reportRoutes.js	86	/api/reports	USE	(all)		(req, res) => { res.status(404).json({ success: false, message: "Report route not found", }); }
+routes/reviewRoutes.js	10	/api/reviews	POST	/	csrfProtection	protect | reviewLimiter | validate(createReviewSchema)
+routes/reviewRoutes.js	11	/api/reviews	GET	/my	csrfProtection	protect | validateQuery(reviewListQuerySchema)
+routes/reviewRoutes.js	12	/api/reviews	GET	/dealer/:dealerId	csrfProtection	validateQuery(reviewListQuerySchema)
+routes/reviewRoutes.js	13	/api/reviews	DELETE	/:id	csrfProtection	protect
+routes/salesDashboardRoutes.js	20	/api/v1/analytics/sales	GET	/		protect | adminOnly
+routes/salesDashboardRoutes.js	23	/api/v1/analytics/sales	GET	/dealers/:dealerId		protect | adminOnly | validateObjectId
+routes/salesDashboardRoutes.js	24	/api/v1/analytics/sales	GET	/dealers		protect | adminOnly
+routes/salesDashboardRoutes.js	27	/api/v1/analytics/sales	GET	/revenue		protect | adminOnly
+routes/savedSearchRoutes.js	14	/api/saved-searches	USE	(all)	csrfProtection	protect
+routes/savedSearchRoutes.js	16	/api/saved-searches	GET	/	csrfProtection	
+routes/savedSearchRoutes.js	24	/api/saved-searches	POST	/	csrfProtection	validate(createSavedSearchSchema)
+routes/savedSearchRoutes.js	39	/api/saved-searches	PUT	/:id	csrfProtection	validateObjectId | validate(updateSavedSearchSchema)
+routes/savedSearchRoutes.js	60	/api/saved-searches	DELETE	/:id	csrfProtection	
+routes/searchAnalyticsRoutes.js	32	/api/search-analytics	GET	/trending		validateQuery(analyticsQuerySchema)
+routes/searchAnalyticsRoutes.js	39	/api/search-analytics	GET	/no-results		protect | adminOnly
+routes/searchAnalyticsRoutes.js	42	/api/search-analytics	GET	/filters		protect | adminOnly
+routes/searchAnalyticsRoutes.js	45	/api/search-analytics	GET	/counties		protect | adminOnly
+routes/searchAnalyticsRoutes.js	48	/api/search-analytics	GET	/price-ranges		protect | adminOnly
+routes/searchAnalyticsRoutes.js	51	/api/search-analytics	GET	/brands		protect | adminOnly
+routes/searchAnalyticsRoutes.js	54	/api/search-analytics	GET	/missing-inventory		protect | adminOnly
+routes/searchAnalyticsRoutes.js	57	/api/search-analytics	GET	/demand-report		protect | adminOnly
+routes/searchAnalyticsRoutes.js	60	/api/search-analytics	GET	/insights		protect | adminOnly
+routes/searchAnalyticsRoutes.js	63	/api/search-analytics	GET	/summary		protect | adminOnly
+routes/searchAnalyticsRoutes.js	70	/api/search-analytics	GET	/dealer/demand		protect | dealerOnly
+routes/searchRoutes.js	8	/api/search	GET	/		optionalAuth
+routes/searchRoutes.js	9	/api/search	GET	/facets		optionalAuth | validateQuery(searchFacetsQuerySchema)
+routes/searchRoutes.js	10	/api/search	GET	/autocomplete		optionalAuth
+routes/securityLogRoutes.js	9	/api/security-logs	GET	/		protect | adminOnly | validateQuery(analyticsQuerySchema)
+routes/securityLogRoutes.js	10	/api/security-logs	GET	/summary		protect | adminOnly | validateQuery(analyticsQuerySchema)
+routes/securityLogRoutes.js	13	/api/security-logs	GET	/my		protect | validateQuery(analyticsQuerySchema)
+routes/seoRoutes.js	24	/	GET	/sitemap.xml		validateQuery(analyticsQuerySchema)
+routes/seoRoutes.js	27	/	GET	/sitemap-cars.xml		
+routes/seoRoutes.js	30	/	GET	/sitemap-dealers.xml		
+routes/seoRoutes.js	33	/	GET	/sitemap-auctions.xml		
+routes/smsBiddingRoutes.js	35	/api/sms-bidding	POST	/webhook/inbound		[requireWebhookApiKey, webhookLimiter]
+routes/smsBiddingRoutes.js	38	/api/sms-bidding	POST	/register		protect | createLimiter
+routes/smsBiddingRoutes.js	39	/api/sms-bidding	GET	/my		protect
+routes/smsBiddingRoutes.js	40	/api/sms-bidding	POST	/subscribe		protect | createLimiter
+routes/smsBiddingRoutes.js	41	/api/sms-bidding	DELETE	/unsubscribe/:carId		protect | validateObjectId
+routes/subscriptionRoutes.js	25	/api/subscriptions	GET	/plans		
+routes/subscriptionRoutes.js	32	/api/subscriptions	GET	/my-subscription		protect
+routes/subscriptionRoutes.js	35	/api/subscriptions	POST	/upgrade		protect | createLimiter | idempotencyCheck
+routes/subscriptionRoutes.js	38	/api/subscriptions	POST	/cancel		protect | createLimiter | idempotencyCheck
+routes/subscriptionRoutes.js	41	/api/subscriptions	POST	/reactivate		protect | createLimiter | idempotencyCheck
+routes/subscriptionRoutes.js	44	/api/subscriptions	GET	/usage-limits		protect
+routes/subscriptionRoutes.js	51	/api/subscriptions	GET	/all		protect | adminOnly | validateQuery(subscriptionAdminQuerySchema)
+routes/subscriptionRoutes.js	54	/api/subscriptions	GET	/analytics		protect | adminOnly | validateQuery(subscriptionAdminQuerySchema)
+routes/supportDashboardRoutes.js	9	/api/v1/analytics/support	GET	/		protect | requireSupportViewer
+routes/supportDashboardRoutes.js	10	/api/v1/analytics/support	GET	/tickets		protect | requireSupportViewer
+routes/supportRoutes.js	16	/api/support	GET	/config		protect
+routes/supportRoutes.js	17	/api/support	POST	/		protect | createLimiter
+routes/supportRoutes.js	18	/api/support	GET	/my-tickets		protect
+routes/supportRoutes.js	21	/api/support	GET	/staff/queue		protect | requireSupportViewer
+routes/supportRoutes.js	22	/api/support	GET	/staff/metrics		protect | requireSupportViewer
+routes/supportRoutes.js	23	/api/support	GET	/staff/team		protect | requireSupportViewer
+routes/supportRoutes.js	24	/api/support	GET	/staff/:id		protect | requireSupportViewer | validateObjectId
+routes/supportRoutes.js	25	/api/support	POST	/staff/:id/messages		protect | requireSupportAgent | chatLimiter | validateObjectId
+routes/supportRoutes.js	26	/api/support	PATCH	/staff/:id		protect | requireSupportAgent | validateObjectId
+routes/supportRoutes.js	29	/api/support	GET	/all		protect | requireSupportViewer
+routes/supportRoutes.js	30	/api/support	GET	/analytics		protect | requireSupportViewer
+routes/supportRoutes.js	32	/api/support	GET	/:id		protect | validateObjectId
+routes/supportRoutes.js	33	/api/support	POST	/:id/messages		protect | chatLimiter | validateObjectId
+routes/supportRoutes.js	34	/api/support	POST	/:id/rate		protect | validateObjectId
+routes/supportRoutes.js	35	/api/support	PUT	/:id/status		protect | requireSupportAgent | validateObjectId
+routes/supportTicketAdminRoutes.js	11	/api/admin/support-tickets	USE	(all)		protect | requireSupportViewer
+routes/supportTicketAdminRoutes.js	13	/api/admin/support-tickets	GET	/stats		
+routes/supportTicketAdminRoutes.js	14	/api/admin/support-tickets	GET	/		
+routes/supportTicketAdminRoutes.js	15	/api/admin/support-tickets	GET	/:id		validateObjectId
+routes/supportTicketAdminRoutes.js	16	/api/admin/support-tickets	PATCH	/:id/status		requireSupportAgent | validateObjectId
+routes/supportTicketAdminRoutes.js	17	/api/admin/support-tickets	PATCH	/:id/assign		requireSupportAgent | validateObjectId
+routes/supportTicketAdminRoutes.js	18	/api/admin/support-tickets	POST	/:id/messages		requireSupportAgent | validateObjectId
+routes/transactionRoutes.js	10	/api/transactions	USE	(all)		protect
+routes/transactionRoutes.js	12	/api/transactions	GET	/		
+routes/transactionRoutes.js	13	/api/transactions	GET	/summary		
+routes/transactionRoutes.js	25	/api/transactions	GET	/:id		
+routes/uploadRoutes.js	23	/api/upload	POST	/	csrfProtection	protect | uploadLimiter | uploadMemory.single("file") | handleUploadError
+routes/uploadRoutes.js	63	/api/upload	POST	/multiple	csrfProtection	protect | uploadLimiter | uploadMemory.array("files", 20) | handleUploadError
+routes/uploadRoutes.js	100	/api/upload	GET	/:id	csrfProtection	protect
+routes/uploadRoutes.js	139	/api/upload	DELETE	/:publicId	csrfProtection	protect
+routes/userPreferenceRoutes.js	25	(unmounted-in-server.js)	GET	/		protect
+routes/userPreferenceRoutes.js	28	(unmounted-in-server.js)	PATCH	/		protect
+routes/userPreferenceRoutes.js	31	(unmounted-in-server.js)	POST	/theme		protect
+routes/userPreferenceRoutes.js	34	(unmounted-in-server.js)	POST	/theme/toggle		protect
+routes/userPreferenceRoutes.js	37	(unmounted-in-server.js)	POST	/language		protect
+routes/userPreferenceRoutes.js	40	(unmounted-in-server.js)	POST	/notifications		protect
+routes/userPreferenceRoutes.js	43	(unmounted-in-server.js)	POST	/search/recent		protect
+routes/userPreferenceRoutes.js	46	(unmounted-in-server.js)	DELETE	/search/recent		protect
+routes/userPreferenceRoutes.js	49	(unmounted-in-server.js)	POST	/accessibility		protect
+routes/userPreferenceRoutes.js	52	(unmounted-in-server.js)	POST	/last-seen		protect
+routes/userPreferenceRoutes.js	59	(unmounted-in-server.js)	GET	/stats		protect | adminOnly
+routes/userRoutes.js	15	/api/users	GET	/search	csrfProtection	protect | validateQuery(userListQuerySchema) | cacheDealerSearch | trackDealerSearchLatency | trackCarSearch
+routes/userRoutes.js	57	/api/users	GET	/me	csrfProtection	protect | cacheUserData
+routes/userRoutes.js	68	/api/users	PUT	/settings	csrfProtection	protect | invalidateCache("user")
+routes/userRoutes.js	96	/api/users	GET	/:id	csrfProtection	validateObjectId | protect | cacheUserData
+routes/userRoutes.js	116	/api/users	POST	/bank-pre-approval	csrfProtection	protect | invalidateCache("user")
+routes/userRoutes.js	145	/api/users	DELETE	/bank-pre-approval	csrfProtection	protect | invalidateCache("user")
+routes/userRoutes.js	162	/api/users	USE	(all)	csrfProtection	(req, res) => { res.status(404).json({ success: false, message: "User route not found" }); }
+routes/v1.js	47	/api/v1	USE	/auth		authLimiter | authRoutes
+routes/v1.js	48	/api/v1	USE	/cars		carRoutes
+routes/v1.js	49	/api/v1	USE	/bids		idempotencyCheck | csrfProtection | bidRoutes
+routes/v1.js	50	/api/v1	USE	/dealer		dealerRoutes
+routes/v1.js	51	/api/v1	USE	/dealer		auctionSetupRoutes
+routes/v1.js	52	/api/v1	USE	/admin		adminRoutes
+routes/v1.js	53	/api/v1	USE	/owner-access		authLimiter | ownerAccessRouter
+routes/v1.js	54	/api/v1	USE	/owner		ownerRouter
+routes/v1.js	55	/api/v1	USE	/payments		paymentRoutes
+routes/v1.js	56	/api/v1	USE	/escrow		idempotencyCheck | csrfProtection | escrowRoutes
+routes/v1.js	57	/api/v1	USE	/chat		chatRoutes
+routes/v1.js	58	/api/v1	USE	/favorites		csrfProtection | favoriteRoutes
+routes/v1.js	59	/api/v1	USE	/notifications		notificationRoutes
+routes/v1.js	60	/api/v1	USE	/reviews		csrfProtection | reviewRoutes
+routes/v1.js	61	/api/v1	USE	/transactions		transactionRoutes
+routes/v1.js	62	/api/v1	USE	/marketplace/purchases		marketplaceFulfilmentRoutes
+routes/v1.js	63	/api/v1	USE	/auction-admin		auctionAdminRoutes
+routes/v1.js	64	/api/v1	USE	/auctions		auctionRoutes
+routes/v1.js	65	/api/v1	USE	/auctions		auctionRegistrationRoutes
+routes/v1.js	66	/api/v1	USE	/auctions		auctionSettlementRoutes
+routes/v1.js	67	/api/v1	USE	/auctions		auctionFulfilmentRoutes
+routes/v1.js	68	/api/v1	USE	/ads		adSlotRoutes
+routes/v1.js	69	/api/v1	USE	/users		csrfProtection | userRoutes
+routes/v1.js	70	/api/v1	USE	/saved-searches		csrfProtection | savedSearchRoutes
+routes/v1.js	71	/api/v1	USE	/ntsa-verification		ntsaVerificationRoutes
+routes/v1.js	72	/api/v1	USE	/inspections		inspectionRoutes
+routes/v1.js	73	/api/v1	USE	/phase22		phase22Routes
+routes/v1.js	74	/api/v1	USE	/security-logs		securityLogRoutes
+routes/v1.js	75	/api/v1	USE	/sms-bidding		smsBiddingRoutes
+routes/v1.js	76	/api/v1	USE	/inspector-applications		inspectorApplicationRoutes
+routes/v1.js	77	/api/v1	USE	/referral		referralRoutes
+routes/v1.js	78	/api/v1	USE	/contact		contactRoutes
+routes/v1.js	79	/api/v1	USE	/market		marketRoutes
+routes/v1.js	84	/api/v1	USE	/bid-logs		bidLogRoutes
+routes/v1.js	88	/api/v1	USE	/localization		localizationRoutes
+routes/v1.js	91	/api/v1	USE	/preferences		userPreferenceRoutes
+routes/v1.js	92	/api/v1	USE	/countries		regionalConfigurationRoutes
+routes/v2.js	15	/api/v2	GET	/		validateQuery(analyticsQuerySchema)
+routes/valuationRoutes.js	8	/api/valuation	GET	/matrix		cacheResponse(300)
+routes/valuationRoutes.js	18	/api/valuation	GET	/:vehicleId		cacheResponse(600)
+routes/vehicleAnalyticsRoutes.js	34	/api/analytics	GET	/market/summary		validateQuery(analyticsQuerySchema)
+routes/vehicleAnalyticsRoutes.js	37	/api/analytics	GET	/market/price-trends		
+routes/vehicleAnalyticsRoutes.js	40	/api/analytics	GET	/market/volume-trends		
+routes/vehicleAnalyticsRoutes.js	43	/api/analytics	GET	/market/county-trends		
+routes/vehicleAnalyticsRoutes.js	46	/api/analytics	GET	/market/brand-trends		
+routes/vehicleAnalyticsRoutes.js	49	/api/analytics	GET	/market/model-trends		
+routes/vehicleAnalyticsRoutes.js	52	/api/analytics	GET	/market/spec-trends		
+routes/vehicleAnalyticsRoutes.js	55	/api/analytics	GET	/market/most-viewed		
+routes/vehicleAnalyticsRoutes.js	58	/api/analytics	GET	/market/most-searched		
+routes/vehicleAnalyticsRoutes.js	61	/api/analytics	GET	/market/fastest-selling		
+routes/vehicleAnalyticsRoutes.js	68	/api/analytics	GET	/market/dealer/:dealerId		protect | validateObjectId
+routes/vehicleAnalyticsRoutes.js	75	/api/analytics	POST	/market/regenerate		protect | adminOnly
+routes/vehicleAnalyticsRoutes.js	78	/api/analytics	GET	/market/admin/all		protect | adminOnly
+routes/verificationRoutes.js	33	/api/verification	USE	(all)		protect
+routes/verificationRoutes.js	40	/api/verification	POST	/submit		idempotencyCheck
+routes/verificationRoutes.js	53	/api/verification	GET	/status		
+routes/verificationRoutes.js	56	/api/verification	POST	/phone/request		idempotencyCheck
+routes/verificationRoutes.js	68	/api/verification	POST	/phone/verify		idempotencyCheck
+routes/verificationRoutes.js	84	/api/verification	GET	/admin/all		allowRoles("admin", "superadmin")
+routes/verificationRoutes.js	87	/api/verification	GET	/admin/:id		allowRoles("admin", "superadmin") | validateObjectId
+routes/verificationRoutes.js	90	/api/verification	POST	/admin/:id/approve		allowRoles("admin", "superadmin") | requireDecisionAuthority("dealer") | validateObjectId | idempotencyCheck
+routes/verificationRoutes.js	107	/api/verification	POST	/admin/:id/reject		allowRoles("admin", "superadmin") | requireDecisionAuthority("dealer") | validateObjectId | idempotencyCheck
+routes/verificationRoutes.js	124	/api/verification	POST	/admin/:id/suspend		allowRoles("admin", "superadmin") | validateObjectId | idempotencyCheck
+routes/verificationRoutes.js	140	/api/verification	POST	/admin/:id/reinstate		allowRoles("admin", "superadmin") | requireDecisionAuthority("dealer") | validateObjectId | idempotencyCheck
+routes/verificationRoutes.js	158	/api/verification	USE	(all)		(req, res) => { res.status(404).json({ success: false, message: "Verification route not found", }); }
+routes/vxpRoutes.js	58	/api/vxp	USE	(all)		protect
+routes/vxpRoutes.js	61	/api/vxp	GET	/stats		
+routes/vxpRoutes.js	67	/api/vxp	GET	/pages		
+routes/vxpRoutes.js	68	/api/vxp	GET	/pages/:id		validateObjectId
+routes/vxpRoutes.js	69	/api/vxp	POST	/pages		allowRoles("admin", "superadmin", "editor")
+routes/vxpRoutes.js	70	/api/vxp	PUT	/pages/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/vxpRoutes.js	71	/api/vxp	DELETE	/pages/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/vxpRoutes.js	72	/api/vxp	POST	/pages/:id/publish		validateObjectId | allowRoles("admin", "superadmin")
+routes/vxpRoutes.js	73	/api/vxp	POST	/pages/:id/duplicate		validateObjectId | allowRoles("admin", "superadmin")
+routes/vxpRoutes.js	79	/api/vxp	GET	/sections		
+routes/vxpRoutes.js	80	/api/vxp	GET	/sections/templates		
+routes/vxpRoutes.js	81	/api/vxp	POST	/sections		allowRoles("admin", "superadmin", "editor")
+routes/vxpRoutes.js	82	/api/vxp	PUT	/sections/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/vxpRoutes.js	83	/api/vxp	DELETE	/sections/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/vxpRoutes.js	84	/api/vxp	POST	/sections/reorder		allowRoles("admin", "superadmin", "editor")
+routes/vxpRoutes.js	90	/api/vxp	GET	/components		
+routes/vxpRoutes.js	91	/api/vxp	GET	/components/library		
+routes/vxpRoutes.js	92	/api/vxp	POST	/components		allowRoles("admin", "superadmin")
+routes/vxpRoutes.js	93	/api/vxp	PUT	/components/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/vxpRoutes.js	94	/api/vxp	DELETE	/components/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/vxpRoutes.js	100	/api/vxp	GET	/themes		
+routes/vxpRoutes.js	101	/api/vxp	GET	/themes/default		
+routes/vxpRoutes.js	102	/api/vxp	GET	/themes/:id		validateObjectId
+routes/vxpRoutes.js	103	/api/vxp	POST	/themes		allowRoles("admin", "superadmin")
+routes/vxpRoutes.js	104	/api/vxp	PUT	/themes/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/vxpRoutes.js	105	/api/vxp	DELETE	/themes/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/vxpRoutes.js	111	/api/vxp	GET	/cards		
+routes/vxpRoutes.js	112	/api/vxp	GET	/cards/fields		
+routes/vxpRoutes.js	113	/api/vxp	POST	/cards		allowRoles("admin", "superadmin", "editor")
+routes/vxpRoutes.js	114	/api/vxp	PUT	/cards/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/vxpRoutes.js	115	/api/vxp	DELETE	/cards/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/vxpRoutes.js	121	/api/vxp	GET	/advertisements		
+routes/vxpRoutes.js	122	/api/vxp	GET	/advertisements/zones		
+routes/vxpRoutes.js	123	/api/vxp	POST	/advertisements		allowRoles("admin", "superadmin", "editor")
+routes/vxpRoutes.js	124	/api/vxp	PUT	/advertisements/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/vxpRoutes.js	125	/api/vxp	DELETE	/advertisements/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/vxpRoutes.js	131	/api/vxp	GET	/versions		
+routes/vxpRoutes.js	132	/api/vxp	POST	/versions/:id/rollback		allowRoles("admin", "superadmin")
+routes/vxpRoutes.js	138	/api/vxp	POST	/ai/design		
+routes/webhookRoutes.js	38	/api/webhooks	POST	/inventory	webhookLimiter	
+routes/xosRoutes.js	68	/api/xos	USE	(all)		protect
+routes/xosRoutes.js	71	/api/xos	GET	/dashboard		
+routes/xosRoutes.js	72	/api/xos	GET	/metrics		
+routes/xosRoutes.js	78	/api/xos	GET	/experiences		
+routes/xosRoutes.js	79	/api/xos	GET	/experiences/:id		validateObjectId
+routes/xosRoutes.js	80	/api/xos	POST	/experiences		allowRoles("admin", "superadmin", "editor")
+routes/xosRoutes.js	81	/api/xos	PUT	/experiences/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/xosRoutes.js	82	/api/xos	DELETE	/experiences/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/xosRoutes.js	83	/api/xos	POST	/experiences/:id/activate		validateObjectId | allowRoles("admin", "superadmin")
+routes/xosRoutes.js	84	/api/xos	POST	/experiences/:id/deactivate		validateObjectId | allowRoles("admin", "superadmin")
+routes/xosRoutes.js	90	/api/xos	GET	/campaigns		
+routes/xosRoutes.js	91	/api/xos	GET	/campaigns/:id		validateObjectId
+routes/xosRoutes.js	92	/api/xos	POST	/campaigns		allowRoles("admin", "superadmin", "editor")
+routes/xosRoutes.js	93	/api/xos	PUT	/campaigns/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/xosRoutes.js	94	/api/xos	DELETE	/campaigns/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/xosRoutes.js	95	/api/xos	POST	/campaigns/:id/launch		validateObjectId | allowRoles("admin", "superadmin")
+routes/xosRoutes.js	96	/api/xos	POST	/campaigns/:id/pause		validateObjectId | allowRoles("admin", "superadmin")
+routes/xosRoutes.js	97	/api/xos	POST	/campaigns/:id/end		validateObjectId | allowRoles("admin", "superadmin")
+routes/xosRoutes.js	103	/api/xos	GET	/audiences		
+routes/xosRoutes.js	104	/api/xos	GET	/audiences/segments		
+routes/xosRoutes.js	105	/api/xos	POST	/audiences		allowRoles("admin", "superadmin", "editor")
+routes/xosRoutes.js	106	/api/xos	PUT	/audiences/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/xosRoutes.js	107	/api/xos	DELETE	/audiences/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/xosRoutes.js	113	/api/xos	GET	/journeys		
+routes/xosRoutes.js	114	/api/xos	GET	/journeys/:id		validateObjectId
+routes/xosRoutes.js	115	/api/xos	POST	/journeys		allowRoles("admin", "superadmin", "editor")
+routes/xosRoutes.js	116	/api/xos	PUT	/journeys/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/xosRoutes.js	117	/api/xos	DELETE	/journeys/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/xosRoutes.js	118	/api/xos	POST	/journeys/:id/activate		validateObjectId | allowRoles("admin", "superadmin")
+routes/xosRoutes.js	124	/api/xos	GET	/themes		
+routes/xosRoutes.js	125	/api/xos	GET	/themes/templates		
+routes/xosRoutes.js	126	/api/xos	POST	/themes		allowRoles("admin", "superadmin")
+routes/xosRoutes.js	127	/api/xos	PUT	/themes/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/xosRoutes.js	128	/api/xos	DELETE	/themes/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/xosRoutes.js	134	/api/xos	GET	/variants		
+routes/xosRoutes.js	135	/api/xos	GET	/variants/types		
+routes/xosRoutes.js	136	/api/xos	POST	/variants		allowRoles("admin", "superadmin", "editor")
+routes/xosRoutes.js	137	/api/xos	PUT	/variants/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/xosRoutes.js	138	/api/xos	DELETE	/variants/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/xosRoutes.js	144	/api/xos	GET	/navigation-rules		
+routes/xosRoutes.js	145	/api/xos	POST	/navigation-rules		allowRoles("admin", "superadmin", "editor")
+routes/xosRoutes.js	146	/api/xos	PUT	/navigation-rules/:id		validateObjectId | allowRoles("admin", "superadmin", "editor")
+routes/xosRoutes.js	147	/api/xos	DELETE	/navigation-rules/:id		validateObjectId | allowRoles("admin", "superadmin")
+routes/xosRoutes.js	153	/api/xos	GET	/analytics		
+routes/xosRoutes.js	154	/api/xos	POST	/analytics/track		
+routes/xosRoutes.js	160	/api/xos	GET	/ai/recommendations		
+routes/xosRoutes.js	166	/api/xos	GET	/resolve		

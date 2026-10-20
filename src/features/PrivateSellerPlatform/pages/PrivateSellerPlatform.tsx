@@ -3,7 +3,7 @@
 // Sections 1-17: Step-by-step seller journey
 // ============================================================
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { buildAuthPath } from '../../../utils/authIntent';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,6 +11,7 @@ import { createCar, getMyListings, VehicleApiError, BackendCar } from '../../../
 import { getMyEscrows, BackendEscrow } from '../../../services/escrowApi';
 import { calculateListingQualityScore } from '../../../utils/listingQualityScore';
 import PhoneVerification from '../../../components/PhoneVerification';
+import { AuctionVerificationSection } from '../components/AuctionVerificationSection';
 import type { UserProfile } from '../../../types';
 import {
   Home, Warehouse, Heart, ShoppingCart, ClipboardCheck, DollarSign, FileText, Clock,
@@ -206,6 +207,7 @@ const KAYAD_THEME = {
 type PlatformSection =
   | 'home'
   | 'listing-wizard'
+  | 'auction-verification'
   | 'trust-center'
   | 'listing-quality'
   | 'escrow'
@@ -229,19 +231,44 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: 
   const [myListings, setMyListings] = useState<BackendCar[]>([]);
   const [myEscrows, setMyEscrows] = useState<BackendEscrow[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
+  const [listingsError, setListingsError] = useState<string | null>(null);
+  const [escrowsError, setEscrowsError] = useState<string | null>(null);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<Date | null>(null);
+  const requestGeneration = useRef(0);
+
+  const loadSellerData = useCallback(async () => {
+    const generation = ++requestGeneration.current;
+    if (!user?.id) {
+      setDataLoading(false);
+      setMyListings([]);
+      setMyEscrows([]);
+      setListingsError(null);
+      setEscrowsError(null);
+      return;
+    }
+    setDataLoading(true);
+    const [listingsResult, escrowsResult] = await Promise.allSettled([getMyListings(), getMyEscrows()]);
+    if (generation !== requestGeneration.current) return;
+    if (listingsResult.status === 'fulfilled') {
+      setMyListings(listingsResult.value);
+      setListingsError(null);
+    } else {
+      setListingsError('Your listings could not be loaded. Please try again.');
+    }
+    if (escrowsResult.status === 'fulfilled') {
+      setMyEscrows(escrowsResult.value);
+      setEscrowsError(null);
+    } else {
+      setEscrowsError('Your escrow activity could not be loaded. Please try again.');
+    }
+    if (listingsResult.status === 'fulfilled' || escrowsResult.status === 'fulfilled') setLastRefreshedAt(new Date());
+    setDataLoading(false);
+  }, [user?.id]);
+
   useEffect(() => {
-    if (!user) { setDataLoading(false); return; }
-    let cancelled = false;
-    Promise.all([
-      getMyListings().catch(() => [] as BackendCar[]),
-      getMyEscrows().catch(() => [] as BackendEscrow[]),
-    ]).then(([listings, escrows]) => {
-      if (cancelled) return;
-      setMyListings(listings);
-      setMyEscrows(escrows);
-    }).finally(() => { if (!cancelled) setDataLoading(false); });
-    return () => { cancelled = true; };
-  }, [user]);
+    void loadSellerData();
+    return () => { requestGeneration.current += 1; };
+  }, [loadSellerData]);
 
   const handleSectionChange = useCallback((section: PlatformSection) => {
     setActiveSection(section);
@@ -317,9 +344,13 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: 
             <span className="text-white font-bold">Sell</span>
           </div>
           <button
+            type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 rounded-lg"
+            className="p-2 rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+            aria-label={mobileMenuOpen ? 'Close seller navigation' : 'Open seller navigation'}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="seller-mobile-navigation"
           >
             {mobileMenuOpen ? <X size={20} color="white" /> : <Menu size={20} color="white" />}
           </button>
@@ -338,6 +369,9 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: 
             onClick={() => setMobileMenuOpen(false)}
           >
             <motion.div
+              id="seller-mobile-navigation"
+              role="dialog"
+              aria-label="Seller navigation"
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
@@ -366,8 +400,9 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: 
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
             >
-              {activeSection === 'home' && <SellerHomeSection listings={myListings} loading={dataLoading} userName={user?.name} onNavigate={handleSectionChange} />}
+              {activeSection === 'home' && <SellerHomeSection listings={myListings} escrows={myEscrows} loading={dataLoading} listingsError={listingsError} escrowsError={escrowsError} lastRefreshedAt={lastRefreshedAt} onRefresh={loadSellerData} userName={user?.name} onNavigate={handleSectionChange} />}
               {activeSection === 'listing-wizard' && <ListingWizardSection draft={listingDraft} setDraft={setListingDraft} onNavigate={handleSectionChange} />}
+              {activeSection === 'auction-verification' && <AuctionVerificationSection listings={myListings} />}
               {activeSection === 'trust-center' && <TrustCenterSection />}
               {activeSection === 'listing-quality' && <ListingQualitySection listings={myListings} loading={dataLoading} />}
               {activeSection === 'escrow' && <EscrowCenterSection transactions={myEscrows} loading={dataLoading} />}
@@ -394,9 +429,10 @@ function SidebarContent({
   const navItems: { id: PlatformSection; label: string; icon: React.ReactNode; badge?: number }[] = [
     { id: 'home', label: 'Seller Home', icon: <Home size={20} /> },
     { id: 'listing-wizard', label: 'Create Listing', icon: <PlusCircleIcon size={20} /> },
-    { id: 'escrow', label: 'Escrow', icon: <Shield size={20} /> },
+    { id: 'escrow', label: 'Escrow & Deals', icon: <CreditCard size={20} /> },
+    { id: 'auction-verification', label: 'Auction verification', icon: <ShieldCheck size={20} /> },
     { id: 'trust-center', label: 'Trust Center', icon: <BadgeCheck size={20} /> },
-    { id: 'listing-quality', label: 'My Listings', icon: <CheckCircle size={20} /> },
+    { id: 'listing-quality', label: 'My Listings', icon: <Car size={20} /> },
     { id: 'help', label: 'Help', icon: <HelpCircle size={20} /> },
   ];
 
@@ -419,10 +455,12 @@ function SidebarContent({
           {navItems.map(item => (
             <button
               key={item.id}
+              type="button"
+              aria-current={activeSection === item.id ? 'page' : undefined}
               onClick={() => onSectionChange(item.id)}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors relative ${
                 activeSection === item.id
-                  ? 'bg-[#13B8A6]/20 text-[#5AAFA4]'
+                  ? 'bg-[#13B8A6]/20 text-[#A7F0E6]'
                   : 'text-white/70 hover:bg-white/5 hover:text-white'
               }`}
             >
@@ -456,69 +494,97 @@ function SidebarContent({
 // SECTION 1: SELLER HOME
 // ============================================================
 
-function SellerHomeSection({ listings, loading, userName, onNavigate }: {
+function SellerHomeSection({ listings, escrows, loading, listingsError, escrowsError, lastRefreshedAt, onRefresh, userName, onNavigate }: {
   listings: BackendCar[];
+  escrows: BackendEscrow[];
   loading: boolean;
+  listingsError: string | null;
+  escrowsError: string | null;
+  lastRefreshedAt: Date | null;
+  onRefresh: () => void;
   userName?: string;
   onNavigate: (s: PlatformSection) => void;
 }) {
   const greeting = new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 18 ? 'Good afternoon' : 'Good evening';
   const activeListings = listings.filter((l) => l.status === 'available' || l.status === 'active').length;
   const soldListings = listings.filter((l) => l.status === 'sold').length;
+  const draftListings = listings.filter((l) => l.status === 'draft').length;
+  const pendingListings = listings.filter((l) => l.status === 'pending' || l.status === 'under_review').length;
+  const viewCountsComplete = listings.every((listing) => typeof listing.views === 'number' && Number.isFinite(listing.views));
+  const totalViews = listings.reduce((sum, listing) => sum + (typeof listing.views === 'number' && Number.isFinite(listing.views) ? listing.views : 0), 0);
+  const openEscrows = escrows.filter((escrow) => !['closed', 'cancelled', 'refunded', 'released'].includes(escrow.status)).length;
+  const refreshedLabel = lastRefreshedAt ? lastRefreshedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null;
+  const listingsMetric = listingsError && listings.length === 0 ? 'Unavailable' : loading && listings.length === 0 ? '—' : String(listings.length);
+  const activeMetric = listingsError && listings.length === 0 ? 'Unavailable' : loading && listings.length === 0 ? '—' : String(activeListings);
+  const reviewMetric = listingsError && listings.length === 0 ? 'Unavailable' : loading && listings.length === 0 ? '—' : String(pendingListings);
+  const viewsMetric = listingsError && listings.length === 0 ? 'Unavailable' : loading && listings.length === 0 ? '—' : listings.length > 0 && !viewCountsComplete ? 'Unavailable' : totalViews.toLocaleString();
+  const escrowMetric = escrowsError && escrows.length === 0 ? 'Unavailable' : loading && escrows.length === 0 ? '—' : String(openEscrows);
 
   return (
     <div className="space-y-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl p-6 lg:p-8"
-        style={{ background: `linear-gradient(135deg, ${KAYAD_THEME.navy} 0%, #2d4a6f 100%)` }}
-      >
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">
-              {greeting}{userName ? `, ${userName.split(' ')[0]}` : ''}
-            </h1>
-            <p className="text-white/70">Manage your listings and track your sales</p>
+      <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="overflow-hidden rounded-2xl p-5 sm:p-6 lg:p-8" style={{ background: `linear-gradient(125deg, ${KAYAD_THEME.navy} 0%, ${KAYAD_THEME.navyLight} 68%, #176B87 100%)` }} aria-labelledby="seller-dashboard-title">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-teal-100"><ShieldCheck size={14} aria-hidden="true" /> KAYAD SELLER STUDIO</div>
+            <h1 id="seller-dashboard-title" className="text-2xl font-bold text-white sm:text-3xl">{greeting}{userName ? `, ${userName.split(' ')[0]}` : ''}</h1>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/75">Manage your listings, follow approval progress and keep track of buyer interest.</p>
+            <p className="mt-3 text-xs text-white/60" aria-live="polite">{loading ? 'Refreshing your seller data…' : refreshedLabel ? `Last updated ${refreshedLabel}` : 'Seller data has not been refreshed yet'}</p>
           </div>
-          <button
-            onClick={() => onNavigate('listing-wizard')}
-            className="px-6 py-3 rounded-xl font-bold text-white flex items-center gap-2"
-            style={{ backgroundColor: KAYAD_THEME.orange }}
-          >
-            <PlusCircleIcon size={20} /> Create Listing
-          </button>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mt-6">
-          <QuickStat icon={<Car size={20} />} value={activeListings.toString()} label="Active Listings" color={KAYAD_THEME.orange} />
-          <QuickStat icon={<CheckCircle size={20} />} value={soldListings.toString()} label="Sold" color="#10B981" />
-        </div>
-      </motion.div>
-
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold" style={{ color: KAYAD_THEME.navy }}>Your Listings</h2>
-          <button onClick={() => onNavigate('listing-quality')} className="text-sm font-medium flex items-center gap-1" style={{ color: KAYAD_THEME.orange }}>
-            View All <ChevronRight size={16} />
-          </button>
-        </div>
-        {loading ? (
-          <p className="text-sm text-[#94A3B8]">Loading your listings…</p>
-        ) : listings.length === 0 ? (
-          <p className="text-sm text-[#94A3B8]">You haven't listed any vehicles yet.</p>
-        ) : (
-          <div className="space-y-4">
-            {listings.slice(0, 5).map((listing, i) => (
-              <ListingCard key={listing.id} listing={listing} delay={i * 0.1} />
-            ))}
+          <div className="flex shrink-0 flex-wrap gap-2">
+            <button type="button" onClick={onRefresh} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60" aria-label="Refresh seller dashboard data"><RefreshCw size={16} aria-hidden="true" className={loading ? 'animate-spin' : ''} /> Refresh</button>
+            <button type="button" onClick={() => onNavigate('listing-wizard')} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" style={{ backgroundColor: KAYAD_THEME.emerald }}><PlusCircle size={17} aria-hidden="true" /> Create Listing</button>
           </div>
-        )}
+        </div>
+      </motion.section>
+
+      {listingsError && <div role="alert" className="flex flex-col gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-start gap-3 text-rose-800"><AlertTriangle size={19} className="mt-0.5 shrink-0" aria-hidden="true" /><div><p className="font-semibold">Listings unavailable</p><p className="mt-1 text-sm">{listingsError} Existing values, if any, are retained and may be stale.</p></div></div><button type="button" onClick={onRefresh} disabled={loading} className="rounded-lg border border-rose-300 px-3 py-2 text-sm font-semibold text-rose-800 disabled:opacity-50">Try again</button></div>}
+
+      <section aria-label="Seller overview" className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+        <SellerMetric icon={<Car size={19} />} label="Total Listings" value={listingsMetric} hint="Your vehicles" color="#176B87" />
+        <SellerMetric icon={<CheckCircle2 size={19} />} label="Active Listings" value={activeMetric} hint="Live marketplace" color="#0D9488" />
+        <SellerMetric icon={<Clock3 size={19} />} label="Under Review" value={reviewMetric} hint="Awaiting review" color="#B7791F" />
+        <SellerMetric icon={<Eye size={19} />} label="Listing Views" value={viewsMetric} hint="Across your listings" color="#2563EB" />
+        <SellerMetric icon={<ShieldCheck size={19} />} label="Open Deals" value={escrowMetric} hint="Account-linked escrow activity" color="#7C3AED" />
+      </section>
+
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.85fr)]">
+        <section className="min-w-0 rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm sm:p-5" aria-labelledby="seller-listings-heading">
+          <div className="mb-4 flex items-center justify-between gap-3"><div><h2 id="seller-listings-heading" className="text-lg font-bold" style={{ color: KAYAD_THEME.navy }}>My Listings</h2><p className="mt-1 text-sm text-slate-500">Your latest vehicles and their current status.</p></div><button type="button" onClick={() => onNavigate('listing-quality')} className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-[#D7E7E4] px-3 py-2 text-sm font-semibold hover:bg-[#F6FAF9]" style={{ color: KAYAD_THEME.navy }}>View all <ChevronRight size={15} aria-hidden="true" /></button></div>
+          <div className="mb-4 flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-[#E7F5F2] px-3 py-1.5 font-semibold text-[#0F766E]">Active {activeListings}</span><span className="rounded-full bg-amber-50 px-3 py-1.5 font-semibold text-amber-800">Under review {pendingListings}</span><span className="rounded-full bg-slate-100 px-3 py-1.5 font-semibold text-slate-700">Drafts {draftListings}</span><span className="rounded-full bg-[#EEF4FA] px-3 py-1.5 font-semibold text-[#12576D]">Sold {soldListings}</span></div>
+          {loading && listings.length === 0 ? <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-5 text-sm text-slate-600"><RefreshCw size={17} className="animate-spin" aria-hidden="true" /> Loading your listings…</div> : listingsError && listings.length === 0 ? <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center"><AlertCircle size={24} className="mx-auto mb-2 text-rose-500" aria-hidden="true" /><p className="font-semibold text-slate-800">We couldn't retrieve your listings</p><p className="mt-1 text-sm text-slate-500">Try refreshing. We won't show a false empty state.</p></div> : listings.length === 0 ? <div className="rounded-xl border border-dashed border-[#D7E7E4] bg-[#F8FBFA] p-7 text-center"><div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#DDF4F0] text-[#12576D]"><Car size={24} aria-hidden="true" /></div><p className="font-semibold text-slate-800">Your first listing starts here</p><p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">Add your vehicle details and photos to begin the KAYAD review process.</p><button type="button" onClick={() => onNavigate('listing-wizard')} className="mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold text-white" style={{ backgroundColor: KAYAD_THEME.navy }}><Plus size={16} aria-hidden="true" /> Create your first listing</button></div> : <div className="space-y-3">{listings.slice(0, 5).map((listing, i) => <ListingCard key={listing.id} listing={listing} delay={i * 0.04} />)}</div>}
+        </section>
+
+        <aside className="space-y-5">
+          <section className="rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm sm:p-5" aria-labelledby="seller-actions-heading"><h2 id="seller-actions-heading" className="text-lg font-bold" style={{ color: KAYAD_THEME.navy }}>Quick Actions</h2><p className="mt-1 text-sm text-slate-500">Common tasks for your seller account.</p><div className="mt-4 space-y-2">
+            <SellerAction icon={<PlusCircle size={17} />} title="Create a listing" description="Start a new vehicle submission" onClick={() => onNavigate('listing-wizard')} />
+            <SellerAction icon={<ClipboardList size={17} />} title="Manage my listings" description="Review statuses and listing details" onClick={() => onNavigate('listing-quality')} />
+            <SellerAction icon={<ShieldCheck size={17} />} title="Trust & verification" description="Review your seller access and next steps" onClick={() => onNavigate('trust-center')} />
+            <SellerAction icon={<CreditCard size={17} />} title="Escrow & sale progress" description="Review deals associated with your account" onClick={() => onNavigate('escrow')} />
+            <SellerAction icon={<HelpCircle size={17} />} title="Help & support" description="Find guidance for selling on KAYAD" onClick={() => onNavigate('help')} />
+          </div></section>
+
+          <section className="rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm sm:p-5" aria-labelledby="seller-activity-heading"><div className="mb-3 flex items-center gap-2"><TrendingUp size={18} className="text-[#176B87]" aria-hidden="true" /><h2 id="seller-activity-heading" className="text-lg font-bold" style={{ color: KAYAD_THEME.navy }}>Seller Snapshot</h2></div>
+            {escrowsError && escrows.length === 0 ? <p role="status" className="text-sm text-amber-800">Escrow activity is temporarily unavailable.</p> : <div className="space-y-3"><SellerSnapshotRow label="Open drafts" value={listingsError && listings.length === 0 ? 'Unavailable' : loading && listings.length === 0 ? '—' : String(draftListings)} /><SellerSnapshotRow label="Released / closed records" value={escrowsError ? 'Unavailable' : loading && escrows.length === 0 ? '—' : String(escrows.filter((escrow) => ['closed', 'released'].includes(escrow.status)).length)} /><SellerSnapshotRow label="Escrow records" value={escrowsError ? 'Unavailable' : String(escrows.length)} /></div>}
+            <p className="mt-4 text-xs leading-5 text-slate-500">Metrics reflect records returned by the authenticated account's existing APIs. Escrow activity may include deals where the account is a buyer or seller; views are engagement counts, not unique buyers or confirmed inquiries.</p>
+          </section>
+        </aside>
       </div>
+      {escrowsError && <div role="status" className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><div className="flex items-start gap-2"><AlertTriangle size={17} className="mt-0.5 shrink-0" aria-hidden="true" /><div><strong>Escrow summary unavailable.</strong> {escrowsError} Previously loaded escrow values may be stale; listing information remains available independently.</div></div></div>}
     </div>
   );
 }
 
+function SellerMetric({ icon, label, value, hint, color }: { icon: React.ReactNode; label: string; value: string; hint: string; color: string }) {
+  return <div className="min-w-0 rounded-xl border border-[#D7E7E4] bg-white p-3 shadow-sm sm:p-4"><div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg" style={{ color, backgroundColor: `${color}14` }}>{icon}</div><p className="break-words text-xl font-bold leading-tight text-[#0A3340] sm:text-2xl">{value}</p><p className="mt-1 text-xs font-semibold text-slate-700 sm:text-sm">{label}</p><p className="mt-1 text-[11px] leading-4 text-slate-500">{hint}</p></div>;
+}
+
+function SellerAction({ icon, title, description, onClick }: { icon: React.ReactNode; title: string; description: string; onClick: () => void }) {
+  return <button type="button" onClick={onClick} className="group flex w-full items-center gap-3 rounded-xl border border-[#E2ECEA] p-3 text-left transition hover:border-[#8ECFC4] hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]"><span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#E7F5F2] text-[#12576D]" aria-hidden="true">{icon}</span><span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-[#0A3340]">{title}</span><span className="mt-0.5 block text-xs leading-4 text-slate-500">{description}</span></span><ChevronRight size={16} className="shrink-0 text-slate-400 transition group-hover:translate-x-0.5 group-hover:text-[#176B87]" aria-hidden="true" /></button>;
+}
+
+function SellerSnapshotRow({ label, value }: { label: string; value: string }) {
+  return <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-2 last:border-0 last:pb-0"><span className="text-sm text-slate-600">{label}</span><span className="text-sm font-bold text-[#0A3340]">{value}</span></div>;
+}
 function QuickStat({ icon, value, label, color }: { icon: React.ReactNode; value: string; label: string; color: string }) {
   return (
     <div className="flex items-center gap-3">
@@ -555,7 +621,7 @@ function ListingCard({ listing, delay }: { listing: BackendCar; delay: number })
       <div className="flex flex-col md:flex-row">
         <div className="w-full md:w-48 h-32 md:h-auto flex items-center justify-center" style={{ backgroundColor: KAYAD_THEME.slate[100] }}>
           {image ? (
-            <img src={image} alt={listing.title} className="w-full h-full object-cover" />
+            <img src={image} alt={`${listing.year} ${listing.brand} ${listing.model}`} className="w-full h-full object-cover" loading="lazy" />
           ) : (
             <Car size={48} style={{ color: KAYAD_THEME.slate[300] }} />
           )}
@@ -570,7 +636,7 @@ function ListingCard({ listing, delay }: { listing: BackendCar; delay: number })
               {listing.status || 'draft'}
             </span>
           </div>
-          <p className="text-xl font-bold mb-3" style={{ color: KAYAD_THEME.gold }}>KES {(listing.price / 1000000).toFixed(1)}M</p>
+          <p className="text-xl font-bold mb-3" style={{ color: KAYAD_THEME.gold }}>KES {Number(listing.price || 0).toLocaleString('en-KE')}</p>
           <div className="flex flex-wrap gap-3 text-sm" style={{ color: KAYAD_THEME.slate[500] }}>
             <span className="flex items-center gap-1"><EyeIcon size={14} /> {listing.views || 0}</span>
           </div>
