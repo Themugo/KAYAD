@@ -1,3 +1,4 @@
+import { isStaffRole, staffRoleLabel } from '../utils/staffRoles';
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -487,7 +488,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <p className="font-bold text-[#0A3340] truncate">{user.name}</p>
                         <p className="text-[11px] text-[#64748B] truncate">{user.email}</p>
                         <span className="inline-block mt-1 px-2 py-0.5 bg-[#0A3340] text-white font-semibold text-[9px] rounded uppercase">
-                          {user.role === 'dealer' ? 'Verified Dealer' : user.role === 'mechanic' ? 'NTSA Mechanic' : user.role === 'admin' ? 'Administrator' : 'Private Seller / Buyer'}
+                          {isStaffRole(user.role) ? staffRoleLabel(user.role) : user.role === 'dealer' ? 'Verified Dealer' : user.role === 'mechanic' ? 'NTSA Mechanic' : user.role === 'admin' ? 'Administrator' : 'Private Seller / Buyer'}
                         </span>
                       </div>
                     </div>
@@ -499,9 +500,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                         className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
                       >
                         <LayoutDashboard className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
-                        <span>Buyer Command Center</span>
+                        <span>{isStaffRole(user.role) ? 'Operations Dashboard' : 'Buyer Command Center'}</span>
                       </button>
 
+                      {!isStaffRole(user.role) && (
                       <button
                         onClick={() => handleNavSelect('seller-dashboard')}
                         className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
@@ -509,6 +511,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <Car className="w-4 h-4 text-[#176B87] stroke-[1.75]" />
                         <span>Private Seller Dashboard</span>
                       </button>
+                      )}
 
                       <button
                         onClick={() => { navigate('/notifications'); setShowUserDropdown(false); }}
@@ -538,6 +541,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                         )}
                       </button>
 
+                      {!isStaffRole(user.role) && (
+                        <>
                       <button
                         onClick={() => handleNavSelect('seller-platform')}
                         className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
@@ -590,6 +595,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <CreditCard className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
                         <span>Vehicle Financing</span>
                       </button>
+                        </>
+                      )}
 
                       <button
                         onClick={() => handleNavSelect('profile')}
@@ -659,7 +666,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </div>
                     )}
 
-                    {user.role === 'admin' && (
+                    {isStaffRole(user.role) && (
                       <div className="border-t border-[#D7E7E4] pt-1.5 mt-1.5 bg-[#EEF7F5]/80 pb-1">
                         <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-[#12576D]">
                           System Administration
@@ -806,7 +813,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
                 {user?.role === 'dealer' && <section className="mb-4 rounded-[20px] border border-white/[0.07] bg-white/[0.035] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">Dealer Tools</span><div className="grid grid-cols-2 gap-1.5"><button type="button" onClick={() => handleNavSelect('dealer-dashboard')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Building2 className="mb-1 h-4 w-4 text-[#79D8CF]" />Dashboard</button><button type="button" onClick={() => handleNavSelect('dealer-dashboard')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Layers className="mb-1 h-4 w-4 text-[#79D8CF]" />Inventory</button></div></section>}
                 {user?.role === 'mechanic' && <section className="mb-4 rounded-[20px] border border-emerald-300/10 bg-emerald-400/[0.05] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-emerald-300">Inspection Tools</span><button type="button" onClick={() => handleNavSelect('inspections')} className="flex w-full items-center gap-2 rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-emerald-100"><ShieldCheck className="h-4 w-4" />Inspection Portal</button></section>}
-                {user?.role === 'admin' && <section className="mb-4 rounded-[20px] border border-white/[0.07] bg-white/[0.035] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-[#A8B8BC]">Administration</span><button type="button" onClick={() => handleNavSelect('admin')} className="flex w-full items-center gap-2 rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Settings className="h-4 w-4" />Admin Console</button></section>}
+                {(user?.role === 'admin' || isStaffRole(user?.role)) && <section className="mb-4 rounded-[20px] border border-white/[0.07] bg-white/[0.035] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-[#A8B8BC]">Administration</span><button type="button" onClick={() => handleNavSelect('admin')} className="flex w-full items-center gap-2 rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Settings className="h-4 w-4" />Admin Console</button></section>}
 
                 <button type="button" onClick={() => handleNavSelect('seller-platform')} id="mobile-cta-sell-car" className="mb-4 flex min-h-14 w-full items-center justify-between rounded-[20px] border border-[#43D0C2]/40 bg-gradient-to-r from-[#0D7187] to-[#176B87] px-4 text-left text-white shadow-[0_16px_35px_rgba(7,57,68,.22)] active:scale-[.99]"><span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/10"><PlusCircle className="h-5 w-5" /></span><span><strong className="block text-sm font-black">Sell Vehicle</strong><small className="text-[10px] text-white/60">List your vehicle with KAYAD</small></span></span><ChevronDown className="h-5 w-5 -rotate-90 text-[#8DE4DB]" /></button>
                 <div className="flex items-center justify-between border-t border-white/[0.08] px-1 pt-4 text-[10px] text-white/50"><span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-[#79D8CF]" />{selectedCounty}</span><button type="button" onClick={() => { onOpenAlerts(); setMobileMenuOpen(false); }} className="inline-flex min-h-11 items-center px-2 font-black text-white/65">Price alerts</button></div>
