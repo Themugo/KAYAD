@@ -10,6 +10,7 @@
 import { logInfo, logWarn } from "../utils/logger.js";
 import { findAll, findById, update } from "../db/index.js";
 import { isSupabaseConnected } from "../utils/supabase.js";
+import { evaluateEligibilityBatch } from "./privateSellerAuctionEligibility.service.js";
 import { emitCommunication, COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
 
 const ENABLED = process.env.AUCTION_REMINDER_ENABLED !== "false";
@@ -48,7 +49,12 @@ const runReminders = async () => {
 
     if (endingAuctions.length === 0) continue;
 
-    for (const car of endingAuctions) {
+    // Stage 5F.10: never tell bidders "ends in N minutes" about an auction whose bidding is currently blocked by the
+    // private-seller gate. Fail-closed: if the gate cannot be evaluated, send nothing this tick.
+    let reminderVerdicts;
+    try { reminderVerdicts = await evaluateEligibilityBatch(endingAuctions.map((c) => c.id)); } catch { continue; }
+
+    for (const car of endingAuctions.filter((c) => reminderVerdicts.get(String(c.id))?.eligible === true)) {
       try {
         const activeBidders = await findAll("bids", { filters: { carId: car.id, status: { $in: ["active", "paid"] } }, select: "user" });
         const bidderIds = [...new Set(activeBidders.map(b => b.user).filter(Boolean))];

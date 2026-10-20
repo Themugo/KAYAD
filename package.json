@@ -151,7 +151,15 @@
     "validate:master-identity-authz-corrections": "node scripts/validate-master-identity-authz-corrections.mjs",
     "validate:stage5f2-dashboard-data-workflow": "node scripts/validate-stage5f2-dashboard-data-workflow.mjs",
     "validate:stage5f6-buyer-convergence": "node scripts/validate-stage5f6-buyer-convergence.mjs",
+<<<<<<< HEAD
     "validate:stage5f7-private-auction-contract": "node scripts/validate-stage5f7-private-auction-contract.mjs"
+=======
+    "validate:stage5f7-private-auction-contract": "node scripts/validate-stage5f7-private-auction-contract.mjs",
+    "validate:stage5f10-private-seller-gate": "node scripts/validate-stage5f10-private-seller-gate.mjs",
+    "test:pg:stage5f10": "node runbooks/stage5f10-private-seller-custody-20261020/pg/stage5f10_gate_pg.mjs",
+    "test:http:stage5f10": "node runbooks/stage5f10-private-seller-custody-20261020/http/stage5f10_http_e2e.mjs",
+    "test:ui:stage5f10": "node runbooks/stage5f10-private-seller-custody-20261020/ui/ui_5f10.mjs"
+>>>>>>> origin/main
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

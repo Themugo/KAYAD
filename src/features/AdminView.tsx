@@ -26,6 +26,7 @@ import AdminSupportWorkspace from './AdminSupportWorkspace';
 import AdminSettingsOnboarding from '../pages/admin/AdminSettingsOnboarding';
 // STAGE 5B: owner membership management (owner-only on the server; the tab is shown only to owners).
 import AdminOwnerManagement from '../pages/admin/AdminOwnerManagement';
+import AdminAuctionVerification from './AdminAuctionVerification'; // STAGE 5F.10
 import { useAuth } from '../context/AuthContext';
 
 interface AdminViewProps {
@@ -33,7 +34,8 @@ interface AdminViewProps {
   onQuickViewVehicle?: (vehicle: Vehicle) => void;
 }
 
-type AdminStats = Record<string, number>;
+type AdminStats = Record<string, number | null>;
+type QueueFilter = 'pendingDealers' | 'pendingVehicles' | null;
 type AdminUser = {
   _id: string;
   name?: string;
@@ -76,15 +78,19 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [cars, setCars] = useState<AdminCar[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditRecord[]>([]);
-  const [module, setModule] = useState<'overview' | 'users' | 'cars' | 'audit' | 'communications' | 'navigation' | 'providers' | 'support' | 'onboarding' | 'owners'>('overview');
+  const [module, setModule] = useState<'overview' | 'users' | 'cars' | 'audit' | 'communications' | 'navigation' | 'providers' | 'support' | 'onboarding' | 'auctions' | 'owners'>('overview');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [statsStatus, setStatsStatus] = useState<'loading' | 'ready' | 'stale' | 'error'>('loading');
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  // Queue tiles open their destination list already filtered to the rows the tile counts.
+  const [queue, setQueue] = useState<QueueFilter>(null);
+  // Sources the server refused for this role (403). That is an access boundary, not an outage, and is reported as such.
+  const [restricted, setRestricted] = useState<string[]>([]);
 
-  const load = async () => {
+  const load = async (activeQueue: QueueFilter = queue) => {
     setLoading(true);
     setError(null);
     setStatsStatus((current) => current === 'ready' || current === 'stale' ? 'stale' : 'loading');
@@ -93,13 +99,18 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
     // results from the others or make the entire command centre look unavailable.
     const results = await Promise.allSettled([
       adminAPI.stats(),
-      adminAPI.users({ page: 1, limit: 50, search: search || undefined }),
-      adminAPI.cars({ page: 1, limit: 50, search: search || undefined }),
+      adminAPI.users({ page: 1, limit: 50, search: search || undefined, ...(activeQueue === 'pendingDealers' ? { role: 'dealer', pendingApproval: true } : {}) }),
+      adminAPI.cars({ page: 1, limit: 50, search: search || undefined, ...(activeQueue === 'pendingVehicles' ? { status: 'pending' } : {}) }),
       adminAPI.getAuditLog({ page: 1, limit: 25 }),
     ] as const);
 
     const failures: string[] = [];
+    const denied: string[] = [];
     const [statsResult, usersResult, carsResult, auditResult] = results;
+    const isDenied = (r: PromiseSettledResult<unknown>) => r.status === 'rejected' && (r.reason as any)?.response?.status === 403;
+    const note = (r: PromiseSettledResult<unknown>, label: string, failLabel: string) => {
+      if (isDenied(r)) denied.push(label); else failures.push(failLabel);
+    };
 
     if (statsResult.status === 'fulfilled') {
       const payload = unwrap<any>(statsResult.value);
@@ -113,7 +124,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       }
     } else {
       setStatsStatus((current) => current === 'stale' ? 'stale' : 'error');
-      failures.push('dashboard statistics');
+      note(statsResult, 'dashboard statistics', 'dashboard statistics');
     }
 
     if (usersResult.status === 'fulfilled') {
@@ -125,7 +136,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
         failures.push('user records (invalid response)');
       }
     } else {
-      failures.push('user records');
+      note(usersResult, 'user records', 'user records');
     }
 
     if (carsResult.status === 'fulfilled') {
@@ -136,7 +147,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
         failures.push('vehicle records (invalid response)');
       }
     } else {
-      failures.push('vehicle records');
+      note(carsResult, 'vehicle records', 'vehicle records');
     }
 
     if (auditResult.status === 'fulfilled') {
@@ -145,8 +156,9 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       if (Array.isArray(entries)) setAuditLogs(entries);
       else failures.push('audit log (invalid response)');
     } else {
-      failures.push('audit log');
+      note(auditResult, 'audit log', 'audit log');
     }
+    setRestricted(denied);
 
     setError(failures.length
       ? `Some operational data sources are unavailable: ${failures.join(', ')}. Other successful results remain available.`
@@ -239,7 +251,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
         <div className="h-1 bg-gradient-to-r from-[#0B3440] via-[#176B87] to-[#13B8A6]" />
         <div className="flex flex-col gap-4 px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[#138A83]">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[#0F7A74]">
               <ShieldCheck className="h-4 w-4 shrink-0" /> KAYAD Operations
               <span className="rounded-full border border-[#D7E7E4] bg-[#F4FAF9] px-2 py-1 tracking-normal text-[#49656D]">{isOwner ? 'Owner access' : 'Administration'}</span>
             </div>
@@ -260,8 +272,12 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
         </Card>
       )}
 
+      {restricted.length > 0 && (
+        <p role="note" className="text-xs text-[#58717A]">Not included in your role: {restricted.join(', ')}. This is an access boundary, not an outage.</p>
+      )}
+
       <div className="flex flex-wrap gap-2">
-        {([...(['overview', 'users', 'cars', 'audit', 'communications', 'navigation', 'providers', 'support', 'onboarding'] as const), ...(isOwner ? (['owners'] as const) : [])]).map((item) => (
+        {([...(['overview', 'users', 'cars', 'audit', 'communications', 'navigation', 'providers', 'support', 'onboarding', 'auctions'] as const), ...(isOwner ? (['owners'] as const) : [])]).map((item) => (
           <Button key={item} variant={module === item ? 'primary' : 'outline'} size="sm" onClick={() => setModule(item)}>
             {item === 'overview' && <ShieldCheck className="w-4 h-4" />}
             {item === 'users' && <Users className="w-4 h-4" />}
@@ -275,15 +291,15 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             {item[0].toUpperCase() + item.slice(1)}
           </Button>
         ))}
-        {module !== 'overview' && module !== 'navigation' && module !== 'providers' && module !== 'support' && module !== 'onboarding' && module !== 'owners' && <div className="ml-auto min-w-[240px]"><Input aria-label="Search administration records" placeholder="Search live records…" value={search} onChange={(e) => setSearch(e.target.value)} /></div>}
+        {module !== 'overview' && module !== 'navigation' && module !== 'providers' && module !== 'support' && module !== 'onboarding' && module !== 'auctions' && module !== 'owners' && <div className="ml-auto min-w-[240px]"><Input aria-label="Search administration records" placeholder="Search live records…" value={search} onChange={(e) => setSearch(e.target.value)} /></div>}
       </div>
 
       {module === 'overview' && (
         <>
           <section aria-labelledby="marketplace-overview-heading" className="space-y-3">
             <div className="flex items-end justify-between gap-3">
-              <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#718792]">Marketplace snapshot</p><h2 id="marketplace-overview-heading" className="mt-1 text-lg font-bold text-[#0B3440]">Platform at a glance</h2></div>
-              <span className="hidden text-xs text-[#718792] sm:inline">Values reflect the latest API response</span>
+              <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#58717A]">Marketplace snapshot</p><h2 id="marketplace-overview-heading" className="mt-1 text-lg font-bold text-[#0B3440]">Platform at a glance</h2></div>
+              <span className="hidden text-xs text-[#58717A] sm:inline">Values reflect the latest API response</span>
             </div>
             <div className="grid grid-cols-2 gap-3 xl:grid-cols-5 xl:gap-4">
               <StatWidget label="Total users" value={stat('totalUsers')} icon={<Users className="w-4 h-4" />} />
@@ -296,14 +312,14 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
 
           <section aria-labelledby="operations-queues-heading" className="space-y-3">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-              <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#718792]">Work requiring attention</p><h2 id="operations-queues-heading" className="mt-1 text-lg font-bold text-[#0B3440]">Operational queues</h2></div>
-              <p className="text-xs text-[#718792]">Unavailable values are not reported as zero.</p>
+              <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#58717A]">Work requiring attention</p><h2 id="operations-queues-heading" className="mt-1 text-lg font-bold text-[#0B3440]">Operational queues</h2></div>
+              <p className="text-xs text-[#58717A]">Unavailable values are not reported as zero.</p>
             </div>
             <div className="grid gap-4 xl:grid-cols-2">
               {[
                 { title: 'Marketplace decisions', description: 'Dealer and vehicle workflows.', items: [
-                  { label: 'Pending dealers', value: stat('pendingDealers'), destination: 'users' as const },
-                  { label: 'Pending vehicles', value: stat('pendingCars'), destination: 'cars' as const },
+                  { label: 'Pending dealers', value: stat('pendingDealers'), destination: 'users' as const, queue: 'pendingDealers' as const },
+                  { label: 'Pending vehicles', value: stat('pendingCars'), destination: 'cars' as const, queue: 'pendingVehicles' as const },
                   { label: 'Verification queue', value: stat('verificationQueue') },
                   { label: 'Pending reviews', value: stat('pendingReviews') },
                 ] },
@@ -315,12 +331,12 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
                 ] },
               ].map((group) => (
                 <Card key={group.title} className="p-4 sm:p-5">
-                  <div className="border-b border-[#E3ECEF] pb-3"><h3 className="font-bold text-[#0B3440]">{group.title}</h3><p className="mt-1 text-xs leading-5 text-[#718792]">{group.description}</p></div>
+                  <div className="border-b border-[#E3ECEF] pb-3"><h3 className="font-bold text-[#0B3440]">{group.title}</h3><p className="mt-1 text-xs leading-5 text-[#58717A]">{group.description}</p></div>
                   <div className="mt-3 grid grid-cols-2 gap-3">
                     {group.items.map((item) => {
-                      const content = <><div className="text-[10px] font-bold uppercase leading-4 tracking-wide text-[#647D86] sm:text-[11px]">{item.label}</div><div className="mt-2 break-words text-2xl font-extrabold tracking-tight text-[#176B87]">{item.value}</div>{item.destination && <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#176B87]">Open workflow <span aria-hidden="true">→</span></span>}</>;
+                      const content = <><div className="text-[10px] font-bold uppercase leading-4 tracking-wide text-[#4B646D] sm:text-[11px]">{item.label}</div><div className="mt-2 break-words text-2xl font-extrabold tracking-tight text-[#176B87]">{item.value}</div>{item.destination && <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#176B87]">Open workflow <span aria-hidden="true">→</span></span>}</>;
                       return item.destination
-                        ? <button key={item.label} type="button" onClick={() => { setSearch(''); setModule(item.destination!); }} className="min-w-0 rounded-lg border border-[#DCE8EB] bg-[#F8FBFB] p-3 text-left transition hover:border-[#176B87] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B87] focus-visible:ring-offset-2 sm:p-4" aria-label={`Open ${item.label.toLowerCase()} workflow`}>{content}</button>
+                        ? <button key={item.label} type="button" onClick={() => { setSearch(''); const q = ('queue' in item ? item.queue : null) as QueueFilter; setQueue(q); setModule(item.destination!); if (q !== queue) void load(q); }} className="min-w-0 rounded-lg border border-[#DCE8EB] bg-[#F8FBFB] p-3 text-left transition hover:border-[#176B87] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B87] focus-visible:ring-offset-2 sm:p-4" aria-label={`Open ${item.label.toLowerCase()} workflow`}>{content}</button>
                         : <div key={item.label} className="min-w-0 rounded-lg border border-[#DCE8EB] bg-[#F8FBFB] p-3 sm:p-4">{content}</div>;
                     })}
                   </div>
@@ -329,6 +345,13 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             </div>
           </section>
         </>
+      )}
+
+      {queue && (module === 'users' || module === 'cars') && ((queue === 'pendingDealers' && module === 'users') || (queue === 'pendingVehicles' && module === 'cars')) && (
+        <div className="flex items-center gap-2 text-sm text-[#0B3440]" data-testid="queue-filter">
+          <Badge variant="warning">{queue === 'pendingDealers' ? 'Showing pending dealers only' : 'Showing pending vehicles only'}</Badge>
+          <Button size="sm" variant="outline" onClick={() => { setQueue(null); void load(null); }}>Show all</Button>
+        </div>
       )}
 
       {module === 'users' && (
@@ -374,6 +397,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       {module === 'navigation' && <AdminNavigationControl />}
       {module === 'providers' && <AdminProviderGovernance />}
       {module === 'support' && <AdminSupportWorkspace />}
+      {module === 'auctions' && <AdminAuctionVerification />}
       {module === 'onboarding' && <AdminSettingsOnboarding />}
       {module === 'owners' && isOwner && <AdminOwnerManagement />}
 

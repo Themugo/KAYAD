@@ -54,7 +54,10 @@ export const protectAccount = async (req, res, next) => {
     }
 
     // 4. The MAIN owner is the most protected: never deactivated/banned by anyone.
-    if (isMainOwnerEmail(target.email) && /toggle-ban|deactivate/.test(req.path)) {
+    // STAGE 5F.5 (D-5): PUT /admin/staff/:id {isBanned:true} suspends an account without passing through a toggle-ban/deactivate
+    // path, so the body flag is checked as well.
+    const bodyBans = !!req.body && typeof req.body === "object" && (req.body.isBanned === true || req.body.isBanned === "true");
+    if (isMainOwnerEmail(target.email) && (/toggle-ban|deactivate/.test(req.path) || bodyBans)) {
       return res.status(403).json({
         success: false,
         message: "The primary platform owner cannot be suspended or deactivated.",

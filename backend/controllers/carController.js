@@ -13,6 +13,7 @@ import { detectDuplicates, flagDuplicate } from "../services/duplicateVehicleSer
 import { logVehicleCreated, logVehicleEdited, logVehicleDeleted } from "../services/auditService.js";
 import { getDealerEntitlement, assertDealerCanCreateListing } from "../services/dealerSubscription.service.js";
 import { atomicCreateDealerListing } from "../utils/atomicTransactions.js";
+import { evaluateEligibilityBatch } from "../services/privateSellerAuctionEligibility.service.js";
 import { randomUUID } from "node:crypto";
 import { registerMediaUploadJob, registerMediaUploadFailure, completeMediaUpload } from "../services/mediaRecovery.service.js";
 import { getOnboardingPolicy, isPolicyTrusted } from "../services/onboardingPolicy.service.js"; // STAGE 5
@@ -263,11 +264,18 @@ export const getCars = async (req, res) => {
     // dealer object - on every real car fetch, not just auctions.
     findQuery = findQuery.populate("dealer", "name businessName phone role avatar dealerApprovedAt");
 
-    const [cars, total] = await Promise.all([
+    let [cars, total] = await Promise.all([
       findQuery.sort(sortOption).skip(skip).limit(limitNum).lean(),
 
       Car.countDocuments(query),
     ]);
+
+    // Stage 5F.10: a live auction whose vehicle fails the PostgreSQL private-seller gate is not shown publicly.
+    const liveIds = (cars || []).filter((c) => c?.auctionStatus === "live").map((c) => c.id ?? c._id);
+    if (liveIds.length) {
+      const verdicts = await evaluateEligibilityBatch(liveIds); // throws 503 (fail-closed) when the gate cannot be evaluated
+      cars = cars.filter((c) => c?.auctionStatus !== "live" || verdicts.get(String(c.id ?? c._id))?.eligible === true);
+    }
 
     res.json({
       success: true,
@@ -290,6 +298,7 @@ export const getCars = async (req, res) => {
       page: pageNum,
       limit: limitNum,
     });
+    if (err?.status === 503) return res.status(503).json({ success: false, code: err.code, message: err.message, data: [] });
     res.status(500).json({ success: false, message: "Failed to fetch cars", data: [] });
   }
 };
@@ -1073,10 +1082,18 @@ export const getCar = async (req, res) => {
       return res.status(404).json({ success: false, message: "Car not found" });
     }
 
-    const isOwner = req.user && String(car.dealer?._id) === String(req.user.id);
+    const isOwner = req.user && String(car.dealer?.id ?? car.dealer?._id ?? car.dealer) === String(req.user.id);
     const isAdmin = req.user && STAFF_ROLES.includes(req.user.role);
     if (car.status !== "available" && car.status !== "sold" && !isOwner && !isAdmin) {
       return res.status(404).json({ success: false, message: "Car not found" });
+    }
+    // Stage 5F.10: public viewers never see a live auction that fails the PostgreSQL private-seller gate.
+    if (car.auctionStatus === "live" && !isOwner && !isAdmin) {
+      let verdicts;
+      try { verdicts = await evaluateEligibilityBatch([car.id ?? car._id]); } catch (gateErr) {
+        return res.status(503).json({ success: false, code: gateErr.code || "ELIGIBILITY_UNAVAILABLE", message: gateErr.message });
+      }
+      if (verdicts.get(String(car.id ?? car._id))?.eligible !== true) return res.status(404).json({ success: false, message: "Car not found" });
     }
 
     if (car.dealer?.visibility) {
@@ -1110,7 +1127,7 @@ export const getCar = async (req, res) => {
     // (paymentController.js uses the identical computeEffectiveEscrowEnabled()).
     car.escrowEnabled = await getEffectiveEscrowForCar({
       carEscrowEnabled: car.escrowEnabled,
-      sellerId: car.dealer?._id || car.dealer,
+      sellerId: car.dealer?.id ?? car.dealer?._id ?? car.dealer,
     });
 
     // ── VIEW COUNT (Issue #5) ─────────────────────────────────
