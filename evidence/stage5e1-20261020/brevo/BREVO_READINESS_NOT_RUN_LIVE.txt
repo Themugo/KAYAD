@@ -1,0 +1,3 @@
+backend/scripts/brevo-readiness.mjs was exercised only through injected-fetch tests (12) and one offline smoke run with an EMPTY environment.
+It was NOT run with a real BREVO_API_KEY and Brevo was NOT contacted from this environment. Live readiness of the deployed Brevo account is UNKNOWN.
+Endpoints used in --live-readonly mode (GET only): /v3/senders, /v3/senders/domains (field names confirmed from Brevo developer docs).

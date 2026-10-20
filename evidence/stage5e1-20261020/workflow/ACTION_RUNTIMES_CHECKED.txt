@@ -1,0 +1,5 @@
+Read from raw.githubusercontent.com/<repo>/<tag>/action.yml on 2026-10-20 (runs.using):
+actions/checkout v5 node24 | v6 node24 ; actions/setup-node v5 node24 | v6 node24 ; actions/upload-artifact v5 node20 | v6 node24 | v7 node24
+actions/download-artifact v5 node20 | v6 node20 | v7 node24 ; actions/github-script v8 node24 ; github/codeql-action v4 node24 (init)
+gitleaks/gitleaks-action v2 node20 | v3 node24 ; current pins in main: checkout v4, setup-node v4, upload/download-artifact v4, github-script v7, codeql v3, gitleaks-action v2 (all node20 or v3-deprecating)
+actionlint v1.7.7: identical output before/after candidate bumps (one pre-existing finding: dependabot-auto-merge.yml:113)
