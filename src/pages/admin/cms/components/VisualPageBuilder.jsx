@@ -2,8 +2,8 @@ import React, { useState, useCallback, useEffect } from 'react';
 import * as cmsApi from '../../../../services/cmsApi';
 import { getCars } from '../../../../services/vehicleApi';
 import {
-  Type, Heading1, Heading2, Paragraph, Button, Image as ImageIcon,
-  Video, Gallery, Car, Users, Banner, BarChart, MessageSquare,
+  Type, Heading1, Heading2, Pilcrow as Paragraph, SquareMousePointer as Button, Image as ImageIcon,
+  Video, Images as Gallery, Car, Users, RectangleHorizontal as Banner, BarChart, MessageSquare,
   MapPin, Clock, Mail, List, Code, Box, Layout, GripVertical,
   Plus, Trash2, Copy, MoveUp, MoveDown, Eye, Save, Undo, Redo,
   Settings, ChevronDown, ChevronRight, Search, Monitor, Tablet, Smartphone

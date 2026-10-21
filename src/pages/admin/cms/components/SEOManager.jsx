@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import {
   Globe, Search, Share2, FileText, CheckCircle, AlertCircle,
-  ExternalLink, Copy, Edit, Save, RefreshCw, Link, Robots,
-  Sitemap, Eye, Smartphone, Monitor, ChevronDown, Plus, Trash2,
+  ExternalLink, Copy, Edit, Save, RefreshCw, Link, Bot as Robots,
+  Network as Sitemap, Eye, Smartphone, Monitor, ChevronDown, Plus, Trash2,
   ArrowRightLeft, BarChart3, X, Settings
 } from 'lucide-react';
 

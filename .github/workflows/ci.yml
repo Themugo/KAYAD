@@ -47,6 +47,8 @@ jobs:
       - name: Validate V14 runtime preflight
         run: npm run validate:v14:runtime-preflight
 
+      - name: Validate lucide-react icon exports
+        run: npm run validate:lucide-icon-exports
       - name: Build
         run: npm run build
 

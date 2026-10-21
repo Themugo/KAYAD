@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 
 const api = vi.hoisted(() => ({
   stats: vi.fn(), users: vi.fn(), cars: vi.fn(), getAuditLog: vi.fn(), toggleBan: vi.fn(), approveDealer: vi.fn(), verifyDealer: vi.fn(), moderateCar: vi.fn(), verifyCar: vi.fn(),
@@ -28,7 +29,8 @@ beforeEach(() => {
   api.getAuditLog.mockResolvedValue({ entries: [] });
 });
 afterEach(() => cleanup());
-const mount = () => render(<AdminView vehicles={[]} />);
+// AdminView renders inside the app's router in production (main.tsx); the department matrix uses <Link>.
+const mount = () => render(<MemoryRouter><AdminView vehicles={[]} /></MemoryRouter>);
 const tile = (label: string) => screen.getByText(label).closest('div')!.parentElement!;
 
 describe('Command centre — truthful figures', () => {
@@ -183,8 +185,8 @@ describe('Command centre — departmental capability convergence', () => {
     await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
     fireEvent.click(screen.getByRole('button', { name: 'Departments module' }));
     expect(screen.getByTestId('department-capability-matrix')).toBeTruthy();
-    expect(screen.getByText('Accounting & Finance')).toBeTruthy();
-    expect(screen.getByText('IMPLEMENTED BUT UNVERIFIED')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Accounting & Finance' })).toBeTruthy();
+    expect(screen.getAllByText('IMPLEMENTED BUT UNVERIFIED').length).toBeGreaterThan(0);
     expect(screen.getByText(/This inventory does not grant access/)).toBeTruthy();
     expect(screen.getByRole('link', { name: 'Open existing Transaction oversight workflow' }).getAttribute('href')).toBe('/admin/transactions');
     expect(screen.getByRole('link', { name: 'Open existing Ledger and reconciliation workflow' }).getAttribute('href')).toBe('/admin/escrows');

@@ -1,5 +1,6 @@
 // Re-export types from types/index for consistency
 import type { Vehicle, BodyStyle, TransmissionType, FuelType, VehicleCondition } from './types/index';
+import type { StaffRole } from './utils/authRoutes';
 export type { Vehicle, BodyStyle, TransmissionType, FuelType, VehicleCondition };
 
 export interface BidRecord {
@@ -620,7 +621,8 @@ export interface UserProfile {
   name: string;
   email: string;
   phone: string;
-  role: 'buyer' | 'dealer' | 'mechanic' | 'bank_officer' | 'admin';
+  // Staff roles come from the canonical STAFF_ROLES list; the session can carry any of them at runtime.
+  role: 'buyer' | 'dealer' | 'mechanic' | 'bank_officer' | StaffRole;
   avatar: string;
   isVerified?: boolean;
   unreadMessagesCount?: number;

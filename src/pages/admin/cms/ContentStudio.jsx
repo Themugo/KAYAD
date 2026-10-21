@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  LayoutDashboard, FileText, LandingPage, Newspaper, BookOpen,
+  LayoutDashboard, FileText, LayoutTemplate as LandingPage, Newspaper, BookOpen,
   HelpCircle, Megaphone, Image, Palette, Calendar, Search,
   BarChart3, Globe, SplitSquareVertical, Settings, ChevronRight,
   Plus, Eye, Edit, Trash2, Clock, CheckCircle, AlertCircle,
