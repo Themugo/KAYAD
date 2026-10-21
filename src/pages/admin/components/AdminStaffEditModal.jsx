@@ -1,6 +1,5 @@
 import { ORG } from './AdminStaffOrgChart';
 
-const creatableRoles = ORG.filter(r => r.canCreate !== false && r.role !== 'superadmin').map(r => r.role);
 
 function Field({ label, children }) {
   return (
@@ -11,7 +10,7 @@ function Field({ label, children }) {
   );
 }
 
-export default function AdminStaffEditModal({ member, setMember, onSave, onClose }) {
+export default function AdminStaffEditModal({ member, setMember, roles = [], onSave, onClose, saving = false }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10, 51, 64, 0.8)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose} role="presentation">
       <div style={{ background: '#0a3340', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 18, padding: 32, width: '100%', maxWidth: 420 }} onClick={e => e.stopPropagation()} role="presentation">
@@ -19,18 +18,19 @@ export default function AdminStaffEditModal({ member, setMember, onSave, onClose
           <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.2rem', color: '#fff', margin: 0 }}>Edit: {member.name}</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 20 }}>✕</button>
         </div>
+        <Field label="Full Name"><input value={member.name || ''} maxLength={120} onChange={e => setMember(p => ({ ...p, name: e.target.value }))} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 9, border: '1px solid rgba(10,51,64,.15)', background: '#fff', color: '#0a3340', fontSize: 13 }} /></Field>
         <Field label="Change Role">
           <select defaultValue={member.role}
             onChange={e => setMember(p => ({ ...p, role: e.target.value }))}
             style={{ width: '100%', padding: '10px 12px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.09)', background: '#0a3340', color: '#fff', fontSize: 13, outline: 'none' }}>
-            {creatableRoles.map(r => {
+            {roles.filter(({ role }) => role !== 'superadmin' && role !== 'webhoist' && role !== 'owner').map(({ role: r }) => {
               const org = ORG.find(o => o.role === r);
               return <option key={r} value={r} style={{ background: '#0a3340' }}>{org?.icon} {org?.title || r}</option>;
             })}
           </select>
         </Field>
-        <button onClick={onSave} style={{ width: '100%', padding: '12px', background: 'var(--brand)', border: 'none', borderRadius: 10, color: '#0a3340', fontSize: 13, fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-          Save Changes
+        <button onClick={onSave} disabled={saving || !member.name?.trim()} style={{ width: '100%', padding: '12px', background: 'var(--brand)', border: 'none', borderRadius: 10, color: '#0a3340', fontSize: 13, fontWeight: 900, cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.65 : 1, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          {saving ? 'Saving…' : 'Save Changes'}
         </button>
       </div>
     </div>

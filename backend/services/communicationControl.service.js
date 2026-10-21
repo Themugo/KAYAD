@@ -84,29 +84,52 @@ export const getDeliveryHistory = async ({ userId, channel, category, status, li
 };
 
 export const getProviderHealth = async () => {
+  // Configuration is reported independently from connectivity/delivery. This
+  // endpoint never sends a test message or makes a payment/provider transaction.
   const configured = {
-    brevo: Boolean(process.env.BREVO_API_KEY),
-    africastalking: Boolean(process.env.AT_API_KEY),
+    brevo: Boolean(process.env.BREVO_API_KEY && (process.env.BREVO_FROM_EMAIL || process.env.EMAIL_FROM)),
+    africastalking: Boolean(process.env.AT_API_KEY && process.env.AT_USERNAME),
     twilio_whatsapp: Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_NUMBER),
   };
   const rows = await findAll("communication_deliveries", { orderBy: "createdAt", ascending: false, limit: 1000 });
   const providers = {};
+  const ensureProvider = (key) => providers[key] ||= {
+    provider: key, total: 0, sent: 0, delivered: 0, failed: 0, bounced: 0, deadLetter: 0,
+    lastAttemptAt: null,
+  };
+  Object.keys(configured).forEach(ensureProvider);
   for (const row of rows) {
     const key = row.provider || "unknown";
-    const p = providers[key] ||= { provider: key, total: 0, sent: 0, delivered: 0, failed: 0, bounced: 0, deadLetter: 0 };
+    const p = ensureProvider(key);
     p.total++;
     if (row.status === "sent") p.sent++;
     if (row.status === "delivered" || row.status === "read") p.delivered++;
     if (row.status === "failed") p.failed++;
     if (row.status === "bounced") p.bounced++;
-    // STAGE 2 API CONTRACT CONVERGENCE FIX: dead_letter (a delivery that
-    // exhausted its retries — see DELIVERY_TRANSITIONS/TERMINAL in
-    // communicationGateway.service.js) was counted in `total` but in none of
-    // the per-status buckets, so it was invisible as a failure here and
-    // understated each provider's real failure rate.
     if (row.status === "dead_letter") p.deadLetter++;
+    const attemptAt = row.createdAt || row.created_at || null;
+    if (attemptAt && (!p.lastAttemptAt || new Date(attemptAt).getTime() > new Date(p.lastAttemptAt).getTime())) p.lastAttemptAt = attemptAt;
   }
-  return Object.values(providers).map(p => ({ ...p, configured: configured[p.provider] ?? null, successRate: p.total ? Math.round(((p.delivered + p.sent) / p.total) * 10000) / 100 : 0 }));
+  const checkedAt = new Date().toISOString();
+  return Object.values(providers).map((p) => {
+    const isConfigured = configured[p.provider];
+    const hasEvidence = p.total > 0;
+    const failedCount = p.failed + p.bounced + p.deadLetter;
+    return {
+      ...p,
+      configured: Object.prototype.hasOwnProperty.call(configured, p.provider) ? isConfigured : null,
+      // Delivery ledger evidence is not a live provider probe. Never label a
+      // configured provider connected, or a provider with no rows healthy.
+      status: !Object.prototype.hasOwnProperty.call(configured, p.provider) ? "unknown"
+        : !isConfigured ? "disconnected"
+        : !hasEvidence ? "unknown"
+        : failedCount === p.total ? "failed"
+        : failedCount > 0 ? "degraded" : "unknown",
+      evidence: hasEvidence ? "delivery_ledger" : "configuration_only",
+      checkedAt,
+      successRate: p.total ? Math.round(((p.delivered + p.sent) / p.total) * 10000) / 100 : null,
+    };
+  });
 };
 
 export const getCommunicationAnalytics = async ({ hours = 24 } = {}) => {

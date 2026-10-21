@@ -131,6 +131,7 @@
     "validate:auction-phase9": "node scripts/validate-auction-phase9.mjs",
     "validate:auction-phase10": "node scripts/validate-auction-phase10.mjs",
     "validate:navigation-convergence": "node scripts/validate-navigation-convergence.mjs",
+    "validate:admin-route-convergence": "node scripts/validate-admin-route-convergence.mjs",
     "validate:auction-public-error-states": "node scripts/validate-auction-public-error-states.mjs",
     "validate:public-support-surface": "node scripts/validate-public-support-surface.mjs",
     "validate:public-escrow-boundary": "node scripts/validate-public-escrow-boundary.mjs",
@@ -155,7 +156,9 @@
     "validate:stage5f10-private-seller-gate": "node scripts/validate-stage5f10-private-seller-gate.mjs",
     "test:pg:stage5f10": "node runbooks/stage5f10-private-seller-custody-20261020/pg/stage5f10_gate_pg.mjs",
     "test:http:stage5f10": "node runbooks/stage5f10-private-seller-custody-20261020/http/stage5f10_http_e2e.mjs",
-    "test:ui:stage5f10": "node runbooks/stage5f10-private-seller-custody-20261020/ui/ui_5f10.mjs"
+    "test:ui:stage5f10": "node runbooks/stage5f10-private-seller-custody-20261020/ui/ui_5f10.mjs",
+    "validate:business-command-centre-phase04": "node scripts/validate-business-command-centre-phase04.mjs",
+    "validate:phase06:departments": "node scripts/validate-phase06-department-capabilities.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

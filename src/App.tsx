@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect, Suspense } from 'react';
 import { buildAuthPath, loginPathFor } from './utils/authIntent';
 import Navbar from './components/Navbar';
+import AdminRouteSurface from './components/admin/AdminRouteSurface';
 import VehicleMarketplace from './features/VehicleMarketplace';
 import TopNoticeStrip from './components/TopNoticeStrip';
 import VehicleDetailModal from './components/VehicleDetailModal';
@@ -863,6 +864,18 @@ function AuthRouteSurface() {
   // users to /dashboard; that protected dashboard route redirected to /login.
   if (path === '/notifications') return <RequireAuth><NotificationsPage /></RequireAuth>;
 
+  // Canonical admin shell: /admin is the Business Command Centre home, and
+  // existing /admin/* destinations render inside the same sidebar/layout.
+  // Legacy query-backed entry points are redirected without discarding any
+  // non-admin query parameters from specialist admin URLs.
+  if (path === '/admin' || path.startsWith('/admin/')) return <AdminRouteSurface />;
+  if (path === '/' && new URLSearchParams(location.search).get('nav') === 'admin') {
+    const remaining = new URLSearchParams(location.search);
+    remaining.delete('nav');
+    const suffix = remaining.toString();
+    return <RequireAdmin><Navigate to={`/admin${suffix ? `?${suffix}` : ''}${location.hash}`} replace /></RequireAdmin>;
+  }
+
   // Canonicalize legacy/direct routes into the single AppInner navigation
   // surface. This prevents stale links such as /gallery, /auction, /escrow,
   // /chat, /admin and /dealer from silently rendering the wrong public page.
@@ -880,7 +893,6 @@ function AuthRouteSurface() {
   if (path === '/dashboard') return <RequireAuth><Navigate to="/?nav=dashboard" replace /></RequireAuth>;
   if (path === '/buyer-platform') return <RequireAuth><Navigate to="/?nav=buyer-platform" replace /></RequireAuth>;
   if (path === '/dealer') return <RequireAuth><RequireDealer><Navigate to="/?nav=dealer-dashboard" replace /></RequireDealer></RequireAuth>;
-  if (path === '/admin') return <RequireAdmin><Navigate to="/?nav=admin" replace /></RequireAdmin>;
   if (path === '/inspector/dashboard') return <RequireAuth><Navigate to="/?nav=inspections" replace /></RequireAuth>;
 
   if (path === '/dealer/onboarding') return <RequireAuth><RequireDealer><DealerOnboarding /></RequireDealer></RequireAuth>;

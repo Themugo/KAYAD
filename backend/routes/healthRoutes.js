@@ -82,6 +82,7 @@ router.get("/", async (req, res) => {
     if (readiness.schema === "schema_mismatch") health.status = "degraded";
   } catch {
     health.checks.communications = { schema: "unknown" };
+    health.status = "degraded";
   }
 
   // Memory health
@@ -167,6 +168,15 @@ router.get("/detailed", protect, adminOnly, async (req, res) => {
     heapTotal: `${Math.round(memoryUsage.heapTotal / 1024 / 1024)} MB`,
     external: `${Math.round(memoryUsage.external / 1024 / 1024)} MB`,
     rss: `${Math.round(memoryUsage.rss / 1024 / 1024)} MB`,
+  };
+
+  // Provider credential presence is configuration evidence only, never proof
+  // of provider connectivity or message delivery. Do not expose secret values.
+  health.checks.providers = {
+    brevo: { configured: Boolean(process.env.BREVO_API_KEY && (process.env.BREVO_FROM_EMAIL || process.env.EMAIL_FROM)), status: process.env.BREVO_API_KEY && (process.env.BREVO_FROM_EMAIL || process.env.EMAIL_FROM) ? "configured" : "not_configured" },
+    africastalking: { configured: Boolean(process.env.AT_API_KEY && process.env.AT_USERNAME), status: process.env.AT_API_KEY && process.env.AT_USERNAME ? "configured" : "not_configured" },
+    twilioWhatsApp: { configured: Boolean(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_NUMBER), status: process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN && process.env.TWILIO_WHATSAPP_NUMBER ? "configured" : "not_configured" },
+    mpesa: { configured: Boolean(process.env.MPESA_CONSUMER_KEY && process.env.MPESA_CONSUMER_SECRET && process.env.MPESA_SHORTCODE && process.env.MPESA_PASSKEY), status: process.env.MPESA_CONSUMER_KEY && process.env.MPESA_CONSUMER_SECRET && process.env.MPESA_SHORTCODE && process.env.MPESA_PASSKEY ? "configured" : "not_configured", probe: "not_run_no_transaction" },
   };
 
   // Cache health

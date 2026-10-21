@@ -29,9 +29,8 @@ function SI({ value, onChange, placeholder, type = 'text' }) {
 
 import { Eye, EyeOff } from 'lucide-react';
 
-const creatableRoles = ORG.filter(r => r.canCreate !== false && r.role !== 'superadmin').map(r => r.role);
 
-export default function AdminStaffCreateModal({ form, set, saving, onSubmit, onClose }) {
+export default function AdminStaffCreateModal({ form, set, roles = [], saving, onSubmit, onClose }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10, 51, 64, 0.8)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose} role="presentation">
       <div style={{ background: '#0a3340', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 18, padding: 32, width: '100%', maxWidth: 480 }} onClick={e => e.stopPropagation()} role="presentation">
@@ -42,11 +41,11 @@ export default function AdminStaffCreateModal({ form, set, saving, onSubmit, onC
         <form onSubmit={onSubmit}>
           <Field label="Full Name"><SI value={form.name} onChange={e => set('name', e.target.value)} placeholder="Jane Wanjiku" /></Field>
           <Field label="Email Address"><SI type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="jane@kayad.space" /></Field>
-          <Field label="Temporary Password"><SI type="password" value={form.password} onChange={e => set('password', e.target.value)} placeholder="Min 8 characters" /></Field>
+          <Field label="Initial Password (12+ characters)"><SI type="password" value={form.password} onChange={e => set('password', e.target.value)} placeholder="At least 12 characters" /></Field>
           <Field label="Role">
             <select value={form.role} onChange={e => set('role', e.target.value)}
               style={{ width: '100%', padding: '10px 12px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.09)', background: '#0a3340', color: '#fff', fontSize: 13, outline: 'none' }}>
-              {creatableRoles.map(r => {
+              {roles.filter(({ role }) => role !== 'superadmin' && role !== 'webhoist' && role !== 'owner').map(({ role: r }) => {
                 const org = ORG.find(o => o.role === r);
                 return <option key={r} value={r} style={{ background: '#0a3340' }}>{org?.icon} {org?.title || r}</option>;
               })}

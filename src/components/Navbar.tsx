@@ -19,7 +19,6 @@ import {
   LayoutDashboard,
   MessageSquare,
   Building2,
-  Lock,
   Settings,
   BarChart3,
   Layers,
@@ -34,6 +33,19 @@ import { useBranding } from '../context/BrandingContext';
 import { usePrefersReducedMotion } from '../hooks/useMediaQuery';
 import { applyNavigationConfig, visibleChildren, type NavPrimary } from './navigation/navConfig';
 import '../styles/kayad-navigation.css';
+
+interface AccountAvatarProps { src?: string | null; name?: string | null; className: string }
+
+/** A real account image when available; initials are the deterministic fallback. */
+function AccountAvatar({ src, name, className }: AccountAvatarProps) {
+  const [failed, setFailed] = useState(!src);
+  useEffect(() => { setFailed(!src); }, [src]);
+  const initials = (name || 'KAYAD').trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'K';
+  if (!src || failed) {
+    return <span className={`${className} inline-flex items-center justify-center bg-[#DDF4F0] text-[#0A3340] font-bold`} aria-hidden="true">{initials}</span>;
+  }
+  return <img src={src} alt="" aria-hidden="true" className={className} loading="lazy" decoding="async" onError={() => setFailed(true)} />;
+}
 
 interface NavbarProps {
   user: UserProfile | null;
@@ -226,7 +238,19 @@ export const Navbar: React.FC<NavbarProps> = ({
     navigate(path);
   };
 
+  const handleAdminRoute = (path: string) => {
+    setShowUserDropdown(false);
+    setMobileMenuOpen(false);
+    setOpenMenu(null);
+    pinnedMenu.current = null;
+    navigate(path);
+  };
+
   const handleNavSelect = (navId: string) => {
+    if (navId === 'admin') {
+      handleAdminRoute('/admin');
+      return;
+    }
     onNavClick(navId);
     setShowUserDropdown(false);
     setMobileMenuOpen(false);
@@ -462,10 +486,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   aria-label={`Account menu for ${user.name}`}
                 >
                   <div className="relative">
-                    <img
+                    <AccountAvatar
                       src={user.avatar}
-                      alt={user.name}
-                      className="w-7 h-7 rounded-full object-cover border border-[#0A3340]/30 shadow-2xs"
+                      name={user.name}
+                      className="w-7 h-7 rounded-full object-cover border border-[#0A3340]/30 shadow-2xs text-[9px]"
                     />
                     {hasNotifications && (
                       <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-rose-500 rounded-full border border-white"></span>
@@ -483,7 +507,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <div id="kayad-account-panel" className="absolute right-0 mt-2 w-64 max-h-[calc(100svh-96px)] overflow-y-auto bg-white rounded-2xl shadow-xl border border-[#D7E7E4] py-2 z-50 animate-fade-in text-xs">
                     {/* User Header Info */}
                     <div className="px-4 py-3 border-b border-[#D7E7E4] flex items-center gap-3 bg-[#DDF4F0]/60 rounded-t-2xl">
-                      <img src={user.avatar} alt={user.name} className="w-9 h-9 rounded-full object-cover border border-[#0A3340]/30" />
+                      <AccountAvatar src={user.avatar} name={user.name} className="w-9 h-9 rounded-full object-cover border border-[#0A3340]/30 text-[11px] shrink-0" />
                       <div className="overflow-hidden">
                         <p className="font-bold text-[#0A3340] truncate">{user.name}</p>
                         <p className="text-[11px] text-[#64748B] truncate">{user.email}</p>
@@ -496,7 +520,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {/* Standard Links */}
                     <div className="py-1">
                       <button
-                        onClick={() => handleNavSelect('dashboard')}
+                        onClick={() => isStaffRole(user.role) ? handleAdminRoute('/admin') : handleNavSelect('dashboard')}
                         className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
                       >
                         <LayoutDashboard className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
@@ -671,20 +695,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-[#12576D]">
                           System Administration
                         </div>
-                        <button
-                          onClick={() => handleNavSelect('admin')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-[#DDF4F0] flex items-center gap-2.5 font-bold text-[#0A3340]"
-                        >
-                          <Lock className="w-4 h-4 text-[#12576D]" />
-                          <span>Admin Panel</span>
-                        </button>
-                        <button
-                          onClick={() => handleNavSelect('admin')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-[#DDF4F0] flex items-center gap-2.5 font-bold text-[#0A3340]"
-                        >
-                          <Sliders className="w-4 h-4 text-[#12576D]" />
-                          <span>System Management</span>
-                        </button>
+                        {(user.role === 'superadmin' || user.role === 'admin') && (
+                          <button
+                            onClick={() => handleAdminRoute('/admin/settings')}
+                            className="w-full text-left px-4 py-1.5 hover:bg-[#DDF4F0] flex items-center gap-2.5 font-bold text-[#0A3340]"
+                          >
+                            <Sliders className="w-4 h-4 text-[#12576D]" />
+                            <span>System Management</span>
+                          </button>
+                        )}
                       </div>
                     )}
 

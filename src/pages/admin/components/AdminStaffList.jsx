@@ -1,4 +1,4 @@
-import { Users, Edit3, Trash2 } from 'lucide-react';
+import { Users, Edit3 } from 'lucide-react';
 import { ORG } from './AdminStaffOrgChart';
 
 export default function AdminStaffList({ staff, loading, isSuperAdmin, onEdit, onToggleBan, onDelete, onShowAdd }) {
@@ -38,14 +38,11 @@ export default function AdminStaffList({ staff, loading, isSuperAdmin, onEdit, o
             </div>
             {isSuperAdmin && m.role !== 'superadmin' && (
               <div style={{ display: 'flex', gap: 6 }}>
-                <button onClick={() => onEdit(m)} style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(10, 51, 64, 0.05)', border: '1px solid rgba(10, 51, 64, 0.08)', color: 'rgba(10, 51, 64, 0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <button type="button" aria-label={`Edit ${m.name}`} onClick={() => onEdit(m)} style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(10, 51, 64, 0.05)', border: '1px solid rgba(10, 51, 64, 0.08)', color: 'rgba(10, 51, 64, 0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Edit3 size={13} />
                 </button>
-                <button onClick={() => onToggleBan(m._id, m.isBanned)} style={{ width: 32, height: 32, borderRadius: 8, background: m.isBanned ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)', border: `1px solid ${m.isBanned ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)'}`, color: m.isBanned ? '#22c55e' : '#ef4444', cursor: 'pointer', fontSize: 11, fontWeight: 700 }}>
+                <button type="button" aria-label={m.isBanned ? `Restore access for ${m.name}` : `Suspend access for ${m.name}`} onClick={() => onToggleBan(m._id, m.isBanned)} style={{ width: 32, height: 32, borderRadius: 8, background: m.isBanned ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)', border: `1px solid ${m.isBanned ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)'}`, color: m.isBanned ? '#22c55e' : '#ef4444', cursor: 'pointer', fontSize: 11, fontWeight: 700 }}>
                   {m.isBanned ? '↑' : '⊘'}
-                </button>
-                <button onClick={() => onDelete(m._id, m.name)} style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(239,68,68,0.07)', border: '1px solid rgba(239,68,68,0.14)', color: 'rgba(239,68,68,0.6)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Trash2 size={13} />
                 </button>
               </div>
             )}

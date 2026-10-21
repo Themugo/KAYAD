@@ -28,7 +28,7 @@ export default function AdminStaffPermissions() {
       setStaff(s.staff || []);
       setCatalog(c.catalog || []);
     } catch (_e) {
-      toast('Failed to load staff & permissions', 'error');
+      toast(_e?.response?.data?.message || 'Failed to load staff & permissions', 'error');
     } finally {
       setLoading(false);
     }
@@ -66,7 +66,12 @@ export default function AdminStaffPermissions() {
       // revoked = role defaults the System Owner turned OFF
       const revokedPermissions = [...rolePerms].filter(p => !desired.has(p));
 
-      const res = await adminAPI.setStaffPerms(editing._id, { grantedPermissions, revokedPermissions });
+      const removed = [...(editing.effectivePermissions || [])].filter(p => !desired.has(p));
+      const added = [...desired].filter(p => !(editing.effectivePermissions || []).includes(p));
+      const reason = window.prompt(`Reason for changing permissions for ${editing.email} (recorded in the audit trail):`);
+      if (!reason?.trim()) { toast('A reason is required; no permissions were changed.', 'info'); return; }
+      if (!window.confirm(`Confirm permission change for ${editing.email}?\n\nGrant: ${added.length}\nRevoke: ${removed.length}\n\nThis changes backend authorization on subsequent requests.`)) return;
+      const res = await adminAPI.setStaffPerms(editing._id, { grantedPermissions, revokedPermissions, reason: reason.trim().slice(0, 500) });
       toast(`Permissions updated for ${editing.name}`, 'success');
 
       // Update local state

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
@@ -10,15 +10,28 @@ export default function AdminInspectorApplications() {
   const [expanded, setExpanded] = useState(null);
   const [reviewNotes, setReviewNotes] = useState({});
   const [actionLoading, setActionLoading] = useState(null);
+  const [loadError, setLoadError] = useState('');
+  const requestSequence = useRef(0);
 
-  const fetchApps = useCallback(() => {
+  const fetchApps = useCallback(async () => {
+    const requestId = ++requestSequence.current;
     setLoading(true);
+    setLoadError('');
     const params = {};
     if (statusFilter) params.status = statusFilter;
-    adminAPI.inspectorApplications(params)
-      .then(d => setApps(d.applications || []))
-      .catch(() => toast('Failed to load', 'error'))
-      .finally(() => setLoading(false));
+    try {
+      const response = await adminAPI.inspectorApplications(params);
+      if (requestId !== requestSequence.current) return;
+      if (!Array.isArray(response?.applications)) throw new Error('The server returned an invalid inspector application response.');
+      setApps(response.applications);
+    } catch (error) {
+      if (requestId !== requestSequence.current) return;
+      const message = error?.response?.data?.message || error?.message || 'Failed to load inspector applications.';
+      setLoadError(message);
+      toast(message, 'error');
+    } finally {
+      if (requestId === requestSequence.current) setLoading(false);
+    }
   }, [statusFilter, toast]);
 
   useEffect(() => { fetchApps(); }, [fetchApps]);
@@ -55,8 +68,16 @@ export default function AdminInspectorApplications() {
           </select>
         </div>
 
+        {loadError && (
+          <div role="alert" className="card" style={{ padding: 16, marginBottom: 16 }}>
+            <p>{loadError}</p>
+            <button type="button" className="btn btn-sm btn-outline" onClick={() => void fetchApps()} disabled={loading} style={{ marginTop: 8 }}>Retry loading applications</button>
+          </div>
+        )}
         {loading ? (
-          <div className="loading-center"><div className="spinner" /></div>
+          <div className="loading-center" role="status"><div className="spinner" /><span>Loading inspector applications…</span></div>
+        ) : loadError ? (
+          <div className="card" style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)' }}>Applications could not be loaded. Existing decisions are not changed.</div>
         ) : apps.length === 0 ? (
           <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>No applications found</div>
         ) : (

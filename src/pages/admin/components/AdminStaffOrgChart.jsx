@@ -22,7 +22,7 @@ export default function AdminStaffOrgChart({ staff, isSuperAdmin, onAddStaff }) 
       {[0, 1, 2, 3].map(level => {
         const levelRoles = ORG.filter(r => r.level === level);
         if (!levelRoles.length) return null;
-        const levelLabel = ['Platform Owner', 'Senior Administration', 'Department Heads', 'Specialists'][level];
+        const levelLabel = ['System Governance', 'Senior Administration', 'Departmental Roles', 'Specialist Roles'][level];
         return (
           <div key={level} style={{ marginBottom: 32 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>

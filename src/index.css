@@ -972,3 +972,22 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
     transition-duration: .01ms !important;
   }
 }
+
+/* Frontend polish pass: strengthen keyboard visibility and long-content resilience
+   inside the existing administration workspace without changing domain behavior. */
+[data-testid="admin-command-centre"] :where(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid rgba(19, 184, 166, .78);
+  outline-offset: 3px;
+}
+[data-testid="admin-command-centre"] :where(p, li, td, th, label) {
+  overflow-wrap: anywhere;
+}
+[data-testid="admin-command-centre"] :where(table) {
+  max-width: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-testid="admin-command-centre"] :where(.animate-spin, .animate-pulse, .transition-all, .transition-colors, .transition-transform) {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}

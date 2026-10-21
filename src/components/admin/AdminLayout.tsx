@@ -4,6 +4,8 @@ import AdminSidebar from './AdminSidebar';
 import { useAuth, SessionRecovery } from '../../context/AuthContext';
 import { useLocation, Navigate } from 'react-router-dom';
 import { ChevronRight, Menu } from 'lucide-react';
+import '../../styles/kayad-admin-shell.css';
+import { useRef } from 'react';
 
 const ROLE_LABELS: Record<string, string> = {
   superadmin: 'Super Admin', admin: 'Admin', marketing: 'Marketing',
@@ -20,10 +22,24 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const { user, isAuth, loading, sessionStatus } = useAuth();
   const loc = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const sidebarToggleRef = useRef<HTMLButtonElement>(null);
+  const closeSidebar = () => { setSidebarOpen(false); sidebarToggleRef.current?.focus(); };
 
   useEffect(() => {
     document.body.style.overflow = sidebarOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
+  }, [sidebarOpen]);
+
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      closeSidebar();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    const firstLink = document.querySelector<HTMLElement>('.admin-sidebar a[href]');
+    firstLink?.focus();
+    return () => document.removeEventListener('keydown', onKeyDown);
   }, [sidebarOpen]);
 
   if (loading) return null;
@@ -42,8 +58,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const segments = loc.pathname.split('/').filter(Boolean);
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#0a3340' }}>
-      <AdminSidebar mobileOpen={sidebarOpen} onToggle={() => setSidebarOpen(false)} />
+    <div className="kayad-admin-shell" style={{ display: 'flex', minHeight: '100vh', background: '#0a3340' }}>
+      <AdminSidebar mobileOpen={sidebarOpen} onToggle={closeSidebar} />
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Top header bar */}
         <div style={{
@@ -54,9 +70,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           {/* Breadcrumbs */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>
             <button
+              ref={sidebarToggleRef}
               className="sidebar-toggle-btn"
+              aria-label={sidebarOpen ? 'Close admin navigation' : 'Open admin navigation'}
+              aria-expanded={sidebarOpen}
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              style={{ display: 'none', background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', padding: 4, marginRight: 4 }}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.8)', cursor: 'pointer', padding: 4, marginRight: 4 }}
             >
               <Menu size={18} />
             </button>
@@ -90,7 +109,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
         </div>
         {/* Page content */}
-        <div style={{ flex: 1, overflow: 'auto' }}>
+        <div className="kayad-admin-shell__content" style={{ flex: 1, overflow: 'auto' }}> 
           {children}
         </div>
       </div>

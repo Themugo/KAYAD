@@ -235,6 +235,7 @@ export const adminAPI = {
   updateStaff:     (id: string, body: any)    => api.put(`/admin/staff/${id}`, body).then(unwrap),
   deleteStaff:     (id: string)          => api.delete(`/admin/staff/${id}`).then(unwrap),
   getPermCatalog:  ()            => api.get('/admin/staff/permissions/catalog').then(unwrap),
+  getStaffRoleCatalog: ()        => api.get('/admin/staff/roles/catalog').then(unwrap),
   getStaffPerms:   (id: string)          => api.get(`/admin/staff/${id}/permissions`).then(unwrap),
   setStaffPerms:   (id: string, body: any)    => api.put(`/admin/staff/${id}/permissions`, body).then(unwrap),
   deleteUser:      (userId: string)      => api.delete(`/admin/users/${userId}`).then(unwrap),

@@ -1,134 +1,150 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
-import { Plus } from 'lucide-react';
+import { Plus, Search, RefreshCw, ShieldAlert, Users, LockKeyhole } from 'lucide-react';
 import AdminStaffOrgChart from './components/AdminStaffOrgChart';
 import AdminStaffList from './components/AdminStaffList';
 import AdminStaffPermMatrix from './components/AdminStaffPermMatrix';
 import AdminStaffCreateModal from './components/AdminStaffCreateModal';
 import AdminStaffEditModal from './components/AdminStaffEditModal';
 
+const STAFF_ROLES = ['admin', 'marketing', 'technical_support', 'hr', 'accounts', 'escrow_officer', 'ad_manager', 'moderator', 'ghost_checker'];
+
 export default function AdminStaff() {
   const { user: me } = useAuth();
   const isSystemOwner = me?.isOwner === true;
   const { toast } = useToast();
-  const [staff,   setStaff]   = useState([]);
+  const [staff, setStaff] = useState([]);
+  const [roleCatalog, setRoleCatalog] = useState(STAFF_ROLES.map(role => ({ role, permissions: [] }))); 
   const [loading, setLoading] = useState(true);
-  const [tab,     setTab]     = useState('hierarchy');
+  const [error, setError] = useState('');
+  const [tab, setTab] = useState('directory');
+  const [query, setQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [showAdd, setShowAdd] = useState(false);
   const [editMember, setEditMember] = useState(null);
-  const [form, setForm] = useState({ name:'', email:'', password:'', role:'admin' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'admin' });
   const [saving, setSaving] = useState(false);
+  const requestId = useRef(0);
+  const set = (k, v) => setForm(p => ({ ...p, [k]: v }));
 
-  const set = (k, v) => setForm(p => ({...p, [k]:v}));
+  const loadStaff = useCallback(async ({ quiet = false } = {}) => {
+    const id = ++requestId.current;
+    if (!quiet) setLoading(true);
+    setError('');
+    try {
+      const d = await adminAPI.getStaff();
+      if (id !== requestId.current) return;
+      setStaff(Array.isArray(d.staff) ? d.staff : []);
+    } catch (err) {
+      if (id !== requestId.current) return;
+      const message = err?.response?.data?.message || 'Staff directory could not be loaded. Your changes have not been assumed.';
+      setError(message);
+      toast(message, 'error');
+    } finally {
+      if (id === requestId.current) setLoading(false);
+    }
+  }, [toast]);
 
   useEffect(() => {
-    if (!isSystemOwner) { setLoading(false); return; }
-    adminAPI.getStaff?.().then(d => setStaff(d.staff || [])).catch(() => {}).finally(() => setLoading(false));
-  }, [isSystemOwner]);
+    if (isSystemOwner) {
+      loadStaff();
+      adminAPI.getStaffRoleCatalog().then(result => { if (Array.isArray(result.roles)) setRoleCatalog(result.roles); }).catch(err => { toast(err?.response?.data?.message || 'Canonical role catalog unavailable; role changes must be verified by the backend.', 'error'); });
+    } else setLoading(false);
+    return () => { requestId.current += 1; };
+  }, [isSystemOwner, loadStaff, toast]);
+
+  const filteredStaff = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return staff.filter(member => {
+      const matchesQuery = !q || [member.name, member.email, member.role].some(value => String(value || '').toLowerCase().includes(q));
+      const matchesRole = roleFilter === 'all' || member.role === roleFilter;
+      const matchesStatus = statusFilter === 'all' || (statusFilter === 'suspended' ? member.isBanned === true : member.isBanned !== true);
+      return matchesQuery && matchesRole && matchesStatus;
+    });
+  }, [staff, query, roleFilter, statusFilter]);
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.password || !form.role) { toast('All fields required', 'error'); return; }
+    const name = form.name.trim();
+    const email = form.email.trim().toLowerCase();
+    if (!name || !email || !form.password || !form.role) { toast('Complete all required fields.', 'error'); return; }
+    if (name.length > 120 || form.password.length < 12 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      toast('Use a valid email, a name up to 120 characters, and an initial password of at least 12 characters.', 'error'); return;
+    }
+    if (!STAFF_ROLES.includes(form.role)) { toast('Select a supported staff role.', 'error'); return; }
+    const reason = window.prompt('Reason for creating this staff account (recorded in the audit trail):');
+    if (!reason?.trim()) { toast('A reason is required; no staff account was created.', 'info'); return; }
+    if (!window.confirm(`Create a ${form.role.replaceAll('_', ' ')} account for ${email}? This uses the existing initial-password endpoint, not an email invitation.`)) return;
     setSaving(true);
     try {
-      const d = await adminAPI.createStaff?.(form);
-      setStaff(p => [...p, d.user || { ...form, _id: Date.now(), createdAt: new Date() }]);
-      setForm({ name:'', email:'', password:'', role:'admin' });
+      await adminAPI.createStaff({ name, email, password: form.password, role: form.role, reason: reason.trim().slice(0, 500) });
+      setForm({ name: '', email: '', password: '', role: 'admin' });
       setShowAdd(false);
-      toast(`Staff account created: ${form.email}`, 'success');
+      toast('Staff account created. The initial password was not displayed or logged.', 'success');
+      await loadStaff({ quiet: true });
     } catch (err) {
-      toast(err.response?.data?.message || 'Failed to create staff', 'error');
+      toast(err?.response?.data?.message || 'Staff account could not be created.', 'error');
     } finally { setSaving(false); }
   };
 
   const handleUpdate = async (id, updates) => {
+    const current = staff.find(s => s._id === id);
+    if (!current) return;
+    const nextRole = updates.role ?? current.role;
+    const nextBanned = updates.isBanned ?? current.isBanned === true;
+    const changes = [];
+    if (updates.name && updates.name !== current.name) changes.push(`name: ${current.name} → ${updates.name}`);
+    if (nextRole !== current.role) changes.push(`role: ${current.role} → ${nextRole}`);
+    if (nextBanned !== (current.isBanned === true)) changes.push(`access: ${nextBanned ? 'suspend' : 'restore'}`);
+    if (!changes.length) { setEditMember(null); return; }
+    if (current.role === 'superadmin' || current.isOwner === true) { toast('System Owner / Super Admin identity cannot be changed through staff editing.', 'error'); return; }
+    const reason = window.prompt(`Reason for changing access for ${current.email} (recorded in the audit trail):`);
+    if (!reason?.trim()) { toast('A reason is required; no staff changes were made.', 'info'); return; }
+    if (!window.confirm(`Confirm staff access change for ${current.email}?\n\n${changes.join('\n')}\n\nThis action will be sent to the server and audited.`)) return;
+    setSaving(true);
     try {
-      await adminAPI.updateStaff?.(id, updates);
-      setStaff(p => p.map(s => s._id === id ? {...s, ...updates} : s));
+      await adminAPI.updateStaff(id, { ...(updates.name !== undefined ? { name: updates.name } : {}), ...(updates.role !== undefined ? { role: updates.role } : {}), ...(updates.isBanned !== undefined ? { isBanned: updates.isBanned } : {}), reason: reason.trim().slice(0, 500) });
       setEditMember(null);
-      toast('Staff updated', 'success');
-    } catch { toast('Failed to update', 'error'); }
+      toast('Staff record updated.', 'success');
+      await loadStaff({ quiet: true });
+    } catch (err) {
+      toast(err?.response?.data?.message || 'Staff record could not be updated.', 'error');
+    } finally { setSaving(false); }
   };
 
-  const handleDelete = async (id, name) => {
-    if (!confirm(`Delete ${name}'s account permanently?`)) return;
-    try {
-      await adminAPI.deleteStaff?.(id);
-      setStaff(p => p.filter(s => s._id !== id));
-      toast('Staff account deleted', 'info');
-    } catch (err) {
-      toast(err.response?.data?.message || 'Cannot delete this account', 'error');
-    }
-  };
+  if (!isSystemOwner) return <div role="alert" style={{ maxWidth: 760, margin: '48px auto', padding: 28, background: '#fff', border: '1px solid #dbe7e8', borderRadius: 16, color: '#0a3340' }}><LockKeyhole size={32} /><h2>System Owner governance</h2><p>Only a verified active System Owner can manage staff records and permissions. This page-level check is not a substitute for backend authorization.</p></div>;
 
   return (
-    <div style={{ background:'#f6faf9', minHeight:'100vh' }}>
-      {/* Header */}
-      <div style={{ background:'linear-gradient(180deg, rgba(23, 107, 135, 0.04) 0%, transparent 100%)', borderBottom:'1px solid rgba(10, 51, 64, 0.05)', padding:'36px 0 0' }}>
-        <div style={{ maxWidth:1300, margin:'0 auto', padding:'0 32px' }}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:24, flexWrap:'wrap', gap:16 }}>
-            <div>
-              <div style={{ fontSize:9, color:'var(--brand)', fontWeight:700, letterSpacing:'0.22em', textTransform:'uppercase', marginBottom:6 }}>Admin Centre</div>
-              <h1 style={{ fontFamily:'var(--font-display)', fontWeight:900, fontStyle:'italic', fontSize:'clamp(1.6rem,3vw,2.2rem)', color:'#0a3340', margin:'0 0 6px' }}>
-                Staff <span style={{ color:'var(--brand)' }}>Hierarchy</span>
-              </h1>
-              <p style={{ color:'rgba(10, 51, 64, 0.3)', fontSize:13, margin:0 }}>
-                Manage platform staff, roles and access levels · {staff.length} active staff
-              </p>
-            </div>
-            {isSystemOwner && (
-              <button onClick={() => setShowAdd(true)} style={{ display:'flex', alignItems:'center', gap:8, padding:'10px 20px', background:'var(--brand)', border:'none', borderRadius:10, color:'#0a3340', fontSize:13, fontWeight:900, cursor:'pointer', textTransform:'uppercase', letterSpacing:'0.06em' }}>
-                <Plus size={14}/> Add Staff
-              </button>
-            )}
-          </div>
-          <div style={{ display:'flex', gap:2 }}>
-            {[{id:'hierarchy', label:'Org Chart'}, {id:'staff', label:'All Staff'}, {id:'permissions', label:'Permission Matrix'}].map(t => (
-              <button key={t.id} onClick={() => setTab(t.id)} style={{ padding:'11px 18px', background:'none', border:'none', cursor:'pointer', fontSize:13, fontWeight: tab===t.id ? 700 : 500, color: tab===t.id ? '#0a3340' : 'rgba(10, 51, 64, 0.4)', borderBottom:`2px solid ${tab===t.id ? 'var(--brand)' : 'transparent'}`, transition:'all 0.2s' }}>
-                {t.label}
-              </button>
-            ))}
-          </div>
-        </div>
+    <main style={{ maxWidth: 1320, minWidth: 0, margin: '0 auto', padding: '24px clamp(12px, 3vw, 32px)', color: '#0a3340' }}>
+      <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
+        <div><div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.14em', color: '#176b87' }}>System Owner · Access governance</div><h1 style={{ fontSize: 'clamp(24px, 3vw, 34px)', margin: '8px 0' }}>Staff directory & access</h1><p style={{ margin: 0, color: '#64748b', maxWidth: 720 }}>Manage existing staff identities, supported roles, suspensions and permission assignments. Role labels describe access policy; they do not certify a separate HR, accounting or sales subsystem.</p></div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><button type="button" onClick={() => loadStaff()} disabled={loading} style={buttonStyle('secondary')}><RefreshCw size={15} /> Refresh</button><button type="button" onClick={() => setShowAdd(true)} style={buttonStyle('primary')}><Plus size={16} /> Create staff account</button></div>
+      </header>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
+        {[['directory', 'Staff directory'], ['hierarchy', 'Role overview'], ['permissions', 'Permission matrix']].map(([key, label]) => <button type="button" key={key} onClick={() => setTab(key)} aria-pressed={tab === key} style={{ ...buttonStyle(tab === key ? 'primary' : 'secondary'), background: tab === key ? '#0a3340' : '#fff', color: tab === key ? '#fff' : '#0a3340' }}>{label}</button>)}
       </div>
-
-      {!isSystemOwner ? (
-        <div role="status" style={{ maxWidth:900, margin:'32px auto', padding:24, border:'1px solid #cbd5e1', borderRadius:14, background:'#fff', color:'#334155' }}>
-          <h2 style={{ margin:'0 0 8px', color:'#0a3340' }}>System Owner governance</h2>
-          <p style={{ margin:0, fontSize:14, lineHeight:1.6 }}>Staff creation, role assignment and permission changes are reserved for a verified active System Owner. Your current account does not have owner-governance authority.</p>
-        </div>
-      ) : (
-      <div style={{ maxWidth:1300, margin:'0 auto', padding:'32px 32px' }}>
-
-        {tab === 'hierarchy' && (
-          <AdminStaffOrgChart staff={staff} isSuperAdmin={isSystemOwner}
-            onAddStaff={(role) => { setForm(p => ({...p, role})); setShowAdd(true); }} />
-        )}
-
-        {tab === 'staff' && (
-          <AdminStaffList staff={staff} loading={loading} isSuperAdmin={isSystemOwner}
-            onEdit={(m) => setEditMember(m)}
-            onToggleBan={(id, isBanned) => handleUpdate(id, { isBanned: !isBanned })}
-            onDelete={(id, name) => handleDelete(id, name)}
-            onShowAdd={() => setShowAdd(true)} />
-        )}
-
-        {tab === 'permissions' && <AdminStaffPermMatrix />}
-
-      {showAdd && isSystemOwner && (
-        <AdminStaffCreateModal form={form} set={set} saving={saving}
-          onSubmit={handleCreate} onClose={() => setShowAdd(false)} />
-      )}
-
-      {editMember && (
-        <AdminStaffEditModal member={editMember} setMember={setEditMember}
-          onSave={() => handleUpdate(editMember._id, { role: editMember.role })}
-          onClose={() => setEditMember(null)} />
-      )}
-      </div>
-      )}
-    </div>
+      {error && <div role="alert" style={{ padding: 12, marginBottom: 16, borderRadius: 10, border: '1px solid #fecaca', background: '#fff1f2', color: '#9f1239' }}><ShieldAlert size={16} style={{ display: 'inline', marginRight: 8 }} />{error}</div>}
+      {tab === 'directory' && <>
+        <section aria-label="Staff filters" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, padding: 14, marginBottom: 16, border: '1px solid #dbe7e8', borderRadius: 14, background: '#fff' }}>
+          <label style={labelStyle}>Search staff<input value={query} onChange={e => setQuery(e.target.value)} placeholder="Name, email or role" style={inputStyle} /></label>
+          <label style={labelStyle}>Role<select value={roleFilter} onChange={e => setRoleFilter(e.target.value)} style={inputStyle}><option value="all">All roles</option>{roleCatalog.map(({ role }) => <option key={role} value={role}>{role.replaceAll('_', ' ')}</option>)}</select></label>
+          <label style={labelStyle}>Account status<select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={inputStyle}><option value="all">All statuses</option><option value="active">Not suspended</option><option value="suspended">Suspended</option></select></label>
+          <div style={{ alignSelf: 'end', color: '#64748b', fontSize: 13, padding: '10px 0' }}><Users size={15} style={{ display: 'inline', marginRight: 6 }} />{filteredStaff.length} of {staff.length} staff</div>
+        </section>
+        {loading ? <div role="status" style={{ padding: 48, textAlign: 'center' }}>Loading staff records…</div> : <AdminStaffList staff={filteredStaff} loading={false} isSuperAdmin onEdit={setEditMember} onToggleBan={(id, banned) => handleUpdate(id, { isBanned: !banned })} onShowAdd={() => setShowAdd(true)} />}
+        <p style={{ color: '#64748b', fontSize: 12, marginTop: 12 }}>Department assignment and email invitations are not currently represented by verified backend contracts. This directory does not fabricate either capability. “Suspended” maps to the existing `isBanned` field.</p>
+      </>}
+      {tab === 'hierarchy' && <AdminStaffOrgChart staff={staff} isSuperAdmin onAddStaff={(role) => { setForm(p => ({ ...p, role })); setShowAdd(true); }} />}
+      {tab === 'permissions' && <AdminStaffPermMatrix />}
+      {showAdd && <AdminStaffCreateModal form={form} set={set} roles={roleCatalog} saving={saving} onSubmit={handleCreate} onClose={() => !saving && setShowAdd(false)} />}
+      {editMember && <AdminStaffEditModal member={editMember} setMember={setEditMember} roles={roleCatalog} saving={saving} onSave={() => handleUpdate(editMember._id, { name: editMember.name, role: editMember.role })} onClose={() => !saving && setEditMember(null)} />}
+    </main>
   );
 }
+
+function buttonStyle(kind) { return { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '10px 14px', borderRadius: 10, border: kind === 'primary' ? '1px solid #0a3340' : '1px solid #dbe7e8', background: kind === 'primary' ? '#0a3340' : '#fff', color: kind === 'primary' ? '#fff' : '#0a3340', fontWeight: 700, fontSize: 13, cursor: 'pointer' }; }
+const labelStyle = { display: 'grid', gap: 6, color: '#475569', fontSize: 12, fontWeight: 700 };
+const inputStyle = { width: '100%', minWidth: 0, padding: '10px 11px', border: '1px solid #cbd5e1', borderRadius: 8, background: '#fff', color: '#0a3340', fontSize: 13 };

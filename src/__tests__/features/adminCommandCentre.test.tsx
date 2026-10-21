@@ -87,6 +87,35 @@ describe('Command centre — canonical queue destinations', () => {
   });
 });
 
+
+describe('Command centre — responsive and accessible presentation', () => {
+  it('provides a named administration navigation region and identifies the active module', async () => {
+    mount();
+    await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
+    expect(screen.getByRole('navigation', { name: 'Administration modules' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Overview module' }).getAttribute('aria-current')).toBe('page');
+    fireEvent.click(screen.getByRole('button', { name: 'Users module' }));
+    expect(screen.getByRole('button', { name: 'Users module' }).getAttribute('aria-current')).toBe('page');
+    expect(screen.getByRole('button', { name: 'Overview module' }).getAttribute('aria-current')).toBeNull();
+  });
+
+  it('announces the loaded state and allows a manual refresh', async () => {
+    mount();
+    await waitFor(() => expect(screen.getByRole('status').textContent).toContain('Operational data loaded'));
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh administration data' }));
+    await waitFor(() => expect(api.stats).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.getByRole('status').textContent).toContain('Operational data loaded'));
+  });
+
+  it('uses an alert role for partial data failures without hiding successful metrics', async () => {
+    api.getAuditLog.mockRejectedValue(Object.assign(new Error('temporary failure'), { response: { status: 503 } }));
+    mount();
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toMatch(/audit log/));
+    expect(screen.getByText('120')).toBeTruthy();
+    expect(screen.getByRole('status').textContent).toContain('Some operational data is unavailable');
+  });
+});
+
 describe('Command centre — role boundaries', () => {
   it('a 403 from a source is reported as an access boundary, not as an outage', async () => {
     api.getAuditLog.mockRejectedValue(forbidden());
@@ -116,5 +145,56 @@ describe('Command centre — role boundaries', () => {
     mount();
     await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
     expect(screen.queryByText('Owners')).toBeNull();
+  });
+});
+
+describe('Command centre — canonical approval workbench', () => {
+  it('links to each existing specialist workflow without inventing counts or parallel routes', async () => {
+    mount();
+    await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
+    const workbench = screen.getByTestId('approval-workbench');
+    const routes = [
+      ['Dealer verification', '/admin/dealer-verifications'],
+      ['Seller accounts', '/admin/sellers'],
+      ['Inspector applications', '/admin/inspector-applications'],
+      ['Vehicle moderation', '/admin/moderation'],
+      ['Vehicle and document verification', '/admin/ntsa-queue'],
+      ['Inspection operations', '/admin/inspections'],
+    ];
+    for (const [label, href] of routes) {
+      const link = screen.getByRole('link', { name: `Open ${label} workflow` });
+      expect(link.getAttribute('href')).toBe(href);
+      expect(workbench.contains(link)).toBe(true);
+    }
+    expect(workbench.textContent).toContain('Each workflow retains its own domain rules');
+  });
+});
+
+
+describe('Command centre — departmental capability convergence', () => {
+  it('shows the capability matrix only to a confirmed owner and links to existing workflows', async () => {
+    mount();
+    await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
+    expect(screen.queryByRole('button', { name: 'Departments module' })).toBeNull();
+
+    cleanup();
+    authUser = { id: 'o1', role: 'superadmin', isOwner: true };
+    mount();
+    await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: 'Departments module' }));
+    expect(screen.getByTestId('department-capability-matrix')).toBeTruthy();
+    expect(screen.getByText('Accounting & Finance')).toBeTruthy();
+    expect(screen.getByText('IMPLEMENTED BUT UNVERIFIED')).toBeTruthy();
+    expect(screen.getByText(/This inventory does not grant access/)).toBeTruthy();
+    expect(screen.getByRole('link', { name: 'Open existing Transaction oversight workflow' }).getAttribute('href')).toBe('/admin/transactions');
+    expect(screen.getByRole('link', { name: 'Open existing Ledger and reconciliation workflow' }).getAttribute('href')).toBe('/admin/escrows');
+    expect(screen.getByText(/No new records, database tables, financial totals/)).toBeTruthy();
+  });
+
+  it('does not reveal owner-only department inventory from a forged owner marker', async () => {
+    authUser = { id: 'u2', role: 'admin', isOwner: 'true' };
+    mount();
+    await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
+    expect(screen.queryByRole('button', { name: 'Departments module' })).toBeNull();
   });
 });

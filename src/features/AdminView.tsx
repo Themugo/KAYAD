@@ -4,6 +4,8 @@ import { adminAPI } from '../api/api.exports';
 import {
   AlertTriangle,
   Ban,
+  Building2,
+  ChevronRight,
   Car,
   CheckCircle2,
   Compass,
@@ -27,6 +29,7 @@ import AdminSettingsOnboarding from '../pages/admin/AdminSettingsOnboarding';
 // STAGE 5B: owner membership management (owner-only on the server; the tab is shown only to owners).
 import AdminOwnerManagement from '../pages/admin/AdminOwnerManagement';
 import AdminAuctionVerification from './AdminAuctionVerification'; // STAGE 5F.10
+import AdminDepartmentCapabilities from './AdminDepartmentCapabilities';
 import { useAuth } from '../context/AuthContext';
 
 interface AdminViewProps {
@@ -78,7 +81,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [cars, setCars] = useState<AdminCar[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditRecord[]>([]);
-  const [module, setModule] = useState<'overview' | 'users' | 'cars' | 'audit' | 'communications' | 'navigation' | 'providers' | 'support' | 'onboarding' | 'auctions' | 'owners'>('overview');
+  const [module, setModule] = useState<'overview' | 'users' | 'cars' | 'audit' | 'communications' | 'navigation' | 'providers' | 'support' | 'onboarding' | 'auctions' | 'owners' | 'departments'>('overview');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [statsStatus, setStatsStatus] = useState<'loading' | 'ready' | 'stale' | 'error'>('loading');
@@ -246,8 +249,8 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
   };
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-2xl border border-[#CFE2E7] bg-white shadow-sm overflow-hidden">
+    <div className="mx-auto w-full min-w-0 max-w-[1600px] space-y-5 sm:space-y-6" data-testid="admin-command-centre">
+      <section aria-labelledby="admin-command-centre-title" className="overflow-hidden rounded-2xl border border-[#CFE2E7] bg-white shadow-sm">
         <div className="h-1 bg-gradient-to-r from-[#0B3440] via-[#176B87] to-[#13B8A6]" />
         <div className="flex flex-col gap-4 px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="min-w-0">
@@ -255,18 +258,18 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
               <ShieldCheck className="h-4 w-4 shrink-0" /> KAYAD Operations
               <span className="rounded-full border border-[#D7E7E4] bg-[#F4FAF9] px-2 py-1 tracking-normal text-[#49656D]">{isOwner ? 'Owner access' : 'Administration'}</span>
             </div>
-            <h1 className="mt-2 text-2xl font-extrabold tracking-tight text-[#0B3440] sm:text-3xl">Command centre</h1>
+            <h1 id="admin-command-centre-title" className="mt-2 text-2xl font-extrabold tracking-tight text-[#0B3440] sm:text-3xl">Command centre</h1>
             <p className="mt-1 max-w-3xl text-sm leading-6 text-[#58717A]">Review marketplace decisions, operational queues and administration activity from the protected KAYAD backend.</p>
           </div>
           <div className="flex shrink-0 flex-wrap items-center gap-3">
-            <div className="text-xs text-[#64748B]" aria-live="polite">{loading ? 'Refreshing operational data…' : error ? (statsStatus === 'stale' ? 'Showing last successful statistics; some sources failed' : 'Some operational data is unavailable') : 'Latest request completed'}</div>
+            <div className="text-xs text-[#64748B]" role="status" aria-live="polite" aria-atomic="true">{loading ? 'Refreshing operational data…' : error ? (statsStatus === 'stale' ? 'Showing last successful statistics; some sources failed' : 'Some operational data is unavailable') : statsStatus === 'ready' ? 'Operational data loaded' : statsStatus === 'stale' ? 'Showing last successful statistics' : 'Waiting for operational data'}</div>
             <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading} aria-label="Refresh administration data"><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh</Button>
           </div>
         </div>
       </section>
 
       {(error || actionError) && (
-        <Card className="p-4 border-[#BDE5DE] bg-[#F3FAF9] text-[#0A3340] text-sm flex items-start gap-2">
+        <Card role="alert" className="flex items-start gap-2 border-[#BDE5DE] bg-[#F3FAF9] p-4 text-sm text-[#0A3340]">
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
           <span>{actionError || error}</span>
         </Card>
@@ -276,9 +279,11 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
         <p role="note" className="text-xs text-[#58717A]">Not included in your role: {restricted.join(', ')}. This is an access boundary, not an outage.</p>
       )}
 
-      <div className="flex flex-wrap gap-2">
-        {([...(['overview', 'users', 'cars', 'audit', 'communications', 'navigation', 'providers', 'support', 'onboarding', 'auctions'] as const), ...(isOwner ? (['owners'] as const) : [])]).map((item) => (
-          <Button key={item} variant={module === item ? 'primary' : 'outline'} size="sm" onClick={() => setModule(item)}>
+      <nav aria-label="Administration modules" className="rounded-xl border border-[#DCE8EB] bg-white p-2 shadow-sm">
+      <div className="flex min-w-0 flex-wrap items-center gap-2">
+        {([...(['overview', 'users', 'cars', 'audit', 'communications', 'navigation', 'providers', 'support', 'onboarding', 'auctions'] as const), ...(isOwner ? (['owners', 'departments'] as const) : [])]).map((item) => (
+          <Button key={item} variant={module === item ? 'primary' : 'outline'} size="sm" onClick={() => setModule(item)} aria-current={module === item ? 'page' : undefined} aria-label={`${item[0].toUpperCase() + item.slice(1)} module`}>
+            {item === 'departments' && <Building2 className="w-4 h-4" />}
             {item === 'overview' && <ShieldCheck className="w-4 h-4" />}
             {item === 'users' && <Users className="w-4 h-4" />}
             {item === 'cars' && <Car className="w-4 h-4" />}
@@ -291,8 +296,9 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             {item[0].toUpperCase() + item.slice(1)}
           </Button>
         ))}
-        {module !== 'overview' && module !== 'navigation' && module !== 'providers' && module !== 'support' && module !== 'onboarding' && module !== 'auctions' && module !== 'owners' && <div className="ml-auto min-w-[240px]"><Input aria-label="Search administration records" placeholder="Search live records…" value={search} onChange={(e) => setSearch(e.target.value)} /></div>}
+        {module !== 'overview' && module !== 'navigation' && module !== 'providers' && module !== 'support' && module !== 'onboarding' && module !== 'auctions' && module !== 'owners' && module !== 'departments' && <div className="w-full min-w-0 pt-1 sm:ml-auto sm:w-64 sm:pt-0"><Input aria-label="Search administration records" placeholder="Search live records…" value={search} onChange={(e) => setSearch(e.target.value)} /></div>}
       </div>
+      </nav>
 
       {module === 'overview' && (
         <>
@@ -301,7 +307,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
               <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#58717A]">Marketplace snapshot</p><h2 id="marketplace-overview-heading" className="mt-1 text-lg font-bold text-[#0B3440]">Platform at a glance</h2></div>
               <span className="hidden text-xs text-[#58717A] sm:inline">Values reflect the latest API response</span>
             </div>
-            <div className="grid grid-cols-2 gap-3 xl:grid-cols-5 xl:gap-4">
+            <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 xl:gap-4">
               <StatWidget label="Total users" value={stat('totalUsers')} icon={<Users className="w-4 h-4" />} />
               <StatWidget label="Vehicles" value={stat('totalCars')} icon={<Car className="w-4 h-4" />} />
               <StatWidget label="Active listings" value={stat('activeListings')} icon={<CheckCircle2 className="w-4 h-4" />} />
@@ -315,7 +321,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
               <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#58717A]">Work requiring attention</p><h2 id="operations-queues-heading" className="mt-1 text-lg font-bold text-[#0B3440]">Operational queues</h2></div>
               <p className="text-xs text-[#58717A]">Unavailable values are not reported as zero.</p>
             </div>
-            <div className="grid gap-4 xl:grid-cols-2">
+            <div className="grid min-w-0 gap-4 2xl:grid-cols-2">
               {[
                 { title: 'Marketplace decisions', description: 'Dealer and vehicle workflows.', items: [
                   { label: 'Pending dealers', value: stat('pendingDealers'), destination: 'users' as const, queue: 'pendingDealers' as const },
@@ -330,17 +336,40 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
                   { label: 'Unread alerts', value: stat('activeAlerts') },
                 ] },
               ].map((group) => (
-                <Card key={group.title} className="p-4 sm:p-5">
+                <Card key={group.title} className="min-w-0 border-[#DCE8EB] p-4 transition-shadow hover:shadow-md sm:p-5">
                   <div className="border-b border-[#E3ECEF] pb-3"><h3 className="font-bold text-[#0B3440]">{group.title}</h3><p className="mt-1 text-xs leading-5 text-[#58717A]">{group.description}</p></div>
-                  <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div className="mt-3 grid min-w-0 grid-cols-1 gap-3 min-[420px]:grid-cols-2">
                     {group.items.map((item) => {
-                      const content = <><div className="text-[10px] font-bold uppercase leading-4 tracking-wide text-[#4B646D] sm:text-[11px]">{item.label}</div><div className="mt-2 break-words text-2xl font-extrabold tracking-tight text-[#176B87]">{item.value}</div>{item.destination && <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#176B87]">Open workflow <span aria-hidden="true">→</span></span>}</>;
+                      const content = <><div className="text-[10px] font-bold uppercase leading-4 tracking-wide text-[#4B646D] sm:text-[11px]">{item.label}</div><div className="mt-2 break-words text-2xl font-extrabold tracking-tight text-[#176B87]">{item.value}</div>{item.destination && <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#176B87]">Open workflow <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /></span>}</>;
                       return item.destination
-                        ? <button key={item.label} type="button" onClick={() => { setSearch(''); const q = ('queue' in item ? item.queue : null) as QueueFilter; setQueue(q); setModule(item.destination!); if (q !== queue) void load(q); }} className="min-w-0 rounded-lg border border-[#DCE8EB] bg-[#F8FBFB] p-3 text-left transition hover:border-[#176B87] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B87] focus-visible:ring-offset-2 sm:p-4" aria-label={`Open ${item.label.toLowerCase()} workflow`}>{content}</button>
+                        ? <button key={item.label} type="button" onClick={() => { setSearch(''); const q = ('queue' in item ? item.queue : null) as QueueFilter; setQueue(q); setModule(item.destination!); if (q !== queue) void load(q); }} className="group min-w-0 rounded-lg border border-[#DCE8EB] bg-[#F8FBFB] p-3 text-left transition-colors hover:border-[#176B87] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B87] focus-visible:ring-offset-2 active:bg-[#EFF8F7] sm:p-4" aria-label={`Open ${item.label.toLowerCase()} workflow`}>{content}</button>
                         : <div key={item.label} className="min-w-0 rounded-lg border border-[#DCE8EB] bg-[#F8FBFB] p-3 sm:p-4">{content}</div>;
                     })}
                   </div>
                 </Card>
+              ))}
+            </div>
+          </section>
+
+          <section aria-labelledby="approval-workflows-heading" className="space-y-3" data-testid="approval-workbench">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#58717A]">Canonical workflows</p>
+              <h2 id="approval-workflows-heading" className="mt-1 text-lg font-bold text-[#0B3440]">Approval workbench</h2>
+              <p className="mt-1 text-sm leading-6 text-[#58717A]">Open the existing protected review pages. Each workflow retains its own domain rules, evidence handling, permissions and audit trail.</p>
+            </div>
+            <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {[
+                { label: 'Dealer verification', description: 'Review dealer verification records and their submitted evidence.', href: '/admin/dealer-verifications', icon: <ShieldCheck className="h-5 w-5" /> },
+                { label: 'Seller accounts', description: 'Review existing seller-account status without merging seller and dealer identities.', href: '/admin/sellers', icon: <Users className="h-5 w-5" /> },
+                { label: 'Inspector applications', description: 'Review inspector-specific applications and reviewer notes.', href: '/admin/inspector-applications', icon: <ProvidersIcon className="h-5 w-5" /> },
+                { label: 'Vehicle moderation', description: 'Open the canonical listing review and moderation queue.', href: '/admin/moderation', icon: <Car className="h-5 w-5" /> },
+                { label: 'Vehicle and document verification', description: 'Open the existing NTSA verification queue; evidence availability depends on the API response and access.', href: '/admin/ntsa-queue', icon: <FileCheck className="h-5 w-5" /> },
+                { label: 'Inspection operations', description: 'Open existing inspection operations; this is not a substitute for inspector application approval.', href: '/admin/inspections', icon: <CheckCircle2 className="h-5 w-5" /> },
+              ].map((workflow) => (
+                <a key={workflow.href} href={workflow.href} className="group flex min-w-0 items-start gap-3 rounded-xl border border-[#DCE8EB] bg-white p-4 transition-colors hover:border-[#176B87] hover:bg-[#F8FBFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B87] focus-visible:ring-offset-2" aria-label={`Open ${workflow.label} workflow`}>
+                  <span className="mt-0.5 rounded-lg bg-[#EAF4F5] p-2 text-[#176B87]" aria-hidden="true">{workflow.icon}</span>
+                  <span className="min-w-0 flex-1"><span className="block font-bold text-[#0B3440]">{workflow.label}</span><span className="mt-1 block text-sm leading-5 text-[#58717A]">{workflow.description}</span><span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#176B87]">Open existing workflow <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /></span></span>
+                </a>
               ))}
             </div>
           </section>
@@ -355,7 +384,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       )}
 
       {module === 'users' && (
-        <Card className="overflow-hidden">
+        <Card className="min-w-0 overflow-x-auto border-[#DCE8EB]">
           <Table>
             <TableHeader><TableRow><TableHead>User</TableHead><TableHead>Role</TableHead><TableHead>Status</TableHead><TableHead>Action</TableHead></TableRow></TableHeader>
             <TableBody>
@@ -376,7 +405,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       )}
 
       {module === 'cars' && (
-        <Card className="overflow-hidden">
+        <Card className="min-w-0 overflow-x-auto border-[#DCE8EB]">
           <Table>
             <TableHeader><TableRow><TableHead>Vehicle</TableHead><TableHead>Status</TableHead><TableHead>Price</TableHead><TableHead>Action</TableHead></TableRow></TableHeader>
             <TableBody>
@@ -400,9 +429,10 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       {module === 'auctions' && <AdminAuctionVerification />}
       {module === 'onboarding' && <AdminSettingsOnboarding />}
       {module === 'owners' && isOwner && <AdminOwnerManagement />}
+      {module === 'departments' && isOwner && <AdminDepartmentCapabilities />}
 
       {module === 'audit' && (
-        <Card className="overflow-hidden">
+        <Card className="min-w-0 overflow-x-auto border-[#DCE8EB]">
           <Table>
             <TableHeader><TableRow><TableHead>Time</TableHead><TableHead>Action</TableHead><TableHead>Module</TableHead><TableHead>Target</TableHead><TableHead>Actor</TableHead></TableRow></TableHeader>
             <TableBody>

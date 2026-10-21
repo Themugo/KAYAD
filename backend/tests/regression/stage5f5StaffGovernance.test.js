@@ -90,7 +90,7 @@ const call = (method, path, { as, body } = {}) =>
 const noMutation = () => { expect(saves).not.toHaveBeenCalled(); expect(userCreate).not.toHaveBeenCalled(); expect(authCreate).not.toHaveBeenCalled(); expect(softDelete).not.toHaveBeenCalled(); };
 
 const WRITES = [
-  ["POST", "/api/admin/staff", { name: "N", email: "new@example.test", password: "Passw0rd!x", role: "hr" }],
+  ["POST", "/api/admin/staff", { name: "N", email: "new@example.test", password: "Str0ngPassw0rd!2026", role: "hr" }],
   ["PUT", `/api/admin/staff/${TARGET}`, { role: "accounts" }],
   ["PUT", `/api/admin/staff/${TARGET}/permissions`, { grantedPermissions: [ASSIGNABLE_PERMISSIONS[0]] }],
   ["DELETE", `/api/admin/staff/${TARGET}`, undefined],
@@ -108,6 +108,7 @@ describe("only the verified System Owner can govern staff", () => {
     expect([401, 403]).toContain((await call("GET", "/api/admin/staff", { as })).status);
     expect([401, 403]).toContain((await call("GET", `/api/admin/staff/${TARGET}/permissions`, { as })).status);
     expect([401, 403]).toContain((await call("GET", "/api/admin/staff/permissions/catalog", { as })).status);
+    expect([401, 403]).toContain((await call("GET", "/api/admin/staff/roles/catalog", { as })).status);
   });
   test("non-owner superadmin receives the SYSTEM_OWNER_REQUIRED code", async () => {
     const r = await call("PUT", `/api/admin/staff/${TARGET}`, { as: "superadmin", body: { role: "admin" } });
@@ -125,6 +126,10 @@ describe("owner operations", () => {
   test("owner can list staff and read permissions", async () => {
     expect((await call("GET", "/api/admin/staff", { as: "owner" })).status).toBe(200);
     expect((await call("GET", `/api/admin/staff/${TARGET}/permissions`, { as: "owner" })).status).toBe(200);
+    const catalog = await call("GET", "/api/admin/staff/roles/catalog", { as: "owner" });
+    expect(catalog.status).toBe(200);
+    expect(catalog.body.roles.map(row => row.role)).toContain("ghost_checker");
+    expect(catalog.body.roles.map(row => row.role)).not.toContain("superadmin");
   });
   test("owner changes a staff role (saved once)", async () => {
     const r = await call("PUT", `/api/admin/staff/${TARGET}`, { as: "owner", body: { role: "accounts" } });
@@ -139,22 +144,27 @@ describe("owner operations", () => {
   });
   test("creating a staff account with role superadmin/owner is rejected", async () => {
     for (const role of ["superadmin", "owner", "webhoist"]) {
-      expect((await call("POST", "/api/admin/staff", { as: "owner", body: { name: "N", email: "n@example.test", password: "Passw0rd!x", role } })).status).toBe(400);
+      expect((await call("POST", "/api/admin/staff", { as: "owner", body: { name: "N", email: "n@example.test", password: "Str0ngPassw0rd!2026", role } })).status).toBe(400);
     }
     noMutation();
   });
   test("owner addresses are reserved: staff create with the owner email is 409", async () => {
-    const r = await call("POST", "/api/admin/staff", { as: "owner", body: { name: "N", email: "owner@example.test", password: "Passw0rd!x", role: "hr" } });
+    const r = await call("POST", "/api/admin/staff", { as: "owner", body: { name: "N", email: "owner@example.test", password: "Str0ngPassw0rd!2026", role: "hr" } });
     expect(r.status).toBe(409);
     noMutation();
   });
+  test("short initial passwords are rejected before any identity is created", async () => {
+    const r = await call("POST", "/api/admin/staff", { as: "owner", body: { name: "N", email: "short@example.test", password: "short", role: "hr" } });
+    expect(r.status).toBe(400);
+    noMutation();
+  });
   test("a created staff account stores a hashed password, never the plaintext", async () => {
-    const r = await call("POST", "/api/admin/staff", { as: "owner", body: { name: "N", email: "fresh@example.test", password: "Passw0rd!x", role: "hr" } });
+    const r = await call("POST", "/api/admin/staff", { as: "owner", body: { name: "N", email: "fresh@example.test", password: "Str0ngPassw0rd!2026", role: "hr" } });
     expect(r.status).toBe(200);
     const stored = authCreate.mock.calls[0][0].password;
-    expect(stored).not.toBe("Passw0rd!x");
+    expect(stored).not.toBe("Str0ngPassw0rd!2026");
     expect(stored).toMatch(/^\$2[aby]\$/);
-    expect(JSON.stringify(r.body)).not.toContain("Passw0rd");
+    expect(JSON.stringify(r.body)).not.toContain("Str0ngPassw0rd!2026");
   });
   test("permission grants are filtered to the assignable catalog; unknown keys are dropped", async () => {
     const good = ASSIGNABLE_PERMISSIONS[0];
@@ -202,12 +212,12 @@ describe("audit trail for every owner-only staff mutation (before/after, no secr
     expect(g[0].details.after.granted).toEqual([p]);
   });
   test("create and delete are recorded; neither the password nor the e-mail is written to the trail", async () => {
-    await call("POST", "/api/admin/staff", { as: "owner", body: { name: "N", email: "fresh@example.test", password: "Passw0rd!x", role: "hr" } });
+    await call("POST", "/api/admin/staff", { as: "owner", body: { name: "N", email: "fresh@example.test", password: "Str0ngPassw0rd!2026", role: "hr" } });
     await call("DELETE", `/api/admin/staff/${TARGET}`, { as: "owner" });
     const g = governance();
     expect(g.map((e) => e.action)).toEqual(["Staff governance: account created", "Staff governance: account deleted"]);
     const blob = JSON.stringify(g);
-    expect(blob).not.toContain("Passw0rd");
+    expect(blob).not.toContain("Str0ngPassw0rd!2026");
     expect(blob).not.toContain("fresh@example.test");
   });
   test("a denied attempt writes no governance record", async () => {

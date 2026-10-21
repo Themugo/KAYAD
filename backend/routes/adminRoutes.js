@@ -1245,6 +1245,7 @@ router.get(
       "escrow_officer",
       "ad_manager",
       "moderator",
+      "ghost_checker",
     ];
     const staff = await User.find({ role: { $in: staffRoles } })
       // STAGE 5F.5 (D-13): users has `last_login_at`, not `last_login`, and no `permissions_updated_at` column — selecting either
@@ -1276,6 +1277,18 @@ router.get(
       group: PERM_LABELS[p]?.group || "Other",
     }));
     res.json({ success: true, catalog });
+  }),
+);
+
+// GET CANONICAL ASSIGNABLE STAFF ROLE CATALOG. Labels are descriptive only;
+// role permissions come from the backend policy, never from frontend labels.
+router.get(
+  "/staff/roles/catalog",
+  authorize("superadmin"),
+  systemOwnerOnly,
+  asyncHandler(async (_req, res) => {
+    const staffRoles = ["admin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator", "ghost_checker"];
+    res.json({ success: true, roles: staffRoles.map((role) => ({ role, permissions: ROLE_PERMISSIONS[role] || [] })) });
   }),
 );
 
@@ -1341,7 +1354,7 @@ router.put(
       action: "Staff governance: permissions changed",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
-      details: { targetUserId: String(user.id ?? req.params.id), targetRole: user.role, before: beforePerms, after: { granted: grantedPermissions, revoked: revokedPermissions } },
+      details: { targetUserId: String(user.id ?? req.params.id), targetRole: user.role, before: beforePerms, after: { granted: grantedPermissions, revoked: revokedPermissions }, reason: typeof req.body.reason === "string" ? req.body.reason.trim().slice(0, 500) : undefined },
     });
 
     res.json({
@@ -1362,7 +1375,8 @@ router.post(
   authorize("superadmin"),
   systemOwnerOnly,
   asyncHandler(async (req, res) => {
-    const { name, email, password, role } = req.body;
+    const { name, password, role } = req.body;
+    const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
     const staffRoles = [
       "admin",
       "marketing",
@@ -1373,8 +1387,11 @@ router.post(
       "ad_manager",
       "moderator",
     ];
-    if (!name || !email || !password || !role) {
-      return res.status(400).json({ success: false, message: "name, email, password, role required" });
+    if (typeof name !== "string" || !name.trim() || name.trim().length > 120 || !email || typeof password !== "string" || password.length < 12 || !role) {
+      return res.status(400).json({ success: false, message: "A valid name (1–120 characters), email, password (at least 12 characters), and role are required." });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ success: false, message: "A valid email address is required." });
     }
     if (!staffRoles.includes(role)) {
       return res
@@ -1389,13 +1406,13 @@ router.post(
     if (exists) {
       return res.status(409).json({ success: false, message: "Email already in use" });
     }
-    const user = await User.create({ name, email, role });
+    const user = await User.create({ name: name.trim(), email, role });
     await UserAuth.create({ user: user.id, password: await bcrypt.hash(password, 12) });
     await auditAfterCommit({
       action: "Staff governance: account created",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
-      details: { targetUserId: String(user.id), role },
+      details: { targetUserId: String(user.id), role, reason: typeof req.body.reason === "string" ? req.body.reason.trim().slice(0, 500) : undefined },
     });
     res.json({
       success: true,
@@ -1451,7 +1468,7 @@ router.put(
       action: "Staff governance: staff record updated",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
-      details: { targetUserId: String(user.id ?? req.params.id), before: beforeState, after: { role: user.role, isBanned: user.isBanned === true } },
+      details: { targetUserId: String(user.id ?? req.params.id), before: beforeState, after: { role: user.role, isBanned: user.isBanned === true }, reason: typeof req.body.reason === "string" ? req.body.reason.trim().slice(0, 500) : undefined },
     });
     res.json({
       success: true,

@@ -85,8 +85,8 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
 
   return (
     <>
-    {mobileOpen && <div className="admin-sidebar-backdrop" onClick={onToggle} role="button" tabIndex={0} onKeyPress={onToggle} />}
-    <div className={`admin-sidebar ${mobileOpen ? 'open' : ''}`} style={{
+    {mobileOpen && <button type="button" className="admin-sidebar-backdrop" onClick={onToggle} aria-label="Close admin navigation" />}
+    <aside className={`admin-sidebar ${mobileOpen ? 'open' : ''}`} aria-label="Administration navigation" style={{
       width: collapsed ? 52 : 220,
       transition: 'width 0.25s ease, transform 0.3s ease',
       background: '#0a3340',
@@ -138,6 +138,7 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
               position: 'relative',
             })}
             title={collapsed ? link.label : undefined}
+            onClick={() => { if (mobileOpen) onToggle(); }}
           >
             <link.icon size={collapsed ? 18 : 16} style={{ flexShrink: 0 }} />
             {!collapsed && <span>{link.label}</span>}
@@ -157,7 +158,7 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
           {!collapsed && <span>{alertCount} alert{alertCount !== 1 ? 's' : ''}</span>}
         </div>
       )}
-    </div>
+    </aside>
     </>
   );
 }
