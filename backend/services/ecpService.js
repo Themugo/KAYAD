@@ -1,3 +1,4 @@
+import { performance } from "node:perf_hooks";
 import { getSupabase } from "../utils/supabase.js";
 import { create, findAll, findById, update, count } from "../db/index.js";
 import { logAuditEvent } from "./auditService.js";
@@ -16,7 +17,7 @@ const since = (days = 1) => new Date(Date.now() - days * 86400000).toISOString()
 export async function getSystemHealth() {
   const services = [];
   for (const name of SERVICE_NAMES) {
-    const started = Date.now();
+    const started = performance.now();
     let status = "healthy";
     let error = null;
     try {
@@ -26,8 +27,13 @@ export async function getSystemHealth() {
       else if (name === "inspections") await count("vehicle_inspections", {});
       else if (name === "search") await count("search_analytics", {});
       else if (name === "notifications") await count("notifications", { isRead: false });
-    } catch (e) { status = "degraded"; error = e.message; }
-    services.push({ name, status, latency: Date.now() - started, error });
+    } catch {
+      // Health responses are consumed by admin dashboards; keep provider/database
+      // internals out of the API payload while preserving the degraded signal.
+      status = "degraded";
+      error = "Health check failed";
+    }
+    services.push({ name, status, latency: Math.max(0, Math.round(performance.now() - started)), error });
   }
   const healthy = services.filter(s => s.status === "healthy").length;
   return { success: true, data: { services, summary: { healthy, degraded: services.length - healthy, down: 0 }, checkedAt: new Date().toISOString() } };

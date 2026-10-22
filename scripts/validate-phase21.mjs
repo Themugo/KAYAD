@@ -46,9 +46,12 @@ for (const file of sourceFiles) {
 }
 
 const seller = read('src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx');
-for (const token of ['SAMPLE_', 'KDG 492A', 'Jimmy Mugo', '7,300,000', 'setListings', 'buyerProgress', 'requiredAction']) {
+// Match the retired setter as a complete identifier. A substring check falsely
+// flagged the legitimate `setListingsError` state setter as the old `setListings` token.
+for (const token of ['SAMPLE_', 'KDG 492A', 'Jimmy Mugo', '7,300,000', 'buyerProgress', 'requiredAction']) {
   if (seller.includes(token)) fail(`active private seller dashboard contains stale/fabricated token: ${token}`);
 }
+if (/\bsetListings\b/.test(seller)) fail('active private seller dashboard contains stale/fabricated token: setListings');
 if (!/createCar\b/.test(seller)) fail('private seller listing creation is not wired to canonical vehicle service');
 if (!/getMyListings\b/.test(seller)) fail('private seller inventory does not use canonical own-listings service');
 if (!/publishedCarId/.test(seller) || !/publishError/.test(seller)) fail('private seller publication state is not fail-closed');

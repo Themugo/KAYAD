@@ -276,6 +276,9 @@ router.get(
         pendingDealers,
         pendingCars,
         openEscrows,
+        // Keep the explicit domain name for new consumers while retaining the
+        // historical `alerts` alias for existing dashboard clients.
+        disputedEscrows,
         alerts: disputedEscrows,
         totalBids: totalBidsAll,
         totalFavorites: totalFavs,

@@ -161,7 +161,10 @@
     "validate:phase06:departments": "node scripts/validate-phase06-department-capabilities.mjs",
     "validate:lucide-icon-exports": "node scripts/validate-lucide-icon-exports.mjs",
     "validate:phaseC-soft-delete": "node scripts/validate-phaseC-soft-delete-integrity.mjs",
-    "validate:phaseC1-runtime-integrity": "node scripts/validate-phaseC1-runtime-integrity.mjs"
+    "validate:phaseC1-runtime-integrity": "node scripts/validate-phaseC1-runtime-integrity.mjs",
+    "validate:super-admin-phase1-navigation": "node scripts/validate-super-admin-phase1-navigation.mjs",
+    "validate:super-admin-phase3-foundation": "node scripts/validate-super-admin-phase3-foundation.mjs",
+    "validate:phase5-gap-closure": "node scripts/validate-phase5-gap-closure.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

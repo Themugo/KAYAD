@@ -1,78 +1,203 @@
-import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import { adminAPI } from '../../api/api';
-import { useSocket } from '../../context/SocketContext';
-import { useToast } from '../../context/ToastContext';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
-  Users, Car, DollarSign, AlertTriangle, TrendingUp, TrendingDown,
-  Activity, Clock, CheckCircle, XCircle, RefreshCw, Eye, Shield,
-  ArrowUpRight, ArrowDownRight, Zap, BarChart3, AlertCircle
+  Users, Car, DollarSign, AlertTriangle, Activity, Clock,
+  XCircle, RefreshCw, Eye, Shield, Zap, BarChart3, AlertCircle,
 } from 'lucide-react';
+import { adminAPI } from '../../api/api';
 
 const METRIC_CARDS = [
   { key: 'totalUsers', label: 'Total Users', icon: Users, color: '#176B87' },
-  { key: 'totalDealers', label: 'Active Dealers', icon: Shield, color: '#5aafa4' },
-  { key: 'totalCars', label: 'Total Listings', icon: Car, color: '#13B8A6' },
-  { key: 'activeEscrows', label: 'Active Escrows', icon: DollarSign, color: '#10b981' },
+  { key: 'totalDealers', label: 'Total Dealers', icon: Shield, color: '#5aafa4' },
+  { key: 'activeListings', label: 'Available Listings', icon: Car, color: '#13B8A6' },
+  { key: 'openEscrows', label: 'Open Escrows', icon: DollarSign, color: '#10b981' },
 ];
 
+const SUMMARY_GROUPS = [
+  {
+    title: 'Platform Activity',
+    icon: Eye,
+    items: [
+      { key: 'activeListings', label: 'Available Listings' },
+      { key: 'activeAuctions', label: 'Live Auctions' },
+      { key: 'totalBids', label: 'Total Recorded Bids' },
+    ],
+  },
+  {
+    title: 'Transaction Overview',
+    icon: Shield,
+    items: [
+      { key: 'totalPayments', label: 'Successful Payments' },
+      { key: 'totalEscrows', label: 'Total Escrows' },
+      { key: 'disputedEscrows', label: 'Disputed Escrows' },
+    ],
+  },
+  {
+    title: 'Dealer Operations',
+    icon: Users,
+    items: [
+      { key: 'pendingDealers', label: 'Pending Dealers' },
+      { key: 'pendingCars', label: 'Pending Listings' },
+      { key: 'supportQueue', label: 'Open Support Queue' },
+    ],
+  },
+];
+
+const isRecord = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+const safeDate = (value) => {
+  if (typeof value !== 'string' && !(value instanceof Date) && typeof value !== 'number') return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
 export default function OperationsControlRoom() {
-  const socket = useSocket();
-  const { toast } = useToast();
   const [metrics, setMetrics] = useState(null);
+  const [metricsError, setMetricsError] = useState('');
+  const [metricsStale, setMetricsStale] = useState(false);
   const [alerts, setAlerts] = useState([]);
+  const [alertsError, setAlertsError] = useState('');
+  const [alertsStale, setAlertsStale] = useState(false);
   const [activity, setActivity] = useState([]);
+  const [activityError, setActivityError] = useState('');
+  const [activityStale, setActivityStale] = useState(false);
   const [systemHealth, setSystemHealth] = useState([]);
+  const [healthLoading, setHealthLoading] = useState(true);
+  const [healthError, setHealthError] = useState('');
+  const [healthCheckedAt, setHealthCheckedAt] = useState(null);
+  const [healthStale, setHealthStale] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState(new Date());
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastUpdate, setLastUpdate] = useState(null);
+  const requestInFlight = useRef(false);
+  const hasMetricsSuccess = useRef(false);
+  const hasAlertsSuccess = useRef(false);
+  const hasActivitySuccess = useRef(false);
+  const hasHealthSuccess = useRef(false);
 
   const loadMetrics = useCallback(async () => {
+    if (requestInFlight.current) return;
+    requestInFlight.current = true;
+    setRefreshing(true);
+    setHealthLoading(true);
+
     try {
-      const data = await adminAPI.getOperationsMetrics();
-      setMetrics(data);
-      if (data.alerts) setAlerts(data.alerts);
-      if (data.activity) setActivity(data.activity);
-      if (data.systemHealth) setSystemHealth(data.systemHealth);
-      setLastUpdate(new Date());
-    } catch {
-      toast('Failed to load operations metrics', 'error');
+      const [metricsResult, alertsResult, activityResult, healthResult] = await Promise.allSettled([
+        adminAPI.stats(),
+        adminAPI.alerts({ limit: 10 }),
+        adminAPI.getAuditLog({ page: 1, limit: 20 }),
+        adminAPI.getInfrastructureHealth(),
+      ]);
+
+      if (metricsResult.status === 'fulfilled' && isRecord(metricsResult.value?.stats)) {
+        setMetrics(metricsResult.value);
+        setMetricsError('');
+        setMetricsStale(false);
+        hasMetricsSuccess.current = true;
+        setLastUpdate(new Date());
+      } else {
+        setMetricsError('Operations metrics are unavailable. The statistics endpoint did not return a verified metrics object.');
+        setMetricsStale(hasMetricsSuccess.current);
+      }
+
+      if (alertsResult.status === 'fulfilled' && Array.isArray(alertsResult.value?.alerts)) {
+        setAlerts(alertsResult.value.alerts.filter(isRecord));
+        setAlertsError('');
+        setAlertsStale(false);
+        hasAlertsSuccess.current = true;
+      } else {
+        setAlertsError('Recent alerts could not be loaded. The alert state is unknown.');
+        setAlertsStale(hasAlertsSuccess.current);
+      }
+
+      if (activityResult.status === 'fulfilled' && Array.isArray(activityResult.value?.entries)) {
+        setActivity(activityResult.value.entries.filter(isRecord));
+        setActivityError('');
+        setActivityStale(false);
+        hasActivitySuccess.current = true;
+      } else {
+        setActivityError('Audit activity could not be loaded. The activity state is unknown.');
+        setActivityStale(hasActivitySuccess.current);
+      }
+
+      if (healthResult.status === 'fulfilled') {
+        const response = healthResult.value;
+        const health = response?.data?.health || response?.health || response?.data || response;
+        const rawServices = Array.isArray(health?.services) ? health.services : [];
+        const services = rawServices
+          .filter((service) => service && typeof service.name === 'string' && service.name.trim())
+          .map((service) => {
+            const rawStatus = typeof service.status === 'string' ? service.status.toLowerCase() : '';
+            const status = ['healthy', 'degraded', 'down', 'unavailable'].includes(rawStatus) ? rawStatus : 'unknown';
+            const latency = service.latency != null && Number.isFinite(Number(service.latency)) && Number(service.latency) >= 0
+              ? Number(service.latency)
+              : null;
+            return {
+              label: service.name.replace(/[-_]/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()),
+              status,
+              latency,
+            };
+          });
+
+        if (services.length > 0) {
+          setSystemHealth(services);
+          setHealthCheckedAt(safeDate(health?.checkedAt || response?.timestamp));
+          setHealthError('');
+          setHealthStale(false);
+          hasHealthSuccess.current = true;
+        } else {
+          setHealthError('The health endpoint returned no verifiable service checks. The current service state is unknown.');
+          setHealthStale(hasHealthSuccess.current);
+        }
+      } else {
+        setHealthError('System health could not be checked. The current service state is unknown.');
+        setHealthStale(hasHealthSuccess.current);
+      }
+    } finally {
+      requestInFlight.current = false;
+      setHealthLoading(false);
+      setLoading(false);
+      setRefreshing(false);
     }
-    setLoading(false);
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
-    loadMetrics();
+    void loadMetrics();
   }, [loadMetrics]);
 
-  // Operations metrics are API-authoritative. The backend does not emit
-  // operations:* Socket.IO events, so poll the canonical endpoint instead of
-  // registering listeners that can never fire.
+  // The existing polling behavior is retained, but overlapping refreshes are
+  // ignored so slow API requests cannot create a request storm or race results.
   useEffect(() => {
-    const timer = window.setInterval(() => { void loadMetrics(); }, 10000);
+    const timer = window.setInterval(() => { void loadMetrics(); }, 30000);
     return () => window.clearInterval(timer);
   }, [loadMetrics]);
 
-  const formatTime = (date) => {
-    if (!date) return '';
-    const d = new Date(date);
-    return d.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const formatTime = (value) => {
+    const date = safeDate(value);
+    return date ? date.toLocaleTimeString('en-KE', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'time unavailable';
   };
 
   const formatValue = (value) => {
+    if (value === null || value === undefined || (typeof value === 'number' && !Number.isFinite(value))) return 'Unavailable';
     if (typeof value === 'number') {
       if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
       if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
       return value.toLocaleString();
     }
-    return value;
+    return typeof value === 'string' ? value : 'Unavailable';
+  };
+
+  const metricValue = (key) => {
+    const stats = metrics?.stats;
+    const unavailable = Array.isArray(metrics?.unavailable) ? metrics.unavailable : [];
+    if (!isRecord(stats) || unavailable.includes(key) || stats[key] === null || stats[key] === undefined) return null;
+    return stats[key];
   };
 
   const getAlertColor = (severity) => {
-    switch (severity) {
+    switch (String(severity || '').toLowerCase()) {
       case 'critical': return { bg: 'rgba(239, 68, 68, 0.1)', border: 'rgba(239, 68, 68, 0.3)', icon: XCircle, color: '#ef4444' };
-      case 'warning': return { bg: 'rgba(19, 184, 166, 0.1)', border: 'rgba(19, 184, 166, 0.3)', icon: AlertTriangle, color: '#176b87' };
-      case 'info': return { bg: 'rgba(23, 107, 135, 0.1)', border: 'rgba(23, 107, 135, 0.3)', icon: AlertCircle, color: '#176B87' };
-      default: return { bg: 'rgba(156, 163, 175, 0.1)', border: 'rgba(156, 163, 175, 0.3)', icon: AlertCircle, color: '#9ca3af' };
+      case 'warning': case 'high': return { bg: 'rgba(245, 158, 11, 0.1)', border: 'rgba(245, 158, 11, 0.3)', icon: AlertTriangle, color: '#b45309' };
+      case 'info': case 'low': return { bg: 'rgba(23, 107, 135, 0.1)', border: 'rgba(23, 107, 135, 0.3)', icon: AlertCircle, color: '#176B87' };
+      default: return { bg: 'rgba(156, 163, 175, 0.1)', border: 'rgba(156, 163, 175, 0.3)', icon: AlertCircle, color: '#6b7280' };
     }
   };
 
@@ -87,51 +212,26 @@ export default function OperationsControlRoom() {
 
   return (
     <div className="admin-page">
-      {/* Header */}
       <div className="admin-header">
         <div>
-          <h1 className="admin-title">
-            <Activity size={24} />
-            Operations Control Room
-          </h1>
-          <p className="admin-subtitle">
-            Real-time monitoring · Last updated: {formatTime(lastUpdate)}
-          </p>
+          <h1 className="admin-title"><Activity size={24} />Operations Control Room</h1>
+          <p className="admin-subtitle">Operational records · Last refreshed: {formatTime(lastUpdate)}</p>
         </div>
-        <div style={{ display: 'flex', gap: 12 }}>
-          <button
-            className="btn btn-outline"
-            onClick={loadMetrics}
-            style={{ display: 'flex', alignItems: 'center', gap: 6 }}
-          >
-            <RefreshCw size={16} /> Refresh
-          </button>
-          {socket?.connected && (
-            <div className="live-indicator">
-              <span className="live-dot" /> Live
-            </div>
-          )}
-        </div>
+        <button className="btn btn-outline" onClick={() => void loadMetrics()} disabled={refreshing} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <RefreshCw size={16} />{refreshing ? 'Refreshing…' : 'Refresh'}
+        </button>
       </div>
 
-      {/* Metric Cards */}
+      {metricsError && <p role="alert" style={{ color: 'var(--red)', marginBottom: 12 }}>{metricsError}{metricsStale ? ' Showing the last successful metrics response.' : ''}</p>}
+
       <div className="admin-grid admin-grid--metrics">
         {METRIC_CARDS.map((card) => {
           const Icon = card.icon;
-          const value = metrics?.[card.key] ?? 0;
-          const trend = metrics?.[`${card.key}Trend`] ?? 0;
-          const TrendIcon = trend >= 0 ? TrendingUp : TrendingDown;
-
+          const value = metricValue(card.key);
           return (
             <div key={card.key} className="admin-card admin-card--metric">
               <div className="metric-header">
-                <div className="metric-icon" style={{ background: `${card.color}15`, color: card.color }}>
-                  <Icon size={20} />
-                </div>
-                <div className="metric-trend" style={{ color: trend >= 0 ? 'var(--green)' : 'var(--red)' }}>
-                  <TrendIcon size={14} />
-                  {Math.abs(trend)}%
-                </div>
+                <div className="metric-icon" style={{ background: `${card.color}15`, color: card.color }}><Icon size={20} /></div>
               </div>
               <div className="metric-value">{formatValue(value)}</div>
               <div className="metric-label">{card.label}</div>
@@ -140,43 +240,30 @@ export default function OperationsControlRoom() {
         })}
       </div>
 
-      {/* Main Content Grid */}
       <div className="admin-grid admin-grid--main">
-        {/* Alerts Panel */}
         <div className="admin-card">
           <div className="card-header">
-            <h3 className="card-title">
-              <AlertTriangle size={18} />
-              Recent Alerts
-            </h3>
-            <span className="badge">{alerts.length}</span>
+            <h3 className="card-title"><AlertTriangle size={18} />Recent Alerts</h3>
+            <span className="badge">{alertsError ? '—' : alerts.length}</span>
           </div>
           <div className="card-body" style={{ maxHeight: 400, overflowY: 'auto' }}>
-            {alerts.length === 0 ? (
-              <div className="empty-state" style={{ padding: 32 }}>
-                <CheckCircle size={32} style={{ color: 'var(--green)', marginBottom: 8 }} />
-                <p>No recent alerts</p>
-              </div>
+            {alertsError ? (
+              <p role="alert" style={{ color: 'var(--red)' }}>{alertsError}{alertsStale ? ' Showing the last successful alert result.' : ''}</p>
+            ) : alerts.length === 0 ? (
+              <div className="empty-state" style={{ padding: 32 }}><AlertCircle size={32} style={{ color: 'var(--text-muted)', marginBottom: 8 }} /><p>No alert records were returned by the alert service.</p></div>
             ) : (
               <div className="alerts-list">
-                {alerts.map((alert) => {
+                {alerts.map((alert, index) => {
                   const config = getAlertColor(alert.severity);
                   const Icon = config.icon;
+                  const message = alert.message || alert.title || alert.description || 'Alert message unavailable';
+                  const timestamp = alert.createdAt || alert.timestamp;
                   return (
-                    <div
-                      key={alert.id}
-                      className="alert-item"
-                      style={{ background: config.bg, borderColor: config.border }}
-                    >
+                    <div key={alert.id || alert._id || `${message}-${index}`} className="alert-item" style={{ background: config.bg, borderColor: config.border }}>
                       <Icon size={18} style={{ color: config.color, flexShrink: 0 }} />
                       <div className="alert-content">
-                        <div className="alert-title">{alert.message}</div>
-                        <div className="alert-meta">
-                          <span>{alert.category || 'System'}</span>
-                          {alert.timestamp && (
-                            <span>· {formatTime(alert.timestamp)}</span>
-                          )}
-                        </div>
+                        <div className="alert-title">{message}</div>
+                        <div className="alert-meta"><span>{alert.category || alert.source || 'System'}</span>{timestamp && <span>· {formatTime(timestamp)}</span>}</div>
                       </div>
                     </div>
                   );
@@ -186,159 +273,89 @@ export default function OperationsControlRoom() {
           </div>
         </div>
 
-        {/* Activity Feed */}
         <div className="admin-card">
           <div className="card-header">
-            <h3 className="card-title">
-              <Clock size={18} />
-              Live Activity Feed
-            </h3>
-            <span className="live-indicator" style={{ fontSize: 11 }}>
-              <span className="live-dot" /> {activity.length} events
-            </span>
+            <h3 className="card-title"><Clock size={18} />Recent Audit Activity</h3>
+            <span className="badge">{activityError ? '—' : activity.length}</span>
           </div>
           <div className="card-body" style={{ maxHeight: 400, overflowY: 'auto' }}>
-            {activity.length === 0 ? (
-              <div className="empty-state" style={{ padding: 32 }}>
-                <Activity size={32} style={{ color: 'var(--text-muted)', marginBottom: 8 }} />
-                <p>Waiting for activity...</p>
-              </div>
+            {activityError ? (
+              <p role="alert" style={{ color: 'var(--red)' }}>{activityError}{activityStale ? ' Showing the last successful activity result.' : ''}</p>
+            ) : activity.length === 0 ? (
+              <div className="empty-state" style={{ padding: 32 }}><Activity size={32} style={{ color: 'var(--text-muted)', marginBottom: 8 }} /><p>No recent audit activity was returned.</p></div>
             ) : (
               <div className="activity-list">
-                {activity.slice(0, 20).map((item) => (
-                  <div key={item.id} className="activity-item">
-                    <div className="activity-icon" style={{ background: `${item.color || '#64748b'}20` }}>
-                      {item.icon || '📌'}
-                    </div>
-                    <div className="activity-content">
-                      <div className="activity-title">{item.message}</div>
-                      <div className="activity-meta">
-                        <span>{item.source || 'System'}</span>
-                        <span>· {formatTime(item.timestamp)}</span>
+                {activity.slice(0, 20).map((item, index) => {
+                  const action = typeof item.action === 'string' ? item.action.replace(/[._-]+/g, ' ') : 'Audit action';
+                  const actor = item.admin || item.actorName || item.actor?.name || item.actor_name || 'Administrator';
+                  const timestamp = item.createdAt || item.created_at || item.timestamp;
+                  return (
+                    <div key={item.id || item._id || `${action}-${index}`} className="activity-item">
+                      <div className="activity-icon" style={{ background: '#64748b20' }}><Activity size={16} color="#64748b" /></div>
+                      <div className="activity-content">
+                        <div className="activity-title">{action}</div>
+                        <div className="activity-meta"><span>{actor}</span><span>· {formatTime(timestamp)}</span></div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
         </div>
 
-        {/* System Health */}
         <div className="admin-card">
-          <div className="card-header">
-            <h3 className="card-title">
-              <Zap size={18} />
-              System Health
-            </h3>
-          </div>
-          <div className="card-body">
-            {systemHealth.length === 0 ? (
-              <div className="empty-state" style={{ padding: 32 }}>
-                <BarChart3 size={32} style={{ color: 'var(--text-muted)', marginBottom: 8 }} />
-                <p>No system metrics available</p>
-              </div>
-            ) : (
+          <div className="card-header"><h3 className="card-title"><Zap size={18} />System Health</h3></div>
+          <div className="card-body" aria-busy={healthLoading}>
+            <p style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 12 }}>
+              Service status is based on existing read-only backend checks. Check duration is measured elapsed milliseconds, not uptime or provider delivery time.
+            </p>
+            {healthLoading && <p role="status" style={{ color: 'var(--text-muted)', fontSize: 13 }}>Checking service health…</p>}
+            {healthError && <p role="alert" style={{ color: 'var(--red)', fontSize: 13, marginBottom: 12 }}>{healthError}</p>}
+            {healthStale && <p role="status" style={{ color: 'var(--orange)', fontSize: 12, marginBottom: 12 }}>Showing the last successful check from {healthCheckedAt ? formatTime(healthCheckedAt) : 'an unknown time'}; the latest check failed or returned invalid data.</p>}
+            {!healthLoading && systemHealth.length === 0 && !healthError && <div className="empty-state" style={{ padding: 24 }}><BarChart3 size={32} style={{ color: 'var(--text-muted)', marginBottom: 8 }} /><p>Service status is unknown; no verified checks were returned.</p></div>}
+            {systemHealth.length > 0 && (
               <div className="health-list">
-                {systemHealth.map((item, i) => (
-                  <div key={i} className="health-item">
-                    <div className="health-header">
-                      <span className="health-label">{item.label}</span>
-                      <span
-                        className="health-status"
-                        style={{ color: item.status === 'healthy' ? 'var(--green)' : item.status === 'warning' ? 'var(--orange)' : 'var(--red)' }}
-                      >
-                        {item.status === 'healthy' ? '✓' : item.status === 'warning' ? '!' : '✗'}
-                      </span>
+                {systemHealth.map((item) => {
+                  const healthy = item.status === 'healthy';
+                  const degraded = item.status === 'degraded';
+                  const color = healthy ? 'var(--green)' : degraded ? 'var(--orange)' : item.status === 'unknown' ? 'var(--text-muted)' : 'var(--red)';
+                  const label = healthy ? 'Healthy' : degraded ? 'Degraded' : item.status === 'unknown' ? 'Unknown' : 'Unavailable';
+                  return (
+                    <div key={item.label} className="health-item">
+                      <div className="health-header"><span className="health-label">{item.label}</span><span className="health-status" style={{ color }} aria-label={`${item.label}: ${label}`}>{label}</span></div>
+                      <div className="health-value">{item.latency === null ? 'Check duration unavailable' : `Check duration: ${item.latency} ms`}</div>
                     </div>
-                    <div className="health-bar">
-                      <div
-                        className="health-bar-fill"
-                        style={{
-                          width: `${item.value}%`,
-                          background: item.status === 'healthy' ? 'var(--green)' : item.status === 'warning' ? 'var(--orange)' : 'var(--red)',
-                        }}
-                      />
-                    </div>
-                    <div className="health-value">{item.value}%</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
+            <p style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 12 }}>Last checked: {healthCheckedAt ? formatTime(healthCheckedAt) : 'time unavailable'}</p>
+            <button type="button" className="btn btn-outline" onClick={() => void loadMetrics()} disabled={refreshing || healthLoading} style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+              <RefreshCw size={14} /> Refresh health
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Quick Stats Grid */}
       <div className="admin-grid admin-grid--stats">
-        <div className="admin-card">
-          <div className="card-header">
-            <h3 className="card-title">
-              <Eye size={18} />
-              Platform Visibility
-            </h3>
-          </div>
-          <div className="card-body">
-            <div className="quick-stat">
-              <div className="quick-stat-label">Active Users (now)</div>
-              <div className="quick-stat-value">{formatValue(metrics?.activeUsers ?? 0)}</div>
+        {SUMMARY_GROUPS.map((group) => {
+          const Icon = group.icon;
+          return (
+            <div className="admin-card" key={group.title}>
+              <div className="card-header"><h3 className="card-title"><Icon size={18} />{group.title}</h3></div>
+              <div className="card-body">
+                {group.items.map((item) => (
+                  <div className="quick-stat" key={item.key}>
+                    <div className="quick-stat-label">{item.label}</div>
+                    <div className="quick-stat-value">{formatValue(metricValue(item.key))}</div>
+                  </div>
+                ))}
+                {metricsError && <p style={{ color: 'var(--text-muted)', fontSize: 12 }}>{metricsStale ? 'Values are from the last successful response.' : 'Statistics are currently unavailable.'}</p>}
+              </div>
             </div>
-            <div className="quick-stat">
-              <div className="quick-stat-label">Page Views (today)</div>
-              <div className="quick-stat-value">{formatValue(metrics?.pageViews ?? 0)}</div>
-            </div>
-            <div className="quick-stat">
-              <div className="quick-stat-label">API Requests (min)</div>
-              <div className="quick-stat-value">{formatValue(metrics?.apiRequestsPerMin ?? 0)}</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="admin-card">
-          <div className="card-header">
-            <h3 className="card-title">
-              <Shield size={18} />
-              Transaction Security
-            </h3>
-          </div>
-          <div className="card-body">
-            <div className="quick-stat">
-              <div className="quick-stat-label">Escrow Success Rate</div>
-              <div className="quick-stat-value">{metrics?.escrowSuccessRate ?? 0}%</div>
-            </div>
-            <div className="quick-stat">
-              <div className="quick-stat-label">Avg Transaction Time</div>
-              <div className="quick-stat-value">{metrics?.avgTransactionTime ?? '0m'}</div>
-            </div>
-            <div className="quick-stat">
-              <div className="quick-stat-label">Disputes (7d)</div>
-              <div className="quick-stat-value">{metrics?.disputesLastWeek ?? 0}</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="admin-card">
-          <div className="card-header">
-            <h3 className="card-title">
-              <Users size={18} />
-              Dealer Operations
-            </h3>
-          </div>
-          <div className="card-body">
-            <div className="quick-stat">
-              <div className="quick-stat-label">Pending Approvals</div>
-              <div className="quick-stat-value">{metrics?.pendingApprovals ?? 0}</div>
-            </div>
-            <div className="quick-stat">
-              <div className="quick-stat-label">New Listings (today)</div>
-              <div className="quick-stat-value">{metrics?.newListingsToday ?? 0}</div>
-            </div>
-            <div className="quick-stat">
-              <div className="quick-stat-label">Support Tickets</div>
-              <div className="quick-stat-value">{metrics?.openTickets ?? 0}</div>
-            </div>
-          </div>
-        </div>
+          );
+        })}
       </div>
     </div>
   );

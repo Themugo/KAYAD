@@ -200,3 +200,34 @@ describe('Command centre — departmental capability convergence', () => {
     expect(screen.queryByRole('button', { name: 'Departments module' })).toBeNull();
   });
 });
+
+
+describe('Command centre — Phase 6 right-side administration panel', () => {
+  it('preserves the established account, department and provider destinations', async () => {
+    mount();
+    await waitFor(() => expect(screen.getByTestId('admin-right-rail')).toBeTruthy());
+    const rail = screen.getByTestId('admin-right-rail');
+    const expected = [
+      ['Operations Dashboard', '/admin'],
+      ['Account Settings', '/admin/settings'],
+      ['Audit & Logs', '/admin/security-log'],
+      ['Staff & Departments', '/admin/staff'],
+      ['Providers & Integrations', '/admin/provider-governance'],
+    ];
+    for (const [label, href] of expected) {
+      const link = Array.from(rail.querySelectorAll('a')).find((candidate) => candidate.textContent?.includes(label));
+      expect(link?.getAttribute('href')).toBe(href);
+    }
+    expect(screen.getByRole('navigation', { name: 'Account shortcuts' })).toBeTruthy();
+  });
+
+  it('does not fabricate account identity or claim provider connectivity when data is absent', async () => {
+    authUser = { id: 'u1', role: '', name: '' };
+    mount();
+    await waitFor(() => expect(screen.getByTestId('admin-right-rail')).toBeTruthy());
+    expect(screen.getByText('Account name unavailable')).toBeTruthy();
+    expect(screen.getByText('Role unavailable')).toBeTruthy();
+    expect(screen.getByText(/Live connectivity is not verified in this summary/)).toBeTruthy();
+    expect(screen.queryByText('Provider healthy')).toBeNull();
+  });
+});

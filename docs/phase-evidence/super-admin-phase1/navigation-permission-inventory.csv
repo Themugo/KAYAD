@@ -1,0 +1,30 @@
+group,label,path,sidebar visibility rule,route/authority note
+Command Centre,Dashboard,/admin,Eligible staff; Super Admin sees all,Canonical command-centre home
+Business Operations,Users,/admin/users,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Operations,Sellers,/admin/sellers,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Operations,Listings,/admin/cars,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Operations,Moderation,/admin/moderation,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Operations,Auctions,/admin/auctions,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Operations,Bids,/admin/bids,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Operations,Escrows,/admin/escrows,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Operations,Transactions,/admin/transactions,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Operations,NTSA Queue,/admin/ntsa-queue,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Operations,Inspections,/admin/inspections,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Operations,Dealer Verifications,/admin/dealer-verifications,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Operations,Inspector Apps,/admin/inspector-applications,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Management,Reviews,/admin/reviews,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Management,Referrals,/admin/referrals,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Management,Chats,/admin/chats,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Management,Reports,/admin/reports,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Management,Support Tickets,/admin/support-tickets,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Management,Feedback,/admin/feedback,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Management,Market Data,/admin/market-data,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Management,Ad Manager,/admin/ads,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+Business Management,Broadcast,/admin/broadcast,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+System Administration,Security Log,/admin/security-log,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+System Administration,Settings,/admin/settings,Existing PAGE_PERMISSIONS filtering,Existing route guard remains authoritative
+System Administration,Control Room,/admin/control-room,Existing existing role filtering; route guard authoritative,Specialist admin route
+System Administration,Staff,/admin/staff,Super Admin only,Super Admin route guard remains authoritative
+System Administration,Staff Permissions,/admin/staff-permissions,Super Admin only,Super Admin route guard remains authoritative
+System Administration,Panic Room,/admin/panic-room,Danger + Super Admin only,Existing visibility/route rules retained
+System Administration,Webhoist,/admin/webhoist,Super Admin only,Super Admin route guard remains authoritative

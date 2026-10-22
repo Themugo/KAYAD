@@ -3,126 +3,130 @@ import { Link } from "react-router-dom";
 import { useToast } from "../../context/ToastContext";
 import { adminAPI } from "../../api/api";
 import {
-  EnterpriseCard, EnterpriseKPI, EnterpriseRevenue, EnterpriseTimeline,
-  EnterpriseNotifications, EnterpriseChart, EnterpriseDonut,
-  EnterpriseTable, EnterpriseBadge,
-  EnterpriseMetricRow, DashboardHeader, EnterpriseTabs,
-  EnterpriseProgress, EnterpriseQuickActions,
+  EnterpriseCard, EnterpriseKPI, EnterpriseTable,
+  EnterpriseMetricRow, DashboardHeader, EnterpriseTabs, EnterpriseQuickActions,
   EnterpriseTokens
 } from "../../components/enterprise/EnterpriseDashboard";
 
-const MONTHLY_REVENUE = [
-  { label: "Jan", value: 18500000 },
-  { label: "Feb", value: 22000000 },
-  { label: "Mar", value: 19800000 },
-  { label: "Apr", value: 24500000 },
-  { label: "May", value: 26200000 },
-  { label: "Jun", value: 28500000 },
-];
-
-const LISTINGS_TREND = [
-  { label: "Mon", value: 45 },
-  { label: "Tue", value: 52 },
-  { label: "Wed", value: 48 },
-  { label: "Thu", value: 61 },
-  { label: "Fri", value: 55 },
-  { label: "Sat", value: 38 },
-  { label: "Sun", value: 32 },
-];
-
-const PLATFORM_HEALTH = [
-  { label: "Escrows", count: 34, total: 45, color: EnterpriseTokens.success },
-  { label: "Inspections", count: 89, total: 100, color: EnterpriseTokens.info },
-  { label: "Approvals", count: 12, total: 20, color: EnterpriseTokens.warning },
-];
-
-const RECENT_ACTIVITY = [
-  { title: "New dealer registered", description: "Mombasa Motors Ltd submitted application", time: "5m ago", color: EnterpriseTokens.info },
-  { title: "Escrow released", description: "KES 12.5M - Mercedes GLE 350d", time: "12m ago", color: EnterpriseTokens.success },
-  { title: "Vehicle approved", description: "Toyota Land Cruiser 300 - Nairobi Auto Hub", time: "25m ago", color: EnterpriseTokens.gold },
-  { title: "Dispute resolved", description: "Escrow #4021 - Buyer confirmed delivery", time: "1h ago", color: EnterpriseTokens.purple },
-  { title: "Inspection completed", description: "BMW X5 - 94/100 score", time: "2h ago", color: EnterpriseTokens.success },
-  { title: "Listing flagged", description: "Suspected duplicate - under review", time: "3h ago", color: EnterpriseTokens.warning },
-];
-
-const NOTIFICATIONS = [
-  { icon: "👤", title: "New dealer registration", description: "Coast Motors Ltd - pending verification", time: "15m ago", unread: true, color: EnterpriseTokens.info },
-  { icon: "🚗", title: "Listing requires moderation", description: "Suspicious pricing detected - Toyota Land Cruiser", time: "1h ago", unread: true, color: EnterpriseTokens.warning },
-  { icon: "💰", title: "High-value transaction", description: "Escrow KES 18.5M released successfully", time: "2h ago", unread: false, color: EnterpriseTokens.success },
-  { icon: "🔧", title: "Inspection scheduled", description: "12 vehicles pending inspection", time: "3h ago", unread: false, color: EnterpriseTokens.purple },
-];
-
-const TOP_DEALERS = [
-  { name: "Nairobi Auto Hub", cars: 124, revenue: "KES 890M", rating: 4.9, status: "Active" },
-  { name: "Premium Auto KE", cars: 98, revenue: "KES 720M", rating: 4.8, status: "Active" },
-  { name: "Highland Cars", cars: 76, revenue: "KES 540M", rating: 4.7, status: "Active" },
-  { name: "Mombasa Motors", cars: 52, revenue: "KES 380M", rating: 4.6, status: "Review" },
-  { name: "Coast Autos", cars: 45, revenue: "KES 320M", rating: 4.5, status: "Active" },
+const PLATFORM_QUICK_ACTIONS = [
+  { icon: "👥", label: "Manage Dealers", desc: "Open dealer records", to: "/admin/sellers" },
+  { icon: "🚗", label: "Moderate Listings", desc: "Review vehicle records", to: "/admin/cars" },
+  { icon: "💰", label: "Escrow Overview", desc: "Review escrow records", to: "/admin/escrows" },
+  { icon: "🔍", label: "Inspection Queue", desc: "Open inspection records", to: "/admin/inspections" },
+  { icon: "🎫", label: "Support Tickets", desc: "Review support queue", to: "/admin/support" },
+  { icon: "📊", label: "Analytics", desc: "Open existing reports", to: "/admin/reports" },
 ];
 
 const TABLE_COLUMNS = [
   { key: "name", label: "Dealer" },
-  { key: "cars", label: "Listings", align: "right" },
-  { key: "revenue", label: "Revenue", align: "right" },
-  { key: "rating", label: "Rating", align: "center" },
-  { key: "status", label: "Status" },
+  { key: "email", label: "Email" },
+  { key: "status", label: "Account Status" },
 ];
 
-const PLATFORM_QUICK_ACTIONS = [
-  { icon: "👥", label: "Manage Dealers", desc: "156 registered", to: "/admin/sellers" },
-  { icon: "🚗", label: "Moderate Listings", desc: "8 pending review", to: "/admin/cars" },
-  { icon: "💰", label: "Escrow Overview", desc: "34 active", to: "/admin/escrows" },
-  { icon: "🔍", label: "Inspection Queue", desc: "12 scheduled", to: "/admin/inspections" },
-  { icon: "🎫", label: "Support Tickets", desc: "23 open", to: "/admin/support" },
-  { icon: "📊", label: "Analytics", desc: "View reports", to: "/admin/reports" },
-];
+const formatCount = (value) => {
+  if (value === null || value === undefined || !Number.isFinite(Number(value))) return "—";
+  return Number(value).toLocaleString();
+};
+
+const formatKes = (value) => {
+  if (value === null || value === undefined || !Number.isFinite(Number(value))) return "—";
+  return `KES ${Number(value).toLocaleString("en-KE", { maximumFractionDigits: 2 })}`;
+};
 
 export default function AdminDashboard() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("overview");
-  const [stats, setStats] = useState({
-    totalUsers: 0, totalDealers: 0, totalCars: 0, activeListings: 0,
-    activeEscrows: 0, supportTickets: 0,
-  });
+  const [stats, setStats] = useState(null);
+  const [unavailableMetrics, setUnavailableMetrics] = useState([]);
   const [statsLoading, setStatsLoading] = useState(true);
+  const [statsError, setStatsError] = useState(false);
+  const [dealers, setDealers] = useState([]);
+  const [dealersLoading, setDealersLoading] = useState(true);
+  const [dealersUnavailable, setDealersUnavailable] = useState(false);
 
   useEffect(() => {
+    let active = true;
     adminAPI.stats()
-      .then(d => {
-        const s = d.stats || {};
-        setStats({
-          totalUsers: s.totalUsers || 0,
-          totalDealers: s.totalDealers || 0,
-          totalCars: s.totalCars || 0,
-          activeListings: s.activeListings || 0,
-          activeEscrows: s.openEscrows || 0,
-          supportTickets: s.supportQueue || 0,
-        });
+      .then((response) => {
+        if (!active) return;
+        const nextStats = response?.stats;
+        if (!nextStats || typeof nextStats !== "object") {
+          setStatsError(true);
+          return;
+        }
+        setStats(nextStats);
+        setUnavailableMetrics(Array.isArray(response.unavailable) ? response.unavailable : []);
       })
-      .catch(() => toast('Failed to load dashboard stats', 'error'))
-      .finally(() => setStatsLoading(false));
-  }, []);
+      .catch(() => {
+        if (!active) return;
+        setStatsError(true);
+        toast("Dashboard statistics are currently unavailable", "error");
+      })
+      .finally(() => {
+        if (active) setStatsLoading(false);
+      });
+
+    adminAPI.users({ role: "dealer", page: 1, limit: 5 })
+      .then((response) => {
+        if (!active) return;
+        if (!Array.isArray(response?.users)) {
+          setDealersUnavailable(true);
+          return;
+        }
+        setDealers(response.users);
+      })
+      .catch(() => {
+        if (active) setDealersUnavailable(true);
+      })
+      .finally(() => {
+        if (active) setDealersLoading(false);
+      });
+
+    return () => { active = false; };
+  }, [toast]);
+
+  const metric = (key, formatter = formatCount) => {
+    if (statsLoading) return "Loading…";
+    if (statsError || unavailableMetrics.includes(key) || stats?.[key] === null || stats?.[key] === undefined) {
+      return "Unavailable";
+    }
+    return formatter(stats[key]);
+  };
 
   const tabs = [
-    { id: "overview", label: "Overview", icon: "📊" },
-    { id: "dealers", label: "Dealers", icon: "👥", count: stats.totalDealers },
-    { id: "listings", label: "Listings", icon: "🚗", count: stats.activeListings },
-    { id: "finances", label: "Finances", icon: "💰" },
+    { id: "overview", label: "Overview" },
+    { id: "dealers", label: "Dealers", count: stats?.totalDealers ?? undefined },
+    { id: "listings", label: "Listings", count: stats?.activeListings ?? undefined },
+    { id: "finances", label: "Finances" },
   ];
+
+  const dealerRows = dealers.map((dealer) => ({
+    name: dealer.name || dealer.businessName || "Unnamed dealer",
+    email: dealer.email || "—",
+    status: dealer.status || (dealer.isBanned ? "Banned" : "Unknown"),
+  }));
+
+  const revenueValue = statsLoading ? "Loading…" : metric("totalRevenue", formatKes);
 
   return (
     <div style={{ background: EnterpriseTokens.bg, minHeight: "100vh" }}>
       <DashboardHeader
         badge="Platform Owner"
         greeting="Platform Overview"
-        subtitle="2,847 users · 156 dealers · 1,842 vehicles"
+        subtitle={
+          statsLoading
+            ? "Loading verified platform statistics…"
+            : statsError
+              ? "Platform statistics could not be loaded."
+              : `${metric("totalUsers")} users · ${metric("totalDealers")} dealers · ${metric("totalCars")} vehicles`
+        }
         actions={
           <Link to="/admin/settings" style={{
             padding: "8px 16px",
             borderRadius: 10,
-            background: EnterpriseTokens.goldBg,
-            border: "1px solid " + EnterpriseTokens.goldBorder,
-            color: EnterpriseTokens.gold,
+            background: EnterpriseTokens.infoBg,
+            border: "1px solid " + EnterpriseTokens.infoBorder,
+            color: EnterpriseTokens.info,
             fontSize: 11,
             fontWeight: 700,
             textDecoration: "none",
@@ -140,117 +144,112 @@ export default function AdminDashboard() {
 
         {activeTab === "overview" && (
           <>
+            {statsError && (
+              <div role="alert" style={{
+                marginBottom: 20, padding: 14, borderRadius: 10,
+                border: `1px solid ${EnterpriseTokens.warning}`,
+                color: EnterpriseTokens.textPrimary, background: EnterpriseTokens.surface,
+              }}>
+                Dashboard statistics could not be verified. Values are shown as unavailable rather than replaced with zero.
+              </div>
+            )}
+
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 24 }}>
-              <EnterpriseKPI icon="👥" label="Total Users" value={stats.totalUsers.toLocaleString()} trend={12} accent={EnterpriseTokens.info} />
-              <EnterpriseKPI icon="🏪" label="Dealers" value={stats.totalDealers} trend={5} accent={EnterpriseTokens.purple} />
-              <EnterpriseKPI icon="🚗" label="Total Vehicles" value={stats.totalCars.toLocaleString()} trend={8} accent={EnterpriseTokens.gold} />
-              <EnterpriseKPI icon="✅" label="Active Listings" value={stats.activeListings} accent={EnterpriseTokens.success} />
-              <EnterpriseKPI icon="🔒" label="Active Escrows" value={stats.activeEscrows} accent={EnterpriseTokens.warning} />
-              <EnterpriseKPI icon="🎫" label="Open Tickets" value={stats.supportTickets} accent={EnterpriseTokens.danger} />
+              <EnterpriseKPI icon="👥" label="Total Users" value={metric("totalUsers")} accent={EnterpriseTokens.info} />
+              <EnterpriseKPI icon="🏪" label="Dealers" value={metric("totalDealers")} accent={EnterpriseTokens.purple} />
+              <EnterpriseKPI icon="🚗" label="Total Vehicles" value={metric("totalCars")} accent={EnterpriseTokens.info} />
+              <EnterpriseKPI icon="✅" label="Active Listings" value={metric("activeListings")} accent={EnterpriseTokens.success} />
+              <EnterpriseKPI icon="🔒" label="Open Escrows" value={metric("openEscrows")} accent={EnterpriseTokens.warning} />
+              <EnterpriseKPI icon="🎫" label="Open Tickets" value={metric("supportQueue")} accent={EnterpriseTokens.danger} />
             </div>
 
             <div style={{ marginBottom: 24 }}>
-              <EnterpriseRevenue label="Monthly Revenue" value="KES 28.5M" sub="+18% vs last month" period="June 2026" />
+              <EnterpriseCard header="Recorded Commission Revenue" icon="💰">
+                <EnterpriseKPI
+                  icon="💎"
+                  label="All-time recorded total"
+                  value={revenueValue}
+                  sub={statsLoading ? "Loading verified statistics" : stats?.totalRevenue == null ? "Revenue data unavailable" : "Based on released escrow commission records"}
+                  accent={EnterpriseTokens.info}
+                />
+              </EnterpriseCard>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20, marginBottom: 24 }}>
-              <EnterpriseCard header="Revenue Trend" icon="📈">
-                <EnterpriseChart data={MONTHLY_REVENUE} height={180} showLabels color={EnterpriseTokens.gold} />
-              </EnterpriseCard>
-
-              <EnterpriseCard header="Platform Health" icon="💚">
-                <div style={{ display: "flex", justifyContent: "space-around", marginBottom: 20 }}>
-                  {PLATFORM_HEALTH.map((item, i) => (
-                    <EnterpriseDonut key={i} value={item.count} max={item.total} label={item.label} color={item.color} />
-                  ))}
+            <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 2fr) minmax(260px, 1fr)", gap: 20, marginBottom: 24 }}>
+              <EnterpriseCard header="Verified Platform Counts" icon="📊">
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 16 }}>
+                  <EnterpriseMetricRow icon="🏷️" label="Pending Dealers" value={metric("pendingDealers")} color={EnterpriseTokens.warning} />
+                  <EnterpriseMetricRow icon="🚘" label="Pending Vehicles" value={metric("pendingCars")} color={EnterpriseTokens.warning} />
+                  <EnterpriseMetricRow icon="🔨" label="Live Auctions" value={metric("activeAuctions")} color={EnterpriseTokens.info} />
+                  <EnterpriseMetricRow icon="🛡️" label="Disputed Escrows" value={metric("alerts")} color={EnterpriseTokens.danger} />
                 </div>
-                <EnterpriseProgress value={92} max={100} label="Overall Health Score" color={EnterpriseTokens.success} showPercent />
+              </EnterpriseCard>
+              <EnterpriseCard header="System Health" icon="💚">
+                <p style={{ margin: 0, color: EnterpriseTokens.textMuted, fontSize: 13, lineHeight: 1.6 }}>
+                  Live infrastructure health is not inferred from marketplace statistics. Open the existing operations control room to review verified service indicators.
+                </p>
+                <Link to="/admin/control-room" style={{
+                  display: "inline-flex", marginTop: 16, textDecoration: "none",
+                  color: EnterpriseTokens.info, fontWeight: 700, fontSize: 13,
+                }}>Open Operations Control Room →</Link>
               </EnterpriseCard>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 20, marginBottom: 24 }}>
-              <EnterpriseCard header="Recent Activity" icon="🔔">
-                <EnterpriseTimeline items={RECENT_ACTIVITY} maxHeight={320} />
-              </EnterpriseCard>
-
-              <EnterpriseCard header="Notifications" icon="📨">
-                <EnterpriseNotifications items={NOTIFICATIONS} />
+            <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)", gap: 20, marginBottom: 24 }}>
+              <EnterpriseCard header="Recent Dealer Records" icon="👥" action={{ label: "View All", to: "/admin/sellers" }}>
+                {dealersLoading ? (
+                  <p style={{ color: EnterpriseTokens.textMuted }}>Loading dealer records…</p>
+                ) : dealersUnavailable ? (
+                  <p role="status" style={{ color: EnterpriseTokens.textMuted }}>Dealer records are currently unavailable.</p>
+                ) : dealerRows.length === 0 ? (
+                  <p style={{ color: EnterpriseTokens.textMuted }}>No dealer records were returned.</p>
+                ) : (
+                  <EnterpriseTable columns={TABLE_COLUMNS} data={dealerRows} />
+                )}
               </EnterpriseCard>
 
               <EnterpriseCard header="Quick Actions" icon="⚡">
                 <EnterpriseQuickActions actions={PLATFORM_QUICK_ACTIONS} cols={2} />
               </EnterpriseCard>
             </div>
-
-            <EnterpriseCard header="Top Performing Dealers" icon="🏆" action={{ label: "View All", to: "/admin/sellers" }}>
-              <EnterpriseTable
-                columns={TABLE_COLUMNS}
-                data={TOP_DEALERS.map((d) => ({
-                  name: d.name,
-                  cars: d.cars,
-                  revenue: d.revenue,
-                  rating: d.rating + " ★",
-                  status: d.status,
-                }))}
-                onRowClick={() => toast("Opening dealer profile...")}
-              />
-            </EnterpriseCard>
           </>
         )}
 
         {activeTab === "dealers" && (
-          <EnterpriseCard header="All Dealers" icon="👥">
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
-              {TOP_DEALERS.map((dealer, i) => (
-                <div key={i} style={{
-                  padding: 20,
-                  background: EnterpriseTokens.surface,
-                  borderRadius: 12,
-                  border: "1px solid " + EnterpriseTokens.border,
-                }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 12 }}>
-                    <div>
-                      <div style={{ fontSize: 14, fontWeight: 700, color: EnterpriseTokens.textPrimary }}>{dealer.name}</div>
-                      <div style={{ fontSize: 11, color: EnterpriseTokens.textMuted }}>{dealer.cars} listings</div>
-                    </div>
-                    <EnterpriseBadge label={dealer.status} color={dealer.status === "Active" ? EnterpriseTokens.success : EnterpriseTokens.warning} />
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <div>
-                      <div style={{ fontSize: 12, color: EnterpriseTokens.textMuted }}>Revenue</div>
-                      <div style={{ fontSize: 16, fontWeight: 700, color: EnterpriseTokens.gold }}>{dealer.revenue}</div>
-                    </div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: EnterpriseTokens.textPrimary }}>
-                      <span style={{ color: "#FFB800" }}>★</span> {dealer.rating}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <EnterpriseCard header="Dealer Records" icon="👥" action={{ label: "Manage Dealers", to: "/admin/sellers" }}>
+            {dealersLoading ? (
+              <p style={{ color: EnterpriseTokens.textMuted }}>Loading dealer records…</p>
+            ) : dealersUnavailable ? (
+              <p role="status" style={{ color: EnterpriseTokens.textMuted }}>Dealer records are currently unavailable.</p>
+            ) : dealerRows.length === 0 ? (
+              <p style={{ color: EnterpriseTokens.textMuted }}>No dealer records were returned.</p>
+            ) : (
+              <EnterpriseTable columns={TABLE_COLUMNS} data={dealerRows} />
+            )}
           </EnterpriseCard>
         )}
 
         {activeTab === "listings" && (
-          <EnterpriseCard header="Listings Overview" icon="🚗">
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
-              <EnterpriseMetricRow icon="📊" label="Total Listings" value="1,842" color={EnterpriseTokens.info} />
-              <EnterpriseMetricRow icon="✅" label="Active" value="892" color={EnterpriseTokens.success} />
-              <EnterpriseMetricRow icon="⏳" label="Pending Review" value="28" color={EnterpriseTokens.warning} />
-              <EnterpriseMetricRow icon="🗑️" label="Sold/Removed" value="922" color={EnterpriseTokens.textMuted} />
-            </div>
-            <div style={{ marginTop: 24 }}>
-              <EnterpriseChart data={LISTINGS_TREND} label="New Listings This Week" height={120} showLabels color={EnterpriseTokens.info} />
+          <EnterpriseCard header="Listings Overview" icon="🚗" action={{ label: "Review Listings", to: "/admin/cars" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 20 }}>
+              <EnterpriseMetricRow icon="📊" label="Total Vehicles" value={metric("totalCars")} color={EnterpriseTokens.info} />
+              <EnterpriseMetricRow icon="✅" label="Active Listings" value={metric("activeListings")} color={EnterpriseTokens.success} />
+              <EnterpriseMetricRow icon="⏳" label="Pending Review" value={metric("pendingCars")} color={EnterpriseTokens.warning} />
+              <EnterpriseMetricRow icon="🏁" label="Sold Vehicles" value={metric("carsSold")} color={EnterpriseTokens.textMuted} />
             </div>
           </EnterpriseCard>
         )}
 
         {activeTab === "finances" && (
           <EnterpriseCard header="Financial Overview" icon="💰">
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
-              <EnterpriseKPI icon="💎" label="Platform Revenue" value="KES 456.8M" trend={22} accent={EnterpriseTokens.gold} />
-              <EnterpriseKPI icon="📊" label="Monthly Average" value="KES 38.1M" trend={18} accent={EnterpriseTokens.success} />
-              <EnterpriseKPI icon="🔒" label="Escrow Volume" value="KES 892M" trend={12} accent={EnterpriseTokens.purple} />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: 20 }}>
+              <EnterpriseKPI icon="💎" label="Recorded Commission Revenue" value={metric("totalRevenue", formatKes)} accent={EnterpriseTokens.info} />
+              <EnterpriseKPI icon="📊" label="Successful Payments (count)" value={metric("totalPayments")} accent={EnterpriseTokens.success} />
+              <EnterpriseKPI icon="🔒" label="Total Escrow Records" value={metric("totalEscrows")} accent={EnterpriseTokens.purple} />
             </div>
+            <p style={{ marginTop: 18, color: EnterpriseTokens.textMuted, fontSize: 12, lineHeight: 1.6 }}>
+              Monthly averages and historical trends are not shown because the current dashboard statistics contract does not provide verified time-series data.
+            </p>
           </EnterpriseCard>
         )}
       </div>
