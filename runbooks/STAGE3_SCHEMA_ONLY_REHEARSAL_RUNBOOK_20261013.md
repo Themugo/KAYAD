@@ -71,7 +71,7 @@ sha256sum prod_*.sql prod_*.tsv prod_extensions.txt > SHA256SUMS
 - Record the four SHA-256 values in the Stage 4 report. Re-verify them (`sha256sum -c SHA256SUMS`) before every later use.
 
 **Cross-check against existing evidence (no new access):** the `md5` column of step 3 is computed differently from the 2026-10-11/13 captures
-(`docs/audits/evidence/hosted-readonly-20261011/production-migration-statement-digests.tsv`, `KAYAD_PRODUCTION_ONLY_MIGRATIONS_20261013.tsv`);
+(`docs/audits/evidence/hosted-readonly-20261011/production-migration-statement-digests.tsv`, `docs/production/migrations/production-only-20261013.tsv`);
 compare **lengths** first, then md5 of the step-4 text normalised as in `evidence/stage3/stage3_production_only_and_edited_findings.txt` §D.
 
 ## 5. Isolated restore (local PostgreSQL 17.6 only)

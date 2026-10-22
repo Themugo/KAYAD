@@ -1,0 +1,15 @@
+panel_or_metric,existing source,fields/logic,status/limitations
+Total Users,adminAPI.stats(),stats.totalUsers,source-level; verify real payload
+Active Staff,/admin/staff,destination only,count intentionally not fabricated
+Verified Dealers,adminAPI.stats(),stats.verifiedDealers,source-level; verify real payload
+Vehicles,adminAPI.stats(),stats.totalCars,source-level; verify real payload
+Live Auctions,adminAPI.stats() and loaded cars,stats.activeAuctions; explicit auctionStatus/auction_status live filter,verify actual API semantics
+Open Escrows,adminAPI.stats(),stats.openEscrows,source-level; verify real payload
+Approval dealers,adminAPI.users() and stats,loaded user sample; pending dealers; pendingDealers stat,authoritative list remains dealer verification workspace
+Vehicle submissions,adminAPI.cars(),title/year/price/images/status where available,image fallback added
+Team members,adminAPI.users(),loaded sample filtered by role list,not a global staff total
+RBAC summary,adminAPI.users(),unique roles in current sample,explicitly labelled as sample counts
+System health,/admin/control-room,link only,no fabricated statuses
+Department overview,/admin/staff,link only,no fabricated counts
+Provider status,/admin/provider-governance,link only,no fabricated connection status
+Calendar,none verified in current dashboard contract,omitted,do not invent events

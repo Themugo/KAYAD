@@ -1,0 +1,5 @@
+path,proposal,decision,evidence,reason,next prerequisite
+scripts/validate-phase58.mjs,Rename/move,DEFERRED / NO CHANGE,package.json; validate-phase59.mjs; validate-release.mjs,Active local consumers confirmed; external consumers incomplete,Authorized external consumer evidence and full regression
+scripts/validate-phase59.mjs,Rename/move,DEFERRED / NO CHANGE,package.json; validate-phase60.mjs,Active local consumer confirmed; external consumers incomplete,Authorized external consumer evidence and full regression
+scripts/validate-phase60.mjs,Rename/move,DEFERRED / NO CHANGE,package.json; validate-release.mjs,Active local consumer confirmed; external consumers incomplete,Authorized external consumer evidence and full regression
+scripts/validate-release.mjs,Rename/move,DEFERRED / NO CHANGE,package.json,Package command confirmed; external consumers incomplete,Authorized external consumer evidence and safe transitive graph review

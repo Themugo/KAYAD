@@ -1,0 +1,2 @@
+change_id,path,operation,before_sha256,after_sha256,authorization,result
+C11-000,docs/repository-convergence/phase-11/,ADD EVIDENCE PACKAGE,,,Phase 11 prompt authorizes additive evidence,CREATED

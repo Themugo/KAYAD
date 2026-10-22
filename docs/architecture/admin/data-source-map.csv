@@ -1,0 +1,18 @@
+widget,source,field_or_logic,limitations
+Total Users,adminAPI.stats(),totalUsers,Missing/non-numeric displays Unavailable
+Active Staff,Existing route,/admin/staff,Not rendered as an unverified count
+Verified Dealers,adminAPI.stats(),verifiedDealers,Missing/non-numeric displays Unavailable
+Vehicles,adminAPI.stats(),totalCars,Missing/non-numeric displays Unavailable
+Live Auctions,adminAPI.stats(),activeAuctions,Count from existing stats response
+Open Escrows,adminAPI.stats(),openEscrows,Missing/non-numeric displays Unavailable
+Approval dealer rows,adminAPI.users(),role dealer and pending status/approved false,Initial loaded user sample is capped at 50
+Approval route links,existing route registry,canonical existing routes,No new routes/endpoints
+Recent Vehicle Submissions,adminAPI.cars(),first four returned records,Image/year only rendered if existing fields returned
+Live auction detail rows,adminAPI.cars(),auctionStatus or auction_status equals live,Only loaded sample; no separate auction API call
+Team Members,adminAPI.users(),known staff role values,Current loaded user sample only
+RBAC summary,adminAPI.users(),unique roles and counts in loaded sample,Not authoritative global role totals
+System Health,existing control room link,/admin/control-room,No embedded health source verified in this pass
+Department Overview,existing staff workspace link,/admin/staff,No embedded department count source verified
+Provider Status,existing provider governance link,/admin/provider-governance,No provider status asserted by dashboard
+Business Calendar,none verified,not rendered,No event source verified; no invented events
+Audit records,adminAPI.getAuditLog(),entries/logs/auditLogs,Existing specialist module preserved

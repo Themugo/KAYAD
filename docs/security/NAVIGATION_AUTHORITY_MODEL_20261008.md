@@ -122,7 +122,7 @@ even if stored hidden, and a result with no items falls back to canonical.
   existing role middleware (`access_denied`).
 * **RLS** — unchanged. `platform_config` keeps RLS enabled with no policies,
   i.e. service-role-only. Proven on real PostgreSQL 16 with Supabase-style
-  roles and default grants (`NAVIGATION_RLS_PROOF_OUTPUT_20261008.txt`):
+  roles and default grants (`docs/history/legacy-root-evidence/security-and-identity/navigation-rls-proof-output-20261008.txt`):
   after the migration `anon` and `authenticated` see 0 rows, update 0 rows,
   cannot insert (`new row violates row-level security policy`), delete 0 rows;
   `service_role` reads and writes. The migration is idempotent.

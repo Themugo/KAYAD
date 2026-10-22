@@ -19,7 +19,7 @@ check('Backup helpers', exists('scripts/backup-database.sh') && exists('scripts/
 check('Recovery runbooks', exists('runbooks/database-failure.md') && exists('runbooks/deployment-rollback.md') && exists('runbooks/third-party-outage.md') && exists('docs/production/DISASTER_RECOVERY.md'));
 check('Current email provider in DR docs', !/SendGrid|sendgrid/i.test(read('docs/production/DISASTER_RECOVERY.md')+read('runbooks/third-party-outage.md')));
 check('Production rollback endpoints are configurable', /BACKEND_URL/.test(read('runbooks/deployment-rollback.md')) && /FRONTEND_URL/.test(read('runbooks/deployment-rollback.md')));
-check('Recovery tooling retained', exists('scripts/validate-recovery-repair.mjs') && exists('APPLY_RECOVERY_TO_REPO.cmd'));
+check('Recovery tooling retained', exists('scripts/validate-recovery-repair.mjs') && exists('evidence/legacy-maintenance-scripts/root-phase-and-git-wrappers/APPLY_RECOVERY_TO_REPO.cmd'));
 check('Production security gate retained', exists('scripts/validate-phase7-security-release.mjs'));
 check('Phase 6 release gate retained', exists('scripts/validate-phase6-release.mjs') && exists('scripts/certify-phase6-live.mjs'));
 check('No private-key material in operational files', !/(BEGIN (RSA|OPENSSH|EC) PRIVATE KEY|ghp_[A-Za-z0-9]{20,}|sk-[A-Za-z0-9]{20,})/.test(read('backend/config/alerting.js')+read('backend/config/sentry.js')));

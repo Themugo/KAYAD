@@ -38,7 +38,7 @@ if (dryRunOnly) {
 }
 
 // Stage 3 (2026-10-13) fail-closed guard: production migration history has drifted from this repository (see
-// KAYAD_PRESTAGING_SECURITY_AND_MIGRATION_DRIFT_20261013.md §7–§9). The dry run above stays available; applying does not.
+// docs/production/prestaging-security-and-migration-drift-20261013.md §7–§9). The dry run above stays available; applying does not.
 if (process.env.KAYAD_MIGRATION_DRIFT_ACKNOWLEDGED !== 'reconciled-and-authorized') {
   console.error('\nRefusing --apply: migration history drift is unresolved. Only after it is reconciled and the push is authorized');
   console.error('in writing, re-run with KAYAD_MIGRATION_DRIFT_ACKNOWLEDGED=reconciled-and-authorized.');

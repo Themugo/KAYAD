@@ -1,7 +1,7 @@
 import Car from "../models/Car.js";
 import User from "../models/User.js";
 import PlatformConfig from "../models/PlatformConfig.js";
-import { cacheDelPattern } from "../utils/cache.js";
+import { invalidatePublicListingCaches } from "../utils/publicListingCache.js";
 import { uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
 import { logWarn, logError } from "../utils/logger.js";
@@ -94,7 +94,9 @@ export const getCars = async (req, res) => {
     // never trigger an unbounded query (pagination cap — Issue: security test).
     limitNum = Math.min(Math.max(toNumber(limit, 12), 1), 100);
 
-    query = { status: "available" };
+    // Phase C.1: Car.softDelete() stamps deleted_at but keeps status, so "available" alone would keep a
+    // deleted listing in the public marketplace. Soft-deleted vehicles are never public.
+    query = { status: "available", deletedAt: { $exists: false } };
 
     if (keyword) {
       const trimmed = keyword.trim();
@@ -519,10 +521,8 @@ export const createCar = async (req, res) => {
       }
     }
 
-    await cacheDelPattern("cars:list:*");
-    // Listing changes also refresh the canonical, database-derived showroom facets/autocomplete.
-    await cacheDelPattern("kayad:search:facets:*");
-    await cacheDelPattern("kayad:search:suggestions:*");
+    // Listing changes refresh every public inventory cache (listing, search, facets, autocomplete). Phase C.1.
+    await invalidatePublicListingCaches();
 
     await logActionFromReq(req, "create_car", {
       target: car._id,
@@ -861,10 +861,8 @@ export const updateCar = async (req, res) => {
 
     await car.save();
 
-    await cacheDelPattern("cars:list:*");
-    // Listing changes also refresh the canonical, database-derived showroom facets/autocomplete.
-    await cacheDelPattern("kayad:search:facets:*");
-    await cacheDelPattern("kayad:search:suggestions:*");
+    // Listing changes refresh every public inventory cache (listing, search, facets, autocomplete). Phase C.1.
+    await invalidatePublicListingCaches();
 
     await logActionFromReq(req, "update_car", {
       target: car._id,
@@ -912,10 +910,8 @@ export const deleteCar = async (req, res) => {
       }
     }
 
-    await cacheDelPattern("cars:list:*");
-    // Listing changes also refresh the canonical, database-derived showroom facets/autocomplete.
-    await cacheDelPattern("kayad:search:facets:*");
-    await cacheDelPattern("kayad:search:suggestions:*");
+    // Listing changes refresh every public inventory cache (listing, search, facets, autocomplete). Phase C.1.
+    await invalidatePublicListingCaches();
 
     await logActionFromReq(req, "delete_car", {
       target: req.params.id,
@@ -978,10 +974,8 @@ export const deleteCarImage = async (req, res) => {
     }
 
     await car.save();
-    await cacheDelPattern("cars:list:*");
-    // Listing changes also refresh the canonical, database-derived showroom facets/autocomplete.
-    await cacheDelPattern("kayad:search:facets:*");
-    await cacheDelPattern("kayad:search:suggestions:*");
+    // Listing changes refresh every public inventory cache (listing, search, facets, autocomplete). Phase C.1.
+    await invalidatePublicListingCaches();
 
     await logActionFromReq(req, "delete_car_image", {
       target: car._id,
@@ -1043,10 +1037,8 @@ export const addCarImages = async (req, res) => {
 
     car.images = [...(car.images || []), ...newImages];
     await car.save();
-    await cacheDelPattern("cars:list:*");
-    // Listing changes also refresh the canonical, database-derived showroom facets/autocomplete.
-    await cacheDelPattern("kayad:search:facets:*");
-    await cacheDelPattern("kayad:search:suggestions:*");
+    // Listing changes refresh every public inventory cache (listing, search, facets, autocomplete). Phase C.1.
+    await invalidatePublicListingCaches();
 
     await logActionFromReq(req, "add_car_images", {
       target: car._id,
@@ -1084,7 +1076,9 @@ export const getCar = async (req, res) => {
 
     const isOwner = req.user && String(car.dealer?.id ?? car.dealer?._id ?? car.dealer) === String(req.user.id);
     const isAdmin = req.user && STAFF_ROLES.includes(req.user.role);
-    if (car.status !== "available" && car.status !== "sold" && !isOwner && !isAdmin) {
+    // Phase C.1: a soft-deleted listing is treated like a non-public status: owner and staff may still open it.
+    const softDeleted = Boolean(car.deletedAt ?? car.deleted_at);
+    if ((softDeleted || (car.status !== "available" && car.status !== "sold")) && !isOwner && !isAdmin) {
       return res.status(404).json({ success: false, message: "Car not found" });
     }
     // Stage 5F.10: public viewers never see a live auction that fails the PostgreSQL private-seller gate.

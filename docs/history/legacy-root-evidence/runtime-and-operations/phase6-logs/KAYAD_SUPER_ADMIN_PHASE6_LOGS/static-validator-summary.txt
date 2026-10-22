@@ -1,0 +1,1304 @@
+
+===== node scripts/validate-admin-route-convergence.mjs =====
+PASS: AdminView is the canonical /admin and /admin/dashboard home
+PASS: Legacy /?nav=admin deep link redirects into canonical /admin and preserves other query/hash values
+PASS: All admin sidebar destinations are registered or resolve to the command-centre root
+PASS: Standalone route registry preserves specialist /admin/* paths
+PASS: Unknown admin paths show an explicit in-shell not-found state instead of silently opening a different workspace
+PASS: Admin pages use the existing permission guard and backend remains authoritative
+PASS: Superadmin-only sidebar destinations have an explicit route guard
+PASS: Duplicate layout is a compatibility re-export to the canonical admin layout
+PASS: Duplicate sidebar is a compatibility re-export to the canonical admin sidebar
+PASS: Account menu has one command-centre entry and removes duplicate Admin Panel action
+PASS: System Management has a distinct existing destination and is limited to admin/superadmin menu roles
+PASS: Profile image uses a real source with deterministic initials fallback and error recovery
+PASS: Mobile admin drawer has semantic backdrop, Escape close, focus return and body overflow cleanup
+PASS: Responsive admin shell stylesheet defines mobile drawer and reduced-motion behaviour
+Admin route convergence: 14/14 PASS
+EXIT_CODE=0
+
+===== node scripts/validate-business-command-centre-phase04.mjs =====
+PASS approval workbench links dealer verification to canonical route
+PASS seller account workflow retains canonical route
+PASS inspector application workflow retains canonical route
+PASS vehicle moderation retains canonical route
+PASS document verification and inspection routes are distinct
+PASS inspector review endpoints require protected reviewer role
+PASS inspector approval rejects non-pending or self-review
+PASS dealer decisions use decision-authority guard and atomic RPC
+PASS vehicle listing decisions use decision-authority guard
+PASS inspector page has visible error and retry state
+PASS inspector refresh protects against stale response races
+PASS tests assert canonical workflow route destinations
+PASS no new approval API endpoints added by this phase
+Phase 04 source-contract validation: 13/13 passed
+EXIT_CODE=0
+
+===== node scripts/validate-stage5f2-dashboard-data-workflow.mjs =====
+PASS dashboard data sources use allSettled independently
+PASS dashboard no longer clears every source on one request failure
+PASS stats have explicit loading/ready/stale/error states
+PASS malformed/missing statistics remain unavailable rather than zero
+PASS dealer approval workflow opens the existing dealer verification route
+PASS vehicle listing approval workflow opens the existing moderation route
+PASS customer support queue opens the existing support workspace
+PASS workflow links and review actions have accessible names and keyboard focus styling
+PASS admin stats endpoint uses real model counts
+PASS hero endpoint returns an explicit error rather than fabricated slides
+PASS public config frontend client uses canonical API client path
+
+Stage 5F.2 source-contract checks: 11/11 passed
+EXIT_CODE=0
+
+===== node scripts/validate-ui-surface-convergence.mjs =====
+PASS canonical escrow PaymentModal exists
+PASS legacy PaymentModal TS removed
+PASS legacy PaymentModal JSX removed
+PASS canonical common InternalNotes exists
+PASS legacy InternalNotes removed
+PASS root SearchBar is compatibility re-export
+PASS Showroom still imports compatibility SearchBar
+PASS canonical escrow PaymentModal is retained for settlement surfaces
+PASS canonical dispute support component is retained
+
+UI surface convergence: 9/9 checks passed
+EXIT_CODE=0
+
+===== node scripts/validate-mobile-navigation-polish-20261012.mjs =====
+PASS mobile menu remains the canonical Navbar drawer
+PASS drawer is an accessible modal dialog
+PASS drawer measures the visual viewport
+PASS drawer retains safe-area bottom padding
+PASS drawer primary destinations use grouped grid
+PASS drawer category icons remain sourced from canonical nav config
+PASS drawer child destinations show canonical icons
+PASS drawer child active state is exposed
+PASS drawer support group spans the grid
+PASS narrow phone uses single-column destination groups
+PASS small tablet drawer uses three columns
+PASS menu overlay hides canonical mobile dock
+PASS menu overlay hides legacy mobile dock
+PASS menu overlay prevents dock hit-testing
+PASS drawer links have high-visibility keyboard focus
+PASS drawer respects reduced motion
+PASS bottom dock retains five canonical actions
+PASS bottom dock labels retain explicit text
+PASS bottom dock no longer duplicates the header menu
+PASS saved dock item uses the real Heart icon and active state
+PASS mobile menu destination cards remain compact instead of stretching
+PASS bottom dock uses touch-sized targets
+PASS bottom dock icon sizing is normalized
+PASS bottom dock uses KAYAD palette
+PASS bottom dock uses semantic color-coded real icons
+PASS phone header reserves readable brand descriptor beside logo
+PASS narrow header actions are compacted
+PASS focus ring uses theme mint
+PASS navigation still derives child destinations from visibleChildren
+PASS navigation configuration remains admin-controlled
+PASS seller CTA remains existing authenticated navigation action
+PASS saved and messaging shortcuts remain in the same drawer
+PASS notifications remain reachable in the drawer
+PASS role-specific dealer tools remain role-gated
+PASS role-specific admin tools remain role-gated
+PASS source still contains escape and viewport cleanup hooks
+
+Mobile navigation polish: 36/36 PASS
+EXIT_CODE=0
+
+===== node scripts/validate-premium-presentation-pass.mjs =====
+Premium presentation validation: 16/16 PASS
+PASS — Router location drives auth surface
+PASS — Navbar uses canonical /login navigation
+PASS — Registration is reachable: combined header entry -> /login -> /register CTA
+PASS — Hero keeps stable mobile/desktop footprint
+PASS — Hero keeps real vehicle source
+PASS — Hero retains existing actions
+PASS — Hero retains carousel controls
+PASS — Hero uses Kenyan-road visual fallback
+PASS — Hero premium vehicle stage present (desktop pair + mobile carousel + vehicle info cards on real featured inventory)
+PASS — Login remains canonical standalone surface
+PASS — Register remains canonical standalone surface
+PASS — Login uses shared premium shell
+PASS — Login primary action is explicit
+PASS — Auth screens carry no advertising or decorative artwork
+PASS — Reduced-motion preserved
+PASS — Login test contract matches current presentation
+EXIT_CODE=0
+
+===== node scripts/validate-brand-palette-convergence.mjs =====
+Brand palette convergence: PASS (660 frontend source files + 13 shared assets/service surfaces scanned)
+Canonical palette: deep teal #0A3340 · slate teal #176B87 · accent #13B8A6 · mint surfaces #F6FAF9 / #DDF4F0
+Legacy warm/dark visual palettes and unrelated blue/purple/pink accents are converged; legacy branding data and vehicle paint swatches are preserved as data.
+EXIT_CODE=0
+
+===== node scripts/validate-lucide-icon-exports.mjs =====
+FAIL - lucide-react is not installed; run npm ci before this validator.
+EXIT_CODE=1
+
+===== node scripts/validate-phase06-department-capabilities.mjs =====
+PASS department matrix is mounted inside existing AdminView
+FAIL department navigation requires strict owner marker
+PASS all eight requested departments represented
+PASS all four required capability classifications defined
+PASS capability catalog includes source evidence and canonical destinations
+PASS every linked department destination is registered in the canonical admin route map
+PASS no fabricated counts or live KPI requests in capability component
+PASS no new departmental API mounted in backend server
+PASS existing finance endpoints remain the source of truth
+PASS ledger write operations require MANAGE_FINANCE
+PASS finance route scope and existing allowlist preserved
+PASS test coverage checks owner gate, status honesty and canonical routes
+PASS owner matrix warns that UI visibility does not grant API access
+PASS financial separation-of-duties risk is explicit
+
+13/14 checks passed
+EXIT_CODE=1
+
+===== npm run typecheck =====
+
+> kayad@0.0.0 typecheck
+> tsc --noEmit
+
+src/App.tsx(1,76): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/App.tsx(47,52): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/App.tsx(512,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/api/apiResilience.test.ts(10,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/api/csrfBootstrapPath.test.ts(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/api/csrfBootstrapPath.test.ts(2,16): error TS2307: Cannot find module 'node:fs' or its corresponding type declarations.
+src/__tests__/api/csrfBootstrapPath.test.ts(3,18): error TS2307: Cannot find module 'node:path' or its corresponding type declarations.
+src/__tests__/api/csrfBootstrapPath.test.ts(7,49): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+src/__tests__/api/csrfBootstrapPath.test.ts(15,49): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+src/__tests__/components/AuthModal.test.tsx(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/components/AuthModal.test.tsx(2,32): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/components/AuthModal.test.tsx(3,58): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/__tests__/components/AuthModal.test.tsx(8,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/components/DealerProfileModal.test.tsx(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/components/DealerProfileModal.test.tsx(2,32): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/components/DealerProfileModal.test.tsx(18,34): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/components/EscrowView.test.tsx(1,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/components/EscrowView.test.tsx(2,60): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/components/EscrowView.test.tsx(8,86): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/components/MobileBottomNav.test.tsx(1,42): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/components/MobileBottomNav.test.tsx(2,43): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/components/MobileBottomNav.test.tsx(7,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/components/VehicleCard.test.tsx(1,42): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/components/VehicleCard.test.tsx(2,32): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/components/VehicleCard.test.tsx(20,37): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/components/VehicleDetailModal.test.tsx(1,42): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/components/VehicleDetailModal.test.tsx(2,43): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/components/VehicleDetailModal.test.tsx(11,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/components/VehicleDetailPage.bidPath.test.tsx(1,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/components/VehicleDetailPage.bidPath.test.tsx(2,52): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/components/VehicleDetailPage.bidPath.test.tsx(96,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/components/VehicleMarketplace.test.tsx(1,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/components/VehicleMarketplace.test.tsx(2,60): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/components/VehicleMarketplace.test.tsx(3,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/components/VehicleMarketplace.test.tsx(55,25): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/components/VehicleMarketplace.test.tsx(424,71): error TS2339: Property 'textContent' does not exist on type 'unknown'.
+src/__tests__/components/admin/AdminRouteSurface.test.tsx(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/components/navigationAuthority.test.ts(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/context/AuthSessionStates.test.tsx(3,65): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/context/AuthSessionStates.test.tsx(4,48): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/context/AuthSessionStates.test.tsx(5,58): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/__tests__/context/AuthSessionStates.test.tsx(15,52): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/context/SocketContext.rejoin.test.tsx(1,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/context/SocketContext.rejoin.test.tsx(2,42): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/context/SocketContext.rejoin.test.tsx(3,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/context/SocketContext.rejoin.test.tsx(24,44): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/context/SocketContext.ticket.test.tsx(1,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/context/SocketContext.ticket.test.tsx(2,37): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/context/SocketContext.ticket.test.tsx(3,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/context/SocketContext.ticket.test.tsx(29,87): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/context/roleMapping.test.ts(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/data/mockAuctions.test.ts(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/data/mockVehicles.test.ts(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/diagnostics/regression.test.tsx(6,65): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/diagnostics/regression.test.tsx(7,52): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/diagnostics/regression.test.tsx(8,31): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/__tests__/diagnostics/regression.test.tsx(9,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/diagnostics/regression.test.tsx(49,17): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/diagnostics/regression.test.tsx(272,7): error TS2304: Cannot find name 'global'.
+src/__tests__/features.PaymentHistoryView.test.tsx(1,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features.PaymentHistoryView.test.tsx(2,41): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features.PaymentHistoryView.test.tsx(35,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/adminAuctionVerification.test.tsx(1,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/adminAuctionVerification.test.tsx(2,41): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/adminAuctionVerification.test.tsx(3,23): error TS2307: Cannot find module '@testing-library/user-event' or its corresponding type declarations.
+src/__tests__/features/adminAuctionVerification.test.tsx(14,54): error TS2339: Property 'mockReset' does not exist on type 'unknown'.
+src/__tests__/features/adminAuctionVerification.test.tsx(21,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/adminCommandCentre.test.tsx(1,65): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/adminCommandCentre.test.tsx(2,61): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/adminCommandCentre.test.tsx(3,30): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/__tests__/features/adminCommandCentre.test.tsx(25,39): error TS2339: Property 'mockReset' does not exist on type 'unknown'.
+src/__tests__/features/adminCommandCentre.test.tsx(33,28): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/auctionVerificationSection.test.tsx(1,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/auctionVerificationSection.test.tsx(2,41): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/auctionVerificationSection.test.tsx(3,23): error TS2307: Cannot find module '@testing-library/user-event' or its corresponding type declarations.
+src/__tests__/features/auctionVerificationSection.test.tsx(20,56): error TS2339: Property 'mockReset' does not exist on type 'unknown'.
+src/__tests__/features/auctionVerificationSection.test.tsx(25,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/auctionsViewLoadFailure.test.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/features/auctionsViewLoadFailure.test.tsx(2,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/auctionsViewLoadFailure.test.tsx(3,52): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/auctionsViewLoadFailure.test.tsx(4,30): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/__tests__/features/auctionsViewLoadFailure.test.tsx(14,33): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/automotive/adminProviderGovernance.test.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/features/automotive/adminProviderGovernance.test.tsx(2,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/automotive/adminProviderGovernance.test.tsx(3,52): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/automotive/adminProviderGovernance.test.tsx(24,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/automotive/dealerProfileTruth.test.tsx(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/automotive/dealerProfileTruth.test.tsx(2,43): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/automotive/dealerProfileTruth.test.tsx(12,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/automotive/providerModals.test.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/features/automotive/providerModals.test.tsx(2,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/automotive/providerModals.test.tsx(3,52): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/automotive/providerModals.test.tsx(39,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/automotive/serviceFinder.test.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/features/automotive/serviceFinder.test.tsx(2,65): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/automotive/serviceFinder.test.tsx(3,60): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/automotive/serviceFinder.test.tsx(18,94): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/automotive/servicesHub.test.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/features/automotive/servicesHub.test.tsx(2,16): error TS2307: Cannot find module 'node:fs' or its corresponding type declarations.
+src/__tests__/features/automotive/servicesHub.test.tsx(3,18): error TS2307: Cannot find module 'node:path' or its corresponding type declarations.
+src/__tests__/features/automotive/servicesHub.test.tsx(4,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/automotive/servicesHub.test.tsx(5,43): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/automotive/servicesHub.test.tsx(9,73): error TS2347: Untyped function calls may not accept type arguments.
+src/__tests__/features/automotive/servicesHub.test.tsx(23,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/automotive/servicesHub.test.tsx(117,43): error TS2580: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node`.
+src/__tests__/features/automotive/transportPaths.test.ts(1,61): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/buyerPlatformConvergence.test.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/features/buyerPlatformConvergence.test.tsx(2,52): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/buyerPlatformConvergence.test.tsx(3,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/buyerPlatformConvergence.test.tsx(15,94): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/escrowClaims.test.ts(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/escrowClaims.test.ts(2,53): error TS2307: Cannot find module 'fs' or its corresponding type declarations.
+src/__tests__/features/escrowClaims.test.ts(3,22): error TS2307: Cannot find module 'path' or its corresponding type declarations.
+src/__tests__/features/escrowClaims.test.ts(35,21): error TS2304: Cannot find name '__dirname'.
+src/__tests__/features/escrowDeepLink.test.tsx(1,53): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/escrowDeepLink.test.tsx(2,41): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/escrowDeepLink.test.tsx(44,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/escrowRulesConfig.test.ts(1,50): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/inspections/BookingActions.test.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/features/inspections/BookingActions.test.tsx(2,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/inspections/BookingActions.test.tsx(3,52): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/inspections/BookingActions.test.tsx(8,13): error TS2347: Untyped function calls may not accept type arguments.
+src/__tests__/features/inspections/BookingActions.test.tsx(25,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/inspections/InspectionsView.test.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/features/inspections/InspectionsView.test.tsx(2,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/inspections/InspectionsView.test.tsx(3,51): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/inspections/InspectionsView.test.tsx(8,73): error TS2347: Untyped function calls may not accept type arguments.
+src/__tests__/features/inspections/InspectionsView.test.tsx(28,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/inspections/RequestInspectionModal.test.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/features/inspections/RequestInspectionModal.test.tsx(2,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/inspections/RequestInspectionModal.test.tsx(3,52): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/inspections/RequestInspectionModal.test.tsx(7,24): error TS2347: Untyped function calls may not accept type arguments.
+src/__tests__/features/inspections/RequestInspectionModal.test.tsx(19,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/inspections/inspectionJourney.test.ts(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/inspections/inspectionPayment.test.ts(1,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/organization/organizationWorkspace.test.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/features/organization/organizationWorkspace.test.tsx(2,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/organization/organizationWorkspace.test.tsx(3,69): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/organization/organizationWorkspace.test.tsx(22,50): error TS2339: Property 'mockReset' does not exist on type 'unknown'.
+src/__tests__/features/organization/organizationWorkspace.test.tsx(36,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/support/adminSupportWorkspace.test.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/features/support/adminSupportWorkspace.test.tsx(2,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/support/adminSupportWorkspace.test.tsx(3,52): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/support/adminSupportWorkspace.test.tsx(32,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/support/supportFaq.test.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/features/support/supportFaq.test.tsx(2,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/support/supportFaq.test.tsx(3,52): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/support/supportFaq.test.tsx(21,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/support/supportView.test.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/__tests__/features/support/supportView.test.tsx(2,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/features/support/supportView.test.tsx(3,52): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/features/support/supportView.test.tsx(44,34): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/features/supportFaqTrustClaims.test.ts(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/heroExtras.test.ts(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/hooks/useVehicleCollections.test.ts(1,53): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/hooks/useVehicleCollections.test.ts(2,42): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/onboarding/OnboardingFlow.test.tsx(1,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/onboarding/OnboardingFlow.test.tsx(2,61): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/onboarding/OnboardingFlow.test.tsx(3,30): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/__tests__/onboarding/OnboardingFlow.test.tsx(16,47): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/onboarding/roles.test.ts(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/pages/NotificationsPage.test.tsx(1,53): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/pages/NotificationsPage.test.tsx(2,52): error TS2307: Cannot find module '@testing-library/react' or its corresponding type declarations.
+src/__tests__/pages/NotificationsPage.test.tsx(3,30): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/__tests__/pages/NotificationsPage.test.tsx(26,33): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/__tests__/services/authApi.getMe.test.ts(1,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/services/authApi.ownerUnverified.test.ts(1,54): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/services/inspectionApi.test.ts(1,53): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/services/vehicleApi.test.ts(1,53): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/utils/authIntent.test.ts(1,50): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/utils/escrowOverride.test.ts(1,50): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/utils/listingQualityScore.test.ts(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/utils/navLocation.test.ts(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/utils/notificationDestination.test.ts(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/utils/permissionsParity.test.ts(3,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/__tests__/utils/staffRoles.test.ts(1,38): error TS2307: Cannot find module 'vitest' or its corresponding type declarations.
+src/api/httpClient.ts(1,19): error TS2307: Cannot find module 'axios' or its corresponding type declarations.
+src/components/AdminTableRow.tsx(4,71): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/AdminTableRow.tsx(5,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/AdminTableRow.tsx(38,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/AppLayout.tsx(1,61): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/AppLayout.tsx(47,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/AuthModal.tsx(1,34): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/AuthModal.tsx(2,42): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/CarCard.tsx(1,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/CarCard.tsx(2,94): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/CarCard.tsx(64,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/CarSilhouette.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/CarSilhouette.tsx(18,3): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/CartyGrid.tsx(1,32): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/CartyGrid.tsx(2,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/CartyGrid.tsx(3,43): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/CartyGrid.tsx(79,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/CompareModal.tsx(1,33): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/CompareModal.tsx(4,83): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/CompareModal.tsx(53,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/CountdownDisplay.tsx(21,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/DashboardHub.tsx(1,53): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/DashboardHub.tsx(2,170): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/DashboardHub.tsx(62,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/DealerMarketInsights.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/DealerMarketInsights.tsx(2,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/DealerMarketInsights.tsx(3,84): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/DealerMarketInsights.tsx(23,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/EscrowTimeline.tsx(2,71): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/EscrowTimeline.tsx(22,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/FloatingAdRail.tsx(1,44): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/FloatingAdRail.tsx(32,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/Footer.tsx(14,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/GalleryModal.tsx(1,58): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/GalleryModal.tsx(2,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/GalleryModal.tsx(3,52): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/GalleryModal.tsx(69,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/HeroCarousel.tsx(1,75): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/HeroCarousel.tsx(2,77): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/HeroCarousel.tsx(37,30): error TS2503: Cannot find namespace 'NodeJS'.
+src/components/HeroCarousel.tsx(118,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/InitializationScreen.tsx(1,53): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/InitializationScreen.tsx(5,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/LazyImage.tsx(1,57): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/LazyImage.tsx(58,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/LoadingPage.tsx(5,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/MarketPulse.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/MarketPulse.tsx(2,75): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/MarketPulse.tsx(19,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/MarketingCard.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/MarketingCard.tsx(2,42): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/MarketingCard.tsx(45,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/MarketplaceFilterBar.tsx(1,53): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/MarketplaceFilterBar.tsx(2,54): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/MarketplaceFilterBar.tsx(20,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/MobileBottomNav.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/MobileBottomNav.tsx(2,47): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/MobileBottomNav.tsx(20,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/Navbar.tsx(2,74): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/Navbar.tsx(3,29): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/Navbar.tsx(30,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/Navbar.tsx(45,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/Navbar.tsx(217,27): error TS2339: Property 'offsetParent' does not exist on type 'unknown'.
+src/components/Navbar.tsx(223,14): error TS2339: Property 'focus' does not exist on type 'unknown'.
+src/components/Navbar.tsx(226,15): error TS2339: Property 'focus' does not exist on type 'unknown'.
+src/components/NotificationCenter.tsx(1,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/NotificationCenter.tsx(3,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/NotificationCenter.tsx(4,81): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/NotificationCenter.tsx(45,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/OnboardingFlow.tsx(1,61): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/OnboardingFlow.tsx(2,48): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/OnboardingFlow.tsx(3,44): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/OnboardingFlow.tsx(159,9): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/PhoneVerification.tsx(1,44): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/PhoneVerification.tsx(2,45): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/PhoneVerification.tsx(81,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/PriceAlertsModal.tsx(1,44): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/PriceAlertsModal.tsx(2,33): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/PriceAlertsModal.tsx(57,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/SEOHead.tsx(7,24): error TS2307: Cannot find module 'react-helmet-async' or its corresponding type declarations.
+src/components/SEOHead.tsx(46,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/SearchSidebar.tsx(1,51): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/SearchSidebar.tsx(2,59): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/SearchSidebar.tsx(27,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/Skeleton.tsx(4,36): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/Skeleton.tsx(37,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/TcoCalculator.tsx(1,35): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/TcoCalculator.tsx(2,58): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/TcoCalculator.tsx(58,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/TopNoticeStrip.tsx(1,53): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/TopNoticeStrip.tsx(73,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/TrustBadgeMatrix.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/TrustBadgeMatrix.tsx(12,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/TrustBadgeMatrix.tsx(44,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/VehicleCard.tsx(1,44): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/VehicleCard.tsx(14,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/VehicleCard.tsx(99,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/VehicleDetailModal.tsx(1,53): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/VehicleDetailModal.tsx(50,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/VehicleDetailModal.tsx(176,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/VirtualList.tsx(4,143): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/VirtualList.tsx(194,24): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/admin/AdminLayout.tsx(1,53): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/admin/AdminLayout.tsx(5,39): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/admin/AdminLayout.tsx(6,36): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/admin/AdminLayout.tsx(8,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/admin/AdminLayout.tsx(47,52): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/admin/AdminPage.tsx(1,51): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/admin/AdminPage.tsx(2,168): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/admin/AdminPage.tsx(75,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/admin/AdminRouteSurface.tsx(1,60): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/admin/AdminRouteSurface.tsx(2,48): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/admin/AdminRouteSurface.tsx(135,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/admin/AdminSidebar.tsx(1,25): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/admin/AdminSidebar.tsx(8,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/admin/AdminSidebar.tsx(9,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/admin/AdminSidebar.tsx(87,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/admin/AdminWidgets.tsx(5,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/admin/AdminWidgets.tsx(6,32): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/admin/AdminWidgets.tsx(27,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/auction/AuctionDisclaimer.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/auction/AuctionDisclaimer.tsx(2,60): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/auction/AuctionDisclaimer.tsx(31,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/auction/AuctionExperienceRail.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/auction/AuctionExperienceRail.tsx(2,97): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/auction/AuctionExperienceRail.tsx(23,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/auction/AuctionInteractionLayer.tsx(1,44): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/auction/AuctionInteractionLayer.tsx(2,59): error TS2307: Cannot find module 'framer-motion' or its corresponding type declarations.
+src/components/auction/AuctionInteractionLayer.tsx(3,78): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/auction/AuctionInteractionLayer.tsx(18,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/auction/AuctionPremiumSurface.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/auction/AuctionPremiumSurface.tsx(2,66): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/auction/AuctionPremiumSurface.tsx(5,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/auction/AuctionWowExperience.tsx(1,61): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/auction/AuctionWowExperience.tsx(2,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/auction/AuctionWowExperience.tsx(3,55): error TS2307: Cannot find module 'framer-motion' or its corresponding type declarations.
+src/components/auction/AuctionWowExperience.tsx(4,141): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/auction/AuctionWowExperience.tsx(28,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/common/Breadcrumbs.tsx(1,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/common/Breadcrumbs.tsx(2,36): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/common/Breadcrumbs.tsx(90,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/common/NavigationBar.tsx(1,74): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/common/NavigationBar.tsx(3,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/common/NavigationBar.tsx(37,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/common/ScrollToTopButton.tsx(1,46): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/common/ScrollToTopButton.tsx(2,25): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/common/ScrollToTopButton.tsx(3,41): error TS2307: Cannot find module 'framer-motion' or its corresponding type declarations.
+src/components/common/ScrollToTopButton.tsx(29,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/compliance/ComplianceChecklist.tsx(1,33): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/compliance/ComplianceChecklist.tsx(20,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/compliance/ComplianceChecklist.tsx(45,17): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/compliance/ComplianceDashboard.tsx(1,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/compliance/ComplianceDashboard.tsx(34,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/compliance/ComplianceDashboard.tsx(71,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/compliance/ComplianceHistory.tsx(1,60): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/compliance/ComplianceHistory.tsx(19,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/compliance/ComplianceHistory.tsx(39,11): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/dashboard/DashboardPage.tsx(1,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/dashboard/DashboardPage.tsx(20,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/dashboard/DashboardPage.tsx(29,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/dashboard/DashboardPage.tsx(30,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/dashboard/DashboardPage.tsx(77,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/dealer/DealerLayout.tsx(1,53): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/dealer/DealerLayout.tsx(4,35): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/dealer/DealerLayout.tsx(5,48): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/dealer/DealerLayout.tsx(42,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/dealer/DealerMarketInsights.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/dealer/DealerMarketInsights.tsx(2,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/dealer/DealerMarketInsights.tsx(3,84): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/dealer/DealerMarketInsights.tsx(5,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/dealer/DealerMarketInsights.tsx(23,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/dealer/DealerMarketInsights.tsx(129,33): error TS2322: Type '{ key: any; rec: any; }' is not assignable to type 'RecommendationCardProps'.
+  Property 'key' does not exist on type 'RecommendationCardProps'.
+src/components/dealer/DealerProfilePage.tsx(1,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/dealer/DealerProfilePage.tsx(2,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/dealer/DealerProfilePage.tsx(3,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/dealer/DealerProfilePage.tsx(4,91): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/dealer/DealerProfilePage.tsx(18,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/detail/PriceAlertModal.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/detail/PriceAlertModal.tsx(2,41): error TS2307: Cannot find module 'framer-motion' or its corresponding type declarations.
+src/components/detail/PriceAlertModal.tsx(16,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/detail/PriceAlertModal.tsx(20,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/detail/PriceAlertModal.tsx(21,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/detail/PriceAlertModal.tsx(113,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/detail/VehicleDetailPage.tsx(1,45): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/detail/VehicleDetailPage.tsx(35,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/detail/VehicleDetailPage.tsx(43,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/detail/VehicleDetailPage.tsx(44,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/detail/VehicleDetailPage.tsx(148,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/admin/AdminWidgets.tsx(4,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/features/admin/AdminWidgets.tsx(5,32): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/admin/AdminWidgets.tsx(26,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/auction/CountdownDisplay.tsx(14,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/auction/WinnerModal.tsx(1,24): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/auction/WinnerModal.tsx(15,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/car/CarDetail/AuctionAnnouncement.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/car/CarDetail/AuctionAnnouncement.tsx(2,47): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/car/CarDetail/AuctionAnnouncement.tsx(83,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/car/CarDetail/CarDetailReviews.tsx(1,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/car/CarDetail/CarDetailReviews.tsx(2,37): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/car/CarDetail/CarDetailReviews.tsx(73,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/car/CarDetail/CarDetailWidgets.tsx(1,84): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/car/CarDetail/CarDetailWidgets.tsx(2,60): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/car/CarDetail/CarDetailWidgets.tsx(42,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/car/CarDetail/DetailSkeleton.tsx(3,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/car/CarDetail/GalleryModal.tsx(1,50): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/car/CarDetail/GalleryModal.tsx(2,73): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/car/CarDetail/GalleryModal.tsx(60,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/car/CarDetail/InlineBidding.tsx(1,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/car/CarDetail/InlineBidding.tsx(2,71): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/car/CarDetail/InlineBidding.tsx(68,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/car/CarDetail/NtsaStatusCard.tsx(1,68): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/car/CarDetail/NtsaStatusCard.tsx(47,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/car/GalleryModal.tsx(1,75): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/car/GalleryModal.tsx(2,52): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/car/GalleryModal.tsx(68,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/car/SimilarCars.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/car/SimilarCars.tsx(2,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/features/car/SimilarCars.tsx(28,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/ActiveBidLogs.tsx(1,46): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/ActiveBidLogs.tsx(46,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/AppInstallPrompt.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/AppInstallPrompt.tsx(26,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/BackButton.tsx(1,42): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/features/common/BackButton.tsx(2,27): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/common/BackButton.tsx(3,36): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/BackButton.tsx(32,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/CompareDrawer.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/CompareDrawer.tsx(2,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/features/common/CompareDrawer.tsx(3,35): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/common/CompareDrawer.tsx(22,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/DarkModeToggle.tsx(2,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/DarkModeToggle.tsx(31,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/EvidenceTimeline.tsx(1,54): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/common/EvidenceTimeline.tsx(51,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/HeroCarousel.tsx(1,75): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/HeroCarousel.tsx(2,77): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/common/HeroCarousel.tsx(37,30): error TS2503: Cannot find namespace 'NodeJS'.
+src/components/features/common/HeroCarousel.tsx(118,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/InternalNotes.tsx(1,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/InternalNotes.tsx(2,43): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/common/InternalNotes.tsx(47,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/LazyImage.tsx(1,57): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/LazyImage.tsx(58,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/LoadingPage.tsx(5,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/MarketPulse.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/MarketPulse.tsx(2,75): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/common/MarketPulse.tsx(19,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/MarketValuationMatrix.tsx(1,46): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/MarketValuationMatrix.tsx(2,55): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/common/MarketValuationMatrix.tsx(26,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/NotificationCenter.tsx(1,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/NotificationCenter.tsx(3,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/features/common/NotificationCenter.tsx(4,81): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/common/NotificationCenter.tsx(43,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/ReferralStats.tsx(1,66): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/common/ReferralStats.tsx(2,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/ReferralStats.tsx(23,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/ReportButton.tsx(1,45): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/ReportButton.tsx(2,22): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/common/ReportButton.tsx(67,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/SEOHead.tsx(7,24): error TS2307: Cannot find module 'react-helmet-async' or its corresponding type declarations.
+src/components/features/common/SEOHead.tsx(70,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/SWUpdateBanner.tsx(1,27): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/SearchBar.tsx(1,45): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/SearchBar.tsx(2,34): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/common/SearchBar.tsx(76,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/SeoStructuredData.tsx(1,27): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/SeoStructuredData.tsx(3,30): error TS2551: Property 'VITE_PUBLIC_URL' does not exist on type 'ImportMetaEnv'. Did you mean 'VITE_API_URL'?
+src/components/features/common/SkeletonCard.tsx(3,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/TcoCalculator.tsx(1,35): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/TcoCalculator.tsx(2,58): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/common/TcoCalculator.tsx(58,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/ThemeSettings.tsx(1,35): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/ThemeSettings.tsx(29,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/common/VirtualList.tsx(4,143): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/common/VirtualList.tsx(194,24): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/dealer/DealerHub.tsx(1,41): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/dealer/DealerHub.tsx(2,35): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/features/dealer/DealerHub.tsx(7,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/dealer/DealerHub.tsx(21,9): error TS2503: Cannot find namespace 'React'.
+src/components/features/dealer/DealerHub.tsx(77,9): error TS2503: Cannot find namespace 'React'.
+src/components/features/dealer/DealerHub.tsx(327,14): error TS2503: Cannot find namespace 'React'.
+src/components/features/dealer/DealerHub.tsx(391,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/dealer/DealerMarketInsights.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/dealer/DealerMarketInsights.tsx(2,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/features/dealer/DealerMarketInsights.tsx(3,84): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/dealer/DealerMarketInsights.tsx(22,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/dealer/DealerMarketInsights.tsx(128,33): error TS2322: Type '{ key: any; rec: any; }' is not assignable to type 'RecommendationCardProps'.
+  Property 'key' does not exist on type 'RecommendationCardProps'.
+src/components/features/escrow/EscrowTimeline.tsx(2,71): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/features/escrow/EscrowTimeline.tsx(22,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/escrow/PaymentModal.tsx(1,45): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/escrow/PaymentModal.tsx(121,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/features/escrow/SecureEscrowHub.tsx(1,46): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/features/escrow/SecureEscrowHub.tsx(45,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/filter/ProductFilters.tsx(1,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/filter/ProductFilters.tsx(2,62): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/filter/ProductFilters.tsx(79,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/gallery/FilterSidebar.tsx(1,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/gallery/FilterSidebar.tsx(2,109): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/gallery/FilterSidebar.tsx(5,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/gallery/FilterSidebar.tsx(96,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/gallery/GalleryPage.tsx(1,35): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/gallery/GalleryPage.tsx(15,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/gallery/GalleryPage.tsx(20,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/gallery/GalleryPage.tsx(122,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/gallery/VehicleCard.tsx(1,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/gallery/VehicleCard.tsx(2,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/gallery/VehicleCard.tsx(18,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/gallery/VehicleCard.tsx(22,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/gallery/VehicleCard.tsx(64,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/BrowseByCategory.tsx(10,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/BrowseByCategory.tsx(13,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/BrowseByCategory.tsx(110,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/CustomerStories.tsx(1,22): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/CustomerStories.tsx(2,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/CustomerStories.tsx(6,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/CustomerTestimonials.tsx(1,43): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/CustomerTestimonials.tsx(2,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/CustomerTestimonials.tsx(7,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/EscrowTrustBanner.tsx(13,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/EscrowTrustBanner.tsx(15,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/EscrowTrustBanner.tsx(60,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/EscrowWorkflowSection.tsx(1,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/EscrowWorkflowSection.tsx(16,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/EscrowWorkflowSection.tsx(18,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/EscrowWorkflowSection.tsx(76,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/FeaturedVehicles.tsx(1,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/FeaturedVehicles.tsx(2,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/FeaturedVehicles.tsx(3,59): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/FeaturedVehicles.tsx(7,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/FeaturedVehicles.tsx(20,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/FinalCtaSection.tsx(1,40): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/FinalCtaSection.tsx(3,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/FinalCtaSection.tsx(9,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/GlobalSearchSection.tsx(1,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/GlobalSearchSection.tsx(2,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/GlobalSearchSection.tsx(3,116): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/GlobalSearchSection.tsx(6,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/GlobalSearchSection.tsx(77,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/Hero.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/Hero.tsx(11,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/Hero.tsx(13,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/Hero.tsx(42,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/LiveAuctionsSection.tsx(1,70): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/LiveAuctionsSection.tsx(4,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/LiveAuctionsSection.tsx(15,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/PartnerEcosystem.tsx(1,51): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/PartnerEcosystem.tsx(2,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/PartnerEcosystem.tsx(11,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/SellCarBanner.tsx(1,38): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/SellCarBanner.tsx(3,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/SellCarBanner.tsx(9,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/TrustMetricsBar.tsx(1,62): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/TrustMetricsBar.tsx(2,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/TrustMetricsBar.tsx(33,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/VehicleCollectionsSection.tsx(12,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/VehicleCollectionsSection.tsx(15,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/VehicleCollectionsSection.tsx(115,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/home/WhyKayadComparison.tsx(1,53): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/home/WhyKayadComparison.tsx(3,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/home/WhyKayadComparison.tsx(42,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/layout/DealerLayout.tsx(1,48): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/layout/DealerLayout.tsx(4,35): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/layout/DealerLayout.tsx(5,48): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/layout/DealerLayout.tsx(42,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/layout/DealerSidebar.tsx(1,25): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/layout/DealerSidebar.tsx(7,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/layout/DealerSidebar.tsx(8,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/layout/DealerSidebar.tsx(49,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/layout/Footer.tsx(1,29): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/layout/Footer.tsx(76,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/layout/MobileBottomNav.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/layout/MobileBottomNav.tsx(2,35): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/layout/MobileBottomNav.tsx(3,66): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/layout/MobileBottomNav.tsx(55,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/layout/NotificationPanel.tsx(1,41): error TS2307: Cannot find module 'framer-motion' or its corresponding type declarations.
+src/components/layout/NotificationPanel.tsx(2,103): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/layout/NotificationPanel.tsx(4,29): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/layout/NotificationPanel.tsx(25,33): error TS2503: Cannot find namespace 'React'.
+src/components/layout/NotificationPanel.tsx(53,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/navigation/navConfig.ts(17,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/onboarding/fields.tsx(1,45): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/onboarding/fields.tsx(2,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/onboarding/fields.tsx(22,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/organizer/BuyerProtectionNotice.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/organizer/BuyerProtectionNotice.tsx(2,57): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/organizer/BuyerProtectionNotice.tsx(23,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/organizer/OrganizerProfile.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/organizer/OrganizerProfile.tsx(16,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/organizer/OrganizerProfile.tsx(70,20): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/organizer/OrganizerTrustCenter.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/organizer/OrganizerTrustCenter.tsx(23,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/organizer/OrganizerTrustCenter.tsx(83,3): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/organizer/PaymentTransparency.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/organizer/PaymentTransparency.tsx(12,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/organizer/PaymentTransparency.tsx(46,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/organizer/TrustBadge.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/organizer/TrustBadge.tsx(15,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/organizer/TrustBadge.tsx(45,11): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/product/ProductGallery.tsx(1,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/product/ProductGallery.tsx(2,70): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/product/ProductGallery.tsx(35,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/readiness/AuctionReadinessEngine.tsx(1,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/readiness/AuctionReadinessEngine.tsx(20,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/readiness/AuctionReadinessEngine.tsx(50,19): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/reports/ArchitectureReportModal.tsx(4,105): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/reports/ArchitectureReportModal.tsx(11,39): error TS2503: Cannot find namespace 'React'.
+src/components/reports/ArchitectureReportModal.tsx(13,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/risk/AuctionRiskDashboard.tsx(1,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/risk/AuctionRiskDashboard.tsx(31,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/risk/AuctionRiskDashboard.tsx(68,26): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/risk/AuctionRiskDashboard.tsx(535,41): error TS2339: Property 'length' does not exist on type 'unknown'.
+src/components/risk/AuctionRiskDashboard.tsx(552,69): error TS2339: Property 'length' does not exist on type 'unknown'.
+src/components/risk/AuctionRiskDashboard.tsx(555,34): error TS2339: Property 'map' does not exist on type 'unknown'.
+src/components/risk/OperatorRiskChecklist.tsx(1,32): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/risk/OperatorRiskChecklist.tsx(11,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/risk/OperatorRiskChecklist.tsx(32,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/risk/RiskHistory.tsx(1,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/risk/RiskHistory.tsx(13,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/risk/RiskHistory.tsx(78,11): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/risk/RiskHistory.tsx(253,59): error TS2339: Property 'length' does not exist on type 'unknown'.
+src/components/risk/RiskHistory.tsx(256,24): error TS2339: Property 'map' does not exist on type 'unknown'.
+src/components/sell/SellPage.tsx(1,26): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/sell/SellPage.tsx(9,31): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Alert.tsx(1,66): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/ui/Alert.tsx(8,14): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Alert.tsx(14,35): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Alert.tsx(15,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Avatar.tsx(1,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/Avatar.tsx(2,22): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/ui/Avatar.tsx(92,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Avatar.tsx(160,11): error TS2322: Type '{ key: number; src: string; name: string; size: "xs" | "sm" | "md" | "lg" | "xl"; className: string; }' is not assignable to type 'AvatarProps'.
+  Property 'key' does not exist on type 'AvatarProps'.
+src/components/ui/Badge.tsx(6,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Badge.tsx(11,10): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Badge.tsx(13,11): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Badge.tsx(16,21): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Badge.tsx(26,39): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Badge.tsx(37,45): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Badge.tsx(85,20): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Badge.tsx(100,19): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Badge.tsx(109,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Badge.tsx(122,14): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Badge.tsx(124,11): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Badge.tsx(127,27): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Button.tsx(5,35): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/Button.tsx(137,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Card.tsx(6,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Card.tsx(11,11): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Card.tsx(16,20): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Card.tsx(33,20): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Card.tsx(48,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Card.tsx(64,12): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Card.tsx(66,11): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Card.tsx(69,26): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Card.tsx(77,22): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Card.tsx(88,21): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Card.tsx(96,24): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Card.tsx(115,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Card.tsx(118,11): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Card.tsx(121,26): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Card.tsx(127,22): error TS2503: Cannot find namespace 'React'.
+src/components/ui/DomainPremiumSurface.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/DomainPremiumSurface.tsx(2,78): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/ui/DomainPremiumSurface.tsx(22,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Dropdown.tsx(1,45): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/Dropdown.tsx(2,29): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/ui/Dropdown.tsx(7,10): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Dropdown.tsx(60,29): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Dropdown.tsx(103,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Dropdown.tsx(190,12): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Dropdown.tsx(191,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Dropdown.tsx(247,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Dropdown.tsx(251,10): error TS2503: Cannot find namespace 'React'.
+src/components/ui/ErrorBoundary.tsx(1,38): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/ErrorBoundary.tsx(2,59): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/ui/ErrorBoundary.tsx(3,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/components/ui/ErrorBoundary.tsx(8,39): error TS2503: Cannot find namespace 'React'.
+src/components/ui/ErrorBoundary.tsx(19,10): error TS2339: Property 'state' does not exist on type 'ErrorBoundary'.
+src/components/ui/ErrorBoundary.tsx(26,46): error TS2503: Cannot find namespace 'React'.
+src/components/ui/ErrorBoundary.tsx(28,10): error TS2339: Property 'props' does not exist on type 'ErrorBoundary'.
+src/components/ui/ErrorBoundary.tsx(32,10): error TS2339: Property 'setState' does not exist on type 'ErrorBoundary'.
+src/components/ui/ErrorBoundary.tsx(36,14): error TS2339: Property 'state' does not exist on type 'ErrorBoundary'.
+src/components/ui/ErrorBoundary.tsx(37,16): error TS2339: Property 'props' does not exist on type 'ErrorBoundary'.
+src/components/ui/ErrorBoundary.tsx(38,21): error TS2339: Property 'props' does not exist on type 'ErrorBoundary'.
+src/components/ui/ErrorBoundary.tsx(42,9): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/ErrorBoundary.tsx(56,19): error TS2339: Property 'state' does not exist on type 'ErrorBoundary'.
+src/components/ui/ErrorBoundary.tsx(60,25): error TS2339: Property 'state' does not exist on type 'ErrorBoundary'.
+src/components/ui/ErrorBoundary.tsx(87,17): error TS2339: Property 'props' does not exist on type 'ErrorBoundary'.
+src/components/ui/ErrorBoundary.tsx(93,14): error TS2503: Cannot find namespace 'React'.
+src/components/ui/ErrorBoundary.tsx(95,4): error TS2503: Cannot find namespace 'React'.
+src/components/ui/FormField.tsx(1,28): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/FormField.tsx(3,34): error TS2503: Cannot find namespace 'React'.
+src/components/ui/FormField.tsx(18,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/FormField.tsx(80,37): error TS2503: Cannot find namespace 'React'.
+src/components/ui/FormField.tsx(157,35): error TS2503: Cannot find namespace 'React'.
+src/components/ui/GlassPanel.tsx(7,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/GlassPanel.tsx(9,11): error TS2503: Cannot find namespace 'React'.
+src/components/ui/GlassPanel.tsx(29,21): error TS2503: Cannot find namespace 'React'.
+src/components/ui/GlassPanel.tsx(47,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Input.tsx(5,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/Input.tsx(146,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/LoadingSpinner.tsx(14,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/MarketplacePrimitives.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/MarketplacePrimitives.tsx(10,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Modal.tsx(1,48): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/Modal.tsx(2,19): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/ui/Modal.tsx(11,14): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Modal.tsx(17,12): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Modal.tsx(21,21): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Modal.tsx(73,31): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Modal.tsx(80,24): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Modal.tsx(93,21): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Modal.tsx(108,22): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Modal.tsx(116,21): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Modal.tsx(123,27): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Modal.tsx(129,27): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Modal.tsx(144,23): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Modal.tsx(150,22): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Modal.tsx(161,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Progress.tsx(37,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/SearchBar.tsx(1,101): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/ui/SearchBar.tsx(2,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/SearchBar.tsx(50,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Skeleton.tsx(33,16): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Skeleton.tsx(39,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Skeleton.tsx(109,21): error TS2322: Type '{ key: number; variant: "text"; className: string; height: number; }' is not assignable to type 'SkeletonProps'.
+  Property 'key' does not exist on type 'SkeletonProps'.
+src/components/ui/Skeleton.tsx(121,15): error TS2322: Type '{ key: number; variant: "text"; className: string; height: number; width: string; }' is not assignable to type 'SkeletonProps'.
+  Property 'key' does not exist on type 'SkeletonProps'.
+src/components/ui/Skeleton.tsx(238,10): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Skeleton.tsx(242,12): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Skeleton.tsx(244,21): error TS2503: Cannot find namespace 'React'.
+src/components/ui/SkipLink.tsx(1,29): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/SkipLink.tsx(14,39): error TS2503: Cannot find namespace 'React'.
+src/components/ui/SkipLink.tsx(25,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/SkipLink.tsx(49,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/SkipLink.tsx(73,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/SkipLink.tsx(84,37): error TS2503: Cannot find namespace 'React'.
+src/components/ui/SkipLink.tsx(85,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/SkipLink.tsx(90,3): error TS2339: Property 'href' does not exist on type 'ExternalLinkProps'.
+src/components/ui/SkipLink.tsx(91,3): error TS2339: Property 'className' does not exist on type 'ExternalLinkProps'.
+src/components/ui/Table.tsx(1,22): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/Table.tsx(6,11): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Table.tsx(9,39): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Table.tsx(18,11): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Table.tsx(47,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Table.tsx(166,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(1,66): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/Tabs.tsx(5,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(8,11): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(26,20): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(43,25): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(51,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Tabs.tsx(60,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(62,11): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(65,23): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(70,20): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(88,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(90,10): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(92,11): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(95,19): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(106,19): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(150,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(152,11): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(155,24): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tabs.tsx(165,21): error TS2503: Cannot find namespace 'React'.
+src/components/ui/ThemeToggle.tsx(1,27): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/ui/ThemeToggle.tsx(7,11): error TS2503: Cannot find namespace 'React'.
+src/components/ui/ThemeToggle.tsx(10,27): error TS2503: Cannot find namespace 'React'.
+src/components/ui/ThemeToggle.tsx(17,22): error TS2503: Cannot find namespace 'React'.
+src/components/ui/ThemeToggle.tsx(34,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Tooltip.tsx(1,45): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/Tooltip.tsx(4,12): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tooltip.tsx(5,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tooltip.tsx(35,29): error TS2503: Cannot find namespace 'NodeJS'.
+src/components/ui/Tooltip.tsx(61,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/components/ui/Tooltip.tsx(104,12): error TS2503: Cannot find namespace 'React'.
+src/components/ui/Tooltip.tsx(105,13): error TS2503: Cannot find namespace 'React'.
+src/components/ui/index.tsx(1,52): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/components/ui/index.tsx(2,19): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/components/ui/index.tsx(51,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/context/AuthContext.tsx(2,105): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/context/AuthContext.tsx(3,39): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/context/AuthContext.tsx(288,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/context/BrandingContext.tsx(1,84): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/context/BrandingContext.tsx(296,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/context/CompareContext.tsx(1,97): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/context/CompareContext.tsx(27,25): error TS2339: Property 'DEV' does not exist on type 'ImportMetaEnv'.
+src/context/CompareContext.tsx(43,27): error TS2339: Property 'DEV' does not exist on type 'ImportMetaEnv'.
+src/context/CompareContext.tsx(79,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/context/MarketplaceContext.tsx(1,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/context/MarketplaceContext.tsx(2,81): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/context/MarketplaceContext.tsx(3,29): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/context/MarketplaceContext.tsx(9,25): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/context/MarketplaceContext.tsx(550,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/context/NotificationContext.tsx(1,105): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/context/NotificationContext.tsx(258,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/context/SocketContext.tsx(1,96): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/context/SocketContext.tsx(11,73): error TS2339: Property 'PROD' does not exist on type 'ImportMetaEnv'.
+src/context/SocketContext.tsx(46,9): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/context/ThemeContext.tsx(1,88): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/context/ThemeContext.tsx(28,29): error TS2503: Cannot find namespace 'React'.
+src/context/ThemeContext.tsx(121,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/context/ToastContext.tsx(1,77): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/context/ToastContext.tsx(71,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/context/ToastContext.tsx(102,20): error TS2322: Type '{ key: string; toast: Toast; onRemove: (id: string) => void; }' is not assignable to type 'ToastItemProps'.
+  Property 'key' does not exist on type 'ToastItemProps'.
+src/design-system/Badge.tsx(3,13): error TS2503: Cannot find namespace 'React'.
+src/design-system/Badge.tsx(8,21): error TS2503: Cannot find namespace 'React'.
+src/design-system/Badge.tsx(22,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/design-system/Button.tsx(2,38): error TS2503: Cannot find namespace 'React'.
+src/design-system/Button.tsx(6,13): error TS2503: Cannot find namespace 'React'.
+src/design-system/Button.tsx(9,22): error TS2503: Cannot find namespace 'React'.
+src/design-system/Button.tsx(38,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/design-system/Card.tsx(3,13): error TS2503: Cannot find namespace 'React'.
+src/design-system/Card.tsx(9,20): error TS2503: Cannot find namespace 'React'.
+src/design-system/Card.tsx(16,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/design-system/DataTable.tsx(5,22): error TS2503: Cannot find namespace 'React'.
+src/design-system/DataTable.tsx(22,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/design-system/Drawer.tsx(1,27): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/design-system/Drawer.tsx(2,19): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/design-system/Drawer.tsx(8,13): error TS2503: Cannot find namespace 'React'.
+src/design-system/Drawer.tsx(12,22): error TS2503: Cannot find namespace 'React'.
+src/design-system/Drawer.tsx(35,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/design-system/Input.tsx(2,37): error TS2503: Cannot find namespace 'React'.
+src/design-system/Input.tsx(5,14): error TS2503: Cannot find namespace 'React'.
+src/design-system/Input.tsx(6,15): error TS2503: Cannot find namespace 'React'.
+src/design-system/Input.tsx(9,21): error TS2503: Cannot find namespace 'React'.
+src/design-system/Input.tsx(21,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/design-system/Modal.tsx(1,27): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/design-system/Modal.tsx(2,19): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/design-system/Modal.tsx(8,13): error TS2503: Cannot find namespace 'React'.
+src/design-system/Modal.tsx(12,21): error TS2503: Cannot find namespace 'React'.
+src/design-system/Modal.tsx(41,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/design-system/Tabs.tsx(5,10): error TS2503: Cannot find namespace 'React'.
+src/design-system/Tabs.tsx(16,20): error TS2503: Cannot find namespace 'React'.
+src/design-system/Tabs.tsx(23,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/design-system/Toast.tsx(1,52): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/design-system/Toast.tsx(9,21): error TS2503: Cannot find namespace 'React'.
+src/design-system/Toast.tsx(27,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/AdManager/AdManagerPanel.tsx(1,44): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/AdManager/AdManagerPanel.tsx(2,55): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/AdManager/AdManagerPanel.tsx(137,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/AdminAuctionVerification.tsx(3,58): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/AdminAuctionVerification.tsx(39,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/AdminDepartmentCapabilities.tsx(1,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/AdminDepartmentCapabilities.tsx(2,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/features/AdminDepartmentCapabilities.tsx(3,74): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/AdminDepartmentCapabilities.tsx(110,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/AdminDepartmentCapabilities.tsx(140,154): error TS2322: Type '{ key: CapabilityStatus; status: CapabilityStatus; }' is not assignable to type '{ status: CapabilityStatus; }'.
+  Property 'key' does not exist on type '{ status: CapabilityStatus; }'.
+src/features/AdminNavigationControl.tsx(1,44): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/AdminNavigationControl.tsx(2,36): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/AdminNavigationControl.tsx(85,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/AdminProviderGovernance.tsx(1,57): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/AdminProviderGovernance.tsx(55,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/AdminSupportWorkspace.tsx(1,66): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/AdminSupportWorkspace.tsx(2,48): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/AdminSupportWorkspace.tsx(80,25): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/AdminView.tsx(1,61): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/AdminView.tsx(2,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/features/AdminView.tsx(22,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/AdminView.tsx(279,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/AuctionsView.tsx(1,66): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/AuctionsView.tsx(2,109): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/AuctionsView.tsx(7,29): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/features/AuctionsView.tsx(282,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/ChatView.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/ChatView.tsx(18,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/DealersView.tsx(1,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/DealersView.tsx(19,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/DealersView.tsx(73,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/DealersView/components/DealerBusinessView.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/DealersView/components/DealerBusinessView.tsx(18,3): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/DealersView/components/DealerProfileModal.tsx(1,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/DealersView/components/DealerProfileModal.tsx(3,270): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/DealersView/components/DealerProfileModal.tsx(157,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/DealersView/components/DealersView.tsx(1,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/DealersView/components/DealersView.tsx(3,139): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/DealersView/components/DealersView.tsx(54,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/EscrowView.tsx(1,57): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/EscrowView.tsx(47,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/FinancePlatform/pages/FinanceMarketplace.tsx(1,44): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/FinancePlatform/pages/FinanceMarketplace.tsx(2,62): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/FinancePlatform/pages/FinanceMarketplace.tsx(110,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/FinancingView.tsx(1,61): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/FinancingView.tsx(39,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/FinancingView.tsx(237,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/Governance/pages/GovernanceDashboard.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/Governance/pages/GovernanceDashboard.tsx(2,39): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/Governance/pages/GovernanceDashboard.tsx(20,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/HeroEditor/HeroEditorPanel.tsx(1,44): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/HeroEditor/HeroEditorPanel.tsx(2,55): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/HeroEditor/HeroEditorPanel.tsx(138,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/components/CapabilityBadges.tsx(1,38): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/InspectionMarketplace/components/CapabilityBadges.tsx(21,28): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/components/ProviderCard.tsx(5,24): error TS2307: Cannot find module 'framer-motion' or its corresponding type declarations.
+src/features/InspectionMarketplace/components/ProviderCard.tsx(6,77): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/InspectionMarketplace/components/ProviderCard.tsx(44,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/components/ProviderCard.tsx(186,55): error TS2503: Cannot find namespace 'React'.
+src/features/InspectionMarketplace/components/ProviderFilters.tsx(6,35): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/InspectionMarketplace/components/ProviderFilters.tsx(29,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/organization/BranchesPanel.tsx(1,33): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionMarketplace/organization/BranchesPanel.tsx(19,32): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/organization/MyMembershipsPanel.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionMarketplace/organization/MyMembershipsPanel.tsx(14,40): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/organization/OperationsPanel.tsx(1,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionMarketplace/organization/OperationsPanel.tsx(24,42): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/organization/OrgReportPanel.tsx(1,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionMarketplace/organization/OrgReportPanel.tsx(27,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/organization/OrganizationWorkspace.tsx(1,50): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionMarketplace/organization/OrganizationWorkspace.tsx(28,40): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/organization/TeamPanel.tsx(1,42): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionMarketplace/organization/TeamPanel.tsx(22,48): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/organization/orgUi.tsx(1,65): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionMarketplace/organization/orgUi.tsx(25,3): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/pages/BookingFlow.tsx(5,45): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionMarketplace/pages/BookingFlow.tsx(6,41): error TS2307: Cannot find module 'framer-motion' or its corresponding type declarations.
+src/features/InspectionMarketplace/pages/BookingFlow.tsx(18,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/InspectionMarketplace/pages/BookingFlow.tsx(215,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/pages/InspectionMarketplacePage.tsx(10,67): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionMarketplace/pages/InspectionMarketplacePage.tsx(11,24): error TS2307: Cannot find module 'framer-motion' or its corresponding type declarations.
+src/features/InspectionMarketplace/pages/InspectionMarketplacePage.tsx(12,68): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/InspectionMarketplace/pages/InspectionMarketplacePage.tsx(125,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/pages/InspectionMarketplacePage.tsx(222,19): error TS2322: Type '{ children: any[]; key: any; active: boolean; onClick: () => void; }' is not assignable to type '{ active: boolean; onClick: () => void; children: React.ReactNode; }'.
+  Property 'key' does not exist on type '{ active: boolean; onClick: () => void; children: React.ReactNode; }'.
+src/features/InspectionMarketplace/pages/InspectionMarketplacePage.tsx(291,56): error TS2322: Type '{ key: any; provider: any; taxonomy: any; onSelect: (provider: InspectionProvider) => Promise<void>; }' is not assignable to type 'ProviderCardProps'.
+  Property 'key' does not exist on type 'ProviderCardProps'.
+src/features/InspectionMarketplace/pages/InspectionMarketplacePage.tsx(315,96): error TS2503: Cannot find namespace 'React'.
+src/features/InspectionMarketplace/pages/ProviderBusinessCenter.tsx(5,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionMarketplace/pages/ProviderBusinessCenter.tsx(6,24): error TS2307: Cannot find module 'framer-motion' or its corresponding type declarations.
+src/features/InspectionMarketplace/pages/ProviderBusinessCenter.tsx(19,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/InspectionMarketplace/pages/ProviderBusinessCenter.tsx(92,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/pages/ProviderBusinessCenter.tsx(253,30): error TS2322: Type '{ key: string; booking: Booking; }' is not assignable to type '{ booking: Booking; }'.
+  Property 'key' does not exist on type '{ booking: Booking; }'.
+src/features/InspectionMarketplace/pages/ProviderBusinessCenter.tsx(364,26): error TS2322: Type '{ key: any; booking: any; }' is not assignable to type '{ booking: Booking; }'.
+  Property 'key' does not exist on type '{ booking: Booking; }'.
+src/features/InspectionMarketplace/pages/ProviderBusinessCenter.tsx(471,58): error TS2503: Cannot find namespace 'React'.
+src/features/InspectionMarketplace/pages/ProviderBusinessCenter.tsx(566,56): error TS2503: Cannot find namespace 'React'.
+src/features/InspectionMarketplace/pages/ProviderProfilePage.tsx(1,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionMarketplace/pages/ProviderProfilePage.tsx(3,97): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/InspectionMarketplace/pages/ProviderProfilePage.tsx(6,24): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionMarketplace/pages/ProviderProfilePage.tsx(42,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionMarketplace/pages/ProviderProfilePage.tsx(120,74): error TS2322: Type '{ key: string; pkg: InspectionPackage; }' is not assignable to type '{ pkg: InspectionPackage; }'.
+  Property 'key' does not exist on type '{ pkg: InspectionPackage; }'.
+src/features/InspectionMarketplace/services/api.ts(5,41): error TS2307: Cannot find module 'axios' or its corresponding type declarations.
+src/features/InspectionsView.tsx(1,74): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionsView.tsx(4,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/InspectionsView.tsx(112,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionsView/BookingActions.tsx(1,59): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionsView/BookingActions.tsx(2,39): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/InspectionsView/BookingActions.tsx(62,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionsView/InspectionReportModal.tsx(1,57): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionsView/InspectionReportModal.tsx(2,36): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/InspectionsView/InspectionReportModal.tsx(17,3): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionsView/ProviderApplicationModal.tsx(1,59): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionsView/ProviderApplicationModal.tsx(2,49): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/InspectionsView/ProviderApplicationModal.tsx(94,33): error TS2731: Implicit conversion of a 'symbol' to a 'string' will fail at runtime. Consider wrapping this expression in 'String(...)'.
+src/features/InspectionsView/ProviderApplicationModal.tsx(95,28): error TS2731: Implicit conversion of a 'symbol' to a 'string' will fail at runtime. Consider wrapping this expression in 'String(...)'.
+src/features/InspectionsView/ProviderApplicationModal.tsx(100,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionsView/ProviderServicesModal.tsx(1,64): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionsView/ProviderServicesModal.tsx(63,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/InspectionsView/RequestInspectionModal.tsx(1,57): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/InspectionsView/RequestInspectionModal.tsx(2,57): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/InspectionsView/RequestInspectionModal.tsx(107,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/MultiCountry/pages/RegionalDashboard.tsx(1,62): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/MultiCountry/pages/RegionalDashboard.tsx(2,104): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/MultiCountry/pages/RegionalDashboard.tsx(39,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/MultiCountry/pages/RegionalDashboard.tsx(66,54): error TS2322: Type '{ key: any; country: any; selected: boolean; onSelect: () => any; }' is not assignable to type '{ country: Country; selected: boolean; onSelect: () => void; compact?: boolean; }'.
+  Property 'key' does not exist on type '{ country: Country; selected: boolean; onSelect: () => void; compact?: boolean; }'.
+src/features/MultiCountry/pages/RegionalDashboard.tsx(75,58): error TS2322: Type '{ key: any; country: any; selected: boolean; onSelect: () => any; compact: true; }' is not assignable to type '{ country: Country; selected: boolean; onSelect: () => void; compact?: boolean; }'.
+  Property 'key' does not exist on type '{ country: Country; selected: boolean; onSelect: () => void; compact?: boolean; }'.
+src/features/OwnershipPlatform/pages/BuyerPlatform.tsx(1,53): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/OwnershipPlatform/pages/BuyerPlatform.tsx(2,167): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/OwnershipPlatform/pages/BuyerPlatform.tsx(146,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/PaymentHistoryView.tsx(1,66): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/PaymentHistoryView.tsx(2,109): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/PaymentHistoryView.tsx(38,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/PrivateSellerPlatform/components/AuctionVerificationSection.tsx(3,58): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/PrivateSellerPlatform/components/AuctionVerificationSection.tsx(71,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx(6,58): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx(7,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx(9,41): error TS2307: Cannot find module 'framer-motion' or its corresponding type declarations.
+src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx(37,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx(285,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx(429,63): error TS2503: Cannot find namespace 'React'.
+src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx(554,1492): error TS2322: Type '{ key: string; listing: BackendCar; delay: number; }' is not assignable to type '{ listing: BackendCar; delay: number; }'.
+  Property 'key' does not exist on type '{ listing: BackendCar; delay: number; }'.
+src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx(577,68): error TS2503: Cannot find namespace 'React'.
+src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx(581,70): error TS2503: Cannot find namespace 'React'.
+src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx(588,59): error TS2503: Cannot find namespace 'React'.
+src/features/Reliability/pages/ReliabilityDashboard.tsx(6,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/Reliability/pages/ReliabilityDashboard.tsx(7,24): error TS2307: Cannot find module 'framer-motion' or its corresponding type declarations.
+src/features/Reliability/pages/ReliabilityDashboard.tsx(26,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/Reliability/pages/ReliabilityDashboard.tsx(91,48): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/SupportFAQ.tsx(1,53): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/SupportFAQ.tsx(16,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/SupportFAQ.tsx(43,46): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/SupportView.tsx(1,61): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/SupportView.tsx(21,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/SupportView.tsx(371,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/UnifiedCommunicationHub.tsx(1,61): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/UnifiedCommunicationHub.tsx(2,29): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/features/UnifiedCommunicationHub.tsx(56,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/UnifiedCommunicationHub.tsx(368,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/VehicleMarketplace/components/HomePageAdminPanel.tsx(1,33): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/VehicleMarketplace/components/HomePageAdminPanel.tsx(2,118): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/VehicleMarketplace/components/HomePageAdminPanel.tsx(181,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/VehicleMarketplace/components/VehicleMarketplace.tsx(1,74): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/VehicleMarketplace/components/VehicleMarketplace.tsx(4,299): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/VehicleMarketplace/components/VehicleMarketplace.tsx(355,101): error TS2339: Property 'localeCompare' does not exist on type 'unknown'.
+src/features/VehicleMarketplace/components/VehicleMarketplace.tsx(362,101): error TS2339: Property 'localeCompare' does not exist on type 'unknown'.
+src/features/VehicleMarketplace/components/VehicleMarketplace.tsx(368,101): error TS2339: Property 'localeCompare' does not exist on type 'unknown'.
+src/features/VehicleMarketplace/components/VehicleMarketplace.tsx(374,101): error TS2339: Property 'localeCompare' does not exist on type 'unknown'.
+src/features/VehicleMarketplace/components/VehicleMarketplace.tsx(384,113): error TS2339: Property 'localeCompare' does not exist on type 'unknown'.
+src/features/VehicleMarketplace/components/VehicleMarketplace.tsx(892,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/VehicleMarketplace/hooks/useHomePageConfig.ts(1,39): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/WorkflowOrchestration/pages/WorkflowOrchestrationDashboard.tsx(6,26): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/WorkflowOrchestration/pages/WorkflowOrchestrationDashboard.tsx(7,24): error TS2307: Cannot find module 'framer-motion' or its corresponding type declarations.
+src/features/WorkflowOrchestration/pages/WorkflowOrchestrationDashboard.tsx(31,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/WorkflowOrchestration/pages/WorkflowOrchestrationDashboard.tsx(73,51): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/WorkflowOrchestration/pages/WorkflowOrchestrationDashboard.tsx(485,9): error TS2503: Cannot find namespace 'React'.
+src/features/escrow/ActionDialog.tsx(1,49): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/escrow/ActionDialog.tsx(51,88): error TS2339: Property 'focus' does not exist on type 'unknown'.
+src/features/escrow/ActionDialog.tsx(52,94): error TS2339: Property 'focus' does not exist on type 'unknown'.
+src/features/escrow/ActionDialog.tsx(56,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/escrow/EscrowOperationsDesk.tsx(1,57): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/escrow/EscrowOperationsDesk.tsx(2,27): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/escrow/EscrowOperationsDesk.tsx(79,41): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/escrow/ParticipantEscrowDesk.tsx(1,66): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/escrow/ParticipantEscrowDesk.tsx(2,78): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/escrow/ParticipantEscrowDesk.tsx(49,3): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/features/escrow/PublicEscrowExplainer.tsx(1,19): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/features/escrow/PublicEscrowExplainer.tsx(2,71): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/features/escrow/PublicEscrowExplainer.tsx(34,3): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/hooks/useAccessibility.tsx(1,58): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/hooks/useAccessibility.tsx(76,41): error TS2503: Cannot find namespace 'React'.
+src/hooks/useAccessibility.tsx(156,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/hooks/useAccessibility.tsx(171,39): error TS2503: Cannot find namespace 'React'.
+src/hooks/useApi.ts(4,67): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/hooks/useCountdown.ts(1,46): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/hooks/useDebouncedValue.ts(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/hooks/useFocusManagement.ts(2,35): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/hooks/useFormValidation.ts(1,56): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/hooks/useFormValidation.ts(35,73): error TS2503: Cannot find namespace 'React'.
+src/hooks/useFormValidation.ts(44,19): error TS2503: Cannot find namespace 'React'.
+src/hooks/useFormValidation.ts(262,23): error TS2503: Cannot find namespace 'React'.
+src/hooks/useFormValidation.ts(325,21): error TS2503: Cannot find namespace 'React'.
+src/hooks/useInfiniteScroll.ts(1,48): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/hooks/useInfiniteScroll.ts(9,16): error TS2503: Cannot find namespace 'React'.
+src/hooks/useLocalization.tsx(1,88): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/hooks/useLocalization.tsx(36,36): error TS2503: Cannot find namespace 'React'.
+src/hooks/useLocalization.tsx(134,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/hooks/useMediaQuery.ts(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/hooks/useOptimizedCallback.ts(1,67): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/hooks/useOptimizedCallback.ts(6,9): error TS2503: Cannot find namespace 'React'.
+src/hooks/useOptimizedCallback.ts(10,30): error TS2503: Cannot find namespace 'React'.
+src/hooks/useOptimizedCallback.ts(31,56): error TS2503: Cannot find namespace 'React'.
+src/hooks/useOptimizedCallback.ts(33,30): error TS2503: Cannot find namespace 'React'.
+src/hooks/useOptimizedCallback.ts(49,44): error TS2503: Cannot find namespace 'React'.
+src/hooks/useOptimizedCallback.ts(62,29): error TS2503: Cannot find namespace 'NodeJS'.
+src/hooks/useOptimizedCallback.ts(110,29): error TS2503: Cannot find namespace 'NodeJS'.
+src/hooks/useOptimizedCallback.ts(221,25): error TS2339: Property 'DEV' does not exist on type 'ImportMetaEnv'.
+src/hooks/useRecentSearches.ts(1,50): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/hooks/useVehicleCollections.ts(1,67): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/main.tsx(1,66): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/main.tsx(2,22): error TS2307: Cannot find module 'react-dom/client' or its corresponding type declarations.
+src/main.tsx(3,31): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/main.tsx(15,10): error TS2339: Property 'state' does not exist on type 'ErrorBoundary'.
+src/main.tsx(27,14): error TS2339: Property 'state' does not exist on type 'ErrorBoundary'.
+src/main.tsx(29,9): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/main.tsx(41,21): error TS2339: Property 'state' does not exist on type 'ErrorBoundary'.
+src/main.tsx(61,17): error TS2339: Property 'props' does not exist on type 'ErrorBoundary'.
+src/pages/AuctionDiscoveryNetwork.tsx(1,57): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/pages/AuctionDiscoveryNetwork.tsx(29,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/pages/AuctionDiscoveryNetwork.tsx(98,155): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/Compare.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/pages/Compare.tsx(2,22): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/pages/Compare.tsx(3,91): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/pages/Compare.tsx(35,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/Dashboard.tsx(1,27): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/pages/Dashboard.tsx(2,29): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/pages/Dashboard.tsx(23,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/ForgotPasswordPage.tsx(1,41): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/pages/ForgotPasswordPage.tsx(2,35): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/pages/ForgotPasswordPage.tsx(38,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/Gallery.tsx(14,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/KAYADLive.tsx(1,44): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/pages/KAYADLive.tsx(2,56): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/pages/KAYADLive.tsx(57,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/NotificationsPage.tsx(1,29): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/pages/NotificationsPage.tsx(2,64): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/pages/NotificationsPage.tsx(19,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/Profile.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/pages/Profile.tsx(2,29): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/pages/Profile.tsx(3,115): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/pages/Profile.tsx(76,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/ResetPasswordPage.tsx(1,50): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/pages/ResetPasswordPage.tsx(2,35): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/pages/ResetPasswordPage.tsx(44,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/Sell.tsx(4,10): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/Showroom.tsx(1,37): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/pages/Showroom.tsx(2,29): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/pages/Showroom.tsx(3,49): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/pages/Showroom.tsx(31,12): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/VerifyEmailPage.tsx(1,52): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/pages/VerifyEmailPage.tsx(2,35): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/pages/VerifyEmailPage.tsx(3,70): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/pages/VerifyEmailPage.tsx(55,38): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/admin/ThemeStudio.tsx(1,50): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/pages/admin/ThemeStudio.tsx(2,29): error TS2307: Cannot find module 'react-router-dom' or its corresponding type declarations.
+src/pages/admin/ThemeStudio.tsx(25,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/pages/admin/ThemeStudio.tsx(115,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/admin/ThemeStudio.tsx(361,23): error TS2322: Type '{ key: keyof ThemeColors; label: string; value: any; onChange: (v: string) => any; }' is not assignable to type '{ label: string; value: string; onChange: (val: string) => void; }'.
+  Property 'key' does not exist on type '{ label: string; value: string; onChange: (val: string) => void; }'.
+src/pages/admin/ThemeStudio.tsx(374,23): error TS2322: Type '{ key: keyof ThemeColors; label: string; value: any; onChange: (v: string) => any; }' is not assignable to type '{ label: string; value: string; onChange: (val: string) => void; }'.
+  Property 'key' does not exist on type '{ label: string; value: string; onChange: (val: string) => void; }'.
+src/pages/admin/ThemeStudio.tsx(748,25): error TS2322: Type '{ key: keyof ThemeColors; label: string; value: string; onChange: (v: string) => any; }' is not assignable to type '{ label: string; value: string; onChange: (val: string) => void; }'.
+  Property 'key' does not exist on type '{ label: string; value: string; onChange: (val: string) => void; }'.
+src/pages/admin/ThemeStudio.tsx(761,25): error TS2322: Type '{ key: keyof ThemeColors; label: string; value: string; onChange: (v: string) => any; }' is not assignable to type '{ label: string; value: string; onChange: (val: string) => void; }'.
+  Property 'key' does not exist on type '{ label: string; value: string; onChange: (val: string) => void; }'.
+src/pages/dealer/dashboard/DealerDashboard.tsx(1,44): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/pages/dealer/dashboard/DealerDashboard.tsx(11,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/pages/dealer/dashboard/DealerDashboard.tsx(395,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/dealer/dashboard/DealerDashboard.tsx(463,15): error TS2322: Type '{ key: string; icon: any; label: string; active: boolean; onClick: () => any; badge: any; }' is not assignable to type '{ icon: any; label: any; active: any; onClick: any; badge: any; }'.
+  Property 'key' does not exist on type '{ icon: any; label: any; active: any; onClick: any; badge: any; }'.
+src/pages/dealer/dashboard/DealerDashboard.tsx(567,25): error TS2322: Type '{ key: any; type: any; message: any; time: any; icon: any; }' is not assignable to type '{ type: any; message: any; time: any; icon: any; }'.
+  Property 'key' does not exist on type '{ type: any; message: any; time: any; icon: any; }'.
+src/pages/dealer/dashboard/DealerDashboard.tsx(592,35): error TS2322: Type '{ key: any; vehicle: any; rank: any; }' is not assignable to type '{ vehicle: any; rank: any; }'.
+  Property 'key' does not exist on type '{ vehicle: any; rank: any; }'.
+src/test-setup.ts(44,1): error TS2304: Cannot find name 'global'.
+src/test-setup.ts(66,1): error TS2304: Cannot find name 'global'.
+src/theme/DesignThemeProvider.tsx(1,93): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/theme/DesignThemeProvider.tsx(109,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/theme/ThemeProvider.tsx(1,64): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/theme/ThemeProvider.tsx(18,29): error TS2503: Cannot find namespace 'React'.
+src/theme/ThemeProvider.tsx(18,50): error TS2503: Cannot find namespace 'React'.
+src/theme/ThemeProvider.tsx(90,5): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/utils/logger.ts(2,23): error TS2339: Property 'DEV' does not exist on type 'ImportMetaEnv'.
+src/utils/logger.ts(8,23): error TS2339: Property 'DEV' does not exist on type 'ImportMetaEnv'.
+src/utils/logger.ts(14,23): error TS2339: Property 'DEV' does not exist on type 'ImportMetaEnv'.
+src/utils/observability.ts(14,14): error TS2307: Cannot find module '@sentry/react' or its corresponding type declarations.
+src/utils/observability.ts(15,14): error TS2307: Cannot find module 'posthog-js' or its corresponding type declarations.
+src/utils/observability.ts(44,36): error TS2307: Cannot find module 'web-vitals' or its corresponding type declarations.
+src/utils/posthog.ts(9,30): error TS2307: Cannot find module 'posthog-js' or its corresponding type declarations.
+src/utils/security.ts(128,23): error TS2339: Property 'PROD' does not exist on type 'ImportMetaEnv'.
+src/utils/seoService.ts(7,34): error TS2551: Property 'VITE_PUBLIC_URL' does not exist on type 'ImportMetaEnv'. Did you mean 'VITE_API_URL'?
+EXIT_CODE=2
+
+===== npm run build =====
+
+> kayad@0.0.0 build
+> vite build
+
+sh: 1: vite: not found
+EXIT_CODE=127
+
+===== npm test -- --run =====
+
+> kayad@0.0.0 test
+> vitest run --run
+
+sh: 1: vitest: not found
+EXIT_CODE=127

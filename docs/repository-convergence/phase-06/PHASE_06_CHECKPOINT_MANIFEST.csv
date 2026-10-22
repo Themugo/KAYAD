@@ -1,0 +1,5 @@
+item,type,sha256_or_count,status,notes
+KAYAD-REPOSITORY-CONVERGENCE-PHASE-05-EVIDENCE-DRIVEN-IMPLEMENTATION-20261022.zip,foundation_zip_sha256,c5c4be89a9d4ac64ce1bbee7c39e724d40bd524ef2e591584ac733c2b9e34fd9,VERIFIED,Original foundation preserved
+original_archive_entries,count,6796,PRESERVED,Entries copied without changing payload bytes
+phase_06_reports,count,21,ADDED,Under docs/repository-convergence/phase-06/
+application_files_moved,count,0,UNCHANGED,No relocation performed

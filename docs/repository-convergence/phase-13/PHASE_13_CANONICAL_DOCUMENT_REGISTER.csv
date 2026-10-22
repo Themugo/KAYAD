@@ -1,0 +1,20 @@
+document_group,path,observed_type,authority_status,basis,recommended_action
+Project entry point,README.md,README,UNVERIFIED_AS_CANONICAL,Presence/name alone does not establish authority,"Review content, links and maintainer ownership"
+Support test matrix,KAYAD_SUPPORT_TEST_MATRIX.md,Test matrix,UNRESOLVED; DISTINCT FROM DOCS COPY,Phase 12 specifically preserves both distinct files,Keep separate until content comparison and owner decision
+Support test matrix,docs/domains/KAYAD_SUPPORT_TEST_MATRIX.md,Test matrix,UNRESOLVED; DISTINCT FROM ROOT COPY,Phase 12 specifically preserves both distinct files,Keep separate until content comparison and owner decision
+Phase records,docs/repository-convergence/phase-00 through phase-12,Historical evidence,HISTORICAL / RELEASE-SCOPED,Phase-scoped evidence and checkpoint records,Preserve; cite exact phase and checkpoint
+README inventory,README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically
+README inventory,backend/inspection/README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically
+README inventory,backend/inspectionBusinessCenter/README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically
+README inventory,backend/mediaEventEngine/README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically
+README inventory,docs/README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically
+README inventory,docs/adr/README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically
+README inventory,docs/messaging-consistency-audit/README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically
+README inventory,evidence/foundation-reconciliation-20261018/README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically
+README inventory,evidence/stage2-entry-20261018/README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically
+README inventory,evidence/stage3a-20261018/README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically
+README inventory,runbooks/README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically
+README inventory,runbooks/stage5e3-hosted-recovery-20261020/README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically
+README inventory,runbooks/stage5f10-private-seller-custody-20261020/README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically
+README inventory,runbooks/stage5f5-admin-governance-20261020/README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically
+README inventory,scripts/local-db/README.md,README,AUTHORITY NOT INFERRED,Found by filename; contents need review,Index; do not consolidate automatically

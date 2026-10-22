@@ -1,0 +1,9 @@
+sequence,action,result,evidence,change_count
+1,Verify Phase 8 SHA-256 and sidecar,PASS,f189acf74113e833f38196dbecec75bdb47156ed246e3c9ffd833ad226380688,0
+2,Validate Phase 8 ZIP integrity,PASS,zipfile.testzip returned no corrupt entry; entries=6857 files=6371 dirs=486,0
+3,Reconcile Phase 8 expected evidence records,PASS_WITH_NOTE,18 expected records; 0 missing; baseline root files=439 root dirs=23,0
+4,Reconcile candidate decisions and approvals,PASS_WITH_BLOCKERS,Seven candidates assessed; no qualifying candidate-specific owner approval found in supplied archive,0
+5,Compare support test-matrix files,PASS_WITH_BLOCKERS,Both files exist; root sha256=95da2372703c497a74c6da9549bcd4ce2da307b2ff7cb61a88b05173bec5f714; docs sha256=3c56218e75d17618a5885e04920cd7e3fa961b459e6f140e291634450564b1ff; content differs,0
+6,Search local text-readable files for candidate names,PASS_WITH_LIMITATIONS,6205 text-readable files scanned; 7 oversized and 159 binary-like files skipped; external consumers not inspectable,0
+7,Execute authorized relocations,SKIPPED,No candidate met every gate; zero moves and zero reference edits,0
+8,Package Phase 9 evidence and verify original payloads,PASS,ZIP integrity passed; 6857 original entries retained; 6371 original file payload hashes matched; output SHA-256/sidecar independently verified after final build,0

@@ -1,0 +1,9 @@
+check,command_or_method,result,scope_limit
+Foundation SHA-256,sha256sum archive,PASS,Exact expected digest matched
+ZIP integrity,Python zipfile.testzip,PASS,No corrupt member
+Phase 58 syntax,node --check scripts/validate-phase58.mjs,PASS,Syntax only
+Phase 59 syntax,node --check scripts/validate-phase59.mjs,PASS,Syntax only
+Phase 60 syntax,node --check scripts/validate-phase60.mjs,PASS,Syntax only
+Package mappings,Node JSON parse/read of package.json scripts,PASS,Does not execute target validators
+Application build/tests,Not run,NOT RUN,Outside this targeted static phase
+External CI/hosting,Not run,NOT RUN,No authorized external evidence in local-only scope

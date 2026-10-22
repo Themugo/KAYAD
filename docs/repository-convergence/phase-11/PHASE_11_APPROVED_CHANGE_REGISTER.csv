@@ -1,0 +1,2 @@
+change_id,source_path,destination_path,source_sha256,approval_reference,authorization_status,execution_status,reason
+NONE,,,,NOT PROVIDED,NOT AUTHORIZED,NOT EXECUTED,No candidate met all required gates; zero cleanup operations performed

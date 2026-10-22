@@ -1,0 +1,2 @@
+path,pre_sha256,post_sha256,comparison,notes
+ALL ORIGINAL PHASE 4 PAYLOAD FILES,See embedded Phase 4 manifest,Not recomputed into extracted tree; ZIP payload preserved unchanged,NO INTENTIONAL CHANGES,Only Phase 5 report files are appended to the checkpoint; no original payload file content was changed.

@@ -15,6 +15,7 @@ import inspectionGovernanceRoutes from "./adminInspectionGovernanceRoutes.js";
 import User from "../models/User.js";
 import UserAuth from "../models/UserAuth.js";
 import { cacheMiddleware, CACHE_TTL } from "../utils/cache.js";
+import { invalidatePublicListingCaches } from "../utils/publicListingCache.js";
 import Car from "../models/Car.js";
 import PlatformConfig from "../models/PlatformConfig.js";
 import AuditLog from "../models/AuditLog.js";
@@ -570,6 +571,7 @@ router.delete(
     }
 
     await Car.softDelete(car._id, req.user.id);
+    await invalidatePublicListingCaches(); // Phase C.1: deleted listing must leave every public cache now
     if (car.dealer) {
       await User.findByIdAndUpdate(car.dealer, {
         $inc: { listingCount: -1 },
@@ -1176,6 +1178,7 @@ router.delete(
       (await Car.find({ dealer: user._id }, { _id: 1 })).map((c) => c._id),
       req.user.id,
     );
+    await invalidatePublicListingCaches(); // Phase C.1
     await user.deleteOne();
 
     await auditAfterCommit({

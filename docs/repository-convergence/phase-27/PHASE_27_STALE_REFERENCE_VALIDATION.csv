@@ -1,0 +1,4 @@
+target,search_scope,finding,disposition
+scripts/validate-phase58.mjs,package.json; scripts/validate-phase59.mjs; scripts/validate-release.mjs; docs references,Package entry and known local references point to existing target; historical log/manifests also contain references,No stale path correction justified
+scripts/validate-phase59.mjs,package.json; scripts/validate-phase60.mjs; docs references,Package entry and known local references point to existing target; historical references preserved,No stale path correction justified
+scripts/validate-phase60.mjs,package.json; scripts/validate-release.mjs; docs references,Package entry and release validator list point to existing target,No stale path correction justified

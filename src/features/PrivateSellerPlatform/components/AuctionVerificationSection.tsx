@@ -113,7 +113,7 @@ export function AuctionVerificationSection({ listings }: { listings: BackendCar[
             {selected && detailError && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-800">{detailError}</p>}
             {selected && p && detail && (
               <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
-                <p className={`rounded-lg px-3 py-2 text-sm font-semibold ${detail.eligibility.eligible ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-900'}`}>
+                <p className={`rounded-lg px-3 py-2 text-sm font-semibold ${detail.eligibility.eligible ? 'bg-emerald-50 text-emerald-800' : 'bg-warning/10 text-warning'}`}>
                   {detail.eligibility.eligible ? 'Cleared for auction — all verification and custody requirements are met.' : 'Not yet cleared for auction. Bidding cannot open until every step below is complete.'}
                 </p>
                 <ol className="space-y-3" aria-label="Verification progress">

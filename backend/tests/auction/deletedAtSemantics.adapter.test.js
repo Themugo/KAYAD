@@ -44,6 +44,7 @@ jest.unstable_mockModule("../../services/privateSellerAuctionEligibility.service
   toGateConflict: (e) => e,
 }));
 const Car = (await import("../../models/Car.js")).default;
+const { findAll } = await import("../../db/index.js");
 const { listAuctions, getActiveAuctions, getAuction } = await import("../../controllers/auctionController.js");
 
 const FUTURE = new Date(Date.now() + 3 * 3600e3).toISOString();
@@ -56,10 +57,17 @@ const ids = (rows) => rows.map((r) => r.id).sort();
 
 beforeEach(() => { tables = { cars: [ABSENT, NULLED, DELETED], auction_setups: [] }; });
 
+describe("shared database helper: explicit null filter semantics", () => {
+  test("findAll translates a bare null filter into IS NULL", async () => {
+    const rows = await findAll("cars", { filters: { deletedAt: null } });
+    expect(ids(rows)).toEqual(ids([ABSENT, NULLED]));
+  });
+});
+
 describe("Car adapter: deletedAt filter forms", () => {
-  test("bare `deletedAt: null` is DROPPED by the adapter (documents the hazard): deleted vehicle is exposed", async () => {
+  test("bare `deletedAt: null` filters active vehicles and excludes soft-deleted vehicles", async () => {
     const rows = await Car.find({ deletedAt: null }).lean();
-    expect(ids(rows)).toEqual(ids([ABSENT, NULLED, DELETED]));
+    expect(ids(rows)).toEqual(ids([ABSENT, NULLED]));
   });
   test("`{ $exists:false }` keeps absent + explicit-null vehicles and excludes the deleted one", async () => {
     const rows = await Car.find({ deletedAt: { $exists: false } }).lean();

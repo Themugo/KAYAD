@@ -1,0 +1,12 @@
+file,change_type,reason,scope_status
+src/features/AdminView.tsx,source,Accessible workflow names and Customer & Risk Operations panel using existing routes,ALLOWED_ADMIN_ONLY
+src/features/admin-command-centre.css,style,Visible keyboard focus and support/escrow shortcut styling,ALLOWED_ADMIN_ONLY
+scripts/validate-stage5f2-dashboard-data-workflow.mjs,test,Align stale route assertions to current canonical routes and add accessibility checks,ALLOWED_RELATED_VALIDATOR
+KAYAD_ADMIN_PHASE2_EXECUTION_REPORT.md,documentation,Execution and certification results,ALLOWED_DOCUMENTATION
+KAYAD_ADMIN_PHASE2_CHANGE_LEDGER.md,documentation,Exact change record,ALLOWED_DOCUMENTATION
+KAYAD_ADMIN_PHASE2_GAP_ANALYSIS.md,documentation,Remaining work,ALLOWED_DOCUMENTATION
+KAYAD_ADMIN_PHASE2_VISUAL_CONVERGENCE_REPORT.md,documentation,Visual change and browser status,ALLOWED_DOCUMENTATION
+KAYAD_ADMIN_PHASE2_DATA_SOURCE_AUDIT.md,documentation,Data provenance and limitations,ALLOWED_DOCUMENTATION
+KAYAD_ADMIN_PHASE2_TEST_RESULTS.md,documentation,Test commands and results,ALLOWED_DOCUMENTATION
+KAYAD_ADMIN_PHASE2_REMAINING_DEFECTS.md,documentation,Blocker handoff,ALLOWED_DOCUMENTATION
+KAYAD_ADMIN_PHASE2_SCREENSHOT_COMPARISON.md,documentation,Visual verification status,ALLOWED_DOCUMENTATION

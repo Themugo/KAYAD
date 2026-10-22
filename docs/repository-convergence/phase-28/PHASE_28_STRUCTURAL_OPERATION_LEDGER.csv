@@ -1,0 +1,4 @@
+operation_id,operation,path,result,reason
+SO28-01,ADD,docs/repository-convergence/phase-28/,COMPLETED,New phase evidence and runtime logs only
+SO28-02,MODIFY_EXISTING_SOURCE,None,NOT_PERFORMED,No justified source correction
+SO28-03,MOVE_RENAME_DELETE_EXISTING_PATH,None,NOT_PERFORMED,External consumer evidence incomplete; preserve paths

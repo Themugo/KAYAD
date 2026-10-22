@@ -4,7 +4,7 @@ import { findAll, findOne, create, update, count, upsert } from "../db/index.js"
 export const calculateAverageSellingPrice = async (startDate, endDate) => {
   try {
     const escrows = await findAll("escrows", { filters: { status: "released", releasedAt: { $gte: startDate, $lte: endDate } } });
-    const auctionSales = await findAll("cars", { filters: { auctionStatus: "ended", auctionEnd: { $gte: startDate, $lte: endDate }, deletedAt: null }, select: "id,currentBid" });
+    const auctionSales = await findAll("cars", { filters: { auctionStatus: "ended", auctionEnd: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }, select: "id,currentBid" });
     const prices = [];
     escrows.forEach((e) => { if (e.amount) prices.push(e.amount); });
     auctionSales.forEach((a) => { if (a.currentBid) prices.push(a.currentBid); });
@@ -14,14 +14,14 @@ export const calculateAverageSellingPrice = async (startDate, endDate) => {
 
 export const calculateAverageListingPrice = async (startDate, endDate) => {
   try {
-    const cars = await findAll("cars", { filters: { status: "available", createdAt: { $gte: startDate, $lte: endDate }, deletedAt: null } });
+    const cars = await findAll("cars", { filters: { status: "available", createdAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } } });
     return cars.length === 0 ? 0 : cars.reduce((a, b) => a + (b.price || 0), 0) / cars.length;
   } catch (err) { logError("Failed to calculate average listing price", err); throw err; }
 };
 
 export const calculateDaysOnMarket = async (startDate, endDate) => {
   try {
-    const soldCars = await findAll("cars", { filters: { status: "sold", updatedAt: { $gte: startDate, $lte: endDate }, deletedAt: null } });
+    const soldCars = await findAll("cars", { filters: { status: "sold", updatedAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } } });
     if (soldCars.length === 0) return { average: 0, median: 0, fastest: 0 };
     const daysOnMarket = soldCars.map((car) => Math.floor((new Date(car.updatedAt) - new Date(car.createdAt)) / 86400000)).sort((a, b) => a - b);
     const sum = daysOnMarket.reduce((a, b) => a + b, 0);
@@ -31,7 +31,7 @@ export const calculateDaysOnMarket = async (startDate, endDate) => {
 
 export const getMostViewedVehicles = async (limit = 10, startDate, endDate) => {
   try {
-    const cars = await findAll("cars", { filters: { createdAt: { $gte: startDate, $lte: endDate }, deletedAt: null }, orderBy: "views", ascending: false, limit, select: "id,title,views,price" });
+    const cars = await findAll("cars", { filters: { createdAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }, orderBy: "views", ascending: false, limit, select: "id,title,views,price" });
     return cars.map((car) => ({ carId: car.id, title: car.title, views: car.views, price: car.price }));
   } catch (err) { logError("Failed to get most viewed vehicles", err); throw err; }
 };
@@ -47,14 +47,14 @@ export const getMostSearchedVehicles = async (limit = 10, startDate, endDate) =>
 
 export const getFastestSellingVehicles = async (limit = 10, startDate, endDate) => {
   try {
-    const soldCars = await findAll("cars", { filters: { status: "sold", updatedAt: { $gte: startDate, $lte: endDate }, deletedAt: null }, select: "id,title,createdAt,updatedAt,price" });
+    const soldCars = await findAll("cars", { filters: { status: "sold", updatedAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }, select: "id,title,createdAt,updatedAt,price" });
     return soldCars.map((car) => ({ carId: car.id, title: car.title, daysOnMarket: Math.floor((new Date(car.updatedAt) - new Date(car.createdAt)) / 86400000), sellingPrice: car.price })).sort((a, b) => a.daysOnMarket - b.daysOnMarket).slice(0, limit);
   } catch (err) { logError("Failed to get fastest selling vehicles", err); throw err; }
 };
 
 export const getCountyTrends = async (startDate, endDate) => {
   try {
-    const cars = await findAll("cars", { filters: { status: { $in: ["available", "sold"] }, createdAt: { $gte: startDate, $lte: endDate }, deletedAt: null }, select: "location,price,status,createdAt,updatedAt" });
+    const cars = await findAll("cars", { filters: { status: { $in: ["available", "sold"] }, createdAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }, select: "location,price,status,createdAt,updatedAt" });
     const countyData = {};
     cars.forEach((car) => {
       const county = car.location?.city || "Unknown";
@@ -72,7 +72,7 @@ export const getCountyTrends = async (startDate, endDate) => {
 
 export const getBrandTrends = async (startDate, endDate) => {
   try {
-    const cars = await findAll("cars", { filters: { status: { $in: ["available", "sold"] }, createdAt: { $gte: startDate, $lte: endDate }, deletedAt: null }, select: "brand,price,status,createdAt,updatedAt" });
+    const cars = await findAll("cars", { filters: { status: { $in: ["available", "sold"] }, createdAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }, select: "brand,price,status,createdAt,updatedAt" });
     const totalVolume = cars.length;
     const brandData = {};
     cars.forEach((car) => {
@@ -91,7 +91,7 @@ export const getBrandTrends = async (startDate, endDate) => {
 
 export const getModelTrends = async (startDate, endDate) => {
   try {
-    const cars = await findAll("cars", { filters: { status: { $in: ["available", "sold"] }, createdAt: { $gte: startDate, $lte: endDate }, deletedAt: null }, select: "brand,model,price,status,createdAt,updatedAt" });
+    const cars = await findAll("cars", { filters: { status: { $in: ["available", "sold"] }, createdAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }, select: "brand,model,price,status,createdAt,updatedAt" });
     const modelData = {};
     cars.forEach((car) => {
       const key = `${car.brand || "Unknown"}-${car.model || "Unknown"}`;
@@ -109,7 +109,7 @@ export const getModelTrends = async (startDate, endDate) => {
 
 export const getSpecTrends = async (startDate, endDate) => {
   try {
-    const cars = await findAll("cars", { filters: { status: { $in: ["available", "sold"] }, createdAt: { $gte: startDate, $lte: endDate }, deletedAt: null }, select: "fuel,transmission,bodyType,price" });
+    const cars = await findAll("cars", { filters: { status: { $in: ["available", "sold"] }, createdAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }, select: "fuel,transmission,bodyType,price" });
     const fuelData = {}, transmissionData = {}, bodyTypeData = {};
     cars.forEach((car) => {
       if (car.fuel) { if (!fuelData[car.fuel]) fuelData[car.fuel] = { type: car.fuel, totalPrice: 0, volume: 0 }; fuelData[car.fuel].totalPrice += car.price || 0; fuelData[car.fuel].volume += 1; }
@@ -146,14 +146,14 @@ export const generateMarketAnalytics = async (period, startDate, endDate) => {
       getModelTrends(startDate, endDate), getSpecTrends(startDate, endDate),
     ]);
 
-    const cars = await findAll("cars", { filters: { status: { $in: ["available", "sold"] }, createdAt: { $gte: startDate, $lte: endDate }, deletedAt: null }, select: "price" });
+    const cars = await findAll("cars", { filters: { status: { $in: ["available", "sold"] }, createdAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }, select: "price" });
     const prices = cars.map((c) => c.price).filter((p) => p > 0).sort((a, b) => a - b);
     const priceRange = { min: prices[0] || 0, max: prices[prices.length - 1] || 0, median: prices[Math.floor(prices.length / 2)] || 0 };
 
     const [totalListings, totalSales, totalAuctions] = await Promise.all([
-      count("cars", { status: "available", createdAt: { $gte: startDate, $lte: endDate }, deletedAt: null }),
-      count("cars", { status: "sold", updatedAt: { $gte: startDate, $lte: endDate }, deletedAt: null }),
-      count("cars", { auctionStatus: "ended", auctionEnd: { $gte: startDate, $lte: endDate }, deletedAt: null }),
+      count("cars", { status: "available", createdAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }),
+      count("cars", { status: "sold", updatedAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }),
+      count("cars", { auctionStatus: "ended", auctionEnd: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }),
     ]);
 
     const conversionRate = totalListings > 0 ? (totalSales / totalListings) * 100 : 0;

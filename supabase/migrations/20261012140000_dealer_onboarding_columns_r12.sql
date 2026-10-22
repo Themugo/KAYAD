@@ -2,7 +2,7 @@
 -- (backend/routes/dealerRoutes.js) writes bio/paymentDetails/onboardingComplete/
 -- onboardingCompletedAt to the `dealers` table, but the live table never had
 -- these columns, so every real onboarding-completion call fails with a
--- Postgres "column does not exist" error. See KAYAD_DEALER_ONBOARDING_STATE_MACHINE.md
+-- Postgres "column does not exist" error. See docs/domains/dealer/onboarding-state-machine.md
 -- §4 and KAYAD_DEALER_GAP_AND_RISK_REGISTER.md R12 for full evidence.
 --
 -- Purely additive: no existing column is altered, renamed, or dropped; no

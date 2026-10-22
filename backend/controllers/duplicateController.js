@@ -10,6 +10,7 @@ import User from "../models/User.js";
 import { restoreScores } from "../services/duplicateVehicleService.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { moderationBlockedReason } from "../utils/carModerationGuard.js";
+import { invalidatePublicListingCaches } from "../utils/publicListingCache.js";
 
 // =============================
 // 📋 GET ALL FLAGGED DUPLICATES
@@ -187,6 +188,7 @@ export const confirmAsDuplicate = async (req, res) => {
       }
 
       await car.save();
+      if (action === "removed") await invalidatePublicListingCaches(); // Phase C.1
     }
 
     await log.markAsReviewed(req.user.id, action, reviewNotes);

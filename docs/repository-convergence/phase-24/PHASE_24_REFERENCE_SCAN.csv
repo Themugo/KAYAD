@@ -1,0 +1,8 @@
+﻿name,active_scope_hits,active_scope_paths,decision,notes
+load-test.js,4,eslint.config.js; load-tests/database-load-test.js; load-tests/api-load-test.js; load-tests/websocket-load-test.js,MOVED_AND_REFERENCE_UPDATED,Historical references excluded from active-scope count; no external consumer inspection available.
+setup-ssl.sh,0,,RETAIN_ROOT,Historical references excluded from active-scope count; no external consumer inspection available.
+start-all.bat,1,scripts/validate-startup-convergence.mjs,RETAIN_ROOT,Historical references excluded from active-scope count; no external consumer inspection available.
+start-backend.bat,0,,RETAIN_ROOT,Historical references excluded from active-scope count; no external consumer inspection available.
+start-frontend.bat,1,scripts/validate-startup-convergence.mjs,RETAIN_ROOT,Historical references excluded from active-scope count; no external consumer inspection available.
+start.bat,0,,RETAIN_ROOT,Historical references excluded from active-scope count; no external consumer inspection available.
+setup-windows.bat,0,,RETAIN_ROOT,Historical references excluded from active-scope count; no external consumer inspection available.

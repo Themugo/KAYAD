@@ -1,0 +1,6 @@
+event_id,event,scope,result,evidence,timestamp_utc,notes
+EVT-15-001,Foundation SHA-256 verification,Phase 14 ZIP,PASS,Expected digest and sidecar matched,2026-10-22,No source archive modification.
+EVT-15-002,ZIP integrity test,Phase 14 ZIP,PASS,zipfile testzip returned no corrupt member,2026-10-22,
+EVT-15-003,Phase 14 manifest validation,6507 manifest rows,PASS,Manifest content hashes and sizes checked,2026-10-22,valid=6507; missing=0; mismatch=0
+EVT-15-004,Historical checksum investigation,Phase 12/13 provenance,BLOCKED,Phase 12 ZIP unavailable; Phase 13 ZIP digest recalculated,2026-10-22,No conclusion of tampering or corruption.
+EVT-15-005,Structural operations,Repository organization,NO_CHANGE,No exact file-level approvals established,2026-10-22,"Zero moves, renames, merges, or deletions executed."

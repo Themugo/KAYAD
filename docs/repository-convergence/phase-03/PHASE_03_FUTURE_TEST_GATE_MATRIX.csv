@@ -1,0 +1,11 @@
+gate_id,area,when,check,acceptance_criteria,status
+G0,Foundation,Before any implementation,Verify Phase 3 ZIP SHA-256 and integrity,SHA and ZIP pass,PLANNED — not executed
+G1,Inventory,After each batch,Compare original/current path inventory and hashes,Only explicitly mapped paths differ,PLANNED — not executed
+G2,References,After each batch,Search import/config/script/docs/CI/runtime path references,No unresolved old-path references for moved files,PLANNED — not executed
+G3,Static code,After code/config path moves,Run typecheck/lint/import validation when dependencies/environment permit,Commands actually execute and pass,PLANNED — not executed
+G4,Build,After any toolchain/source/config path change,Run production build in compatible isolated environment,Build passes; outputs match expected location,PLANNED — not executed
+G5,Tests,After each meaningful batch,Run relevant unit/integration tests and regression subset,Results captured; blocked tests disclosed,PLANNED — not executed
+G6,Browser/E2E,After route/assets/test config moves,Run relevant browser journeys in isolated test environment,Expected journeys pass,PLANNED — not executed
+G7,Infrastructure,After CI/CD/deployment path changes,"Validate build root, start command, container context, migration discovery",All consumers resolve correctly; no production mutation,PLANNED — not executed
+G8,Rollback,If any gate fails,Restore batch snapshot and re-run inventory/reference checks,Original paths/content restored,PLANNED — not executed
+G9,Checkpoint,After approved phase completion,Create full project ZIP and SHA-256 sidecar,ZIP integrity and hash verified,PLANNED — not executed

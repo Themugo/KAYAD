@@ -1,0 +1,7 @@
+phase58	npm run validate:phase58	2026-10-22T16:34:23Z	2026-10-22T16:34:23Z	0	docs/repository-convergence/phase-28/evidence/phase58
+phase59	npm run validate:phase59	2026-10-22T16:34:23Z	2026-10-22T16:34:23Z	0	docs/repository-convergence/phase-28/evidence/phase59
+phase60	npm run validate:phase60	2026-10-22T16:34:23Z	2026-10-22T16:34:23Z	0	docs/repository-convergence/phase-28/evidence/phase60
+syntax-validate_phase58	node --check scripts/validate-phase58.mjs	2026-10-22T16:36:06Z	2026-10-22T16:36:06Z	0	docs/repository-convergence/phase-28/evidence/validate_phase58.syntax
+syntax-validate_phase59	node --check scripts/validate-phase59.mjs	2026-10-22T16:36:06Z	2026-10-22T16:36:06Z	0	docs/repository-convergence/phase-28/evidence/validate_phase59.syntax
+syntax-validate_phase60	node --check scripts/validate-phase60.mjs	2026-10-22T16:36:06Z	2026-10-22T16:36:06Z	0	docs/repository-convergence/phase-28/evidence/validate_phase60.syntax
+syntax-validate_release	node --check scripts/validate-release.mjs	2026-10-22T16:36:06Z	2026-10-22T16:36:06Z	0	docs/repository-convergence/phase-28/evidence/validate_release.syntax

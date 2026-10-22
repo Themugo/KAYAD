@@ -1,0 +1,8 @@
+candidate_path,blocker,status
+KAYAD_STAGE16_SHA256_MANIFEST_20261012.txt,"External CI/CD, developer-machine, human-runbook, dynamic path and hosted-service consumers cannot be certified from ZIP-only inspection.",BLOCKED_PENDING_APPROVAL
+KAYAD_SUPPORT_TEST_MATRIX.md,"External CI/CD, developer-machine, human-runbook, dynamic path and hosted-service consumers cannot be certified from ZIP-only inspection.",BLOCKED_PENDING_APPROVAL
+KAYAD_DEALER_CHANGE_LEDGER.md,"External CI/CD, developer-machine, human-runbook, dynamic path and hosted-service consumers cannot be certified from ZIP-only inspection.",BLOCKED_PENDING_APPROVAL
+KAYAD_ALL_AREAS_EXECUTION_LOG.md,"External CI/CD, developer-machine, human-runbook, dynamic path and hosted-service consumers cannot be certified from ZIP-only inspection.",BLOCKED_PENDING_APPROVAL
+KAYAD_STAGE20_STAGING_RUNBOOK_20261012.md,"External CI/CD, developer-machine, human-runbook, dynamic path and hosted-service consumers cannot be certified from ZIP-only inspection.",BLOCKED_PENDING_APPROVAL
+KAYAD_FIRST_SELLER_LAUNCH_CERTIFICATION_REPORT.md,"External CI/CD, developer-machine, human-runbook, dynamic path and hosted-service consumers cannot be certified from ZIP-only inspection.",BLOCKED_PENDING_APPROVAL
+KAYAD_STAGE5F15_CHANGED_FILES_SHA256.txt,"External CI/CD, developer-machine, human-runbook, dynamic path and hosted-service consumers cannot be certified from ZIP-only inspection.",BLOCKED_PENDING_APPROVAL

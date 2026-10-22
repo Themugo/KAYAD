@@ -1,0 +1,11 @@
+path,status,reason
+src/features/AdminView.tsx,MODIFIED,Honest status copy when data sources are restricted or dashboard statistics fail
+src/features/admin-command-centre.css,MODIFIED,Visible keyboard focus for dashboard panel links and specialist search input
+scripts/validate-stage5f1-command-centre-layout.mjs,MODIFIED,Regression checks for honest status and focus styling
+KAYAD_ADMIN_PHASE4B_FULL_AUDIT_REPORT.md,ADDED,"Phase 4B audit, test, visual comparison or scope report"
+KAYAD_ADMIN_PHASE4B_GAP_ANALYSIS.md,ADDED,"Phase 4B audit, test, visual comparison or scope report"
+KAYAD_ADMIN_PHASE4B_CHANGE_LEDGER.md,ADDED,"Phase 4B audit, test, visual comparison or scope report"
+KAYAD_ADMIN_PHASE4B_TEST_RESULTS.md,ADDED,"Phase 4B audit, test, visual comparison or scope report"
+KAYAD_ADMIN_PHASE4B_SCREENSHOT_COMPARISON.md,ADDED,"Phase 4B audit, test, visual comparison or scope report"
+KAYAD_ADMIN_PHASE4B_REMAINING_DEFECTS.md,ADDED,"Phase 4B audit, test, visual comparison or scope report"
+KAYAD_ADMIN_PHASE4B_EDIT_SCOPE.csv,ADDED,Scope allowlist

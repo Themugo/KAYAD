@@ -1,0 +1,13 @@
+path,status,reason
+src/features/AdminView.tsx,MODIFIED,"Local type alignment, graceful vehicle image fallback, explicit role summary typing"
+KAYAD_ADMIN_PHASE4_BASELINE.md,ADDED,Foundation/runtime baseline
+KAYAD_ADMIN_PHASE4_EDIT_SCOPE.csv,ADDED,Change allowlist
+KAYAD_ADMIN_PHASE4_ROUTE_MAP.csv,ADDED,Existing route map
+KAYAD_ADMIN_PHASE4_DATA_SOURCE_MAP.csv,ADDED,Existing data source map
+KAYAD_ADMIN_PHASE4_GAP_ANALYSIS.md,ADDED,Remaining gaps
+KAYAD_ADMIN_PHASE4_DATA_PROVENANCE.md,ADDED,Metric and panel source interpretation
+KAYAD_ADMIN_PHASE4_TEST_RESULTS.md,ADDED,Actual test outcomes
+KAYAD_ADMIN_PHASE4_SCREENSHOT_COMPARISON.md,ADDED,Visual verification status
+KAYAD_ADMIN_PHASE4_CHANGE_LEDGER.md,ADDED,Change audit
+KAYAD_ADMIN_PHASE4_REMAINING_DEFECTS.md,ADDED,Remaining blockers
+KAYAD_ADMIN_PHASE4_EXECUTION_REPORT.md,ADDED,Final report

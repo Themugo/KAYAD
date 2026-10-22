@@ -1,0 +1,2 @@
+item,demonstrated_defect,proposed_change,decision,reason,regression
+CP28-01,No source defect demonstrated by executed validator evidence,None,NO_CHANGE,All targeted validators passed; no safe justified correction emerged,Not applicable

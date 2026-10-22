@@ -1,0 +1,6 @@
+consumer,source,path_or_command,evidence_status,observed_fact,limits,path_change_decision
+npm scripts,package.json,validate:phase58 / validate:phase59 / validate:phase60,DIRECT_LOCAL_EVIDENCE,All three package commands exist,Local invocation only,No path change
+GitHub Actions CI, .github/workflows/ci.yml,Node 22.22.2; npm run typecheck/test/validate:phase6-release/frontend-runtime-contracts/v14 checks/build,LOCAL_CONFIG_ONLY,Workflow config does not directly invoke Phase 58/59/60 or release validator,Actual remote CI runs not accessed,No path change
+GitHub Actions deployment, .github/workflows/deploy.yml,"Node 22.22.2; several validators, build, Vercel deployment",LOCAL_CONFIG_ONLY,Workflow config does not directly invoke Phase 58/59/60 or release validator,Actual deployment history not accessed; no deployment performed,No path change
+Release validator,scripts/validate-release.mjs,Phase 58 and Phase 60 listed as maintained validators,LOCAL_SOURCE_EVIDENCE,Script list includes Phase 58/60 but not Phase 59,Script itself not executed,Retain all paths
+Remote hosting/scheduled/operator automation,Not present or not verified in archive,Unknown,UNAVAILABLE,No authorized direct evidence collected,Cannot infer active or inactive status,No path change

@@ -1,0 +1,2 @@
+change_id,change_type,path,reason,authorization,result
+P9-000,NO_OP,Repository contents outside Phase 9 evidence,No candidate met relocation gates; preserve all existing files,No move approval supplied,No application or existing-file changes; Phase 9 evidence only

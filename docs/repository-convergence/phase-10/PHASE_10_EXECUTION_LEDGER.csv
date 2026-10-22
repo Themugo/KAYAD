@@ -1,0 +1,11 @@
+step,action,status,evidence,notes
+10-01,Verify foundation hash/sidecar/size,PASS,d8d9dfc6aa7424c55ea6350bcf48f420be7673efcbe0fdbc93e585ab07198ed5,"Matched expected digest, sidecar, and 74,378,395-byte size"
+10-02,Verify ZIP integrity and entry counts,PASS,6878 entries,testzip returned None
+10-03,Read Phase 9 decision/evidence records,PASS,16/16,No missing key reports in requested list
+10-04,Recalculate file hashes and baseline inventory,PASS,6391 file payloads,Baseline hashes generated from verified archive
+10-05,Search repository text for candidate names,PASS_WITH_LIMITATIONS,6223 text files; 3838 matching lines,"Size, binary, external and dynamic limitations documented"
+10-06,Compare support test matrices,PASS_WITH_BLOCKER,Distinct hashes/content,Preserve both; owner decision missing
+10-07,Evaluate authorization gate,BLOCKED,No qualifying approval evidence supplied,No cleanup operation authorized
+10-08,Move/delete/rename/overwrite/merge candidates,NOT_EXECUTED,Zero operations,Deliberately withheld
+10-09,Application build/runtime/database/payment/browser tests,NOT_RUN,No app changes,Out of scope for repository evidence phase
+10-10,Commit/push/deploy/migration/production mutation,NOT_EXECUTED,None,Explicitly prohibited

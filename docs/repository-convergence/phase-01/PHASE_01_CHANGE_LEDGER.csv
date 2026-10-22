@@ -1,0 +1,14 @@
+﻿path,change_type,purpose,reference_impact,integrity_note,scope_status
+docs/repository-convergence/phase-01/PHASE_01_BASELINE_COMPARISON.md,ADDED,Phase 1 audit artifact,No application reference changes intended,Manifest contains artifact hash except manifest self-reference,Permitted
+docs/repository-convergence/phase-01/PHASE_01_CHANGE_LEDGER.csv,ADDED,Phase 1 audit artifact,No application reference changes intended,Manifest contains artifact hash except manifest self-reference,Permitted
+docs/repository-convergence/phase-01/PHASE_01_CHECKPOINT_MANIFEST.csv,ADDED,Phase 1 audit artifact,No application reference changes intended,Manifest contains artifact hash except manifest self-reference,Permitted
+docs/repository-convergence/phase-01/PHASE_01_DEPLOYMENT_PATH_REGISTER.csv,ADDED,Phase 1 audit artifact,No application reference changes intended,Manifest contains artifact hash except manifest self-reference,Permitted
+docs/repository-convergence/phase-01/PHASE_01_DUPLICATION_CANDIDATES.csv,ADDED,Phase 1 audit artifact,No application reference changes intended,Manifest contains artifact hash except manifest self-reference,Permitted
+docs/repository-convergence/phase-01/PHASE_01_FILE_CLASSIFICATION.csv,ADDED,Phase 1 audit artifact,No application reference changes intended,Manifest contains artifact hash except manifest self-reference,Permitted
+docs/repository-convergence/phase-01/PHASE_01_FOUNDATION_SHA256.txt,ADDED,Phase 1 audit artifact,No application reference changes intended,Manifest contains artifact hash except manifest self-reference,Permitted
+docs/repository-convergence/phase-01/PHASE_01_ROOT_INVENTORY.csv,ADDED,Phase 1 audit artifact,No application reference changes intended,Manifest contains artifact hash except manifest self-reference,Permitted
+docs/repository-convergence/phase-01/PHASE_01_STRUCTURE_AUDIT.md,ADDED,Phase 1 audit artifact,No application reference changes intended,Manifest contains artifact hash except manifest self-reference,Permitted
+docs/repository-convergence/phase-01/PHASE_01_SUBSYSTEM_INVENTORY.csv,ADDED,Phase 1 audit artifact,No application reference changes intended,Manifest contains artifact hash except manifest self-reference,Permitted
+docs/repository-convergence/phase-01/PHASE_01_TEST_AND_VALIDATOR_REGISTER.csv,ADDED,Phase 1 audit artifact,No application reference changes intended,Manifest contains artifact hash except manifest self-reference,Permitted
+docs/repository-convergence/phase-01/PHASE_01_UNKNOWN_ITEMS.csv,ADDED,Phase 1 audit artifact,No application reference changes intended,Manifest contains artifact hash except manifest self-reference,Permitted
+docs/repository-convergence/phase-01/PHASE_01_VALIDATION_REPORT.md,ADDED,Phase 1 audit artifact,No application reference changes intended,Manifest contains artifact hash except manifest self-reference,Permitted

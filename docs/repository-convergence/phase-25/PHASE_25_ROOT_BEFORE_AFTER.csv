@@ -1,0 +1,3 @@
+metric,before,after,notes
+root files,50,50,no root moves; preserve uncertain ownership
+root dirs,19,19,no root directory changes

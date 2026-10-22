@@ -1,0 +1,15 @@
+route_or_destination,purpose,evidence/status
+/admin,Canonical command centre,Static route validator PASS
+/admin/dashboard,Canonical command centre alias,Static route validator PASS
+/admin/dealer-verifications,Dealer approval workflow,Phase 04 and Stage 5F.2 validators PASS
+/admin/moderation,Vehicle moderation workflow,Phase 04 and Stage 5F.2 validators PASS
+/admin/sellers,Seller workflow,Phase 04 validator PASS
+/admin/inspector-applications,Inspector workflow,Phase 04 validator PASS
+/admin/ntsa-queue,Document verification,Phase 04 validator PASS
+/admin/inspections,Inspection workflow,Phase 04 validator PASS
+/admin/control-room,System health destination,Existing link; runtime not verified
+/admin/support,Customer support workspace,Stage 5F.2 validator PASS
+/admin/auctions,Auction workspace,Existing link; runtime not verified
+/admin/staff,Staff and departments destination,Existing link; runtime not verified
+/admin/staff-permissions,Role management destination,Existing link; runtime not verified
+/admin/provider-governance,Provider integrations destination,Existing link; runtime not verified

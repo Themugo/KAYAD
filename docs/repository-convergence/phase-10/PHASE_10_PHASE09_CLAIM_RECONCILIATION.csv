@@ -1,0 +1,10 @@
+claim_id,phase09_claim,phase10_status,phase10_evidence,notes
+P9-01,Foundation SHA and sidecar matched,VERIFIED,d8d9dfc6aa7424c55ea6350bcf48f420be7673efcbe0fdbc93e585ab07198ed5,Independent SHA-256 equals expected hash and sidecar
+P9-02,"Archive entry count 6,878 (6,391 files, 487 directories)",VERIFIED,6878,Observed archive metadata agrees with Phase 9 summary checkpoint counts in current artifact
+P9-03,"Phase 8 reported 6,838 entries vs actual 6,857",HISTORICAL_ASSERTION_PRESERVED,Not rederived from original Phase 8 archive in this Phase 10 run,Preserve discrepancy as historical; Phase 9 checkpoint itself contains it
+P9-04,Seven candidates individually assessed,REVIEWED_AGAIN,7,Candidate hashes and paths recalculated from current foundation
+P9-05,No owner approvals present,NO_NEW_APPROVAL_EVIDENCE,Not provided,Phase 10 archive contains no new human approval artifact; do not infer approval
+P9-06,No files moved/deleted/overwritten in Phase 9,CONSISTENT_WITH_PHASE9_LEDGER,Zero Phase 10 cleanup operations,Phase 9 records preserved; no cleanup executed in Phase 10
+P9-07,Two support matrices materially differ,VERIFIED,byte-identical=No,Recalculated both hashes and lengths; see comparison report
+P9-08,External consumers cannot be certified archive-only,STILL_BLOCKED,Archive-only scan,External systems and human-run processes not accessible in provided foundation
+P9-09,Application runtime certification not performed,PRESERVED,No application tests run in Phase 10,Repository organization phase; application untouched

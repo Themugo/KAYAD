@@ -1,0 +1,9 @@
+sequence,action,result,evidence,change_count
+1,Verify foundation hash and sidecar,PASS,KAYAD-REPOSITORY-CONVERGENCE-PHASE-06-CANDIDATE-VERIFIED-IMPLEMENTATION-20261022.zip,0
+2,ZIP integrity test,PASS,zipfile.testzip returned no corrupt entry,0
+3,Reconcile Phase 6 executive summary and decision register,PASS,No relocation reported in Phase 6,0
+4,Inventory archive entries and root classifications,PASS,6818 entries; 462 top-level items,0
+5,Search exact candidate names in text-readable files,PASS,6166 text-readable files scanned,0
+6,Evaluate move gates,BLOCKED,No candidate-specific approval; external consumers incomplete,0
+7,Execute moves or reference edits,SKIPPED,No candidate passed all gates,0
+8,Package Phase 7 evidence and verify preservation,PASS,"Final ZIP integrity, all 6818 original entries/payloads byte-for-byte preserved, 10 Phase 7 CSVs structurally valid, sidecar matched",0

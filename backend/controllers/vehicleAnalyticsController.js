@@ -338,7 +338,7 @@ export const getDealerAnalytics = async (req, res) => {
     const dealerCars = await Car.find({
       dealer: dealerId,
       createdAt: { $gte: startDate ? new Date(startDate) : defaultStartDate },
-      deletedAt: null,
+      deletedAt: { $exists: false },
     }).select("price status createdAt updatedAt views");
 
     // Calculate dealer-specific metrics

@@ -1,0 +1,58 @@
+﻿path,extracted_path_command_hints,validation_status,relocation_risk
+render.yaml,context=./,Not executed; configuration-only inspection,Verify all consumers before moving
+render-staging.yaml,buildCommand=cd backend && npm ci; startCommand=cd backend && node bootstrap.js,Not executed; configuration-only inspection,Verify all consumers before moving
+nginx.conf,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+vercel-staging.json,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+nginx.docker.conf,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+docker-compose.yml,context=./backend; context=.; file=Dockerfile; file=- ./backend/.env; file=Dockerfile.frontend,Not executed; configuration-only inspection,Verify all consumers before moving
+Dockerfile.frontend,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+vercel.json,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/ingress.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/network-policies.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/strategies/blue-green-deployment.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/strategies/rolling-deployment.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/strategies/canary-deployment.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/frontend/deployment.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/frontend/hpa.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/frontend/service.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/frontend/pdb.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/backend/configmap.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/backend/deployment.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/backend/hpa.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/backend/service.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/backend/secret.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/backend/pvc.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+k8s/backend/pdb.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-frontend/values.yaml,context=runAsNonRoot: true; context=allowPrivilegeEscalation: false,Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-frontend/Chart.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-frontend/templates/deployment.yaml,context={{- toYaml . | nindent 8 }}; context={{- toYaml .Values.securityContext | nindent 10 }},Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-frontend/templates/hpa.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-frontend/templates/service.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-frontend/templates/pdb.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-frontend/templates/_helpers.tpl,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-backend/values.yaml,context=runAsNonRoot: true; context=allowPrivilegeEscalation: false,Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-backend/Chart.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-backend/templates/deployment.yaml,context={{- toYaml . | nindent 8 }}; context={{- toYaml .Values.securityContext | nindent 10 }},Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-backend/templates/hpa.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-backend/templates/service.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-backend/templates/secret.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-backend/templates/pvc.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-backend/templates/pdb.yaml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+helm/kayad-backend/templates/_helpers.tpl,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+grafana/kayad-backend-dashboard.json,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+nginx/nginx.conf,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+supabase/config.toml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+backend/Dockerfile,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+.github/link-check-config.json,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+.github/dependabot.yml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+.github/lighthouse-budget.json,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+.github/dependency-check-suppressions.xml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+.github/PULL_REQUEST_TEMPLATE.md,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+.github/lighthouserc.json,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+.github/ISSUE_TEMPLATE/bug_report.md,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+.github/ISSUE_TEMPLATE/security_issue.md,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+.github/ISSUE_TEMPLATE/feature_request.md,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+.github/workflows/deploy.yml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+.github/workflows/dependabot-auto-merge.yml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving
+.github/workflows/ci.yml,working-directory=backend; working-directory=backend; working-directory=backend,Not executed; configuration-only inspection,Verify all consumers before moving
+.github/workflows/security.yml,No simple path/command hints extracted; manual inspection required,Not executed; configuration-only inspection,Verify all consumers before moving

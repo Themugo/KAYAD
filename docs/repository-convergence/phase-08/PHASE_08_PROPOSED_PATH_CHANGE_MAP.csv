@@ -1,0 +1,8 @@
+source_path,proposed_destination,change_type,approval_evidence,decision,reason
+KAYAD_STAGE16_SHA256_MANIFEST_20261012.txt,,NO MOVE,Not supplied,BLOCKED,Historical/documentary exact-name references found or external/runtime consumers cannot be excluded from archive-only evidence; no candidate-specific owner approval supplied.
+KAYAD_SUPPORT_TEST_MATRIX.md,,NO MOVE,Not supplied,BLOCKED,Same basename exists at repository root and docs/domains; contents/provenance must be compared before any consolidation; root candidate remains untouched.
+KAYAD_DEALER_CHANGE_LEDGER.md,,NO MOVE,Not supplied,BLOCKED,Historical/documentary exact-name references found or external/runtime consumers cannot be excluded from archive-only evidence; no candidate-specific owner approval supplied.
+KAYAD_ALL_AREAS_EXECUTION_LOG.md,,NO MOVE,Not supplied,BLOCKED,Historical/documentary exact-name references found or external/runtime consumers cannot be excluded from archive-only evidence; no candidate-specific owner approval supplied.
+KAYAD_STAGE20_STAGING_RUNBOOK_20261012.md,,NO MOVE,Not supplied,BLOCKED,Historical/documentary exact-name references found or external/runtime consumers cannot be excluded from archive-only evidence; no candidate-specific owner approval supplied.
+KAYAD_FIRST_SELLER_LAUNCH_CERTIFICATION_REPORT.md,,NO MOVE,Not supplied,BLOCKED,Historical/documentary exact-name references found or external/runtime consumers cannot be excluded from archive-only evidence; no candidate-specific owner approval supplied.
+KAYAD_STAGE5F15_CHANGED_FILES_SHA256.txt,,NO MOVE,Not supplied,BLOCKED,Historical/documentary exact-name references found or external/runtime consumers cannot be excluded from archive-only evidence; no candidate-specific owner approval supplied.

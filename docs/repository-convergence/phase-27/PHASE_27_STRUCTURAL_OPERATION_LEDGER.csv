@@ -1,0 +1,2 @@
+operation_id,original_path,destination_path,operation_type,reason,pre_sha256,post_sha256,consumer_updates,validation,rollback,outcome
+OP-000,N/A,docs/repository-convergence/phase-27/,ADD PHASE EVIDENCE,Record Phase 27 evidence and validation; no pre-existing source/config/documentation changed,,,No existing consumer paths changed,Generated reports and package verification checked,Remove only phase-27 evidence directory in a working copy,PASS

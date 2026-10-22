@@ -1,0 +1,2 @@
+﻿old_path,new_path,status,sha256,bytes,reason
+docs/ARCHITECTURE.md,docs/history/legacy-root-evidence/general-project-evidence/TOPLINE_FLOORING_ARCHITECTURE_BASELINE.md,MOVED_AND_VERIFIED,566fb9ed87140fbe419414061de598a6b593e98a79b34bd864363f80a5bd53b1,4979,"Document title and body identify Topline Flooring & Waterproofing rather than KAYAD. It was incorrectly placed at docs/ARCHITECTURE.md, competing with the KAYAD-specific docs/architecture/ARCHITECTURE.md. Content hash and byte size preserved."

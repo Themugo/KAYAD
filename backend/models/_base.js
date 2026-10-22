@@ -517,7 +517,12 @@ export function createModel(name) {
   function buildWhere(supabaseQuery, filters) {
     let q = supabaseQuery;
     for (const [k, v] of Object.entries(filters)) {
-      if (v === undefined || v === null) continue;
+      if (v === undefined) continue;
+
+      if (v === null) {
+        q = q.is(mapKeyOut(table, k), null);
+        continue;
+      }
 
       if (k === "$text") {
         const term = v?.$search;
@@ -553,7 +558,7 @@ export function createModel(name) {
               if (fv.$ilike !== undefined) ops.push(`${col}.ilike.${lit(String(fv.$ilike).replace(/%/g, "*"))}`);
               return ops;
             }
-            return [`${col}.eq.${lit(fv)}`];
+            return [fv === null ? `${col}.is.null` : `${col}.eq.${lit(fv)}`];
           });
           return parts.length > 1 ? `and(${parts.join(",")})` : parts[0];
         }).filter(Boolean).join(",");
@@ -563,7 +568,10 @@ export function createModel(name) {
 
       if (k === "$and") {
         for (const cond of v) {
-          for (const [fk, fv] of Object.entries(cond)) q = q.eq(mapKeyOut(table, fk), fv);
+          for (const [fk, fv] of Object.entries(cond)) {
+            const col = mapKeyOut(table, fk);
+            q = fv === null ? q.is(col, null) : q.eq(col, fv);
+          }
         }
         continue;
       }
@@ -591,9 +599,11 @@ export function createModel(name) {
         if (v.$lte !== undefined) q = q.lte(col, toComparable(v.$lte));
         if (v.$gt !== undefined) q = q.gt(col, toComparable(v.$gt));
         if (v.$lt !== undefined) q = q.lt(col, toComparable(v.$lt));
-        if (v.$ne !== undefined) q = q.neq(col, v.$ne);
-        // Additive: `{ $exists: false }` = IS NULL, `{ $exists: true }` = IS NOT NULL. A bare `null` filter value is
-        // skipped by this adapter (legacy behaviour relied on by callers), so soft-delete checks must use this form.
+        // Phase C.1: `$ne: null` means IS NOT NULL (as in db/index.js). `.neq(col, null)` sent the literal string
+        // "null", which PostgreSQL rejects for typed columns (22007 on timestamptz) and mis-compares on text.
+        if (v.$ne !== undefined) q = v.$ne === null ? q.not(col, "is", null) : q.neq(col, v.$ne);
+        // Additive: `{ $exists: false }` = IS NULL, `{ $exists: true }` = IS NOT NULL. Bare null values are also
+        // translated to IS NULL by buildWhere so explicit nullable filters retain their intended semantics.
         if (v.$exists === false) q = q.is(col, null);
         if (v.$exists === true) q = q.not(col, "is", null);
         if (v.$in !== undefined) q = q.in(col, v.$in);
@@ -603,7 +613,7 @@ export function createModel(name) {
           q = q.ilike(col, `%${term}%`);
         }
       } else {
-        q = q.eq(col, v);
+        q = v === null ? q.is(col, null) : q.eq(col, v);
       }
     }
     return q;

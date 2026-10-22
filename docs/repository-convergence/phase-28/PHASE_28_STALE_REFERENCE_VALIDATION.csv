@@ -1,0 +1,2 @@
+scan,scope,result,limitations
+Targeted reference scan,package.json; four validator scripts; .github/workflows/ci.yml; .github/workflows/deploy.yml,No path changes made; references reconciled,Not a repository-wide proof of absence of consumers

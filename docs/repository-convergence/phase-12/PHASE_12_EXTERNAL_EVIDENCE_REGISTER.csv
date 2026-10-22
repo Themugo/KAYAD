@@ -1,0 +1,6 @@
+evidence_id,system_or_workflow,access_method,artifact_inspected,finding,status,limitations,candidate_scope
+EXT12-01,GitHub Actions,Repository archive only; no authenticated remote access,Repository-contained workflow files only,Remote settings/history not verified,NEEDS_EXTERNAL_EVIDENCE,Static archive cannot establish active remote settings,ALL
+EXT12-02,Vercel,No authenticated connected-system evidence available,None,Remote project settings not inspected,NEEDS_EXTERNAL_EVIDENCE,No claim of remote inspection,ALL
+EXT12-03,Render,No authenticated connected-system evidence available,None,Remote service settings not inspected,NEEDS_EXTERNAL_EVIDENCE,No claim of remote inspection,ALL
+EXT12-04,Local developer and human workflows,Archive documentation only,Available scripts and runbooks within archive,External/local usage cannot be confirmed,NEEDS_EXTERNAL_EVIDENCE,Unrecorded/manual procedures may exist,ALL
+EXT12-05,Release/archive packaging,Repository-only scan,Available repository text,External packaging consumers remain unknown,NEEDS_EXTERNAL_EVIDENCE,Dynamic paths and external scripts may be absent,ALL

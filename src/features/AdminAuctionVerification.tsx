@@ -58,7 +58,7 @@ export default function AdminAuctionVerification() {
         <div className="space-y-4">
           {p && detail ? (
             <div className="space-y-4 rounded border bg-white p-4">
-              <p className={`rounded px-3 py-2 text-sm font-semibold ${detail.eligibility.eligible ? 'bg-emerald-50 text-emerald-800' : 'bg-amber-50 text-amber-900'}`}>{detail.eligibility.eligible ? 'Gate: eligible for auction' : 'Gate: blocked'}</p>
+              <p className={`rounded px-3 py-2 text-sm font-semibold ${detail.eligibility.eligible ? 'bg-emerald-50 text-emerald-800' : 'bg-warning/10 text-warning'}`}>{detail.eligibility.eligible ? 'Gate: eligible for auction' : 'Gate: blocked'}</p>
               {detail.eligibility.blockers.length > 0 && <ul className="list-disc pl-5 text-sm">{detail.eligibility.blockers.map((b) => <li key={b}>{b}</li>)}</ul>}
               <dl className="grid grid-cols-2 gap-2 text-sm"><dt>Proposal / evidence version</dt><dd>{p.proposal_version} / {p.evidence_version}</dd><dt>Inspection</dt><dd>{lbl(p.verification_status)}</dd><dt>Custody</dt><dd>{lbl(p.custody_status)}</dd><dt>Appeal</dt><dd>{lbl(p.appeal_status)}</dd><dt>Payment</dt><dd>{p.inspection_payment_confirmed_at ? 'Confirmed (server-recorded)' : 'Not confirmed'}</dd></dl>
               <fieldset disabled={busy} className="space-y-3 border-t pt-3">

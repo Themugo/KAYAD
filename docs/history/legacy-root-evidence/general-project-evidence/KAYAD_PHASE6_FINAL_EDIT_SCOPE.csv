@@ -1,0 +1,6 @@
+path,change_type,reason,verification
+.env.example,restored-template,Foundation archive omitted safe root environment template; required by validator,validate:phase60 PASS 12/12
+.env.production.example,restored-template,Foundation archive omitted safe production example template,Present; no production action performed
+backend/.env.example,restored-template,Foundation archive omitted safe backend environment template; required by validator,validate:phase40 PASS 23/23
+KAYAD_PHASE6_FINAL_LOGS/*,evidence,Preserve command outputs and exit codes,Files included in checkpoint
+KAYAD_PHASE6_FINAL_*.md,documentation,Audit reports and blockers,Manual review

@@ -1,0 +1,5 @@
+scope,method,result,limitations
+package.json,parse scripts,PASS: script entries enumerated,Does not prove scripts run
+text files,path and basename substring search,completed; see consumer matrix,dynamic/external consumers not excluded
+Markdown links,relative link existence,completed; see link validation CSV,fragments/external links not fully checked
+CI/tool config,static inventory/search,not executed,No workflow run performed

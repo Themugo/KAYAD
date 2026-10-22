@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { Vehicle } from '../types';
 import { adminAPI } from '../api/api.exports';
 import {
@@ -19,7 +20,7 @@ import {
   Users,
   Wrench as ProvidersIcon,
 } from 'lucide-react';
-import { Badge, Button, Card, Input, StatWidget, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui';
+import { Badge, Button, Card, Input, Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui';
 import AdminCommunications from '../pages/admin/AdminCommunications';
 import AdminNavigationControl from './AdminNavigationControl';
 import AdminProviderGovernance from './AdminProviderGovernance';
@@ -30,6 +31,7 @@ import AdminSettingsOnboarding from '../pages/admin/AdminSettingsOnboarding';
 import AdminOwnerManagement from '../pages/admin/AdminOwnerManagement';
 import AdminAuctionVerification from './AdminAuctionVerification'; // STAGE 5F.10
 import AdminDepartmentCapabilities from './AdminDepartmentCapabilities';
+import './admin-command-centre.css';
 import { useAuth } from '../context/AuthContext';
 
 interface AdminViewProps {
@@ -53,7 +55,18 @@ type AdminCar = {
   title?: string;
   status?: string;
   auctionStatus?: string;
+  auction_status?: string;
+  currentBid?: number;
+  current_bid?: number;
   price?: number;
+  bidsCount?: number;
+  bids_count?: number;
+  auctionEnd?: string;
+  auction_end?: string;
+  year?: number | string;
+  images?: Array<string | { url?: string; thumb?: string }>;
+  image?: string;
+  imageUrl?: string;
   dealer?: { name?: string; email?: string };
   seller?: { name?: string; email?: string };
 };
@@ -81,6 +94,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [cars, setCars] = useState<AdminCar[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditRecord[]>([]);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const [module, setModule] = useState<'overview' | 'users' | 'cars' | 'audit' | 'communications' | 'navigation' | 'providers' | 'support' | 'onboarding' | 'auctions' | 'owners' | 'departments'>('overview');
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -92,8 +106,13 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
   const [queue, setQueue] = useState<QueueFilter>(null);
   // Sources the server refused for this role (403). That is an access boundary, not an outage, and is reported as such.
   const [restricted, setRestricted] = useState<string[]>([]);
+  const [failedVehicleImages, setFailedVehicleImages] = useState<string[]>([]);
+  // Only the latest dashboard request may publish results. This prevents a slow
+  // refresh from overwriting newer queue-filter or post-action data.
+  const loadSequence = useRef(0);
 
   const load = async (activeQueue: QueueFilter = queue) => {
+    const sequence = ++loadSequence.current;
     setLoading(true);
     setError(null);
     setStatsStatus((current) => current === 'ready' || current === 'stale' ? 'stale' : 'loading');
@@ -106,6 +125,8 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       adminAPI.cars({ page: 1, limit: 50, search: search || undefined, ...(activeQueue === 'pendingVehicles' ? { status: 'pending' } : {}) }),
       adminAPI.getAuditLog({ page: 1, limit: 25 }),
     ] as const);
+
+    if (sequence !== loadSequence.current) return;
 
     const failures: string[] = [];
     const denied: string[] = [];
@@ -169,7 +190,13 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
     setLoading(false);
   };
 
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+    return () => { loadSequence.current += 1; };
+    // The dashboard performs its initial load once; explicit refresh and action
+    // handlers call load directly with the current queue when needed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -250,24 +277,24 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
 
   return (
     <div className="mx-auto w-full min-w-0 max-w-[1600px] space-y-5 sm:space-y-6" data-testid="admin-command-centre">
-      <section aria-labelledby="admin-command-centre-title" className="overflow-hidden rounded-2xl border border-[#CFE2E7] bg-white shadow-sm">
-        <div className="h-1 bg-gradient-to-r from-[#0B3440] via-[#176B87] to-[#13B8A6]" />
-        <div className="flex flex-col gap-4 px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-[#0F7A74]">
-              <ShieldCheck className="h-4 w-4 shrink-0" /> KAYAD Operations
-              <span className="rounded-full border border-[#D7E7E4] bg-[#F4FAF9] px-2 py-1 tracking-normal text-[#49656D]">{isOwner ? 'Owner access' : 'Administration'}</span>
-            </div>
-            <h1 id="admin-command-centre-title" className="mt-2 text-2xl font-extrabold tracking-tight text-[#0B3440] sm:text-3xl">Command centre</h1>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-[#58717A]">Review marketplace decisions, operational queues and administration activity from the protected KAYAD backend.</p>
-          </div>
-          <div className="flex shrink-0 flex-wrap items-center gap-3">
-            <div className="text-xs text-[#64748B]" role="status" aria-live="polite" aria-atomic="true">{loading ? 'Refreshing operational data…' : error ? (statsStatus === 'stale' ? 'Showing last successful statistics; some sources failed' : 'Some operational data is unavailable') : statsStatus === 'ready' ? 'Operational data loaded' : statsStatus === 'stale' ? 'Showing last successful statistics' : 'Waiting for operational data'}</div>
-            <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading} aria-label="Refresh administration data"><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh</Button>
+      <section aria-labelledby="admin-command-centre-title" className="kayad-command-hero">
+        <div className="kayad-command-hero-content">
+          <div className="kayad-command-eyebrow"><ShieldCheck size={15} /> KAYAD BUSINESS COMMAND CENTRE</div>
+          <h1 id="admin-command-centre-title">Welcome back, <span>{(typeof sessionUser?.name === 'string' ? sessionUser.name.split(' ')[0] : '') || 'Administrator'}</span></h1>
+          <p>Oversee your marketplace, team, operations and systems — all from one portal.</p>
+          <div className="kayad-command-meta"><span>{new Intl.DateTimeFormat('en-KE', { dateStyle: 'full', timeZone: 'Africa/Nairobi' }).format(new Date())}</span><span>{error || restricted.length > 0 || statsStatus === 'error' ? 'Some operational data unavailable or restricted' : loading ? 'Loading operational data' : 'Operational data loaded'}</span></div>
+        </div>
+        <div className="kayad-command-actions" aria-label="Quick Actions">
+          <strong>Quick Actions</strong>
+          <div>
+            <Link to="/admin/staff">Add Staff</Link>
+            <Link to="/admin/dealer-verifications">Approve Dealer</Link>
+            <Link to="/admin/cars">View Vehicles</Link>
+            <Link to="/admin/reports">View Reports</Link>
           </div>
         </div>
       </section>
-
+      <div className="kayad-command-toolbar"><span>{statsStatus === 'stale' ? 'Showing last successful statistics' : statsStatus === 'ready' ? 'Values reflect the latest API response' : 'Live data pending'}</span><Button variant="outline" size="sm" onClick={() => void load()} disabled={loading} aria-label="Refresh administration data"><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh</Button></div>
       {(error || actionError) && (
         <Card role="alert" className="flex items-start gap-2 border-[#BDE5DE] bg-[#F3FAF9] p-4 text-sm text-[#0A3340]">
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
@@ -279,101 +306,78 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
         <p role="note" className="text-xs text-[#58717A]">Not included in your role: {restricted.join(', ')}. This is an access boundary, not an outage.</p>
       )}
 
-      <nav aria-label="Administration modules" className="rounded-xl border border-[#DCE8EB] bg-white p-2 shadow-sm">
-      <div className="flex min-w-0 flex-wrap items-center gap-2">
-        {([...(['overview', 'users', 'cars', 'audit', 'communications', 'navigation', 'providers', 'support', 'onboarding', 'auctions'] as const), ...(isOwner ? (['owners', 'departments'] as const) : [])]).map((item) => (
-          <Button key={item} variant={module === item ? 'primary' : 'outline'} size="sm" onClick={() => setModule(item)} aria-current={module === item ? 'page' : undefined} aria-label={`${item[0].toUpperCase() + item.slice(1)} module`}>
-            {item === 'departments' && <Building2 className="w-4 h-4" />}
-            {item === 'overview' && <ShieldCheck className="w-4 h-4" />}
-            {item === 'users' && <Users className="w-4 h-4" />}
-            {item === 'cars' && <Car className="w-4 h-4" />}
-            {item === 'audit' && <History className="w-4 h-4" />}
-            {item === 'communications' && <Send className="w-4 h-4" />}
-            {item === 'navigation' && <Compass className="w-4 h-4" />}
-            {item === 'providers' && <ProvidersIcon className="w-4 h-4" />}
-            {item === 'support' && <LifeBuoy className="w-4 h-4" />}
-            {item === 'onboarding' && <Compass className="w-4 h-4" />}
-            {item[0].toUpperCase() + item.slice(1)}
-          </Button>
-        ))}
-        {module !== 'overview' && module !== 'navigation' && module !== 'providers' && module !== 'support' && module !== 'onboarding' && module !== 'auctions' && module !== 'owners' && module !== 'departments' && <div className="w-full min-w-0 pt-1 sm:ml-auto sm:w-64 sm:pt-0"><Input aria-label="Search administration records" placeholder="Search live records…" value={search} onChange={(e) => setSearch(e.target.value)} /></div>}
+      <div className="kayad-command-specialists">
+        <button type="button" onClick={() => setToolsOpen(!toolsOpen)} aria-expanded={toolsOpen} aria-controls="kayad-specialist-tools">{toolsOpen ? 'Hide' : 'Show'} specialist tools <ChevronRight className="inline h-4 w-4" /></button>
+        {toolsOpen && <div id="kayad-specialist-tools" className="kayad-command-tool-links">
+          {([['overview', 'Dashboard'], ['users', 'User review'], ['cars', 'Vehicle review'], ['audit', 'Audit records'], ['communications', 'Communications'], ['navigation', 'Navigation settings'], ['providers', 'Providers'], ['support', 'Support'], ['onboarding', 'Onboarding'], ['auctions', 'Auction verification'], ...(isOwner ? [['owners', 'Owner management'], ['departments', 'Departments']] : [])] as [typeof module, string][]).map(([key, label]) => <button type="button" key={key} className={module === key ? 'selected' : ''} onClick={() => { setModule(key); setToolsOpen(false); }}>{label}</button>)}
+          {module !== 'overview' && <Input aria-label="Search administration records" placeholder="Search live records…" value={search} onChange={(e) => setSearch(e.target.value)} />}
+        </div>}
       </div>
-      </nav>
-
       {module === 'overview' && (
-        <>
-          <section aria-labelledby="marketplace-overview-heading" className="space-y-3">
-            <div className="flex items-end justify-between gap-3">
-              <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#58717A]">Marketplace snapshot</p><h2 id="marketplace-overview-heading" className="mt-1 text-lg font-bold text-[#0B3440]">Platform at a glance</h2></div>
-              <span className="hidden text-xs text-[#58717A] sm:inline">Values reflect the latest API response</span>
-            </div>
-            <div className="grid grid-cols-1 gap-3 min-[420px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5 xl:gap-4">
-              <StatWidget label="Total users" value={stat('totalUsers')} icon={<Users className="w-4 h-4" />} />
-              <StatWidget label="Vehicles" value={stat('totalCars')} icon={<Car className="w-4 h-4" />} />
-              <StatWidget label="Active listings" value={stat('activeListings')} icon={<CheckCircle2 className="w-4 h-4" />} />
-              <StatWidget label="Live auctions" value={stat('activeAuctions')} icon={<FileCheck className="w-4 h-4" />} />
-              <StatWidget label="Open escrows" value={stat('openEscrows')} icon={<ShieldCheck className="w-4 h-4" />} />
-            </div>
+        <div className="kayad-command-overview">
+          <section aria-label="Marketplace metrics" className="kayad-command-kpis">
+            {[
+              { label: 'Total Users', value: stat('totalUsers'), icon: <Users size={22} />, to: '/admin/users' },
+              { label: 'Active Staff', value: 'View staff', icon: <ShieldCheck size={22} />, to: '/admin/staff' },
+              { label: 'Verified Dealers', value: stat('verifiedDealers'), icon: <Building2 size={22} />, to: '/admin/dealer-verifications' },
+              { label: 'Vehicles', value: stat('totalCars'), icon: <Car size={22} />, to: '/admin/cars' },
+              { label: 'Live Auctions', value: stat('activeAuctions'), icon: <FileCheck size={22} />, to: '/admin/auctions' },
+              { label: 'Open Escrows', value: stat('openEscrows'), icon: <ShieldCheck size={22} />, to: '/admin/escrows' },
+            ].map(item => <Link to={item.to} className="kayad-command-kpi" key={item.label}><div className="kayad-command-kpi-icon">{item.icon}</div><div><small>{item.label}</small><strong>{item.value}</strong></div></Link>)}
           </section>
-
-          <section aria-labelledby="operations-queues-heading" className="space-y-3">
-            <div className="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
-              <div><p className="text-xs font-bold uppercase tracking-[0.14em] text-[#58717A]">Work requiring attention</p><h2 id="operations-queues-heading" className="mt-1 text-lg font-bold text-[#0B3440]">Operational queues</h2></div>
-              <p className="text-xs text-[#58717A]">Unavailable values are not reported as zero.</p>
-            </div>
-            <div className="grid min-w-0 gap-4 2xl:grid-cols-2">
-              {[
-                { title: 'Marketplace decisions', description: 'Dealer and vehicle workflows.', items: [
-                  { label: 'Pending dealers', value: stat('pendingDealers'), destination: 'users' as const, queue: 'pendingDealers' as const },
-                  { label: 'Pending vehicles', value: stat('pendingCars'), destination: 'cars' as const, queue: 'pendingVehicles' as const },
-                  { label: 'Verification queue', value: stat('verificationQueue') },
-                  { label: 'Pending reviews', value: stat('pendingReviews') },
-                ] },
-                { title: 'Customer & risk operations', description: 'Support demand, disputes and risk signals.', items: [
-                  { label: 'Support queue', value: stat('supportQueue'), destination: 'support' as const },
-                  { label: 'Disputes', value: stat('pendingReports') },
-                  { label: 'Fraud alerts', value: stat('fraudAlerts') },
-                  { label: 'Unread alerts', value: stat('activeAlerts') },
-                ] },
-              ].map((group) => (
-                <Card key={group.title} className="min-w-0 border-[#DCE8EB] p-4 transition-shadow hover:shadow-md sm:p-5">
-                  <div className="border-b border-[#E3ECEF] pb-3"><h3 className="font-bold text-[#0B3440]">{group.title}</h3><p className="mt-1 text-xs leading-5 text-[#58717A]">{group.description}</p></div>
-                  <div className="mt-3 grid min-w-0 grid-cols-1 gap-3 min-[420px]:grid-cols-2">
-                    {group.items.map((item) => {
-                      const content = <><div className="text-[10px] font-bold uppercase leading-4 tracking-wide text-[#4B646D] sm:text-[11px]">{item.label}</div><div className="mt-2 break-words text-2xl font-extrabold tracking-tight text-[#176B87]">{item.value}</div>{item.destination && <span className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#176B87]">Open workflow <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /></span>}</>;
-                      return item.destination
-                        ? <button key={item.label} type="button" onClick={() => { setSearch(''); const q = ('queue' in item ? item.queue : null) as QueueFilter; setQueue(q); setModule(item.destination!); if (q !== queue) void load(q); }} className="group min-w-0 rounded-lg border border-[#DCE8EB] bg-[#F8FBFB] p-3 text-left transition-colors hover:border-[#176B87] hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B87] focus-visible:ring-offset-2 active:bg-[#EFF8F7] sm:p-4" aria-label={`Open ${item.label.toLowerCase()} workflow`}>{content}</button>
-                        : <div key={item.label} className="min-w-0 rounded-lg border border-[#DCE8EB] bg-[#F8FBFB] p-3 sm:p-4">{content}</div>;
-                    })}
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </section>
-
-          <section aria-labelledby="approval-workflows-heading" className="space-y-3" data-testid="approval-workbench">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[#58717A]">Canonical workflows</p>
-              <h2 id="approval-workflows-heading" className="mt-1 text-lg font-bold text-[#0B3440]">Approval workbench</h2>
-              <p className="mt-1 text-sm leading-6 text-[#58717A]">Open the existing protected review pages. Each workflow retains its own domain rules, evidence handling, permissions and audit trail.</p>
-            </div>
-            <div className="grid min-w-0 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-              {[
-                { label: 'Dealer verification', description: 'Review dealer verification records and their submitted evidence.', href: '/admin/dealer-verifications', icon: <ShieldCheck className="h-5 w-5" /> },
-                { label: 'Seller accounts', description: 'Review existing seller-account status without merging seller and dealer identities.', href: '/admin/sellers', icon: <Users className="h-5 w-5" /> },
-                { label: 'Inspector applications', description: 'Review inspector-specific applications and reviewer notes.', href: '/admin/inspector-applications', icon: <ProvidersIcon className="h-5 w-5" /> },
-                { label: 'Vehicle moderation', description: 'Open the canonical listing review and moderation queue.', href: '/admin/moderation', icon: <Car className="h-5 w-5" /> },
-                { label: 'Vehicle and document verification', description: 'Open the existing NTSA verification queue; evidence availability depends on the API response and access.', href: '/admin/ntsa-queue', icon: <FileCheck className="h-5 w-5" /> },
-                { label: 'Inspection operations', description: 'Open existing inspection operations; this is not a substitute for inspector application approval.', href: '/admin/inspections', icon: <CheckCircle2 className="h-5 w-5" /> },
-              ].map((workflow) => (
-                <a key={workflow.href} href={workflow.href} className="group flex min-w-0 items-start gap-3 rounded-xl border border-[#DCE8EB] bg-white p-4 transition-colors hover:border-[#176B87] hover:bg-[#F8FBFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B87] focus-visible:ring-offset-2" aria-label={`Open ${workflow.label} workflow`}>
-                  <span className="mt-0.5 rounded-lg bg-[#EAF4F5] p-2 text-[#176B87]" aria-hidden="true">{workflow.icon}</span>
-                  <span className="min-w-0 flex-1"><span className="block font-bold text-[#0B3440]">{workflow.label}</span><span className="mt-1 block text-sm leading-5 text-[#58717A]">{workflow.description}</span><span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-[#176B87]">Open existing workflow <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" /></span></span>
-                </a>
-              ))}
-            </div>
-          </section>
-        </>
+          <div className="kayad-command-main-grid">
+            <section className="kayad-command-panel" aria-labelledby="approval-workflows-heading" data-testid="approval-workbench">
+              <header><h2 id="approval-workflows-heading">Approval Workflows</h2><Link to="/admin/dealer-verifications">View All</Link></header>
+              <div className="kayad-command-queue-tabs">
+                {[
+                  { label: 'Dealers', href: '/admin/dealer-verifications', count: stat('pendingDealers') },
+                  { label: 'Sellers', href: '/admin/sellers' },
+                  { label: 'Inspectors', href: '/admin/inspector-applications' },
+                  { label: 'Vehicle Listings', href: '/admin/moderation', count: stat('pendingCars') },
+                  { label: 'Document Verification', href: '/admin/ntsa-queue' },
+                  { label: 'Inspections', href: '/admin/inspections' },
+                ].map((item) => <Link key={item.href} to={item.href} aria-label={`Open ${item.label.toLowerCase()} approval workflow`}>{item.label}{item.count !== undefined && <b>{item.count}</b>}</Link>)}
+              </div>
+              <div className="kayad-command-approval-list">
+                {users.filter(u => u.role === 'dealer' && (u.status === 'pending' || u.approved === false)).slice(0, 4).map(u => <div key={u._id}><div><strong>{u.name || 'Dealer application'}</strong><small>{u.email || 'No email provided'}</small></div><span className="kayad-command-pending">Pending Review</span><button type="button" aria-label={`Review dealer application for ${u.name || u.email || 'dealer'}`} onClick={() => { setQueue('pendingDealers'); setModule('users'); void load('pendingDealers'); }}>Review</button></div>)}
+                {!users.some(u => u.role === 'dealer' && (u.status === 'pending' || u.approved === false)) && <p className="kayad-command-empty">{loading ? 'Loading approval records…' : restricted.includes('user records') ? 'Dealer records are restricted for this role. Use the authorized dealer verification workspace.' : error ? 'Approval records may be unavailable. Open the dealer verification queue for the authoritative list.' : 'No pending dealers in the loaded records. View all to inspect the full queue.'}</p>}
+              </div>
+            </section>
+            <section className="kayad-command-panel" aria-labelledby="system-health-heading">
+              <header><h2 id="system-health-heading">System Health</h2><Link to="/admin/control-room">View All</Link></header>
+              <p className="kayad-command-empty">Service-level health and response times are available in the existing operations control room. No status is assumed without a health check.</p>
+              <Link className="kayad-command-inline-link" to="/admin/control-room">Open system monitoring <ChevronRight size={14}/></Link>
+            </section>
+            <section className="kayad-command-panel" aria-labelledby="recent-submissions-heading">
+              <header><h2 id="recent-submissions-heading">Recent Vehicle Submissions</h2><Link to="/admin/cars">View All</Link></header>
+              <div className="kayad-command-vehicles">
+                {cars.slice(0, 4).map(car => { const firstImage = car.images?.[0]; const imageUrl = (typeof firstImage === 'string' ? firstImage : firstImage?.thumb || firstImage?.url) || car.imageUrl || car.image; return <div key={car._id} className="kayad-command-vehicle"><div className="kayad-command-vehicle-art">{imageUrl && !failedVehicleImages.includes(`${car._id}:${imageUrl}`) ? <img src={imageUrl} alt={car.title || 'Vehicle submission'} loading="lazy" onError={() => setFailedVehicleImages((current) => current.includes(`${car._id}:${imageUrl}`) ? current : [...current, `${car._id}:${imageUrl}`])} /> : <Car size={32} aria-hidden="true" />}</div><strong>{car.title || 'Untitled vehicle'}</strong><small>{car.year ? `${car.year} · ` : ''}{typeof car.price === 'number' ? `KES ${car.price.toLocaleString()}` : 'Price not provided'}</small><span>{car.status || 'Status unavailable'}</span></div>; })}
+                {!cars.length && <p className="kayad-command-empty">{loading ? 'Loading submissions…' : restricted.includes('vehicle records') ? 'Vehicle records are restricted for this role.' : error ? 'Vehicle records unavailable.' : 'No vehicle submissions in the loaded records.'}</p>}
+              </div>
+            </section>
+            <section className="kayad-command-panel" aria-labelledby="customer-risk-heading">
+              <header><h2 id="customer-risk-heading">Customer &amp; Risk Operations</h2><Link to="/admin/support" aria-label="Open support queue">View Support</Link></header>
+              <p className="kayad-command-empty">Review customer support demand and route operational issues through the existing authorized workspaces.</p>
+              <div className="kayad-command-risk-links">
+                <Link to="/admin/support" aria-label="Open support tickets queue"><LifeBuoy size={16} /> Support queue <ChevronRight size={14} /></Link>
+                <Link to="/admin/escrows" aria-label="Open escrow operations"><ShieldCheck size={16} /> Escrow operations <ChevronRight size={14} /></Link>
+              </div>
+            </section>
+            <section className="kayad-command-panel" aria-labelledby="live-auctions-heading">
+              <header><h2 id="live-auctions-heading">Live Auctions</h2><Link to="/admin/auctions">View All</Link></header>
+              {cars.filter(car => (car.auctionStatus || car.auction_status || '').toLowerCase() === 'live').slice(0, 4).map(car => <div className="kayad-command-auction-row" key={car._id}><div className="kayad-command-auction-thumb"><Car size={20}/></div><div className="kayad-command-auction-info"><strong>{car.title || 'Live vehicle auction'}</strong><small>{typeof (car.currentBid ?? car.current_bid) === 'number' ? `KES ${(car.currentBid ?? car.current_bid as number).toLocaleString()}` : typeof car.price === 'number' ? `Starting price KES ${car.price.toLocaleString()}` : 'Current bid unavailable'}</small></div><span className="kayad-command-live">Live</span></div>)}
+              {!cars.some(car => (car.auctionStatus || car.auction_status || '').toLowerCase() === 'live') && <p className="kayad-command-empty">{loading ? 'Loading auction records…' : restricted.includes('vehicle records') ? 'Auction details are restricted with the vehicle records for this role.' : error ? 'Auction records may be unavailable.' : 'No live auctions in the loaded vehicle records. Open the auction workspace for the authoritative list.'}</p>}
+              <Link className="kayad-command-inline-link" to="/admin/auctions">Open live auction operations <ChevronRight size={14}/></Link>
+            </section>
+            <section className="kayad-command-panel" aria-labelledby="team-heading"><header><h2 id="team-heading">Team Members</h2><Link to="/admin/staff">View All</Link></header>{users.filter(u => ['superadmin','admin','moderator','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','ghost_checker'].includes((u.role || '').toLowerCase())).slice(0, 3).map(u => <div className="kayad-command-team-row" key={u._id}><span className="kayad-command-team-avatar">{(u.name || u.email || 'S').charAt(0).toUpperCase()}</span><div><strong>{u.name || 'Staff member'}</strong><small>{u.role || 'Staff role unavailable'}</small></div></div>)}{!users.some(u => ['superadmin','admin','moderator','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','ghost_checker'].includes((u.role || '').toLowerCase())) && <p className="kayad-command-empty">{loading ? 'Loading team records…' : restricted.includes('user records') ? 'Team records are restricted for this role.' : error ? 'Team records may be unavailable. Open staff management for the authoritative list.' : 'No staff accounts found in the current user sample. Open staff management for the authoritative list.'}</p>}<Link className="kayad-command-inline-link" to="/admin/staff">Manage staff <ChevronRight size={14}/></Link></section>
+            <section className="kayad-command-panel" aria-labelledby="rbac-heading"><header><h2 id="rbac-heading">Role-Based Access Control</h2><Link to="/admin/staff-permissions">Manage Roles</Link></header><div className="kayad-command-role-summary">{Array.from(new Set<string>(users.map(u => (u.role || '').trim()).filter((role): role is string => Boolean(role)))).slice(0, 4).map((role: string) => <div key={role}><span>{role.replace(/_/g, ' ')}</span><b>{users.filter(u => (u.role || '').trim() === role).length}</b></div>)}</div><p className="kayad-command-data-note">{restricted.includes('user records') ? 'Role membership is restricted for this role; no counts are available here.' : 'Counts reflect only the current loaded user sample, not total role membership.'}</p><Link className="kayad-command-inline-link" to="/admin/staff-permissions">Review permissions <ChevronRight size={14}/></Link></section>
+          </div>
+          <aside className="kayad-command-rail" aria-label="Account and system information">
+            <section className="kayad-command-panel"><header><h2>My Account</h2></header><div className="kayad-command-account"><div className="kayad-command-avatar">{(typeof sessionUser?.name === 'string' ? sessionUser.name.charAt(0) : '') || 'A'}</div><div><strong>{sessionUser?.name || 'Administrator'}</strong><small>{sessionUser?.role || 'Staff'}</small></div></div><Link to="/admin">Operations Dashboard</Link><Link to="/admin/settings">Account Settings</Link><Link to="/admin/security-log">Audit & Logs</Link></section>
+            <section className="kayad-command-panel"><header><h2>Department Overview</h2><Link to="/admin/staff">View All</Link></header><p className="kayad-command-empty">Department information is managed in the existing staff and departmental workspace.</p><Link to="/admin/staff">Staff & Departments</Link></section>
+            <section className="kayad-command-panel"><header><h2>Provider Status</h2><Link to="/admin/provider-governance">View All</Link></header><p className="kayad-command-empty">Provider connectivity is not assumed. Review the verified status in provider governance.</p><Link to="/admin/provider-governance">Providers & Integrations</Link></section>
+          </aside>
+        </div>
       )}
 
       {queue && (module === 'users' || module === 'cars') && ((queue === 'pendingDealers' && module === 'users') || (queue === 'pendingVehicles' && module === 'cars')) && (
@@ -398,7 +402,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
                   <Button size="sm" variant="outline" disabled={busyId === u._id} onClick={() => void toggleBan(u)}><Ban className="w-3.5 h-3.5" /> {u.isBanned ? 'Unban' : 'Ban'}</Button>
                 </div></TableCell>
               </TableRow>)}
-              {!filteredUsers.length && <TableRow><TableCell colSpan={4} className="text-center py-8 text-[#64748B]">No live users returned by the server.</TableCell></TableRow>}
+              {!filteredUsers.length && <TableRow><TableCell colSpan={4} className="text-center py-8 text-[#64748B]">{restricted.includes('user records') ? 'User records are restricted for this role.' : error ? 'User records are unavailable. Refresh or use an authorized workspace.' : 'No users matched the current search.'}</TableCell></TableRow>}
             </TableBody>
           </Table>
         </Card>
@@ -415,7 +419,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
                 <TableCell>{typeof c.price === 'number' ? `Ksh ${c.price.toLocaleString()}` : 'Not provided'}</TableCell>
                 <TableCell><div className="flex flex-wrap gap-2">{c.status === 'pending' && <Button size="sm" variant="primary" disabled={busyId === c._id} onClick={() => void moderateListing(c, 'approve')}>Approve</Button>}{(c.status === 'pending' || c.status === 'available') && <Button size="sm" variant="outline" disabled={busyId === c._id} onClick={() => void moderateListing(c, 'hide')}>Hide</Button>}<Button size="sm" variant="outline" disabled={busyId === c._id} onClick={() => void verifyCar(c)}><FileCheck className="w-3.5 h-3.5" /> Verify</Button>{onQuickViewVehicle && <Button size="sm" variant="outline" onClick={() => { const v = vehicles.find((x) => x.id === c._id); if (v) onQuickViewVehicle(v); }}>View</Button>}</div></TableCell>
               </TableRow>)}
-              {!filteredCars.length && <TableRow><TableCell colSpan={4} className="text-center py-8 text-[#64748B]">No live vehicles returned by the server.</TableCell></TableRow>}
+              {!filteredCars.length && <TableRow><TableCell colSpan={4} className="text-center py-8 text-[#64748B]">{restricted.includes('vehicle records') ? 'Vehicle records are restricted for this role.' : error ? 'Vehicle records are unavailable. Refresh or use an authorized workspace.' : 'No vehicles matched the current search.'}</TableCell></TableRow>}
             </TableBody>
           </Table>
         </Card>
@@ -443,7 +447,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
                 <TableCell className="font-mono text-xs">{log.targetId || '—'}</TableCell>
                 <TableCell>{log.actor?.email || log.user?.email || 'Server record'}</TableCell>
               </TableRow>)}
-              {!auditLogs.length && <TableRow><TableCell colSpan={5} className="text-center py-8 text-[#64748B]">No live audit records returned by the server.</TableCell></TableRow>}
+              {!auditLogs.length && <TableRow><TableCell colSpan={5} className="text-center py-8 text-[#64748B]">{restricted.includes('audit log') ? 'Audit records are restricted for this role.' : error ? 'Audit records are unavailable. Refresh or use an authorized workspace.' : 'No audit records returned by the server.'}</TableCell></TableRow>}
             </TableBody>
           </Table>
         </Card>

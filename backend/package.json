@@ -24,6 +24,8 @@
     "test:vitest": "vitest run --config vitest.config.js",
     "test:node": "node --test --test-force-exit tests/response-lifecycle.test.js",
     "test:chat-integrity": "node --test tests/integration/chat-message-integrity.integration.test.js",
+    "test:soft-delete-integrity": "node --test --test-force-exit tests/integration/soft-delete-integrity.integration.test.js",
+    "test:cache-invalidation": "node --test --test-force-exit tests/integration/cache-invalidation.integration.test.js",
     "test:phase39-mpesa-proxy-regression": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand tests/regression/phase39MpesaTrustedProxy.test.js tests/regression/phase38DeploymentRuntimeReconciliation.test.js"
   },
   "dependencies": {

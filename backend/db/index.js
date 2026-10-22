@@ -25,7 +25,12 @@ const normalizeFilterValue = (value) => value instanceof Date ? value.toISOStrin
 const applyFilters = (query, filters, table) => {
   if (!filters) return query;
   for (const [key, value] of Object.entries(filters)) {
-    if (value === undefined || value === null) continue;
+    if (value === undefined) continue;
+
+    if (value === null) {
+      query = query.is(mapKeyOut(table, key), null);
+      continue;
+    }
 
     if (key === '$text') {
       const term = value?.$search;
@@ -46,7 +51,7 @@ const applyFilters = (query, filters, table) => {
             const term = (fv.$regex.source || fv.$regex).toString().replace(/[,%^$]/g, '');
             return `${col}.ilike.*${escapeLike(term)}*`;
           }
-          return `${col}.eq.${normalizeFilterValue(fv)}`;
+          return fv === null ? `${col}.is.null` : `${col}.eq.${normalizeFilterValue(fv)}`;
         }).join(',')
       ).join(',');
       query = query.or(orExpr);
@@ -55,7 +60,10 @@ const applyFilters = (query, filters, table) => {
 
     if (key === '$and') {
       for (const cond of value) {
-        for (const [fk, fv] of Object.entries(cond)) query = query.eq(mapKeyOut(table, fk), normalizeFilterValue(fv));
+        for (const [fk, fv] of Object.entries(cond)) {
+          const col = mapKeyOut(table, fk);
+          query = fv === null ? query.is(col, null) : query.eq(col, normalizeFilterValue(fv));
+        }
       }
       continue;
     }
@@ -70,8 +78,8 @@ const applyFilters = (query, filters, table) => {
       // Handle legacy query operators.
       for (const [op, val] of Object.entries(value)) {
         switch (op) {
-          case '$eq': case 'eq': query = query.eq(col, normalizeFilterValue(val)); break;
-          case '$ne': case 'ne': query = query.neq(col, normalizeFilterValue(val)); break;
+          case '$eq': case 'eq': query = val === null ? query.is(col, null) : query.eq(col, normalizeFilterValue(val)); break;
+          case '$ne': case 'ne': query = val === null ? query.not(col, 'is', null) : query.neq(col, normalizeFilterValue(val)); break;
           case '$gt': case 'gt': query = query.gt(col, normalizeFilterValue(val)); break;
           case '$gte': case 'gte': query = query.gte(col, normalizeFilterValue(val)); break;
           case '$lt': case 'lt': query = query.lt(col, normalizeFilterValue(val)); break;

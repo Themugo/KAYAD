@@ -63,19 +63,19 @@ export const calculateVehicleMetrics = async (startDate, endDate) => {
   try {
     const vehiclesListed = await count("cars", {
       status: "available",
-      deletedAt: null,
+      deletedAt: { $exists: false },
     });
 
     const vehiclesSold = await count("cars", {
       status: "sold",
       updatedAt: { $gte: startDate, $lte: endDate },
-      deletedAt: null,
+      deletedAt: { $exists: false },
     });
 
     const newListings = await count("cars", {
       status: "available",
       createdAt: { $gte: startDate, $lte: endDate },
-      deletedAt: null,
+      deletedAt: { $exists: false },
     });
 
     return { vehiclesListed, vehiclesSold, newListings };
@@ -105,12 +105,12 @@ export const calculateConversionRates = async (startDate, endDate) => {
     const totalAuctions = await count("cars", {
       hasAuction: true,
       createdAt: { $gte: startDate, $lte: endDate },
-      deletedAt: null,
+      deletedAt: { $exists: false },
     });
     const completedAuctions = await count("cars", {
       auctionStatus: "ended",
       auctionEnd: { $gte: startDate, $lte: endDate },
-      deletedAt: null,
+      deletedAt: { $exists: false },
     });
     const auctionConversionRate = totalAuctions > 0 ? (completedAuctions / totalAuctions) * 100 : 0;
 

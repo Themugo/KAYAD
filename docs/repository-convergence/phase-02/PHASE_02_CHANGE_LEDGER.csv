@@ -1,0 +1,2 @@
+﻿change_id,path,change_type,before_hash,after_hash,description,authorization_scope
+P2-001,docs/repository-convergence/phase-02/,ADD AUDIT ARTIFACTS ONLY,N/A,N/A,Added Phase 2 static dependency and relocation-risk reports; application source/configuration untouched by intended workflow.,Phase 2 read-only audit prompt

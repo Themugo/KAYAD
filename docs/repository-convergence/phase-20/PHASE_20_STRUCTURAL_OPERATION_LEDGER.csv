@@ -1,0 +1,2 @@
+﻿operation,source,destination,status,files_preserved,reason
+CREATE_GOVERNANCE_EVIDENCE_SET,(new Phase 20 evidence),docs/repository-convergence/phase-20/,CREATED_AND_VERIFIED,all existing files untouched,Canonical existing repository-governance hierarchy used; no application or operational path changed.

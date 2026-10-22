@@ -1,0 +1,8 @@
+scope_area,disposition,changed_files,evidence
+foundation ZIP,unchanged,N/A,hash and ZIP integrity verified
+application source,unchanged,none,No speculative source edit made
+backend/database/API/auth/RBAC,unchanged,none,Out of scope
+providers/payments/escrow/auction logic,unchanged,none,Out of scope
+public/non-admin pages,unchanged,none,Out of scope
+package manifests/lockfiles,unchanged,none,No dependency changes
+certification reports,added,six root-level files,Document actual test outcomes and blockers

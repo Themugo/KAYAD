@@ -1,0 +1,6 @@
+# KAYAD Phase 0 — Foundation SHA-256
+
+- Filename: `KAYAD-PHASE6-UPDATED-FULL-PROJECT-20261022.zip`
+- SHA-256: `18fb1e4bff1ab079e8f640d8002303a384724cbd15e7f0ecd32628d8a168c3e6`
+- Sidecar comparison: MATCH
+- ZIP integrity: PASS

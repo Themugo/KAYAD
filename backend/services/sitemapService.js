@@ -6,7 +6,8 @@ const BASE_URL = "https://www.kayad.space";
 export const generateVehicleSitemap = async () => {
   try {
     const cars = await findAll("cars", {
-      filters: { status: "available" },
+      // Phase C.1: soft-deleted vehicles keep status "available"; never advertise them.
+      filters: { status: "available", deletedAt: { $exists: false } },
       select: "id,updatedAt",
     });
 
@@ -48,7 +49,7 @@ export const generateDealerSitemap = async () => {
 export const generateAuctionSitemap = async () => {
   try {
     const auctions = await findAll("cars", {
-      filters: { deletedAt: null, auctionStatus: { $in: ["live", "ended"] } },
+      filters: { deletedAt: { $exists: false }, auctionStatus: { $in: ["live", "ended"] } },
       select: "id,updatedAt,auctionStatus",
     });
 

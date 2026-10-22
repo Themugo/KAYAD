@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Stage 4 static migration-chain analysis (read-only; touches no database).
 
-Inputs : supabase/migrations/*.sql, KAYAD_MIGRATION_INVENTORY_20261013.tsv (historical production status; NOT live evidence)
+Inputs : supabase/migrations/*.sql, docs/production/migrations/inventory-20261013.tsv (historical production status; NOT live evidence)
 Outputs: a TSV risk matrix (one row per migration) and a dependency-inversion report
          (an object referenced by a migration that sorts BEFORE the migration that creates it).
 Usage  : python3 scripts/analyze-migration-chain-stage4.py <repo_root> <out_dir>
@@ -12,7 +12,7 @@ root, out = sys.argv[1], sys.argv[2]
 mdir = os.path.join(root, "supabase", "migrations")
 files = sorted(f for f in os.listdir(mdir) if f.endswith(".sql"))
 inv = {}
-with open(os.path.join(root, "KAYAD_MIGRATION_INVENTORY_20261013.tsv"), newline="") as fh:
+with open(os.path.join(root, "docs/production/migrations/inventory-20261013.tsv"), newline="") as fh:
     for r in csv.DictReader(fh, delimiter="\t"):
         inv[r["file"]] = r
 

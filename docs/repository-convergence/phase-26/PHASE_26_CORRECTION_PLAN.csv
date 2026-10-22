@@ -1,0 +1,11 @@
+candidate_id,priority,proposed_correction,evidence_required_before_change,selected_for_mutation,result
+C001,C,None approved,Hosting/deployment convention; moving could alter discovery,NO,Retained pending stronger consumer/ownership evidence
+C002,C,None approved,Environment-template convention and broad documentation references,NO,Retained pending stronger consumer/ownership evidence
+C003,C,None approved,Environment-template convention and infrastructure references,NO,Retained pending stronger consumer/ownership evidence
+C004,C,None approved,Frontend build entry point and deployment/test consumers,NO,Retained pending stronger consumer/ownership evidence
+C005,C,None approved,Historical/release evidence and path references; ownership unclear,NO,Retained pending stronger consumer/ownership evidence
+C006,B-UNPROVEN,None approved,Phase-labelled name alone does not prove obsolescence; consumer review needed,NO,Retained pending stronger consumer/ownership evidence
+C007,B-UNPROVEN,None approved,Phase-labelled name alone does not prove obsolescence; consumer review needed,NO,Retained pending stronger consumer/ownership evidence
+C008,B-UNPROVEN,None approved,Phase-labelled name alone does not prove obsolescence; consumer review needed,NO,Retained pending stronger consumer/ownership evidence
+C009,B-UNPROVEN,None approved,Authority-like name requires content/owner adjudication,NO,Retained pending stronger consumer/ownership evidence
+C010,B-UNPROVEN,None approved,Authority-like name requires content/owner adjudication,NO,Retained pending stronger consumer/ownership evidence

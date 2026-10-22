@@ -1,0 +1,8 @@
+source_path,proposed_destination,candidate,known_in_repo_references,external_consumers_cleared,explicit_approval,change_executed,reason
+KAYAD_STAGE16_SHA256_MANIFEST_20261012.txt,NOT AUTHORIZED / NOT PROPOSED,KAYAD_STAGE16_SHA256_MANIFEST_20261012.txt,See consumer reference audit,NO,NO,NO,Evidence/approval gate not met; preserve in place
+KAYAD_SUPPORT_TEST_MATRIX.md,NOT AUTHORIZED / NOT PROPOSED,KAYAD_SUPPORT_TEST_MATRIX.md,See consumer reference audit,NO,NO,NO,Evidence/approval gate not met; preserve in place
+KAYAD_DEALER_CHANGE_LEDGER.md,NOT AUTHORIZED / NOT PROPOSED,KAYAD_DEALER_CHANGE_LEDGER.md,See consumer reference audit,NO,NO,NO,Evidence/approval gate not met; preserve in place
+KAYAD_ALL_AREAS_EXECUTION_LOG.md,NOT AUTHORIZED / NOT PROPOSED,KAYAD_ALL_AREAS_EXECUTION_LOG.md,See consumer reference audit,NO,NO,NO,Evidence/approval gate not met; preserve in place
+KAYAD_STAGE20_STAGING_RUNBOOK_20261012.md,NOT AUTHORIZED / NOT PROPOSED,KAYAD_STAGE20_STAGING_RUNBOOK_20261012.md,See consumer reference audit,NO,NO,NO,Evidence/approval gate not met; preserve in place
+KAYAD_FIRST_SELLER_LAUNCH_CERTIFICATION_REPORT.md,NOT AUTHORIZED / NOT PROPOSED,KAYAD_FIRST_SELLER_LAUNCH_CERTIFICATION_REPORT.md,See consumer reference audit,NO,NO,NO,Evidence/approval gate not met; preserve in place
+KAYAD_STAGE5F15_CHANGED_FILES_SHA256.txt,NOT AUTHORIZED / NOT PROPOSED,KAYAD_STAGE5F15_CHANGED_FILES_SHA256.txt,See consumer reference audit,NO,NO,NO,Evidence/approval gate not met; preserve in place

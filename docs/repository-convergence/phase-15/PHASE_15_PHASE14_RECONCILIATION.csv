@@ -1,0 +1,10 @@
+item,phase14_record,phase15_observed,status,notes
+archive_sha256,fec6b81b97b815ad2922d8dcd21f404aa1f5d8b3c33888e371a5f79016b51430,fec6b81b97b815ad2922d8dcd21f404aa1f5d8b3c33888e371a5f79016b51430,MATCH,Independently recalculated
+archive_size_bytes,79530074,79530074,MATCH,Exact size
+zip_integrity,PASS,PASS,MATCH,Archive integrity test passed
+archive_entries,7001,7001,RECONCILED,Actual count recalculated
+files,6508,6508,RECONCILED,Directory entries excluded
+directory_entries,493,493,RECONCILED,Actual ZIP directory entries
+phase14_manifest_rows,6507,6507,RECONCILED,Manifest excludes itself per non-recursive policy
+manifest_valid_rows,6507,6507,PASS,All listed sizes and hashes match
+phase12_hash_conflict,5b60f88681eef57dfb70775535aa25917d7045adc560d45fca2a9ebe4933e302 vs d2cdbf4eae9caefbc0be9e872ae768c757c35c0dc67db32eaa95c810a1a617cf,Phase 12 archive hashes to 5b60f88681eef57dfb70775535aa25917d7045adc560d45fca2a9ebe4933e302; Phase 13 archive hashes to d2cdbf4eae9caefbc0be9e872ae768c757c35c0dc67db32eaa95c810a1a617cf,RESOLVED_WRONG_ARTIFACT_REFERENCE,Actual Phase 12 ZIP and sidecar verified; later narrative assigned Phase 13 digest to Phase 12 context

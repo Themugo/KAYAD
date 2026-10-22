@@ -1,0 +1,3 @@
+change_id,change_type,path,before_sha256,after_sha256,authorization,validation,status
+P7-CHG-001,Add audit evidence directory,docs/repository-convergence/phase-07/,,,Phase 7 execution scope,ZIP manifest and hash verification,EVIDENCE_ADDED
+P7-CHG-002,Move/rename/delete source items,NONE,,,Not authorized; gates not passed,Not applicable,NO SOURCE CHANGES

@@ -85,7 +85,9 @@ describe("truthful figures", () => {
     const calls = countFn.mock.calls.map(([t, f]) => `${t}|${JSON.stringify(f)}`);
     expect(calls).toEqual(expect.arrayContaining([
       'users|{"role":"dealer","status":"pending"}',                // → Users page, pending approval
-      'cars|{"status":"pending","deletedAt":null}',                // → Cars page, pending review
+      // Phase C standardised soft-delete filters on `{ $exists: false }` (identical SQL to `deletedAt: null`,
+      // deleted_at IS NULL — proven against PostgREST in tests/integration/soft-delete-integrity.integration.test.js).
+      'cars|{"status":"pending","deletedAt":{"$exists":false}}',   // → Cars page, pending review
       'support_tickets|{"status":{"$in":["open","pending","in_progress"]}}', // → Support
     ]));
   });

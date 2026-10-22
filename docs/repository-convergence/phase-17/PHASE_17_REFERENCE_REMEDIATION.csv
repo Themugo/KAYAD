@@ -1,0 +1,12 @@
+file,old_names_referenced,status,notes
+scripts/bootstrap-supabase-production.mjs,KAYAD_PRESTAGING_SECURITY_AND_MIGRATION_DRIFT_20261013.md,UPDATED,references rewritten in non-historical files
+scripts/apply-schema.sh,KAYAD_PRESTAGING_SECURITY_AND_MIGRATION_DRIFT_20261013.md,UPDATED,references rewritten in non-historical files
+scripts/analyze-migration-chain-stage4.py,KAYAD_MIGRATION_INVENTORY_20261013.tsv,UPDATED,references rewritten in non-historical files
+runbooks/STAGE3_SCHEMA_ONLY_REHEARSAL_RUNBOOK_20261013.md,KAYAD_PRODUCTION_ONLY_MIGRATIONS_20261013.tsv,UPDATED,references rewritten in non-historical files
+runbooks/stage4-rehearsal-20261018/01_READONLY_IDENTITY_LIFECYCLE_PREFLIGHT.sql,KAYAD_MIGRATION_INVENTORY_20261013.tsv,UPDATED,references rewritten in non-historical files
+runbooks/identity-staging/01_OWNER_RECOVERY_GATE.md,"KAYAD_MIGRATION_INVENTORY_20261013.tsv,KAYAD_MIGRATION_RECONCILIATION_20261013.tsv",UPDATED,references rewritten in non-historical files
+docs/production/schema-auth-communications-convergence-20261013.md,"KAYAD_MIGRATION_INVENTORY_20261013.tsv,KAYAD_PRODUCTION_MIGRATION_READINESS_20261013.md",UPDATED,references rewritten in non-historical files
+docs/production/prestaging-security-and-migration-drift-20261013.md,KAYAD_PRESTAGING_SECURITY_AND_MIGRATION_DRIFT_20261013.md,UPDATED,references rewritten in non-historical files
+docs/security/NAVIGATION_ADMIN_CONTROL_EXECUTION_REPORT_20261008.md,NAVIGATION_RLS_PROOF_OUTPUT_20261008.txt,UPDATED,references rewritten in non-historical files
+docs/security/NAVIGATION_AUTHORITY_MODEL_20261008.md,NAVIGATION_RLS_PROOF_OUTPUT_20261008.txt,UPDATED,references rewritten in non-historical files
+supabase/migrations/20261012140000_dealer_onboarding_columns_r12.sql,KAYAD_DEALER_ONBOARDING_STATE_MACHINE.md,UPDATED,references rewritten in non-historical files

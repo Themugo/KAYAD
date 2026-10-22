@@ -522,7 +522,7 @@ export const calculateListingQualityScore = async (dealerId) => {
 
 export const calculateAuctionScore = async (dealerId) => {
   try {
-    const cars = await findAll("cars", { filters: { dealer: dealerId, auctionStatus: { $ne: "none" }, deletedAt: null } });
+    const cars = await findAll("cars", { filters: { dealer: dealerId, auctionStatus: { $ne: "none" }, deletedAt: { $exists: false } } });
     const auctionIds = cars.map((c) => c.id);
 
     if (auctionIds.length === 0) {

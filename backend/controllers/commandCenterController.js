@@ -58,7 +58,7 @@ export async function getControlPlaneSnapshot(req, res) {
   const plan = {
     // totals
     users: () => count("users", {}),
-    cars: () => count("cars", { deletedAt: null }),
+    cars: () => count("cars", { deletedAt: { $exists: false } }),
     payments: () => count("payments", {}),
     escrows: () => count("escrows", {}),
     dealers: () => count("dealers", {}),
@@ -67,7 +67,7 @@ export async function getControlPlaneSnapshot(req, res) {
     alerts: () => count("alerts", {}),
     // actionable queues
     pendingDealers: () => count("users", { role: "dealer", status: "pending" }),
-    pendingVehicles: () => count("cars", { status: "pending", deletedAt: null }),
+    pendingVehicles: () => count("cars", { status: "pending", deletedAt: { $exists: false } }),
     openSupport: () => count("support_tickets", { status: { $in: ["open", "pending", "in_progress"] } }),
     disputedEscrows: () => count("escrows", { status: "disputed" }),
     pendingPayments: () => count("payments", { status: "pending" }),
@@ -102,7 +102,7 @@ export async function getLiveActivity(req, res) {
   ensureOperator(req);
   const [incidents, alerts, payments, listings, inspections, users] = await Promise.all([
     list("incidents", {}, "createdAt", 20), list("alerts", {}, "createdAt", 20), list("payments", { createdAt: { $gte: since(1) } }, "createdAt", 20),
-    list("cars", { createdAt: { $gte: since(1) }, deletedAt: null }, "createdAt", 20), list("vehicle_inspections", { createdAt: { $gte: since(1) } }, "createdAt", 20),
+    list("cars", { createdAt: { $gte: since(1) }, deletedAt: { $exists: false } }, "createdAt", 20), list("vehicle_inspections", { createdAt: { $gte: since(1) } }, "createdAt", 20),
     list("users", { createdAt: { $gte: since(1) } }, "createdAt", 20),
   ]);
   const events = [
@@ -126,16 +126,16 @@ export async function getLiveActivity(req, res) {
 async function domainCounts() {
   const [users, dealers, cars, auctions, payments, inspections, support, disputes] = await Promise.all([
     counts("users", { isBanned: false, deactivatedAt: null }), counts("users", { role: "dealer", isBanned: false, deactivatedAt: null }),
-    counts("cars", { deletedAt: null }), counts("cars", { hasAuction: true, auctionStatus: "live", deletedAt: null }), counts("payments", { status: "pending" }),
+    counts("cars", { deletedAt: { $exists: false } }), counts("cars", { hasAuction: true, auctionStatus: "live", deletedAt: { $exists: false } }), counts("payments", { status: "pending" }),
     counts("vehicle_inspections", {}), counts("support_tickets", { status: { $in: ["open", "pending", "in_progress"] } }), counts("escrows", { status: "disputed" }),
   ]);
   return { users, dealers, cars, auctions, pendingPayments: payments, inspections, openSupport: support, openDisputes: disputes };
 }
 
 export async function getOperationsCenter(req, res) { ensureOperator(req); return ok(res, { snapshot: await operationalSnapshot(), queues: await domainCounts() }); }
-export async function getMarketplaceCenter(req, res) { ensureOperator(req); return ok(res, { listings: await counts("cars", { status: "available", deletedAt: null }), newListings24h: await counts("cars", { createdAt: { $gte: since(1) }, deletedAt: null }), sold24h: await counts("cars", { status: { $in: ["sold", "completed"] }, updatedAt: { $gte: since(1) } }), activeAuctions: await counts("cars", { hasAuction: true, auctionStatus: "live", deletedAt: null }), disputes: await counts("escrows", { status: "disputed" }) }); }
+export async function getMarketplaceCenter(req, res) { ensureOperator(req); return ok(res, { listings: await counts("cars", { status: "available", deletedAt: { $exists: false } }), newListings24h: await counts("cars", { createdAt: { $gte: since(1) }, deletedAt: { $exists: false } }), sold24h: await counts("cars", { status: { $in: ["sold", "completed"] }, updatedAt: { $gte: since(1) } }), activeAuctions: await counts("cars", { hasAuction: true, auctionStatus: "live", deletedAt: { $exists: false } }), disputes: await counts("escrows", { status: "disputed" }) }); }
 export async function getDealerOperations(req, res) { ensureOperator(req); return ok(res, { totalDealers: await counts("users", { role: "dealer" }), pendingVerification: await counts("users", { role: "dealer", verified: false }), pendingKyc: await counts("users", { role: "dealer", kycVerified: false }), pendingApproval: await counts("users", { role: "dealer", status: "pending" }) }); }
-export async function getAuctionOperations(req, res) { ensureOperator(req); return ok(res, { activeAuctions: await counts("cars", { hasAuction: true, auctionStatus: "live", deletedAt: null }), pendingBids: await counts("bids", { status: "pending" }), recentBids: await counts("bids", { createdAt: { $gte: since(1) } }) }); }
+export async function getAuctionOperations(req, res) { ensureOperator(req); return ok(res, { activeAuctions: await counts("cars", { hasAuction: true, auctionStatus: "live", deletedAt: { $exists: false } }), pendingBids: await counts("bids", { status: "pending" }), recentBids: await counts("bids", { createdAt: { $gte: since(1) } }) }); }
 export async function getInspectionOperations(req, res) { ensureOperator(req); return ok(res, { requested: await counts("vehicle_inspections", { status: "requested" }), assigned: await counts("vehicle_inspections", { status: "assigned" }), completed24h: await counts("vehicle_inspections", { status: "completed", updatedAt: { $gte: since(1) } }), overdue: await counts("vehicle_inspections", { status: { $in: ["requested", "assigned"] }, scheduledDate: { $lt: new Date().toISOString() } }) }); }
 export async function getFinanceOperations(req, res) { ensureOperator(req); const [pending, failed, processing, successful] = await Promise.all([counts("payments", { status: "pending" }), counts("payments", { status: "failed", createdAt: { $gte: since(1) } }), counts("payments", { status: "processing" }), counts("payments", { status: "success", createdAt: { $gte: since(1) } })]); return ok(res, { pending, failed24h: failed, processing, successful24h: successful }); }
 export async function getSupportOperations(req, res) { ensureOperator(req); return ok(res, { open: await counts("support_tickets", { status: { $in: ["open", "pending", "in_progress"] } }), urgent: await counts("support_tickets", { priority: { $in: ["urgent", "critical"] }, status: { $nin: ["closed", "resolved"] } }), escalated: await counts("support_tickets", { status: "escalated" }) }); }

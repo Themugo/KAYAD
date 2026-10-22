@@ -1,0 +1,10 @@
+﻿paths,decision,reason
+docs/DATABASE.md,MOVED_AND_VERIFIED,Topline-only database model was incorrectly located among KAYAD maintained docs; moved to existing historical evidence hierarchy.
+docs/DATABASE-SOURCE-OF-TRUTH-2026-10-02.md,MOVED_AND_VERIFIED,Topline-only source-of-truth document moved to historical evidence; catalog link updated.
+docs/DATABASE-MIGRATION-SHA256-2026-10-02.txt,MOVED_AND_VERIFIED,Topline migration checksum record moved with related historical evidence; no migration or database was changed.
+docs/DATABASE_SOURCE_OF_TRUTH.md,RETAINED_CANONICAL,Its content identifies KAYAD and describes KAYAD schema history; not interchangeable with Topline docs.
+docs/API.md | docs/domains/API_GUIDE.md | docs/domains/API_CONTRACTS.md,RETAINED_CANONICAL,"Content differs in purpose and authority: API overview, guide with examples, and observed contract record. Consolidation not justified without owner review."
+docs/architecture/ARCHITECTURE.md | docs/architecture/ARCHITECTURE_MAP.md | docs/CANONICAL_ARCHITECTURE.md,RETAINED_CANONICAL,Related architecture documents describe different layers and historical states; similarity is insufficient to merge without reconciling claims.
+docs/DEPLOYMENT.md | docs/DEPLOYMENT_INFRASTRUCTURE_AUDIT.md,RETAINED_CANONICAL,Deployment guide and dated infrastructure audit have distinct maintained-procedure versus historical findings roles.
+docs/OBSERVABILITY.md | docs/OPERATION_10_RELIABILITY_OBSERVABILITY_INCIDENT_RESPONSE_360.md,RETAINED_CANONICAL,Observability guide and broader operations 360 document have different scope; no consolidation performed.
+docs/ADMIN-AUTHENTICATION-AUTHORIZATION-360.md | docs/OPERATION_13_IDENTITY_PRIVILEGED_ACCESS_360.md,RETAINED_CANONICAL,Security/identity documents have overlapping themes but distinct scope; retained pending detailed authority/owner review.

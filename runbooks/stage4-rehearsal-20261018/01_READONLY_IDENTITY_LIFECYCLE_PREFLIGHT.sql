@@ -115,7 +115,7 @@ SELECT to_regclass('public.feature_flags') IS NOT NULL AS feature_flags_exists;
 SELECT column_name, data_type, is_nullable FROM information_schema.columns
 WHERE table_schema = 'public' AND table_name = 'feature_flags' ORDER BY ordinal_position;
 
--- M1. Applied migration history (supabase_migrations.schema_migrations). Compare with KAYAD_MIGRATION_INVENTORY_20261013.tsv.
+-- M1. Applied migration history (supabase_migrations.schema_migrations). Compare with docs/production/migrations/inventory-20261013.tsv.
 SELECT count(*) AS applied_versions, min(version) AS first_version, max(version) AS last_version
 FROM supabase_migrations.schema_migrations;
 SELECT version FROM supabase_migrations.schema_migrations ORDER BY version DESC LIMIT 25;

@@ -1,0 +1,12 @@
+0	node scripts/validate-admin-route-convergence.mjs	KAYAD_SUPER_ADMIN_PHASE6_LOGS/static-validator-1.log
+0	node scripts/validate-business-command-centre-phase04.mjs	KAYAD_SUPER_ADMIN_PHASE6_LOGS/static-validator-2.log
+0	node scripts/validate-stage5f2-dashboard-data-workflow.mjs	KAYAD_SUPER_ADMIN_PHASE6_LOGS/static-validator-3.log
+0	node scripts/validate-ui-surface-convergence.mjs	KAYAD_SUPER_ADMIN_PHASE6_LOGS/static-validator-4.log
+0	node scripts/validate-mobile-navigation-polish-20261012.mjs	KAYAD_SUPER_ADMIN_PHASE6_LOGS/static-validator-5.log
+0	node scripts/validate-premium-presentation-pass.mjs	KAYAD_SUPER_ADMIN_PHASE6_LOGS/static-validator-6.log
+0	node scripts/validate-brand-palette-convergence.mjs	KAYAD_SUPER_ADMIN_PHASE6_LOGS/static-validator-7.log
+1	node scripts/validate-lucide-icon-exports.mjs	KAYAD_SUPER_ADMIN_PHASE6_LOGS/static-validator-8.log
+1	node scripts/validate-phase06-department-capabilities.mjs	KAYAD_SUPER_ADMIN_PHASE6_LOGS/static-validator-9.log
+2	npm run typecheck	KAYAD_SUPER_ADMIN_PHASE6_LOGS/npm_run_typecheck.log
+127	npm run build	KAYAD_SUPER_ADMIN_PHASE6_LOGS/npm_run_build.log
+127	npm test -- --run	KAYAD_SUPER_ADMIN_PHASE6_LOGS/npm_test_--_--run.log

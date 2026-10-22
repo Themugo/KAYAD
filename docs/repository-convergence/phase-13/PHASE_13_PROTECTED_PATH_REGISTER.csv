@@ -1,0 +1,10 @@
+path_or_pattern,reason_for_protection,allowed_action,approval_required
+src/,Application source; preserve architecture and behavior,Read-only inventory only,Explicit scoped approval for any change
+backend/,Backend/auth/financial behavior and API contracts,Read-only inventory only,Explicit scoped approval for any change
+supabase/,Database migrations/schema/RLS evidence,Read-only inventory only,Explicit scoped approval; production changes prohibited
+.github/workflows/,CI/deployment workflow consumers,Read-only inventory only,Workflow owner approval for edits/moves
+*SHA256*;*MANIFEST*;*CHECKSUM*,Provenance and integrity evidence,Preserve byte-for-byte unless exact manifest update approved,Explicit scoped approval
+docs/repository-convergence/phase-*/,Historical phase evidence and decisions,Append new phase evidence only,Explicit scoped approval to alter prior evidence
+KAYAD_SUPPORT_TEST_MATRIX.md,Distinct support matrix; authority unresolved,Preserve separately,Owner approval plus content comparison
+docs/domains/KAYAD_SUPPORT_TEST_MATRIX.md,Distinct support matrix; authority unresolved,Preserve separately,Owner approval plus content comparison
+scripts/; *.cmd; *.bat; *.ps1; *.sh,Potential operator invocation paths,Retain names/paths,Consumer analysis and explicit approval

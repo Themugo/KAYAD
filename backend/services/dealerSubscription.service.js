@@ -68,7 +68,7 @@ export async function getDealerEntitlement(dealerId) {
   // every caller uses the same definition.
   const used = await Car.countDocuments({
     dealer: dealerId,
-    deletedAt: null,
+    deletedAt: { $exists: false },
     status: { $in: ["available", "pending"] },
   });
   const listingMax = usable ? Number(subscription.listing_max || 0) : 0;

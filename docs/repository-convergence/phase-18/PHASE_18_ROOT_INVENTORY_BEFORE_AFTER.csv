@@ -1,0 +1,3 @@
+snapshot,root_files,root_directories,phase_labelled_scripts,all_operational_scripts,root_documentation_candidates,structural_moves,structural_renames,deletions
+BEFORE,74,23,12,24,6,0,0,0
+AFTER,74,23,12,24,6,0,0,0

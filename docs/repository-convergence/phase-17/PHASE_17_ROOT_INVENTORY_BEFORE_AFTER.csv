@@ -1,0 +1,218 @@
+snapshot,path,kind,classification_or_reason
+BEFORE,.dockerignore,file,root file at Phase 16 baseline
+BEFORE,.editorconfig,file,root file at Phase 16 baseline
+BEFORE,.env.example,file,root file at Phase 16 baseline
+BEFORE,.env.production.example,file,root file at Phase 16 baseline
+BEFORE,.eslintignore,file,root file at Phase 16 baseline
+BEFORE,.gitattributes,file,root file at Phase 16 baseline
+BEFORE,.gitignore,file,root file at Phase 16 baseline
+BEFORE,.gitleaks.toml,file,root file at Phase 16 baseline
+BEFORE,.node-version,file,root file at Phase 16 baseline
+BEFORE,.npmrc,file,root file at Phase 16 baseline
+BEFORE,.nvmrc,file,root file at Phase 16 baseline
+BEFORE,.prettierignore,file,root file at Phase 16 baseline
+BEFORE,.prettierrc,file,root file at Phase 16 baseline
+BEFORE,.releaserc.json,file,root file at Phase 16 baseline
+BEFORE,.replit,file,root file at Phase 16 baseline
+BEFORE,.replitignore,file,root file at Phase 16 baseline
+BEFORE,APPLY_PHASE_40_TO_REPO.cmd,file,root file at Phase 16 baseline
+BEFORE,APPLY_PHASE_41_TO_REPO.cmd,file,root file at Phase 16 baseline
+BEFORE,APPLY_PHASE_42_TO_REPO.cmd,file,root file at Phase 16 baseline
+BEFORE,APPLY_PHASE_43_TO_REPO.cmd,file,root file at Phase 16 baseline
+BEFORE,APPLY_PHASE_44_TO_REPO.cmd,file,root file at Phase 16 baseline
+BEFORE,APPLY_PHASE_45_TO_REPO.cmd,file,root file at Phase 16 baseline
+BEFORE,APPLY_PHASE_46_TO_REPO.cmd,file,root file at Phase 16 baseline
+BEFORE,APPLY_PHASE_47_TO_REPO.cmd,file,root file at Phase 16 baseline
+BEFORE,APPLY_PHASE_49_TO_REPO.cmd,file,root file at Phase 16 baseline
+BEFORE,APPLY_PHASE_50_TO_REPO.cmd,file,root file at Phase 16 baseline
+BEFORE,APPLY_PHASE_54_TO_REPO.cmd,file,root file at Phase 16 baseline
+BEFORE,APPLY_RECOVERY_TO_REPO.cmd,file,root file at Phase 16 baseline
+BEFORE,CHANGES.md,file,root file at Phase 16 baseline
+BEFORE,COMMIT_AND_PUSH_HERO_MOBILE_HARDENING.cmd,file,root file at Phase 16 baseline
+BEFORE,CONTRIBUTING.md,file,root file at Phase 16 baseline
+BEFORE,Dockerfile.frontend,file,root file at Phase 16 baseline
+BEFORE,FULL_PROJECT_COMMIT_PUSH.cmd,file,root file at Phase 16 baseline
+BEFORE,GEMINI.md.txt,file,root file at Phase 16 baseline
+BEFORE,KAYAD-DESIGN-UPGRADE-CHANGED-FILES-20261016.txt,file,root file at Phase 16 baseline
+BEFORE,KAYAD-RUNTIME-RECOVERY-CHECKS.txt,file,root file at Phase 16 baseline
+BEFORE,KAYAD_ADMIN_REDESIGN_DATA_SOURCE_MAP.csv,file,root file at Phase 16 baseline
+BEFORE,KAYAD_ADMIN_REDESIGN_ROUTE_MAP.csv,file,root file at Phase 16 baseline
+BEFORE,KAYAD_COMMUNICATIONS_EVENT_CONTRACT.md,file,root file at Phase 16 baseline
+BEFORE,KAYAD_DATABASE_SCHEMA_PARITY_20261011.md,file,root file at Phase 16 baseline
+BEFORE,KAYAD_DEALER_ONBOARDING_STATE_MACHINE.md,file,root file at Phase 16 baseline
+BEFORE,KAYAD_DEALER_ROUTE_API_OWNERSHIP_MAP.md,file,root file at Phase 16 baseline
+BEFORE,KAYAD_DESIGN_SYSTEM_CONVERGENCE.md,file,root file at Phase 16 baseline
+BEFORE,KAYAD_FIRST_SELLER_RELEASE_RUNBOOK.md,file,root file at Phase 16 baseline
+BEFORE,KAYAD_IDENTITY_AUTHZ_CORRECTION_PASS_20261015.md,file,root file at Phase 16 baseline
+BEFORE,KAYAD_MIGRATION_INVENTORY_20261013.tsv,file,root file at Phase 16 baseline
+BEFORE,KAYAD_MIGRATION_RECONCILIATION_20261013.tsv,file,root file at Phase 16 baseline
+BEFORE,KAYAD_NEXT_GATE_STATUS_20261015.md,file,root file at Phase 16 baseline
+BEFORE,KAYAD_OWNER_IDENTITY_CONVERGENCE_20261015.md,file,root file at Phase 16 baseline
+BEFORE,KAYAD_PRESTAGING_SECURITY_AND_MIGRATION_DRIFT_20261013.md,file,root file at Phase 16 baseline
+BEFORE,KAYAD_PRODUCTION_MIGRATION_READINESS_20261013.md,file,root file at Phase 16 baseline
+BEFORE,KAYAD_PRODUCTION_ONLY_MIGRATIONS_20261013.tsv,file,root file at Phase 16 baseline
+BEFORE,KAYAD_PRODUCTION_SCHEMA_AUTH_COMMS_CONVERGENCE_20261013.md,file,root file at Phase 16 baseline
+BEFORE,KAYAD_RELEASE_MANIFEST.sha256,file,root file at Phase 16 baseline
+BEFORE,KAYAD_REMAINING_BLOCKERS.md,file,root file at Phase 16 baseline
+BEFORE,KAYAD_STAGING_DECISION_20261013.md,file,root file at Phase 16 baseline
+BEFORE,KAYAD_VALIDATOR_BATTERY_20261011.tsv,file,root file at Phase 16 baseline
+BEFORE,LICENSE,file,root file at Phase 16 baseline
+BEFORE,NAVIGATION_RLS_PROOF_OUTPUT_20261008.txt,file,root file at Phase 16 baseline
+BEFORE,README.md,file,root file at Phase 16 baseline
+BEFORE,RUN_PHASE_2_CERTIFICATION.cmd,file,root file at Phase 16 baseline
+BEFORE,SECURITY.md,file,root file at Phase 16 baseline
+BEFORE,bun.lock,file,root file at Phase 16 baseline
+BEFORE,docker-compose.yml,file,root file at Phase 16 baseline
+BEFORE,eslint.config.js,file,root file at Phase 16 baseline
+BEFORE,harden_commercial.py,file,root file at Phase 16 baseline
+BEFORE,index.html,file,root file at Phase 16 baseline
+BEFORE,kayad-land-cruiser-clean-preview.jpg,file,root file at Phase 16 baseline
+BEFORE,kayad-land-cruiser-clean-preview2.jpg,file,root file at Phase 16 baseline
+BEFORE,kayad-mercedes-gle-clean-preview.jpg,file,root file at Phase 16 baseline
+BEFORE,kayad-mercedes-gle-clean-preview2.jpg,file,root file at Phase 16 baseline
+BEFORE,load-test.js,file,root file at Phase 16 baseline
+BEFORE,merc_cut.png,file,root file at Phase 16 baseline
+BEFORE,metadata.json,file,root file at Phase 16 baseline
+BEFORE,nginx.conf,file,root file at Phase 16 baseline
+BEFORE,nginx.docker.conf,file,root file at Phase 16 baseline
+BEFORE,package-lock.json,file,root file at Phase 16 baseline
+BEFORE,package.json,file,root file at Phase 16 baseline
+BEFORE,patch_comm.py,file,root file at Phase 16 baseline
+BEFORE,patch_more.py,file,root file at Phase 16 baseline
+BEFORE,render-staging.yaml,file,root file at Phase 16 baseline
+BEFORE,render.yaml,file,root file at Phase 16 baseline
+BEFORE,setup-ssl.sh,file,root file at Phase 16 baseline
+BEFORE,setup-windows.bat,file,root file at Phase 16 baseline
+BEFORE,start-all.bat,file,root file at Phase 16 baseline
+BEFORE,start-backend.bat,file,root file at Phase 16 baseline
+BEFORE,start-frontend.bat,file,root file at Phase 16 baseline
+BEFORE,start.bat,file,root file at Phase 16 baseline
+BEFORE,tailwind.config.js,file,root file at Phase 16 baseline
+BEFORE,tsconfig.app.json,file,root file at Phase 16 baseline
+BEFORE,tsconfig.base.json,file,root file at Phase 16 baseline
+BEFORE,tsconfig.json,file,root file at Phase 16 baseline
+BEFORE,tsconfig.node.json,file,root file at Phase 16 baseline
+BEFORE,vercel-staging.json,file,root file at Phase 16 baseline
+BEFORE,vercel.json,file,root file at Phase 16 baseline
+BEFORE,vite.config.ts,file,root file at Phase 16 baseline
+BEFORE,vitest.config.ts,file,root file at Phase 16 baseline
+BEFORE,.github,directory,root directory at Phase 16 baseline
+BEFORE,KAYAD_PHASE6_FINAL_LOGS,directory,root directory at Phase 16 baseline
+BEFORE,KAYAD_SUPER_ADMIN_PHASE5_LOGS,directory,root directory at Phase 16 baseline
+BEFORE,KAYAD_SUPER_ADMIN_PHASE6_LOGS,directory,root directory at Phase 16 baseline
+BEFORE,KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS,directory,root directory at Phase 16 baseline
+BEFORE,backend,directory,root directory at Phase 16 baseline
+BEFORE,docs,directory,root directory at Phase 16 baseline
+BEFORE,e2e,directory,root directory at Phase 16 baseline
+BEFORE,evidence,directory,root directory at Phase 16 baseline
+BEFORE,grafana,directory,root directory at Phase 16 baseline
+BEFORE,helm,directory,root directory at Phase 16 baseline
+BEFORE,k8s,directory,root directory at Phase 16 baseline
+BEFORE,lib,directory,root directory at Phase 16 baseline
+BEFORE,load-tests,directory,root directory at Phase 16 baseline
+BEFORE,nginx,directory,root directory at Phase 16 baseline
+BEFORE,public,directory,root directory at Phase 16 baseline
+BEFORE,reports,directory,root directory at Phase 16 baseline
+BEFORE,runbooks,directory,root directory at Phase 16 baseline
+BEFORE,scripts,directory,root directory at Phase 16 baseline
+BEFORE,src,directory,root directory at Phase 16 baseline
+BEFORE,supabase,directory,root directory at Phase 16 baseline
+BEFORE,tests,directory,root directory at Phase 16 baseline
+BEFORE,validation-logs,directory,root directory at Phase 16 baseline
+AFTER,.dockerignore,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.editorconfig,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.env.example,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.env.production.example,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.eslintignore,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.gitattributes,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.gitignore,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.gitleaks.toml,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.node-version,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.npmrc,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.nvmrc,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.prettierignore,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.prettierrc,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.releaserc.json,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.replit,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.replitignore,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,APPLY_PHASE_40_TO_REPO.cmd,file,LEGACY_OPERATIONAL_SCRIPT_BLOCKED: Potentially mutating script; contains fixed paths/patch behavior; not executed or renamed without external consumer proof
+AFTER,APPLY_PHASE_41_TO_REPO.cmd,file,LEGACY_OPERATIONAL_SCRIPT_BLOCKED: Potentially mutating script; contains fixed paths/patch behavior; not executed or renamed without external consumer proof
+AFTER,APPLY_PHASE_42_TO_REPO.cmd,file,LEGACY_OPERATIONAL_SCRIPT_BLOCKED: Potentially mutating script; contains fixed paths/patch behavior; not executed or renamed without external consumer proof
+AFTER,APPLY_PHASE_43_TO_REPO.cmd,file,LEGACY_OPERATIONAL_SCRIPT_BLOCKED: Potentially mutating script; contains fixed paths/patch behavior; not executed or renamed without external consumer proof
+AFTER,APPLY_PHASE_44_TO_REPO.cmd,file,LEGACY_OPERATIONAL_SCRIPT_BLOCKED: Potentially mutating script; contains fixed paths/patch behavior; not executed or renamed without external consumer proof
+AFTER,APPLY_PHASE_45_TO_REPO.cmd,file,LEGACY_OPERATIONAL_SCRIPT_BLOCKED: Potentially mutating script; contains fixed paths/patch behavior; not executed or renamed without external consumer proof
+AFTER,APPLY_PHASE_46_TO_REPO.cmd,file,LEGACY_OPERATIONAL_SCRIPT_BLOCKED: Potentially mutating script; contains fixed paths/patch behavior; not executed or renamed without external consumer proof
+AFTER,APPLY_PHASE_47_TO_REPO.cmd,file,LEGACY_OPERATIONAL_SCRIPT_BLOCKED: Potentially mutating script; contains fixed paths/patch behavior; not executed or renamed without external consumer proof
+AFTER,APPLY_PHASE_49_TO_REPO.cmd,file,LEGACY_OPERATIONAL_SCRIPT_BLOCKED: Potentially mutating script; contains fixed paths/patch behavior; not executed or renamed without external consumer proof
+AFTER,APPLY_PHASE_50_TO_REPO.cmd,file,LEGACY_OPERATIONAL_SCRIPT_BLOCKED: Potentially mutating script; contains fixed paths/patch behavior; not executed or renamed without external consumer proof
+AFTER,APPLY_PHASE_54_TO_REPO.cmd,file,LEGACY_OPERATIONAL_SCRIPT_BLOCKED: Potentially mutating script; contains fixed paths/patch behavior; not executed or renamed without external consumer proof
+AFTER,APPLY_RECOVERY_TO_REPO.cmd,file,OPERATIONAL_SCRIPT_RETAINED: Potentially invoked by users or tooling; retained pending consumer validation
+AFTER,CHANGES.md,file,CONTRIBUTOR_CHANGELOG: Conventional root-level change log retained
+AFTER,COMMIT_AND_PUSH_HERO_MOBILE_HARDENING.cmd,file,OPERATIONAL_SCRIPT_RETAINED: Potentially invoked by users or tooling; retained pending consumer validation
+AFTER,CONTRIBUTING.md,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,Dockerfile.frontend,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,FULL_PROJECT_COMMIT_PUSH.cmd,file,OPERATIONAL_SCRIPT_RETAINED: Potentially invoked by users or tooling; retained pending consumer validation
+AFTER,GEMINI.md.txt,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,KAYAD_RELEASE_MANIFEST.sha256,file,ROOT_RETAINED_REQUIRES_REVIEW: Not moved in this pass; retained rather than risk unverified consumer breakage
+AFTER,LICENSE,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,README.md,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,RUN_PHASE_2_CERTIFICATION.cmd,file,LEGACY_OPERATIONAL_SCRIPT_BLOCKED: Potentially mutating script; contains fixed paths/patch behavior; not executed or renamed without external consumer proof
+AFTER,SECURITY.md,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,bun.lock,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,docker-compose.yml,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,eslint.config.js,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,harden_commercial.py,file,OPERATIONAL_SCRIPT_RETAINED: Potentially invoked by users or tooling; retained pending consumer validation
+AFTER,index.html,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,kayad-land-cruiser-clean-preview.jpg,file,ROOT_ASSET_RETAINED: Potential app or preview asset; reference/consumer confirmation needed before moving
+AFTER,kayad-land-cruiser-clean-preview2.jpg,file,ROOT_ASSET_RETAINED: Potential app or preview asset; reference/consumer confirmation needed before moving
+AFTER,kayad-mercedes-gle-clean-preview.jpg,file,ROOT_ASSET_RETAINED: Potential app or preview asset; reference/consumer confirmation needed before moving
+AFTER,kayad-mercedes-gle-clean-preview2.jpg,file,ROOT_ASSET_RETAINED: Potential app or preview asset; reference/consumer confirmation needed before moving
+AFTER,load-test.js,file,OPERATIONAL_SCRIPT_RETAINED: Potentially invoked by users or tooling; retained pending consumer validation
+AFTER,merc_cut.png,file,ROOT_ASSET_RETAINED: Potential app or preview asset; reference/consumer confirmation needed before moving
+AFTER,metadata.json,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,nginx.conf,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,nginx.docker.conf,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,package-lock.json,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,package.json,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,patch_comm.py,file,OPERATIONAL_SCRIPT_RETAINED: Potentially invoked by users or tooling; retained pending consumer validation
+AFTER,patch_more.py,file,OPERATIONAL_SCRIPT_RETAINED: Potentially invoked by users or tooling; retained pending consumer validation
+AFTER,render-staging.yaml,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,render.yaml,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,setup-ssl.sh,file,OPERATIONAL_SCRIPT_RETAINED: Potentially invoked by users or tooling; retained pending consumer validation
+AFTER,setup-windows.bat,file,OPERATIONAL_SCRIPT_RETAINED: Potentially invoked by users or tooling; retained pending consumer validation
+AFTER,start-all.bat,file,OPERATIONAL_SCRIPT_RETAINED: Potentially invoked by users or tooling; retained pending consumer validation
+AFTER,start-backend.bat,file,OPERATIONAL_SCRIPT_RETAINED: Potentially invoked by users or tooling; retained pending consumer validation
+AFTER,start-frontend.bat,file,OPERATIONAL_SCRIPT_RETAINED: Potentially invoked by users or tooling; retained pending consumer validation
+AFTER,start.bat,file,OPERATIONAL_SCRIPT_RETAINED: Potentially invoked by users or tooling; retained pending consumer validation
+AFTER,tailwind.config.js,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,tsconfig.app.json,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,tsconfig.base.json,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,tsconfig.json,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,tsconfig.node.json,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,vercel-staging.json,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,vercel.json,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,vite.config.ts,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,vitest.config.ts,file,"ROOT_REQUIRED_OR_CONVENTIONAL: Tooling, package, deployment, source-control, security, or contributor convention"
+AFTER,.github,directory,retained root directory
+AFTER,KAYAD_PHASE6_FINAL_LOGS,directory,retained root directory
+AFTER,KAYAD_SUPER_ADMIN_PHASE5_LOGS,directory,retained root directory
+AFTER,KAYAD_SUPER_ADMIN_PHASE6_LOGS,directory,retained root directory
+AFTER,KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS,directory,retained root directory
+AFTER,backend,directory,retained root directory
+AFTER,docs,directory,retained root directory
+AFTER,e2e,directory,retained root directory
+AFTER,evidence,directory,retained root directory
+AFTER,grafana,directory,retained root directory
+AFTER,helm,directory,retained root directory
+AFTER,k8s,directory,retained root directory
+AFTER,lib,directory,retained root directory
+AFTER,load-tests,directory,retained root directory
+AFTER,nginx,directory,retained root directory
+AFTER,public,directory,retained root directory
+AFTER,reports,directory,retained root directory
+AFTER,runbooks,directory,retained root directory
+AFTER,scripts,directory,retained root directory
+AFTER,src,directory,retained root directory
+AFTER,supabase,directory,retained root directory
+AFTER,tests,directory,retained root directory
+AFTER,validation-logs,directory,retained root directory

@@ -1,0 +1,440 @@
+current_path,current_name,proposed_rename,disposition,approval_or_evidence_status
+.dockerignore,.dockerignore,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+.editorconfig,.editorconfig,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+.env.example,.env.example,No change proposed,Root candidate; retain,No owner-approved rename evidence supplied
+.env.production.example,.env.production.example,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+.eslintignore,.eslintignore,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+.gitattributes,.gitattributes,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+.gitignore,.gitignore,No change proposed,Root candidate; retain,No owner-approved rename evidence supplied
+.gitleaks.toml,.gitleaks.toml,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+.node-version,.node-version,No change proposed,Root candidate; retain,No owner-approved rename evidence supplied
+.npmrc,.npmrc,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+.nvmrc,.nvmrc,No change proposed,Root candidate; retain,No owner-approved rename evidence supplied
+.prettierignore,.prettierignore,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+.prettierrc,.prettierrc,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+.releaserc.json,.releaserc.json,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+.replit,.replit,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+.replitignore,.replitignore,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+ADVANCED_SWEEP_CERTIFICATION_STATUS_20260930.txt,ADVANCED_SWEEP_CERTIFICATION_STATUS_20260930.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+APPLY_PHASE_40_TO_REPO.cmd,APPLY_PHASE_40_TO_REPO.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+APPLY_PHASE_41_TO_REPO.cmd,APPLY_PHASE_41_TO_REPO.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+APPLY_PHASE_42_TO_REPO.cmd,APPLY_PHASE_42_TO_REPO.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+APPLY_PHASE_43_TO_REPO.cmd,APPLY_PHASE_43_TO_REPO.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+APPLY_PHASE_44_TO_REPO.cmd,APPLY_PHASE_44_TO_REPO.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+APPLY_PHASE_45_TO_REPO.cmd,APPLY_PHASE_45_TO_REPO.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+APPLY_PHASE_46_TO_REPO.cmd,APPLY_PHASE_46_TO_REPO.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+APPLY_PHASE_47_TO_REPO.cmd,APPLY_PHASE_47_TO_REPO.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+APPLY_PHASE_49_TO_REPO.cmd,APPLY_PHASE_49_TO_REPO.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+APPLY_PHASE_50_TO_REPO.cmd,APPLY_PHASE_50_TO_REPO.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+APPLY_PHASE_54_TO_REPO.cmd,APPLY_PHASE_54_TO_REPO.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+APPLY_RECOVERY_TO_REPO.cmd,APPLY_RECOVERY_TO_REPO.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+AUCTION_360_HARDENING_MANIFEST_20261007.txt,AUCTION_360_HARDENING_MANIFEST_20261007.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+AUCTION_PHASE_A_CHANGED_FILES_20261007.txt,AUCTION_PHASE_A_CHANGED_FILES_20261007.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+CHANGES.md,CHANGES.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+CLEAN_SWEEP_CHANGED_FILES_20260930.txt,CLEAN_SWEEP_CHANGED_FILES_20260930.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+COMMIT_AND_PUSH_HERO_MOBILE_HARDENING.cmd,COMMIT_AND_PUSH_HERO_MOBILE_HARDENING.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+CONTRIBUTING.md,CONTRIBUTING.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+Dockerfile.frontend,Dockerfile.frontend,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+FULL_PROJECT_COMMIT_PUSH.cmd,FULL_PROJECT_COMMIT_PUSH.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+GEMINI.md.txt,GEMINI.md.txt,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD-DESIGN-UPGRADE-CHANGED-FILES-20261016.txt,KAYAD-DESIGN-UPGRADE-CHANGED-FILES-20261016.txt,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD-RUNTIME-RECOVERY-CHECKS.txt,KAYAD-RUNTIME-RECOVERY-CHECKS.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE2_CHANGE_LEDGER.md,KAYAD_ADMIN_PHASE2_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE2_DATA_SOURCE_AUDIT.md,KAYAD_ADMIN_PHASE2_DATA_SOURCE_AUDIT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE2_EDIT_SCOPE.csv,KAYAD_ADMIN_PHASE2_EDIT_SCOPE.csv,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE2_EXECUTION_REPORT.md,KAYAD_ADMIN_PHASE2_EXECUTION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE2_GAP_ANALYSIS.md,KAYAD_ADMIN_PHASE2_GAP_ANALYSIS.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE2_REMAINING_DEFECTS.md,KAYAD_ADMIN_PHASE2_REMAINING_DEFECTS.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE2_SCREENSHOT_COMPARISON.md,KAYAD_ADMIN_PHASE2_SCREENSHOT_COMPARISON.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE2_TEST_RESULTS.md,KAYAD_ADMIN_PHASE2_TEST_RESULTS.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE2_VISUAL_CONVERGENCE_REPORT.md,KAYAD_ADMIN_PHASE2_VISUAL_CONVERGENCE_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE3_CHANGE_LEDGER.md,KAYAD_ADMIN_PHASE3_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE3_EDIT_SCOPE.csv,KAYAD_ADMIN_PHASE3_EDIT_SCOPE.csv,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE3_EXECUTION_REPORT.md,KAYAD_ADMIN_PHASE3_EXECUTION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE3_GAP_ANALYSIS.md,KAYAD_ADMIN_PHASE3_GAP_ANALYSIS.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE3_TEST_RESULTS.md,KAYAD_ADMIN_PHASE3_TEST_RESULTS.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4B_CHANGE_LEDGER.md,KAYAD_ADMIN_PHASE4B_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4B_EDIT_SCOPE.csv,KAYAD_ADMIN_PHASE4B_EDIT_SCOPE.csv,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4B_FULL_AUDIT_REPORT.md,KAYAD_ADMIN_PHASE4B_FULL_AUDIT_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4B_GAP_ANALYSIS.md,KAYAD_ADMIN_PHASE4B_GAP_ANALYSIS.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4B_REMAINING_DEFECTS.md,KAYAD_ADMIN_PHASE4B_REMAINING_DEFECTS.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4B_SCREENSHOT_COMPARISON.md,KAYAD_ADMIN_PHASE4B_SCREENSHOT_COMPARISON.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4B_TEST_RESULTS.md,KAYAD_ADMIN_PHASE4B_TEST_RESULTS.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4_BASELINE.md,KAYAD_ADMIN_PHASE4_BASELINE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4_CHANGE_LEDGER.md,KAYAD_ADMIN_PHASE4_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4_DATA_PROVENANCE.md,KAYAD_ADMIN_PHASE4_DATA_PROVENANCE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4_DATA_SOURCE_MAP.csv,KAYAD_ADMIN_PHASE4_DATA_SOURCE_MAP.csv,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4_EDIT_SCOPE.csv,KAYAD_ADMIN_PHASE4_EDIT_SCOPE.csv,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4_EXECUTION_REPORT.md,KAYAD_ADMIN_PHASE4_EXECUTION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4_GAP_ANALYSIS.md,KAYAD_ADMIN_PHASE4_GAP_ANALYSIS.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4_REMAINING_DEFECTS.md,KAYAD_ADMIN_PHASE4_REMAINING_DEFECTS.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4_ROUTE_MAP.csv,KAYAD_ADMIN_PHASE4_ROUTE_MAP.csv,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4_SCREENSHOT_COMPARISON.md,KAYAD_ADMIN_PHASE4_SCREENSHOT_COMPARISON.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_PHASE4_TEST_RESULTS.md,KAYAD_ADMIN_PHASE4_TEST_RESULTS.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_ADMIN_REDESIGN_CHANGE_LEDGER.md,KAYAD_ADMIN_REDESIGN_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ADMIN_REDESIGN_DATA_SOURCE_MAP.csv,KAYAD_ADMIN_REDESIGN_DATA_SOURCE_MAP.csv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_ADMIN_REDESIGN_EXECUTION_REPORT.md,KAYAD_ADMIN_REDESIGN_EXECUTION_REPORT.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_ADMIN_REDESIGN_FINAL_REPORT.md,KAYAD_ADMIN_REDESIGN_FINAL_REPORT.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_ADMIN_REDESIGN_GAP_ANALYSIS.md,KAYAD_ADMIN_REDESIGN_GAP_ANALYSIS.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_ADMIN_REDESIGN_ROUTE_MAP.csv,KAYAD_ADMIN_REDESIGN_ROUTE_MAP.csv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_ALL_AREAS_AUDIT_REPORT.md,KAYAD_ALL_AREAS_AUDIT_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ALL_AREAS_CHANGE_LEDGER.md,KAYAD_ALL_AREAS_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_ALL_AREAS_EXECUTION_LOG.md,KAYAD_ALL_AREAS_EXECUTION_LOG.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_ALL_AREAS_ROUTE_ROLE_MATRIX.tsv,KAYAD_ALL_AREAS_ROUTE_ROLE_MATRIX.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_ALL_AREAS_STATUS_MATRIX.tsv,KAYAD_ALL_AREAS_STATUS_MATRIX.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_BUSINESS_COMMAND_CENTRE_PHASE01_EXECUTION_REPORT.md,KAYAD_BUSINESS_COMMAND_CENTRE_PHASE01_EXECUTION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_CHANGE_LEDGER.md,KAYAD_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_CHANGE_LEDGER_20261011.md,KAYAD_CHANGE_LEDGER_20261011.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_CLEAN_FOUNDATION_CHANGE_LEDGER_20261012.md,KAYAD_CLEAN_FOUNDATION_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_CLEAN_FOUNDATION_EXECUTION_REPORT_20261012.md,KAYAD_CLEAN_FOUNDATION_EXECUTION_REPORT_20261012.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_CLEAN_FOUNDATION_VALIDATION_MATRIX_20261012.tsv,KAYAD_CLEAN_FOUNDATION_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_COLOR_IDENTITY_AUDIT_20261014.md,KAYAD_COLOR_IDENTITY_AUDIT_20261014.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_COMMUNICATIONS_EVENT_CONTRACT.md,KAYAD_COMMUNICATIONS_EVENT_CONTRACT.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_CONTINUATION_FIX_REPORT_20261017.md,KAYAD_CONTINUATION_FIX_REPORT_20261017.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_DATABASE_SCHEMA_PARITY_20261011.md,KAYAD_DATABASE_SCHEMA_PARITY_20261011.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_DEALER_ADMIN_AND_NOTIFICATIONS_REPORT.md,KAYAD_DEALER_ADMIN_AND_NOTIFICATIONS_REPORT.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_DEALER_BASELINE_VALIDATION_REPORT.md,KAYAD_DEALER_BASELINE_VALIDATION_REPORT.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_DEALER_CAPABILITY_WIRING_MATRIX.md,KAYAD_DEALER_CAPABILITY_WIRING_MATRIX.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_DEALER_CHANGE_LEDGER.md,KAYAD_DEALER_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_DEALER_EXECUTION_REPORT.md,KAYAD_DEALER_EXECUTION_REPORT.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_DEALER_GAP_AND_RISK_REGISTER.md,KAYAD_DEALER_GAP_AND_RISK_REGISTER.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_DEALER_INVENTORY_AND_OPERATIONS_REPORT.md,KAYAD_DEALER_INVENTORY_AND_OPERATIONS_REPORT.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_DEALER_ONBOARDING_STATE_MACHINE.md,KAYAD_DEALER_ONBOARDING_STATE_MACHINE.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_DEALER_R12_R14_STAGING_VERIFICATION_REPORT.md,KAYAD_DEALER_R12_R14_STAGING_VERIFICATION_REPORT.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_DEALER_REGISTRATION_GATE_REPORT.md,KAYAD_DEALER_REGISTRATION_GATE_REPORT.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_DEALER_ROUTE_API_OWNERSHIP_MAP.md,KAYAD_DEALER_ROUTE_API_OWNERSHIP_MAP.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_DEALER_SECURITY_AND_RLS_REPORT.md,KAYAD_DEALER_SECURITY_AND_RLS_REPORT.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_DEALER_VALIDATION_MATRIX.tsv,KAYAD_DEALER_VALIDATION_MATRIX.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_DESIGN_SYSTEM_CONVERGENCE.md,KAYAD_DESIGN_SYSTEM_CONVERGENCE.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_EMAIL_ONBOARDING_AUDIT_20261012.md,KAYAD_EMAIL_ONBOARDING_AUDIT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_FINANCIAL_INTEGRITY_REPORT_20261011.md,KAYAD_FINANCIAL_INTEGRITY_REPORT_20261011.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_FIRST_SELLER_CHANGE_LEDGER.md,KAYAD_FIRST_SELLER_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_FIRST_SELLER_E2E_EVIDENCE_MATRIX.md,KAYAD_FIRST_SELLER_E2E_EVIDENCE_MATRIX.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_FIRST_SELLER_LAUNCH_CERTIFICATION_REPORT.md,KAYAD_FIRST_SELLER_LAUNCH_CERTIFICATION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_FIRST_SELLER_RELEASE_RUNBOOK.md,KAYAD_FIRST_SELLER_RELEASE_RUNBOOK.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_FIRST_SELLER_SHA256_MANIFEST.txt,KAYAD_FIRST_SELLER_SHA256_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_FOUNDATION_RECONCILIATION_REPORT_20261018.md,KAYAD_FOUNDATION_RECONCILIATION_REPORT_20261018.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_FULL_AUDIT_REPORT_20261011.md,KAYAD_FULL_AUDIT_REPORT_20261011.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_IDENTITY_AUTHZ_CORRECTION_PASS_20261015.md,KAYAD_IDENTITY_AUTHZ_CORRECTION_PASS_20261015.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_MASTER_CONVERGENCE_PHASE_C1_CERTIFICATION_REPORT.md,KAYAD_MASTER_CONVERGENCE_PHASE_C1_CERTIFICATION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_MASTER_CONVERGENCE_PHASE_C_REPORT.md,KAYAD_MASTER_CONVERGENCE_PHASE_C_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_MASTER_IDENTITY_AUTHORIZATION_AUDIT_20261015.md,KAYAD_MASTER_IDENTITY_AUTHORIZATION_AUDIT_20261015.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_MASTER_POLISH_AUDIT.md,KAYAD_MASTER_POLISH_AUDIT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_MESSAGING_NOTIFICATION_SECURITY_MATRIX_20261011.md,KAYAD_MESSAGING_NOTIFICATION_SECURITY_MATRIX_20261011.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_MIGRATION_INVENTORY_20261013.tsv,KAYAD_MIGRATION_INVENTORY_20261013.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_MIGRATION_PROVENANCE_AND_STAGING_CERTIFICATION_20261013.md,KAYAD_MIGRATION_PROVENANCE_AND_STAGING_CERTIFICATION_20261013.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_MIGRATION_RECONCILIATION_20261013.tsv,KAYAD_MIGRATION_RECONCILIATION_20261013.tsv,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_NEXT_GATE_STATUS_20261015.md,KAYAD_NEXT_GATE_STATUS_20261015.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_OWNER_IDENTITY_CONVERGENCE_20261015.md,KAYAD_OWNER_IDENTITY_CONVERGENCE_20261015.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_PHASE37_BASELINE_AND_INTEGRITY_REPORT.md,KAYAD_PHASE37_BASELINE_AND_INTEGRITY_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE37_EXECUTION_AND_CERTIFICATION_REPORT.md,KAYAD_PHASE37_EXECUTION_AND_CERTIFICATION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE37_GAP_AND_RISK_REGISTER.md,KAYAD_PHASE37_GAP_AND_RISK_REGISTER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE38_CHANGE_LEDGER.md,KAYAD_PHASE38_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE38_EXECUTION_AND_CERTIFICATION_REPORT.md,KAYAD_PHASE38_EXECUTION_AND_CERTIFICATION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE38_GAP_AND_RISK_REGISTER.md,KAYAD_PHASE38_GAP_AND_RISK_REGISTER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE38_STATUS_MATRIX.tsv,KAYAD_PHASE38_STATUS_MATRIX.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_PHASE39_CHANGE_LEDGER.md,KAYAD_PHASE39_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE39_EXECUTION_AND_CERTIFICATION_REPORT.md,KAYAD_PHASE39_EXECUTION_AND_CERTIFICATION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE39_STAGING_RUNBOOK.md,KAYAD_PHASE39_STAGING_RUNBOOK.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE39_STATUS_MATRIX.tsv,KAYAD_PHASE39_STATUS_MATRIX.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_PHASE6_FINAL_ACCESSIBILITY_RESPONSIVE_REPORT.md,KAYAD_PHASE6_FINAL_ACCESSIBILITY_RESPONSIVE_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE6_FINAL_AUTHORIZATION_MATRIX.md,KAYAD_PHASE6_FINAL_AUTHORIZATION_MATRIX.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_PHASE6_FINAL_CERTIFICATION_REPORT.md,KAYAD_PHASE6_FINAL_CERTIFICATION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE6_FINAL_CHANGE_LEDGER.md,KAYAD_PHASE6_FINAL_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE6_FINAL_DATA_PROVENANCE.md,KAYAD_PHASE6_FINAL_DATA_PROVENANCE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE6_FINAL_DEFECT_REGISTER.md,KAYAD_PHASE6_FINAL_DEFECT_REGISTER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE6_FINAL_EDIT_SCOPE.csv,KAYAD_PHASE6_FINAL_EDIT_SCOPE.csv,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE6_FINAL_EVIDENCE_INDEX.md,KAYAD_PHASE6_FINAL_EVIDENCE_INDEX.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE6_FINAL_REMAINING_BLOCKERS.md,KAYAD_PHASE6_FINAL_REMAINING_BLOCKERS.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PHASE6_FINAL_VISUAL_COMPARISON.md,KAYAD_PHASE6_FINAL_VISUAL_COMPARISON.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PRESTAGING_SECURITY_AND_MIGRATION_DRIFT_20261013.md,KAYAD_PRESTAGING_SECURITY_AND_MIGRATION_DRIFT_20261013.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_PRODUCTION_MIGRATION_READINESS_20261013.md,KAYAD_PRODUCTION_MIGRATION_READINESS_20261013.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_PRODUCTION_ONLY_MIGRATIONS_20261013.tsv,KAYAD_PRODUCTION_ONLY_MIGRATIONS_20261013.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_PRODUCTION_SCHEMA_AUTH_COMMS_CONVERGENCE_20261013.md,KAYAD_PRODUCTION_SCHEMA_AUTH_COMMS_CONVERGENCE_20261013.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_PUBLIC_SUPPORT_AUDIT_20261012.md,KAYAD_PUBLIC_SUPPORT_AUDIT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PUBLIC_SUPPORT_CHANGE_LEDGER_20261012.md,KAYAD_PUBLIC_SUPPORT_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_PUBLIC_SUPPORT_EXECUTION_LOG_20261012.txt,KAYAD_PUBLIC_SUPPORT_EXECUTION_LOG_20261012.txt,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_PUBLIC_SUPPORT_VALIDATION_MATRIX_20261012.tsv,KAYAD_PUBLIC_SUPPORT_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_RELEASE_MANIFEST.sha256,KAYAD_RELEASE_MANIFEST.sha256,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_REMAINING_BLOCKERS.md,KAYAD_REMAINING_BLOCKERS.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_ROUTE_UX_MATRIX.tsv,KAYAD_ROUTE_UX_MATRIX.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_RUNTIME_CERTIFICATION_20261011.md,KAYAD_RUNTIME_CERTIFICATION_20261011.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SHA256_MANIFEST_20261011.txt,KAYAD_SHA256_MANIFEST_20261011.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE12_EXECUTION_LOG_20261011.md,KAYAD_STAGE12_EXECUTION_LOG_20261011.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE13_AUDIT_REPORT_20261012.md,KAYAD_STAGE13_AUDIT_REPORT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE13_CHANGE_LEDGER_20261012.md,KAYAD_STAGE13_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE13_EXECUTION_LOG_20261012.md,KAYAD_STAGE13_EXECUTION_LOG_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE13_SHA256_MANIFEST_20261012.txt,KAYAD_STAGE13_SHA256_MANIFEST_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE13_VALIDATION_LOG_20261012.txt,KAYAD_STAGE13_VALIDATION_LOG_20261012.txt,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE13_VALIDATION_MATRIX_20261012.tsv,KAYAD_STAGE13_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE14_SHA256_MANIFEST_20261012.txt,KAYAD_STAGE14_SHA256_MANIFEST_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE15_PUBLIC_ESCROW_AUDIT_20261012.md,KAYAD_STAGE15_PUBLIC_ESCROW_AUDIT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE15_PUBLIC_ESCROW_CHANGE_LEDGER_20261012.md,KAYAD_STAGE15_PUBLIC_ESCROW_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE15_PUBLIC_ESCROW_EXECUTION_LOG_20261012.txt,KAYAD_STAGE15_PUBLIC_ESCROW_EXECUTION_LOG_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE15_PUBLIC_ESCROW_VALIDATION_MATRIX_20261012.tsv,KAYAD_STAGE15_PUBLIC_ESCROW_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE15_SHA256_MANIFEST_20261012.txt,KAYAD_STAGE15_SHA256_MANIFEST_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE16_EXECUTION_LOG_20261012.md,KAYAD_STAGE16_EXECUTION_LOG_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE16_MESSAGING_NOTIFICATION_AUDIT_20261012.md,KAYAD_STAGE16_MESSAGING_NOTIFICATION_AUDIT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE16_MESSAGING_NOTIFICATION_CHANGE_LEDGER_20261012.md,KAYAD_STAGE16_MESSAGING_NOTIFICATION_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE16_SHA256_MANIFEST_20261012.txt,KAYAD_STAGE16_SHA256_MANIFEST_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE16_VALIDATION_LOG_20261012.txt,KAYAD_STAGE16_VALIDATION_LOG_20261012.txt,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE16_VALIDATION_MATRIX_20261012.tsv,KAYAD_STAGE16_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE17_AUTO_SERVICES_AUDIT_20261012.md,KAYAD_STAGE17_AUTO_SERVICES_AUDIT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE17_AUTO_SERVICES_CHANGE_LEDGER_20261012.md,KAYAD_STAGE17_AUTO_SERVICES_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE17_AUTO_SERVICES_EXECUTION_LOG_20261012.txt,KAYAD_STAGE17_AUTO_SERVICES_EXECUTION_LOG_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE17_AUTO_SERVICES_VALIDATION_MATRIX_20261012.tsv,KAYAD_STAGE17_AUTO_SERVICES_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE17_SHA256_MANIFEST_20261012.txt,KAYAD_STAGE17_SHA256_MANIFEST_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE18_PUBLIC_FINANCING_AUDIT_20261012.md,KAYAD_STAGE18_PUBLIC_FINANCING_AUDIT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE18_PUBLIC_FINANCING_CHANGE_LEDGER_20261012.md,KAYAD_STAGE18_PUBLIC_FINANCING_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE18_PUBLIC_FINANCING_EXECUTION_LOG_20261012.txt,KAYAD_STAGE18_PUBLIC_FINANCING_EXECUTION_LOG_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE18_PUBLIC_FINANCING_VALIDATION_MATRIX_20261012.tsv,KAYAD_STAGE18_PUBLIC_FINANCING_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE18_SHA256_MANIFEST_20261012.txt,KAYAD_STAGE18_SHA256_MANIFEST_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE19_BUYER_PORTAL_AUDIT_20261012.md,KAYAD_STAGE19_BUYER_PORTAL_AUDIT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE19_BUYER_PORTAL_CHANGE_LEDGER_20261012.md,KAYAD_STAGE19_BUYER_PORTAL_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE19_BUYER_PORTAL_EXECUTION_LOG_20261012.txt,KAYAD_STAGE19_BUYER_PORTAL_EXECUTION_LOG_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE19_BUYER_PORTAL_VALIDATION_MATRIX_20261012.tsv,KAYAD_STAGE19_BUYER_PORTAL_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE19_SHA256_MANIFEST_20261012.txt,KAYAD_STAGE19_SHA256_MANIFEST_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE20_BUYER_PORTAL_STAGING_AUDIT_20261012.md,KAYAD_STAGE20_BUYER_PORTAL_STAGING_AUDIT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE20_BUYER_PORTAL_STAGING_CHANGE_LEDGER_20261012.md,KAYAD_STAGE20_BUYER_PORTAL_STAGING_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE20_BUYER_PORTAL_STAGING_EXECUTION_LOG_20261012.txt,KAYAD_STAGE20_BUYER_PORTAL_STAGING_EXECUTION_LOG_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE20_BUYER_PORTAL_STAGING_VALIDATION_MATRIX_20261012.tsv,KAYAD_STAGE20_BUYER_PORTAL_STAGING_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE20_SHA256_MANIFEST_20261012.txt,KAYAD_STAGE20_SHA256_MANIFEST_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE20_STAGING_RUNBOOK_20261012.md,KAYAD_STAGE20_STAGING_RUNBOOK_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_AUDIT_20261012.md,KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_AUDIT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_CHANGE_LEDGER_20261012.md,KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_EXECUTION_LOG_20261012.txt,KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_EXECUTION_LOG_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_VALIDATION_MATRIX_20261012.tsv,KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE21_SHA256_MANIFEST_20261012.txt,KAYAD_STAGE21_SHA256_MANIFEST_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE22_PUBLIC_FACING_SWEEP_AUDIT_20261012.md,KAYAD_STAGE22_PUBLIC_FACING_SWEEP_AUDIT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE22_PUBLIC_FACING_SWEEP_CHANGE_LEDGER_20261012.md,KAYAD_STAGE22_PUBLIC_FACING_SWEEP_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE22_PUBLIC_FACING_SWEEP_EXECUTION_LOG_20261012.txt,KAYAD_STAGE22_PUBLIC_FACING_SWEEP_EXECUTION_LOG_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE22_PUBLIC_FACING_SWEEP_VALIDATION_MATRIX_20261012.tsv,KAYAD_STAGE22_PUBLIC_FACING_SWEEP_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE22_SHA256_MANIFEST_20261012.txt,KAYAD_STAGE22_SHA256_MANIFEST_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE23_MOBILE_MENU_PHONE_POLISH_AUDIT_20261012.md,KAYAD_STAGE23_MOBILE_MENU_PHONE_POLISH_AUDIT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE23_MOBILE_MENU_PHONE_POLISH_CHANGE_LEDGER_20261012.md,KAYAD_STAGE23_MOBILE_MENU_PHONE_POLISH_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE23_MOBILE_MENU_PHONE_POLISH_EXECUTION_LOG_20261012.txt,KAYAD_STAGE23_MOBILE_MENU_PHONE_POLISH_EXECUTION_LOG_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE23_MOBILE_MENU_PHONE_POLISH_VALIDATION_MATRIX_20261012.tsv,KAYAD_STAGE23_MOBILE_MENU_PHONE_POLISH_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE23_SHA256_MANIFEST_20261012.txt,KAYAD_STAGE23_SHA256_MANIFEST_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE24_THEME_SWEEP_AUDIT_20261012.md,KAYAD_STAGE24_THEME_SWEEP_AUDIT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE24_THEME_SWEEP_CHANGE_LEDGER_20261012.md,KAYAD_STAGE24_THEME_SWEEP_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE24_THEME_SWEEP_EXECUTION_LOG_20261012.txt,KAYAD_STAGE24_THEME_SWEEP_EXECUTION_LOG_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE24_THEME_SWEEP_SHA256_MANIFEST_20261012.txt,KAYAD_STAGE24_THEME_SWEEP_SHA256_MANIFEST_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE24_THEME_SWEEP_VALIDATION_MATRIX_20261012.tsv,KAYAD_STAGE24_THEME_SWEEP_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE25_ADMIN_LOGO_IDENTITY_AUDIT_20261012.md,KAYAD_STAGE25_ADMIN_LOGO_IDENTITY_AUDIT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE25_ADMIN_LOGO_IDENTITY_CHANGE_LEDGER_20261012.md,KAYAD_STAGE25_ADMIN_LOGO_IDENTITY_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE25_ADMIN_LOGO_IDENTITY_EXECUTION_LOG_20261012.txt,KAYAD_STAGE25_ADMIN_LOGO_IDENTITY_EXECUTION_LOG_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE25_ADMIN_LOGO_IDENTITY_VALIDATION_MATRIX_20261012.tsv,KAYAD_STAGE25_ADMIN_LOGO_IDENTITY_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE25_SHA256_MANIFEST_20261012.txt,KAYAD_STAGE25_SHA256_MANIFEST_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE26_GLOBAL_THEME_AUDIT_20261012.md,KAYAD_STAGE26_GLOBAL_THEME_AUDIT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE26_GLOBAL_THEME_CHANGE_LEDGER_20261012.md,KAYAD_STAGE26_GLOBAL_THEME_CHANGE_LEDGER_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE26_GLOBAL_THEME_EXECUTION_LOG_20261012.txt,KAYAD_STAGE26_GLOBAL_THEME_EXECUTION_LOG_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE26_GLOBAL_THEME_VALIDATION_MATRIX_20261012.tsv,KAYAD_STAGE26_GLOBAL_THEME_VALIDATION_MATRIX_20261012.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE26_SHA256_MANIFEST_20261012.txt,KAYAD_STAGE26_SHA256_MANIFEST_20261012.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE29_MOBILE_FOUNDATION_EXECUTION_LOG_20261012.md,KAYAD_STAGE29_MOBILE_FOUNDATION_EXECUTION_LOG_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE2_ENTRY_CERTIFICATION_REPORT_20261018.md,KAYAD_STAGE2_ENTRY_CERTIFICATION_REPORT_20261018.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE34_MOBILE_SHOWROOM_ICON_POLISH_20261012.md,KAYAD_STAGE34_MOBILE_SHOWROOM_ICON_POLISH_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE35_HOME_HERO_MOBILE_PAIR_POLISH_20261012.md,KAYAD_STAGE35_HOME_HERO_MOBILE_PAIR_POLISH_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE36_ADMIN_CONTROL_PLANE_AUDIT_REPORT.md,KAYAD_STAGE36_ADMIN_CONTROL_PLANE_AUDIT_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE36_HARDCODED_VS_WIRED_MATRIX.tsv,KAYAD_STAGE36_HARDCODED_VS_WIRED_MATRIX.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE36_SHOWROOM_CANONICAL_SEARCH_MOBILE_POLISH_20261012.md,KAYAD_STAGE36_SHOWROOM_CANONICAL_SEARCH_MOBILE_POLISH_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE36_VALIDATION_MATRIX.tsv,KAYAD_STAGE36_VALIDATION_MATRIX.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE3A_INTEGRATION_AND_VERIFICATION_REPORT_20261018.md,KAYAD_STAGE3A_INTEGRATION_AND_VERIFICATION_REPORT_20261018.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE3_CHANGE_LEDGER_20261013.md,KAYAD_STAGE3_CHANGE_LEDGER_20261013.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE3_DATABASE_CONTRACT_REPORT_20261018.md,KAYAD_STAGE3_DATABASE_CONTRACT_REPORT_20261018.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE3_DUPLICATE_VERSION_MATRIX_20261013.tsv,KAYAD_STAGE3_DUPLICATE_VERSION_MATRIX_20261013.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE3_PRESTAGING_CHANGE_LEDGER_20261013.md,KAYAD_STAGE3_PRESTAGING_CHANGE_LEDGER_20261013.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE3_SHA256_MANIFEST_20261013.txt,KAYAD_STAGE3_SHA256_MANIFEST_20261013.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE3_VALIDATION_MATRIX_20261013.tsv,KAYAD_STAGE3_VALIDATION_MATRIX_20261013.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE4A_GATE_CLOSURE_REPORT_20261018.md,KAYAD_STAGE4A_GATE_CLOSURE_REPORT_20261018.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE4_COMPLETION_CHANGE_LEDGER.md,KAYAD_STAGE4_COMPLETION_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE4_COMPLETION_EVIDENCE_MATRIX.md,KAYAD_STAGE4_COMPLETION_EVIDENCE_MATRIX.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE4_COMPLETION_EXECUTION_REPORT.md,KAYAD_STAGE4_COMPLETION_EXECUTION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE4_COMPLETION_SHA256_MANIFEST.txt,KAYAD_STAGE4_COMPLETION_SHA256_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE4_NEXT_STAGE_HANDOFF.md,KAYAD_STAGE4_NEXT_STAGE_HANDOFF.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE4_RUNTIME_DATABASE_IDENTITY_REPORT_20261018.md,KAYAD_STAGE4_RUNTIME_DATABASE_IDENTITY_REPORT_20261018.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5A_CHANGE_LEDGER_20261019.md,KAYAD_STAGE5A_CHANGE_LEDGER_20261019.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5A_EXECUTION_CERTIFICATION_REPORT_20261019.md,KAYAD_STAGE5A_EXECUTION_CERTIFICATION_REPORT_20261019.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5A_SHA256_MANIFEST_20261019.txt,KAYAD_STAGE5A_SHA256_MANIFEST_20261019.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5B_CERTIFIED_SHA256_MANIFEST_20261019.txt,KAYAD_STAGE5B_CERTIFIED_SHA256_MANIFEST_20261019.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5B_CHANGE_LEDGER_20261019.md,KAYAD_STAGE5B_CHANGE_LEDGER_20261019.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5B_CLOSURE_CERTIFICATION_REPORT_20261019.md,KAYAD_STAGE5B_CLOSURE_CERTIFICATION_REPORT_20261019.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5B_EXECUTION_CERTIFICATION_REPORT_20261019.md,KAYAD_STAGE5B_EXECUTION_CERTIFICATION_REPORT_20261019.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5B_SHA256_MANIFEST_20261019.txt,KAYAD_STAGE5B_SHA256_MANIFEST_20261019.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5C1_COVERAGE_CLOSURE_REPORT_20261019.md,KAYAD_STAGE5C1_COVERAGE_CLOSURE_REPORT_20261019.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5C1_SHA256_MANIFEST_20261019.txt,KAYAD_STAGE5C1_SHA256_MANIFEST_20261019.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5C_EXECUTION_CERTIFICATION_REPORT_20261019.md,KAYAD_STAGE5C_EXECUTION_CERTIFICATION_REPORT_20261019.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5D_READINESS_REPORT_20261019.md,KAYAD_STAGE5D_READINESS_REPORT_20261019.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5D_SHA256_MANIFEST_20261019.txt,KAYAD_STAGE5D_SHA256_MANIFEST_20261019.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5E1_BREVO_FIRST_REPORT_20261020.md,KAYAD_STAGE5E1_BREVO_FIRST_REPORT_20261020.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5E1_SHA256_MANIFEST_20261020.txt,KAYAD_STAGE5E1_SHA256_MANIFEST_20261020.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5E3_EMAIL_AND_SESSION_RECOVERY_REPORT_20261020.md,KAYAD_STAGE5E3_EMAIL_AND_SESSION_RECOVERY_REPORT_20261020.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5E3_SHA256_MANIFEST_20261020.txt,KAYAD_STAGE5E3_SHA256_MANIFEST_20261020.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5E_READINESS_REPORT_20261019.md,KAYAD_STAGE5E_READINESS_REPORT_20261019.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5E_SHA256_MANIFEST_20261019.txt,KAYAD_STAGE5E_SHA256_MANIFEST_20261019.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5E_VERIFICATION_RECOVERY_REPORT_20261019.md,KAYAD_STAGE5E_VERIFICATION_RECOVERY_REPORT_20261019.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5E_VR_SHA256_MANIFEST_20261019.txt,KAYAD_STAGE5E_VR_SHA256_MANIFEST_20261019.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F10_API_AND_RPC_ELIGIBILITY_MATRIX.md,KAYAD_STAGE5F10_API_AND_RPC_ELIGIBILITY_MATRIX.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F10_BASELINE_RESULTS.md,KAYAD_STAGE5F10_BASELINE_RESULTS.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F10_DEFECT_REGISTER.md,KAYAD_STAGE5F10_DEFECT_REGISTER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F10_EXECUTION_REPORT.md,KAYAD_STAGE5F10_EXECUTION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F10_IDENTITY_PERMISSION_APPROVAL_MATRIX.md,KAYAD_STAGE5F10_IDENTITY_PERMISSION_APPROVAL_MATRIX.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F10_INPUT_VERIFICATION.md,KAYAD_STAGE5F10_INPUT_VERIFICATION.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F10_PRIVATE_SELLER_AUCTION_CUSTODY_STATE_MACHINE.md,KAYAD_STAGE5F10_PRIVATE_SELLER_AUCTION_CUSTODY_STATE_MACHINE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F10_SHA256_MANIFEST.txt,KAYAD_STAGE5F10_SHA256_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F10_SOURCE_DIFF_AND_MERGE_LEDGER.md,KAYAD_STAGE5F10_SOURCE_DIFF_AND_MERGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F10_TEST_VERIFICATION_MATRIX.md,KAYAD_STAGE5F10_TEST_VERIFICATION_MATRIX.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F10_VALIDATION_LOG.md,KAYAD_STAGE5F10_VALIDATION_LOG.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F11_DEALER_BUSINESS_AUDIT.md,KAYAD_STAGE5F11_DEALER_BUSINESS_AUDIT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F11_DEALER_PROPOSED_DESIGN.md,KAYAD_STAGE5F11_DEALER_PROPOSED_DESIGN.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F11_SHA256_MANIFEST.txt,KAYAD_STAGE5F11_SHA256_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F11_VALIDATION_LOG.txt,KAYAD_STAGE5F11_VALIDATION_LOG.txt,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F12_DEALER_WORKFLOW_MATRIX.md,KAYAD_STAGE5F12_DEALER_WORKFLOW_MATRIX.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F12_EXECUTION_REPORT.md,KAYAD_STAGE5F12_EXECUTION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F12_SHA256_MANIFEST.txt,KAYAD_STAGE5F12_SHA256_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F12_VALIDATION_LOG.txt,KAYAD_STAGE5F12_VALIDATION_LOG.txt,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F13_DEALER_LIFECYCLE_ACCEPTANCE_MATRIX.md,KAYAD_STAGE5F13_DEALER_LIFECYCLE_ACCEPTANCE_MATRIX.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F13_EXECUTION_REPORT.md,KAYAD_STAGE5F13_EXECUTION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F13_SHA256_MANIFEST.txt,KAYAD_STAGE5F13_SHA256_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F13_VALIDATION_LOG.txt,KAYAD_STAGE5F13_VALIDATION_LOG.txt,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F14_PREPURCHASE_INSPECTION_GARAGE_AUDIT.md,KAYAD_STAGE5F14_PREPURCHASE_INSPECTION_GARAGE_AUDIT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F14_SHA256_MANIFEST.txt,KAYAD_STAGE5F14_SHA256_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F14_VALIDATION_LOG.txt,KAYAD_STAGE5F14_VALIDATION_LOG.txt,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F15_CHANGED_FILES_SHA256.txt,KAYAD_STAGE5F15_CHANGED_FILES_SHA256.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F15_INSPECTOR_GARAGE_ONBOARDING_DASHBOARD_POLISH_REPORT.md,KAYAD_STAGE5F15_INSPECTOR_GARAGE_ONBOARDING_DASHBOARD_POLISH_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F16_EXECUTION_REPORT_20261020.md,KAYAD_STAGE5F16_EXECUTION_REPORT_20261020.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F16_FULL_SHA256_MANIFEST.txt,KAYAD_STAGE5F16_FULL_SHA256_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F16_SHA256_MANIFEST_20261020.txt,KAYAD_STAGE5F16_SHA256_MANIFEST_20261020.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F1_COMMAND_CENTRE_LAYOUT_REPORT_20261020.md,KAYAD_STAGE5F1_COMMAND_CENTRE_LAYOUT_REPORT_20261020.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F1_SHA256_MANIFEST_20261020.txt,KAYAD_STAGE5F1_SHA256_MANIFEST_20261020.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F2_CHANGE_LEDGER_20261020.md,KAYAD_STAGE5F2_CHANGE_LEDGER_20261020.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F2_LIVE_DASHBOARD_DATA_WORKFLOW_REPORT_20261020.md,KAYAD_STAGE5F2_LIVE_DASHBOARD_DATA_WORKFLOW_REPORT_20261020.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F2_SHA256_MANIFEST_20261020.txt,KAYAD_STAGE5F2_SHA256_MANIFEST_20261020.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F3_EXECUTION_REPORT_20261020.md,KAYAD_STAGE5F3_EXECUTION_REPORT_20261020.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F3_SHA256_MANIFEST_20261020.txt,KAYAD_STAGE5F3_SHA256_MANIFEST_20261020.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F4_OWNER_ROLE_GOVERNANCE_EXECUTION_REPORT_20261020.md,KAYAD_STAGE5F4_OWNER_ROLE_GOVERNANCE_EXECUTION_REPORT_20261020.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F4_ROLE_GOVERNANCE_MATRIX_20261020.md,KAYAD_STAGE5F4_ROLE_GOVERNANCE_MATRIX_20261020.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F4_SHA256_MANIFEST_20261020.txt,KAYAD_STAGE5F4_SHA256_MANIFEST_20261020.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F5_API_VERIFICATION_MATRIX.md,KAYAD_STAGE5F5_API_VERIFICATION_MATRIX.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F5_DEFECT_REGISTER.md,KAYAD_STAGE5F5_DEFECT_REGISTER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F5_EXECUTION_REPORT.md,KAYAD_STAGE5F5_EXECUTION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F5_ICON_AUDIT.md,KAYAD_STAGE5F5_ICON_AUDIT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F5_SHA256_MANIFEST.txt,KAYAD_STAGE5F5_SHA256_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F6_AUCTION_INSPECTION_PURCHASE_FLOW.md,KAYAD_STAGE5F6_AUCTION_INSPECTION_PURCHASE_FLOW.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F6_BUYER_API_VERIFICATION_MATRIX.md,KAYAD_STAGE5F6_BUYER_API_VERIFICATION_MATRIX.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F6_BUYER_CAPABILITY_MATRIX.md,KAYAD_STAGE5F6_BUYER_CAPABILITY_MATRIX.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F6_DEFECT_REGISTER.md,KAYAD_STAGE5F6_DEFECT_REGISTER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F6_EXECUTION_REPORT.md,KAYAD_STAGE5F6_EXECUTION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F6_SHA256_MANIFEST.txt,KAYAD_STAGE5F6_SHA256_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F7_API_AUTHORIZATION_MATRIX.md,KAYAD_STAGE5F7_API_AUTHORIZATION_MATRIX.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F7_EXECUTION_REPORT.md,KAYAD_STAGE5F7_EXECUTION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F7_PHASE_A_CONTRACT_FREEZE.md,KAYAD_STAGE5F7_PHASE_A_CONTRACT_FREEZE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F7_SHA256_MANIFEST.txt,KAYAD_STAGE5F7_SHA256_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F7_THREAT_MODEL.md,KAYAD_STAGE5F7_THREAT_MODEL.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F7_VALIDATION_LOG.txt,KAYAD_STAGE5F7_VALIDATION_LOG.txt,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F8_EXECUTION_REPORT.md,KAYAD_STAGE5F8_EXECUTION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F8_SHA256_MANIFEST.txt,KAYAD_STAGE5F8_SHA256_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F8_VALIDATION_LOG.txt,KAYAD_STAGE5F8_VALIDATION_LOG.txt,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F9_EXECUTION_REPORT.md,KAYAD_STAGE5F9_EXECUTION_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F9_VALIDATION_LOG.txt,KAYAD_STAGE5F9_VALIDATION_LOG.txt,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_STAGE5F_UIUX_ITERATION1_REPORT_20261020.md,KAYAD_STAGE5F_UIUX_ITERATION1_REPORT_20261020.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5F_UIUX_ITERATION1_SHA256_MANIFEST.txt,KAYAD_STAGE5F_UIUX_ITERATION1_SHA256_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5_BASELINE_REPORT_20261019.md,KAYAD_STAGE5_BASELINE_REPORT_20261019.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5_CHANGE_LEDGER_20261019.md,KAYAD_STAGE5_CHANGE_LEDGER_20261019.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5_EXECUTION_CERTIFICATION_REPORT_20261019.md,KAYAD_STAGE5_EXECUTION_CERTIFICATION_REPORT_20261019.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGE5_SHA256_MANIFEST_20261019.txt,KAYAD_STAGE5_SHA256_MANIFEST_20261019.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGING_AND_PRODUCTION_CERTIFICATION_RUNBOOK.md,KAYAD_STAGING_AND_PRODUCTION_CERTIFICATION_RUNBOOK.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGING_CERTIFICATION_RUNBOOK_20261011.md,KAYAD_STAGING_CERTIFICATION_RUNBOOK_20261011.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_STAGING_DECISION_20261013.md,KAYAD_STAGING_DECISION_20261013.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_FINAL_CHANGE_LEDGER.md,KAYAD_SUPER_ADMIN_FINAL_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_FINAL_COMPLETION_REPORT.md,KAYAD_SUPER_ADMIN_FINAL_COMPLETION_REPORT.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_FINAL_EDIT_SCOPE.csv,KAYAD_SUPER_ADMIN_FINAL_EDIT_SCOPE.csv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_FINAL_REMAINING_BLOCKERS.md,KAYAD_SUPER_ADMIN_FINAL_REMAINING_BLOCKERS.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_FINAL_TEST_RESULTS.md,KAYAD_SUPER_ADMIN_FINAL_TEST_RESULTS.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_FINAL_VISUAL_COMPARISON.md,KAYAD_SUPER_ADMIN_FINAL_VISUAL_COMPARISON.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE5_CHANGE_LEDGER.md,KAYAD_SUPER_ADMIN_PHASE5_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE5_DATA_PROVENANCE.md,KAYAD_SUPER_ADMIN_PHASE5_DATA_PROVENANCE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE5_EDIT_SCOPE.csv,KAYAD_SUPER_ADMIN_PHASE5_EDIT_SCOPE.csv,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE5_MASTER_AUDIT.md,KAYAD_SUPER_ADMIN_PHASE5_MASTER_AUDIT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE5_REMAINING_BLOCKERS.md,KAYAD_SUPER_ADMIN_PHASE5_REMAINING_BLOCKERS.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE5_TEST_RESULTS.md,KAYAD_SUPER_ADMIN_PHASE5_TEST_RESULTS.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE5_VISUAL_COMPARISON.md,KAYAD_SUPER_ADMIN_PHASE5_VISUAL_COMPARISON.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE6_CHANGE_LEDGER.md,KAYAD_SUPER_ADMIN_PHASE6_CHANGE_LEDGER.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE6_DATA_PROVENANCE.md,KAYAD_SUPER_ADMIN_PHASE6_DATA_PROVENANCE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE6_EDIT_SCOPE.csv,KAYAD_SUPER_ADMIN_PHASE6_EDIT_SCOPE.csv,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE6_MASTER_AUDIT.md,KAYAD_SUPER_ADMIN_PHASE6_MASTER_AUDIT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE6_REMAINING_BLOCKERS.md,KAYAD_SUPER_ADMIN_PHASE6_REMAINING_BLOCKERS.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE6_RESPONSIVE_ACCESSIBILITY.md,KAYAD_SUPER_ADMIN_PHASE6_RESPONSIVE_ACCESSIBILITY.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_REPORT.md,KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_REPORT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE6_TEST_RESULTS.md,KAYAD_SUPER_ADMIN_PHASE6_TEST_RESULTS.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_SUPER_ADMIN_PHASE6_VISUAL_COMPARISON.md,KAYAD_SUPER_ADMIN_PHASE6_VISUAL_COMPARISON.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPPORT_CONVERGENCE_REPORT.md,KAYAD_SUPPORT_CONVERGENCE_REPORT.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_SUPPORT_DISCOVERY_AUDIT.md,KAYAD_SUPPORT_DISCOVERY_AUDIT.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPPORT_RUNTIME_CERTIFICATION.md,KAYAD_SUPPORT_RUNTIME_CERTIFICATION.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+KAYAD_SUPPORT_SECURITY_AND_DATA_BOUNDARY_REPORT.md,KAYAD_SUPPORT_SECURITY_AND_DATA_BOUNDARY_REPORT.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_SUPPORT_TEST_MATRIX.md,KAYAD_SUPPORT_TEST_MATRIX.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_VALIDATION_MATRIX.tsv,KAYAD_VALIDATION_MATRIX.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+KAYAD_VALIDATOR_BATTERY_20261011.tsv,KAYAD_VALIDATOR_BATTERY_20261011.tsv,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+LICENSE,LICENSE,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+NAVIGATION_RLS_PROOF_OUTPUT_20261008.txt,NAVIGATION_RLS_PROOF_OUTPUT_20261008.txt,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+PHASE_10_AUDIT_MANIFEST.txt,PHASE_10_AUDIT_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+PHASE_11_AUDIT_MANIFEST.txt,PHASE_11_AUDIT_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+PHASE_12_AUDIT_MANIFEST.txt,PHASE_12_AUDIT_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+PHASE_13_AUDIT_MANIFEST.txt,PHASE_13_AUDIT_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+PHASE_14_AUDIT_MANIFEST.txt,PHASE_14_AUDIT_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+PHASE_15_AUDIT_MANIFEST.txt,PHASE_15_AUDIT_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+PHASE_6_CHANGE_MANIFEST_20261002.txt,PHASE_6_CHANGE_MANIFEST_20261002.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+PHASE_7_MANIFEST.txt,PHASE_7_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+PHASE_8_AUDIT_MANIFEST.txt,PHASE_8_AUDIT_MANIFEST.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+PHASE_NEXT_FULL_CERTIFICATION_20260928.txt,PHASE_NEXT_FULL_CERTIFICATION_20260928.txt,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+README.md,README.md,No change proposed,Root candidate; retain,No owner-approved rename evidence supplied
+README_STAGE5B_CERTIFIED_RELEASE.md,README_STAGE5B_CERTIFIED_RELEASE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+README_STAGE5C1_RELEASE.md,README_STAGE5C1_RELEASE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+README_STAGE5C_RELEASE.md,README_STAGE5C_RELEASE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+README_STAGE5D_RELEASE.md,README_STAGE5D_RELEASE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+README_STAGE5E1_RELEASE.md,README_STAGE5E1_RELEASE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+README_STAGE5E3_RELEASE.md,README_STAGE5E3_RELEASE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+README_STAGE5E_RELEASE.md,README_STAGE5E_RELEASE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+README_STAGE5E_VR_RELEASE.md,README_STAGE5E_VR_RELEASE.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+RUN_PHASE_2_CERTIFICATION.cmd,RUN_PHASE_2_CERTIFICATION.cmd,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+SECURITY.md,SECURITY.md,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+STAGE27-BRAND-IDENTITY-ADMIN-EDITABILITY-20261012.md,STAGE27-BRAND-IDENTITY-ADMIN-EDITABILITY-20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+STAGE28-NAVBAR-AND-BROADCAST-TICKER-CONVERGENCE-20261012.md,STAGE28-NAVBAR-AND-BROADCAST-TICKER-CONVERGENCE-20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+STAGE30_SEARCH_AUCTION_MOBILE_POLISH_REPORT_20261012.md,STAGE30_SEARCH_AUCTION_MOBILE_POLISH_REPORT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+STAGE31_AUTO_SERVICES_MOBILE_ONBOARDING_POLISH_REPORT_20261012.md,STAGE31_AUTO_SERVICES_MOBILE_ONBOARDING_POLISH_REPORT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+STAGE32_MOBILE_MENU_AND_BOTTOM_NAV_POLISH_REPORT_20261012.md,STAGE32_MOBILE_MENU_AND_BOTTOM_NAV_POLISH_REPORT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+STAGE33_MASTER_BRAND_LOCKUP_NAVBAR_REPORT_20261012.md,STAGE33_MASTER_BRAND_LOCKUP_NAVBAR_REPORT_20261012.md,No change proposed,Preserve historical name/provenance,No owner-approved rename evidence supplied
+bun.lock,bun.lock,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+docker-compose.yml,docker-compose.yml,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+eslint.config.js,eslint.config.js,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+harden_commercial.py,harden_commercial.py,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+index.html,index.html,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+kayad-land-cruiser-clean-preview.jpg,kayad-land-cruiser-clean-preview.jpg,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+kayad-land-cruiser-clean-preview2.jpg,kayad-land-cruiser-clean-preview2.jpg,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+kayad-mercedes-gle-clean-preview.jpg,kayad-mercedes-gle-clean-preview.jpg,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+kayad-mercedes-gle-clean-preview2.jpg,kayad-mercedes-gle-clean-preview2.jpg,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+load-test.js,load-test.js,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+merc_cut.png,merc_cut.png,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+metadata.json,metadata.json,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+nginx.conf,nginx.conf,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+nginx.docker.conf,nginx.docker.conf,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+package-lock.json,package-lock.json,No change proposed,Root candidate; retain,No owner-approved rename evidence supplied
+package.json,package.json,No change proposed,Root candidate; retain,No owner-approved rename evidence supplied
+patch_comm.py,patch_comm.py,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+patch_more.py,patch_more.py,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+render-staging.yaml,render-staging.yaml,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+render.yaml,render.yaml,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+setup-ssl.sh,setup-ssl.sh,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+setup-windows.bat,setup-windows.bat,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+start-all.bat,start-all.bat,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+start-backend.bat,start-backend.bat,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+start-frontend.bat,start-frontend.bat,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+start.bat,start.bat,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+tailwind.config.js,tailwind.config.js,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+tsconfig.app.json,tsconfig.app.json,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+tsconfig.base.json,tsconfig.base.json,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+tsconfig.json,tsconfig.json,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+tsconfig.node.json,tsconfig.node.json,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+vercel-staging.json,vercel-staging.json,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+vercel.json,vercel.json,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+vite.config.ts,vite.config.ts,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied
+vitest.config.ts,vitest.config.ts,No change proposed,No rename proposed in Phase 13,No owner-approved rename evidence supplied

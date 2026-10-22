@@ -12,7 +12,7 @@ const ledger = read('backend/routes/ledgerRoutes.js');
 const tests = read('src/__tests__/features/adminCommandCentre.test.tsx');
 const checks = [
   ['department matrix is mounted inside existing AdminView', adminView.includes("import AdminDepartmentCapabilities from './AdminDepartmentCapabilities'") && adminView.includes("module === 'departments' && isOwner && <AdminDepartmentCapabilities />")],
-  ['department navigation requires strict owner marker', adminView.includes("...(isOwner ? (['owners', 'departments'] as const) : [])") && adminView.includes("?.isOwner === true")],
+  ['department navigation requires strict owner marker', /\.\.\.\(isOwner \? \[\['owners', 'Owner management'\], \['departments', 'Departments'\]\] : \[\]\)/.test(adminView) && adminView.includes("?.isOwner === true")],
   ['all eight requested departments represented', ['Sales & Orders','Accounting & Finance','Technical Operations','Inspections','Support & Disputes','Marketing & Communications','Administration','Reporting & Analytics'].every((x) => matrix.includes(x))],
   ['all four required capability classifications defined', ['IMPLEMENTED AND VERIFIED','IMPLEMENTED BUT UNVERIFIED','PARTIAL','NOT IMPLEMENTED'].every((x) => matrix.includes(x))],
   ['capability catalog includes source evidence and canonical destinations', matrix.includes('evidence:') && matrix.includes('href:') && routes.includes("'/admin/transactions'") && routes.includes("'/admin/inspections'")],

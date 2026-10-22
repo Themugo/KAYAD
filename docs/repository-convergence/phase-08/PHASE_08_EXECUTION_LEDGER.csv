@@ -1,0 +1,9 @@
+sequence,action,result,evidence,change_count
+1,Verify Phase 7 archive SHA-256 and sidecar,PASS,6c4ed2b513073cffd21b7bee36926bfcaa95fac601fc99def6fe7de79eefb0d1,0
+2,Validate Phase 7 ZIP integrity,PASS,zipfile.testzip returned no corrupt entry,0
+3,Reconcile Phase 7 expected evidence records,PASS_WITH_NOTE,19 expected names; 0 missing; archive contains 6838 entries,0
+4,Inventory archive and root items,PASS,439 immediate files; 23 immediate directory names,0
+5,Search seven candidate names in text-readable files,PASS_WITH_LIMITATIONS,6186 files scanned; 7 oversized and 159 binary-like skipped,0
+6,Review candidate consumers and external unknowns,BLOCKED,External/human/hosted consumers not inspectable from archive alone; no approvals supplied,0
+7,Execute relocations and reference edits,SKIPPED,No candidate met all gates and no candidate-specific authorization supplied,0
+8,Package Phase 8 evidence and verify preservation,PASS,Output ZIP integrity passed; all 6838 original entries preserved with zero payload mismatches; all 11 Phase 8 CSVs had consistent row widths; sidecar matched final SHA-256,0

@@ -1,0 +1,9 @@
+step_id,workstream,action,result,evidence,mutation_status
+E-01,Foundation,Verify archive digest and sidecar,PASS,89498786e7df08cf98ee52f129857e8d2be0a29714ce9e4bcc3fd1555569252d,READ_ONLY
+E-02,Foundation,Verify ZIP integrity and enumerate entries,PASS; 6899 entries,75555481 bytes,READ_ONLY
+E-03,Reconciliation,Inspect Phase 10 evidence artifacts,21/21 present,Phase 10 directory,READ_ONLY
+E-04,Candidates,Assess seven candidate files,PASS WITH BLOCKERS,Candidate disposition register,READ_ONLY
+E-05,References,Scan candidate basename matches,7740 matching lines,6244 scanned; 8 large and 160 binary skipped,READ_ONLY
+E-06,External workflows,Inspect authenticated remote systems,NOT PERFORMED,No connected evidence supplied,NO ACTION
+E-07,Cleanup,Move/delete/rename/merge candidates,WITHHELD,Approval gates not met,NO MUTATION
+E-08,Checkpoint,Create Phase 11 evidence and archive,PENDING FINAL VALIDATION,This phase evidence package,ADDITIVE ONLY

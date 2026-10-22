@@ -1,0 +1,2 @@
+change_id,change_type,path,before_sha256,after_sha256,approval_status,result,notes
+DOC-14-001,ADD_PHASE_EVIDENCE,docs/repository-convergence/phase-14/,NOT_PRESENT,See checkpoint manifest for individual artifact hashes,Authorized by Phase14 execution prompt,EXECUTED,Added Phase14 evidence only; original project files untouched.

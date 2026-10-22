@@ -1,0 +1,1 @@
+migration chain with Supabase default privileges: applied 184/184 ok=1

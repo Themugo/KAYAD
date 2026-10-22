@@ -14,7 +14,7 @@
 1. Record project ref (non-secret), database name, PostgreSQL version, service environment name, and timestamp.
 2. Confirm staging is isolated from production at both project and connection-string level. Never echo the connection string.
 3. Run `00_READONLY_STAGE_INVENTORY.sql` using a read-only role where possible. Save output in a restricted local evidence folder; redact PII and secret-bearing values.
-4. Compare migration versions/names against `KAYAD_MIGRATION_INVENTORY_20261013.tsv` and `KAYAD_MIGRATION_RECONCILIATION_20261013.tsv`. A name match is not proof that the SQL effects match.
+4. Compare migration versions/names against `docs/production/migrations/inventory-20261013.tsv` and `docs/production/migrations/reconciliation-20261013.tsv`. A name match is not proof that the SQL effects match.
 5. For every conflict, compare actual definitions and dependencies; classify as MATCH, EFFECT_MISSING, CONFLICT, EFFECT_PRESENT_HISTORY_MISSING, UNVERIFIED, or HISTORY_ONLY. No repair until each row has a reviewed disposition and tested rollback/restore plan.
 
 ## Gate B — establish intended owner identity privately

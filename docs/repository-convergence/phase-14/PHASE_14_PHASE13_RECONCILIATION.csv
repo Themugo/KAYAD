@@ -1,0 +1,11 @@
+check,expected_or_reported,observed,status,evidence,notes
+Phase13 archive SHA-256,d2cdbf4eae9caefbc0be9e872ae768c757c35c0dc67db32eaa95c810a1a617cf,d2cdbf4eae9caefbc0be9e872ae768c757c35c0dc67db32eaa95c810a1a617cf,PASS,KAYAD-REPOSITORY-CONVERGENCE-PHASE-13-HANDOVER-READY-REPOSITORY-20261022.zip,Independently calculated from the supplied archive.
+Phase13 sidecar digest,d2cdbf4eae9caefbc0be9e872ae768c757c35c0dc67db32eaa95c810a1a617cf,d2cdbf4eae9caefbc0be9e872ae768c757c35c0dc67db32eaa95c810a1a617cf,PASS,KAYAD-REPOSITORY-CONVERGENCE-PHASE-13-HANDOVER-READY-REPOSITORY-20261022.zip.sha256,Sidecar digest compared with expected and independently calculated digest.
+Phase13 archive size,78763141,78763141,PASS,KAYAD-REPOSITORY-CONVERGENCE-PHASE-13-HANDOVER-READY-REPOSITORY-20261022.zip,Exact bytes on disk.
+ZIP integrity,No CRC/decompression errors,Python zipfile testzip returned no failing member (verified during packaging workflow),PASS,KAYAD-REPOSITORY-CONVERGENCE-PHASE-13-HANDOVER-READY-REPOSITORY-20261022.zip,Archive fully readable.
+ZIP entries,6976 total; 6484 files; 492 directories from prior delivery,6976 total; 6484 files; 492 directory entries,PASS,KAYAD-REPOSITORY-CONVERGENCE-PHASE-13-HANDOVER-READY-REPOSITORY-20261022.zip,Archive includes a single top-level project directory.
+Phase13 manifest rows,6483 rows excluding the manifest itself,6483,PASS,docs/repository-convergence/phase-13/PHASE_13_CHECKPOINT_MANIFEST.csv,Non-recursive manifest policy expected.
+Phase13 manifest payload verification,6483,6483,PASS,PHASE_14_PHASE13_RECONCILIATION.csv / manifest,0 missing or mismatching paths.
+Root files,439,439,PASS,Fresh filesystem inventory,Count is immediate files under the project root.
+Root directories,23,23,PASS,Fresh filesystem inventory,Count is immediate directories under the project root.
+Phase13 internal foundation hash claim,Phase13 executive summary lists 116da26340d0a8e862f510e584f1a8cd8141d5da147943ba367fd72395b345e1 for Phase12,Phase12 checkpoint's verified hash was 5b60f88681eef57dfb70775535aa25917d7045adc560d45fca2a9ebe4933e302 per prior checkpoint verification,DOCUMENTED_DISCREPANCY,Phase13 executive summary; prior Phase12 checkpoint record,Not silently corrected; historical claim and independently recorded Phase12 hash differ.

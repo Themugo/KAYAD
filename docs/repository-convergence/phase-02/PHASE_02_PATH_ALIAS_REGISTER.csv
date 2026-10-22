@@ -1,0 +1,5 @@
+﻿configuration_path,consumer_tool,alias_pattern,target_pattern,base_url,target_exists_exact_or_prefix,conflict_or_risk,evidence,confidence
+vitest.config.ts,JS config heuristic,@sentry/react,/src/__tests__/__mocks__/sentry-react.js,,UNKNOWN,Heuristic match; requires manual confirmation,"resolve: {
+    alias: {
+      '@sentry/react': '/src/__tests__/__mocks__/sentry-react.js'",LOW
+tsconfig.json,TypeScript/JS config,@/*,./*,.,YES,Check consistency with bundler/test runtime alias,compilerOptions.paths,HIGH

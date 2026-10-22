@@ -1,0 +1,3 @@
+measure,before,after,explanation
+root regular files,50,50,No root files moved; phase evidence added under docs/repository-convergence/phase-26.
+pre-existing source/config files mutated,0,0,No evidence-backed Priority A correction could be proven from the available matrices without semantic consumer/owner confirmation.

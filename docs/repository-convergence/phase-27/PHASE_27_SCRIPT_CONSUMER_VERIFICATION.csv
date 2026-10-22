@@ -1,0 +1,8 @@
+candidate_id,target,consumer,evidence_type,classification,decision
+P27-C001,scripts/validate-phase58.mjs,package.json,npm script mapping,VERIFIED INTERNAL CONSUMER,Retain path
+P27-C001,scripts/validate-phase58.mjs,scripts/validate-phase59.mjs,filesystem existence check,VERIFIED INTERNAL REFERENCE,Retain path
+P27-C001,scripts/validate-phase58.mjs,scripts/validate-release.mjs,maintained validator list,VERIFIED STATIC CONSUMER,Retain path
+P27-C002,scripts/validate-phase59.mjs,package.json,npm script mapping,VERIFIED INTERNAL CONSUMER,Retain path
+P27-C002,scripts/validate-phase59.mjs,scripts/validate-phase60.mjs,filesystem existence check,VERIFIED INTERNAL REFERENCE,Retain path
+P27-C003,scripts/validate-phase60.mjs,package.json,npm script mapping,VERIFIED INTERNAL CONSUMER,Retain path
+P27-C003,scripts/validate-phase60.mjs,scripts/validate-release.mjs,maintained validator list,VERIFIED STATIC CONSUMER,Retain path

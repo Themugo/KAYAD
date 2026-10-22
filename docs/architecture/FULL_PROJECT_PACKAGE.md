@@ -1,23 +1,14 @@
 # KAYAD — Full Project Production Package
 
-This archive is the complete KAYAD source tree prepared from the latest consolidated production-hardening source package.
+This document describes a historical complete-source package. It is retained for context, not as an authorization to replace a working checkout.
 
 ## Included
-- Complete frontend and backend source tree
-- Supabase schema and normalized migration chain
-- CMS/Website Builder foundation
-- Canonical authorization helper (`public.is_admin()`)
-- Supabase production bootstrap/validation tooling
+- Frontend and backend source tree
+- Database schema and migration documentation
 - Existing governance, inspection, marketplace, dispute, communications, dealer, finance and integration domains
 - Project configuration, documentation, tests and validation scripts
 
-## Important
-This is a full replacement source package. It is intended to be extracted as a complete project, rather than applied as a patch.
+## Safety
+Do not copy `.env` secrets into an archive. Populate environment variables locally or through the deployment provider. Do not blindly rerun destructive database resets or recreate existing production tables.
 
-Do not copy `.env` secrets into the archive. Populate environment variables locally/through the deployment provider.
-
-## Production database
-The KAYAD Supabase production project has already been migrated through `20260908060000` in the verified migration sequence. Do not blindly rerun a destructive reset or recreate existing production tables.
-
-## Before push
-From the extracted project run the validation commands in `FULL_PROJECT_COMMIT_PUSH.cmd`.
+The legacy `FULL_PROJECT_COMMIT_PUSH.cmd` wrapper has been archived under `evidence/legacy-maintenance-scripts/root-phase-and-git-wrappers/` because it combines validation with Git mutation and is not a safe default entrypoint. Do not execute it. Run individual, reviewed validation commands from the current package scripts, inspect the resulting diff, and authorize commit/push actions separately.

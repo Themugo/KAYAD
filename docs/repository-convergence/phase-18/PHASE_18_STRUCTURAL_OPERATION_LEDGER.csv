@@ -1,0 +1,2 @@
+source_path,destination_path,operation,status,reason
+(none),(none),NO STRUCTURAL MOVE/RENAME/DELETE,WITHHELD_WITH_REASON,"The remaining phase-labelled apply scripts contain fixed local checkout assumptions and potentially mutating copy/archive extraction operations; external callers cannot be established. Remaining root docs are root entry points, contributor/security/legal guidance, config, assets, or operational helpers without evidence supporting relocation."

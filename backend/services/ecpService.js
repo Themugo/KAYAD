@@ -21,7 +21,7 @@ export async function getSystemHealth() {
     let error = null;
     try {
       if (name === "database") await count("users", {});
-      else if (name === "marketplace") await count("cars", { deletedAt: null });
+      else if (name === "marketplace") await count("cars", { deletedAt: { $exists: false } });
       else if (name === "payments") await count("payments", { status: "pending" });
       else if (name === "inspections") await count("vehicle_inspections", {});
       else if (name === "search") await count("search_analytics", {});
@@ -131,7 +131,7 @@ export async function executeSelfHealing(action, actorId, req) {
 // value), so this executive dashboard stat was permanently 0.
 export async function getBusinessHealth() {
   const [activeUsers, activeDealers, vehiclesListed, liveAuctions, revenueRows, incidents] = await Promise.all([
-    count("users", { isBanned: false, deactivatedAt: null }), count("users", { role: "dealer", isBanned: false, deactivatedAt: null }), count("cars", { status: "available", deletedAt: null }), count("cars", { hasAuction: true, auctionStatus: "live", deletedAt: null }), findAll("payments", { filters: { status: "success", createdAt: { $gte: since(1) } }, limit: 500 }), count("incidents", { status: { $in: ["open", "investigating", "mitigated"] } })
+    count("users", { isBanned: false, deactivatedAt: null }), count("users", { role: "dealer", isBanned: false, deactivatedAt: null }), count("cars", { status: "available", deletedAt: { $exists: false } }), count("cars", { hasAuction: true, auctionStatus: "live", deletedAt: { $exists: false } }), findAll("payments", { filters: { status: "success", createdAt: { $gte: since(1) } }, limit: 500 }), count("incidents", { status: { $in: ["open", "investigating", "mitigated"] } })
   ]);
   return { success: true, data: { activeUsers, activeDealers, vehiclesListed, liveAuctions, revenueToday: revenueRows.reduce((s,p) => s + Number(p.amount || 0), 0), openIncidents: incidents } };
 }
@@ -143,7 +143,7 @@ export async function getExecutiveDashboard() {
 }
 
 export async function getPerformanceMetrics() {
-  const start = Date.now(); await count("cars", { deletedAt: null }); const dbLatency = Date.now() - start;
+  const start = Date.now(); await count("cars", { deletedAt: { $exists: false } }); const dbLatency = Date.now() - start;
   const failedJobs = await count("job_failures", { createdAt: { $gte: since(1) } }).catch(() => 0);
   return { success: true, data: { databaseLatencyMs: dbLatency, failedJobs24h: failedJobs, status: dbLatency < 500 ? "healthy" : "degraded", measuredAt: new Date().toISOString() } };
 }

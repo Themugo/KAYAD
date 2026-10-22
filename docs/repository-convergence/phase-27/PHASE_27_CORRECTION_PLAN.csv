@@ -1,0 +1,6 @@
+candidate_id,confirmed_defect,proposed_change,risk,validation,decision
+P27-C001,No defect established from current evidence,No source mutation; preserve path and record evidence,Low,Syntax checks and package mapping inspection passed,NO CHANGE JUSTIFIED
+P27-C002,No defect established from current evidence,No source mutation; preserve path and record evidence,Low,Syntax checks and package mapping inspection passed,NO CHANGE JUSTIFIED
+P27-C003,No defect established from current evidence,No source mutation; preserve path and record evidence,Low,Syntax checks and package mapping inspection passed,NO CHANGE JUSTIFIED
+P27-C004,No defect established from current evidence,No source mutation; preserve path and record evidence,Low,Syntax checks and package mapping inspection passed,NO CHANGE JUSTIFIED
+P27-C005,No defect established from current evidence,No source mutation; preserve path and record evidence,Low,Syntax checks and package mapping inspection passed,NO CHANGE JUSTIFIED

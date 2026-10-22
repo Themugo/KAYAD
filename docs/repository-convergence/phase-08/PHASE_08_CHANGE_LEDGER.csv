@@ -1,0 +1,3 @@
+change_id,change_type,path,before_sha256,after_sha256,authorization,validation,status
+P8-CHG-001,Add Phase 8 audit evidence,kayad-phase6-final-completion-work-20261022/docs/repository-convergence/phase-08/,,,Phase 8 prompt; evidence-only scope,Archive manifest/hash verification,EVIDENCE_ADDED
+P8-CHG-002,Move/rename/delete source items,NONE,,,No candidate passed all gates,Not applicable,NO_SOURCE_CHANGES

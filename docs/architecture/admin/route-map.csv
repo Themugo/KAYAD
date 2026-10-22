@@ -1,0 +1,15 @@
+area,label,canonical_route,behavior,status
+Dashboard,Command Centre,/admin,AdminView overview,verified by route validator
+Users,User review,/admin/users,Existing specialist module,route preserved
+Dealers,Dealer verification,/admin/dealer-verifications,Existing approval workflow,route preserved
+Sellers,Seller review,/admin/sellers,Existing specialist workflow,route preserved
+Inspectors,Inspector applications,/admin/inspector-applications,Existing specialist workflow,route preserved
+Vehicle listings,Moderation,/admin/moderation,Existing moderation workflow,route preserved
+Documents,NTSA queue,/admin/ntsa-queue,Existing document verification route,route preserved
+Inspections,Inspections,/admin/inspections,Distinct existing inspection route,route preserved
+Staff,Staff management,/admin/staff,Existing staff workspace,route preserved
+Roles,Staff permissions,/admin/staff-permissions,Existing permission management,route preserved
+Auctions,Auction operations,/admin/auctions,Existing auction workspace,route preserved
+System health,Control room,/admin/control-room,Existing monitoring destination,route preserved
+Providers,Provider governance,/admin/provider-governance,Existing provider workspace,route preserved
+Reports,Reports,/admin/reports,Existing reports destination,route preserved

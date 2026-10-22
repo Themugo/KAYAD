@@ -1,8 +1,7 @@
 // Auction list integrity regression (Gate 4).
 // Root causes covered:
-//  1. The Mongo-style filter `deletedAt: null` was silently DROPPED by the Supabase adapter (null values are skipped),
-//     so soft-deleted vehicles were returned as public auctions (list, scheduled, active) and total counts included them.
-//  2. The adapter now supports `{ $exists: false }` => IS NULL, which the auction endpoints use.
+//  1. Explicit null filters now compile to PostgREST IS NULL instead of being silently dropped.
+//  2. `{ $exists: false }` remains supported for legacy Mongo-style soft-delete queries.
 import { describe, test, expect, jest, beforeEach } from "@jest/globals";
 
 // ---- adapter level: records the PostgREST calls the real model builder makes ----
@@ -21,9 +20,10 @@ const { createModel } = await import("../../models/_base.js");
 
 describe("model adapter: soft-delete filter semantics", () => {
   beforeEach(() => { calls.length = 0; });
-  test("bare null is skipped (legacy contract), so callers cannot rely on it for soft-delete", async () => {
+  test("bare null compiles to deleted_at IS NULL", async () => {
     await createModel("Car").find({ deletedAt: null, auctionStatus: "live" }).lean();
-    expect(calls.some(([m, c]) => m === "is" && c === "deleted_at")).toBe(false);
+    expect(calls).toContainEqual(["is", "deleted_at", null]);
+    expect(calls).toContainEqual(["eq", "auction_status", "live"]);
   });
   test("{ $exists: false } becomes deleted_at IS NULL", async () => {
     await createModel("Car").find({ deletedAt: { $exists: false }, auctionStatus: "live" }).lean();

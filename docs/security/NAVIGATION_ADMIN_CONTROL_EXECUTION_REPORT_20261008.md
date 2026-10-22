@@ -1,7 +1,7 @@
 # NAVIGATION ADMIN CONTROL — EXECUTION REPORT — 2026-10-08 (Stage 14A)
 
 Companion: `NAVIGATION_AUTHORITY_MODEL_20261008.md`,
-`NAVIGATION_RLS_PROOF_OUTPUT_20261008.txt`.
+`docs/history/legacy-root-evidence/security-and-identity/navigation-rls-proof-output-20261008.txt`.
 
 ## Phase K gate — could the existing architecture already do it?
 

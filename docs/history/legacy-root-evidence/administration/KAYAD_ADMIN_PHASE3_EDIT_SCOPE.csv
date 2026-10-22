@@ -1,0 +1,8 @@
+path,status,reason
+src/features/AdminView.tsx,MODIFIED,Dashboard request race guard and honest restricted/unavailable states
+scripts/validate-stage5f1-command-centre-layout.mjs,MODIFIED,Update stale source-contract assertions to current design; strengthen coverage
+KAYAD_ADMIN_PHASE3_EXECUTION_REPORT.md,ADDED,Execution evidence and release decision
+KAYAD_ADMIN_PHASE3_CHANGE_LEDGER.md,ADDED,Auditable changes
+KAYAD_ADMIN_PHASE3_GAP_ANALYSIS.md,ADDED,Remaining gaps
+KAYAD_ADMIN_PHASE3_TEST_RESULTS.md,ADDED,Test outcomes
+KAYAD_ADMIN_PHASE3_EDIT_SCOPE.csv,ADDED,Scope allowlist

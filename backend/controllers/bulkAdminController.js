@@ -3,7 +3,7 @@ import User from "../models/User.js";
 import AuditLog from "../models/AuditLog.js";
 import { auditAfterCommit } from "../utils/auditAfterCommit.js";
 import { moderationBlockedReason } from "../utils/carModerationGuard.js";
-import { cacheDelPattern } from "../utils/cache.js";
+import { invalidatePublicListingCaches } from "../utils/publicListingCache.js";
 import { sendNotification } from "../services/notification.service.js";
 import { logInfo, logError } from "../utils/logger.js";
 
@@ -172,9 +172,7 @@ export const bulkDeleteCars = async (req, res) => {
         }
       }
     }
-    await cacheDelPattern("cars:list:*");
-    await cacheDelPattern("kayad:search:facets:*");
-    await cacheDelPattern("kayad:search:suggestions:*");
+    await invalidatePublicListingCaches(); // Phase C.1: includes vehicle_search:*
 
     logInfo("Bulk car delete", { carIds, adminId: req.user.id, count: eligible.length });
 

@@ -1,0 +1,7 @@
+﻿paths,decision,reason
+.node-version | .nvmrc,RETAINED_CANONICAL,Both files encode Node version 22.22.2 but serve different version-manager conventions; retaining both avoids breaking tooling consumers.
+public/security.txt | public/.well-known/security.txt,RETAINED_CANONICAL,Both files are the same RFC-style policy content at conventional and canonical well-known paths; both paths may be consumed by clients and should remain.
+docs/ARCHITECTURE.md | docs/architecture/ARCHITECTURE.md,MOVED_AND_VERIFIED,"The former is a Topline Flooring & Waterproofing architecture document, not KAYAD architecture. Moved to historical evidence with hash preserved; the KAYAD architecture document remains in place."
+docs/domains/KAYAD_SUPPORT_DISCOVERY_AUDIT.md | docs/history/legacy-root-evidence/runtime-and-operations/KAYAD_SUPPORT_DISCOVERY_AUDIT.md,RETAINED_HISTORICAL,Exact byte identity does not erase distinction between maintained domain documentation and historical evidence/provenance.
+reports/phase-c1/PHASE_C1_STAGING_RUNBOOK.md | runbooks/phase-c1-runtime-20261021/PHASE_C1_STAGING_RUNBOOK.md,RETAINED_HISTORICAL,Same bytes appear in a report/history context and an operational runbook context; external consumer and execution-role equivalence not established.
+docs/repository-convergence/phase-13/PHASE_13_APPROVED_CHANGE_REGISTER.csv | docs/repository-convergence/phase-14/PHASE_14_APPROVED_CHANGE_REGISTER.csv,RETAINED_HISTORICAL,Phase-specific register identity is provenance; do not merge phase snapshots.

@@ -46,6 +46,6 @@ export const getFraudAlerts = async (req,res) => {
 };
 
 export const getDashboardOverview = async (req,res) => {
-  const [users,cars,dealers,payments,escrows,inspections,disputes] = await Promise.all([c('users',{}),c('cars',{deletedAt:null}),c('dealers',{}),c('payments',{status:'pending'}),c('escrows',{}),c('vehicle_inspections',{}),c('escrows',{status:'disputed'})]);
+  const [users,cars,dealers,payments,escrows,inspections,disputes] = await Promise.all([c('users',{}),c('cars',{deletedAt:{ $exists: false }}),c('dealers',{}),c('payments',{status:'pending'}),c('escrows',{}),c('vehicle_inspections',{}),c('escrows',{status:'disputed'})]);
   res.json({success:true,data:{counts:{users,cars,dealers,pendingPayments:payments,escrows,inspections,disputes},generatedAt:new Date().toISOString()}});
 };

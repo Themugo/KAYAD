@@ -1,0 +1,9 @@
+check_id,command_or_check,result,exit_code,evidence,scope_limit
+TV28-01,node --check scripts/validate-phase58.mjs,PASS,0,command output recorded during execution,Syntax only
+TV28-02,node --check scripts/validate-phase59.mjs,PASS,0,command output recorded during execution,Syntax only
+TV28-03,node --check scripts/validate-phase60.mjs,PASS,0,command output recorded during execution,Syntax only
+TV28-04,node --check scripts/validate-release.mjs,PASS,0,command output recorded during execution,Syntax only; release validator not run
+TV28-05,npm run validate:phase58,PASS,0,evidence/phase58.stdout.log,13/13 checks; runtime version below contract
+TV28-06,npm run validate:phase59,PASS,0,evidence/phase59.stdout.log,11/11 checks; runtime version below contract
+TV28-07,npm run validate:phase60,PASS,0,evidence/phase60.stdout.log,12/12 checks; runtime version below contract
+TV28-08,npm run validate:release,NOT_RUN,,safety register,Blocked due deletion side effect and broad transitive execution

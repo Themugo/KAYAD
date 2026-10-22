@@ -1,0 +1,6 @@
+validate:backend-boot exit=0
+validate:lucide-icon-exports exit=0
+validate:phaseC-soft-delete exit=0
+validate:phaseC1-runtime-integrity exit=0
+scripts/validate-admin-control-plane-e2e.mjs (no npm script; run directly) 11/11 exit=0
+validate:migration-hygiene exit=0

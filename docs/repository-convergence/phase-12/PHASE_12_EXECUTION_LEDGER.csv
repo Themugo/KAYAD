@@ -1,0 +1,8 @@
+step_id,action,result,evidence,status
+EX12-01,Verify source SHA-256 and sidecar,MATCH,8d7dc59d4461374427eb1de4e1cf08e7ae7f5908a6576ca9b77969856cc56fd5,PASS
+EX12-02,Verify source ZIP integrity,testzip returned None,actual archive,PASS
+EX12-03,Reconcile Phase 11 manifest,All listed files match; manifest itself excluded,Phase 11 manifest comparison,PASS_WITH_REPORTED_COUNT_DISCREPANCY
+EX12-04,Inventory and hash seven candidates,All seven candidates accounted for; support matrix has two copies,Candidate inventory,PASS_WITH_BLOCKERS
+EX12-05,Scan repository text for candidate names,6269 scanned; 9 large and 156 binary/non-UTF8 skipped; 7808 matches,Consumer reference audit,PASS_WITH_LIMITATIONS
+EX12-06,Execute cleanup changes,No changes authorized; zero executed,Approval gate,WITHHELD
+EX12-07,Application runtime tests,Not run,Out of scope; no app changes,NOT_RUN

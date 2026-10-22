@@ -1,0 +1,4 @@
+finding_id,observation,classification,impact,decision,evidence
+F28-01,Node runtime v22.16.0 is below >=22.22.2 contract,ENVIRONMENT_MISMATCH,Limits environment-conformant interpretation,Retain validator results; rerun on required Node version,evidence/environment.txt; package.json; .github/workflows/ci.yml
+F28-02,Release validator contains deletion and broad transitive validator execution,SAFETY_BLOCKER,Could delete a report and trigger unreviewed commands,Do not execute in Phase 28,scripts/validate-release.mjs
+F28-03,External scheduled and platform consumers not evidenced by archive,EVIDENCE_GAP,Cannot conclude path is unused externally,No path changes,External consumer evidence matrix

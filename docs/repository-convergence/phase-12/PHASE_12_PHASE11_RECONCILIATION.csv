@@ -1,0 +1,7 @@
+claim_id,historical_claim,actual_observation,status,evidence,notes
+R12-01,Phase 11 archive size 75555481 bytes,76719916,DISCREPANCY_DOCUMENTED,actual ZIP filesystem size,Historical report preserved unchanged
+R12-02,Phase 11 entries 6899 total; 6412 files; 487 directories,6921 total; 6434 files; 487 directories,DISCREPANCY_DOCUMENTED,zipfile archive inventory,Actual archive has 22 more files/entries; directory count matches
+R12-03,Phase 11 manifest has 6433 file rows,6433 rows; missing 0; mismatches 0; extra actual files 1,VERIFIED_WITH_LIMITATION,PHASE_11_CHECKPOINT_MANIFEST.csv compared with extracted files,Only manifest itself is not listed to avoid recursion
+R12-04,Seven candidates assessed,7 candidates reassessed,VERIFIED,candidate path/hash inventory,No owner approval found
+R12-05,Both support matrices are distinct,Two paths with different sizes and hashes,VERIFIED,file hash comparison,Both retained
+R12-06,External workflows unverified,No authenticated external evidence accessed,UNRESOLVED,Phase 11 report and current access scope,Do not claim remote systems inspected

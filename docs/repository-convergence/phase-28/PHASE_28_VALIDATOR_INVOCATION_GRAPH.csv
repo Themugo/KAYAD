@@ -1,0 +1,9 @@
+node,invocation_or_dependency,evidence_type,status,notes
+package.json,validate:phase58 -> node scripts/validate-phase58.mjs,Direct package script,CONFIRMED,Executed
+package.json,validate:phase59 -> node scripts/validate-phase59.mjs,Direct package script,CONFIRMED,Executed
+package.json,validate:phase60 -> node scripts/validate-phase60.mjs,Direct package script,CONFIRMED,Executed
+package.json,validate:release -> node scripts/validate-release.mjs,Direct package script,CONFIRMED,Not executed
+validate-phase59.mjs,checks scripts/validate-phase58.mjs exists,Static file dependency,CONFIRMED,No subprocess
+validate-phase60.mjs,checks package command and scripts/validate-phase59.mjs exists,Static file dependency,CONFIRMED,No subprocess
+validate-release.mjs,"execFileSync(process.execPath, [full]) for maintained validator list",Transitive subprocess execution,CONFIRMED,Not executed due broad unreviewed effects
+validate-release.mjs,"rmSync(api-governance-report.json, force:true)",Potential workspace deletion,CONFIRMED,Execution blocked

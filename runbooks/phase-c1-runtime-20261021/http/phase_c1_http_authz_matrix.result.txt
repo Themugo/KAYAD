@@ -1,0 +1,31 @@
+PASS P1 anon GET /api/cars lists dealer A's active vehicle
+PASS P2 anon cannot DELETE a listing -> 401
+PASS P3 dealer B cannot DELETE dealer A's listing -> 403
+PASS P4 dealer B cannot UPDATE dealer A's listing -> 403
+PASS P5 buyer cannot DELETE a listing (dealerOnly) -> 403
+PASS P6 owner DELETE without CSRF header is rejected
+PASS P7 owner soft-deletes own listing -> 200
+PASS P8 database row is soft-deleted (deleted_at stamped, row retained)
+PASS P9 anon GET /api/cars no longer lists the deleted vehicle; active A2 and B1 remain
+PASS P10 anon GET /api/cars/:id of deleted vehicle -> 404
+PASS P11 other dealer GET /api/cars/:id of deleted vehicle -> 404
+PASS P12 owner can still open own deleted vehicle -> 200
+PASS P13 admin can open deleted vehicle (history) -> 200
+PASS P14 public vehicle sitemap excludes the deleted vehicle and keeps active ones
+PASS P15 dealer B my-listings never includes dealer A's vehicles
+PASS P16 anon my-listings -> 401
+PASS A1 anon GET /api/admin/users -> 401
+PASS A2 buyer GET /api/admin/users -> 403
+PASS A3 dealer GET /api/admin/users -> 403
+PASS A4 admin GET /api/admin/users -> 200
+PASS A5 anon Command Centre snapshot -> 401
+PASS A6 dealer Command Centre snapshot -> 403
+PASS A7 admin snapshot 200 and cars count excludes soft-deleted rows (exact DB count)
+PASS A8 admin cannot read superadmin+owner staff role catalog -> 403
+PASS A9 non-owner superadmin cannot read staff role catalog (systemOwnerOnly) -> 403
+PASS A10 admin cannot open owner governance -> 403
+PASS A11 non-owner superadmin cannot open owner governance -> 403
+PASS A12 anon owner governance -> 401
+PASS A13 forged token (wrong secret) is rejected -> 401
+PASS A14 moderator cannot delete another user (adminOrSuper) -> 403
+phase_c1_http_authz_matrix: pass=30 fail=0

@@ -1,0 +1,5 @@
+scope,method,phase25_result,phase26_result,limitation
+package.json,parse scripts,PASS: script entries enumerated,Reviewed; no new source path edits were made,Does not prove scripts run Phase 26 did not infer external-consumer absence.
+text files,path and basename substring search,completed; see consumer matrix,Reviewed; no new source path edits were made,dynamic/external consumers not excluded Phase 26 did not infer external-consumer absence.
+Markdown links,relative link existence,completed; see link validation CSV,Reviewed; no new source path edits were made,fragments/external links not fully checked Phase 26 did not infer external-consumer absence.
+CI/tool config,static inventory/search,not executed,Reviewed; no new source path edits were made,No workflow run performed Phase 26 did not infer external-consumer absence.

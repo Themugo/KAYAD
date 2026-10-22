@@ -1,0 +1,440 @@
+path,category,confidence,classification_basis,proposed_disposition,structural_change_executed
+.dockerignore,Deployment and infrastructure configuration,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.editorconfig,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.env.example,Environment examples and runtime-version configuration,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.env.production.example,Environment examples and runtime-version configuration,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.eslintignore,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.gitattributes,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.gitignore,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.gitleaks.toml,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.node-version,Environment examples and runtime-version configuration,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.npmrc,Environment examples and runtime-version configuration,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.nvmrc,Environment examples and runtime-version configuration,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.prettierignore,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.prettierrc,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.releaserc.json,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.replit,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+.replitignore,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+ADVANCED_SWEEP_CERTIFICATION_STATUS_20260930.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+APPLY_PHASE_40_TO_REPO.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+APPLY_PHASE_41_TO_REPO.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+APPLY_PHASE_42_TO_REPO.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+APPLY_PHASE_43_TO_REPO.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+APPLY_PHASE_44_TO_REPO.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+APPLY_PHASE_45_TO_REPO.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+APPLY_PHASE_46_TO_REPO.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+APPLY_PHASE_47_TO_REPO.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+APPLY_PHASE_49_TO_REPO.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+APPLY_PHASE_50_TO_REPO.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+APPLY_PHASE_54_TO_REPO.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+APPLY_RECOVERY_TO_REPO.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+AUCTION_360_HARDENING_MANIFEST_20261007.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+AUCTION_PHASE_A_CHANGED_FILES_20261007.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+CHANGES.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+CLEAN_SWEEP_CHANGED_FILES_20260930.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+COMMIT_AND_PUSH_HERO_MOBILE_HARDENING.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+CONTRIBUTING.md,Root essentials and repository metadata,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+Dockerfile.frontend,Deployment and infrastructure configuration,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+FULL_PROJECT_COMMIT_PUSH.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+GEMINI.md.txt,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD-DESIGN-UPGRADE-CHANGED-FILES-20261016.txt,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD-RUNTIME-RECOVERY-CHECKS.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE2_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE2_DATA_SOURCE_AUDIT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE2_EDIT_SCOPE.csv,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE2_EXECUTION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE2_GAP_ANALYSIS.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE2_REMAINING_DEFECTS.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE2_SCREENSHOT_COMPARISON.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE2_TEST_RESULTS.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE2_VISUAL_CONVERGENCE_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE3_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE3_EDIT_SCOPE.csv,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE3_EXECUTION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE3_GAP_ANALYSIS.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE3_TEST_RESULTS.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4B_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4B_EDIT_SCOPE.csv,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4B_FULL_AUDIT_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4B_GAP_ANALYSIS.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4B_REMAINING_DEFECTS.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4B_SCREENSHOT_COMPARISON.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4B_TEST_RESULTS.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4_BASELINE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4_DATA_PROVENANCE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4_DATA_SOURCE_MAP.csv,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4_EDIT_SCOPE.csv,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4_EXECUTION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4_GAP_ANALYSIS.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4_REMAINING_DEFECTS.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4_ROUTE_MAP.csv,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4_SCREENSHOT_COMPARISON.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_PHASE4_TEST_RESULTS.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_REDESIGN_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_REDESIGN_DATA_SOURCE_MAP.csv,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_REDESIGN_EXECUTION_REPORT.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_REDESIGN_FINAL_REPORT.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_REDESIGN_GAP_ANALYSIS.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ADMIN_REDESIGN_ROUTE_MAP.csv,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ALL_AREAS_AUDIT_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ALL_AREAS_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ALL_AREAS_EXECUTION_LOG.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ALL_AREAS_ROUTE_ROLE_MATRIX.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ALL_AREAS_STATUS_MATRIX.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_BUSINESS_COMMAND_CENTRE_PHASE01_EXECUTION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_CHANGE_LEDGER_20261011.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_CLEAN_FOUNDATION_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_CLEAN_FOUNDATION_EXECUTION_REPORT_20261012.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_CLEAN_FOUNDATION_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_COLOR_IDENTITY_AUDIT_20261014.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_COMMUNICATIONS_EVENT_CONTRACT.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_CONTINUATION_FIX_REPORT_20261017.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DATABASE_SCHEMA_PARITY_20261011.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DEALER_ADMIN_AND_NOTIFICATIONS_REPORT.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DEALER_BASELINE_VALIDATION_REPORT.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DEALER_CAPABILITY_WIRING_MATRIX.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DEALER_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DEALER_EXECUTION_REPORT.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DEALER_GAP_AND_RISK_REGISTER.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DEALER_INVENTORY_AND_OPERATIONS_REPORT.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DEALER_ONBOARDING_STATE_MACHINE.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DEALER_R12_R14_STAGING_VERIFICATION_REPORT.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DEALER_REGISTRATION_GATE_REPORT.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DEALER_ROUTE_API_OWNERSHIP_MAP.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DEALER_SECURITY_AND_RLS_REPORT.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DEALER_VALIDATION_MATRIX.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_DESIGN_SYSTEM_CONVERGENCE.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_EMAIL_ONBOARDING_AUDIT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_FINANCIAL_INTEGRITY_REPORT_20261011.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_FIRST_SELLER_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_FIRST_SELLER_E2E_EVIDENCE_MATRIX.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_FIRST_SELLER_LAUNCH_CERTIFICATION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_FIRST_SELLER_RELEASE_RUNBOOK.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_FIRST_SELLER_SHA256_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_FOUNDATION_RECONCILIATION_REPORT_20261018.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_FULL_AUDIT_REPORT_20261011.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_IDENTITY_AUTHZ_CORRECTION_PASS_20261015.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_MASTER_CONVERGENCE_PHASE_C1_CERTIFICATION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_MASTER_CONVERGENCE_PHASE_C_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_MASTER_IDENTITY_AUTHORIZATION_AUDIT_20261015.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_MASTER_POLISH_AUDIT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_MESSAGING_NOTIFICATION_SECURITY_MATRIX_20261011.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_MIGRATION_INVENTORY_20261013.tsv,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_MIGRATION_PROVENANCE_AND_STAGING_CERTIFICATION_20261013.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_MIGRATION_RECONCILIATION_20261013.tsv,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_NEXT_GATE_STATUS_20261015.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_OWNER_IDENTITY_CONVERGENCE_20261015.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE37_BASELINE_AND_INTEGRITY_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE37_EXECUTION_AND_CERTIFICATION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE37_GAP_AND_RISK_REGISTER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE38_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE38_EXECUTION_AND_CERTIFICATION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE38_GAP_AND_RISK_REGISTER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE38_STATUS_MATRIX.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE39_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE39_EXECUTION_AND_CERTIFICATION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE39_STAGING_RUNBOOK.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE39_STATUS_MATRIX.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE6_FINAL_ACCESSIBILITY_RESPONSIVE_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE6_FINAL_AUTHORIZATION_MATRIX.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE6_FINAL_CERTIFICATION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE6_FINAL_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE6_FINAL_DATA_PROVENANCE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE6_FINAL_DEFECT_REGISTER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE6_FINAL_EDIT_SCOPE.csv,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE6_FINAL_EVIDENCE_INDEX.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE6_FINAL_REMAINING_BLOCKERS.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PHASE6_FINAL_VISUAL_COMPARISON.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PRESTAGING_SECURITY_AND_MIGRATION_DRIFT_20261013.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PRODUCTION_MIGRATION_READINESS_20261013.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PRODUCTION_ONLY_MIGRATIONS_20261013.tsv,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PRODUCTION_SCHEMA_AUTH_COMMS_CONVERGENCE_20261013.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PUBLIC_SUPPORT_AUDIT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PUBLIC_SUPPORT_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PUBLIC_SUPPORT_EXECUTION_LOG_20261012.txt,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_PUBLIC_SUPPORT_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_RELEASE_MANIFEST.sha256,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_REMAINING_BLOCKERS.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_ROUTE_UX_MATRIX.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_RUNTIME_CERTIFICATION_20261011.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SHA256_MANIFEST_20261011.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE12_EXECUTION_LOG_20261011.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE13_AUDIT_REPORT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE13_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE13_EXECUTION_LOG_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE13_SHA256_MANIFEST_20261012.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE13_VALIDATION_LOG_20261012.txt,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE13_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE14_SHA256_MANIFEST_20261012.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE15_PUBLIC_ESCROW_AUDIT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE15_PUBLIC_ESCROW_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE15_PUBLIC_ESCROW_EXECUTION_LOG_20261012.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE15_PUBLIC_ESCROW_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE15_SHA256_MANIFEST_20261012.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE16_EXECUTION_LOG_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE16_MESSAGING_NOTIFICATION_AUDIT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE16_MESSAGING_NOTIFICATION_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE16_SHA256_MANIFEST_20261012.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE16_VALIDATION_LOG_20261012.txt,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE16_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE17_AUTO_SERVICES_AUDIT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE17_AUTO_SERVICES_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE17_AUTO_SERVICES_EXECUTION_LOG_20261012.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE17_AUTO_SERVICES_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE17_SHA256_MANIFEST_20261012.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE18_PUBLIC_FINANCING_AUDIT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE18_PUBLIC_FINANCING_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE18_PUBLIC_FINANCING_EXECUTION_LOG_20261012.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE18_PUBLIC_FINANCING_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE18_SHA256_MANIFEST_20261012.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE19_BUYER_PORTAL_AUDIT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE19_BUYER_PORTAL_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE19_BUYER_PORTAL_EXECUTION_LOG_20261012.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE19_BUYER_PORTAL_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE19_SHA256_MANIFEST_20261012.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE20_BUYER_PORTAL_STAGING_AUDIT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE20_BUYER_PORTAL_STAGING_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE20_BUYER_PORTAL_STAGING_EXECUTION_LOG_20261012.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE20_BUYER_PORTAL_STAGING_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE20_SHA256_MANIFEST_20261012.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE20_STAGING_RUNBOOK_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_AUDIT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_EXECUTION_LOG_20261012.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE21_SELL_AUTH_PUBLIC_SWEEP_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE21_SHA256_MANIFEST_20261012.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE22_PUBLIC_FACING_SWEEP_AUDIT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE22_PUBLIC_FACING_SWEEP_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE22_PUBLIC_FACING_SWEEP_EXECUTION_LOG_20261012.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE22_PUBLIC_FACING_SWEEP_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE22_SHA256_MANIFEST_20261012.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE23_MOBILE_MENU_PHONE_POLISH_AUDIT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE23_MOBILE_MENU_PHONE_POLISH_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE23_MOBILE_MENU_PHONE_POLISH_EXECUTION_LOG_20261012.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE23_MOBILE_MENU_PHONE_POLISH_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE23_SHA256_MANIFEST_20261012.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE24_THEME_SWEEP_AUDIT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE24_THEME_SWEEP_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE24_THEME_SWEEP_EXECUTION_LOG_20261012.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE24_THEME_SWEEP_SHA256_MANIFEST_20261012.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE24_THEME_SWEEP_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE25_ADMIN_LOGO_IDENTITY_AUDIT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE25_ADMIN_LOGO_IDENTITY_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE25_ADMIN_LOGO_IDENTITY_EXECUTION_LOG_20261012.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE25_ADMIN_LOGO_IDENTITY_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE25_SHA256_MANIFEST_20261012.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE26_GLOBAL_THEME_AUDIT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE26_GLOBAL_THEME_CHANGE_LEDGER_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE26_GLOBAL_THEME_EXECUTION_LOG_20261012.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE26_GLOBAL_THEME_VALIDATION_MATRIX_20261012.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE26_SHA256_MANIFEST_20261012.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE29_MOBILE_FOUNDATION_EXECUTION_LOG_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE2_ENTRY_CERTIFICATION_REPORT_20261018.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE34_MOBILE_SHOWROOM_ICON_POLISH_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE35_HOME_HERO_MOBILE_PAIR_POLISH_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE36_ADMIN_CONTROL_PLANE_AUDIT_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE36_HARDCODED_VS_WIRED_MATRIX.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE36_SHOWROOM_CANONICAL_SEARCH_MOBILE_POLISH_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE36_VALIDATION_MATRIX.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE3A_INTEGRATION_AND_VERIFICATION_REPORT_20261018.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE3_CHANGE_LEDGER_20261013.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE3_DATABASE_CONTRACT_REPORT_20261018.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE3_DUPLICATE_VERSION_MATRIX_20261013.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE3_PRESTAGING_CHANGE_LEDGER_20261013.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE3_SHA256_MANIFEST_20261013.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE3_VALIDATION_MATRIX_20261013.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE4A_GATE_CLOSURE_REPORT_20261018.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE4_COMPLETION_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE4_COMPLETION_EVIDENCE_MATRIX.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE4_COMPLETION_EXECUTION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE4_COMPLETION_SHA256_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE4_NEXT_STAGE_HANDOFF.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE4_RUNTIME_DATABASE_IDENTITY_REPORT_20261018.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5A_CHANGE_LEDGER_20261019.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5A_EXECUTION_CERTIFICATION_REPORT_20261019.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5A_SHA256_MANIFEST_20261019.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5B_CERTIFIED_SHA256_MANIFEST_20261019.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5B_CHANGE_LEDGER_20261019.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5B_CLOSURE_CERTIFICATION_REPORT_20261019.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5B_EXECUTION_CERTIFICATION_REPORT_20261019.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5B_SHA256_MANIFEST_20261019.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5C1_COVERAGE_CLOSURE_REPORT_20261019.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5C1_SHA256_MANIFEST_20261019.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5C_EXECUTION_CERTIFICATION_REPORT_20261019.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5D_READINESS_REPORT_20261019.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5D_SHA256_MANIFEST_20261019.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5E1_BREVO_FIRST_REPORT_20261020.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5E1_SHA256_MANIFEST_20261020.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5E3_EMAIL_AND_SESSION_RECOVERY_REPORT_20261020.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5E3_SHA256_MANIFEST_20261020.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5E_READINESS_REPORT_20261019.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5E_SHA256_MANIFEST_20261019.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5E_VERIFICATION_RECOVERY_REPORT_20261019.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5E_VR_SHA256_MANIFEST_20261019.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F10_API_AND_RPC_ELIGIBILITY_MATRIX.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F10_BASELINE_RESULTS.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F10_DEFECT_REGISTER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F10_EXECUTION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F10_IDENTITY_PERMISSION_APPROVAL_MATRIX.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F10_INPUT_VERIFICATION.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F10_PRIVATE_SELLER_AUCTION_CUSTODY_STATE_MACHINE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F10_SHA256_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F10_SOURCE_DIFF_AND_MERGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F10_TEST_VERIFICATION_MATRIX.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F10_VALIDATION_LOG.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F11_DEALER_BUSINESS_AUDIT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F11_DEALER_PROPOSED_DESIGN.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F11_SHA256_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F11_VALIDATION_LOG.txt,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F12_DEALER_WORKFLOW_MATRIX.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F12_EXECUTION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F12_SHA256_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F12_VALIDATION_LOG.txt,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F13_DEALER_LIFECYCLE_ACCEPTANCE_MATRIX.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F13_EXECUTION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F13_SHA256_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F13_VALIDATION_LOG.txt,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F14_PREPURCHASE_INSPECTION_GARAGE_AUDIT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F14_SHA256_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F14_VALIDATION_LOG.txt,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F15_CHANGED_FILES_SHA256.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F15_INSPECTOR_GARAGE_ONBOARDING_DASHBOARD_POLISH_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F16_EXECUTION_REPORT_20261020.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F16_FULL_SHA256_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F16_SHA256_MANIFEST_20261020.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F1_COMMAND_CENTRE_LAYOUT_REPORT_20261020.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F1_SHA256_MANIFEST_20261020.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F2_CHANGE_LEDGER_20261020.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F2_LIVE_DASHBOARD_DATA_WORKFLOW_REPORT_20261020.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F2_SHA256_MANIFEST_20261020.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F3_EXECUTION_REPORT_20261020.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F3_SHA256_MANIFEST_20261020.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F4_OWNER_ROLE_GOVERNANCE_EXECUTION_REPORT_20261020.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F4_ROLE_GOVERNANCE_MATRIX_20261020.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F4_SHA256_MANIFEST_20261020.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F5_API_VERIFICATION_MATRIX.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F5_DEFECT_REGISTER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F5_EXECUTION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F5_ICON_AUDIT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F5_SHA256_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F6_AUCTION_INSPECTION_PURCHASE_FLOW.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F6_BUYER_API_VERIFICATION_MATRIX.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F6_BUYER_CAPABILITY_MATRIX.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F6_DEFECT_REGISTER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F6_EXECUTION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F6_SHA256_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F7_API_AUTHORIZATION_MATRIX.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F7_EXECUTION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F7_PHASE_A_CONTRACT_FREEZE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F7_SHA256_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F7_THREAT_MODEL.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F7_VALIDATION_LOG.txt,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F8_EXECUTION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F8_SHA256_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F8_VALIDATION_LOG.txt,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F9_EXECUTION_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F9_VALIDATION_LOG.txt,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F_UIUX_ITERATION1_REPORT_20261020.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5F_UIUX_ITERATION1_SHA256_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5_BASELINE_REPORT_20261019.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5_CHANGE_LEDGER_20261019.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5_EXECUTION_CERTIFICATION_REPORT_20261019.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGE5_SHA256_MANIFEST_20261019.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGING_AND_PRODUCTION_CERTIFICATION_RUNBOOK.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGING_CERTIFICATION_RUNBOOK_20261011.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_STAGING_DECISION_20261013.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_FINAL_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_FINAL_COMPLETION_REPORT.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_FINAL_EDIT_SCOPE.csv,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_FINAL_REMAINING_BLOCKERS.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_FINAL_TEST_RESULTS.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_FINAL_VISUAL_COMPARISON.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE5_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE5_DATA_PROVENANCE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE5_EDIT_SCOPE.csv,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE5_MASTER_AUDIT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE5_REMAINING_BLOCKERS.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE5_TEST_RESULTS.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE5_VISUAL_COMPARISON.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE6_CHANGE_LEDGER.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE6_DATA_PROVENANCE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE6_EDIT_SCOPE.csv,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE6_MASTER_AUDIT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE6_REMAINING_BLOCKERS.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE6_RESPONSIVE_ACCESSIBILITY.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_REPORT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE6_TEST_RESULTS.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPER_ADMIN_PHASE6_VISUAL_COMPARISON.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPPORT_CONVERGENCE_REPORT.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPPORT_DISCOVERY_AUDIT.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPPORT_RUNTIME_CERTIFICATION.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPPORT_SECURITY_AND_DATA_BOUNDARY_REPORT.md,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_SUPPORT_TEST_MATRIX.md,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_VALIDATION_MATRIX.tsv,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+KAYAD_VALIDATOR_BATTERY_20261011.tsv,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+LICENSE,Root essentials and repository metadata,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+NAVIGATION_RLS_PROOF_OUTPUT_20261008.txt,Maintainer and project documentation,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+PHASE_10_AUDIT_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+PHASE_11_AUDIT_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+PHASE_12_AUDIT_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+PHASE_13_AUDIT_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+PHASE_14_AUDIT_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+PHASE_15_AUDIT_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+PHASE_6_CHANGE_MANIFEST_20261002.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+PHASE_7_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+PHASE_8_AUDIT_MANIFEST.txt,SHA-256 manifests and release evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+PHASE_NEXT_FULL_CERTIFICATION_20260928.txt,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+README.md,Root essentials and repository metadata,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+README_STAGE5B_CERTIFIED_RELEASE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+README_STAGE5C1_RELEASE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+README_STAGE5C_RELEASE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+README_STAGE5D_RELEASE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+README_STAGE5E1_RELEASE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+README_STAGE5E3_RELEASE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+README_STAGE5E_RELEASE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+README_STAGE5E_VR_RELEASE.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+RUN_PHASE_2_CERTIFICATION.cmd,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+SECURITY.md,Root essentials and repository metadata,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+STAGE27-BRAND-IDENTITY-ADMIN-EDITABILITY-20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+STAGE28-NAVBAR-AND-BROADCAST-TICKER-CONVERGENCE-20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+STAGE30_SEARCH_AUCTION_MOBILE_POLISH_REPORT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+STAGE31_AUTO_SERVICES_MOBILE_ONBOARDING_POLISH_REPORT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+STAGE32_MOBILE_MENU_AND_BOTTOM_NAV_POLISH_REPORT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+STAGE33_MASTER_BRAND_LOCKUP_NAVBAR_REPORT_20261012.md,Audit reports and phase execution evidence,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+bun.lock,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+docker-compose.yml,Deployment and infrastructure configuration,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+eslint.config.js,Application and build configuration,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+harden_commercial.py,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+index.html,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+kayad-land-cruiser-clean-preview.jpg,Images and visual comparison evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+kayad-land-cruiser-clean-preview2.jpg,Images and visual comparison evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+kayad-mercedes-gle-clean-preview.jpg,Images and visual comparison evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+kayad-mercedes-gle-clean-preview2.jpg,Images and visual comparison evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+load-test.js,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+merc_cut.png,Images and visual comparison evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+metadata.json,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+nginx.conf,Deployment and infrastructure configuration,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+nginx.docker.conf,Deployment and infrastructure configuration,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+package-lock.json,Application and build configuration,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+package.json,Application and build configuration,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+patch_comm.py,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+patch_more.py,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+render-staging.yaml,Deployment and infrastructure configuration,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+render.yaml,Deployment and infrastructure configuration,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+setup-ssl.sh,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+setup-windows.bat,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+start-all.bat,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+start-backend.bat,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+start-frontend.bat,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+start.bat,Operational scripts and helper tools,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+tailwind.config.js,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+tsconfig.app.json,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+tsconfig.base.json,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+tsconfig.json,Application and build configuration,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+tsconfig.node.json,Unknown or unresolved,LOW,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+vercel-staging.json,Deployment and infrastructure configuration,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+vercel.json,Deployment and infrastructure configuration,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+vite.config.ts,Application and build configuration,HIGH,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No
+vitest.config.ts,Validation matrices and test evidence,MEDIUM,Filename/type heuristic; not proof of authority,Retain in place pending exact consumer/owner evidence,No

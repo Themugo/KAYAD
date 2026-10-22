@@ -1,0 +1,17 @@
+artifact,purpose,status
+Phase 3 foundation ZIP,Authoritative source checkpoint,SHA256_VERIFIED
+PHASE_04_EXECUTIVE_SUMMARY.md,Phase outcome,CREATED
+PHASE_04_FOUNDATION_VERIFICATION.md,Foundation integrity gate,CREATED
+PHASE_04_BASELINE_INVENTORY.csv,Original path inventory,CREATED
+PHASE_04_BASELINE_HASH_MANIFEST.csv,Baseline file hashes/sizes/modes,CREATED
+PHASE_04_BATCH_01_APPROVAL_AND_PLAN.md,Decision and no-move rationale,CREATED
+PHASE_04_BATCH_EXECUTION_LEDGER.csv,Batch decisions,CREATED
+PHASE_04_PATH_CHANGE_MAP.csv,Executed path changes (empty),CREATED
+PHASE_04_PRE_POST_HASH_COMPARISON.csv,Baseline vs post-decision file hashes,CREATED
+PHASE_04_REFERENCE_VALIDATION_REPORT.md,Reference impact decision,CREATED
+PHASE_04_TEST_AND_BUILD_RESULTS.md,Test/build status,CREATED
+PHASE_04_ROLLBACK_AND_RECOVERY_REPORT.md,Recovery state,CREATED
+PHASE_04_VALIDATION_REPORT.md,Acceptance outcome,CREATED
+PHASE_04_CHANGE_LEDGER.csv,Auditable change ledger,CREATED
+PHASE_04_FOUNDATION_SHA256.txt,Foundation hash record,CREATED
+PHASE_04_CHECKPOINT_MANIFEST.csv,Artifact manifest,CREATED

@@ -19,11 +19,14 @@ const levenshtein = (a, b) => {
   return row[bb.length];
 };
 
+// Phase C.1: suggestion sources use the same public-inventory definition as search.
+const PUBLIC_INVENTORY = Object.freeze({ status: 'available', deletedAt: { $exists: false } });
 const clean = (value) => typeof value === 'string' ? value.trim() : value;
 const arrayValue = (value) => Array.isArray(value) ? value : String(value || '').split(',').map(v => v.trim()).filter(Boolean);
 
 const buildFilters = (params = {}) => {
-  const filters = { status: 'available' };
+  // Phase C.1: soft-deleted vehicles keep status 'available'; public search and facets must exclude them.
+  const filters = { status: 'available', deletedAt: { $exists: false } };
   const keyword = clean(params.keyword || params.q);
   if (keyword) {
     const safe = keyword.replace(/[%_]/g, '').slice(0, 80);
@@ -122,10 +125,10 @@ export async function getSearchSuggestions(query, limit = MAX_AUTOCOMPLETE) {
   // so a dealer's newly listed make/model can become discoverable without an
   // administrator maintaining a second, manually curated brand list.
   const [brands, models, cities, bodyTypes] = await Promise.all([
-    db.distinct('cars', 'brand', { status: 'available' }),
-    db.distinct('cars', 'model', { status: 'available' }),
-    db.distinct('cars', 'locationCity', { status: 'available' }),
-    db.distinct('cars', 'bodyType', { status: 'available' }),
+    db.distinct('cars', 'brand', PUBLIC_INVENTORY),
+    db.distinct('cars', 'model', PUBLIC_INVENTORY),
+    db.distinct('cars', 'locationCity', PUBLIC_INVENTORY),
+    db.distinct('cars', 'bodyType', PUBLIC_INVENTORY),
   ]);
   const candidates = new Map();
   for (const [type, values] of [['make', brands], ['model', models], ['city', cities], ['bodyType', bodyTypes]]) {

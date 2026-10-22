@@ -1,0 +1,2 @@
+candidate_id,issue,evidence,resolution,status
+P27-C004/P27-C005,Potential authority overlap inferred from names,Content inspection shows distinct scopes: canonical architecture overview versus detailed database source-of-truth history,No content edit; document scope difference and preserve both,NO PROVEN CONFLICT

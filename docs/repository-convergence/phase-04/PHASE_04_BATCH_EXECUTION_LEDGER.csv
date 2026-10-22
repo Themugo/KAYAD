@@ -1,0 +1,6 @@
+batch_id,candidate_scope,decision,files_moved,reference_updates,validation,rollback,notes
+B0,Phase 4 baseline and report generation,PASS,0,0,Foundation/hash/ZIP/report-register checks passed,NOT_REQUIRED,Audit-only checkpoint; no application file changes
+B1,Historical documentation/evidence candidates,DEFERRED,0,0,Not executed; per-file approval/provenance evidence incomplete,NOT_REQUIRED,Phase 3 says individual approval required
+B2,Standalone developer utility scripts,DEFERRED,0,0,Not executed; invocation and side-effect evidence incomplete,NOT_REQUIRED,No script paths changed
+B3,Historical checkpoint/evidence grouping,DEFERRED,0,0,Not executed; provenance and authoritative role unresolved,NOT_REQUIRED,No checkpoint/archive moved or deleted
+B4,Root configuration/runtime entry points,PRESERVED,0,0,No move attempted,NOT_REQUIRED,Explicit preservation boundary

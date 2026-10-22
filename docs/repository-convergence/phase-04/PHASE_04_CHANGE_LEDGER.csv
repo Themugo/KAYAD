@@ -1,0 +1,4 @@
+change_id,batch_id,timestamp_utc,original_path,new_path,original_sha256,final_sha256,reference_files_changed,reason,approval_status,verification,rollback_status,final_disposition
+CHG-001,B0,2026-10-22T11:29:12.006937+00:00,,docs/repository-convergence/phase-04/,,,,Added Phase 4 audit reports and baseline registers only,IN_SCOPE,Foundation SHA/ZIP and CSV validation; final package checks,NOT_REQUIRED,CHECKPOINT_REPORTING_ONLY
+CHG-002,B1/B2/B3,,,,,,,Considered relocation proposals,NOT_APPROVED,Per-file evidence/approval incomplete,NOT_REQUIRED,DEFERRED_NO_MOVE
+CHG-003,B4,,,,,,,Root config/runtime entry points,PRESERVATION_BOUNDARY,No move attempted,NOT_REQUIRED,PRESERVED

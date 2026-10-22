@@ -1,0 +1,2 @@
+change_id,batch_id,timestamp_utc,original_path,new_path,original_sha256,final_sha256,reason,approval_status,verification,rollback_status,disposition
+PH05-000,B01,2026-10-22T11:42:28.460786+00:00,,,0e288bbc12b4f2ad8fd54469fc9f91755875d4a2f24b9880d8558458fc97b754,0e288bbc12b4f2ad8fd54469fc9f91755875d4a2f24b9880d8558458fc97b754,Foundation verified; baseline accounting discrepancy blocks safe candidate-specific relocation.,NOT APPROVED,SHA256 PASS; ZIP PASS; baseline reconciliation BLOCKED,NOT REQUIRED,NO FILE CHANGES

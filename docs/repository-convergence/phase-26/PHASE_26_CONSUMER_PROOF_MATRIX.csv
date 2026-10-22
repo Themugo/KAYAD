@@ -1,0 +1,87 @@
+candidate_id,target_path,consumer_path,evidence_type,semantic_consumer_verified,decision
+C001,render.yaml,,No candidate-specific row in Phase 25 script matrix / root matrix,NO,No mutation; absence of text match does not prove no consumer
+C002,.env.example,,No candidate-specific row in Phase 25 script matrix / root matrix,NO,No mutation; absence of text match does not prove no consumer
+C003,.env.production.example,,No candidate-specific row in Phase 25 script matrix / root matrix,NO,No mutation; absence of text match does not prove no consumer
+C004,index.html,,No candidate-specific row in Phase 25 script matrix / root matrix,NO,No mutation; absence of text match does not prove no consumer
+C005,KAYAD_RELEASE_MANIFEST.sha256,,No candidate-specific row in Phase 25 script matrix / root matrix,NO,No mutation; absence of text match does not prove no consumer
+C006,scripts/validate-phase58.mjs,README.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/audits/evidence/certification-20261011/validators/validate_phase58.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/audits/evidence/certification-20261011/validators/validate_release.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/audits/evidence/final-verification/validators/validate_release.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/audits/evidence/runtime-convergence-20261011/final-regression/validators-battery-before-validator-path-fix/validate_phase58.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/audits/evidence/runtime-convergence-20261011/final-regression/validators-battery-before-validator-path-fix/validate_release.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/audits/evidence/runtime-convergence-20261011/final-regression/validators/validate_phase58.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/audits/evidence/runtime-convergence-20261011/final-regression/validators/validate_release.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/audits/evidence/security-sweep-20261011/validators-run1-node22.22.0/validate_phase58.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/audits/evidence/security-sweep-20261011/validators-run1-node22.22.0/validate_release.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/audits/evidence/security-sweep-20261011/validators/validate_phase58.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/audits/evidence/security-sweep-20261011/validators/validate_release.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/history/PHASE_58_COMPLETE.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/history/PHASE_59_COMPLETE.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/history/PHASE_60_COMPLETE.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/history/legacy-root-evidence/general-project-evidence/KAYAD_STAGE13_SHA256_MANIFEST_20261012.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,docs/repository-convergence/phase-14/PHASE_14_DEVELOPMENT_AND_VALIDATION_GUIDE.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,evidence/automotive-services/validators_baseline.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,evidence/automotive-services/validators_final.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,evidence/foundation-reconciliation-20261018/validator-logs/fvlog_validate-release.mjs.log.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,evidence/foundation-reconciliation-20261018/validator-logs/vlog_validate-release.mjs.log.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,evidence/release-gate/extracted_validators.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,evidence/stage2-entry-20261018/validator-logs/validate-release.mjs.log.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,evidence/stage3/logs/validators/validate_release.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,evidence/stage3a-20261018/validator-logs-work/validate-release.mjs.log.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,evidence/stage5e-20261019/provenance/head_files.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,evidence/stage5e-20261019/provenance/zip5d_files.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,evidence/ux-convergence/validators_final.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,package.json,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C006,scripts/validate-phase58.mjs,scripts/validate-phase59.mjs,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,README.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,docs/audits/evidence/certification-20261011/validators/validate_phase59.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,docs/audits/evidence/runtime-convergence-20261011/final-regression/validators-battery-before-validator-path-fix/validate_phase59.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,docs/audits/evidence/runtime-convergence-20261011/final-regression/validators/validate_phase59.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,docs/audits/evidence/security-sweep-20261011/validators-run1-node22.22.0/validate_phase59.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,docs/audits/evidence/security-sweep-20261011/validators/validate_phase59.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,docs/domains/FRONTEND_FAILURE_REPAIR_REPORT.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,docs/history/PHASE_59_COMPLETE.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,docs/history/PHASE_60_COMPLETE.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,docs/history/legacy-root-evidence/administration/KAYAD_STAGE36_ADMIN_CONTROL_PLANE_AUDIT_REPORT.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,docs/history/legacy-root-evidence/general-project-evidence/KAYAD_STAGE13_SHA256_MANIFEST_20261012.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,docs/production/DEPLOYMENT_DEEP_AUDIT_AND_FIXES_20261002.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,docs/repository-convergence/phase-14/PHASE_14_DEVELOPMENT_AND_VALIDATION_GUIDE.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,evidence/automotive-services/validators_baseline.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,evidence/automotive-services/validators_final.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,evidence/release-gate/extracted_validators.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,evidence/stage5e-20261019/provenance/head_files.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,evidence/stage5e-20261019/provenance/zip5d_files.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,evidence/ux-convergence/validators_final.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,package.json,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C007,scripts/validate-phase59.mjs,scripts/validate-phase60.mjs,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/audits/evidence/certification-20261011/validators/validate_phase60.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/audits/evidence/certification-20261011/validators/validate_release.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/audits/evidence/final-verification/validators/validate_release.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/audits/evidence/runtime-convergence-20261011/final-regression/validators-battery-before-validator-path-fix/validate_phase60.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/audits/evidence/runtime-convergence-20261011/final-regression/validators-battery-before-validator-path-fix/validate_release.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/audits/evidence/runtime-convergence-20261011/final-regression/validators/validate_phase60.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/audits/evidence/runtime-convergence-20261011/final-regression/validators/validate_release.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/audits/evidence/security-sweep-20261011/validators-run1-node22.22.0/validate_phase60.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/audits/evidence/security-sweep-20261011/validators-run1-node22.22.0/validate_release.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/audits/evidence/security-sweep-20261011/validators/validate_phase60.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/audits/evidence/security-sweep-20261011/validators/validate_release.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/history/PHASE_60_COMPLETE.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/history/legacy-root-evidence/administration/KAYAD_STAGE36_ADMIN_CONTROL_PLANE_AUDIT_REPORT.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/history/legacy-root-evidence/general-project-evidence/KAYAD_STAGE13_SHA256_MANIFEST_20261012.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,docs/repository-convergence/phase-14/PHASE_14_DEVELOPMENT_AND_VALIDATION_GUIDE.md,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,evidence/automotive-services/validators_baseline.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,evidence/automotive-services/validators_final.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,evidence/foundation-reconciliation-20261018/validator-logs/fvlog_validate-release.mjs.log.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,evidence/foundation-reconciliation-20261018/validator-logs/vlog_validate-release.mjs.log.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,evidence/release-gate/extracted_validators.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,evidence/stage2-entry-20261018/validator-logs/validate-release.mjs.log.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,evidence/stage3/logs/validators/validate_release.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,evidence/stage3a-20261018/validator-logs-work/validate-release.mjs.log.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,evidence/stage5e-20261019/provenance/head_files.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,evidence/stage5e-20261019/provenance/zip5d_files.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,evidence/ux-convergence/validators_final.txt,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,package.json,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C008,scripts/validate-phase60.mjs,scripts/validate-release.mjs,path or basename string match,NO,Preserve; string/path match alone is insufficient
+C009,docs/CANONICAL_ARCHITECTURE.md,,No candidate-specific row in Phase 25 script matrix / root matrix,NO,No mutation; absence of text match does not prove no consumer
+C010,docs/DATABASE_SOURCE_OF_TRUTH.md,,No candidate-specific row in Phase 25 script matrix / root matrix,NO,No mutation; absence of text match does not prove no consumer

@@ -95,11 +95,15 @@ export const cacheDel = async (...keys) => {
 export const cacheDelPattern = async (pattern) => {
   try {
     if (client && connected) {
+      // Phase C.1: `client` is ioredis, whose SCAN takes positional arguments and returns [cursor, keys].
+      // The previous node-redis-style call (`scan(cursor, { MATCH, COUNT })` + `reply.keys`) threw on every call
+      // and the error was swallowed below, so no pattern invalidation ever reached Redis (verified against a
+      // real Redis server; see backend/tests/integration/cache-invalidation.integration.test.js).
       let cursor = "0";
       do {
-        const reply = await client.scan(cursor, { MATCH: pattern, COUNT: 100 });
-        cursor = reply.cursor;
-        if (reply.keys.length) await client.del(reply.keys);
+        const [next, keys] = await client.scan(cursor, "MATCH", pattern, "COUNT", 100);
+        cursor = String(next);
+        if (keys.length) await client.del(...keys);
       } while (cursor !== "0");
     } else {
       const regex = new RegExp(pattern.replace("*", ".*"));

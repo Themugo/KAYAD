@@ -1,0 +1,19 @@
+artifact,purpose,status,notes
+PHASE_05_BASELINE_RECONCILIATION.csv,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_BATCH_01_APPROVAL_AND_PLAN.md,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_BATCH_EXECUTION_LEDGER.csv,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_CANDIDATE_EVIDENCE_REGISTER.csv,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_CHANGE_LEDGER.csv,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_CURRENT_TO_TARGET_PATH_MAP.csv,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_DESTINATION_AND_OWNERSHIP_MATRIX.csv,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_FOUNDATION_SHA256.txt,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_FOUNDATION_VERIFICATION.md,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_PRE_POST_HASH_COMPARISON.csv,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_PROVENANCE_AND_DUPLICATE_ANALYSIS.md,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_REFERENCE_AND_CONSUMER_AUDIT.csv,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_REFERENCE_VALIDATION_REPORT.md,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_RELOCATION_DEPENDENCY_GRAPH.md,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_ROLLBACK_AND_RECOVERY_REPORT.md,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_TEST_AND_BUILD_RESULTS.md,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_UNRESOLVED_EVIDENCE_REGISTER.csv,Phase 5 report/register,CREATED,No source/application files moved or edited.
+PHASE_05_VALIDATION_REPORT.md,Phase 5 report/register,CREATED,No source/application files moved or edited.

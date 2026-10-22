@@ -1,0 +1,5 @@
+request_id,evidence_needed,why_needed,requested_from,status,blocking_action
+EXT-001,Owner authorization for any exact move/rename/delete,Required safety gate for structural mutation,Repository owner / maintainer,NOT PROVIDED,No structural cleanup
+EXT-002,CI/hosting workflow access or authoritative consumer inventory,Static repository scan cannot prove external workflows unused,Authorized CI/hosting owners,NOT VERIFIED,Treat possible external consumers as unresolved
+EXT-003,Decision on authority of duplicate-named support matrices,Contents and claims are distinct and may serve different consumers,Support/domain owner,NOT PROVIDED,Keep both files unchanged
+EXT-004,Maintainer-confirmed setup and release procedures,Avoid presenting inferred commands as verified operations,Current technical maintainer,NOT PROVIDED,Label commands unverified unless source/config evidence is direct

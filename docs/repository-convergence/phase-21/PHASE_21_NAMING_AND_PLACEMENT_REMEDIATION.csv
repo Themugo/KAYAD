@@ -1,0 +1,2 @@
+﻿path_before,path_after,issue,decision,verification
+docs/ARCHITECTURE.md,docs/history/legacy-root-evidence/general-project-evidence/TOPLINE_FLOORING_ARCHITECTURE_BASELINE.md,Cross-project architecture document misplaced at KAYAD docs root; duplicates/competes with KAYAD-specific architecture doc.,MOVED_AND_VERIFIED,Hash unchanged 566fb9ed87140fbe419414061de598a6b593e98a79b34bd864363f80a5bd53b1; 77 local references scanned; 5 active-reference candidates requiring manual interpretation.

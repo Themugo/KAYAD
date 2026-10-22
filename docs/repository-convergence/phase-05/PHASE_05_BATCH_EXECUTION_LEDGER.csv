@@ -1,0 +1,2 @@
+batch_id,candidate_id,source_path,destination_path,action,approval_status,execution_status,validation,rollback_status,notes
+B01,NONE,,,NO CHANGE,NOT APPROVED,NOT EXECUTED,BLOCKED — BASELINE RECONCILIATION,NOT REQUIRED,No candidate moved or edited; per-file consumer/provenance evidence not yet sufficient.

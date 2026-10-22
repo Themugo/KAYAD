@@ -223,7 +223,7 @@ const checkEndingAuctions = async () => {
 
     const auctions = await findAll("cars", {
       filters: {
-        deletedAt: null,
+        deletedAt: { $exists: false },
         auctionStatus: "live",
         auctionEnd: { $lte: sixHours, $gte: oneHour },
       },

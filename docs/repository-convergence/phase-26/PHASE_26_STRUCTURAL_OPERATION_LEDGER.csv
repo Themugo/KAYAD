@@ -1,0 +1,2 @@
+operation_id,original_path,destination_path,operation_type,reason,supporting_evidence,pre_change_sha256,post_change_sha256,consumer_updates,validation,rollback,outcome
+P26-ADD-001,,docs/repository-convergence/phase-26/,Additive audit evidence only,Record targeted adjudication and unresolved evidence gaps,Phase 25 audit matrices and direct inspection of Phase 25 foundation,N/A,N/A,None,Final archive and manifest verification,Remove only phase-26 evidence directory if required; preserve all prior phase files,Added reports; no pre-existing source/configuration file changed

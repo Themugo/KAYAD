@@ -85,7 +85,7 @@ const recalculateRiskScore = async (userId, role) => {
 // =============================
 const auctionCars = async (extraFilters = {}) => findAll("cars", {
   filters: {
-    deletedAt: null,
+    deletedAt: { $exists: false },
     auctionStatus: { $in: ["live", "ended"] },
     ...extraFilters,
   },

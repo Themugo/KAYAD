@@ -1,0 +1,4 @@
+evidence_id,system_or_artifact,required_evidence,availability,status,next_action
+EXT-15-001,External CI settings,Authenticated verification of external workflow consumers,Not accessed in this phase,EXTERNAL_UNVERIFIED,Obtain authorized access and inspect only nominated paths before any structural operation
+EXT-15-002,Hosting/deployment settings,Authenticated verification of external hosting consumers,Not accessed in this phase,EXTERNAL_UNVERIFIED,Obtain authorized access and inspect only nominated paths before any structural operation
+EXT-15-003,Owner approval,Exact source-operation-destination approval for each proposed move or rename,No exact approval found in available evidence,BLOCKED_PENDING_OWNER,Record explicit approval or retain current path

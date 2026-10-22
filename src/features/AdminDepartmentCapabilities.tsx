@@ -102,7 +102,7 @@ export const DEPARTMENT_CAPABILITIES: Department[] = [
 const STATUS_STYLE: Record<CapabilityStatus, string> = {
   'IMPLEMENTED AND VERIFIED': 'border-emerald-200 bg-emerald-50 text-emerald-800',
   'IMPLEMENTED BUT UNVERIFIED': 'border-sky-200 bg-sky-50 text-sky-800',
-  PARTIAL: 'border-amber-200 bg-amber-50 text-amber-900',
+  PARTIAL: 'border-warning/30 bg-warning/10 text-warning',
   'NOT IMPLEMENTED': 'border-slate-300 bg-slate-100 text-slate-700',
 };
 
@@ -192,7 +192,7 @@ export default function AdminDepartmentCapabilities() {
         ))}
         {filteredDepartments.length === 0 && <div className="rounded-xl border border-dashed border-[#BFD3D9] bg-white p-8 text-center xl:col-span-2" role="status"><p className="font-semibold text-[#0B3440]">No matching capabilities</p><p className="mt-1 text-sm text-[#58717A]">Try another search term or reset the filters.</p><button type="button" onClick={() => { setQuery(''); setStatusFilter('ALL'); setDepartmentFilter('ALL'); }} className="mt-3 min-h-10 rounded-lg border border-[#BFD3D9] px-4 text-sm font-semibold text-[#176B87] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#176B87]">Clear filters</button></div>}
       </div>
-      <aside className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-950" role="note">
+      <aside className="flex items-start gap-2 rounded-xl border border-warning/30 bg-warning/10 p-4 text-sm leading-6 text-warning" role="note">
         <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
         <p>Financial controls remain a release risk: existing routes use different role/permission guards. This inventory does not grant access, alter role permissions or authorize financial writes. Do not treat Super Admin visibility as a substitute for audit trails or separation of duties.</p>
       </aside>

@@ -1,0 +1,9 @@
+item,Phase12_expected_or_reported,Phase13_observed,result,notes
+Archive SHA-256,5b60f88681eef57dfb70775535aa25917d7045adc560d45fca2a9ebe4933e302,116da26340d0a8e862f510e584f1a8cd8141d5da147943ba367fd72395b345e1,MATCH,Independently recalculated
+Archive size bytes,84114539,84114539,MATCH,Exact file size
+ZIP entries,6945,6945,MATCH,Includes directory entries
+ZIP files,6457,6457,MATCH,Non-directory entries
+ZIP directory entries,488,488,MATCH,Directory entries
+Immediate root files,439,439,MATCH,Relative to enclosing project directory
+Immediate root directories,Not stated in prompt,23,OBSERVED,Direct children only
+Phase12 payload changes,None expected before Phase13 additions,No pre-existing files intentionally changed,PRESERVED,Phase13 only adds its own evidence directory; no structural cleanup executed

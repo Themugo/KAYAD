@@ -1,37 +1,15 @@
 # KAYAD Recovery Build-Stabilization Package
 
-This package is based on the recovered Phase 39 source tree, which already contains the Phase 38 transaction-boundary cleanup and Phase 39 Socket.IO authorization hardening. It then applies the build/test regressions identified during the Phase 37 forensic review.
+This document records a historical recovery package based on the recovered Phase 39 source tree. It is retained for provenance and is not a current apply procedure.
 
-## Important
+## Safety notice
 
-- Git metadata is intentionally NOT included. Keep the existing `.git` directory in `C:\Users\hp\Desktop\KAYAD-main`.
-- The package includes the exact files that were removed during the recovered Phase 38/39 work. If extracting over an existing checkout, run `APPLY_RECOVERY_TO_REPO.cmd` afterward so those deletions are applied.
-- No `git reset`, `git clean`, force push, or history rewrite is required.
+`APPLY_RECOVERY_TO_REPO.cmd` has been archived under `evidence/legacy-maintenance-scripts/root-phase-and-git-wrappers/`. Do not execute it from the archive: it contains workstation-specific paths and recursive copy behavior, and relocation intentionally removes its former root-level execution context. The historical wrapper is preserved as evidence only.
 
-## Recovered fixes
+For any future recovery, verify the selected checkpoint, extract into a disposable isolated directory, review a path/hash diff, and run the current project validation commands before approving any replacement. Do not apply this historical package over a working or production checkout.
 
-- Restored `login`, `register`, and `updateProfile` in `src/services/authApi.ts` using the canonical transport and real `/api/v1/auth/*` routes.
-- Fixed the relocated `DealerBusinessView` import.
-- Fixed fixture type import depths and retired the orphan `AuctionCalendar` test.
-- Removed remaining fabricated private-seller offer/inquiry/sales counters.
-- Removed the false financed-vehicle presentation and replaced it with an honest backend-unavailable state.
-- Removed synthetic payment wallet balances and duplicate imports.
-- Restored missing inspection types.
-- Made notification type handling compatible with the backend notification payload.
-- Added a fail-closed smart-action handler in the unified communications hub.
-- Repaired stale mobile/CMS/component relative imports.
-- Removed stale CMS component re-exports from the API service module.
-- Fixed backend test contracts to match the current fail-closed M-Pesa and atomic-settlement architecture.
-- Added `npm run validate:recovery`.
+## Historical fixes recorded by the package
 
-## Validation completed in this environment
+The original package described restored auth API methods and routes, import and fixture corrections, removal of fabricated seller counters and wallet balances, inspection type restoration, notification payload compatibility, communications handling, mobile/CMS import repairs, backend test-contract updates, and a recovery validator. These are historical claims from the source document and are not independently recertified by Phase 23.
 
-- Recovery validator: PASS (16 checks)
-- Phase 37 validator: PASS
-- Phase 38 validator: PASS
-- Phase 39 validator: PASS
-- Relative-import audit: PASS (0 missing relative imports)
-- Targeted TypeScript unresolved-name audit: PASS for source files
-- Changed backend/test JavaScript syntax checks: PASS
-
-A full dependency-backed `npm run build` / `npm run test` could not be executed here because this environment does not have the repository's complete dependency tree and the package requires Node >=22.22.2 while the available runtime is Node 22.16.0. Run those two commands on the Windows development machine after extraction.
+The original document reported that full dependency-backed build and test execution was not completed in its environment. Phase 23 does not upgrade that historical status.

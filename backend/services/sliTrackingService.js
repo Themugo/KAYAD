@@ -44,7 +44,9 @@ function computeHistogramQuantileSli(sliDef) {
 
 function computeCacheHitRateSli(sliDef) {
   const hits = getCounter(sliDef.metric.numerator.counter);
-  const misses = getCounter(sliDef.metric.other.other.counter);
+  // Phase C.1: config/reliability.js defines the miss counter at metric.denominator.other; the previous
+  // `metric.other.other` path threw on every scheduler tick, so this SLI was never computed.
+  const misses = getCounter(sliDef.metric.denominator.other.counter);
   const total = hits + misses;
   return total > 0 ? (hits / total) * 100 : 0;
 }

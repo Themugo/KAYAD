@@ -18,7 +18,7 @@ This directory contains operational runbooks for managing the KAYAD platform. Th
 | Runbook | Severity | RTO | Description |
 |---------|----------|-----|-------------|
 | [Security Incident](../docs/runbooks/security-incident.md) | P0-P3 | Varies | Security breach response |
-| [Database Failure](../docs/DATABASE.md) | P1-P2 | 30 min | Database outage handling |
+| [Database Failure](database-failure.md) | P1-P2 | 30 min | Database outage handling |
 | [Cache Failure](../docs/OBSERVABILITY.md) | P2 | 5 min | Redis/cache issues |
 | [Third-Party Outage](../docs/runbooks/infrastructure-outage.md) | P1-P2 | Varies | External service failures |
 

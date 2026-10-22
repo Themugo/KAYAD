@@ -1,0 +1,147 @@
+=== validate:admin-route-convergence ===
+validate:admin-route-convergence|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_admin-route-convergence.log
+PASS: System Management has a distinct existing destination and is limited to admin/superadmin menu roles
+PASS: Profile image uses a real source with deterministic initials fallback and error recovery
+PASS: Mobile admin drawer has semantic backdrop, Escape close, focus return and body overflow cleanup
+PASS: Responsive admin shell stylesheet defines mobile drawer and reduced-motion behaviour
+Admin route convergence: 14/14 PASS
+=== validate:business-command-centre-phase04 ===
+validate:business-command-centre-phase04|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_business-command-centre-phase04.log
+PASS inspector page has visible error and retry state
+PASS inspector refresh protects against stale response races
+PASS tests assert canonical workflow route destinations
+PASS no new approval API endpoints added by this phase
+Phase 04 source-contract validation: 13/13 passed
+=== validate:stage5f2-dashboard-data-workflow ===
+validate:stage5f2-dashboard-data-workflow|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_stage5f2-dashboard-data-workflow.log
+PASS admin stats endpoint uses real model counts
+PASS hero endpoint returns an explicit error rather than fabricated slides
+PASS public config frontend client uses canonical API client path
+
+Stage 5F.2 source-contract checks: 11/11 passed
+=== validate:ui-surface-convergence ===
+validate:ui-surface-convergence|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_ui-surface-convergence.log
+PASS Showroom still imports compatibility SearchBar
+PASS canonical escrow PaymentModal is retained for settlement surfaces
+PASS canonical dispute support component is retained
+
+UI surface convergence: 9/9 checks passed
+=== validate:phase06:departments ===
+validate:phase06:departments|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_phase06_departments.log
+PASS test coverage checks owner gate, status honesty and canonical routes
+PASS owner matrix warns that UI visibility does not grant API access
+PASS financial separation-of-duties risk is explicit
+
+14/14 checks passed
+=== validate:premium-presentation-pass ===
+validate:premium-presentation-pass|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_premium-presentation-pass.log
+PASS — Login uses shared premium shell
+PASS — Login primary action is explicit
+PASS — Auth screens carry no advertising or decorative artwork
+PASS — Reduced-motion preserved
+PASS — Login test contract matches current presentation
+=== validate:brand-palette-convergence ===
+validate:brand-palette-convergence|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_brand-palette-convergence.log
+> node scripts/validate-brand-palette-convergence.mjs
+
+Brand palette convergence: PASS (660 frontend source files + 13 shared assets/service surfaces scanned)
+Canonical palette: deep teal #0A3340 · slate teal #176B87 · accent #13B8A6 · mint surfaces #F6FAF9 / #DDF4F0
+Legacy warm/dark visual palettes and unrelated blue/purple/pink accents are converged; legacy branding data and vehicle paint swatches are preserved as data.
+=== validate:mobile-navigation-polish ===
+validate:mobile-navigation-polish|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_mobile-navigation-polish.log
+PASS role-specific dealer tools remain role-gated
+PASS role-specific admin tools remain role-gated
+PASS source still contains escape and viewport cleanup hooks
+
+Mobile navigation polish: 36/36 PASS
+=== validate:lucide-icon-exports ===
+validate:lucide-icon-exports|1|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_lucide-icon-exports.log
+
+> kayad@0.0.0 validate:lucide-icon-exports
+> node scripts/validate-lucide-icon-exports.mjs
+
+FAIL - lucide-react is not installed; run npm ci before this validator.
+=== validate:stage24-theme-convergence ===
+validate:stage24-theme-convergence|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_stage24-theme-convergence.log
+PASS role and status color behavior not globally overridden
+PASS homepage full-bleed hero composition remains unflattened
+PASS theme audit created before change
+
+Stage 24 theme convergence: 14/14 PASS
+=== validate:admin-logo-identity ===
+validate:admin-logo-identity|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_admin-logo-identity.log
+PASS upload endpoint remains protected by admin authorization
+PASS server persists logo URL and image mode
+PASS branding context normalizes saved config
+
+12/12 checks passed
+=== validate:phase34 ===
+validate:phase34|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_phase34.log
+PASS: API documentation generator uses canonical ad-slot route
+PASS: API governance checker uses canonical ad-slot route
+PASS: API documentation generator has no stale ad route mapping
+PASS: API governance checker has no stale ad route mapping
+PHASE 34 API ROUTE VERSIONING VALIDATION: PASS
+=== validate:phase35 ===
+validate:phase35|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_phase35.log
+Core production secret requirements: PASS
+Secret length and HTTPS URL guards: PASS
+CORS unknown-mode fail-closed behavior: PASS
+Production 5xx/stack disclosure guard: PASS
+Backend syntax: PASS
+=== validate:phase36 ===
+validate:phase36|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_phase36.log
+PHASE 36 CSRF BOUNDARY VALIDATION: PASS
+Backend route files discovered: 108
+Global browser-facing mutation CSRF: ENABLED
+JWT Authorization compatibility: ENABLED
+Machine callback exemptions: EXPLICIT / AUTHENTICATED SEPARATELY
+=== validate:phase37 ===
+validate:phase37|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_phase37.log
+- CSRF validation binds request token to cookie token: PASS
+- CSRF responses are not cacheable: PASS
+- Session uses explicit KAYAD cookie name: PASS
+- Session cookie is SameSite strict: PASS
+- Session cookie path is root: PASS
+=== validate:phase38 ===
+validate:phase38|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_phase38.log
+PHASE 38 TRANSACTION BOUNDARY VALIDATION: PASS
+No-op transaction session shim: RETIRED
+Legacy escrow_vaults runtime dependency: RETIRED
+Canonical escrow source: public.escrows
+Canonical bid atomicity: PostgreSQL RPC + distributed lock
+=== validate:phase39 ===
+validate:phase39|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_phase39.log
+PASS Socket typing requires an authorized chat room
+PASS Socket typing does not trust client identity fields
+PASS Socket room identifiers remain UUID validated
+PASS Phase 39 completion document exists
+PHASE 39 SOCKET AUTHORIZATION VALIDATION: PASS
+=== validate:phase40 ===
+validate:phase40|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_phase40.log
+PASS dealer-platform-no-fabricated-finance: dealer profile and finance endpoint are database-backed
+PASS regional-no-unverified-banks: regional provider bootstrap contains no unverified bank partnerships
+PASS env-no-named-escrow-bank: escrow bank name is deployment-configured
+
+Phase 40 validation: 23/23 passed
+=== validate:phase58 ===
+validate:phase58|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_phase58.log
+PASS pre-deploy uses configured lint command
+PASS deployment health supports HTTP and HTTPS
+PASS no fake production deployment URLs in config
+
+Phase 58 validation: 13/13 checks passed.
+=== validate:phase59 ===
+validate:phase59|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_phase59.log
+PASS: Vite config has no AI Studio-specific messaging
+PASS: deployment config contains no example.com placeholder
+PASS: phase 58 validator remains present
+
+Phase 59 validation: 11/11 checks passed.
+=== validate:phase60 ===
+validate:phase60|0|KAYAD_SUPER_ADMIN_PHASE6_SWEEP2_LOGS/validate_phase60.log
+PASS: deployment validator does not demand vercel env secrets in vercel.json
+PASS: pre-deploy script uses repository Node 22 contract
+PASS: Phase 59 validator remains present
+
+Phase 60 validation: 12/12 checks passed.

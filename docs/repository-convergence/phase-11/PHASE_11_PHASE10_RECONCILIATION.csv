@@ -1,0 +1,9 @@
+claim_id,claim,phase10_assertion,phase11_observation,status
+P10-01,Phase 10 foundation hash,Expected 89498786e7df08cf98ee52f129857e8d2be0a29714ce9e4bcc3fd1555569252d,Independently verified exact match,VERIFIED
+P10-02,Phase 10 archive size,No separate size assertion available beyond actual supplied file,Observed 75555481 bytes,VERIFIED_OBSERVED
+P10-03,Phase 10 archive entries,"Prior report describes 6,899 entries; actual archive count recalculated",Observed 6899 entries / 6412 files / 487 dirs,VERIFIED_OBSERVED
+P10-04,All expected Phase 10 evidence files,21 expected files,Present 21/21; missing none,VERIFIED
+P10-05,Candidate owner approvals,Phase 10 reports none supplied,No additional approval artifact obtained in Phase 11,OUTSTANDING
+P10-06,External workflow evidence,Phase 10 says not verified,No authenticated external evidence supplied/accessed,OUTSTANDING
+P10-07,Candidate cleanup operations,Phase 10 reports zero operations,Phase 11 also executed zero cleanup operations,VERIFIED_FROM_CHANGE_SET
+P10-08,Support matrix copies,Phase 10 says materially different,Rehashed; different sizes and SHA-256; both preserved,VERIFIED

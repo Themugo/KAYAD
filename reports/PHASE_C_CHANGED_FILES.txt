@@ -1,0 +1,26 @@
+Phase C source changes:
+- backend/db/index.js
+- backend/models/_base.js
+- backend/controllers/vehicleAnalyticsController.js
+- backend/controllers/commandCenterController.js
+- backend/controllers/operationsDashboardController.js
+- backend/services/marketplaceHealthService.js
+- backend/services/dealerSubscription.service.js
+- backend/services/ecpService.js
+- backend/services/reminderAutomationService.js
+- backend/services/auctionIntegrityService.js
+- backend/services/vehicleAnalyticsService.js
+- backend/services/sitemapService.js
+- backend/services/dealerHealthScoreService.js
+- backend/tests/auction/deletedAtSemantics.adapter.test.js
+- backend/tests/auction/auctionListIntegrity.test.js
+- package.json
+- scripts/validate-phaseC-soft-delete-integrity.mjs
+
+Audit artifacts:
+- KAYAD_MASTER_CONVERGENCE_PHASE_C_REPORT.md
+- reports/PHASE_C_SCHEMA_TABLE_RECONCILIATION.csv
+- reports/PHASE_C_SOFT_DELETE_CALLSITE_INVENTORY.csv
+- reports/PHASE_C_CHANGED_FILES.txt
+
+No package lockfile, migration, deployment setting, production data, public-page stylesheet, or dashboard layout changed.
