@@ -279,18 +279,28 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
     <div className="mx-auto w-full min-w-0 max-w-[1600px] space-y-5 sm:space-y-6" data-testid="admin-command-centre">
       <section aria-labelledby="admin-command-centre-title" className="kayad-command-hero">
         <div className="kayad-command-hero-content">
-          <div className="kayad-command-eyebrow"><ShieldCheck size={15} /> KAYAD BUSINESS COMMAND CENTRE</div>
-          <h1 id="admin-command-centre-title">Welcome back, <span>{(typeof sessionUser?.name === 'string' ? sessionUser.name.split(' ')[0] : '') || 'Administrator'}</span></h1>
-          <p>Oversee your marketplace, team, operations and systems — all from one portal.</p>
-          <div className="kayad-command-meta"><span>{new Intl.DateTimeFormat('en-KE', { dateStyle: 'full', timeZone: 'Africa/Nairobi' }).format(new Date())}</span><span>{error || restricted.length > 0 || statsStatus === 'error' ? 'Some operational data unavailable or restricted' : loading ? 'Loading operational data' : 'Operational data loaded'}</span></div>
+          <div className="kayad-command-eyebrow"><ShieldCheck size={15} aria-hidden="true" /> KAYAD BUSINESS COMMAND CENTRE</div>
+          <h1 id="admin-command-centre-title">Welcome back, <span>{(typeof sessionUser?.name === 'string' ? sessionUser.name.trim().split(/\\s+/)[0] : '') || 'Administrator'}</span></h1>
+          <p className="kayad-command-intro">Oversee your marketplace, team, operations and systems — all from one portal.</p>
+          <div className="kayad-command-identity" aria-label="Authenticated administrator">
+            <span className="kayad-command-identity-mark" aria-hidden="true">{(typeof sessionUser?.name === 'string' && sessionUser.name.trim() ? sessionUser.name.trim().split(/\\s+/).slice(0, 2).map((part) => part.charAt(0)).join('').toUpperCase() : 'AD')}</span>
+            <span className="kayad-command-identity-copy">
+              <strong>{(typeof sessionUser?.name === 'string' && sessionUser.name.trim()) || 'Administrator'}</strong>
+              <small>{(typeof sessionUser?.role === 'string' && sessionUser.role.trim()) ? sessionUser.role.replace(/[-_]/g, ' ').replace(/\\b\\w/g, (letter) => letter.toUpperCase()) : isOwner ? 'Account Owner' : 'Authorized Administrator'}</small>
+            </span>
+          </div>
+          <div className="kayad-command-meta">
+            <span className="kayad-command-meta-item"><span className="kayad-command-meta-label">Nairobi time</span><time dateTime={new Date().toISOString()}>{new Intl.DateTimeFormat('en-KE', { dateStyle: 'full', timeStyle: 'short', timeZone: 'Africa/Nairobi' }).format(new Date())}</time></span>
+            <span className={`kayad-command-data-state${error || restricted.length > 0 || statsStatus === 'error' ? ' is-limited' : loading ? ' is-loading' : ' is-ready'}`}><span aria-hidden="true" />{error || restricted.length > 0 || statsStatus === 'error' ? 'Some operational data unavailable or restricted' : loading ? 'Loading operational data' : 'Operational data loaded'}</span>
+          </div>
         </div>
         <div className="kayad-command-actions" aria-label="Quick Actions">
-          <strong>Quick Actions</strong>
-          <div>
-            <Link to="/admin/staff">Add Staff</Link>
-            <Link to="/admin/dealer-verifications">Approve Dealer</Link>
-            <Link to="/admin/cars">View Vehicles</Link>
-            <Link to="/admin/reports">View Reports</Link>
+          <div className="kayad-command-actions-heading"><strong>Quick Actions</strong><span>Common workspaces</span></div>
+          <div className="kayad-command-actions-grid">
+            <Link to="/admin/staff">Add Staff <ChevronRight size={14} aria-hidden="true" /></Link>
+            <Link to="/admin/dealer-verifications">Approve Dealer <ChevronRight size={14} aria-hidden="true" /></Link>
+            <Link to="/admin/cars">View Vehicles <ChevronRight size={14} aria-hidden="true" /></Link>
+            <Link to="/admin/reports">View Reports <ChevronRight size={14} aria-hidden="true" /></Link>
           </div>
         </div>
       </section>
@@ -372,10 +382,32 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             <section className="kayad-command-panel" aria-labelledby="team-heading"><header><h2 id="team-heading">Team Members</h2><Link to="/admin/staff">View All</Link></header>{users.filter(u => ['superadmin','admin','moderator','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','ghost_checker'].includes((u.role || '').toLowerCase())).slice(0, 3).map(u => <div className="kayad-command-team-row" key={u._id}><span className="kayad-command-team-avatar">{(u.name || u.email || 'S').charAt(0).toUpperCase()}</span><div><strong>{u.name || 'Staff member'}</strong><small>{u.role || 'Staff role unavailable'}</small></div></div>)}{!users.some(u => ['superadmin','admin','moderator','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','ghost_checker'].includes((u.role || '').toLowerCase())) && <p className="kayad-command-empty">{loading ? 'Loading team records…' : restricted.includes('user records') ? 'Team records are restricted for this role.' : error ? 'Team records may be unavailable. Open staff management for the authoritative list.' : 'No staff accounts found in the current user sample. Open staff management for the authoritative list.'}</p>}<Link className="kayad-command-inline-link" to="/admin/staff">Manage staff <ChevronRight size={14}/></Link></section>
             <section className="kayad-command-panel" aria-labelledby="rbac-heading"><header><h2 id="rbac-heading">Role-Based Access Control</h2><Link to="/admin/staff-permissions">Manage Roles</Link></header><div className="kayad-command-role-summary">{Array.from(new Set<string>(users.map(u => (u.role || '').trim()).filter((role): role is string => Boolean(role)))).slice(0, 4).map((role: string) => <div key={role}><span>{role.replace(/_/g, ' ')}</span><b>{users.filter(u => (u.role || '').trim() === role).length}</b></div>)}</div><p className="kayad-command-data-note">{restricted.includes('user records') ? 'Role membership is restricted for this role; no counts are available here.' : 'Counts reflect only the current loaded user sample, not total role membership.'}</p><Link className="kayad-command-inline-link" to="/admin/staff-permissions">Review permissions <ChevronRight size={14}/></Link></section>
           </div>
-          <aside className="kayad-command-rail" aria-label="Account and system information">
-            <section className="kayad-command-panel"><header><h2>My Account</h2></header><div className="kayad-command-account"><div className="kayad-command-avatar">{(typeof sessionUser?.name === 'string' ? sessionUser.name.charAt(0) : '') || 'A'}</div><div><strong>{sessionUser?.name || 'Administrator'}</strong><small>{sessionUser?.role || 'Staff'}</small></div></div><Link to="/admin">Operations Dashboard</Link><Link to="/admin/settings">Account Settings</Link><Link to="/admin/security-log">Audit & Logs</Link></section>
-            <section className="kayad-command-panel"><header><h2>Department Overview</h2><Link to="/admin/staff">View All</Link></header><p className="kayad-command-empty">Department information is managed in the existing staff and departmental workspace.</p><Link to="/admin/staff">Staff & Departments</Link></section>
-            <section className="kayad-command-panel"><header><h2>Provider Status</h2><Link to="/admin/provider-governance">View All</Link></header><p className="kayad-command-empty">Provider connectivity is not assumed. Review the verified status in provider governance.</p><Link to="/admin/provider-governance">Providers & Integrations</Link></section>
+          <aside className="kayad-command-rail" aria-label="Account and system information" data-testid="admin-right-rail">
+            <section className="kayad-command-panel kayad-command-rail-panel" aria-labelledby="right-rail-account-heading">
+              <header><h2 id="right-rail-account-heading">My Account</h2></header>
+              <div className="kayad-command-account">
+                <div className="kayad-command-avatar" aria-hidden="true">{typeof sessionUser?.name === 'string' && sessionUser.name.trim() ? sessionUser.name.trim().charAt(0).toUpperCase() : '—'}</div>
+                <div className="kayad-command-account-copy">
+                  <strong>{typeof sessionUser?.name === 'string' && sessionUser.name.trim() ? sessionUser.name.trim() : 'Account name unavailable'}</strong>
+                  <small>{typeof sessionUser?.role === 'string' && sessionUser.role.trim() ? sessionUser.role.replace(/_/g, ' ') : 'Role unavailable'}</small>
+                </div>
+              </div>
+              <nav className="kayad-command-rail-links" aria-label="Account shortcuts">
+                <Link to="/admin">Operations Dashboard <ChevronRight size={14} aria-hidden="true" /></Link>
+                <Link to="/admin/settings">Account Settings <ChevronRight size={14} aria-hidden="true" /></Link>
+                <Link to="/admin/security-log">Audit &amp; Logs <ChevronRight size={14} aria-hidden="true" /></Link>
+              </nav>
+            </section>
+            <section className="kayad-command-panel kayad-command-rail-panel" aria-labelledby="right-rail-department-heading">
+              <header><h2 id="right-rail-department-heading">Department Overview</h2><Link to="/admin/staff">View All</Link></header>
+              <div className="kayad-command-rail-summary"><Building2 size={17} aria-hidden="true" /><p className="kayad-command-empty">Department information is managed in the existing staff and departmental workspace.</p></div>
+              <Link className="kayad-command-rail-primary" to="/admin/staff">Staff &amp; Departments <ChevronRight size={14} aria-hidden="true" /></Link>
+            </section>
+            <section className="kayad-command-panel kayad-command-rail-panel" aria-labelledby="right-rail-provider-heading">
+              <header><h2 id="right-rail-provider-heading">Provider Status</h2><Link to="/admin/provider-governance">View All</Link></header>
+              <div className="kayad-command-rail-summary"><ProvidersIcon size={17} aria-hidden="true" /><p className="kayad-command-empty">Live connectivity is not verified in this summary. Review provider governance for the available records and verification state.</p></div>
+              <Link className="kayad-command-rail-primary" to="/admin/provider-governance">Providers &amp; Integrations <ChevronRight size={14} aria-hidden="true" /></Link>
+            </section>
           </aside>
         </div>
       )}

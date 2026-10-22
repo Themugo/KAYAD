@@ -229,7 +229,9 @@ export const adminAPI = {
   verifyDealer:    (userId: string, body: any) => api.post(`/admin/users/${userId}/verify-dealer`, body).then(unwrap),
   verifyCar:       (carId: string, body: any) => api.post(`/admin/cars/${carId}/verify`, body).then(unwrap),
   moderateCar:     (carId: string, body: any) => api.post(`/admin/cars/${carId}/moderate`, body).then(unwrap),
-  getOperationsMetrics: () => api.get('/admin/operations/metrics').then(unwrap),
+  // Existing protected operations-dashboard health contract. Returns measured service checks,
+  // per-check elapsed milliseconds and a checkedAt timestamp; this is not synthetic uptime.
+  getInfrastructureHealth: () => api.get('/ecp/health').then(unwrap),
   getStaff:        ()            => api.get('/admin/staff').then(unwrap),
   createStaff:     (body: any)        => api.post('/admin/staff', body).then(unwrap),
   updateStaff:     (id: string, body: any)    => api.put(`/admin/staff/${id}`, body).then(unwrap),

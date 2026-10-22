@@ -1,10 +1,10 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboard, Users, Car, ShieldCheck, Gavel, Lock, DollarSign, UserCheck, Star, Shield, Crown, PanelRight, ChevronLeft,
   Activity, Megaphone, Settings, AlertTriangle, ClipboardCheck, BarChart3,
-  Gift, MessageSquare, TrendingUp, Bell, X, LucideIcon, Flag, TicketCheck,
-  Radio,
+  Gift, MessageSquare, TrendingUp, Bell, X, type LucideIcon, Flag, TicketCheck,
+  Radio, ChevronDown, BriefcaseBusiness, Building2, Wrench,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../../api/api';
@@ -18,48 +18,73 @@ interface LinkItem {
   danger?: boolean;
 }
 
-const ALL_LINKS: LinkItem[] = [
-  { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/admin/users', icon: Users, label: 'Users' },
-  { to: '/admin/sellers', icon: UserCheck, label: 'Sellers' },
-  { to: '/admin/cars', icon: Car, label: 'Listings' },
-  { to: '/admin/moderation', icon: ShieldCheck, label: 'Moderation' },
-  { to: '/admin/auctions', icon: Activity, label: 'Auctions' },
-  { to: '/admin/bids', icon: Gavel, label: 'Bids' },
-  { to: '/admin/escrows', icon: Lock, label: 'Escrows' },
-  { to: '/admin/reviews', icon: Star, label: 'Reviews' },
-  { to: '/admin/referrals', icon: Gift, label: 'Referrals' },
-  { to: '/admin/chats', icon: MessageSquare, label: 'Chats' },
-  { to: '/admin/reports', icon: Flag, label: 'Reports' },
-  { to: '/admin/support-tickets', icon: TicketCheck, label: 'Support Tickets' },
-  { to: '/admin/feedback', icon: MessageSquare, label: 'Feedback' },
-  { to: '/admin/market-data', icon: TrendingUp, label: 'Market Data' },
-  { to: '/admin/transactions', icon: DollarSign, label: 'Transactions' },
-  { to: '/admin/ntsa-queue', icon: ClipboardCheck, label: 'NTSA Queue' },
-  { to: '/admin/inspections', icon: BarChart3, label: 'Inspections' },
-  { to: '/admin/dealer-verifications', icon: ShieldCheck, label: 'Dealer Verifications' },
-  { to: '/admin/inspector-applications', icon: UserCheck, label: 'Inspector Apps' },
-  { to: '/admin/security-log', icon: Shield, label: 'Security Log' },
-  { to: '/admin/ads', icon: Megaphone, label: 'Ad Manager' },
-  { to: '/admin/broadcast', icon: Radio, label: 'Broadcast' },
-  { to: '/admin/settings', icon: Settings, label: 'Settings' },
-  { to: '/admin/control-room', icon: LayoutDashboard, label: 'Control Room' },
-  { to: '/admin/staff', icon: Crown, label: 'Staff', superadmin: true },
-  { to: '/admin/staff-permissions', icon: Shield, label: 'Staff Permissions', superadmin: true },
-  { to: '/admin/panic-room', icon: AlertTriangle, label: 'Panic Room', danger: true },
-  { to: '/admin/webhoist', icon: Crown, label: 'Webhoist', superadmin: true },
+interface NavigationGroup {
+  id: string;
+  label: string;
+  icon: LucideIcon;
+  links: LinkItem[];
+}
+
+const NAVIGATION_GROUPS: NavigationGroup[] = [
+  {
+    id: 'command-centre', label: 'Command Centre', icon: LayoutDashboard,
+    links: [{ to: '/admin', icon: LayoutDashboard, label: 'Dashboard' }],
+  },
+  {
+    id: 'business-operations', label: 'Business Operations', icon: BriefcaseBusiness,
+    links: [
+      { to: '/admin/users', icon: Users, label: 'Users' },
+      { to: '/admin/sellers', icon: UserCheck, label: 'Sellers' },
+      { to: '/admin/cars', icon: Car, label: 'Listings' },
+      { to: '/admin/moderation', icon: ShieldCheck, label: 'Moderation' },
+      { to: '/admin/auctions', icon: Activity, label: 'Auctions' },
+      { to: '/admin/bids', icon: Gavel, label: 'Bids' },
+      { to: '/admin/escrows', icon: Lock, label: 'Escrows' },
+      { to: '/admin/transactions', icon: DollarSign, label: 'Transactions' },
+      { to: '/admin/ntsa-queue', icon: ClipboardCheck, label: 'NTSA Queue' },
+      { to: '/admin/inspections', icon: BarChart3, label: 'Inspections' },
+      { to: '/admin/dealer-verifications', icon: ShieldCheck, label: 'Dealer Verifications' },
+      { to: '/admin/inspector-applications', icon: UserCheck, label: 'Inspector Apps' },
+    ],
+  },
+  {
+    id: 'business-management', label: 'Business Management', icon: Building2,
+    links: [
+      { to: '/admin/reviews', icon: Star, label: 'Reviews' },
+      { to: '/admin/referrals', icon: Gift, label: 'Referrals' },
+      { to: '/admin/chats', icon: MessageSquare, label: 'Chats' },
+      { to: '/admin/reports', icon: Flag, label: 'Reports' },
+      { to: '/admin/support-tickets', icon: TicketCheck, label: 'Support Tickets' },
+      { to: '/admin/feedback', icon: MessageSquare, label: 'Feedback' },
+      { to: '/admin/market-data', icon: TrendingUp, label: 'Market Data' },
+      { to: '/admin/ads', icon: Megaphone, label: 'Ad Manager' },
+      { to: '/admin/broadcast', icon: Radio, label: 'Broadcast' },
+    ],
+  },
+  {
+    id: 'system-administration', label: 'System Administration', icon: Wrench,
+    links: [
+      { to: '/admin/security-log', icon: Shield, label: 'Security Log' },
+      { to: '/admin/settings', icon: Settings, label: 'Settings' },
+      { to: '/admin/control-room', icon: LayoutDashboard, label: 'Control Room' },
+      { to: '/admin/staff', icon: Crown, label: 'Staff', superadmin: true },
+      { to: '/admin/staff-permissions', icon: Shield, label: 'Staff Permissions', superadmin: true },
+      { to: '/admin/panic-room', icon: AlertTriangle, label: 'Panic Room', danger: true },
+      { to: '/admin/webhoist', icon: Crown, label: 'Webhoist', superadmin: true },
+    ],
+  },
 ];
 
 const ELIGIBLE_ROLES = ['superadmin', 'admin', 'moderator', 'escrow_officer', 'marketing', 'ad_manager', 'accounts', 'technical_support', 'hr', 'ghost_checker'];
 
 const roleLinks = (user: { role?: string; permissions?: string[] }): LinkItem[] => {
   const role = user?.role;
-  if (role === 'superadmin') return ALL_LINKS;
+  if (role === 'superadmin') return NAVIGATION_GROUPS.flatMap(group => group.links);
   const perms = getEffectivePermissions(user);
-  return ALL_LINKS.filter(l => {
-    if (l.danger || l.superadmin) return false;
-    if (SUPERADMIN_ONLY.has(l.to)) return false;
-    const required = PAGE_PERMISSIONS[l.to];
+  return NAVIGATION_GROUPS.flatMap(group => group.links).filter(link => {
+    if (link.danger || link.superadmin) return false;
+    if (SUPERADMIN_ONLY.has(link.to)) return false;
+    const required = PAGE_PERMISSIONS[link.to];
     if (!required) return true;
     return perms.includes(required);
   });
@@ -72,93 +97,134 @@ interface AdminSidebarProps {
 
 export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps) {
   const { user } = useAuth();
+  const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    'command-centre': true,
+    'business-operations': true,
+    'business-management': true,
+    'system-administration': true,
+  });
   const [alertCount, setAlertCount] = useState(0);
 
   useEffect(() => {
-    adminAPI.alerts({ limit: 1, read: 'false' }).then(d => setAlertCount(d.unreadCount || 0)).catch(() => {});
+    adminAPI.alerts({ limit: 1, read: 'false' }).then(data => setAlertCount(data.unreadCount || 0)).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (mobileOpen) setCollapsed(false);
+  }, [mobileOpen]);
+
+  const permittedLinks = new Set(user ? roleLinks(user).map(link => link.to) : []);
+  const visibleGroups = NAVIGATION_GROUPS.map(group => ({
+    ...group,
+    links: group.links.filter(link => permittedLinks.has(link.to)),
+  })).filter(group => group.links.length > 0);
+
+  // Keep the group containing the current route discoverable, including nested routes.
+  const activeGroup = visibleGroups.find(group => group.links.some(link =>
+    link.to === '/admin' ? location.pathname === '/admin' : location.pathname === link.to || location.pathname.startsWith(`${link.to}/`),
+  ));
+  useEffect(() => {
+    if (activeGroup) setExpandedGroups(current => ({ ...current, [activeGroup.id]: true }));
+  }, [activeGroup?.id, location.pathname]);
 
   if (!user || !ELIGIBLE_ROLES.includes(user.role || '')) return null;
 
-  const links = roleLinks(user);
-
   return (
     <>
-    {mobileOpen && <button type="button" className="admin-sidebar-backdrop" onClick={onToggle} aria-label="Close admin navigation" />}
-    <aside className={`admin-sidebar ${mobileOpen ? 'open' : ''}`} aria-label="Administration navigation" style={{
-      width: collapsed ? 52 : 220,
-      transition: 'width 0.25s ease, transform 0.3s ease',
-      background: '#0a3340',
-      borderRight: '1px solid rgba(255,255,255,0.05)',
-      display: 'flex', flexDirection: 'column',
-      overflow: 'hidden', flexShrink: 0,
-    }}>
-      <div style={{
-        padding: collapsed ? '12px 0' : '16px 18px',
-        borderBottom: '1px solid rgba(255,255,255,0.04)',
-        display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'space-between',
-      }}>
-        {!collapsed && <span style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.12em' }}>Admin</span>}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto' }}>
-          {mobileOpen && (
-            <button onClick={onToggle} aria-label="Close sidebar"
-              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', padding: 4 }}>
-              <X size={16} />
-            </button>
+      {mobileOpen && <button type="button" className="admin-sidebar-backdrop" onClick={onToggle} aria-label="Close admin navigation" />}
+      <aside
+        id="admin-sidebar-navigation"
+        className={`admin-sidebar${mobileOpen ? ' open' : ''}${collapsed ? ' is-collapsed' : ''}`}
+        aria-label="Administration navigation"
+      >
+        <div className="admin-sidebar__brand">
+          {!collapsed && (
+            <div className="admin-sidebar__brand-copy">
+              <span className="admin-sidebar__eyebrow">KAYAD</span>
+              <span className="admin-sidebar__brand-title">Admin Console</span>
+            </div>
           )}
-          <button onClick={() => setCollapsed(!collapsed)}
-            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.25)', cursor: 'pointer', display: 'flex', padding: 4 }}>
-            {collapsed ? <PanelRight size={16} /> : <ChevronLeft size={16} />}
-          </button>
+          <div className="admin-sidebar__controls">
+            {mobileOpen && (
+              <button type="button" className="admin-sidebar__icon-button admin-sidebar__mobile-close" onClick={onToggle} aria-label="Close sidebar">
+                <X size={17} aria-hidden="true" />
+              </button>
+            )}
+            <button
+              type="button"
+              className="admin-sidebar__icon-button admin-sidebar__collapse"
+              onClick={() => setCollapsed(value => !value)}
+              aria-label={collapsed ? 'Expand admin sidebar' : 'Collapse admin sidebar'}
+              aria-expanded={!collapsed}
+              title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            >
+              {collapsed ? <PanelRight size={17} aria-hidden="true" /> : <ChevronLeft size={17} aria-hidden="true" />}
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div style={{
-        flex: 1, overflowY: 'auto', overflowX: 'hidden',
-        padding: collapsed ? '8px 0' : '8px 0',
-        scrollbarWidth: 'thin',
-      }}>
-        {links.map(link => (
-          <NavLink
-            key={link.to}
-            to={link.to}
-            end={link.to === '/admin'}
-            style={({ isActive }) => ({
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: collapsed ? '10px 0' : '8px 18px',
-              margin: '1px 6px', borderRadius: 8,
-              textDecoration: 'none',
-              fontSize: 12, fontWeight: 600,
-              color: isActive ? 'var(--brand)' : link.danger ? 'rgba(239,68,68,0.6)' : 'rgba(255,255,255,0.5)',
-              background: isActive ? 'rgba(19, 184, 166, 0.06)' : 'transparent',
-              justifyContent: collapsed ? 'center' : 'flex-start',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.15s',
-              position: 'relative',
-            })}
-            title={collapsed ? link.label : undefined}
-            onClick={() => { if (mobileOpen) onToggle(); }}
-          >
-            <link.icon size={collapsed ? 18 : 16} style={{ flexShrink: 0 }} />
-            {!collapsed && <span>{link.label}</span>}
-          </NavLink>
-        ))}
-      </div>
+        <nav className="admin-sidebar__navigation" aria-label="Admin sections">
+          {visibleGroups.map(group => {
+            const GroupIcon = group.icon;
+            const isExpanded = expandedGroups[group.id] ?? true;
+            const groupHasActiveRoute = group.links.some(link =>
+              link.to === '/admin' ? location.pathname === '/admin' : location.pathname === link.to || location.pathname.startsWith(`${link.to}/`),
+            );
+            return (
+              <section className={`admin-sidebar__group${groupHasActiveRoute ? ' has-active-route' : ''}`} key={group.id}>
+                {!collapsed ? (
+                  <button
+                    type="button"
+                    className="admin-sidebar__group-toggle"
+                    aria-expanded={isExpanded}
+                    aria-controls={`admin-nav-group-${group.id}`}
+                    onClick={() => setExpandedGroups(current => ({ ...current, [group.id]: !(current[group.id] ?? true) }))}
+                  >
+                    <GroupIcon size={14} aria-hidden="true" />
+                    <span>{group.label}</span>
+                    <ChevronDown className="admin-sidebar__group-chevron" size={14} aria-hidden="true" />
+                  </button>
+                ) : (
+                  <div className="admin-sidebar__collapsed-group-label" title={group.label} aria-label={group.label}>
+                    <GroupIcon size={15} aria-hidden="true" />
+                  </div>
+                )}
+                {(!collapsed && isExpanded || collapsed) && (
+                  <div className="admin-sidebar__links" id={`admin-nav-group-${group.id}`}>
+                    {group.links.map(link => {
+                      const LinkIcon = link.icon;
+                      return (
+                        <NavLink
+                          key={link.to}
+                          to={link.to}
+                          end={link.to === '/admin'}
+                          className={({ isActive }) => `admin-sidebar__link${isActive ? ' is-active' : ''}${link.danger ? ' is-danger' : ''}`}
+                          title={collapsed ? link.label : undefined}
+                          aria-label={collapsed ? link.label : undefined}
+                          onClick={() => { if (mobileOpen) onToggle(); }}
+                        >
+                          <LinkIcon size={16} aria-hidden="true" />
+                          {!collapsed && <span>{link.label}</span>}
+                        </NavLink>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            );
+          })}
+        </nav>
 
-      {/* Alert badge at bottom */}
-      {alertCount > 0 && (
-        <div style={{
-          padding: collapsed ? '8px 0' : '10px 18px',
-          borderTop: '1px solid rgba(255,255,255,0.04)',
-          display: 'flex', alignItems: 'center', gap: 8, justifyContent: collapsed ? 'center' : 'flex-start',
-          fontSize: 11, color: '#ef4444', fontWeight: 600,
-        }}>
-          <Bell size={14} />
-          {!collapsed && <span>{alertCount} alert{alertCount !== 1 ? 's' : ''}</span>}
-        </div>
-      )}
-    </aside>
+        {alertCount > 0 && (
+          <div className="admin-sidebar__alerts" role="status" aria-live="polite" title={`${alertCount} unread alert${alertCount !== 1 ? 's' : ''}`}>
+            <Bell size={15} aria-hidden="true" />
+            {!collapsed && <span>{alertCount} unread alert{alertCount !== 1 ? 's' : ''}</span>}
+            {collapsed && <span className="admin-sidebar__alert-dot" aria-hidden="true" />}
+          </div>
+        )}
+      </aside>
     </>
   );
 }
