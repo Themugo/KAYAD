@@ -54,6 +54,13 @@ describe('Command centre — truthful figures', () => {
     await waitFor(() => expect(screen.getAllByText('Unavailable').length).toBeGreaterThan(5));
     expect(screen.getByText(/Some operational data sources are unavailable: dashboard statistics/)).toBeTruthy();
   });
+  it('malformed negative or fractional count values are unavailable rather than displayed as counts', async () => {
+    api.stats.mockResolvedValue({ stats: { ...GOOD_STATS, totalUsers: -1, totalCars: 2.5 } });
+    mount();
+    await waitFor(() => expect(screen.getByText('Unavailable')).toBeTruthy());
+    expect(screen.queryByText('-1')).toBeNull();
+    expect(screen.queryByText('2.5')).toBeNull();
+  });
 });
 
 describe('Command centre — canonical queue destinations', () => {

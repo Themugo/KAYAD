@@ -20,6 +20,9 @@ const checks = [
   ['UI does not expose staff account deletion control', !/Trash2|onDelete\(m\._id/.test(list)],
   ['UI explicitly distinguishes password creation from email invitation', /not an email invitation/.test(page)],
   ['role selection uses backend role catalog API', /getStaffRoleCatalog/.test(page) && /getStaffRoleCatalog:/.test(api)],
+  ['staff create UI excludes ghost_checker because the existing POST contract rejects it', page.includes("CREATABLE_STAFF_ROLES = STAFF_ROLES.filter(role => role !== 'ghost_checker')") && create.includes("role !== 'ghost_checker'") && /if \(!staffRoles\.includes\(role\)\)/.test(routes)],
+  ['permission page distinguishes API failure from a legitimate empty result', perms.includes("const [loadError, setLoadError] = useState('')") && perms.includes('No matching staff records were returned') && perms.includes('role="alert"')],
+  ['ghost_checker role remains supported by catalog and existing staff role updates', routes.includes('ROLE_PERMISSIONS[role] || []') && routes.slice(routes.indexOf('UPDATE STAFF ROLE')).includes('"ghost_checker"')],
   ['permission changes require a reason and confirmation', /Reason for changing permissions/.test(perms) && /window\.confirm/.test(perms)],
   ['governance regression covers catalog, invalid password and owner boundaries', /staff\/roles\/catalog/.test(tests) && /short initial passwords/.test(tests) && /owner role\/email are immutable/.test(tests)],
 ];

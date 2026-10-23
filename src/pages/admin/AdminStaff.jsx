@@ -10,6 +10,9 @@ import AdminStaffCreateModal from './components/AdminStaffCreateModal';
 import AdminStaffEditModal from './components/AdminStaffEditModal';
 
 const STAFF_ROLES = ['admin', 'marketing', 'technical_support', 'hr', 'accounts', 'escrow_officer', 'ad_manager', 'moderator', 'ghost_checker'];
+// Keep account creation aligned with POST /api/admin/staff. ghost_checker remains
+// a supported catalog/edit role, but the current create endpoint deliberately excludes it.
+const CREATABLE_STAFF_ROLES = STAFF_ROLES.filter(role => role !== 'ghost_checker');
 
 export default function AdminStaff() {
   const { user: me } = useAuth();
@@ -74,7 +77,7 @@ export default function AdminStaff() {
     if (name.length > 120 || form.password.length < 12 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       toast('Use a valid email, a name up to 120 characters, and an initial password of at least 12 characters.', 'error'); return;
     }
-    if (!STAFF_ROLES.includes(form.role)) { toast('Select a supported staff role.', 'error'); return; }
+    if (!CREATABLE_STAFF_ROLES.includes(form.role)) { toast('Select a staff role supported by the account-creation endpoint.', 'error'); return; }
     const reason = window.prompt('Reason for creating this staff account (recorded in the audit trail):');
     if (!reason?.trim()) { toast('A reason is required; no staff account was created.', 'info'); return; }
     if (!window.confirm(`Create a ${form.role.replaceAll('_', ' ')} account for ${email}? This uses the existing initial-password endpoint, not an email invitation.`)) return;

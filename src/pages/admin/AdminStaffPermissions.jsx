@@ -20,15 +20,19 @@ export default function AdminStaffPermissions() {
   const [editing, setEditing] = useState(null);     // staff member being edited
   const [draftPerms, setDraftPerms] = useState(new Set()); // desired effective perms
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
+    setLoadError('');
     try {
       const [s, c] = await Promise.all([adminAPI.getStaff(), adminAPI.getPermCatalog()]);
       setStaff(s.staff || []);
       setCatalog(c.catalog || []);
     } catch (_e) {
-      toast(_e?.response?.data?.message || 'Failed to load staff & permissions', 'error');
+      const message = _e?.response?.data?.message || 'Failed to load staff & permissions';
+      setLoadError(message);
+      toast(message, 'error');
     } finally {
       setLoading(false);
     }
@@ -115,6 +119,13 @@ export default function AdminStaffPermissions() {
 
       {loading ? (
         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>Loading staff…</div>
+      ) : loadError ? (
+        <div role="alert" style={{ padding: 16, border: '1px solid #fecaca', borderRadius: 12, background: '#fff1f2', color: '#9f1239' }}>
+          <p style={{ margin: '0 0 10px' }}>{loadError}. Staff and permissions are not being shown as an empty successful result.</p>
+          <button type="button" onClick={load} style={{ padding: '7px 12px', border: '1px solid currentColor', borderRadius: 8, background: 'transparent', color: 'inherit', fontWeight: 700, cursor: 'pointer' }}>Retry loading</button>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div style={{ padding: '2rem 1rem', textAlign: 'center', border: '1px solid var(--border)', borderRadius: 12, color: 'var(--text-muted)' }}>No matching staff records were returned.</div>
       ) : (
         <div style={{ display: 'grid', gap: 12 }}>
           {filtered.map(member => {

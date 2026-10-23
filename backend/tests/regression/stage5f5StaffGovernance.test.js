@@ -137,12 +137,23 @@ describe("owner operations", () => {
     expect(saves).toHaveBeenCalledTimes(1);
     expect(saves.mock.calls[0][1].role).toBe("accounts");
   });
+  test("ghost_checker remains an existing assignable staff role but is not accepted by the create endpoint", async () => {
+    const update = await call("PUT", `/api/admin/staff/${TARGET}`, { as: "owner", body: { role: "ghost_checker" } });
+    expect(update.status).toBe(200);
+    expect(saves.mock.calls[0][1].role).toBe("ghost_checker");
+    saves.mockClear();
+    const create = await call("POST", "/api/admin/staff", { as: "owner", body: { name: "N", email: "ghost@example.test", password: "Str0ngPassw0rd!2026", role: "ghost_checker" } });
+    expect(create.status).toBe(400);
+    expect(saves).not.toHaveBeenCalled();
+    expect(userCreate).not.toHaveBeenCalled();
+    expect(authCreate).not.toHaveBeenCalled();
+  });
   test.each(["superadmin", "webhoist", "owner", "user", "dealer", 5])("assigning role %j is rejected, nothing saved", async (role) => {
     const r = await call("PUT", `/api/admin/staff/${TARGET}`, { as: "owner", body: { role } });
     expect(r.status).toBe(400);
     expect(saves).not.toHaveBeenCalled();
   });
-  test("creating a staff account with role superadmin/owner is rejected", async () => {
+  test("creating a staff account with privileged or create-unsupported roles is rejected", async () => {
     for (const role of ["superadmin", "owner", "webhoist"]) {
       expect((await call("POST", "/api/admin/staff", { as: "owner", body: { name: "N", email: "n@example.test", password: "Str0ngPassw0rd!2026", role } })).status).toBe(400);
     }

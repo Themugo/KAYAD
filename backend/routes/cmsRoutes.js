@@ -154,7 +154,7 @@ router.delete("/ab-tests/:id", validateObjectId, allowRoles("admin", "superadmin
 router.get("/analytics", asyncHandler(getAnalytics));
 router.get("/analytics/content/:contentId", asyncHandler(getContentAnalytics));
 
-// Publishing Calendar
-router.get("/calendar", asyncHandler(getPublishingCalendar));
+// Publishing Calendar exposes unpublished scheduling metadata; restrict it to existing CMS authoring roles.
+router.get("/calendar", allowRoles("admin", "superadmin", "editor", "publisher"), asyncHandler(getPublishingCalendar));
 
 export default router;

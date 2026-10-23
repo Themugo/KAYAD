@@ -92,6 +92,9 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
   const isOwner = (sessionUser as { isOwner?: boolean } | null)?.isOwner === true; // display only — the server enforces owner authority on every call
   const [stats, setStats] = useState<AdminStats>({});
   const [users, setUsers] = useState<AdminUser[]>([]);
+  // A separate server-filtered preview prevents pending dealers beyond the first
+  // general users page from disappearing from the command-centre queue.
+  const [pendingDealerUsers, setPendingDealerUsers] = useState<AdminUser[]>([]);
   const [cars, setCars] = useState<AdminCar[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditRecord[]>([]);
   const [toolsOpen, setToolsOpen] = useState(false);
@@ -121,6 +124,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
     // results from the others or make the entire command centre look unavailable.
     const results = await Promise.allSettled([
       adminAPI.stats(),
+      adminAPI.users({ page: 1, limit: 4, role: 'dealer', pendingApproval: true }),
       adminAPI.users({ page: 1, limit: 50, search: search || undefined, ...(activeQueue === 'pendingDealers' ? { role: 'dealer', pendingApproval: true } : {}) }),
       adminAPI.cars({ page: 1, limit: 50, search: search || undefined, ...(activeQueue === 'pendingVehicles' ? { status: 'pending' } : {}) }),
       adminAPI.getAuditLog({ page: 1, limit: 25 }),
@@ -130,7 +134,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
 
     const failures: string[] = [];
     const denied: string[] = [];
-    const [statsResult, usersResult, carsResult, auditResult] = results;
+    const [statsResult, pendingDealersResult, usersResult, carsResult, auditResult] = results;
     const isDenied = (r: PromiseSettledResult<unknown>) => r.status === 'rejected' && (r.reason as any)?.response?.status === 403;
     const note = (r: PromiseSettledResult<unknown>, label: string, failLabel: string) => {
       if (isDenied(r)) denied.push(label); else failures.push(failLabel);
@@ -161,6 +165,19 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       }
     } else {
       note(usersResult, 'user records', 'user records');
+    }
+
+    if (pendingDealersResult.status === 'fulfilled') {
+      const payload = unwrap<any>(pendingDealersResult.value);
+      if (Array.isArray(payload?.users)) {
+        setPendingDealerUsers(payload.users
+          .filter((u: any) => u && u.role === 'dealer' && u.status === 'pending')
+          .map((u: any) => ({ ...u, _id: u._id ?? u.id })));
+      } else {
+        failures.push('pending dealer queue (invalid response)');
+      }
+    } else {
+      note(pendingDealersResult, 'pending dealer queue', 'pending dealer queue');
     }
 
     if (carsResult.status === 'fulfilled') {
@@ -269,7 +286,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
   // A numeric zero is shown only when the API actually returned zero.
   const stat = (key: string) => {
     const value = stats[key];
-    if (typeof value !== 'number' || !Number.isFinite(value)) {
+    if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0) {
       return statsStatus === 'loading' || (loading && statsStatus !== 'stale') ? 'Loading…' : 'Unavailable';
     }
     return value.toLocaleString();
@@ -348,9 +365,9 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
                   { label: 'Inspections', href: '/admin/inspections' },
                 ].map((item) => <Link key={item.href} to={item.href} aria-label={`Open ${item.label.toLowerCase()} approval workflow`}>{item.label}{item.count !== undefined && <b>{item.count}</b>}</Link>)}
               </div>
-              <div className="kayad-command-approval-list">
-                {users.filter(u => u.role === 'dealer' && (u.status === 'pending' || u.approved === false)).slice(0, 4).map(u => <div key={u._id}><div><strong>{u.name || 'Dealer application'}</strong><small>{u.email || 'No email provided'}</small></div><span className="kayad-command-pending">Pending Review</span><button type="button" aria-label={`Review dealer application for ${u.name || u.email || 'dealer'}`} onClick={() => { setQueue('pendingDealers'); setModule('users'); void load('pendingDealers'); }}>Review</button></div>)}
-                {!users.some(u => u.role === 'dealer' && (u.status === 'pending' || u.approved === false)) && <p className="kayad-command-empty">{loading ? 'Loading approval records…' : restricted.includes('user records') ? 'Dealer records are restricted for this role. Use the authorized dealer verification workspace.' : error ? 'Approval records may be unavailable. Open the dealer verification queue for the authoritative list.' : 'No pending dealers in the loaded records. View all to inspect the full queue.'}</p>}
+              <div className="kayad-command-approval-list" aria-live="polite">
+                {pendingDealerUsers.map(u => <div key={u._id}><div><strong>{u.name || 'Dealer application'}</strong><small>{u.email || 'No email provided'}</small></div><span className="kayad-command-pending">Pending Review</span><button type="button" aria-label={`Review dealer application for ${u.name || u.email || 'dealer'}`} onClick={() => { setQueue('pendingDealers'); setModule('users'); void load('pendingDealers'); }}>Review</button></div>)}
+                {!pendingDealerUsers.length && <p className="kayad-command-empty">{loading ? 'Loading approval records…' : restricted.includes('pending dealer queue') || restricted.includes('user records') ? 'Dealer records are restricted for this role. Use the authorized dealer verification workspace.' : error ? 'Approval records may be unavailable. Open the dealer verification queue for the authoritative list.' : 'No pending dealers returned by the server-filtered queue. View all to inspect the full queue.'}</p>}
               </div>
             </section>
             <section className="kayad-command-panel" aria-labelledby="system-health-heading">

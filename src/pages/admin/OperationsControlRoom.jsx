@@ -195,7 +195,7 @@ export default function OperationsControlRoom() {
   const getAlertColor = (severity) => {
     switch (String(severity || '').toLowerCase()) {
       case 'critical': return { bg: 'rgba(239, 68, 68, 0.1)', border: 'rgba(239, 68, 68, 0.3)', icon: XCircle, color: '#ef4444' };
-      case 'warning': case 'high': return { bg: 'rgba(245, 158, 11, 0.1)', border: 'rgba(245, 158, 11, 0.3)', icon: AlertTriangle, color: '#b45309' };
+      case 'warning': case 'high': return { bg: 'rgba(217, 119, 6, 0.10)', border: 'rgba(217, 119, 6, 0.30)', icon: AlertTriangle, color: 'var(--admin-status-warning)' };
       case 'info': case 'low': return { bg: 'rgba(23, 107, 135, 0.1)', border: 'rgba(23, 107, 135, 0.3)', icon: AlertCircle, color: '#176B87' };
       default: return { bg: 'rgba(156, 163, 175, 0.1)', border: 'rgba(156, 163, 175, 0.3)', icon: AlertCircle, color: '#6b7280' };
     }

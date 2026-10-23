@@ -1,11 +1,68 @@
-/* Canonical KAYAD admin shell: navigation and header only. */
+/* Canonical KAYAD admin design tokens. Scoped to authenticated admin surfaces so
+   the public marketplace keeps its established theme and information architecture. */
 .kayad-admin-shell {
-  --admin-shell-bg: #082c37;
-  --admin-sidebar-bg: #092f3b;
-  --admin-sidebar-border: rgba(156, 207, 216, 0.12);
-  --admin-text: #e8f3f5;
-  --admin-muted: #9ab4bc;
-  --admin-accent: var(--brand, #13b8a6);
+  /* Brand and shell */
+  --admin-shell-bg: #0A3340;
+  --admin-sidebar-bg: #092F3B;
+  --admin-header-bg: #0E4655;
+  --admin-sidebar-border: rgba(156, 207, 216, 0.16);
+  --admin-text: #E8F3F5;
+  --admin-muted: #A9C0C6;
+  --admin-accent: #13B8A6;
+  --admin-accent-strong: #0B756E;
+  --admin-accent-text: #0B756E;
+  --admin-accent-muted: #347E78;
+  --admin-muted-on-dark: #94A3B8;
+  --admin-accent-bright: #72E2D4;
+  --admin-accent-soft: rgba(19, 184, 166, 0.14);
+  --admin-accent-border: rgba(19, 184, 166, 0.30);
+  --admin-shell-hover: rgba(222, 246, 248, 0.06);
+  --admin-shell-focus: #5EEAD4;
+  --admin-shell-danger: #F2A2A2;
+  --admin-shell-danger-hover: #FFC4C4;
+  --admin-shell-danger-bg: rgba(239, 68, 68, 0.09);
+  /* Content surfaces and typography */
+  --admin-canvas: #F6FAF9;
+  --admin-surface: #FFFFFF;
+  --admin-surface-soft: #EEF7F5;
+  --admin-surface-muted: #F3FAF9;
+  --admin-surface-hover: #E6F6F3;
+  --admin-ink: #0A3340;
+  --admin-body: #334155;
+  --admin-muted-content: #64748B;
+  --admin-brand: #176B87;
+  --admin-brand-dark: #12576D;
+  --admin-brand-deep: #0A3340;
+  --admin-brand-soft: #DDF4F0;
+  --admin-border: #D7E7E4;
+  --admin-border-soft: #E3EFEC;
+  --admin-divider: #E7EFED;
+  --admin-focus-ring: rgba(19, 184, 166, 0.72);
+  --admin-font-sans: var(--font-sans, 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif);
+  --admin-font-display: var(--font-display, 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif);
+  --admin-type-xs: 10px;
+  --admin-type-sm: 12px;
+  --admin-type-base: 14px;
+  --admin-type-title: 18px;
+  --admin-radius-sm: 6px;
+  --admin-radius-md: 9px;
+  --admin-radius-lg: 12px;
+  --admin-shadow-card: 0 2px 8px rgba(10, 51, 64, 0.06), 0 1px 3px rgba(10, 51, 64, 0.04);
+  --admin-shadow-hover: 0 8px 20px rgba(10, 51, 64, 0.10);
+  /* Semantic status tokens; never repurpose these for brand decoration. */
+  --admin-status-success: #15803D;
+  --admin-status-success-bright: #16A34A;
+  --admin-status-success-bg: #DCFCE7;
+  --admin-status-warning: rgb(146, 64, 14);
+  --admin-status-warning-bright: rgb(217, 119, 6);
+  --admin-status-warning-bg: #FEF3C7;
+  --admin-status-danger: #B91C1C;
+  --admin-status-danger-bg: #FEE2E2;
+  --admin-status-info: #0E7490;
+  --admin-status-info-bright: #0891B2;
+  --admin-status-info-bg: #E0F2FE;
+  --admin-status-neutral: #475569;
+  --admin-status-neutral-bg: #F1F5F9;
   display: flex;
   min-width: 0;
   min-height: 100vh;
@@ -37,7 +94,7 @@
   padding: 0 24px;
   flex-shrink: 0;
   border-bottom: 1px solid var(--admin-sidebar-border);
-  background: #0a3541;
+  background: var(--admin-header-bg);
   box-shadow: 0 5px 18px rgba(0, 14, 20, 0.08);
 }
 .kayad-admin-header__breadcrumb,
@@ -56,11 +113,11 @@
 }
 .kayad-admin-header__crumb { gap: 7px; text-transform: capitalize; }
 .kayad-admin-header__crumb > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.kayad-admin-header__crumb .is-current { color: #e5f1f3; font-weight: 650; }
+.kayad-admin-header__crumb .is-current { color: var(--admin-text); font-weight: 650; }
 .kayad-admin-header__identity { gap: 11px; flex-shrink: 0; }
 .kayad-admin-header__identity-copy { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
-.kayad-admin-header__identity-name { max-width: 220px; overflow: hidden; color: #eaf5f6; font-size: 12px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
-.kayad-admin-header__identity-role { color: #9ab8c0; font-size: 11px; }
+.kayad-admin-header__identity-name { max-width: 220px; overflow: hidden; color: var(--admin-text); font-size: 12px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.kayad-admin-header__identity-role { color: var(--admin-muted); font-size: 11px; }
 .kayad-admin-header__avatar {
   display: grid;
   width: 34px;
@@ -70,7 +127,7 @@
   border: 1px solid rgba(19, 184, 166, 0.28);
   border-radius: 50%;
   background: rgba(19, 184, 166, 0.13);
-  color: #72e2d4;
+  color: var(--admin-accent-bright);
   font-size: 11px;
   font-weight: 800;
 }
@@ -88,7 +145,7 @@
 }
 .kayad-admin-shell button:focus-visible,
 .kayad-admin-shell a:focus-visible {
-  outline: 2px solid #5eead4;
+  outline: 2px solid var(--admin-shell-focus);
   outline-offset: 2px;
 }
 
@@ -119,8 +176,8 @@
   border-bottom: 1px solid var(--admin-sidebar-border);
 }
 .admin-sidebar__brand-copy { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
-.admin-sidebar__eyebrow { color: #6ddbcf; font-size: 10px; font-weight: 800; letter-spacing: 0.16em; }
-.admin-sidebar__brand-title { color: #edf7f8; font-size: 13px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; }
+.admin-sidebar__eyebrow { color: var(--admin-accent-bright); font-size: 10px; font-weight: 800; letter-spacing: 0.16em; }
+.admin-sidebar__brand-title { color: var(--admin-text); font-size: 13px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; }
 .admin-sidebar__controls { display: flex; flex-shrink: 0; align-items: center; gap: 4px; }
 .admin-sidebar__icon-button {
   display: inline-flex;
@@ -131,10 +188,10 @@
   border: 1px solid transparent;
   border-radius: 7px;
   background: transparent;
-  color: #9bb8bf;
+  color: var(--admin-muted);
   cursor: pointer;
 }
-.admin-sidebar__icon-button:hover { border-color: rgba(148, 205, 213, 0.15); background: rgba(222, 246, 248, 0.06); color: #e8f6f7; }
+.admin-sidebar__icon-button:hover { border-color: rgba(148, 205, 213, 0.15); background: rgba(222, 246, 248, 0.06); color: var(--admin-text); }
 .admin-sidebar__navigation { flex: 1 1 auto; overflow-x: hidden; overflow-y: auto; padding: 10px 8px 14px; scrollbar-color: rgba(137, 184, 193, 0.25) transparent; scrollbar-width: thin; }
 .admin-sidebar__group { margin: 0 0 7px; }
 .admin-sidebar__group-toggle {
@@ -147,7 +204,7 @@
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: #91aeb7;
+  color: var(--admin-muted);
   cursor: pointer;
   font: inherit;
   font-size: 10px;
@@ -157,7 +214,7 @@
   text-transform: uppercase;
 }
 .admin-sidebar__group-toggle > span { flex: 1; }
-.admin-sidebar__group-toggle:hover { background: rgba(221, 246, 248, 0.045); color: #dbecef; }
+.admin-sidebar__group-toggle:hover { background: rgba(221, 246, 248, 0.045); color: var(--admin-text); }
 .admin-sidebar__group-chevron { flex-shrink: 0; transition: transform 160ms ease; }
 .admin-sidebar__group-toggle[aria-expanded="false"] .admin-sidebar__group-chevron { transform: rotate(-90deg); }
 .admin-sidebar__links { display: grid; gap: 2px; padding: 2px 0 5px; }
@@ -171,7 +228,7 @@
   padding: 8px 10px;
   border: 1px solid transparent;
   border-radius: 7px;
-  color: #a9c0c6;
+  color: var(--admin-muted);
   font-size: 12px;
   font-weight: 550;
   line-height: 1.3;
@@ -180,24 +237,24 @@
 }
 .admin-sidebar__link > svg { flex-shrink: 0; opacity: 0.88; }
 .admin-sidebar__link > span { overflow: hidden; text-overflow: ellipsis; }
-.admin-sidebar__link:hover { background: rgba(222, 246, 248, 0.055); color: #f0f9fa; }
+.admin-sidebar__link:hover { background: rgba(222, 246, 248, 0.055); color: var(--admin-text); }
 .admin-sidebar__link.is-active {
   border-color: rgba(45, 212, 191, 0.14);
   background: linear-gradient(90deg, rgba(19, 184, 166, 0.17), rgba(19, 184, 166, 0.055));
-  color: #7be5d7;
+  color: var(--admin-accent-bright);
   font-weight: 700;
 }
-.admin-sidebar__link.is-active::before { position: absolute; inset: 7px auto 7px -1px; width: 3px; border-radius: 0 4px 4px 0; background: #36d5c2; content: ''; }
-.admin-sidebar__link.is-danger { color: #f2a2a2; }
-.admin-sidebar__link.is-danger:hover { background: rgba(239, 68, 68, 0.09); color: #ffc4c4; }
-.admin-sidebar__collapsed-group-label { display: flex; height: 24px; align-items: center; justify-content: center; color: #6ddbcf; }
+.admin-sidebar__link.is-active::before { position: absolute; inset: 7px auto 7px -1px; width: 3px; border-radius: 0 4px 4px 0; background: var(--admin-accent); content: ''; }
+.admin-sidebar__link.is-danger { color: var(--admin-shell-danger); }
+.admin-sidebar__link.is-danger:hover { background: rgba(239, 68, 68, 0.09); color: var(--admin-shell-danger-hover); }
+.admin-sidebar__collapsed-group-label { display: flex; height: 24px; align-items: center; justify-content: center; color: var(--admin-accent-bright); }
 .kayad-admin-shell .admin-sidebar.is-collapsed .admin-sidebar__brand { justify-content: center; padding-right: 5px; padding-left: 5px; }
 .kayad-admin-shell .admin-sidebar.is-collapsed .admin-sidebar__controls { flex-direction: column; }
 .kayad-admin-shell .admin-sidebar.is-collapsed .admin-sidebar__navigation { padding-right: 5px; padding-left: 5px; }
 .kayad-admin-shell .admin-sidebar.is-collapsed .admin-sidebar__links { padding-top: 3px; }
 .kayad-admin-shell .admin-sidebar.is-collapsed .admin-sidebar__link { justify-content: center; padding: 9px 0; }
-.admin-sidebar__alerts { display: flex; min-height: 42px; align-items: center; gap: 9px; padding: 10px 17px; border-top: 1px solid var(--admin-sidebar-border); color: #f2a0a0; font-size: 11px; font-weight: 650; }
-.admin-sidebar__alert-dot { width: 5px; height: 5px; margin-left: -6px; align-self: flex-start; border-radius: 50%; background: #fb7185; }
+.admin-sidebar__alerts { display: flex; min-height: 42px; align-items: center; gap: 9px; padding: 10px 17px; border-top: 1px solid var(--admin-sidebar-border); color: var(--admin-shell-danger); font-size: 11px; font-weight: 650; }
+.admin-sidebar__alert-dot { width: 5px; height: 5px; margin-left: -6px; align-self: flex-start; border-radius: 50%; background: var(--admin-status-danger); }
 .admin-sidebar-backdrop { display: none; }
 
 @media (max-width: 1024px) {
@@ -247,3 +304,88 @@
 @media (prefers-reduced-motion: reduce) {
   .kayad-admin-shell *, .kayad-admin-shell *::before, .kayad-admin-shell *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
 }
+
+
+/* Phase 9 — scoped utility convergence across existing admin routes.
+   This reuses the current Tailwind classes and central admin tokens; no duplicate components or paths. */
+.kayad-admin-shell [class~="text-[#64748B]"],
+.kayad-admin-shell [class~="text-[#64748b]"] { color: var(--admin-muted-content) !important; }
+.kayad-admin-shell [class~="text-[#0A3340]"] { color: var(--admin-ink) !important; }
+.kayad-admin-shell [class~="text-[#12576D]"],
+.kayad-admin-shell [class~="text-[#12576d]"] { color: var(--admin-brand-dark) !important; }
+.kayad-admin-shell [class~="text-[#176B87]"],
+.kayad-admin-shell [class~="text-[#176b87]"] { color: var(--admin-brand) !important; }
+.kayad-admin-shell [class~="text-[#13B8A6]"],
+.kayad-admin-shell [class~="text-[#13b8a6]"] { color: var(--admin-accent-text) !important; }
+.kayad-admin-shell [class~="text-[#5AAFA4]"],
+.kayad-admin-shell [class~="text-[#5aafa4]"] { color: var(--admin-accent-muted, #5AAFA4) !important; }
+.kayad-admin-shell [class~="text-[#94A3B8]"] { color: var(--admin-muted-on-dark) !important; }
+.kayad-admin-shell [class~="text-[#BDE5DE]"] { color: var(--admin-brand-soft) !important; }
+.kayad-admin-shell [class~="text-[#2ECC71]"] { color: var(--admin-status-success-bright) !important; }
+.kayad-admin-shell [class~="text-[#DC3545]"] { color: var(--admin-status-danger) !important; }
+
+.kayad-admin-shell [class~="bg-[#F6FAF9]"] { background-color: var(--admin-canvas) !important; }
+.kayad-admin-shell [class~="bg-[#F3FAF9]"] { background-color: var(--admin-surface-muted) !important; }
+.kayad-admin-shell [class~="bg-[#EEF7F5]"] { background-color: var(--admin-surface-soft) !important; }
+.kayad-admin-shell [class~="bg-[#DDF4F0]"] { background-color: var(--admin-brand-soft) !important; }
+.kayad-admin-shell [class~="bg-[#BDE5DE]"] { background-color: var(--admin-brand-soft) !important; }
+.kayad-admin-shell [class~="bg-[#0A3340]"] { background-color: var(--admin-brand-deep) !important; }
+.kayad-admin-shell [class~="bg-[#12576D]"] { background-color: var(--admin-brand-dark) !important; }
+.kayad-admin-shell [class~="bg-[#176B87]"] { background-color: var(--admin-brand) !important; }
+.kayad-admin-shell [class~="bg-[#13B8A6]"] { background-color: var(--admin-accent) !important; }
+.kayad-admin-shell [class~="bg-[#5AAFA4]"],
+.kayad-admin-shell [class~="bg-[#5aafa4]"] { background-color: var(--admin-brand-soft) !important; }
+.kayad-admin-shell [class~="bg-[#2ECC71]"] { background-color: var(--admin-status-success-bright) !important; }
+
+.kayad-admin-shell [class~="border-[#D7E7E4]"] { border-color: var(--admin-border) !important; }
+.kayad-admin-shell [class~="border-[#BDE5DE]"] { border-color: var(--admin-border-soft) !important; }
+.kayad-admin-shell [class~="border-[#5AAFA4]"],
+.kayad-admin-shell [class~="border-[#5aafa4]"] { border-color: var(--admin-accent-muted) !important; }
+.kayad-admin-shell [class~="border-[#176B87]"] { border-color: var(--admin-brand) !important; }
+.kayad-admin-shell [class~="border-[#13B8A6]"] { border-color: var(--admin-accent) !important; }
+.kayad-admin-shell [class~="ring-[#0A3340]"],
+.kayad-admin-shell [class~="ring-[#5aafa4]"],
+.kayad-admin-shell [class~="ring-[#13B8A6]"] { --tw-ring-color: var(--admin-focus-ring) !important; }
+
+/* Status utility colors keep consistent meaning across the admin route tree. */
+.kayad-admin-shell [class~="text-emerald-700"],
+.kayad-admin-shell [class~="text-emerald-800"],
+.kayad-admin-shell [class~="text-emerald-600"],
+.kayad-admin-shell [class~="text-emerald-500"],
+.kayad-admin-shell [class~="text-green-700"],
+.kayad-admin-shell [class~="text-green-600"],
+.kayad-admin-shell [class~="text-green-400"] { color: var(--admin-status-success) !important; }
+.kayad-admin-shell [class~="bg-emerald-100"],
+.kayad-admin-shell [class~="bg-emerald-50"],
+.kayad-admin-shell [class~="bg-green-100"],
+.kayad-admin-shell [class~="bg-green-50"] { background-color: var(--admin-status-success-bg) !important; }
+.kayad-admin-shell [class~="bg-emerald-500"],
+.kayad-admin-shell [class~="bg-emerald-600"],
+.kayad-admin-shell [class~="bg-emerald-700"],
+.kayad-admin-shell [class~="bg-emerald-400"],
+.kayad-admin-shell [class~="bg-green-500"] { background-color: var(--admin-status-success-bright) !important; }
+.kayad-admin-shell [class~="border-emerald-200"],
+.kayad-admin-shell [class~="border-green-500"] { border-color: #86EFAC !important; }
+.kayad-admin-shell [class~="text-red-800"],
+.kayad-admin-shell [class~="text-red-700"],
+.kayad-admin-shell [class~="text-red-600"],
+.kayad-admin-shell [class~="text-red-500"],
+.kayad-admin-shell [class~="text-red-400"] { color: var(--admin-status-danger) !important; }
+.kayad-admin-shell [class~="bg-red-100"],
+.kayad-admin-shell [class~="bg-red-50"] { background-color: var(--admin-status-danger-bg) !important; }
+.kayad-admin-shell [class~="bg-red-500"],
+.kayad-admin-shell [class~="bg-red-600"],
+.kayad-admin-shell [class~="bg-red-700"] { background-color: var(--admin-status-danger) !important; }
+.kayad-admin-shell [class~="border-red-100"],
+.kayad-admin-shell [class~="border-red-200"] { border-color: #FECACA !important; }
+
+/* Unify common admin typography, cards and elevations without changing behavior. */
+.kayad-admin-shell [class~="font-serif"] { font-family: var(--admin-font-display) !important; }
+.kayad-admin-shell [class~="rounded-3xl"],
+.kayad-admin-shell [class~="rounded-2xl"] { border-radius: var(--admin-radius-lg) !important; }
+.kayad-admin-shell [class~="rounded-xl"],
+.kayad-admin-shell [class~="rounded-lg"] { border-radius: var(--admin-radius-md) !important; }
+.kayad-admin-shell [class~="shadow-xs"],
+.kayad-admin-shell [class~="shadow-sm"],
+.kayad-admin-shell [class~="shadow-md"] { box-shadow: var(--admin-shadow-card) !important; }
+.kayad-admin-shell [class~="shadow-lg"] { box-shadow: var(--admin-shadow-hover) !important; }

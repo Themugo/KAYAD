@@ -45,7 +45,7 @@ export default function AdminStaffCreateModal({ form, set, roles = [], saving, o
           <Field label="Role">
             <select value={form.role} onChange={e => set('role', e.target.value)}
               style={{ width: '100%', padding: '10px 12px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.09)', background: '#0a3340', color: '#fff', fontSize: 13, outline: 'none' }}>
-              {roles.filter(({ role }) => role !== 'superadmin' && role !== 'webhoist' && role !== 'owner').map(({ role: r }) => {
+              {roles.filter(({ role }) => role !== 'superadmin' && role !== 'webhoist' && role !== 'owner' && role !== 'ghost_checker').map(({ role: r }) => {
                 const org = ORG.find(o => o.role === r);
                 return <option key={r} value={r} style={{ background: '#0a3340' }}>{org?.icon} {org?.title || r}</option>;
               })}
