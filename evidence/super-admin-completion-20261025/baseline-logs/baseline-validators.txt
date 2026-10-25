@@ -1,0 +1,25 @@
+0 validate-phase12-admin-status-token-convergence :: PASS compatibility aliases resolve through canonical admin tokens
+0 validate-brand-palette-convergence :: Legacy warm/dark visual palettes and unrelated blue/purple/pink accents are converged; legacy branding data and vehicle paint swatches are p
+0 validate-admin-route-convergence :: Admin route convergence: 14/14 PASS
+0 validate-super-admin-phase1-navigation :: Super Admin Phase 1 navigation validation: 12/12 PASS
+0 validate-super-admin-phase2-hero :: Super Admin Phase 2 hero validation: 13/13 PASS
+0 validate-super-admin-phase3-foundation :: 12/12 checks passed.
+0 validate-phase5-gap-closure :: Phase 5 gap-closure source contract: 15/15 checks passed.
+0 validate-phase8-operations :: RESULT: 15/15 PASS
+0 validate-homepage-convergence :: Homepage convergence validation: PASS
+0 validate-dependency-security :: Dependency security validation: PASS
+0 validate-foundation-integrity :: FOUNDATION INTEGRITY: PASS
+0 validate-runtime-integrity :: Runtime integrity validation passed: 7/7
+0 validate-runtime-convergence :: Runtime convergence static gate: 7/7 PASS
+0 validate-canonical-architecture :: KAYAD canonical architecture validation: PASS
+0 validate-navigation-convergence :: Navigation convergence: 43/43 PASS
+0 validate-lucide-icon-exports :: PASS - lucide-react named imports exist in the installed package (98 importing modules across 238 reachable files)
+1 validate-stage24-theme-convergence-20261012 :: Stage 24 theme convergence: 13/14 PASS
+0 validate-phase6-right-panel :: Phase 6 right-panel source contract: 15/15 checks passed.
+0 validate-business-command-centre-phase04 :: Phase 04 source-contract validation: 13/13 passed
+0 validate-phase06-department-capabilities :: 14/14 checks passed
+1 validate-stage5f1-command-centre-layout :: Stage 5F.1 command-centre regression checks: 12/13 passed
+1 validate-stage5f2-dashboard-data-workflow :: Stage 5F.2 source-contract checks: 10/11 passed
+0 validate-mobile-navigation-polish-20261012 :: Mobile navigation polish: 36/36 PASS
+0 validate-code-splitting :: Code splitting validation: PASS
+0 validate-frontend-runtime-contracts :: Frontend runtime contract validation: PASS

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { feedbackAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { timeAgo } from '../../utils/helpers';
-import { MessageSquare, Eye } from 'lucide-react';
+import { MessageSquare, Eye, X } from 'lucide-react';
 
 const TYPE_BADGE = {
   general: 'badge-blue',
@@ -183,7 +183,7 @@ export default function AdminFeedback() {
                   {selected.name || selected.user?.name} &middot; {selected.email || selected.user?.email} &middot; {timeAgo(selected.createdAt)}
                 </div>
               </div>
-              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
+              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }} aria-label="Close" title="Close"><X size={16} aria-hidden="true" /></button>
             </div>
 
             <div style={{ background: 'var(--surface)', borderRadius: 10, padding: 16, marginBottom: 20 }}>

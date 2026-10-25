@@ -1,10 +1,11 @@
-import { NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
   LayoutDashboard, Users, Car, ShieldCheck, Gavel, Lock, DollarSign, UserCheck, Star, Shield, Crown, PanelRight, ChevronLeft,
   Activity, Megaphone, Settings, AlertTriangle, ClipboardCheck, BarChart3,
   Gift, MessageSquare, TrendingUp, Bell, X, type LucideIcon, Flag, TicketCheck,
   Radio, ChevronDown, BriefcaseBusiness, Building2, Wrench,
+  BadgeCheck, UserSearch, Gauge, Server, KeyRound, MessageSquareText, Store,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../../api/api';
@@ -43,8 +44,8 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
       { to: '/admin/transactions', icon: DollarSign, label: 'Transactions' },
       { to: '/admin/ntsa-queue', icon: ClipboardCheck, label: 'NTSA Queue' },
       { to: '/admin/inspections', icon: BarChart3, label: 'Inspections' },
-      { to: '/admin/dealer-verifications', icon: ShieldCheck, label: 'Dealer Verifications' },
-      { to: '/admin/inspector-applications', icon: UserCheck, label: 'Inspector Apps' },
+      { to: '/admin/dealer-verifications', icon: BadgeCheck, label: 'Dealer Verifications' },
+      { to: '/admin/inspector-applications', icon: UserSearch, label: 'Inspector Apps' },
     ],
   },
   {
@@ -55,7 +56,7 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
       { to: '/admin/chats', icon: MessageSquare, label: 'Chats' },
       { to: '/admin/reports', icon: Flag, label: 'Reports' },
       { to: '/admin/support-tickets', icon: TicketCheck, label: 'Support Tickets' },
-      { to: '/admin/feedback', icon: MessageSquare, label: 'Feedback' },
+      { to: '/admin/feedback', icon: MessageSquareText, label: 'Feedback' },
       { to: '/admin/market-data', icon: TrendingUp, label: 'Market Data' },
       { to: '/admin/ads', icon: Megaphone, label: 'Ad Manager' },
       { to: '/admin/broadcast', icon: Radio, label: 'Broadcast' },
@@ -66,11 +67,11 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
     links: [
       { to: '/admin/security-log', icon: Shield, label: 'Security Log' },
       { to: '/admin/settings', icon: Settings, label: 'Settings' },
-      { to: '/admin/control-room', icon: LayoutDashboard, label: 'Control Room' },
+      { to: '/admin/control-room', icon: Gauge, label: 'Control Room' },
       { to: '/admin/staff', icon: Crown, label: 'Staff', superadmin: true },
-      { to: '/admin/staff-permissions', icon: Shield, label: 'Staff Permissions', superadmin: true },
+      { to: '/admin/staff-permissions', icon: KeyRound, label: 'Staff Permissions', superadmin: true },
       { to: '/admin/panic-room', icon: AlertTriangle, label: 'Panic Room', danger: true },
-      { to: '/admin/webhoist', icon: Crown, label: 'Webhoist', superadmin: true },
+      { to: '/admin/webhoist', icon: Server, label: 'Webhoist', superadmin: true },
     ],
   },
 ];
@@ -216,6 +217,13 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
             );
           })}
         </nav>
+
+        <div className="admin-sidebar__footer">
+          <Link className="admin-sidebar__link" to="/" title={collapsed ? 'View marketplace' : undefined} aria-label={collapsed ? 'View marketplace' : undefined} onClick={() => { if (mobileOpen) onToggle(); }}>
+            <Store size={16} aria-hidden="true" />
+            {!collapsed && <span>View marketplace</span>}
+          </Link>
+        </div>
 
         {alertCount > 0 && (
           <div className="admin-sidebar__alerts" role="status" aria-live="polite" title={`${alertCount} unread alert${alertCount !== 1 ? 's' : ''}`}>

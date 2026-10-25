@@ -19,31 +19,31 @@ const CS = {
   pageContainer: { maxWidth: 1000, margin: '0 auto', padding: '32px 32px 60px' },
   headerRow: { marginBottom: 32, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' },
   h1Title: { fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 28, color: '#0a3340', marginBottom: 4, fontStyle: 'italic' },
-  subtitle: { color: 'rgba(10, 51, 64, 0.35)', fontSize: 14 },
+  subtitle: { color: 'var(--admin-muted-content)', fontSize: 14 },
   refreshRight: { textAlign: 'right' },
-  refreshBtn: { padding: '8px 16px', borderRadius: 8, background: 'rgba(10, 51, 64, 0.05)', border: '1px solid rgba(10, 51, 64, 0.1)', color: 'rgba(10, 51, 64, 0.6)', fontSize: 12, cursor: 'pointer', fontWeight: 600 },
-  updateTime: { fontSize: 10, color: 'rgba(10, 51, 64, 0.25)', marginTop: 4 },
-  lastChecked: { fontSize: 11, color: 'rgba(10, 51, 64, 0.35)', marginTop: 2 },
+  refreshBtn: { padding: '8px 16px', borderRadius: 8, background: 'rgba(10, 51, 64, 0.05)', border: '1px solid rgba(10, 51, 64, 0.1)', color: 'var(--admin-muted-content)', fontSize: 12, cursor: 'pointer', fontWeight: 600 },
+  updateTime: { fontSize: 10, color: 'var(--admin-muted-content)', marginTop: 4 },
+  lastChecked: { fontSize: 11, color: 'var(--admin-muted-content)', marginTop: 2 },
   statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 10 },
   statCard: { padding: '10px 12px', borderRadius: 8, background: 'rgba(10, 51, 64, 0.02)', border: '1px solid rgba(10, 51, 64, 0.05)' },
-  statLabel: { fontSize: 10, color: 'rgba(10, 51, 64, 0.4)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 },
+  statLabel: { fontSize: 10, color: 'var(--admin-muted-content)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 4 },
   quickNavGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 10 },
   noUnderline: { textDecoration: 'none' },
-  navDesc: { fontSize: 11, color: 'rgba(10, 51, 64, 0.4)', marginTop: 2 },
+  navDesc: { fontSize: 11, color: 'var(--admin-muted-content)', marginTop: 2 },
   loadingContainer: { padding: 24 },
   btnRow: { display: 'flex', gap: 10 },
   dangerBtn: { padding: '10px 20px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, color: '#ef4444', fontSize: 12, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 },
   normalBtn: { padding: '10px 20px', background: 'rgba(10, 51, 64, 0.05)', border: '1px solid rgba(10, 51, 64, 0.1)', borderRadius: 10, color: '#0a3340', fontSize: 12, fontWeight: 600, cursor: 'pointer' },
-  warningBox: { marginTop: 12, padding: '10px 14px', background: 'rgba(19, 184, 166, 0.06)', borderRadius: 8, fontSize: 12, color: 'rgba(10, 51, 64, 0.5)' },
-  noData: { color: 'rgba(10, 51, 64, 0.4)', fontSize: 13, padding: 12 },
-  staffDesc: { fontSize: 13, lineHeight: 1.8, color: 'rgba(10, 51, 64, 0.6)' },
+  warningBox: { marginTop: 12, padding: '10px 14px', background: 'rgba(19, 184, 166, 0.06)', borderRadius: 8, fontSize: 12, color: 'var(--admin-muted-content)' },
+  noData: { color: 'var(--admin-muted-content)', fontSize: 13, padding: 12 },
+  staffDesc: { fontSize: 13, lineHeight: 1.8, color: 'var(--admin-muted-content)' },
   staffGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
   goldCard: { padding: 14, borderRadius: 10, background: 'rgba(19, 184, 166, 0.04)', border: '1px solid rgba(19, 184, 166, 0.1)' },
   goldTitle: { fontSize: 12, fontWeight: 700, color: 'var(--brand)', marginBottom: 6 },
-  goldList: { margin: 0, paddingLeft: 16, fontSize: 12, color: 'rgba(10, 51, 64, 0.5)', lineHeight: 2 },
+  goldList: { margin: 0, paddingLeft: 16, fontSize: 12, color: 'var(--admin-muted-content)', lineHeight: 2 },
   blueCard: { padding: 14, borderRadius: 10, background: 'rgba(23, 107, 135, 0.04)', border: '1px solid rgba(23, 107, 135, 0.1)' },
   blueTitle: { fontSize: 12, fontWeight: 700, color: '#176B87', marginBottom: 6 },
-  blueList: { margin: 0, paddingLeft: 16, fontSize: 12, color: 'rgba(10, 51, 64, 0.5)', lineHeight: 2 },
+  blueList: { margin: 0, paddingLeft: 16, fontSize: 12, color: 'var(--admin-muted-content)', lineHeight: 2 },
   deptGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 },
   deptLink: { textDecoration: 'none' },
   deptCard: { padding: '10px 12px', borderRadius: 8, background: 'rgba(10, 51, 64, 0.02)', border: '1px solid rgba(10, 51, 64, 0.05)', fontSize: 12, textAlign: 'center' },
@@ -51,12 +51,12 @@ const CS = {
 
 const sectionCardStyles = {
   container: { background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.07)', borderRadius: 16, padding: 24, marginBottom: 20 },
-  header: { fontSize: 11, color: 'rgba(10, 51, 64, 0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, marginBottom: 16, borderBottom: '1px solid rgba(10, 51, 64, 0.05)', paddingBottom: 12 },
+  header: { fontSize: 11, color: 'var(--admin-muted-content)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, marginBottom: 16, borderBottom: '1px solid rgba(10, 51, 64, 0.05)', paddingBottom: 12 },
 };
 
 const statRowStyles = {
   row: { display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(10, 51, 64, 0.03)', fontSize: 13 },
-  label: { color: 'rgba(10, 51, 64, 0.45)' },
+  label: { color: 'var(--admin-muted-content)' },
 };
 
 const getHealthBannerStyle = (status) => ({
@@ -206,7 +206,7 @@ export default function ControlRoom() {
             </p>
             <div style={CS.staffGrid}>
               <div style={CS.goldCard}>
-                <div style={CS.goldTitle}>👑 Webhost / Superadmin</div>
+                <div style={CS.goldTitle}>Webhost / Superadmin</div>
                 <ul style={CS.goldList}>
                   <li>Full system access &amp; configuration</li>
                   <li>Staff account management (CRUD)</li>
@@ -216,7 +216,7 @@ export default function ControlRoom() {
                 </ul>
               </div>
               <div style={CS.blueCard}>
-                <div style={CS.blueTitle}>⚙ Platform Admin</div>
+                <div style={CS.blueTitle}>Platform Admin</div>
                 <ul style={CS.blueList}>
                   <li>User &amp; seller management</li>
                   <li>Escrow &amp; transaction oversight</li>

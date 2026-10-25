@@ -6,6 +6,10 @@ import {
   Lightbulb, Send, Eye, Edit, Trash2, X, Check
 } from 'lucide-react';
 import * as govApi from '../../../services/governanceApi';
+import { isUnavailable } from '../../../components/admin/adminStat';
+
+// A missing or non-numeric figure is shown as Unavailable, never as 0.
+const nv = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 'Unavailable');
 
 // Design System Colors
 const colors = {
@@ -130,20 +134,20 @@ export default function GovernanceStudio() {
       {/* Summary Cards */}
       <div className="grid grid-cols-6 gap-4">
         {[
-          { label: 'Active Policies', value: dashboard?.summary?.activePolicies || 0, icon: FileText, color: colors.emerald },
-          { label: 'Pending Changes', value: dashboard?.summary?.pendingChanges || 0, icon: GitBranch, color: colors.terracotta },
-          { label: 'Pending Approvals', value: dashboard?.summary?.pendingApprovals || 0, icon: CheckCircle, color: colors.purple },
-          { label: 'Open Risks', value: dashboard?.summary?.openRisks || 0, icon: AlertTriangle, color: colors.mutedCrimson },
-          { label: 'Upcoming Releases', value: dashboard?.summary?.upcomingReleases || 0, icon: Clock, color: colors.softBlue },
-          { label: 'Compliance Score', value: dashboard?.summary?.complianceScore || 0, icon: Shield, color: colors.navy, suffix: '%' },
+          { label: 'Active Policies', value: nv(dashboard?.summary?.activePolicies), icon: FileText, color: colors.emerald },
+          { label: 'Pending Changes', value: nv(dashboard?.summary?.pendingChanges), icon: GitBranch, color: colors.terracotta },
+          { label: 'Pending Approvals', value: nv(dashboard?.summary?.pendingApprovals), icon: CheckCircle, color: colors.purple },
+          { label: 'Open Risks', value: nv(dashboard?.summary?.openRisks), icon: AlertTriangle, color: colors.mutedCrimson },
+          { label: 'Upcoming Releases', value: nv(dashboard?.summary?.upcomingReleases), icon: Clock, color: colors.softBlue },
+          { label: 'Compliance Score', value: nv(dashboard?.summary?.complianceScore), icon: Shield, color: colors.navy, suffix: '%' },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
             <div className="flex items-center gap-2 mb-3">
               <stat.icon size={18} style={{ color: stat.color }} />
               <span className="text-sm text-[#64748B]">{stat.label}</span>
             </div>
-            <p className="text-2xl font-bold text-[#0A3340]">
-              {stat.value}{stat.suffix}
+            <p className={`${isUnavailable(stat.value) ? 'text-base' : 'text-2xl'} font-bold text-[#0A3340]`}>
+              {stat.value}{typeof stat.value === 'number' ? stat.suffix : ''}
             </p>
           </div>
         ))}
@@ -154,14 +158,16 @@ export default function GovernanceStudio() {
         <h3 className="font-semibold text-[#0A3340] mb-4">Risk Overview</h3>
         <div className="grid grid-cols-4 gap-4">
           {[
-            { label: 'Critical', value: dashboard?.riskOverview?.critical || 0, color: colors.mutedCrimson },
-            { label: 'High', value: dashboard?.riskOverview?.high || 0, color: colors.mutedOrange },
-            { label: 'Medium', value: dashboard?.riskOverview?.medium || 0, color: '#13b8a6' },
-            { label: 'Low', value: dashboard?.riskOverview?.low || 0, color: colors.emerald },
+            { label: 'Critical', value: nv(dashboard?.riskOverview?.critical), color: colors.mutedCrimson },
+            { label: 'High', value: nv(dashboard?.riskOverview?.high), color: colors.mutedOrange },
+            { label: 'Medium', value: nv(dashboard?.riskOverview?.medium), color: '#13b8a6' },
+            { label: 'Low', value: nv(dashboard?.riskOverview?.low), color: colors.emerald },
           ].map((risk, i) => (
             <div key={i} className="text-center">
-              <div className="w-16 h-16 rounded-full mx-auto mb-2 flex items-center justify-center" style={{ backgroundColor: `${risk.color}20` }}>
-                <span className="text-2xl font-bold" style={{ color: risk.color }}>{risk.value}</span>
+              <div className="w-16 h-16 rounded-full mx-auto mb-2 flex items-center justify-center" style={{ backgroundColor: isUnavailable(risk.value) ? '#EEF4F3' : `${risk.color}20` }}>
+                {isUnavailable(risk.value)
+                  ? <span className="text-2xl font-bold" style={{ color: 'var(--admin-muted-content)' }}><span aria-hidden="true">—</span><span className="sr-only">Unavailable</span></span>
+                  : <span className="text-2xl font-bold" style={{ color: risk.color }}>{risk.value}</span>}
               </div>
               <p className="text-sm text-[#64748B]">{risk.label}</p>
             </div>
@@ -488,13 +494,13 @@ export default function GovernanceStudio() {
 
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Policy Compliance', value: compliance?.metrics?.policyCompliance?.score || 96, color: colors.emerald },
-          { label: 'Approval Compliance', value: compliance?.metrics?.approvalCompliance?.score || 98, color: colors.emerald },
-          { label: 'Overall Score', value: compliance?.overall?.score || 94, color: colors.navy },
+          { label: 'Policy Compliance', value: nv(compliance?.metrics?.policyCompliance?.score), color: colors.emerald },
+          { label: 'Approval Compliance', value: nv(compliance?.metrics?.approvalCompliance?.score), color: colors.emerald },
+          { label: 'Overall Score', value: nv(compliance?.overall?.score), color: colors.navy },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4] text-center">
             <p className="text-sm text-[#64748B] mb-2">{stat.label}</p>
-            <p className="text-4xl font-bold" style={{ color: stat.color }}>{stat.value}%</p>
+            <p className={`${isUnavailable(stat.value) ? 'text-xl' : 'text-4xl'} font-bold`} style={{ color: stat.color }}>{stat.value}{typeof stat.value === 'number' ? '%' : ''}</p>
           </div>
         ))}
       </div>
@@ -505,11 +511,11 @@ export default function GovernanceStudio() {
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <span className="text-sm text-[#64748B]">Open</span>
-              <span className="font-bold text-[#0A3340]">{compliance?.metrics?.auditFindings?.open || 3}</span>
+              <span className="font-bold text-[#0A3340]">{nv(compliance?.metrics?.auditFindings?.open)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-[#64748B]">Resolved</span>
-              <span className="font-bold text-emerald-600">{compliance?.metrics?.auditFindings?.resolved || 12}</span>
+              <span className="font-bold text-emerald-600">{nv(compliance?.metrics?.auditFindings?.resolved)}</span>
             </div>
           </div>
         </div>
@@ -517,15 +523,13 @@ export default function GovernanceStudio() {
         <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
           <h3 className="font-semibold text-[#0A3340] mb-4">Upcoming Reviews</h3>
           <div className="space-y-2">
-            {(compliance?.upcomingReviews || [
-              { policy: 'Security Policy', reviewDate: '2024-03-01' },
-              { policy: 'Data Privacy Policy', reviewDate: '2024-03-15' },
-            ]).map((review, i) => (
+            {(Array.isArray(compliance?.upcomingReviews) ? compliance.upcomingReviews : []).map((review, i) => (
               <div key={i} className="flex justify-between items-center p-3 bg-[#F6FAF9] rounded-lg">
                 <span className="text-sm text-[#12576D]">{review.policy}</span>
                 <span className="text-xs text-[#64748B]">{review.reviewDate}</span>
               </div>
             ))}
+            {!(Array.isArray(compliance?.upcomingReviews) && compliance.upcomingReviews.length) && <p className="text-sm text-[#64748B]" role="status">No upcoming reviews were returned.</p>}
           </div>
         </div>
       </div>
@@ -559,6 +563,7 @@ export default function GovernanceStudio() {
                 <td className="px-6 py-4 text-sm text-[#64748B]">{new Date(log.timestamp).toLocaleString()}</td>
               </tr>
             ))}
+            {auditLogs.length === 0 && <tr><td colSpan={4} className="px-6 py-6 text-sm text-[#64748B]">No audit entries were returned.</td></tr>}
           </tbody>
         </table>
       </div>
@@ -682,11 +687,11 @@ export default function GovernanceStudio() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-sm">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full" />
-                {dashboard?.summary?.complianceScore || 94}% Compliant
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${typeof dashboard?.summary?.complianceScore === 'number' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                <span className={`w-2 h-2 rounded-full ${typeof dashboard?.summary?.complianceScore === 'number' ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                {typeof dashboard?.summary?.complianceScore === 'number' ? `${dashboard.summary.complianceScore}% Compliant` : 'Compliance unavailable'}
               </div>
-              <button onClick={loadData} className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button onClick={loadData} className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Refresh">
                 <RefreshCw size={20} className="text-[#64748B]" />
               </button>
             </div>
@@ -719,9 +724,9 @@ export default function GovernanceStudio() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 overflow-auto">
+        <div className="flex-1 p-6 overflow-auto">
           {renderModuleContent()}
-        </main>
+        </div>
       </div>
     </div>
   );

@@ -2,10 +2,37 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { timeAgo, formatDate, initials } from '../../utils/helpers';
-import { AdminUserRow } from '../../components/AdminTableRow';
 
 const ROLE_BADGE  = { user: 'badge-blue', dealer: 'badge-gold', admin: 'badge-red' };
-const ROLE_ICON   = { user: '👤', dealer: '🏪', admin: '🔑' };
+
+const isBanned = (u) => Boolean(u.isBanned ?? u.is_banned);
+
+// One row per user, matching the eight columns declared in the table header.
+function UserRow({ user: u, onBan, onApprove, onSelect, actionId, selected }) {
+  const banned = isBanned(u);
+  const needsApproval = u.role === 'dealer' && !u.approved;
+  const statusLabel = banned ? 'banned' : needsApproval ? 'pending' : 'approved';
+  const statusClass = banned ? 'badge-red' : needsApproval ? 'badge-orange' : 'badge-green';
+  return (
+    <tr aria-selected={selected?._id === u._id || undefined} onClick={() => onSelect?.(u)}>
+      <td><span className="badge badge-muted" aria-hidden="true">{initials(u.name || u.email || '?')}</span></td>
+      <td style={{ fontWeight: 600, color: 'var(--admin-ink)' }}>{u.name || 'Unknown'}</td>
+      <td style={{ overflowWrap: 'anywhere' }}>{u.email || '—'}</td>
+      <td><span className={`badge ${ROLE_BADGE[u.role] || 'badge-muted'}`}>{u.role || 'user'}</span></td>
+      <td>{u.phone || '—'}</td>
+      <td>{u.createdAt || u.created_at ? formatDate(u.createdAt || u.created_at) : '—'}</td>
+      <td><span className={`badge ${statusClass}`}>{statusLabel}</span></td>
+      <td>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {needsApproval && (
+            <button type="button" className="btn btn-sm btn-primary" disabled={actionId === u._id + '-app'} onClick={(e) => { e.stopPropagation(); onApprove(u); }}>Approve</button>
+          )}
+          <button type="button" className="btn btn-sm btn-outline" disabled={actionId === u._id + '-ban'} onClick={(e) => { e.stopPropagation(); onBan(u); }}>{banned ? 'Unban' : 'Ban'}</button>
+        </div>
+      </td>
+    </tr>
+  );
+}
 
 export default function AdminUsers() {
   const { toast } = useToast();
@@ -44,7 +71,7 @@ export default function AdminUsers() {
       await adminAPI.toggleBan(u._id);
       setUsers(prev => prev.map(x => x._id === u._id ? { ...x, isBanned: !x.isBanned } : x));
       if (selected?._id === u._id) setSelected(prev => prev ? { ...prev, isBanned: !prev.isBanned } : prev);
-      toast(u.isBanned ? '✅ User unbanned' : '🚫 User banned', 'success');
+      toast(u.isBanned ? 'User unbanned' : 'User banned', 'success');
     } catch { toast('Failed', 'error'); }
     finally { setActionId(null); }
   }, [selected, toast]);
@@ -54,7 +81,7 @@ export default function AdminUsers() {
     try {
       await adminAPI.approveDealer(u._id);
       setUsers(prev => prev.map(x => x._id === u._id ? { ...x, approved: true } : x));
-      toast('✅ Dealer approved', 'success');
+      toast('Dealer approved', 'success');
     } catch { toast('Failed', 'error'); }
     finally { setActionId(null); }
   }, [toast]);
@@ -63,7 +90,7 @@ export default function AdminUsers() {
     const total = users.length;
     const admins = users.filter(u => u.role === 'admin' || u.role === 'superadmin').length;
     const dealers = users.filter(u => u.role === 'dealer').length;
-    const banned = users.filter(u => u.is_banned).length;
+    const banned = users.filter(isBanned).length;
     const pending = users.filter(u => u.role === 'dealer' && !u.approved).length;
     return { total, admins, dealers, banned, pending };
   }, [users]);
@@ -73,7 +100,7 @@ export default function AdminUsers() {
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 24, paddingBottom: 48 }}>
-        <h2 style={{ marginBottom: 24 }}>👥 User Management</h2>
+        <h2 style={{ marginBottom: 24 }}>User Management</h2>
 
         <div className="stat-grid" style={{ marginBottom: 24 }}>
           {[
@@ -91,7 +118,7 @@ export default function AdminUsers() {
         </div>
 
         <div className="data-table-controls" style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-          <input className="input" placeholder="🔍 Search users..." value={search}
+          <input className="input" placeholder="Search users..." value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             style={{ flex: '1 1 260px', maxWidth: 360 }} aria-label="Search users" />
           <select className="input" value={roleFilter} onChange={e => { setRoleFilter(e.target.value); setPage(1); }}
@@ -125,7 +152,7 @@ export default function AdminUsers() {
             </thead>
             <tbody>
               {users.map(u => (
-                <AdminUserRow
+                <UserRow
                   key={u._id}
                   user={u}
                   onBan={handleBan}

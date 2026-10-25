@@ -92,7 +92,7 @@ function ActionDialog({ action, target, onCancel, onDone }) {
         <label htmlFor="own-pw" style={{ display: 'block', fontWeight: 600, fontSize: 13 }}>Your password (to confirm it is really you)</label>
         <input id="own-pw" type="password" autoComplete="current-password" style={input} value={password} onChange={(e) => setPassword(e.target.value)} required />
       </div>
-      {error && <div role="alert" style={{ ...BOX, background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B' }}>{error}</div>}
+      {error && <div role="alert" style={{ ...BOX, background: 'var(--admin-status-danger-bg)', border: '1px solid var(--admin-status-danger-border)', color: 'var(--admin-status-danger)' }}>{error}</div>}
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
         <Button type="submit" variant={cfg.danger ? 'danger' : 'primary'} disabled={busy || !confirmOk || !password}>{busy ? 'Working…' : cfg.cta}</Button>
         <Button type="button" variant="outline" onClick={onCancel} disabled={busy}>Cancel</Button>
@@ -111,6 +111,10 @@ export default function AdminOwnerManagement() {
   const load = useCallback(async () => {
     try {
       const res = await ownerAPI.overview();
+      if (!res || !Array.isArray(res.members) || !Array.isArray(res.invitations)) {
+        setState({ status: 'error', message: 'Owner management returned an unexpected response. Nothing is shown rather than guessing.' });
+        return;
+      }
       setData(res); setState({ status: 'ready' });
     } catch (err) {
       const d = err?.response?.data || {};
@@ -123,7 +127,7 @@ export default function AdminOwnerManagement() {
 
   if (state.status === 'loading') return <div className="loading-center"><div className="spinner" /></div>;
   if (state.status === 'error') {
-    return <div role="alert" style={{ ...BOX, background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B' }}>{state.message} <button className="btn btn-sm btn-outline" onClick={load}>Retry</button></div>;
+    return <div role="alert" style={{ ...BOX, background: 'var(--admin-status-danger-bg)', border: '1px solid var(--admin-status-danger-border)', color: 'var(--admin-status-danger)' }}>{state.message} <button className="btn btn-sm btn-outline" onClick={load}>Retry</button></div>;
   }
 
   const usableCount = data.members.filter((m) => m.usable).length;
@@ -146,11 +150,11 @@ export default function AdminOwnerManagement() {
         {data.bootstrap?.status === 'open' ? ' Initial setup is still open.' : ''}
       </p>
       {!data.canManage && (
-        <div role="alert" style={{ ...BOX, background: '#EFF6FF', border: '1px solid #93C5FD', color: '#1E3A8A' }}>
+        <div role="alert" style={{ ...BOX, background: 'var(--admin-status-info-bg)', border: '1px solid var(--admin-status-info-border)', color: 'var(--admin-status-info)' }}>
           {data.store?.mode === 'legacy' ? 'Owner management needs the owner-governance migration, which has not been applied to this database. Owner access works as before.' : 'The membership store cannot be read, so changes are disabled.'}
         </div>
       )}
-      {notice && <div role="status" style={{ ...BOX, background: '#ECFDF5', border: '1px solid #6EE7B7', color: '#065F46' }}>{notice.text}</div>}
+      {notice && <div role="status" style={{ ...BOX, background: 'var(--admin-status-success-bg)', border: '1px solid var(--admin-status-success-border)', color: 'var(--admin-status-success)' }}>{notice.text}</div>}
       {dialog && <ActionDialog action={dialog.action} target={dialog.target} onCancel={() => setDialog(null)} onDone={done} />}
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>

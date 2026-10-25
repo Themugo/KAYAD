@@ -1,15 +1,16 @@
 import { useState } from 'react';
 
+import { Crown, Settings, Users, Wallet, Lock, Megaphone, Target, Wrench, ShieldCheck } from 'lucide-react';
 const ORG = [
-  { role: 'superadmin', title: 'Super Admin', icon: '👑', color: 'var(--brand)', bg: 'rgba(23, 107, 135, 0.1)', desc: 'Full platform control. Manages all staff, config, and financials.', level: 0, canCreate: false },
-  { role: 'admin', title: 'Admin', icon: '⚙️', color: '#176B87', bg: 'rgba(23, 107, 135, 0.08)', desc: 'Platform-wide oversight — users, cars, auctions, transactions.', level: 1 },
-  { role: 'hr', title: 'HR Manager', icon: '👥', color: '#176b87', bg: 'rgba(19, 184, 166, 0.08)', desc: 'Approves dealers and brokers. Manages seller onboarding.', level: 2 },
-  { role: 'accounts', title: 'Accounts & Finance', icon: '💰', color: '#22c55e', bg: 'rgba(34,197,94,0.08)', desc: 'Payments, escrows, reconciliation and financial reports.', level: 2 },
-  { role: 'escrow_officer', title: 'Escrow Officer', icon: '🔒', color: '#13B8A6', bg: 'rgba(19,184,166,0.08)', desc: 'Manages escrow releases and individual seller payment oversight.', level: 2 },
-  { role: 'marketing', title: 'Marketing', icon: '📢', color: '#5aafa4', bg: 'rgba(139,92,246,0.08)', desc: 'Ad campaigns, banners, homepage content and promotions.', level: 2 },
-  { role: 'ad_manager', title: 'Ad Manager', icon: '🎯', color: '#5aafa4', bg: 'rgba(168,85,247,0.08)', desc: 'Creates and manages sponsored listings and banner ads.', level: 3 },
-  { role: 'technical_support', title: 'Tech Support', icon: '🛠️', color: '#64748b', bg: 'rgba(100,116,139,0.08)', desc: 'User account management and car listing assistance.', level: 2 },
-  { role: 'moderator', title: 'Moderator', icon: '🛡️', color: '#64748b', bg: 'rgba(71,85,105,0.08)', desc: 'Content review, listing moderation and compliance.', level: 3 },
+  { role: 'superadmin', title: 'Super Admin', icon: Crown, color: 'var(--brand)', bg: 'rgba(23, 107, 135, 0.1)', desc: 'Full platform control. Manages all staff, config, and financials.', level: 0, canCreate: false },
+  { role: 'admin', title: 'Admin', icon: Settings, color: '#176B87', bg: 'rgba(23, 107, 135, 0.08)', desc: 'Platform-wide oversight — users, cars, auctions, transactions.', level: 1 },
+  { role: 'hr', title: 'HR Manager', icon: Users, color: '#176b87', bg: 'rgba(19, 184, 166, 0.08)', desc: 'Approves dealers and brokers. Manages seller onboarding.', level: 2 },
+  { role: 'accounts', title: 'Accounts & Finance', icon: Wallet, color: '#22c55e', bg: 'rgba(34,197,94,0.08)', desc: 'Payments, escrows, reconciliation and financial reports.', level: 2 },
+  { role: 'escrow_officer', title: 'Escrow Officer', icon: Lock, color: '#13B8A6', bg: 'rgba(19,184,166,0.08)', desc: 'Manages escrow releases and individual seller payment oversight.', level: 2 },
+  { role: 'marketing', title: 'Marketing', icon: Megaphone, color: '#5aafa4', bg: 'rgba(139,92,246,0.08)', desc: 'Ad campaigns, banners, homepage content and promotions.', level: 2 },
+  { role: 'ad_manager', title: 'Ad Manager', icon: Target, color: '#5aafa4', bg: 'rgba(168,85,247,0.08)', desc: 'Creates and manages sponsored listings and banner ads.', level: 3 },
+  { role: 'technical_support', title: 'Tech Support', icon: Wrench, color: '#64748b', bg: 'rgba(100,116,139,0.08)', desc: 'User account management and car listing assistance.', level: 2 },
+  { role: 'moderator', title: 'Moderator', icon: ShieldCheck, color: '#64748b', bg: 'rgba(71,85,105,0.08)', desc: 'Content review, listing moderation and compliance.', level: 3 },
 ];
 
 export { ORG };
@@ -27,7 +28,7 @@ export default function AdminStaffOrgChart({ staff, isSuperAdmin, onAddStaff }) 
           <div key={level} style={{ marginBottom: 32 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
               <div style={{ height: 1, flex: 1, background: 'rgba(10, 51, 64, 0.05)' }} />
-              <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(10, 51, 64, 0.25)', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'var(--admin-muted-content)', whiteSpace: 'nowrap' }}>
                 Level {level} · {levelLabel}
               </span>
               <div style={{ height: 1, flex: 1, background: 'rgba(10, 51, 64, 0.05)' }} />
@@ -39,10 +40,10 @@ export default function AdminStaffOrgChart({ staff, isSuperAdmin, onAddStaff }) 
                   <div key={r.role} style={{ background: '#FFFFFF', border: `1px solid ${r.color}20`, borderRadius: 14, padding: '20px', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, ${r.color}, transparent)` }} />
                     <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 12 }}>
-                      <div style={{ width: 42, height: 42, borderRadius: 10, background: r.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>{r.icon}</div>
+                      <div style={{ width: 42, height: 42, borderRadius: 10, background: r.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}><r.icon size={22} aria-hidden="true" /></div>
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 800, color: r.color, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{r.title}</div>
-                        <div style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.35)', marginTop: 3, lineHeight: 1.5 }}>{r.desc}</div>
+                        <div style={{ fontSize: 11, color: 'var(--admin-muted-content)', marginTop: 3, lineHeight: 1.5 }}>{r.desc}</div>
                       </div>
                     </div>
                     {members.length > 0 ? (
@@ -54,14 +55,14 @@ export default function AdminStaffOrgChart({ staff, isSuperAdmin, onAddStaff }) 
                             </div>
                             <div style={{ flex: 1, minWidth: 0 }}>
                               <div style={{ fontSize: 12, fontWeight: 600, color: '#0a3340', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</div>
-                              <div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.email}</div>
+                              <div style={{ fontSize: 10, color: 'var(--admin-muted-content)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.email}</div>
                             </div>
                             <div style={{ width: 6, height: 6, borderRadius: '50%', background: m.isBanned ? '#ef4444' : '#22c55e', flexShrink: 0 }} />
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.2)', fontStyle: 'italic', textAlign: 'center', padding: '8px 0' }}>No staff assigned</div>
+                      <div style={{ fontSize: 11, color: 'var(--admin-muted-content)', fontStyle: 'italic', textAlign: 'center', padding: '8px 0' }}>No staff assigned</div>
                     )}
                     {isSuperAdmin && r.role !== 'superadmin' && (
                       <button onClick={() => onAddStaff(r.role)}

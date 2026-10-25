@@ -1,0 +1,32 @@
+PASS Admin legacy surface stylesheet is imported by the canonical shell
+PASS Every selector in the legacy surface is scoped to the admin shell (no public/global leakage)
+PASS Legacy surface uses only defined admin tokens
+PASS Legacy surface introduces no raw brand hex values
+PASS Admin content canvas is light and the header and sidebar are sticky
+PASS Sidebar destinations each have a distinct icon
+PASS Sidebar offers a route back to the marketplace
+PASS Breadcrumb is a labelled navigation with readable acronym labels
+PASS Dashboard hero identity and role regexes are single-escaped (they match)
+PASS Dashboard announces data state with a status role and exposes labelled module navigation
+PASS Dashboard alerts panel reads the existing alerts source and never invents entries
+PASS Users and Listings tables render a row per declared column
+PASS AI builder defines the send handler its input calls
+PASS Platform Factory has no synthetic fallback data or invented growth figure
+PASS Automation and Configuration studios contain no invented rows
+PASS Studios contain no invented recommendations, breakdowns, review dates or knowledge counts
+PASS Visual Experience Studio has no hard-coded version history
+PASS SEO manager does not claim a sitemap time or active state it cannot know
+PASS Missing counters are not rendered as zero on resilience-fixed pages
+PASS Ad manager root no longer forces a dark page background
+PASS Automation, Configuration, VXP and Platform Factory contain no sample tasks, rules, templates, flags, makes, placements or campaigns
+PASS Governance, Control Center, Escrows and Referrals never substitute scores, statuses or zeros for missing data
+PASS Audience segment sizes and content analytics are not invented
+PASS Mounted admin pages and shell use the lucide icon family only (no pictograph emoji in the route import graph)
+PASS Dashboard System Health reads only the existing health contract and Recent Activity reads only fetched audit records
+PASS Quick actions and KPI links are offered only for destinations the role may open
+PASS The toast fallback is one stable module-level object (no per-render identity change)
+PASS Studio pages do not nest a second <main> inside the shell main
+PASS Studio sub-navigation and fixed grids collapse on narrow screens
+PASS The closed mobile navigation drawer is hidden from keyboard focus (visibility:hidden unless .open)
+
+Super Admin completion checks: 30/30 passed

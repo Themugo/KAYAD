@@ -9,6 +9,10 @@ import {
   EyeOff, Download, Upload, Save, RotateCcw
 } from 'lucide-react';
 import * as aiApi from '../../../services/aiApi';
+import { isUnavailable } from '../../../components/admin/adminStat';
+
+// A missing or non-numeric figure is shown as Unavailable, never as 0.
+const nv = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 'Unavailable');
 
 // Design System Colors
 const colors = {
@@ -95,6 +99,7 @@ export default function AIPlatformBuilder() {
   const [templates, setTemplates] = useState([]);
   const [pendingCommands, setPendingCommands] = useState([]);
   const messagesEndRef = useRef(null);
+  const scrollToBottom = () => { messagesEndRef.current?.scrollIntoView?.({ behavior: 'smooth' }); };
 
   useEffect(() => {
     loadData();
@@ -126,6 +131,38 @@ export default function AIPlatformBuilder() {
 
   const handleQuickAction = (command) => {
     setInput(command);
+  };
+
+  const handleSend = async () => {
+    const command = input.trim();
+    if (!command || loading) return;
+    setMessages(prev => [...prev, { role: 'user', content: command, timestamp: new Date().toISOString() }]);
+    setInput('');
+    setLoading(true);
+    try {
+      const { data: body } = await aiApi.processAICommand({ command });
+      const payload = body?.data ?? body ?? {};
+      const needsApproval = Boolean(payload.requiresApproval || payload.status === 'pending_approval');
+      if (needsApproval && payload.commandId) {
+        setPendingCommands(prev => [...prev.filter(c => c.commandId !== payload.commandId), payload]);
+      }
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: body?.message || payload.message || 'The command was submitted. The server returned no message.',
+        data: payload,
+        timestamp: new Date().toISOString(),
+      }]);
+    } catch (error) {
+      console.error('Failed to process AI command:', error);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: error?.response?.data?.message || 'The command could not be processed. Nothing was changed.',
+        isError: true,
+        timestamp: new Date().toISOString(),
+      }]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleApprove = async (commandId) => {
@@ -278,6 +315,7 @@ export default function AIPlatformBuilder() {
           />
           <button
             onClick={handleSend}
+            aria-label="Send"
             disabled={!input.trim() || loading}
             className="px-4 py-3 bg-[#0A3340] text-white rounded-xl hover:bg-[#12576D] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
@@ -398,7 +436,7 @@ export default function AIPlatformBuilder() {
           placeholder="Describe your automation... e.g., 'When a dealer is approved, send a welcome email, create their showroom, assign a support manager, and schedule onboarding.'"
           className="w-full h-32 p-4 border border-[#D7E7E4] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#0A3340]"
         />
-        <button className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#5aafa4] text-white rounded-lg hover:bg-[#176b87]">
+        <button className="mt-4 flex items-center gap-2 px-4 py-2 bg-[#176B87] text-white rounded-lg hover:bg-[#12576D]">
           <Sparkles size={18} />
           Generate Automation
         </button>
@@ -436,6 +474,7 @@ export default function AIPlatformBuilder() {
                     <button
                       onClick={() => { setInput(tmpl.example); setActiveModule('assistant'); }}
                       className="p-2 hover:bg-[#DDF4F0] rounded-lg"
+                      aria-label="Try this example"
                     >
                       <Play size={14} />
                     </button>
@@ -464,14 +503,7 @@ export default function AIPlatformBuilder() {
       </div>
 
       <div className="grid grid-cols-4 gap-4">
-        {[
-          { name: 'Policies', count: 24, color: colors.navy },
-          { name: 'Business Rules', count: 18, color: colors.emerald },
-          { name: 'Dealer Guidelines', count: 32, color: colors.terracotta },
-          { name: 'Auction Rules', count: 15, color: colors.softBlue },
-          { name: 'Support Articles', count: 156, color: colors.purple },
-          { name: 'Internal Docs', count: 45, color: colors.mutedOrange },
-        ].map((cat, i) => (
+        {[].map((cat, i) => (
           <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-[#D7E7E4]">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-3" style={{ backgroundColor: `${cat.color}20` }}>
               <BookOpen size={20} style={{ color: cat.color }} />
@@ -480,7 +512,7 @@ export default function AIPlatformBuilder() {
             <p className="text-2xl font-bold text-[#0A3340]">{cat.count}</p>
             <p className="text-xs text-[#64748B]">documents</p>
           </div>
-        ))}
+        ))}<p className="col-span-full text-sm text-[#64748B]" role="status">No knowledge categories were returned.</p>
       </div>
 
       <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
@@ -513,9 +545,9 @@ export default function AIPlatformBuilder() {
       {/* Stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Total Commands', value: dashboard?.totalCommands || 0, icon: Bot, color: colors.navy },
-          { label: 'Executed Today', value: dashboard?.executedToday || 0, icon: CheckCircle2, color: colors.emerald },
-          { label: 'Active Conversations', value: dashboard?.activeConversations || 0, icon: MessageSquare, color: colors.softBlue },
+          { label: 'Total Commands', value: nv(dashboard?.totalCommands), icon: Bot, color: colors.navy },
+          { label: 'Executed Today', value: nv(dashboard?.executedToday), icon: CheckCircle2, color: colors.emerald },
+          { label: 'Active Conversations', value: nv(dashboard?.activeConversations), icon: MessageSquare, color: colors.softBlue },
           { label: 'Success Rate', value: '96%', icon: TrendingUp, color: colors.terracotta },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
@@ -523,7 +555,7 @@ export default function AIPlatformBuilder() {
               <stat.icon size={18} style={{ color: stat.color }} />
               <span className="text-sm text-[#64748B]">{stat.label}</span>
             </div>
-            <p className="text-3xl font-bold text-[#0A3340]">{stat.value}</p>
+            <p className={`${isUnavailable(stat.value) ? 'text-lg' : 'text-3xl'} font-bold text-[#0A3340]`}>{stat.value}</p>
           </div>
         ))}
       </div>
@@ -533,13 +565,7 @@ export default function AIPlatformBuilder() {
         <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
           <h3 className="font-semibold text-[#0A3340] mb-4">Commands by Type</h3>
           <div className="space-y-3">
-            {[
-              { name: 'Create Pages', count: 45, color: colors.navy },
-              { name: 'Update Design', count: 38, color: colors.purple },
-              { name: 'Launch Campaigns', count: 28, color: colors.emerald },
-              { name: 'Analytics Queries', count: 25, color: colors.softBlue },
-              { name: 'Content Generation', count: 20, color: colors.terracotta },
-            ].map((item, i) => (
+            {[].map((item, i) => (
               <div key={i} className="flex items-center gap-3">
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
@@ -554,7 +580,7 @@ export default function AIPlatformBuilder() {
                   </div>
                 </div>
               </div>
-            ))}
+            ))}<p className="col-span-full text-sm text-[#64748B]" role="status">Command usage is not reported yet.</p>
           </div>
         </div>
 
@@ -663,11 +689,11 @@ export default function AIPlatformBuilder() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-2">
-                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" title="View">
+                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" title="View" aria-label="View">
                       <Eye size={16} />
                     </button>
                     {item.status === 'executed' && (
-                      <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" title="Rollback">
+                      <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" title="Rollback" aria-label="Rollback">
                         <RotateCcw size={16} />
                       </button>
                     )}
@@ -843,11 +869,11 @@ export default function AIPlatformBuilder() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-sm">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                AI Online
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${dashboard ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                <span className={`w-2 h-2 rounded-full ${dashboard ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                {dashboard ? 'AI data loaded' : 'AI status unavailable'}
               </div>
-              <button onClick={loadData} className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button onClick={loadData} className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Refresh">
                 <RefreshCw size={20} className="text-[#64748B]" />
               </button>
             </div>
@@ -868,7 +894,7 @@ export default function AIPlatformBuilder() {
                   onClick={() => setActiveModule(mod.id)}
                   className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                     isActive
-                      ? 'bg-[#5aafa4] text-white'
+                      ? 'bg-[#176B87] text-white'
                       : 'text-[#64748B] hover:bg-[#EEF7F5]'
                   }`}
                 >
@@ -887,11 +913,11 @@ export default function AIPlatformBuilder() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[#64748B]">Commands</span>
-                  <span className="text-sm font-medium text-[#0A3340]">{dashboard.executedToday}</span>
+                  <span className="text-sm font-medium text-[#0A3340]">{Number.isFinite(dashboard.executedToday) ? dashboard.executedToday : 'Unavailable'}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[#64748B]">Success</span>
-                  <span className="text-sm font-medium text-emerald-600">96%</span>
+                  <span className="text-sm font-medium text-emerald-600">{Number.isFinite(dashboard.successRate) ? `${dashboard.successRate}%` : 'Unavailable'}</span>
                 </div>
               </div>
             </div>
@@ -899,9 +925,9 @@ export default function AIPlatformBuilder() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-hidden">
+        <div className="flex-1 overflow-hidden">
           {renderModuleContent()}
-        </main>
+        </div>
       </div>
     </div>
   );

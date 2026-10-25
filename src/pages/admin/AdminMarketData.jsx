@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
+import { BarChart3 } from 'lucide-react';
 const EMPTY_FORM = { brand: '', model: '', year: '', bodyType: '', fuel: '', transmission: '', engineCC: '', lowPrice: '', avgPrice: '', highPrice: '', sampleSize: 1, source: 'platform' };
 
 export default function AdminMarketData() {
@@ -65,10 +66,10 @@ export default function AdminMarketData() {
       const body = { ...form, year: Number(form.year), engineCC: form.engineCC ? Number(form.engineCC) : undefined, lowPrice: Number(form.lowPrice), avgPrice: Number(form.avgPrice), highPrice: Number(form.highPrice), sampleSize: Number(form.sampleSize) };
       if (editing) {
         await adminAPI.updateMarketData(editing, body);
-        toast('✅ Entry updated', 'success');
+        toast('Entry updated', 'success');
       } else {
         await adminAPI.createMarketData(body);
-        toast('✅ Entry created', 'success');
+        toast('Entry created', 'success');
       }
       resetForm();
       load();
@@ -81,7 +82,7 @@ export default function AdminMarketData() {
     if (!window.confirm('Delete this market data entry?')) return;
     try {
       await adminAPI.deleteMarketData(id);
-      toast('🗑️ Entry deleted', 'success');
+      toast('Entry deleted', 'success');
       load();
     } catch (err) {
       toast(err.response?.data?.message || 'Delete failed', 'error');
@@ -95,7 +96,7 @@ export default function AdminMarketData() {
     if (!Array.isArray(parsed)) return toast('JSON must be an array of entries', 'error');
     try {
       const res = await adminAPI.bulkMarketData(parsed);
-      toast(`📦 ${res.created} created, ${res.errors?.length || 0} errors out of ${res.total}`, res.errors?.length ? 'warning' : 'success');
+      toast(`${res.created} created, ${res.errors?.length || 0} errors out of ${res.total}`, res.errors?.length ? 'warning' : 'success');
       setBulkInput('');
       setShowBulk(false);
       load();
@@ -112,10 +113,10 @@ export default function AdminMarketData() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
           <div>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 900, fontStyle: 'italic' }}> Market Data</h2>
-            <p style={{ color: 'rgba(10, 51, 64, 0.35)', fontSize: 13, marginTop: 6 }}>Pricing guide CRUD management</p>
+            <p style={{ color: 'var(--admin-muted-content)', fontSize: 13, marginTop: 6 }}>Pricing guide CRUD management</p>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-outline btn-sm" onClick={() => setShowBulk(!showBulk)} style={{ fontSize: 11 }}>📦 Bulk Import</button>
+            <button className="btn btn-outline btn-sm" onClick={() => setShowBulk(!showBulk)} style={{ fontSize: 11 }}>Bulk Import</button>
             <button className="btn btn-gold btn-sm" onClick={() => { resetForm(); setShowForm(true); }} style={{ fontSize: 11 }}>+ New Entry</button>
           </div>
         </div>
@@ -179,7 +180,7 @@ export default function AdminMarketData() {
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}><div className="spinner" /></div>
         ) : entries.length === 0 ? (
-          <div className="empty-state" style={{ padding: 48 }}><div className="empty-icon">📊</div><h3>No market data found</h3><p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Add your first pricing entry or adjust filters</p></div>
+          <div className="empty-state" style={{ padding: 48 }}><div className="empty-icon"><BarChart3 size={32} aria-hidden="true" /></div><h3>No market data found</h3><p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Add your first pricing entry or adjust filters</p></div>
         ) : (
           <>
             <div style={{ background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.07)', borderRadius: 14, overflow: 'hidden' }}>
@@ -187,7 +188,7 @@ export default function AdminMarketData() {
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(10, 51, 64, 0.06)' }}>
                     {['Brand', 'Model', 'Year', 'Body', 'Fuel', 'Low', 'Avg', 'High', 'Sample', 'Actions'].map(h => (
-                      <th key={h} style={{ padding: '12px 14px', textAlign: 'left', color: 'rgba(10, 51, 64, 0.4)', fontWeight: 600, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{h}</th>
+                      <th key={h} style={{ padding: '12px 14px', textAlign: 'left', color: 'var(--admin-muted-content)', fontWeight: 600, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -196,13 +197,13 @@ export default function AdminMarketData() {
                     <tr key={e._id} style={{ borderBottom: '1px solid rgba(10, 51, 64, 0.04)' }}>
                       <td style={{ padding: '12px 14px', color: '#0a3340', fontWeight: 600 }}>{e.brand}</td>
                       <td style={{ padding: '12px 14px', color: 'rgba(10, 51, 64, 0.7)' }}>{e.model}</td>
-                      <td style={{ padding: '12px 14px', color: 'rgba(10, 51, 64, 0.5)' }}>{e.year}</td>
-                      <td style={{ padding: '12px 14px', color: 'rgba(10, 51, 64, 0.4)' }}>{e.bodyType || '—'}</td>
-                      <td style={{ padding: '12px 14px', color: 'rgba(10, 51, 64, 0.4)' }}>{e.fuel || '—'}</td>
-                      <td style={{ padding: '12px 14px', color: 'rgba(10, 51, 64, 0.5)' }}>{formatKES(e.lowPrice)}</td>
+                      <td style={{ padding: '12px 14px', color: 'var(--admin-muted-content)' }}>{e.year}</td>
+                      <td style={{ padding: '12px 14px', color: 'var(--admin-muted-content)' }}>{e.bodyType || '—'}</td>
+                      <td style={{ padding: '12px 14px', color: 'var(--admin-muted-content)' }}>{e.fuel || '—'}</td>
+                      <td style={{ padding: '12px 14px', color: 'var(--admin-muted-content)' }}>{formatKES(e.lowPrice)}</td>
                       <td style={{ padding: '12px 14px', color: 'var(--brand)', fontWeight: 600 }}>{formatKES(e.avgPrice)}</td>
-                      <td style={{ padding: '12px 14px', color: 'rgba(10, 51, 64, 0.5)' }}>{formatKES(e.highPrice)}</td>
-                      <td style={{ padding: '12px 14px', color: 'rgba(10, 51, 64, 0.3)' }}>{e.sampleSize}</td>
+                      <td style={{ padding: '12px 14px', color: 'var(--admin-muted-content)' }}>{formatKES(e.highPrice)}</td>
+                      <td style={{ padding: '12px 14px', color: 'var(--admin-muted-content)' }}>{e.sampleSize}</td>
                       <td style={{ padding: '12px 14px' }}>
                         <div style={{ display: 'flex', gap: 6 }}>
                           <button className="btn btn-outline btn-sm" style={{ fontSize: 9 }} onClick={() => handleEdit(e)}>Edit</button>

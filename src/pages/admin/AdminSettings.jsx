@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Children, cloneElement, isValidElement } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { adminAPI } from '../../api/api';
@@ -173,18 +173,18 @@ export default function AdminSettings() {
         {label}
         {hint && <div style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>{hint}</div>}
       </label>
-      {children}
+      {Children.map(children, child => (isValidElement(child) && child.props['aria-label'] === undefined ? cloneElement(child, { 'aria-label': label }) : child))}
     </div>
   );
 
   const tabs = useMemo(() => {
     const all = [
-      { id: 'general', label: '⚙ General' },
-      { id: 'onboarding', label: '🚪 Onboarding' },
-      { id: 'branding', label: '🎨 Branding' },
-      { id: 'payments', label: '💳 Payments' },
-      { id: 'reconciliation', label: '🔄 Reconciliation' },
-      { id: 'audit', label: '📋 Audit Log' },
+      { id: 'general', label: 'General' },
+      { id: 'onboarding', label: 'Onboarding' },
+      { id: 'branding', label: 'Branding' },
+      { id: 'payments', label: 'Payments' },
+      { id: 'reconciliation', label: 'Reconciliation' },
+      { id: 'audit', label: 'Audit Log' },
     ];
     return isSuperAdmin ? all : all.filter((t) => ['general', 'onboarding', 'branding', 'payments'].includes(t.id));
   }, [isSuperAdmin]);
@@ -251,7 +251,7 @@ export default function AdminSettings() {
                 ].map(f => (
                   <div key={f.key} className="input-group">
                     <label className="input-label">{f.label}</label>
-                    <input className="input" type={f.type} value={config[f.key]}
+                    <input aria-label={f.label} className="input" type={f.type} value={config[f.key]}
                       onChange={e => setConfig(p => ({ ...p, [f.key]: e.target.value }))} />
                   </div>
                 ))}
@@ -269,7 +269,7 @@ export default function AdminSettings() {
                 ].map(f => (
                   <div key={f.key} className="input-group">
                     <label className="input-label">{f.label}</label>
-                    <input className="input" type={f.type} min={f.min} max={f.max} value={config[f.key]}
+                    <input aria-label={f.label} className="input" type={f.type} min={f.min} max={f.max} value={config[f.key]}
                       onChange={e => setConfig(p => ({ ...p, [f.key]: e.target.value }))} />
                   </div>
                 ))}
@@ -290,7 +290,7 @@ export default function AdminSettings() {
               ))}
               <div style={{ marginTop: 16 }}>
                 <button className="btn btn-gold" onClick={() => saveConfig('general')} disabled={saving} style={{ width: '100%' }}>
-                  {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : '💾 Save General Settings'}
+                  {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : 'Save General Settings'}
                 </button>
               </div>
             </div>
@@ -303,7 +303,7 @@ export default function AdminSettings() {
           <div style={{ display: 'grid', gap: 20 }}>
             <div className="card" style={{ padding: 24 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <h3 style={{ fontSize: 18 }}>📱 Daraja / M-Pesa</h3>
+                <h3 style={{ fontSize: 18 }}>Daraja / M-Pesa</h3>
                 <span className={`badge ${daraja.environment === 'production' ? 'badge-orange' : 'badge-green'}`} style={{ textTransform: 'uppercase' }}>
                   {daraja.environment}
                 </span>
@@ -344,22 +344,22 @@ export default function AdminSettings() {
                 </Field>
 
                 <div style={{ borderTop: '1px solid var(--border)', paddingTop: 16 }}>
-                  <h4 style={{ fontSize: 14, marginBottom: 12 }}>🧪 Test M-Pesa Payment</h4>
+                  <h4 style={{ fontSize: 14, marginBottom: 12 }}>Test M-Pesa Payment</h4>
                   <div style={{ display: 'flex', gap: 16, alignItems: 'flex-end', flexWrap: 'wrap' }}>
                     <div>
                       <label style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>Test Phone (254...)</label>
-                      <input className="input" type="text" value={testPhone}
+                      <input aria-label="Test phone number" className="input" type="text" value={testPhone}
                         onChange={e => setTestPhone(e.target.value)}
                         style={{ width: 180, height: 38 }} />
                     </div>
                     <div>
                       <label style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>Amount (KES)</label>
-                      <input className="input" type="number" min={1} max={1000} value={testAmount}
+                      <input aria-label="Test amount in KES" className="input" type="number" min={1} max={1000} value={testAmount}
                         onChange={e => setTestAmount(Number(e.target.value))}
                         style={{ width: 100, height: 38 }} />
                     </div>
                     <button className="btn btn-gold" onClick={testMpesa} disabled={testingMpesa} style={{ height: 38 }}>
-                      {testingMpesa ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Sending...</> : '💳 Send Test Payment'}
+                      {testingMpesa ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Sending...</> : 'Send Test Payment'}
                     </button>
                   </div>
                   <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
@@ -369,14 +369,14 @@ export default function AdminSettings() {
 
                 <div style={{ marginTop: 8 }}>
                   <button className="btn btn-gold" onClick={() => saveConfig('payments')} disabled={saving}>
-                    {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : '💾 Save Payment Settings'}
+                    {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : 'Save Payment Settings'}
                   </button>
                 </div>
               </div>
             </div>
 
             <div className="card" style={{ padding: 24 }}>
-              <h3 style={{ fontSize: 18, marginBottom: 20 }}>🏦 Bank Transfer</h3>
+              <h3 style={{ fontSize: 18, marginBottom: 20 }}>Bank Transfer</h3>
               <div style={{ display: 'grid', gap: 16, maxWidth: 700 }}>
                 {[
                   { key: 'bankName', label: 'Bank Name' },
@@ -404,7 +404,7 @@ export default function AdminSettings() {
         {/* ═══ RECONCILIATION ═══ */}
         {tab === 'reconciliation' && (
           <div className="card" style={{ padding: 24 }}>
-            <h3 style={{ fontSize: 18, marginBottom: 20 }}>🔄 Auto-Reconciliation</h3>
+            <h3 style={{ fontSize: 18, marginBottom: 20 }}>Auto-Reconciliation</h3>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
               Automatically match M-Pesa and bank deposits to platform transactions.
             </p>
@@ -452,7 +452,7 @@ export default function AdminSettings() {
             </div>
             <div style={{ marginTop: 20 }}>
               <button className="btn btn-gold" onClick={() => saveConfig('reconciliation')} disabled={saving}>
-                {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : '💾 Save Reconciliation Settings'}
+                {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : 'Save Reconciliation Settings'}
               </button>
             </div>
           </div>

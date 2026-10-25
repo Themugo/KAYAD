@@ -1,0 +1,4030 @@
+[
+ {
+  "name": "fin-b-populated-admin-390x844",
+  "route": "/admin",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [
+    {
+     "t": "TA",
+     "r": 1.67,
+     "el": "span.kayad-command-identity-mark"
+    }
+   ],
+   "lowContrastCount": 1,
+   "firstChild": {
+    "tag": "div",
+    "cls": "mx-auto w-full min-w-0 max-w-[1600px] space-y-5 sm:space-y-6",
+    "pt": "12px",
+    "pl": "12px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [
+    "a."
+   ],
+   "h1": "Welcome back, Test Administrator",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "a",
+      "name": "Add Staff",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "a",
+      "name": "Approve Dealer",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "a",
+      "name": "View Vehicles",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "a",
+      "name": "View Reports",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "button",
+      "name": "Refresh administration data",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "button",
+      "name": "Show specialist tools",
+      "outline": true,
+      "shadow": true
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 6,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 12
+ },
+ {
+  "name": "fin-b-populated-admin_users-390x844",
+  "route": "/admin/users",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [
+    "table.",
+    "thead.",
+    "tr.",
+    "th.",
+    "tbody.",
+    "td."
+   ],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "input",
+      "name": "Search users",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "select",
+      "name": "Filter by role",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "select",
+      "name": "Filter by status",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "button",
+      "name": "Approve",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Ban",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Approve",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_sellers-390x844",
+  "route": "/admin/sellers",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [
+    "table.data-table",
+    "thead.",
+    "tr.",
+    "th.",
+    "tbody.",
+    "td."
+   ],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "button",
+      "name": "All",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Approved",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Pending",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Suspended",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Price",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_cars-390x844",
+  "route": "/admin/cars",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [
+    "table.",
+    "thead.",
+    "tr.",
+    "th.",
+    "tbody.",
+    "td."
+   ],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "input",
+      "name": "Search listings",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "select",
+      "name": "Filter by status",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "a",
+      "name": "2019 Fixture Prado TX",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Delete",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "a",
+      "name": "2021 Fixture Mazda CX-5",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Delete",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 6,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_moderation-390x844",
+  "route": "/admin/moderation",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 497,
+   "contentClientW": 390,
+   "overflowing": [
+    "div.",
+    "select.input",
+    "table.data-table",
+    "thead.",
+    "tr.",
+    "th."
+   ],
+   "h1": "Car Moderation Queue",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "select",
+      "name": "Filter vehicles by moderation ",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "input",
+      "name": "Select all vehicles on this pa",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "input",
+      "name": "Select this vehicle",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Approve",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Hide",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_auctions-390x844",
+  "route": "/admin/auctions",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Live (0)",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Draft (0)",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Ended (0)",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Live (0)",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 7
+ },
+ {
+  "name": "fin-b-populated-admin_bids-390x844",
+  "route": "/admin/bids",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "All Bids (0)",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Suspicious (0)",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "button",
+      "name": "All",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Paid",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Unpaid",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 6
+ },
+ {
+  "name": "fin-b-populated-admin_escrows-390x844",
+  "route": "/admin/escrows",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 428,
+   "contentClientW": 390,
+   "overflowing": [
+    "button.btn btn-outline btn-sm"
+   ],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "↻ Reconcile",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "◈ Scan Anomalies",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 6
+ },
+ {
+  "name": "fin-b-populated-admin_transactions-390x844",
+  "route": "/admin/transactions",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [
+    "table.data-table",
+    "thead.",
+    "tr.",
+    "th.",
+    "tbody.",
+    "td."
+   ],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "select",
+      "name": "Filter transactions by status",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "select",
+      "name": "Filter transactions by type",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "div",
+      "name": "Transactions table (scrollable",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "select",
+      "name": "Filter transactions by status",
+      "outline": true,
+      "shadow": true
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_ntsa_queue-390x844",
+  "route": "/admin/ntsa-queue",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "32px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "select",
+      "name": "Filter NTSA queue by status",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Queue Car",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "select",
+      "name": "Filter NTSA queue by status",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Queue Car",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_inspections-390x844",
+  "route": "/admin/inspections",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "32px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "select",
+      "name": "Filter inspections by status",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "select",
+      "name": "Filter inspections by status",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 6
+ },
+ {
+  "name": "fin-b-populated-admin_dealer_verifications-390x844",
+  "route": "/admin/dealer-verifications",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "",
+    "pt": "32px",
+    "pl": "32px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [
+    "table.",
+    "thead.",
+    "tr.",
+    "th.",
+    "tbody.",
+    "td."
+   ],
+   "h1": "Dealer Verifications",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "select",
+      "name": "Filter dealer verifications by",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "div",
+      "name": "Dealer verification table (scr",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_inspector_applications-390x844",
+  "route": "/admin/inspector-applications",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "select",
+      "name": "Filter inspector applications ",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "button",
+      "name": "Retry loading applications",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "select",
+      "name": "Filter inspector applications ",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "button",
+      "name": "Retry loading applications",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_reviews-390x844",
+  "route": "/admin/reviews",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "",
+    "pt": "32px",
+    "pl": "32px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_referrals-390x844",
+  "route": "/admin/referrals",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "",
+    "pt": "32px",
+    "pl": "32px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "All Referrals",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Stats",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "User Tree",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "All",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "pending",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "credited",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_chats-390x844",
+  "route": "/admin/chats",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "",
+    "pt": "32px",
+    "pl": "32px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 603,
+   "contentClientW": 390,
+   "overflowing": [
+    "div.",
+    "h2.",
+    "p.",
+    "input.",
+    "div.empty-state",
+    "div.empty-icon"
+   ],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_reports-390x844",
+  "route": "/admin/reports",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Reports",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_support_tickets-390x844",
+  "route": "/admin/support-tickets",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "space-y-4",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "select",
+      "name": "ActiveAllOpenIn progressWaitin",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "select",
+      "name": "Anylowmediumhighurgent",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "select",
+      "name": "AnyoneUnassigned",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 7
+ },
+ {
+  "name": "fin-b-populated-admin_feedback-390x844",
+  "route": "/admin/feedback",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "All",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "New",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Read",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Addressed",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_market_data-390x844",
+  "route": "/admin/market-data",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "",
+    "pt": "32px",
+    "pl": "32px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Bulk Import",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "+ New Entry",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_ads-390x844",
+  "route": "/admin/ads",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "+ New Campaign",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Retry",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "+ New Campaign",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Retry",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_broadcast-390x844",
+  "route": "/admin/broadcast",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Broadcast Message",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "textarea",
+      "name": "",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "select",
+      "name": "Audience",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": true
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 4
+ },
+ {
+  "name": "fin-b-populated-admin_security_log-390x844",
+  "route": "/admin/security-log",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 442,
+   "contentClientW": 390,
+   "overflowing": [
+    "div.",
+    "button.btn btn-sm btn-outline"
+   ],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Show Statistics",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Export JSON",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Export CSV",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "select",
+      "name": "Filter by severity",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "select",
+      "name": "Filter by target model",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": true
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_settings-390x844",
+  "route": "/admin/settings",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "General",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Onboarding",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Branding",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Payments",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Reconciliation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Audit Log",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 6
+ },
+ {
+  "name": "fin-b-populated-admin_control_room-390x844",
+  "route": "/admin/control-room",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "admin-page",
+    "pt": "16px",
+    "pl": "16px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Operations Control Room",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Refresh health",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Refresh health",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 8
+ },
+ {
+  "name": "fin-b-populated-admin_staff-390x844",
+  "route": "/admin/staff",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "",
+    "pt": "24px",
+    "pl": "12px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Staff directory & access",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Create staff account",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Staff directory",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Role overview",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Permission matrix",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 6
+ },
+ {
+  "name": "fin-b-populated-admin_staff_permissions-390x844",
+  "route": "/admin/staff-permissions",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "",
+    "pt": "0px",
+    "pl": "4px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 6
+ },
+ {
+  "name": "fin-b-populated-admin_panic_room-390x844",
+  "route": "/admin/panic-room",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Panic Room",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "KILL ALL AUCTIONS",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "button",
+      "name": "↩ Re-enable Auctions",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "FREEZE PAYMENTS",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "button",
+      "name": "↩ Re-enable Payments",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "BLOCK REGISTRATIONS",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "button",
+      "name": "↩ Open Registrations",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_webhoist-390x844",
+  "route": "/admin/webhoist",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "",
+    "pt": "28px",
+    "pl": "32px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "System Overview",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "a",
+      "name": "Total Users: 1,280. View detai",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "a",
+      "name": "Total Cars: 342. View details",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "a",
+      "name": "Active Auctions: 7. View detai",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "a",
+      "name": "Open Escrows: 12. View details",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "a",
+      "name": "Total Bids: Unavailable. View ",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 6
+ },
+ {
+  "name": "fin-b-populated-admin_cms-390x844",
+  "route": "/admin/cms",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "min-h-screen bg-[#EEF7F5]",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 465,
+   "contentClientW": 390,
+   "overflowing": [
+    "div.flex items-center gap-4",
+    "div.relative",
+    "input.pl-10 pr-4 py-2 rounded-lg border border",
+    "button.p-2 rounded-lg hover:bg-[#EEF7F5] text-[",
+    "path.[object SVGAnimatedString]",
+    "circle.[object SVGAnimatedString]"
+   ],
+   "h1": "Content Studio",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "button",
+      "name": "Notifications",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Settings",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Dashboard",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Pages",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Landing Pages",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 6
+ },
+ {
+  "name": "fin-b-populated-admin_automation-390x844",
+  "route": "/admin/automation",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "min-h-screen bg-[#EEF7F5]",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Automation Studio",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Notifications",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Settings",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Dashboard",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Workflows",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Business Rules",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Approvals",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 6
+ },
+ {
+  "name": "fin-b-populated-admin_config-390x844",
+  "route": "/admin/config",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "min-h-screen bg-[#EEF7F5]",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Configuration Center",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Notifications",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Dashboard",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "General Settings",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Vehicle Master Data",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Location Data",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_lowcode-390x844",
+  "route": "/admin/lowcode",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "min-h-screen bg-[#EEF7F5]",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Business Object Studio",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Settings",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Business Objects",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Schema Designer",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Form Builder",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "View Builder",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 6
+ },
+ {
+  "name": "fin-b-populated-admin_vxp-390x844",
+  "route": "/admin/vxp",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "min-h-screen bg-[#EEF7F5]",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 463,
+   "contentClientW": 390,
+   "overflowing": [
+    "div.flex items-center gap-3",
+    "div.flex items-center gap-4 text-sm",
+    "span.text-[#64748B]",
+    "button.p-2 hover:bg-[#EEF7F5] rounded-lg",
+    "path.[object SVGAnimatedString]",
+    "circle.[object SVGAnimatedString]"
+   ],
+   "h1": "Visual Experience Studio",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Settings",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Page Designer",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Theme Designer",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Layout Manager",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Component Library",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Card Designer",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 8
+ },
+ {
+  "name": "fin-b-populated-admin_xos-390x844",
+  "route": "/admin/xos",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [
+    {
+     "t": "AI Experience Recommendations",
+     "r": 1.09,
+     "el": "h3.font-semibold"
+    }
+   ],
+   "lowContrastCount": 1,
+   "firstChild": {
+    "tag": "div",
+    "cls": "min-h-screen bg-[#EEF7F5]",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Experience Studio",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Settings",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Dashboard",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Campaigns",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Audiences",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Journeys",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 12
+ },
+ {
+  "name": "fin-b-populated-admin_ai-390x844",
+  "route": "/admin/ai",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "min-h-screen bg-[#EEF7F5]",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [
+    "button.flex items-center gap-2 px-3 py-1.5 bg-w",
+    "path.[object SVGAnimatedString]",
+    "circle.[object SVGAnimatedString]",
+    "rect.[object SVGAnimatedString]",
+    "line.[object SVGAnimatedString]"
+   ],
+   "h1": "AI Platform Builder",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "AI Assistant",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "AI Designer",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "AI Automation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Prompt Studio",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Knowledge Base",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 9
+ },
+ {
+  "name": "fin-b-populated-admin_digital_twin-390x844",
+  "route": "/admin/digital-twin",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [
+    {
+     "t": "AI Decision Recommendations",
+     "r": 1.09,
+     "el": "h3.font-semibold"
+    }
+   ],
+   "lowContrastCount": 1,
+   "firstChild": {
+    "tag": "div",
+    "cls": "min-h-screen bg-[#EEF7F5]",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Digital Twin Center",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Decision Dashboard",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Marketplace Simulator",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Auction Simulator",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Pricing Simulator",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Marketing Simulator",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 9
+ },
+ {
+  "name": "fin-b-populated-admin_control_center-390x844",
+  "route": "/admin/control-center",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "min-h-screen bg-[#EEF7F5]",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Enterprise Control Center",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Executive Overview",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "System Health",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Business Health",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Security Center",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Incidents",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 11
+ },
+ {
+  "name": "fin-b-populated-admin_integration-390x844",
+  "route": "/admin/integration",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "section",
+    "cls": "space-y-6",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Integration Studio",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_governance-390x844",
+  "route": "/admin/governance",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "min-h-screen bg-[#EEF7F5]",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Governance Studio",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Executive Dashboard",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Policy Manager",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Change Management",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Approval Matrix",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Feature Lifecycle",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 15
+ },
+ {
+  "name": "fin-b-populated-admin_intelligence-390x844",
+  "route": "/admin/intelligence",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "section",
+    "cls": "space-y-6",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Executive Intelligence",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_command_center-390x844",
+  "route": "/admin/command-center",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "section",
+    "cls": "space-y-6 p-6 md:p-8",
+    "pt": "24px",
+    "pl": "24px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Command Center",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 6
+ },
+ {
+  "name": "fin-b-populated-admin_improvement-390x844",
+  "route": "/admin/improvement",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "section",
+    "cls": "space-y-6",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Continuous Improvement",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 6
+ },
+ {
+  "name": "fin-b-populated-admin_platform_factory-390x844",
+  "route": "/admin/platform-factory",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "min-h-screen bg-[#EEF7F5]",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": "Platform Factory",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Dashboard",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Templates",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Products",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Components",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Services",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 11
+ },
+ {
+  "name": "fin-b-populated-admin_owners-390x844",
+  "route": "/admin/owners",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "",
+    "pt": "10px",
+    "pl": "14px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Retry",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Retry",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_communications-390x844",
+  "route": "/admin/communications",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "p-6 space-y-6",
+    "pt": "24px",
+    "pl": "24px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [
+    "table.w-full text-sm",
+    "thead.",
+    "tr.text-left text-xs text-[#64748B] border-",
+    "th.p-3",
+    "tbody."
+   ],
+   "h1": "Messaging Operations",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Email",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Kenya SMS",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "WhatsApp",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Off",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "div",
+      "name": "Scrollable table",
+      "outline": true,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 9
+ },
+ {
+  "name": "fin-b-populated-admin_provider_governance-390x844",
+  "route": "/admin/provider-governance",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "bg-white rounded-2xl border border-[#D7E7E4] shadow-card tra",
+    "pt": "20px",
+    "pl": "20px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "select",
+      "name": "all stagesunder reviewcredenti",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Open admin navigation",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "select",
+      "name": "all stagesunder reviewcredenti",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": true
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 5
+ },
+ {
+  "name": "fin-b-populated-admin_support-390x844",
+  "route": "/admin/support",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [],
+   "lowContrastCount": 0,
+   "firstChild": {
+    "tag": "div",
+    "cls": "space-y-4",
+    "pt": "0px",
+    "pl": "0px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "select",
+      "name": "ActiveAllOpenIn progressWaitin",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "select",
+      "name": "Anylowmediumhighurgent",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "select",
+      "name": "AnyoneUnassigned",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "input",
+      "name": "",
+      "outline": true,
+      "shadow": false
+     },
+     {
+      "tag": "button",
+      "name": "Refresh",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "body",
+      "name": "KAYADAdmin ConsoleCommand Cent",
+      "outline": false,
+      "shadow": false
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": true
+   }
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 7
+ },
+ {
+  "name": "fin-b-populated-admin_dashboard-390x844",
+  "route": "/admin/dashboard",
+  "viewport": "390x844",
+  "scenario": "populated",
+  "metrics": {
+   "lowContrast": [
+    {
+     "t": "TA",
+     "r": 1.67,
+     "el": "span.kayad-command-identity-mark"
+    }
+   ],
+   "lowContrastCount": 1,
+   "firstChild": {
+    "tag": "div",
+    "cls": "mx-auto w-full min-w-0 max-w-[1600px] space-y-5 sm:space-y-6",
+    "pt": "12px",
+    "pl": "12px",
+    "left": 0,
+    "top": 0
+   },
+   "boundary": false,
+   "unnamedControls": 0,
+   "unnamedList": [],
+   "scrollW": 390,
+   "innerW": 390,
+   "hOverflowPage": false,
+   "contentScrollW": 390,
+   "contentClientW": 390,
+   "overflowing": [
+    "a."
+   ],
+   "h1": "Welcome back, Test Administrator",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+   "axe": [],
+   "interact": {
+    "navOpen": true,
+    "focusInSidebar": true,
+    "navClosedByEscape": true,
+    "focusReturnedToToggle": true,
+    "tabSequence": [
+     {
+      "tag": "a",
+      "name": "Add Staff",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "a",
+      "name": "Approve Dealer",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "a",
+      "name": "View Vehicles",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "a",
+      "name": "View Reports",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "button",
+      "name": "Refresh administration data",
+      "outline": true,
+      "shadow": true
+     },
+     {
+      "tag": "button",
+      "name": "Show specialist tools",
+      "outline": true,
+      "shadow": true
+     }
+    ],
+    "focusIndicatorOnAll": true,
+    "tabWrapped": false
+   }
+  },
+  "consoleErrors": 6,
+  "pageErrors": [],
+  "failedRequests": 3,
+  "apiRequests": 12
+ }
+]

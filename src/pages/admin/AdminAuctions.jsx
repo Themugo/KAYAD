@@ -4,6 +4,7 @@ import { carsAPI, auctionAdminAPI, bidsAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { CountdownDisplay } from '../../components/CountdownDisplay';
 
+import { X, Radio, Pause, Flag, Zap, Car, Crown } from 'lucide-react';
 export default function AdminAuctions() {
   const { toast } = useToast();
   const [cars, setCars]       = useState([]);
@@ -52,7 +53,7 @@ export default function AdminAuctions() {
     setActionId(selected._id);
     try {
       await auctionAdminAPI.start(selected._id, {});
-      toast('🔴 Auction is now LIVE!', 'success');
+      toast('Auction is now LIVE!', 'success');
       setSelected(null);
       load();
     } catch (err) {
@@ -94,7 +95,7 @@ export default function AdminAuctions() {
     setActionId(bidId);
     try {
       await auctionAdminAPI.setWinner(winnerModal.car._id, bidId);
-      toast('🏆 Winner recorded. Settlement follows the published auction mode.', 'success');
+      toast('Winner recorded. Settlement follows the published auction mode.', 'success');
       setWinnerModal(null);
       load();
     } catch (err) {
@@ -121,9 +122,9 @@ export default function AdminAuctions() {
         {/* Stats bar */}
         <div className="grid-3" style={{ marginBottom: 28 }}>
           {[
-            { label: 'Live Auctions', val: liveCars.length,  color: 'var(--green)', icon: '🔴' },
-            { label: 'Ready to Launch', val: draftCars.length, color: 'var(--brand-light)', icon: '⏸' },
-            { label: 'Completed', val: endedCars.length,     color: 'var(--text-muted)', icon: '🏁' },
+            { label: 'Live Auctions', val: liveCars.length,  color: 'var(--green)', icon: Radio },
+            { label: 'Ready to Launch', val: draftCars.length, color: 'var(--brand-light)', icon: Pause },
+            { label: 'Completed', val: endedCars.length,     color: 'var(--text-muted)', icon: Flag },
           ].map(s => (
             <div key={s.label} className="stat-box">
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -131,7 +132,7 @@ export default function AdminAuctions() {
                   <div className="stat-label">{s.label}</div>
                   <div className="stat-value" style={{ color: s.color }}>{s.val}</div>
                 </div>
-                <span style={{ fontSize: 28 }}>{s.icon}</span>
+                <s.icon size={28} aria-hidden="true" />
               </div>
             </div>
           ))}
@@ -140,9 +141,9 @@ export default function AdminAuctions() {
         {/* Tabs */}
         <div className="tabs">
           {[
-            { key: 'live',  label: `🔴 Live (${liveCars.length})` },
-            { key: 'draft', label: `⏸ Draft (${draftCars.length})` },
-            { key: 'ended', label: `🏁 Ended (${endedCars.length})` },
+            { key: 'live',  label: `Live (${liveCars.length})` },
+            { key: 'draft', label: `Draft (${draftCars.length})` },
+            { key: 'ended', label: `Ended (${endedCars.length})` },
           ].map(t => (
             <button key={t.key} className={`tab-btn ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)}>
               {t.label}
@@ -154,7 +155,7 @@ export default function AdminAuctions() {
           <div className="loading-center"><div className="spinner" /></div>
         ) : displayed.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-icon">⚡</div>
+            <div className="empty-icon"><Zap size={32} aria-hidden="true" /></div>
             <h3>No {tab} auctions</h3>
             {tab === 'draft' && <p>Dealers need to create listings with bidding enabled first.</p>}
           </div>
@@ -171,7 +172,7 @@ export default function AdminAuctions() {
                   <div style={{ width: 80, height: 56, borderRadius: 6, overflow: 'hidden', background: 'var(--surface)', flexShrink: 0 }}>
                     {car.images?.[0]?.url
                       ? <img src={car.images[0].url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🚗</div>
+                      : <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Car size={28} aria-hidden="true" /></div>
                     }
                   </div>
 
@@ -234,14 +235,14 @@ export default function AdminAuctions() {
                           {actionId === car._id ? '...' : '⏹ End Now'}
                         </button>
                         <button className="btn btn-outline btn-sm" onClick={() => openWinnerModal(car)}>
-                          🏆 Set Winner
+                          Set Winner
                         </button>
                       </>
                     )}
 
                     {car._tab === 'ended' && car.bidsCount > 0 && (
                       <button className="btn btn-gold btn-sm" onClick={() => openWinnerModal(car)}>
-                        🏆 Declare Winner
+                        Declare Winner
                       </button>
                     )}
 
@@ -263,7 +264,7 @@ export default function AdminAuctions() {
                 <div style={{ fontSize: 11, color: 'var(--green)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Start Auction</div>
                 <h3 style={{ marginTop: 4 }}>{selected.title}</h3>
               </div>
-              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
+              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }} aria-label="Close" title="Close"><X size={16} aria-hidden="true" /></button>
             </div>
 
             <div style={{ background: 'var(--brand-glow)', border: '1px solid rgba(23, 107, 135, 0.15)', borderRadius: 'var(--radius)', padding: 16, marginBottom: 20 }}>
@@ -286,7 +287,7 @@ export default function AdminAuctions() {
             </div>
 
             <button className="btn btn-gold btn-full btn-lg" onClick={handleStart} disabled={actionId === selected._id}>
-              {actionId === selected._id ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Starting...</> : '🔴 Go Live Now'}
+              {actionId === selected._id ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Starting...</> : 'Go Live Now'}
             </button>
           </div>
         </div>
@@ -301,7 +302,7 @@ export default function AdminAuctions() {
                 <div style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Declare Winner</div>
                 <h3 style={{ marginTop: 4 }}>{winnerModal.car.title}</h3>
               </div>
-              <button onClick={() => setWinnerModal(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
+              <button onClick={() => setWinnerModal(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }} aria-label="Close" title="Close"><X size={16} aria-hidden="true" /></button>
             </div>
 
             <p style={{ color: 'var(--text-muted)', fontSize: 14, marginBottom: 20 }}>
@@ -310,7 +311,7 @@ export default function AdminAuctions() {
 
             {winnerModal.bids.length === 0 ? (
               <div className="empty-state" style={{ padding: 32 }}>
-                <div className="empty-icon">⚡</div>
+                <div className="empty-icon"><Zap size={32} aria-hidden="true" /></div>
                 <h3>No bids placed</h3>
               </div>
             ) : (
@@ -326,9 +327,9 @@ export default function AdminAuctions() {
                     }}>
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          {i === 0 && <span>👑</span>}
+                          {i === 0 && <Crown size={14} aria-label="Highest bid" />}
                           <span style={{ fontWeight: 600, fontSize: 14 }}>{bid.user?.name || 'Bidder'}</span>
-                          {confirmed ? <span className="badge badge-green" style={{ fontSize: 9 }}>✓ Confirmed</span> : <span className="badge badge-muted" style={{ fontSize: 9 }}>Pending payment</span>}
+                          {confirmed ? <span className="badge badge-green" style={{ fontSize: 9 }}>Confirmed</span> : <span className="badge badge-muted" style={{ fontSize: 9 }}>Pending payment</span>}
                         </div>
                         <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 2 }}>
                           {bid.phone} · {new Date(bid.createdAt).toLocaleString('en-KE')}
@@ -341,7 +342,7 @@ export default function AdminAuctions() {
                           onClick={() => handleSetWinner(bid._id)}
                           disabled={actionId === bid._id || !confirmed}
                         >
-                          {actionId === bid._id ? '...' : confirmed ? '🏆 Select' : 'Awaiting payment'}
+                          {actionId === bid._id ? '...' : confirmed ? 'Select' : 'Awaiting payment'}
                         </button>
                       </div>
                     </div>

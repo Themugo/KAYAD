@@ -56,10 +56,10 @@ export default function AdminInspectorApplications() {
       <div className="container" style={{ paddingTop: 32, paddingBottom: 32, maxWidth: 960 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <div>
-            <h2>🔧 Inspector Applications</h2>
+            <h2>Inspector Applications</h2>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>Review and approve mechanic inspector applicants</p>
           </div>
-          <select className="input" style={{ width: 160, fontSize: 12 }}
+          <select aria-label="Filter inspector applications by status" className="input" style={{ width: 160, fontSize: 12 }}
             value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
             <option value="">All</option>
             <option value="pending">Pending</option>
@@ -141,11 +141,11 @@ export default function AdminInspectorApplications() {
                         <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
                           <button className="btn btn-sm btn-green" disabled={actionLoading === app._id}
                             onClick={() => handleAction(app._id, 'approve')}>
-                            {actionLoading === app._id ? 'Processing...' : '✅ Approve'}
+                            {actionLoading === app._id ? 'Processing...' : 'Approve'}
                           </button>
                           <button className="btn btn-sm btn-outline" disabled={actionLoading === app._id}
                             onClick={() => handleAction(app._id, 'reject')} style={{ color: 'var(--red)', borderColor: 'var(--red)' }}>
-                            {actionLoading === app._id ? 'Processing...' : '❌ Reject'}
+                            {actionLoading === app._id ? 'Processing...' : 'Reject'}
                           </button>
                         </div>
                       </div>

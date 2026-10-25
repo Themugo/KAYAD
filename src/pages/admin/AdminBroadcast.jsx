@@ -32,7 +32,7 @@ export default function AdminBroadcast() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <input className="input" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
           <textarea className="input" placeholder="Message" value={message} onChange={e => setMessage(e.target.value)} rows={6} style={{ resize: 'vertical' }} />
-          <select className="input" value={audience} onChange={e => setAudience(e.target.value)}>
+          <select aria-label="Audience" className="input" value={audience} onChange={e => setAudience(e.target.value)}>
             <option value="all">All Users</option>
             <option value="dealers">Dealers</option>
             <option value="buyers">Buyers</option>

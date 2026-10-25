@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { adsAPI } from '../../api/api';
+import { Megaphone } from 'lucide-react';
 
 const PLACEMENTS = [
   { value: 'navbar_banner', label: 'Navbar Banner' },
@@ -24,12 +25,17 @@ export default function AdManager() {
   const [form, setForm] = useState(emptyForm());
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   const load = () => {
     setLoading(true);
+    setLoadError(false);
     adsAPI.adminList()
-      .then(({ ads: list }) => setAds(list || []))
-      .catch(() => {})
+      .then((body) => {
+        if (Array.isArray(body?.ads)) setAds(body.ads);
+        else { setAds([]); setLoadError(true); }
+      })
+      .catch(() => { setAds([]); setLoadError(true); })
       .finally(() => setLoading(false));
   };
 
@@ -87,7 +93,7 @@ export default function AdManager() {
   };
 
   return (
-    <div className="page" style={{ background: '#08090A' }}>
+    <div className="page" >
       <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
           <div>
@@ -95,13 +101,13 @@ export default function AdManager() {
             <h2 style={{ fontStyle: 'italic' }}>AD <span style={{ color: 'var(--brand)' }}>TRAFFIC CONTROL</span></h2>
           </div>
           <button onClick={() => { setShowForm(!showForm); setForm(emptyForm()); setEditing(null); }}
-            style={{ background: 'var(--brand)', color: 'black', padding: '12px 24px', borderRadius: 100, fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer' }}>
+            style={{ background: 'var(--admin-brand-dark)', color: 'var(--admin-surface)', padding: '12px 24px', borderRadius: 100, fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer' }}>
             {showForm ? 'Cancel' : '+ New Campaign'}
           </button>
         </div>
 
         {showForm && (
-          <div style={{ background: '#0a3340', padding: 32, borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)', marginBottom: 40 }}>
+          <div style={{ background: 'var(--admin-surface)', padding: 32, borderRadius: 'var(--admin-radius-lg)', border: '1px solid var(--admin-border)', boxShadow: 'var(--admin-shadow-card)', marginBottom: 40 }}>
             <h4 style={{ marginBottom: 24, color: 'var(--brand)' }}>{editing ? 'Edit Campaign' : 'New Campaign'}</h4>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
               <div>
@@ -134,7 +140,7 @@ export default function AdManager() {
               </div>
             </div>
             <button onClick={handleSave} disabled={saving || !form.clientName}
-              style={{ marginTop: 24, background: 'var(--brand)', color: 'black', padding: '12px 32px', borderRadius: 100, fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer', opacity: saving || !form.clientName ? 0.5 : 1 }}>
+              style={{ marginTop: 24, background: 'var(--admin-brand-dark)', color: 'var(--admin-surface)', padding: '12px 32px', borderRadius: 100, fontWeight: 700, fontSize: 12, border: 'none', cursor: 'pointer', opacity: saving || !form.clientName ? 0.5 : 1 }}>
               {saving ? 'Saving...' : editing ? 'Update Campaign' : 'Create Campaign'}
             </button>
           </div>
@@ -142,26 +148,31 @@ export default function AdManager() {
 
         {loading ? (
           <div className="loading-center"><div className="spinner" /></div>
+        ) : loadError ? (
+          <div role="alert" style={{ textAlign: 'center', padding: 60, color: 'var(--admin-status-danger)' }}>
+            <h3>Ad campaigns could not be loaded</h3>
+            <p style={{ fontSize: 13, marginTop: 8 }}>This is a loading failure, not an empty list. <button type="button" className="btn btn-sm btn-outline" onClick={load}>Retry</button></p>
+          </div>
         ) : ads.length === 0 ? (
           <div style={{ textAlign: 'center', padding: 80, color: 'var(--text-muted)' }}>
-            <div style={{ fontSize: 48, marginBottom: 16 }}>📢</div>
+            <Megaphone size={40} aria-hidden="true" style={{ marginBottom: 16 }} />
             <h3>No ad campaigns yet</h3>
             <p style={{ fontSize: 13, marginTop: 8 }}>Create your first campaign to start monetizing placements.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {ads.map(ad => (
-              <div key={ad._id} style={{ background: '#0a3340', padding: 24, borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <div key={ad._id} style={{ background: 'var(--admin-surface)', padding: 24, borderRadius: 'var(--admin-radius-lg)', border: '1px solid var(--admin-border)', boxShadow: 'var(--admin-shadow-card)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                     <span style={{
-                      background: ad.isActive ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)',
-                      color: ad.isActive ? '#10b981' : '#ef4444',
+                      background: ad.isActive ? 'var(--admin-status-success-bg)' : 'var(--admin-status-danger-bg)',
+                      color: ad.isActive ? 'var(--admin-status-success)' : 'var(--admin-status-danger)',
                       fontSize: 10, padding: '4px 8px', borderRadius: 4, fontWeight: 700,
                     }}>
                       {ad.isActive ? 'ACTIVE' : 'PAUSED'}
                     </span>
-                    <span style={{ background: 'rgba(23, 107, 135, 0.1)', color: 'var(--brand)', fontSize: 10, padding: '4px 8px', borderRadius: 4, fontWeight: 500 }}>
+                    <span style={{ background: 'var(--admin-brand-soft)', color: 'var(--admin-brand-dark)', fontSize: 10, padding: '4px 8px', borderRadius: 4, fontWeight: 500 }}>
                       {PLACEMENTS.find(p => p.value === ad.placement)?.label || ad.placement}
                     </span>
                   </div>
@@ -175,23 +186,23 @@ export default function AdManager() {
                       Edit
                     </button>
                     <button onClick={() => handleDelete(ad._id)}
-                      style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontSize: 11, color: 'var(--red)', cursor: 'pointer' }}>
+                      style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 6, padding: '4px 8px', fontSize: 11, color: 'var(--admin-status-danger)', cursor: 'pointer' }}>
                       Delete
                     </button>
                   </div>
                 </div>
-                <h4 style={{ fontWeight: 700, color: 'white' }}>{ad.clientName}</h4>
+                <h4 style={{ fontWeight: 700, color: 'var(--admin-ink)' }}>{ad.clientName}</h4>
                 {ad.targetLink && (
                   <p style={{ fontSize: 12, color: 'var(--brand)', marginTop: 4, wordBreak: 'break-all' }}>{ad.targetLink}</p>
                 )}
                 <div style={{ marginTop: 16, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                  <div style={{ background: 'black', padding: 12, borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                  <div style={{ background: 'var(--admin-surface-muted)', padding: 12, borderRadius: 12, border: '1px solid var(--admin-border)', textAlign: 'center' }}>
                     <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Impressions</p>
-                    <p style={{ fontSize: '1.125rem', fontFamily: 'monospace', color: 'white' }}>{ad.viewCount?.toLocaleString() || 0}</p>
+                    <p style={{ fontSize: '1.125rem', fontFamily: 'monospace', color: 'var(--admin-ink)' }}>{Number.isFinite(ad.viewCount) ? ad.viewCount.toLocaleString() : '—'}</p>
                   </div>
-                  <div style={{ background: 'black', padding: 12, borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)', textAlign: 'center' }}>
+                  <div style={{ background: 'var(--admin-surface-muted)', padding: 12, borderRadius: 12, border: '1px solid var(--admin-border)', textAlign: 'center' }}>
                     <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Clicks</p>
-                    <p style={{ fontSize: '1.125rem', fontFamily: 'monospace', color: 'var(--brand)' }}>{ad.clickCount?.toLocaleString() || 0}</p>
+                    <p style={{ fontSize: '1.125rem', fontFamily: 'monospace', color: 'var(--admin-brand-dark)' }}>{Number.isFinite(ad.clickCount) ? ad.clickCount.toLocaleString() : '—'}</p>
                   </div>
                 </div>
                 {ad.budgetRemaining > 0 && (

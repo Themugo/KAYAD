@@ -3,11 +3,29 @@ import { Link } from 'react-router-dom';
 import { adminAPI, carsAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { timeAgo } from '../../utils/helpers';
-import { AdminCarRow } from '../../components/AdminTableRow';
 
 const STATUS_BADGE = {
   live:   'badge-green', draft: 'badge-muted', ended: 'badge-muted', sold: 'badge-gold',
 };
+
+// One row per listing, matching the seven columns declared in the table header.
+function CarRow({ car: c, onDelete, onSelect, actionId }) {
+  const price = Number(c.price ?? c.startingPrice);
+  const vehicle = [c.year, Number.isFinite(Number(c.mileage)) && c.mileage !== null && c.mileage !== undefined ? `${Number(c.mileage).toLocaleString()} km` : null].filter(Boolean).join(' · ');
+  return (
+    <tr onClick={() => onSelect?.(c)}>
+      <td>{c.image || c.images?.[0] ? <img src={c.image || c.images[0]} alt="" loading="lazy" decoding="async" style={{ width: 44, height: 44, objectFit: 'cover', borderRadius: 6 }} /> : <span aria-hidden="true">—</span>}</td>
+      <td style={{ fontWeight: 600 }}><Link to={`/cars/${c._id}`} style={{ color: 'var(--admin-brand-dark)' }} onClick={(e) => e.stopPropagation()}>{c.title || [c.year, c.brand, c.model].filter(Boolean).join(' ') || 'Untitled listing'}</Link></td>
+      <td>{Number.isFinite(price) ? formatKES(price) : 'Unavailable'}</td>
+      <td>{vehicle || '—'}</td>
+      <td><span className={`badge ${STATUS_BADGE[c.status] || 'badge-muted'}`}>{c.status || 'unknown'}</span></td>
+      <td>{c.createdAt ? timeAgo(c.createdAt) : '—'}</td>
+      <td>
+        <button type="button" className="btn btn-sm btn-danger" disabled={actionId === c._id + '-del'} onClick={(e) => { e.stopPropagation(); onDelete(c); }}>Delete</button>
+      </td>
+    </tr>
+  );
+}
 
 export default function AdminCars() {
   const { toast } = useToast();
@@ -60,7 +78,7 @@ export default function AdminCars() {
   return (
     <div className="page">
       <div className="container" style={{ paddingTop: 24, paddingBottom: 48 }}>
-        <h2 style={{ marginBottom: 24 }}>🚗 Listing Management</h2>
+        <h2 style={{ marginBottom: 24 }}>Listing Management</h2>
 
         <div className="stat-grid" style={{ marginBottom: 24 }}>
           {[
@@ -77,7 +95,7 @@ export default function AdminCars() {
         </div>
 
         <div className="data-table-controls" style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap', alignItems: 'center' }}>
-          <input className="input" placeholder="🔍 Search listings..." value={search}
+          <input className="input" placeholder="Search listings..." value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             style={{ flex: '1 1 260px', maxWidth: 360 }} aria-label="Search listings" />
           <select className="input" value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
@@ -105,7 +123,7 @@ export default function AdminCars() {
             </thead>
             <tbody>
               {cars.map(c => (
-                <AdminCarRow key={c._id} car={c} onDelete={handleDelete} onSelect={setSelected} actionId={actionId} />
+                <CarRow key={c._id} car={c} onDelete={handleDelete} onSelect={setSelected} actionId={actionId} />
               ))}
               {cars.length === 0 && (
                 <tr><td colSpan={7} style={{ textAlign: 'center', padding: 24, color: 'var(--text-muted)' }}>No listings found</td></tr>

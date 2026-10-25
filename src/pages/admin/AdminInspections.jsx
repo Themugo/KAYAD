@@ -65,7 +65,7 @@ export default function AdminInspections() {
             <h2>All Inspection Orders</h2>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+            <select aria-label="Filter inspections by status" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
               style={{ background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.1)', borderRadius: 8, padding: '6px 10px', color: '#0a3340', fontSize: 12 }}>
               <option value="">All Status</option>
               <option value="pending_payment">Pending Payment</option>
@@ -99,7 +99,7 @@ export default function AdminInspections() {
                       <ClipboardCheck size={18} style={{ color: sc.color }} />
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 700, color: '#0a3340' }}>{car.title || car._id}</div>
-                        <div style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.35)', marginTop: 2 }}>
+                        <div style={{ fontSize: 11, color: 'var(--admin-muted-content)', marginTop: 2 }}>
                           Fee: {formatKES(o.fee)} · {o.location || 'No location'}
                         </div>
                       </div>
@@ -112,7 +112,7 @@ export default function AdminInspections() {
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: 12, marginTop: 10, fontSize: 11, color: 'rgba(10, 51, 64, 0.4)', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 12, marginTop: 10, fontSize: 11, color: 'var(--admin-muted-content)', flexWrap: 'wrap' }}>
                     <span>Buyer: {o.buyer?.name || o.buyer?.email || '—'}</span>
                     {o.inspector && <span>Inspector: {o.inspector.name || o.inspector.email}</span>}
                     {o.overallScore && <span>Score: {o.overallScore}/100</span>}
@@ -133,7 +133,7 @@ export default function AdminInspections() {
                             </button>
                           ))}
                           <button onClick={() => setAssigning(null)} style={{
-                            background: 'transparent', border: 'none', color: 'rgba(10, 51, 64, 0.3)',
+                            background: 'transparent', border: 'none', color: 'var(--admin-muted-content)',
                             fontSize: 11, cursor: 'pointer',
                           }}>Cancel</button>
                         </div>
@@ -161,7 +161,7 @@ export default function AdminInspections() {
                       }}>{o.overallScore}</div>
                       <div>
                         <div style={{ fontSize: 11, fontWeight: 700, color: '#0a3340', textTransform: 'capitalize' }}>{o.conditionRating} condition</div>
-                        <div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)' }}>{o.checklist?.length || 0} items checked</div>
+                        <div style={{ fontSize: 10, color: 'var(--admin-muted-content)' }}>{o.checklist?.length || 0} items checked</div>
                       </div>
                     </div>
                   )}

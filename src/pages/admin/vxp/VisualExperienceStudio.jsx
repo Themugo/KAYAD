@@ -84,6 +84,7 @@ export default function VisualExperienceStudio() {
   const [cards, setCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
   const [stats, setStats] = useState(null);
+  const [versions, setVersions] = useState({ status: 'idle', items: [] });
   const [loading, setLoading] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   const [devicePreview, setDevicePreview] = useState('desktop');
@@ -145,32 +146,38 @@ export default function VisualExperienceStudio() {
           <div className="flex items-center gap-1 bg-[#EEF7F5] rounded-lg p-1">
             <button
               onClick={() => setDevicePreview('desktop')}
+              aria-label="Desktop preview"
+              aria-pressed={devicePreview === 'desktop'}
               className={`p-2 rounded-lg ${devicePreview === 'desktop' ? 'bg-white shadow-sm' : 'hover:bg-white/50'}`}
             >
               <Monitor size={18} className={devicePreview === 'desktop' ? 'text-[#0A3340]' : 'text-[#64748B]'} />
             </button>
             <button
               onClick={() => setDevicePreview('tablet')}
+              aria-label="Tablet preview"
+              aria-pressed={devicePreview === 'tablet'}
               className={`p-2 rounded-lg ${devicePreview === 'tablet' ? 'bg-white shadow-sm' : 'hover:bg-white/50'}`}
             >
               <Tablet size={18} className={devicePreview === 'tablet' ? 'text-[#0A3340]' : 'text-[#64748B]'} />
             </button>
             <button
               onClick={() => setDevicePreview('mobile')}
+              aria-label="Mobile preview"
+              aria-pressed={devicePreview === 'mobile'}
               className={`p-2 rounded-lg ${devicePreview === 'mobile' ? 'bg-white shadow-sm' : 'hover:bg-white/50'}`}
             >
               <Smartphone size={18} className={devicePreview === 'mobile' ? 'text-[#0A3340]' : 'text-[#64748B]'} />
             </button>
           </div>
           <div className="flex items-center gap-1">
-            <button className="p-2 hover:bg-[#EEF7F5] rounded-lg"><ZoomOut size={18} /></button>
+            <button aria-label="Zoom out" className="p-2 hover:bg-[#EEF7F5] rounded-lg"><ZoomOut size={18} /></button>
             <span className="text-sm text-[#64748B] w-16 text-center">100%</span>
-            <button className="p-2 hover:bg-[#EEF7F5] rounded-lg"><ZoomIn size={18} /></button>
+            <button aria-label="Zoom in" className="p-2 hover:bg-[#EEF7F5] rounded-lg"><ZoomIn size={18} /></button>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button className="p-2 hover:bg-[#EEF7F5] rounded-lg"><Undo size={18} /></button>
-          <button className="p-2 hover:bg-[#EEF7F5] rounded-lg"><Redo size={18} /></button>
+          <button aria-label="Undo" className="p-2 hover:bg-[#EEF7F5] rounded-lg"><Undo size={18} /></button>
+          <button aria-label="Redo" className="p-2 hover:bg-[#EEF7F5] rounded-lg"><Redo size={18} /></button>
           <div className="w-px h-6 bg-[#DDF4F0] mx-2" />
           <button
             onClick={() => setPreviewMode(!previewMode)}
@@ -229,7 +236,7 @@ export default function VisualExperienceStudio() {
                     }`}>
                       {selectedPage.status}
                     </span>
-                    <button className="p-2 hover:bg-[#DDF4F0] rounded-lg">
+                    <button className="p-2 hover:bg-[#DDF4F0] rounded-lg" aria-label="Edit">
                       <Edit size={16} />
                     </button>
                   </div>
@@ -400,7 +407,7 @@ export default function VisualExperienceStudio() {
           <div className="space-y-3">
             <button className="w-full px-4 py-2 bg-[#0A3340] text-white rounded-lg">Primary Button</button>
             <button className="w-full px-4 py-2 border border-[#0A3340] text-[#0A3340] rounded-lg">Secondary</button>
-            <button className="w-full px-4 py-2 bg-[#5aafa4] text-white rounded-lg">Accent</button>
+            <button className="w-full px-4 py-2 bg-[#176B87] text-white rounded-lg">Accent</button>
             <div className="p-3 bg-emerald-100 text-emerald-700 rounded-lg text-sm text-center">Success</div>
             <div className="p-3 bg-softBlue-100 text-softBlue-700 rounded-lg text-sm text-center">Info</div>
           </div>
@@ -518,7 +525,7 @@ export default function VisualExperienceStudio() {
 
         {/* Card Preview */}
         <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
-          <h3 className="font-semibold text-[#0A3340] mb-4">Preview</h3>
+          <h3 className="font-semibold text-[#0A3340] mb-4">Preview <span className="text-xs font-normal text-[#64748B]">(sample content, not live data)</span></h3>
           <div className="bg-[#EEF7F5] p-6 rounded-xl">
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="h-40 bg-gradient-to-br from-[#DDF4F0] to-[#BDE5DE]" />
@@ -638,15 +645,7 @@ export default function VisualExperienceStudio() {
         <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
           <h3 className="font-semibold text-[#0A3340] mb-4">Ad Placements</h3>
           <div className="space-y-2">
-            {[
-              { zone: 'Homepage Hero', size: '728x90', status: 'active' },
-              { zone: 'Homepage Sidebar', size: '300x250', status: 'active' },
-              { zone: 'Search Results', size: '728x90', status: 'paused' },
-              { zone: 'Car Details Sidebar', size: '300x600', status: 'active' },
-              { zone: 'Auction Page', size: '728x90', status: 'active' },
-              { zone: 'Footer Banner', size: '728x90', status: 'paused' },
-              { zone: 'Popup Modal', size: '500x500', status: 'inactive' },
-            ].map((ad, i) => (
+            {[].map((ad, i) => (
               <div key={i} className="flex items-center justify-between p-3 rounded-lg border border-[#D7E7E4] hover:bg-[#F6FAF9]">
                 <div>
                   <p className="font-medium text-[#0A3340] text-sm">{ad.zone}</p>
@@ -660,7 +659,7 @@ export default function VisualExperienceStudio() {
                   {ad.status}
                 </span>
               </div>
-            ))}
+            ))}<p className="col-span-full text-sm text-[#64748B]" role="status">Ad placements are not connected to a data source, so none are listed.</p>
           </div>
         </div>
 
@@ -668,11 +667,7 @@ export default function VisualExperienceStudio() {
         <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
           <h3 className="font-semibold text-[#0A3340] mb-4">Active Campaigns</h3>
           <div className="space-y-3">
-            {[
-              { name: 'Summer Car Sale', impressions: '125,000', ctr: '2.4%', budget: 'KES 500,000' },
-              { name: 'Toyota Week', impressions: '89,000', ctr: '3.1%', budget: 'KES 350,000' },
-              { name: 'Auction Promo', impressions: '45,000', ctr: '1.8%', budget: 'KES 200,000' },
-            ].map((campaign, i) => (
+            {[].map((campaign, i) => (
               <div key={i} className="p-4 rounded-lg border border-[#D7E7E4]">
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-medium text-[#0A3340]">{campaign.name}</h4>
@@ -693,7 +688,7 @@ export default function VisualExperienceStudio() {
                   </div>
                 </div>
               </div>
-            ))}
+            ))}<p className="col-span-full text-sm text-[#64748B]" role="status">Ad campaign performance is not connected to a data source, so no campaigns are listed.</p>
           </div>
         </div>
       </div>
@@ -748,11 +743,7 @@ export default function VisualExperienceStudio() {
 
       {/* AI Suggestions */}
       <div className="grid grid-cols-3 gap-4">
-        {[
-          { title: 'Hero Layout A', description: 'Full-width with video background', preview: colors.navy },
-          { title: 'Hero Layout B', description: 'Split screen with image', preview: colors.terracotta },
-          { title: 'Hero Layout C', description: 'Centered with gradient', preview: colors.softBlue },
-        ].map((suggestion, i) => (
+        {[].map((suggestion, i) => (
           <div key={i} className="bg-white rounded-xl border border-[#D7E7E4] overflow-hidden hover:border-[#0A3340] transition-colors cursor-pointer">
             <div className="h-32 relative" style={{ backgroundColor: suggestion.preview }}>
               <div className="absolute inset-0 flex items-center justify-center">
@@ -764,7 +755,7 @@ export default function VisualExperienceStudio() {
               <p className="text-xs text-[#94A3B8]">{suggestion.description}</p>
             </div>
           </div>
-        ))}
+        ))}<p className="col-span-full text-sm text-[#64748B]" role="status">AI layout suggestions appear here once a design has been generated.</p>
       </div>
     </div>
   );
@@ -773,48 +764,42 @@ export default function VisualExperienceStudio() {
   // VERSION HISTORY
   // ============================================
 
+  useEffect(() => {
+    if (activeSection !== 'versions') return undefined;
+    let cancelled = false;
+    vxpApi.getVersions({ limit: 20 })
+      .then((res) => {
+        if (cancelled) return;
+        const body = res?.data;
+        const items = Array.isArray(body?.data) ? body.data : Array.isArray(body) ? body : null;
+        setVersions(items ? { status: 'ready', items } : { status: 'error', items: [] });
+      })
+      .catch(() => { if (!cancelled) setVersions({ status: 'error', items: [] }); });
+    return () => { cancelled = true; };
+  }, [activeSection]);
+
   const renderVersionHistory = () => (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold text-[#0A3340]">Version History</h2>
 
-      <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
-        <div className="space-y-4">
-          {[
-            { version: 'v12', date: '2 hours ago', user: 'Admin', changes: 'Updated hero section and pricing cards' },
-            { version: 'v11', date: '1 day ago', user: 'Admin', changes: 'Added new statistics section' },
-            { version: 'v10', date: '3 days ago', user: 'Admin', changes: 'Published summer sale campaign' },
-            { version: 'v9', date: '1 week ago', user: 'Admin', changes: 'Redesigned footer layout' },
-            { version: 'v8', date: '2 weeks ago', user: 'Admin', changes: 'Updated color palette' },
-          ].map((v, i) => (
-            <div key={i} className={`flex items-center justify-between p-4 rounded-lg ${i === 0 ? 'bg-[#0A3340]/5 border border-[#0A3340]/20' : 'bg-[#F6FAF9]'}`}>
-              <div className="flex items-center gap-4">
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${i === 0 ? 'bg-[#0A3340] text-white' : 'bg-[#DDF4F0] text-[#64748B]'}`}>
-                  <History size={18} />
-                </div>
+      <div className="bg-white rounded-xl border border-[#D7E7E4] p-6" role="status" aria-live="polite">
+        {(versions.status === 'loading' || versions.status === 'idle') && <p className="text-sm text-[#64748B]">Loading version history…</p>}
+        {versions.status === 'error' && <p className="text-sm text-[#64748B]">Version history is unavailable right now. Nothing is shown rather than guessing.</p>}
+        {versions.status === 'ready' && versions.items.length === 0 && <p className="text-sm text-[#64748B]">No saved versions yet.</p>}
+        {versions.status === 'ready' && versions.items.length > 0 && (
+          <div className="space-y-4">
+            {versions.items.map((v, i) => (
+              <div key={v._id || v.id || i} className="flex items-center gap-4 p-4 rounded-lg bg-[#F6FAF9]">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-[#DDF4F0] text-[#12576D]"><History size={18} /></div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-[#0A3340]">{v.version}</span>
-                    {i === 0 && <span className="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded text-xs">Current</span>}
-                  </div>
-                  <p className="text-sm text-[#64748B]">{v.changes}</p>
-                  <p className="text-xs text-[#94A3B8]">{v.date} by {v.user}</p>
+                  <span className="font-semibold text-[#0A3340]">{String(v.version ?? v.versionNumber ?? v.id ?? v._id ?? 'Version')}</span>
+                  {(v.changes || v.description || v.summary) && <p className="text-sm text-[#64748B]">{String(v.changes || v.description || v.summary)}</p>}
+                  {(v.createdAt || v.created_at) && <p className="text-xs text-[#64748B]">{new Date(v.createdAt || v.created_at).toLocaleString()}</p>}
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                {i !== 0 && (
-                  <button className="px-3 py-1.5 text-sm border border-[#D7E7E4] rounded-lg hover:bg-[#EEF7F5]">
-                    Preview
-                  </button>
-                )}
-                {i !== 0 && (
-                  <button className="px-3 py-1.5 text-sm text-[#0A3340] border border-[#0A3340] rounded-lg hover:bg-[#0A3340]/5">
-                    Restore
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -852,12 +837,12 @@ export default function VisualExperienceStudio() {
             <div className="flex items-center gap-3">
               {stats && (
                 <div className="flex items-center gap-4 text-sm">
-                  <span className="text-[#64748B]">{stats.pages.total} Pages</span>
-                  <span className="text-[#64748B]">{stats.sections.total} Sections</span>
-                  <span className="text-[#64748B]">{stats.themes.total} Themes</span>
+                  <span className="text-[#64748B]">{Number.isFinite(stats?.pages?.total) ? stats.pages.total : 'Unavailable'} Pages</span>
+                  <span className="text-[#64748B]">{Number.isFinite(stats?.sections?.total) ? stats.sections.total : 'Unavailable'} Sections</span>
+                  <span className="text-[#64748B]">{Number.isFinite(stats?.themes?.total) ? stats.themes.total : 'Unavailable'} Themes</span>
                 </div>
               )}
-              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Settings">
                 <Settings size={20} className="text-[#64748B]" />
               </button>
             </div>
@@ -916,9 +901,9 @@ export default function VisualExperienceStudio() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <div className="flex-1 p-6">
           {renderSectionContent()}
-        </main>
+        </div>
       </div>
 
       {/* New Page Modal */}
@@ -927,7 +912,7 @@ export default function VisualExperienceStudio() {
           <div className="bg-white rounded-xl w-full max-w-lg">
             <div className="p-4 border-b border-[#D7E7E4] flex items-center justify-between">
               <h2 className="text-lg font-bold text-[#0A3340]">Create New Page</h2>
-              <button onClick={() => setShowNewPageModal(false)} className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button onClick={() => setShowNewPageModal(false)} aria-label="Close" className="p-2 hover:bg-[#EEF7F5] rounded-lg">
                 <X size={20} />
               </button>
             </div>

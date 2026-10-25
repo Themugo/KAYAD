@@ -119,7 +119,7 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
         const buttonStyles = {
           primary: 'bg-[#0A3340] text-white hover:bg-[#12576D]',
           secondary: 'bg-white text-[#0A3340] border border-[#0A3340] hover:bg-[#F6FAF9]',
-          accent: 'bg-[#5aafa4] text-white hover:bg-[#5aafa4]',
+          accent: 'bg-[#176B87] text-white hover:bg-[#12576D]',
         };
         return (
           <button className={`px-6 py-3 rounded-lg font-medium transition-colors ${buttonStyles[block.props.style] || buttonStyles.primary}`}>
@@ -214,10 +214,10 @@ const BlockRenderer = ({ block, isEditing, onUpdate, onDelete, onMoveUp, onMoveD
             >
               <MoveDown size={14} />
             </button>
-            <button className="p-1.5 rounded hover:bg-white/20 text-white" title="Duplicate">
+            <button className="p-1.5 rounded hover:bg-white/20 text-white" title="Duplicate" aria-label="Duplicate">
               <Copy size={14} />
             </button>
-            <button onClick={onDelete} className="p-1.5 rounded hover:bg-red-500 text-white" title="Delete">
+            <button onClick={onDelete} className="p-1.5 rounded hover:bg-red-500 text-white" title="Delete" aria-label="Delete">
               <Trash2 size={14} />
             </button>
           </div>
@@ -396,7 +396,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
       </aside>
 
       {/* Canvas */}
-      <main className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col">
         {/* Toolbar */}
         <div className="bg-white border-b border-[#D7E7E4] px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -498,7 +498,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
             </div>
           </div>
         </div>
-      </main>
+      </div>
 
       {/* Properties Panel */}
       {selectedBlock !== null && blocks[selectedBlock] && (

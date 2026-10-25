@@ -51,7 +51,7 @@ export const AdminSupportWorkspace: React.FC = () => {
     setError(null);
     try {
       const [q, m] = await Promise.all([getStaffQueue({ ...filters, limit: 50 }), getStaffMetrics(30)]);
-      setRows(q.cases); setTotal(q.total); setCapability(q.capability === 'oversight' ? 'oversight' : 'agent'); setMetrics(m.metrics); setForbidden(false);
+      setRows(Array.isArray(q.cases) ? q.cases : []); setTotal(Number.isFinite(q.total) ? q.total : 0); setCapability(q.capability === 'oversight' ? 'oversight' : 'agent'); setMetrics(m.metrics); setForbidden(false);
     } catch (e) {
       if (e instanceof SupportApiError && e.kind === 'forbidden') setForbidden(true);
       setError(errText(e, 'Unable to load the support queue.'));
@@ -61,7 +61,7 @@ export const AdminSupportWorkspace: React.FC = () => {
   }, [filters]);
 
   useEffect(() => { void load(); }, [load]);
-  useEffect(() => { getStaffTeam().then((r) => setTeam(r.staff)).catch(() => setTeam([])); }, []);
+  useEffect(() => { getStaffTeam().then((r) => setTeam(Array.isArray(r.staff) ? r.staff : [])).catch(() => setTeam([])); }, []);
 
   const open = async (id: string, why?: string) => {
     setReply(''); setInternal(false); setNextStatus(''); setResolution(''); setDetailError(null);
@@ -155,12 +155,12 @@ export const AdminSupportWorkspace: React.FC = () => {
                 <p className="text-[10px] font-extrabold tracking-wider text-[#176B87]">{selected.ticketNumber} · {selected.category}</p>
                 <h3 className="text-base font-black text-[#0A3340]">{selected.subject}</h3>
                 <p className="text-[11px] text-[#64748B]">Customer: {selected.customer?.name || 'Unknown'} · Opened {when(selected.createdAt)}{selected.reopenCount ? ` · reopened ${selected.reopenCount}×` : ''}</p>
-                {selected.references.length > 0 && <p className="mt-1 text-[11px] text-[#64748B]">Linked: {selected.references.map((r) => `${r.kind} ${r.id}`).join(', ')}</p>}
+                {(selected.references?.length ?? 0) > 0 && <p className="mt-1 text-[11px] text-[#64748B]">Linked: {(selected.references ?? []).map((r) => `${r.kind} ${r.id}`).join(', ')}</p>}
                 <p className="mt-2 whitespace-pre-wrap rounded-xl bg-[#F6FAF9] border border-[#D7E7E4] p-3 text-sm text-[#12576D]">{selected.description}</p>
               </div>
 
               <ul className="space-y-2 max-h-72 overflow-auto">
-                {selected.messages.map((m, i) => (
+                {(selected.messages ?? []).map((m, i) => (
                   <li key={m.id || i} className={`rounded-xl border p-3 text-sm ${m.internal ? 'border-[#BDE5DE] bg-[#F3FAF9]' : m.kind === 'staff' ? 'border-[#D7E7E4] bg-[#F6FAF9]' : 'border-[#D7E7E4]'}`}>
                     <div className="flex justify-between text-[10px] font-extrabold uppercase tracking-wider text-[#64748B]"><span>{m.internal ? 'Internal note' : m.kind === 'staff' ? `Staff${m.senderName ? ` · ${m.senderName}` : ''}` : 'Customer'}</span><span>{when(m.createdAt)}</span></div>
                     <p className="mt-1 whitespace-pre-wrap text-[#12576D]">{m.content}</p>

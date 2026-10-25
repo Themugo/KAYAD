@@ -4,6 +4,7 @@ import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { userHasPermission, PERM } from '../../utils/permissions';
 
+import { Check } from 'lucide-react';
 const STATUS = {
   pending: ['Pending funding', 'badge-orange'],
   funded: ['Funds held', 'badge-blue'],
@@ -15,10 +16,13 @@ const STATUS = {
   closed: ['Closed', 'badge-muted'],
 };
 
+// A missing figure is Unavailable, never a reassuring zero (this page governs held funds).
+const figure = (v) => (Number.isFinite(v) ? v : 'Unavailable');
+
 const Queue = ({ title, count, amount, tone, children, onOpen }) => (
   <div className="card" style={{ padding: 18, borderTop: `3px solid ${tone}` }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' }}>
-      <div><div className="stat-label">{title}</div><div style={{ fontSize: 25, fontWeight: 700, marginTop: 4 }}>{count}</div>{amount != null && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{formatKES(amount)} exposed</div>}</div>
+      <div><div className="stat-label">{title}</div><div style={{ fontSize: 25, fontWeight: 700, marginTop: 4 }}>{count}</div>{amount !== undefined && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{Number.isFinite(amount) ? `${formatKES(amount)} exposed` : 'Exposure unavailable'}</div>}</div>
       {onOpen && <button className="btn btn-outline btn-sm" onClick={onOpen}>Open</button>}
     </div>
     {children}
@@ -125,18 +129,18 @@ export default function AdminEscrows() {
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
             <div><div className="section-eyebrow">Escrow control plane</div><strong>Authorized control rights</strong></div>
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontSize: 11 }}>
-              {[[canOperate,'Operate'],[canRelease,'Approve release'],[canRefund,'Approve refund'],[canSettle,'Settle external obligations'],[canReconcile,'Reconcile'],[canEmergency,'Emergency control']].map(([allowed,label]) => <span key={label} className={`badge ${allowed ? 'badge-green' : 'badge-muted'}`}>{allowed ? '✓' : '—'} {label}</span>)}
+              {[[canOperate,'Operate'],[canRelease,'Approve release'],[canRefund,'Approve refund'],[canSettle,'Settle external obligations'],[canReconcile,'Reconcile'],[canEmergency,'Emergency control']].map(([allowed,label]) => <span key={label} className={`badge ${allowed ? 'badge-green' : 'badge-muted'}`}>{allowed ? <Check size={12} aria-hidden="true" /> : '—'} {label}</span>)}
             </div>
           </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(170px,1fr))', gap: 12, marginBottom: 18 }}>
-          <Queue title="Funds held" count={queues.funded?.count || 0} amount={queues.funded?.amount || 0} tone="var(--blue)" onOpen={() => setFilter('funded')} />
-          <Queue title="Buyer confirmation" count={queues.vehicleConfirmed?.count || 0} tone="var(--blue)" onOpen={() => setFilter('vehicle_confirmed')} />
-          <Queue title="Delivered / settlement" count={queues.delivered?.count || 0} tone="var(--brand)" onOpen={() => setFilter('delivered')} />
-          <Queue title="Disputes" count={queues.disputed?.count || 0} tone="var(--red)" onOpen={() => setFilter('disputed')} />
-          <Queue title="Refund work" count={queues.refunds?.count || 0} tone="var(--brand)" />
-          <Queue title="Control exceptions" count={(queues.reconciliation?.count || 0) + (queues.anomalies?.count || 0)} tone="var(--orange)"><div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{queues.reconciliation?.count || 0} reconciliation · {queues.anomalies?.count || 0} anomalies</div></Queue>
+          <Queue title="Funds held" count={figure(queues.funded?.count)} amount={queues.funded?.amount ?? null} tone="var(--blue)" onOpen={() => setFilter('funded')} />
+          <Queue title="Buyer confirmation" count={figure(queues.vehicleConfirmed?.count)} tone="var(--blue)" onOpen={() => setFilter('vehicle_confirmed')} />
+          <Queue title="Delivered / settlement" count={figure(queues.delivered?.count)} tone="var(--brand)" onOpen={() => setFilter('delivered')} />
+          <Queue title="Disputes" count={figure(queues.disputed?.count)} tone="var(--red)" onOpen={() => setFilter('disputed')} />
+          <Queue title="Refund work" count={figure(queues.refunds?.count)} tone="var(--brand)" />
+          <Queue title="Control exceptions" count={Number.isFinite(queues.reconciliation?.count) && Number.isFinite(queues.anomalies?.count) ? queues.reconciliation.count + queues.anomalies.count : 'Unavailable'} tone="var(--orange)"><div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>{figure(queues.reconciliation?.count)} reconciliation · {figure(queues.anomalies?.count)} anomalies</div></Queue>
         </div>
 
         <div className="card" style={{ padding: 12, marginBottom: 18 }}>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
+import { Palette, Leaf, Layers, PenLine, BarChart3 } from 'lucide-react';
 // Color field component with color picker and hex input
 const ColorField = ({ label, value, onChange, description }) => (
   <div className="input-group">
@@ -16,7 +17,7 @@ const ColorField = ({ label, value, onChange, description }) => (
         position: 'relative',
         overflow: 'hidden'
       }}>
-        <input type="color"
+        <input type="color" aria-label={label}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           style={{
@@ -34,7 +35,7 @@ const ColorField = ({ label, value, onChange, description }) => (
         {description && <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 400 }}>{description}</div>}
       </div>
     </label>
-    <input className="input" type="text" value={value}
+    <input aria-label={`${label} value`} className="input" type="text" value={value}
       onChange={(e) => onChange(e.target.value)}
       style={{ height: 38, fontFamily: 'monospace', fontSize: 13, marginTop: 6 }}
       placeholder="#0a3340"
@@ -46,7 +47,7 @@ const ColorField = ({ label, value, onChange, description }) => (
 const SectionCard = ({ title, icon, children }) => (
   <div className="card" style={{ padding: 24 }}>
     <h3 style={{ fontSize: '1rem', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
-      {icon && <span style={{ fontSize: '1.2rem' }}>{icon}</span>}
+      {icon && (() => { const Icon = icon; return <Icon size={20} aria-hidden="true" />; })()}
       {title}
     </h3>
     {children}
@@ -204,7 +205,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
   return (
     <div style={{ display: 'grid', gap: 20 }}>
       {/* Logo & Identity Section */}
-      <SectionCard title="Logo & Identity" icon="🎨">
+      <SectionCard title="Logo & Identity" icon={Palette}>
         <div style={{ display: 'grid', gap: 16, maxWidth: 600 }}>
           {/* Logo Type Selection */}
           <div>
@@ -266,7 +267,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
           ) : (
             <div className="input-group">
               <label className="input-label">Logo Text</label>
-              <input className="input" type="text" value={branding.logoText}
+              <input aria-label="Logo Text" className="input" type="text" value={branding.logoText}
                 onChange={e => setBranding(p => ({...p, logoText: e.target.value}))}
                 placeholder="K" style={{ height: 44 }} />
             </div>
@@ -274,14 +275,14 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
 
           <div className="input-group">
             <label className="input-label">Brand Tagline</label>
-            <input className="input" type="text" value={branding.brandTagline}
+            <input aria-label="Brand Tagline" className="input" type="text" value={branding.brandTagline}
               onChange={e => setBranding(p => ({...p, brandTagline: e.target.value}))}
               placeholder="Kenya’s Trusted Vehicle Marketplace" style={{ height: 44 }} />
           </div>
 
           <div className="input-group">
             <label className="input-label">Footer Description</label>
-            <textarea className="input" value={branding.footerDescription || ''} rows={3}
+            <textarea aria-label="Footer Description" className="input" value={branding.footerDescription || ''} rows={3}
               onChange={e => setBranding(p => ({...p, footerDescription: e.target.value}))}
               placeholder="Short description shown below the footer logo" style={{ minHeight: 76, padding: 12, resize: 'vertical' }} />
             <small style={{ color: 'var(--text-muted)' }}>Editable footer brand copy, shared across the site.</small>
@@ -289,7 +290,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
 
           <div className="input-group">
             <label className="input-label">Footer Copyright Text</label>
-            <input className="input" type="text" value={branding.footerCopyright || ''}
+            <input aria-label="Footer Copyright Text" className="input" type="text" value={branding.footerCopyright || ''}
               onChange={e => setBranding(p => ({...p, footerCopyright: e.target.value}))}
               placeholder="KAYAD Motors Kenya Ltd. All rights reserved." style={{ height: 44 }} />
           </div>
@@ -297,7 +298,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
       </SectionCard>
 
       {/* Primary Colors Section */}
-      <SectionCard title="Primary Brand Colors" icon="🌿">
+      <SectionCard title="Primary Brand Colors" icon={Leaf}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, maxWidth: 600 }}>
           <ColorField
             label="Primary Color"
@@ -338,12 +339,12 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
             cursor: 'pointer',
           }}
         >
-          🔄 Auto-generate Variants
+          Auto-generate Variants
         </button>
       </SectionCard>
 
       {/* Background Colors Section */}
-      <SectionCard title="Background & Surface Colors" icon="🎭">
+      <SectionCard title="Background & Surface Colors" icon={Layers}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, maxWidth: 600 }}>
           <ColorField
             label="Background"
@@ -373,7 +374,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
       </SectionCard>
 
       {/* Text Colors Section */}
-      <SectionCard title="Text Colors" icon="✏️">
+      <SectionCard title="Text Colors" icon={PenLine}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, maxWidth: 600 }}>
           <ColorField
             label="Primary Text"
@@ -403,7 +404,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
       </SectionCard>
 
       {/* Status Colors Section */}
-      <SectionCard title="Status & Semantic Colors" icon="📊">
+      <SectionCard title="Status & Semantic Colors" icon={BarChart3}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, maxWidth: 600 }}>
           <ColorField
             label="Success"
@@ -464,7 +465,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
             Saving...
           </>
         ) : (
-          <>💾 Save Branding Settings</>
+          <>Save Branding Settings</>
         )}
       </button>
     </div>

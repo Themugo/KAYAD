@@ -8,6 +8,10 @@ import {
   Save, Eye, History, AlertTriangle
 } from 'lucide-react';
 import * as configApi from '../../../services/configApi';
+import { isUnavailable } from '../../../components/admin/adminStat';
+
+// A missing or non-numeric figure is shown as Unavailable, never as 0.
+const nv = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 'Unavailable');
 
 // Design System Colors
 const colors = {
@@ -48,6 +52,8 @@ export default function ConfigurationCenter() {
   const [locationData, setLocationData] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [flagsState, setFlagsState] = useState('idle');
+  const [loadError, setLoadError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItem, setSelectedItem] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -59,22 +65,42 @@ export default function ConfigurationCenter() {
   const loadDashboard = async () => {
     try {
       setLoading(true);
+      setLoadError(false);
       const { data } = await configApi.getConfigStats();
       setStats(data.data);
     } catch (error) {
       console.error('Failed to load stats:', error);
-      setStats({
-        configEntries: { total: 156 },
-        featureFlags: { total: 24, active: 18, inactive: 6 },
-        referenceData: { total: 342, byType: { vehicle_status: 8, listing_status: 6 } },
-        vehicleMasterData: { total: 567, makes: 45, models: 234, bodyTypes: 15 },
-        locationMasterData: { total: 234, countries: 6, regions: 47, cities: 181 },
-        countries: { total: 6 },
-      });
+      // No synthetic fallback: figures stay unavailable until the backend responds.
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (activeSection !== 'features') return undefined;
+    let cancelled = false;
+    setFlagsState('loading');
+    configApi.getFeatureFlags()
+      .then(({ data }) => {
+        if (cancelled) return;
+        const rows = Array.isArray(data?.data) ? data.data : null;
+        if (!rows) throw new Error('Unexpected feature flag payload');
+        setFeatureFlags(rows.map(f => ({
+          ...f,
+          name: f.name || f.key,
+          status: f.status || (f.isActive || f.enabled ? 'active' : 'inactive'),
+        })));
+        setFlagsState('ready');
+      })
+      .catch(() => { if (!cancelled) setFlagsState('error'); });
+    return () => { cancelled = true; };
+  }, [activeSection]);
+
+  const visibleFlags = featureFlags.filter(f => {
+    const q = searchQuery.trim().toLowerCase();
+    return !q || [f.name, f.key, f.category].some(v => String(v || '').toLowerCase().includes(q));
+  });
 
   const toggleFeatureFlag = async (id) => {
     try {
@@ -106,10 +132,10 @@ export default function ConfigurationCenter() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Feature Flags', value: stats?.featureFlags?.total || 0, sub: `${stats?.featureFlags?.active || 0} active`, icon: Flag, color: '#5aafa4' },
-          { label: 'Reference Data', value: stats?.referenceData?.total || 0, sub: 'lookup values', icon: Database, color: colors.softBlue },
-          { label: 'Vehicle Data', value: stats?.vehicleMasterData?.total || 0, sub: `${stats?.vehicleMasterData?.makes || 0} makes`, icon: Car, color: colors.terracotta },
-          { label: 'Locations', value: stats?.locationMasterData?.total || 0, sub: `${stats?.locationMasterData?.countries || 0} countries`, icon: MapPin, color: colors.emerald },
+          { label: 'Feature Flags', value: nv(stats?.featureFlags?.total), sub: `${nv(stats?.featureFlags?.active)} active`, icon: Flag, color: '#5aafa4' },
+          { label: 'Reference Data', value: nv(stats?.referenceData?.total), sub: 'lookup values', icon: Database, color: colors.softBlue },
+          { label: 'Vehicle Data', value: nv(stats?.vehicleMasterData?.total), sub: `${nv(stats?.vehicleMasterData?.makes)} makes`, icon: Car, color: colors.terracotta },
+          { label: 'Locations', value: nv(stats?.locationMasterData?.total), sub: `${nv(stats?.locationMasterData?.countries)} countries`, icon: MapPin, color: colors.emerald },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
             <div className="flex items-center gap-3 mb-3">
@@ -118,7 +144,7 @@ export default function ConfigurationCenter() {
               </div>
               <span className="text-sm text-[#64748B]">{stat.label}</span>
             </div>
-            <div className="text-3xl font-bold text-[#0A3340]">{stat.value.toLocaleString()}</div>
+            <div className={`${isUnavailable(stat.value) ? 'text-lg' : 'text-3xl'} font-bold text-[#0A3340]`}>{stat.value.toLocaleString()}</div>
             <div className="text-xs text-[#94A3B8] mt-1">{stat.sub}</div>
           </div>
         ))}
@@ -155,13 +181,7 @@ export default function ConfigurationCenter() {
           </button>
         </div>
         <div className="space-y-3">
-          {[
-            { action: 'Updated', item: 'Auction Duration Settings', user: 'Admin', time: '5 min ago' },
-            { action: 'Created', item: 'New Vehicle Make: BYD', user: 'Editor', time: '1 hour ago' },
-            { action: 'Enabled', item: 'AI Assistant Feature', user: 'Admin', time: '2 hours ago' },
-            { action: 'Updated', item: 'M-Pesa Configuration', user: 'Admin', time: '3 hours ago' },
-            { action: 'Created', item: 'New Region: Nakuru', user: 'Editor', time: '5 hours ago' },
-          ].map((log, i) => (
+          {[].map((log, i) => (
             <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-[#F6FAF9]">
               <div className="flex items-center gap-3">
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
@@ -179,6 +199,7 @@ export default function ConfigurationCenter() {
               <span className="text-xs text-[#94A3B8]">{log.time}</span>
             </div>
           ))}
+          <p className="text-sm text-[#64748B]" role="status">No change history is connected to this view yet.</p>
         </div>
       </div>
     </div>
@@ -225,18 +246,8 @@ export default function ConfigurationCenter() {
 
       {/* Feature Flags Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[
-          { key: 'auctions_enabled', name: 'Auctions', category: 'Marketplace', status: 'active', description: 'Enable auction functionality' },
-          { key: 'escrow_enabled', name: 'Escrow', category: 'Finance', status: 'active', description: 'Enable escrow payments' },
-          { key: 'finance_enabled', name: 'Finance', category: 'Finance', status: 'active', description: 'Enable financing options' },
-          { key: 'messaging_enabled', name: 'Messaging', category: 'Communication', status: 'active', description: 'Enable in-app messaging' },
-          { key: 'ai_assistant', name: 'AI Assistant', category: 'Experimental', status: 'inactive', description: 'Enable AI-powered assistant' },
-          { key: 'live_video', name: 'Live Video Tours', category: 'Experimental', status: 'inactive', description: 'Enable live video vehicle tours' },
-          { key: 'voice_commentary', name: 'Voice Commentary', category: 'Experimental', status: 'inactive', description: 'Enable voice notes on listings' },
-          { key: 'dealer_analytics', name: 'Dealer Analytics', category: 'Analytics', status: 'active', description: 'Enable dealer dashboard analytics' },
-          { key: 'vehicle_passport', name: 'Vehicle Passport', category: 'Marketplace', status: 'active', description: 'Enable vehicle passport feature' },
-        ].map((flag, i) => (
-          <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
+        {flagsState === 'ready' && visibleFlags.map((flag) => (
+          <div key={flag.id ?? flag.key} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${flag.status === 'active' ? 'bg-emerald-100' : 'bg-[#EEF7F5]'}`}>
@@ -248,7 +259,9 @@ export default function ConfigurationCenter() {
                 </div>
               </div>
               <button
-                onClick={() => toggleFeatureFlag(flag.key)}
+                aria-label={`${flag.status === 'active' ? 'Disable' : 'Enable'} ${flag.name}`}
+                aria-pressed={flag.status === 'active'}
+                onClick={() => toggleFeatureFlag(flag.id)}
                 className="flex items-center gap-1"
               >
                 {flag.status === 'active' ? (
@@ -267,6 +280,9 @@ export default function ConfigurationCenter() {
             </div>
           </div>
         ))}
+        {flagsState === 'loading' && <p className="col-span-full text-sm text-[#64748B]" role="status">Loading feature flags…</p>}
+        {flagsState === 'error' && <p className="col-span-full text-sm text-red-700" role="alert">Feature flags could not be loaded. No flags are shown rather than guessing their state.</p>}
+        {flagsState === 'ready' && visibleFlags.length === 0 && <p className="col-span-full text-sm text-[#64748B]" role="status">No feature flags were returned.</p>}
       </div>
     </div>
   );
@@ -287,19 +303,19 @@ export default function ConfigurationCenter() {
       {/* Data Types */}
       <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
         {[
-          { label: 'Makes', count: stats?.vehicleMasterData?.makes || 45, type: 'make' },
-          { label: 'Models', count: stats?.vehicleMasterData?.models || 234, type: 'model' },
-          { label: 'Body Types', count: stats?.vehicleMasterData?.bodyTypes || 15, type: 'body_type' },
-          { label: 'Fuel Types', count: 8, type: 'fuel_type' },
-          { label: 'Transmissions', count: 4, type: 'transmission_type' },
-          { label: 'Colors', count: 24, type: 'color' },
+          { label: 'Makes', count: stats?.vehicleMasterData?.makes, type: 'make' },
+          { label: 'Models', count: stats?.vehicleMasterData?.models, type: 'model' },
+          { label: 'Body Types', count: stats?.vehicleMasterData?.bodyTypes, type: 'body_type' },
+          { label: 'Fuel Types', count: undefined, type: 'fuel_type' },
+          { label: 'Transmissions', count: undefined, type: 'transmission_type' },
+          { label: 'Colors', count: undefined, type: 'color' },
         ].map((item) => (
           <button
             key={item.type}
             onClick={() => setActiveSection(`vehicle_${item.type}`)}
             className="p-4 rounded-xl border border-[#D7E7E4] hover:border-[#0A3340] hover:bg-[#0A3340]/5 transition-all text-center"
           >
-            <div className="text-2xl font-bold text-[#0A3340]">{item.count}</div>
+            <div className={`${isUnavailable(Number.isFinite(item.count) ? item.count : 'Unavailable') ? 'text-base' : 'text-2xl'} font-bold text-[#0A3340]`}>{Number.isFinite(item.count) ? item.count : 'Unavailable'}</div>
             <div className="text-sm text-[#64748B]">{item.label}</div>
           </button>
         ))}
@@ -321,20 +337,7 @@ export default function ConfigurationCenter() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#D7E7E4]">
-            {[
-              { make: 'Toyota', models: 45, country: 'Japan', status: 'active' },
-              { make: 'Honda', models: 32, country: 'Japan', status: 'active' },
-              { make: 'Nissan', models: 28, country: 'Japan', status: 'active' },
-              { make: 'Subaru', models: 18, country: 'Japan', status: 'active' },
-              { make: 'Mitsubishi', models: 22, country: 'Japan', status: 'active' },
-              { make: 'Isuzu', models: 12, country: 'Japan', status: 'active' },
-              { make: 'Volkswagen', models: 35, country: 'Germany', status: 'active' },
-              { make: 'Mercedes-Benz', models: 42, country: 'Germany', status: 'active' },
-              { make: 'BMW', models: 38, country: 'Germany', status: 'active' },
-              { make: 'Ford', models: 30, country: 'USA', status: 'active' },
-              { make: 'BYD', models: 15, country: 'China', status: 'active' },
-              { make: 'Geely', models: 12, country: 'China', status: 'active' },
-            ].map((item, i) => (
+            {[].map((item, i) => (
               <tr key={i} className="hover:bg-[#F6FAF9]">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
@@ -351,16 +354,16 @@ export default function ConfigurationCenter() {
                 </td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-1">
-                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Edit">
                       <Edit size={16} className="text-[#64748B]" />
                     </button>
-                    <button className="p-2 hover:bg-red-50 rounded-lg">
+                    <button className="p-2 hover:bg-red-50 rounded-lg" aria-label="Delete">
                       <Trash2 size={16} className="text-red-400" />
                     </button>
                   </div>
                 </td>
               </tr>
-            ))}
+            ))}<tr><td colSpan={6} className="px-6 py-6 text-sm text-[#64748B]">Vehicle make data is not connected to this view, so no makes are listed.</td></tr>
           </tbody>
         </table>
       </div>
@@ -383,14 +386,14 @@ export default function ConfigurationCenter() {
       {/* Reference Types */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Vehicle Status', count: 8, icon: Car },
-          { label: 'Listing Status', count: 6, icon: Tag },
-          { label: 'Dealer Levels', count: 5, icon: Users },
-          { label: 'Auction Categories', count: 12, icon: Gavel },
-          { label: 'Inspection Outcomes', count: 7, icon: ShieldCheck },
-          { label: 'Finance Status', count: 9, icon: DollarSign },
-          { label: 'Payment Methods', count: 8, icon: CreditCard },
-          { label: 'Risk Levels', count: 5, icon: AlertTriangle },
+          { label: 'Vehicle Status', icon: Car },
+          { label: 'Listing Status', icon: Tag },
+          { label: 'Dealer Levels', icon: Users },
+          { label: 'Auction Categories', icon: Gavel },
+          { label: 'Inspection Outcomes', icon: ShieldCheck },
+          { label: 'Finance Status', icon: DollarSign },
+          { label: 'Payment Methods', icon: CreditCard },
+          { label: 'Risk Levels', icon: AlertTriangle },
         ].map((type) => (
           <button
             key={type.label}
@@ -398,7 +401,7 @@ export default function ConfigurationCenter() {
           >
             <div className="flex items-center gap-3 mb-2">
               <type.icon size={20} className="text-[#64748B]" />
-              <span className="font-medium text-[#0A3340]">{type.count}</span>
+              <span className="font-medium text-[#0A3340]">{Number.isFinite(type.count) ? type.count : 'Unavailable'}</span>
             </div>
             <p className="text-sm text-[#64748B]">{type.label}</p>
           </button>
@@ -421,18 +424,7 @@ export default function ConfigurationCenter() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#D7E7E4]">
-            {[
-              { type: 'vehicle_status', value: 'active', label: 'Active', order: 1 },
-              { type: 'vehicle_status', value: 'pending', label: 'Pending Review', order: 2 },
-              { type: 'vehicle_status', value: 'sold', label: 'Sold', order: 3 },
-              { type: 'vehicle_status', value: 'archived', label: 'Archived', order: 4 },
-              { type: 'listing_status', value: 'draft', label: 'Draft', order: 1 },
-              { type: 'listing_status', value: 'published', label: 'Published', order: 2 },
-              { type: 'listing_status', value: 'featured', label: 'Featured', order: 3 },
-              { type: 'dealer_level', value: 'basic', label: 'Basic', order: 1 },
-              { type: 'dealer_level', value: 'premium', label: 'Premium', order: 2 },
-              { type: 'dealer_level', value: 'elite', label: 'Elite', order: 3 },
-            ].map((item, i) => (
+            {[].map((item, i) => (
               <tr key={i} className="hover:bg-[#F6FAF9]">
                 <td className="px-6 py-4">
                   <span className="px-2 py-1 bg-[#EEF7F5] rounded text-xs text-[#64748B]">{item.type}</span>
@@ -442,16 +434,16 @@ export default function ConfigurationCenter() {
                 <td className="px-6 py-4 text-[#64748B]">{item.order}</td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-1">
-                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Edit">
                       <Edit size={16} className="text-[#64748B]" />
                     </button>
-                    <button className="p-2 hover:bg-red-50 rounded-lg">
+                    <button className="p-2 hover:bg-red-50 rounded-lg" aria-label="Delete">
                       <Trash2 size={16} className="text-red-400" />
                     </button>
                   </div>
                 </td>
               </tr>
-            ))}
+            ))}<tr><td colSpan={6} className="px-6 py-6 text-sm text-[#64748B]">Reference values are not connected to this view, so none are listed.</td></tr>
           </tbody>
         </table>
       </div>
@@ -482,13 +474,7 @@ export default function ConfigurationCenter() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#D7E7E4]">
-            {[
-              { action: 'Update', entity: 'Feature Flag', user: 'admin@kayad.co.ke', prev: 'inactive', new: 'active', time: '2024-01-15 14:30' },
-              { action: 'Create', entity: 'Vehicle Make', user: 'editor@kayad.co.ke', prev: '-', new: 'BYD', time: '2024-01-15 13:45' },
-              { action: 'Update', entity: 'Config Entry', user: 'admin@kayad.co.ke', prev: '14 days', new: '30 days', time: '2024-01-15 12:00' },
-              { action: 'Delete', entity: 'Reference Data', user: 'admin@kayad.co.ke', prev: 'obsolete_status', new: '-', time: '2024-01-15 10:30' },
-              { action: 'Update', entity: 'Country Config', user: 'admin@kayad.co.ke', prev: 'KE', new: 'Kenya', time: '2024-01-14 16:45' },
-            ].map((log, i) => (
+            {[].map((log, i) => (
               <tr key={i} className="hover:bg-[#F6FAF9]">
                 <td className="px-6 py-4">
                   <span className={`px-2 py-1 rounded text-xs font-medium ${
@@ -511,6 +497,8 @@ export default function ConfigurationCenter() {
                 </td>
               </tr>
             ))}
+            <tr><td colSpan={6} className="px-6 py-6 text-sm text-[#64748B]">No audit entries are connected to this view yet.</td></tr>
+            <tr><td colSpan={7} className="px-6 py-8 text-center text-sm text-[#64748B]">No configuration change records are connected to this view yet.</td></tr>
           </tbody>
         </table>
       </div>
@@ -552,10 +540,10 @@ export default function ConfigurationCenter() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Refresh">
                 <RefreshCw size={20} className="text-[#64748B]" />
               </button>
-              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Notifications">
                 <Bell size={20} className="text-[#64748B]" />
               </button>
             </div>
@@ -590,9 +578,10 @@ export default function ConfigurationCenter() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <div className="flex-1 p-6">
+          {loadError && <div role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">Configuration statistics could not be loaded. Figures are unavailable, not zero.</div>}
           {renderSectionContent()}
-        </main>
+        </div>
       </div>
     </div>
   );

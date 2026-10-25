@@ -10,7 +10,7 @@ export default function AdminSettingsPackages({ packages, setPackages, saving, s
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:20 }}>
           <div>
             <h3 style={{ fontSize:'1rem', margin:0, color:'#0a3340' }}>Listing Packages</h3>
-            <p style={{ fontSize:13, color:'rgba(10, 51, 64, 0.35)', marginTop:6 }}>
+            <p style={{ fontSize:13, color: 'var(--admin-muted-content)', marginTop:6 }}>
               Edit package prices and limits here. Toggle isFree to waive payment for any package.
             </p>
           </div>
@@ -30,13 +30,13 @@ export default function AdminSettingsPackages({ packages, setPackages, saving, s
                   { label:'Listing Max (0=∞)', value:pkg.listingMax, onChange:e => setPackages(p => p.map((x, j) => j === i ? {...x, listingMax:Number(e.target.value)} : x)), type:'number', min:0 },
                 ].map(f => (
                   <div key={f.label}>
-                    <div style={{ fontSize:9, color:'rgba(10, 51, 64, 0.3)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>{f.label}</div>
+                    <div style={{ fontSize:9, color: 'var(--admin-muted-content)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>{f.label}</div>
                     <input type={f.type} min={f.min} value={f.value} onChange={f.onChange}
                       style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:'1px solid rgba(10, 51, 64, 0.1)', background:'rgba(10, 51, 64, 0.05)', color:'#0a3340', fontSize:13, outline:'none', boxSizing:'border-box' }} />
                   </div>
                 ))}
                 <div>
-                  <div style={{ fontSize:9, color:'rgba(10, 51, 64, 0.3)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>For</div>
+                  <div style={{ fontSize:9, color: 'var(--admin-muted-content)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>For</div>
                   <select value={pkg.forRole} onChange={e => setPackages(p => p.map((x, j) => j === i ? {...x, forRole:e.target.value} : x))}
                     style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:'1px solid rgba(10, 51, 64, 0.1)', background: '#FFFFFF', color:'#0a3340', fontSize:12, outline:'none' }}>
                     <option value="dealer">Dealer</option>
@@ -45,14 +45,14 @@ export default function AdminSettingsPackages({ packages, setPackages, saving, s
                   </select>
                 </div>
                 <div>
-                  <div style={{ fontSize:9, color:'rgba(10, 51, 64, 0.3)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>Free</div>
+                  <div style={{ fontSize:9, color: 'var(--admin-muted-content)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>Free</div>
                   <button onClick={() => setPackages(p => p.map((x, j) => j === i ? {...x, isFree:!x.isFree} : x))}
                     style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:`1px solid ${pkg.isFree ? 'rgba(34,197,94,0.3)' : 'rgba(10, 51, 64, 0.1)'}`, background:pkg.isFree ? 'rgba(34,197,94,0.1)' : 'rgba(10, 51, 64, 0.04)', color:pkg.isFree ? '#22c55e' : 'rgba(10, 51, 64, 0.4)', fontSize:12, fontWeight:700, cursor:'pointer' }}>
                     {pkg.isFree ? '✓ Free' : 'Paid'}
                   </button>
                 </div>
                 <div>
-                  <div style={{ fontSize:9, color:'rgba(10, 51, 64, 0.3)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>Active</div>
+                  <div style={{ fontSize:9, color: 'var(--admin-muted-content)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>Active</div>
                   <button onClick={() => setPackages(p => p.map((x, j) => j === i ? {...x, isActive:!x.isActive} : x))}
                     style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:`1px solid ${pkg.isActive ? 'rgba(23, 107, 135, 0.3)' : 'rgba(10, 51, 64, 0.08)'}`, background:pkg.isActive ? 'rgba(23, 107, 135, 0.08)' : 'rgba(10, 51, 64, 0.03)', color:pkg.isActive ? 'var(--brand)' : 'rgba(10, 51, 64, 0.3)', fontSize:12, fontWeight:700, cursor:'pointer' }}>
                     {pkg.isActive ? 'On' : 'Off'}
@@ -64,7 +64,7 @@ export default function AdminSettingsPackages({ packages, setPackages, saving, s
               <div style={{ marginTop:10 }}>
                 <input placeholder="Description (shown to users)" value={pkg.description || ''}
                   onChange={e => setPackages(p => p.map((x, j) => j === i ? {...x, description:e.target.value} : x))}
-                  style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:'1px solid rgba(10, 51, 64, 0.07)', background:'rgba(10, 51, 64, 0.03)', color:'rgba(10, 51, 64, 0.6)', fontSize:12, outline:'none', boxSizing:'border-box' }} />
+                  style={{ width:'100%', padding:'7px 10px', borderRadius:8, border:'1px solid rgba(10, 51, 64, 0.07)', background:'rgba(10, 51, 64, 0.03)', color: 'var(--admin-muted-content)', fontSize:12, outline:'none', boxSizing:'border-box' }} />
               </div>
             </div>
           ))}

@@ -121,7 +121,7 @@ export default function AdminStaff() {
   if (!isSystemOwner) return <div role="alert" style={{ maxWidth: 760, margin: '48px auto', padding: 28, background: '#fff', border: '1px solid #dbe7e8', borderRadius: 16, color: '#0a3340' }}><LockKeyhole size={32} /><h2>System Owner governance</h2><p>Only a verified active System Owner can manage staff records and permissions. This page-level check is not a substitute for backend authorization.</p></div>;
 
   return (
-    <main style={{ maxWidth: 1320, minWidth: 0, margin: '0 auto', padding: '24px clamp(12px, 3vw, 32px)', color: '#0a3340' }}>
+    <div style={{ maxWidth: 1320, minWidth: 0, margin: '0 auto', padding: '24px clamp(12px, 3vw, 32px)', color: '#0a3340' }}>
       <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
         <div><div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.14em', color: '#176b87' }}>System Owner · Access governance</div><h1 style={{ fontSize: 'clamp(24px, 3vw, 34px)', margin: '8px 0' }}>Staff directory & access</h1><p style={{ margin: 0, color: '#64748b', maxWidth: 720 }}>Manage existing staff identities, supported roles, suspensions and permission assignments. Role labels describe access policy; they do not certify a separate HR, accounting or sales subsystem.</p></div>
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><button type="button" onClick={() => loadStaff()} disabled={loading} style={buttonStyle('secondary')}><RefreshCw size={15} /> Refresh</button><button type="button" onClick={() => setShowAdd(true)} style={buttonStyle('primary')}><Plus size={16} /> Create staff account</button></div>
@@ -144,7 +144,7 @@ export default function AdminStaff() {
       {tab === 'permissions' && <AdminStaffPermMatrix />}
       {showAdd && <AdminStaffCreateModal form={form} set={set} roles={roleCatalog} saving={saving} onSubmit={handleCreate} onClose={() => !saving && setShowAdd(false)} />}
       {editMember && <AdminStaffEditModal member={editMember} setMember={setEditMember} roles={roleCatalog} saving={saving} onSave={() => handleUpdate(editMember._id, { name: editMember.name, role: editMember.role })} onClose={() => !saving && setEditMember(null)} />}
-    </main>
+    </div>
   );
 }
 

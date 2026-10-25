@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /home/claude/work/kayad-working
+
+
+ Test Files  103 passed (103)
+      Tests  808 passed | 1 skipped (809)
+   Start at  16:30:53
+   Duration  179.14s (transform 4.73s, setup 12.64s, import 17.24s, tests 56.59s, environment 76.47s)
+

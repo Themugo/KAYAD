@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
+import { Star } from 'lucide-react';
 export default function AdminReviews() {
   const { toast } = useToast();
   const [reviews, setReviews] = useState([]);
@@ -47,7 +48,7 @@ export default function AdminReviews() {
     setActionId(id);
     try {
       await adminAPI.deleteReview(id);
-      toast('🗑️ Review deleted', 'success');
+      toast('Review deleted', 'success');
       load();
       if (selected?._id === id) setSelected(null);
     } catch (err) {
@@ -61,8 +62,8 @@ export default function AdminReviews() {
     <div style={{ padding: '32px', background: '#f6faf9', minHeight: '100vh' }}>
       <div style={{ maxWidth: 1400, margin: '0 auto' }}>
         <div style={{ marginBottom: 28 }}>
-          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 900, fontStyle: 'italic' }}>⭐ Review Moderation</h2>
-          <p style={{ color: 'rgba(10, 51, 64, 0.35)', fontSize: 13, marginTop: 6 }}>Manage and moderate dealer reviews across the platform</p>
+          <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 900, fontStyle: 'italic' }}>Review Moderation</h2>
+          <p style={{ color: 'var(--admin-muted-content)', fontSize: 13, marginTop: 6 }}>Manage and moderate dealer reviews across the platform</p>
         </div>
 
         <input
@@ -79,7 +80,7 @@ export default function AdminReviews() {
           <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}><div className="spinner" /></div>
         ) : reviews.length === 0 ? (
           <div className="empty-state" style={{ padding: 48 }}>
-            <div className="empty-icon">⭐</div>
+            <div className="empty-icon"><Star size={32} aria-hidden="true" /></div>
             <h3>No reviews found</h3>
             <p style={{ color: 'var(--text-muted)', fontSize: 14, marginTop: 8 }}>{search ? 'No reviews match your search' : 'No reviews have been submitted yet'}</p>
           </div>
@@ -91,11 +92,11 @@ export default function AdminReviews() {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                     <div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-                        <span style={{ fontSize: 16 }}>{'⭐'.repeat(Math.min(r.rating || 0, 5))}</span>
+                        <span style={{ display: 'inline-flex', gap: 2, color: 'var(--admin-status-warning)' }} role="img" aria-label={`${Number.isFinite(r.rating) ? Math.min(Math.max(r.rating, 0), 5) : 0} out of 5 stars`}>{Array.from({ length: Math.min(Math.max(Number.isFinite(r.rating) ? r.rating : 0, 0), 5) }, (_, k) => <Star key={k} size={16} fill="currentColor" aria-hidden="true" />)}</span>
                         <span style={{ fontSize: 14, fontWeight: 700, color: '#0a3340' }}>{r.rating}/5</span>
                       </div>
-                      <div style={{ fontSize: 12, color: 'rgba(10, 51, 64, 0.4)' }}>
-                        <span style={{ color: 'rgba(10, 51, 64, 0.6)' }}>{r.user?.name || 'Anonymous'}</span>
+                      <div style={{ fontSize: 12, color: 'var(--admin-muted-content)' }}>
+                        <span style={{ color: 'var(--admin-muted-content)' }}>{r.user?.name || 'Anonymous'}</span>
                         {' · '}
                         <span style={{ color: 'var(--brand)' }}>{r.dealer?.name || 'Unknown Dealer'}</span>
                         {' · '}
@@ -118,7 +119,7 @@ export default function AdminReviews() {
                     </div>
                   )}
                   {r._id === selected?._id && (
-                    <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(10, 51, 64, 0.06)', fontSize: 11, color: 'rgba(10, 51, 64, 0.35)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                    <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid rgba(10, 51, 64, 0.06)', fontSize: 11, color: 'var(--admin-muted-content)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                       <div>Review ID: {r._id}</div>
                       <div>User ID: {r.user?._id || '—'}</div>
                       <div>Dealer ID: {r.dealer?._id || '—'}</div>

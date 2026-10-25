@@ -13,6 +13,7 @@
   --admin-accent-text: #0B756E;
   --admin-accent-muted: #347E78;
   --admin-muted-on-dark: #94A3B8;
+  --admin-accent-on-dark: #2DD4BF;
   --admin-accent-bright: #72E2D4;
   --admin-accent-soft: rgba(19, 184, 166, 0.14);
   --admin-accent-border: rgba(19, 184, 166, 0.30);
@@ -29,7 +30,7 @@
   --admin-surface-hover: #E6F6F3;
   --admin-ink: #0A3340;
   --admin-body: #334155;
-  --admin-muted-content: #64748B;
+  --admin-muted-content: #586579;
   --admin-brand: #176B87;
   --admin-brand-dark: #12576D;
   --admin-brand-deep: #0A3340;
@@ -56,13 +57,52 @@
   --admin-status-warning: rgb(146, 64, 14);
   --admin-status-warning-bright: rgb(217, 119, 6);
   --admin-status-warning-bg: #FEF3C7;
+  --admin-status-warning-border: #FCD34D;
   --admin-status-danger: #B91C1C;
   --admin-status-danger-bg: #FEE2E2;
+  --admin-status-danger-border: #FECACA;
   --admin-status-info: #0E7490;
   --admin-status-info-bright: #0891B2;
   --admin-status-info-bg: #E0F2FE;
+  --admin-status-info-border: #BAE6FD;
   --admin-status-neutral: #475569;
   --admin-status-neutral-bg: #F1F5F9;
+  --admin-status-neutral-border: #CBD5E1;
+  /*
+   * Scoped compatibility aliases for established admin pages. Many older
+   * admin components use these names in inline styles. Keep them local to the
+   * authenticated shell and map them to the canonical Phase 9 tokens so the
+   * public marketplace theme is not affected.
+   */
+  --text-muted: var(--admin-muted-content);
+  --text-dim: var(--admin-muted-content);
+  --text-secondary: var(--admin-body);
+  --text-primary: var(--admin-ink);
+  --text: var(--admin-ink);
+  --border: var(--admin-border);
+  --border-soft: var(--admin-border-soft);
+  --card: var(--admin-surface);
+  --surface: var(--admin-surface);
+  --bg-card: var(--admin-surface);
+  --bg-secondary: var(--admin-surface-soft);
+  --bg-base: var(--admin-canvas);
+  --bg: var(--admin-canvas);
+  --red: var(--admin-status-danger);
+  --red-500: var(--admin-status-danger);
+  --red-400: var(--admin-status-danger);
+  --green: var(--admin-status-success);
+  --green-400: var(--admin-status-success-bright);
+  --orange: var(--admin-status-warning);
+  --orange-400: var(--admin-status-warning);
+  --brand-light: var(--admin-accent-text);
+  --danger: var(--admin-status-danger);
+  --purple: var(--admin-brand);
+  --purple-500: var(--admin-brand);
+  --teal: var(--admin-accent);
+  --gray: var(--admin-status-neutral);
+  --radius: var(--admin-radius-md);
+  --radius-lg: var(--admin-radius-lg);
+  --shadow-md: var(--admin-shadow-hover);
   display: flex;
   min-width: 0;
   min-height: 100vh;
@@ -75,7 +115,7 @@
   flex: 1 1 auto;
   flex-direction: column;
   min-width: 0;
-  overflow: hidden;
+  overflow-x: clip;
 }
 .kayad-admin-shell__content {
   flex: 1 1 auto;
@@ -84,7 +124,8 @@
   overscroll-behavior: contain;
 }
 .kayad-admin-header {
-  position: relative;
+  position: sticky;
+  top: 0;
   z-index: 20;
   display: flex;
   min-height: 58px;
@@ -106,7 +147,7 @@
 }
 .kayad-admin-header__breadcrumb { gap: 8px; color: var(--admin-muted); font-size: 12px; }
 .kayad-admin-header__brand {
-  color: var(--admin-accent);
+  color: var(--admin-accent-on-dark);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.11em;
@@ -144,8 +185,18 @@
   cursor: pointer;
 }
 .kayad-admin-shell button:focus-visible,
-.kayad-admin-shell a:focus-visible {
+.kayad-admin-shell a:focus-visible,
+.kayad-admin-shell input:focus-visible,
+.kayad-admin-shell select:focus-visible,
+.kayad-admin-shell textarea:focus-visible,
+.kayad-admin-shell [tabindex]:focus-visible {
   outline: 2px solid var(--admin-shell-focus);
+  outline-offset: 2px;
+}
+.kayad-admin-shell input:focus-visible,
+.kayad-admin-shell select:focus-visible,
+.kayad-admin-shell textarea:focus-visible {
+  outline: 2px solid var(--admin-shell-focus) !important; /* some legacy pages set outline:none inline */
   outline-offset: 2px;
 }
 
@@ -166,6 +217,9 @@
   transition: width 220ms ease, transform 220ms ease;
 }
 .kayad-admin-shell .admin-sidebar.is-collapsed { width: 60px; }
+@media (min-width: 768px) {
+  .kayad-admin-shell .admin-sidebar { position: sticky; top: 0; align-self: flex-start; }
+}
 .admin-sidebar__brand {
   display: flex;
   min-height: 66px;
@@ -253,6 +307,7 @@
 .kayad-admin-shell .admin-sidebar.is-collapsed .admin-sidebar__navigation { padding-right: 5px; padding-left: 5px; }
 .kayad-admin-shell .admin-sidebar.is-collapsed .admin-sidebar__links { padding-top: 3px; }
 .kayad-admin-shell .admin-sidebar.is-collapsed .admin-sidebar__link { justify-content: center; padding: 9px 0; }
+.kayad-admin-shell .admin-sidebar__footer { flex: 0 0 auto; padding: 8px; border-top: 1px solid var(--admin-sidebar-border); }
 .admin-sidebar__alerts { display: flex; min-height: 42px; align-items: center; gap: 9px; padding: 10px 17px; border-top: 1px solid var(--admin-sidebar-border); color: var(--admin-shell-danger); font-size: 11px; font-weight: 650; }
 .admin-sidebar__alert-dot { width: 5px; height: 5px; margin-left: -6px; align-self: flex-start; border-radius: 50%; background: var(--admin-status-danger); }
 .admin-sidebar-backdrop { display: none; }
@@ -270,11 +325,12 @@
     height: 100dvh;
     max-height: 100dvh;
     transform: translateX(-105%);
+    visibility: hidden; /* closed off-canvas drawer must not be keyboard-focusable */
     z-index: 80;
     box-shadow: 14px 0 36px rgba(0, 14, 20, 0.32);
   }
   .kayad-admin-shell .admin-sidebar.is-collapsed { width: min(292px, 88vw); }
-  .kayad-admin-shell .admin-sidebar.open { transform: translateX(0); }
+  .kayad-admin-shell .admin-sidebar.open { transform: translateX(0); visibility: visible; }
   .kayad-admin-shell .admin-sidebar.open.is-collapsed { width: min(292px, 88vw); }
   .kayad-admin-shell .admin-sidebar.open.is-collapsed .admin-sidebar__brand-copy { display: flex; }
   .kayad-admin-shell .admin-sidebar.open.is-collapsed .admin-sidebar__controls { flex-direction: row; }
@@ -319,7 +375,9 @@
 .kayad-admin-shell [class~="text-[#13b8a6]"] { color: var(--admin-accent-text) !important; }
 .kayad-admin-shell [class~="text-[#5AAFA4]"],
 .kayad-admin-shell [class~="text-[#5aafa4]"] { color: var(--admin-accent-muted, #5AAFA4) !important; }
-.kayad-admin-shell [class~="text-[#94A3B8]"] { color: var(--admin-muted-on-dark) !important; }
+/* Slate-400 helper text is only legible on dark panels; on the light canvas it falls to 2.5:1, so it uses the muted content token there. */
+.kayad-admin-shell [class~="text-[#94A3B8]"] { color: var(--admin-muted-content) !important; }
+.kayad-admin-shell :is([class~="bg-[#0A3340]"], [class~="bg-[#12576D]"], [class~="bg-[#176B87]"], [class*="bg-gradient"]) [class~="text-[#94A3B8]"] { color: var(--admin-muted-on-dark) !important; }
 .kayad-admin-shell [class~="text-[#BDE5DE]"] { color: var(--admin-brand-soft) !important; }
 .kayad-admin-shell [class~="text-[#2ECC71]"] { color: var(--admin-status-success-bright) !important; }
 .kayad-admin-shell [class~="text-[#DC3545]"] { color: var(--admin-status-danger) !important; }

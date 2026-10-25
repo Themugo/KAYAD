@@ -1,6 +1,7 @@
 import { ORG } from './AdminStaffOrgChart';
 
 
+import { X } from 'lucide-react';
 function Field({ label, children }) {
   return (
     <div style={{ marginBottom: 16 }}>
@@ -16,7 +17,7 @@ export default function AdminStaffEditModal({ member, setMember, roles = [], onS
       <div style={{ background: '#0a3340', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 18, padding: 32, width: '100%', maxWidth: 420 }} onClick={e => e.stopPropagation()} role="presentation">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.2rem', color: '#fff', margin: 0 }}>Edit: {member.name}</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 20 }}>✕</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 20 }} aria-label="Close" title="Close"><X size={18} aria-hidden="true" /></button>
         </div>
         <Field label="Full Name"><input value={member.name || ''} maxLength={120} onChange={e => setMember(p => ({ ...p, name: e.target.value }))} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 9, border: '1px solid rgba(10,51,64,.15)', background: '#fff', color: '#0a3340', fontSize: 13 }} /></Field>
         <Field label="Change Role">

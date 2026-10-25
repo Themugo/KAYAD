@@ -109,7 +109,7 @@ export default function AdminSecurityLog() {
       <div className="container" style={{ paddingTop: 32, paddingBottom: 32, maxWidth: 1200 }}>
         <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h2>📋 Immutable Audit Trail</h2>
+            <h2>Immutable Audit Trail</h2>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
               Enterprise-grade audit logging — records cannot be altered or deleted
             </p>
@@ -140,7 +140,7 @@ export default function AdminSecurityLog() {
 
         {showStatistics && statistics && (
           <div className="card" style={{ marginBottom: 24, padding: 16 }}>
-            <h3 style={{ fontSize: 14, marginBottom: 12 }}>📊 Audit Statistics (Last 30 Days)</h3>
+            <h3 style={{ fontSize: 14, marginBottom: 12 }}>Audit Statistics (Last 30 Days)</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
               <div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Total Logs</div>
@@ -186,6 +186,7 @@ export default function AdminSecurityLog() {
         <div className="card" style={{ marginBottom: 24, padding: 16 }}>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <select
+              aria-label="Filter by severity"
               className="input"
               style={{ width: 140, fontSize: 12, padding: '6px 10px' }}
               value={severityFilter}
@@ -197,6 +198,7 @@ export default function AdminSecurityLog() {
               <option value="info">Info</option>
             </select>
             <select
+              aria-label="Filter by target model"
               className="input"
               style={{ width: 140, fontSize: 12, padding: '6px 10px' }}
               value={targetModelFilter}

@@ -154,20 +154,25 @@ function ToastItem({ toast, onRemove }: ToastItemProps) {
   );
 }
 
+const noop = () => {};
+const NOOP_TOAST_CONTEXT: ToastContextValue = {
+  toasts: [],
+  addToast: noop,
+  removeToast: noop,
+  success: noop,
+  error: noop,
+  warning: noop,
+  info: noop,
+  toast: noop,
+};
+
 export const useToast = (): ToastContextValue => {
   const context = useContext(ToastCtx);
   if (!context) {
-    // Return a no-op context if not in provider (for testing)
-    return {
-      toasts: [],
-      addToast: () => {},
-      removeToast: () => {},
-      success: () => {},
-      error: () => {},
-      warning: () => {},
-      info: () => {},
-      toast: () => {},
-    };
+    // No provider is mounted (tests, and currently the app shell): return one shared no-op context. It must be a
+    // module-level constant: a fresh object per render gave callers a new `toast` identity every render, and every
+    // effect/useCallback that lists `toast` as a dependency re-ran forever (a request storm on admin pages).
+    return NOOP_TOAST_CONTEXT;
   }
   return context;
 };

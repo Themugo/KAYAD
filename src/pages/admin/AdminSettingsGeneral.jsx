@@ -30,7 +30,7 @@ export default function AdminSettingsGeneral({ config, setConfig, saveConfig, sa
             {s.fields.map(f => (
               <div key={f.key} className="input-group">
                 <label className="input-label">{f.label}</label>
-                <input className="input" type={f.type} min={f.min} max={f.max}
+                <input aria-label={f.label} className="input" type={f.type} min={f.min} max={f.max}
                   value={config[f.key] ?? ''}
                   onChange={e => setConfig(p => ({ ...p, [f.key]: e.target.value }))} />
               </div>

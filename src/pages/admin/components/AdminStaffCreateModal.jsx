@@ -27,7 +27,7 @@ function SI({ value, onChange, placeholder, type = 'text' }) {
   );
 }
 
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, X } from 'lucide-react';
 
 
 export default function AdminStaffCreateModal({ form, set, roles = [], saving, onSubmit, onClose }) {
@@ -36,7 +36,7 @@ export default function AdminStaffCreateModal({ form, set, roles = [], saving, o
       <div style={{ background: '#0a3340', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 18, padding: 32, width: '100%', maxWidth: 480 }} onClick={e => e.stopPropagation()} role="presentation">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: '1.3rem', color: '#fff', margin: 0 }}>Add Staff Member</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 20 }}>✕</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 20 }} aria-label="Close" title="Close"><X size={18} aria-hidden="true" /></button>
         </div>
         <form onSubmit={onSubmit}>
           <Field label="Full Name"><SI value={form.name} onChange={e => set('name', e.target.value)} placeholder="Jane Wanjiku" /></Field>

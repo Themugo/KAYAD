@@ -32,7 +32,7 @@ export default function IntegrationStudio() {
       </header>
       {state.error && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{state.error}</div>}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {cards.map(([key, label, Icon]) => <div key={key} className="rounded-xl border border-[#D7E7E4] bg-white p-5 shadow-sm"><div className="flex items-center gap-3 text-[#64748B]"><Icon size={18} /><span className="text-sm">{label}</span></div><div className="mt-3 text-2xl font-semibold text-[#0A3340]">{state.loading ? '—' : Number(data[key] || 0).toLocaleString()}</div></div>)}
+        {cards.map(([key, label, Icon]) => <div key={key} className="rounded-xl border border-[#D7E7E4] bg-white p-5 shadow-sm"><div className="flex items-center gap-3 text-[#64748B]"><Icon size={18} /><span className="text-sm">{label}</span></div><div className="mt-3 text-2xl font-semibold text-[#0A3340]">{state.loading ? '—' : (data[key] !== null && data[key] !== undefined && data[key] !== '' && Number.isFinite(Number(data[key])) ? Number(data[key]).toLocaleString() : 'Unavailable')}</div></div>)}
       </div>
       {!state.loading && <div className="rounded-xl border border-[#D7E7E4] bg-white p-5 shadow-sm"><div className="flex items-center gap-2"><span className={`h-2.5 w-2.5 rounded-full ${data.health === 'operational' ? 'bg-emerald-500' : 'bg-[#13B8A6]'}`} /><span className="font-medium text-[#0A3340]">Gateway health: {data.health || 'unknown'}</span></div><p className="mt-2 text-sm text-[#64748B]">Telemetry is derived from persisted integration records. Credentials and webhook secrets are never displayed in list views.</p></div>}
     </section>

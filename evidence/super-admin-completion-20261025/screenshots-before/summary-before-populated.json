@@ -1,0 +1,982 @@
+[
+ {
+  "name": "before-populated-admin-1440x900",
+  "route": "/admin",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Welcome back, Test Administrator",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 4,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 10
+ },
+ {
+  "name": "before-populated-admin_users-1440x900",
+  "route": "/admin/users",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_sellers-1440x900",
+  "route": "/admin/sellers",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_cars-1440x900",
+  "route": "/admin/cars",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_moderation-1440x900",
+  "route": "/admin/moderation",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Car Moderation Queue",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_auctions-1440x900",
+  "route": "/admin/auctions",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 7
+ },
+ {
+  "name": "before-populated-admin_bids-1440x900",
+  "route": "/admin/bids",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 6
+ },
+ {
+  "name": "before-populated-admin_escrows-1440x900",
+  "route": "/admin/escrows",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 6
+ },
+ {
+  "name": "before-populated-admin_reviews-1440x900",
+  "route": "/admin/reviews",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_referrals-1440x900",
+  "route": "/admin/referrals",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_chats-1440x900",
+  "route": "/admin/chats",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_reports-1440x900",
+  "route": "/admin/reports",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Reports",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_support_tickets-1440x900",
+  "route": "/admin/support-tickets",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": null,
+   "contentClientW": null,
+   "overflowing": [],
+   "h1": "Something went wrong",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 7
+ },
+ {
+  "name": "before-populated-admin_feedback-1440x900",
+  "route": "/admin/feedback",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_market_data-1440x900",
+  "route": "/admin/market-data",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_transactions-1440x900",
+  "route": "/admin/transactions",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_ntsa_queue-1440x900",
+  "route": "/admin/ntsa-queue",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_inspections-1440x900",
+  "route": "/admin/inspections",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 6
+ },
+ {
+  "name": "before-populated-admin_dealer_verifications-1440x900",
+  "route": "/admin/dealer-verifications",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Dealer Verifications",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_inspector_applications-1440x900",
+  "route": "/admin/inspector-applications",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_security_log-1440x900",
+  "route": "/admin/security-log",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_ads-1440x900",
+  "route": "/admin/ads",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_broadcast-1440x900",
+  "route": "/admin/broadcast",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Broadcast Message",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 4
+ },
+ {
+  "name": "before-populated-admin_settings-1440x900",
+  "route": "/admin/settings",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 6
+ },
+ {
+  "name": "before-populated-admin_control_room-1440x900",
+  "route": "/admin/control-room",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Operations Control Room",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 8
+ },
+ {
+  "name": "before-populated-admin_staff-1440x900",
+  "route": "/admin/staff",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Staff directory & access",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 6
+ },
+ {
+  "name": "before-populated-admin_staff_permissions-1440x900",
+  "route": "/admin/staff-permissions",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 6
+ },
+ {
+  "name": "before-populated-admin_panic_room-1440x900",
+  "route": "/admin/panic-room",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Panic Room",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_webhoist-1440x900",
+  "route": "/admin/webhoist",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "System Overview",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 6
+ },
+ {
+  "name": "before-populated-admin_cms-1440x900",
+  "route": "/admin/cms",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Content Studio",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 6
+ },
+ {
+  "name": "before-populated-admin_automation-1440x900",
+  "route": "/admin/automation",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Automation Studio",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_config-1440x900",
+  "route": "/admin/config",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Configuration Center",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_lowcode-1440x900",
+  "route": "/admin/lowcode",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Business Object Studio",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 6
+ },
+ {
+  "name": "before-populated-admin_vxp-1440x900",
+  "route": "/admin/vxp",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": null,
+   "contentClientW": null,
+   "overflowing": [],
+   "h1": "Something went wrong",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 8
+ },
+ {
+  "name": "before-populated-admin_xos-1440x900",
+  "route": "/admin/xos",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Experience Studio",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 12
+ },
+ {
+  "name": "before-populated-admin_ai-1440x900",
+  "route": "/admin/ai",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": null,
+   "contentClientW": null,
+   "overflowing": [],
+   "h1": "Something went wrong",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 4
+ },
+ {
+  "name": "before-populated-admin_digital_twin-1440x900",
+  "route": "/admin/digital-twin",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Digital Twin Center",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 9
+ },
+ {
+  "name": "before-populated-admin_control_center-1440x900",
+  "route": "/admin/control-center",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Enterprise Control Center",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 11
+ },
+ {
+  "name": "before-populated-admin_integration-1440x900",
+  "route": "/admin/integration",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Integration Studio",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_governance-1440x900",
+  "route": "/admin/governance",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Governance Studio",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 15
+ },
+ {
+  "name": "before-populated-admin_intelligence-1440x900",
+  "route": "/admin/intelligence",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": null,
+   "contentClientW": null,
+   "overflowing": [],
+   "h1": "Something went wrong",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_command_center-1440x900",
+  "route": "/admin/command-center",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Command Center",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 6
+ },
+ {
+  "name": "before-populated-admin_improvement-1440x900",
+  "route": "/admin/improvement",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Continuous Improvement",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 6
+ },
+ {
+  "name": "before-populated-admin_platform_factory-1440x900",
+  "route": "/admin/platform-factory",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Platform Factory",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 11
+ },
+ {
+  "name": "before-populated-admin_owners-1440x900",
+  "route": "/admin/owners",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": null,
+   "contentClientW": null,
+   "overflowing": [],
+   "h1": "Something went wrong",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_communications-1440x900",
+  "route": "/admin/communications",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": null,
+   "contentClientW": null,
+   "overflowing": [],
+   "h1": "Something went wrong",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 5,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 9
+ },
+ {
+  "name": "before-populated-admin_provider_governance-1440x900",
+  "route": "/admin/provider-governance",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": null,
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 5
+ },
+ {
+  "name": "before-populated-admin_support-1440x900",
+  "route": "/admin/support",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": null,
+   "contentClientW": null,
+   "overflowing": [],
+   "h1": "Something went wrong",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 4,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 7
+ },
+ {
+  "name": "before-populated-admin_does_not_exist-1440x900",
+  "route": "/admin/does-not-exist",
+  "viewport": "1440x900",
+  "scenario": "populated",
+  "metrics": {
+   "scrollW": 1440,
+   "innerW": 1440,
+   "hOverflowPage": false,
+   "contentScrollW": 1192,
+   "contentClientW": 1192,
+   "overflowing": [],
+   "h1": "Admin page not found",
+   "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+  },
+  "consoleErrors": 3,
+  "pageErrors": [],
+  "failedRequests": 2,
+  "apiRequests": 4
+ }
+]

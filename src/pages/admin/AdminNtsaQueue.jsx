@@ -23,9 +23,9 @@ function Modal({ title, children, onClose }) {
       }}>
         <button onClick={onClose} style={{
           position: 'absolute', top: 12, right: 12,
-          background: 'none', border: 'none', color: 'rgba(10, 51, 64, 0.3)',
+          background: 'none', border: 'none', color: 'var(--admin-muted-content)',
           cursor: 'pointer', fontSize: 18,
-        }}><X size={18} /></button>
+        }} aria-label="Close"><X size={18} /></button>
         <h3 style={{ marginTop: 0, marginBottom: 18 }}>{title}</h3>
         {children}
       </div>
@@ -105,7 +105,7 @@ export default function AdminNtsaQueue() {
             <h2>Verification Queue</h2>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
-            <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+            <select aria-label="Filter NTSA queue by status" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
               style={{ background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.1)', borderRadius: 8, padding: '6px 10px', color: '#0a3340', fontSize: 12 }}>
               <option value="">All Status</option>
               <option value="pending">Pending</option>
@@ -147,7 +147,7 @@ export default function AdminNtsaQueue() {
                       </div>
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 13, fontWeight: 700, color: '#0a3340' }}>{car.title || car._id}</div>
-                        <div style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.35)', marginTop: 2 }}>
+                        <div style={{ fontSize: 11, color: 'var(--admin-muted-content)', marginTop: 2 }}>
                           Requested {new Date(r.createdAt).toLocaleDateString()}
                         </div>
                       </div>
@@ -162,15 +162,15 @@ export default function AdminNtsaQueue() {
                   {selected?._id === r._id && (
                     <div style={{ marginTop: 14, paddingTop: 14, borderTop: '1px solid rgba(10, 51, 64, 0.06)' }}>
                       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 14 }}>
-                        <div><span style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)' }}>Duty Status</span><div style={{ fontSize: 12, color: '#0a3340', marginTop: 2 }}>{r.dutyStatus}</div></div>
-                        <div><span style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)' }}>Chassis Verified</span><div style={{ fontSize: 12, color: '#0a3340', marginTop: 2 }}>{r.chassisVerified ? '✅' : '⏳'}</div></div>
-                        <div><span style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)' }}>Logbook Verified</span><div style={{ fontSize: 12, color: '#0a3340', marginTop: 2 }}>{r.logbookVerified ? '✅' : '⏳'}</div></div>
-                        <div><span style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)' }}>Import Verified</span><div style={{ fontSize: 12, color: '#0a3340', marginTop: 2 }}>{r.importVerified ? '✅' : '⏳'}</div></div>
+                        <div><span style={{ fontSize: 10, color: 'var(--admin-muted-content)' }}>Duty Status</span><div style={{ fontSize: 12, color: '#0a3340', marginTop: 2 }}>{r.dutyStatus}</div></div>
+                        <div><span style={{ fontSize: 10, color: 'var(--admin-muted-content)' }}>Chassis Verified</span><div style={{ fontSize: 12, color: '#0a3340', marginTop: 2 }}>{r.chassisVerified ? 'Verified' : 'Pending'}</div></div>
+                        <div><span style={{ fontSize: 10, color: 'var(--admin-muted-content)' }}>Logbook Verified</span><div style={{ fontSize: 12, color: '#0a3340', marginTop: 2 }}>{r.logbookVerified ? 'Verified' : 'Pending'}</div></div>
+                        <div><span style={{ fontSize: 10, color: 'var(--admin-muted-content)' }}>Import Verified</span><div style={{ fontSize: 12, color: '#0a3340', marginTop: 2 }}>{r.importVerified ? 'Verified' : 'Pending'}</div></div>
                       </div>
                       {r.adminNotes && (
                         <div style={{ background: 'rgba(10, 51, 64, 0.03)', borderRadius: 8, padding: '10px 14px', marginBottom: 14 }}>
-                          <div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)', marginBottom: 4 }}>Admin Notes</div>
-                          <div style={{ fontSize: 12, color: 'rgba(10, 51, 64, 0.6)' }}>{r.adminNotes}</div>
+                          <div style={{ fontSize: 10, color: 'var(--admin-muted-content)', marginBottom: 4 }}>Admin Notes</div>
+                          <div style={{ fontSize: 12, color: 'var(--admin-muted-content)' }}>{r.adminNotes}</div>
                         </div>
                       )}
                       {r.status === 'pending' && (
@@ -187,7 +187,7 @@ export default function AdminNtsaQueue() {
                       )}
                       {r.documents?.length > 0 && (
                         <div style={{ marginTop: 12 }}>
-                          <div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)', marginBottom: 6 }}>Documents ({r.documents.length})</div>
+                          <div style={{ fontSize: 10, color: 'var(--admin-muted-content)', marginBottom: 6 }}>Documents ({r.documents.length})</div>
                           {r.documents.map((d, i) => (
                             <a key={i} href={d.url} target="_blank" rel="noopener noreferrer"
                               style={{ display: 'block', fontSize: 11, color: '#176B87', marginBottom: 3 }}>
@@ -209,7 +209,7 @@ export default function AdminNtsaQueue() {
       {processModal && (
         <Modal title={processModal.status === 'passed' ? 'Approve Verification' : 'Reject Verification'} onClose={() => setProcessModal(null)}>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.4)', display: 'block', marginBottom: 6 }}>
+            <label style={{ fontSize: 11, color: 'var(--admin-muted-content)', display: 'block', marginBottom: 6 }}>
               Admin Notes {processModal.status === 'failed' ? <span style={{ color: '#ef4444' }}>(required)</span> : ''}
             </label>
             <textarea value={notes} onChange={e => setNotes(e.target.value)}
@@ -244,7 +244,7 @@ export default function AdminNtsaQueue() {
       {queueModal && (
         <Modal title="Queue Car for NTSA Verification" onClose={() => setQueueModal(false)}>
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.4)', display: 'block', marginBottom: 6 }}>
+            <label style={{ fontSize: 11, color: 'var(--admin-muted-content)', display: 'block', marginBottom: 6 }}>
               Car ID
             </label>
             <input value={carIdInput} onChange={e => setCarIdInput(e.target.value)}

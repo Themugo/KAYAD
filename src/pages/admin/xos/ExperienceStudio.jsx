@@ -8,6 +8,10 @@ import {
   RefreshCw, TrendingDown, MousePointer, EyeOff, History, Bell, Map
 } from 'lucide-react';
 import * as xosApi from '../../../services/xosApi';
+import { isUnavailable } from '../../../components/admin/adminStat';
+
+// A missing or non-numeric figure is shown as Unavailable, never as 0.
+const nv = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 'Unavailable');
 
 // Design System Colors
 const colors = {
@@ -43,12 +47,12 @@ const campaignTypes = [
 ];
 
 const audienceSegments = [
-  { id: 'buyer', name: 'Buyers', icon: ShoppingCart, count: 12500 },
-  { id: 'seller', name: 'Sellers', icon: Tag, count: 3200 },
-  { id: 'dealer', name: 'Dealers', icon: Building, count: 450 },
-  { id: 'visitor', name: 'Visitors', icon: Eye, count: 45000 },
-  { id: 'auction', name: 'Auction Participants', icon: Gavel, count: 2800 },
-  { id: 'finance', name: 'Finance Applicants', icon: Calculator, count: 890 },
+  { id: 'buyer', name: 'Buyers', icon: ShoppingCart },
+  { id: 'seller', name: 'Sellers', icon: Tag },
+  { id: 'dealer', name: 'Dealers', icon: Building },
+  { id: 'visitor', name: 'Visitors', icon: Eye },
+  { id: 'auction', name: 'Auction Participants', icon: Gavel },
+  { id: 'finance', name: 'Finance Applicants', icon: Calculator },
 ];
 
 const seasonalTemplates = [
@@ -142,10 +146,10 @@ export default function ExperienceStudio() {
       {/* Stats Overview */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Active Experiences', value: dashboard?.experiences?.active || 0, icon: Zap, color: colors.emerald },
-          { label: 'Active Campaigns', value: dashboard?.campaigns?.active || 0, icon: Target, color: colors.terracotta },
-          { label: 'Active Journeys', value: dashboard?.journeys?.active || 0, icon: Map, color: colors.softBlue },
-          { label: 'Seasonal Themes', value: dashboard?.themes?.active || 0, icon: Palette, color: colors.mutedOrange },
+          { label: 'Active Experiences', value: nv(dashboard?.experiences?.active), icon: Zap, color: colors.emerald },
+          { label: 'Active Campaigns', value: nv(dashboard?.campaigns?.active), icon: Target, color: colors.terracotta },
+          { label: 'Active Journeys', value: nv(dashboard?.journeys?.active), icon: Map, color: colors.softBlue },
+          { label: 'Seasonal Themes', value: nv(dashboard?.themes?.active), icon: Palette, color: colors.mutedOrange },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
             <div className="flex items-center gap-3 mb-3">
@@ -154,7 +158,7 @@ export default function ExperienceStudio() {
               </div>
               <span className="text-sm text-[#64748B]">{stat.label}</span>
             </div>
-            <div className="text-3xl font-bold text-[#0A3340]">{stat.value}</div>
+            <div className={`${isUnavailable(stat.value) ? 'text-lg' : 'text-3xl'} font-bold text-[#0A3340]`}>{stat.value}</div>
           </div>
         ))}
       </div>
@@ -263,7 +267,7 @@ export default function ExperienceStudio() {
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-[#D7E7E4]">
             <p className="text-sm text-[#64748B]">{stat.label}</p>
-            <p className="text-2xl font-bold" style={{ color: stat.color }}>{stat.value}</p>
+            <p className={`${isUnavailable(stat.value) ? 'text-base' : 'text-2xl'} font-bold`} style={{ color: stat.color }}>{stat.value}</p>
           </div>
         ))}
       </div>
@@ -286,7 +290,7 @@ export default function ExperienceStudio() {
               <tr key={campaign.id} className="hover:bg-[#F6FAF9]">
                 <td className="px-6 py-4">
                   <p className="font-medium text-[#0A3340]">{campaign.name}</p>
-                  <p className="text-sm text-[#64748B]">Budget: KES {(campaign.budget || 0).toLocaleString()}</p>
+                  <p className="text-sm text-[#64748B]">Budget: {Number.isFinite(campaign.budget) ? `KES ${campaign.budget.toLocaleString()}` : 'Unavailable'}</p>
                 </td>
                 <td className="px-6 py-4">
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -321,15 +325,15 @@ export default function ExperienceStudio() {
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-2">
                     {campaign.status === 'active' ? (
-                      <button className="p-2 hover:bg-[#F3FAF9] rounded-lg text-[#176B87]">
+                      <button className="p-2 hover:bg-[#F3FAF9] rounded-lg text-[#176B87]" aria-label="Pause">
                         <Pause size={16} />
                       </button>
                     ) : campaign.status === 'paused' ? (
-                      <button className="p-2 hover:bg-emerald-50 rounded-lg text-emerald-600">
+                      <button className="p-2 hover:bg-emerald-50 rounded-lg text-emerald-600" aria-label="Resume">
                         <Play size={16} />
                       </button>
                     ) : null}
-                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Edit">
                       <Edit size={16} />
                     </button>
                   </div>
@@ -385,7 +389,7 @@ export default function ExperienceStudio() {
           {audienceSegments.map((seg) => (
             <div key={seg.id} className="p-4 bg-[#F6FAF9] rounded-lg">
               <p className="font-medium text-[#0A3340]">{seg.name}</p>
-              <p className="text-2xl font-bold text-[#0A3340]">{seg.count?.toLocaleString()}</p>
+              <p className={`${isUnavailable(Number.isFinite(seg.count) ? seg.count.toLocaleString() : 'Unavailable') ? 'text-base' : 'text-2xl'} font-bold text-[#0A3340]`}>{Number.isFinite(seg.count) ? seg.count.toLocaleString() : 'Unavailable'}</p>
               <p className="text-xs text-[#64748B]">users</p>
             </div>
           ))}
@@ -449,7 +453,7 @@ export default function ExperienceStudio() {
                 }`}>
                   {journey.status}
                 </span>
-                <button className="p-2 hover:bg-[#DDF4F0] rounded-lg">
+                <button className="p-2 hover:bg-[#DDF4F0] rounded-lg" aria-label="Edit">
                   <Edit size={16} />
                 </button>
               </div>
@@ -522,7 +526,7 @@ export default function ExperienceStudio() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-2">
-                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Edit">
                       <Edit size={16} />
                     </button>
                   </div>
@@ -591,10 +595,10 @@ export default function ExperienceStudio() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-2">
-                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="View">
                       <Eye size={16} />
                     </button>
-                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Edit">
                       <Edit size={16} />
                     </button>
                   </div>
@@ -629,7 +633,7 @@ export default function ExperienceStudio() {
               <metric.icon size={18} className="text-[#94A3B8]" />
             </div>
             <div className="flex items-end justify-between">
-              <p className="text-3xl font-bold text-[#0A3340]">{metric.value}</p>
+              <p className={`${isUnavailable(metric.value) ? 'text-lg' : 'text-3xl'} font-bold text-[#0A3340]`}>{metric.value}</p>
               <span className={`text-sm font-medium ${metric.positive ? 'text-emerald-600' : 'text-red-600'}`}>
                 {metric.change}
               </span>
@@ -643,11 +647,7 @@ export default function ExperienceStudio() {
         <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
           <h3 className="font-semibold text-[#0A3340] mb-4">By Device</h3>
           <div className="space-y-3">
-            {[
-              { device: 'Desktop', impressions: 1234567, rate: 21.3 },
-              { device: 'Tablet', impressions: 456789, rate: 18.9 },
-              { device: 'Mobile', impressions: 765433, rate: 15.2 },
-            ].map((item) => (
+            {[].map((item) => (
               <div key={item.device} className="p-3 bg-[#F6FAF9] rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium text-[#0A3340]">{item.device}</span>
@@ -658,18 +658,14 @@ export default function ExperienceStudio() {
                 </div>
                 <p className="text-xs text-[#64748B] mt-1">{item.impressions?.toLocaleString()} impressions</p>
               </div>
-            ))}
+            ))}<p className="col-span-full text-sm text-[#64748B]" role="status">Device breakdown is not reported yet.</p>
           </div>
         </div>
 
         <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
           <h3 className="font-semibold text-[#0A3340] mb-4">By Country</h3>
           <div className="space-y-3">
-            {[
-              { country: 'Kenya', impressions: 1567890, rate: 19.8 },
-              { country: 'Uganda', impressions: 345678, rate: 17.2 },
-              { country: 'Tanzania', impressions: 289012, rate: 18.5 },
-            ].map((item) => (
+            {[].map((item) => (
               <div key={item.country} className="p-3 bg-[#F6FAF9] rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <span className="font-medium text-[#0A3340]">{item.country}</span>
@@ -680,18 +676,14 @@ export default function ExperienceStudio() {
                 </div>
                 <p className="text-xs text-[#64748B] mt-1">{item.impressions?.toLocaleString()} impressions</p>
               </div>
-            ))}
+            ))}<p className="col-span-full text-sm text-[#64748B]" role="status">Country breakdown is not reported yet.</p>
           </div>
         </div>
 
         <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
           <h3 className="font-semibold text-[#0A3340] mb-4">Top Experiences</h3>
           <div className="space-y-3">
-            {[
-              { name: 'Kenya Buyer', rate: 23.4 },
-              { name: 'Auction Week', rate: 28.7 },
-              { name: 'Dealer Portal', rate: 19.2 },
-            ].map((item, i) => (
+            {[].map((item, i) => (
               <div key={item.name} className="flex items-center justify-between p-3 bg-[#F6FAF9] rounded-lg">
                 <div className="flex items-center gap-3">
                   <span className="w-6 h-6 rounded-full bg-[#0A3340]/10 flex items-center justify-center text-xs font-medium text-[#0A3340]">
@@ -701,7 +693,7 @@ export default function ExperienceStudio() {
                 </div>
                 <span className="font-bold text-emerald-600">{item.rate}%</span>
               </div>
-            ))}
+            ))}<p className="col-span-full text-sm text-[#64748B]" role="status">Experience performance is not reported yet.</p>
           </div>
         </div>
       </div>
@@ -779,10 +771,10 @@ export default function ExperienceStudio() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Refresh">
                 <RefreshCw size={20} className="text-[#64748B]" />
               </button>
-              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Settings">
                 <Settings size={20} className="text-[#64748B]" />
               </button>
             </div>
@@ -817,9 +809,9 @@ export default function ExperienceStudio() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <div className="flex-1 p-6">
           {renderModuleContent()}
-        </main>
+        </div>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import {
   Clock, TrendingUp, Server, Code, Palette as PaletteIcon, Monitor
 } from 'lucide-react';
 import * as pfApi from '../../../services/platformFactoryApi';
+import { isUnavailable } from '../../../components/admin/adminStat';
 
 // Design System Colors
 const colors = {
@@ -32,9 +33,12 @@ const modules = [
   { id: 'store', label: 'App Store', icon: Rocket, color: colors.emerald },
 ];
 
+const num = (value, format) => (Number.isFinite(value) ? format(value) : 'Unavailable');
+
 export default function PlatformFactory() {
   const [activeModule, setActiveModule] = useState('dashboard');
   const [dashboard, setDashboard] = useState(null);
+  const [loadError, setLoadError] = useState('');
   const [templates, setTemplates] = useState([]);
   const [products, setProducts] = useState([]);
   const [components, setComponents] = useState([]);
@@ -52,46 +56,31 @@ export default function PlatformFactory() {
   const loadAllData = async () => {
     try {
       setLoading(true);
+      setLoadError('');
       const { data: dashData } = await pfApi.getPlatformDashboard();
       setDashboard(dashData.data);
 
       const { data: tempData } = await pfApi.getTemplates();
-      setTemplates(tempData.data);
+      setTemplates(Array.isArray(tempData?.data) ? tempData.data : []);
 
       const { data: prodData } = await pfApi.getProducts();
-      setProducts(prodData.data);
+      setProducts(Array.isArray(prodData?.data) ? prodData.data : []);
 
       const { data: compData } = await pfApi.getComponents();
-      setComponents(compData.data);
+      setComponents(Array.isArray(compData?.data) ? compData.data : []);
 
       const { data: servData } = await pfApi.getSharedServices();
-      setServices(servData.data);
+      setServices(Array.isArray(servData?.data) ? servData.data : []);
 
       const { data: brandData } = await pfApi.getBrands();
-      setBrands(brandData.data);
+      setBrands(Array.isArray(brandData?.data) ? brandData.data : []);
 
       const { data: healthData } = await pfApi.getPlatformHealth();
       setHealth(healthData.data);
     } catch (error) {
       console.error('Failed to load platform data:', error);
-      setDashboard({
-        totalProducts: 5,
-        activeProducts: 4,
-        totalRevenue: 123456789,
-        totalUsers: 45678,
-        templates: 13,
-        components: 89,
-        health: 94.5,
-      });
-      setProducts([
-        { id: '1', name: 'KAYAD Cars', template: 'Vehicle Marketplace', status: 'production', health: 94.5, users: 23456 },
-        { id: '2', name: 'KAYAD Fleet', template: 'Fleet Management', status: 'production', health: 92.3, users: 4567 },
-      ]);
-      setTemplates([
-        { id: '1', name: 'Vehicle Marketplace', category: 'automotive', popularity: 98 },
-        { id: '2', name: 'Fleet Management', category: 'automotive', popularity: 85 },
-        { id: '3', name: 'Vehicle Rental', category: 'automotive', popularity: 78 },
-      ]);
+      // No synthetic fallback: show the failure and leave every figure unavailable.
+      setLoadError('Platform Factory data could not be loaded. Figures below are unavailable, not zero.');
     } finally {
       setLoading(false);
     }
@@ -129,6 +118,8 @@ export default function PlatformFactory() {
         </button>
       </div>
 
+      {loadError && <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{loadError}</div>}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-4 gap-4">
         <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
@@ -136,15 +127,15 @@ export default function PlatformFactory() {
             <Package size={20} className="text-[#176B87]" />
             <span className="text-sm text-[#64748B]">Total Products</span>
           </div>
-          <p className="text-3xl font-bold text-[#0A3340]">{dashboard?.totalProducts}</p>
-          <p className="text-xs text-emerald-600 mt-2">{dashboard?.activeProducts} active</p>
+          <p className={`${isUnavailable(num(dashboard?.totalProducts, String)) ? 'text-lg' : 'text-3xl'} font-bold text-[#0A3340]`}>{num(dashboard?.totalProducts, String)}</p>
+          <p className="text-xs text-[#64748B] mt-2">{num(dashboard?.activeProducts, String)} active</p>
         </div>
         <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
           <div className="flex items-center gap-2 mb-2">
             <DollarSign size={20} className="text-emerald-600" />
             <span className="text-sm text-[#64748B]">Total Revenue</span>
           </div>
-          <p className="text-3xl font-bold text-[#0A3340]">{(dashboard?.totalRevenue / 1000000).toFixed(1)}M</p>
+          <p className={`${isUnavailable(num(dashboard?.totalRevenue, (v) => `${(v / 1000000).toFixed(1)}M`)) ? 'text-lg' : 'text-3xl'} font-bold text-[#0A3340]`}>{num(dashboard?.totalRevenue, (v) => `${(v / 1000000).toFixed(1)}M`)}</p>
           <p className="text-xs text-[#64748B] mt-2">Across all products</p>
         </div>
         <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
@@ -152,16 +143,15 @@ export default function PlatformFactory() {
             <Users size={20} className="text-[#176B87]" />
             <span className="text-sm text-[#64748B]">Total Users</span>
           </div>
-          <p className="text-3xl font-bold text-[#0A3340]">{(dashboard?.totalUsers / 1000).toFixed(1)}K</p>
-          <p className="text-xs text-emerald-600 mt-2">+12% growth</p>
+          <p className={`${isUnavailable(num(dashboard?.totalUsers, (v) => `${(v / 1000).toFixed(1)}K`)) ? 'text-lg' : 'text-3xl'} font-bold text-[#0A3340]`}>{num(dashboard?.totalUsers, (v) => `${(v / 1000).toFixed(1)}K`)}</p>
         </div>
         <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
           <div className="flex items-center gap-2 mb-2">
             <Shield size={20} className="text-emerald-600" />
             <span className="text-sm text-[#64748B]">Platform Health</span>
           </div>
-          <p className="text-3xl font-bold text-emerald-600">{dashboard?.health}%</p>
-          <p className="text-xs text-[#64748B] mt-2">All systems operational</p>
+          <p className={`${isUnavailable(num(dashboard?.health, (v) => `${v}%`)) ? 'text-lg' : 'text-3xl'} font-bold text-emerald-600`}>{num(dashboard?.health, (v) => `${v}%`)}</p>
+          <p className="text-xs text-[#64748B] mt-2">As reported by the platform health service</p>
         </div>
       </div>
 
@@ -310,13 +300,13 @@ export default function PlatformFactory() {
                 <td className="px-6 py-4 text-sm text-[#64748B]">{product.users?.toLocaleString()}</td>
                 <td className="px-6 py-4 text-right">
                   <div className="flex items-center justify-end gap-2">
-                    <button className="p-1.5 hover:bg-[#EEF7F5] rounded-lg">
+                    <button className="p-1.5 hover:bg-[#EEF7F5] rounded-lg" aria-label="View">
                       <Eye size={16} className="text-[#64748B]" />
                     </button>
-                    <button className="p-1.5 hover:bg-[#EEF7F5] rounded-lg">
+                    <button className="p-1.5 hover:bg-[#EEF7F5] rounded-lg" aria-label="Edit">
                       <Edit size={16} className="text-[#64748B]" />
                     </button>
-                    <button className="p-1.5 hover:bg-[#EEF7F5] rounded-lg">
+                    <button className="p-1.5 hover:bg-[#EEF7F5] rounded-lg" aria-label="Settings">
                       <Settings size={16} className="text-[#64748B]" />
                     </button>
                   </div>
@@ -445,25 +435,9 @@ export default function PlatformFactory() {
           <div key={env} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-[#0A3340]">{env}</h3>
-              <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+              <span className="w-2 h-2 bg-slate-300 rounded-full" aria-hidden="true" />
             </div>
-            <div className="space-y-2 text-sm text-[#64748B]">
-              <div className="flex justify-between">
-                <span>Instances</span>
-                <span>{env === 'Production' ? 3 : 1}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Uptime</span>
-                <span className="text-emerald-600">99.9%</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Scaling</span>
-                <span>{env === 'Production' ? 'Auto' : 'Manual'}</span>
-              </div>
-            </div>
-            <button className="w-full mt-4 px-3 py-2 bg-[#0A3340] text-white rounded-lg text-sm hover:bg-[#12576D]">
-              Manage
-            </button>
+            <p className="text-sm text-[#64748B]">Instances, uptime and scaling for this environment are not connected to a data source, so they are not shown.</p>
           </div>
         ))}
       </div>
@@ -479,14 +453,7 @@ export default function PlatformFactory() {
       <h2 className="text-2xl font-bold text-[#0A3340]">App Store</h2>
 
       <div className="grid grid-cols-3 gap-4">
-        {[
-          { name: 'Premium Theme', type: 'theme', price: 'Free', installs: 2345, rating: 4.8 },
-          { name: 'Vehicle History Report', type: 'plugin', price: 'KES 500', installs: 567, rating: 4.9 },
-          { name: 'Insurance Integration', type: 'integration', price: 'KES 1,000', installs: 234, rating: 4.6 },
-          { name: 'AI Valuation Report', type: 'ai', price: 'KES 100', installs: 789, rating: 4.9 },
-          { name: 'WhatsApp Integration', type: 'integration', price: 'KES 2,000', installs: 456, rating: 4.8 },
-          { name: 'Automotive Pack', type: 'industry', price: 'KES 5,000', installs: 89, rating: 4.9 },
-        ].map((app, i) => (
+        {[].map((app, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
             <div className="flex items-start justify-between mb-3">
               <div className="w-10 h-10 bg-[#DDF4F0] rounded-lg flex items-center justify-center">
@@ -500,13 +467,13 @@ export default function PlatformFactory() {
               <span>•</span>
               <span>{app.installs} installs</span>
               <span>•</span>
-              <span className="text-[#176B87]">★ {app.rating}</span>
+              <span className="text-[#176B87]">Rating {app.rating}</span>
             </div>
             <button className="w-full px-3 py-2 border border-[#D7E7E4] rounded-lg text-sm hover:bg-[#F6FAF9]">
               Install
             </button>
           </div>
-        ))}
+        ))}<p className="col-span-full text-sm text-[#64748B]" role="status">The app marketplace catalogue is not connected to a data source, so no apps are listed.</p>
       </div>
     </div>
   );
@@ -623,11 +590,11 @@ export default function PlatformFactory() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-sm">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full" />
-                {dashboard?.activeProducts || 0} Active Products
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${Number.isFinite(dashboard?.activeProducts) ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                <span className={`w-2 h-2 rounded-full ${Number.isFinite(dashboard?.activeProducts) ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                {Number.isFinite(dashboard?.activeProducts) ? `${dashboard.activeProducts} Active Products` : 'Active products unavailable'}
               </div>
-              <button onClick={loadAllData} className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button onClick={loadAllData} className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Refresh">
                 <RefreshCw size={20} className={loading ? 'animate-spin' : ''} />
               </button>
             </div>
@@ -659,9 +626,9 @@ export default function PlatformFactory() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 overflow-auto">
+        <div className="flex-1 p-6 overflow-auto">
           {renderModuleContent()}
-        </main>
+        </div>
       </div>
 
       {/* Generator Modal */}

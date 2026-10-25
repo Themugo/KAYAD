@@ -8,6 +8,7 @@ import {
   Brain, ArrowUpRight, TrendingUp, ClipboardList, FlaskConical
 } from 'lucide-react';
 import * as automationApi from '../../../services/automationApi';
+import { isUnavailable } from '../../../components/admin/adminStat';
 
 // Design System Colors
 const colors = {
@@ -45,6 +46,8 @@ const statusColors = {
   in_progress: 'bg-[#DDF4F0] text-[#12576D]',
 };
 
+const known = (value) => typeof value === 'number' && Number.isFinite(value);
+
 export default function AutomationStudio() {
   const [activeModule, setActiveModule] = useState('dashboard');
   const [stats, setStats] = useState(null);
@@ -68,6 +71,12 @@ export default function AutomationStudio() {
     } catch (error) {
       console.error('Failed to load stats:', error);
       // No synthetic production fallback: the dashboard remains empty until the backend responds.
+    }
+    try {
+      const { data } = await automationApi.getWorkflows();
+      setWorkflows(Array.isArray(data?.data) ? data.data : []);
+    } catch (error) {
+      console.error('Failed to load workflows:', error);
     } finally {
       setLoading(false);
     }
@@ -89,10 +98,10 @@ export default function AutomationStudio() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Active Workflows', value: stats?.workflows?.active || 0, sub: `${stats?.workflows?.total || 0} total`, icon: GitBranch, color: colors.softBlue },
-          { label: 'Pending Tasks', value: stats?.tasks?.pending || 0, sub: `${stats?.tasks?.overdue || 0} overdue`, icon: ListChecks, color: colors.terracotta },
-          { label: 'Active Rules', value: stats?.rules?.active || 0, sub: `${stats?.rules?.total || 0} configured`, icon: Shield, color: colors.emerald },
-          { label: 'Executions Today', value: stats?.executions?.total || 0, sub: `${Math.round((stats?.executions?.successful || 0) / (stats?.executions?.total || 1) * 100)}% success`, icon: Activity, color: colors.navy },
+          { label: 'Active Workflows', value: stats?.workflows?.active, sub: `${known(stats?.workflows?.total) ? stats.workflows.total : 'Unavailable'} total`, icon: GitBranch, color: colors.softBlue },
+          { label: 'Pending Tasks', value: stats?.tasks?.pending, sub: `${known(stats?.tasks?.overdue) ? stats.tasks.overdue : 'Unavailable'} overdue`, icon: ListChecks, color: colors.terracotta },
+          { label: 'Active Rules', value: stats?.rules?.active, sub: `${known(stats?.rules?.total) ? stats.rules.total : 'Unavailable'} configured`, icon: Shield, color: colors.emerald },
+          { label: 'Executions Today', value: stats?.executions?.total, sub: known(stats?.executions?.total) && stats.executions.total > 0 && known(stats?.executions?.successful) ? `${Math.round(stats.executions.successful / stats.executions.total * 100)}% success` : 'Success rate unavailable', icon: Activity, color: colors.navy },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
             <div className="flex items-center gap-3 mb-3">
@@ -101,7 +110,7 @@ export default function AutomationStudio() {
               </div>
               <span className="text-sm text-[#64748B]">{stat.label}</span>
             </div>
-            <div className="text-3xl font-bold text-[#0A3340]">{stat.value.toLocaleString()}</div>
+            <div className={`${isUnavailable(known(stat.value) ? stat.value.toLocaleString() : 'Unavailable') ? 'text-lg' : 'text-3xl'} font-bold text-[#0A3340]`}>{known(stat.value) ? stat.value.toLocaleString() : 'Unavailable'}</div>
             <div className="text-xs text-[#94A3B8] mt-1">{stat.sub}</div>
           </div>
         ))}
@@ -121,13 +130,7 @@ export default function AutomationStudio() {
             </button>
           </div>
           <div className="space-y-3">
-            {[
-              { name: 'Dealer Verification', status: 'success', time: '2 min ago', duration: '1.2s' },
-              { name: 'Auction Reminder', status: 'success', time: '5 min ago', duration: '0.8s' },
-              { name: 'Vehicle Expiry Check', status: 'success', time: '12 min ago', duration: '2.1s' },
-              { name: 'Finance Approval', status: 'failed', time: '18 min ago', duration: '0.3s' },
-              { name: 'Subscription Renewal', status: 'success', time: '25 min ago', duration: '1.5s' },
-            ].map((exec, i) => (
+            {[].map((exec, i) => (
               <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-[#F6FAF9]">
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${exec.status === 'success' ? 'bg-emerald-100' : 'bg-red-100'}`}>
@@ -141,6 +144,7 @@ export default function AutomationStudio() {
                 <span className="text-xs text-[#64748B]">{exec.duration}</span>
               </div>
             ))}
+            <p className="text-sm text-[#64748B]" role="status">No recent executions are connected to this view yet.</p>
           </div>
         </div>
 
@@ -156,13 +160,7 @@ export default function AutomationStudio() {
             </button>
           </div>
           <div className="space-y-3">
-            {[
-              { title: 'Review Dealer Documents', priority: 'high', assignee: 'Moderator', due: '1 hour' },
-              { title: 'Approve Auction Listing', priority: 'medium', assignee: 'Admin', due: '2 hours' },
-              { title: 'Verify Bank Partnership', priority: 'medium', assignee: 'Admin', due: '3 hours' },
-              { title: 'Process Refund Request', priority: 'low', assignee: 'Support', due: '5 hours' },
-              { title: 'Update Vehicle Details', priority: 'low', assignee: 'Editor', due: '1 day' },
-            ].map((task, i) => (
+            {[].map((task, i) => (
               <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-[#F6FAF9]">
                 <div className="flex items-center gap-3">
                   <div className={`w-2 h-2 rounded-full ${task.priority === 'high' ? 'bg-red-500' : task.priority === 'medium' ? 'bg-[#13B8A6]' : 'bg-[#91CEC5]'}`} />
@@ -173,7 +171,7 @@ export default function AutomationStudio() {
                 </div>
                 <span className="text-xs text-[#64748B]">{task.due}</span>
               </div>
-            ))}
+            ))}<p className="col-span-full text-sm text-[#64748B]" role="status">No tasks are connected to this view yet.</p>
           </div>
         </div>
       </div>
@@ -196,11 +194,7 @@ export default function AutomationStudio() {
           </button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[
-            { title: 'Automate Dealer Verification', desc: '47 pending verifications detected', impact: '+2.5 hrs/day' },
-            { title: 'Auction Approval Bottleneck', desc: 'Avg 4.2 hours approval time', impact: '+3 hrs/day' },
-            { title: 'Vehicle Expiry Reminders', desc: '60% lower engagement on stale listings', impact: '+1 hr/day' },
-          ].map((sug, i) => (
+          {[].map((sug, i) => (
             <div key={i} className="p-4 rounded-lg border border-[#D7E7E4] hover:border-[#0A3340] transition-colors cursor-pointer">
               <div className="flex items-start justify-between mb-2">
                 <h4 className="font-medium text-[#0A3340]">{sug.title}</h4>
@@ -212,7 +206,7 @@ export default function AutomationStudio() {
                 <span className="text-sm font-medium text-emerald-600">{sug.impact}</span>
               </div>
             </div>
-          ))}
+          ))}<p className="col-span-full text-sm text-[#64748B]" role="status">AI suggestions are not connected to a data source, so none are shown.</p>
         </div>
       </div>
     </div>
@@ -236,14 +230,7 @@ export default function AutomationStudio() {
 
       {/* Workflow Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[
-          { name: 'Dealer Onboarding', category: 'onboarding', status: 'active', runs: 234, success: 98 },
-          { name: 'Auction Setup', category: 'auctions', status: 'active', runs: 156, success: 99 },
-          { name: 'Complaint Handling', category: 'support', status: 'paused', runs: 89, success: 95 },
-          { name: 'Vehicle Publishing', category: 'marketplace', status: 'active', runs: 412, success: 97 },
-          { name: 'Subscription Renewal', category: 'billing', status: 'draft', runs: 0, success: 0 },
-          { name: 'Finance Approval', category: 'finance', status: 'active', runs: 78, success: 96 },
-        ].map((workflow, i) => (
+        {workflows.map((workflow, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4] hover:border-[#0A3340] transition-colors">
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-3">
@@ -251,36 +238,37 @@ export default function AutomationStudio() {
                   <GitBranch size={20} className="text-[#64748B]" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-[#0A3340]">{workflow.name}</h3>
-                  <p className="text-xs text-[#94A3B8] capitalize">{workflow.category}</p>
+                  <h3 className="font-semibold text-[#0A3340]">{workflow.name || 'Untitled workflow'}</h3>
+                  <p className="text-xs text-[#64748B] capitalize">{workflow.category || 'uncategorised'}</p>
                 </div>
               </div>
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[workflow.status]}`}>
+              <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[workflow.status] || ''}`}>
                 {workflow.status}
               </span>
             </div>
             <div className="flex items-center justify-between pt-3 border-t border-[#D7E7E4]">
               <div className="flex items-center gap-4 text-sm text-[#64748B]">
-                <span>{workflow.runs} runs</span>
-                {workflow.success > 0 && <span className="text-emerald-600">{workflow.success}% success</span>}
+                <span>{Number.isFinite(workflow.runs ?? workflow.executionCount) ? `${workflow.runs ?? workflow.executionCount} runs` : 'Runs not reported'}</span>
+                {Number.isFinite(workflow.success) && workflow.success > 0 && <span className="text-emerald-600">{workflow.success}% success</span>}
               </div>
               <div className="flex items-center gap-1">
                 {workflow.status === 'active' ? (
-                  <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" title="Pause">
+                  <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" title="Pause" aria-label="Pause">
                     <Pause size={16} className="text-[#64748B]" />
                   </button>
                 ) : workflow.status === 'paused' ? (
-                  <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" title="Resume">
+                  <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" title="Resume" aria-label="Resume">
                     <Play size={16} className="text-[#64748B]" />
                   </button>
                 ) : null}
-                <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" title="Edit">
+                <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" title="Edit" aria-label="Edit">
                   <Edit size={16} className="text-[#64748B]" />
                 </button>
               </div>
             </div>
           </div>
         ))}
+        {workflows.length === 0 && <p className="col-span-full text-sm text-[#64748B]" role="status">No workflows were returned.</p>}
       </div>
     </div>
   );
@@ -335,13 +323,7 @@ export default function AutomationStudio() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#D7E7E4]">
-            {[
-              { title: 'Review Dealer Documents', type: 'approval', priority: 'high', status: 'pending', assignee: 'Moderator', due: '1 hour' },
-              { title: 'Approve Auction Listing', type: 'approval', priority: 'medium', status: 'in_progress', assignee: 'Admin', due: '2 hours' },
-              { title: 'Verify Bank Partnership', type: 'verification', priority: 'medium', status: 'pending', assignee: 'Admin', due: '3 hours' },
-              { title: 'Process Refund Request', type: 'refund', priority: 'low', status: 'pending', assignee: 'Support', due: '5 hours' },
-              { title: 'Investigate Fraud Alert', type: 'security', priority: 'high', status: 'in_progress', assignee: 'Security', due: '30 min' },
-            ].map((task, i) => (
+            {[].map((task, i) => (
               <tr key={i} className="hover:bg-[#F6FAF9] transition-colors">
                 <td className="px-6 py-4">
                   <div>
@@ -384,13 +366,13 @@ export default function AutomationStudio() {
                         Complete
                       </button>
                     )}
-                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="More actions">
                       <MoreVertical size={16} className="text-[#64748B]" />
                     </button>
                   </div>
                 </td>
               </tr>
-            ))}
+            ))}<tr><td colSpan={6} className="px-6 py-6 text-sm text-[#64748B]">Task data is not connected to a source, so no tasks are listed.</td></tr>
           </tbody>
         </table>
       </div>
@@ -408,14 +390,7 @@ export default function AutomationStudio() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[
-          { name: 'Low Dealer Rating', condition: 'Dealer Rating < 3', action: 'Suspend new listings', status: 'active', executions: 45 },
-          { name: 'Auction Deposit Verified', condition: 'Deposit = Verified', action: 'Issue Bidder Pass', status: 'active', executions: 234 },
-          { name: 'Low Inspection Score', condition: 'Score < Minimum', action: 'Hide listing', status: 'active', executions: 12 },
-          { name: 'Subscription Expired', condition: 'Days Since Payment > 30', action: 'Disable premium features', status: 'active', executions: 89 },
-          { name: 'Vehicle Sold', condition: 'Status = Sold', action: 'Archive listing', status: 'active', executions: 567 },
-          { name: 'Payment Failed', condition: 'Payment Status = Failed', action: 'Notify seller', status: 'paused', executions: 23 },
-        ].map((rule, i) => (
+        {[].map((rule, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
             <div className="flex items-start justify-between mb-4">
               <div>
@@ -437,18 +412,18 @@ export default function AutomationStudio() {
               </div>
             </div>
             <div className="flex items-center gap-2 mt-4 pt-4 border-t border-[#D7E7E4]">
-              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Edit">
                 <Edit size={16} className="text-[#64748B]" />
               </button>
-              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label={rule.status === 'active' ? 'Pause rule' : 'Resume rule'}>
                 {rule.status === 'active' ? <Pause size={16} className="text-[#64748B]" /> : <Play size={16} className="text-[#64748B]" />}
               </button>
-              <button className="p-2 hover:bg-red-50 rounded-lg">
+              <button className="p-2 hover:bg-red-50 rounded-lg" aria-label="Delete">
                 <Trash2 size={16} className="text-red-400" />
               </button>
             </div>
           </div>
-        ))}
+        ))}<p className="col-span-full text-sm text-[#64748B]" role="status">Business rules are not connected to a source, so none are listed.</p>
       </div>
     </div>
   );
@@ -464,14 +439,7 @@ export default function AutomationStudio() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[
-          { name: 'Auction Reminder', type: 'email', channel: 'Email + SMS', usage: 1234 },
-          { name: 'Inspection Reminder', type: 'sms', channel: 'SMS', usage: 567 },
-          { name: 'Finance Approval', type: 'email', channel: 'Email', usage: 234 },
-          { name: 'Dealer Verification', type: 'email', channel: 'Email + Push', usage: 456 },
-          { name: 'Subscription Reminder', type: 'email', channel: 'Email', usage: 890 },
-          { name: 'Vehicle Expiry', type: 'push', channel: 'Push Notification', usage: 321 },
-        ].map((template, i) => (
+        {[].map((template, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-lg bg-[#EEF7F5] flex items-center justify-center">
@@ -485,16 +453,16 @@ export default function AutomationStudio() {
             <div className="flex items-center justify-between pt-3 border-t border-[#D7E7E4]">
               <span className="text-sm text-[#64748B]">{template.usage} sent</span>
               <div className="flex items-center gap-1">
-                <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+                <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="View">
                   <Eye size={16} className="text-[#64748B]" />
                 </button>
-                <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+                <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Edit">
                   <Edit size={16} className="text-[#64748B]" />
                 </button>
               </div>
             </div>
           </div>
-        ))}
+        ))}<p className="col-span-full text-sm text-[#64748B]" role="status">Notification templates are not connected to a source, so none are listed.</p>
       </div>
     </div>
   );
@@ -522,13 +490,7 @@ export default function AutomationStudio() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#D7E7E4]">
-            {[
-              { name: 'Archive Expired Listings', schedule: 'Daily 2:00 AM', lastRun: '2 hours ago', nextRun: '14 hours', status: 'active' },
-              { name: 'Dealer Score Update', schedule: 'Weekly Monday', lastRun: '2 days ago', nextRun: '5 days', status: 'active' },
-              { name: 'Market Statistics', schedule: 'Daily 6:00 AM', lastRun: '8 hours ago', nextRun: '10 hours', status: 'active' },
-              { name: 'Commission Reports', schedule: 'Monthly 1st', lastRun: '29 days ago', nextRun: '1 day', status: 'active' },
-              { name: 'Inspection Metrics', schedule: 'Daily 8:00 AM', lastRun: '6 hours ago', nextRun: '12 hours', status: 'paused' },
-            ].map((job, i) => (
+            {[].map((job, i) => (
               <tr key={i} className="hover:bg-[#F6FAF9] transition-colors">
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
@@ -551,13 +513,14 @@ export default function AutomationStudio() {
                     <button className="px-3 py-1 text-xs border border-[#D7E7E4] rounded hover:bg-[#F6FAF9]">
                       Run Now
                     </button>
-                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Edit">
                       <Edit size={16} className="text-[#64748B]" />
                     </button>
                   </div>
                 </td>
               </tr>
             ))}
+            <tr><td colSpan={5} className="px-6 py-6 text-center text-sm text-[#64748B]">No scheduled jobs are connected to this view yet.</td></tr>
           </tbody>
         </table>
       </div>
@@ -600,10 +563,10 @@ export default function AutomationStudio() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Notifications">
                 <Bell size={20} className="text-[#64748B]" />
               </button>
-              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Settings">
                 <Settings size={20} className="text-[#64748B]" />
               </button>
             </div>
@@ -638,9 +601,9 @@ export default function AutomationStudio() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <div className="flex-1 p-6">
           {renderModuleContent()}
-        </main>
+        </div>
       </div>
     </div>
   );

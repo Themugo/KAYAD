@@ -124,10 +124,10 @@ export default function SEOManager() {
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-[#64748B]">Pages Optimized</span>
-                <span className="text-sm font-semibold text-emerald-600">4/6</span>
+                <span className="text-sm font-semibold text-emerald-600">{pages.length > 0 ? `${pages.filter(p => getScore(p) >= 80).length}/${pages.length}` : '—'}</span>
               </div>
               <div className="w-full bg-[#DDF4F0] rounded-full h-2">
-                <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '66%' }} />
+                <div className="bg-emerald-500 h-2 rounded-full" style={{ width: pages.length > 0 ? `${Math.round((pages.filter(p => getScore(p) >= 80).length / pages.length) * 100)}%` : '0%' }} />
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-[#64748B]">Active Redirects</span>
@@ -138,7 +138,7 @@ export default function SEOManager() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <div className="flex-1 p-6">
           {activeTab === 'pages' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
@@ -209,22 +209,24 @@ export default function SEOManager() {
               </div>
 
               {/* Google Preview */}
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-[#D7E7E4]">
-                <h3 className="text-lg font-semibold text-[#0A3340] mb-4">Google Search Preview</h3>
-                <div className="max-w-2xl space-y-4">
-                  <div className="p-4 bg-white border border-[#D7E7E4] rounded-lg">
-                    <div className="text-[#176B87] text-lg hover:underline cursor-pointer truncate">
-                      {pages[0].metaTitle || 'KAYAD - East Africa\'s Premier Automotive Marketplace'}
-                    </div>
-                    <div className="text-green-700 text-sm truncate">
-                      https://kayad.co.ke{pages[0].url}
-                    </div>
-                    <div className="text-[#64748B] text-sm mt-1 line-clamp-2">
-                      {pages[0].metaDescription || 'Buy, sell, and auction vehicles with confidence. Trusted escrow protection, professional inspections, and verified dealers.'}
+              {pages.length > 0 && (
+                <div className="bg-white rounded-xl p-6 shadow-sm border border-[#D7E7E4]">
+                  <h3 className="text-lg font-semibold text-[#0A3340] mb-4">Google Search Preview</h3>
+                  <div className="max-w-2xl space-y-4">
+                    <div className="p-4 bg-white border border-[#D7E7E4] rounded-lg">
+                      <div className="text-[#176B87] text-lg hover:underline cursor-pointer truncate">
+                        {pages[0]?.metaTitle}
+                      </div>
+                      <div className="text-green-700 text-sm truncate">
+                        https://kayad.co.ke{pages[0]?.url}
+                      </div>
+                      <div className="text-[#64748B] text-sm mt-1 line-clamp-2">
+                        {pages[0]?.metaDescription}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -242,8 +244,8 @@ export default function SEOManager() {
                     <h3 className="font-semibold text-[#0A3340]">Facebook</h3>
                   </div>
                   <div className="border border-[#D7E7E4] rounded-lg overflow-hidden">
-                    {pages[0].ogImage ? (
-                      <img src={pages[0].ogImage} alt="OG" className="w-full h-48 object-cover" />
+                    {pages[0]?.ogImage ? (
+                      <img src={pages[0]?.ogImage} alt="OG" className="w-full h-48 object-cover" />
                     ) : (
                       <div className="w-full h-48 bg-[#EEF7F5] flex items-center justify-center">
                         <span className="text-[#94A3B8]">No image set</span>
@@ -251,8 +253,8 @@ export default function SEOManager() {
                     )}
                     <div className="p-3">
                       <div className="text-xs text-[#64748B] uppercase">kayad.co.ke</div>
-                      <div className="font-semibold text-[#0A3340]">{pages[0].metaTitle || 'Page Title'}</div>
-                      <div className="text-sm text-[#64748B] line-clamp-2">{pages[0].metaDescription || 'Page description...'}</div>
+                      <div className="font-semibold text-[#0A3340]">{pages[0]?.metaTitle || 'Page Title'}</div>
+                      <div className="text-sm text-[#64748B] line-clamp-2">{pages[0]?.metaDescription}</div>
                     </div>
                   </div>
                 </div>
@@ -266,16 +268,16 @@ export default function SEOManager() {
                     <h3 className="font-semibold text-[#0A3340]">Twitter / X</h3>
                   </div>
                   <div className="border border-[#D7E7E4] rounded-lg overflow-hidden">
-                    {pages[0].ogImage ? (
-                      <img src={pages[0].ogImage} alt="OG" className="w-full h-40 object-cover" />
+                    {pages[0]?.ogImage ? (
+                      <img src={pages[0]?.ogImage} alt="OG" className="w-full h-40 object-cover" />
                     ) : (
                       <div className="w-full h-40 bg-[#EEF7F5] flex items-center justify-center">
                         <span className="text-[#94A3B8]">No image set</span>
                       </div>
                     )}
                     <div className="p-3">
-                      <div className="font-semibold text-[#0A3340]">{pages[0].metaTitle || 'Page Title'}</div>
-                      <div className="text-sm text-[#64748B] line-clamp-2">{pages[0].metaDescription || 'Page description...'}</div>
+                      <div className="font-semibold text-[#0A3340]">{pages[0]?.metaTitle || 'Page Title'}</div>
+                      <div className="text-sm text-[#64748B] line-clamp-2">{pages[0]?.metaDescription}</div>
                       <div className="text-xs text-[#64748B] mt-1">kayad.co.ke</div>
                     </div>
                   </div>
@@ -338,7 +340,7 @@ export default function SEOManager() {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right">
-                          <button className="p-2 hover:bg-[#EEF7F5] rounded-lg text-[#94A3B8] hover:text-red-500">
+                          <button className="p-2 hover:bg-[#EEF7F5] rounded-lg text-[#94A3B8] hover:text-red-500" aria-label="Delete">
                             <Trash2 size={16} />
                           </button>
                         </td>
@@ -365,11 +367,12 @@ export default function SEOManager() {
                   <Sitemap size={24} className="text-[#0A3340]" />
                   <div>
                     <h3 className="font-semibold text-[#0A3340]">Sitemap Status</h3>
-                    <p className="text-sm text-[#64748B]">Last generated: 2 hours ago</p>
+                    <p className="text-sm text-[#64748B]">Generation time is not reported by this view.</p>
                   </div>
-                  <span className="ml-auto px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium">Active</span>
+                  <span className="ml-auto px-3 py-1 bg-[#F1F5F9] text-[#475569] rounded-full text-sm font-medium">Status not reported</span>
                 </div>
 
+                <p className="text-xs text-[#64748B] mb-2">Illustrative template only — this view does not read the live file from the site.</p>
                 <div className="bg-[#0A3340] rounded-lg p-4 overflow-auto">
                   <pre className="text-green-400 text-xs font-mono">
 {`<?xml version="1.0" encoding="UTF-8"?>
@@ -415,6 +418,7 @@ export default function SEOManager() {
               <h2 className="text-xl font-bold text-[#0A3340]">robots.txt Configuration</h2>
 
               <div className="bg-white rounded-xl p-6 shadow-sm border border-[#D7E7E4]">
+                <p className="text-xs text-[#64748B] mb-2">Illustrative template only — this view does not read the live file from the site.</p>
                 <div className="bg-[#0A3340] rounded-lg p-4 overflow-auto">
                   <pre className="text-green-400 text-sm font-mono">
 {`User-agent: *
@@ -459,7 +463,7 @@ Crawl-delay: 10`}
               </div>
             </div>
           )}
-        </main>
+        </div>
       </div>
 
       {/* Edit Page Modal */}

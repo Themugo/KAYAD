@@ -109,9 +109,9 @@ export default function AdminSettingsOnboarding() {
   };
 
   const noticeStyle = {
-    success: { background: '#ECFDF5', border: '1px solid #6EE7B7', color: '#065F46' },
-    conflict: { background: '#EFF6FF', border: '1px solid #93C5FD', color: '#1E3A8A' },
-    error: { background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B' },
+    success: { background: 'var(--admin-status-success-bg)', border: '1px solid var(--admin-status-success-border)', color: 'var(--admin-status-success)' },
+    conflict: { background: 'var(--admin-status-info-bg)', border: '1px solid var(--admin-status-info-border)', color: 'var(--admin-status-info)' },
+    error: { background: 'var(--admin-status-danger-bg)', border: '1px solid var(--admin-status-danger-border)', color: 'var(--admin-status-danger)' },
   };
 
   return (

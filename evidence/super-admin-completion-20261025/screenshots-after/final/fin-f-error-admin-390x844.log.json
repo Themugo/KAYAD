@@ -1,0 +1,70 @@
+{
+ "metrics": {
+  "lowContrast": [
+   {
+    "t": "TA",
+    "r": 1.67,
+    "el": "span.kayad-command-identity-mark"
+   }
+  ],
+  "lowContrastCount": 1,
+  "firstChild": {
+   "tag": "div",
+   "cls": "mx-auto w-full min-w-0 max-w-[1600px] space-y-5 sm:space-y-6",
+   "pt": "12px",
+   "pl": "12px",
+   "left": 0,
+   "top": 0
+  },
+  "boundary": false,
+  "unnamedControls": 0,
+  "unnamedList": [],
+  "scrollW": 390,
+  "innerW": 390,
+  "hOverflowPage": false,
+  "contentScrollW": 390,
+  "contentClientW": 390,
+  "overflowing": [
+   "a.",
+   "b."
+  ],
+  "h1": "Welcome back, Test Administrator",
+  "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault"
+ },
+ "requests": [
+  "GET /v1/auth/me",
+  "GET /admin/public/config",
+  "GET /admin/alerts?limit=1&read=false",
+  "GET /notifications?limit=50",
+  "GET /ecp/health",
+  "GET /admin/alerts?limit=4",
+  "GET /admin/stats",
+  "GET /admin/users?page=1&limit=4&role=dealer&pendingApproval=true",
+  "GET /admin/users?page=1&limit=50",
+  "GET /admin/cars?page=1&limit=50",
+  "GET /admin/audit-log?page=1&limit=25",
+  "GET /cars?limit=50"
+ ],
+ "console": [
+  "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+  "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+  "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+  "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+  "warning: Unable to fetch notifications AxiosError: Request failed with status code 500\n    at Bt (http://127.0.0.1:4173/assets/httpClient-OEhkWBrp.js:3:11860)\n    at XMLHttpRequest._ (http://127.0.0.1:4173/assets/httpClient-OEhkWBrp.js:3:18940)",
+  "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+  "warning: [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:4173/assets/index-D5-9H82j.js:10:374700)",
+  "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+  "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+  "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+  "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+  "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+  "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+  "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+  "error: Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+ ],
+ "pageErrors": [],
+ "failed": [
+  "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap",
+  "https://api.kayad.space/socket.io/socket.io.js"
+ ]
+}

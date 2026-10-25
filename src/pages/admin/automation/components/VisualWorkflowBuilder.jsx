@@ -8,6 +8,7 @@ import {
   FileText, Users, AlertTriangle, RefreshCw, Check, X
 } from 'lucide-react';
 
+
 // Design System Colors
 const colors = {
   navy: '#0A3340',
@@ -127,7 +128,7 @@ const WorkflowEdge = ({ edge, nodes }) => {
 
   const sourceX = (sourceNode.position?.x || 0) + 192;
   const sourceY = (sourceNode.position?.y || 0) + 40;
-  const targetX = targetNode.position?.x || 0;
+  const targetX = (targetNode.position?.x || 0);
   const targetY = (targetNode.position?.y || 0) + 40;
 
   const midX = (sourceX + targetX) / 2;
@@ -345,7 +346,7 @@ export default function VisualWorkflowBuilder() {
       )}
 
       {/* Canvas */}
-      <main className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col">
         {/* Toolbar */}
         <div className="bg-white border-b border-[#D7E7E4] px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -459,7 +460,7 @@ export default function VisualWorkflowBuilder() {
             </div>
           )}
         </div>
-      </main>
+      </div>
 
       {/* Properties Panel */}
       {selectedNode && (
@@ -644,16 +645,12 @@ export default function VisualWorkflowBuilder() {
               <div>
                 <h3 className="font-semibold text-[#0A3340] mb-3">Possible Outcomes</h3>
                 <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { name: 'Complete', probability: 85 },
-                    { name: 'Needs Approval', probability: 10 },
-                    { name: 'Failed', probability: 5 },
-                  ].map((outcome, i) => (
+                  {[].map((outcome, i) => (
                     <div key={i} className="p-3 bg-[#F6FAF9] rounded-lg text-center">
                       <div className="text-2xl font-bold text-[#0A3340]">{outcome.probability}%</div>
                       <div className="text-xs text-[#64748B]">{outcome.name}</div>
                     </div>
-                  ))}
+                  ))}<p className="col-span-full text-sm text-[#64748B]" role="status">Outcome probabilities are not calculated by this builder.</p>
                 </div>
               </div>
             </div>

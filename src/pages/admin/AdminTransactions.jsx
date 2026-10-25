@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { adminPaymentsAPI, formatKES } from '../../api/api';
 import { timeAgo } from '../../utils/helpers';
 
+import { X, Wallet, BarChart3 } from 'lucide-react';
 export default function AdminTransactions() {
   const [payments, setPayments] = useState([]);
   const [summary, setSummary] = useState(null);
@@ -43,8 +44,8 @@ export default function AdminTransactions() {
         {summary && (
           <div className="grid-4" style={{ marginBottom: 24 }}>
             {[
-              { label: 'Total Revenue', value: formatKES(summary.totalRevenue), icon: '💰' },
-              { label: 'Transactions', value: summary.totalTransactions.toLocaleString(), icon: '📊' },
+              { label: 'Total Revenue', value: formatKES(summary.totalRevenue), icon: Wallet },
+              { label: 'Transactions', value: summary.totalTransactions.toLocaleString(), icon: BarChart3 },
             ].map(s => (
               <div key={s.label} className="stat-box">
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -52,7 +53,7 @@ export default function AdminTransactions() {
                     <div className="stat-label">{s.label}</div>
                     <div className="stat-value">{s.value}</div>
                   </div>
-                  <span style={{ fontSize: 26 }}>{s.icon}</span>
+                  <s.icon size={26} aria-hidden="true" />
                 </div>
               </div>
             ))}
@@ -60,13 +61,13 @@ export default function AdminTransactions() {
         )}
 
         <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
-          <select className="input" style={{ width: 'auto', padding: '8px 16px' }} value={filter} onChange={e => setFilter(e.target.value)}>
+          <select aria-label="Filter transactions by status" className="input" style={{ width: 'auto', padding: '8px 16px' }} value={filter} onChange={e => setFilter(e.target.value)}>
             <option value="all">All Status</option>
             <option value="success">Success</option>
             <option value="pending">Pending</option>
             <option value="failed">Failed</option>
           </select>
-          <select className="input" style={{ width: 'auto', padding: '8px 16px' }} value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
+          <select aria-label="Filter transactions by type" className="input" style={{ width: 'auto', padding: '8px 16px' }} value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
             <option value="all">All Types</option>
             <option value="bid">Bid</option>
             <option value="purchase">Purchase</option>
@@ -75,7 +76,7 @@ export default function AdminTransactions() {
         </div>
 
         <div className="card" style={{ padding: 0 }}>
-          <div className="table-wrap">
+          <div className="table-wrap" tabIndex={0} role="region" aria-label="Transactions table (scrollable)">
             <table className="data-table">
               <thead>
                 <tr>
@@ -131,7 +132,7 @@ export default function AdminTransactions() {
             <div className="modal" onClick={e => e.stopPropagation()} role="presentation" style={{ maxWidth: 480 }}>
               <div className="modal-header">
                 <h3>Transaction Details</h3>
-                <button className="modal-close" onClick={() => setSelected(null)}>✕</button>
+                <button className="modal-close" onClick={() => setSelected(null)} aria-label="Close" title="Close"><X size={16} aria-hidden="true" /></button>
               </div>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[

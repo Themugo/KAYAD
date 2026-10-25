@@ -148,7 +148,7 @@ export default function MediaLibrary() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <div className="flex-1 p-6">
           {/* Toolbar */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
@@ -204,7 +204,7 @@ export default function MediaLibrary() {
                   </button>
                 </>
               )}
-              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Refresh">
                 <RefreshCw size={18} className="text-[#64748B]" />
               </button>
             </div>
@@ -269,7 +269,7 @@ export default function MediaLibrary() {
                       )}
                     </button>
                     <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button className="p-1.5 bg-white rounded shadow hover:bg-[#F6FAF9]">
+                      <button className="p-1.5 bg-white rounded shadow hover:bg-[#F6FAF9]" aria-label="More actions">
                         <MoreVertical size={14} />
                       </button>
                     </div>
@@ -329,16 +329,16 @@ export default function MediaLibrary() {
                         <td className="px-4 py-3 text-sm text-[#64748B]">{formatDate(item.uploadedAt)}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
-                            <button className="p-1.5 rounded hover:bg-[#EEF7F5]" title="Preview">
+                            <button className="p-1.5 rounded hover:bg-[#EEF7F5]" title="Preview" aria-label="Preview">
                               <Eye size={14} />
                             </button>
-                            <button className="p-1.5 rounded hover:bg-[#EEF7F5]" title="Edit">
+                            <button className="p-1.5 rounded hover:bg-[#EEF7F5]" title="Edit" aria-label="Edit">
                               <Edit size={14} />
                             </button>
-                            <button className="p-1.5 rounded hover:bg-[#EEF7F5]" title="Copy URL">
+                            <button className="p-1.5 rounded hover:bg-[#EEF7F5]" title="Copy URL" aria-label="Copy URL">
                               <Copy size={14} />
                             </button>
-                            <button className="p-1.5 rounded hover:bg-red-50 text-[#94A3B8] hover:text-red-500" title="Delete">
+                            <button className="p-1.5 rounded hover:bg-red-50 text-[#94A3B8] hover:text-red-500" title="Delete" aria-label="Delete">
                               <Trash2 size={14} />
                             </button>
                           </div>
@@ -350,7 +350,7 @@ export default function MediaLibrary() {
               </table>
             </div>
           )}
-        </main>
+        </div>
       </div>
 
       {/* Upload Modal */}
@@ -442,7 +442,7 @@ export default function MediaLibrary() {
                         value={selectedMedia.url}
                         className="flex-1 px-3 py-2 text-xs bg-[#F6FAF9] rounded border border-[#D7E7E4]"
                       />
-                      <button className="p-2 bg-[#EEF7F5] rounded hover:bg-[#DDF4F0]">
+                      <button className="p-2 bg-[#EEF7F5] rounded hover:bg-[#DDF4F0]" aria-label="Copy">
                         <Copy size={14} />
                       </button>
                     </div>

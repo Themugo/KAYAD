@@ -5,6 +5,7 @@ import { fetchAdminBids, fetchSuspiciousBids, setBidWinner } from '../../service
 import { useToast } from '../../context/ToastContext';
 import { timeAgo } from '../../utils/helpers';
 
+import { Trophy, Zap, CheckCircle2, Clock, AlertTriangle, X } from 'lucide-react';
 const FRAUD_META = {
   low:    { label: 'Low',    color: 'var(--green)',  bg: 'rgba(34,197,94,0.1)' },
   medium: { label: 'Medium', color: 'var(--orange)', bg: 'rgba(19, 184, 166, 0.1)' },
@@ -48,7 +49,7 @@ export default function AdminBids() {
     setActionId(bid._id);
     try {
       await setBidWinner(bid._id);
-      toast('🏆 Winner recorded. Settlement follows the published auction mode.', 'success');
+      toast('Winner recorded. Settlement follows the published auction mode.', 'success');
       setSelected(null);
       load();
     } catch (err) {
@@ -75,10 +76,10 @@ export default function AdminBids() {
         {/* Stats row */}
         <div className="grid-4" style={{ marginBottom: 24 }}>
           {[
-            { label: 'Total Bids',    val: total.toLocaleString(),   icon: '⚡', color: 'var(--brand)' },
-            { label: 'M-Pesa Paid',   val: formatKES(paidTotal),     icon: '✅', color: 'var(--green)' },
-            { label: 'Unpaid Bids',   val: unpaidCount,              icon: '⏳', color: 'var(--orange)' },
-            { label: 'Suspicious',    val: suspicious.length,        icon: '⚠️', color: 'var(--red)' },
+            { label: 'Total Bids',    val: total.toLocaleString(),   icon: Zap, color: 'var(--brand)' },
+            { label: 'M-Pesa Paid',   val: formatKES(paidTotal),     icon: CheckCircle2, color: 'var(--green)' },
+            { label: 'Unpaid Bids',   val: unpaidCount,              icon: Clock, color: 'var(--orange)' },
+            { label: 'Suspicious',    val: suspicious.length,        icon: AlertTriangle, color: 'var(--red)' },
           ].map(s => (
             <div key={s.label} className="stat-box">
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -86,7 +87,7 @@ export default function AdminBids() {
                   <div className="stat-label">{s.label}</div>
                   <div className="stat-value" style={{ color: s.color, fontSize: '1.4rem' }}>{s.val}</div>
                 </div>
-                <span style={{ fontSize: 22 }}>{s.icon}</span>
+                <s.icon size={22} aria-hidden="true" />
               </div>
             </div>
           ))}
@@ -96,7 +97,7 @@ export default function AdminBids() {
         {suspicious.length > 0 && (
           <div style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 'var(--radius)', padding: '14px 18px', marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ color: 'var(--red)', fontWeight: 700 }}>⚠️ {suspicious.length} bid{suspicious.length > 1 ? 's' : ''} flagged by fraud engine</div>
+              <div style={{ color: 'var(--red)', fontWeight: 700 }}>{suspicious.length} bid{suspicious.length > 1 ? 's' : ''} flagged by fraud engine</div>
               <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 3 }}>
                 High fraud scores detected. Review immediately before releasing funds.
               </div>
@@ -111,7 +112,7 @@ export default function AdminBids() {
             All Bids ({total})
           </button>
           <button className={`tab-btn ${tab === 'suspicious' ? 'active' : ''}`} onClick={() => setTab('suspicious')}>
-            ⚠️ Suspicious ({suspicious.length})
+            Suspicious ({suspicious.length})
           </button>
         </div>
 
@@ -123,7 +124,7 @@ export default function AdminBids() {
             {['all', 'paid', 'unpaid'].map(f => (
               <button key={f} className={`btn btn-sm ${paidFilter === f ? 'btn-gold' : 'btn-outline'}`}
                 onClick={() => { setPaidFilter(f); setPage(1); }}>
-                {f === 'paid' ? '✅ Paid' : f === 'unpaid' ? '⏳ Unpaid' : 'All'}
+                {f === 'paid' ? 'Paid' : f === 'unpaid' ? 'Unpaid' : 'All'}
               </button>
             ))}
           </div>
@@ -136,7 +137,7 @@ export default function AdminBids() {
               <div className="loading-center" style={{ padding: 48 }}><div className="spinner" /></div>
             ) : display.length === 0 ? (
               <div className="empty-state" style={{ padding: 48 }}>
-                <div className="empty-icon">⚡</div>
+                <div className="empty-icon"><Zap size={32} aria-hidden="true" /></div>
                 <h3>No bids found</h3>
               </div>
             ) : (
@@ -170,7 +171,7 @@ export default function AdminBids() {
                         <td style={{ fontWeight: 700, color: 'var(--brand-light)' }}>{formatKES(bid.amount)}</td>
                         <td>
                           <span className={`badge ${bid.status === 'paid' ? 'badge-green' : 'badge-orange'}`}>
-                            {bid.status === 'paid' ? '✓ Paid' : 'Pending'}
+                            {bid.status === 'paid' ? 'Paid' : 'Pending'}
                           </span>
                         </td>
                         <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>
@@ -193,8 +194,9 @@ export default function AdminBids() {
                         </td>
                         <td onClick={e => e.stopPropagation()}>
                           <button className="btn btn-gold btn-sm" disabled={actionId === bid._id}
+                            aria-label="Declare as auction winner" title="Declare as auction winner"
                             onClick={() => handleSetWinner(bid)}>
-                            {actionId === bid._id ? '...' : '🏆'}
+                            {actionId === bid._id ? '...' : <Trophy size={14} aria-hidden="true" />}
                           </button>
                         </td>
                       </tr>
@@ -224,7 +226,7 @@ export default function AdminBids() {
                 <div style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Bid Detail</div>
                 <h3 style={{ marginTop: 4 }}>{selected.car?.title || 'Bid Record'}</h3>
               </div>
-              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }}>✕</button>
+              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }} aria-label="Close" title="Close"><X size={16} aria-hidden="true" /></button>
             </div>
 
             <div style={{ background: 'var(--brand-glow)', border: '1px solid rgba(23, 107, 135, 0.15)', borderRadius: 'var(--radius)', padding: 16, textAlign: 'center', marginBottom: 20 }}>
@@ -241,12 +243,12 @@ export default function AdminBids() {
               {[
                 { label: 'Bidder',      val: selected.user?.name || '—' },
                 { label: 'Phone',       val: selected.phone || selected.user?.phone || '—', mono: true },
-                { label: 'M-Pesa Paid', val: selected.status === 'paid' ? '✅ Yes' : '⏳ Pending' },
+                { label: 'M-Pesa Paid', val: selected.status === 'paid' ? 'Yes' : 'Pending' },
                 { label: 'Receipt',     val: selected.mpesaReceipt || '—', mono: true },
                 { label: 'Fraud Score', val: selected.fraudScore !== undefined ? `${selected.fraudScore}%` : '—' },
                 { label: 'Time',        val: selected.createdAt ? new Date(selected.createdAt).toLocaleString('en-KE') : '—' },
                 { label: 'Bid ID',      val: `#${selected._id?.slice(-10)}`, mono: true },
-                { label: 'Suspicious',  val: selected.suspicious ? '⚠️ Yes' : '✅ Clean' },
+                { label: 'Suspicious',  val: selected.suspicious ? 'Yes' : 'Clean' },
               ].map(r => (
                 <div key={r.label}>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{r.label}</div>
@@ -257,7 +259,7 @@ export default function AdminBids() {
 
             <button className="btn btn-gold btn-full" disabled={actionId === selected._id}
               onClick={() => handleSetWinner(selected)}>
-              {actionId === selected._id ? 'Setting winner...' : '🏆 Declare as Auction Winner'}
+              {actionId === selected._id ? 'Setting winner...' : 'Declare as Auction Winner'}
             </button>
           </div>
         </div>

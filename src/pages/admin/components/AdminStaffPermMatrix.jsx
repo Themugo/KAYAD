@@ -1,13 +1,14 @@
+import { Crown, Settings, Users, Wallet, Lock, Megaphone, Target, Wrench, ShieldCheck } from 'lucide-react';
 const ORG_DATA = [
-  { role: 'superadmin', title: 'Super Admin', icon: '👑', color: 'var(--brand)', level: 0 },
-  { role: 'admin', title: 'Admin', icon: '⚙️', color: '#176B87', level: 1 },
-  { role: 'hr', title: 'HR Manager', icon: '👥', color: '#176b87', level: 2 },
-  { role: 'accounts', title: 'Accounts & Finance', icon: '💰', color: '#22c55e', level: 2 },
-  { role: 'escrow_officer', title: 'Escrow Officer', icon: '🔒', color: '#13B8A6', level: 2 },
-  { role: 'marketing', title: 'Marketing', icon: '📢', color: '#5aafa4', level: 2 },
-  { role: 'ad_manager', title: 'Ad Manager', icon: '🎯', color: '#5aafa4', level: 3 },
-  { role: 'technical_support', title: 'Tech Support', icon: '🛠️', color: '#64748b', level: 2 },
-  { role: 'moderator', title: 'Moderator', icon: '🛡️', color: '#64748b', level: 3 },
+  { role: 'superadmin', title: 'Super Admin', icon: Crown, color: 'var(--brand)', level: 0 },
+  { role: 'admin', title: 'Admin', icon: Settings, color: '#176B87', level: 1 },
+  { role: 'hr', title: 'HR Manager', icon: Users, color: '#176b87', level: 2 },
+  { role: 'accounts', title: 'Accounts & Finance', icon: Wallet, color: '#22c55e', level: 2 },
+  { role: 'escrow_officer', title: 'Escrow Officer', icon: Lock, color: '#13B8A6', level: 2 },
+  { role: 'marketing', title: 'Marketing', icon: Megaphone, color: '#5aafa4', level: 2 },
+  { role: 'ad_manager', title: 'Ad Manager', icon: Target, color: '#5aafa4', level: 3 },
+  { role: 'technical_support', title: 'Tech Support', icon: Wrench, color: '#64748b', level: 2 },
+  { role: 'moderator', title: 'Moderator', icon: ShieldCheck, color: '#64748b', level: 3 },
 ];
 
 const PERMISSIONS = {
@@ -30,7 +31,7 @@ function PermBadge({ level }) {
     edit: { label: 'Edit', color: '#13b8a6', bg: 'rgba(234,179,8,0.1)' },
     partial: { label: 'Partial', color: '#5aafa4', bg: 'rgba(139,92,246,0.1)' },
     moderate: { label: 'Moderate', color: '#64748b', bg: 'rgba(100,116,139,0.1)' },
-    none: { label: '—', color: 'rgba(10, 51, 64, 0.15)', bg: 'transparent' },
+    none: { label: '—', color: 'var(--admin-muted-content)', bg: 'transparent' },
   };
   const c = cfg[level] || cfg.none;
   return (
@@ -46,9 +47,9 @@ export default function AdminStaffPermMatrix() {
       <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.07)', borderRadius: 14, overflow: 'hidden' }}>
         <thead>
           <tr>
-            <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(10, 51, 64, 0.4)', background: '#FFFFFF', borderBottom: '1px solid rgba(10, 51, 64, 0.06)' }}>Role</th>
+            <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--admin-muted-content)', background: '#FFFFFF', borderBottom: '1px solid rgba(10, 51, 64, 0.06)' }}>Role</th>
             {['Users', 'Cars', 'Payments', 'Escrow', 'Config', 'Staff', 'Ads', 'Auctions'].map(h => (
-              <th key={h} style={{ padding: '14px 12px', textAlign: 'center', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'rgba(10, 51, 64, 0.3)', background: '#FFFFFF', borderBottom: '1px solid rgba(10, 51, 64, 0.06)', whiteSpace: 'nowrap' }}>{h}</th>
+              <th key={h} style={{ padding: '14px 12px', textAlign: 'center', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--admin-muted-content)', background: '#FFFFFF', borderBottom: '1px solid rgba(10, 51, 64, 0.06)', whiteSpace: 'nowrap' }}>{h}</th>
             ))}
           </tr>
         </thead>
@@ -59,10 +60,10 @@ export default function AdminStaffPermMatrix() {
               <tr key={r.role}>
                 <td style={{ padding: '12px 18px', borderBottom: i < ORG_DATA.length - 1 ? '1px solid rgba(10, 51, 64, 0.04)' : 'none' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 16 }}>{r.icon}</span>
+                    <r.icon size={16} aria-hidden="true" />
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 700, color: r.color }}>{r.title}</div>
-                      <div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.3)' }}>Level {r.level}</div>
+                      <div style={{ fontSize: 10, color: 'var(--admin-muted-content)' }}>Level {r.level}</div>
                     </div>
                   </div>
                 </td>

@@ -8,7 +8,7 @@ const KILL_SWITCHES = [
   {
     id: 'auctions', label: 'Auction Engine', icon: Activity,
     desc: 'Pauses all live countdowns and prevents new bids.',
-    killColor: '#ef4444', killBg: 'rgba(239,68,68,0.05)', killBorder: 'rgba(239,68,68,0.3)',
+    killColor: '#b91c1c', killBg: 'rgba(185,28,28,0.05)', killBorder: 'rgba(185,28,28,0.3)',
     killLabel: 'KILL ALL AUCTIONS', recoverLabel: 'Re-enable Auctions',
   },
   {
@@ -20,7 +20,7 @@ const KILL_SWITCHES = [
   {
     id: 'registrations', label: 'User Registrations', icon: Shield,
     desc: 'Blocks new account creation. Existing users unaffected.',
-    killColor: '#5aafa4', killBg: 'rgba(139,92,246,0.05)', killBorder: 'rgba(139,92,246,0.3)',
+    killColor: '#0E7490', killBg: 'rgba(139,92,246,0.05)', killBorder: 'rgba(139,92,246,0.3)',
     killLabel: 'BLOCK REGISTRATIONS', recoverLabel: 'Open Registrations',
   },
   {
@@ -32,13 +32,13 @@ const KILL_SWITCHES = [
   {
     id: 'escrows', label: 'Escrow Transactions', icon: Shield,
     desc: 'Pauses all escrow creation and releases.',
-    killColor: '#13B8A6', killBg: 'rgba(19,184,166,0.05)', killBorder: 'rgba(19,184,166,0.3)',
+    killColor: '#0F766E', killBg: 'rgba(19,184,166,0.05)', killBorder: 'rgba(19,184,166,0.3)',
     killLabel: 'FREEZE ESCROWS', recoverLabel: 'Re-enable Escrows',
   },
   {
     id: 'messaging', label: 'Messaging System', icon: WifiOff,
     desc: 'Disables chat and notification delivery.',
-    killColor: '#64748b', killBg: 'rgba(100,116,139,0.05)', killBorder: 'rgba(100,116,139,0.3)',
+    killColor: '#475569', killBg: 'rgba(71,85,105,0.05)', killBorder: 'rgba(71,85,105,0.3)',
     killLabel: 'DISABLE MESSAGING', recoverLabel: 'Enable Messaging',
   },
 ];
@@ -61,7 +61,7 @@ export default function PanicRoom() {
     setLoading(type);
     try {
       await adminAPI.systemKillSwitch({ type, ...extra });
-      toast(`⚠️ ${label} DISABLED`, 'error');
+      toast(`${label} DISABLED`, 'error');
     } catch { toast('Failed to execute', 'error'); }
     finally { setLoading(null); }
   };
@@ -71,7 +71,7 @@ export default function PanicRoom() {
     setLoading(`recover_${type}`);
     try {
       await adminAPI.systemRecover({ type });
-      toast(`✅ ${type} re-enabled`, 'success');
+      toast(`${type} re-enabled`, 'success');
     } catch { toast('Failed to recover', 'error'); }
     finally { setLoading(null); }
   };
@@ -82,33 +82,40 @@ export default function PanicRoom() {
     <div style={{ background: '#f6faf9', minHeight: '100vh' }}>
       <div style={{ maxWidth: 1100, margin: '0 auto', padding: '32px 32px 60px' }}>
         <div style={{ marginBottom: 28 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 12 }}>
-            <AlertTriangle size={12} style={{ color: '#ef4444' }} />
-            <span style={{ fontSize: 10, color: '#ef4444', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Super Admin</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(185,28,28,0.08)', border: '1px solid rgba(185,28,28,0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 12 }}>
+            <AlertTriangle size={12} style={{ color: '#b91c1c' }} />
+            <span style={{ fontSize: 10, color: '#b91c1c', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Super Admin</span>
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.8rem,3vw,2.4rem)', color: '#0a3340', margin: '0 0 8px' }}>
-            Panic <span style={{ color: '#ef4444' }}>Room</span>
+            Panic <span style={{ color: '#b91c1c' }}>Room</span>
           </h1>
-          <p style={{ color: 'rgba(10, 51, 64, 0.3)', fontSize: 13 }}>System-wide emergency controls. Use only in production incidents.</p>
+          <p style={{ color: 'var(--admin-muted-content)', fontSize: 13 }}>System-wide emergency controls. Use only in production incidents.</p>
         </div>
 
         {/* System Health Banner */}
-        {health && (
-          <div style={{
-            marginBottom: 28, padding: '14px 20px', borderRadius: 12,
-            background: health.status === 'healthy' ? 'rgba(34,197,94,0.06)' : 'rgba(239,68,68,0.06)',
-            border: `1px solid ${health.status === 'healthy' ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.2)'}`,
-            display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
-          }}>
-            {health.status === 'healthy' ? <Wifi size={18} style={{ color: '#22c55e' }} /> : <WifiOff size={18} style={{ color: '#ef4444' }} />}
-            <span style={{ fontWeight: 600, color: health.status === 'healthy' ? '#22c55e' : '#ef4444', fontSize: 13, textTransform: 'uppercase' }}>
-              {health.status === 'healthy' ? 'System Healthy' : 'System Warning'}
-            </span>
-            <span style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.35)' }}>
-              {health.users} users · {health.listings} listings · {health.liveAuctions} live auctions · {health.criticalAlerts24h > 0 ? `${health.criticalAlerts24h} critical alerts (24h)` : 'no critical alerts'}
-            </span>
-          </div>
-        )}
+        {health && (() => {
+          // Only a status the health source actually states is reported; anything else is "unknown", never "healthy" or "warning".
+          const raw = typeof health.status === 'string' ? health.status.toLowerCase() : '';
+          const tone = raw === 'healthy' ? 'success' : ['degraded', 'warning', 'critical', 'down', 'unhealthy'].includes(raw) ? 'danger' : 'neutral';
+          const label = tone === 'success' ? 'System Healthy' : tone === 'danger' ? 'System Warning' : 'System status unknown';
+          const count = (v, noun) => (typeof v === 'number' && Number.isFinite(v) ? `${v} ${noun}` : `${noun} unavailable`);
+          const alerts = typeof health.criticalAlerts24h === 'number' && Number.isFinite(health.criticalAlerts24h)
+            ? (health.criticalAlerts24h > 0 ? `${health.criticalAlerts24h} critical alerts (24h)` : 'no critical alerts (24h)')
+            : 'critical alerts unavailable';
+          return (
+            <div role="status" style={{
+              marginBottom: 28, padding: '14px 20px', borderRadius: 12,
+              background: `var(--admin-status-${tone}-bg)`, border: `1px solid var(--admin-status-${tone}-border)`,
+              display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap',
+            }}>
+              {tone === 'success' ? <Wifi size={18} aria-hidden="true" style={{ color: 'var(--admin-status-success)' }} /> : <WifiOff size={18} aria-hidden="true" style={{ color: `var(--admin-status-${tone})` }} />}
+              <span style={{ fontWeight: 600, color: `var(--admin-status-${tone})`, fontSize: 13, textTransform: 'uppercase' }}>{label}</span>
+              <span style={{ fontSize: 12, color: 'var(--admin-muted-content)' }}>
+                {count(health.users, 'users')} · {count(health.listings, 'listings')} · {count(health.liveAuctions, 'live auctions')} · {alerts}
+              </span>
+            </div>
+          );
+        })()}
 
         {/* Kill Switch Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16, marginBottom: 32 }}>
@@ -145,7 +152,7 @@ export default function PanicRoom() {
               {loading === 'full_maintenance' ? '...' : 'ACTIVATE GLOBAL MAINTENANCE'}
             </button>
             <button onClick={() => handleRecover('maintenance')} disabled={loading === 'recover_maintenance'}
-              style={{ flex: 1, padding: '14px 0', background: 'var(--brand)', color: '#0a3340', fontWeight: 700, fontSize: 13, borderRadius: 10, border: 'none', cursor: 'pointer' }}>
+              style={{ flex: 1, padding: '14px 0', background: '#13B8A6', color: '#0a3340', fontWeight: 700, fontSize: 13, borderRadius: 10, border: 'none', cursor: 'pointer' }}>
               {loading === 'recover_maintenance' ? '...' : 'END MAINTENANCE'}
             </button>
           </div>

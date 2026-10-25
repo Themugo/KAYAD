@@ -8,6 +8,10 @@ import {
   Send, Lightbulb, BarChart3, LineChart, PieChart, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
 import * as ecpApi from '../../../services/ecpApi';
+import { isUnavailable } from '../../../components/admin/adminStat';
+
+// A missing or non-numeric figure is shown as Unavailable, never as 0.
+const nv = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 'Unavailable');
 
 // Design System Colors
 const colors = {
@@ -35,6 +39,9 @@ const modules = [
   { id: 'compliance', label: 'Compliance', icon: Lock, color: colors.emerald },
   { id: 'audit', label: 'Audit Logs', icon: ClipboardCheck, color: colors.terracotta },
 ];
+
+const withUnit = (v, unit) => (Number.isFinite(v) ? `${v}${unit}` : 'Unavailable');
+const kes = (v) => (Number.isFinite(v) ? `KES ${v.toLocaleString()}` : 'Unavailable');
 
 export default function EnterpriseControlCenter() {
   const [activeModule, setActiveModule] = useState('executive');
@@ -115,18 +122,18 @@ export default function EnterpriseControlCenter() {
       {/* Overall Status */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Health Score', value: dashboard?.overall?.healthScore || 0, unit: '%', icon: Activity, color: colors.emerald },
-          { label: 'Platform Uptime', value: dashboard?.overall?.uptime || 0, unit: '%', icon: Clock, color: colors.navy },
-          { label: 'Risk Level', value: dashboard?.overall?.riskLevel || 'low', icon: Shield, color: colors.softBlue, isText: true },
-          { label: 'Active Users', value: dashboard?.business?.activeUsers || 0, icon: Users, color: colors.purple },
+          { label: 'Health Score', value: nv(dashboard?.overall?.healthScore), unit: '%', icon: Activity, color: colors.emerald },
+          { label: 'Platform Uptime', value: nv(dashboard?.overall?.uptime), unit: '%', icon: Clock, color: colors.navy },
+          { label: 'Risk Level', value: dashboard?.overall?.riskLevel || 'Unavailable', icon: Shield, color: colors.softBlue, isText: true },
+          { label: 'Active Users', value: nv(dashboard?.business?.activeUsers), icon: Users, color: colors.purple },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
             <div className="flex items-center gap-2 mb-3">
               <stat.icon size={18} style={{ color: stat.color }} />
               <span className="text-sm text-[#64748B]">{stat.label}</span>
             </div>
-            <p className="text-3xl font-bold text-[#0A3340]">
-              {stat.isText ? stat.value : stat.value}{!stat.isText && stat.unit && <span className="text-lg text-[#94A3B8] ml-1">{stat.unit}</span>}
+            <p className={`${isUnavailable(stat.value) ? 'text-lg' : 'text-3xl'} font-bold text-[#0A3340]`}>
+              {stat.isText ? stat.value : stat.value}{!stat.isText && stat.unit && typeof stat.value === 'number' && <span className="text-lg text-[#94A3B8] ml-1">{stat.unit}</span>}
             </p>
           </div>
         ))}
@@ -146,10 +153,10 @@ export default function EnterpriseControlCenter() {
               <kpi.icon size={18} className="text-[#94A3B8]" />
             </div>
             <div className="flex items-end gap-2">
-              <p className="text-2xl font-bold text-[#0A3340]">
-                {kpi.format === 'currency' ? `KES ${(kpi.value || 0).toLocaleString()}` : kpi.value}
+              <p className={`${Number.isFinite(kpi.value) ? 'text-2xl' : 'text-base'} font-bold text-[#0A3340]`}>
+                {!Number.isFinite(kpi.value) ? 'Unavailable' : kpi.format === 'currency' ? `KES ${kpi.value.toLocaleString()}` : kpi.value}
               </p>
-              {kpi.change && (
+              {Number.isFinite(kpi.change) && kpi.change !== 0 && (
                 <span className="text-sm text-emerald-600 flex items-center">
                   <ArrowUpRight size={14} />
                   {kpi.change}%
@@ -169,7 +176,7 @@ export default function EnterpriseControlCenter() {
               <div key={key} className="flex items-center justify-between p-3 bg-[#F6FAF9] rounded-lg">
                 <span className="text-sm text-[#12576D] capitalize">{key}</span>
                 <div className="flex items-center gap-3">
-                  <span className="text-sm text-[#64748B]">{service.latency}ms</span>
+                  <span className="text-sm text-[#64748B]">{withUnit(service.latency, 'ms')}</span>
                   <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                     service.status === 'healthy' ? 'bg-emerald-100 text-emerald-700' : 'bg-[#DDF4F0] text-[#12576D]'
                   }`}>
@@ -215,13 +222,13 @@ export default function EnterpriseControlCenter() {
       {/* Summary */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Healthy', value: systemHealth?.summary?.healthy || 0, color: colors.emerald },
-          { label: 'Degraded', value: systemHealth?.summary?.degraded || 0, color: colors.mutedOrange },
-          { label: 'Down', value: systemHealth?.summary?.down || 0, color: colors.mutedCrimson },
+          { label: 'Healthy', value: nv(systemHealth?.summary?.healthy), color: colors.emerald },
+          { label: 'Degraded', value: nv(systemHealth?.summary?.degraded), color: colors.mutedOrange },
+          { label: 'Down', value: nv(systemHealth?.summary?.down), color: colors.mutedCrimson },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-[#D7E7E4]">
             <p className="text-sm text-[#64748B]">{stat.label}</p>
-            <p className="text-3xl font-bold" style={{ color: stat.color }}>{stat.value}</p>
+            <p className={`${isUnavailable(stat.value) ? 'text-lg' : 'text-3xl'} font-bold`} style={{ color: stat.color }}>{stat.value}</p>
           </div>
         ))}
       </div>
@@ -240,11 +247,11 @@ export default function EnterpriseControlCenter() {
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-[#64748B]">Latency</span>
-                <span className="font-medium">{service.latency}ms</span>
+                <span className="font-medium">{withUnit(service.latency, 'ms')}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-[#64748B]">Uptime</span>
-                <span className="font-medium">{service.uptime}%</span>
+                <span className="font-medium">{withUnit(service.uptime, '%')}</span>
               </div>
             </div>
           </div>
@@ -266,10 +273,10 @@ export default function EnterpriseControlCenter() {
         <h3 className="font-semibold text-[#0A3340] mb-4">Revenue</h3>
         <div className="grid grid-cols-4 gap-4">
           {[
-            { label: 'Today', value: `KES ${(businessHealth?.revenue?.today || 0).toLocaleString()}` },
-            { label: 'This Week', value: `KES ${(businessHealth?.revenue?.thisWeek || 0).toLocaleString()}` },
-            { label: 'Growth', value: `${businessHealth?.revenue?.growth || 0}%`, positive: true },
-            { label: 'Projected', value: `KES ${(businessHealth?.revenue?.projection || 0).toLocaleString()}` },
+            { label: 'Today', value: kes(businessHealth?.revenue?.today) },
+            { label: 'This Week', value: kes(businessHealth?.revenue?.thisWeek) },
+            { label: 'Growth', value: (typeof businessHealth?.revenue?.growth === 'number' ? `${businessHealth.revenue.growth}%` : 'Unavailable'), positive: true },
+            { label: 'Projected', value: kes(businessHealth?.revenue?.projection) },
           ].map((item, i) => (
             <div key={i} className="p-4 bg-[#F6FAF9] rounded-lg">
               <p className="text-sm text-[#64748B]">{item.label}</p>
@@ -286,15 +293,15 @@ export default function EnterpriseControlCenter() {
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-[#64748B]">Total</span>
-              <span className="font-bold text-[#0A3340]">{businessHealth?.dealers?.total}</span>
+              <span className="font-bold text-[#0A3340]">{nv(businessHealth?.dealers?.total)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[#64748B]">Active</span>
-              <span className="font-bold text-emerald-600">{businessHealth?.dealers?.active}</span>
+              <span className="font-bold text-emerald-600">{nv(businessHealth?.dealers?.active)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[#64748B]">Growth</span>
-              <span className="font-bold text-emerald-600">+{businessHealth?.dealers?.growth}%</span>
+              <span className="font-bold text-emerald-600">{typeof businessHealth?.dealers?.growth === 'number' ? `${businessHealth.dealers.growth > 0 ? '+' : ''}${businessHealth.dealers.growth}%` : 'Unavailable'}</span>
             </div>
           </div>
         </div>
@@ -304,15 +311,15 @@ export default function EnterpriseControlCenter() {
           <div className="space-y-3">
             <div className="flex justify-between items-center">
               <span className="text-[#64748B]">Active</span>
-              <span className="font-bold text-[#0A3340]">{businessHealth?.auctions?.active}</span>
+              <span className="font-bold text-[#0A3340]">{nv(businessHealth?.auctions?.active)}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[#64748B]">Success Rate</span>
-              <span className="font-bold text-emerald-600">{businessHealth?.auctions?.successRate}%</span>
+              <span className="font-bold text-emerald-600">{withUnit(businessHealth?.auctions?.successRate, '%')}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[#64748B]">Total Volume</span>
-              <span className="font-bold text-[#0A3340]">KES {(businessHealth?.auctions?.totalVolume || 0).toLocaleString()}</span>
+              <span className="font-bold text-[#0A3340]">{kes(businessHealth?.auctions?.totalVolume)}</span>
             </div>
           </div>
         </div>
@@ -333,11 +340,11 @@ export default function EnterpriseControlCenter() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm opacity-80">Overall Status</p>
-            <p className="text-3xl font-bold capitalize">{security?.overall?.status || 'secure'}</p>
+            <p className={`${isUnavailable(security?.overall?.status || 'Unavailable') ? 'text-lg' : 'text-3xl'} font-bold capitalize`}>{security?.overall?.status || 'Unavailable'}</p>
           </div>
           <div className="text-right">
             <p className="text-sm opacity-80">Security Score</p>
-            <p className="text-3xl font-bold">{security?.overall?.score || 92}%</p>
+            <p className={`${isUnavailable(withUnit(security?.overall?.score, '%')) ? 'text-lg' : 'text-3xl'} font-bold`}>{withUnit(security?.overall?.score, '%')}</p>
           </div>
         </div>
       </div>
@@ -345,14 +352,14 @@ export default function EnterpriseControlCenter() {
       {/* Metrics */}
       <div className="grid grid-cols-3 gap-4">
         {[
-          { label: 'Failed Logins', value: security?.authentication?.failedLogins || 0, icon: Lock },
-          { label: 'Blocked Accounts', value: security?.authentication?.blockedAccounts || 0, icon: Shield },
-          { label: 'Abuse Attempts', value: security?.api?.abuseAttempts || 0, icon: AlertTriangle },
+          { label: 'Failed Logins', value: nv(security?.authentication?.failedLogins), icon: Lock },
+          { label: 'Blocked Accounts', value: nv(security?.authentication?.blockedAccounts), icon: Shield },
+          { label: 'Abuse Attempts', value: nv(security?.api?.abuseAttempts), icon: AlertTriangle },
         ].map((metric, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
             <metric.icon size={24} className="text-[#94A3B8] mb-3" />
             <p className="text-sm text-[#64748B]">{metric.label}</p>
-            <p className="text-2xl font-bold text-[#0A3340]">{metric.value}</p>
+            <p className={`${isUnavailable(metric.value) ? 'text-base' : 'text-2xl'} font-bold text-[#0A3340]`}>{metric.value}</p>
           </div>
         ))}
       </div>
@@ -408,13 +415,13 @@ export default function EnterpriseControlCenter() {
         <h3 className="font-semibold text-[#0A3340] mb-4">Core Web Vitals</h3>
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: 'LCP', value: performance?.coreWebVitals?.lcp?.value || 0, unit: 's', target: '<2.5s' },
-            { label: 'FID', value: performance?.coreWebVitals?.fid?.value || 0, unit: 'ms', target: '<100ms' },
-            { label: 'CLS', value: performance?.coreWebVitals?.cls?.value || 0, target: '<0.1' },
+            { label: 'LCP', value: nv(performance?.coreWebVitals?.lcp?.value), unit: 's', target: '<2.5s' },
+            { label: 'FID', value: nv(performance?.coreWebVitals?.fid?.value), unit: 'ms', target: '<100ms' },
+            { label: 'CLS', value: nv(performance?.coreWebVitals?.cls?.value), target: '<0.1' },
           ].map((vital, i) => (
             <div key={i} className="p-4 bg-[#F6FAF9] rounded-lg text-center">
               <p className="text-sm text-[#64748B] mb-1">{vital.label}</p>
-              <p className="text-2xl font-bold text-[#0A3340]">{vital.value}{vital.unit}</p>
+              <p className={`${isUnavailable(vital.value) ? 'text-base' : 'text-2xl'} font-bold text-[#0A3340]`}>{vital.value}{typeof vital.value === 'number' ? vital.unit : ''}</p>
               <p className="text-xs text-[#94A3B8]">Target: {vital.target}</p>
             </div>
           ))}
@@ -426,14 +433,14 @@ export default function EnterpriseControlCenter() {
         <h3 className="font-semibold text-[#0A3340] mb-4">API Latency</h3>
         <div className="grid grid-cols-4 gap-4">
           {[
-            { label: 'p50', value: performance?.apiLatency?.p50 || 0 },
-            { label: 'p95', value: performance?.apiLatency?.p95 || 0 },
-            { label: 'p99', value: performance?.apiLatency?.p99 || 0 },
-            { label: 'Target', value: performance?.apiLatency?.target || 200 },
+            { label: 'p50', value: nv(performance?.apiLatency?.p50) },
+            { label: 'p95', value: nv(performance?.apiLatency?.p95) },
+            { label: 'p99', value: nv(performance?.apiLatency?.p99) },
+            { label: 'Target', value: nv(performance?.apiLatency?.target) },
           ].map((latency, i) => (
             <div key={i} className="p-4 bg-[#F6FAF9] rounded-lg text-center">
               <p className="text-sm text-[#64748B] mb-1">{latency.label}</p>
-              <p className="text-2xl font-bold text-[#0A3340]">{latency.value}ms</p>
+              <p className={`${isUnavailable(latency.value) ? 'text-base' : 'text-2xl'} font-bold text-[#0A3340]`}>{latency.value}{typeof latency.value === 'number' ? 'ms' : ''}</p>
             </div>
           ))}
         </div>
@@ -444,13 +451,13 @@ export default function EnterpriseControlCenter() {
         <h3 className="font-semibold text-[#0A3340] mb-4">Uptime</h3>
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: 'Last 24 Hours', value: performance?.uptime?.last24h || 0 },
-            { label: 'Last 7 Days', value: performance?.uptime?.last7d || 0 },
-            { label: 'Last 30 Days', value: performance?.uptime?.last30d || 0 },
+            { label: 'Last 24 Hours', value: nv(performance?.uptime?.last24h) },
+            { label: 'Last 7 Days', value: nv(performance?.uptime?.last7d) },
+            { label: 'Last 30 Days', value: nv(performance?.uptime?.last30d) },
           ].map((uptime, i) => (
             <div key={i} className="p-4 bg-emerald-50 rounded-lg text-center">
               <p className="text-sm text-[#64748B] mb-1">{uptime.label}</p>
-              <p className="text-2xl font-bold text-emerald-600">{uptime.value}%</p>
+              <p className={`${isUnavailable(uptime.value) ? 'text-base' : 'text-2xl'} font-bold text-emerald-600`}>{uptime.value}{typeof uptime.value === 'number' ? '%' : ''}</p>
             </div>
           ))}
         </div>
@@ -501,7 +508,10 @@ export default function EnterpriseControlCenter() {
             ].map((action, i) => (
               <button
                 key={i}
-                className="flex items-center gap-2 px-4 py-3 border border-[#D7E7E4] rounded-lg hover:bg-[#F6FAF9]"
+                type="button"
+                disabled
+                title="Operational actions are not connected to a backend control yet"
+                className="flex items-center gap-2 px-4 py-3 border border-[#D7E7E4] rounded-lg opacity-60 cursor-not-allowed"
               >
                 <action.icon size={16} />
                 <span className="text-sm">{action.label}</span>
@@ -630,11 +640,11 @@ export default function EnterpriseControlCenter() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-sm">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                All Systems Operational
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${Number.isFinite(dashboard?.overall?.healthScore) ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                <span className={`w-2 h-2 rounded-full ${Number.isFinite(dashboard?.overall?.healthScore) ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                {Number.isFinite(dashboard?.overall?.healthScore) ? `Health score ${dashboard.overall.healthScore}%` : 'Platform status unavailable'}
               </div>
-              <button onClick={loadData} className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button onClick={loadData} className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Refresh">
                 <RefreshCw size={20} className="text-[#64748B]" />
               </button>
             </div>
@@ -669,9 +679,9 @@ export default function EnterpriseControlCenter() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 overflow-auto">
+        <div className="flex-1 p-6 overflow-auto">
           {renderModuleContent()}
-        </main>
+        </div>
       </div>
     </div>
   );

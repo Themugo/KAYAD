@@ -1,0 +1,89 @@
+{
+ "metrics": {
+  "lowContrast": [],
+  "lowContrastCount": 0,
+  "firstChild": {
+   "tag": "div",
+   "cls": "",
+   "pt": "24px",
+   "pl": "32px",
+   "left": 0,
+   "top": 0
+  },
+  "boundary": false,
+  "unnamedControls": 0,
+  "unnamedList": [],
+  "scrollW": 1440,
+  "innerW": 1440,
+  "hOverflowPage": false,
+  "contentScrollW": 1192,
+  "contentClientW": 1192,
+  "overflowing": [],
+  "h1": "Staff directory & access",
+  "title": "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault",
+  "axe": [],
+  "interact": {
+   "tabSequence": [
+    {
+     "tag": "button",
+     "name": "Collapse admin sidebar",
+     "outline": true,
+     "shadow": false
+    },
+    {
+     "tag": "button",
+     "name": "Command Centre",
+     "outline": true,
+     "shadow": false
+    },
+    {
+     "tag": "a",
+     "name": "Dashboard",
+     "outline": true,
+     "shadow": false
+    },
+    {
+     "tag": "button",
+     "name": "Business Operations",
+     "outline": true,
+     "shadow": false
+    },
+    {
+     "tag": "a",
+     "name": "Users",
+     "outline": true,
+     "shadow": false
+    },
+    {
+     "tag": "a",
+     "name": "Sellers",
+     "outline": true,
+     "shadow": false
+    }
+   ],
+   "focusIndicatorOnAll": true,
+   "tabWrapped": false
+  }
+ },
+ "requests": [
+  "GET /v1/auth/me",
+  "GET /admin/public/config",
+  "GET /admin/alerts?limit=1&read=false",
+  "GET /notifications?limit=50",
+  "GET /admin/staff",
+  "GET /admin/staff/roles/catalog"
+ ],
+ "console": [
+  "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+  "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+  "warning: [KAYAD] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:4173/assets/index-D5-9H82j.js:10:374700)",
+  "warning: Couldn't load preload assets:  ProgressEvent",
+  "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+ ],
+ "pageErrors": [],
+ "failed": [
+  "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap",
+  "https://api.kayad.space/socket.io/socket.io.js",
+  "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap"
+ ]
+}

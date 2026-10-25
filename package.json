@@ -164,7 +164,8 @@
     "validate:phaseC1-runtime-integrity": "node scripts/validate-phaseC1-runtime-integrity.mjs",
     "validate:super-admin-phase1-navigation": "node scripts/validate-super-admin-phase1-navigation.mjs",
     "validate:super-admin-phase3-foundation": "node scripts/validate-super-admin-phase3-foundation.mjs",
-    "validate:phase5-gap-closure": "node scripts/validate-phase5-gap-closure.mjs"
+    "validate:phase5-gap-closure": "node scripts/validate-phase5-gap-closure.mjs",
+    "validate:phase12-admin-status-tokens": "node scripts/validate-phase12-admin-status-token-convergence.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

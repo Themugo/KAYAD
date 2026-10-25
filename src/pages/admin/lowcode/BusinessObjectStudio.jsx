@@ -9,6 +9,10 @@ import {
   MessageSquare, AlertTriangle, CheckCircle, Clock, FileCode
 } from 'lucide-react';
 import * as lowCodeApi from '../../../services/lowCodeApi';
+import { isUnavailable } from '../../../components/admin/adminStat';
+
+// A missing or non-numeric figure is shown as Unavailable, never as 0.
+const nv = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 'Unavailable');
 
 // Design System Colors
 const colors = {
@@ -187,11 +191,11 @@ export default function BusinessObjectStudio() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {[
-          { label: 'Total Objects', value: stats?.totalObjects || 0, icon: Layers, color: colors.navy },
-          { label: 'Published', value: stats?.publishedObjects || 0, icon: CheckCircle, color: colors.emerald },
-          { label: 'Draft', value: stats?.draftObjects || 0, icon: Edit, color: colors.mutedOrange },
-          { label: 'Total Fields', value: stats?.totalFields || 0, icon: Database, color: colors.softBlue },
-          { label: 'Total Views', value: stats?.totalViews || 0, icon: Layout, color: colors.terracotta },
+          { label: 'Total Objects', value: nv(stats?.totalObjects), icon: Layers, color: colors.navy },
+          { label: 'Published', value: nv(stats?.publishedObjects), icon: CheckCircle, color: colors.emerald },
+          { label: 'Draft', value: nv(stats?.draftObjects), icon: Edit, color: colors.mutedOrange },
+          { label: 'Total Fields', value: nv(stats?.totalFields), icon: Database, color: colors.softBlue },
+          { label: 'Total Views', value: nv(stats?.totalViews), icon: Layout, color: colors.terracotta },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
             <div className="flex items-center gap-3 mb-3">
@@ -200,7 +204,7 @@ export default function BusinessObjectStudio() {
               </div>
               <span className="text-sm text-[#64748B]">{stat.label}</span>
             </div>
-            <div className="text-3xl font-bold text-[#0A3340]">{stat.value}</div>
+            <div className={`${isUnavailable(stat.value) ? 'text-lg' : 'text-3xl'} font-bold text-[#0A3340]`}>{stat.value}</div>
           </div>
         ))}
       </div>
@@ -249,7 +253,7 @@ export default function BusinessObjectStudio() {
             className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[#D7E7E4] focus:border-[#0A3340] outline-none"
           />
         </div>
-        <select className="px-4 py-2.5 rounded-lg border border-[#D7E7E4] outline-none">
+        <select aria-label="Category" className="px-4 py-2.5 rounded-lg border border-[#D7E7E4] outline-none">
           <option>All Categories</option>
           <option>Vehicle</option>
           <option>Fleet</option>
@@ -257,7 +261,7 @@ export default function BusinessObjectStudio() {
           <option>Support</option>
           <option>Custom</option>
         </select>
-        <select className="px-4 py-2.5 rounded-lg border border-[#D7E7E4] outline-none">
+        <select aria-label="Status" className="px-4 py-2.5 rounded-lg border border-[#D7E7E4] outline-none">
           <option>All Status</option>
           <option>Published</option>
           <option>Draft</option>
@@ -309,7 +313,7 @@ export default function BusinessObjectStudio() {
                   >
                     Forms
                   </button>
-                  <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+                  <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="More actions">
                     <MoreVertical size={16} className="text-[#64748B]" />
                   </button>
                 </div>
@@ -330,7 +334,7 @@ export default function BusinessObjectStudio() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <button className="px-4 py-2 border border-[#D7E7E4] rounded-lg hover:bg-[#F6FAF9]">
+          <button className="px-4 py-2 border border-[#D7E7E4] rounded-lg hover:bg-[#F6FAF9]" aria-label="Download">
             <Download size={18} />
           </button>
           <button className="px-4 py-2 border border-[#D7E7E4] rounded-lg hover:bg-[#F6FAF9]">
@@ -395,10 +399,10 @@ export default function BusinessObjectStudio() {
                   {field.unique && (
                     <span className="px-2 py-0.5 bg-[#DDF4F0] text-[#176B87] rounded text-xs">Unique</span>
                   )}
-                  <button className="p-1.5 hover:bg-[#EEF7F5] rounded">
+                  <button className="p-1.5 hover:bg-[#EEF7F5] rounded" aria-label="Edit">
                     <Edit size={14} className="text-[#64748B]" />
                   </button>
-                  <button className="p-1.5 hover:bg-red-50 rounded">
+                  <button className="p-1.5 hover:bg-red-50 rounded" aria-label="Delete">
                     <Trash2 size={14} className="text-red-400" />
                   </button>
                 </div>
@@ -574,10 +578,10 @@ CREATE INDEX idx_vehicle_rental_created_at ON custom_vehicle_rental(created_at);
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Refresh">
                 <RefreshCw size={20} className="text-[#64748B]" />
               </button>
-              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Settings">
                 <Settings size={20} className="text-[#64748B]" />
               </button>
             </div>
@@ -612,9 +616,9 @@ CREATE INDEX idx_vehicle_rental_created_at ON custom_vehicle_rental(created_at);
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6">
+        <div className="flex-1 p-6">
           {renderModuleContent()}
-        </main>
+        </div>
       </div>
 
       {/* New Object Modal */}

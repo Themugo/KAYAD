@@ -11,6 +11,10 @@ import VisualPageBuilder from './components/VisualPageBuilder';
 import MediaLibrary from './components/MediaLibrary';
 import SEOManager from './components/SEOManager';
 import PublishingCalendar from './components/PublishingCalendar';
+import { isUnavailable } from '../../../components/admin/adminStat';
+
+// A missing or non-numeric figure is shown as Unavailable, never as 0.
+const nv = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 'Unavailable');
 
 // Design System Colors
 const colors = {
@@ -136,12 +140,12 @@ export default function ContentStudio() {
       {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {[
-          { label: 'Total Pages', value: stats?.pages?.total || 0, sub: `${stats?.pages?.published || 0} published`, color: colors.softBlue },
-          { label: 'Articles', value: stats?.content?.total || 0, sub: `${stats?.content?.published || 0} published`, color: colors.terracotta },
-          { label: 'Media Files', value: stats?.media?.total || 0, sub: 'in library', color: colors.emerald },
-          { label: 'FAQs', value: stats?.faqs?.total || 0, sub: 'articles', color: colors.mutedOrange },
-          { label: 'Active Campaigns', value: stats?.campaigns?.active || 0, sub: 'running', color: '#13B8A6' },
-          { label: 'Active Banners', value: stats?.banners?.active || 0, sub: 'on site', color: '#5aafa4' },
+          { label: 'Total Pages', value: nv(stats?.pages?.total), sub: `${nv(stats?.pages?.published)} published`, color: colors.softBlue },
+          { label: 'Articles', value: nv(stats?.content?.total), sub: `${nv(stats?.content?.published)} published`, color: colors.terracotta },
+          { label: 'Media Files', value: nv(stats?.media?.total), sub: 'in library', color: colors.emerald },
+          { label: 'FAQs', value: nv(stats?.faqs?.total), sub: 'articles', color: colors.mutedOrange },
+          { label: 'Active Campaigns', value: nv(stats?.campaigns?.active), sub: 'running', color: '#13B8A6' },
+          { label: 'Active Banners', value: nv(stats?.banners?.active), sub: 'on site', color: '#5aafa4' },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-xl p-4 shadow-sm border border-[#D7E7E4]">
             <div className="flex items-center gap-3 mb-2">
@@ -150,7 +154,7 @@ export default function ContentStudio() {
               </div>
               <span className="text-sm text-[#64748B]">{stat.label}</span>
             </div>
-            <div className="text-2xl font-bold text-[#0A3340]">{stat.value}</div>
+            <div className={`${isUnavailable(stat.value) ? 'text-base' : 'text-2xl'} font-bold text-[#0A3340]`}>{stat.value}</div>
             <div className="text-xs text-[#94A3B8] mt-1">{stat.sub}</div>
           </div>
         ))}
@@ -161,15 +165,15 @@ export default function ContentStudio() {
         <h3 className="text-lg font-semibold text-[#0A3340] mb-4">This Week's Performance</h3>
         <div className="grid grid-cols-3 gap-6">
           <div className="text-center">
-            <div className="text-3xl font-bold text-[#0A3340]">{stats?.analytics?.weekViews?.toLocaleString() || 0}</div>
+            <div className={`${isUnavailable(Number.isFinite(stats?.analytics?.weekViews) ? stats.analytics.weekViews.toLocaleString() : 'Unavailable') ? 'text-lg' : 'text-3xl'} font-bold text-[#0A3340]`}>{Number.isFinite(stats?.analytics?.weekViews) ? stats.analytics.weekViews.toLocaleString() : 'Unavailable'}</div>
             <div className="text-sm text-[#64748B] mt-1">Page Views</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-emerald-600">{stats?.analytics?.weekClicks?.toLocaleString() || 0}</div>
+            <div className={`${isUnavailable(Number.isFinite(stats?.analytics?.weekClicks) ? stats.analytics.weekClicks.toLocaleString() : 'Unavailable') ? 'text-lg' : 'text-3xl'} font-bold text-emerald-600`}>{Number.isFinite(stats?.analytics?.weekClicks) ? stats.analytics.weekClicks.toLocaleString() : 'Unavailable'}</div>
             <div className="text-sm text-[#64748B] mt-1">Clicks</div>
           </div>
           <div className="text-center">
-            <div className="text-3xl font-bold text-[#5aafa4]">{stats?.analytics?.weekConversions?.toLocaleString() || 0}</div>
+            <div className={`${isUnavailable(Number.isFinite(stats?.analytics?.weekConversions) ? stats.analytics.weekConversions.toLocaleString() : 'Unavailable') ? 'text-lg' : 'text-3xl'} font-bold text-[#5aafa4]`}>{Number.isFinite(stats?.analytics?.weekConversions) ? stats.analytics.weekConversions.toLocaleString() : 'Unavailable'}</div>
             <div className="text-sm text-[#64748B] mt-1">Conversions</div>
           </div>
         </div>
@@ -235,9 +239,9 @@ export default function ContentStudio() {
                 </button>
               ))}
             </aside>
-            <main className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0">
               {selectedPage ? <VisualPageBuilder page={selectedPage} onSaved={handlePageSaved} /> : <div className="h-full flex items-center justify-center text-[#94A3B8]">Create or select a page to begin.</div>}
-            </main>
+            </div>
           </div>
         </div>
       );
@@ -329,10 +333,10 @@ export default function ContentStudio() {
                   className="pl-10 pr-4 py-2 rounded-lg border border-[#D7E7E4] focus:border-[#0A3340] focus:ring-2 focus:ring-[#0A3340]/20 outline-none w-64"
                 />
               </div>
-              <button className="p-2 rounded-lg hover:bg-[#EEF7F5] text-[#64748B]">
+              <button className="p-2 rounded-lg hover:bg-[#EEF7F5] text-[#64748B]" aria-label="Notifications">
                 <Bell size={20} />
               </button>
-              <button className="p-2 rounded-lg hover:bg-[#EEF7F5] text-[#64748B]">
+              <button className="p-2 rounded-lg hover:bg-[#EEF7F5] text-[#64748B]" aria-label="Settings">
                 <Settings size={20} />
               </button>
             </div>
@@ -367,7 +371,7 @@ export default function ContentStudio() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-0">
+        <div className="flex-1 p-0">
           {activeModule === 'dashboard' && renderDashboard()}
           {activeModule === 'pages' && <VisualPageBuilder />}
           {activeModule === 'landing' && <VisualPageBuilder />}
@@ -386,7 +390,7 @@ export default function ContentStudio() {
           {activeModule === 'widgets' && renderModuleContent()}
           {activeModule === 'abtests' && renderModuleContent()}
           {activeModule === 'analytics' && renderModuleContent()}
-        </main>
+        </div>
       </div>
     </div>
   );

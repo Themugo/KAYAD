@@ -1,0 +1,268 @@
+{
+ "/admin": {
+  "py-1.5": 1,
+  "gap-1.5": 1
+ },
+ "/admin/users": {
+  "page": 1,
+  "stat-grid": 1,
+  "stat-box": 5,
+  "stat-value": 5,
+  "stat-label": 5,
+  "data-table-controls": 1,
+  "input": 3,
+  "data-table": 1,
+  "btn": 2,
+  "btn-sm": 2,
+  "btn-outline": 2
+ },
+ "/admin/sellers": {
+  "page": 1,
+  "section-eyebrow": 1,
+  "input": 1,
+  "btn": 4,
+  "btn-sm": 4,
+  "btn-gold": 1,
+  "btn-outline": 3,
+  "table-wrap": 1,
+  "data-table": 1
+ },
+ "/admin/cars": {
+  "page": 1,
+  "stat-grid": 1,
+  "stat-box": 4,
+  "stat-value": 4,
+  "stat-label": 4,
+  "data-table-controls": 1,
+  "input": 2,
+  "data-table": 1,
+  "btn": 2,
+  "btn-sm": 2,
+  "btn-outline": 2
+ },
+ "/admin/moderation": {
+  "page": 1,
+  "section-eyebrow": 1,
+  "input": 2,
+  "loading-center": 1,
+  "spinner": 1
+ },
+ "/admin/auctions": {
+  "page": 1,
+  "section-eyebrow": 1,
+  "grid-3": 1,
+  "stat-box": 3,
+  "stat-label": 3,
+  "stat-value": 3,
+  "tabs": 1,
+  "tab-btn": 3,
+  "empty-state": 1,
+  "empty-icon": 1
+ },
+ "/admin/bids": {
+  "page": 1,
+  "section-eyebrow": 1,
+  "grid-4": 1,
+  "stat-box": 4,
+  "stat-label": 4,
+  "stat-value": 4,
+  "tabs": 1,
+  "tab-btn": 2,
+  "input": 1,
+  "btn": 3,
+  "btn-sm": 3,
+  "btn-gold": 1,
+  "btn-outline": 2,
+  "table-wrap": 1,
+  "empty-state": 1,
+  "empty-icon": 1
+ },
+ "/admin/escrows": {
+  "page": 1,
+  "section-eyebrow": 3,
+  "btn": 6,
+  "btn-outline": 6,
+  "badge": 6,
+  "badge-green": 6,
+  "stat-label": 6,
+  "btn-sm": 4,
+  "tab-btn": 9,
+  "empty-state": 1
+ },
+ "/admin/reviews": {
+  "spinner": 1
+ },
+ "/admin/referrals": {
+  "btn": 7,
+  "btn-sm": 7,
+  "btn-gold": 2,
+  "btn-outline": 5,
+  "spinner": 1
+ },
+ "/admin/chats": {
+  "spinner": 1,
+  "empty-state": 1,
+  "empty-icon": 1
+ },
+ "/admin/reports": {
+  "page": 1,
+  "empty-state": 1
+ },
+ "/admin/support-tickets": {},
+ "/admin/feedback": {
+  "page": 1,
+  "section-eyebrow": 1,
+  "btn": 4,
+  "btn-sm": 4,
+  "btn-gold": 1,
+  "btn-outline": 3,
+  "table-wrap": 1,
+  "loading-center": 1,
+  "spinner": 1
+ },
+ "/admin/market-data": {
+  "btn": 2,
+  "btn-outline": 1,
+  "btn-sm": 2,
+  "btn-gold": 1,
+  "empty-state": 1,
+  "empty-icon": 1
+ },
+ "/admin/transactions": {
+  "page": 1,
+  "section-eyebrow": 1,
+  "input": 2,
+  "table-wrap": 1,
+  "data-table": 1
+ },
+ "/admin/ntsa-queue": {
+  "page": 1,
+  "section-eyebrow": 1,
+  "btn": 1,
+  "btn-gold": 1,
+  "btn-sm": 1,
+  "empty-state": 1
+ },
+ "/admin/inspections": {
+  "page": 1,
+  "section-eyebrow": 1,
+  "empty-state": 1
+ },
+ "/admin/dealer-verifications": {},
+ "/admin/inspector-applications": {
+  "page": 1,
+  "input": 1,
+  "loading-center": 1,
+  "spinner": 1
+ },
+ "/admin/security-log": {
+  "page": 1,
+  "btn": 4,
+  "btn-sm": 4,
+  "btn-outline": 2,
+  "btn-gold": 2,
+  "input": 3
+ },
+ "/admin/ads": {
+  "page": 1,
+  "section-eyebrow": 1
+ },
+ "/admin/broadcast": {
+  "page": 1,
+  "input": 3,
+  "btn": 1,
+  "btn-primary": 1
+ },
+ "/admin/settings": {
+  "page": 1,
+  "section-eyebrow": 1,
+  "btn": 7,
+  "btn-sm": 6,
+  "btn-gold": 2,
+  "btn-outline": 5,
+  "input-group": 7,
+  "input-label": 7,
+  "input": 7
+ },
+ "/admin/control-room": {
+  "admin-page": 1,
+  "admin-header": 1,
+  "admin-title": 1,
+  "admin-subtitle": 1,
+  "btn": 2,
+  "btn-outline": 2,
+  "admin-grid": 3,
+  "admin-grid--metrics": 1,
+  "admin-card": 10,
+  "admin-card--metric": 4,
+  "metric-header": 4,
+  "metric-icon": 4,
+  "metric-value": 4,
+  "metric-label": 4,
+  "admin-grid--main": 1,
+  "card-header": 6,
+  "card-title": 6,
+  "badge": 2,
+  "card-body": 6,
+  "empty-state": 1,
+  "admin-grid--stats": 1,
+  "quick-stat": 9,
+  "quick-stat-label": 9,
+  "quick-stat-value": 9
+ },
+ "/admin/staff": {},
+ "/admin/staff-permissions": {},
+ "/admin/panic-room": {},
+ "/admin/webhoist": {
+  "overview-row": 1
+ },
+ "/admin/cms": {
+  "py-2.5": 18
+ },
+ "/admin/automation": {
+  "py-2.5": 11
+ },
+ "/admin/config": {
+  "py-2.5": 15
+ },
+ "/admin/lowcode": {
+  "py-2.5": 13
+ },
+ "/admin/vxp": {},
+ "/admin/xos": {
+  "py-2.5": 9
+ },
+ "/admin/ai": {},
+ "/admin/digital-twin": {
+  "py-1.5": 1,
+  "py-2.5": 10,
+  "py-0.5": 3
+ },
+ "/admin/control-center": {
+  "py-1.5": 1,
+  "py-2.5": 11,
+  "py-0.5": 1
+ },
+ "/admin/integration": {
+  "h-2.5": 1,
+  "w-2.5": 1
+ },
+ "/admin/governance": {
+  "py-1.5": 1,
+  "py-2.5": 14
+ },
+ "/admin/intelligence": {},
+ "/admin/command-center": {},
+ "/admin/improvement": {},
+ "/admin/platform-factory": {
+  "py-1.5": 1,
+  "py-2.5": 8
+ },
+ "/admin/owners": {},
+ "/admin/communications": {},
+ "/admin/provider-governance": {
+  "py-1.5": 1,
+  "gap-1.5": 1
+ },
+ "/admin/support": {}
+}

@@ -16,8 +16,8 @@ export function StatBox({ icon: Icon, label, value, sub, color = 'var(--brand)',
         <Icon size={18} style={{ color }} />
       </div>
       <div style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: '2rem', color: '#0a3340', lineHeight: 1, marginBottom: 4 }}>{value ?? '—'}</div>
-      <div style={{ fontSize: 11, fontWeight: 700, color: 'rgba(10, 51, 64, 0.4)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{label}</div>
-      {sub && <div style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.22)', marginTop: 4 }}>{sub}</div>}
+      <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--admin-muted-content)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>{label}</div>
+      {sub && <div style={{ fontSize: 11, color: 'var(--admin-muted-content)', marginTop: 4 }}>{sub}</div>}
     </div>
   );
   return to ? <Link to={to} style={{ textDecoration: 'none' }}>{inner}</Link> : inner;
@@ -42,9 +42,9 @@ export function NavTile({ to, icon: Icon, label, desc, danger }) {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: danger ? '#ef4444' : '#fff', marginBottom: 2 }}>{label}</div>
-          <div style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.3)' }}>{desc}</div>
+          <div style={{ fontSize: 11, color: 'var(--admin-muted-content)' }}>{desc}</div>
         </div>
-        <ChevronRight size={14} style={{ color: 'rgba(10, 51, 64, 0.2)', flexShrink: 0 }} />
+        <ChevronRight size={14} style={{ color: 'var(--admin-muted-content)', flexShrink: 0 }} />
       </div>
     </Link>
   );

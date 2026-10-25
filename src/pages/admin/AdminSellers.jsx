@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
+import { X, Search } from 'lucide-react';
 export default function AdminSellers() {
   const { toast } = useToast();
   const [sellers, setSellers] = useState([]);
@@ -115,7 +116,7 @@ export default function AdminSellers() {
                   <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Loading sellers...</td></tr>
                 ) : sellers.length === 0 ? (
                   <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>
-                    <div style={{ fontSize: 32, marginBottom: 8 }}>🔍</div>
+                    <div style={{ marginBottom: 8 }}><Search size={32} aria-hidden="true" /></div>
                     <div style={{ fontWeight: 600, marginBottom: 4 }}>No sellers found</div>
                     <div style={{ fontSize: 13 }}>Try adjusting your search or filter</div>
                   </td></tr>
@@ -123,7 +124,7 @@ export default function AdminSellers() {
                   <tr key={s.id} style={{ cursor: 'pointer' }} onClick={() => setSelected(selected?.id === s.id ? null : s)}>
                     <td>
                       <div style={{ fontWeight: 600, fontSize: 13 }}>{s.businessName}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.name} · ⭐ {s.rating}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.name} · Rating {s.rating}</div>
                     </td>
                     <td style={{ fontSize: 13 }}>
                       <div>{s.email}</div>
@@ -170,7 +171,7 @@ export default function AdminSellers() {
                         {editing === s.id ? (
                           <button className="btn btn-gold btn-sm" onClick={() => saveSeller(s.id)}>Save</button>
                         ) : (
-                          <button className="btn btn-outline btn-sm" onClick={() => setEditing(s.id)}>✏ Price</button>
+                          <button className="btn btn-outline btn-sm" onClick={() => setEditing(s.id)}>Price</button>
                         )}
                         <button className={`btn btn-sm ${s.status === 'approved' ? 'btn-danger' : 'btn-gold'}`}
                           onClick={() => toggleStatus(s.id, s.status)}>
@@ -192,7 +193,7 @@ export default function AdminSellers() {
                 <h3 style={{ marginBottom: 4 }}>{selected.businessName}</h3>
                 <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>{selected.name} · {selected.email}</div>
               </div>
-              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer' }}>✕</button>
+              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer' }} aria-label="Close" title="Close"><X size={16} aria-hidden="true" /></button>
             </div>
             <div className="grid-4">
               {[
@@ -201,7 +202,7 @@ export default function AdminSellers() {
                 { label: 'Discount', val: selected.discount > 0 ? `${selected.discount}%` : 'None' },
                 { label: 'Total Sales', val: formatKES(selected.totalSales) },
                 { label: 'Listings', val: selected.listingCount },
-                { label: 'Rating', val: `⭐ ${selected.rating}/5` },
+                { label: 'Rating', val: `${selected.rating}/5` },
                 { label: 'Status', val: selected.status },
                 { label: 'Since', val: new Date(selected.createdAt).toLocaleDateString('en-KE') },
               ].map(r => (

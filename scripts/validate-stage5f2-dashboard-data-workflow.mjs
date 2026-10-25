@@ -9,7 +9,7 @@ const checks = [
   ['dashboard data sources use allSettled independently', adminView.includes('Promise.allSettled(')],
   ['dashboard no longer clears every source on one request failure', !/setStats\(\{\}\);\s*setUsers\(\[\]\);\s*setCars\(\[\]\);\s*setAuditLogs\(\[\]\);/.test(adminView)],
   ['stats have explicit loading/ready/stale/error states', /statsStatus, setStatsStatus/.test(adminView) && /'loading' \| 'ready' \| 'stale' \| 'error'/.test(adminView)],
-  ['malformed/missing statistics remain unavailable rather than zero', /typeof value !== 'number' \|\| !Number\.isFinite\(value\)/.test(adminView) && adminView.includes("'Unavailable'")],
+  ['malformed/missing statistics remain unavailable rather than zero', /typeof value !== 'number' \|\| !Number\.isSafeInteger\(value\) \|\| value < 0/.test(adminView) && adminView.includes("'Unavailable'")],
   ['dealer approval workflow opens the existing dealer verification route', /label: 'Dealers', href: '\/admin\/dealer-verifications'/.test(adminView)],
   ['vehicle listing approval workflow opens the existing moderation route', /label: 'Vehicle Listings', href: '\/admin\/moderation'/.test(adminView)],
   ['customer support queue opens the existing support workspace', /to="\/admin\/support" aria-label="Open support tickets queue"/.test(adminView)],

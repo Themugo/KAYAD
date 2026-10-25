@@ -124,7 +124,7 @@ export default function AdminCarModeration() {
                 style={{ paddingLeft: 36, minWidth: 220 }}
               />
             </div>
-            <select className="input" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
+            <select aria-label="Filter vehicles by moderation status" className="input" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}
               style={{ minWidth: 140 }}>
               <option value="all">All Statuses</option>
               <option value="pending">Pending Review</option>
@@ -157,7 +157,7 @@ export default function AdminCarModeration() {
               </button>
               <button
                 className="btn btn-sm"
-                style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontWeight: 700, fontSize: 11, borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
+                style={{ background: 'transparent', border: '1px solid rgba(185,28,28,0.3)', color: '#b91c1c', fontWeight: 700, fontSize: 11, borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
                 disabled={bulkAction !== null}
                 onClick={() => handleBulkModerate('hide')}>
                 <XCircle size={12} style={{ marginRight: 4 }} />
@@ -175,9 +175,9 @@ export default function AdminCarModeration() {
               <thead>
                 <tr>
                   <th style={{ width: 40 }}>
-                    <input type="checkbox" checked={cars.length > 0 && selectedIds.length === cars.length}
+                    <input type="checkbox" aria-label="Select all vehicles on this page" checked={cars.length > 0 && selectedIds.length === cars.length}
                       onChange={toggleSelectAll}
-                      onClick={e => e.stopPropagation()} role="presentation"
+                      onClick={e => e.stopPropagation()}
                       style={{ accentColor: 'var(--brand)', cursor: 'pointer' }} />
                   </th>
                   <th>Listing</th>
@@ -194,7 +194,7 @@ export default function AdminCarModeration() {
                   return (
                   <tr key={car._id} onClick={() => setSelected(car)} style={{ cursor: 'pointer', opacity: isSelected ? 0.8 : 1 }}>
                     <td onClick={e => e.stopPropagation()} role="presentation">
-                      <input type="checkbox" checked={isSelected}
+                      <input type="checkbox" aria-label="Select this vehicle" checked={isSelected}
                         onChange={() => toggleSelect(car._id)}
                         style={{ accentColor: 'var(--brand)', cursor: 'pointer' }} />
                     </td>
@@ -229,7 +229,7 @@ export default function AdminCarModeration() {
                         </button>
                         <button
                           className="btn btn-sm"
-                          style={{ background: 'transparent', border: '1px solid rgba(239,68,68,0.3)', color: '#ef4444', fontWeight: 700, fontSize: 11, borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
+                          style={{ background: 'transparent', border: '1px solid rgba(185,28,28,0.3)', color: '#b91c1c', fontWeight: 700, fontSize: 11, borderRadius: 8, padding: '7px 16px', cursor: 'pointer' }}
                           disabled={actionId === car._id}
                           onClick={() => handleModerate(car._id, 'hide')}>
                           <XCircle size={12} style={{ marginRight: 4 }} />
@@ -296,7 +296,7 @@ export default function AdminCarModeration() {
                   <CheckCircle size={14} style={{ marginRight: 6 }} /> Approve Listing
                 </button>
                 <button className="btn btn-sm"
-                  style={{ background: '#ef4444', color: '#fff', fontWeight: 700, border: 'none', borderRadius: 8, padding: '9px 20px', cursor: 'pointer' }}
+                  style={{ background: '#b91c1c', color: '#fff', fontWeight: 700, border: 'none', borderRadius: 8, padding: '9px 20px', cursor: 'pointer' }}
                   disabled={actionId === selected._id}
                   onClick={() => { handleModerate(selected._id, 'hide'); setSelected(null); }}>
                   <XCircle size={14} style={{ marginRight: 6 }} /> Hide Listing

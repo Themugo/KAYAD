@@ -9,6 +9,10 @@ import {
   	  ArrowDownRight, Layers, GitBranch, Server, Cpu, Gauge, Megaphone
 } from 'lucide-react';
 import * as dtApi from '../../../services/digitalTwinApi';
+import { isUnavailable } from '../../../components/admin/adminStat';
+
+// A missing or non-numeric figure is shown as Unavailable, never as 0.
+const nv = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : 'Unavailable');
 
 // Design System Colors
 const colors = {
@@ -56,6 +60,7 @@ export default function DigitalTwinCenter() {
   const [templates, setTemplates] = useState([]);
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [whatIfQuestion, setWhatIfQuestion] = useState('');
   const [whatIfResult, setWhatIfResult] = useState(null);
   const [selectedSimulation, setSelectedSimulation] = useState(null);
@@ -74,6 +79,7 @@ export default function DigitalTwinCenter() {
   const loadData = async () => {
     try {
       setLoading(true);
+      setLoadError(false);
       const { data: dashData } = await dtApi.getDigitalTwinDashboard();
       setDashboard(dashData.data);
 
@@ -90,41 +96,8 @@ export default function DigitalTwinCenter() {
       setHistory(historyData.data);
     } catch (error) {
       console.error('Failed to load Digital Twin data:', error);
-      setDashboard({
-        overview: {
-          totalSimulations: 24,
-          completedSimulations: 18,
-          totalScenarios: 12,
-          totalPredictions: 45,
-        },
-        recentSimulations: [
-          { id: '1', name: 'Uganda Expansion', type: 'marketplace', status: 'completed', createdAt: new Date().toISOString() },
-          { id: '2', name: 'Commission Change 10%', type: 'pricing', status: 'completed', createdAt: new Date(Date.now() - 86400000).toISOString() },
-          { id: '3', name: 'Auction Rule Change', type: 'auction', status: 'completed', createdAt: new Date(Date.now() - 172800000).toISOString() },
-        ],
-        popularScenarios: [
-          { id: '1', name: 'Country Expansion', category: 'growth', usageCount: 15 },
-          { id: '2', name: 'Commission Change', category: 'pricing', usageCount: 12 },
-          { id: '3', name: 'Marketing Campaign', category: 'marketing', usageCount: 10 },
-        ],
-      });
-      setSimulations([
-        { id: '1', name: 'Uganda Expansion', simulationType: 'marketplace', status: 'completed', duration: 180 },
-        { id: '2', name: 'Commission Increase', simulationType: 'pricing', status: 'completed', duration: 90 },
-        { id: '3', name: 'Auction Week', simulationType: 'auction', status: 'completed', duration: 30 },
-      ]);
-      setTemplates([
-        { id: 'country_expansion', name: 'Country Expansion', category: 'growth', description: 'Simulate expanding to a new country' },
-        { id: 'commission_change', name: 'Commission Change', category: 'pricing', description: 'Simulate changing commission rates' },
-        { id: 'auction_rule_change', name: 'Auction Rule Change', category: 'auction', description: 'Simulate new auction rules' },
-        { id: 'marketing_campaign', name: 'Marketing Campaign', category: 'marketing', description: 'Simulate a marketing campaign' },
-        { id: 'pricing_adjustment', name: 'Pricing Adjustment', category: 'pricing', description: 'Simulate subscription price changes' },
-        { id: 'seasonal_demand', name: 'Seasonal Demand', category: 'marketplace', description: 'Simulate holiday season demand' },
-      ]);
-      setHistory([
-        { id: '1', name: 'Uganda Expansion', simulationType: 'marketplace', status: 'completed', createdAt: new Date().toISOString() },
-        { id: '2', name: 'Commission Increase', simulationType: 'pricing', status: 'completed', createdAt: new Date(Date.now() - 86400000).toISOString() },
-      ]);
+      // No synthetic fallback: figures stay unavailable until the backend responds.
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -199,17 +172,17 @@ export default function DigitalTwinCenter() {
       {/* Overview Stats */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Total Simulations', value: dashboard?.overview?.totalSimulations || 0, icon: Binary, color: colors.navy },
-          { label: 'Completed', value: dashboard?.overview?.completedSimulations || 0, icon: CheckCircle, color: colors.emerald },
-          { label: 'Saved Scenarios', value: dashboard?.overview?.totalScenarios || 0, icon: BookOpen, color: colors.purple },
-          { label: 'Predictions', value: dashboard?.overview?.totalPredictions || 0, icon: Sparkles, color: colors.mutedOrange },
+          { label: 'Total Simulations', value: nv(dashboard?.overview?.totalSimulations), icon: Binary, color: colors.navy },
+          { label: 'Completed', value: nv(dashboard?.overview?.completedSimulations), icon: CheckCircle, color: colors.emerald },
+          { label: 'Saved Scenarios', value: nv(dashboard?.overview?.totalScenarios), icon: BookOpen, color: colors.purple },
+          { label: 'Predictions', value: nv(dashboard?.overview?.totalPredictions), icon: Sparkles, color: colors.mutedOrange },
         ].map((stat, i) => (
           <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
             <div className="flex items-center gap-2 mb-3">
               <stat.icon size={18} style={{ color: stat.color }} />
               <span className="text-sm text-[#64748B]">{stat.label}</span>
             </div>
-            <p className="text-3xl font-bold text-[#0A3340]">{stat.value}</p>
+            <p className={`${isUnavailable(stat.value) ? 'text-lg' : 'text-3xl'} font-bold text-[#0A3340]`}>{stat.value}</p>
           </div>
         ))}
       </div>
@@ -280,11 +253,7 @@ export default function DigitalTwinCenter() {
           <h3 className="font-semibold text-lg">AI Decision Recommendations</h3>
         </div>
         <div className="grid grid-cols-3 gap-4">
-          {[
-            { title: 'Expand to Uganda', impact: 'High', confidence: 78, description: 'Market analysis shows 30% revenue potential' },
-            { title: 'Increase Commission 5%', impact: 'Medium', confidence: 85, description: '10% revenue increase with 5% churn' },
-            { title: 'Auction Reserve Rules', impact: 'Medium', confidence: 72, description: '15% better completion rate' },
-          ].map((rec, i) => (
+          {[].map((rec, i) => (
             <div key={i} className="bg-white/10 backdrop-blur rounded-lg p-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className={`px-2 py-0.5 rounded text-xs font-medium ${
@@ -297,7 +266,7 @@ export default function DigitalTwinCenter() {
               <h4 className="font-medium mb-1">{rec.title}</h4>
               <p className="text-sm opacity-80">{rec.description}</p>
             </div>
-          ))}
+          ))}<p className="col-span-full text-sm text-white/90" role="status">No AI recommendations were returned.</p>
         </div>
       </div>
     </div>
@@ -588,10 +557,10 @@ export default function DigitalTwinCenter() {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center justify-end gap-2">
-                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" title="View">
+                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" title="View" aria-label="View">
                       <Eye size={16} />
                     </button>
-                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" title="Rerun">
+                    <button className="p-2 hover:bg-[#EEF7F5] rounded-lg" title="Rerun" aria-label="Rerun">
                       <RefreshCw size={16} />
                     </button>
                   </div>
@@ -633,11 +602,7 @@ export default function DigitalTwinCenter() {
       <div className="bg-white rounded-xl p-5 shadow-sm border border-[#D7E7E4]">
         <h3 className="font-semibold text-[#0A3340] mb-4">Recent Predictions</h3>
         <div className="space-y-3">
-          {[
-            { type: 'revenue', prediction: 'Monthly revenue projected to grow 15% in Q2', confidence: 85, date: '2024-01-15' },
-            { type: 'users', prediction: 'User base expected to reach 75,000 by June 2024', confidence: 82, date: '2024-01-14' },
-            { type: 'market', prediction: 'SUV segment demand expected to increase 20%', confidence: 78, date: '2024-01-13' },
-          ].map((pred, i) => (
+          {[].map((pred, i) => (
             <div key={i} className="p-4 bg-[#F6FAF9] rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <span className="px-2 py-0.5 bg-[#0A3340]/10 text-[#0A3340] rounded text-xs font-medium capitalize">{pred.type}</span>
@@ -651,7 +616,7 @@ export default function DigitalTwinCenter() {
                 <span className="text-xs font-medium text-[#64748B]">{pred.confidence}%</span>
               </div>
             </div>
-          ))}
+          ))}<p className="col-span-full text-sm text-[#64748B]" role="status">No predictions have been recorded.</p>
         </div>
       </div>
     </div>
@@ -691,11 +656,11 @@ export default function DigitalTwinCenter() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full text-sm">
-                <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                Twin Active
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${dashboard ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                <span className={`w-2 h-2 rounded-full ${dashboard ? 'bg-emerald-500' : 'bg-slate-400'}`} />
+                {dashboard ? 'Twin data loaded' : 'Twin status unavailable'}
               </div>
-              <button onClick={loadData} className="p-2 hover:bg-[#EEF7F5] rounded-lg">
+              <button onClick={loadData} className="p-2 hover:bg-[#EEF7F5] rounded-lg" aria-label="Refresh">
                 <RefreshCw size={20} className="text-[#64748B]" />
               </button>
             </div>
@@ -734,12 +699,12 @@ export default function DigitalTwinCenter() {
               <p className="text-xs text-[#64748B] mb-2">Simulation Activity</p>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-[#64748B]">This Week</span>
-                  <span className="text-sm font-medium text-[#0A3340]">{dashboard.overview?.completedSimulations || 0}</span>
+                  <span className="text-sm text-[#64748B]">Completed</span>
+                  <span className="text-sm font-medium text-[#0A3340]">{nv(dashboard.overview?.completedSimulations)}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-[#64748B]">Success Rate</span>
-                  <span className="text-sm font-medium text-emerald-600">92%</span>
+                  <span className="text-sm font-medium text-emerald-600">{Number.isFinite(dashboard.overview?.successRate) ? `${dashboard.overview.successRate}%` : 'Unavailable'}</span>
                 </div>
               </div>
             </div>
@@ -747,9 +712,10 @@ export default function DigitalTwinCenter() {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 p-6 overflow-auto">
+        <div className="flex-1 p-6 overflow-auto">
+          {loadError && <div role="alert" className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">Digital Twin data could not be loaded. Figures are unavailable, not zero.</div>}
           {renderModuleContent()}
-        </main>
+        </div>
       </div>
     </div>
   );

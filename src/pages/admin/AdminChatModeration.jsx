@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
+import { MessageSquare } from 'lucide-react';
 export default function AdminChatModeration() {
   const { toast } = useToast();
   const [chats, setChats] = useState([]);
@@ -43,7 +44,7 @@ export default function AdminChatModeration() {
     setActionId(msgId);
     try {
       await adminAPI.deleteChatMessage(selectedChat._id, msgId);
-      toast('🗑️ Message deleted', 'success');
+      toast('Message deleted', 'success');
       loadMessages(selectedChat);
     } catch (err) {
       toast(err.response?.data?.message || 'Delete failed', 'error');
@@ -56,7 +57,7 @@ export default function AdminChatModeration() {
     try {
       if (block) await adminAPI.blockChat(chat._id);
       else await adminAPI.unblockChat(chat._id);
-      toast(block ? '🔒 Chat blocked' : '🔓 Chat unblocked', 'success');
+      toast(block ? 'Chat blocked' : 'Chat unblocked', 'success');
       load();
       if (selectedChat?._id === chat._id) {
         setSelectedChat(prev => prev ? { ...prev, isBlocked: block } : null);
@@ -75,7 +76,7 @@ export default function AdminChatModeration() {
         <div style={{ flex: '0 0 400px', minWidth: 0 }}>
           <div style={{ marginBottom: 28 }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.8rem', fontWeight: 900, fontStyle: 'italic' }}> Chat Moderation</h2>
-            <p style={{ color: 'rgba(10, 51, 64, 0.35)', fontSize: 13, marginTop: 6 }}>Read-only conversation view for dispute resolution</p>
+            <p style={{ color: 'var(--admin-muted-content)', fontSize: 13, marginTop: 6 }}>Read-only conversation view for dispute resolution</p>
           </div>
 
           <input placeholder="Search by participant name/email…"
@@ -85,7 +86,7 @@ export default function AdminChatModeration() {
           {loading ? (
             <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}><div className="spinner" /></div>
           ) : chats.length === 0 ? (
-            <div className="empty-state" style={{ padding: 32 }}><div className="empty-icon">💬</div><h3>No chats found</h3></div>
+            <div className="empty-state" style={{ padding: 32 }}><div className="empty-icon"><MessageSquare size={32} aria-hidden="true" /></div><h3>No chats found</h3></div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {chats.map(c => (
@@ -104,7 +105,7 @@ export default function AdminChatModeration() {
                     </div>
                     {c.isBlocked && <span style={{ fontSize: 10, color: '#ef4444', fontWeight: 700 }}>BLOCKED</span>}
                   </div>
-                  <div style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.35)' }}>
+                  <div style={{ fontSize: 11, color: 'var(--admin-muted-content)' }}>
                     {c.lastMessage?.text?.substring(0, 60) || 'No messages'} · {new Date(c.updatedAt).toLocaleDateString()}
                   </div>
                   {c.car && <div style={{ fontSize: 10, color: 'var(--brand)', marginTop: 2 }}>{c.car.brand} {c.car.model}</div>}
@@ -127,7 +128,7 @@ export default function AdminChatModeration() {
         {/* RIGHT: Message view */}
         <div style={{ flex: 1, minWidth: 0 }}>
           {!selectedChat ? (
-            <div className="empty-state" style={{ padding: 64 }}><div className="empty-icon">💬</div><h3>Select a conversation</h3><p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Choose a chat from the left panel to view messages</p></div>
+            <div className="empty-state" style={{ padding: 64 }}><div className="empty-icon"><MessageSquare size={32} aria-hidden="true" /></div><h3>Select a conversation</h3><p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Choose a chat from the left panel to view messages</p></div>
           ) : (
             <div>
               <div style={{ background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.07)', borderRadius: 14, padding: '16px 20px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -135,7 +136,7 @@ export default function AdminChatModeration() {
                   <div style={{ fontSize: 14, fontWeight: 700, color: '#0a3340' }}>
                     {selectedChat.participants?.map(p => p?.name).join(' · ')}
                   </div>
-                  <div style={{ fontSize: 11, color: 'rgba(10, 51, 64, 0.35)' }}>
+                  <div style={{ fontSize: 11, color: 'var(--admin-muted-content)' }}>
                     {selectedChat.participants?.map(p => p?.email).join(' · ')}
                   </div>
                 </div>
@@ -143,14 +144,14 @@ export default function AdminChatModeration() {
                   style={{ fontSize: 11 }}
                   disabled={actionId === selectedChat._id}
                   onClick={() => handleBlockToggle(selectedChat, !selectedChat.isBlocked)}>
-                  {actionId === selectedChat._id ? '…' : selectedChat.isBlocked ? '🔓 Unblock' : '🔒 Block'}
+                  {actionId === selectedChat._id ? '…' : selectedChat.isBlocked ? 'Unblock' : 'Block'}
                 </button>
               </div>
 
               {messagesLoading ? (
                 <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}><div className="spinner" /></div>
               ) : messages.length === 0 ? (
-                <div className="empty-state" style={{ padding: 32 }}><div className="empty-icon">💬</div><h3>No messages</h3></div>
+                <div className="empty-state" style={{ padding: 32 }}><div className="empty-icon"><MessageSquare size={32} aria-hidden="true" /></div><h3>No messages</h3></div>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   {messages.map((msg, idx) => (
@@ -160,7 +161,7 @@ export default function AdminChatModeration() {
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                         <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--brand)' }}>{msg.sender?.name || 'Unknown'}</div>
                         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                          <span style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.25)' }}>{new Date(msg.createdAt || Date.now()).toLocaleString()}</span>
+                          <span style={{ fontSize: 10, color: 'var(--admin-muted-content)' }}>{new Date(msg.createdAt || Date.now()).toLocaleString()}</span>
                           <button className="btn btn-outline btn-sm" style={{ fontSize: 9, color: 'var(--red)', borderColor: 'rgba(239,68,68,0.3)', padding: '2px 8px' }}
                             disabled={actionId === msg._id} onClick={() => handleDeleteMessage(msg._id)}>
                             {actionId === msg._id ? '…' : 'Delete'}
@@ -171,7 +172,7 @@ export default function AdminChatModeration() {
                         {msg.text}
                       </div>
                       {msg.attachments?.length > 0 && (
-                        <div style={{ marginTop: 8, fontSize: 11, color: 'rgba(10, 51, 64, 0.3)' }}>{msg.attachments.length} attachment(s)</div>
+                        <div style={{ marginTop: 8, fontSize: 11, color: 'var(--admin-muted-content)' }}>{msg.attachments.length} attachment(s)</div>
                       )}
                     </div>
                   ))}

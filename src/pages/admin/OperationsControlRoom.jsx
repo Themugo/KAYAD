@@ -6,10 +6,10 @@ import {
 import { adminAPI } from '../../api/api';
 
 const METRIC_CARDS = [
-  { key: 'totalUsers', label: 'Total Users', icon: Users, color: '#176B87' },
-  { key: 'totalDealers', label: 'Total Dealers', icon: Shield, color: '#5aafa4' },
-  { key: 'activeListings', label: 'Available Listings', icon: Car, color: '#13B8A6' },
-  { key: 'openEscrows', label: 'Open Escrows', icon: DollarSign, color: '#10b981' },
+  { key: 'totalUsers', label: 'Total Users', icon: Users, color: 'var(--admin-brand)', background: 'var(--admin-brand-soft)' },
+  { key: 'totalDealers', label: 'Total Dealers', icon: Shield, color: 'var(--admin-accent-muted)', background: 'var(--admin-surface-soft)' },
+  { key: 'activeListings', label: 'Available Listings', icon: Car, color: 'var(--admin-accent)', background: 'var(--admin-accent-soft)' },
+  { key: 'openEscrows', label: 'Open Escrows', icon: DollarSign, color: 'var(--admin-status-success)', background: 'var(--admin-status-success-bg)' },
 ];
 
 const SUMMARY_GROUPS = [
@@ -194,10 +194,16 @@ export default function OperationsControlRoom() {
 
   const getAlertColor = (severity) => {
     switch (String(severity || '').toLowerCase()) {
-      case 'critical': return { bg: 'rgba(239, 68, 68, 0.1)', border: 'rgba(239, 68, 68, 0.3)', icon: XCircle, color: '#ef4444' };
-      case 'warning': case 'high': return { bg: 'rgba(217, 119, 6, 0.10)', border: 'rgba(217, 119, 6, 0.30)', icon: AlertTriangle, color: 'var(--admin-status-warning)' };
-      case 'info': case 'low': return { bg: 'rgba(23, 107, 135, 0.1)', border: 'rgba(23, 107, 135, 0.3)', icon: AlertCircle, color: '#176B87' };
-      default: return { bg: 'rgba(156, 163, 175, 0.1)', border: 'rgba(156, 163, 175, 0.3)', icon: AlertCircle, color: '#6b7280' };
+      case 'critical':
+        return { bg: 'var(--admin-status-danger-bg)', border: 'var(--admin-status-danger-border)', icon: XCircle, color: 'var(--admin-status-danger)' };
+      case 'warning':
+      case 'high':
+        return { bg: 'var(--admin-status-warning-bg)', border: 'var(--admin-status-warning-border)', icon: AlertTriangle, color: 'var(--admin-status-warning)' };
+      case 'info':
+      case 'low':
+        return { bg: 'var(--admin-status-info-bg)', border: 'var(--admin-status-info-border)', icon: AlertCircle, color: 'var(--admin-status-info)' };
+      default:
+        return { bg: 'var(--admin-status-neutral-bg)', border: 'var(--admin-status-neutral-border)', icon: AlertCircle, color: 'var(--admin-status-neutral)' };
     }
   };
 
@@ -205,7 +211,7 @@ export default function OperationsControlRoom() {
     return (
       <div className="admin-page loading-center">
         <div className="spinner" />
-        <p style={{ marginTop: 16, color: 'var(--text-muted)' }}>Loading operations data...</p>
+        <p style={{ marginTop: 16, color: 'var(--admin-muted-content)' }}>Loading operations data...</p>
       </div>
     );
   }
@@ -222,7 +228,7 @@ export default function OperationsControlRoom() {
         </button>
       </div>
 
-      {metricsError && <p role="alert" style={{ color: 'var(--red)', marginBottom: 12 }}>{metricsError}{metricsStale ? ' Showing the last successful metrics response.' : ''}</p>}
+      {metricsError && <p role="alert" style={{ color: 'var(--admin-status-danger)', marginBottom: 12 }}>{metricsError}{metricsStale ? ' Showing the last successful metrics response.' : ''}</p>}
 
       <div className="admin-grid admin-grid--metrics">
         {METRIC_CARDS.map((card) => {
@@ -231,7 +237,7 @@ export default function OperationsControlRoom() {
           return (
             <div key={card.key} className="admin-card admin-card--metric">
               <div className="metric-header">
-                <div className="metric-icon" style={{ background: `${card.color}15`, color: card.color }}><Icon size={20} /></div>
+                <div className="metric-icon" style={{ background: card.background, color: card.color }}><Icon size={20} /></div>
               </div>
               <div className="metric-value">{formatValue(value)}</div>
               <div className="metric-label">{card.label}</div>
@@ -248,9 +254,9 @@ export default function OperationsControlRoom() {
           </div>
           <div className="card-body" style={{ maxHeight: 400, overflowY: 'auto' }}>
             {alertsError ? (
-              <p role="alert" style={{ color: 'var(--red)' }}>{alertsError}{alertsStale ? ' Showing the last successful alert result.' : ''}</p>
+              <p role="alert" style={{ color: 'var(--admin-status-danger)' }}>{alertsError}{alertsStale ? ' Showing the last successful alert result.' : ''}</p>
             ) : alerts.length === 0 ? (
-              <div className="empty-state" style={{ padding: 32 }}><AlertCircle size={32} style={{ color: 'var(--text-muted)', marginBottom: 8 }} /><p>No alert records were returned by the alert service.</p></div>
+              <div className="empty-state" style={{ padding: 32 }}><AlertCircle size={32} style={{ color: 'var(--admin-muted-content)', marginBottom: 8 }} /><p>No alert records were returned by the alert service.</p></div>
             ) : (
               <div className="alerts-list">
                 {alerts.map((alert, index) => {
@@ -280,9 +286,9 @@ export default function OperationsControlRoom() {
           </div>
           <div className="card-body" style={{ maxHeight: 400, overflowY: 'auto' }}>
             {activityError ? (
-              <p role="alert" style={{ color: 'var(--red)' }}>{activityError}{activityStale ? ' Showing the last successful activity result.' : ''}</p>
+              <p role="alert" style={{ color: 'var(--admin-status-danger)' }}>{activityError}{activityStale ? ' Showing the last successful activity result.' : ''}</p>
             ) : activity.length === 0 ? (
-              <div className="empty-state" style={{ padding: 32 }}><Activity size={32} style={{ color: 'var(--text-muted)', marginBottom: 8 }} /><p>No recent audit activity was returned.</p></div>
+              <div className="empty-state" style={{ padding: 32 }}><Activity size={32} style={{ color: 'var(--admin-muted-content)', marginBottom: 8 }} /><p>No recent audit activity was returned.</p></div>
             ) : (
               <div className="activity-list">
                 {activity.slice(0, 20).map((item, index) => {
@@ -291,7 +297,7 @@ export default function OperationsControlRoom() {
                   const timestamp = item.createdAt || item.created_at || item.timestamp;
                   return (
                     <div key={item.id || item._id || `${action}-${index}`} className="activity-item">
-                      <div className="activity-icon" style={{ background: '#64748b20' }}><Activity size={16} color="#64748b" /></div>
+                      <div className="activity-icon" style={{ background: 'var(--admin-status-neutral-bg)' }}><Activity size={16} color="var(--admin-status-neutral)" /></div>
                       <div className="activity-content">
                         <div className="activity-title">{action}</div>
                         <div className="activity-meta"><span>{actor}</span><span>· {formatTime(timestamp)}</span></div>
@@ -307,19 +313,19 @@ export default function OperationsControlRoom() {
         <div className="admin-card">
           <div className="card-header"><h3 className="card-title"><Zap size={18} />System Health</h3></div>
           <div className="card-body" aria-busy={healthLoading}>
-            <p style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 12 }}>
+            <p style={{ color: 'var(--admin-muted-content)', fontSize: 12, marginBottom: 12 }}>
               Service status is based on existing read-only backend checks. Check duration is measured elapsed milliseconds, not uptime or provider delivery time.
             </p>
-            {healthLoading && <p role="status" style={{ color: 'var(--text-muted)', fontSize: 13 }}>Checking service health…</p>}
-            {healthError && <p role="alert" style={{ color: 'var(--red)', fontSize: 13, marginBottom: 12 }}>{healthError}</p>}
-            {healthStale && <p role="status" style={{ color: 'var(--orange)', fontSize: 12, marginBottom: 12 }}>Showing the last successful check from {healthCheckedAt ? formatTime(healthCheckedAt) : 'an unknown time'}; the latest check failed or returned invalid data.</p>}
-            {!healthLoading && systemHealth.length === 0 && !healthError && <div className="empty-state" style={{ padding: 24 }}><BarChart3 size={32} style={{ color: 'var(--text-muted)', marginBottom: 8 }} /><p>Service status is unknown; no verified checks were returned.</p></div>}
+            {healthLoading && <p role="status" style={{ color: 'var(--admin-muted-content)', fontSize: 13 }}>Checking service health…</p>}
+            {healthError && <p role="alert" style={{ color: 'var(--admin-status-danger)', fontSize: 13, marginBottom: 12 }}>{healthError}</p>}
+            {healthStale && <p role="status" style={{ color: 'var(--admin-status-warning)', fontSize: 12, marginBottom: 12 }}>Showing the last successful check from {healthCheckedAt ? formatTime(healthCheckedAt) : 'an unknown time'}; the latest check failed or returned invalid data.</p>}
+            {!healthLoading && systemHealth.length === 0 && !healthError && <div className="empty-state" style={{ padding: 24 }}><BarChart3 size={32} style={{ color: 'var(--admin-muted-content)', marginBottom: 8 }} /><p>Service status is unknown; no verified checks were returned.</p></div>}
             {systemHealth.length > 0 && (
               <div className="health-list">
                 {systemHealth.map((item) => {
                   const healthy = item.status === 'healthy';
                   const degraded = item.status === 'degraded';
-                  const color = healthy ? 'var(--green)' : degraded ? 'var(--orange)' : item.status === 'unknown' ? 'var(--text-muted)' : 'var(--red)';
+                  const color = healthy ? 'var(--admin-status-success)' : degraded ? 'var(--admin-status-warning)' : item.status === 'unknown' ? 'var(--admin-status-neutral)' : 'var(--admin-status-danger)';
                   const label = healthy ? 'Healthy' : degraded ? 'Degraded' : item.status === 'unknown' ? 'Unknown' : 'Unavailable';
                   return (
                     <div key={item.label} className="health-item">
@@ -330,7 +336,7 @@ export default function OperationsControlRoom() {
                 })}
               </div>
             )}
-            <p style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 12 }}>Last checked: {healthCheckedAt ? formatTime(healthCheckedAt) : 'time unavailable'}</p>
+            <p style={{ color: 'var(--admin-muted-content)', fontSize: 11, marginTop: 12 }}>Last checked: {healthCheckedAt ? formatTime(healthCheckedAt) : 'time unavailable'}</p>
             <button type="button" className="btn btn-outline" onClick={() => void loadMetrics()} disabled={refreshing || healthLoading} style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               <RefreshCw size={14} /> Refresh health
             </button>
@@ -351,7 +357,7 @@ export default function OperationsControlRoom() {
                     <div className="quick-stat-value">{formatValue(metricValue(item.key))}</div>
                   </div>
                 ))}
-                {metricsError && <p style={{ color: 'var(--text-muted)', fontSize: 12 }}>{metricsStale ? 'Values are from the last successful response.' : 'Statistics are currently unavailable.'}</p>}
+                {metricsError && <p style={{ color: 'var(--admin-muted-content)', fontSize: 12 }}>{metricsStale ? 'Values are from the last successful response.' : 'Statistics are currently unavailable.'}</p>}
               </div>
             </div>
           );
