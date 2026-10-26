@@ -1,0 +1,13 @@
+Action,Buyer (none),Pending,Approved,Rejected,Suspended,Revoked,Legacy individual_seller (approved),Dealer owner,Staff,Evidence
+Marketplace browse / bid / save / message / pay (existing rules),allowed,allowed,allowed,allowed,allowed,allowed,allowed,allowed,n/a,unchanged code; DashboardHub tests keep buyer sections
+POST /api/private-seller-capability/apply,allowed (verified email),409,409,allowed (re-apply),409,409,403,403,403,phase13eSellerCapability
+GET /api/private-seller-capability/me,allowed,allowed,allowed,allowed,allowed,allowed,allowed,allowed,allowed,same
+Admin decision / list applications,403,403,403,403,403,403,403,403,MANAGE_USERS only,same
+POST/PUT/DELETE /api/cars (listing writes),403 SELLER_CAPABILITY_REQUIRED,403,allowed (moderation policy applies),403,403,403,allowed (pending also allowed),allowed (dealer rules),allowed (dealerOnly),sellerListingAccess tests
+"GET /api/cars/dealer/my-cars, /dealer/analytics (own data)",403,allowed,allowed,allowed,allowed,allowed,allowed (suspended/rejected too),allowed,allowed,same
+"Dealer-business routes (/api/dealer team/upgrade/wholesale, /api/dealer-platform business)",403,403,403,403,403,403,403,allowed,allowed (existing),phase13dDealerIsolation + 13E isolation case
+Listing-quality /dealer/:id/*,own id only,own id only,own id only,own id only,own id only,own id only,own id only,own id only,allowed,phase13dDealerIsolation
+Escrow / private-seller auctions / payouts,unchanged,unchanged,unchanged (role user gets NO escrow capability),unchanged,unchanged,unchanged,unchanged,unchanged,unchanged,not modified (protected)
+private seller approved -> suspended,Buyer capabilities remain available; approved non-deleted public listings become hidden,Database trigger migration + cache invalidation added locally,Not verified on PostgreSQL/staging; migration not applied
+private seller suspended/revoked -> approved,Restore only policy-hidden listings still hidden and still owned by same user,Database trigger migration added locally,Not verified on PostgreSQL/staging; migration not applied
+admin private seller review,Only MANAGE_USERS-authorized staff can review/decide; reject/suspend/revoke require reason,API and UI wired locally; UI tests added,Full Jest/Vitest/Playwright not rerun after follow-up

@@ -1,0 +1,7 @@
+validate:communications:providers exit=1
+validate:live-runtime exit=1
+validate:v14:live-certification-contract exit=1
+validate:v14:release-candidate exit=1
+validate:brand-palette-convergence exit=1
+validate:stage24-theme-convergence exit=1
+validate:stage5f7-private-auction-contract exit=1

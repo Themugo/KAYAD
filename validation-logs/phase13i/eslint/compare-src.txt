@@ -1,0 +1,20 @@
+BASELINE errors=0 warnings=1557 files=766 filesWithProblems=283
+FINAL    errors=0 warnings=1557 files=768 filesWithProblems=283
+NEW violations (not in baseline by file+rule+message): 0
+RESOLVED violations: 0
+TOP RULES (final):
+     542 @typescript-eslint/no-explicit-any [warn] (baseline 542)
+     463 @typescript-eslint/no-unused-vars [warn] (baseline 463)
+     159 react-hooks/set-state-in-effect [warn] (baseline 159)
+      78 jsx-a11y/no-static-element-interactions [warn] (baseline 78)
+      72 react-hooks/refs [warn] (baseline 72)
+      71 jsx-a11y/click-events-have-key-events [warn] (baseline 71)
+      63 react-hooks/exhaustive-deps [warn] (baseline 63)
+      41 react-hooks/static-components [warn] (baseline 41)
+      31 react-hooks/immutability [warn] (baseline 31)
+      21 react-hooks/purity [warn] (baseline 21)
+       5 react-hooks/rules-of-hooks [warn] (baseline 5)
+       5 no-empty [warn] (baseline 5)
+       4 (parse/other) [warn] (baseline 4)
+       1 react-hooks/preserve-manual-memoization [warn] (baseline 1)
+       1 jsx-a11y/anchor-has-content [warn] (baseline 1)

@@ -1,0 +1,14 @@
+PASS approval workbench links dealer verification to canonical route
+PASS seller account workflow retains canonical route
+PASS inspector application workflow retains canonical route
+PASS vehicle moderation retains canonical route
+PASS document verification and inspection routes are distinct
+PASS inspector review endpoints require protected reviewer role
+PASS inspector approval rejects non-pending or self-review
+PASS dealer decisions use decision-authority guard and atomic RPC
+PASS vehicle listing decisions use decision-authority guard
+PASS inspector page has visible error and retry state
+PASS inspector refresh protects against stale response races
+PASS tests assert canonical workflow route destinations
+PASS no new approval API endpoints added by this phase
+Phase 04 source-contract validation: 13/13 passed

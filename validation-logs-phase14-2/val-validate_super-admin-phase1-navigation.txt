@@ -1,0 +1,13 @@
+PASS: All 30 established sidebar destinations (29 original + approved private-seller review) remain present exactly once
+PASS: Every sidebar destination remains registered or resolves to the canonical command centre
+PASS: Four approved visual navigation groups are present
+PASS: Expandable groups expose aria-expanded and aria-controls
+PASS: Current route group is expanded and nested routes are recognized
+PASS: Existing role/permission filtering and super-admin-only protections remain wired
+PASS: Unread alert count remains sourced from the existing alerts API
+PASS: Mobile drawer includes labelled backdrop and Escape/focus/body-scroll handling
+PASS: Header identity and role are derived from authenticated user context
+PASS: Responsive and reduced-motion styles remain defined
+PASS: Compatibility layout/sidebar files remain re-exports of canonical components
+PASS: No new icon dependency was introduced
+Super Admin Phase 1 navigation validation: 12/12 PASS

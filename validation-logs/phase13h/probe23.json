@@ -1,0 +1,296 @@
+[
+ {
+  "path": "/api/admin/queue/aggregated",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "/api/admin/queue/aggregated 500 50.205 ms - 62",
+   "[03:35:12] INFO: Email queue initialized",
+   "[03:35:12] INFO: Notification queue initialized"
+  ]
+ },
+ {
+  "path": "/api/admin/queue/dlq/jobs",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 503,
+  "superadmin": 503,
+  "logExcerpt": [
+   "3] ERROR: Failed to get DLQ jobs",
+   "      \"message\": \"Dead letter queue not initialized\",",
+   "          Error: Dead letter queue not initialized"
+  ]
+ },
+ {
+  "path": "/api/admin/queue/dlq/statistics",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 503,
+  "superadmin": 503,
+  "logExcerpt": [
+   "/api/admin/queue/dlq/statistics 503 26.466 ms - 58",
+   "[03:35:13] ERROR: Failed to get DLQ statistics",
+   "      \"message\": \"Dead letter queue not initialized\","
+  ]
+ },
+ {
+  "path": "/api/admin/queue/statistics",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "3] ERROR: Failed to get all queue statistics",
+   "      \"message\": \"JobFailure is not defined\",",
+   "          ReferenceError: JobFailure is not defined"
+  ]
+ },
+ {
+  "path": "/api/analytics/market/county-trends",
+  "anonymous": 500,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "4] ERROR: Failed to get county trends",
+   "    message: \"column cars.location does not exist\"",
+   "[03:35:14] ERROR: Failed to get county trends"
+  ]
+ },
+ {
+  "path": "/api/bids/admin/suspicious",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "4] ERROR: Server error",
+   "    message: \"column bids.is_suspicious does not exist\"",
+   "[03:35:14] ERROR: Critical memory usage detected"
+  ]
+ },
+ {
+  "path": "/api/dealer-health-score/admin/distribution",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "4] ERROR: Failed to get score distribution",
+   "      \"message\": \"DealerHealthScore.getScoreDistribution is not a function\",",
+   "          TypeError: DealerHealthScore.getScoreDistribution is not a function"
+  ]
+ },
+ {
+  "path": "/api/dealer-health-score/ranking/list",
+  "anonymous": 500,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:35:15] ERROR: Critical memory usage detected",
+   "[03:35:15] ERROR: Failed to get dealer ranking",
+   "          TypeError: DealerHealthScore.getTopDealers is not a function"
+  ]
+ },
+ {
+  "path": "/api/dealer/trade-listings",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 503,
+  "admin": 503,
+  "superadmin": 503,
+  "logExcerpt": [
+   "onnect ECONNREFUSED 127.0.0.1:6379",
+   "  code: 'ECONNREFUSED',",
+   "Error: connect ECONNREFUSED 127.0.0.1:6379"
+  ]
+ },
+ {
+  "path": "/api/escrow/operations/dashboard",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "6] ERROR: Server error",
+   "[03:35:16] ERROR: Critical memory usage detected",
+   "[03:35:16] ERROR: Server error"
+  ]
+ },
+ {
+  "path": "/api/feature-flags",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "6] ERROR: Failed to get all flags",
+   "          TypeError: s.replace is not a function",
+   "      \"name\": \"TypeError\""
+  ]
+ },
+ {
+  "path": "/api/feature-flags/meta/categories",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "7] ERROR: Failed to get flag categories",
+   "          ReferenceError: FeatureFlag is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ]
+ },
+ {
+  "path": "/api/feature-flags/user",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "7] ERROR: Failed to get enabled flags for user",
+   "          ReferenceError: FeatureFlag is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ]
+ },
+ {
+  "path": "/api/finance/issues",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "7] ERROR: Get unresolved issues error",
+   "[03:35:17] ERROR: Get unresolved issues error"
+  ]
+ },
+ {
+  "path": "/api/intelligence/countries",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": []
+ },
+ {
+  "path": "/api/listing-quality/platform/benchmarks",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "8] ERROR: Failed to get platform quality stats",
+   "          ReferenceError: ListingQuality is not defined",
+   "      \"name\": \"ReferenceError\""
+  ]
+ },
+ {
+  "path": "/api/listing-quality/platform/low-quality",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "9] ERROR: Failed to get low quality listings",
+   "          ReferenceError: ListingQuality is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ]
+ },
+ {
+  "path": "/api/listing-quality/platform/stats",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:35:19] ERROR: Failed to get platform quality stats",
+   "          ReferenceError: ListingQuality is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ]
+ },
+ {
+  "path": "/api/marketplace-health/alerts",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "9] ERROR: Failed to get active alerts",
+   "          ReferenceError: MarketplaceHealth is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ]
+ },
+ {
+  "path": "/api/notification-analytics/channel-stats",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:35:20] ERROR: Failed to get channel stats",
+   "          ReferenceError: NotificationAudit is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ]
+ },
+ {
+  "path": "/api/notification-analytics/engagement-metrics",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:35:20] ERROR: Failed to get engagement metrics",
+   "          ReferenceError: NotificationAudit is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ]
+ },
+ {
+  "path": "/api/notification-analytics/failure-analysis",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "0] ERROR: Failed to get failure analysis",
+   "          ReferenceError: NotificationAudit is not defined",
+   "              at getFailureAnalysis (file:///home/claude/h/KAYAD-PHASE13H-WORK/backend/services/notificationAnalyticsService.js:101:22)"
+  ]
+ },
+ {
+  "path": "/api/notification-analytics/retry-stats",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "1] ERROR: Failed to get retry stats",
+   "          ReferenceError: NotificationAudit is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ]
+ }
+]

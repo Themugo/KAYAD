@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /home/claude/work/p13d/work
+
+
+ Test Files  103 passed (103)
+      Tests  808 passed | 1 skipped (809)
+   Start at  20:32:40
+   Duration  192.54s (transform 5.91s, setup 13.18s, import 19.27s, tests 64.40s, environment 78.78s)
+

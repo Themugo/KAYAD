@@ -1,0 +1,66 @@
+# KAYAD Phase 13G — Test Results Matrix
+
+All runs on 2026-10-26 against the 13G tree, disposable loopback stack only (PostgreSQL 16, PostgREST 12.2.3, Redis, Express). Nothing here is staging or production evidence.
+
+| id | command | exit | s | result | evidence |
+|---|---|---|---|---|---|
+| typecheck | npm run typecheck | 0 | 31 | tsc --noEmit: 0 errors | validation-logs/phase13g/suites/typecheck.log |
+| vite-build | npx vite build --outDir /home/claude/spa-dist-verify | 0 | 5 | production build succeeds (chunk-size advisory only) | validation-logs/phase13g/suites/vite-build.log |
+| backend-jest | npm run test:jest | 0 | 164 | 157 suites / 2799 tests passed, 0 failed, 0 skipped | validation-logs/phase13g/suites/backend-jest.log |
+| backend-vitest | npm run test:vitest | 0 | 11 | 6 files / 36 tests passed | validation-logs/phase13g/suites/backend-vitest.log |
+| backend-node-test | npm run test:node | 0 | 1 | 1 test passed | validation-logs/phase13g/suites/backend-node-test.log |
+| frontend-vitest | npx vitest run | 0 | 174 | 107 files / 852 passed, 1 skipped (pre-existing skip), 0 failed | validation-logs/phase13g/suites/frontend-vitest.log |
+| validate-13e-visibility | npm run validate:phase13e-listing-visibility | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-13e-visibility.log |
+| validate-migration-hygiene | npm run validate:migration-hygiene | 0 | 1 | validator exit code only | validation-logs/phase13g/suites/validate-migration-hygiene.log |
+| validate-supabase-migrations | npm run validate:supabase-migrations | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-supabase-migrations.log |
+| validate-admin-route-convergence | npm run validate:admin-route-convergence | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-admin-route-convergence.log |
+| validate-csrf-route | npm run validate:csrf-route | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-csrf-route.log |
+| validate-dealer-modal-convergence | npm run validate:dealer-modal-convergence | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-dealer-modal-convergence.log |
+| validate-explicit-auth-flows | npm run validate:explicit-auth-flows | 0 | 1 | validator exit code only | validation-logs/phase13g/suites/validate-explicit-auth-flows.log |
+| validate-master-identity-authz-corrections | npm run validate:master-identity-authz-corrections | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-master-identity-authz-corrections.log |
+| validate-mobile-navigation-polish | npm run validate:mobile-navigation-polish | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-mobile-navigation-polish.log |
+| validate-navigation-convergence | npm run validate:navigation-convergence | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-navigation-convergence.log |
+| validate-owner-identity-convergence | npm run validate:owner-identity-convergence | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-owner-identity-convergence.log |
+| validate-passport-authorization | npm run validate:passport-authorization | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-passport-authorization.log |
+| validate-premium-auth-surfaces | npm run validate:premium-auth-surfaces | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-premium-auth-surfaces.log |
+| validate-premium-sell-auth-public-convergence | npm run validate:premium-sell-auth-public-convergence | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-premium-sell-auth-public-convergence.log |
+| validate-private-upload-cache | npm run validate:private-upload-cache | 0 | 1 | validator exit code only | validation-logs/phase13g/suites/validate-private-upload-cache.log |
+| validate-registration-onboarding | npm run validate:registration-onboarding | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-registration-onboarding.log |
+| validate-registration-role-matrix | npm run validate:registration-role-matrix | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-registration-role-matrix.log |
+| validate-session-availability | npm run validate:session-availability | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-session-availability.log |
+| validate-stage5f10-private-seller-gate | npm run validate:stage5f10-private-seller-gate | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-stage5f10-private-seller-gate.log |
+| validate-stage5f7-private-auction-contract | npm run validate:stage5f7-private-auction-contract | 1 | 0 | FAILS - identical failure in unmodified 13F tree (pre-existing, see report) | validation-logs/phase13g/suites/validate-stage5f7-private-auction-contract.log |
+| validate-super-admin-phase1-navigation | npm run validate:super-admin-phase1-navigation | 1 | 0 | FAILS - identical failure in unmodified 13F tree (pre-existing, see report) | validation-logs/phase13g/suites/validate-super-admin-phase1-navigation.log |
+| validate-financial-audit-rls-hardening | npm run validate:financial-audit-rls-hardening | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-financial-audit-rls-hardening.log |
+| validate-payment-escrow-domain | npm run validate:payment-escrow-domain | 0 | 1 | validator exit code only | validation-logs/phase13g/suites/validate-payment-escrow-domain.log |
+| validate-financial-ledger-reconciliation-domain | npm run validate:financial-ledger-reconciliation-domain | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-financial-ledger-reconciliation-domain.log |
+| validate-high-risk-boundaries | npm run validate:high-risk-boundaries | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-high-risk-boundaries.log |
+| validate-database-contract-alignment | npm run validate:database-contract-alignment | 0 | 0 | validator exit code only | validation-logs/phase13g/suites/validate-database-contract-alignment.log |
+| db-migration-rollback-driver | PGHOST=127.0.0.1 scripts/validate-phase13g-db.sh | 0 | n/a | 17/17 (188 migrations on empty DB; re-apply; grants/RLS; rollback; re-apply; backup recipe) + embedded 13F DB driver 28/28 | validation-logs/phase13g/db-validation-driver.log |
+| http-13f-lifecycle-matrix | node runbooks/phase13f-20261025/http/phase13f_http_lifecycle_matrix.mjs (real backend->PostgREST->PostgreSQL) | 0 | n/a | 103/103 passed | validation-logs/phase13g/http-13f-lifecycle-matrix.log |
+| http-13g-search-alerts-matrix | node runbooks/phase13g-20261026/http/phase13g_search_alerts_matrix.mjs | 0 | n/a | 83/83 passed (search, injection, visibility, alerts, chats, RBAC) | validation-logs/phase13g/search-alerts-matrix-final.log |
+| browser-journeys-playwright | node runbooks/phase13g-20261026/ui/phase13g_ui_journeys.mjs (Chromium, 1280px + 390px, axe wcag2a/2aa) | 0 | n/a | 74/74 passed; axe critical=0 serious=0 on all 6 scanned pages | validation-logs/phase13g/ui-journeys-final.log |
+| eslint-src | npx eslint src | 0 | n/a | 0 errors / 1557 warnings (13F baseline 5 / 1557); 0 new violations | validation-logs/phase13g/eslint/compare-src.txt |
+| eslint-all | npx eslint . | 1 | n/a | 2250 errors / 1557 warnings (13F baseline 2255 / 1557); 0 new violations; remaining errors pre-existing, 2071 are no-undef in node scripts | validation-logs/phase13g/eslint/compare-all.txt |
+| route-schema-sweep | node runbooks/phase13g-20261026/http/phase13g_route_schema_sweep.mjs | n/a | n/a | 480 routes: 5xx 113 -> 110 (3 fixed, 0 new); 110 remaining documented | validation-logs/phase13g/sweep-after.log |
+
+## Comparison with Phase 13F
+
+| suite | 13F | 13G | delta |
+|---|---|---|---|
+| backend jest | 156 suites / 2791 tests | 157 / 2799 | +1 suite, +8 tests (phase13gSearchQueryTranslation) |
+| frontend vitest | 106 files / 848 passed / 1 skipped | 107 / 852 / 1 | +1 file, +4 tests (Phase13gAccessibility) |
+| 13F HTTP lifecycle matrix | 103 | 103 | none |
+| 13F DB driver | 28 | 28 | none |
+| browser journeys | 60 | 74 | +14 (keyword search, admin alerts) |
+| eslint src errors | 5 | 0 | -5 |
+
+## Skipped / failing
+
+- frontend vitest: 1 skipped test, carried from 13F unchanged.
+- `validate:stage5f7-private-auction-contract` fails (ENOENT: reads `KAYAD_STAGE5F7_PHASE_A_CONTRACT_FREEZE.md`, absent from the package) and `validate:super-admin-phase1-navigation` fails 1/12 (expects 29 sidebar destinations). Both fail identically on the unmodified 13F tree (exit 1 each), so they are pre-existing and not regressions; neither was altered because they concern protected/unrelated areas.
+
+## Evidence-integrity notes
+
+- Browser journey IDs of the new checks were renamed from S*/X* to KS*/AL* before the final run; the logs cited are from that final run.
+- `validate-phase13f-db.sh` and the 13F HTTP matrix were re-run unmodified on this tree.

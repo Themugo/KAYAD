@@ -1,0 +1,8 @@
+(node:325) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 12 passed, 12 total
+Tests:       351 passed, 351 total
+Snapshots:   0 total
+Time:        16.208 s
+Ran all test suites matching tests/regression/stage1AuthzConvergence.test.js|tests/regression/stage4AuthorizationPolicy.test.js|tests/regression/allAreasAuthzRuntime.test.js|tests/regression/stage5aSellerSelfPublication.test.js|tests/regression/stage1ListingWriteBoundaries.test.js|tests/regression/stage5f16DealerLifecycleInvariants.test.js|tests/regression/stage4IdentityLifecycle.test.js|tests/validation/registrationPrivilegedRoles.test.js|tests/escrow/escrowCapability.service.test.js|tests/escrow/escrowAuthorization.test.js|tests/security/carAuctionLockAndUpdate.test.js|tests/onboarding/onboardingFlow.test.js.

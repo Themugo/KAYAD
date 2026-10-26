@@ -1,0 +1,55 @@
+# KAYAD Phase 13I — Test Matrix (definitive run on the frozen final tree)
+
+All rows below are FRESH results produced in this phase on the final source tree against the disposable local stack (PostgreSQL 16 rebuilt from the 188-migration chain, PostgREST, Redis, real Express backend, real Chromium). Nothing is production or staging evidence. Historical 13F/13G/13H reports were not relied on; their harnesses were re-run.
+
+| id | command | exit | s | result | log |
+|---|---|---|---|---|---|
+| cert-typecheck | `npm run typecheck` | 0 | 55 | tsc --noEmit: 0 errors | `validation-logs/phase13i/cert/cert-typecheck.log` |
+| cert-vite-build | `npx vite build --outDir /home/claude/spa-dist-cert --emptyOutDir` | 0 | 7 | production build succeeded | `validation-logs/phase13i/cert/cert-vite-build.log` |
+| cert-frontend-vitest | `npx vitest run` | 0 | 276 | 110 files, 879 passed, 1 skipped (pre-existing ToastContext it.skip), 0 failed | `validation-logs/phase13i/cert/cert-frontend-vitest.log` |
+| cert-backend-jest | `npm run test:jest` | 0 | 213 | 159 suites, 2837 tests passed, 0 failed | `validation-logs/phase13i/cert/cert-backend-jest.log` |
+| cert-backend-vitest | `npm run test:vitest` | 0 | 17 | 6 files, 36 tests passed | `validation-logs/phase13i/cert/cert-backend-vitest.log` |
+| cert-backend-node-test | `npm run test:node` | 0 | 2 | 1 test file (response-lifecycle): 1 pass, 0 fail | `validation-logs/phase13i/cert/cert-backend-node-test.log` |
+| cert-validate-phase13e | `npm run validate:phase13e-listing-visibility` | 0 | 1 | PASS | `validation-logs/phase13i/cert/cert-validate-phase13e.log` |
+| cert-validate-migration-hygiene | `npm run validate:migration-hygiene` | 0 | 0 | PASS (188 migrations) | `validation-logs/phase13i/cert/cert-validate-migration-hygiene.log` |
+| cert-validate-supabase-migrations | `npm run validate:supabase-migrations` | 0 | 0 | PASS | `validation-logs/phase13i/cert/cert-validate-supabase-migrations.log` |
+| cert-validate-stage5f7 | `npm run validate:stage5f7-private-auction-contract` | 1 | 1 | FAIL (ENOENT planning docs; historical, identical on 13F/13G/13H; not weakened; no effect on this phase) | `validation-logs/phase13i/cert/cert-validate-stage5f7.log` |
+| cert-validate-superadmin-nav | `npm run validate:super-admin-phase1-navigation` | 0 | 0 | PASS (mutation proof: removal and unplanned addition both detected; validation-logs/phase13i/pre-freeze-intermediate/nav-validator-mutation.log) | `validation-logs/phase13i/cert/cert-validate-superadmin-nav.log` |
+| cert-validate-communications | `npm run validate:communications` | 0 | 0 | PASS | `validation-logs/phase13i/cert/cert-validate-communications.log` |
+| cert-validate-transaction-integrity | `npm run validate:transaction-integrity` | 0 | 1 | PASS | `validation-logs/phase13i/cert/cert-validate-transaction-integrity.log` |
+| cert-validate-frontend-runtime-contracts | `npm run validate:frontend-runtime-contracts` | 0 | 0 | PASS | `validation-logs/phase13i/cert/cert-validate-frontend-runtime-contracts.log` |
+| cert-validate-code-splitting | `npm run validate:code-splitting` | 0 | 0 | PASS | `validation-logs/phase13i/cert/cert-validate-code-splitting.log` |
+| cert-validate-navigation-convergence | `npm run validate:navigation-convergence` | 0 | 1 | PASS | `validation-logs/phase13i/cert/cert-validate-navigation-convergence.log` |
+| cert-validate-admin-route-convergence | `npm run validate:admin-route-convergence` | 0 | 0 | PASS | `validation-logs/phase13i/cert/cert-validate-admin-route-convergence.log` |
+| cert-eslint-src | `npx eslint src --format json -o validation-logs/phase13i/eslint/final-src.json` | 0 | 121 | 0 errors, 1557 warnings, 0 new vs 13H | `validation-logs/phase13i/cert/cert-eslint-src.log` |
+| cert-eslint-all | `npx eslint . --format json -o validation-logs/phase13i/eslint/final-all.json` | 1 | 120 | 2250 errors, 1557 warnings (exit 1 = pre-existing backlog), 0 new vs 13H | `validation-logs/phase13i/cert/cert-eslint-all.log` |
+| cert-http-matrix-13i | `node runbooks/phase13i-20261026/http/phase13i_personal_account_matrix.mjs` | 0 | 51 | 77 pass, 0 fail, 1 OPEN protected (auction registration) | `validation-logs/phase13i/cert/cert-http-matrix-13i.log` |
+| cert-http-exposure | `node runbooks/phase13i-20261026/http/phase13i_public_endpoint_exposure.mjs` | 0 | 4 | 165 pass, 0 fail | `validation-logs/phase13i/cert/cert-http-exposure.log` |
+| cert-http-13f | `node runbooks/phase13f-20261025/http/phase13f_http_lifecycle_matrix.mjs` | 0 | 6 | 103 pass, 0 fail | `validation-logs/phase13i/cert/cert-http-13f.log` |
+| cert-http-13g-search | `node runbooks/phase13g-20261026/http/phase13g_search_alerts_matrix.mjs` | 0 | 5 | 83 pass, 0 fail | `validation-logs/phase13i/cert/cert-http-13g-search.log` |
+| cert-http-13h-route | `node runbooks/phase13h-20261026/http/phase13h_route_matrix.mjs` | 0 | 2 | 17 pass, 0 fail | `validation-logs/phase13i/cert/cert-http-13h-route.log` |
+| cert-http-c1-authz | `node runbooks/phase-c1-runtime-20261021/http/phase_c1_http_authz_matrix.mjs` | 0 | 2 | 30 pass, 0 fail | `validation-logs/phase13i/cert/cert-http-c1-authz.log` |
+| cert-registration-repro | `node runbooks/phase13i-20261026/http/phase13i_registration_disclosure_repro.mjs` | 0 | 1 | reproduces OPEN blocker (exit 0 = reproduction completed) | `validation-logs/phase13i/cert/cert-registration-repro.log` |
+| cert-db-saved-search | `node runbooks/phase13i-20261026/db/phase13i_saved_search_job_db.mjs` | 0 | 7 | 25 pass, 0 fail | `validation-logs/phase13i/cert/cert-db-saved-search.log` |
+| cert-db-driver-13g | `bash scripts/validate-phase13g-db.sh` | 0 | 27 | 17 pass (+ nested 13F driver 28 pass), 0 fail | `validation-logs/phase13i/cert/cert-db-driver-13g.log` |
+| cert-route-sweep | `node runbooks/phase13g-20261026/http/phase13g_route_schema_sweep.mjs` | 0 | 65 | 480 routes; 112 5xx (identical to 13H); 0 in personal-account routes | `validation-logs/phase13i/cert/cert-route-sweep.log` |
+| cert-ui-journeys | `node runbooks/phase13i-20261026/ui/phase13i_ui_journeys.mjs` | 0 | 251 | 118 pass, 0 fail; axe wcag2a/2aa: 16 pages, 0 critical, 0 serious | `validation-logs/phase13i/cert/cert-ui-journeys.log` |
+
+## Baseline vs final (same stack, same commands)
+| suite | baseline (13H code, run at phase start) | final |
+|---|---|---|
+| frontend vitest | 108 files / 861 passed / 1 skipped | 110 files / 879 passed / 1 skipped (+18 new tests, 0 removed) |
+| backend jest | 158 suites / 2803 passed | 159 suites / 2837 passed (+1 suite, +34 tests, 0 removed) |
+| backend vitest | 36 passed | 36 passed |
+| 13F/13G/13H harnesses | present | all re-run and green (103 / 83 / 17) |
+
+## 13F / 13G / 13H tests remain present and meaningful
+`backend/tests/regression/phase13fCapabilityHardening.test.js`, `phase13gSearchQueryTranslation.test.js`, `phase13hCarsLocationColumn.test.js`; `src/__tests__/components/DashboardHubUnifiedAccount.test.jsx`, `PrivateSellerPlatformGate.test.tsx`, `Phase13gAccessibility.test.tsx`, `Phase13hAdminAlertMessage.test.tsx`, `src/__tests__/pages/AdminPrivateSellerApplications.test.tsx`. One existing assertion was changed deliberately (see ledger): `AdminPrivateSellerApplications` "does NOT refresh when a decision fails" became "reloads the real state after a refused decision" because the 13I fix intentionally reloads; and `phaseC1PublicListingCacheInvalidation` expects the added matrix cache pattern. No test was deleted, skipped or weakened.
+
+## Skipped / failing
+- Skipped: 1 (`ToastContext.test.jsx` `it.skip('auto-dismisses after duration')`, pre-existing timing test).
+- Failing: `validate:stage5f7-private-auction-contract` (historical; reads three planning documents that are not in the package). Not changed, not weakened.
+- `eslint .` exit 1 is the pre-existing backlog (2250 errors), unchanged.
+
+## Harness evidence files (kept next to the harnesses)
+`runbooks/phase13i-20261026/{http,db,ui}/*.result.txt`; screenshots in `evidence/phase13i-screenshots/` (24).

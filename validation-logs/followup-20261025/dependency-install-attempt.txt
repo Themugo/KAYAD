@@ -1,0 +1,6 @@
+Command: npm ci --engine-strict=false --ignore-scripts --no-audit --no-fund
+Working directory: KAYAD-PHASE13E-UNIFIED-PERSONAL-ACCOUNT
+Runtime: Node.js v22.16.0, npm 10.9.2
+Required runtime: Node.js >=22.22.2
+Result: command exceeded the 120-second execution limit and did not complete. npm emitted EBADENGINE for the root package, jsdom@30.0.1 (requires ^22.22.2 or supported newer versions), and undici@8.10.2 (requires >=22.19.0).
+Follow-up: the partial node_modules directory was removed before packaging. No package lock changes were made. Full tests, typecheck, and build were not run after the completion follow-up changes.

@@ -1,0 +1,159 @@
+{
+ "relation \\\"public.ads\\\" does not exist": [
+  "/api/admin/ads"
+ ],
+ "relation \\\"public.admin_alerts\\\" does not exist": [
+  "/api/admin/alerts"
+ ],
+ "column chats.updated_at does not exist": [
+  "/api/admin/chats"
+ ],
+ "relation \\\"public.market_data\\\" does not exist": [
+  "/api/admin/market-data"
+ ],
+ "relation \\\"public.transactions\\\" does not exist": [
+  "/api/admin/referrals/stats",
+  "/api/referral/stats"
+ ],
+ "relation \\\"public.ai_commands\\\" does not exist": [
+  "/api/ai/analytics",
+  "/api/ai/history"
+ ],
+ "relation \\\"public.ai_conversations\\\" does not exist": [
+  "/api/ai/conversations"
+ ],
+ "relation \\\"public.ai_prompts\\\" does not exist": [
+  "/api/ai/dashboard",
+  "/api/ai/prompts"
+ ],
+ "relation \\\"public.ai_knowledge\\\" does not exist": [
+  "/api/ai/knowledge"
+ ],
+ "relation \\\"public.ai_workspaces\\\" does not exist": [
+  "/api/ai/workspaces"
+ ],
+ "relation \\\"public.approval_chains\\\" does not exist": [
+  "/api/automation/approvals"
+ ],
+ "relation \\\"public.workflow_logs\\\" does not exist": [
+  "/api/automation/logs"
+ ],
+ "relation \\\"public.scheduled_jobs\\\" does not exist": [
+  "/api/automation/scheduled"
+ ],
+ "relation \\\"public.automation_tasks\\\" does not exist": [
+  "/api/automation/stats",
+  "/api/automation/tasks"
+ ],
+ "relation \\\"public.notification_templates\\\" does not exist": [
+  "/api/automation/templates/notifications"
+ ],
+ "relation \\\"public.workflows\\\" does not exist": [
+  "/api/automation/workflows"
+ ],
+ "column bids.is_suspicious does not exist": [
+  "/api/bids/admin/suspicious"
+ ],
+ "relation \\\"public.config_audit_logs\\\" does not exist": [
+  "/api/config/audit"
+ ],
+ "relation \\\"public.country_configs\\\" does not exist": [
+  "/api/config/countries"
+ ],
+ "relation \\\"public.config_entries\\\" does not exist": [
+  "/api/config/entries",
+  "/api/config/export",
+  "/api/config/stats"
+ ],
+ "relation \\\"public.feature_flags\\\" does not exist": [
+  "/api/config/features"
+ ],
+ "relation \\\"public.location_master_data\\\" does not exist": [
+  "/api/config/location",
+  "/api/config/location/cities",
+  "/api/config/location/countries",
+  "/api/config/location/regions"
+ ],
+ "relation \\\"public.reference_data\\\" does not exist": [
+  "/api/config/reference"
+ ],
+ "relation \\\"public.vehicle_master_data\\\" does not exist": [
+  "/api/config/vehicle",
+  "/api/config/vehicle/makes",
+  "/api/config/vehicle/models"
+ ],
+ "relation \\\"public.predictions\\\" does not exist": [
+  "/api/digital-twin/dashboard",
+  "/api/digital-twin/predictions"
+ ],
+ "relation \\\"public.scenarios\\\" does not exist": [
+  "/api/digital-twin/scenarios"
+ ],
+ "relation \\\"public.simulations\\\" does not exist": [
+  "/api/digital-twin/simulations"
+ ],
+ "'issue_details' is not an embedded resource in this request": [
+  "/api/escrow/operations/dashboard"
+ ],
+ "relation \\\"public.custom_dashboards\\\" does not exist": [
+  "/api/lowcode/dashboards"
+ ],
+ "relation \\\"public.business_objects\\\" does not exist": [
+  "/api/lowcode/objects",
+  "/api/lowcode/stats"
+ ],
+ "relation \\\"public.error_budgets\\\" does not exist": [
+  "/api/reliability/error-budgets",
+  "/api/reliability/health",
+  "/api/reliability/report"
+ ],
+ "relation \\\"public.vx_advertisements\\\" does not exist": [
+  "/api/vxp/advertisements"
+ ],
+ "relation \\\"public.vx_cards\\\" does not exist": [
+  "/api/vxp/cards"
+ ],
+ "relation \\\"public.vx_components\\\" does not exist": [
+  "/api/vxp/components"
+ ],
+ "relation \\\"public.vx_pages\\\" does not exist": [
+  "/api/vxp/pages",
+  "/api/vxp/stats"
+ ],
+ "relation \\\"public.vx_sections\\\" does not exist": [
+  "/api/vxp/sections"
+ ],
+ "relation \\\"public.vx_themes\\\" does not exist": [
+  "/api/vxp/themes",
+  "/api/vxp/themes/default"
+ ],
+ "relation \\\"public.vx_versions\\\" does not exist": [
+  "/api/vxp/versions"
+ ],
+ "relation \\\"public.experience_analytics\\\" does not exist": [
+  "/api/xos/analytics"
+ ],
+ "relation \\\"public.audiences\\\" does not exist": [
+  "/api/xos/audiences"
+ ],
+ "relation \\\"public.campaigns\\\" does not exist": [
+  "/api/xos/campaigns"
+ ],
+ "relation \\\"public.experiences\\\" does not exist": [
+  "/api/xos/dashboard",
+  "/api/xos/experiences",
+  "/api/xos/resolve"
+ ],
+ "relation \\\"public.journeys\\\" does not exist": [
+  "/api/xos/journeys"
+ ],
+ "relation \\\"public.navigation_rules\\\" does not exist": [
+  "/api/xos/navigation-rules"
+ ],
+ "relation \\\"public.seasonal_themes\\\" does not exist": [
+  "/api/xos/themes"
+ ],
+ "relation \\\"public.homepage_variants\\\" does not exist": [
+  "/api/xos/variants"
+ ]
+}

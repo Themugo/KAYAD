@@ -1,0 +1,166 @@
+PASS BY-valuation/avail/anon public listing answers (200)
+PASS BY-valuation/avail/other public listing answers (200)
+PASS BY-valuation/avail/owner public listing answers (200)
+PASS BY-valuation/avail/admin public listing answers (200)
+PASS BY-valuation/sold/anon public listing answers (200)
+PASS BY-valuation/sold/other public listing answers (200)
+PASS BY-valuation/sold/owner public listing answers (200)
+PASS BY-valuation/sold/admin public listing answers (200)
+PASS BY-valuation/hidden/anon non-public listing -> 404, no body detail
+PASS BY-valuation/hidden/other non-public listing -> 404, no body detail
+PASS BY-valuation/hidden/owner non-public listing -> 404, no body detail
+PASS BY-valuation/hidden/admin non-public listing -> 404, no body detail
+PASS BY-valuation/pending/anon non-public listing -> 404, no body detail
+PASS BY-valuation/pending/other non-public listing -> 404, no body detail
+PASS BY-valuation/pending/owner non-public listing -> 404, no body detail
+PASS BY-valuation/pending/admin non-public listing -> 404, no body detail
+PASS BY-valuation/draft/anon non-public listing -> 404, no body detail
+PASS BY-valuation/draft/other non-public listing -> 404, no body detail
+PASS BY-valuation/draft/owner non-public listing -> 404, no body detail
+PASS BY-valuation/draft/admin non-public listing -> 404, no body detail
+PASS BY-valuation/reserved/anon non-public listing -> 404, no body detail
+PASS BY-valuation/reserved/other non-public listing -> 404, no body detail
+PASS BY-valuation/reserved/owner non-public listing -> 404, no body detail
+PASS BY-valuation/reserved/admin non-public listing -> 404, no body detail
+PASS BY-valuation/deleted/anon non-public listing -> 404, no body detail
+PASS BY-valuation/deleted/other non-public listing -> 404, no body detail
+PASS BY-valuation/deleted/owner non-public listing -> 404, no body detail
+PASS BY-valuation/deleted/admin non-public listing -> 404, no body detail
+PASS BY-valuation/malformed id -> 404 (no 5xx)
+PASS BY-valuation/unknown id -> 404
+PASS BY-ai-decision explain/avail/anon requires a signed-in caller (401), nothing leaked
+PASS BY-ai-decision explain/avail/other public listing answers (200)
+PASS BY-ai-decision explain/avail/owner public listing answers (200)
+PASS BY-ai-decision explain/avail/admin public listing answers (200)
+PASS BY-ai-decision explain/sold/anon requires a signed-in caller (401), nothing leaked
+PASS BY-ai-decision explain/sold/other public listing answers (200)
+PASS BY-ai-decision explain/sold/owner public listing answers (200)
+PASS BY-ai-decision explain/sold/admin public listing answers (200)
+PASS BY-ai-decision explain/hidden/anon requires a signed-in caller (401), nothing leaked
+PASS BY-ai-decision explain/hidden/other non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/hidden/owner non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/hidden/admin non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/pending/anon requires a signed-in caller (401), nothing leaked
+PASS BY-ai-decision explain/pending/other non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/pending/owner non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/pending/admin non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/draft/anon requires a signed-in caller (401), nothing leaked
+PASS BY-ai-decision explain/draft/other non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/draft/owner non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/draft/admin non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/reserved/anon requires a signed-in caller (401), nothing leaked
+PASS BY-ai-decision explain/reserved/other non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/reserved/owner non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/reserved/admin non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/deleted/anon requires a signed-in caller (401), nothing leaked
+PASS BY-ai-decision explain/deleted/other non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/deleted/owner non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/deleted/admin non-public listing -> 404, no body detail
+PASS BY-ai-decision explain/malformed id -> 404 (no 5xx)
+PASS BY-ai-decision explain/unknown id -> 404
+PASS BY-market pulse/avail/anon public listing answers (200)
+PASS BY-market pulse/avail/other public listing answers (200)
+PASS BY-market pulse/avail/owner public listing answers (200)
+PASS BY-market pulse/avail/admin public listing answers (200)
+PASS BY-market pulse/sold/anon public listing answers (200)
+PASS BY-market pulse/sold/other public listing answers (200)
+PASS BY-market pulse/sold/owner public listing answers (200)
+PASS BY-market pulse/sold/admin public listing answers (200)
+PASS BY-market pulse/hidden/anon non-public listing -> 404, no body detail
+PASS BY-market pulse/hidden/other non-public listing -> 404, no body detail
+PASS BY-market pulse/hidden/owner non-public listing -> 404, no body detail
+PASS BY-market pulse/hidden/admin non-public listing -> 404, no body detail
+PASS BY-market pulse/pending/anon non-public listing -> 404, no body detail
+PASS BY-market pulse/pending/other non-public listing -> 404, no body detail
+PASS BY-market pulse/pending/owner non-public listing -> 404, no body detail
+PASS BY-market pulse/pending/admin non-public listing -> 404, no body detail
+PASS BY-market pulse/draft/anon non-public listing -> 404, no body detail
+PASS BY-market pulse/draft/other non-public listing -> 404, no body detail
+PASS BY-market pulse/draft/owner non-public listing -> 404, no body detail
+PASS BY-market pulse/draft/admin non-public listing -> 404, no body detail
+PASS BY-market pulse/reserved/anon non-public listing -> 404, no body detail
+PASS BY-market pulse/reserved/other non-public listing -> 404, no body detail
+PASS BY-market pulse/reserved/owner non-public listing -> 404, no body detail
+PASS BY-market pulse/reserved/admin non-public listing -> 404, no body detail
+PASS BY-market pulse/deleted/anon non-public listing -> 404, no body detail
+PASS BY-market pulse/deleted/other non-public listing -> 404, no body detail
+PASS BY-market pulse/deleted/owner non-public listing -> 404, no body detail
+PASS BY-market pulse/deleted/admin non-public listing -> 404, no body detail
+PASS BY-market pulse/malformed id -> 404 (no 5xx)
+PASS BY-market pulse/unknown id -> 404
+PASS LA/avail anonymous -> 401
+PASS LA/avail unrelated signed-in buyer -> 404 (same as a missing id, no existence oracle)
+PASS LA/avail owner may analyse their own listing in any state (200)
+PASS LA/avail listing-management staff may analyse (200)
+PASS LA/sold anonymous -> 401
+PASS LA/sold unrelated signed-in buyer -> 404 (same as a missing id, no existence oracle)
+PASS LA/sold owner may analyse their own listing in any state (200)
+PASS LA/sold listing-management staff may analyse (200)
+PASS LA/hidden anonymous -> 401
+PASS LA/hidden unrelated signed-in buyer -> 404 (same as a missing id, no existence oracle)
+PASS LA/hidden owner may analyse their own listing in any state (200)
+PASS LA/hidden listing-management staff may analyse (200)
+PASS LA/pending anonymous -> 401
+PASS LA/pending unrelated signed-in buyer -> 404 (same as a missing id, no existence oracle)
+PASS LA/pending owner may analyse their own listing in any state (200)
+PASS LA/pending listing-management staff may analyse (200)
+PASS LA/draft anonymous -> 401
+PASS LA/draft unrelated signed-in buyer -> 404 (same as a missing id, no existence oracle)
+PASS LA/draft owner may analyse their own listing in any state (200)
+PASS LA/draft listing-management staff may analyse (200)
+PASS LA/reserved anonymous -> 401
+PASS LA/reserved unrelated signed-in buyer -> 404 (same as a missing id, no existence oracle)
+PASS LA/reserved owner may analyse their own listing in any state (200)
+PASS LA/reserved listing-management staff may analyse (200)
+PASS LA/deleted anonymous -> 401
+PASS LA/deleted unrelated signed-in buyer -> 404 (same as a missing id, no existence oracle)
+PASS LA/deleted owner may analyse their own listing in any state (200)
+PASS LA/deleted listing-management staff may analyse (200)
+PASS LA existence oracle closed: unknown id and hidden id answer identically
+PASS AGG-market trends (NON brand)/anon 200 and no non-public listing marker in the body
+PASS AGG-market trends (NON brand)/anon aggregate reflects PUBLIC inventory only
+PASS AGG-market trends (NON brand)/other 200 and no non-public listing marker in the body
+PASS AGG-market trends (NON brand)/other aggregate reflects PUBLIC inventory only
+PASS AGG-market trends (NON brand)/owner 200 and no non-public listing marker in the body
+PASS AGG-market trends (NON brand)/owner aggregate reflects PUBLIC inventory only
+PASS AGG-market trends (NON brand)/admin 200 and no non-public listing marker in the body
+PASS AGG-market trends (NON brand)/admin aggregate reflects PUBLIC inventory only
+PASS AGG-market trends (PUB brand)/anon 200 and no non-public listing marker in the body
+PASS AGG-market trends (PUB brand)/anon aggregate reflects PUBLIC inventory only
+PASS AGG-market trends (PUB brand)/other 200 and no non-public listing marker in the body
+PASS AGG-market trends (PUB brand)/other aggregate reflects PUBLIC inventory only
+PASS AGG-market trends (PUB brand)/owner 200 and no non-public listing marker in the body
+PASS AGG-market trends (PUB brand)/owner aggregate reflects PUBLIC inventory only
+PASS AGG-market trends (PUB brand)/admin 200 and no non-public listing marker in the body
+PASS AGG-market trends (PUB brand)/admin aggregate reflects PUBLIC inventory only
+PASS AGG-valuation matrix (NON brand)/anon 200 and no non-public listing marker in the body
+PASS AGG-valuation matrix (NON brand)/anon aggregate reflects PUBLIC inventory only
+PASS AGG-valuation matrix (NON brand)/other 200 and no non-public listing marker in the body
+PASS AGG-valuation matrix (NON brand)/other aggregate reflects PUBLIC inventory only
+PASS AGG-valuation matrix (NON brand)/owner 200 and no non-public listing marker in the body
+PASS AGG-valuation matrix (NON brand)/owner aggregate reflects PUBLIC inventory only
+PASS AGG-valuation matrix (NON brand)/admin 200 and no non-public listing marker in the body
+PASS AGG-valuation matrix (NON brand)/admin aggregate reflects PUBLIC inventory only
+PASS AGG-valuation matrix (PUB brand)/anon 200 and no non-public listing marker in the body
+PASS AGG-valuation matrix (PUB brand)/anon aggregate reflects PUBLIC inventory only
+PASS AGG-valuation matrix (PUB brand)/other 200 and no non-public listing marker in the body
+PASS AGG-valuation matrix (PUB brand)/other aggregate reflects PUBLIC inventory only
+PASS AGG-valuation matrix (PUB brand)/owner 200 and no non-public listing marker in the body
+PASS AGG-valuation matrix (PUB brand)/owner aggregate reflects PUBLIC inventory only
+PASS AGG-valuation matrix (PUB brand)/admin 200 and no non-public listing marker in the body
+PASS AGG-valuation matrix (PUB brand)/admin aggregate reflects PUBLIC inventory only
+PASS AGG-most-viewed/anon 200 and no non-public listing marker in the body
+PASS AGG-most-viewed/other 200 and no non-public listing marker in the body
+PASS AGG-most-viewed/owner 200 and no non-public listing marker in the body
+PASS AGG-most-viewed/admin 200 and no non-public listing marker in the body
+PASS AGG-most-viewed lists the PUBLIC listings (available + sold) even though non-public listings have far higher view counts
+PASS CA0 fixture: owner approved as a private seller through the real admin API
+PASS CA1 while the seller is approved the owner's public listing answers on every by-id endpoint and appears in the aggregates
+PASS CA2 real suspension by an administrator (200); DB trigger hides the listing
+PASS CA3 CACHE: by-id endpoints answer 404 IMMEDIATELY after suspension although they were cached while public (guard runs before the cache)
+PASS CA4 CACHE: anonymous aggregates (matrix / trends / most-viewed) stop including the suspended seller's listing immediately
+PASS CA5 reinstatement restores the listing; by-id endpoints answer 200 again with no stale 404 served from cache
+PASS CA6 aggregates include the restored listing again
+PASS OW1 ownership and listing identity preserved through suspend/reinstate (same id, same owner, status available)
+PASS OW2 buyer endpoints unaffected for the same account throughout (own capability endpoint still 200)
+phase13i_public_endpoint_exposure: pass=165 fail=0

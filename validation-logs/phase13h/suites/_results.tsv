@@ -1,0 +1,11 @@
+typecheck	npm run typecheck	0	72
+vite-build	npx vite build --outDir /home/claude/spa-dist-verify-h	0	7
+backend-jest	npm run test:jest	0	278
+backend-vitest	npm run test:vitest	0	18
+backend-node-test	npm run test:node	0	1
+frontend-vitest	npx vitest run	0	316
+validate-phase13e-listing-visibility	npm run validate:phase13e-listing-visibility	0	0
+validate-migration-hygiene	npm run validate:migration-hygiene	0	1
+validate-supabase-migrations	npm run validate:supabase-migrations	0	0
+validate-stage5f7-private-auction-contract	npm run validate:stage5f7-private-auction-contract	1	0
+validate-super-admin-phase1-navigation	npm run validate:super-admin-phase1-navigation	1	0

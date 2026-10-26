@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /home/claude/work/p142/KAYAD-PHASE14_2-DEALER-WORKSPACE-CONVERGENCE
+
+
+ Test Files  111 passed (111)
+      Tests  894 passed | 1 skipped (895)
+   Start at  12:17:57
+   Duration  215.12s (transform 6.61s, setup 14.60s, import 21.84s, tests 69.03s, environment 90.74s)
+

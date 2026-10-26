@@ -1,0 +1,55 @@
+# KAYAD Phase 13H — Test Matrix
+
+All runs on 2026-10-26 on the 13H tree against the disposable loopback stack (PostgreSQL 16, PostgREST 12.2.3, Redis, Express). **No staging or production evidence exists in this matrix.** Counts are fresh 13H runs, not historical.
+
+| id | command | exit | s | result | evidence |
+|---|---|---|---|---|---|
+| typecheck | npm run typecheck | 0 | 72 | tsc --noEmit: 0 errors | validation-logs/phase13h/suites/typecheck.log |
+| vite-build | npx vite build --outDir /home/claude/spa-dist-verify-h | 0 | 7 | production build succeeds (chunk-size advisory only) | validation-logs/phase13h/suites/vite-build.log |
+| backend-jest | npm run test:jest | 0 | 278 | 158 suites / 2803 tests passed, 0 failed, 0 skipped | validation-logs/phase13h/suites/backend-jest.log |
+| backend-vitest | npm run test:vitest | 0 | 18 | 6 files / 36 tests passed | validation-logs/phase13h/suites/backend-vitest.log |
+| backend-node-test | npm run test:node | 0 | 1 | 1 test passed, 0 skipped | validation-logs/phase13h/suites/backend-node-test.log |
+| frontend-vitest | npx vitest run | 0 | 316 | 108 files / 861 passed, 1 skipped (pre-existing), 0 failed | validation-logs/phase13h/suites/frontend-vitest.log |
+| validate-phase13e-listing-visibility | npm run validate:phase13e-listing-visibility | 0 | 0 | PASS | validation-logs/phase13h/suites/validate-phase13e-listing-visibility.log |
+| validate-migration-hygiene | npm run validate:migration-hygiene | 0 | 1 | PASS | validation-logs/phase13h/suites/validate-migration-hygiene.log |
+| validate-supabase-migrations | npm run validate:supabase-migrations | 0 | 0 | PASS | validation-logs/phase13h/suites/validate-supabase-migrations.log |
+| validate-stage5f7-private-auction-contract | npm run validate:stage5f7-private-auction-contract | 1 | 0 | FAIL: ENOENT KAYAD_STAGE5F7_PHASE_A_CONTRACT_FREEZE.md (identical on 13G and 13F trees; log preserved) | validation-logs/phase13h/suites/validate-stage5f7-private-auction-contract.log |
+| validate-super-admin-phase1-navigation | npm run validate:super-admin-phase1-navigation | 1 | 0 | FAIL 11/12 before the validator update (expected 29 destinations; sidebar has 30 incl. approved private-seller review); log preserved | validation-logs/phase13h/suites/validate-super-admin-phase1-navigation.log |
+| validate-super-admin-phase1-navigation (after update) | npm run validate:super-admin-phase1-navigation | 0 | 0 | 12/12 PASS; mutation checks (remove one destination / add an unplanned one) both FAIL as required | validation-logs/phase13h/validators/super-admin-nav-13H-after-update.log |
+| db-migration-rollback-driver | PGHOST=127.0.0.1 bash scripts/validate-phase13g-db.sh (fresh chain of 188, re-apply, grants/RLS, rollback, backup recipe, embedded 13F driver) | 0 | n/a | 17/17; embedded 13F database driver 28/28 | validation-logs/phase13h/db-validation-driver.log |
+| http-13f-lifecycle-matrix | node runbooks/phase13f-20261025/http/phase13f_http_lifecycle_matrix.mjs | 0 | n/a | 103/103 (identity, capability lifecycle, visibility, dealer isolation, authz) | validation-logs/phase13h/http-13f-lifecycle-matrix.log |
+| http-13g-search-alerts-matrix | node runbooks/phase13g-20261026/http/phase13g_search_alerts_matrix.mjs | 0 | n/a | 83/83 (keyword search, injection, long/NUL/wildcard input, visibility, alerts, chats, RBAC) | validation-logs/phase13h/http-13g-search-alerts-matrix.log |
+| http-13h-route-matrix | node runbooks/phase13h-20261026/http/phase13h_route_matrix.mjs | 0 | n/a | 17/17 (county-trends 200 on real rows, alert contract, alerts boundary, protected routes closed, PostgREST anon/authenticated denied on admin_alerts) | validation-logs/phase13h/http-13h-route-matrix.log |
+| browser-journeys-playwright | node runbooks/phase13h-20261026/ui/phase13h_ui_journeys.mjs (Chromium 1280px + 390px, axe wcag2a/2aa) | 0 | n/a | 76/76; axe critical=0 serious=0 on 6 pages | validation-logs/phase13h/ui-journeys.log |
+| eslint-src | npx eslint src (ESLint 9.39.5) | 0 | n/a | 0 errors / 1557 warnings; 0 new vs 13G | validation-logs/phase13h/eslint/compare-src.txt |
+| eslint-all | npx eslint . (ESLint 9.39.5) | 1 | n/a | 2250 errors / 1557 warnings; identical to 13G; 0 new violations | validation-logs/phase13h/eslint/compare-all.txt |
+| route-sweep-baseline | phase13g_route_schema_sweep.mjs on fresh DB (13G code) | n/a | n/a | 480 routes: 5xx = 113 | validation-logs/phase13h/sweep-baseline-13G-code.log |
+| route-sweep-after | phase13g_route_schema_sweep.mjs on fresh DB (13H code) | n/a | n/a | 480 routes: 5xx = 112 | validation-logs/phase13h/sweep-after-13H.log |
+| owner-export-script-selftest | psql -f scripts/owner/phase13h_schema_metadata_export.sql (disposable DB, READ ONLY txn) | 0 | n/a | runs clean; reads catalog only | validation-logs/phase13h/owner-export-script-selftest.log |
+| staging-preflight-script-selftest | psql -f scripts/owner/phase13h_staging_preflight_readonly.sql (disposable DB) | 0 | n/a | runs clean | validation-logs/phase13h/staging-preflight-script-selftest.log |
+| NOT RUN: production schema export | requires an authorized read-only production connection | BLOCKED | - | not available | - |
+| NOT RUN: any staging check | no staging project identified or authorized | BLOCKED | - | not available | - |
+| NOT RUN: external providers (M-Pesa, email, SMS, payments) | prohibited / no credentials | NOT RUN | - | - | - |
+
+## Delta against Phase 13G
+
+| suite | 13G | 13H | delta |
+|---|---|---|---|
+| backend jest | 157 suites / 2799 | 158 / 2803 | +1 suite, +4 tests (phase13hCarsLocationColumn) |
+| frontend vitest | 107 files / 852 passed, 1 skipped | 108 / 861, 1 skipped | +1 file, +9 tests (Phase13hAdminAlertMessage) |
+| backend vitest / node:test | 36 / 1 | 36 / 1 | none |
+| 13F HTTP matrix | 103 | 103 | none |
+| 13G search/alerts matrix | 83 | 83 | none |
+| 13H route matrix | - | 17 | new |
+| browser journeys | 74 | 76 | +2 (alert text) |
+| 13G DB driver | 17 (+28) | 17 (+28) | none |
+| eslint src | 0 / 1557 | 0 / 1557 | none |
+| eslint . | 2250 / 1557 | 2250 / 1557 | none |
+
+## Failed or unavailable checks (kept visible)
+- `stage5f7-private-auction-contract`: fails (missing planning documents); historical, unchanged. See `KAYAD_PHASE13H_VALIDATOR_INVESTIGATION.md`.
+- `super-admin-phase1-navigation`: failed in the full-suite run (11/12) because its expectation predated the approved private-seller review entry; updated afterwards (12/12) — both logs retained.
+- `eslint .` exits 1: pre-existing backlog.
+- Production schema export, staging checks, external providers: NOT RUN / BLOCKED.
+
+Note: the full-suite run preceded the validator update and the lint-only cleanup of one probe script; no application source changed after the suites ran.

@@ -1,0 +1,144 @@
+--- a/backend/controllers/carController.js
++++ b/backend/controllers/carController.js
+@@ -18,6 +18,7 @@
+ import { registerMediaUploadJob, registerMediaUploadFailure, completeMediaUpload } from "../services/mediaRecovery.service.js";
+ import { getOnboardingPolicy, isPolicyTrusted } from "../services/onboardingPolicy.service.js"; // STAGE 5
+ import { getEscrowEnabledForNewOrEditedCar, getEffectiveEscrowForCar } from "../services/escrowCapability.service.js";
++import { toPublicVehicleDetail, PUBLIC_VEHICLE_POLICY } from "../utils/publicVehicleProjection.js"; // Phase 13K: public responses are allowlisted, never raw rows
+ 
+ const DEALER_ROLES = SELLER_ROLES; // backward compat
+ 
+@@ -264,7 +265,7 @@
+     // best-effort and swallows its own error), so car.dealer was
+     // always just the raw, unpopulated foreign key - never the real
+     // dealer object - on every real car fetch, not just auctions.
+-    findQuery = findQuery.populate("dealer", "name businessName phone role avatar dealerApprovedAt");
++    findQuery = findQuery.populate("dealer", PUBLIC_VEHICLE_POLICY.exposeSellerPhone ? "name businessName phone role avatar dealerApprovedAt" : "name businessName role avatar dealerApprovedAt"); // Phase 13K: seller account phone only when the owner policy allows it
+ 
+     let [cars, total] = await Promise.all([
+       findQuery.sort(sortOption).skip(skip).limit(limitNum).lean(),
+@@ -1144,7 +1145,8 @@
+       Car.updateMany({ id: car.id }, { $inc: { views: 1 } }).catch((e) => logWarn("View count increment failed (fallback)", { error: e.message }));
+     }
+ 
+-    res.json({ success: true, data: car });
++    // Phase 13K: the owner and staff keep the full record (dealer edit page); every other viewer, authenticated or not, receives the public projection.
++    res.json({ success: true, data: isOwner || isAdmin ? car : toPublicVehicleDetail(car) });
+   } catch (err) {
+     logError("GET ONE ERROR", { error: err.message });
+     res.status(500).json({ success: false, message: "Failed to fetch car" });
+--- a/backend/controllers/searchController.js
++++ b/backend/controllers/searchController.js
+@@ -1,10 +1,11 @@
+ import { searchVehicles, getSearchSuggestions, getSearchFacets } from '../services/searchService.js';
+ import { trackSearch } from '../services/searchInsightsService.js';
++import { toPublicVehicleSummary } from '../utils/publicVehicleProjection.js'; // Phase 13K
+ 
+ export async function search(req, res) {
+   const result = await searchVehicles(req.query);
+   try { await trackSearch({ searchTerm: req.query.keyword || req.query.q || '', filters: req.query, userId: req.user?.id, userRole: req.user?.role, ipAddress: req.ip, userAgent: req.get('user-agent'), searchType: 'quick_search', category: 'listings', resultCount: result.data.length }); } catch { /* analytics failure must not break search */ }
+-  res.json({ success: true, ...result });
++  res.json({ success: true, ...result, data: (result.data || []).map((row) => toPublicVehicleSummary(row)) }); // Phase 13K: never serialize raw cars rows
+ }
+ 
+ export async function autocomplete(req, res) {
+--- a/src/components/VehicleDetailModal.tsx
++++ b/src/components/VehicleDetailModal.tsx
+@@ -615,7 +615,7 @@
+                 { enabled: Boolean(vehicle.inspectionPassed || vehicle.inspection), title: '✓ Inspection Report', desc: 'Inspection data is available' },
+                 { enabled: Boolean(vehicle.financeAvailable), title: '✓ Finance Available', desc: 'Financing is offered for this listing' },
+                 { enabled: Boolean(vehicle.escrowEligible || isEscrowActive), title: `✓ ${getEscrowBadgeLabel(vehicle)}`, desc: 'Escrow workflow is available for this listing' },
+-                { enabled: Boolean(vehicle.vin), title: '✓ Vehicle Identity', desc: 'VIN is recorded on the listing' }
++                ...(vehicle.vin ? [{ enabled: true, title: '✓ Vehicle Identity', desc: 'VIN is recorded on the listing' }] : []) // Phase 13K: the public API no longer carries the VIN, so the badge is shown only when the VIN is actually available (owner/staff)
+               ].map((item, idx) => (
+                 <div key={idx} className={`p-3 rounded-2xl backdrop-blur-md border space-y-0.5 ${item.enabled ? 'bg-white/10 border-white/15' : 'bg-white/5 border-white/10 opacity-60'}`}>
+                   <p className="font-extrabold text-white text-xs">{item.title}</p>
+--- a/src/components/detail/PriceAlertModal.tsx
++++ b/src/components/detail/PriceAlertModal.tsx
+@@ -154,7 +154,7 @@
+               />
+               <div className="flex-1 min-w-0">
+                 <h4 className="text-sm font-bold text-[#176B87] truncate">{vehicle.title}</h4>
+-                <p className="text-xs text-[#64748b]">VIN: {vehicle.vin}</p>
++                {vehicle.vin ? <p className="text-xs text-[#64748b]">VIN: {vehicle.vin}</p> : null}
+                 <div className="flex items-center gap-2 mt-1">
+                   <span className="text-xs font-semibold text-[#64748b]">Current Listed Price:</span>
+                   <span className="text-sm font-black text-[#176B87] font-serif">
+--- a/src/components/detail/VehicleDetailPage.tsx
++++ b/src/components/detail/VehicleDetailPage.tsx
+@@ -420,20 +420,25 @@
+               {vehicle.location}
+             </span>
+             <span className="text-[#D7E7E4]">•</span>
+-            <span className="font-semibold flex items-center gap-1.5">
+-              <span>VIN:</span>
+-              <code className="font-mono bg-[#EEF7F5] border border-[#D7E7E4] px-2 py-0.5 rounded text-navy-600 font-bold">
+-                {vehicle.vin}
+-              </code>
+-              <button
+-                onClick={handleCopyVin}
+-                className="p-1 text-[#64748b] hover:text-navy-600 transition-colors cursor-pointer"
+-                title="Copy VIN"
+-              >
+-                {copiedVin ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+-              </button>
+-            </span>
+-            <span className="text-[#D7E7E4]">•</span>
++            {/* Phase 13K: the public API no longer serializes the VIN (owner decision); render the VIN row only when a VIN is actually present (owner/staff views). */}
++            {vehicle.vin ? (
++              <>
++                <span className="font-semibold flex items-center gap-1.5">
++                  <span>VIN:</span>
++                  <code className="font-mono bg-[#EEF7F5] border border-[#D7E7E4] px-2 py-0.5 rounded text-navy-600 font-bold">
++                    {vehicle.vin}
++                  </code>
++                  <button
++                    onClick={handleCopyVin}
++                    className="p-1 text-[#64748b] hover:text-navy-600 transition-colors cursor-pointer"
++                    title="Copy VIN"
++                  >
++                    {copiedVin ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
++                  </button>
++                </span>
++                <span className="text-[#D7E7E4]">•</span>
++              </>
++            ) : null}
+             <span className="flex items-center gap-1 text-[#64748b] font-medium">
+               <Eye className="w-3.5 h-3.5" />
+               <span>{vehicle.viewsCount != null ? `${vehicle.viewsCount} Views` : 'Views unavailable'}</span>
+--- /dev/null
++++ b/backend/utils/publicVehicleProjection.js
+@@ -0,0 +1,33 @@
++// Phase 13K — public vehicle projection (allowlist serializers).
++// The public vehicle-detail, list and search responses must never be assembled from a raw database row: `cars` carries reserve price,
++// chassis/registration numbers, the highest bidder, winner, payment state, deletion/duplicate/approval flags and the listing contact phone.
++// Policy switches below record the owner's contract decisions; change them only with a documented decision.
++export const PUBLIC_VEHICLE_POLICY = Object.freeze({
++  /** VIN is rendered by the public detail page (copy button, structured data); owner decision 13K. */
++  exposeVin: false,
++  /** Seller account phone feeds the public "Call Seller" action; owner decision 13K. */
++  exposeSellerPhone: false,
++});
++
++const DETAIL_FIELDS = new Set(("id _id slug title brand model year price mileage fuel transmission bodyType body_type color engine driveType drive_type drivetrain condition description features images coverImage cover_image city location_city status views inspectionStatus inspection_status dutyStatus duty_status isVerifiedDealer is_verified_dealer isPromoted is_promoted dealRating deal_rating auctionStatus auction_status auctionEnd auction_end auctionStartTime auction_start_time startingBid starting_bid currentBid current_bid bidsCount bids_count allowBid allow_bid allowBuy allow_buy hasAuction has_auction isAuction createdAt created_at updatedAt updated_at escrowEnabled escrow_enabled sold dealer").split(" "));
++const SUMMARY_FIELDS = new Set(("id _id slug status title price images coverImage cover_image brand year model city location_city fuel transmission mileage bodyType body_type color condition description allowBid allow_bid allowBuy allow_buy auctionStatus auction_status currentBid current_bid bidsCount bids_count views trustScore trust_score dealRating deal_rating createdAt created_at dealer dealer_id isVerifiedDealer is_verified_dealer inspectionStatus inspection_status ntsaVerified ntsa_verified dutyStatus duty_status isPromoted is_promoted escrowEnabled escrow_enabled").split(" "));
++const DEALER_FIELDS = new Set("id _id name businessName business_name avatar role dealerApprovedAt dealerRating".split(" "));
++
++const filterKeys = (src, allow) => Object.fromEntries(Object.entries(src || {}).filter(([k, v]) => allow.has(k) && v !== undefined));
++export const toPublicDealer = (dealer, policy = PUBLIC_VEHICLE_POLICY) => {
++  if (!dealer || typeof dealer !== "object") return dealer; // an unpopulated foreign key is only the seller id already used for chat/profile links
++  const out = filterKeys(dealer, DEALER_FIELDS);
++  if (policy.exposeSellerPhone && dealer.phone) out.phone = dealer.phone;
++  return out;
++};
++export const toPublicVehicleDetail = (car, policy = PUBLIC_VEHICLE_POLICY) => {
++  const out = filterKeys(car, DETAIL_FIELDS);
++  if (policy.exposeVin && car?.vin) out.vin = car.vin;
++  if (car?.dealer !== undefined) out.dealer = toPublicDealer(car.dealer, policy);
++  return out;
++};
++export const toPublicVehicleSummary = (car, policy = PUBLIC_VEHICLE_POLICY) => {
++  const out = filterKeys(car, SUMMARY_FIELDS);
++  if (car?.dealer !== undefined) out.dealer = toPublicDealer(car.dealer, policy);
++  return out;
++};

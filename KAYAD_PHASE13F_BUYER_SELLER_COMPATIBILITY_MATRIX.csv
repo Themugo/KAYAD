@@ -1,0 +1,14 @@
+actor_state,buyer_dashboard_favorites_bids,apply_to_sell,seller_studio_and_listing_writes,public_listings_visible,dealer_business_api,evidence
+"buyer, never applied",yes,yes,no (403),n/a,no (403),BROWSER B1-B6; HTTP A
+pending,yes,no (409),no,n/a,no,BROWSER B3-B6; HTTP B
+approved,yes,no,yes,yes,no (403),"BROWSER D1-D2,L1-L4,DL2-DL3; HTTP D"
+rejected,yes,yes (re-apply),no,n/a,no,BROWSER X3-X5; HTTP
+suspended,yes,no,no (401/403),hidden,no,BROWSER S1-S7; DB; HTTP E
+revoked,yes,no,no,hidden,no,BROWSER V1-V3; HTTP G
+reinstated (from suspended/revoked),yes,no,yes,only policy-hidden eligible listings restored,no,"BROWSER R1-R3,V3; DB"
+legacy individual_seller approved (no row),yes,n/a,yes,yes,no,HTTP J; UNIT
+legacy individual_seller pending,yes,n/a,yes (as before 13E),yes,no,UNIT; HTTP J
+legacy individual_seller suspended/revoked/rejected,yes,n/a,no; workspace action hidden,hidden (if row),no,UNIT; HTTP J
+dealer,own dealer workflow unchanged,n/a (not applicable),dealer workflow unchanged,own,yes,BROWSER DL1; HTTP K
+admin (MANAGE_USERS),n/a,n/a,n/a,n/a,n/a,BROWSER A1-A4; HTTP C
+anonymous,no (login),no,no,published only,no,BROWSER N2-N4; HTTP

@@ -1,0 +1,8 @@
+PASS ledger idempotency closes concurrent insert race
+PASS ledger account locks are deterministic
+PASS ledger rejects same-account postings
+PASS M-Pesa webhook receipt is replay-safe under concurrent insert
+PASS M-Pesa webhook lock has bounded long-running TTL
+PASS inventory synchronization lock covers large batches
+PASS production never silently falls back to process-local locks
+Runtime convergence static gate: 7/7 PASS

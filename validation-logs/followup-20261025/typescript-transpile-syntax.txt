@@ -1,0 +1,10 @@
+PASS TS/TSX syntax src/pages/admin/AdminPrivateSellerApplications.tsx
+PASS TS/TSX syntax src/components/SellerCapabilityPanel.tsx
+PASS TS/TSX syntax src/services/privateSellerCapabilityApi.ts
+PASS TS/TSX syntax src/components/admin/AdminRouteSurface.tsx
+PASS TS/TSX syntax src/components/admin/AdminSidebar.tsx
+PASS TS/TSX syntax src/context/AuthContext.tsx
+PASS TS/TSX syntax src/utils/permissions.ts
+PASS TS/TSX syntax src/__tests__/pages/AdminPrivateSellerApplications.test.tsx
+PASS TS/TSX syntax src/__tests__/components/admin/AdminRouteSurface.test.tsx
+9/9 files passed transpile syntax check

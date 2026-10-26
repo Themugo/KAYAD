@@ -1,0 +1,1 @@
+PASS - lucide-react named imports exist in the installed package (116 importing modules across 246 reachable files)

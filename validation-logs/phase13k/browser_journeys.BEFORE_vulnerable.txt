@@ -1,0 +1,33 @@
+PASS J1 desktop-1280 anonymous: vehicle detail renders title and listing price
+PASS J1 desktop-1280 anonymous: legitimate seller display and actions present (seller name, Contact Dealer, View Showroom)
+PASS J1 desktop-1280 anonymous: no VIN row / copy-VIN button rendered (VIN hidden by contract)
+PASS J1 desktop-1280 anonymous: seller phone not shown and no tel: link rendered
+PASS J1 desktop-1280 anonymous: no sensitive value anywhere in the rendered page text
+FAIL J1 desktop-1280 anonymous: no sensitive value in any API response the page fetched (16 GETs) :: /api/cars/c13055b0-154e-4b10-9069-b8ebdc8cc787→9876543+VINK13UI9517283+CHSK13UI9517283+REGK13UI9517283++254799517283++254711517283+owner-9517283-k13ui@kayad-test.example+5b9d0ceb-67fc-4e50-a37b-e98c86a334a0
+PASS J1 desktop-1280 anonymous: the detail API call itself was made and returned 200
+PASS J1 desktop-1280 anonymous: no uncaught page errors, no 5xx
+PASS J2 desktop-1280 anonymous: hidden listing is not displayed and leaks nothing
+PASS J2 desktop-1280 anonymous: hidden detail API answered 404
+PASS J2 desktop-1280 anonymous: deleted listing is not displayed and leaks nothing
+PASS J2 desktop-1280 anonymous: deleted detail API answered 404
+FAIL J3 desktop-1280 signed-in buyer: detail renders, no sensitive value in page or API bodies :: render=true textLeak= apiLeak=/api/cars?limit=50→+254711517283 | /api/cars?limit=50→+254711517283
+PASS J1 mobile-390 anonymous: vehicle detail renders title and listing price
+PASS J1 mobile-390 anonymous: legitimate seller display and actions present (seller name, Contact Dealer, View Showroom)
+PASS J1 mobile-390 anonymous: no VIN row / copy-VIN button rendered (VIN hidden by contract)
+PASS J1 mobile-390 anonymous: seller phone not shown and no tel: link rendered
+PASS J1 mobile-390 anonymous: no sensitive value anywhere in the rendered page text
+FAIL J1 mobile-390 anonymous: no sensitive value in any API response the page fetched (15 GETs) :: /api/cars?limit=50→+254711517283
+FAIL J1 mobile-390 anonymous: the detail API call itself was made and returned 200 :: 
+PASS J1 mobile-390 anonymous: no uncaught page errors, no 5xx
+PASS J1 mobile-390 anonymous: no horizontal scroll
+FAIL J2 mobile-390 anonymous: hidden listing is not displayed and leaks nothing :: KAYAD | Verified vehicles across East Africa | Live auctions | Transparent bidding | Protected trans
+PASS J2 mobile-390 anonymous: hidden detail API answered 404
+FAIL J2 mobile-390 anonymous: deleted listing is not displayed and leaks nothing :: KAYAD | Verified vehicles across East Africa | Live auctions | Transparent bidding | Protected trans
+PASS J2 mobile-390 anonymous: deleted detail API answered 404
+FAIL J3 mobile-390 signed-in buyer: detail renders, no sensitive value in page or API bodies :: render=true textLeak= apiLeak=/api/cars?limit=50→+254711517283 | /api/cars?limit=50→+254711517283
+PASS J4 (observation) owner session opening own hidden listing in the SPA: not rendered by the SPA flow (API-level owner/staff view is certified in the HTTP suite)
+OPEN K13UI9517283 available:client-side navigation | K13UI9517283 hidden:client-side navigation | K13UI9517283 deleted:client-side navigation | K13UI9517283 available:client-side navigation | K13UI9517283 available:client-side navigation | K13UI9517283 hidden:client-side navigation | K13UI9517283 deleted:client-side navigation | K13UI9517283 available:client-side navigation
+
+SUMMARY pass=21 fail=7
+A11Y detail-anon-desktop-1280: critical=2 serious=1 button-name(critical,1) color-contrast(serious,27) label(critical,2)
+A11Y detail-anon-mobile-390: critical=2 serious=2 aria-prohibited-attr(serious,1) button-name(critical,1) color-contrast(serious,13) label(critical,2)

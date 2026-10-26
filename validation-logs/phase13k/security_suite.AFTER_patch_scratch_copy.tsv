@@ -1,0 +1,277 @@
+PASS	available · cars/:id · anonymous → 200 with vehicle	status=200
+PASS	available · cars/:id · anonymous → no sensitive VALUES anywhere in body	
+PASS	available · cars/:id · anonymous → no denied KEYS at any depth	
+PASS	available · cars/:id · anonymous → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	available · cars/:id · buyer → 200 with vehicle	status=200
+PASS	available · cars/:id · buyer → no sensitive VALUES anywhere in body	
+PASS	available · cars/:id · buyer → no denied KEYS at any depth	
+PASS	available · cars/:id · buyer → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	available · cars/:id · psApproved → 200 with vehicle	status=200
+PASS	available · cars/:id · psApproved → no sensitive VALUES anywhere in body	
+PASS	available · cars/:id · psApproved → no denied KEYS at any depth	
+PASS	available · cars/:id · psApproved → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	available · cars/:id · psPending → 200 with vehicle	status=200
+PASS	available · cars/:id · psPending → no sensitive VALUES anywhere in body	
+PASS	available · cars/:id · psPending → no denied KEYS at any depth	
+PASS	available · cars/:id · psPending → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	available · cars/:id · dealer → 200 with vehicle	status=200
+PASS	available · cars/:id · dealer → no sensitive VALUES anywhere in body	
+PASS	available · cars/:id · dealer → no denied KEYS at any depth	
+PASS	available · cars/:id · dealer → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	available · cars/:id · rival → 200 with vehicle	status=200
+PASS	available · cars/:id · rival → no sensitive VALUES anywhere in body	
+PASS	available · cars/:id · rival → no denied KEYS at any depth	
+PASS	available · cars/:id · rival → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	available · v1/cars/:id · anonymous → 200 with vehicle	status=200
+PASS	available · v1/cars/:id · anonymous → no sensitive VALUES anywhere in body	
+PASS	available · v1/cars/:id · anonymous → no denied KEYS at any depth	
+PASS	available · v1/cars/:id · anonymous → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	available · v1/cars/:id · buyer → 200 with vehicle	status=200
+PASS	available · v1/cars/:id · buyer → no sensitive VALUES anywhere in body	
+PASS	available · v1/cars/:id · buyer → no denied KEYS at any depth	
+PASS	available · v1/cars/:id · buyer → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	available · v1/cars/:id · psApproved → 200 with vehicle	status=200
+PASS	available · v1/cars/:id · psApproved → no sensitive VALUES anywhere in body	
+PASS	available · v1/cars/:id · psApproved → no denied KEYS at any depth	
+PASS	available · v1/cars/:id · psApproved → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	available · v1/cars/:id · psPending → 200 with vehicle	status=200
+PASS	available · v1/cars/:id · psPending → no sensitive VALUES anywhere in body	
+PASS	available · v1/cars/:id · psPending → no denied KEYS at any depth	
+PASS	available · v1/cars/:id · psPending → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	available · v1/cars/:id · dealer → 200 with vehicle	status=200
+PASS	available · v1/cars/:id · dealer → no sensitive VALUES anywhere in body	
+PASS	available · v1/cars/:id · dealer → no denied KEYS at any depth	
+PASS	available · v1/cars/:id · dealer → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	available · v1/cars/:id · rival → 200 with vehicle	status=200
+PASS	available · v1/cars/:id · rival → no sensitive VALUES anywhere in body	
+PASS	available · v1/cars/:id · rival → no denied KEYS at any depth	
+PASS	available · v1/cars/:id · rival → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	sold · cars/:id · anonymous → 200 with vehicle	status=200
+PASS	sold · cars/:id · anonymous → no sensitive VALUES anywhere in body	
+PASS	sold · cars/:id · anonymous → no denied KEYS at any depth	
+PASS	sold · cars/:id · anonymous → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	sold · cars/:id · buyer → 200 with vehicle	status=200
+PASS	sold · cars/:id · buyer → no sensitive VALUES anywhere in body	
+PASS	sold · cars/:id · buyer → no denied KEYS at any depth	
+PASS	sold · cars/:id · buyer → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	sold · cars/:id · psApproved → 200 with vehicle	status=200
+PASS	sold · cars/:id · psApproved → no sensitive VALUES anywhere in body	
+PASS	sold · cars/:id · psApproved → no denied KEYS at any depth	
+PASS	sold · cars/:id · psApproved → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	sold · cars/:id · psPending → 200 with vehicle	status=200
+PASS	sold · cars/:id · psPending → no sensitive VALUES anywhere in body	
+PASS	sold · cars/:id · psPending → no denied KEYS at any depth	
+PASS	sold · cars/:id · psPending → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	sold · cars/:id · dealer → 200 with vehicle	status=200
+PASS	sold · cars/:id · dealer → no sensitive VALUES anywhere in body	
+PASS	sold · cars/:id · dealer → no denied KEYS at any depth	
+PASS	sold · cars/:id · dealer → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	sold · cars/:id · rival → 200 with vehicle	status=200
+PASS	sold · cars/:id · rival → no sensitive VALUES anywhere in body	
+PASS	sold · cars/:id · rival → no denied KEYS at any depth	
+PASS	sold · cars/:id · rival → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	sold · v1/cars/:id · anonymous → 200 with vehicle	status=200
+PASS	sold · v1/cars/:id · anonymous → no sensitive VALUES anywhere in body	
+PASS	sold · v1/cars/:id · anonymous → no denied KEYS at any depth	
+PASS	sold · v1/cars/:id · anonymous → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	sold · v1/cars/:id · buyer → 200 with vehicle	status=200
+PASS	sold · v1/cars/:id · buyer → no sensitive VALUES anywhere in body	
+PASS	sold · v1/cars/:id · buyer → no denied KEYS at any depth	
+PASS	sold · v1/cars/:id · buyer → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	sold · v1/cars/:id · psApproved → 200 with vehicle	status=200
+PASS	sold · v1/cars/:id · psApproved → no sensitive VALUES anywhere in body	
+PASS	sold · v1/cars/:id · psApproved → no denied KEYS at any depth	
+PASS	sold · v1/cars/:id · psApproved → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	sold · v1/cars/:id · psPending → 200 with vehicle	status=200
+PASS	sold · v1/cars/:id · psPending → no sensitive VALUES anywhere in body	
+PASS	sold · v1/cars/:id · psPending → no denied KEYS at any depth	
+PASS	sold · v1/cars/:id · psPending → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	sold · v1/cars/:id · dealer → 200 with vehicle	status=200
+PASS	sold · v1/cars/:id · dealer → no sensitive VALUES anywhere in body	
+PASS	sold · v1/cars/:id · dealer → no denied KEYS at any depth	
+PASS	sold · v1/cars/:id · dealer → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	sold · v1/cars/:id · rival → 200 with vehicle	status=200
+PASS	sold · v1/cars/:id · rival → no sensitive VALUES anywhere in body	
+PASS	sold · v1/cars/:id · rival → no denied KEYS at any depth	
+PASS	sold · v1/cars/:id · rival → top-level fields ⊆ allowlist, dealer ⊆ dealer allowlist	carExtra=0 dealerExtra=0
+PASS	UI contract (api): title/brand/model/year/price/mileage/fuel/transmission/condition/description/images fields present	
+PASS	UI contract (api): city, auction fields, escrowEnabled, dutyStatus, inspectionStatus present	
+PASS	UI contract (api): seller display data present (dealer id + name for chat/profile/Listed-by)	dealerKeys=id,name,business_name,role,businessName,dealerRating,dealerApprovedAt
+PASS	seller phone policy=hide (api)	phone absent
+PASS	VIN policy=hide (api)	vin absent
+PASS	UI contract (v1): title/brand/model/year/price/mileage/fuel/transmission/condition/description/images fields present	
+PASS	UI contract (v1): city, auction fields, escrowEnabled, dutyStatus, inspectionStatus present	
+PASS	UI contract (v1): seller display data present (dealer id + name for chat/profile/Listed-by)	dealerKeys=id,name,business_name,role,businessName,dealerRating,dealerApprovedAt
+PASS	seller phone policy=hide (v1)	phone absent
+PASS	VIN policy=hide (v1)	vin absent
+PASS	hidden · api · anonymous → 404 generic, no data	status=404
+PASS	hidden · api · buyer → 404 generic, no data	status=404
+PASS	hidden · api · psApproved → 404 generic, no data	status=404
+PASS	hidden · api · psPending → 404 generic, no data	status=404
+PASS	hidden · api · dealer → 404 generic, no data	status=404
+PASS	hidden · api · rival → 404 generic, no data	status=404
+PASS	hidden · v1 · anonymous → 404 generic, no data	status=404
+PASS	hidden · v1 · buyer → 404 generic, no data	status=404
+PASS	hidden · v1 · psApproved → 404 generic, no data	status=404
+PASS	hidden · v1 · psPending → 404 generic, no data	status=404
+PASS	hidden · v1 · dealer → 404 generic, no data	status=404
+PASS	hidden · v1 · rival → 404 generic, no data	status=404
+PASS	pending · api · anonymous → 404 generic, no data	status=404
+PASS	pending · api · buyer → 404 generic, no data	status=404
+PASS	pending · api · psApproved → 404 generic, no data	status=404
+PASS	pending · api · psPending → 404 generic, no data	status=404
+PASS	pending · api · dealer → 404 generic, no data	status=404
+PASS	pending · api · rival → 404 generic, no data	status=404
+PASS	pending · v1 · anonymous → 404 generic, no data	status=404
+PASS	pending · v1 · buyer → 404 generic, no data	status=404
+PASS	pending · v1 · psApproved → 404 generic, no data	status=404
+PASS	pending · v1 · psPending → 404 generic, no data	status=404
+PASS	pending · v1 · dealer → 404 generic, no data	status=404
+PASS	pending · v1 · rival → 404 generic, no data	status=404
+PASS	draft · api · anonymous → 404 generic, no data	status=404
+PASS	draft · api · buyer → 404 generic, no data	status=404
+PASS	draft · api · psApproved → 404 generic, no data	status=404
+PASS	draft · api · psPending → 404 generic, no data	status=404
+PASS	draft · api · dealer → 404 generic, no data	status=404
+PASS	draft · api · rival → 404 generic, no data	status=404
+PASS	draft · v1 · anonymous → 404 generic, no data	status=404
+PASS	draft · v1 · buyer → 404 generic, no data	status=404
+PASS	draft · v1 · psApproved → 404 generic, no data	status=404
+PASS	draft · v1 · psPending → 404 generic, no data	status=404
+PASS	draft · v1 · dealer → 404 generic, no data	status=404
+PASS	draft · v1 · rival → 404 generic, no data	status=404
+PASS	deleted · api · anonymous → 404 generic, no data	status=404
+PASS	deleted · api · buyer → 404 generic, no data	status=404
+PASS	deleted · api · psApproved → 404 generic, no data	status=404
+PASS	deleted · api · psPending → 404 generic, no data	status=404
+PASS	deleted · api · dealer → 404 generic, no data	status=404
+PASS	deleted · api · rival → 404 generic, no data	status=404
+PASS	deleted · v1 · anonymous → 404 generic, no data	status=404
+PASS	deleted · v1 · buyer → 404 generic, no data	status=404
+PASS	deleted · v1 · psApproved → 404 generic, no data	status=404
+PASS	deleted · v1 · psPending → 404 generic, no data	status=404
+PASS	deleted · v1 · dealer → 404 generic, no data	status=404
+PASS	deleted · v1 · rival → 404 generic, no data	status=404
+PASS	available · owner (owner/staff) → 200 and keeps full edit view (reserve, chassis, VIN)	status=200
+PASS	available · admin (owner/staff) → 200 and keeps full edit view (reserve, chassis, VIN)	status=200
+PASS	hidden · owner (owner/staff) → 200 and keeps full edit view (reserve, chassis, VIN)	status=200
+PASS	hidden · admin (owner/staff) → 200 and keeps full edit view (reserve, chassis, VIN)	status=200
+PASS	deleted · owner (owner/staff) → 200 and keeps full edit view (reserve, chassis, VIN)	status=200
+PASS	deleted · admin (owner/staff) → 200 and keeps full edit view (reserve, chassis, VIN)	status=200
+PASS	non-owner dealer cannot open another dealer's hidden listing	status=404
+PASS	id "82f3f673-bb49-40ce-a" · api · anonymous → 4xx, no data, no stack/debug	status=404
+PASS	id "82f3f673-bb49-40ce-a" · api · buyer → 4xx, no data, no stack/debug	status=404
+PASS	id "82f3f673-bb49-40ce-a" · v1 · anonymous → 4xx, no data, no stack/debug	status=404
+PASS	id "82f3f673-bb49-40ce-a" · v1 · buyer → 4xx, no data, no stack/debug	status=404
+PASS	id "not-a-uuid" · api · anonymous → 4xx, no data, no stack/debug	status=400
+PASS	id "not-a-uuid" · api · buyer → 4xx, no data, no stack/debug	status=400
+PASS	id "not-a-uuid" · v1 · anonymous → 4xx, no data, no stack/debug	status=400
+PASS	id "not-a-uuid" · v1 · buyer → 4xx, no data, no stack/debug	status=400
+PASS	id "1" · api · anonymous → 4xx, no data, no stack/debug	status=400
+PASS	id "1" · api · buyer → 4xx, no data, no stack/debug	status=400
+PASS	id "1" · v1 · anonymous → 4xx, no data, no stack/debug	status=400
+PASS	id "1" · v1 · buyer → 4xx, no data, no stack/debug	status=400
+PASS	id "%00" · api · anonymous → 4xx, no data, no stack/debug	status=400
+PASS	id "%00" · api · buyer → 4xx, no data, no stack/debug	status=400
+PASS	id "%00" · v1 · anonymous → 4xx, no data, no stack/debug	status=400
+PASS	id "%00" · v1 · buyer → 4xx, no data, no stack/debug	status=400
+PASS	id "'%20OR%201=1--" · api · anonymous → 4xx, no data, no stack/debug	status=400
+PASS	id "'%20OR%201=1--" · api · buyer → 4xx, no data, no stack/debug	status=400
+PASS	id "'%20OR%201=1--" · v1 · anonymous → 4xx, no data, no stack/debug	status=400
+PASS	id "'%20OR%201=1--" · v1 · buyer → 4xx, no data, no stack/debug	status=400
+PASS	id "..%2Fcars" · api · anonymous → 4xx, no data, no stack/debug	status=400
+PASS	id "..%2Fcars" · api · buyer → 4xx, no data, no stack/debug	status=400
+PASS	id "..%2Fcars" · v1 · anonymous → 4xx, no data, no stack/debug	status=400
+PASS	id "..%2Fcars" · v1 · buyer → 4xx, no data, no stack/debug	status=400
+PASS	id "00000000-0000-0000-0" · api · anonymous → 4xx, no data, no stack/debug	status=404
+PASS	id "00000000-0000-0000-0" · api · buyer → 4xx, no data, no stack/debug	status=404
+PASS	id "00000000-0000-0000-0" · v1 · anonymous → 4xx, no data, no stack/debug	status=404
+PASS	id "00000000-0000-0000-0" · v1 · buyer → 4xx, no data, no stack/debug	status=404
+PASS	expansion ?fields=* · anonymous → no sensitive values/keys	status=200
+PASS	expansion ?fields=* · buyer → no sensitive values/keys	status=200
+PASS	expansion ?select=* · anonymous → no sensitive values/keys	status=200
+PASS	expansion ?select=* · buyer → no sensitive values/keys	status=200
+PASS	expansion ?include=reserve,dealer · anonymous → no sensitive values/keys	status=200
+PASS	expansion ?include=reserve,dealer · buyer → no sensitive values/keys	status=200
+PASS	expansion ?populate=dealer · anonymous → no sensitive values/keys	status=200
+PASS	expansion ?populate=dealer · buyer → no sensitive values/keys	status=200
+PASS	expansion ?expand=all · anonymous → no sensitive values/keys	status=200
+PASS	expansion ?expand=all · buyer → no sensitive values/keys	status=200
+PASS	expansion ?debug=1 · anonymous → no sensitive values/keys	status=200
+PASS	expansion ?debug=1 · buyer → no sensitive values/keys	status=200
+PASS	expansion ?admin=true · anonymous → no sensitive values/keys	status=200
+PASS	expansion ?admin=true · buyer → no sensitive values/keys	status=200
+PASS	expansion ?fields=reserve_price,dealer_phone,vin · anonymous → no sensitive values/keys	status=200
+PASS	expansion ?fields=reserve_price,dealer_phone,vin · buyer → no sensitive values/keys	status=200
+PASS	header x-fields cannot widen anonymous response	status=200
+PASS	header x-include cannot widen anonymous response	status=200
+PASS	header x-role cannot widen anonymous response	status=200
+PASS	header x-forwarded-user cannot widen anonymous response	status=200
+PASS	header x-user-id cannot widen anonymous response	status=200
+PASS	alternate path /api/cars/:id/ → no sensitive data	status=200
+PASS	alternate path /api/v2/cars/:id → no sensitive data	status=404
+PASS	alternate path /api/CARS/:id → no sensitive data	status=200
+PASS	cache: owner full view never contaminates the anonymous cached body	anon1=200 owner=200 anon2=200
+PASS	cache: authenticated buyer body is sanitized too (not just anonymous)	
+PASS	cache lifecycle: primed anonymous responses (api + v1) are 200 and sanitized	
+PASS	cache lifecycle: after owner soft-delete, anonymous api + v1 return 404 (no stale cached body)	delete=200 api=404 v1=404
+PASS	cache lifecycle: after restore, listing is public again and still sanitized	status=200
+PASS	related /api/cars?brand=:run · anonymous → no sensitive values	status=200
+PASS	related /api/cars?brand=:run · buyer → no sensitive values	status=200
+PASS	related /api/v1/cars?brand=:run · anonymous → no sensitive values	status=200
+PASS	related /api/v1/cars?brand=:run · buyer → no sensitive values	status=200
+PASS	related /api/cars?search=:run · anonymous → no sensitive values	status=200
+PASS	related /api/cars?search=:run · buyer → no sensitive values	status=200
+PASS	related /api/cars/:id/insights · anonymous → no sensitive values	status=200
+PASS	related /api/cars/:id/insights · buyer → no sensitive values	status=200
+PASS	related /api/cars/:id/price-history · anonymous → no sensitive values	status=200
+PASS	related /api/cars/:id/price-history · buyer → no sensitive values	status=200
+PASS	related /api/cars/:id/valuation · anonymous → no sensitive values	status=200
+PASS	related /api/cars/:id/valuation · buyer → no sensitive values	status=200
+PASS	related /api/valuation/:id · anonymous → no sensitive values	status=200
+PASS	related /api/valuation/:id · buyer → no sensitive values	status=200
+PASS	related /api/market/pulse/:id · anonymous → no sensitive values	status=200
+PASS	related /api/market/pulse/:id · buyer → no sensitive values	status=200
+PASS	related /api/listing-quality/car/:id · anonymous → no sensitive values	status=500
+PASS	related /api/listing-quality/car/:id · buyer → no sensitive values	status=500
+PASS	related /api/ntsa-verification/car/:id/status · anonymous → no sensitive values	status=401
+PASS	related /api/ntsa-verification/car/:id/status · buyer → no sensitive values	status=500
+PASS	related /api/auctions · anonymous → no sensitive values	status=200
+PASS	related /api/auctions · buyer → no sensitive values	status=200
+PASS	related /api/auctions/active · anonymous → no sensitive values	status=200
+PASS	related /api/auctions/active · buyer → no sensitive values	status=200
+PASS	related /api/auctions/:id · anonymous → no sensitive values	status=404
+PASS	related /api/auctions/:id · buyer → no sensitive values	status=404
+PASS	related /api/auctions/:id/bids · anonymous → no sensitive values	status=404
+PASS	related /api/auctions/:id/bids · buyer → no sensitive values	status=404
+PASS	related /api/auctions/:id/room · anonymous → no sensitive values	status=200
+PASS	related /api/auctions/:id/room · buyer → no sensitive values	status=200
+PASS	related /api/bids/:id/bids · anonymous → no sensitive values	status=401
+PASS	related /api/bids/:id/bids · buyer → no sensitive values	status=200
+PASS	related /api/dealer-platform/profile/:id · anonymous → no sensitive values	status=200
+PASS	related /api/dealer-platform/profile/:id · buyer → no sensitive values	status=200
+PASS	related /api/dealer-health-score/:id · anonymous → no sensitive values	status=500
+PASS	related /api/dealer-health-score/:id · buyer → no sensitive values	status=500
+PASS	related /api/duplicates/:id · anonymous → no sensitive values	status=401
+PASS	related /api/duplicates/:id · buyer → no sensitive values	status=403
+PASS	related /api/recommendations · anonymous → no sensitive values	status=401
+PASS	related /api/recommendations · buyer → no sensitive values	status=200
+PASS	related /api/search?q=:run · anonymous → no sensitive values	status=200
+PASS	related /api/search?q=:run · buyer → no sensitive values	status=200
+PASS	related /api/search?keyword=:run&limit=100 · anonymous → no sensitive values	status=200
+PASS	related /api/search?keyword=:run&limit=100 · buyer → no sensitive values	status=200
+PASS	related /api/search/autocomplete?q=:run · anonymous → no sensitive values	status=200
+PASS	related /api/search/autocomplete?q=:run · buyer → no sensitive values	status=200
+PASS	related /api/search/facets?brand=:run · anonymous → no sensitive values	status=200
+PASS	related /api/search/facets?brand=:run · buyer → no sensitive values	status=200
+PASS	related /api/analytics/market/most-viewed?limit=100 · anonymous → no sensitive values	status=200
+PASS	related /api/analytics/market/most-viewed?limit=100 · buyer → no sensitive values	status=200
+PASS	related /api/seo/sitemap-cars.xml · anonymous → no sensitive values	status=404
+PASS	related /api/seo/sitemap-cars.xml · buyer → no sensitive values	status=404
+PASS	related /sitemap-cars.xml · anonymous → no sensitive values	status=200
+PASS	related /sitemap-cars.xml · buyer → no sensitive values	status=200
+PASS	related /api/favorites · anonymous → no sensitive values	status=401
+PASS	related /api/favorites · buyer → no sensitive values	status=200
+PASS	13J: registration route still returns only the allowlisted contract (no reserve/payout/fulfilment/snapshot)	status=200
+PASS	13J: auction-setup config (reserve, payout account, fulfilment, snapshot) never appears in public vehicle detail	status=200
+SUMMARY http://127.0.0.1:5056 (VIN_POLICY=hide, SELLER_PHONE_POLICY=hide): 276/276 passed, 0 failed

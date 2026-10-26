@@ -1,0 +1,7 @@
+PASS Production verifier checks browser-facing /api/health
+PASS Production verifier checks canonical /api/cars inventory
+PASS Production verifier validates inventory response contract
+PASS Production verifier checks both Vercel rewrite and public-domain inventory paths
+PASS Vercel canonical API rewrite remains explicit
+PASS SPA fallback remains after API rewrite and excludes /api and /assets
+Production verifier contract validation: PASS

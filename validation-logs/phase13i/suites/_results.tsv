@@ -1,0 +1,10 @@
+baseline-typecheck	npm run typecheck	0	62
+baseline-backend-jest	npm run test:jest	0	235
+baseline-backend-vitest	npm run test:vitest	0	17
+baseline-backend-node-test	npm run test:node	0	1
+baseline-frontend-vitest	npx vitest run	0	309
+baseline-validate-phase13e	npm run validate:phase13e-listing-visibility	0	0
+baseline-validate-migration-hygiene	npm run validate:migration-hygiene	0	0
+baseline-validate-supabase-migrations	npm run validate:supabase-migrations	0	1
+baseline-validate-stage5f7	npm run validate:stage5f7-private-auction-contract	1	0
+baseline-validate-superadmin-nav	npm run validate:super-admin-phase1-navigation	0	0

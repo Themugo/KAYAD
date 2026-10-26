@@ -1,0 +1,16 @@
+=== 0. identity of what was described (not a secret) ===
+=== 1. which of the listed tables exist ===
+=== 2. columns, types, nullability, defaults, generated/identity ===
+=== 3. constraints (PK, FK, UNIQUE, CHECK, EXCLUDE) ===
+=== 4. indexes ===
+=== 5. triggers (definitions) ===
+=== 6. RLS state and policies ===
+=== 7. grants (who can touch these tables) ===
+=== 8. sequences owned by these tables ===
+=== 9. views / materialized views that depend on them (definitions) ===
+=== 10. functions/procedures in public (names + definitions of those that mention a listed table) ===
+=== 11. installed extensions ===
+=== 12. migration history (names/versions only) ===
+supabase_migrations.schema_migrations does not exist: record how schema changes are applied (external process?)
+=== 13. roles relevant to the API (no passwords) ===
+=== 14. approximate row counts only (planner statistics, no table scan) ===

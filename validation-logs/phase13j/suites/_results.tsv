@@ -1,0 +1,13 @@
+typecheck	npm run typecheck	0	63
+build	npm run build	0	6
+backend-jest	npm run test:jest	0	240
+backend-vitest	npm run test:vitest	0	17
+backend-node-test	npm run test:node	0	1
+frontend-vitest	npx vitest run	0	283
+validate-phase13e	npm run validate:phase13e-listing-visibility	0	0
+validate-migration-hygiene	npm run validate:migration-hygiene	0	0
+validate-supabase-migrations	npm run validate:supabase-migrations	0	1
+validate-stage5f7	npm run validate:stage5f7-private-auction-contract	1	0
+validate-superadmin-nav	npm run validate:super-admin-phase1-navigation	0	0
+personal-account-matrix	node runbooks/phase13i-20261026/http/phase13i_personal_account_matrix.mjs	0	49
+public-endpoint-exposure	node runbooks/phase13i-20261026/http/phase13i_public_endpoint_exposure.mjs	0	5

@@ -1,0 +1,15 @@
+--- a/backend/routes/auctionRegistrationRoutes.js	2026-10-26 08:34:30.550986328 +0300
++++ b/backend/routes/auctionRegistrationRoutes.js	2026-10-26 08:34:30.584211080 +0300
+@@ -18,8 +18,10 @@
+ 
+ router.get("/:id/registration", protect, validateObjectId, asyncHandler(async (req, res) => {
+   const result = await getRegistration({ auctionId: req.params.id, userId: req.user.id });
+-  if (!result.car) return res.status(404).json({ success: false, message: "Auction not found" });
+-  res.json({ success: true, ...result });
++  // SECURITY (Phase 13I proposal, NOT APPLIED): answer only for publicly listed vehicles and return an allow-list, never the raw row.
++  if (!result.car || !["available", "sold"].includes(String(result.car.status)) || result.car.deletedAt || result.car.deleted_at) return res.status(404).json({ success: false, message: "Auction not found" });
++  const { id, title, brand, model, year, price, mileage, coverImage, images, auctionStatus, auctionStartTime, auctionEnd, startingBid, currentBid, bidsCount, allowBid, status } = result.car;
++  res.json({ success: true, ...result, car: { id, title, brand, model, year, price, mileage, coverImage, images, auctionStatus, auctionStartTime, auctionEnd, startingBid, currentBid, bidsCount, allowBid, status } });
+ }));
+ 
+ router.post("/:id/registration", protect, validateObjectId, asyncHandler(async (req, res) => {

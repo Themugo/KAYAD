@@ -1,0 +1,146 @@
+{
+  "BEFORE (13J, unpatched)": {
+    "GET /api/cars/:id": {
+      "http": 200,
+      "fieldCount": 110,
+      "dealerKeys": [
+        "bio",
+        "businessName",
+        "business_name",
+        "dealerApprovedAt",
+        "dealerRating",
+        "dealer_approved_at",
+        "dealer_rating",
+        "email",
+        "id",
+        "location",
+        "name",
+        "phone",
+        "role"
+      ],
+      "sensitiveValuesPresent": [
+        "reservePrice",
+        "listingDealerPhone",
+        "chassisNumber",
+        "vin",
+        "registrationNumber",
+        "highestBidderId",
+        "sellerAccountPhone",
+        "sellerEmail"
+      ]
+    },
+    "GET /api/v1/cars/:id": {
+      "http": 200,
+      "fieldCount": 110,
+      "dealerKeys": [
+        "bio",
+        "businessName",
+        "business_name",
+        "dealerApprovedAt",
+        "dealerRating",
+        "dealer_approved_at",
+        "dealer_rating",
+        "email",
+        "id",
+        "location",
+        "name",
+        "phone",
+        "role"
+      ],
+      "sensitiveValuesPresent": [
+        "reservePrice",
+        "listingDealerPhone",
+        "chassisNumber",
+        "vin",
+        "registrationNumber",
+        "highestBidderId",
+        "sellerAccountPhone",
+        "sellerEmail"
+      ]
+    },
+    "GET /api/search?q=": {
+      "http": 200,
+      "fieldCount": 110,
+      "dealerKeys": null,
+      "sensitiveValuesPresent": [
+        "reservePrice",
+        "listingDealerPhone",
+        "chassisNumber",
+        "vin",
+        "registrationNumber",
+        "highestBidderId"
+      ]
+    },
+    "GET /api/cars?brand=": {
+      "http": 200,
+      "fieldCount": 50,
+      "dealerKeys": [
+        "avatar",
+        "businessName",
+        "business_name",
+        "dealerApprovedAt",
+        "dealer_approved_at",
+        "id",
+        "logo",
+        "name",
+        "phone",
+        "role"
+      ],
+      "sensitiveValuesPresent": [
+        "sellerAccountPhone"
+      ]
+    }
+  },
+  "AFTER (13K, patched)": {
+    "GET /api/cars/:id": {
+      "http": 200,
+      "fieldCount": 62,
+      "dealerKeys": [
+        "businessName",
+        "business_name",
+        "dealerApprovedAt",
+        "dealerRating",
+        "id",
+        "name",
+        "role"
+      ],
+      "sensitiveValuesPresent": []
+    },
+    "GET /api/v1/cars/:id": {
+      "http": 200,
+      "fieldCount": 62,
+      "dealerKeys": [
+        "businessName",
+        "business_name",
+        "dealerApprovedAt",
+        "dealerRating",
+        "id",
+        "name",
+        "role"
+      ],
+      "sensitiveValuesPresent": []
+    },
+    "GET /api/search?q=": {
+      "http": 200,
+      "fieldCount": 52,
+      "dealerKeys": null,
+      "sensitiveValuesPresent": []
+    },
+    "GET /api/cars?brand=": {
+      "http": 200,
+      "fieldCount": 50,
+      "dealerKeys": [
+        "avatar",
+        "businessName",
+        "business_name",
+        "dealerApprovedAt",
+        "dealer_approved_at",
+        "id",
+        "logo",
+        "name",
+        "role"
+      ],
+      "sensitiveValuesPresent": []
+    }
+  }
+}

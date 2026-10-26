@@ -1,0 +1,27 @@
+desktop dealer dashboard -> /?nav=dealer-dashboard | h="Dealer Hub" crash=false overflow=0 axe=none errs=0
+desktop dealer onboarding -> /dealer/onboarding | h="Set Up Your Shop" crash=false overflow=0 axe=none errs=0
+desktop dealer auction-setup -> /dealer/auction-setup | h="Build an auction people want to enter." crash=false overflow=0 axe=color-contrast:4 errs=0
+desktop dealer auction-operations -> /dealer/auction-operations | h="A premium command centre for every auction outcome." crash=false overflow=0 axe=color-contrast:5 errs=0
+desktop dealer notifications -> /notifications | h="Notifications" crash=false overflow=0 axe=none errs=0
+desktop buyer dashboard -> / | h="Something went wrong" crash=true overflow=0 axe=color-contrast:1 errs=0
+desktop buyer onboarding -> / | h="Something went wrong" crash=true overflow=0 axe=color-contrast:1 errs=0
+desktop buyer auction-setup -> / | h="Something went wrong" crash=true overflow=0 axe=color-contrast:1 errs=0
+desktop buyer auction-operations -> / | h="Something went wrong" crash=true overflow=0 axe=color-contrast:1 errs=0
+tablet dealer dashboard -> /?nav=dealer-dashboard | h="Dealer Hub" crash=false overflow=0 axe=none errs=0
+tablet dealer onboarding -> /dealer/onboarding | h="Set Up Your Shop" crash=false overflow=0 axe=none errs=0
+tablet dealer auction-setup -> /dealer/auction-setup | h="Build an auction people want to enter." crash=false overflow=0 axe=color-contrast:4 errs=0
+tablet dealer auction-operations -> /dealer/auction-operations | h="A premium command centre for every auction outcome." crash=false overflow=0 axe=color-contrast:5 errs=0
+tablet dealer notifications -> /notifications | h="Notifications" crash=false overflow=0 axe=none errs=0
+tablet buyer dashboard -> / | h="Something went wrong" crash=true overflow=0 axe=color-contrast:1 errs=0
+tablet buyer onboarding -> / | h="Something went wrong" crash=true overflow=0 axe=color-contrast:1 errs=0
+tablet buyer auction-setup -> / | h="Something went wrong" crash=true overflow=0 axe=color-contrast:1 errs=0
+tablet buyer auction-operations -> / | h="Something went wrong" crash=true overflow=0 axe=color-contrast:1 errs=0
+mobile dealer dashboard -> /?nav=dealer-dashboard | h="Dealer Hub" crash=false overflow=0 axe=none errs=0
+mobile dealer onboarding -> /dealer/onboarding | h="Set Up Your Shop" crash=false overflow=0 axe=none errs=0
+mobile dealer auction-setup -> /dealer/auction-setup | h="Build an auction people want to enter." crash=false overflow=0 axe=color-contrast:4 errs=0
+mobile dealer auction-operations -> /dealer/auction-operations | h="A premium command centre for every auction outcome." crash=false overflow=0 axe=color-contrast:5 errs=0
+mobile dealer notifications -> /notifications | h="Notifications" crash=false overflow=0 axe=none errs=0
+mobile buyer dashboard -> / | h="Something went wrong" crash=true overflow=0 axe=color-contrast:1 errs=0
+mobile buyer onboarding -> / | h="Something went wrong" crash=true overflow=0 axe=color-contrast:1 errs=0
+mobile buyer auction-setup -> / | h="Something went wrong" crash=true overflow=0 axe=color-contrast:1 errs=0
+mobile buyer auction-operations -> / | h="Something went wrong" crash=true overflow=0 axe=color-contrast:1 errs=0

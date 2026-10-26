@@ -1,0 +1,4 @@
+Phase 12 admin status-token convergence: PASS (21 direct tokens, 26 scoped compatibility aliases)
+PASS severity mappings: critical, warning, info and neutral fallback
+PASS legacy unresolved status variables removed from Operations Control Room
+PASS compatibility aliases resolve through canonical admin tokens

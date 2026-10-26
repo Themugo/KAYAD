@@ -1,0 +1,4 @@
+Migration hygiene: 186 migration files scanned.
+PASS exact duplicate migration bodies: none
+PASS duplicate table creators: none
+Migration hygiene gate: PASS

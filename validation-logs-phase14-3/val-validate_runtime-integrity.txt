@@ -1,0 +1,8 @@
+PASS obsolete browser Supabase clients removed
+PASS SocketContext uses canonical backend Socket.IO transport
+PASS production API fallback is same-origin
+PASS user preference stats no longer returns 501
+PASS src/main.tsx exists
+PASS src/App.tsx exists
+PASS src/api/httpRequest.ts exists
+Runtime integrity validation passed: 7/7

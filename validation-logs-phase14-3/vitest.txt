@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /home/claude/work/p143/KAYAD-PHASE14.3-FULL-DEALER-BUSINESS-OPERATIONS-CONVERGENCE-20261026
+
+
+ Test Files  113 passed (113)
+      Tests  909 passed | 1 skipped (910)
+   Start at  12:40:11
+   Duration  283.05s (transform 8.64s, setup 17.16s, import 28.08s, tests 100.62s, environment 113.00s)
+

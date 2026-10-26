@@ -1,0 +1,861 @@
+{
+  "routes": 480,
+  "statusCounts": {
+    "200": 339,
+    "400": 14,
+    "403": 6,
+    "404": 2,
+    "405": 1,
+    "408": 2,
+    "500": 113,
+    "503": 3
+  },
+  "serverErrors": [
+    {
+      "path": "/api/admin/ads",
+      "status": 500,
+      "cause": "relation \"public.ads\" does not exist"
+    },
+    {
+      "path": "/api/admin/alerts",
+      "status": 500,
+      "cause": "relation \"public.admin_alerts\" does not exist"
+    },
+    {
+      "path": "/api/admin/chats",
+      "status": 500,
+      "cause": "column chats.updated_at does not exist"
+    },
+    {
+      "path": "/api/admin/market-data",
+      "status": 500,
+      "cause": "relation \"public.market_data\" does not exist"
+    },
+    {
+      "path": "/api/admin/queue/aggregated",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/admin/queue/dlq/jobs",
+      "status": 503,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/admin/queue/dlq/statistics",
+      "status": 503,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/admin/queue/failures",
+      "status": 500,
+      "cause": "relation \"public.job_failures\" does not exist"
+    },
+    {
+      "path": "/api/admin/queue/statistics",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/admin/referrals/stats",
+      "status": 500,
+      "cause": "relation \"public.transactions\" does not exist"
+    },
+    {
+      "path": "/api/ai/analytics",
+      "status": 500,
+      "cause": "relation \"public.ai_commands\" does not exist"
+    },
+    {
+      "path": "/api/ai/conversations",
+      "status": 500,
+      "cause": "relation \"public.ai_conversations\" does not exist"
+    },
+    {
+      "path": "/api/ai/dashboard",
+      "status": 500,
+      "cause": "relation \"public.ai_commands\" does not exist"
+    },
+    {
+      "path": "/api/ai/history",
+      "status": 500,
+      "cause": "relation \"public.ai_commands\" does not exist"
+    },
+    {
+      "path": "/api/ai/knowledge",
+      "status": 500,
+      "cause": "relation \"public.ai_knowledge\" does not exist"
+    },
+    {
+      "path": "/api/ai/prompts",
+      "status": 500,
+      "cause": "relation \"public.ai_prompts\" does not exist"
+    },
+    {
+      "path": "/api/ai/workspaces",
+      "status": 500,
+      "cause": "relation \"public.ai_workspaces\" does not exist"
+    },
+    {
+      "path": "/api/analytics/market/county-trends",
+      "status": 500,
+      "cause": "column cars.location does not exist"
+    },
+    {
+      "path": "/api/announcements",
+      "status": 500,
+      "cause": "relation \"public.announcements\" does not exist"
+    },
+    {
+      "path": "/api/automation/approvals",
+      "status": 500,
+      "cause": "relation \"public.approval_chains\" does not exist"
+    },
+    {
+      "path": "/api/automation/logs",
+      "status": 500,
+      "cause": "relation \"public.workflow_logs\" does not exist"
+    },
+    {
+      "path": "/api/automation/scheduled",
+      "status": 500,
+      "cause": "relation \"public.scheduled_jobs\" does not exist"
+    },
+    {
+      "path": "/api/automation/stats",
+      "status": 500,
+      "cause": "relation \"public.automation_tasks\" does not exist"
+    },
+    {
+      "path": "/api/automation/tasks",
+      "status": 500,
+      "cause": "relation \"public.automation_tasks\" does not exist"
+    },
+    {
+      "path": "/api/automation/templates/notifications",
+      "status": 500,
+      "cause": "relation \"public.notification_templates\" does not exist"
+    },
+    {
+      "path": "/api/automation/workflows",
+      "status": 500,
+      "cause": "relation \"public.workflows\" does not exist"
+    },
+    {
+      "path": "/api/bids/admin/suspicious",
+      "status": 500,
+      "cause": "column bids.is_suspicious does not exist"
+    },
+    {
+      "path": "/api/config/audit",
+      "status": 500,
+      "cause": "relation \"public.config_audit_logs\" does not exist"
+    },
+    {
+      "path": "/api/config/countries",
+      "status": 500,
+      "cause": "relation \"public.country_configs\" does not exist"
+    },
+    {
+      "path": "/api/config/entries",
+      "status": 500,
+      "cause": "relation \"public.config_entries\" does not exist"
+    },
+    {
+      "path": "/api/config/export",
+      "status": 500,
+      "cause": "relation \"public.config_entries\" does not exist"
+    },
+    {
+      "path": "/api/config/features",
+      "status": 500,
+      "cause": "relation \"public.feature_flags\" does not exist"
+    },
+    {
+      "path": "/api/config/location",
+      "status": 500,
+      "cause": "relation \"public.location_master_data\" does not exist"
+    },
+    {
+      "path": "/api/config/location/cities",
+      "status": 500,
+      "cause": "relation \"public.location_master_data\" does not exist"
+    },
+    {
+      "path": "/api/config/location/countries",
+      "status": 500,
+      "cause": "relation \"public.location_master_data\" does not exist"
+    },
+    {
+      "path": "/api/config/location/regions",
+      "status": 500,
+      "cause": "relation \"public.location_master_data\" does not exist"
+    },
+    {
+      "path": "/api/config/reference",
+      "status": 500,
+      "cause": "relation \"public.reference_data\" does not exist"
+    },
+    {
+      "path": "/api/config/stats",
+      "status": 500,
+      "cause": "relation \"public.location_master_data\" does not exist"
+    },
+    {
+      "path": "/api/config/vehicle",
+      "status": 500,
+      "cause": "relation \"public.vehicle_master_data\" does not exist"
+    },
+    {
+      "path": "/api/config/vehicle/makes",
+      "status": 500,
+      "cause": "relation \"public.vehicle_master_data\" does not exist"
+    },
+    {
+      "path": "/api/config/vehicle/models",
+      "status": 500,
+      "cause": "relation \"public.vehicle_master_data\" does not exist"
+    },
+    {
+      "path": "/api/contact",
+      "status": 500,
+      "cause": "relation \"public.contacts\" does not exist"
+    },
+    {
+      "path": "/api/dealer-health-score/admin/alerts",
+      "status": 500,
+      "cause": "relation \"public.dealer_health_scores\" does not exist"
+    },
+    {
+      "path": "/api/dealer-health-score/admin/distribution",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/dealer-health-score/ranking/list",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/dealer/trade-listings",
+      "status": 503,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/digital-twin/dashboard",
+      "status": 500,
+      "cause": "relation \"public.predictions\" does not exist"
+    },
+    {
+      "path": "/api/digital-twin/predictions",
+      "status": 500,
+      "cause": "relation \"public.predictions\" does not exist"
+    },
+    {
+      "path": "/api/digital-twin/scenarios",
+      "status": 500,
+      "cause": "relation \"public.scenarios\" does not exist"
+    },
+    {
+      "path": "/api/digital-twin/simulations",
+      "status": 500,
+      "cause": "relation \"public.simulations\" does not exist"
+    },
+    {
+      "path": "/api/duplicates/all",
+      "status": 500,
+      "cause": "relation \"public.duplicate_vehicle_logs\" does not exist"
+    },
+    {
+      "path": "/api/escrow/operations/dashboard",
+      "status": 500,
+      "cause": "relation \"public.escrow_anomalies\" does not exist"
+    },
+    {
+      "path": "/api/feature-flags",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/feature-flags/meta/categories",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/feature-flags/user",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/feedback/admin/all",
+      "status": 500,
+      "cause": "relation \"public.feedback\" does not exist"
+    },
+    {
+      "path": "/api/finance/issues",
+      "status": 500,
+      "cause": "Verify that 'issue_details' is included in the 'select' query parameter.\""
+    },
+    {
+      "path": "/api/fraud/all",
+      "status": 500,
+      "cause": "relation \"public.fraud_detection\" does not exist"
+    },
+    {
+      "path": "/api/fraud/analytics",
+      "status": 500,
+      "cause": "relation \"public.fraud_detection\" does not exist"
+    },
+    {
+      "path": "/api/funnel/dealer/analytics",
+      "status": 500,
+      "cause": "relation \"public.conversion_funnels\" does not exist"
+    },
+    {
+      "path": "/api/intelligence/countries",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/intelligence/inspections",
+      "status": 500,
+      "cause": "relation \"public.inspections\" does not exist"
+    },
+    {
+      "path": "/api/listing-quality/platform/benchmarks",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/listing-quality/platform/low-quality",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/listing-quality/platform/stats",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/listing-quality/platform/trends",
+      "status": 500,
+      "cause": "relation \"public.listing_quality\" does not exist"
+    },
+    {
+      "path": "/api/lowcode/dashboards",
+      "status": 500,
+      "cause": "relation \"public.custom_dashboards\" does not exist"
+    },
+    {
+      "path": "/api/lowcode/objects",
+      "status": 500,
+      "cause": "relation \"public.business_objects\" does not exist"
+    },
+    {
+      "path": "/api/lowcode/stats",
+      "status": 500,
+      "cause": "relation \"public.form_definitions\" does not exist"
+    },
+    {
+      "path": "/api/marketplace-health/admin/all",
+      "status": 500,
+      "cause": "relation \"public.marketplace_health\" does not exist"
+    },
+    {
+      "path": "/api/marketplace-health/alerts",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/marketplace-health/metrics",
+      "status": 500,
+      "cause": "relation \"public.marketplace_health\" does not exist"
+    },
+    {
+      "path": "/api/marketplace-health/summary",
+      "status": 500,
+      "cause": "relation \"public.marketplace_health\" does not exist"
+    },
+    {
+      "path": "/api/new-admin/auction-integrity",
+      "status": 500,
+      "cause": "relation \"public.auction_integrity_flags\" does not exist"
+    },
+    {
+      "path": "/api/new-admin/auction-integrity/dashboard",
+      "status": 500,
+      "cause": "relation \"public.auction_integrity_flags\" does not exist"
+    },
+    {
+      "path": "/api/new-admin/auction-integrity/risk-profiles",
+      "status": 500,
+      "cause": "relation \"public.auction_risk_profiles\" does not exist"
+    },
+    {
+      "path": "/api/notification-analytics/channel-stats",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/notification-analytics/delivery-report",
+      "status": 500,
+      "cause": "relation \"public.notification_audits\" does not exist"
+    },
+    {
+      "path": "/api/notification-analytics/delivery-stats",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/notification-analytics/engagement-metrics",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/notification-analytics/failure-analysis",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/notification-analytics/platform-stats",
+      "status": 500,
+      "cause": "relation \"public.notification_audits\" does not exist"
+    },
+    {
+      "path": "/api/notification-analytics/retry-queue",
+      "status": 500,
+      "cause": "relation \"public.notification_audits\" does not exist"
+    },
+    {
+      "path": "/api/notification-analytics/retry-stats",
+      "status": 500,
+      "cause": "not a schema error (no relation/column message in the log)"
+    },
+    {
+      "path": "/api/notification-analytics/trends",
+      "status": 500,
+      "cause": "relation \"public.notification_audits\" does not exist"
+    },
+    {
+      "path": "/api/organizations/platform-stats",
+      "status": 500,
+      "cause": "relation \"public.organizations\" does not exist"
+    },
+    {
+      "path": "/api/reconciliation/alerts",
+      "status": 500,
+      "cause": "relation \"public.admin_alerts\" does not exist"
+    },
+    {
+      "path": "/api/referral/stats",
+      "status": 500,
+      "cause": "relation \"public.transactions\" does not exist"
+    },
+    {
+      "path": "/api/reliability/error-budgets",
+      "status": 500,
+      "cause": "relation \"public.error_budgets\" does not exist"
+    },
+    {
+      "path": "/api/reliability/health",
+      "status": 500,
+      "cause": "relation \"public.error_budgets\" does not exist"
+    },
+    {
+      "path": "/api/reliability/report",
+      "status": 500,
+      "cause": "relation \"public.error_budgets\" does not exist"
+    },
+    {
+      "path": "/api/reports/admin/all",
+      "status": 500,
+      "cause": "relation \"public.reports\" does not exist"
+    },
+    {
+      "path": "/api/reports/my",
+      "status": 500,
+      "cause": "relation \"public.reports\" does not exist"
+    },
+    {
+      "path": "/api/security-logs",
+      "status": 500,
+      "cause": "relation \"public.security_logs\" does not exist"
+    },
+    {
+      "path": "/api/security-logs/my",
+      "status": 500,
+      "cause": "relation \"public.security_logs\" does not exist"
+    },
+    {
+      "path": "/api/security-logs/summary",
+      "status": 500,
+      "cause": "relation \"public.security_logs\" does not exist"
+    },
+    {
+      "path": "/api/sms-bidding/my",
+      "status": 500,
+      "cause": "relation \"public.sms_bidders\" does not exist"
+    },
+    {
+      "path": "/api/vxp/advertisements",
+      "status": 500,
+      "cause": "relation \"public.vx_advertisements\" does not exist"
+    },
+    {
+      "path": "/api/vxp/cards",
+      "status": 500,
+      "cause": "relation \"public.vx_cards\" does not exist"
+    },
+    {
+      "path": "/api/vxp/components",
+      "status": 500,
+      "cause": "relation \"public.vx_components\" does not exist"
+    },
+    {
+      "path": "/api/vxp/pages",
+      "status": 500,
+      "cause": "relation \"public.vx_pages\" does not exist"
+    },
+    {
+      "path": "/api/vxp/sections",
+      "status": 500,
+      "cause": "relation \"public.vx_sections\" does not exist"
+    },
+    {
+      "path": "/api/vxp/stats",
+      "status": 500,
+      "cause": "relation \"public.vx_cards\" does not exist"
+    },
+    {
+      "path": "/api/vxp/themes",
+      "status": 500,
+      "cause": "relation \"public.vx_themes\" does not exist"
+    },
+    {
+      "path": "/api/vxp/themes/default",
+      "status": 500,
+      "cause": "relation \"public.vx_themes\" does not exist"
+    },
+    {
+      "path": "/api/vxp/versions",
+      "status": 500,
+      "cause": "relation \"public.vx_versions\" does not exist"
+    },
+    {
+      "path": "/api/xos/analytics",
+      "status": 500,
+      "cause": "relation \"public.experience_analytics\" does not exist"
+    },
+    {
+      "path": "/api/xos/audiences",
+      "status": 500,
+      "cause": "relation \"public.audiences\" does not exist"
+    },
+    {
+      "path": "/api/xos/campaigns",
+      "status": 500,
+      "cause": "relation \"public.campaigns\" does not exist"
+    },
+    {
+      "path": "/api/xos/dashboard",
+      "status": 500,
+      "cause": "relation \"public.journeys\" does not exist"
+    },
+    {
+      "path": "/api/xos/experiences",
+      "status": 500,
+      "cause": "relation \"public.experiences\" does not exist"
+    },
+    {
+      "path": "/api/xos/journeys",
+      "status": 500,
+      "cause": "relation \"public.journeys\" does not exist"
+    },
+    {
+      "path": "/api/xos/navigation-rules",
+      "status": 500,
+      "cause": "relation \"public.navigation_rules\" does not exist"
+    },
+    {
+      "path": "/api/xos/resolve",
+      "status": 500,
+      "cause": "relation \"public.experiences\" does not exist"
+    },
+    {
+      "path": "/api/xos/themes",
+      "status": 500,
+      "cause": "relation \"public.seasonal_themes\" does not exist"
+    },
+    {
+      "path": "/api/xos/variants",
+      "status": 500,
+      "cause": "relation \"public.homepage_variants\" does not exist"
+    }
+  ],
+  "schemaErrors": [
+    {
+      "error": "relation \"public.ads\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.admin_alerts\" does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "column chats.updated_at does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.market_data\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.job_failures\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.transactions\" does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "relation \"public.ai_commands\" does not exist",
+      "occurrences": 3
+    },
+    {
+      "error": "relation \"public.ai_conversations\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.ai_knowledge\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.ai_prompts\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.ai_workspaces\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "column cars.location does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "relation \"public.announcements\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.approval_chains\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.workflow_logs\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.scheduled_jobs\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.automation_tasks\" does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "relation \"public.notification_templates\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.workflows\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "column bids.is_suspicious does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.config_audit_logs\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.country_configs\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.config_entries\" does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "relation \"public.feature_flags\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.location_master_data\" does not exist",
+      "occurrences": 5
+    },
+    {
+      "error": "relation \"public.reference_data\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.vehicle_master_data\" does not exist",
+      "occurrences": 3
+    },
+    {
+      "error": "relation \"public.contacts\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.dealer_health_scores\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.predictions\" does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "relation \"public.scenarios\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.simulations\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.duplicate_vehicle_logs\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.escrow_anomalies\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.feedback\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.fraud_detection\" does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "relation \"public.conversion_funnels\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.inspections\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.listing_quality\" does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "relation \"public.custom_dashboards\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.business_objects\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.form_definitions\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.marketplace_health\" does not exist",
+      "occurrences": 3
+    },
+    {
+      "error": "relation \"public.auction_integrity_flags\" does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "relation \"public.auction_risk_profiles\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.notification_audits\" does not exist",
+      "occurrences": 7
+    },
+    {
+      "error": "relation \"public.organizations\" does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "relation \"public.error_budgets\" does not exist",
+      "occurrences": 8
+    },
+    {
+      "error": "relation \"public.reports\" does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "relation \"public.security_logs\" does not exist",
+      "occurrences": 3
+    },
+    {
+      "error": "relation \"public.sms_bidders\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.vx_advertisements\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.vx_cards\" does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "relation \"public.vx_components\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.vx_pages\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.vx_sections\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.vx_themes\" does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "relation \"public.vx_versions\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.experience_analytics\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.audiences\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.campaigns\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.journeys\" does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "relation \"public.experiences\" does not exist",
+      "occurrences": 2
+    },
+    {
+      "error": "relation \"public.navigation_rules\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.seasonal_themes\" does not exist",
+      "occurrences": 1
+    },
+    {
+      "error": "relation \"public.homepage_variants\" does not exist",
+      "occurrences": 1
+    }
+  ]
+}

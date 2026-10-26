@@ -1,0 +1,9 @@
+INSPECTION DOMAIN RLS ENABLEMENT: PASS (8/8 tables enabled, 0 inert-policy tables found tree-wide)
+- inspection_bookings: RLS enabled
+- inspection_disputes: RLS enabled
+- inspection_quality_audits: RLS enabled
+- inspection_report_amendments: RLS enabled
+- inspection_reports: RLS enabled
+- inspection_reviews: RLS enabled
+- inspection_staff: RLS enabled
+- inspection_status_history: RLS enabled

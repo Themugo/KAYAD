@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /home/claude/work/p142/_orig_ref
+
+
+ Test Files  110 passed (110)
+      Tests  879 passed | 1 skipped (880)
+   Start at  12:24:43
+   Duration  223.05s (transform 6.75s, setup 14.93s, import 22.37s, tests 75.22s, environment 91.43s)
+

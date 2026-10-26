@@ -1,0 +1,11 @@
+PASS homepage uses canonical VehicleMarketplace surface
+PASS homepage passes real user/admin context
+PASS hero prefers real featured inventory and keeps curated artwork presentation-only
+PASS hero has no remote background dependency
+PASS homepage has real live market signals
+PASS how-it-works action stays inside existing journey
+PASS featured picks use current server result source
+PASS no known demo identities in active homepage source
+PASS production env contract exists
+
+Homepage convergence validation: PASS

@@ -1,0 +1,50 @@
+{
+ "baseline": {
+  "errors": 5,
+  "warnings": 1557
+ },
+ "final": {
+  "errors": 0,
+  "warnings": 1557
+ },
+ "newViolations": [],
+ "resolved": 4,
+ "byRuleFinal": {
+  "react-hooks/set-state-in-effect [warn]": 159,
+  "react-hooks/immutability [warn]": 31,
+  "react-hooks/exhaustive-deps [warn]": 63,
+  "react-hooks/preserve-manual-memoization [warn]": 1,
+  "@typescript-eslint/no-explicit-any [warn]": 542,
+  "@typescript-eslint/no-unused-vars [warn]": 463,
+  "react-hooks/purity [warn]": 21,
+  "jsx-a11y/click-events-have-key-events [warn]": 71,
+  "jsx-a11y/no-static-element-interactions [warn]": 78,
+  "react-hooks/refs [warn]": 72,
+  "react-hooks/rules-of-hooks [warn]": 5,
+  "no-empty [warn]": 5,
+  "jsx-a11y/anchor-has-content [warn]": 1,
+  "(parse/other) [warn]": 4,
+  "react-hooks/static-components [warn]": 41
+ },
+ "byRuleBaseline": {
+  "react-hooks/set-state-in-effect [warn]": 159,
+  "react-hooks/immutability [warn]": 31,
+  "react-hooks/exhaustive-deps [warn]": 63,
+  "react-hooks/preserve-manual-memoization [warn]": 1,
+  "@typescript-eslint/no-explicit-any [warn]": 542,
+  "react-hooks/globals [error]": 1,
+  "@typescript-eslint/no-unused-vars [warn]": 463,
+  "react-hooks/purity [warn]": 21,
+  "jsx-a11y/click-events-have-key-events [warn]": 71,
+  "jsx-a11y/no-static-element-interactions [warn]": 78,
+  "react-hooks/refs [warn]": 72,
+  "react-hooks/rules-of-hooks [warn]": 5,
+  "no-empty [warn]": 5,
+  "jsx-a11y/anchor-has-content [warn]": 1,
+  "(parse/other) [warn]": 4,
+  "react-refresh/only-export-components [error]": 1,
+  "react-hooks/use-memo [error]": 1,
+  "no-useless-escape [error]": 2,
+  "react-hooks/static-components [warn]": 41
+ }
+}

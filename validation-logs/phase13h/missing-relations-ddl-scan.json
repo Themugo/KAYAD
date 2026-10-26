@@ -1,0 +1,166 @@
+{
+ "tables": [
+  "ads",
+  "ai_commands",
+  "ai_conversations",
+  "ai_knowledge",
+  "ai_prompts",
+  "ai_workspaces",
+  "announcements",
+  "approval_chains",
+  "auction_integrity_flags",
+  "auction_risk_profiles",
+  "audiences",
+  "automation_tasks",
+  "business_objects",
+  "campaigns",
+  "config_audit_logs",
+  "config_entries",
+  "contacts",
+  "conversion_funnels",
+  "country_configs",
+  "custom_dashboards",
+  "dealer_health_scores",
+  "duplicate_vehicle_logs",
+  "error_budgets",
+  "experience_analytics",
+  "experiences",
+  "feature_flags",
+  "feedback",
+  "fraud_detection",
+  "homepage_variants",
+  "inspections",
+  "job_failures",
+  "journeys",
+  "listing_quality",
+  "location_master_data",
+  "market_data",
+  "marketplace_health",
+  "navigation_rules",
+  "notification_audits",
+  "notification_templates",
+  "organizations",
+  "predictions",
+  "reference_data",
+  "reports",
+  "scenarios",
+  "scheduled_jobs",
+  "seasonal_themes",
+  "security_logs",
+  "simulations",
+  "sms_bidders",
+  "transactions",
+  "vehicle_master_data",
+  "vx_advertisements",
+  "vx_cards",
+  "vx_components",
+  "vx_pages",
+  "vx_sections",
+  "vx_themes",
+  "vx_versions",
+  "workflow_logs",
+  "workflows"
+ ],
+ "nonMigrationDDL": {
+  "organizations": [
+   "backend/db/identity.schema.sql"
+  ],
+  "transactions": [
+   "docs/messaging-consistency-audit/harness/sql/post_chain_harness_shim.sql"
+  ]
+ },
+ "otherCauses": [
+  [
+   "/api/admin/queue/aggregated",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/admin/queue/dlq/jobs",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/admin/queue/dlq/statistics",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/admin/queue/statistics",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/analytics/market/county-trends",
+   "column cars.location does not exist"
+  ],
+  [
+   "/api/bids/admin/suspicious",
+   "column bids.is_suspicious does not exist"
+  ],
+  [
+   "/api/dealer-health-score/admin/distribution",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/dealer-health-score/ranking/list",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/dealer/trade-listings",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/escrow/operations/dashboard",
+   "'issue_details' is not an embedded resource in this request"
+  ],
+  [
+   "/api/feature-flags",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/feature-flags/meta/categories",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/feature-flags/user",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/finance/issues",
+   "Verify that 'issue_details' is included in the 'select' query parameter.\""
+  ],
+  [
+   "/api/intelligence/countries",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/listing-quality/platform/benchmarks",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/listing-quality/platform/low-quality",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/listing-quality/platform/stats",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/marketplace-health/alerts",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/notification-analytics/channel-stats",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/notification-analytics/engagement-metrics",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/notification-analytics/failure-analysis",
+   "not a schema error (no relation/column message in the log)"
+  ],
+  [
+   "/api/notification-analytics/retry-stats",
+   "not a schema error (no relation/column message in the log)"
+  ]
+ ]
+}

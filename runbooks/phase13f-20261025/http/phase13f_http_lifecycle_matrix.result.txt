@@ -1,0 +1,104 @@
+PASS A1 buyer without application: /me says none, canApply, no seller privilege
+PASS A2 anonymous /me -> 401
+PASS A3 buyer applies (same users.id) -> 201 pending
+PASS A4 exactly one capability row keyed by the buyer's users.id; role/status of the buyer untouched
+PASS A5 duplicate application -> 409 SELLER_APPLICATION_EXISTS
+PASS A6 invalid phone -> 400
+PASS A7 terms not accepted -> 400
+PASS A8 unverified email cannot apply -> 403
+PASS A9 dealer cannot apply -> 403
+PASS A10 legacy individual_seller cannot apply (already a seller account) -> 403
+PASS A11 no dealer record was created for the applicant
+PASS B1 pending buyer still has buyer access (favorites)
+PASS B2 pending seller cannot create a listing (direct API) -> 403 SELLER_CAPABILITY_REQUIRED
+PASS B3 pending seller cannot reach dealer-business routes -> 403
+PASS B4 own-listing read view is available to a pending seller (write:false guard)
+PASS C1 buyer cannot list applications -> 403
+PASS C2 buyer cannot self-approve -> 403, state unchanged
+PASS C3 state still pending after self-approve attempt
+PASS C4 dealer cannot decide -> 403
+PASS C5 legacy seller cannot decide -> 403
+PASS C6 marketing staff (no MANAGE_USERS) cannot decide -> 403
+PASS C7 anonymous cannot decide -> 401
+PASS C8 staff with MANAGE_USERS (hr) may list applications -> 200
+PASS C9 malformed user id -> 400
+PASS C10 unknown decision -> 400
+PASS C11 no application -> 404
+PASS C12 pending cannot be suspended -> 409 INVALID_TRANSITION
+PASS C13 reject without a reason -> 400 REASON_REQUIRED
+PASS D1 admin approves -> 200 pending->approved
+PASS D2 database: approved, reviewer recorded, buyer identity untouched
+PASS D3 decision is audited (audit_logs fallback store)
+PASS D4 repeating the approval is rejected, not duplicated -> 409
+PASS D5 /me now approved + canList, buyer features intact
+PASS D6 buyer access intact after approval
+PASS D7 approved private seller still cannot use dealer-business routes -> 403
+PASS D8 approved seller creates a listing through the REAL API in the SAME account -> 201
+PASS D9 real createCar: owned by the buyer's users.id, NOT labelled a verified dealer, held for moderation (pending), no dealer row created
+PASS D10 anon marketplace lists the published listing (cache warmed)
+PASS D10b second call served from cache still lists it
+PASS D11 anon public detail -> 200
+PASS D11b anon featured list includes it (cache warmed)
+PASS D11c anon price-history of a public listing -> 200 (cache warmed)
+PASS D11d anon insights of a public listing -> 200 (cache warmed)
+PASS D11e anon search finds the listing (cache warmed)
+PASS D11f buyer2 saves the listing (saved vehicles)
+PASS D12 sitemap includes the listing
+PASS E1 suspend without a reason -> 400
+PASS E2 admin suspends -> 200 with truthful visibility result
+PASS E3 database: listing hidden, owner unchanged, event tracked
+PASS E4 cached marketplace list no longer shows it (cache invalidated)
+PASS E4b cached featured list no longer shows it
+PASS E4c cached search no longer returns the hidden listing
+PASS E4d price-history of a hidden listing -> 404 (direct by-id lookup)
+PASS E4e insights of a hidden listing -> 404
+PASS E4f valuation of a hidden listing -> 404
+PASS E5 direct public lookup by id -> 404 for anonymous
+PASS E6 direct lookup -> 404 for another logged-in buyer
+PASS E7 owner can still open their own hidden listing (records retained)
+PASS E7b owner/staff viewing the hidden listing does not repopulate the shared cache: anonymous still 404
+PASS E7c saved-vehicles list of another buyer does not expose the hidden listing's details
+PASS E7d a hidden listing cannot be newly saved by another buyer -> 404
+PASS E8 sitemap no longer includes the listing
+PASS E9 suspended seller cannot create listings -> 403
+PASS E10 suspended seller cannot edit the hidden listing -> 403
+PASS E11 suspended seller cannot delete the listing -> 403
+PASS E12 buyer functionality remains while suspended (favorites)
+PASS E13 suspended seller still blocked from dealer-business routes -> 403
+PASS E14 /me truthfully reports suspended
+PASS E15 retry of the same suspend -> 409, no duplicate side effects
+PASS E16 still exactly one open event
+PASS E17 backstop: a listing published while suspended is hidden immediately
+PASS F1 admin restores approval -> 200 suspended->approved with cache refreshed
+PASS F2 policy-hidden listings restored; manually hidden listing NOT published
+PASS F3 marketplace shows the restored listing again (no stale cache)
+PASS F4 public detail restored -> 200
+PASS F4b saved vehicle reappears for the buyer who saved it after restoration (favorite record retained)
+PASS F5 repeated reinstatement -> 409, nothing duplicated
+PASS F6 restored seller can edit their own listing again (real API)
+PASS G1 admin revokes approved seller -> 200
+PASS G2 listings hidden after revocation, ownership intact
+PASS G3 revoked: public lookup -> 404
+PASS G4 revoked seller blocked from listing writes -> 403
+PASS G5 cannot reject a revoked application -> 409
+PASS G6 admin reinstates a revoked seller -> 200
+PASS G7 listing restored after reinstatement from revoked
+PASS H1 buyer2 applies
+PASS H2 admin rejects with reason
+PASS H3 rejected buyer keeps buyer access
+PASS H4 rejected seller cannot write listings -> 403
+PASS H5 /me shows rejected with canApply
+PASS H6 rejected buyer may re-apply -> pending
+PASS H7 re-application cleared the previous review record
+PASS I1 two simultaneous approvals: exactly one succeeds, the other gets 409
+PASS I2 two simultaneous conflicting decisions never leave a contradictory state
+PASS J1 legacy approved seller (no capability row) still creates listings through the real API -> 201
+PASS J2 legacy suspended seller is blocked from listing writes -> 403 SELLER_CAPABILITY_BLOCKED
+PASS J3 no role conversion or record reassignment for legacy sellers
+PASS K1 profile endpoint cannot change role/capability
+PASS K2 direct database REST access with the anon role cannot read capability rows
+PASS K3 direct database REST write with the anon role cannot approve
+PASS L1 dealer owner keeps dealer-business access
+PASS L2 seller lifecycle never touched dealer-owned inventory
+PASS L3 a private seller cannot edit a dealer's listing -> 403/404
+phase13f_http_lifecycle_matrix: pass=103 fail=0

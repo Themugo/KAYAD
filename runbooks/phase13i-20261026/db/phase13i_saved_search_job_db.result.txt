@@ -1,0 +1,26 @@
+PASS J0 default environment (no variables): job does nothing
+PASS J0b invalid mode value behaves as off
+PASS J1 dry_run: plans the buyer's notification, emits nothing, writes no ledger row
+PASS J1b dry_run never enables external delivery even when requested
+PASS J1c the dry_run is audited (audit_logs 'Saved-search job run', details carry mode and counts)
+PASS J2 enabled (in-app only): exactly one ledger row, for the opted-in buyer
+PASS J2b only the publicly listed, recent, matching car was included (not pending/draft/hidden/sold/deleted/old)
+PASS J2c notify=false search, banned recipient and the seller's own listing produced nothing
+PASS J2d no provider was configured or called (external flag off)
+PASS J3 re-running immediately is idempotent: nothing planned, no new ledger rows
+PASS J4 two overlapping runs for one new car deliver it exactly once (lock and/or idempotency key)
+PASS J4b the second ledger row contains ONLY the new car (old one not repeated)
+PASS J5 external delivery enabled: every external channel is attempted separately through the double (never a real provider)
+PASS J5b the buyer's disabled email consent (gateway-style refusal) is counted, and does not stop sms/whatsapp
+PASS J5c in-app ledger row recorded for the third car
+PASS J6 REAL gateway, external flag on, no provider credentials: no external delivery row is created and nothing is sent
+PASS J6b the new car is still recorded in-app exactly once
+PASS J7 a listing hidden before the run is never announced
+PASS K1 a failed in-app delivery is counted and recorded as failed; the buyer whose delivery worked is unaffected
+PASS K2 the retry delivers the missed notification exactly once and does NOT re-send the one already delivered to the other buyer
+PASS K3 a further run is a no-op (no duplicates after retry)
+PASS K4 recipient isolation: every ledger row's user owns the saved search it names; no row names another buyer's search
+PASS K5 REAL gateway + REAL consent rows (A opted out, E opted in) + external flag on: no provider exists, so nothing is sent or queued for either buyer
+PASS K6 the job never writes consent rows (preferences unchanged by a run)
+PASS K7 both buyers still hold their in-app notification for the newest car, each exactly once
+phase13i_saved_search_job_db: pass=25 fail=0

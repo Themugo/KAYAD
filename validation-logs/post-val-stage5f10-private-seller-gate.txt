@@ -1,0 +1,45 @@
+PASS kayad_place_bid_atomic re-created in migration
+PASS kayad_place_bid_atomic evaluates the gate inside its transaction
+PASS kayad_place_bid_atomic locks the car before the gate
+PASS kayad_auto_bid_atomic re-created in migration
+PASS kayad_auto_bid_atomic evaluates the gate inside its transaction
+PASS kayad_auto_bid_atomic locks the car before the gate
+PASS kayad_start_auction_atomic re-created in migration
+PASS kayad_start_auction_atomic evaluates the gate inside its transaction
+PASS kayad_start_auction_atomic locks the car before the gate
+PASS kayad_start_scheduled_auction_atomic re-created in migration
+PASS kayad_start_scheduled_auction_atomic evaluates the gate inside its transaction
+PASS kayad_start_scheduled_auction_atomic locks the car before the gate
+PASS kayad_settle_bid_payment_atomic re-created in migration
+PASS kayad_settle_bid_payment_atomic evaluates the gate inside its transaction
+PASS kayad_settle_bid_payment_atomic locks the car before the gate
+PASS cars backstop trigger
+PASS auction_setups publish backstop trigger
+PASS audit tables append-only
+PASS RLS enabled on proposal tables
+PASS gate functions not executable by anon/authenticated
+PASS rollback runbook exists and is non-destructive
+PASS service calls the DB gate
+PASS service has no "no proposal => eligible" shortcut
+PASS service fails closed with 503
+PASS atomicPlaceBid maps the gate refusal to 409
+PASS atomicAutoBid maps the gate refusal to 409
+PASS atomicStartAuction maps the gate refusal to 409
+PASS atomicStartScheduledAuction maps the gate refusal to 409
+PASS atomicSettleBidPayment maps the gate refusal to 409
+PASS bid pre-check runs before payment is initiated
+PASS backend/controllers/auctionController.js uses the DB-backed gate
+PASS backend/controllers/carController.js uses the DB-backed gate
+PASS backend/services/auctionRoom.service.js uses the DB-backed gate
+PASS backend/services/sitemapService.js uses the DB-backed gate
+PASS backend/services/leadService.js uses the DB-backed gate
+PASS backend/services/auctionReminderCron.js uses the DB-backed gate
+PASS backend/services/reminderAutomationService.js uses the DB-backed gate
+PASS backend/services/auctionLifecycle.service.js uses the DB-backed gate
+PASS backend/services/auctionSetup.service.js uses the DB-backed gate
+PASS proposal router mounted
+PASS admin routes require admin role AND permission
+PASS mutations require Idempotency-Key
+PASS seller UI is inside PrivateSellerPlatform (no second dashboard)
+PASS admin UI mounted in AdminView
+stage5f10 gate contract: 44/44 passed

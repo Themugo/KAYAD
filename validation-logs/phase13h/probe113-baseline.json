@@ -1,0 +1,1564 @@
+[
+ {
+  "path": "/api/admin/ads",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:35:36] ERROR: Server error",
+   "    message: \"relation \\\"public.ads\\\" does not exist\""
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/admin/market-data",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "6] ERROR: Server error",
+   "    message: \"relation \\\"public.market_data\\\" does not exist\"",
+   "[03:35:36] ERROR: Critical memory usage detected"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/admin/queue/aggregated",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "/api/admin/queue/aggregated 500 45.060 ms - 62",
+   "[03:35:36] INFO: Email queue initialized",
+   "[03:35:36] INFO: Notification queue initialized"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/admin/queue/dlq/jobs",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 503,
+  "superadmin": 503,
+  "logExcerpt": [
+   "7] ERROR: Failed to get DLQ jobs",
+   "      \"message\": \"Dead letter queue not initialized\",",
+   "          Error: Dead letter queue not initialized"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/admin/queue/dlq/statistics",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 503,
+  "superadmin": 503,
+  "logExcerpt": [
+   "7] ERROR: Failed to get DLQ statistics",
+   "      \"message\": \"Dead letter queue not initialized\",",
+   "          Error: Dead letter queue not initialized"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/admin/queue/failures",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "8] ERROR: Failed to get job failures",
+   "    message: \"relation \\\"public.job_failures\\\" does not exist\"",
+   "    url: \"/api/admin/queue/failures\""
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/admin/queue/statistics",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "    url: \"/api/admin/queue/statistics\"",
+   "GET /api/admin/queue/statistics 500 23.099 ms - 60",
+   "[03:35:38] ERROR: Failed to get all queue statistics"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/admin/referrals/stats",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "9] ERROR: Server error",
+   "    message: \"relation \\\"public.transactions\\\" does not exist\"",
+   "Error: connect ECONNREFUSED 127.0.0.1:6379"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/ai/analytics",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:35:39] ERROR: Server error",
+   "    message: \"relation \\\"public.ai_commands\\\" does not exist\"",
+   "[03:35:39] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/ai/conversations",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "9] ERROR: Server error",
+   "    message: \"relation \\\"public.ai_conversations\\\" does not exist\"",
+   "Error: connect ECONNREFUSED 127.0.0.1:6379"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/ai/dashboard",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "0] ERROR: Server error",
+   "    message: \"relation \\\"public.ai_commands\\\" does not exist\"",
+   "[03:35:40] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/ai/history",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "0] ERROR: Server error",
+   "    message: \"relation \\\"public.ai_commands\\\" does not exist\"",
+   "[03:35:40] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/ai/knowledge",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:35:41] ERROR: Server error",
+   "    message: \"relation \\\"public.ai_knowledge\\\" does not exist\""
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/ai/prompts",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "1] ERROR: Server error",
+   "    message: \"relation \\\"public.ai_prompts\\\" does not exist\"",
+   "[03:35:41] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/ai/workspaces",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "2] ERROR: Server error",
+   "    message: \"relation \\\"public.ai_workspaces\\\" does not exist\"",
+   "[03:35:42] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/analytics/market/county-trends",
+  "anonymous": 500,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "2] ERROR: Failed to get county trends",
+   "    message: \"column cars.location does not exist\"",
+   "[03:35:42] ERROR: Failed to get county trends"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/announcements",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "2] ERROR: Get announcements error",
+   "    message: \"relation \\\"public.announcements\\\" does not exist\"",
+   "[03:35:42] ERROR: Get announcements error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/automation/approvals",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:35:43] ERROR: Server error",
+   "    message: \"relation \\\"public.approval_chains\\\" does not exist\""
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/automation/logs",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "3] ERROR: Server error",
+   "    message: \"relation \\\"public.workflow_logs\\\" does not exist\"",
+   "[03:35:43] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/automation/scheduled",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "3] ERROR: Server error",
+   "    message: \"relation \\\"public.scheduled_jobs\\\" does not exist\"",
+   "[03:35:43] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/automation/stats",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "4] ERROR: Server error",
+   "    message: \"relation \\\"public.workflows\\\" does not exist\"",
+   "[03:35:44] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/automation/tasks",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:35:44] ERROR: Server error",
+   "    message: \"relation \\\"public.automation_tasks\\\" does not exist\""
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/automation/templates/notifications",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "5] ERROR: Server error",
+   "    message: \"relation \\\"public.notification_templates\\\" does not exist\"",
+   "[03:35:45] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/automation/workflows",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "5] ERROR: Server error",
+   "    message: \"relation \\\"public.workflows\\\" does not exist\"",
+   "[03:35:45] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/bids/admin/suspicious",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "5] ERROR: Server error",
+   "    message: \"column bids.is_suspicious does not exist\"",
+   "[03:35:45] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/config/audit",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:35:46] ERROR: Server error",
+   "    message: \"relation \\\"public.config_audit_logs\\\" does not exist\""
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/config/countries",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "6] ERROR: Server error",
+   "    message: \"relation \\\"public.country_configs\\\" does not exist\"",
+   "[03:35:46] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/config/entries",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "7] ERROR: Server error",
+   "    message: \"relation \\\"public.config_entries\\\" does not exist\"",
+   "[03:35:47] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/config/export",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "7] ERROR: Server error",
+   "    message: \"relation \\\"public.config_entries\\\" does not exist\"",
+   "[03:35:47] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/config/features",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "7] ERROR: Server error",
+   "    message: \"relation \\\"public.feature_flags\\\" does not exist\"",
+   "[03:35:47] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/config/location",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:35:48] ERROR: Server error",
+   "    message: \"relation \\\"public.location_master_data\\\" does not exist\""
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/config/location/cities",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:35:48] ERROR: Server error",
+   "    message: \"relation \\\"public.location_master_data\\\" does not exist\"",
+   "[03:35:48] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/config/location/countries",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:35:49] ERROR: Server error",
+   "    message: \"relation \\\"public.location_master_data\\\" does not exist\""
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/config/location/regions",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "9] ERROR: Server error",
+   "    message: \"relation \\\"public.location_master_data\\\" does not exist\"",
+   "[03:35:49] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/config/reference",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "9] ERROR: Server error",
+   "    message: \"relation \\\"public.reference_data\\\" does not exist\"",
+   "[03:35:49] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/config/stats",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "0] ERROR: Server error",
+   "    message: \"relation \\\"public.feature_flags\\\" does not exist\"",
+   "[03:35:50] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/config/vehicle",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "0] ERROR: Server error",
+   "    message: \"relation \\\"public.vehicle_master_data\\\" does not exist\"",
+   "[03:35:50] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/config/vehicle/makes",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "1] ERROR: Server error",
+   "    message: \"relation \\\"public.vehicle_master_data\\\" does not exist\"",
+   "[03:35:51] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/config/vehicle/models",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "1] ERROR: Server error",
+   "    message: \"relation \\\"public.vehicle_master_data\\\" does not exist\"",
+   "[03:35:51] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/contact",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "1] ERROR: Failed to list contacts",
+   "    message: \"relation \\\"public.contacts\\\" does not exist\"",
+   "[03:35:51] ERROR: Failed to list contacts"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/dealer-health-score/admin/alerts",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "2] ERROR: Failed to get score alerts",
+   "    message: \"relation \\\"public.dealer_health_scores\\\" does not exist\"",
+   "[03:35:52] ERROR: Failed to get score alerts"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/dealer-health-score/admin/distribution",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "2] ERROR: Failed to get score distribution",
+   "      \"message\": \"DealerHealthScore.getScoreDistribution is not a function\",",
+   "          TypeError: DealerHealthScore.getScoreDistribution is not a function"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/dealer-health-score/ranking/list",
+  "anonymous": 500,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:35:52] ERROR: Failed to get dealer ranking",
+   "          TypeError: DealerHealthScore.getTopDealers is not a function",
+   "      \"name\": \"TypeError\""
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/dealer/trade-listings",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 503,
+  "admin": 503,
+  "superadmin": 503,
+  "logExcerpt": [],
+  "feRef": true
+ },
+ {
+  "path": "/api/digital-twin/dashboard",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "3] ERROR: Server error",
+   "    message: \"relation \\\"public.scenarios\\\" does not exist\"",
+   "[03:35:53] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/digital-twin/predictions",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "4] ERROR: Server error",
+   "    message: \"relation \\\"public.predictions\\\" does not exist\"",
+   "[03:35:54] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/digital-twin/scenarios",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "4] ERROR: Server error",
+   "    message: \"relation \\\"public.scenarios\\\" does not exist\"",
+   "[03:35:54] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/digital-twin/simulations",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "4] ERROR: Server error",
+   "    message: \"relation \\\"public.simulations\\\" does not exist\"",
+   "[03:35:54] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/duplicates/all",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "5] ERROR: Get all flagged duplicates error",
+   "    message: \"relation \\\"public.duplicate_vehicle_logs\\\" does not exist\"",
+   "[03:35:55] ERROR: Get all flagged duplicates error"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/escrow/operations/dashboard",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "5] ERROR: Server error",
+   "[03:35:55] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/feature-flags",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "6] ERROR: Failed to get all flags",
+   "          TypeError: s.replace is not a function",
+   "      \"name\": \"TypeError\""
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/feature-flags/meta/categories",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "6] ERROR: Failed to get flag categories",
+   "          ReferenceError: FeatureFlag is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/feature-flags/user",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "6] ERROR: Failed to get enabled flags for user",
+   "          ReferenceError: FeatureFlag is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/feedback/admin/all",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "7] ERROR: Get all feedback error",
+   "    message: \"relation \\\"public.feedback\\\" does not exist\"",
+   "[03:35:57] ERROR: Get all feedback error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/finance/issues",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "7] ERROR: Get unresolved issues error",
+   "[03:35:57] ERROR: Get unresolved issues error"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/fraud/all",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "8] ERROR: Error getting fraud detections",
+   "    message: \"relation \\\"public.fraud_detection\\\" does not exist\"",
+   "[03:35:58] ERROR: Error getting fraud detections"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/fraud/analytics",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "8] ERROR: Error getting fraud analytics",
+   "    message: \"relation \\\"public.fraud_detection\\\" does not exist\"",
+   "[03:35:58] ERROR: Error getting fraud analytics"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/funnel/dealer/analytics",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "8] ERROR: Error getting dealer funnel analytics:",
+   "    message: \"relation \\\"public.conversion_funnels\\\" does not exist\"",
+   "[03:35:58] ERROR: Error getting dealer funnel analytics:"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/intelligence/countries",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [],
+  "feRef": true
+ },
+ {
+  "path": "/api/intelligence/inspections",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "9] ERROR: intelligence module",
+   "    message: \"relation \\\"public.inspections\\\" does not exist\"",
+   "[03:35:59] ERROR: intelligence module"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/listing-quality/platform/benchmarks",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "0] ERROR: Failed to get platform quality stats",
+   "          ReferenceError: ListingQuality is not defined",
+   "      \"name\": \"ReferenceError\""
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/listing-quality/platform/low-quality",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "0] ERROR: Failed to get low quality listings",
+   "          ReferenceError: ListingQuality is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/listing-quality/platform/stats",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "0] ERROR: Failed to get platform quality stats",
+   "          ReferenceError: ListingQuality is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/listing-quality/platform/trends",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "1] ERROR: Failed to get quality trends",
+   "    message: \"relation \\\"public.listing_quality\\\" does not exist\"",
+   "[03:36:01] ERROR: Failed to get quality trends"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/lowcode/dashboards",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "1] ERROR: Server error",
+   "    message: \"relation \\\"public.custom_dashboards\\\" does not exist\"",
+   "[03:36:01] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/lowcode/objects",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "1] ERROR: Server error",
+   "    message: \"relation \\\"public.business_objects\\\" does not exist\"",
+   "[03:36:01] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/lowcode/stats",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "2] ERROR: Server error",
+   "    message: \"relation \\\"public.object_fields\\\" does not exist\"",
+   "[03:36:02] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/marketplace-health/admin/all",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "2] ERROR: Failed to get all health records",
+   "    message: \"relation \\\"public.marketplace_health\\\" does not exist\"",
+   "[03:36:02] ERROR: Failed to get all health records"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/marketplace-health/alerts",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "3] ERROR: Failed to get active alerts",
+   "          ReferenceError: MarketplaceHealth is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/marketplace-health/metrics",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "3] ERROR: Failed to get detailed metrics",
+   "    message: \"relation \\\"public.marketplace_health\\\" does not exist\"",
+   "[03:36:03] ERROR: Failed to get detailed metrics"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/marketplace-health/summary",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "3] ERROR: Failed to get health summary",
+   "    message: \"relation \\\"public.marketplace_health\\\" does not exist\"",
+   "[03:36:03] ERROR: Failed to get health summary"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/new-admin/auction-integrity",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:36:04] ERROR: List flags failed",
+   "    message: \"relation \\\"public.auction_integrity_flags\\\" does not exist\""
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/new-admin/auction-integrity/dashboard",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:36:04] ERROR: Integrity dashboard failed",
+   "    message: \"relation \\\"public.auction_integrity_flags\\\" does not exist\"",
+   "[03:36:04] ERROR: Integrity dashboard failed"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/new-admin/auction-integrity/risk-profiles",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "4] ERROR: List risk profiles failed",
+   "    message: \"relation \\\"public.auction_risk_profiles\\\" does not exist\"",
+   "[03:36:05] ERROR: List risk profiles failed"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/notification-analytics/channel-stats",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "5] ERROR: Failed to get channel stats",
+   "          ReferenceError: NotificationAudit is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/notification-analytics/delivery-report",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "5] ERROR: Failed to get delivery stats",
+   "          ReferenceError: NotificationAudit is not defined",
+   "      \"name\": \"ReferenceError\""
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/notification-analytics/delivery-stats",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:36:06] ERROR: Failed to get delivery stats",
+   "          ReferenceError: NotificationAudit is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/notification-analytics/engagement-metrics",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:36:06] ERROR: Failed to get engagement metrics",
+   "          ReferenceError: NotificationAudit is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/notification-analytics/failure-analysis",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "6] ERROR: Failed to get failure analysis",
+   "          ReferenceError: NotificationAudit is not defined",
+   "              at getFailureAnalysis (file:///home/claude/h/KAYAD-PHASE13H-WORK/backend/services/notificationAnalyticsService.js:101:22)"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/notification-analytics/platform-stats",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "7] ERROR: Failed to get platform notification stats",
+   "    message: \"relation \\\"public.notification_audits\\\" does not exist\"",
+   "[03:36:07] ERROR: Failed to get platform stats"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/notification-analytics/retry-queue",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "7] ERROR: Failed to get retry queue",
+   "    message: \"relation \\\"public.notification_audits\\\" does not exist\"",
+   "[03:36:07] ERROR: Failed to get retry queue"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/notification-analytics/retry-stats",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "8] ERROR: Failed to get retry stats",
+   "          ReferenceError: NotificationAudit is not defined",
+   "              at process.processTicksAndRejections (node:internal/process/task_queues:103:5)"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/notification-analytics/trends",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:36:08] ERROR: Failed to get notification trends",
+   "    message: \"relation \\\"public.notification_audits\\\" does not exist\"",
+   "[03:36:08] ERROR: Failed to get notification trends"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/organizations/platform-stats",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "8] ERROR: Failed to get platform organization stats",
+   "    message: \"relation \\\"public.organizations\\\" does not exist\"",
+   "[03:36:08] ERROR: Failed to get platform organization stats"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/referral/stats",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:36:09] ERROR: Server error",
+   "    message: \"relation \\\"public.transactions\\\" does not exist\""
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/reliability/error-budgets",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "9] ERROR: Server error",
+   "    message: \"relation \\\"public.error_budgets\\\" does not exist\"",
+   "    path: \"/api/reliability/error-budgets\""
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/reliability/health",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "0] ERROR: Server error",
+   "    message: \"relation \\\"public.error_budgets\\\" does not exist\"",
+   "[03:36:10] ERROR: Server error"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/reliability/report",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "0] ERROR: Server error",
+   "    message: \"relation \\\"public.error_budgets\\\" does not exist\"",
+   "[03:36:10] ERROR: Server error"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/reports/admin/all",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "0] ERROR: Get all reports error",
+   "    message: \"relation \\\"public.reports\\\" does not exist\"",
+   "[03:36:11] ERROR: Get all reports error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/reports/my",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "1] ERROR: Get my reports error",
+   "    message: \"relation \\\"public.reports\\\" does not exist\"",
+   "[03:36:11] ERROR: Get my reports error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/security-logs",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:36:11] ERROR: \u274c GET SECURITY LOGS ERROR:",
+   "    message: \"relation \\\"public.security_logs\\\" does not exist\"",
+   "[03:36:11] ERROR: \u274c GET SECURITY LOGS ERROR:"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/security-logs/my",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:36:12] ERROR: \u274c GET MY SECURITY LOGS ERROR:",
+   "    message: \"relation \\\"public.security_logs\\\" does not exist\"",
+   "[03:36:12] ERROR: \u274c GET MY SECURITY LOGS ERROR:"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/security-logs/summary",
+  "anonymous": 401,
+  "user": 403,
+  "dealer": 403,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "R: \u274c SECURITY LOG SUMMARY ERROR:",
+   "    message: \"relation \\\"public.security_logs\\\" does not exist\"",
+   "[03:36:12] ERROR: \u274c SECURITY LOG SUMMARY ERROR:"
+  ],
+  "feRef": false
+ },
+ {
+  "path": "/api/sms-bidding/my",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "\u274c GET SMS PROFILE ERROR",
+   "    message: \"relation \\\"public.sms_bidders\\\" does not exist\"",
+   "[03:36:12] ERROR: \u274c GET SMS PROFILE ERROR"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/vxp/advertisements",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.vx_advertisements\\\" does not exist\"",
+   "[03:36:13] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/vxp/cards",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.vx_cards\\\" does not exist\"",
+   "[03:36:13] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/vxp/components",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.vx_components\\\" does not exist\"",
+   "[03:36:14] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/vxp/pages",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.vx_pages\\\" does not exist\"",
+   "[03:36:14] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/vxp/sections",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.vx_sections\\\" does not exist\"",
+   "[03:36:14] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/vxp/stats",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.vx_themes\\\" does not exist\"",
+   "Error: connect ECONNREFUSED 127.0.0.1:6379"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/vxp/themes",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.vx_themes\\\" does not exist\"",
+   "[03:36:15] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/vxp/themes/default",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.vx_themes\\\" does not exist\"",
+   "[03:36:15] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/vxp/versions",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.vx_versions\\\" does not exist\"",
+   "[03:36:16] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/xos/analytics",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.experience_analytics\\\" does not exist\"",
+   "[03:36:16] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/xos/audiences",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "[03:36:17] ERROR: Server error",
+   "    message: \"relation \\\"public.audiences\\\" does not exist\""
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/xos/campaigns",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.campaigns\\\" does not exist\"",
+   "[03:36:17] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/xos/dashboard",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.campaigns\\\" does not exist\"",
+   "[03:36:17] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/xos/experiences",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.experiences\\\" does not exist\"",
+   "[03:36:18] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/xos/journeys",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.journeys\\\" does not exist\"",
+   "[03:36:18] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/xos/navigation-rules",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.navigation_rules\\\" does not exist\"",
+   "[03:36:19] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/xos/resolve",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.experiences\\\" does not exist\"",
+   "[03:36:19] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/xos/themes",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "mServer error",
+   "    message: \"relation \\\"public.seasonal_themes\\\" does not exist\"",
+   "[03:36:19] ERROR: Server error"
+  ],
+  "feRef": true
+ },
+ {
+  "path": "/api/xos/variants",
+  "anonymous": 401,
+  "user": 500,
+  "dealer": 500,
+  "admin": 500,
+  "superadmin": 500,
+  "logExcerpt": [
+   "Error: connect ECONNREFUSED 127.0.0.1:6379",
+   "  code: 'ECONNREFUSED',",
+   "[03:36:20] ERROR: Server error"
+  ],
+  "feRef": true
+ }
+]

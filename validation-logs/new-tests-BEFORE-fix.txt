@@ -1,0 +1,1257 @@
+(node:12135) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/regression/phase13dDealerIsolation.test.js
+  ● Workstream A — legacy /api/dealer/* admits no private seller or buyer › approved private seller: GET /api/dealer/team → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      180 |     test.each(LEGACY_DEALER_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+      181 |       const r = await call(method, path, id, body);
+    > 182 |       expect(r.status).toBe(403);
+          |                        ^
+      183 |     });
+      184 |   }
+      185 |   test.each(LEGACY_SELLER_OWN_ROUTES)("approved private seller KEEPS caller-scoped %s %s (not a dealer-business route; unchanged by 13D)", async (m, p, b) => {
+
+      at tests/regression/phase13dDealerIsolation.test.js:182:24
+
+  ● Workstream A — legacy /api/dealer/* admits no private seller or buyer › approved private seller: POST /api/dealer/team/invite → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      180 |     test.each(LEGACY_DEALER_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+      181 |       const r = await call(method, path, id, body);
+    > 182 |       expect(r.status).toBe(403);
+          |                        ^
+      183 |     });
+      184 |   }
+      185 |   test.each(LEGACY_SELLER_OWN_ROUTES)("approved private seller KEEPS caller-scoped %s %s (not a dealer-business route; unchanged by 13D)", async (m, p, b) => {
+
+      at tests/regression/phase13dDealerIsolation.test.js:182:24
+
+  ● Workstream A — legacy /api/dealer/* admits no private seller or buyer › approved private seller: PATCH /api/dealer/team/99999999-9999-4999-8999-999999999999 → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 404
+
+      180 |     test.each(LEGACY_DEALER_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+      181 |       const r = await call(method, path, id, body);
+    > 182 |       expect(r.status).toBe(403);
+          |                        ^
+      183 |     });
+      184 |   }
+      185 |   test.each(LEGACY_SELLER_OWN_ROUTES)("approved private seller KEEPS caller-scoped %s %s (not a dealer-business route; unchanged by 13D)", async (m, p, b) => {
+
+      at tests/regression/phase13dDealerIsolation.test.js:182:24
+
+  ● Workstream A — legacy /api/dealer/* admits no private seller or buyer › approved private seller: DELETE /api/dealer/team/99999999-9999-4999-8999-999999999999 → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 404
+
+      180 |     test.each(LEGACY_DEALER_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+      181 |       const r = await call(method, path, id, body);
+    > 182 |       expect(r.status).toBe(403);
+          |                        ^
+      183 |     });
+      184 |   }
+      185 |   test.each(LEGACY_SELLER_OWN_ROUTES)("approved private seller KEEPS caller-scoped %s %s (not a dealer-business route; unchanged by 13D)", async (m, p, b) => {
+
+      at tests/regression/phase13dDealerIsolation.test.js:182:24
+
+  ● Workstream A — legacy /api/dealer/* admits no private seller or buyer › approved private seller: POST /api/dealer/upgrade → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 500
+
+      180 |     test.each(LEGACY_DEALER_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+      181 |       const r = await call(method, path, id, body);
+    > 182 |       expect(r.status).toBe(403);
+          |                        ^
+      183 |     });
+      184 |   }
+      185 |   test.each(LEGACY_SELLER_OWN_ROUTES)("approved private seller KEEPS caller-scoped %s %s (not a dealer-business route; unchanged by 13D)", async (m, p, b) => {
+
+      at tests/regression/phase13dDealerIsolation.test.js:182:24
+
+  ● Workstream A — legacy /api/dealer/* admits no private seller or buyer › approved private seller: GET /api/dealer/trade-listings → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      180 |     test.each(LEGACY_DEALER_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+      181 |       const r = await call(method, path, id, body);
+    > 182 |       expect(r.status).toBe(403);
+          |                        ^
+      183 |     });
+      184 |   }
+      185 |   test.each(LEGACY_SELLER_OWN_ROUTES)("approved private seller KEEPS caller-scoped %s %s (not a dealer-business route; unchanged by 13D)", async (m, p, b) => {
+
+      at tests/regression/phase13dDealerIsolation.test.js:182:24
+
+  ● Workstream A — legacy /api/dealer/* admits no private seller or buyer › approved private seller: PATCH /api/dealer/cars/99999999-9999-4999-8999-999999999999/wholesale → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 404
+
+      180 |     test.each(LEGACY_DEALER_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+      181 |       const r = await call(method, path, id, body);
+    > 182 |       expect(r.status).toBe(403);
+          |                        ^
+      183 |     });
+      184 |   }
+      185 |   test.each(LEGACY_SELLER_OWN_ROUTES)("approved private seller KEEPS caller-scoped %s %s (not a dealer-business route; unchanged by 13D)", async (m, p, b) => {
+
+      at tests/regression/phase13dDealerIsolation.test.js:182:24
+
+  ● Workstream A — legacy /api/dealer/* admits no private seller or buyer › approved private seller: POST /api/dealer/pricing-recommendations → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      180 |     test.each(LEGACY_DEALER_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+      181 |       const r = await call(method, path, id, body);
+    > 182 |       expect(r.status).toBe(403);
+          |                        ^
+      183 |     });
+      184 |   }
+      185 |   test.each(LEGACY_SELLER_OWN_ROUTES)("approved private seller KEEPS caller-scoped %s %s (not a dealer-business route; unchanged by 13D)", async (m, p, b) => {
+
+      at tests/regression/phase13dDealerIsolation.test.js:182:24
+
+  ● Workstream A — /api/dealer-platform business routes › pending private seller: GET /api/dealer-platform/dashboard → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › pending private seller: GET /api/dealer-platform/inventory → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › pending private seller: POST /api/dealer-platform/inventory/bulk → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › pending private seller: GET /api/dealer-platform/leads → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › pending private seller: GET /api/dealer-platform/pipeline → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › pending private seller: GET /api/dealer-platform/marketing → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › pending private seller: POST /api/dealer-platform/marketing → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › pending private seller: GET /api/dealer-platform/analytics → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › pending private seller: GET /api/dealer-platform/subscription → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › pending private seller: GET /api/dealer-platform/customers → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › pending private seller: POST /api/dealer-platform/copilot → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › approved private seller: GET /api/dealer-platform/dashboard → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › approved private seller: GET /api/dealer-platform/inventory → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › approved private seller: POST /api/dealer-platform/inventory/bulk → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › approved private seller: GET /api/dealer-platform/leads → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › approved private seller: GET /api/dealer-platform/pipeline → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › approved private seller: GET /api/dealer-platform/marketing → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › approved private seller: POST /api/dealer-platform/marketing → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › approved private seller: GET /api/dealer-platform/analytics → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › approved private seller: GET /api/dealer-platform/subscription → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › approved private seller: GET /api/dealer-platform/customers → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › approved private seller: POST /api/dealer-platform/copilot → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › suspended private seller: GET /api/dealer-platform/dashboard → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › suspended private seller: GET /api/dealer-platform/inventory → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › suspended private seller: POST /api/dealer-platform/inventory/bulk → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › suspended private seller: GET /api/dealer-platform/leads → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › suspended private seller: GET /api/dealer-platform/pipeline → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › suspended private seller: GET /api/dealer-platform/marketing → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › suspended private seller: POST /api/dealer-platform/marketing → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › suspended private seller: GET /api/dealer-platform/analytics → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › suspended private seller: GET /api/dealer-platform/subscription → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › suspended private seller: GET /api/dealer-platform/customers → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › suspended private seller: POST /api/dealer-platform/copilot → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › rejected private seller: GET /api/dealer-platform/dashboard → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › rejected private seller: GET /api/dealer-platform/inventory → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › rejected private seller: POST /api/dealer-platform/inventory/bulk → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › rejected private seller: GET /api/dealer-platform/leads → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › rejected private seller: GET /api/dealer-platform/pipeline → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › rejected private seller: GET /api/dealer-platform/marketing → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › rejected private seller: POST /api/dealer-platform/marketing → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › rejected private seller: GET /api/dealer-platform/analytics → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › rejected private seller: GET /api/dealer-platform/subscription → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › rejected private seller: GET /api/dealer-platform/customers → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream A — /api/dealer-platform business routes › rejected private seller: POST /api/dealer-platform/copilot → 403
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      206 |   for (const [label, id] of PRIVATE_NON_DEALERS) {
+      207 |     test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+    > 208 |       expect((await call(method, path, id, body)).status).toBe(403);
+          |                                                           ^
+      209 |     });
+      210 |   }
+      211 |   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+
+      at tests/regression/phase13dDealerIsolation.test.js:208:59
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › unrelated dealer D2 denied GET /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/stats; service never invoked
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      233 |   test.each(paths(D1))("unrelated dealer D2 denied %s %s; service never invoked", async (m, p, _kind) => {
+      234 |     const r = await call(m, p, D2, {});
+    > 235 |     expect(r.status).toBe(403);
+          |                      ^
+      236 |     expect(qualityCalls).toEqual([]);
+      237 |   });
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+
+      at tests/regression/phase13dDealerIsolation.test.js:235:22
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › unrelated dealer D2 denied GET /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/report; service never invoked
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      233 |   test.each(paths(D1))("unrelated dealer D2 denied %s %s; service never invoked", async (m, p, _kind) => {
+      234 |     const r = await call(m, p, D2, {});
+    > 235 |     expect(r.status).toBe(403);
+          |                      ^
+      236 |     expect(qualityCalls).toEqual([]);
+      237 |   });
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+
+      at tests/regression/phase13dDealerIsolation.test.js:235:22
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › unrelated dealer D2 denied POST /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/bulk-recalculate; service never invoked
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      233 |   test.each(paths(D1))("unrelated dealer D2 denied %s %s; service never invoked", async (m, p, _kind) => {
+      234 |     const r = await call(m, p, D2, {});
+    > 235 |     expect(r.status).toBe(403);
+          |                      ^
+      236 |     expect(qualityCalls).toEqual([]);
+      237 |   });
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+
+      at tests/regression/phase13dDealerIsolation.test.js:235:22
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › approved private seller denied another dealer's GET /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/stats
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+      239 |     test.each(paths(D1))(`${label} denied another dealer's %s %s`, async (m, p, _kind) => {
+    > 240 |       expect((await call(m, p, id, {})).status).toBe(403);
+          |                                                 ^
+      241 |       expect(qualityCalls).toEqual([]);
+      242 |     });
+      243 |   }
+
+      at tests/regression/phase13dDealerIsolation.test.js:240:49
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › approved private seller denied another dealer's GET /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/report
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+      239 |     test.each(paths(D1))(`${label} denied another dealer's %s %s`, async (m, p, _kind) => {
+    > 240 |       expect((await call(m, p, id, {})).status).toBe(403);
+          |                                                 ^
+      241 |       expect(qualityCalls).toEqual([]);
+      242 |     });
+      243 |   }
+
+      at tests/regression/phase13dDealerIsolation.test.js:240:49
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › approved private seller denied another dealer's POST /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/bulk-recalculate
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+      239 |     test.each(paths(D1))(`${label} denied another dealer's %s %s`, async (m, p, _kind) => {
+    > 240 |       expect((await call(m, p, id, {})).status).toBe(403);
+          |                                                 ^
+      241 |       expect(qualityCalls).toEqual([]);
+      242 |     });
+      243 |   }
+
+      at tests/regression/phase13dDealerIsolation.test.js:240:49
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › pending private seller denied another dealer's GET /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/stats
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+      239 |     test.each(paths(D1))(`${label} denied another dealer's %s %s`, async (m, p, _kind) => {
+    > 240 |       expect((await call(m, p, id, {})).status).toBe(403);
+          |                                                 ^
+      241 |       expect(qualityCalls).toEqual([]);
+      242 |     });
+      243 |   }
+
+      at tests/regression/phase13dDealerIsolation.test.js:240:49
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › pending private seller denied another dealer's GET /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/report
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+      239 |     test.each(paths(D1))(`${label} denied another dealer's %s %s`, async (m, p, _kind) => {
+    > 240 |       expect((await call(m, p, id, {})).status).toBe(403);
+          |                                                 ^
+      241 |       expect(qualityCalls).toEqual([]);
+      242 |     });
+      243 |   }
+
+      at tests/regression/phase13dDealerIsolation.test.js:240:49
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › pending private seller denied another dealer's POST /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/bulk-recalculate
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+      239 |     test.each(paths(D1))(`${label} denied another dealer's %s %s`, async (m, p, _kind) => {
+    > 240 |       expect((await call(m, p, id, {})).status).toBe(403);
+          |                                                 ^
+      241 |       expect(qualityCalls).toEqual([]);
+      242 |     });
+      243 |   }
+
+      at tests/regression/phase13dDealerIsolation.test.js:240:49
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › suspended private seller denied another dealer's GET /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/stats
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+      239 |     test.each(paths(D1))(`${label} denied another dealer's %s %s`, async (m, p, _kind) => {
+    > 240 |       expect((await call(m, p, id, {})).status).toBe(403);
+          |                                                 ^
+      241 |       expect(qualityCalls).toEqual([]);
+      242 |     });
+      243 |   }
+
+      at tests/regression/phase13dDealerIsolation.test.js:240:49
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › suspended private seller denied another dealer's GET /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/report
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+      239 |     test.each(paths(D1))(`${label} denied another dealer's %s %s`, async (m, p, _kind) => {
+    > 240 |       expect((await call(m, p, id, {})).status).toBe(403);
+          |                                                 ^
+      241 |       expect(qualityCalls).toEqual([]);
+      242 |     });
+      243 |   }
+
+      at tests/regression/phase13dDealerIsolation.test.js:240:49
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › suspended private seller denied another dealer's POST /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/bulk-recalculate
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+      239 |     test.each(paths(D1))(`${label} denied another dealer's %s %s`, async (m, p, _kind) => {
+    > 240 |       expect((await call(m, p, id, {})).status).toBe(403);
+          |                                                 ^
+      241 |       expect(qualityCalls).toEqual([]);
+      242 |     });
+      243 |   }
+
+      at tests/regression/phase13dDealerIsolation.test.js:240:49
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › rejected private seller denied another dealer's GET /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/stats
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+      239 |     test.each(paths(D1))(`${label} denied another dealer's %s %s`, async (m, p, _kind) => {
+    > 240 |       expect((await call(m, p, id, {})).status).toBe(403);
+          |                                                 ^
+      241 |       expect(qualityCalls).toEqual([]);
+      242 |     });
+      243 |   }
+
+      at tests/regression/phase13dDealerIsolation.test.js:240:49
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › rejected private seller denied another dealer's GET /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/report
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+      239 |     test.each(paths(D1))(`${label} denied another dealer's %s %s`, async (m, p, _kind) => {
+    > 240 |       expect((await call(m, p, id, {})).status).toBe(403);
+          |                                                 ^
+      241 |       expect(qualityCalls).toEqual([]);
+      242 |     });
+      243 |   }
+
+      at tests/regression/phase13dDealerIsolation.test.js:240:49
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › rejected private seller denied another dealer's POST /api/listing-quality/dealer/11111111-1111-4111-8111-111111111111/bulk-recalculate
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      238 |   for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+      239 |     test.each(paths(D1))(`${label} denied another dealer's %s %s`, async (m, p, _kind) => {
+    > 240 |       expect((await call(m, p, id, {})).status).toBe(403);
+          |                                                 ^
+      241 |       expect(qualityCalls).toEqual([]);
+      242 |     });
+      243 |   }
+
+      at tests/regression/phase13dDealerIsolation.test.js:240:49
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › identifier substitution: nonexistent dealer id by a non-owner is 403 (no existence leak), not 404/200
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      247 |   });
+      248 |   test("identifier substitution: nonexistent dealer id by a non-owner is 403 (no existence leak), not 404/200", async () => {
+    > 249 |     expect((await call("GET", `/api/listing-quality/dealer/${NOBODY}/stats`, D2)).status).toBe(403);
+          |                                                                                           ^
+      250 |     expect(qualityCalls).toEqual([]);
+      251 |   });
+      252 |   test("malformed identifier → 400 before any ownership or service work", async () => {
+
+      at Object.<anonymous> (tests/regression/phase13dDealerIsolation.test.js:249:91)
+
+  ● Workstream B — listing-quality ownership (read and recalculation) › a caller-supplied dealerId in the query or body cannot override the path/ownership decision
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 403
+    Received: 200
+
+      267 |   });
+      268 |   test("a caller-supplied dealerId in the query or body cannot override the path/ownership decision", async () => {
+    > 269 |     expect((await call("GET", `/api/listing-quality/dealer/${D1}/stats?dealerId=${D2}`, D2)).status).toBe(403);
+          |                                                                                                      ^
+      270 |     expect((await call("POST", `/api/listing-quality/dealer/${D1}/bulk-recalculate`, D2, { dealerId: D2 })).status).toBe(403);
+      271 |   });
+      272 | });
+
+      at Object.<anonymous> (tests/regression/phase13dDealerIsolation.test.js:269:102)
+
+  ● Workstream C — requireDealerVerification creates no dealership for private sellers › individual_seller (pending) without a Dealer row: no Dealer.create, request not blocked
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"approved": true, "user": "55555555-5555-4555-8555-555555555552", "verifiedAt": 2026-10-25T17:31:27.913Z}
+
+      292 |     Dealer.findOne.mockResolvedValue(null);
+      293 |     const r = await run({ id: S_APPROVED, role: "individual_seller", status });
+    > 294 |     expect(Dealer.create).not.toHaveBeenCalled();
+          |                               ^
+      295 |     expect(r.passed).toBe(true);
+      296 |     expect(r.req.dealer ?? null).toBeNull();
+      297 |   });
+
+      at tests/regression/phase13dDealerIsolation.test.js:294:31
+
+  ● Workstream C — requireDealerVerification creates no dealership for private sellers › individual_seller (approved) without a Dealer row: no Dealer.create, request not blocked
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"approved": true, "user": "55555555-5555-4555-8555-555555555552", "verifiedAt": 2026-10-25T17:31:27.916Z}
+
+      292 |     Dealer.findOne.mockResolvedValue(null);
+      293 |     const r = await run({ id: S_APPROVED, role: "individual_seller", status });
+    > 294 |     expect(Dealer.create).not.toHaveBeenCalled();
+          |                               ^
+      295 |     expect(r.passed).toBe(true);
+      296 |     expect(r.req.dealer ?? null).toBeNull();
+      297 |   });
+
+      at tests/regression/phase13dDealerIsolation.test.js:294:31
+
+  ● Workstream C — requireDealerVerification creates no dealership for private sellers › individual_seller (suspended) without a Dealer row: no Dealer.create, request not blocked
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"approved": true, "user": "55555555-5555-4555-8555-555555555552", "verifiedAt": 2026-10-25T17:31:27.917Z}
+
+      292 |     Dealer.findOne.mockResolvedValue(null);
+      293 |     const r = await run({ id: S_APPROVED, role: "individual_seller", status });
+    > 294 |     expect(Dealer.create).not.toHaveBeenCalled();
+          |                               ^
+      295 |     expect(r.passed).toBe(true);
+      296 |     expect(r.req.dealer ?? null).toBeNull();
+      297 |   });
+
+      at tests/regression/phase13dDealerIsolation.test.js:294:31
+
+  ● Workstream C — requireDealerVerification creates no dealership for private sellers › individual_seller (rejected) without a Dealer row: no Dealer.create, request not blocked
+
+    expect(jest.fn()).not.toHaveBeenCalled()
+
+    Expected number of calls: 0
+    Received number of calls: 1
+
+    1: {"approved": true, "user": "55555555-5555-4555-8555-555555555552", "verifiedAt": 2026-10-25T17:31:27.918Z}
+
+      292 |     Dealer.findOne.mockResolvedValue(null);
+      293 |     const r = await run({ id: S_APPROVED, role: "individual_seller", status });
+    > 294 |     expect(Dealer.create).not.toHaveBeenCalled();
+          |                               ^
+      295 |     expect(r.passed).toBe(true);
+      296 |     expect(r.req.dealer ?? null).toBeNull();
+      297 |   });
+
+      at tests/regression/phase13dDealerIsolation.test.js:294:31
+
+Test Suites: 1 failed, 1 total
+Tests:       73 failed, 100 passed, 173 total
+Snapshots:   0 total
+Time:        2.232 s
+Ran all test suites matching tests/regression/phase13dDealerIsolation.test.js.

@@ -1,0 +1,16 @@
+PASS live harness uses canonical auth profile endpoint
+PASS v1 auth router mounted
+PASS auth profile route exists
+PASS v1 bids my route exists
+PASS v1 payments my route exists
+PASS v1 escrow my route exists
+PASS dispute my route exists
+PASS inspection my route exists
+PASS loan my route exists
+PASS subscription routes exist
+PASS public auction catalogue route exists
+PASS public subscription plans route exists
+FAIL dealer certification routes exist
+PASS admin escrow route exists
+PASS admin disputes route exists
+V14 live certification contract: 14/15 PASS

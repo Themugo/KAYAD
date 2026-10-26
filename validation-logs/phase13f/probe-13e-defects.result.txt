@@ -1,0 +1,3 @@
+NOTICE:  PROBE dealer-owned listing status after capability suspension (expected available): hidden
+NOTICE:  PROBE listing published while seller suspended (expected hidden): pending->available , new insert->available
+NOTICE:  PROBE soft-deleted hidden listing after reinstatement (expected hidden): status=available, deleted_at set=t

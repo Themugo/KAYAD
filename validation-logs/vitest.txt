@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /home/claude/work/p13e/KAYAD-PHASE13E-UNIFIED-PERSONAL-ACCOUNT
+
+
+ Test Files  105 passed (105)
+      Tests  832 passed | 1 skipped (833)
+   Start at  21:42:29
+   Duration  188.30s (transform 5.86s, setup 12.90s, import 19.34s, tests 59.61s, environment 79.73s)
+

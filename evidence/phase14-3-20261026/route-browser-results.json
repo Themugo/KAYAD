@@ -1,0 +1,335 @@
+[
+  {
+    "viewport": "desktop",
+    "role": "dealer",
+    "route": "dashboard",
+    "finalUrl": "/?nav=dealer-dashboard",
+    "heading": "Dealer Hub",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [],
+    "pageErrors": []
+  },
+  {
+    "viewport": "desktop",
+    "role": "dealer",
+    "route": "onboarding",
+    "finalUrl": "/dealer/onboarding",
+    "heading": "Set Up Your Shop",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [],
+    "pageErrors": []
+  },
+  {
+    "viewport": "desktop",
+    "role": "dealer",
+    "route": "auction-setup",
+    "finalUrl": "/dealer/auction-setup",
+    "heading": "Build an auction people want to enter.",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:4"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "desktop",
+    "role": "dealer",
+    "route": "auction-operations",
+    "finalUrl": "/dealer/auction-operations",
+    "heading": "A premium command centre for every auction outcome.",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:5"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "desktop",
+    "role": "dealer",
+    "route": "notifications",
+    "finalUrl": "/notifications",
+    "heading": "Notifications",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [],
+    "pageErrors": []
+  },
+  {
+    "viewport": "desktop",
+    "role": "buyer",
+    "route": "dashboard",
+    "finalUrl": "/",
+    "heading": "Something went wrong",
+    "crashed": true,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:1"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "desktop",
+    "role": "buyer",
+    "route": "onboarding",
+    "finalUrl": "/",
+    "heading": "Something went wrong",
+    "crashed": true,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:1"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "desktop",
+    "role": "buyer",
+    "route": "auction-setup",
+    "finalUrl": "/",
+    "heading": "Something went wrong",
+    "crashed": true,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:1"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "desktop",
+    "role": "buyer",
+    "route": "auction-operations",
+    "finalUrl": "/",
+    "heading": "Something went wrong",
+    "crashed": true,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:1"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "tablet",
+    "role": "dealer",
+    "route": "dashboard",
+    "finalUrl": "/?nav=dealer-dashboard",
+    "heading": "Dealer Hub",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [],
+    "pageErrors": []
+  },
+  {
+    "viewport": "tablet",
+    "role": "dealer",
+    "route": "onboarding",
+    "finalUrl": "/dealer/onboarding",
+    "heading": "Set Up Your Shop",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [],
+    "pageErrors": []
+  },
+  {
+    "viewport": "tablet",
+    "role": "dealer",
+    "route": "auction-setup",
+    "finalUrl": "/dealer/auction-setup",
+    "heading": "Build an auction people want to enter.",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:4"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "tablet",
+    "role": "dealer",
+    "route": "auction-operations",
+    "finalUrl": "/dealer/auction-operations",
+    "heading": "A premium command centre for every auction outcome.",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:5"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "tablet",
+    "role": "dealer",
+    "route": "notifications",
+    "finalUrl": "/notifications",
+    "heading": "Notifications",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [],
+    "pageErrors": []
+  },
+  {
+    "viewport": "tablet",
+    "role": "buyer",
+    "route": "dashboard",
+    "finalUrl": "/",
+    "heading": "Something went wrong",
+    "crashed": true,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:1"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "tablet",
+    "role": "buyer",
+    "route": "onboarding",
+    "finalUrl": "/",
+    "heading": "Something went wrong",
+    "crashed": true,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:1"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "tablet",
+    "role": "buyer",
+    "route": "auction-setup",
+    "finalUrl": "/",
+    "heading": "Something went wrong",
+    "crashed": true,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:1"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "tablet",
+    "role": "buyer",
+    "route": "auction-operations",
+    "finalUrl": "/",
+    "heading": "Something went wrong",
+    "crashed": true,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:1"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "mobile",
+    "role": "dealer",
+    "route": "dashboard",
+    "finalUrl": "/?nav=dealer-dashboard",
+    "heading": "Dealer Hub",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [],
+    "pageErrors": []
+  },
+  {
+    "viewport": "mobile",
+    "role": "dealer",
+    "route": "onboarding",
+    "finalUrl": "/dealer/onboarding",
+    "heading": "Set Up Your Shop",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [],
+    "pageErrors": []
+  },
+  {
+    "viewport": "mobile",
+    "role": "dealer",
+    "route": "auction-setup",
+    "finalUrl": "/dealer/auction-setup",
+    "heading": "Build an auction people want to enter.",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:4"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "mobile",
+    "role": "dealer",
+    "route": "auction-operations",
+    "finalUrl": "/dealer/auction-operations",
+    "heading": "A premium command centre for every auction outcome.",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:5"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "mobile",
+    "role": "dealer",
+    "route": "notifications",
+    "finalUrl": "/notifications",
+    "heading": "Notifications",
+    "crashed": false,
+    "overflowPx": 0,
+    "axeSeriousCritical": [],
+    "pageErrors": []
+  },
+  {
+    "viewport": "mobile",
+    "role": "buyer",
+    "route": "dashboard",
+    "finalUrl": "/",
+    "heading": "Something went wrong",
+    "crashed": true,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:1"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "mobile",
+    "role": "buyer",
+    "route": "onboarding",
+    "finalUrl": "/",
+    "heading": "Something went wrong",
+    "crashed": true,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:1"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "mobile",
+    "role": "buyer",
+    "route": "auction-setup",
+    "finalUrl": "/",
+    "heading": "Something went wrong",
+    "crashed": true,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:1"
+    ],
+    "pageErrors": []
+  },
+  {
+    "viewport": "mobile",
+    "role": "buyer",
+    "route": "auction-operations",
+    "finalUrl": "/",
+    "heading": "Something went wrong",
+    "crashed": true,
+    "overflowPx": 0,
+    "axeSeriousCritical": [
+      "color-contrast:1"
+    ],
+    "pageErrors": []
+  }
+]

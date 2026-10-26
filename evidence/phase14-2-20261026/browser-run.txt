@@ -1,0 +1,92 @@
+{
+ "log": [
+  {
+   "viewport": "desktop",
+   "afterBack": "Dashboard",
+   "afterFwd": "Team",
+   "afterReload": "Team",
+   "direct": "Reputation",
+   "keyboardEnter": "Customers",
+   "consoleErrors": [
+    "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+    "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+    "Access to XMLHttpRequest at 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap' from origin 'http://127.0.0.1:3100",
+    "Failed to load resource: net::ERR_FAILED"
+   ],
+   "unhandledApiCalls": [
+    "/api/ads?placement=top_ticker",
+    "/api/admin/public/config",
+    "/api/ads?placement=left_rail",
+    "/api/ads?placement=right_rail",
+    "/api/search/facets",
+    "/api/cars?page=1&limit=24&minPrice=50000&sort=newest",
+    "/api/cars?page=1&limit=100&featured=true&sort=newest",
+    "/api/hero",
+    "/api/ads?placement=mid_grid",
+    "/api/ads?placement=sidebar",
+    "/api/cars?limit=50",
+    "/api/favorites?limit=50",
+    "/api/notifications?limit=50",
+    "/api/chat/unread",
+    "/api/escrow/my"
+   ]
+  },
+  {
+   "viewport": "mobile",
+   "afterBack": "Dashboard",
+   "afterFwd": "Team",
+   "afterReload": "Team",
+   "direct": "Reputation",
+   "keyboardEnter": "Customers",
+   "consoleErrors": [
+    "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+    "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+   ],
+   "unhandledApiCalls": [
+    "/api/ads?placement=top_ticker",
+    "/api/admin/public/config",
+    "/api/ads?placement=left_rail",
+    "/api/ads?placement=right_rail",
+    "/api/search/facets",
+    "/api/cars?page=1&limit=24&minPrice=50000&sort=newest",
+    "/api/cars?page=1&limit=100&featured=true&sort=newest",
+    "/api/hero",
+    "/api/ads?placement=mid_grid",
+    "/api/ads?placement=sidebar",
+    "/api/cars?limit=50",
+    "/api/favorites?limit=50",
+    "/api/notifications?limit=50",
+    "/api/chat/unread",
+    "/api/escrow/my"
+   ]
+  }
+ ]
+}
+desktop overview -> Dashboard | current=Overview | fail=false | overflow=0 | navScrolls=false | axe=none
+desktop inventory -> Inventory | current=Inventory | fail=false | overflow=0 | navScrolls=false | axe=none
+desktop leads -> Leads | current=Leads 2 2 new | fail=false | overflow=0 | navScrolls=false | axe=none
+desktop pipeline -> Lead pipeline | current=Pipeline | fail=false | overflow=0 | navScrolls=false | axe=none
+desktop customers -> Customers | current=Customers | fail=false | overflow=0 | navScrolls=false | axe=none
+desktop finance -> Finance applications | current=Finance | fail=false | overflow=0 | navScrolls=false | axe=none
+desktop analytics -> Analytics | current=Analytics | fail=false | overflow=0 | navScrolls=false | axe=none
+desktop reputation -> Reputation | current=Reputation | fail=false | overflow=0 | navScrolls=false | axe=none
+desktop auctions -> Auctions | current=Auctions | fail=false | overflow=0 | navScrolls=false | axe=none
+desktop inspections -> Inspections | current=Inspections | fail=false | overflow=0 | navScrolls=false | axe=none
+desktop escrow -> Escrow | current=Escrow | fail=false | overflow=0 | navScrolls=false | axe=none
+desktop marketing -> Marketing | current=Marketing | fail=false | overflow=0 | navScrolls=false | axe=none
+desktop team -> Team | current=Team | fail=false | overflow=0 | navScrolls=false | axe=none
+desktop settings -> Settings | current=Settings | fail=false | overflow=0 | navScrolls=false | axe=none
+mobile overview -> Dashboard | current=Overview | fail=false | overflow=0 | navScrolls=true | axe=none
+mobile inventory -> Inventory | current=Inventory | fail=false | overflow=0 | navScrolls=true | axe=none
+mobile leads -> Leads | current=Leads 2 2 new | fail=false | overflow=0 | navScrolls=true | axe=none
+mobile pipeline -> Lead pipeline | current=Pipeline | fail=false | overflow=0 | navScrolls=true | axe=none
+mobile customers -> Customers | current=Customers | fail=false | overflow=0 | navScrolls=true | axe=none
+mobile finance -> Finance applications | current=Finance | fail=false | overflow=0 | navScrolls=true | axe=none
+mobile analytics -> Analytics | current=Analytics | fail=false | overflow=0 | navScrolls=true | axe=none
+mobile reputation -> Reputation | current=Reputation | fail=false | overflow=0 | navScrolls=true | axe=none
+mobile auctions -> Auctions | current=Auctions | fail=false | overflow=0 | navScrolls=true | axe=none
+mobile inspections -> Inspections | current=Inspections | fail=false | overflow=0 | navScrolls=true | axe=none
+mobile escrow -> Escrow | current=Escrow | fail=false | overflow=0 | navScrolls=true | axe=none
+mobile marketing -> Marketing | current=Marketing | fail=false | overflow=0 | navScrolls=true | axe=none
+mobile team -> Team | current=Team | fail=false | overflow=0 | navScrolls=true | axe=none
+mobile settings -> Settings | current=Settings | fail=false | overflow=0 | navScrolls=true | axe=none

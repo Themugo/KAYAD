@@ -1,0 +1,15 @@
+PASS: AdminView is the canonical /admin and /admin/dashboard home
+PASS: Legacy /?nav=admin deep link redirects into canonical /admin and preserves other query/hash values
+PASS: All admin sidebar destinations are registered or resolve to the command-centre root
+PASS: Standalone route registry preserves specialist /admin/* paths
+PASS: Unknown admin paths show an explicit in-shell not-found state instead of silently opening a different workspace
+PASS: Admin pages use the existing permission guard and backend remains authoritative
+PASS: Superadmin-only sidebar destinations have an explicit route guard
+PASS: Duplicate layout is a compatibility re-export to the canonical admin layout
+PASS: Duplicate sidebar is a compatibility re-export to the canonical admin sidebar
+PASS: Account menu has one command-centre entry and removes duplicate Admin Panel action
+PASS: System Management has a distinct existing destination and is limited to admin/superadmin menu roles
+PASS: Profile image uses a real source with deterministic initials fallback and error recovery
+PASS: Mobile admin drawer has semantic backdrop, Escape close, focus return and body overflow cleanup
+PASS: Responsive admin shell stylesheet defines mobile drawer and reduced-motion behaviour
+Admin route convergence: 14/14 PASS

@@ -1,0 +1,20 @@
+BASELINE errors=2250 warnings=1557 files=1250 filesWithProblems=709
+FINAL    errors=2250 warnings=1557 files=1259 filesWithProblems=709
+NEW violations (not in baseline by file+rule+message): 0
+RESOLVED violations: 0
+TOP RULES (final):
+    2071 no-undef [error] (baseline 2071)
+     542 @typescript-eslint/no-explicit-any [warn] (baseline 542)
+     463 @typescript-eslint/no-unused-vars [warn] (baseline 463)
+     159 react-hooks/set-state-in-effect [warn] (baseline 159)
+      95 no-unused-vars [error] (baseline 95)
+      78 jsx-a11y/no-static-element-interactions [warn] (baseline 78)
+      72 react-hooks/refs [warn] (baseline 72)
+      71 no-useless-escape [error] (baseline 71)
+      71 jsx-a11y/click-events-have-key-events [warn] (baseline 71)
+      63 react-hooks/exhaustive-deps [warn] (baseline 63)
+      41 react-hooks/static-components [warn] (baseline 41)
+      31 react-hooks/immutability [warn] (baseline 31)
+      21 react-hooks/purity [warn] (baseline 21)
+       8 no-empty [error] (baseline 8)
+       5 react-hooks/rules-of-hooks [warn] (baseline 5)

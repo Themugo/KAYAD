@@ -1,0 +1,374 @@
+{
+  "results": [
+    {
+      "viewport": "desktop",
+      "section": "overview",
+      "url": "/?nav=dealer-dashboard",
+      "h2": "Dashboard",
+      "current": "Overview",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": false,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "desktop",
+      "section": "inventory",
+      "url": "/?nav=dealer-dashboard&section=inventory",
+      "h2": "Inventory",
+      "current": "Inventory",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": false,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "desktop",
+      "section": "leads",
+      "url": "/?nav=dealer-dashboard&section=leads",
+      "h2": "Leads",
+      "current": "Leads 2 2 new",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": false,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "desktop",
+      "section": "pipeline",
+      "url": "/?nav=dealer-dashboard&section=pipeline",
+      "h2": "Lead pipeline",
+      "current": "Pipeline",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": false,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "desktop",
+      "section": "customers",
+      "url": "/?nav=dealer-dashboard&section=customers",
+      "h2": "Customers",
+      "current": "Customers",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": false,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "desktop",
+      "section": "finance",
+      "url": "/?nav=dealer-dashboard&section=finance",
+      "h2": "Finance applications",
+      "current": "Finance",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": false,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "desktop",
+      "section": "analytics",
+      "url": "/?nav=dealer-dashboard&section=analytics",
+      "h2": "Analytics",
+      "current": "Analytics",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": false,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "desktop",
+      "section": "reputation",
+      "url": "/?nav=dealer-dashboard&section=reputation",
+      "h2": "Reputation",
+      "current": "Reputation",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": false,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "desktop",
+      "section": "auctions",
+      "url": "/?nav=dealer-dashboard&section=auctions",
+      "h2": "Auctions",
+      "current": "Auctions",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": false,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "desktop",
+      "section": "inspections",
+      "url": "/?nav=dealer-dashboard&section=inspections",
+      "h2": "Inspections",
+      "current": "Inspections",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": false,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "desktop",
+      "section": "escrow",
+      "url": "/?nav=dealer-dashboard&section=escrow",
+      "h2": "Escrow",
+      "current": "Escrow",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": false,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "desktop",
+      "section": "marketing",
+      "url": "/?nav=dealer-dashboard&section=marketing",
+      "h2": "Marketing",
+      "current": "Marketing",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": false,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "desktop",
+      "section": "team",
+      "url": "/?nav=dealer-dashboard&section=team",
+      "h2": "Team",
+      "current": "Team",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": false,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "desktop",
+      "section": "settings",
+      "url": "/?nav=dealer-dashboard&section=settings",
+      "h2": "Settings",
+      "current": "Settings",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": false,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "mobile",
+      "section": "overview",
+      "url": "/?nav=dealer-dashboard",
+      "h2": "Dashboard",
+      "current": "Overview",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": true,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "mobile",
+      "section": "inventory",
+      "url": "/?nav=dealer-dashboard&section=inventory",
+      "h2": "Inventory",
+      "current": "Inventory",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": true,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "mobile",
+      "section": "leads",
+      "url": "/?nav=dealer-dashboard&section=leads",
+      "h2": "Leads",
+      "current": "Leads 2 2 new",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": true,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "mobile",
+      "section": "pipeline",
+      "url": "/?nav=dealer-dashboard&section=pipeline",
+      "h2": "Lead pipeline",
+      "current": "Pipeline",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": true,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "mobile",
+      "section": "customers",
+      "url": "/?nav=dealer-dashboard&section=customers",
+      "h2": "Customers",
+      "current": "Customers",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": true,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "mobile",
+      "section": "finance",
+      "url": "/?nav=dealer-dashboard&section=finance",
+      "h2": "Finance applications",
+      "current": "Finance",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": true,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "mobile",
+      "section": "analytics",
+      "url": "/?nav=dealer-dashboard&section=analytics",
+      "h2": "Analytics",
+      "current": "Analytics",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": true,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "mobile",
+      "section": "reputation",
+      "url": "/?nav=dealer-dashboard&section=reputation",
+      "h2": "Reputation",
+      "current": "Reputation",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": true,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "mobile",
+      "section": "auctions",
+      "url": "/?nav=dealer-dashboard&section=auctions",
+      "h2": "Auctions",
+      "current": "Auctions",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": true,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "mobile",
+      "section": "inspections",
+      "url": "/?nav=dealer-dashboard&section=inspections",
+      "h2": "Inspections",
+      "current": "Inspections",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": true,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "mobile",
+      "section": "escrow",
+      "url": "/?nav=dealer-dashboard&section=escrow",
+      "h2": "Escrow",
+      "current": "Escrow",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": true,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "mobile",
+      "section": "marketing",
+      "url": "/?nav=dealer-dashboard&section=marketing",
+      "h2": "Marketing",
+      "current": "Marketing",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": true,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "mobile",
+      "section": "team",
+      "url": "/?nav=dealer-dashboard&section=team",
+      "h2": "Team",
+      "current": "Team",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": true,
+      "axeSeriousCritical": []
+    },
+    {
+      "viewport": "mobile",
+      "section": "settings",
+      "url": "/?nav=dealer-dashboard&section=settings",
+      "h2": "Settings",
+      "current": "Settings",
+      "loadFailureShown": false,
+      "horizontalOverflowPx": 0,
+      "navScrolls": true,
+      "axeSeriousCritical": []
+    }
+  ],
+  "log": [
+    {
+      "viewport": "desktop",
+      "afterBack": "Dashboard",
+      "afterFwd": "Team",
+      "afterReload": "Team",
+      "direct": "Reputation",
+      "keyboardEnter": "Customers",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+        "Access to XMLHttpRequest at 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap' from origin 'http://127.0.0.1:3100",
+        "Failed to load resource: net::ERR_FAILED"
+      ],
+      "unhandledApiCalls": [
+        "/api/ads?placement=top_ticker",
+        "/api/admin/public/config",
+        "/api/ads?placement=left_rail",
+        "/api/ads?placement=right_rail",
+        "/api/search/facets",
+        "/api/cars?page=1&limit=24&minPrice=50000&sort=newest",
+        "/api/cars?page=1&limit=100&featured=true&sort=newest",
+        "/api/hero",
+        "/api/ads?placement=mid_grid",
+        "/api/ads?placement=sidebar",
+        "/api/cars?limit=50",
+        "/api/favorites?limit=50",
+        "/api/notifications?limit=50",
+        "/api/chat/unread",
+        "/api/escrow/my"
+      ]
+    },
+    {
+      "viewport": "mobile",
+      "afterBack": "Dashboard",
+      "afterFwd": "Team",
+      "afterReload": "Team",
+      "direct": "Reputation",
+      "keyboardEnter": "Customers",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+        "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+      ],
+      "unhandledApiCalls": [
+        "/api/ads?placement=top_ticker",
+        "/api/admin/public/config",
+        "/api/ads?placement=left_rail",
+        "/api/ads?placement=right_rail",
+        "/api/search/facets",
+        "/api/cars?page=1&limit=24&minPrice=50000&sort=newest",
+        "/api/cars?page=1&limit=100&featured=true&sort=newest",
+        "/api/hero",
+        "/api/ads?placement=mid_grid",
+        "/api/ads?placement=sidebar",
+        "/api/cars?limit=50",
+        "/api/favorites?limit=50",
+        "/api/notifications?limit=50",
+        "/api/chat/unread",
+        "/api/escrow/my"
+      ]
+    }
+  ]
+}

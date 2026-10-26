@@ -1,0 +1,68 @@
+KAYAD PHASE 14.1 — TEST EXECUTION LOG
+Date: 2026-10-26
+
+Environment:
+node --version => v22.16.0
+npm --version => 10.9.2
+Project runtime target: Node >=22.22.2 (.nvmrc and package.json)
+.npmrc => engine-strict=true
+
+Foundation:
+SHA-256 => 56ed9dc09683375e8ddbefd90e63ed3c2c78e742d175976db38b8c4ecd63fd30
+ZIP integrity => PASS (ZipFile.testzip() returned None)
+Original source manifest => PASS (8,626/8,626 hashes matched before edits)
+
+Focused source-contract suite:
+Command: node runbooks/phase14-20261026/phase14_dealer_dashboard_source_checks.mjs
+Exit code: 0
+PASS dashboard retry re-enters loading state
+PASS dashboard loading always settles in finally
+PASS lead pipeline does not invent zero for missing stage data
+PASS conversion metrics distinguish unavailable from zero
+PASS revenue uses a full locale-formatted amount instead of unconditional millions rounding
+PASS inventory cards handle missing price and view data honestly
+PASS team empty state does not direct users to an unrelated invitation flow
+PASS pipeline stage type accepts unavailable marker
+PASS analytics KPI grid collapses responsively on mobile
+PASS inventory retry always triggers another request
+PASS customers retry always triggers another request
+PASS team retry always triggers another request
+PASS reputation retry always triggers another request
+PASS analytics distinguishes unavailable values from zero
+PASS top vehicle cards avoid fabricated price and engagement values
+PASS overview presents explicit empty states for activity and vehicle performance
+PASS overview lower cards stack on mobile
+PASS inventory does not infer draft status when status is missing
+PASS dealer navigation identifies the active section accessibly
+RESULT 19/19 PASS
+
+
+Dependency installation:
+Command: npm ci --ignore-scripts --prefer-offline --no-audit --no-fund
+Exit code: 1
+STDOUT:
+(empty)
+STDERR:
+npm error code EBADENGINE
+npm error engine Unsupported engine
+npm error engine Not compatible with your version of node/npm: kayad@0.0.0
+npm error notsup Not compatible with your version of node/npm: kayad@0.0.0
+npm error notsup Required: {"node":">=22.22.2"}
+npm error notsup Actual:   {"npm":"10.9.2","node":"v22.16.0"}
+npm error A complete log of this run can be found in: /home/oai/.npm/_logs/2026-10-26T08_18_54_302Z-debug-0.log
+
+
+TypeScript project check:
+Command: tsc --noEmit -p tsconfig.app.json
+Exit code: 2
+Total diagnostics: 1444
+Canonical DealerDashboard.tsx diagnostics:
+src/pages/dealer/dashboard/DealerDashboard.tsx(1,44): error TS2307: Cannot find module 'react' or its corresponding type declarations.
+src/pages/dealer/dashboard/DealerDashboard.tsx(11,8): error TS2307: Cannot find module 'lucide-react' or its corresponding type declarations.
+src/pages/dealer/dashboard/DealerDashboard.tsx(400,7): error TS2875: This JSX tag requires the module path 'react/jsx-runtime' to exist, but none could be found. Make sure you have types for the appropriate package installed.
+src/pages/dealer/dashboard/DealerDashboard.tsx(468,15): error TS2322: Type '{ key: string; icon: any; label: string; active: boolean; onClick: () => any; badge: any; }' is not assignable to type '{ icon: any; label: any; active: any; onClick: any; badge: any; }'.
+src/pages/dealer/dashboard/DealerDashboard.tsx(572,25): error TS2322: Type '{ key: any; type: any; message: any; time: any; icon: any; }' is not assignable to type '{ type: any; message: any; time: any; icon: any; }'.
+src/pages/dealer/dashboard/DealerDashboard.tsx(597,35): error TS2322: Type '{ key: any; vehicle: any; rank: any; }' is not assignable to type '{ vehicle: any; rank: any; }'.
+The project check is blocked by missing dependencies/type declarations (including React, lucide-react, vitest and Node types). The React/JSX related diagnostics are not considered a successful typecheck and do not prove source correctness. No package engine strictness was bypassed.
+
+Build, frontend/backend test suites, Playwright, axe and DB-backed authorization suites: NOT RUN.

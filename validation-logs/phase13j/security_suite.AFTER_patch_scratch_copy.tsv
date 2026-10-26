@@ -1,0 +1,146 @@
+PASS	anonymous → 401 and no data (api)	status=401
+PASS	anonymous → 401 and no data (v1)	status=401
+PASS	available/published · buyer → 200	status=200
+PASS	available/published · buyer → no sensitive VALUES in body	
+PASS	available/published · buyer → car ⊆ allowlist, no sensitive keys	fields=17 extra=0
+PASS	available/published · buyer → setup ⊆ allowlist (config keys, settlement, commitment)	setupExtra=[] configExtra=0
+PASS	available/published · psApproved → 200	status=200
+PASS	available/published · psApproved → no sensitive VALUES in body	
+PASS	available/published · psApproved → car ⊆ allowlist, no sensitive keys	fields=17 extra=0
+PASS	available/published · psApproved → setup ⊆ allowlist (config keys, settlement, commitment)	setupExtra=[] configExtra=0
+PASS	available/published · psPending → 200	status=200
+PASS	available/published · psPending → no sensitive VALUES in body	
+PASS	available/published · psPending → car ⊆ allowlist, no sensitive keys	fields=17 extra=0
+PASS	available/published · psPending → setup ⊆ allowlist (config keys, settlement, commitment)	setupExtra=[] configExtra=0
+PASS	available/published · dealer → 200	status=200
+PASS	available/published · dealer → no sensitive VALUES in body	
+PASS	available/published · dealer → car ⊆ allowlist, no sensitive keys	fields=17 extra=0
+PASS	available/published · dealer → setup ⊆ allowlist (config keys, settlement, commitment)	setupExtra=[] configExtra=0
+PASS	available/published · admin → 200	status=200
+PASS	available/published · admin → no sensitive VALUES in body	
+PASS	available/published · admin → car ⊆ allowlist, no sensitive keys	fields=17 extra=0
+PASS	available/published · admin → setup ⊆ allowlist (config keys, settlement, commitment)	setupExtra=[] configExtra=0
+PASS	available/published · participant → 200	status=200
+PASS	available/published · participant → no sensitive VALUES in body	
+PASS	available/published · participant → car ⊆ allowlist, no sensitive keys	fields=17 extra=0
+PASS	available/published · participant → setup ⊆ allowlist (config keys, settlement, commitment)	setupExtra=[] configExtra=0
+PASS	available/published · owner → 200	status=200
+PASS	available/published · owner → no sensitive VALUES in body	
+PASS	available/published · owner → car ⊆ allowlist, no sensitive keys	fields=17 extra=0
+PASS	available/published · owner → setup ⊆ allowlist (config keys, settlement, commitment)	setupExtra=[] configExtra=0
+PASS	sold/published · buyer → 200	status=200
+PASS	sold/published · buyer → no sensitive VALUES in body	
+PASS	sold/published · buyer → car ⊆ allowlist, no sensitive keys	fields=17 extra=0
+PASS	sold/published · buyer → setup ⊆ allowlist (config keys, settlement, commitment)	setupExtra=[] configExtra=0
+PASS	sold/published · psApproved → 200	status=200
+PASS	sold/published · psApproved → no sensitive VALUES in body	
+PASS	sold/published · psApproved → car ⊆ allowlist, no sensitive keys	fields=17 extra=0
+PASS	sold/published · psApproved → setup ⊆ allowlist (config keys, settlement, commitment)	setupExtra=[] configExtra=0
+PASS	sold/published · psPending → 200	status=200
+PASS	sold/published · psPending → no sensitive VALUES in body	
+PASS	sold/published · psPending → car ⊆ allowlist, no sensitive keys	fields=17 extra=0
+PASS	sold/published · psPending → setup ⊆ allowlist (config keys, settlement, commitment)	setupExtra=[] configExtra=0
+PASS	sold/published · dealer → 200	status=200
+PASS	sold/published · dealer → no sensitive VALUES in body	
+PASS	sold/published · dealer → car ⊆ allowlist, no sensitive keys	fields=17 extra=0
+PASS	sold/published · dealer → setup ⊆ allowlist (config keys, settlement, commitment)	setupExtra=[] configExtra=0
+PASS	sold/published · admin → 200	status=200
+PASS	sold/published · admin → no sensitive VALUES in body	
+PASS	sold/published · admin → car ⊆ allowlist, no sensitive keys	fields=17 extra=0
+PASS	sold/published · admin → setup ⊆ allowlist (config keys, settlement, commitment)	setupExtra=[] configExtra=0
+PASS	sold/published · participant → 200	status=200
+PASS	sold/published · participant → no sensitive VALUES in body	
+PASS	sold/published · participant → car ⊆ allowlist, no sensitive keys	fields=17 extra=0
+PASS	sold/published · participant → setup ⊆ allowlist (config keys, settlement, commitment)	setupExtra=[] configExtra=0
+PASS	sold/published · owner → 200	status=200
+PASS	sold/published · owner → no sensitive VALUES in body	
+PASS	sold/published · owner → car ⊆ allowlist, no sensitive keys	fields=17 extra=0
+PASS	sold/published · owner → setup ⊆ allowlist (config keys, settlement, commitment)	setupExtra=[] configExtra=0
+PASS	SPA contract: setup.config has termsVersion, bidIncrement, settlement.mode, commitment.recipient/refundable	{"t":"auction-terms-v1","b":10000}
+PASS	hidden · buyer → 404 generic, no data	status=404
+PASS	hidden · psApproved → 404 generic, no data	status=404
+PASS	hidden · psPending → 404 generic, no data	status=404
+PASS	hidden · dealer → 404 generic, no data	status=404
+PASS	hidden · admin → 404 generic, no data	status=404
+PASS	hidden · participant → 404 generic, no data	status=404
+PASS	hidden · owner → 404 generic, no data	status=404
+PASS	pending · buyer → 404 generic, no data	status=404
+PASS	pending · psApproved → 404 generic, no data	status=404
+PASS	pending · psPending → 404 generic, no data	status=404
+PASS	pending · dealer → 404 generic, no data	status=404
+PASS	pending · admin → 404 generic, no data	status=404
+PASS	pending · participant → 404 generic, no data	status=404
+PASS	pending · owner → 404 generic, no data	status=404
+PASS	draft · buyer → 404 generic, no data	status=404
+PASS	draft · psApproved → 404 generic, no data	status=404
+PASS	draft · psPending → 404 generic, no data	status=404
+PASS	draft · dealer → 404 generic, no data	status=404
+PASS	draft · admin → 404 generic, no data	status=404
+PASS	draft · participant → 404 generic, no data	status=404
+PASS	draft · owner → 404 generic, no data	status=404
+PASS	deleted · buyer → 404 generic, no data	status=404
+PASS	deleted · psApproved → 404 generic, no data	status=404
+PASS	deleted · psPending → 404 generic, no data	status=404
+PASS	deleted · dealer → 404 generic, no data	status=404
+PASS	deleted · admin → 404 generic, no data	status=404
+PASS	deleted · participant → 404 generic, no data	status=404
+PASS	deleted · owner → 404 generic, no data	status=404
+PASS	unpublishedSetup · buyer → 404 generic, no data	status=404
+PASS	unpublishedSetup · psApproved → 404 generic, no data	status=404
+PASS	unpublishedSetup · psPending → 404 generic, no data	status=404
+PASS	unpublishedSetup · dealer → 404 generic, no data	status=404
+PASS	unpublishedSetup · admin → 404 generic, no data	status=404
+PASS	unpublishedSetup · participant → 404 generic, no data	status=404
+PASS	unpublishedSetup · owner → 404 generic, no data	status=404
+PASS	noSetup · buyer → 404 generic, no data	status=404
+PASS	noSetup · psApproved → 404 generic, no data	status=404
+PASS	noSetup · psPending → 404 generic, no data	status=404
+PASS	noSetup · dealer → 404 generic, no data	status=404
+PASS	noSetup · admin → 404 generic, no data	status=404
+PASS	noSetup · participant → 404 generic, no data	status=404
+PASS	noSetup · owner → 404 generic, no data	status=404
+PASS	ineligible and nonexistent listings are indistinguishable (same status + body shape)	404/404/404
+PASS	malformed id "not-a-uuid" → 4xx, no data	status=400
+PASS	malformed id "1" → 4xx, no data	status=400
+PASS	malformed id "%00" → 4xx, no data	status=400
+PASS	malformed id "'%20OR%201=1--" → 4xx, no data	status=400
+PASS	malformed id "../cars" → 4xx, no data	status=400
+PASS	malformed id "027d5a32-c4cb-456d-bf84-37a200" → 4xx, no data	status=400
+PASS	participant sees own active registration only	bidder_number=K-J13PART
+PASS	non-registered buyer gets registration:null (no other bidder's row)	
+PASS	expansion ?fields=* → no sensitive values/keys	status=200
+PASS	expansion ?select=* → no sensitive values/keys	status=200
+PASS	expansion ?include=reserve,dealer → no sensitive values/keys	status=200
+PASS	expansion ?populate=dealer → no sensitive values/keys	status=200
+PASS	expansion ?expand=car → no sensitive values/keys	status=200
+PASS	expansion ?debug=1 → no sensitive values/keys	status=200
+PASS	expansion ?admin=true → no sensitive values/keys	status=200
+PASS	expansion ?fields=reserve_price,dealer_phone → no sensitive values/keys	status=200
+PASS	header x-fields cannot widen response	status=200
+PASS	header x-include cannot widen response	status=200
+PASS	header x-role cannot widen response	status=200
+PASS	header x-forwarded-user cannot widen response	status=200
+PASS	header x-user-id cannot widen response	status=200
+PASS	alternate path /api/auctions/:id/registration/ → no sensitive data	status=200
+PASS	alternate path /api/v1/auctions/:id/registration → no sensitive data	status=200
+PASS	alternate path /api/v1/auctions/:id/registration → no sensitive data	status=404
+PASS	alternate path /api/auctions/:id/registration?x=1 → no sensitive data	status=404
+PASS	sibling /registration/security-policy (available) → no sensitive values	status=200
+PASS	sibling /registration/authorization (available) → no sensitive values	status=403
+PASS	sibling /room (available) → no sensitive values	status=200
+PASS	sibling /registration/security-policy (hidden) → no sensitive values	status=200
+PASS	sibling /registration/authorization (hidden) → no sensitive values	status=403
+PASS	sibling /room (hidden) → no sensitive values	status=200
+PASS	sibling /registration/security-policy (deleted) → no sensitive values	status=200
+PASS	sibling /registration/authorization (deleted) → no sensitive values	status=403
+PASS	sibling /room (deleted) → no sensitive values	status=200
+PASS	sibling /api/bids/:id/bids (available) → no sensitive values	status=200
+PASS	sibling /api/payments/status/:id (available) → no sensitive values	status=200
+PASS	sibling /api/bids/:id/bids (hidden) → no sensitive values	status=200
+PASS	sibling /api/payments/status/:id (hidden) → no sensitive values	status=200
+FAIL	public GET /api/cars/:id (anonymous) exposes no reserve/phone/chassis/highest-bidder/seller-id values	status=200
+PASS	public GET /api/cars/:id for a hidden listing → 404	status=404
+PASS	valid registration workflow: POST registers the eligible buyer (no payment executed)	status=201 
+PASS	valid registration workflow: subsequent GET returns the buyer's own registration with the allowlisted contract	registration.status=active
+PASS	(observation, POST route is outside this remediation) POST registration against a hidden listing → status recorded	status=201 (documented; POST /registration is not modified by the proposed patch)
+SUMMARY http://127.0.0.1:5056: 144/145 passed, 1 failed

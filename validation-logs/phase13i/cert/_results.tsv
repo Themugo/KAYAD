@@ -1,0 +1,30 @@
+cert-typecheck	npm run typecheck	0	55
+cert-vite-build	npx vite build --outDir /home/claude/spa-dist-cert --emptyOutDir	0	7
+cert-frontend-vitest	npx vitest run	0	276
+cert-backend-jest	npm run test:jest	0	213
+cert-backend-vitest	npm run test:vitest	0	17
+cert-backend-node-test	npm run test:node	0	2
+cert-validate-phase13e	npm run validate:phase13e-listing-visibility	0	1
+cert-validate-migration-hygiene	npm run validate:migration-hygiene	0	0
+cert-validate-supabase-migrations	npm run validate:supabase-migrations	0	0
+cert-validate-stage5f7	npm run validate:stage5f7-private-auction-contract	1	1
+cert-validate-superadmin-nav	npm run validate:super-admin-phase1-navigation	0	0
+cert-validate-communications	npm run validate:communications	0	0
+cert-validate-transaction-integrity	npm run validate:transaction-integrity	0	1
+cert-validate-frontend-runtime-contracts	npm run validate:frontend-runtime-contracts	0	0
+cert-validate-code-splitting	npm run validate:code-splitting	0	0
+cert-validate-navigation-convergence	npm run validate:navigation-convergence	0	1
+cert-validate-admin-route-convergence	npm run validate:admin-route-convergence	0	0
+cert-eslint-src	npx eslint src --format json -o validation-logs/phase13i/eslint/final-src.json	0	121
+cert-eslint-all	npx eslint . --format json -o validation-logs/phase13i/eslint/final-all.json	1	120
+cert-http-matrix-13i	node runbooks/phase13i-20261026/http/phase13i_personal_account_matrix.mjs	0	51
+cert-http-exposure	node runbooks/phase13i-20261026/http/phase13i_public_endpoint_exposure.mjs	0	4
+cert-http-13f	node runbooks/phase13f-20261025/http/phase13f_http_lifecycle_matrix.mjs	0	6
+cert-http-13g-search	node runbooks/phase13g-20261026/http/phase13g_search_alerts_matrix.mjs	0	5
+cert-http-13h-route	node runbooks/phase13h-20261026/http/phase13h_route_matrix.mjs	0	2
+cert-http-c1-authz	node runbooks/phase-c1-runtime-20261021/http/phase_c1_http_authz_matrix.mjs	0	2
+cert-registration-repro	node runbooks/phase13i-20261026/http/phase13i_registration_disclosure_repro.mjs	0	1
+cert-db-saved-search	node runbooks/phase13i-20261026/db/phase13i_saved_search_job_db.mjs	0	7
+cert-db-driver-13g	bash scripts/validate-phase13g-db.sh	0	27
+cert-route-sweep	node runbooks/phase13g-20261026/http/phase13g_route_schema_sweep.mjs	0	65
+cert-ui-journeys	node runbooks/phase13i-20261026/ui/phase13i_ui_journeys.mjs	0	251

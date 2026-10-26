@@ -1,0 +1,79 @@
+PASS P1 real registration creates a personal buyer (role user, no seller or dealer state)
+PASS P2 registration created no capability row and no dealer row
+PASS P3 real login returns a session for the same users.id
+PASS P3b session credential obtained (body token or cookie)
+PASS P4 /me for the fresh personal account: none + canApply
+PASS P5 unverified e-mail cannot apply -> 403 EMAIL_VERIFICATION_REQUIRED
+PASS P6 after verification the same account applies -> 201 pending
+PASS P7 users.id, role and status unchanged by the application
+PASS P8 registering the same e-mail again is refused and never merges or alters the existing account
+PASS P9 a different e-mail with the SAME phone number is a separate account (no automatic merge or record transfer)
+PASS P10 a registration that asks for role=dealer through the personal flow does not create an approved dealer
+PASS S1 expired token -> 401
+PASS S2 tampered signature -> 401
+PASS S3 token signed with a different secret -> 401
+PASS S4 token for a non-existent user -> 401
+PASS S5 no credentials on every personal endpoint -> 401
+PASS S6 banned account is refused (buyer features and seller state)
+PASS S7 unbanned account works again immediately (no stale cached denial)
+PASS S8 logout endpoint responds without error
+PASS S9 recorded behaviour of a bearer token after logout (informational: 401)
+PASS L0 default onboarding policy (owner_only): an ordinary admin cannot use the legacy seller-approval endpoint -> 403 DECISION_AUTHORITY_REQUIRED
+PASS L10 database backstop hid the suspended legacy seller's new listing and recorded an open event
+PASS L1a legacy approve of a suspended private seller is refused (409), not reported as approved
+PASS L1b capability row still suspended
+PASS L1c the legacy path did not stamp an approval timestamp (dealer_approved_at stays NULL) or change users.status
+PASS L1d no "account approved" communication was emitted to the suspended seller
+PASS L1e listing stays hidden
+PASS L1f listing writes still blocked
+PASS L20 database backstop hid the revoked legacy seller's new listing and recorded an open event
+PASS L2a legacy approve of a revoked private seller is refused (409), not reported as approved
+PASS L2b capability row still revoked
+PASS L2c the legacy path did not stamp an approval timestamp (dealer_approved_at stays NULL) or change users.status
+PASS L2d no "account approved" communication was emitted to the revoked seller
+PASS L2e listing stays hidden
+PASS L2f listing writes still blocked
+PASS L3 legacy approve of a pending legacy seller -> 200
+PASS L3b both the capability row and users.status are approved
+PASS L4 reinstatement through the review workflow still works for the suspended seller
+PASS L4b the policy-hidden listing is restored by that workflow
+PASS L5 legacy endpoint refuses a plain buyer account (not a seller account) -> 400
+PASS L6 legacy endpoint requires admin authority: buyer -> 403
+PASS L7 legacy endpoint is not reachable by marketing staff -> 403
+PASS L8 the dealer-verification endpoint cannot be used to approve a revoked private seller
+PASS L8b ...and did not stamp an approval timestamp on the revoked seller
+PASS C1 concurrent approve vs reject on one pending application: exactly one wins, the other is a 409
+PASS C1b final state equals the winning decision and is a single state
+PASS C2 stale 'reject' (decided on a pending view) after the application became suspended -> 409
+PASS C2b state unchanged by the stale decision
+PASS C3 five simultaneous applications: exactly one 201, four 409, one row
+PASS C4 three simultaneous approvals: exactly one 200
+PASS C4b one audit trail entry for the winning approval (no duplicates)
+PASS C5 a rejected applicant may reapply (pending), review fields cleared
+PASS C6 a REVOKED seller cannot reapply through the applicant route -> 409 (only rejected may reapply)
+PASS C7 a SUSPENDED seller cannot reapply -> 409
+PASS C8 /me for a revoked seller reports canApply=false and canList=false
+PASS C9 buyer features intact for suspended, revoked and pending accounts (favorites + saved searches + capability)
+PASS C10 a revoked seller (still a buyer) can create and keep a saved search
+PASS V1 suspend hides exactly the seller's PUBLIC listing
+PASS V2 pending/draft/sold/admin-hidden listings were NOT touched by the policy; public one is hidden
+PASS V2b dealer-owned listing untouched
+PASS V2c ownership preserved for every listing
+PASS V3 leak scan ran over 1394 anonymous/buyer GET targets (2760 responses, 0 transport errors)
+PASS V3c positive control: the dealer-owned public listing IS found by the same public routes (scan is capable of detecting a listing)
+PASS V3e protected route /api/auctions/:id/registration no longer leaks a non-public listing
+PASS V3d NO anonymous or buyer GET route (other than the documented protected-domain route) leaked a hidden / pending / draft / admin-hidden listing of the suspended seller
+PASS V4 sold listing is not hidden by the policy and is not treated as available: public by-id
+PASS V5 reinstatement -> 200
+PASS V5b only the policy-hidden listing restored; pending/draft/sold/admin-hidden unchanged
+PASS V5c restored listing visible again on the public list (no stale cache)
+PASS X1 approved private seller creates a listing in the same account -> 201
+PASS X1b held for moderation (pending), owned by the seller, not a verified dealer, no dealer row
+PASS X2 the seller cannot self-publish, self-promote or self-verify through the edit endpoint
+PASS X3 approved private seller cannot edit another seller's listing -> 403/404
+PASS X4 approved private seller still cannot reach dealer-business routes -> 403
+PASS X5 approved private seller cannot approve their own capability or anyone else's -> 403
+PASS X6 unpublish (soft delete) of own listing by the approved seller works and keeps the record
+PASS X6b the record is retained (soft-deleted, ownership intact)
+PASS X7 soft-deleted listing is no longer publicly retrievable -> 404
+phase13i_personal_account_matrix: pass=78 fail=0 open_protected=0

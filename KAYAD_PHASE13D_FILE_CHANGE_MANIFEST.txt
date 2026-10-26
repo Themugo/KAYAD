@@ -1,0 +1,31 @@
+KAYAD Phase 13D — file-level change manifest
+Foundation: Super Admin ZIP sha256 2a9b65a53156cd000568b830c5648ddf196639c9c8c4acd8f17674f40003a7ca (pristine copy compared with diff -rq, excluding node_modules and dist)
+
+== Files that differ from the foundation (8) ==
+Only in backend/middleware: dealerIsolation.js
+Files backend/middleware/dealerVerification.js and backend/middleware/dealerVerification.js differ
+Files backend/routes/dealerPlatformRoutes.js and backend/routes/dealerPlatformRoutes.js differ
+Files backend/routes/dealerRoutes.js and backend/routes/dealerRoutes.js differ
+Files backend/routes/listingQualityRoutes.js and backend/routes/listingQualityRoutes.js differ
+Files backend/routes/searchAnalyticsRoutes.js and backend/routes/searchAnalyticsRoutes.js differ
+Files backend/tests/onboarding/onboardingFlow.test.js and backend/tests/onboarding/onboardingFlow.test.js differ
+Only in backend/tests/regression: phase13dDealerIsolation.test.js
+
+== Evidence files added to the package root and validation-logs/ (not source) ==
+KAYAD_PHASE13D_AFFECTED_ROUTE_INVENTORY.csv
+KAYAD_PHASE13D_CALLER_AND_OWNERSHIP_MAP.md
+KAYAD_PHASE13D_DEALER_ISOLATION_REGRESSION_REPORT.md
+KAYAD_PHASE13D_DEFECT_REPRODUCTION.md
+KAYAD_PHASE13D_FILE_CHANGE_MANIFEST.txt
+KAYAD_PHASE13D_IMPLEMENTATION_APPROVAL_GATE.md
+KAYAD_PHASE13D_IMPLEMENTATION_CHANGE_LEDGER.md
+KAYAD_PHASE13D_REMAINING_RISKS_AND_STAGING_GAPS.md
+KAYAD_PHASE13D_ROLLBACK_PLAN.md
+KAYAD_PHASE13D_VALIDATION_RESULTS.md
+validation-logs/ (command logs and exit codes)
+
+== Hash proof ==
+Identical to foundation (byte-for-byte): 8055 files
+Modified: 6
+New source/test: 2
+Foundation files missing from package (excluding node_modules/dist): 0 (the three `.env*.example` templates were restored; they contain no secrets; real env files are absent from the foundation)

@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /home/claude/work/p144/KAYAD-PHASE14.4-DEALER-WORKFLOW-COMPLETION
+
+
+ Test Files  114 passed (114)
+      Tests  924 passed | 1 skipped (925)
+   Start at  13:25:24
+   Duration  215.36s (transform 6.33s, setup 14.41s, import 21.65s, tests 72.37s, environment 88.00s)
+

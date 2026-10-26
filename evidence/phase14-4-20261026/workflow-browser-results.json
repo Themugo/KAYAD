@@ -1,0 +1,452 @@
+{
+  "rows": [
+    {
+      "viewport": "desktop",
+      "view": "overview",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "inventory",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "leads",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "pipeline",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [
+        "axe-error"
+      ],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "customers",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "analytics",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "finance",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "inspections",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "auctions",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "escrow",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "marketing",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "reputation",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "team",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "settings",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "inventory-new",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "desktop",
+      "view": "inventory-edit",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "overview",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "inventory",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "leads",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "pipeline",
+      "crashed": false,
+      "overflowPx": -16,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "customers",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "analytics",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "finance",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "inspections",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "auctions",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "escrow",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "marketing",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "reputation",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "team",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "settings",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "inventory-new",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "tablet",
+      "view": "inventory-edit",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "overview",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "inventory",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "leads",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "pipeline",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "customers",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "analytics",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "finance",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "inspections",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "auctions",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "escrow",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "marketing",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "reputation",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "team",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "settings",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "inventory-new",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    },
+    {
+      "viewport": "mobile",
+      "view": "inventory-edit",
+      "crashed": false,
+      "overflowPx": 0,
+      "axeSeriousCritical": [],
+      "pageErrors": []
+    }
+  ],
+  "flows": [
+    {
+      "viewport": "desktop",
+      "flow": "listing-create",
+      "validationShown": true,
+      "requests": 1,
+      "multipart": true,
+      "urlAfter": "/?nav=dealer-dashboard&section=inventory"
+    },
+    {
+      "viewport": "desktop",
+      "flow": "listing-edit",
+      "requests": 1,
+      "path": "/api/cars/c1",
+      "body": "{\"title\":\"Prado TX\",\"brand\":\"Toyota\",\"model\":\"Prado\",\"year\":2018,\"price\":4700000,\"city\":\"Nairobi\"}"
+    },
+    {
+      "viewport": "desktop",
+      "flow": "settings-save",
+      "verificationCard": "Pending KAYAD review",
+      "put": [
+        "/api/dealer-platform/profile/d1 {\"businessName\":\"Amani Motors Ltd\",\"location\":\"Nairobi\",\"bio\":\"Hi\",\"phone\":\"+254700000000\"}"
+      ]
+    },
+    {
+      "viewport": "desktop",
+      "flow": "team-invite",
+      "post": [
+        "/api/dealer-platform/team/invite {\"email\":\"new@amani.test\",\"role\":\"sales_agent\"}"
+      ]
+    },
+    {
+      "viewport": "mobile",
+      "flow": "listing-create",
+      "validationShown": true,
+      "requests": 1,
+      "multipart": true,
+      "urlAfter": "/?nav=dealer-dashboard&section=inventory"
+    },
+    {
+      "viewport": "mobile",
+      "flow": "listing-edit",
+      "requests": 1,
+      "path": "/api/cars/c1",
+      "body": "{\"title\":\"Prado TX\",\"brand\":\"Toyota\",\"model\":\"Prado\",\"year\":2018,\"price\":4700000,\"city\":\"Nairobi\"}"
+    },
+    {
+      "viewport": "mobile",
+      "flow": "settings-save",
+      "verificationCard": "Pending KAYAD review",
+      "put": [
+        "/api/dealer-platform/profile/d1 {\"businessName\":\"Amani Motors Ltd\",\"location\":\"Nairobi\",\"bio\":\"Hi\",\"phone\":\"+254700000000\"}"
+      ]
+    },
+    {
+      "viewport": "mobile",
+      "flow": "team-invite",
+      "post": [
+        "/api/dealer-platform/team/invite {\"email\":\"new@amani.test\",\"role\":\"sales_agent\"}"
+      ]
+    }
+  ]
+}

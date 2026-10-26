@@ -1,0 +1,16 @@
+PASS department matrix is mounted inside existing AdminView
+PASS department navigation requires strict owner marker
+PASS all eight requested departments represented
+PASS all four required capability classifications defined
+PASS capability catalog includes source evidence and canonical destinations
+PASS every linked department destination is registered in the canonical admin route map
+PASS no fabricated counts or live KPI requests in capability component
+PASS no new departmental API mounted in backend server
+PASS existing finance endpoints remain the source of truth
+PASS ledger write operations require MANAGE_FINANCE
+PASS finance route scope and existing allowlist preserved
+PASS test coverage checks owner gate, status honesty and canonical routes
+PASS owner matrix warns that UI visibility does not grant API access
+PASS financial separation-of-duties risk is explicit
+
+14/14 checks passed

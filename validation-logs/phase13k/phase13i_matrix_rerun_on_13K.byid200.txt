@@ -1,0 +1,12 @@
+buyer2 /api/bids/cb6e9556-0f6e-4fbf-8e16-868e48934291/bids
+buyer2 /api/bids/c9e4e25c-a0f1-4966-96f8-b70992fe0e01/bids
+buyer2 /api/bids/6ef98b63-9e18-45db-aceb-b6c8511ea333/bids
+buyer2 /api/bids/76c3dd6f-67f5-4f9f-aad4-dca40f1433fc/bids
+buyer2 /api/auctions/cb6e9556-0f6e-4fbf-8e16-868e48934291/registration/security-policy
+buyer2 /api/auctions/c9e4e25c-a0f1-4966-96f8-b70992fe0e01/registration/security-policy
+buyer2 /api/auctions/6ef98b63-9e18-45db-aceb-b6c8511ea333/registration/security-policy
+buyer2 /api/auctions/76c3dd6f-67f5-4f9f-aad4-dca40f1433fc/registration/security-policy
+buyer2 /api/payments/status/cb6e9556-0f6e-4fbf-8e16-868e48934291
+buyer2 /api/payments/status/c9e4e25c-a0f1-4966-96f8-b70992fe0e01
+buyer2 /api/payments/status/6ef98b63-9e18-45db-aceb-b6c8511ea333
+buyer2 /api/payments/status/76c3dd6f-67f5-4f9f-aad4-dca40f1433fc
