@@ -1,113 +1,30 @@
-import { emitCommunication, COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
+// PHASE 13I — saved-search cron entry point.
+// The old tick lived here; it is replaced by savedSearchNotificationJob.js (gated, visibility-aware, consent-aware, idempotent,
+// auditable). This file keeps the public exports (`matches`, `startSavedSearchCron`) so existing imports keep working.
 import { logInfo, logWarn } from "../utils/logger.js";
-import { findAll, findById, update } from "../db/index.js";
 import { isSupabaseConnected } from "../utils/supabase.js";
+import { matches } from "./savedSearchMatching.js";
+import { resolveSavedSearchConfig, runSavedSearchNotificationJob } from "./savedSearchNotificationJob.js";
+
+export { matches };
 
 const CHECK_INTERVAL = 10 * 60 * 1000;
 
-const matches = (car, filters) => {
-  if (!filters || typeof filters !== "object") return true;
-  const f = filters;
-  const keyword = String(f.keyword ?? f.search ?? "").trim().toLowerCase();
-  const brand = String(f.brand ?? "").trim().toLowerCase();
-  const model = String(f.model ?? "").trim().toLowerCase();
-  const location = String(f.location ?? f.city ?? "").trim().toLowerCase();
-  const body = String(f.body ?? f.bodyType ?? "").trim().toLowerCase();
-  const fuel = String(f.fuel ?? "").trim().toLowerCase();
-  const transmission = String(f.transmission ?? "").trim().toLowerCase();
-  const color = String(f.color ?? "").trim().toLowerCase();
-  const haystack = `${car.title || ""} ${car.brand || ""} ${car.model || ""}`.toLowerCase();
-
-  if (keyword && !haystack.includes(keyword)) return false;
-  if (brand && car.brand?.toLowerCase() !== brand) return false;
-  if (model && car.model?.toLowerCase() !== model) return false;
-  if (location && car.location?.city?.toLowerCase() !== location) return false;
-  if (body && car.bodyType?.toLowerCase() !== body) return false;
-  if (fuel && car.fuel?.toLowerCase() !== fuel) return false;
-  if (transmission && car.transmission?.toLowerCase() !== transmission) return false;
-  if (color && car.color?.toLowerCase() !== color) return false;
-
-  const priceMin = f.priceMin ?? f.minPrice;
-  const priceMax = f.priceMax ?? f.maxPrice;
-  const yearMin = f.yearMin ?? f.minYear;
-  const yearMax = f.yearMax ?? f.maxYear;
-  const mileageMin = f.mileageMin ?? f.minMileage;
-  const mileageMax = f.mileageMax ?? f.maxMileage;
-
-  if (priceMin !== undefined && priceMin !== "" && (car.price || 0) < Number(priceMin)) return false;
-  if (priceMax !== undefined && priceMax !== "" && (car.price || 0) > Number(priceMax)) return false;
-  if (yearMin !== undefined && yearMin !== "" && (car.year || 0) < Number(yearMin)) return false;
-  if (yearMax !== undefined && yearMax !== "" && (car.year || 0) > Number(yearMax)) return false;
-  if (mileageMin !== undefined && mileageMin !== "" && (car.mileage || 0) < Number(mileageMin)) return false;
-  if (mileageMax !== undefined && mileageMax !== "" && (car.mileage || 0) > Number(mileageMax)) return false;
-
-  if (f.filter === "auction" || f.auctionOnly === true) {
-    if (car.auctionStatus !== "live" && !car.allowBid) return false;
-  }
-  if (f.filter === "fixed") {
-    if (car.allowBid || car.auctionStatus === "live") return false;
-  }
-  if (f.verifiedOnly === true && car.isVerifiedDealer !== true) return false;
-
-  return true;
-};
-
+/** Returns { mode } describing what was started. With SAVED_SEARCH_JOB_MODE absent/invalid/off NOTHING is scheduled. */
 export const startSavedSearchCron = () => {
+  const cfg = resolveSavedSearchConfig();
+  if (!cfg.modeValid) logWarn(`SavedSearchCron: SAVED_SEARCH_JOB_MODE="${cfg.rawMode}" is not valid (off|dry_run|enabled); treating as off`);
+  if (cfg.mode === "off") {
+    logInfo("SavedSearchCron disabled (SAVED_SEARCH_JOB_MODE is off or unset); no saved-search message will be processed or sent");
+    return { mode: "off" };
+  }
   if (!isSupabaseConnected()) {
     logWarn("SavedSearchCron skipped: Supabase not connected");
-    return;
+    return { mode: "off" };
   }
-
-  const tick = async () => {
-    try {
-      const searches = await findAll("saved_searches", { filters: { notify: true } });
-      if (searches.length === 0) return;
-
-      const since = new Date(Date.now() - CHECK_INTERVAL).toISOString();
-      const newCars = await findAll("cars", {
-        filters: { createdAt: { $gte: since } },
-        select: "title,brand,model,price,year,mileage,fuel,transmission,bodyType,color,location,auctionStatus,allowBid,isVerifiedDealer,createdAt",
-      });
-
-      if (newCars.length === 0) return;
-
-      for (const search of searches) {
-        const matched = newCars.filter((c) => matches(c, search.filters));
-        if (matched.length === 0) continue;
-
-        const lastNotified = search.lastNotifiedAt ? new Date(search.lastNotifiedAt).getTime() : 0;
-        const fresh = matched.filter((c) => new Date(c.createdAt).getTime() > lastNotified);
-
-        if (fresh.length === 0) continue;
-
-        await update("saved_searches", search.id, { lastNotifiedAt: new Date().toISOString() });
-
-        const user = await findById("users", search.user);
-        if (!user) continue;
-        const titles = fresh
-          .slice(0, 3)
-          .map((c) => c.title || `${c.brand || ""} ${c.year || ""}`)
-          .join(", ");
-        const rest = fresh.length > 3 ? ` and ${fresh.length - 3} more` : "";
-        const message = `${fresh.length} vehicle${fresh.length > 1 ? "s" : ""} added: ${titles}${rest}`;
-
-        await emitCommunication({
-          userId: search.user,
-          eventType: COMMUNICATION_EVENTS.SAVED_SEARCH_MATCH,
-          category: "marketing",
-          title: `New matching vehicles: ${search.name}`,
-          subject: `New vehicles matching ${search.name}`,
-          message: `${message}. View: https://www.kayad.space/saved-searches`,
-          channels: ["in_app", "email", "sms", "whatsapp"],
-          metadata: { savedSearchId: search.id, count: fresh.length, vehicles: fresh.slice(0, 10).map((c) => ({ id: c.id || c._id, title: c.title })) },
-        });
-      }
-    } catch (err) {
-      console.error("❌ SavedSearchCron error:", err.message);
-    }
-  };
-
+  const tick = () => runSavedSearchNotificationJob().catch((err) => console.error("❌ SavedSearchCron error:", err.message));
   tick();
-  setInterval(tick, CHECK_INTERVAL);
-  logInfo(`SavedSearchCron: ${CHECK_INTERVAL / 60000}-min cycle`);
+  setInterval(tick, CHECK_INTERVAL).unref?.();
+  logInfo(`SavedSearchCron: mode=${cfg.mode}, external delivery ${cfg.externalDelivery ? "ENABLED" : "disabled (in-app only)"}, ${CHECK_INTERVAL / 60000}-min cycle`);
+  return { mode: cfg.mode, externalDelivery: cfg.externalDelivery };
 };

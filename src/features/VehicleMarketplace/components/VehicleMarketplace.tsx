@@ -671,7 +671,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-nairobi-kicc.jpg';
   const heroAdminBackgroundUrl = heroPresentation.backgroundUrl || KENYA_ROAD_HERO_BACKGROUND;
   const heroBackgroundStyle: React.CSSProperties = {
-    backgroundImage: `url(\"${heroAdminBackgroundUrl}\")`,
+    backgroundImage: `url("${heroAdminBackgroundUrl}")`,
     backgroundSize: 'cover',
     backgroundPosition: `${Math.max(0, Math.min(100, Number(heroPresentation.backgroundPositionX) || 50))}% ${Math.max(0, Math.min(100, Number(heroPresentation.backgroundPositionY) || 50))}%`,
     backgroundRepeat: 'no-repeat',

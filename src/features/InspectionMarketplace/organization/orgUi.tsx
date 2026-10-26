@@ -15,7 +15,8 @@ export function useLoader<T>(fn: () => Promise<T>, deps: React.DependencyList) {
     try { const d = await fn(); if (mine === seq.current) setData(d); }
     catch (e) { if (mine === seq.current) setError(e); }
     finally { if (mine === seq.current) setLoading(false); }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // The caller owns the dependency list by design (useAsync(fn, deps)); both rules are disabled for this single line only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/use-memo
   }, deps);
   useEffect(() => { void run(); }, [run]);
   return { data, loading, error, reload: run };

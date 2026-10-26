@@ -66,11 +66,12 @@ describe("isListingCreationRequest (mounted-router path)", () => {
 describe("requireDealerVerification: who can list on day one", () => {
   const run = async (user, req = {}) => { const r = res(); const next = jest.fn(); await requireDealerVerification({ user, method: "POST", baseUrl: "/api/cars", path: "/", ...req }, r, next); return { r, next }; };
 
-  test("private seller with no dealer row is auto-provisioned and may list", async () => {
+  // PHASE 13D (DI-4): this test used to pin the defect (an approved Dealer row auto-created for any individual_seller).
+  // The listing outcome is preserved (a private seller may still reach the listing handler); the dealership record is not created.
+  test("private seller with no dealer row may list WITHOUT a dealership record being created", async () => {
     dealerModel.findOne.mockResolvedValue(null);
-    dealerModel.create.mockResolvedValue({ approved: true });
     const { next } = await run({ id: U, role: "individual_seller" });
-    expect(dealerModel.create).toHaveBeenCalledWith(expect.objectContaining({ user: U, approved: true }));
+    expect(dealerModel.create).not.toHaveBeenCalled();
     expect(next).toHaveBeenCalled();
   });
 

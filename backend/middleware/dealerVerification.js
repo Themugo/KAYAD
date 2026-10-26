@@ -35,27 +35,18 @@ export const requireDealerVerification = async (req, res, next) => {
     // Check if user is a dealer
     let dealer = await Dealer.findOne({ user: userId });
 
-    // Fixed (re-applied - this project's own earlier hardening work,
-    // Phase 6, already found and fixed this exact defect; confirmed
-    // reverted when this file was rebuilt on a diverged branch,
-    // reproduced failing again directly while testing the real seller
-    // listing-publish flow): a freshly-registered individual_seller
-    // (private seller, not a business dealer) is rejected here with
-    // "Dealer profile not found" on their very first listing attempt,
-    // since nothing anywhere ever creates a Dealer row for this role.
-    // The full business-verification concept this middleware
-    // otherwise enforces does not conceptually apply to a private
-    // individual listing their own single vehicle. Auto-create an
-    // approved Dealer record the first time an individual_seller
-    // reaches this check - the same "grandfathered, no full
-    // verification required" outcome this middleware already grants
-    // legacy approved dealers just below, extended to the one real
-    // role it was silently blocking entirely.
-    if (!dealer && req.user.role === "individual_seller") {
-      dealer = await Dealer.create({ user: userId, approved: true, verifiedAt: new Date() });
-    }
+    // PHASE 13D (DI-4): a private seller (individual_seller) listing their own vehicle is NOT a dealership. This
+    // middleware used to INSERT an `approved: true` Dealer row for any individual_seller that reached it, whatever
+    // their users.status, which silently created (and auto-approved) a dealership identity from a personal listing.
+    // It no longer creates anything: a private seller with no Dealer row is let through to the listing handler (which
+    // keeps its own seller email-verification / publication-review rules) with `req.dealer = null`, exactly the
+    // authorization outcome the old auto-created row produced, minus the dealership record. Dealer rows that already
+    // exist are neither modified nor removed here. Legitimate dealer onboarding (role `dealer`, trigger-created row,
+    // verification workflow) is unchanged.
+    // 13E: a personal account (role user) with an APPROVED private-seller capability (set by sellerListingAccess) is also a private seller.
+    const isPrivateSeller = req.user.role === "individual_seller" || (req.user.role === "user" && req.sellerCapability?.status === "approved");
 
-    if (!dealer) {
+    if (!dealer && !isPrivateSeller) {
       return res.status(403).json({
         success: false,
         message: "Dealer profile not found",
@@ -73,7 +64,7 @@ export const requireDealerVerification = async (req, res, next) => {
         code: "DEALER_ACCOUNT_SUSPENDED",
         message: "Dealer account is suspended and requires an explicit admin reinstatement.",
         verificationStatus: "suspended",
-        suspensionReason: verification.suspensionReason || dealer.suspensionReason || null,
+        suspensionReason: verification.suspensionReason || dealer?.suspensionReason || null,
         suspensionExpiresAt: verification.suspensionExpiresAt || null,
       });
     }
@@ -87,6 +78,13 @@ export const requireDealerVerification = async (req, res, next) => {
         requiresAction: "resubmit_verification",
         rejectionReason: verification.rejectionReason || null,
       });
+    }
+
+    // PHASE 13D: private seller without a Dealer row -> no dealership identity, listing flow continues.
+    if (!dealer) {
+      req.dealer = null;
+      req.verification = verification || null;
+      return next();
     }
 
     // Backward compatibility applies only when there is no newer blocking decision.

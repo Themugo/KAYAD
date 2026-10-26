@@ -139,6 +139,7 @@ export function userHasPermission(user: UserPermissions | null | undefined, perm
 // A page is visible if the user's role grants it OR a permission was assigned.
 export const PAGE_PERMISSIONS: Record<string, Permission> = {
   "/admin/users":         PERM.MANAGE_USERS,
+  "/admin/private-seller-applications": PERM.MANAGE_USERS,
   "/admin/sellers":       PERM.MANAGE_STAFF,
   "/admin/cars":          PERM.MANAGE_CARS,
   "/admin/moderation":    PERM.MANAGE_MODERATION,

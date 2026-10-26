@@ -6,13 +6,15 @@ import { validateObjectId, validateCar, validateQuery, carListQuerySchema, valid
 
 import upload, { handleUploadError, cleanupUploadsOnError } from "../middleware/upload.js"; // STAGE 5C.1
 import { uploadLimiter, createLimiter } from "../middleware/rateLimiter.js";
-import { cacheResponse, invalidateCache } from "../middleware/cacheMiddleware.js";
+import { cacheResponse, cacheResponseAnonymous, invalidateCache } from "../middleware/cacheMiddleware.js";
+import { requirePublicListing } from "../middleware/publicListingVisibility.js"; // Phase 13F
 import { cacheVehicleSearch, invalidateVehicleSearchCache } from "../middleware/searchCache.js";
 import { trackCarSearch } from "../middleware/searchTracking.js";
 import { trackVehicleSearchLatency } from "../middleware/searchLatencyTracking.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { STAFF_ROLES, PERM } from "../config/roles.js";
 import { requireDealerVerification } from "../middleware/dealerVerification.js";
+import { sellerListingAccess } from "../middleware/sellerCapability.js"; // Phase 13E
 import { requirePermission } from "../middleware/rbac.js";
 
 import {
@@ -40,7 +42,7 @@ const router = express.Router();
 router.get(
   "/dealer/my-cars",
   protect,
-  dealerOnly,
+  sellerListingAccess({ write: false }),
   asyncHandler(async (req, res) => {
     const cars = await findAll("cars", {
       filters: { dealer: req.user.id },
@@ -62,7 +64,7 @@ router.get(
 router.get(
   "/dealer/analytics",
   protect,
-  dealerOnly,
+  sellerListingAccess({ write: false }),
   asyncHandler(async (req, res) => {
     const dealerCars = await findAll("cars", {
       filters: { dealer: req.user.id },
@@ -216,7 +218,7 @@ router.get(
   "/:id",
   optionalAuth,
   validateObjectId,
-  cacheResponse(600), // 10 minutes cache
+  cacheResponseAnonymous(600), // 10 minutes cache; Phase 13F: anonymous viewers only (owner/staff views are never shared)
   asyncHandler(getCar),
 );
 
@@ -260,7 +262,7 @@ router.post(
 router.post(
   "/",
   protect,
-  dealerOnly,
+  sellerListingAccess({ write: true }),
   requireDealerVerification,
   uploadLimiter,
   cleanupUploadsOnError,
@@ -275,7 +277,7 @@ router.post(
 router.put(
   "/:id",
   protect,
-  dealerOnly,
+  sellerListingAccess({ write: true }),
   createLimiter,
   validateObjectId,
   validateCar,
@@ -287,7 +289,7 @@ router.put(
 router.delete(
   "/:id",
   protect,
-  dealerOnly,
+  sellerListingAccess({ write: true }),
   createLimiter,
   validateObjectId,
   invalidateCache("cache:*"),
@@ -298,7 +300,7 @@ router.delete(
 router.delete(
   "/:id/images/:imageIndex",
   protect,
-  dealerOnly,
+  sellerListingAccess({ write: true }),
   validateObjectId,
   invalidateCache("cache:*"),
   asyncHandler(deleteCarImage),
@@ -308,7 +310,7 @@ router.delete(
 router.post(
   "/:id/images",
   protect,
-  dealerOnly,
+  sellerListingAccess({ write: true }),
   uploadLimiter,
   cleanupUploadsOnError,
   upload.array("images", 10),
@@ -323,6 +325,7 @@ router.post(
 router.get(
   "/:id/price-history",
   validateObjectId,
+  requirePublicListing, // Phase 13F: hidden/pending/deleted listings are not served or cached
   cacheResponse(600), // 10 minutes cache
   asyncHandler(async (req, res) => {
     const car = await findById("cars", req.params.id, "price,priceHistory");
@@ -346,6 +349,7 @@ router.get(
 router.get(
   "/:id/insights",
   validateObjectId,
+  requirePublicListing, // Phase 13F: hidden/pending/deleted listings are not served or cached
   cacheResponse(600), // 10 minutes cache
   asyncHandler(async (req, res) => {
     const car = await findById("cars", req.params.id);
@@ -389,6 +393,7 @@ router.get(
 // =============================
 router.get(
   "/:id/valuation",
+  requirePublicListing, // Phase 13F: hidden/pending/deleted listings are not served or cached
   cacheResponse(600),
   asyncHandler(async (req, res) => {
     const data = await getVehicleValuation(req.params.id);

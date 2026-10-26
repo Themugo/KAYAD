@@ -1,5 +1,6 @@
 import express from "express";
 import { protect, dealerOnly, requireApproved, allowRoles } from "../middleware/auth.js";
+import { dealerBusinessOnly } from "../middleware/dealerIsolation.js"; // PHASE 13D
 import { requireDealerVerification } from "../middleware/dealerVerification.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
@@ -106,6 +107,10 @@ router.put("/onboarding", protect, allowRoles("dealer"), asyncHandler(async (req
 // =============================
 // 🔒 GLOBAL PROTECTION
 // =============================
+// PHASE 13D (DI-1): the router-level guard is UNCHANGED (`dealerOnly` still admits individual_seller) because this router
+// also hosts caller-scoped listing management that private sellers legitimately use (pinned by S1-LIST-04: cars,
+// bulk-status/delete, mark-sold, bids, auctions, earnings, escrows, payouts). Dealer-BUSINESS routes (team, subscription
+// upgrade, wholesale/trade listings, pricing recommendations) carry the stricter per-route `dealerBusinessOnly` below.
 router.use(protect, dealerOnly, requireApproved);
 
 // =============================
@@ -669,6 +674,7 @@ import crypto from "crypto";
 // GET  /api/dealer/team          — list all team members (PAGINATED + CACHED)
 router.get(
   "/team",
+  dealerBusinessOnly, // PHASE 13D
   cacheDealerData,
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
@@ -692,6 +698,7 @@ router.get(
 // POST /api/dealer/team/invite   — invite by email (creates invite record)
 router.post(
   "/team/invite",
+  dealerBusinessOnly, // PHASE 13D
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const { email, role = "sales_agent", permissions = {} } = req.body;
@@ -753,6 +760,7 @@ router.post(
 // PATCH /api/dealer/team/:memberId  — update role/permissions
 router.patch(
   "/team/:memberId",
+  dealerBusinessOnly, // PHASE 13D
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const record = await findOne("dealer_teams", { id: req.params.memberId, dealer: req.user.id });
@@ -776,6 +784,7 @@ router.patch(
 // DELETE /api/dealer/team/:memberId — remove from team
 router.delete(
   "/team/:memberId",
+  dealerBusinessOnly, // PHASE 13D
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const record = await findOne("dealer_teams", { id: req.params.memberId, dealer: req.user.id });
@@ -1209,6 +1218,7 @@ router.post(
 // =============================
 router.post(
   "/upgrade",
+  dealerBusinessOnly, // PHASE 13D
   asyncHandler(async (req, res) => {
     const { planId, phone } = req.body || {};
     if (!planId) return res.status(400).json({ success: false, message: "planId is required" });
@@ -1239,6 +1249,7 @@ router.post(
 // =============================
 router.patch(
   "/cars/:id/wholesale",
+  dealerBusinessOnly, // PHASE 13D
   asyncHandler(async (req, res) => {
     const existing = await findOne("cars", { id: req.params.id, dealer: req.user.id });
     if (!existing) return res.status(404).json({ success: false, message: "Car not found" });
@@ -1258,6 +1269,7 @@ router.patch(
 // =============================
 router.get(
   "/trade-listings",
+  dealerBusinessOnly, // PHASE 13D
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
     const sb = getSupabase();
@@ -1282,6 +1294,7 @@ router.get(
 // =============================
 router.post(
   "/pricing-recommendations",
+  dealerBusinessOnly, // PHASE 13D
   asyncHandler(async (req, res) => {
     const result = await getPricingRecommendations(req.body);
     res.json({ success: true, ...result });

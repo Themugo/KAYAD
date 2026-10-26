@@ -17,6 +17,7 @@ import {
   getQualityBenchmarksHandler,
 } from "../controllers/listingQualityController.js";
 import { protect, adminOnly, dealerOnly, optionalAuth } from "../middleware/auth.js";
+import { requireOwnDealerResource } from "../middleware/dealerIsolation.js"; // PHASE 13D (DI-3)
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 
@@ -34,10 +35,10 @@ router.get("/car/:carId", optionalAuth, validateObjectId, asyncHandler(getListin
 // =============================
 
 // Get dealer quality stats
-router.get("/dealer/:dealerId/stats", protect, dealerOnly, validateObjectId, asyncHandler(getDealerQualityStatsHandler));
+router.get("/dealer/:dealerId/stats", protect, dealerOnly, validateObjectId, requireOwnDealerResource("dealerId"), asyncHandler(getDealerQualityStatsHandler));
 
 // Get dealer quality report
-router.get("/dealer/:dealerId/report", protect, dealerOnly, validateObjectId, asyncHandler(getDealerQualityReportHandler));
+router.get("/dealer/:dealerId/report", protect, dealerOnly, validateObjectId, requireOwnDealerResource("dealerId"), asyncHandler(getDealerQualityReportHandler));
 
 // Bulk recalculate dealer quality
 router.post(
@@ -45,6 +46,7 @@ router.post(
   protect,
   dealerOnly,
   validateObjectId,
+  requireOwnDealerResource("dealerId"),
   asyncHandler(bulkRecalculateDealerQualityHandler),
 );
 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, ChevronRight } from 'lucide-react';
 import { adminAPI } from '../api/api.exports';
+import { getAlertMessage } from '../utils/adminAlertMessage';
 
 type AlertRow = { id: string; message: string; severity: string; at: string | null };
 type PanelState =
@@ -29,7 +30,7 @@ export default function AdminAlertsPanel() {
           status: 'ready',
           rows: list.slice(0, 4).map((a: any, index: number) => ({
             id: String(a?._id ?? a?.id ?? index),
-            message: text(a?.message) || text(a?.title) || text(a?.description) || 'Alert message unavailable',
+            message: getAlertMessage(a),
             severity: text(a?.severity) || 'unspecified',
             at: text(a?.createdAt) || text(a?.timestamp) || null,
           })),

@@ -3,7 +3,7 @@ import { ADMIN_ROUTE_COMPONENTS } from '../../../components/admin/AdminRouteSurf
 import { SUPERADMIN_ONLY } from '../../../utils/permissions';
 
 const existingSidebarRoutes = [
-  '/admin/users', '/admin/sellers', '/admin/cars', '/admin/moderation', '/admin/auctions',
+  '/admin/users', '/admin/sellers', '/admin/private-seller-applications', '/admin/cars', '/admin/moderation', '/admin/auctions',
   '/admin/bids', '/admin/escrows', '/admin/reviews', '/admin/referrals', '/admin/chats',
   '/admin/reports', '/admin/support-tickets', '/admin/feedback', '/admin/market-data',
   '/admin/transactions', '/admin/ntsa-queue', '/admin/inspections', '/admin/dealer-verifications',

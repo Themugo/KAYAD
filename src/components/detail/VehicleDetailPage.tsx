@@ -420,20 +420,25 @@ export const VehicleDetailPage: FC = () => {
               {vehicle.location}
             </span>
             <span className="text-[#D7E7E4]">•</span>
-            <span className="font-semibold flex items-center gap-1.5">
-              <span>VIN:</span>
-              <code className="font-mono bg-[#EEF7F5] border border-[#D7E7E4] px-2 py-0.5 rounded text-navy-600 font-bold">
-                {vehicle.vin}
-              </code>
-              <button
-                onClick={handleCopyVin}
-                className="p-1 text-[#64748b] hover:text-navy-600 transition-colors cursor-pointer"
-                title="Copy VIN"
-              >
-                {copiedVin ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              </button>
-            </span>
-            <span className="text-[#D7E7E4]">•</span>
+            {/* Phase 13K: the public API no longer serializes the VIN (owner decision); render the VIN row only when a VIN is actually present (owner/staff views). */}
+            {vehicle.vin ? (
+              <>
+                <span className="font-semibold flex items-center gap-1.5">
+                  <span>VIN:</span>
+                  <code className="font-mono bg-[#EEF7F5] border border-[#D7E7E4] px-2 py-0.5 rounded text-navy-600 font-bold">
+                    {vehicle.vin}
+                  </code>
+                  <button
+                    onClick={handleCopyVin}
+                    className="p-1 text-[#64748b] hover:text-navy-600 transition-colors cursor-pointer"
+                    title="Copy VIN"
+                  >
+                    {copiedVin ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </span>
+                <span className="text-[#D7E7E4]">•</span>
+              </>
+            ) : null}
             <span className="flex items-center gap-1 text-[#64748b] font-medium">
               <Eye className="w-3.5 h-3.5" />
               <span>{vehicle.viewsCount != null ? `${vehicle.viewsCount} Views` : 'Views unavailable'}</span>

@@ -615,7 +615,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 { enabled: Boolean(vehicle.inspectionPassed || vehicle.inspection), title: '✓ Inspection Report', desc: 'Inspection data is available' },
                 { enabled: Boolean(vehicle.financeAvailable), title: '✓ Finance Available', desc: 'Financing is offered for this listing' },
                 { enabled: Boolean(vehicle.escrowEligible || isEscrowActive), title: `✓ ${getEscrowBadgeLabel(vehicle)}`, desc: 'Escrow workflow is available for this listing' },
-                { enabled: Boolean(vehicle.vin), title: '✓ Vehicle Identity', desc: 'VIN is recorded on the listing' }
+                ...(vehicle.vin ? [{ enabled: true, title: '✓ Vehicle Identity', desc: 'VIN is recorded on the listing' }] : []) // Phase 13K: the public API no longer carries the VIN, so the badge is shown only when the VIN is actually available (owner/staff)
               ].map((item, idx) => (
                 <div key={idx} className={`p-3 rounded-2xl backdrop-blur-md border space-y-0.5 ${item.enabled ? 'bg-white/10 border-white/15' : 'bg-white/5 border-white/10 opacity-60'}`}>
                   <p className="font-extrabold text-white text-xs">{item.title}</p>

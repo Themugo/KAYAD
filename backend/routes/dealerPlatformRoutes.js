@@ -1,5 +1,6 @@
 import express from "express";
-import { protect, dealerOnly } from "../middleware/auth.js";
+import { protect } from "../middleware/auth.js";
+import { dealerBusinessOnly } from "../middleware/dealerIsolation.js"; // PHASE 13D (DI-2)
 import { dealerOrgAccess } from "../middleware/dealerOrgAccess.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import upload, { handleUploadError, cleanupUploadsOnError } from "../middleware/upload.js"; // STAGE 5C.1
@@ -58,37 +59,37 @@ import {
 const router = express.Router();
 
 // Dashboard
-router.get("/dashboard", protect, dealerOnly, asyncHandler(getDealerDashboard));
+router.get("/dashboard", protect, dealerBusinessOnly, asyncHandler(getDealerDashboard));
 
 // Profile
 router.get("/profile/:dealerId", asyncHandler(getDealerProfile));
 router.put("/profile/:dealerId", protect, asyncHandler(updateDealerProfile));
 
 // Inventory
-router.get("/inventory", protect, dealerOnly, asyncHandler(getInventory));
-router.post("/inventory", protect, dealerOnly, requireDealerVerification, uploadLimiter, cleanupUploadsOnError, upload.array("images", 10), handleUploadError, createLimiter, asyncHandler(createListing));
-router.put("/inventory/:listingId", protect, dealerOnly, createLimiter, asyncHandler(updateListing));
-router.delete("/inventory/:listingId", protect, dealerOnly, createLimiter, asyncHandler(deleteListing));
-router.post("/inventory/bulk", protect, dealerOnly, createLimiter, asyncHandler(bulkUpdateListings));
+router.get("/inventory", protect, dealerBusinessOnly, asyncHandler(getInventory));
+router.post("/inventory", protect, dealerBusinessOnly, requireDealerVerification, uploadLimiter, cleanupUploadsOnError, upload.array("images", 10), handleUploadError, createLimiter, asyncHandler(createListing));
+router.put("/inventory/:listingId", protect, dealerBusinessOnly, createLimiter, asyncHandler(updateListing));
+router.delete("/inventory/:listingId", protect, dealerBusinessOnly, createLimiter, asyncHandler(deleteListing));
+router.post("/inventory/bulk", protect, dealerBusinessOnly, createLimiter, asyncHandler(bulkUpdateListings));
 
 // Leads (CRM)
-router.get("/leads", protect, dealerOnly, asyncHandler(getLeads));
-router.put("/leads/:leadId", protect, dealerOnly, asyncHandler(updateLead));
-router.get("/leads/:leadId/activities", protect, dealerOnly, asyncHandler(getLeadActivities));
-router.post("/leads/:leadId/notes", protect, dealerOnly, createLimiter, asyncHandler(addLeadNote));
-router.post("/leads/:leadId/tasks", protect, dealerOnly, asyncHandler(createTask));
+router.get("/leads", protect, dealerBusinessOnly, asyncHandler(getLeads));
+router.put("/leads/:leadId", protect, dealerBusinessOnly, asyncHandler(updateLead));
+router.get("/leads/:leadId/activities", protect, dealerBusinessOnly, asyncHandler(getLeadActivities));
+router.post("/leads/:leadId/notes", protect, dealerBusinessOnly, createLimiter, asyncHandler(addLeadNote));
+router.post("/leads/:leadId/tasks", protect, dealerBusinessOnly, asyncHandler(createTask));
 
 // Sales Pipeline
-router.get("/pipeline", protect, dealerOnly, asyncHandler(getSalesPipeline));
+router.get("/pipeline", protect, dealerBusinessOnly, asyncHandler(getSalesPipeline));
 
 // Marketing
-router.get("/marketing", protect, dealerOnly, asyncHandler(getMarketingCampaigns));
-router.post("/marketing", protect, dealerOnly, createLimiter, asyncHandler(createCampaign));
-router.put("/marketing/:campaignId", protect, dealerOnly, createLimiter, asyncHandler(updateCampaign));
+router.get("/marketing", protect, dealerBusinessOnly, asyncHandler(getMarketingCampaigns));
+router.post("/marketing", protect, dealerBusinessOnly, createLimiter, asyncHandler(createCampaign));
+router.put("/marketing/:campaignId", protect, dealerBusinessOnly, createLimiter, asyncHandler(updateCampaign));
 
 // Analytics
-router.get("/analytics", protect, dealerOnly, asyncHandler(getDealerAnalytics));
-router.get("/analytics/recommendations", protect, dealerOnly, asyncHandler(getAIRecommendations));
+router.get("/analytics", protect, dealerBusinessOnly, asyncHandler(getDealerAnalytics));
+router.get("/analytics/recommendations", protect, dealerBusinessOnly, asyncHandler(getAIRecommendations));
 
 // Team
 router.get("/team", protect, dealerOrgAccess(), asyncHandler(getTeamMembers));
@@ -98,25 +99,25 @@ router.delete("/team/:memberId", protect, dealerOrgAccess("canManageTeam"), crea
 router.post("/team/accept", protect, asyncHandler(acceptTeamInvite));
 
 // Subscription
-router.get("/subscription", protect, dealerOnly, asyncHandler(getSubscription));
+router.get("/subscription", protect, dealerBusinessOnly, asyncHandler(getSubscription));
 
 // AI Copilot
-router.post("/copilot", protect, dealerOnly, asyncHandler(askDealerCopilot));
+router.post("/copilot", protect, dealerBusinessOnly, asyncHandler(askDealerCopilot));
 
 // Customers
-router.get("/customers", protect, dealerOnly, asyncHandler(getCustomers));
-router.get("/customers/:customerId/timeline", protect, dealerOnly, asyncHandler(getCustomerTimeline));
+router.get("/customers", protect, dealerBusinessOnly, asyncHandler(getCustomers));
+router.get("/customers/:customerId/timeline", protect, dealerBusinessOnly, asyncHandler(getCustomerTimeline));
 
 // Auctions
-router.get("/auctions", protect, dealerOnly, asyncHandler(getAuctionInventory));
+router.get("/auctions", protect, dealerBusinessOnly, asyncHandler(getAuctionInventory));
 
 // Finance
-router.get("/finance", protect, dealerOnly, asyncHandler(getFinanceApplications));
+router.get("/finance", protect, dealerBusinessOnly, asyncHandler(getFinanceApplications));
 
 // Inspections
-router.get("/inspections", protect, dealerOnly, asyncHandler(getInspectionOrders));
+router.get("/inspections", protect, dealerBusinessOnly, asyncHandler(getInspectionOrders));
 
 // Reputation
-router.get("/reputation", protect, dealerOnly, asyncHandler(getReputation));
+router.get("/reputation", protect, dealerBusinessOnly, asyncHandler(getReputation));
 
 export default router;

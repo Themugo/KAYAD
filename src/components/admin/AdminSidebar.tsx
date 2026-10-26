@@ -5,7 +5,7 @@ import {
   Activity, Megaphone, Settings, AlertTriangle, ClipboardCheck, BarChart3,
   Gift, MessageSquare, TrendingUp, Bell, X, type LucideIcon, Flag, TicketCheck,
   Radio, ChevronDown, BriefcaseBusiness, Building2, Wrench,
-  BadgeCheck, UserSearch, Gauge, Server, KeyRound, MessageSquareText, Store,
+  BadgeCheck, UserSearch, IdCard, Gauge, Server, KeyRound, MessageSquareText, Store,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../../api/api';
@@ -36,6 +36,7 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
     links: [
       { to: '/admin/users', icon: Users, label: 'Users' },
       { to: '/admin/sellers', icon: UserCheck, label: 'Sellers' },
+      { to: '/admin/private-seller-applications', icon: IdCard, label: 'Private Seller Applications' },
       { to: '/admin/cars', icon: Car, label: 'Listings' },
       { to: '/admin/moderation', icon: ShieldCheck, label: 'Moderation' },
       { to: '/admin/auctions', icon: Activity, label: 'Auctions' },

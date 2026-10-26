@@ -12,6 +12,14 @@ export const cacheResponse = (ttl = 3600) => {
   return cacheService.middleware(ttl);
 };
 
+// Phase 13F: shared-key response cache that is only ever read or written for ANONYMOUS requests. A response produced for a signed-in
+// viewer (for example the owner or staff opening their own hidden/pending listing) can differ from the public one, and caching it under
+// the shared key `cache:GET:<url>` would serve that private view to the public for the whole TTL.
+export const cacheResponseAnonymous = (ttl = 3600) => {
+  const shared = cacheService.middleware(ttl);
+  return (req, res, next) => (req.user || req.headers?.authorization ? next() : shared(req, res, next));
+};
+
 // Invalidate cache by pattern on successful operations
 export const invalidateCache = (pattern) => {
   return async (req, res, next) => {

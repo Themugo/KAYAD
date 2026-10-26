@@ -115,7 +115,8 @@ export async function getVehicleValuation(vehicleId) {
 }
 
 export async function getValuationMatrix({ brand, model, city, limit = 20 } = {}) {
-  const filters = { price: { $gt: 0 } };
+  // Phase 13I: public inventory only (the matrix is an anonymous, cached aggregate; it previously included pending/draft/hidden/deleted listings).
+  const filters = { price: { $gt: 0 }, status: { $in: ['available', 'sold'] }, deletedAt: { $exists: false } };
   if (brand) filters.brand = brand;
   if (model) filters.model = model;
   if (city) filters.city = city;

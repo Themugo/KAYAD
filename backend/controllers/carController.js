@@ -18,6 +18,7 @@ import { randomUUID } from "node:crypto";
 import { registerMediaUploadJob, registerMediaUploadFailure, completeMediaUpload } from "../services/mediaRecovery.service.js";
 import { getOnboardingPolicy, isPolicyTrusted } from "../services/onboardingPolicy.service.js"; // STAGE 5
 import { getEscrowEnabledForNewOrEditedCar, getEffectiveEscrowForCar } from "../services/escrowCapability.service.js";
+import { toPublicVehicleDetail, PUBLIC_VEHICLE_POLICY } from "../utils/publicVehicleProjection.js"; // Phase 13K: public responses are allowlisted, never raw rows
 
 const DEALER_ROLES = SELLER_ROLES; // backward compat
 
@@ -264,7 +265,7 @@ export const getCars = async (req, res) => {
     // best-effort and swallows its own error), so car.dealer was
     // always just the raw, unpopulated foreign key - never the real
     // dealer object - on every real car fetch, not just auctions.
-    findQuery = findQuery.populate("dealer", "name businessName phone role avatar dealerApprovedAt");
+    findQuery = findQuery.populate("dealer", PUBLIC_VEHICLE_POLICY.exposeSellerPhone ? "name businessName phone role avatar dealerApprovedAt" : "name businessName role avatar dealerApprovedAt"); // Phase 13K: seller account phone only when the owner policy allows it
 
     let [cars, total] = await Promise.all([
       findQuery.sort(sortOption).skip(skip).limit(limitNum).lean(),
@@ -346,7 +347,7 @@ export const createCar = async (req, res) => {
     const config = await PlatformConfig.findOne().lean();
     const pkgs = config?.packages || [];
     const isDealer = seller.role === "dealer";
-    const isSeller = seller.role === "individual_seller";
+    const isSeller = seller.role === "individual_seller" || (seller.role === "user" && req.sellerCapability?.status === "approved"); // 13E
 
     // The platform free-market switch applies only to private sellers.
     // Dealer commercial access is always determined by the authoritative
@@ -412,6 +413,7 @@ export const createCar = async (req, res) => {
     // (an approved seller account publishes immediately; unapproved stays pending). The client cannot
     // influence either: status is server-assigned and overwrites anything in req.body.
     const moderation = await getOnboardingPolicy();
+    const sellerPublishable = seller.role === "user" ? req.sellerCapability?.status === "approved" : seller.status === "approved";
     const autoPublish = isPolicyTrusted(moderation) && moderation.policy.listingModeration === "auto_publish";
     const body = {
       ...req.body,
@@ -419,8 +421,11 @@ export const createCar = async (req, res) => {
       views: 0,
       bidsCount: 0,
       trustScore: 0,
-      status: autoPublish && seller.status === "approved" ? "available" : "pending",
-      isVerifiedDealer: seller.status === "approved",
+      // Phase 13F: a personal (role=user) seller's eligibility is the authoritative private-seller capability that
+      // sellerListingAccess already resolved, never users.status (the buyer-account state). A private seller is also
+      // never labelled a verified dealer: that flag is dealer identity and a seller capability grants none.
+      status: autoPublish && sellerPublishable ? "available" : "pending",
+      isVerifiedDealer: seller.role === "user" ? false : seller.status === "approved",
     };
     // `city` is the correct app-level alias for the real
     // location_city column (confirmed and fixed in this project's own
@@ -1140,7 +1145,8 @@ export const getCar = async (req, res) => {
       Car.updateMany({ id: car.id }, { $inc: { views: 1 } }).catch((e) => logWarn("View count increment failed (fallback)", { error: e.message }));
     }
 
-    res.json({ success: true, data: car });
+    // Phase 13K: the owner and staff keep the full record (dealer edit page); every other viewer, authenticated or not, receives the public projection.
+    res.json({ success: true, data: isOwner || isAdmin ? car : toPublicVehicleDetail(car) });
   } catch (err) {
     logError("GET ONE ERROR", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to fetch car" });

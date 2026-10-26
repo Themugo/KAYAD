@@ -20,6 +20,7 @@ import Car from "../models/Car.js";
 import PlatformConfig from "../models/PlatformConfig.js";
 import AuditLog from "../models/AuditLog.js";
 import { auditAfterCommit } from "../utils/auditAfterCommit.js";
+import { syncLegacyApproval } from "../services/privateSellerCapability.service.js"; // Phase 13E
 import Payment from "../models/Payment.js";
 import Bid from "../models/Bid.js";
 import Escrow from "../models/Escrow.js";
@@ -430,6 +431,27 @@ router.post(
       });
       if (rpcError) throw rpcError;
     }
+    // 13F: sync the authoritative capability row FIRST so a database failure aborts before users.status changes and the
+    // response can state the real capability outcome (a suspended/revoked seller is not reinstated by this legacy endpoint).
+    const legacySync = user.role === "individual_seller" ? await syncLegacyApproval(req.params.id, req.user.id) : null;
+    // Phase 13I: a suspended/revoked private seller is NOT approved by this legacy path. Previously the handler still stamped
+    // users.status/dealerApprovedAt and told the seller "Your seller account has been approved" (e-mail/SMS/WhatsApp/in-app) while the
+    // authoritative capability row stayed restricted. Refuse before ANY side effect; reinstatement runs through the review workflow
+    // (PATCH /api/private-seller-capability/admin/:userId/decision), which restores only the listings the policy hid.
+    if (legacySync && ["suspended", "revoked"].includes(legacySync.status)) {
+      await auditAfterCommit({
+        action: "Dealer decision: approve-dealer refused (private seller restricted)",
+        admin: req.user.name || req.user.email,
+        adminId: req.user.id,
+        details: { outcome: "refused", targetUserId: String(user._id), sellerCapabilityStatus: legacySync.status },
+      });
+      return res.status(409).json({
+        success: false,
+        code: "SELLER_CAPABILITY_RESTRICTED",
+        sellerCapabilityStatus: legacySync.status,
+        message: `This private seller is ${legacySync.status}. Nothing was changed. Use Private Seller Applications to reinstate access.`,
+      });
+    }
     await User.findByIdAndUpdate(req.params.id, { status: "approved", dealerApprovedAt: new Date() });
 
     await auditAfterCommit({
@@ -455,9 +477,10 @@ router.post(
       type: "info",
     }).catch((e) => console.warn("⚠️ Admin notification failed:", e.message));
 
-    res.json({
+res.json({
       success: true,
       message: "Seller approved",
+      ...(legacySync ? { sellerCapabilityStatus: legacySync.status } : {}),
     });
   }),
 );

@@ -14,6 +14,7 @@ export const getDealerAnalytics = () => api.get('/dealer-platform/analytics').th
 
 
 export const getDealerProfile = (dealerId) => api.get(`/dealer-platform/profile/${dealerId}`).then(r => r.data);
+export const getVerificationStatus = () => api.get('/verification/status').then(r => r.data);
 export const updateDealerProfile = (dealerId, body) => api.put(`/dealer-platform/profile/${dealerId}`, body).then(r => r.data);
 export const getReputation = () => api.get("/dealer-platform/reputation").then(r => r.data);
 export const updateCampaign = (campaignId, body) => api.put(`/dealer-platform/marketing/${campaignId}`, body).then(r => r.data);

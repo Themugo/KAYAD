@@ -4,6 +4,7 @@ import {
   XCircle, RefreshCw, Eye, Shield, Zap, BarChart3, AlertCircle,
 } from 'lucide-react';
 import { adminAPI } from '../../api/api';
+import { getAlertMessage } from '../../utils/adminAlertMessage';
 
 const METRIC_CARDS = [
   { key: 'totalUsers', label: 'Total Users', icon: Users, color: 'var(--admin-brand)', background: 'var(--admin-brand-soft)' },
@@ -262,7 +263,7 @@ export default function OperationsControlRoom() {
                 {alerts.map((alert, index) => {
                   const config = getAlertColor(alert.severity);
                   const Icon = config.icon;
-                  const message = alert.message || alert.title || alert.description || 'Alert message unavailable';
+                  const message = getAlertMessage(alert);
                   const timestamp = alert.createdAt || alert.timestamp;
                   return (
                     <div key={alert.id || alert._id || `${message}-${index}`} className="alert-item" style={{ background: config.bg, borderColor: config.border }}>

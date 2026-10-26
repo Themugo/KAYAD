@@ -154,7 +154,7 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
               />
               <div className="flex-1 min-w-0">
                 <h4 className="text-sm font-bold text-[#176B87] truncate">{vehicle.title}</h4>
-                <p className="text-xs text-[#64748b]">VIN: {vehicle.vin}</p>
+                {vehicle.vin ? <p className="text-xs text-[#64748b]">VIN: {vehicle.vin}</p> : null}
                 <div className="flex items-center gap-2 mt-1">
                   <span className="text-xs font-semibold text-[#64748b]">Current Listed Price:</span>
                   <span className="text-sm font-black text-[#176B87] font-serif">

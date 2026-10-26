@@ -4,6 +4,8 @@ import {
   getListingQualityStats,
 } from "../services/listingAssistantService.js";
 import { logError } from "../infrastructure/logging/index.js";
+import { findById } from "../db/index.js";
+import { canManageAnyListing } from "../config/roles.js";
 
 // =============================
 // 🤖 ANALYZE LISTING QUALITY
@@ -12,6 +14,13 @@ import { logError } from "../infrastructure/logging/index.js";
 export const analyzeListing = async (req, res) => {
   try {
     const { carId } = req.params;
+
+    // Phase 13I: the quality analysis is a seller tool. It answered for ANY car id (including hidden, pending and draft listings) to
+    // any signed-in user. Now: the listing's owner or listing-management staff only; everyone else gets the same 404 as a missing id.
+    const owned = await findById("cars", carId, "id,dealer");
+    if (!owned || (!canManageAnyListing(req.user) && String(owned.dealer ?? "") !== String(req.user?.id ?? ""))) {
+      return res.status(404).json({ success: false, message: "Listing not found" });
+    }
 
     const analysis = await analyzeListingQuality(carId);
 

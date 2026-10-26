@@ -163,6 +163,15 @@ export const FIELD_ALIASES = {
     user: "user_id",
     car: "car_id",
   },
+  // Phase 13G (Defect A): public.chats (migration 20260710044600) has real camelCase columns ("createdAt", "updatedAt", "lastMessageAt",
+  // "isBlocked"). With no alias the default camelToSnake() looked for updated_at / is_blocked / last_message_at, so the staff chat-moderation
+  // list (GET /api/admin/chats sorts on updatedAt) failed with `column chats.updated_at does not exist`. Identity aliases only; no schema change.
+  chats: {
+    createdAt: "createdAt",
+    updatedAt: "updatedAt",
+    lastMessageAt: "lastMessageAt",
+    isBlocked: "isBlocked",
+  },
   // Fixed (Final Integration - escrow views): all 4 previous aliases
   // (payment/buyer/seller/car) were wrong, confirmed directly against
   // the real, migrated table (\d escrows) - reproduced the real

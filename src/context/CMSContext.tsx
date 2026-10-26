@@ -1,4 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import type { CMSContentStore, CMSGroupKey } from '@/lib/cms-types';
 import { DEFAULT_CMS_STORE } from '@/lib/cms-defaults';

@@ -45,6 +45,7 @@ import dealerRoutes from "./routes/dealerRoutes.js";
 import auctionSetupRoutes from "./routes/auctionSetupRoutes.js";
 import auctionRegistrationRoutes from "./routes/auctionRegistrationRoutes.js";
 import privateSellerAuctionRoutes from "./routes/privateSellerAuctionRoutes.js";
+import privateSellerCapabilityRoutes from "./routes/privateSellerCapabilityRoutes.js"; // Phase 13E
 import auctionRoutes from "./routes/auctionRoutes.js";
 import auctionSettlementRoutes from "./routes/auctionSettlementRoutes.js";
 import auctionFulfilmentRoutes from "./routes/auctionFulfilmentRoutes.js";
@@ -829,6 +830,7 @@ app.use("/api/dealer", dealerRoutes);
 app.use("/api/dealer", auctionSetupRoutes);
 app.use("/api/auctions", auctionRoutes);
 app.use("/api/auctions", auctionRegistrationRoutes);
+app.use("/api/private-seller-capability", privateSellerCapabilityRoutes); // Phase 13E: personal-account seller application / review
 app.use("/api/private-seller-auctions", privateSellerAuctionRoutes); // Stage 5F.10: proposal / verification / custody lifecycle
 app.use("/api/auctions", auctionSettlementRoutes);
 app.use("/api/auctions", auctionFulfilmentRoutes);
@@ -981,7 +983,7 @@ const startBackgroundServices = async (io) => {
       catch (err) { logError("Failed to start auction reminder cron", err); console.log("❌ Failed to start auction reminder cron:", err); }
     })(),
     (async () => {
-      try { startSavedSearchCron(); console.log("✅ Saved search cron started"); }
+      try { const ss = startSavedSearchCron(); console.log(ss?.mode && ss.mode !== "off" ? `✅ Saved search cron started (mode=${ss.mode})` : "ℹ️ Saved search cron disabled (SAVED_SEARCH_JOB_MODE off)"); }
       catch (err) { logError("Failed to start saved search cron", err); console.log("❌ Failed to start saved search cron:", err); }
     })(),
     (async () => {
@@ -1047,7 +1049,7 @@ const startBackgroundServices = async (io) => {
   logInfo("Background services started", {
     escrowCron: `auto-release after ${process.env.ESCROW_AUTO_RELEASE_DAYS || 7} days`,
     auctionReminderCron: "reminders active",
-    savedSearchCron: "10-min cycle",
+    savedSearchCron: `SAVED_SEARCH_JOB_MODE=${process.env.SAVED_SEARCH_JOB_MODE || "off(default)"}`,
     priceAlertCron: "15-min cycle",
     auctionTimer: "5s close sweep (canonical)",
     sliScheduler: "1-min SLI / 5-min budget / 1-min alerts",

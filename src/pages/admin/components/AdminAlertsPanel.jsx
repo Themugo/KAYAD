@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Bell, Check } from 'lucide-react';
+import { getAlertMessage } from '../../../utils/adminAlertMessage';
 
 export default function AdminAlertsPanel({ alerts, onMarkRead, onMarkAllRead }) {
   return (
@@ -58,7 +59,7 @@ export default function AdminAlertsPanel({ alerts, onMarkRead, onMarkAllRead }) 
                       </span>
                     </div>
                     <div style={{ color: 'var(--text-muted)', fontSize: 11, lineHeight: 1.4 }}>
-                      {a.data?.message || a.message || a.type || 'System alert'}
+                      {getAlertMessage(a, a.type || 'System alert')}
                     </div>
                   </div>
                   <button

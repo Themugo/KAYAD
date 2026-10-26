@@ -16,6 +16,9 @@ import { mapKeyOut, mapRowIn, SEARCHABLE_FIELDS, normalizeSelect } from '../util
 // M-4 FIX: Escape LIKE wildcards (% and _) in ilike terms to prevent
 // users from matching broader patterns than intended.
 const escapeLike = (s) => String(s).replace(/[%_]/g, (ch) => `\\${ch}`);
+// Phase 13G (Defect B): double-quote a value for a PostgREST logical-tree filter (`or=(col.ilike."...")`) so user text containing
+// parentheses, dots, commas or quotes cannot break out of the expression.
+const pgrstQuote = (v) => `"${String(v).replace(/[\\"]/g, '\\$&')}"`;
 
 // Normalize Date values in every PostgREST filter path. Nested Mongo-style operators
 // previously passed native Date objects through and could serialize to Date.toString(),
@@ -47,6 +50,12 @@ const applyFilters = (query, filters, table) => {
       const orExpr = value.map((cond) =>
         Object.entries(cond).map(([fk, fv]) => {
           const col = mapKeyOut(table, fk);
+          // Phase 13G (Defect B): `{ $ilike: '%term%' }` (used by searchService.buildFilters for GET /api/search?q=) had no branch here and
+          // fell through to `.eq.[object Object]`, so every keyword search on that endpoint silently returned zero rows.
+          if (fv && typeof fv === 'object' && fv.$ilike !== undefined) {
+            const pattern = String(fv.$ilike).replace(/[,*\u0000]/g, '').replace(/%/g, '*');
+            return /^\*+$/.test(pattern) || !pattern ? 'id.is.null' : `${col}.ilike.${pgrstQuote(pattern)}`;
+          }
           if (fv && typeof fv === 'object' && fv.$regex) {
             const term = (fv.$regex.source || fv.$regex).toString().replace(/[,%^$]/g, '');
             return `${col}.ilike.*${escapeLike(term)}*`;

@@ -35,6 +35,8 @@ import {
   Calendar as CalendarIcon, MapPin as MapPinIcon, Clock as ClockIcon,
   UserCheck, CheckCircle2,
 } from 'lucide-react';
+import { usePrivateSellerCapability } from '../../../hooks/usePrivateSellerCapability';
+import SellerCapabilityPanel from '../../../components/SellerCapabilityPanel';
 
 // ============================================================
 // TYPES & INTERFACES
@@ -221,6 +223,9 @@ interface PrivateSellerPlatformProps {
 
 export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: PrivateSellerPlatformProps) {
   const [activeSection, setActiveSection] = useState<PlatformSection>('home');
+  // Phase 13E: seller eligibility comes from the real capability state of the SAME personal account.
+  const personalRole = ['user', 'buyer', 'individual_seller'].includes(String(user?.role || '').toLowerCase());
+  const { capability, loading: capLoading, error: capError, reload: reloadCap } = usePrivateSellerCapability(Boolean(user) && personalRole);
   const [sellerAccountType, setSellerAccountType] = useState<'seller' | 'dealer'>('seller');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [listingDraft, setListingDraft] = useState<ListingDraft | null>(null);
@@ -276,7 +281,11 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: 
   }, []);
 
   const normalizedRole = String(user?.role || '').toLowerCase();
-  const sellerWorkspaceAllowed = normalizedRole === 'individual_seller';
+  // approved capability -> workspace. Legacy individual_seller keeps the workspace unless the capability state says otherwise
+  // (suspended / revoked / rejected) or while the state is still loading / could not be loaded (no regression for existing sellers).
+  const sellerWorkspaceAllowed = capability
+    ? capability.status === 'approved' || (normalizedRole === 'individual_seller' && capability.status === 'pending')
+    : normalizedRole === 'individual_seller';
 
   if (!user || !sellerWorkspaceAllowed) {
     const isDealer = sellerAccountType === 'dealer';
@@ -298,7 +307,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: 
           <div className="kayad-sell-entry__intro">
             <span>CHOOSE YOUR SELLING WORKSPACE</span>
             <h2>Built for how you sell.</h2>
-            <p>{signedInWithoutSellerAccess ? 'Your current account is signed in, but seller tools are not enabled for this role. Request the correct access instead of creating a duplicate account.' : 'Start with the right account type. You can sign in with an existing KAYAD account instead of creating another one.'}</p>
+            <p>{signedInWithoutSellerAccess ? (personalRole ? 'You are signed in with your personal account. Private selling is added to this same account once approved; you do not need a second account.' : 'Your current account is signed in, but seller tools are not enabled for this role. Request the correct access instead of creating a duplicate account.') : 'Start with the right account type. You can sign in with an existing KAYAD account instead of creating another one.'}</p>
           </div>
           <div className="kayad-sell-entry__choices">
             <button type="button" aria-pressed={!isDealer} onClick={() => setSellerAccountType('seller')} className={`kayad-sell-choice ${!isDealer ? 'is-selected' : ''}`}>
@@ -313,9 +322,10 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: 
             </button>
           </div>
           <div className="kayad-sell-entry__actions">
-            <button type="button" className="kayad-sell-entry__primary" onClick={() => signedInWithoutSellerAccess ? onNavigate?.('support') : onOpenAuth?.(sellerAccountType)}>
+            {signedInWithoutSellerAccess && personalRole && <div className="w-full"><SellerCapabilityPanel capability={capability} loading={capLoading} error={capError} onReload={reloadCap} onOpenWorkspace={() => onNavigate?.('seller-platform')} /></div>}
+            {!(signedInWithoutSellerAccess && personalRole) && <button type="button" className="kayad-sell-entry__primary" onClick={() => signedInWithoutSellerAccess ? onNavigate?.('support') : onOpenAuth?.(sellerAccountType)}>
               {signedInWithoutSellerAccess ? 'Contact Support about seller access' : `Continue as ${isDealer ? 'a dealership' : 'a private seller'}`} <ArrowRight size={17} aria-hidden="true" />
-            </button>
+            </button>}
             {!signedInWithoutSellerAccess && <Link className="kayad-sell-entry__signin" to={buildAuthPath('login', { intent: sellerAccountType, next: '/?nav=seller-platform' })}>Already have an account? Sign in</Link>}
           </div>
           <p className="kayad-sell-entry__disclaimer">{signedInWithoutSellerAccess ? 'Seller access is role-controlled. Support can direct your request to the existing KAYAD review process; this screen does not change permissions.' : 'Creating an account does not automatically approve a seller or publish a listing. KAYAD reviews eligibility before seller tools are activated.'}</p>
@@ -532,7 +542,7 @@ function SellerHomeSection({ listings, escrows, loading, listingsError, escrowsE
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
             <button type="button" onClick={onRefresh} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60" aria-label="Refresh seller dashboard data"><RefreshCw size={16} aria-hidden="true" className={loading ? 'animate-spin' : ''} /> Refresh</button>
-            <button type="button" onClick={() => onNavigate('listing-wizard')} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" style={{ backgroundColor: KAYAD_THEME.emerald }}><PlusCircle size={17} aria-hidden="true" /> Create Listing</button>
+            <button type="button" onClick={() => onNavigate('listing-wizard')} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:brightness-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" style={{ backgroundColor: '#0F766E' }}><PlusCircle size={17} aria-hidden="true" /> Create Listing</button>
           </div>
         </div>
       </motion.section>

@@ -25,7 +25,7 @@ export function AuctionExperienceRail({ current = 'detail', compact = false, onN
         <div className="auction-xp-mark"><Sparkles size={15} /></div>
         {!compact && <div><span className="auction-xp-overline">YOUR AUCTION JOURNEY</span><strong>One room. Every next step.</strong></div>}
       </div>
-      <div className="auction-xp-steps">
+      <div className="auction-xp-steps" role="group" aria-label="Auction journey steps" tabIndex={0}>
         {steps.map((step, index) => {
           const Icon = step.icon;
           const active = step.id === current;

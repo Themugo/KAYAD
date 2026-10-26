@@ -31,7 +31,7 @@ export const calculateDaysOnMarket = async (startDate, endDate) => {
 
 export const getMostViewedVehicles = async (limit = 10, startDate, endDate) => {
   try {
-    const cars = await findAll("cars", { filters: { createdAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }, orderBy: "views", ascending: false, limit, select: "id,title,views,price" });
+    const cars = await findAll("cars", { filters: { status: { $in: ["available", "sold"] }, createdAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }, orderBy: "views", ascending: false, limit, select: "id,title,views,price" }); // Phase 13I: public statuses only (was every status incl. hidden/pending/draft)
     return cars.map((car) => ({ carId: car.id, title: car.title, views: car.views, price: car.price }));
   } catch (err) { logError("Failed to get most viewed vehicles", err); throw err; }
 };
@@ -54,10 +54,12 @@ export const getFastestSellingVehicles = async (limit = 10, startDate, endDate) 
 
 export const getCountyTrends = async (startDate, endDate) => {
   try {
-    const cars = await findAll("cars", { filters: { status: { $in: ["available", "sold"] }, createdAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }, select: "location,price,status,createdAt,updatedAt" });
+    const cars = await findAll("cars", { filters: { status: { $in: ["available", "sold"] }, createdAt: { $gte: startDate, $lte: endDate }, deletedAt: { $exists: false } }, select: "city,price,status,createdAt,updatedAt" });
     const countyData = {};
     cars.forEach((car) => {
-      const county = car.location?.city || "Unknown";
+      // Phase 13H: cars has no `location` column (real column location_city, app alias `city`); the old select made every call fail with
+      // "column cars.location does not exist" on this PUBLIC route. `location.city` is kept as a fallback for legacy-shaped rows.
+      const county = car.city || car.location?.city || "Unknown";
       if (!countyData[county]) countyData[county] = { county, totalPrice: 0, volume: 0, totalDaysOnMarket: 0, soldCount: 0 };
       countyData[county].totalPrice += car.price || 0;
       countyData[county].volume += 1;

@@ -397,6 +397,7 @@ const ADMIN_PAGE_ROLES: Record<string, string[]> = {
   '/admin/settings':       ['superadmin', 'admin'],
   '/admin/security-log':   ['superadmin', 'admin'],
   '/admin/users':          ['superadmin', 'admin', 'technical_support', 'hr', 'moderator'],
+  '/admin/private-seller-applications': ['superadmin', 'admin', 'technical_support', 'hr'],
   '/admin/transactions':   ['superadmin', 'admin', 'accounts', 'escrow_officer'],
   '/admin/escrows':        ['superadmin', 'admin', 'accounts', 'escrow_officer'],
   '/admin/ads':            ['superadmin', 'admin', 'marketing', 'ad_manager'],

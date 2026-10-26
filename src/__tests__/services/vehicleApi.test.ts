@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError, BackendCar } from '../../services/vehicleApi';
+import { getCars, getCarById, createCar, updateCar, mapBackendCarToVehicle, VehicleApiError, BackendCar } from '../../services/vehicleApi';
 import { HttpRequestError, request } from '../../api/httpRequest';
 
 vi.mock('../../api/httpRequest', async () => {
@@ -202,5 +202,40 @@ describe('mapBackendCarToVehicle - matches the real, corrected schema (Phase 5)'
     expect(mapped.mileage).toBe(0);
     expect(mapped.images).toEqual([]);
     expect(mapped.isAuction).toBe(false);
+  });
+});
+
+describe('vehicleApi.createCar / updateCar - real request shape (Phase 14.4)', () => {
+  afterEach(() => { requestMock.mockReset(); });
+
+  it('createCar posts multipart FormData with images and declares multipart so the shared JSON default cannot flatten the files', async () => {
+    requestMock.mockResolvedValueOnce({ success: true, data: { id: 'c1' } });
+    const img = new File(['x'], 'a.jpg', { type: 'image/jpeg' });
+    await createCar({ title: 'Prado', brand: 'Toyota', price: 100, images: [img] });
+    const [path, opts] = requestMock.mock.calls[0] as [string, { method: string; body: FormData; headers: Record<string, string> }];
+    expect(path).toBe('/api/cars');
+    expect(opts.method).toBe('POST');
+    expect(opts.headers['Content-Type']).toBe('multipart/form-data');
+    expect(opts.body).toBeInstanceOf(FormData);
+    expect(opts.body.get('title')).toBe('Prado');
+    expect(opts.body.getAll('images')).toHaveLength(1);
+  });
+
+  it('createCar surfaces a server rejection as VehicleApiError with the status', async () => {
+    requestMock.mockRejectedValueOnce(new HttpRequestError('Dealer verification required', 403));
+    await expect(createCar({ title: 'x', brand: 'y' })).rejects.toMatchObject({ status: 403, message: 'Dealer verification required' });
+  });
+
+  it('updateCar sends a partial JSON PUT to /api/cars/:id and omits empty values', async () => {
+    requestMock.mockResolvedValueOnce({ success: true, data: { id: 'c1' } });
+    await updateCar('c1', { price: 90, title: '', city: undefined });
+    expect(requestMock).toHaveBeenCalledWith('/api/cars/c1', { method: 'PUT', body: { price: 90 } });
+  });
+
+  it('updateCar maps 404 to not_found and an unreachable server to network', async () => {
+    requestMock.mockRejectedValueOnce(new HttpRequestError('gone', 404));
+    await expect(updateCar('c1', { price: 1 })).rejects.toMatchObject({ kind: 'not_found' });
+    requestMock.mockRejectedValueOnce(new HttpRequestError('offline'));
+    await expect(updateCar('c1', { price: 1 })).rejects.toMatchObject({ kind: 'network' });
   });
 });

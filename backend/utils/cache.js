@@ -92,7 +92,7 @@ export const cacheDel = async (...keys) => {
   } catch {}
 };
 
-export const cacheDelPattern = async (pattern) => {
+export const cacheDelPattern = async (pattern, { strict = false } = {}) => {
   try {
     if (client && connected) {
       // Phase C.1: `client` is ioredis, whose SCAN takes positional arguments and returns [cursor, keys].
@@ -114,7 +114,11 @@ export const cacheDelPattern = async (pattern) => {
         }
       }
     }
-  } catch {}
+  } catch (error) {
+    // Default behaviour is unchanged (best-effort, silent). Phase 13F: callers that must report an honest outcome
+    // (private-seller suspension/reinstatement) pass { strict: true } and receive the failure.
+    if (strict) throw error;
+  }
 };
 
 export const cacheMiddleware = (ttlSeconds = 60, keyFn = null) => {

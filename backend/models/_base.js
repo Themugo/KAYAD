@@ -528,8 +528,12 @@ export function createModel(name) {
         const term = v?.$search;
         const fields = SEARCHABLE_FIELDS[table];
         if (term && fields?.length) {
-          const orExpr = fields.map((f) => `${f}.ilike.*${term.replace(/[,%]/g, "")}*`).join(",");
-          q = q.or(orExpr);
+          // Phase 13G (Defect B): the term is user input embedded in a PostgREST logical-tree filter. Wildcard/separator characters are
+          // removed and the value is double-quoted (backslash and quote escaped) so parentheses, dots or quotes in a keyword
+          // ("O'Brien", "a)", "x),id.is.null") cannot break out of the filter expression. A term with nothing left matches nothing.
+          const clean = String(term).replace(/[,%*_\u0000]/g, "").trim().slice(0, 80);
+          if (!clean) q = q.or("id.is.null");
+          else q = q.or(fields.map((f) => `${f}.ilike."*${clean.replace(/[\\"]/g, "\\$&")}*"`).join(","));
         }
         continue;
       }
@@ -549,8 +553,9 @@ export function createModel(name) {
             const col = mapKeyOut(table, fk);
             if (fv && typeof fv === "object" && !(fv instanceof Date) && !Array.isArray(fv)) {
               if (fv.$regex) {
-                const term = (fv.$regex.source || fv.$regex).toString().replace(/[,%^$]/g, "");
-                return [`${col}.ilike.*${term}*`];
+                // Phase 13G (Defect B): same hardening as $text above (short keyword path of GET /api/cars).
+                const term = (fv.$regex.source || fv.$regex).toString().replace(/[,%^$*_\\\u0000]/g, "").replace(/"/g, "").slice(0, 80);
+                return [term.trim() ? `${col}.ilike."*${term}*"` : "id.is.null"];
               }
               const ops = [];
               for (const [op, pg] of Object.entries(OPS)) if (fv[op] !== undefined) ops.push(`${col}.${pg}.${lit(fv[op])}`);
@@ -632,6 +637,10 @@ export function createModel(name) {
         query = buildWhere(query, q._filters);
         if (q._sort) {
           for (const [k, dir] of Object.entries(q._sort)) {
+            // Phase 13G (Defect B): `{ score: { $meta: "textScore" } }` is a Mongo relevance virtual, not a column. It was sent to
+            // PostgREST as ORDER BY score -> `column cars.score does not exist` -> every keyword search of 3+ characters returned HTTP 500.
+            // The remaining sort keys (createdAt) still apply, so results stay deterministic.
+            if (dir && typeof dir === "object" && "$meta" in dir) continue;
             query = query.order(mapKeyOut(table, k), { ascending: dir === 1 });
           }
         }
@@ -903,6 +912,10 @@ export function createModel(name) {
       const ids = docs.map((d) => d.id);
       const client = sb();
       let updateData = {};
+      // Phase 13G: Mongoose-style shorthand `updateMany(filter, { read: true })` (no operator) used to produce an EMPTY payload that
+      // PostgREST accepted as a successful no-op, so "mark all alerts read" (adminRoutes /alerts/read-all and reconciliationController
+      // markAllAlertsRead) reported success and changed nothing. Plain-field updates are now treated as $set.
+      if (update && !Object.keys(update).some((k) => k.startsWith("$"))) updateData = { ...update };
       if (update.$set) updateData = { ...update.$set };
       if (update.$inc) {
         for (const doc of docs) {
@@ -912,6 +925,7 @@ export function createModel(name) {
         }
       }
       const payload = Object.fromEntries(Object.entries(updateData).map(([k, v]) => [mapKeyOut(table, k), v]));
+      if (Object.keys(payload).length === 0) return { modifiedCount: 0 };   // nothing to write; never report a phantom modification
       const { error } = await client.from(table).update(payload).in("id", ids);
       if (error) throw error;
       return { modifiedCount: ids.length };

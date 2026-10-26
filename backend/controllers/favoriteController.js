@@ -4,6 +4,8 @@ import Favorite from "../models/Favorite.js";
 import Car from "../models/Car.js";
 import { logError } from "../infrastructure/logging/index.js";
 
+const PUBLIC_CAR_STATUSES = new Set(["available", "sold"]);
+
 // GET /api/favorites
 export const getFavorites = async (req, res) => {
   try {
@@ -31,18 +33,22 @@ export const getFavorites = async (req, res) => {
           // the "no error surfaced, wrong data shown" failure mode
           // this phase's own instructions warn against.
           select:
-            "title price images brand model year fuel transmission mileage city auctionStatus currentBid bidsCount views favoritesCount isPromoted isVerifiedDealer",
+            "title price images brand model year fuel transmission mileage city auctionStatus currentBid bidsCount views favoritesCount isPromoted isVerifiedDealer status deletedAt",
         })
         .lean(),
       Favorite.countDocuments({ user: req.user.id }),
     ]);
 
+    // Phase 13F: a saved vehicle that is no longer public (hidden by private-seller suspension/revocation, pending, draft or
+    // soft-deleted) is not exposed through the saved list. The favorite record itself is retained, so the vehicle reappears
+    // automatically if it is restored. Sold vehicles stay visible, matching the public detail page.
+    const isPubliclyVisible = (c) => !c || typeof c !== "object" || (PUBLIC_CAR_STATUSES.has(c.status) && !(c.deletedAt ?? c.deleted_at));
     const items = favorites
-      .map((f) => ({
-        ...(f.car || {}),
-        _favoriteId: f._id,
-        notifyOnPriceDrop: f.notifyOnPriceDrop,
-      }))
+      .filter((f) => isPubliclyVisible(f.car))
+      .map((f) => {
+        const { status: _status, deletedAt: _deletedAt, deleted_at: _deleted_at, ...publicCar } = f.car && typeof f.car === "object" ? f.car : {};
+        return { ...publicCar, _favoriteId: f._id, notifyOnPriceDrop: f.notifyOnPriceDrop };
+      })
       .filter(Boolean);
     res.json({
       success: true,
@@ -61,8 +67,9 @@ export const addFavorite = async (req, res) => {
 
   try {
     const { carId } = req.params;
-    const car = await Car.findById(carId).select("title price images brand");
-    if (!car) {
+    const car = await Car.findById(carId).select("title price images brand status deletedAt");
+    // Phase 13F: only publicly visible vehicles can be saved (hidden/pending/draft/soft-deleted listings answer 404 like the detail page).
+    if (!car || !PUBLIC_CAR_STATUSES.has(car.status) || (car.deletedAt ?? car.deleted_at)) {
       return res.status(404).json({ success: false, message: "Car not found" });
     }
 

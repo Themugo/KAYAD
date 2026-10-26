@@ -6,6 +6,8 @@ import { getControlPlaneSnapshot } from '../services/commandCenterApi';
 import { inspectionAPI } from '../api/api';
 import { AuctionExperienceRail, BidderIdentityCard } from './auction/AuctionExperienceRail';
 import { isStaffRole } from '../utils/staffRoles';
+import { usePrivateSellerCapability } from '../hooks/usePrivateSellerCapability';
+import SellerCapabilityPanel from './SellerCapabilityPanel';
 
 type Props = { user: any; vehicles?: any[]; onNavigate: (nav: string) => void };
 
@@ -24,7 +26,16 @@ const staffActions = [{label:'Control plane',nav:'admin',icon:LayoutDashboard},{
 
 export default function DashboardHub({ user, vehicles = [], onNavigate }: Props) {
   const role = user?.role || 'user';
-  const config = configs[role] || (['admin','superadmin','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','moderator'].includes(role) ? { title: 'Platform Operations Dashboard', subtitle: 'Role-scoped control, queues and platform health.', accent: '#5AAFA4', actions: staffActions } : configs.user);
+  // Phase 13E: a private seller is still a buyer. individual_seller no longer gets a seller-only view; it gets the buyer dashboard
+  // plus the seller workspace entry. The seller section itself is driven by the real capability state (SellerCapabilityPanel).
+  const isPersonal = role === 'user' || role === 'buyer' || role === 'individual_seller';
+  const { capability, loading: capLoading, error: capError, reload: reloadCap } = usePrivateSellerCapability(isPersonal);
+  const sellerApproved = capability ? capability.status === 'approved' : role === 'individual_seller';
+  const baseConfig = configs[role === 'individual_seller' ? 'user' : role];
+  // Phase 13F: a legacy individual_seller whose real capability is suspended/revoked/rejected is not offered the seller workspace entry (the backend refuses their seller writes).
+  const sellerBlocked = !!capability && ['suspended', 'revoked', 'rejected'].includes(capability.status);
+  const personalConfig = role === 'individual_seller' ? { ...baseConfig, title: 'My Dashboard', subtitle: 'Buy and sell from one account: your saved vehicles, active transactions and private-seller tools.', actions: sellerBlocked ? baseConfig.actions : [...baseConfig.actions, {label:'Seller workspace',nav:'seller-platform',icon:LayoutDashboard}] } : (isPersonal && capability?.status === 'approved' ? { ...baseConfig, actions: [...baseConfig.actions, {label:'Seller workspace',nav:'seller-platform',icon:LayoutDashboard}] } : baseConfig);
+  const config = (isPersonal ? personalConfig : undefined) || configs[role] || (['admin','superadmin','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','moderator'].includes(role) ? { title: 'Platform Operations Dashboard', subtitle: 'Role-scoped control, queues and platform health.', accent: '#5AAFA4', actions: staffActions } : configs.user);
   const [density, setDensity] = useState<'comfortable'|'compact'>('comfortable');
   const [hidden, setHidden] = useState<string[]>([]);
   const [snapshot, setSnapshot] = useState<any>(null);
@@ -33,11 +44,12 @@ export default function DashboardHub({ user, vehicles = [], onNavigate }: Props)
 
   const cards = useMemo(() => {
     const owned = vehicles.filter((v) => v?.sellerId && v.sellerId === (user?.id || user?._id));
-    if (role === 'dealer' || role === 'individual_seller' || role === 'broker') return [{id:'inventory',label:'Your inventory',value:owned.length,icon:Car},{id:'saved',label:'Saved vehicles',value:0,icon:ShoppingBag},{id:'activity',label:'Marketplace activity',value:vehicles.length,icon:Activity}];
+    if (role === 'dealer' || role === 'broker') return [{id:'inventory',label:'Your inventory',value:owned.length,icon:Car},{id:'saved',label:'Saved vehicles',value:0,icon:ShoppingBag},{id:'activity',label:'Marketplace activity',value:vehicles.length,icon:Activity}];
     if (['admin','superadmin','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','moderator'].includes(role)) return [{id:'users',label:'Users',value:snapshot?.counts?.users ?? '—',icon:Users},{id:'cars',label:'Vehicles',value:snapshot?.counts?.cars ?? '—',icon:Car},{id:'incidents',label:'Incidents',value:snapshot?.counts?.incidents ?? '—',icon:Activity},{id:'alerts',label:'Alerts',value:snapshot?.counts?.alerts ?? '—',icon:Bell}];
     if (role === 'ghost_checker') return [{id:'assigned',label:'Assigned inspections',value:Array.isArray(snapshot?.orders) ? snapshot.orders.length : '—',icon:ClipboardCheck},{id:'messages',label:'Messages',value:'—',icon:Bell},{id:'market',label:'Marketplace',value:vehicles.length,icon:Car}];
-    return [{id:'saved',label:'Saved vehicles',value:'—',icon:ShoppingBag},{id:'vehicles',label:'Marketplace inventory',value:vehicles.length,icon:Car},{id:'alerts',label:'Action alerts',value:'—',icon:Bell}];
-  }, [vehicles, user, role, snapshot]);
+    const buyerCards = [{id:'saved',label:'Saved vehicles',value:'—',icon:ShoppingBag},{id:'vehicles',label:'Marketplace inventory',value:vehicles.length,icon:Car},{id:'alerts',label:'Action alerts',value:'—',icon:Bell}];
+    return sellerApproved ? [{id:'inventory',label:'Your inventory',value:owned.length,icon:Car}, ...buyerCards] : buyerCards;
+  }, [vehicles, user, role, snapshot, sellerApproved]);
 
   const refresh = async () => {
     setLoading(true); setSourceError('');
@@ -46,7 +58,7 @@ export default function DashboardHub({ user, vehicles = [], onNavigate }: Props)
         const result = await getControlPlaneSnapshot(); setSnapshot(result?.data || result);
       } else if (role === 'dealer') {
         const result = await dealerApi.getDealerDashboard(); setSnapshot(result?.data || result);
-      } else if (role === 'user' || role === 'buyer') {
+      } else if (role === 'user' || role === 'buyer' || role === 'individual_seller') {
         const result = await getOwnershipDashboard(); setSnapshot(result);
       } else if (role === 'ghost_checker') {
         const result = await inspectionAPI.myAssigned(); setSnapshot(result?.data || result);
@@ -71,15 +83,17 @@ export default function DashboardHub({ user, vehicles = [], onNavigate }: Props)
       </div>
     </div>
 
+    {isPersonal && <SellerCapabilityPanel capability={capability} loading={capLoading} error={capError} onReload={reloadCap} onOpenWorkspace={() => onNavigate('seller-platform')} />}
+
     {sourceError && <div className="rounded-xl border border-[#BDE5DE] bg-[#F3FAF9] p-3 text-xs font-bold text-[#0A3340]">{sourceError}</div>}
 
     <div className={`grid gap-3 ${density==='compact'?'sm:grid-cols-4':'sm:grid-cols-2 lg:grid-cols-4'}`}>
-      {cards.filter(c=>!hidden.includes(c.id)).map((card)=>{const Icon=card.icon;return <div key={card.id} className="group rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm"><div className="flex items-start justify-between"><div><p className="text-[10px] font-black uppercase tracking-wider text-[#94A3B8]">{card.label}</p><p className="mt-1 text-2xl font-black text-[#0A3340]">{card.value}</p></div><Icon size={20} style={{color:config.accent}}/></div><button onClick={()=>toggle(card.id)} className="mt-3 text-[10px] font-bold text-[#94A3B8] opacity-0 group-hover:opacity-100">Hide card</button></div>})}
+      {cards.filter(c=>!hidden.includes(c.id)).map((card)=>{const Icon=card.icon;return <div key={card.id} className="group rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm"><div className="flex items-start justify-between"><div><p className="text-[10px] font-black uppercase tracking-wider text-[#5B6B7D]">{card.label}</p><p className="mt-1 text-2xl font-black text-[#0A3340]">{card.value}</p></div><Icon size={20} style={{color:config.accent}}/></div><button onClick={()=>toggle(card.id)} className="mt-3 text-[10px] font-bold text-[#5B6B7D] opacity-0 group-hover:opacity-100">Hide card</button></div>})}
     </div>
 
     <div className="grid gap-5 lg:grid-cols-[1.3fr_.7fr]">
       <div className="rounded-2xl border border-[#D7E7E4] bg-white p-5"><div className="mb-4 flex items-center justify-between"><div><h2 className="text-sm font-black text-[#0A3340]">Workspace controls</h2><p className="text-xs text-[#64748B]">Role-scoped shortcuts into the existing canonical modules.</p></div><BarChart3 size={18} className="text-[#BDE5DE]"/></div><div className="grid gap-3 sm:grid-cols-2">{config.actions.map((action)=>{const Icon=action.icon;return <button key={action.label+action.nav} onClick={()=>onNavigate(action.nav)} className="flex items-center gap-3 rounded-xl border border-[#D7E7E4] p-3 text-left hover:border-[#BDE5DE] hover:shadow-sm"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#F6FAF9] text-[#0A3340]"><Icon size={17}/></span><span className="flex-1 text-xs font-black text-[#12576D]">{action.label}</span><ChevronRight size={15} className="text-[#BDE5DE]"/></button>})}</div></div>
-      <div className="rounded-2xl border border-[#D7E7E4] bg-[#F6FAF9] p-5"><h2 className="text-sm font-black text-[#0A3340]">Dashboard controls</h2><div className="mt-4 space-y-3 text-xs text-[#64748B]"><button onClick={()=>setHidden([])} className="w-full rounded-xl bg-white px-3 py-2.5 text-left font-bold border border-[#D7E7E4]">Restore hidden cards</button><button onClick={()=>setDensity('comfortable')} className="w-full rounded-xl bg-white px-3 py-2.5 text-left font-bold border border-[#D7E7E4]">Reset comfortable density</button><p className="pt-2 text-[11px] leading-5 text-[#94A3B8]">The dashboard shell changes presentation only. Counts and workflow state remain sourced from KAYAD APIs; no placeholder records are created.</p></div></div>
+      <div className="rounded-2xl border border-[#D7E7E4] bg-[#F6FAF9] p-5"><h2 className="text-sm font-black text-[#0A3340]">Dashboard controls</h2><div className="mt-4 space-y-3 text-xs text-[#64748B]"><button onClick={()=>setHidden([])} className="w-full rounded-xl bg-white px-3 py-2.5 text-left font-bold border border-[#D7E7E4]">Restore hidden cards</button><button onClick={()=>setDensity('comfortable')} className="w-full rounded-xl bg-white px-3 py-2.5 text-left font-bold border border-[#D7E7E4]">Reset comfortable density</button><p className="pt-2 text-[11px] leading-5 text-[#5B6B7D]">The dashboard shell changes presentation only. Counts and workflow state remain sourced from KAYAD APIs; no placeholder records are created.</p></div></div>
     </div>
   </section>;
 }

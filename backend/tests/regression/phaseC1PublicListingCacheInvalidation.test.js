@@ -15,7 +15,7 @@ describe("public listing cache invalidation (in-memory)", () => {
 
   test("helper covers every cache family that serves public inventory, including vehicle_search", () => {
     expect([...PUBLIC_LISTING_CACHE_PATTERNS].sort()).toEqual(
-      ["cars:list:*", "kayad:search:facets:*", "kayad:search:suggestions:*", "vehicle_search:*"].sort(),
+      ["cache:GET:/api/cars*", "cache:GET:/api/v1/cars*", "cache:GET:/api/valuation/matrix*", "cars:list:*", "kayad:search:facets:*", "kayad:search:suggestions:*", "vehicle_search:*"].sort(),
     );
   });
 

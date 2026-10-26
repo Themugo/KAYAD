@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authenticate } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { requireRole } from "../middleware/rbac.js";
+import { requirePublicListingParam } from "../middleware/publicListingVisibility.js"; // Phase 13I
 import { validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 import Car from "../models/Car.js";
 import { getMarketPulse, getDealerInsights } from "../services/marketIntel.service.js";
@@ -11,6 +12,7 @@ const router = Router();
 router.get(
   "/pulse/:carId",
   validateObjectId,
+  requirePublicListingParam("carId"), // Phase 13I: anonymous by-id read must not answer for hidden/pending/draft/deleted listings
   asyncHandler(async (req, res) => {
     const car = await Car.findById(req.params.carId)
       .select("title brand year price mileage views createdAt images status")
@@ -29,7 +31,8 @@ router.get(
   asyncHandler(async (req, res) => {
     const { brand, days = 90 } = req.query;
     const since = new Date(Date.now() - Number(days) * 86400000);
-    const match = { createdAt: { $gte: since } };
+    // Phase 13I: public inventory only (anonymous aggregate); pending/draft/hidden/deleted listings are not market data.
+    const match = { createdAt: { $gte: since }, status: { $in: ["available", "sold"] }, deletedAt: { $exists: false } };
     if (brand) match.brand = brand;
     const cars = await Car.find(match).select("brand price year createdAt").lean();
     const byBrand = {};

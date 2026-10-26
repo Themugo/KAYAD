@@ -18,7 +18,8 @@ import {
   getSearchSummaryHandler,
   getDealerDemandInsightsHandler,
 } from "../controllers/searchAnalyticsController.js";
-import { protect, adminOnly, dealerOnly } from "../middleware/auth.js";
+import { protect, adminOnly } from "../middleware/auth.js";
+import { dealerBusinessOnly } from "../middleware/dealerIsolation.js"; // PHASE 13D
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
@@ -67,6 +68,6 @@ router.get("/summary", protect, adminOnly, asyncHandler(getSearchSummaryHandler)
 // =============================
 
 // Get dealer demand insights
-router.get("/dealer/demand", protect, dealerOnly, asyncHandler(getDealerDemandInsightsHandler));
+router.get("/dealer/demand", protect, dealerBusinessOnly, asyncHandler(getDealerDemandInsightsHandler));
 
 export default router;

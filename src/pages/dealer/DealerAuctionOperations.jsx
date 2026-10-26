@@ -28,7 +28,7 @@ export default function DealerAuctionOperations() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    try { const res = await auctionOperationsAPI.list(); setRows(res.data || res || []); }
+    try { const res = await auctionOperationsAPI.list(); const list = res?.data ?? res; setRows(Array.isArray(list) ? list : []); }
     catch (err) { toast(err?.response?.data?.message || 'Failed to load auction operations', 'error'); }
     finally { setLoading(false); }
   }, [toast]);

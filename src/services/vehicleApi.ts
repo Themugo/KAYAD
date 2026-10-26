@@ -436,13 +436,36 @@ export async function createCar(payload: CreateCarPayload): Promise<CreateCarRes
   (images || []).forEach((file) => formData.append('images', file));
 
   try {
+    // The shared client defaults to Content-Type: application/json, and axios
+    // serialises FormData to JSON (dropping the files) under that header.
+    // Declaring multipart lets the browser set the boundary itself.
     return await request<CreateCarResponse>('/api/cars', {
       method: 'POST',
       body: formData,
+      headers: { 'Content-Type': 'multipart/form-data' },
     });
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
     throw new VehicleApiError(error.message, error.status === 404 ? 'not_found' : 'server', error.status);
+  }
+}
+
+export type UpdateCarPayload = Omit<CreateCarPayload, 'images'>;
+
+/** PUT /api/cars/:id - the real, canonical edit endpoint. The backend
+ * enforces owner-or-staff access, blocks staff-only fields and locks
+ * auction fields once an auction has left draft; this helper only sends
+ * the partial JSON body and surfaces whatever the server decides. */
+export async function updateCar(id: string, payload: UpdateCarPayload): Promise<CreateCarResponse> {
+  const body: Record<string, unknown> = {};
+  Object.entries(payload).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') body[key] = value;
+  });
+  try {
+    return await request<CreateCarResponse>(`/api/cars/${encodeURIComponent(id)}`, { method: 'PUT', body });
+  } catch (err) {
+    const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
+    throw new VehicleApiError(error.message, error.status === 404 ? 'not_found' : error.status ? 'server' : 'network', error.status);
   }
 }
 

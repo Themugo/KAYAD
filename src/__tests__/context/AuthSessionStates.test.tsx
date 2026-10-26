@@ -124,10 +124,11 @@ describe('AuthProvider session states', () => {
 
   it('a failed sign-in while the bootstrap was in flight does not leave the app stuck in loading', async () => {
     authMocks.getMe.mockReturnValue(new Promise(() => {})); authMocks.login.mockRejectedValue(err('invalid_credentials', 401));
-    let auth: ReturnType<typeof useAuth> | undefined;
-    function Grab() { auth = useAuth(); return null; }
+    const sink = vi.fn<(a: ReturnType<typeof useAuth>) => void>();
+    const current = () => sink.mock.calls[sink.mock.calls.length - 1][0];
+    function Grab() { sink(useAuth()); return null; }
     render(<MemoryRouter><AuthProvider><Grab /></AuthProvider></MemoryRouter>); await flush();
-    await act(async () => { await auth!.login('a@example.test', 'x').catch(() => undefined); });
-    expect(auth!.sessionStatus).toBe('unauthenticated');
+    await act(async () => { await current().login('a@example.test', 'x').catch(() => undefined); });
+    expect(current().sessionStatus).toBe('unauthenticated');
   });
 });

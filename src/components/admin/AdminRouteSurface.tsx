@@ -9,6 +9,7 @@ import type { Vehicle } from '../../types';
 const AdminView = lazy(() => import('../../features/AdminView').then((module) => ({ default: module.AdminView })));
 const AdminUsers = lazy(() => import('../../pages/admin/AdminUsers'));
 const AdminSellers = lazy(() => import('../../pages/admin/AdminSellers'));
+const AdminPrivateSellerApplications = lazy(() => import('../../pages/admin/AdminPrivateSellerApplications'));
 const AdminCars = lazy(() => import('../../pages/admin/AdminCars'));
 const AdminCarModeration = lazy(() => import('../../pages/admin/AdminCarModeration'));
 const AdminAuctions = lazy(() => import('../../pages/admin/AdminAuctions'));
@@ -67,6 +68,7 @@ interface AdminRouteDefinition {
 export const ADMIN_ROUTE_COMPONENTS: Record<string, AdminRouteDefinition> = {
   '/admin/users': { component: AdminUsers },
   '/admin/sellers': { component: AdminSellers },
+  '/admin/private-seller-applications': { component: AdminPrivateSellerApplications },
   '/admin/cars': { component: AdminCars },
   '/admin/moderation': { component: AdminCarModeration },
   '/admin/auctions': { component: AdminAuctions },
