@@ -1,0 +1,3 @@
+PASS change inventory - added=99 modified=12 removed=0
+PASS manifest lists exactly the files on disk - missing=0 unlisted=0
+RESULT 10/10 PASS (run with --base _ref147 --manifest KAYAD_PHASE14_8_SOURCE_MANIFEST.sha256)

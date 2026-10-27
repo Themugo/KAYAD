@@ -1,0 +1,46 @@
+PASS package identity is KAYAD
+PASS Node release contract is pinned
+PASS production environment contract exists
+PASS no committed build artifacts
+PASS no temporary source artifacts
+PASS source syntax/transpile audit (2248/2248)
+PASS validator validate-recovery-repair.mjs
+PASS validator validate-phase35.mjs
+PASS validator validate-phase36.mjs
+PASS validator validate-phase37.mjs
+PASS validator validate-phase38.mjs
+PASS validator validate-phase39.mjs
+PASS validator validate-phase40.mjs
+PASS validator validate-phase58.mjs
+PASS validator validate-phase60.mjs
+PASS validator validate-marketplace-initiative.mjs
+PASS validator validate-communications-initiative.mjs
+PASS validator validate-transaction-integrity.mjs
+PASS validator validate-inspection-marketplace.mjs
+PASS validator validate-dispute-integrity.mjs
+PASS validator validate-code-splitting.mjs
+PASS validator validate-dealer-modal-convergence.mjs
+PASS validator validate-chat-surface-convergence.mjs
+PASS validator validate-ui-surface-convergence.mjs
+PASS validator validate-auction-transport-convergence.mjs
+PASS validator validate-subscription-domain-e2e.mjs
+PASS validator validate-supabase-migrations.mjs
+PASS validator validate-cms-schema.mjs
+PASS validator validate-frontend-runtime-contracts.mjs
+PASS validator validate-dependency-security.mjs
+PASS validator validate-socket-contract.mjs
+PASS validator validate-backend-runtime-contracts.mjs
+PASS validator validate-production-backend.mjs
+PASS validator validate-startup-convergence.mjs
+PASS validator validate-runtime-integrity.mjs
+PASS validator validate-wave2-invariants.mjs
+PASS validator validate-wave3-convergence.mjs
+PASS validator validate-automation-domain-v12.mjs
+PASS validator validate-v14-production-activation.mjs
+PASS validator validate-phase34.mjs
+PASS validator validate-phase19.mjs
+PASS validator validate-phase21.mjs
+PASS validator validate-phase23.mjs
+PASS validator validate-phase25.mjs
+
+KAYAD release gate: PASS

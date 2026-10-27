@@ -1,0 +1,85 @@
+Pager usage is off.
+BEGIN
+psql:runbooks/phase14-8-20261026/localdb/team_rls_direct_db_test.sql:7: ERROR:  duplicate key value violates unique constraint "users_pkey"
+DETAIL:  Key (id)=(11111111-1111-4111-8111-111111111111) already exists.
+psql:runbooks/phase14-8-20261026/localdb/team_rls_direct_db_test.sql:9: ERROR:  current transaction is aborted, commands ignored until end of transaction block
+ROLLBACK
+SET
+              set_config              
+--------------------------------------
+ 22222222-2222-4222-8222-222222222222
+(1 row)
+
+T1 member self-promote role (expect UPDATE 0)
+UPDATE 0
+T2 member self-grant permissions (expect UPDATE 0)
+UPDATE 0
+T3 member re-point organisation (expect UPDATE 0)
+UPDATE 0
+T4 member reactivate/status (expect UPDATE 0)
+UPDATE 0
+T5 member delete own row (expect DELETE 0)
+DELETE 0
+T6 member insert self into org (expect RLS error)
+psql:runbooks/phase14-8-20261026/localdb/team_rls_direct_db_test.sql:24: ERROR:  new row violates row-level security policy for table "dealer_teams"
+T7 member can read own row only (expect 1)
+ count 
+-------
+     1
+(1 row)
+
+              set_config              
+--------------------------------------
+ 33333333-3333-4333-8333-333333333333
+(1 row)
+
+T8 other dealer cannot see or change owner team (expect 0 / UPDATE 0 / DELETE 0)
+ count 
+-------
+     0
+(1 row)
+
+UPDATE 0
+DELETE 0
+RESET
+SET
+ set_config 
+------------
+ 
+(1 row)
+
+T9 anon sees nothing (expect 0) / cannot update
+ count 
+-------
+     0
+(1 row)
+
+UPDATE 0
+RESET
+SET
+              set_config              
+--------------------------------------
+ 11111111-1111-4111-8111-111111111111
+(1 row)
+
+T10 owner changes role (expect UPDATE 1)
+UPDATE 1
+T11 owner cannot move row to another org (expect UPDATE 1? dealer=other must fail check)
+psql:runbooks/phase14-8-20261026/localdb/team_rls_direct_db_test.sql:43: ERROR:  new row violates row-level security policy for table "dealer_teams"
+T12 owner removes member (expect UPDATE 1)
+UPDATE 1
+RESET
+    role     | status  |                dealer                
+-------------+---------+--------------------------------------
+ sales_agent | invited | b59730e3-c125-4bf8-95bf-d6a7313af210
+ sales_agent | invited | 2ba7951b-759e-4c73-b267-2233641ff077
+ viewer      | invited | 768b9514-700f-4ffa-9a1a-b14c6e8181a4
+ viewer      | invited | 3ca7e468-4f13-4677-855d-d6ddd349a418
+ sales_agent | removed | a92258d8-1969-48c7-946e-e3ac6a0fbaa8
+ viewer      | invited | 908ce9cd-6887-451b-8f1d-26e7ceba08ba
+ sales_agent | removed | 76e79132-8ec4-4c73-9619-818910db20d1
+ viewer      | invited | aae0ed98-6d67-471f-8b22-ccb25295dc16
+ sales_agent | removed | 5cc1dda3-7942-46e2-b234-bee010502558
+ viewer      | removed | 11111111-1111-4111-8111-111111111111
+(10 rows)
+

@@ -1,10 +1,10 @@
 import express from "express";
-import { protect } from "../middleware/auth.js";
+import { protect, optionalAuth } from "../middleware/auth.js";
 import { dealerBusinessOnly } from "../middleware/dealerIsolation.js"; // PHASE 13D (DI-2)
 import { dealerOrgAccess } from "../middleware/dealerOrgAccess.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import upload, { handleUploadError, cleanupUploadsOnError } from "../middleware/upload.js"; // STAGE 5C.1
-import { uploadLimiter, createLimiter } from "../middleware/rateLimiter.js";
+import { uploadLimiter, createLimiter, stepUpLimiter } from "../middleware/rateLimiter.js";
 import { requireDealerVerification } from "../middleware/dealerVerification.js";
 import {
   // Dashboard
@@ -62,8 +62,8 @@ const router = express.Router();
 router.get("/dashboard", protect, dealerBusinessOnly, asyncHandler(getDealerDashboard));
 
 // Profile
-router.get("/profile/:dealerId", asyncHandler(getDealerProfile));
-router.put("/profile/:dealerId", protect, asyncHandler(updateDealerProfile));
+router.get("/profile/:dealerId", optionalAuth, asyncHandler(getDealerProfile));
+router.put("/profile/:dealerId", protect, createLimiter, stepUpLimiter, asyncHandler(updateDealerProfile));
 
 // Inventory
 router.get("/inventory", protect, dealerBusinessOnly, asyncHandler(getInventory));
@@ -92,7 +92,8 @@ router.get("/analytics", protect, dealerBusinessOnly, asyncHandler(getDealerAnal
 router.get("/analytics/recommendations", protect, dealerBusinessOnly, asyncHandler(getAIRecommendations));
 
 // Team
-router.get("/team", protect, dealerOrgAccess(), asyncHandler(getTeamMembers));
+// Phase 14.7: the roster exposes member names/emails, so listing needs the same permission as managing the team.
+router.get("/team", protect, dealerOrgAccess("canManageTeam"), asyncHandler(getTeamMembers));
 router.post("/team/invite", protect, dealerOrgAccess("canManageTeam"), asyncHandler(inviteTeamMember));
 router.put("/team/:memberId", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(updateTeamMember));
 router.delete("/team/:memberId", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(removeTeamMember));

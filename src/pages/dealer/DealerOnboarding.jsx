@@ -128,11 +128,7 @@ export default function DealerOnboarding() {
         },
       });
 
-      if (dealer) {
-        toast('Submitted. Your dealer account is now under review.', 'success');
-      } else {
-        toast('Submitted. Your dealer account is now under review.', 'success');
-      }
+      toast('Submitted. Your dealer account is now under review.', 'success');
       navigate('/dealer/onboarding?complete=1', { replace: true });
     } catch (error) {
       toast(error?.message || 'Failed to complete onboarding. Please try again.', 'error');
@@ -149,6 +145,22 @@ export default function DealerOnboarding() {
     // The `complete` query flag only chooses which screen to show; it is not proof of anything.
     // What the account may do is decided by the approval status the server reports for it.
     const approved = user.status === 'approved';
+    const blocked = user.status === 'rejected' || user.status === 'suspended';
+    if (blocked) {
+      return (
+        <div className="page">
+          <div className="container" style={{ paddingTop: 60, paddingBottom: 60, maxWidth: 600, textAlign: 'center' }} role="status">
+            <h2>{user.status === 'suspended' ? 'Your dealer account is suspended' : 'Your dealer application was not approved'}</h2>
+            <p style={{ color: 'rgba(10, 51, 64, 0.72)', marginBottom: 24 }}>
+              {user.status === 'suspended'
+                ? 'You cannot list vehicles until KAYAD reinstates the account. Contact support if you need help.'
+                : 'Review the details you submitted and contact support if you would like the decision reviewed.'}
+            </p>
+            <button onClick={() => navigate('/')} className="btn btn-gold">Back to KAYAD</button>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="page">
         <div className="container" style={{ paddingTop: 60, paddingBottom: 60, maxWidth: 600, textAlign: 'center' }} role="status">

@@ -1,0 +1,13 @@
+PASS dashboard data sources use allSettled independently
+PASS dashboard no longer clears every source on one request failure
+PASS stats have explicit loading/ready/stale/error states
+PASS malformed/missing statistics remain unavailable rather than zero
+PASS dealer approval workflow opens the existing dealer verification route
+PASS vehicle listing approval workflow opens the existing moderation route
+PASS customer support queue opens the existing support workspace
+PASS workflow links and review actions have accessible names and keyboard focus styling
+PASS admin stats endpoint uses real model counts
+PASS hero endpoint returns an explicit error rather than fabricated slides
+PASS public config frontend client uses canonical API client path
+
+Stage 5F.2 source-contract checks: 11/11 passed

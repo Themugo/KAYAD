@@ -25,10 +25,10 @@ const formatDate = (value?: string | null) => {
 };
 
 const statusTone: Record<string, string> = {
-  pending: 'border-amber-200 bg-amber-50 text-amber-800',
+  pending: 'border-warning/30 bg-warning/10 text-warning',
   approved: 'border-emerald-200 bg-emerald-50 text-emerald-800',
   rejected: 'border-rose-200 bg-rose-50 text-rose-800',
-  suspended: 'border-orange-200 bg-orange-50 text-orange-800',
+  suspended: 'border-slate-300 bg-slate-200 text-slate-900',
   revoked: 'border-slate-200 bg-slate-100 text-slate-700',
 };
 
@@ -138,7 +138,7 @@ export default function AdminPrivateSellerApplications() {
                   <div className="flex flex-wrap gap-2 lg:max-w-xs lg:justify-end">
                     {['pending', 'rejected', 'suspended', 'revoked'].includes(app.status) && <button type="button" disabled={busy} onClick={() => void act(app, 'approve')} className="inline-flex items-center gap-1.5 rounded-lg bg-[#047857] px-3 py-2 text-xs font-bold text-white disabled:opacity-50"><CheckCircle2 size={14} aria-hidden="true" /> {app.status === 'pending' ? 'Approve' : 'Restore approval'}</button>}
                     {app.status === 'pending' && <button type="button" disabled={busy} onClick={() => void act(app, 'reject')} className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 px-3 py-2 text-xs font-bold text-rose-800 disabled:opacity-50"><XCircle size={14} aria-hidden="true" /> Reject</button>}
-                    {app.status === 'approved' && <><button type="button" disabled={busy} onClick={() => void act(app, 'suspend')} className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 px-3 py-2 text-xs font-bold text-amber-900 disabled:opacity-50"><AlertTriangle size={14} aria-hidden="true" /> Suspend</button><button type="button" disabled={busy} onClick={() => void act(app, 'revoke')} className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 px-3 py-2 text-xs font-bold text-rose-800 disabled:opacity-50"><ShieldCheck size={14} aria-hidden="true" /> Revoke</button></>}
+                    {app.status === 'approved' && <><button type="button" disabled={busy} onClick={() => void act(app, 'suspend')} className="inline-flex items-center gap-1.5 rounded-lg border border-warning/40 px-3 py-2 text-xs font-bold text-warning disabled:opacity-50"><AlertTriangle size={14} aria-hidden="true" /> Suspend</button><button type="button" disabled={busy} onClick={() => void act(app, 'revoke')} className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 px-3 py-2 text-xs font-bold text-rose-800 disabled:opacity-50"><ShieldCheck size={14} aria-hidden="true" /> Revoke</button></>}
                   </div>
                 </div>
                 {['pending', 'approved'].includes(app.status) || app.status === 'suspended' ? <div className="mt-4 max-w-2xl"><label htmlFor={`review-reason-${app.userId}`} className="mb-1 block text-xs font-bold text-[#37616A]">Decision reason (required for reject, suspend or revoke)</label><textarea id={`review-reason-${app.userId}`} rows={2} maxLength={500} value={reasons[app.userId] || ''} onChange={(event) => setReasons((old) => ({ ...old, [app.userId]: event.target.value }))} className="w-full rounded-xl border border-[#D7E7E4] px-3 py-2 text-sm text-[#0A3340] outline-none focus:border-[#176B87]" placeholder="Record the reason for this decision" /></div> : null}

@@ -97,7 +97,7 @@ export default function PanicRoom() {
           // Only a status the health source actually states is reported; anything else is "unknown", never "healthy" or "warning".
           const raw = typeof health.status === 'string' ? health.status.toLowerCase() : '';
           const tone = raw === 'healthy' ? 'success' : ['degraded', 'warning', 'critical', 'down', 'unhealthy'].includes(raw) ? 'danger' : 'neutral';
-          const label = tone === 'success' ? 'System Healthy' : tone === 'danger' ? 'System Warning' : 'System status unknown';
+          const label = tone === 'success' ? 'System Healthy' : tone === 'danger' ? 'System Warning' : raw === 'no_critical_alerts' ? 'No critical alerts (provider and queue health not checked here)' : 'System status unknown';
           const count = (v, noun) => (typeof v === 'number' && Number.isFinite(v) ? `${v} ${noun}` : `${noun} unavailable`);
           const alerts = typeof health.criticalAlerts24h === 'number' && Number.isFinite(health.criticalAlerts24h)
             ? (health.criticalAlerts24h > 0 ? `${health.criticalAlerts24h} critical alerts (24h)` : 'no critical alerts (24h)')

@@ -159,7 +159,7 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
         amount: payment.amount,
         carTitle: payment.car?.toString() || "Vehicle",
         mpesaReceipt: receipt || String(payment.id).slice(-8),
-        user: { email: userDoc.email, phone: userDoc.phone, id: userDoc.id },
+        user: { email: userDoc.email, phone: userDoc.phone, id: payment.user }, // Phase 14.9: userDoc selects no id column
       }).catch((e) => logWarn("Digital receipt failed", { error: e.message }));
     }
   } catch (e) { logWarn("Digital receipt notification failed", { error: e.message }); }

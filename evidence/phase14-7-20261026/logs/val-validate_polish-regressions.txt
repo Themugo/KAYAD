@@ -1,0 +1,5 @@
+PASS render counter is dev-only
+PASS lazy image shell uses light surface
+PASS feature lazy image shell uses light surface
+PASS service worker has no console logging
+Polish regressions: 4/4 PASS

@@ -1,0 +1,2 @@
+# Phase 14.9 local real-database harness
+Disposable PostgreSQL 16 + PostgREST (+ rest-prefix proxy) with supabase_shim.sql; backend with throwaway local secrets (never packaged). Scripts: e2e_account_security.cjs (47), e2e_dealer_payments.cjs (73), carried e2e_dealer_lifecycle.cjs (50) and e2e_inventory_team.cjs (60); browser: dealer_workflows_browser_check.cjs, nav_interruption_repro.cjs (needs BASE and OUT env). Environment variables: API_BASE, BACKEND_LOG, plus the DB connection variables read by e2e_lib.cjs. Local sandbox evidence only; no real Daraja calls.

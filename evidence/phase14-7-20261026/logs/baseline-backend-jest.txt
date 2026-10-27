@@ -1,0 +1,54 @@
+(node:251) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 163 passed, 163 total
+Tests:       2898 passed, 2898 total
+Snapshots:   0 total
+Time:        186.219 s
+Ran all test suites.
+
+Jest has detected the following 3 open handles potentially keeping Jest from exiting:
+
+  ●  Timeout
+
+      55 |
+      56 |   // Schedule cleanup after lockout duration
+    > 57 |   setTimeout(() => {
+         |   ^
+      58 |     const entry = failedAttempts.get(ip);
+      59 |     if (entry && Date.now() - entry.lastAttempt >= LOCKOUT_DURATION) {
+      60 |       failedAttempts.delete(ip);
+
+      at Module.recordFailedAttempt (middleware/accountLockout.js:57:3)
+      at Object.<anonymous> (tests/stage5c/ipKeyingAndThrottling.test.js:35:41)
+
+
+  ●  Timeout
+
+      55 |
+      56 |   // Schedule cleanup after lockout duration
+    > 57 |   setTimeout(() => {
+         |   ^
+      58 |     const entry = failedAttempts.get(ip);
+      59 |     if (entry && Date.now() - entry.lastAttempt >= LOCKOUT_DURATION) {
+      60 |       failedAttempts.delete(ip);
+
+      at Module.recordFailedAttempt (middleware/accountLockout.js:57:3)
+      at Object.<anonymous> (tests/stage5c/ipKeyingAndThrottling.test.js:44:41)
+
+
+  ●  Timeout
+
+      275 |         fn(),
+      276 |         new Promise((_, reject) => {
+    > 277 |           setTimeout(() => {
+          |           ^
+      278 |             const timeoutError = new Error(`Operation timeout after ${timeoutMs}ms`);
+      279 |             timeoutError.code = "TIMEOUT";
+      280 |             timeoutError.service = serviceName || key;
+
+      at utils/retry.js:277:11
+      at attemptWithTimeout (utils/retry.js:276:9)
+      at withRetry (utils/retry.js:147:28)
+      at Object.<anonymous> (tests/stage5c/ledgerRedactionAndCircuit.test.js:31:39)
+

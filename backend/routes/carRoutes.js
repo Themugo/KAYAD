@@ -45,7 +45,7 @@ router.get(
   sellerListingAccess({ write: false }),
   asyncHandler(async (req, res) => {
     const cars = await findAll("cars", {
-      filters: { dealer: req.user.id },
+      filters: { dealer: req.user.id, deletedAt: { $exists: false } }, // 14.8: soft-deleted listings are not inventory
       select: "title,price,images,views,clicks,bidsCount,createdAt,status,auctionStatus",
       orderBy: "createdAt",
       ascending: false,
@@ -233,7 +233,9 @@ router.post(
   createLimiter,
   validateObjectId,
   asyncHandler(async (req, res) => {
-    const car = await findById("cars", req.params.id, "clicks");
+    const car = await findById("cars", req.params.id, "clicks,deleted_at");
+    // 14.8: counters never move for a missing or soft-deleted listing.
+    if (!car || car.deletedAt || car.deleted_at) return res.status(404).json({ success: false, message: "Car not found" });
     await update("cars", req.params.id, { clicks: (car?.clicks || 0) + 1 });
 
     res.json({ success: true });
@@ -247,7 +249,8 @@ router.post(
   createLimiter,
   validateObjectId,
   asyncHandler(async (req, res) => {
-    const car = await findById("cars", req.params.id, "favoritesCount");
+    const car = await findById("cars", req.params.id, "favoritesCount,deleted_at");
+    if (!car || car.deletedAt || car.deleted_at) return res.status(404).json({ success: false, message: "Car not found" });
     await update("cars", req.params.id, { favoritesCount: (car?.favoritesCount || 0) + 1 });
 
     res.json({ success: true });

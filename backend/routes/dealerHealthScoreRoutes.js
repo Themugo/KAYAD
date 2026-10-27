@@ -31,7 +31,9 @@ const router = express.Router();
 router.get("/:dealerId", asyncHandler(getDealerHealthScore));
 
 // Get dealer health score details
-router.get("/:dealerId/details", asyncHandler(getDealerHealthScoreDetails));
+// Phase 15: the per-component breakdown (escrow, transaction and verification details) is a platform-internal record that was
+// served to anonymous callers; no SPA screen consumes it. Staff only. The headline score, ranking and top lists stay public.
+router.get("/:dealerId/details", protect, adminOnly, asyncHandler(getDealerHealthScoreDetails));
 
 // Get dealer ranking
 router.get("/ranking/list", asyncHandler(getDealerRanking));
@@ -40,7 +42,7 @@ router.get("/ranking/list", asyncHandler(getDealerRanking));
 router.get("/top/:category", asyncHandler(getTopDealersByCategory));
 
 // Get dealer score trends
-router.get("/:dealerId/trends", asyncHandler(getDealerScoreTrends));
+router.get("/:dealerId/trends", protect, adminOnly, asyncHandler(getDealerScoreTrends));
 
 // =============================
 // 🔐 ADMIN ROUTES

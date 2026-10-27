@@ -20,7 +20,7 @@ const checks = [
   ['no fabricated counts or live KPI requests in capability component', !/fetch\(|axios\.|adminAPI\.|totalRevenue|fake|mock data/i.test(matrix)],
   ['no new departmental API mounted in backend server', !/departmentCapabilities|department-capabilities|departmentalOperations/i.test(server)],
   ['existing finance endpoints remain the source of truth', server.includes('app.use("/api/finance", financeRoutes)') && server.includes('app.use("/api/ledger", ledgerRoutes)')],
-  ['ledger write operations require MANAGE_FINANCE', ledger.includes('const financeWrite = requirePermission(PERM.MANAGE_FINANCE)') && ledger.includes('router.post("/", protect, adminOnly, financeWrite')],
+  ['ledger write operations require MANAGE_FINANCE', ledger.includes('const financeWrite = requireAnyPermission(...STAFF_ACCESS_POLICY["ledger.write"])') && ledger.includes('router.post("/", protect, adminOnly, financeWrite') && /"ledger\.write": \[PERM\.MANAGE_FINANCE\]/.test(fs.readFileSync(new URL('../backend/config/staffAccessPolicy.js', import.meta.url), 'utf8'))],
   ['finance route scope and existing allowlist preserved', finance.includes('allowRoles("admin", "superadmin")') && finance.includes('router.post(')],
   ['test coverage checks owner gate, status honesty and canonical routes', tests.includes('departmental capability convergence') && tests.includes('No new records, database tables, financial totals')],
   ['owner matrix warns that UI visibility does not grant API access', matrix.includes('This inventory does not grant access') && matrix.includes('backend authorization')],

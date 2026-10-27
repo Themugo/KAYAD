@@ -1,0 +1,14 @@
+PASS Dashboard uses the existing admin stats API
+PASS Dashboard uses the existing paginated dealer records API
+PASS Unavailable metrics are not silently converted to zero
+PASS Hardcoded dashboard revenue and activity samples have been removed
+PASS Revenue is labelled as recorded commission revenue
+PASS Historical trends are not fabricated when the API does not supply a time series
+PASS System health is not inferred from marketplace statistics
+PASS Existing admin control room destination is retained
+PASS Dealer API failure and empty states are represented explicitly
+PASS Dashboard request cleanup prevents state updates after unmount
+PASS Dashboard uses the existing EnterpriseKPI contract rather than the chart-only EnterpriseRevenue component
+PASS Dashboard colors reference defined design tokens
+
+12/12 checks passed.

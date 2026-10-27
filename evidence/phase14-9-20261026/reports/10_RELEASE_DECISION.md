@@ -1,0 +1,3 @@
+# Release decision
+**A - LOCAL ACCOUNT AND PAYMENT-READINESS CONVERGENCE COMPLETE; STAGING REQUIRED.**
+All in-scope local account-security, authorization, data-integrity and callback-idempotency criteria pass on a real PostgreSQL/PostgREST database. Outstanding and NOT certified: live or sandbox Daraja, the actual receiving shortcode, Supabase-specific features, staging validation of the newly activated dealer auction-setup endpoints, and the product/protected-domain decisions in report 07. Local sandbox success is not live customer-to-dealer payment certification, and the code shows payments are collected by the platform, not routed directly to dealers.

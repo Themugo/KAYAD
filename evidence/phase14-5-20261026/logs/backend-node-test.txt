@@ -1,0 +1,36 @@
+
+> kayad-backend@2.0.0 test:node
+> node --test --test-force-exit tests/response-lifecycle.test.js
+
+TAP version 13
+# [12:19:27] [33mWARN[39m: [36mRoute not found[39m
+#     [35mpath[39m: "/unknown"
+#     [35mmethod[39m: "GET"
+#     [35mrequestId[39m: "N/A"
+#     [35muser[39m: "guest"
+# Subtest: GET, HEAD, JSON, errors and SLI complete without double sending
+ok 1 - GET, HEAD, JSON, errors and SLI complete without double sending
+  ---
+  duration_ms: 293.596818
+  type: 'test'
+  ...
+# [12:19:27] [33mWARN[39m: [36mRoute not found[39m
+#     [35mpath[39m: "/"
+#     [35mmethod[39m: "HEAD"
+#     [35mrequestId[39m: "N/A"
+#     [35muser[39m: "guest"
+# [12:19:27] [31mERROR[39m: [36mServer error[39m
+#     [35mmessage[39m: "test failure"
+#     [35mpath[39m: "/throw"
+#     [35mmethod[39m: "GET"
+#     [35muser[39m: "guest"
+#     [35mstatusCode[39m: 500
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1806.271587

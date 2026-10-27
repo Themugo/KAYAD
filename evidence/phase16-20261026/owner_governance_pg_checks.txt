@@ -1,0 +1,112 @@
+== migration apply ==
+PASS  candidate applies to a clean replay of the 181 migrations
+PASS  candidate re-applies idempotently
+== privileges / RLS ==
+PASS  RLS enabled on all four tables
+PASS  anon cannot read memberships
+PASS  authenticated cannot read invitations
+PASS  authenticated cannot execute accept
+PASS  anon cannot execute snapshot
+PASS  service_role can read memberships
+PASS  service_role cannot INSERT a membership directly
+PASS  service_role cannot UPDATE an invitation directly
+PASS  service_role can call snapshot
+PASS  internal helper not executable by service_role
+== audit ledger ==
+PASS  events are append-only (UPDATE refused)
+PASS  events are append-only (DELETE refused)
+PASS  events are append-only (TRUNCATE refused)
+PASS  secret-looking metadata key is rejected
+PASS  secret-looking nested key is rejected
+== bootstrap ==
+PASS  bootstrap invitation (no actor) issues
+PASS  duplicate pending invitation refused
+PASS  unattended 'invitation' kind refused
+PASS  invalid expiry refused (past)
+PASS  invalid expiry refused (too far)
+PASS  accept without password for new account refused
+PASS  accept creates verified account + membership
+PASS  created account is role=user, verified, approved
+PASS  membership is active, via bootstrap
+PASS  replaying the same token is refused
+PASS  unknown token refused (same code, no oracle)
+PASS  snapshot lists the usable owner
+== squatter takeover is neutralised ==
+PASS  unverified pre-existing row: accept resets credentials
+PASS  …password replaced
+PASS  …token_version bumped
+PASS  …existing refresh tokens revoked
+PASS  …mailbox now verified
+== existing verified account (third owner) ==
+PASS  owner A invites verified user C
+PASS  accept without being signed in refused
+PASS  accept signed in as someone else refused
+PASS  accept signed in as C succeeds
+PASS  C's credentials were NOT touched
+PASS  membership records who invited
+== bootstrap close ==
+PASS  bootstrap closes once an owner is usable
+PASS  pending bootstrap invitation is revoked by the close
+PASS  closed bootstrap refuses new invitations
+== authorization of the write path ==
+PASS  non-owner cannot invite
+PASS  non-owner cannot revoke
+PASS  owner cannot issue a bootstrap invitation
+PASS  already-active identity cannot be re-invited
+PASS  emergency recovery refused while a usable owner exists
+== last-owner / removal ==
+PASS  three usable owners
+PASS  removing owner C works
+PASS  removal bumps token_version in the same transaction
+PASS  removal revokes refresh tokens
+PASS  removed identity is no longer usable
+PASS  removed owner cannot act
+PASS  self-removal allowed while another usable owner remains
+PASS  LAST usable owner cannot be removed (by self)
+PASS  refusal is audited
+== unusable owners / emergency path ==
+PASS  owner whose mailbox lost verification is not usable
+PASS  …so emergency recovery is permitted
+PASS  …and the emergency issue is audited with the incident label
+PASS  …recovery accept resets credentials of the unusable owner and restores a usable one
+PASS  …usable owners = 1 again
+PASS  …the stale membership row was superseded, not deleted
+PASS  …credentials replaced and sessions invalidated
+PASS  owner whose account e-mail changed is not usable
+PASS  banned owner is not usable
+== expiry, resend, cooldown ==
+PASS  owner invites
+PASS  resend inside cooldown refused
+PASS  resend with no cooldown rotates the token
+PASS  old token is dead after resend
+PASS  expired token is refused as expired
+PASS  …and marked expired
+PASS  expired invitation can be resent
+PASS  after resend the new token works
+PASS  an accepted invitation cannot be resent
+PASS  a pending invitation can be revoked by an owner
+PASS  …revoke works
+PASS  …and a revoked token cannot be accepted
+PASS  suspended/banned account cannot become an owner
+PASS  that denial left no membership behind
+== concurrency (separate sessions, real lock contention) ==
+PASS  round 1: mutual removal leaves exactly one usable owner (true / OWNER_ACTOR_NOT_OWNER)
+PASS  round 1: exactly one removal succeeded
+PASS  round 2: mutual removal leaves exactly one usable owner (true / OWNER_ACTOR_NOT_OWNER)
+PASS  round 2: exactly one removal succeeded
+PASS  round 3: mutual removal leaves exactly one usable owner (true / OWNER_ACTOR_NOT_OWNER)
+PASS  round 3: exactly one removal succeeded
+PASS  round 4: mutual removal leaves exactly one usable owner (true / OWNER_ACTOR_NOT_OWNER)
+PASS  round 4: exactly one removal succeeded
+PASS  round 5: mutual removal leaves exactly one usable owner (true / OWNER_ACTOR_NOT_OWNER)
+PASS  round 5: exactly one removal succeeded
+PASS  concurrent duplicate invitation → one pending row only (true / OWNER_INVITATION_PENDING)
+PASS  duplicate race: one issued, one refused
+PASS  concurrent double-accept of one token → one membership (true / OWNER_INVITATION_INVALID)
+PASS  …and exactly one account
+== audit completeness ==
+PASS  every state change has an event row (issue/accept/revoke/resend/close all present)
+PASS  no event row carries a secret-looking key
+PASS  events store hashes nowhere (no 64-hex string in any column)
+
+RESULT pass=97 fail=0

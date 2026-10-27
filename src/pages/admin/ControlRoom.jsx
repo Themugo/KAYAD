@@ -61,8 +61,8 @@ const statRowStyles = {
 
 const getHealthBannerStyle = (status) => ({
   display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, padding: '12px 16px', borderRadius: 10,
-  background: status === 'healthy' ? 'rgba(34,197,94,0.04)' : 'rgba(239,68,68,0.04)',
-  border: `1px solid ${status === 'healthy' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)'}`,
+  background: status === 'warning' ? 'rgba(239,68,68,0.04)' : 'rgba(10,51,64,0.03)',
+  border: `1px solid ${status === 'warning' ? 'rgba(239,68,68,0.1)' : 'rgba(10,51,64,0.1)'}`,
 });
 
 const getNavCardStyle = (danger) => ({
@@ -75,7 +75,7 @@ const getNavCardStyle = (danger) => ({
 const getNavIconStyle = (danger) => ({ color: danger ? '#ef4444' : 'var(--brand)', marginBottom: 4 });
 const getNavLabelStyle = (danger) => ({ fontWeight: 700, fontSize: 13, color: danger ? '#ef4444' : '#fff' });
 const getStatValueStyle = (color) => ({ fontSize: 18, fontWeight: 900, fontFamily: 'var(--font-display)', color });
-const getHealthStatusColor = (status) => status === 'healthy' ? '#22c55e' : '#ef4444';
+const getHealthStatusColor = (status) => status === 'warning' ? '#ef4444' : '#64748b';
 const getDeptIconStyle = (color) => ({ color, marginBottom: 2 });
 const getDeptLabelStyle = (color) => ({ color, fontWeight: 600 });
 
@@ -151,12 +151,12 @@ export default function ControlRoom() {
 
         {/* System Health */}
         {health && (
-          <SectionCard title="System Health" accent={health.status === 'healthy' ? '#22c55e' : '#ef4444'}>
+          <SectionCard title="System Health" accent={health.status === 'warning' ? '#ef4444' : '#64748b'}>
             <div style={getHealthBannerStyle(health.status)}>
-              {health.status === 'healthy' ? <Wifi size={20} style={healthIcon(health.status)} /> : <WifiOff size={20} style={healthIcon(health.status)} />}
+              {health.status === 'warning' ? <WifiOff size={20} style={healthIcon(health.status)} /> : <Wifi size={20} style={healthIcon(health.status)} />}
               <div>
                 <div style={healthStatusBar(health.status)}>
-                  {health.status === 'healthy' ? 'All Systems Operational' : 'System Warning'}
+                  {health.status === 'warning' ? 'System Warning' : 'No critical alerts - provider, database and queue health are not checked here'}
                 </div>
                 <div style={CS.lastChecked}>
                   Last checked: {new Date(health.timestamp).toLocaleTimeString()}

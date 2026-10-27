@@ -1,0 +1,52 @@
+PASS 1 dealer registration returns 201 with status pending, unverified email
+PASS 1 response never contains password or tokens
+PASS 2 weak password rejected (400)
+PASS 2 dealer without businessName/location rejected
+PASS 2 self-registration as admin/superadmin is refused
+PASS 3 duplicate email (case-insensitive) -> 409
+PASS 3 concurrent duplicate registrations create exactly one account
+PASS 3 database holds exactly one user and one user_auth row for the race email
+PASS 4 password stored as a hash, not plaintext
+PASS 5 login before email verification: 200
+PASS 5 invalid verification token rejected
+PASS 5 verification token verifies the email once
+PASS 5 consumed/unknown token cannot be replayed
+PASS 5 resend for unknown email gives a non-enumerating response
+PASS 6 login succeeds and sets session cookies
+PASS 6 session persists across requests
+PASS 6 cookie session without a valid CSRF token is refused (403)
+PASS 6 no session -> 401
+PASS 6 wrong password -> 401
+PASS 7 registered (unapproved, no verification) dealer cannot create a listing (403)
+PASS 7 dealer inventory-write routes refuse an unapproved dealer (403; the dashboard itself stays readable so onboarding state can be shown)
+PASS 8 invalid onboarding data -> 400 and nothing persisted
+PASS 8 onboarding completes and submits verification (pending)
+PASS 8 dealers row has business details, onboarding flags and payment details
+PASS 8 resubmission while pending is allowed and idempotent (one verification row)
+PASS 8 onboarding is resumable: saved details are returned to the owner
+PASS 9 pending dealer cannot create a listing under the default approval_required policy (403 DEALER_APPROVAL_PENDING)
+PASS 9 public search responds
+PASS 9 a dealer cannot approve a verification (403)
+PASS 9 under the default owner_only policy a non-owner superadmin cannot approve a dealer (403 DECISION_AUTHORITY_REQUIRED)
+PASS 9 admin approves the dealer
+PASS 9 APPROVAL DOES NOT PUBLISH INVENTORY: pending listing still pending after approval
+PASS 9 listing still absent from public search after approval
+PASS 9 approved dealer cannot rewrite onboarding/payment details (409, nothing written)
+PASS 10 approved dealer reaches dashboard data
+PASS 10 approved dealer listing creation is validated server-side: a photo is mandatory (400, nothing written); real photo upload needs Cloudinary and is an UNEXECUTED staging test
+PASS 10 owner edits own listing
+PASS 10 another dealer cannot edit it (403/404)
+PASS 11 rejection recorded with reason
+PASS 11 rejected dealer cannot create listings (403 DEALER_VERIFICATION_REJECTED)
+PASS 11 rejected dealer may resubmit -> pending
+PASS 11 admin suspends an approved dealer
+PASS 11 suspended dealer cannot create listings (403 DEALER_ACCOUNT_SUSPENDED)
+PASS 11 suspended dealer cannot rewrite onboarding data (409)
+PASS 11 reinstatement is an explicit admin decision
+PASS 11 reinstatement does not change listing publication state
+PASS 11 illegal transition approved->rejected refused (409)
+PASS 12 approved private seller cannot use dealer team routes (403)
+PASS 12 private seller approval creates no dealer identity
+PASS 12 private seller cannot enter the dealer verification workflow
+
+50/50 passed

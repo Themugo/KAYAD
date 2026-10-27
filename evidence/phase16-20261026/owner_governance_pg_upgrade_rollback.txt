@@ -1,0 +1,20 @@
+== A. representative prior state: existing users / sessions / controls survive the upgrade ==
+PASS  candidate applies on top of a populated database
+PASS  every pre-existing table is byte-identical after the upgrade except communication_event_controls (+6 rows by design) [208 tables fingerprinted]
+PASS  exactly the six owner.* control rows were added
+PASS  post-upgrade: NO owner exists, including designated verified accounts (no env-list privilege in database mode)
+PASS  post-upgrade: zero memberships — a verified designated account is not auto-promoted
+== B. missing prerequisite aborts cleanly and leaves nothing behind ==
+PASS  candidate refuses to apply when the Stage 5A users security columns are missing (hosted gap #3)
+PASS  failed apply is atomic: none of the four owner governance tables or kayad_owner_* functions was left behind
+== C. rollback: refuses without export, then restores the pre-upgrade state without touching users/sessions ==
+PASS  rollback refuses to run without the export confirmation
+PASS  refused rollback changed nothing
+PASS  audit ledger export captured all 2 events before the rollback
+PASS  rollback applies once export is confirmed
+PASS  rollback removed every owner_* table and kayad_owner_* function
+PASS  the six owner.* control rows were removed again
+PASS  user accounts untouched by rollback (nothing is deleted from users)
+PASS  pre-rollback revocation of a session is NOT undone by the rollback (rollback never restores old sessions)
+
+RESULT pass=15 fail=0

@@ -77,8 +77,8 @@ export default function AdminSellers() {
       });
       setEditing(null);
       toast('Seller settings saved', 'success');
-    } catch {
-      toast('Failed to save seller settings', 'error');
+    } catch (err) {
+      toast(err?.response?.data?.message || 'Failed to save seller settings', 'error');
     }
   };
 

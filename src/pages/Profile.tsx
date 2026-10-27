@@ -31,6 +31,7 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
 
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
+  const [stepUpPassword, setStepUpPassword] = useState('');
 
   const stats = [
     { label: 'Listings', value: user.listingsCount || '0' },
@@ -56,15 +57,20 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
     setEditValue(currentValue || '');
   };
 
+  const needsStepUp = editingField === 'phone' && (user.role === 'dealer' || user.role === 'individual_seller') && editValue.trim() !== (user.phone || '');
   const handleSaveEdit = async () => {
     if (!editingField) return;
+    if (needsStepUp && !stepUpPassword) { toast('Enter your current password to change your phone number', 'error'); return; }
     setLoading(true);
     try {
-      await updateProfile({ [editingField]: editValue });
+      await updateProfile({ [editingField]: editValue, ...(needsStepUp ? { currentPassword: stepUpPassword } : {}) });
+      setStepUpPassword('');
       toast('Profile updated successfully', 'success');
       setEditingField(null);
-    } catch (err) {
-      toast('Failed to update profile', 'error');
+    } catch (err: any) {
+      const status = err?.response?.status;
+      const msg = err?.response?.data?.message;
+      toast(status === 429 ? 'Too many attempts. Please wait a few minutes and try again.' : (status === 403 && msg) ? msg : 'Failed to update profile', 'error');
     } finally {
       setLoading(false);
     }
@@ -221,6 +227,9 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                             onChange={(e) => setEditValue(e.target.value)}
                             className="font-sans text-sm text-[#0A3340] border border-[#BDE5DE] rounded px-2 py-1"
                           />
+                          {needsStepUp && (
+                            <input type="password" autoComplete="current-password" aria-label="Current password" placeholder="Current password" value={stepUpPassword} onChange={(e) => setStepUpPassword(e.target.value)} className="font-sans text-sm text-[#0A3340] border border-[#BDE5DE] rounded px-2 py-1" />
+                          )}
                           <button onClick={handleSaveEdit} disabled={loading} className="text-[#176B87] text-sm font-semibold">
                             {loading ? <Loader2 size={14} className="animate-spin" /> : 'Save'}
                           </button>

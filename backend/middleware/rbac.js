@@ -125,6 +125,31 @@ export function requirePermission(...permissions) {
   };
 }
 
+/**
+ * Phase 16: ANY-of permission gate (requirePermission is ALL-of). Used where two existing business roles legitimately share a
+ * capability (for example platform administration OR customer support). Superadmin and the verified owner pass; every denial is audited.
+ */
+export function requireAnyPermission(...permissions) {
+  return async (req, res, next) => {
+    try {
+      if (!req.user) return res.status(401).json({ success: false, message: "Unauthorized" });
+      if (req.user.role === "superadmin" || permissions.some((perm) => hasPermission(req.user, perm))) {
+        req.user.effectiveRole = getEffectiveRole(req.user);
+        return next();
+      }
+      try {
+        await AuditLog.create({ action: "access_denied", userId: req.user.id, metadata: { permission: permissions.join("|"), path: req.originalUrl, method: req.method, role: req.user.role } });
+      } catch (auditErr) {
+        console.error("RBAC access_denied audit write failed:", auditErr?.message || auditErr);
+      }
+      return res.status(403).json({ success: false, message: `Missing permission: ${permissions.join(" or ")}` });
+    } catch (err) {
+      console.error("RBAC ERROR:", err);
+      return res.status(500).json({ success: false, message: "Authorization failed" });
+    }
+  };
+}
+
 export function requireRole(...roles) {
   return (req, res, next) => {
     if (!req.user) {

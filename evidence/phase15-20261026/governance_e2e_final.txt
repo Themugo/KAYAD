@@ -1,0 +1,75 @@
+PASS A1 /api/platform-factory/dashboard is closed to anonymous, buyer, private seller and dealer
+PASS A2 /api/platform-factory/dashboard still opens for staff (no 401/403)
+PASS A1 /api/platform-factory/products is closed to anonymous, buyer, private seller and dealer
+PASS A2 /api/platform-factory/products still opens for staff (no 401/403)
+PASS A1 /api/improvement/dashboard is closed to anonymous, buyer, private seller and dealer
+PASS A2 /api/improvement/dashboard still opens for staff (no 401/403)
+PASS A1 /api/improvement/opportunities is closed to anonymous, buyer, private seller and dealer
+PASS A2 /api/improvement/opportunities still opens for staff (no 401/403)
+PASS A1 /api/automation/ai-suggestions is closed to anonymous, buyer, private seller and dealer
+PASS A2 /api/automation/ai-suggestions still opens for staff (no 401/403)
+PASS A1 /api/automation/templates is closed to anonymous, buyer, private seller and dealer
+PASS A2 /api/automation/templates still opens for staff (no 401/403)
+PASS A1 /api/lowcode/field-types is closed to anonymous, buyer, private seller and dealer
+PASS A2 /api/lowcode/field-types still opens for staff (no 401/403)
+PASS A3 a buyer can no longer call the platform-factory design endpoint
+PASS A3 a buyer can no longer evaluate automation rules
+PASS A4 dealer health-score breakdown is not public (401 anonymous)
+PASS A4 dealer health-score breakdown is closed to a buyer (403)
+PASS A5 automation suggestions contain no hard-coded figures (no "47 pending", "4.2 hours", efficiency claims)
+PASS B1 superadmin can list payments
+PASS B2 no full customer phone number appears anywhere in the response
+PASS B2 phones are masked to the last three digits
+PASS B3 checkout request ids, raw metadata and internal user ids are not returned
+PASS B4 a verified success is "settled" and carries its receipt
+PASS B5 a pending payment is shown as pending (never settled) with its age
+PASS B5 a long-pending payment keeps its pending status and reports the real age
+PASS B6 an ordinary failure is "failed" (no reconciliation claim)
+PASS B7 failed + amount-mismatch evidence is flagged needs_reconciliation (money may have moved)
+PASS B8 failed + a success callback received afterwards is flagged needs_reconciliation
+PASS B9 failed + refund_required is flagged needs_reconciliation
+PASS B10 stored payment status is never rewritten by viewing (read-only)
+PASS B11 the summary names what it measures (successful collections, not platform revenue)
+PASS B12 payment oversight is closed to buyers, sellers, dealers and non-finance staff
+PASS B12 anonymous gets 401
+PASS B13 the accounts role still has oversight, with the same masking
+PASS B14 there is no admin route that edits a payment status (all methods 404/405)
+PASS C1 ban with explicit target state returns the server-confirmed state
+PASS C2 repeating the same ban is idempotent (stays banned, changed=false, no second audit entry)
+PASS C3 the banned user's existing session stops working
+PASS C3 the banned user cannot log in
+PASS C4 refresh tokens of the banned user are revoked
+PASS C5 the ban is audited with ids and outcome only (no password/token/e-mail)
+PASS C6 unban restores access
+PASS C7 the legacy no-body toggle still works and reports the resulting state
+PASS C8 a superadmin cannot ban themselves
+PASS C8 an admin cannot ban a superadmin
+PASS C9 a buyer cannot ban anyone
+PASS D1 system health reports only what it measured (warning | no_critical_alerts), never "healthy"
+PASS E1 the owner can approve the dealer verification
+PASS E2 approval did not publish pending, draft or hidden listings
+PASS E3 none of them is visible on the public marketplace after approval
+PASS E4 approving an already-approved dealer is refused as an invalid transition (4xx, state unchanged)
+PASS E5 suspension is audited and does not delete listings
+PASS E6 reinstatement restores approval without publishing the unpublished listings
+PASS E7 non-privileged staff cannot suspend a dealer (403)
+PASS F1 the owning dealer can save a setup
+PASS F2 a superadmin cannot write dealer-configured terms through the dealer endpoint
+PASS F3 a private seller cannot read a dealer setup
+PASS F3 a buyer cannot publish
+PASS F4 publishing a listing that is not auction-ready is refused with its readiness blockers (422), never a 5xx, and publishes nothing
+PASS F4 concurrent saves by the owner never 5xx and leave exactly one setup row
+PASS F5 once published, the terms are immutable (409) and the stored configuration is byte-identical
+PASS F5 not even the platform owner can alter published dealer terms through the dealer endpoint
+PASS F6 the Super Admin auction bid view is closed to buyers, sellers and dealers
+PASS G1 a dealer's team list never contains another organization's members
+PASS G2 a dealer cannot edit another dealer's profile
+PASS G3 a buyer cannot write dealer settlement details
+PASS H1 a profile update cannot change role or permissions
+PASS H2 a buyer cannot use the admin user-update route on themselves
+PASS H3 an admin cannot promote an account to superadmin
+PASS H4 self-registration as superadmin is refused
+PASS I1 saving per-seller commission settings answers 503 SELLER_SETTINGS_NOT_PERSISTED (nothing stored, no raw database error)
+PASS I2 a buyer cannot reach seller-settings
+
+73/73 passed

@@ -1,0 +1,6 @@
+tsc exit=0
+build exit=0
+fe-vitest exit=1
+be-jest exit=0
+be-vitest exit=0
+be-node exit=0

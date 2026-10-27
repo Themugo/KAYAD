@@ -660,11 +660,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }, [heroSlides.length, heroRotationMs]);
   const activeHeroSlide = heroSlides[heroSlideIndex % Math.max(heroSlides.length, 1)];
 
-  const heroEyebrow = activeHeroSlide?.eyebrowText?.trim() || 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE';
+  const heroEyebrow = activeHeroSlide?.eyebrowText?.trim() || 'KAYAD KE · PREMIUM AUTOMOTIVE MARKETPLACE';
   const heroHeadline = activeHeroSlide?.headline?.trim() || 'Drive Your Dream Today';
   // Single source of truth for hero copy: desktop AND mobile render these, so every admin edit
   // (hero slide eyebrow / headline / subheadline / CTA text, vehicle card content) shows on both.
-  const heroEyebrowDisplay = heroEyebrow === 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE' ? 'KAYAD MARKETPLACE · VERIFIED VEHICLES' : heroEyebrow;
+  // Brand is KAYAD KE (not KAYAD EA): a previously saved hero slide that still carries the legacy default is normalised too.
+  const heroEyebrowDisplay = heroEyebrow === 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE' ? 'KAYAD KE · PREMIUM AUTOMOTIVE MARKETPLACE' : heroEyebrow;
   // Only the canonical default headline gets the designed line break; any admin-authored headline renders exactly as written.
   const heroHeadlineNode: React.ReactNode = heroHeadline === 'Drive Your Dream Today' ? <>Drive Your Dream<br />Today</> : heroHeadline;
   const heroSubheadline = activeHeroSlide?.subheadline?.trim() || 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.';

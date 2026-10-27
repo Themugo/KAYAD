@@ -25,7 +25,8 @@ export function LoginPage() {
   const verifyRequired = params.get('verify') === 'required';
   const verifiedNow = params.get('verified') === '1';
 
-  const [form, setForm] = useState({ email: location.state?.email || '', password: '' });
+  const [form, setForm] = useState({ email: location.state?.email || '', password: '', mfaCode: '' });
+  const [mfaRequired, setMfaRequired] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [verificationRequired, setVerificationRequired] = useState(verifyRequired);
@@ -49,11 +50,14 @@ export function LoginPage() {
     setError('');
     try {
       setVerificationRequired(false);
-      const data = await login({ email: form.email.trim(), password: form.password });
+      const data = await login({ email: form.email.trim(), password: form.password, ...(form.mfaCode.trim() ? { mfaCode: form.mfaCode.trim() } : {}) });
       toast('Welcome back!', 'success');
       clearStoredAuthIntent();
       navigate(getPostAuthPath(data?.user || user, next), { replace: true });
     } catch (err) {
+      // PHASE 16: an owner with an authenticator gets a second step in the same form (the server issues no session until the code is right).
+      if (err instanceof AuthApiError && err.kind === 'mfa_required') { setMfaRequired(true); setError(err.message); return; }
+      if (mfaRequired) setForm((p) => ({ ...p, mfaCode: '' }));
       const message = err instanceof AuthApiError ? err.message : err?.response?.data?.message || 'Unable to sign in. Please try again.';
       const needsVerification = err instanceof AuthApiError && (err.kind === 'email_verification_required' || (err.status === 403 && /verify your email/i.test(err.message)));
       // STAGE 5E: the owner-identity gate tells the owner to "Resend verification email"; show that action AND keep the owner-specific
@@ -113,6 +117,12 @@ export function LoginPage() {
             value={form.password} onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
           />
         </div>
+        {mfaRequired && (
+          <TextField
+            label="Authenticator code" placeholder="6-digit code or recovery code" required autoComplete="one-time-code" inputMode="text" name="mfaCode"
+            value={form.mfaCode} onChange={(e) => setForm((p) => ({ ...p, mfaCode: e.target.value }))}
+          />
+        )}
         <button className="kayad-auth-submit" type="submit" disabled={loading}>
           {loading ? <><span className="kayad-auth-spinner" /> Signing in…</> : <>Continue to KAYAD <ArrowRight size={16} /></>}
         </button>

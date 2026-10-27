@@ -21,7 +21,7 @@ describe('admin tables render every declared column and keep their actions reach
       { _id: 'd1', name: 'Dealer One', email: 'd1@x.test', role: 'dealer', approved: false, createdAt: '2026-10-01T00:00:00Z' },
       { _id: 'u1', name: 'Buyer One', email: 'b1@x.test', role: 'user', approved: true, isBanned: true },
     ], total: 2 });
-    api.toggleBan.mockResolvedValue({});
+    api.toggleBan.mockResolvedValue({ isBanned: false });
     api.approveDealer.mockResolvedValue({});
     render(<AdminUsers />);
     const dealerRow = (await screen.findByText('Dealer One')).closest('tr');
@@ -32,7 +32,8 @@ describe('admin tables render every declared column and keep their actions reach
     const buyerRow = screen.getByText('Buyer One').closest('tr');
     expect(within(buyerRow).getByText('banned')).toBeTruthy();
     fireEvent.click(within(buyerRow).getByRole('button', { name: 'Unban' }));
-    await waitFor(() => expect(api.toggleBan).toHaveBeenCalledWith('u1'));
+    await waitFor(() => expect(api.toggleBan).toHaveBeenCalledWith('u1', false)); // Phase 15: explicit target state, idempotent on the server
+    await waitFor(() => expect(within(screen.getByText('Buyer One').closest('tr')).queryByText('banned')).toBeNull()); // UI adopts the server-confirmed state
   });
 
   test('Listings: seven cells per row, a missing price is Unavailable, Delete passes the listing', async () => {

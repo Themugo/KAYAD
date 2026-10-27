@@ -1,0 +1,1 @@
+This archive is Windows-safe: file names contain no characters illegal on Windows (the ':' in validator log names was replaced by '_', e.g. val-validate_phase60.txt). All paths are under 200 characters, no symlinks, no reserved names. Same source content as the previous 14.4 archive.

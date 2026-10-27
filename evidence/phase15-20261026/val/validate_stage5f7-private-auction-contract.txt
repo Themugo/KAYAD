@@ -1,0 +1,24 @@
+Stage 5F.7 private-seller contract validator: 23 PASS, 0 FAIL
+PASS contract freeze exists and is substantive
+PASS threat model exists and is substantive
+PASS API authorization matrix exists and is substantive
+PASS contract covers: Physical vehicle custody is mandatory for every private-seller auction
+PASS contract covers: seller pays the disclosed inspection/custody charges
+PASS contract covers: Failed or inconclusive verification blocks auction
+PASS contract covers: `vehicle_custody` capability
+PASS contract covers: existing canonical bid endpoint
+PASS contract covers: Phase B — Backend source-of-truth and persistence integration
+PASS threat model covers: Scheduler bypass
+PASS threat model covers: Bid bypass
+PASS threat model covers: Stale evidence
+PASS threat model covers: Private data leak
+PASS threat model covers: fail-closed
+PASS authorization matrix covers: Place bid
+PASS authorization matrix covers: Accept physical handover
+PASS authorization matrix covers: Approve/reject proposal
+PASS authorization matrix covers: Release vehicle
+PASS source audit target exists: backend/routes/auctionSetupRoutes.js
+PASS source audit target exists: backend/services/auctionSetup.service.js
+PASS source audit target exists: backend/services/auctionSetup.contract.js
+PASS source audit target exists: backend/controllers/bidController.js
+PASS source audit target exists: backend/inspection/services/providerGovernanceService.js

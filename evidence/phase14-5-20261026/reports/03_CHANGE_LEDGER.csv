@@ -1,0 +1,12 @@
+path,change,reason,workstream,test_coverage,protected_domain
+backend/controllers/dealerPlatformController.js,modified,"Profile PUT: identity+role before write, validation, mass-assignment guard, rollback on partial failure, owner-only phone, phoneVerified reset; Team: transition rules, permission validation/no-expansion, token-hash stripping, self-invite refusal",Workstreams A/B/C,backend/tests/regression/dealerProfileAndTeamAuthorization.test.js,No (dealer profile/team sections only; payments/escrow/ledger code in same file untouched)
+backend/routes/dealerPlatformRoutes.js,modified,GET profile uses optionalAuth (owner-only phone); PUT profile adds createLimiter and import,Workstreams A/B,same,No
+package.json,modified,Added script validate:repository-naming,Workstream G,scripts/validate-repository-naming-and-paths.mjs,No
+src/pages/dealer/dashboard/DealerSettingsPanel.tsx,modified,"Prefill owner phone, send only when changed, Kenyan-number validation, unsaved indicator, re-verify notice, server field errors",Workstream B/F,src/__tests__/pages/dealer/DealerWorkflowWrites.test.tsx,No
+src/pages/dealer/dashboard/DealerTeamPanel.tsx,modified,"Status badges, pending-invite note, accessible remove confirmation (focus, Escape), aria labels",Workstream C/F,src/__tests__/pages/dealer/DealerWorkflowWrites.test.tsx,No
+src/__tests__/pages/dealer/DealerWorkflowWrites.test.tsx,modified,"+2 settings tests (phone, server field errors); remove-button selector",Workstream B/F,self,No
+backend/tests/regression/dealerProfileAndTeamAuthorization.test.js,added,36 authorization/lifecycle/privacy regression tests,Workstream A/B/C,self,No
+scripts/validate-repository-naming-and-paths.mjs,added,Naming/path/import/manifest validator,Workstream G,run in validators,No
+runbooks/phase14-5-20261026/dealer_workflows_browser_check.cjs,added,Browser workflow script (mocked API) incl. team remove confirmation,Workstream E,evidence/phase14-5-20261026/logs/browser-run.txt,No
+validation-logs*/ (434 files),renamed,Colon in file name is illegal on Windows (e.g. val-validate:phase60.txt -> val-validate_phase60.txt); content unchanged,Naming governance,scripts/validate-repository-naming-and-paths.mjs,No
+"evidence/phase14-5-20261026/ (screenshots, logs, reports)",added,Release evidence,Workstream H,n/a,No

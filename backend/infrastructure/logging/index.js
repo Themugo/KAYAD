@@ -25,9 +25,21 @@ import { redactUrl } from "../../utils/redactUrl.js";
 const config = getConfig();
 const transports = getTransports();
 
+// Phase 14.9: customer phone numbers (M-Pesa STK, SMS, OTP) must not be written to logs in clear. The value is masked to its last
+// three digits so a log line can still be correlated by support, and credentials are fully redacted at any of these keys.
+const PHONE_KEYS = ["phone", "phoneNumber", "msisdn", "PhoneNumber", "PartyA"];
+const SECRET_KEYS = ["password", "currentPassword", "newPassword", "passkey", "consumerSecret", "SecurityCredential"];
+const redactPaths = [...PHONE_KEYS, ...SECRET_KEYS].flatMap((k) => [k, `*.${k}`]);
+export const maskLogValue = (value, path) => {
+  const key = Array.isArray(path) ? path[path.length - 1] : String(path || "").split(".").pop();
+  if (PHONE_KEYS.includes(key)) return String(value).replace(/\d(?=\d{3})/g, "*");
+  return "[REDACTED]";
+};
+
 const logger = pino(
   {
     ...config,
+    redact: { paths: [...(config.redact?.paths || []), ...redactPaths], censor: maskLogValue },
     serializers: {
       ...config.serializers,
       ...serializers,

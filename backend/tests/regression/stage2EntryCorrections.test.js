@@ -182,8 +182,9 @@ describe("S2-FIN-01/02 ledger writes require MANAGE_FINANCE; reversal records th
     expect((await call("POST", "/api/ledger/seed", admin)).code).toBe(200);
     expect((await call("POST", "/api/ledger/seed", owner)).code).toBe(200);
   });
-  test("reads stay adminOnly (unchanged): ghost_checker can still list", async () => {
-    expect((await call("GET", "/api/ledger", ghost)).code).not.toBe(403);
+  test("PHASE 16: ledger reads now need MANAGE_FINANCE (was adminOnly): ghost_checker is refused, accounts can list", async () => {
+    expect((await call("GET", "/api/ledger", ghost)).code).toBe(403);
+    expect((await call("GET", "/api/ledger", accounts)).code).not.toBe(403);
   });
 });
 

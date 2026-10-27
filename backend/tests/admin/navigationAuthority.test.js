@@ -145,7 +145,7 @@ describe("PUT /api/admin/config navigation — authorization matrix", () => {
   test("a non-navigation config update does not write a navigation audit entry or touch navigation", async () => {
     await call("PUT", "/api/admin/config", { role: "admin", body: { navigation: VALID } });
     auditCreate.mockClear();
-    const res = await call("PUT", "/api/admin/config", { role: "admin", body: { platformName: "KAYAD EA" } });
+    const res = await call("PUT", "/api/admin/config", { role: "admin", body: { platformName: "KAYAD KE" } });
     expect(res.status).toBe(200);
     expect(auditCreate.mock.calls.map((c) => c[0].action)).toEqual(["Platform config updated"]);
     expect(stored.navigation.items).toHaveLength(3);

@@ -469,3 +469,43 @@ export async function updateCar(id: string, payload: UpdateCarPayload): Promise<
   }
 }
 
+
+// ---- Phase 14.6: existing-listing photo management and listing removal --------------------------------------------------
+// All three use routes that already exist and enforce owner-or-staff on the server:
+//   POST   /api/cars/:id/images          (multipart, <=10 files per request, 20 per listing, JPG/PNG/WEBP, 5 MB each)
+//   DELETE /api/cars/:id/images/:index   (index into the listing's current image array)
+//   DELETE /api/cars/:id                 (soft delete; owner-or-staff)
+export const LISTING_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+export const LISTING_IMAGE_MAX_BYTES = 5 * 1024 * 1024;
+export const LISTING_IMAGE_MAX_PER_REQUEST = 10;
+export const LISTING_IMAGE_MAX_PER_LISTING = 20;
+
+export interface ListingImage { url: string; thumb?: string; public_id?: string }
+export interface ListingImagesResponse { success: boolean; message?: string; data?: { images?: ListingImage[]; coverImage?: number } }
+
+function toVehicleError(err: unknown): VehicleApiError {
+  const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
+  return new VehicleApiError(error.message, error.status === 404 ? 'not_found' : error.status ? 'server' : 'network', error.status);
+}
+
+export async function addCarImages(id: string, files: File[]): Promise<ListingImagesResponse> {
+  const formData = new FormData();
+  files.forEach((file) => formData.append('images', file));
+  try {
+    return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images`, {
+      method: 'POST', body: formData, headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  } catch (err) { throw toVehicleError(err); }
+}
+
+export async function deleteCarImage(id: string, index: number): Promise<ListingImagesResponse> {
+  try {
+    return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images/${index}`, { method: 'DELETE' });
+  } catch (err) { throw toVehicleError(err); }
+}
+
+export async function deleteCar(id: string): Promise<{ success: boolean; message?: string }> {
+  try {
+    return await request<{ success: boolean; message?: string }>(`/api/cars/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  } catch (err) { throw toVehicleError(err); }
+}

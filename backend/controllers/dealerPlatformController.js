@@ -3,6 +3,7 @@
 // Digital Operating System for KAYAD Dealers
 // ============================================================
 
+import { checkPasswordStepUp } from "../utils/stepUp.js"; // Phase 14.9
 import User from "../models/User.js";
 import Dealer from "../models/Dealer.js";
 import InspectionOrder from "../models/InspectionOrder.js";
@@ -21,6 +22,8 @@ import { logAuditEvent } from "../services/auditService.js";
 import crypto from "crypto";
 import { sellerMayPublishDirectly, PUBLICATION_REVIEW_REQUIRED } from "../services/onboardingPolicy.service.js"; // STAGE 5
 import { sendTeamInviteEmail } from "../services/email.service.js";
+import { formatPhone } from "../utils/format.js";
+import { DEALER_TEAM_PERMISSIONS } from "../middleware/dealerOrgAccess.js";
 
 // ============================================================
 // DEALER DASHBOARD
@@ -41,7 +44,7 @@ export async function getDealerDashboard(req, res) {
   try {
     const dealerId = req.user.id;
     const [listings, leads, releasedEscrows] = await Promise.all([
-      Car.find({ dealer: dealerId }),
+      Car.find({ dealer: dealerId, deletedAt: { $exists: false } }),
       getDealerLeads(dealerId),
       Escrow.find({ seller: dealerId, status: "released" }),
     ]);
@@ -97,7 +100,7 @@ export async function getDealerProfile(req, res) {
     }
 
     const [listings, reviewSummary] = await Promise.all([
-      Car.find({ dealer: dealerId }),
+      Car.find({ dealer: dealerId, deletedAt: { $exists: false } }),
       listDealerReviews(dealerId, { page: 1, limit: 1 }),
     ]);
 
@@ -111,6 +114,9 @@ export async function getDealerProfile(req, res) {
         name: dealerUser.name,
         bio: dealerUser.bio || null,
         location: dealerRecord?.location || dealerUser.location || null,
+        // Phase 14.5: the account phone is returned ONLY to the signed-in owner of this profile
+        // (route uses optionalAuth). Anonymous callers, buyers and other dealers never receive it.
+        ...(req.user && String(req.user.id) === String(dealerId) ? { phone: dealerUser.phone || null } : {}),
         approved: Boolean(dealerRecord?.approved),
         memberSince: dealerRecord?.createdAt || dealerUser.createdAt || null,
         stats: {
@@ -127,57 +133,121 @@ export async function getDealerProfile(req, res) {
   }
 }
 
+const PROFILE_TEXT_LIMITS = Object.freeze({ businessName: 120, location: 200, bio: 2000 });
+// Fields that must never be set through the profile endpoint (mass-assignment / escalation guard).
+const PROFILE_PROTECTED_FIELDS = Object.freeze([
+  "role", "permissions", "status", "approved", "verificationStatus", "dealer", "dealerId", "user", "owner",
+  "isOwner", "email", "id", "_id", "tokenVersion", "emailVerified", "phoneVerified", "password",
+]);
+
 export async function updateDealerProfile(req, res) {
   try {
     const { dealerId } = req.params;
 
-    if (req.user.id !== dealerId) {
+    // 1. Identity + role BEFORE anything is read for update or written.
+    if (!req.user || String(req.user.id) !== String(dealerId)) {
       return res.status(403).json({
         success: false,
         message: "You can only update your own dealer profile",
       });
     }
+    if (req.user.role !== "dealer") {
+      return res.status(403).json({ success: false, message: "Dealer access only" });
+    }
 
-    const allowed = ["businessName", "location", "phone", "bio"];
+    // 2. Validate the whole body before any write.
+    const body = req.body;
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return res.status(400).json({ success: false, message: "Request body must be an object" });
+    }
+    const forbidden = PROFILE_PROTECTED_FIELDS.filter((f) => Object.prototype.hasOwnProperty.call(body, f));
+    if (forbidden.length) {
+      return res.status(400).json({ success: false, code: "PROFILE_FIELD_NOT_ALLOWED", message: "These fields cannot be changed here", fields: forbidden });
+    }
     const updates = {};
-    for (const field of allowed) {
-      if (req.body?.[field] !== undefined) {
-        updates[field] = String(req.body[field]).trim();
+    const fieldErrors = {};
+    for (const field of Object.keys(PROFILE_TEXT_LIMITS)) {
+      if (body[field] === undefined) continue; // omitted = unchanged
+      if (typeof body[field] !== "string") { fieldErrors[field] = "Must be text"; continue; }
+      const value = body[field].trim();
+      if (field === "businessName" && !value) { fieldErrors[field] = "Business name is required"; continue; }
+      if (value.length > PROFILE_TEXT_LIMITS[field]) { fieldErrors[field] = `Must be ${PROFILE_TEXT_LIMITS[field]} characters or fewer`; continue; }
+      updates[field] = value; // "" clears location / bio
+    }
+    let normalizedPhone;
+    if (body.phone !== undefined) {
+      if (typeof body.phone !== "string" || !body.phone.trim()) fieldErrors.phone = "Enter a valid Kenyan phone number";
+      else {
+        normalizedPhone = formatPhone(body.phone);
+        if (!normalizedPhone) fieldErrors.phone = "Enter a valid Kenyan phone number";
       }
     }
-
-    const user = await User.findByIdAndUpdate(dealerId, updates, {
-      new: true,
-      runValidators: true,
-    });
-
-    if (!user || user.role !== "dealer") {
-      return res.status(404).json({ success: false, message: "Dealer not found" });
+    if (Object.keys(fieldErrors).length) {
+      return res.status(400).json({ success: false, code: "VALIDATION_FAILED", message: "Profile details are invalid", errors: fieldErrors });
+    }
+    if (!Object.keys(updates).length && normalizedPhone === undefined) {
+      return res.status(400).json({ success: false, message: "No valid profile changes supplied" });
     }
 
+    // 3. Confirm the dealer account exists (read only) before the first write.
+    const existingUser = await User.findById(dealerId);
+    if (!existingUser || existingUser.role !== "dealer") {
+      return res.status(404).json({ success: false, message: "Dealer not found" });
+    }
+    const dealerRecord = await Dealer.findOne({ user: dealerId });
+
+    const userUpdates = { ...updates };
+    if (normalizedPhone !== undefined && normalizedPhone !== existingUser.phone) {
+      // Phase 14.9: the account phone is the payout destination - a changed number needs password step-up (before any write).
+      const refusal = await checkPasswordStepUp(req.user.id, body.currentPassword);
+      if (refusal) return res.status(403).json(refusal);
+      userUpdates.phone = normalizedPhone;
+      // A changed number is a new, unverified number: never carry the old verification across.
+      userUpdates.phoneVerified = false;
+    }
+
+    // 4. Write. Dealer record first, user second; if the second write fails, restore the first.
     const dealerUpdates = {};
     if (updates.businessName !== undefined) dealerUpdates.businessName = updates.businessName;
     if (updates.location !== undefined) dealerUpdates.location = updates.location;
-
-    let dealer = await Dealer.findOne({ user: dealerId });
-    if (dealerUpdates.businessName !== undefined || dealerUpdates.location !== undefined) {
-      if (dealer) {
-        dealer = await Dealer.findByIdAndUpdate(dealer.id, dealerUpdates, {
-          new: true,
-          runValidators: true,
-        });
-      }
+    let dealerWritten = false;
+    if (dealerRecord && Object.keys(dealerUpdates).length) {
+      await Dealer.findByIdAndUpdate(dealerRecord.id, dealerUpdates, { new: true, runValidators: true });
+      dealerWritten = true;
     }
+    let user;
+    try {
+      user = Object.keys(userUpdates).length
+        ? await User.findByIdAndUpdate(dealerId, userUpdates, { new: true, runValidators: true })
+        : existingUser;
+    } catch (writeErr) {
+      if (dealerWritten) {
+        await Dealer.findByIdAndUpdate(dealerRecord.id, { businessName: dealerRecord.businessName, location: dealerRecord.location }).catch(() => {});
+      }
+      throw writeErr;
+    }
+    if (!user) {
+      if (dealerWritten) {
+        await Dealer.findByIdAndUpdate(dealerRecord.id, { businessName: dealerRecord.businessName, location: dealerRecord.location }).catch(() => {});
+      }
+      return res.status(404).json({ success: false, message: "Dealer not found" });
+    }
+
+    await logAuditEvent({
+      action: "dealer_profile_updated", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email,
+      target: dealerId, targetModel: "User", details: { fields: Object.keys(userUpdates).filter((f) => f !== "phoneVerified") },
+      ipAddress: req.ip, userAgent: req.get?.("user-agent"), requestId: req.id,
+    }).catch(() => {});
 
     return res.json({
       success: true,
       data: {
         id: user.id,
-        businessName: user.businessName || dealer?.businessName || null,
-        location: user.location || dealer?.location || null,
+        businessName: user.businessName || dealerRecord?.businessName || null,
+        location: user.location || dealerRecord?.location || null,
         phone: user.phone || null,
         bio: user.bio || null,
-        approved: Boolean(dealer?.approved),
+        approved: Boolean(dealerRecord?.approved),
         updatedAt: user.updatedAt || new Date().toISOString(),
       },
     });
@@ -196,7 +266,7 @@ export async function getInventory(req, res) {
     const { status, page = 1, limit = 20 } = req.query;
     const pageNum = Math.max(1, Number.parseInt(page, 10) || 1);
     const limitNum = Math.min(100, Math.max(1, Number.parseInt(limit, 10) || 20));
-    const filter = { dealer: req.user.id };
+    const filter = { dealer: req.user.id, deletedAt: { $exists: false } }; // 14.8: soft-deleted listings are not inventory
     if (status) filter.status = status;
     const all = await Car.find(filter).sort({ createdAt: -1 });
     const total = all.length;
@@ -231,7 +301,7 @@ export async function bulkUpdateListings(req, res) {
     if ((status === "available" || status === "active") && !(await sellerMayPublishDirectly(req.user))) {
       return res.status(403).json(PUBLICATION_REVIEW_REQUIRED);
     }
-    const owned = await Car.find({ id: { $in: ids }, dealer: req.user.id });
+    const owned = await Car.find({ id: { $in: ids }, dealer: req.user.id, deletedAt: { $exists: false } });
     if (owned.length !== ids.length) return res.status(403).json({ success: false, message: "One or more listings are not owned by this dealer" });
     // STAGE 5A (Gate E): sold listings are governed by the sale/escrow workflow, never by a seller bulk status edit.
     if (owned.some((c) => c.status === "sold" || c.sold === true)) {
@@ -425,7 +495,7 @@ export async function getDealerAnalytics(req, res) {
   try {
     const dealerId = req.user.id;
     const [listings, leads, releasedEscrows] = await Promise.all([
-      Car.find({ dealer: dealerId }),
+      Car.find({ dealer: dealerId, deletedAt: { $exists: false } }),
       getDealerLeads(dealerId),
       Escrow.find({ seller: dealerId, status: "released" }),
     ]);
@@ -480,7 +550,7 @@ export async function getDealerAnalytics(req, res) {
 
 export async function getAIRecommendations(req, res) {
   const dealerId = req.user.id;
-  const [listings, leads, entitlement] = await Promise.all([Car.find({ dealer: dealerId }), getDealerLeads(dealerId), getDealerEntitlement(dealerId)]);
+  const [listings, leads, entitlement] = await Promise.all([Car.find({ dealer: dealerId, deletedAt: { $exists: false } }), getDealerLeads(dealerId), getDealerEntitlement(dealerId)]);
   const recommendations = [];
   const slow = listings.filter((car) => Number(car.views || 0) < 5 && ["available","active"].includes(car.status));
   const hot = leads.filter((lead) => lead.isHot && !["sold","lost"].includes(lead.stage));
@@ -498,21 +568,54 @@ export async function getAIRecommendations(req, res) {
 // TEAM MANAGEMENT
 // ============================================================
 
+// Never send invitation token material to a client.
+const publicTeamRow = (row) => {
+  if (!row || typeof row !== "object") return row;
+  // 14.8: the data layer returns BOTH the snake_case column and a camelCase alias, so strip every spelling.
+  const { inviteTokenHash, inviteToken, invite_token_hash, invite_token, ...safe } = row; // eslint-disable-line no-unused-vars
+  return safe;
+};
+// Phase 14.7 team least-privilege rules (non-owner actors only; the dealership owner and admin/superadmin are unrestricted):
+//  * only the owner may create or promote a "manager" (a manager could otherwise mint peers);
+//  * a non-owner may not modify, suspend or remove a "manager", nor a member holding any permission the actor does not hold.
+const isUnrestrictedTeamActor = (req) => Boolean(req.dealerOrg?.isOwner) || ["admin", "superadmin"].includes(req.user?.role);
+const TEAM_PROTECTED = (res, code, message) => res.status(403).json({ success: false, code, message });
+const grantedKeys = (perms) => Object.keys(perms && typeof perms === "object" ? perms : {}).filter((k) => perms[k] === true);
+function teamActorMayManage(req, target) {
+  if (isUnrestrictedTeamActor(req)) return null;
+  if (target.role === "manager") return { code: "TEAM_TARGET_PROTECTED", message: "Only the dealership owner can change or remove a manager." };
+  const own = req.dealerOrg?.permissions || {};
+  if (grantedKeys(target.permissions).some((k) => !own[k])) return { code: "TEAM_TARGET_PROTECTED", message: "You cannot change a member who holds permissions you do not hold." };
+  return null;
+}
+
+const TEAM_ROLES = Object.freeze(["manager", "sales_agent", "lot_agent", "finance_officer", "viewer"]);
+// Server-enforced lifecycle: from -> allowed targets. "invited" is never a client-selectable target and a
+// pending invitation can only become active through POST /team/accept (invitee proves the token + email).
+const TEAM_TRANSITIONS = Object.freeze({
+  active: ["suspended", "removed"],
+  suspended: ["active", "removed"],
+  invited: ["removed"],
+  removed: [],
+});
+
 export async function getTeamMembers(req, res) {
   const dealerId = req.dealerId || req.user.id;
   const rows = await findAll("dealer_teams", { filters: { dealer: dealerId }, orderBy: "createdAt", ascending: false, limit: 200 });
   const memberIds = rows.map(r => r.member).filter(Boolean);
   const users = memberIds.length ? await User.find({ id: { $in: memberIds } }) : [];
   const byId = new Map(users.map(u => [u.id, u]));
-  return res.json({ success: true, data: { items: rows.map(r => ({ ...r, memberProfile: r.member ? { id: r.member, name: byId.get(r.member)?.name || null, email: byId.get(r.member)?.email || r.inviteEmail } : null })), stats: { total: rows.length, active: rows.filter(r => r.status === "active").length, invited: rows.filter(r => r.status === "invited").length, suspended: rows.filter(r => r.status === "suspended").length } } });
+  return res.json({ success: true, data: { items: rows.map(r => ({ ...publicTeamRow(r), memberProfile: r.member ? { id: r.member, name: byId.get(r.member)?.name || null, email: byId.get(r.member)?.email || r.inviteEmail } : null })), stats: { total: rows.length, active: rows.filter(r => r.status === "active").length, invited: rows.filter(r => r.status === "invited").length, suspended: rows.filter(r => r.status === "suspended").length } } });
 }
 
 export async function inviteTeamMember(req, res) {
   const email = String(req.body?.email || "").trim().toLowerCase();
   const role = String(req.body?.role || "sales_agent");
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ success: false, message: "Valid email is required" });
-  if (!["manager","sales_agent","lot_agent","finance_officer","viewer"].includes(role)) return res.status(400).json({ success: false, message: "Invalid team role" });
+  if (!TEAM_ROLES.includes(role)) return res.status(400).json({ success: false, message: "Invalid team role" });
+  if (role === "manager" && !isUnrestrictedTeamActor(req)) return TEAM_PROTECTED(res, "TEAM_ROLE_OWNER_ONLY", "Only the dealership owner can invite a manager.");
   const dealerId = req.dealerId || req.user.id;
+  if (email === String(req.user.email || "").trim().toLowerCase()) return res.status(400).json({ success: false, message: "You cannot invite your own account" });
   const existing = await findOne("dealer_teams", { dealer: dealerId, inviteEmail: email });
   if (existing && existing.status !== "removed") return res.status(409).json({ success: false, message: "An active or pending invitation already exists for this email" });
   const token = crypto.randomBytes(32).toString("hex");
@@ -520,7 +623,7 @@ export async function inviteTeamMember(req, res) {
   const row = existing ? await update("dealer_teams", existing.id, { member: null, role, permissions: {}, status: "invited", inviteEmail: email, inviteTokenHash: hash, inviteExpiresAt: new Date(Date.now() + 7 * 86400000).toISOString(), invitedBy: req.user.id }) : await create("dealer_teams", { dealer: dealerId, role, permissions: {}, status: "invited", inviteEmail: email, inviteTokenHash: hash, inviteExpiresAt: new Date(Date.now() + 7 * 86400000).toISOString(), invitedBy: req.user.id });
   await sendTeamInviteEmail(email, req.user.name || "KAYAD Dealer", role, token).catch(() => {});
   await logAuditEvent({ action: "dealer_team_invitation_created", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", details: { email, role }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
-  return res.status(201).json({ success: true, data: { ...row, inviteToken: undefined } });
+  return res.status(201).json({ success: true, data: publicTeamRow(row) });
 }
 
 export async function updateTeamMember(req, res) {
@@ -530,14 +633,41 @@ export async function updateTeamMember(req, res) {
   if (String(existing.member || "") === String(req.user.id)) {
     return res.status(403).json({ success: false, message: "You cannot change your own role, permissions, or status" });
   }
+  const protectedTarget = teamActorMayManage(req, existing);
+  if (protectedTarget) return TEAM_PROTECTED(res, protectedTarget.code, protectedTarget.message);
+  const body = req.body && typeof req.body === "object" && !Array.isArray(req.body) ? req.body : {};
   const updates = {};
-  if (req.body?.role !== undefined) { if (!["manager","sales_agent","lot_agent","finance_officer","viewer"].includes(req.body.role)) return res.status(400).json({ success: false, message: "Invalid team role" }); updates.role = req.body.role; }
-  if (req.body?.status !== undefined) { if (!["invited","active","suspended","removed"].includes(req.body.status)) return res.status(400).json({ success: false, message: "Invalid team status" }); updates.status = req.body.status; }
-  if (req.body?.permissions !== undefined) { if (!req.body.permissions || typeof req.body.permissions !== "object" || Array.isArray(req.body.permissions)) return res.status(400).json({ success: false, message: "Permissions must be an object" }); updates.permissions = req.body.permissions; }
+  if (body.role === "manager" && existing.role !== "manager" && !isUnrestrictedTeamActor(req)) return TEAM_PROTECTED(res, "TEAM_ROLE_OWNER_ONLY", "Only the dealership owner can promote a member to manager.");
+  if (existing.status === "removed") return res.status(409).json({ success: false, code: "INVALID_TEAM_TRANSITION", message: "This team member has been removed" });
+  if (body.role !== undefined) { if (!TEAM_ROLES.includes(body.role)) return res.status(400).json({ success: false, message: "Invalid team role" }); updates.role = body.role; }
+  if (body.status !== undefined) {
+    if (!["invited","active","suspended","removed"].includes(body.status)) return res.status(400).json({ success: false, message: "Invalid team status" });
+    if (body.status !== existing.status) {
+      if (!(TEAM_TRANSITIONS[existing.status] || []).includes(body.status)) return res.status(409).json({ success: false, code: "INVALID_TEAM_TRANSITION", message: `A ${existing.status} team member cannot be set to ${body.status}` });
+      // reactivation requires an accepted membership
+      if (body.status === "active" && !existing.member) return res.status(409).json({ success: false, code: "INVALID_TEAM_TRANSITION", message: "A pending invitation can only be activated by the invitee accepting it" });
+      updates.status = body.status;
+      if (body.status === "removed") { updates.inviteTokenHash = null; updates.inviteExpiresAt = null; }
+    }
+  }
+  if (body.permissions !== undefined) {
+    const perms = body.permissions;
+    if (!perms || typeof perms !== "object" || Array.isArray(perms)) return res.status(400).json({ success: false, message: "Permissions must be an object" });
+    const keys = Object.keys(perms);
+    const unknown = keys.filter((k) => !DEALER_TEAM_PERMISSIONS.includes(k));
+    if (unknown.length) return res.status(400).json({ success: false, code: "UNKNOWN_PERMISSION", message: "Unknown permission keys", fields: unknown });
+    if (keys.some((k) => typeof perms[k] !== "boolean")) return res.status(400).json({ success: false, message: "Permission values must be true or false" });
+    // No privilege expansion: a non-owner may only grant permissions they hold themselves.
+    const actor = req.dealerOrg || {};
+    const unrestricted = actor.isOwner || ["admin", "superadmin"].includes(req.user.role);
+    const overreach = unrestricted ? [] : keys.filter((k) => perms[k] === true && !actor.permissions?.[k]);
+    if (overreach.length) return res.status(403).json({ success: false, code: "PERMISSION_GRANT_FORBIDDEN", message: "You cannot grant permissions you do not hold", fields: overreach });
+    updates.permissions = perms;
+  }
   if (!Object.keys(updates).length) return res.status(400).json({ success: false, message: "No valid team changes supplied" });
   const row = await update("dealer_teams", existing.id, updates);
-  await logAuditEvent({ action: "dealer_team_member_updated", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", oldValue: existing, newValue: row, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
-  return res.json({ success: true, data: row });
+  await logAuditEvent({ action: "dealer_team_member_updated", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", oldValue: publicTeamRow(existing), newValue: publicTeamRow(row), ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
+  return res.json({ success: true, data: publicTeamRow(row) });
 }
 
 export async function removeTeamMember(req, res) {
@@ -547,14 +677,17 @@ export async function removeTeamMember(req, res) {
   if (String(existing.member || "") === String(req.user.id)) {
     return res.status(403).json({ success: false, message: "You cannot remove yourself from the dealer team" });
   }
+  const protectedTarget = teamActorMayManage(req, existing);
+  if (protectedTarget) return TEAM_PROTECTED(res, protectedTarget.code, protectedTarget.message);
+  if (existing.status === "removed") return res.status(409).json({ success: false, code: "INVALID_TEAM_TRANSITION", message: "This team member has already been removed" });
   const row = await update("dealer_teams", existing.id, { status: "removed", inviteTokenHash: null, inviteExpiresAt: null });
   await logAuditEvent({
     action: "dealer_team_member_removed",
     actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email,
-    target: row.id, targetModel: "DealerTeam", oldValue: existing, newValue: row,
+    target: row.id, targetModel: "DealerTeam", oldValue: publicTeamRow(existing), newValue: publicTeamRow(row),
     ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id,
   });
-  return res.json({ success: true, data: row });
+  return res.json({ success: true, data: publicTeamRow(row) });
 }
 
 export async function acceptTeamInvite(req, res) {
@@ -569,7 +702,7 @@ export async function acceptTeamInvite(req, res) {
   if (activeMembership) return res.status(409).json({ success: false, message: "You are already an active member of this dealer team" });
   const updated = await update("dealer_teams", row.id, { member: req.user.id, status: "active", inviteTokenHash: null, inviteExpiresAt: null });
   await logAuditEvent({ action: "dealer_team_invitation_accepted", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: updated.id, targetModel: "DealerTeam", details: { dealerId: row.dealer }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
-  return res.json({ success: true, data: updated });
+  return res.json({ success: true, data: publicTeamRow(updated) });
 }
 
 // ============================================================
@@ -589,7 +722,7 @@ export async function askDealerCopilot(req, res) {
   const question = String(req.body?.question || "").trim();
   if (question.length < 3 || question.length > 1000) return res.status(400).json({ success: false, message: "Question must be between 3 and 1000 characters" });
   const dealerId = req.user.id;
-  const [listings, leads, escrows, entitlement] = await Promise.all([Car.find({ dealer: dealerId }), getDealerLeads(dealerId), Escrow.find({ seller: dealerId, status: "released" }), getDealerEntitlement(dealerId)]);
+  const [listings, leads, escrows, entitlement] = await Promise.all([Car.find({ dealer: dealerId, deletedAt: { $exists: false } }), getDealerLeads(dealerId), Escrow.find({ seller: dealerId, status: "released" }), getDealerEntitlement(dealerId)]);
   const q = question.toLowerCase();
   let answer;
   if (q.includes("listing") || q.includes("inventory")) answer = { type: "inventory", totalListings: listings.length, activeListings: listings.filter(x => ["available","active"].includes(x.status)).length, totalViews: listings.reduce((n,x) => n + Number(x.views || 0), 0) };
@@ -684,7 +817,7 @@ export async function getCustomerTimeline(req, res) {
 export async function getAuctionInventory(req, res) {
   try {
     const dealerId = req.user.id;
-    const cars = await Car.find({ dealer: dealerId, auctionStatus: { $ne: "none" } }).sort({ auctionEnd: 1 });
+    const cars = await Car.find({ dealer: dealerId, deletedAt: { $exists: false }, auctionStatus: { $ne: "none" } }).sort({ auctionEnd: 1 });
     const items = cars.map((car) => {
       const end = car.auctionEnd ? new Date(car.auctionEnd) : null;
       let status = car.auctionStatus || "none";
@@ -746,7 +879,7 @@ export async function getFinanceApplications(req, res) {
 export async function getInspectionOrders(req, res) {
   try {
     const dealerId = req.user.id;
-    const cars = await Car.find({ dealer: dealerId });
+    const cars = await Car.find({ dealer: dealerId, deletedAt: { $exists: false } });
     const carIds = cars.map((car) => car.id);
     if (!carIds.length) {
       return res.json({ success: true, data: { items: [], stats: { total: 0, completed: 0, inProgress: 0, scheduled: 0 } } });

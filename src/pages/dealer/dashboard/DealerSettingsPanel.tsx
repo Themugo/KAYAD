@@ -7,7 +7,8 @@ import * as dealerApi from '../../../services/dealerPlatformApi';
  * GET/PUT /dealer-platform/profile/:dealerId, self-only on the server) and a
  * read-only verification status card (GET /verification/status). Only fields
  * the contract exposes are shown: businessName, location, bio, phone. The GET
- * response does not return phone, so it is write-only here (blank = unchanged).
+ * response returns phone ONLY to the signed-in owner (Phase 14.5), so it is prefilled here;
+ * it is sent only when changed. A changed number resets phone verification on the server.
  */
 
 interface ProfileForm { businessName: string; location: string; bio: string; phone: string }
@@ -35,6 +36,9 @@ export default function DealerSettingsPanel({ userId }: { userId: string }) {
   const [saveError, setSaveError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
   const [dirty, setDirty] = useState(false);
+  const [savedPhone, setSavedPhone] = useState('');
+  const [phoneNotice, setPhoneNotice] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
   const savingRef = useRef(false);
 
   const [verification, setVerification] = useState<{ stage: string; status?: string } | null>(null);
@@ -49,7 +53,8 @@ export default function DealerSettingsPanel({ userId }: { userId: string }) {
         if (cancelled) return;
         const d = body?.data;
         if (!d) { setLoadError('Could not load your dealership profile. Please try again.'); return; }
-        setForm({ businessName: d.businessName || '', location: d.location || '', bio: d.bio || '', phone: '' });
+        setForm({ businessName: d.businessName || '', location: d.location || '', bio: d.bio || '', phone: d.phone || '' });
+        setSavedPhone(d.phone || '');
         setDirty(false);
       })
       .catch(() => { if (!cancelled) setLoadError('Could not load your dealership profile. Please try again.'); })
@@ -88,26 +93,32 @@ export default function DealerSettingsPanel({ userId }: { userId: string }) {
     const found: Partial<Record<keyof ProfileForm, string>> = {};
     if (!form.businessName.trim()) found.businessName = 'Business name is required.';
     if (form.bio.length > 2000) found.bio = 'Bio must be 2000 characters or fewer.';
-    if (form.phone.trim() && !/^[+\d][\d\s()-]{6,20}$/.test(form.phone.trim())) found.phone = 'Enter a valid phone number.';
+    const phoneChanged = form.phone.trim() !== savedPhone;
+    if (phoneChanged && !/^(\+?254|0)[17]\d{8}$/.test(form.phone.replace(/\s+/g, ''))) found.phone = 'Enter a valid Kenyan mobile number, e.g. 0712 345 678.';
     setErrors(found);
     if (Object.keys(found).length) { document.getElementById(`settings-${Object.keys(found)[0]}`)?.focus(); return; }
+    if (phoneChanged && !currentPassword) { setSaveError('Enter your current password to change your phone number.'); document.getElementById('settings-current-password')?.focus(); return; }
     savingRef.current = true;
     setSaving(true);
     setSaveError(null);
     setSaved(false);
     try {
       const body: Record<string, string> = { businessName: form.businessName.trim(), location: form.location.trim(), bio: form.bio.trim() };
-      if (form.phone.trim()) body.phone = form.phone.trim();
+      if (phoneChanged) { body.phone = form.phone.trim(); body.currentPassword = currentPassword; }
       const res: any = await dealerApi.updateDealerProfile(userId, body);
       if (res?.success === false) { setSaveError(res.message || 'Could not save your changes.'); return; }
       const d = res?.data;
-      if (d) setForm({ businessName: d.businessName || '', location: d.location || '', bio: d.bio || '', phone: '' });
+      if (d) { setForm({ businessName: d.businessName || '', location: d.location || '', bio: d.bio || '', phone: d.phone || '' }); setSavedPhone(d.phone || ''); }
+      setPhoneNotice(phoneChanged);
+      setCurrentPassword('');
       setDirty(false);
       setSaved(true);
     } catch (err: any) {
       const status = err?.response?.status;
       const msg = err?.response?.data?.message;
-      setSaveError(status === 403 ? (msg || 'You can only update your own dealership profile.') : status === 401 ? 'Your session has expired. Please sign in again.' : (msg || 'Could not save your changes. Please try again.'));
+      const serverFields = err?.response?.data?.errors;
+      if (status === 400 && serverFields && typeof serverFields === 'object') setErrors(serverFields);
+      setSaveError(status === 429 ? 'Too many attempts. Please wait a few minutes and try again.' : status === 403 ? (msg || 'You can only update your own dealership profile.') : status === 401 ? 'Your session has expired. Please sign in again.' : (msg || 'Could not save your changes. Please try again.'));
     } finally {
       savingRef.current = false;
       setSaving(false);
@@ -140,7 +151,9 @@ export default function DealerSettingsPanel({ userId }: { userId: string }) {
         ) : (
           <form onSubmit={submit} noValidate aria-label="Dealership profile" className="space-y-4 max-w-xl">
             {saveError && <div role="alert" className="flex items-start gap-2 p-3 rounded-lg bg-[#FEF3F2] border border-[#FDA29B] text-sm text-[#7A271A]"><AlertCircle className="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true" /><span>{saveError}</span></div>}
-            {saved && <p role="status" className="flex items-center gap-2 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-900"><CheckCircle2 className="w-4 h-4" aria-hidden="true" /> Profile saved.</p>}
+            {saved && <p role="status" className="flex items-center gap-2 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-900"><CheckCircle2 className="w-4 h-4" aria-hidden="true" /> Profile saved.{phoneNotice ? ' Your new phone number needs to be verified again.' : ''}</p>}
+            <p className="text-xs text-[#475569]">Fields marked <span aria-hidden="true" className="text-[#B42318]">*</span><span className="sr-only">with an asterisk</span> are required. Verification status above is read-only.</p>
+            {dirty && !saved && <p className="text-xs text-[#475569]" data-testid="unsaved-indicator">You have unsaved changes.</p>}
             <div>
               <label htmlFor="settings-businessName" className="block text-sm font-medium text-[#0A3340] mb-1">Business name <span aria-hidden="true" className="text-[#B42318]">*</span></label>
               <input id="settings-businessName" className={inputCls} value={form.businessName} onChange={set('businessName')} disabled={saving} {...aria('businessName')} />
@@ -153,9 +166,16 @@ export default function DealerSettingsPanel({ userId }: { userId: string }) {
             <div>
               <label htmlFor="settings-phone" className="block text-sm font-medium text-[#0A3340] mb-1">Contact phone</label>
               <input id="settings-phone" type="tel" className={inputCls} value={form.phone} onChange={set('phone')} disabled={saving} {...aria('phone')} />
-              <p className="text-xs text-[#475569] mt-1">Leave blank to keep your current number.</p>
+              <p className="text-xs text-[#475569] mt-1">This is your account phone number. Changing it requires verifying the new number again.</p>
               {fieldErr('phone')}
             </div>
+            {form.phone.trim() !== savedPhone && (
+              <div>
+                <label htmlFor="settings-current-password" className="block text-sm font-medium text-[#0A3340] mb-1">Current password</label>
+                <input id="settings-current-password" type="password" autoComplete="current-password" className={inputCls} value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} disabled={saving} />
+                <p className="text-xs text-[#475569] mt-1">Required to confirm a change to your phone number.</p>
+              </div>
+            )}
             <div>
               <label htmlFor="settings-bio" className="block text-sm font-medium text-[#0A3340] mb-1">About your dealership</label>
               <textarea id="settings-bio" rows={4} className={inputCls} value={form.bio} onChange={set('bio')} disabled={saving} {...aria('bio')} />

@@ -1,0 +1,10 @@
+PASS no Windows-illegal or reserved file/folder names
+PASS no path longer than 200 characters
+PASS no symlinks in the tree
+PASS no case-insensitive duplicate paths
+PASS no phase-numbered / temporary application source directories
+PASS added files avoid temporary/ambiguous names
+PASS added source files do not duplicate an existing implementation
+PASS every relative import in added/modified source resolves
+PASS change inventory — added=439 modified=6 removed=434
+RESULT 9/9 PASS

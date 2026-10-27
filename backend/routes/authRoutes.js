@@ -27,7 +27,7 @@ import User from "../models/User.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateAuth, validateResponse, authResponseSchema } from "../middleware/validate.js";
 import { accountLockout } from "../middleware/accountLockout.js";
-import { authLimiter, registrationLimiter, recoveryLimiter, verificationLimiter } from "../middleware/rateLimiter.js";
+import { authLimiter, registrationLimiter, recoveryLimiter, verificationLimiter, passwordChangeLimiter, stepUpLimiter } from "../middleware/rateLimiter.js";
 
 const router = express.Router();
 
@@ -351,7 +351,7 @@ router.post(
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put("/profile", protect, asyncHandler(updateProfile));
+router.put("/profile", protect, stepUpLimiter, asyncHandler(updateProfile));
 
 // =============================
 // 🔑 CHANGE PASSWORD
@@ -404,7 +404,7 @@ router.put("/profile", protect, asyncHandler(updateProfile));
  *             schema:
  *               $ref: '#/components/schemas/Error'
  */
-router.put("/change-password", protect, asyncHandler(changePassword));
+router.put("/change-password", protect, passwordChangeLimiter, asyncHandler(changePassword));
 
 // =============================
 // 📧 EMAIL VERIFICATION

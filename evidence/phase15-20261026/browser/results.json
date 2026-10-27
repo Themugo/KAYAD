@@ -1,0 +1,74 @@
+[
+  {
+    "viewport": "desktop",
+    "view": "transactions",
+    "hasCollectionsLabel": true,
+    "noTotalRevenue": true,
+    "showsReconciliation": true,
+    "showsPending": true,
+    "fullPhoneVisible": false,
+    "horizontalPageScroll": false,
+    "axeSeriousCritical": []
+  },
+  {
+    "viewport": "desktop",
+    "view": "users-ban",
+    "requestBody": "{\"banned\":true}",
+    "uiShowsBanned": true,
+    "horizontalPageScroll": false,
+    "axeSeriousCritical": []
+  },
+  {
+    "viewport": "desktop",
+    "view": "pageerrors",
+    "errors": []
+  },
+  {
+    "viewport": "tablet",
+    "view": "transactions",
+    "hasCollectionsLabel": true,
+    "noTotalRevenue": true,
+    "showsReconciliation": true,
+    "showsPending": true,
+    "fullPhoneVisible": false,
+    "horizontalPageScroll": false,
+    "axeSeriousCritical": []
+  },
+  {
+    "viewport": "tablet",
+    "view": "users-ban",
+    "requestBody": "{\"banned\":true}",
+    "uiShowsBanned": true,
+    "horizontalPageScroll": false,
+    "axeSeriousCritical": []
+  },
+  {
+    "viewport": "tablet",
+    "view": "pageerrors",
+    "errors": []
+  },
+  {
+    "viewport": "mobile",
+    "view": "transactions",
+    "hasCollectionsLabel": true,
+    "noTotalRevenue": true,
+    "showsReconciliation": true,
+    "showsPending": true,
+    "fullPhoneVisible": false,
+    "horizontalPageScroll": false,
+    "axeSeriousCritical": []
+  },
+  {
+    "viewport": "mobile",
+    "view": "users-ban",
+    "requestBody": "{\"banned\":true}",
+    "uiShowsBanned": true,
+    "horizontalPageScroll": false,
+    "axeSeriousCritical": []
+  },
+  {
+    "viewport": "mobile",
+    "view": "pageerrors",
+    "errors": []
+  }
+]

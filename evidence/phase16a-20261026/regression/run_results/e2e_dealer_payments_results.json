@@ -1,0 +1,369 @@
+{
+ "results": [
+  {
+   "name": "E1 a non-numeric Paybill/Till is refused (400) and nothing is stored",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "E1 an invalid M-Pesa phone is refused (400)",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "E1 markup / control characters in settlement text are refused",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "E2 valid settlement details are saved",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "E2 a field can still be cleared with an empty string",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "E3 identifier substitution in the body cannot change another dealer's settlement details",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "E3 a buyer cannot write dealer settlement details",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "E3 settlement write without CSRF is refused",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "E4 changing the payout phone without the current password is refused (403 STEP_UP_REQUIRED) and nothing changes",
+   "ok": true,
+   "detail": "403 STEP_UP_REQUIRED"
+  },
+  {
+   "name": "E4 a wrong current password is refused (403 STEP_UP_FAILED)",
+   "ok": true,
+   "detail": "403 STEP_UP_FAILED"
+  },
+  {
+   "name": "E4 the account-profile endpoint enforces the same step-up (no bypass route)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "E4 with the correct password the phone changes and verification is reset (14.6 protection preserved)",
+   "ok": true,
+   "detail": "200{\"success\":true,\"data\":{\"id\":\"cfe7db2f-7ded-4307-92fc-fa3d2c404b2d\",\"businessName\":\"Biz dealer_1\",\"l"
+  },
+  {
+   "name": "E4 an unchanged phone or non-phone edit needs no password",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "E5 other profile edits are unaffected by the step-up",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "E5 a dealer cannot edit another dealer's profile (403)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "E6 repeated wrong step-up passwords are rate limited (429)",
+   "ok": true,
+   "detail": "403,403,403,403,403,403,403,403,429,429,429,429"
+  },
+  {
+   "name": "E7 non-payout roles (buyer) keep changing their phone without a password",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "E8 dealer earnings list the sale and its receipt",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "E8 dealer earnings never expose the buyer's phone number, user id or checkout id",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "F1 the owner can save an auction setup for an available listing",
+   "ok": true,
+   "detail": "200{\"success\":true,\"setup\":{\"id\":\"5fecd2cd-9867-4ece-ab61-b3d4f15bb38e\",\"car_id\":\"3ef6d5b2-4257-459e-b1"
+  },
+  {
+   "name": "F1 another dealer cannot read-modify the setup (403) and the saved config is unchanged",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "F1 another dealer cannot read the setup (403)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "F1 another dealer cannot request an amendment (403)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "F1 another dealer cannot publish (403)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "F1 a buyer cannot configure an auction (403)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "F2 saving an auction setup for a soft-deleted listing is refused (404/409) and nothing is written",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "name": "F2 publishing for a soft-deleted listing is refused",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "name": "F2 saving an auction setup for a sold listing is refused (409) and nothing is written",
+   "ok": true,
+   "detail": "409"
+  },
+  {
+   "name": "F2 publishing for a sold listing is refused",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "F2 saving an auction setup for a reserved listing is refused (409) and nothing is written",
+   "ok": true,
+   "detail": "409"
+  },
+  {
+   "name": "F2 publishing for a reserved listing is refused",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "F2 saving an auction setup for a listing whose auction is live is refused (409) and nothing is written",
+   "ok": true,
+   "detail": "409"
+  },
+  {
+   "name": "F2 publishing for a listing whose auction is live is refused",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "F2 saving an auction setup for a listing whose auction has ended is refused (409) and nothing is written",
+   "ok": true,
+   "detail": "409"
+  },
+  {
+   "name": "F2 publishing for a listing whose auction has ended is refused",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "F3 a published auction setup is immutable (409) and its terms are untouched",
+   "ok": true,
+   "detail": "409"
+  },
+  {
+   "name": "F3 the owner can only request a controlled amendment (201), which does not change the live terms",
+   "ok": true,
+   "detail": "201"
+  },
+  {
+   "name": "F3 an amendment requires a reason (400)",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "G1 an available listing reaches the provider stage (local Daraja is unconfigured, so the request fails AFTER validation and the payment is marked failed - never pending/success)",
+   "ok": true,
+   "detail": "500 {\"success\":false,\"message\":\"M-Pesa not configured — set Daraja keys in Admin Settings\"}"
+  },
+  {
+   "name": "G2 a client-supplied amount that differs from the listing price is refused (400)",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "G3 payment initiation for a soft-deleted listing is refused (404) and no payment row is created",
+   "ok": true,
+   "detail": "404 rows=0"
+  },
+  {
+   "name": "G3 payment initiation for a sold listing is refused (409) and no payment row is created",
+   "ok": true,
+   "detail": "409 rows=0"
+  },
+  {
+   "name": "G3 payment initiation for a pending-review listing is refused (404) and no payment row is created",
+   "ok": true,
+   "detail": "404 rows=0"
+  },
+  {
+   "name": "G3 payment initiation for a hidden listing is refused (404) and no payment row is created",
+   "ok": true,
+   "detail": "404 rows=0"
+  },
+  {
+   "name": "G3 payment initiation for a draft listing is refused (404) and no payment row is created",
+   "ok": true,
+   "detail": "404 rows=0"
+  },
+  {
+   "name": "G4 a dealer cannot pay for their own listing (403/409) and no payment row is created",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "G5 a malformed phone is refused by validation (400)",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "G5 initiation without CSRF is refused (403)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "G5 unauthenticated initiation is refused (401)",
+   "ok": true,
+   "detail": "401"
+  },
+  {
+   "name": "G5 types without a server-authoritative amount stay refused",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "G6 the backend log contains no full customer phone numbers from payment initiation",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "H1 five concurrent identical success callbacks all acknowledge (200) and the payment succeeds exactly once with the provider receipt",
+   "ok": true,
+   "detail": "200,200,200,200,200 success|RECEIPT1|true"
+  },
+  {
+   "name": "H1 payment events are not duplicated by the replay (one callback_received, at most one amount_verified)",
+   "ok": true,
+   "detail": "callback_received,amount_verified,marked_paid"
+  },
+  {
+   "name": "H1 the customer receipt is delivered: an in-app payment notification exists for the payer",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "H2 a later replay with a different receipt cannot overwrite the recorded receipt",
+   "ok": true,
+   "detail": "success|RECEIPT1|true"
+  },
+  {
+   "name": "H3 a failure callback arriving after success cannot downgrade the payment (reordered delivery)",
+   "ok": true,
+   "detail": "success|RECEIPT1|true"
+  },
+  {
+   "name": "H4 a cancelled/failed callback marks the payment failed with no receipt",
+   "ok": true,
+   "detail": "failed|-|true"
+  },
+  {
+   "name": "H4 a success callback after a recorded failure does not silently flip the state (documented reconciliation case: provider says paid, platform says failed)",
+   "ok": true,
+   "detail": "failed|-|true"
+  },
+  {
+   "name": "H5 an amount that differs from the server-recorded amount fails the payment and records no success receipt",
+   "ok": true,
+   "detail": "failed|-|true"
+  },
+  {
+   "name": "H6 a callback for an unknown checkout id changes nothing and still acknowledges",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "H7 a callback that is not JSON is rejected without processing",
+   "ok": true,
+   "detail": "200{\"success\":true,\"ResultCode\":1,\"ResultDesc\":\"Invalid content type\"}"
+  },
+  {
+   "name": "H7 a structurally invalid callback is rejected",
+   "ok": true,
+   "detail": "{\"success\":true,\"ResultCode\":1,\"ResultDesc\":\"Invalid structure\"}"
+  },
+  {
+   "name": "H7 a callback with an old timestamp is rejected as a replay and the payment stays pending",
+   "ok": true,
+   "detail": "pending|-|false"
+  },
+  {
+   "name": "H8 concurrent success and failure callbacks for one checkout end in exactly one terminal state with no 5xx",
+   "ok": true,
+   "detail": "200,200 failed|-|true"
+  },
+  {
+   "name": "H9 a pending purchase does not fulfil the sale (listing stays available)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "H9 a failed purchase does not fulfil the sale",
+   "ok": true,
+   "detail": "available"
+  },
+  {
+   "name": "H9 a verified successful purchase callback (sent twice) settles the payment once",
+   "ok": true,
+   "detail": "success|BUY1|true car=sold|true"
+  },
+  {
+   "name": "H9 the sale is recorded against the listing exactly once (escrow or direct settlement per the listing configuration)",
+   "ok": true,
+   "detail": "sold|true escrows=0"
+  },
+  {
+   "name": "I1 a customer's payment history contains only their own payments",
+   "ok": true,
+   "detail": "200 0"
+  },
+  {
+   "name": "I1 the payer sees their own payments",
+   "ok": true,
+   "detail": "1"
+  },
+  {
+   "name": "I2 another customer cannot read a payment by checkout id",
+   "ok": true,
+   "detail": "403{\"success\":false,\"message\":\"Not authorized\"}"
+  },
+  {
+   "name": "I2 the payer can read their own payment status",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "I3 a dealer cannot read a customer's payment record through the customer status route",
+   "ok": true,
+   "detail": "403{\"success\":false,\"message\":\"Not authorized\"}"
+  }
+ ]
+}

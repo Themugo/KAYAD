@@ -1,3 +1,4 @@
+/* global process, console */
 import fs from "node:fs";
 import path from "node:path";
 
@@ -14,7 +15,7 @@ const dispute = read("backend/routes/disputeRoutes.js");
 const inspection = read("backend/inspection/routes/inspectionRoutes.js");
 const loan = read("backend/routes/loanApplicationRoutes.js");
 const subscription = read("backend/routes/subscriptionRoutes.js");
-const auction = read("backend/routes/auctionRoutes.js");
+read("backend/routes/auctionRoutes.js"); // existence check (fails closed if the route file is missing)
 const dealer = read("backend/routes/dealerPlatformRoutes.js");
 
 const checks = [
@@ -30,7 +31,7 @@ const checks = [
   ["subscription routes exist", server.includes('app.use("/api/subscriptions", subscriptionRoutes)') && subscription.includes('router.get("/my-subscription", protect') && subscription.includes('router.get("/all", protect, adminOnly')],
   ["public auction catalogue route exists", server.includes('app.use("/api/auctions",') || v1.includes('router.use("/auctions", auctionRoutes)')],
   ["public subscription plans route exists", server.includes('app.use("/api/subscriptions", subscriptionRoutes)') && subscription.includes('router.get("/plans"')],
-  ["dealer certification routes exist", server.includes('app.use("/api/dealer-platform", dealerPlatformRoutes)') && dealer.includes('router.get("/dashboard", protect, dealerOnly') && dealer.includes('router.get("/finance", protect, dealerOnly')],
+  ["dealer certification routes exist", server.includes('app.use("/api/dealer-platform", dealerPlatformRoutes)') && /router\.get\("\/dashboard", protect, (dealerOnly|dealerBusinessOnly)\b/.test(dealer) && /router\.get\("\/finance", protect, (dealerOnly|dealerBusinessOnly)\b/.test(dealer)],
   ["admin escrow route exists", server.includes('app.use("/api/escrow",') && (escrow.includes('router.get("/", protect, adminOnly') || escrow.includes('router.get("/", protect, escrowViewOnly'))],
   ["admin disputes route exists", dispute.includes('router.get("/", protect, adminOnly')],
 ];

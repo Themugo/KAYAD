@@ -3,12 +3,17 @@
 //  /api/owner-access   public, token-gated invitation preview/accept (rate limited at mount).
 import express from "express";
 import { protect } from "../middleware/auth.js";
-import { isOwnerUser } from "../config/owners.js";
+import { isOwnerUser, isMainOwnerEmail } from "../config/owners.js";
 import * as gov from "../services/ownerGovernance.service.js";
 import * as registry from "../services/ownerRegistry.service.js";
+import * as mfa from "../services/ownerMfa.service.js";
 import { logError } from "../infrastructure/logging/index.js";
 
 const send = (res, e) => {
+  if (e instanceof mfa.MfaError) {
+    if (e.status === 429 || e.status === 503) res.set("Retry-After", e.status === 503 ? "5" : "60");
+    return res.status(e.status).json({ success: false, code: e.code, message: e.message, ...(e.extra || {}) });
+  }
   if (e instanceof gov.OwnerError) {
     if (e.status === 429 || e.status === 503) res.set("Retry-After", e.status === 503 ? "5" : "60");
     return res.status(e.status).json({ success: false, code: e.code, message: e.message, ...(e.extra || {}) });
@@ -47,27 +52,51 @@ ownerRouter.get("/", wrap(async (req, res) => {
   res.set("Cache-Control", "no-store");
   if (d.mode !== "database") return res.json({ success: true, store: d, members: [], invitations: [], events: [], canManage: false, self: { id: req.user.id } });
   const g = await gov.listGovernance({ eventLimit: Math.min(Number(req.query.events) || 100, 500) });
-  res.json({ success: true, ...g, canManage: true, self: { id: req.user.id } });
+  res.json({ success: true, ...g, canManage: true, self: { id: req.user.id, primary: isMainOwnerEmail(req.user.email) }, primaryProtection: process.env.OWNER_PRIMARY_PROTECTION !== "off" });
 }));
 ownerRouter.post("/invitations", requireStore, wrap(async (req, res) => {
   const b = req.body || {};
-  res.status(201).json({ success: true, ...(await gov.inviteOwner({ actor: req.user, email: b.email, confirmEmail: b.confirmEmail, password: b.password, note: b.note })) });
+  res.status(201).json({ success: true, ...(await gov.inviteOwner({ actor: req.user, email: b.email, confirmEmail: b.confirmEmail, password: b.password, mfaCode: b.mfaCode, note: b.note })) });
 }));
 ownerRouter.post("/invitations/:id/resend", requireStore, wrap(async (req, res) => {
   const b = req.body || {};
-  res.json({ success: true, ...(await gov.resendInvitation({ actor: req.user, invitationId: req.params.id, confirmEmail: b.confirmEmail, password: b.password })) });
+  res.json({ success: true, ...(await gov.resendInvitation({ actor: req.user, invitationId: req.params.id, confirmEmail: b.confirmEmail, password: b.password, mfaCode: b.mfaCode })) });
 }));
 ownerRouter.delete("/invitations/:id", requireStore, wrap(async (req, res) => {
   const b = req.body || {};
-  res.json({ success: true, ...(await gov.revokeInvitation({ actor: req.user, invitationId: req.params.id, confirmEmail: b.confirmEmail, password: b.password, reason: b.reason })) });
+  res.json({ success: true, ...(await gov.revokeInvitation({ actor: req.user, invitationId: req.params.id, confirmEmail: b.confirmEmail, password: b.password, mfaCode: b.mfaCode, reason: b.reason })) });
 }));
 ownerRouter.delete("/members/:userId", requireStore, wrap(async (req, res) => {
   const b = req.body || {};
-  res.json({ success: true, ...(await gov.removeOwner({ actor: req.user, targetUserId: req.params.userId, confirmEmail: b.confirmEmail, password: b.password, reason: b.reason })) });
+  res.json({ success: true, ...(await gov.removeOwner({ actor: req.user, targetUserId: req.params.userId, confirmEmail: b.confirmEmail, password: b.password, mfaCode: b.mfaCode, reason: b.reason })) });
 }));
 ownerRouter.post("/members/:userId/recovery", requireStore, wrap(async (req, res) => {
   const b = req.body || {};
-  res.json({ success: true, ...(await gov.recoverOwner({ actor: req.user, targetUserId: req.params.userId, confirmEmail: b.confirmEmail, password: b.password, verifiedVia: b.verifiedVia, note: b.note })) });
+  res.json({ success: true, ...(await gov.recoverOwner({ actor: req.user, targetUserId: req.params.userId, confirmEmail: b.confirmEmail, password: b.password, mfaCode: b.mfaCode, verifiedVia: b.verifiedVia, note: b.note })) });
+}));
+
+// ───── Phase 16: owner second factor (TOTP). Owner-only; no store requirement beyond its own table. ─────
+ownerRouter.get("/mfa", wrap(async (req, res) => { res.set("Cache-Control", "no-store"); res.json({ success: true, mfa: await mfa.status(req.user.id) }); }));
+ownerRouter.post("/mfa/enroll", wrap(async (req, res) => {
+  await gov.passwordStepUp(req.user, (req.body || {}).password);
+  res.set("Cache-Control", "no-store");
+  res.status(201).json({ success: true, ...(await mfa.beginEnrollment({ actor: req.user })) });
+}));
+ownerRouter.post("/mfa/activate", wrap(async (req, res) => {
+  res.set("Cache-Control", "no-store");
+  res.json({ success: true, ...(await mfa.activate({ actor: req.user, code: (req.body || {}).code })) });
+}));
+ownerRouter.post("/mfa/recovery-codes", wrap(async (req, res) => {
+  const b = req.body || {};
+  await gov.requireStepUp(req.user, b.password, b.mfaCode);
+  res.set("Cache-Control", "no-store");
+  res.json({ success: true, ...(await mfa.regenerateRecoveryCodes({ actor: req.user })) });
+}));
+ownerRouter.delete("/mfa", wrap(async (req, res) => {
+  const b = req.body || {};
+  if (mfa.mfaPolicy() === "required") throw new gov.OwnerError("OWNER_MFA_POLICY_REQUIRED", "This deployment requires owners to keep a second factor enabled. Use recovery by another owner if the device is lost.", 403);
+  await gov.requireStepUp(req.user, b.password, b.mfaCode);
+  res.json({ success: true, ...(await mfa.resetFactor(req.user.id, { by: req.user.id, byEmail: req.user.email, reason: "owner disabled own second factor" })) });
 }));
 
 /**

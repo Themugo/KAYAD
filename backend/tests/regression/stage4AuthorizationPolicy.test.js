@@ -219,9 +219,9 @@ describe("Characterization of open owner decisions (changing these must be a del
     expect(next).not.toHaveBeenCalled();
     expect(res.code).toBe(403);
   });
-  test("D6: ledger reads sit behind adminOnly only (no view-finance permission exists); writes need MANAGE_FINANCE", () => {
+  test("D6 (closed in Phase 16): ledger reads AND writes need MANAGE_FINANCE through the staff access policy (no new permission was invented)", () => {
     const src = fs.readFileSync(path.join(repoRoot, "backend/routes/ledgerRoutes.js"), "utf8");
-    expect(src).toMatch(/router\.get\("\/balance-sheet", protect, adminOnly, ledgerController/);
+    expect(src).toMatch(/router\.get\("\/balance-sheet", protect, adminOnly, financeRead, ledgerController/);
     expect(src).toMatch(/router\.post\("\/", protect, adminOnly, financeWrite/);
     expect(Object.values(PERM)).not.toContain("view_finance");
   });

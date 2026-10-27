@@ -1,3 +1,4 @@
+import * as ownerMfa from "../services/ownerMfa.service.js";
 import User from "../models/User.js";
 import UserAuth from "../models/UserAuth.js";
 import Dealer from "../models/Dealer.js";
@@ -24,6 +25,7 @@ const buildEmail = async (builder, args, fallback) => {
 import { emitCommunication, COMMUNICATION_EVENTS } from "../services/communicationEvents.service.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken.js";
 import { invalidateUserCache } from "../middleware/auth.js";
+import { checkPasswordStepUp, needsPhoneStepUp } from "../utils/stepUp.js"; // Phase 14.9
 import { recordFailedAttempt, recordSuccessfulAttempt } from "../middleware/accountLockout.js";
 import { logError, logWarn } from '../infrastructure/logging/index.js';
 import { getSupabase } from '../utils/supabase.js';
@@ -526,6 +528,10 @@ export const login = async (req, res) => {
     if (user.deactivatedAt && !isOwnerUser(user)) {
       return R.error(res, "Account deactivated", 403);
     }
+    // Phase 14.9: a soft-deleted account (staff deletion) must not authenticate; same response as unknown credentials.
+    if (user.deletedAt && !isOwnerUser(user)) {
+      return R.error(res, "Invalid credentials", 401);
+    }
 
     // STAGE 5A (Gate A): an owner-email account that was never verified is not a provisioned owner. Refuse regardless of
     // REQUIRE_EMAIL_VERIFICATION / provider state (the general gate below is config-dependent and owner-exempt in protect()).
@@ -549,6 +555,22 @@ export const login = async (req, res) => {
         "Please verify your email before logging in. Check your inbox or request a new verification link.",
         403,
       );
+    }
+
+    // PHASE 16: owner second factor. Applies only to a verified platform owner whose authenticator is ACTIVE (policy off / store not installed = unchanged).
+    // Evaluated after the password is proven, so the response never reveals anything about an address on its own. The code travels in the same
+    // request (stateless: no half-authenticated session exists between the two steps). Refresh, password reset and recovery cannot bypass it:
+    // sessions are only ever issued through this function, and a reset changes the password, not the second factor.
+    if (isOwnerUser(user)) {
+      let enforced = false;
+      try { enforced = await ownerMfa.isEnforcedFor(user.id); }
+      catch (e) { return res.status(503).json({ success: false, code: e?.code || "OWNER_MFA_STORE_UNAVAILABLE", message: "Owner sign-in is paused because the second-factor store cannot be read. This resolves by itself; see the owner recovery runbook if it persists." }); }
+      if (enforced) {
+        const mfaCode = req.body?.mfaCode;
+        if (!mfaCode) return res.status(401).json({ success: false, code: "MFA_REQUIRED", mfaRequired: true, message: "Enter the 6-digit code from your authenticator app, or a recovery code." });
+        try { await ownerMfa.verifyCode(user.id, mfaCode, { actorEmail: user.email }); }
+        catch (e) { return res.status(e?.status || 403).json({ success: false, code: e?.code || "OWNER_MFA_INVALID", mfaRequired: true, message: e?.message || "The code is not valid." }); }
+      }
     }
 
     // Fixed (Final Integration Phase 5 - API/database contract
@@ -593,6 +615,7 @@ export const refreshToken = async (req, res) => {
     if (!user || !userAuth) return R.errorCode(res, "Invalid credentials", 403, "AUTH_SESSION_EXPIRED");
     // Same account-state gate as protect(): a suspended or deactivated account must
     // not be issued fresh tokens (owner exempt, as in protect()).
+    if (user.deletedAt && !isOwnerUser(user)) return R.errorCode(res, "Invalid credentials", 403, "AUTH_SESSION_EXPIRED"); // Phase 14.9
     if ((user.isBanned || user.deactivatedAt) && !isOwnerUser(user)) {
       return R.errorCode(res, user.isBanned ? "Account suspended" : "Account deactivated", 403, "AUTH_FORBIDDEN");
     }
@@ -720,7 +743,20 @@ export const updateProfile = async (req, res) => {
 
     const updates = {};
     if (name !== undefined) updates.name = String(name).trim();
-    if (phone !== undefined) updates.phone = formatPhone(phone) || String(phone).trim();
+    let normalizedPhone;
+    if (phone !== undefined) {
+      // Same rule as the dealer profile: a phone must normalise to a Kenyan number; it is never silently erased or stored raw.
+      normalizedPhone = formatPhone(phone);
+      if (!normalizedPhone) {
+        return res.status(400).json({
+          success: false,
+          code: "VALIDATION_FAILED",
+          message: "Enter a valid Kenyan phone number (e.g. 0712345678).",
+          fields: ["phone"],
+        });
+      }
+      updates.phone = normalizedPhone;
+    }
     if (location !== undefined) updates.location = String(location).trim();
     if (businessName !== undefined) updates.businessName = String(businessName).trim();
     if (bio !== undefined) updates.bio = String(bio).trim();
@@ -738,6 +774,21 @@ export const updateProfile = async (req, res) => {
         message: "Payout and onboarding details are not part of the account profile. Dealers save them from Settlement / Onboarding.",
         fields: misplaced,
       });
+    }
+
+    // A changed phone is a different number: its verification no longer applies. Applied in the same single write; unrelated updates and
+    // an unchanged phone leave phoneVerified untouched.
+    if (normalizedPhone !== undefined) {
+      const existing = await User.findById(req.user.id).select("phone phoneVerified role");
+      if (!existing) return R.notFound(res, "User not found");
+      if (existing.phone !== normalizedPhone) {
+        // Phase 14.9: the account phone is the payout destination for dealers / private sellers - a changed number needs password step-up.
+        if (needsPhoneStepUp(existing.role)) {
+          const refusal = await checkPasswordStepUp(req.user.id, req.body.currentPassword);
+          if (refusal) return res.status(403).json(refusal);
+        }
+        updates.phoneVerified = false;
+      }
     }
 
     const user = await User.findByIdAndUpdate(req.user.id, updates, { new: true, runValidators: true });
@@ -923,7 +974,7 @@ export const forgotPassword = async (req, res) => {
 
     const user = await User.findOne({ email: normalizeEmail(email) });
     // Always return 200 to prevent user enumeration
-    if (!user) return res.json({ success: true, message: "If that email is registered, a reset link has been sent." });
+    if (!user || user.deletedAt) return res.json({ success: true, message: "If that email is registered, a reset link has been sent." });
 
     const userAuth = await UserAuth.findOne({ user: user._id });
     if (!userAuth) return res.json({ success: true, message: "If that email is registered, a reset link has been sent." });

@@ -1,0 +1,50 @@
+FAIL A1 /api/platform-factory/dashboard is closed to anonymous, buyer, private seller and dealer  -> 401,200,200,200
+PASS A2 /api/platform-factory/dashboard still opens for staff (no 401/403)
+FAIL A1 /api/platform-factory/products is closed to anonymous, buyer, private seller and dealer  -> 401,200,200,200
+PASS A2 /api/platform-factory/products still opens for staff (no 401/403)
+FAIL A1 /api/improvement/dashboard is closed to anonymous, buyer, private seller and dealer  -> 401,200,200,200
+PASS A2 /api/improvement/dashboard still opens for staff (no 401/403)
+FAIL A1 /api/improvement/opportunities is closed to anonymous, buyer, private seller and dealer  -> 401,200,200,200
+PASS A2 /api/improvement/opportunities still opens for staff (no 401/403)
+FAIL A1 /api/automation/ai-suggestions is closed to anonymous, buyer, private seller and dealer  -> 401,200,200,200
+PASS A2 /api/automation/ai-suggestions still opens for staff (no 401/403)
+FAIL A1 /api/automation/templates is closed to anonymous, buyer, private seller and dealer  -> 401,200,200,200
+PASS A2 /api/automation/templates still opens for staff (no 401/403)
+FAIL A1 /api/lowcode/field-types is closed to anonymous, buyer, private seller and dealer  -> 401,200,200,200
+PASS A2 /api/lowcode/field-types still opens for staff (no 401/403)
+FAIL A3 a buyer can no longer call the platform-factory design endpoint  -> 202
+FAIL A3 a buyer can no longer evaluate automation rules  -> 200
+FAIL A4 dealer health-score breakdown is not public (401 anonymous)  -> 500
+FAIL A4 dealer health-score breakdown is closed to a buyer (403)  -> 500
+FAIL A5 automation suggestions contain no hard-coded figures (no "47 pending", "4.2 hours", efficiency claims)  -> {"success":true,"data":[{"id":"sug_1","type":"repetitive_task","title":"Automate Dealer Verification Reminders","description":"You have 47 pending dealer verifi
+PASS B1 superadmin can list payments
+FAIL B2 no full customer phone number appears anywhere in the response  -> 
+FAIL B2 phones are masked to the last three digits  -> 
+FAIL B3 checkout request ids, raw metadata and internal user ids are not returned  -> 
+FAIL B4 a verified success is "settled" and carries its receipt  -> 
+FAIL B5 a pending payment is shown as pending (never settled) with its age  -> 
+FAIL B5 a long-pending payment keeps its pending status and reports the real age  -> {"id":"9a93e533-0313-4004-9f54-5af624a9ffda","user_id":"e5ae7418-ab9d-4cfd-9e39-5a92b0d59af6","car_id":null,"amount":5000,"type":"purchase","phone":"254755500003","status":"pending","mpesa_receipt":null,"checkout_request_id":"ws_CO_40d40c6490f5","created_at":"2026-10-26T17:45:49.738578+03:00","updated_at":"2026-10-26T20:45:49.738578+03:00","reference_id":null,"reference_model":null,"mode":"mpesa","processed":false,"paid_at":null,"metadata":{"internalNote":"do-not-show"},"platform_fee":null,"dealer_amount":null,"result_desc":null,"user":{"id":"e5ae7418-ab9d-4cfd-9e39-5a92b0d59af6","name":"Payer","email":"pp_1793036749664_15@example.test"},"car":null,"mpesaReceipt":null,"checkoutRequestId":"ws_CO_40d40c6490f5","createdAt":"2026-10-26T17:45:49.738578+03:00","updatedAt":"2026-10-26T20:45:49.738578+03:00","referenceId":null,"referenceModel":null,"paidAt":null,"platformFee":null,"dealerAmount":null,"resultDesc":null}
+FAIL B6 an ordinary failure is "failed" (no reconciliation claim)  -> 
+FAIL B7 failed + amount-mismatch evidence is flagged needs_reconciliation (money may have moved)  -> 
+FAIL B8 failed + a success callback received afterwards is flagged needs_reconciliation  -> 
+FAIL B9 failed + refund_required is flagged needs_reconciliation  -> 
+PASS B10 stored payment status is never rewritten by viewing (read-only)
+FAIL B11 the summary names what it measures (successful collections, not platform revenue)  -> {"totalRevenue":12066700,"totalTransactions":42}
+PASS B12 payment oversight is closed to buyers, sellers, dealers and non-finance staff
+PASS B12 anonymous gets 401
+FAIL B13 the accounts role still has oversight, with the same masking  -> 200
+PASS B14 there is no admin route that edits a payment status (all methods 404/405)
+FAIL C1 ban with explicit target state returns the server-confirmed state  -> {"success":true,"message":"User banned"}
+FAIL C2 repeating the same ban is idempotent (stays banned, changed=false, no second audit entry)  -> {"success":true,"message":"User unbanned"}
+FAIL C3 the banned user's existing session stops working  -> 200
+FAIL C3 the banned user cannot log in  -> 200
+FAIL C4 refresh tokens of the banned user are revoked  -> 2
+FAIL C5 the ban is audited with ids and outcome only (no password/token/e-mail)  -> 
+FAIL C6 unban restores access  -> {"success":true,"message":"User banned"}
+FAIL C7 the legacy no-body toggle still works and reports the resulting state  -> {"success":true,"message":"User unbanned"}
+PASS C8 a superadmin cannot ban themselves
+FAIL C8 an admin cannot ban a superadmin  -> true
+PASS C9 a buyer cannot ban anyone
+SCRIPT ERROR TypeError: Cannot read properties of undefined (reading 'slice')
+    at /home/claude/work/p15/KAYAD/runbooks/phase15-20261026/e2e_superadmin_governance.cjs:115:276
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)

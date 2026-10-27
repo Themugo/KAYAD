@@ -31,6 +31,7 @@ export const sendDigitalReceipt = async (transaction) => {
   try {
     await create("notifications", {
       user: userId,
+      title: "Payment verified", // notifications.title is NOT NULL: without it the in-app receipt insert always failed (Phase 14.9)
       message: `Payment Verified: KES ${receiptData.amount} for ${receiptData.car}`,
       type: "payment",
     });

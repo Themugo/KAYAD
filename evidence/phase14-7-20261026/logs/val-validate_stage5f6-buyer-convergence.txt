@@ -1,0 +1,16 @@
+PASS Active App route still mounts the existing BuyerPlatform
+PASS BuyerPlatform reuses the canonical favorites API
+PASS BuyerPlatform reuses the existing ownership dashboard API
+PASS Buyer bid summary uses canonical fetchMyBids service
+PASS Dashboard has direct existing auction navigation
+PASS Dashboard has direct existing marketplace navigation
+PASS Dashboard exposes existing inspection workspace/navigation
+PASS Dashboard reuses participant-scoped escrow workspace
+PASS Dashboard reuses existing account financing component
+PASS Dashboard has truthful unavailable bid state
+PASS Dashboard avoids a second bid/auction/escrow API implementation
+PASS Inspection workflow remains the existing account-mode component
+PASS Dashboard uses accessible icon controls and focus indicators
+PASS Buyer sections support in-page purchase and inspection navigation
+
+Stage 5F.6 source contract: 14/14 checks passed

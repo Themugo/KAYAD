@@ -55,6 +55,38 @@ export const registrationLimiter = authAbuseLimiter(Number(process.env.REGISTRAT
 export const recoveryLimiter = authAbuseLimiter(Number(process.env.RECOVERY_RATE_LIMIT_MAX || 8), "Too many recovery attempts. Try again later.");
 export const verificationLimiter = authAbuseLimiter(Number(process.env.VERIFICATION_RATE_LIMIT_MAX || 8), "Too many verification attempts. Try again later.");
 
+// Phase 14.9: PUT /api/auth/change-password verifies the CURRENT password, so it is a password-guessing oracle for anyone who holds
+// a session (stolen cookie, unattended device). Failed attempts are counted per account and throttled; successful changes are not counted.
+export const passwordChangeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: Number(process.env.PASSWORD_CHANGE_RATE_LIMIT_MAX || 8),
+  keyGenerator: (req) => `pwchange:${req.user?.id || clientIp(req)}`,
+  skipSuccessfulRequests: true,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.setHeader("Retry-After", "900");
+    logWarn("RATE LIMIT (PASSWORD CHANGE)", { user: req.user?.id });
+    res.status(429).json({ success: false, code: "AUTH_RATE_LIMITED", message: "Too many password change attempts. Try again later." });
+  },
+});
+
+// Phase 14.9: password step-up on phone change (utils/stepUp.js). Only refused (403) step-ups count, so ordinary profile edits are not throttled.
+export const stepUpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: Number(process.env.STEP_UP_RATE_LIMIT_MAX || 8),
+  keyGenerator: (req) => `stepup:${req.user?.id || clientIp(req)}`,
+  skipSuccessfulRequests: true,
+  requestWasSuccessful: (req, res) => res.statusCode !== 403,
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.setHeader("Retry-After", "900");
+    logWarn("RATE LIMIT (STEP-UP)", { user: req.user?.id });
+    res.status(429).json({ success: false, code: "AUTH_RATE_LIMITED", message: "Too many password confirmations. Try again later." });
+  },
+});
+
 // =============================
 // 🌐 GLOBAL LIMITER
 // =============================

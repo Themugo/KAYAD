@@ -39,12 +39,16 @@ import { stkPush } from "../services/mpesaService.js";
 import { sendNotification } from "../services/notification.service.js";
 import { getDealerPlans } from "../services/dealerSubscription.service.js";
 import { getSupabase } from "../utils/supabase.js";
+import { buildAdminPaymentView } from "../utils/adminPaymentView.js";
+import { inspectAccountDeletion, accountDeletionBlockedBody } from "../utils/accountDeletionGuard.js"; // Phase 14.9
+import RefreshToken from "../models/RefreshToken.js";
+import { invalidateUserCache } from "../middleware/auth.js";
 import { emitCommunication, COMMUNICATION_EVENTS } from "../services/communicationEvents.service.js";
 import { getEscrowRules, getActiveEscrowAccounts, saveEscrowAccount, removeEscrowAccount } from "../services/escrowConfiguration.service.js";
 import { setSellerEscrowCapability, getSellerEscrowCapabilityStatus } from "../services/escrowCapability.service.js";
 import { setEscrowCapabilitySchema } from "../validation/escrow.schema.js";
 import { moderationBlockedReason } from "../utils/carModerationGuard.js";
-import { isOwnerUser } from "../config/owners.js";
+import { isOwnerUser, isOwnerEmail } from "../config/owners.js";
 import { normalizeNavigation, validateNavigationInput } from "../utils/navigationConfig.js";
 import { presentMessage } from "../services/chatAttachments.js";
 import {
@@ -388,11 +392,47 @@ router.post(
       });
     }
 
-    user.isBanned = !user.isBanned;
-    await user.save();
+    // Phase 15: rank boundary. protectAccount only shields platform-OWNER accounts, so an ordinary `admin` could ban a
+    // superadmin (and another admin) and lock them out. Banning follows the same rule as deactivation: a superadmin target is
+    // only reachable by the platform owner, and an admin target needs a superadmin (or the owner).
+    const requesterIsOwner = isOwnerEmail(req.user?.email);
+    if ((user.role === "superadmin" && !requesterIsOwner) || (user.role === "admin" && req.user.role !== "superadmin" && !requesterIsOwner)) {
+      await auditAfterCommit({
+        action: "User ban refused: insufficient rank",
+        admin: req.user.name || req.user.email,
+        adminId: req.user.id,
+        details: { outcome: "refused", targetUserId: String(user._id), targetRole: user.role },
+      });
+      return res.status(403).json({ success: false, code: "ADMIN_RANK_REQUIRED", message: "You do not have sufficient rank to change this account's ban status." });
+    }
+
+    // Phase 15: the toggle was not idempotent (a stale screen or a double click inverted the intended action), returned no
+    // resulting state and wrote no audit record. An optional explicit `banned` boolean now sets the state idempotently; the
+    // response always carries the server-confirmed `isBanned`, and every change is audited (ids only).
+    const wanted = typeof req.body?.banned === "boolean" ? req.body.banned : !user.isBanned;
+    const changed = wanted !== !!user.isBanned;
+    if (changed) {
+      user.isBanned = wanted;
+      await user.save();
+      if (wanted) {
+        await UserAuth.findOneAndUpdate({ user: req.params.id }, { $inc: { tokenVersion: 1 } });
+        await RefreshToken.revokeAllForUser(req.params.id, "account_banned");
+        invalidateUserCache(req.params.id);
+      } else {
+        invalidateUserCache(req.params.id);
+      }
+      await auditAfterCommit({
+        action: wanted ? "User banned" : "User unbanned",
+        admin: req.user.name || req.user.email,
+        adminId: req.user.id,
+        details: { outcome: "success", targetUserId: String(user._id), targetRole: user.role },
+      });
+    }
 
     res.json({
       success: true,
+      isBanned: !!user.isBanned,
+      changed,
       message: user.isBanned ? "User banned" : "User unbanned",
     });
   }),
@@ -509,7 +549,21 @@ router.put(
       }
     }
 
-    await user.save();
+    // Phase 15: no migration defines users.commission / users.waiver / users.discount, so on the real schema this save fails
+    // with a raw "Could not find the 'commission' column of 'users' in the schema cache" 500. Per-seller commission terms are a
+    // financial policy, so the schema is NOT invented here; the endpoint now says plainly that nothing was stored.
+    try {
+      await user.save();
+    } catch (error) {
+      if (/schema cache|PGRST204|column .* does not exist|42703/i.test(`${error?.code || ""} ${error?.message || ""}`)) {
+        return res.status(503).json({
+          success: false,
+          code: "SELLER_SETTINGS_NOT_PERSISTED",
+          message: "Per-seller commission, waiver and discount settings are not backed by the database schema yet. Nothing was saved.",
+        });
+      }
+      throw error;
+    }
 
     await auditAfterCommit({
       action: `Seller settings updated for ${user.name || user.email}`,
@@ -1184,8 +1238,13 @@ router.post(
 );
 
 // =============================
-// 🗑 DELETE USER (superadmin only — hard remove)
+// 🗑 DELETE USER (superadmin only — permanent removal of an account that has no retained history)
 // =============================
+// Phase 14.9: the previous handler soft-deleted the user's cars and then hard-deleted the user row. On the real schema that
+// either failed with a foreign-key 500 after the cars were already gone, or cascade-deleted payments, payouts, auction
+// registrations/deposit holds, dealerships and teams. The account is now inspected first (utils/accountDeletionGuard.js) and
+// refused with a documented 409 when any retained record depends on it. There is no ownership-transfer / closure workflow,
+// so dealer owners are always refused; deactivation (below) is the supported way to retire an account.
 router.delete(
   "/users/:id",
   authorize("superadmin"),
@@ -1199,21 +1258,62 @@ router.delete(
     if (user._id.toString() === req.user.id)
       return res.status(400).json({ success: false, message: "Cannot delete yourself" });
 
-    // Soft-delete user's cars
-    await Car.softDelete(
-      (await Car.find({ dealer: user._id }, { _id: 1 })).map((c) => c._id),
-      req.user.id,
-    );
-    await invalidatePublicListingCaches(); // Phase C.1
-    await user.deleteOne();
+    const targetId = String(user.id ?? user._id);
+    const refuse = async (reasons, stage) => {
+      await auditAfterCommit({
+        action: "User deletion blocked",
+        admin: req.user.name || req.user.email,
+        adminId: req.user.id,
+        details: { targetUserId: targetId, role: user.role, stage, reasons: reasons.map((r) => ({ code: r.code, count: r.count })) },
+      });
+      return res.status(409).json(accountDeletionBlockedBody(reasons));
+    };
+
+    let reasons;
+    try {
+      reasons = await inspectAccountDeletion(targetId);
+    } catch (err) {
+      // Fail closed: an uninspectable account is never deleted.
+      console.error("ACCOUNT DELETE DEPENDENCY CHECK FAILED:", err.message);
+      return res.status(503).json({ success: false, code: "ACCOUNT_DELETE_CHECK_FAILED", message: "Retained-record check could not be completed; nothing was deleted." });
+    }
+    if (reasons.length) return refuse(reasons, "preflight");
+
+    // Freeze the account (no new sessions or activity) and re-check, so a record created between the first check and the
+    // delete cannot be cascade-deleted. If the re-check finds one, the prior deactivation state is restored.
+    const priorDeactivation = user.deactivatedAt || null;
+    if (!priorDeactivation) await User.findByIdAndUpdate(targetId, { deactivatedAt: new Date() });
+    await UserAuth.findOneAndUpdate({ user: targetId }, { $inc: { tokenVersion: 1 } });
+    await RefreshToken.revokeAllForUser(targetId, "account_deletion");
+    invalidateUserCache(targetId);
+    try {
+      reasons = await inspectAccountDeletion(targetId);
+    } catch (err) {
+      if (!priorDeactivation) await User.findByIdAndUpdate(targetId, { deactivatedAt: null });
+      return res.status(503).json({ success: false, code: "ACCOUNT_DELETE_CHECK_FAILED", message: "Retained-record check could not be completed; nothing was deleted." });
+    }
+    if (reasons.length) {
+      if (!priorDeactivation) await User.findByIdAndUpdate(targetId, { deactivatedAt: null });
+      return refuse(reasons, "recheck");
+    }
+
+    const { data: removed, error: removeError } = await getSupabase().from("users").delete().eq("id", targetId).select("id");
+    if (removeError) {
+      if (!priorDeactivation) await User.findByIdAndUpdate(targetId, { deactivatedAt: null }).catch(() => {});
+      if (removeError.code === "23503") return refuse([{ code: "LINKED_RECORDS", count: 1, message: "A retained record was created while the deletion was in progress." }], "constraint");
+      throw removeError;
+    }
+    if (!removed?.length) return res.status(404).json({ success: false, message: "User not found" });
+    await invalidatePublicListingCaches(); // Phase C.1 contract: a removed account must never linger in any public listing cache
 
     await auditAfterCommit({
-      action: `User deleted: ${user.email} (${user.role})`,
+      action: "User deleted",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
+      details: { targetUserId: targetId, role: user.role },
     });
 
-    res.json({ success: true, message: "User and all associated data deleted" });
+    res.json({ success: true, message: "Account permanently deleted" });
   }),
 );
 
@@ -1520,6 +1620,10 @@ router.delete(
     if (user.role === "superadmin")
       return res.status(400).json({ success: false, message: "Cannot delete superadmin" });
     await User.softDelete(req.params.id, req.user.id);
+    // Phase 14.9: a soft-deleted identity must not keep a working session (auth also rejects deleted accounts).
+    await UserAuth.findOneAndUpdate({ user: req.params.id }, { $inc: { tokenVersion: 1 } });
+    await RefreshToken.revokeAllForUser(req.params.id, "account_deletion");
+    invalidateUserCache(req.params.id);
     await auditAfterCommit({
       action: "Staff governance: account deleted",
       admin: req.user.name || req.user.email,
@@ -1690,13 +1794,22 @@ router.get(
       { $group: { _id: null, total: { $sum: "$amount" }, count: { $sum: 1 } } },
     ]);
 
+    // Phase 15: explicit projection (masked phone, no checkout id / metadata / user id) plus a derived reconciliation state.
+    // `totalRevenue` is kept for client compatibility, but it is the sum of successful customer COLLECTIONS received on the
+    // platform shortcode (not platform revenue, and not proof that dealers have been paid); `totalCollected` is the honest name.
+    const view = await buildAdminPaymentView(payments);
+    const collected = totalRevenue[0]?.total || 0;
+    const needsReconciliation = view.filter((p) => p.reconciliation.state === "needs_reconciliation").length;
     res.json({
       success: true,
-      payments,
+      payments: view,
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
       summary: {
-        totalRevenue: totalRevenue[0]?.total || 0,
+        totalRevenue: collected,
+        totalCollected: collected,
         totalTransactions: totalRevenue[0]?.count || 0,
+        needsReconciliationOnPage: needsReconciliation,
+        basis: "successful customer collections on the platform shortcode; not platform revenue; dealer payouts are separate",
       },
     });
   }),
@@ -2425,12 +2538,17 @@ router.get(
         }),
       ]);
 
-    const status = recentErrors > 0 ? "warning" : "healthy";
+    // Phase 15: "healthy" used to be reported whenever there were no unread critical alerts, which says nothing about the
+    // database, payment provider, messaging providers or queues. This endpoint only has counts and the alert feed, so it can
+    // say "warning" (critical alerts present) or "no_critical_alerts" (nothing evidence-based is wrong) - never "healthy".
+    // Provider/credential telemetry is reported by the communications provider-health and operations control-room routes.
+    const status = recentErrors > 0 ? "warning" : "no_critical_alerts";
 
     res.json({
       success: true,
       health: {
         status,
+        basis: "operational counts and the unread critical-alert feed only; provider, database and queue health are not probed here",
         users: userCount,
         listings: carCount,
         liveAuctions,

@@ -1,0 +1,14 @@
+PASS navbar consumes admin branding context
+PASS navbar renders uploaded image with contained sizing
+PASS footer consumes same canonical branding context
+PASS centered footer supports uploaded logo
+PASS column footer supports uploaded logo
+PASS footer preserves text/icon fallback
+PASS admin preview uses object-contain instead of cropping
+PASS admin upload accepts explicit supported image types
+PASS admin client rejects files over 5 MB
+PASS upload endpoint remains protected by admin authorization
+PASS server persists logo URL and image mode
+PASS branding context normalizes saved config
+
+12/12 checks passed

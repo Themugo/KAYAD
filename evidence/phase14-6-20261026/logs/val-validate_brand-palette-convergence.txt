@@ -1,0 +1,2 @@
+Brand palette convergence: FAIL (1 issue(s))
+ - src/pages/admin/AdminPrivateSellerApplications.tsx: legacy warm utility (border-amber-200)

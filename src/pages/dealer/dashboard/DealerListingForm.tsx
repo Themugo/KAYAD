@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2, ArrowLeft, AlertCircle } from 'lucide-react';
 import { createCar, updateCar, VehicleApiError } from '../../../services/vehicleApi';
 import type { BackendCar, CreateCarPayload } from '../../../services/vehicleApi';
+import DealerListingPhotos from './DealerListingPhotos';
 
 /**
  * Phase 14.4 dealer listing create/edit form.
@@ -11,8 +12,8 @@ import type { BackendCar, CreateCarPayload } from '../../../services/vehicleApi'
  *   PUT  /api/cars/:id    (partial JSON, owner-or-staff) -> updateCar
  * Client validation mirrors backend/validation/car.schema.js for fast
  * feedback only; the server remains the authority (ownership, dealer
- * verification, entitlement, auction-field locks). Image management for an
- * existing listing is intentionally out of scope (separate image routes).
+ * verification, entitlement, auction-field locks). Photos of an existing
+ * listing are managed by DealerListingPhotos (separate image routes).
  */
 
 export const LISTING_FUELS = ['Gasoline', 'Diesel', 'Hybrid', 'Plug-in Hybrid', 'Electric'];
@@ -114,6 +115,7 @@ export interface DealerListingFormProps {
   car?: BackendCar | null;
   onSaved: (car?: BackendCar) => void;
   onCancel: () => void;
+  onPhotosChanged?: () => void;
 }
 
 const inputCls = 'w-full px-3 py-2 border border-[#B9D3CF] rounded-lg text-sm text-[#0A3340] bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#0A3340]';
@@ -129,7 +131,7 @@ const Field: React.FC<{ id: string; label: string; required?: boolean; error?: s
   </div>
 );
 
-const DealerListingForm: React.FC<DealerListingFormProps> = ({ mode, car, onSaved, onCancel }) => {
+const DealerListingForm: React.FC<DealerListingFormProps> = ({ mode, car, onSaved, onCancel, onPhotosChanged }) => {
   const initial = useMemo(() => (mode === 'edit' && car ? fromCar(car) : EMPTY), [mode, car]);
   const [form, setForm] = useState<FormState>(initial);
   const [images, setImages] = useState<File[]>([]);
@@ -270,7 +272,7 @@ const DealerListingForm: React.FC<DealerListingFormProps> = ({ mode, car, onSave
           <div className="sm:col-span-2">
             <Field id="listing-images" label="Photos" required error={err('images')} hint={`Add 1–${MAX_IMAGES} photos. ${images.length} selected.`}>
               <input
-                id="listing-images" type="file" accept="image/*" multiple
+                id="listing-images" type="file" accept="image/jpeg,image/png,image/webp" multiple
                 className={inputCls} disabled={submitting}
                 onChange={(e) => { setImages(Array.from(e.target.files || [])); setDirty(true); }}
                 {...aria('images', true)}
@@ -278,7 +280,12 @@ const DealerListingForm: React.FC<DealerListingFormProps> = ({ mode, car, onSave
             </Field>
           </div>
         ) : (
-          <p className="sm:col-span-2 text-xs text-[#475569]">Photo management for existing listings is not available in this form yet.</p>
+          <DealerListingPhotos
+            carId={String(car?.id || car?._id || '')}
+            initialImages={(car?.images || []).filter((i): i is NonNullable<typeof i> => Boolean(i && i.url))}
+            disabled={submitting}
+            onChanged={() => onPhotosChanged?.()}
+          />
         )}
       </div>
 

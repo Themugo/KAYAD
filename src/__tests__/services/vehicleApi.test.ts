@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { getCars, getCarById, createCar, updateCar, mapBackendCarToVehicle, VehicleApiError, BackendCar } from '../../services/vehicleApi';
+import { getCars, getCarById, createCar, updateCar, addCarImages, deleteCarImage, deleteCar, mapBackendCarToVehicle, VehicleApiError, BackendCar } from '../../services/vehicleApi';
 import { HttpRequestError, request } from '../../api/httpRequest';
 
 vi.mock('../../api/httpRequest', async () => {
@@ -237,5 +237,36 @@ describe('vehicleApi.createCar / updateCar - real request shape (Phase 14.4)', (
     await expect(updateCar('c1', { price: 1 })).rejects.toMatchObject({ kind: 'not_found' });
     requestMock.mockRejectedValueOnce(new HttpRequestError('offline'));
     await expect(updateCar('c1', { price: 1 })).rejects.toMatchObject({ kind: 'network' });
+  });
+});
+
+describe('vehicleApi photo management and delete (Phase 14.6)', () => {
+  afterEach(() => { requestMock.mockReset(); });
+
+  it('addCarImages posts multipart to /api/cars/:id/images', async () => {
+    requestMock.mockResolvedValueOnce({ success: true, data: { images: [] } });
+    await addCarImages('c 1', [new File(['x'], 'a.png', { type: 'image/png' })]);
+    const [path, opts] = requestMock.mock.calls[0] as [string, { method: string; body: FormData; headers: Record<string, string> }];
+    expect(path).toBe('/api/cars/c%201/images');
+    expect(opts.method).toBe('POST');
+    expect(opts.headers['Content-Type']).toBe('multipart/form-data');
+    expect(opts.body.getAll('images')).toHaveLength(1);
+  });
+
+  it('deleteCarImage and deleteCar use the existing DELETE routes', async () => {
+    requestMock.mockResolvedValue({ success: true });
+    await deleteCarImage('c1', 2);
+    await deleteCar('c1');
+    expect(requestMock).toHaveBeenNthCalledWith(1, '/api/cars/c1/images/2', { method: 'DELETE' });
+    expect(requestMock).toHaveBeenNthCalledWith(2, '/api/cars/c1', { method: 'DELETE' });
+  });
+
+  it('maps 403/404/network failures to VehicleApiError', async () => {
+    requestMock.mockRejectedValueOnce(new HttpRequestError('no', 403));
+    await expect(deleteCar('c1')).rejects.toMatchObject({ status: 403, kind: 'server' });
+    requestMock.mockRejectedValueOnce(new HttpRequestError('gone', 404));
+    await expect(deleteCarImage('c1', 0)).rejects.toMatchObject({ kind: 'not_found' });
+    requestMock.mockRejectedValueOnce(new HttpRequestError('offline'));
+    await expect(addCarImages('c1', [])).rejects.toMatchObject({ kind: 'network' });
   });
 });

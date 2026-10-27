@@ -1,0 +1,3 @@
+# Rollback notes
+No migrations or schema changes were made. All changes are application code; roll back by restoring the 14.8 files listed in SOURCE_CHANGE_LEDGER.csv.
+Targeted rollbacks: auction-setup activation = remove the `app.use("/api/dealer", auctionSetupRoutes)` line in backend/server.js (keep it before dealerRoutes if re-added). Phone step-up = remove checkPasswordStepUp calls in authController.updateProfile and dealerPlatformController.updateDealerProfile (and UI fields). Deletion guard = restore the previous DELETE /users/:id (not recommended: it cascades financial history). Log redaction = revert logging/index.js.

@@ -1,0 +1,10 @@
+PASS NotificationContext.errorKind keeps an explicit literal-union type (fixes tsc TS2322)
+PASS InspectionsView guards kayad.value the same way it guards provider.value (fixes unhandled rejection)
+PASS Public escrow page does not render two buttons both named "Open your dashboard"
+PASS SupportFAQ category filter uses role="tablist"/"tab" with aria-selected
+PASS supportFaq tests query the filter by role=tab, not the ambiguous role=button
+PASS Public EscrowView still never references getMyEscrowOverview or escrowId (privacy boundary intact)
+PASS escrowDeepLink test asserts the public page renders no participant deal data
+PASS auctionListSoftDelete timestamp assertions are directionally consistent (both toBeLessThanOrEqual)
+
+Master polish regression guard: 8/8 PASS

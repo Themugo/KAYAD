@@ -1,0 +1,25 @@
+PASS  base has no MFA tables (upgrade starts from the Phase 15 schema)
+PASS  candidate applies
+PASS  candidate re-applies idempotently
+PASS  both tables exist
+PASS  RLS enabled on both
+PASS  no policy exists (service_role only)
+PASS  anon has no privilege on factors
+PASS  anon has no privilege on recovery codes
+PASS  authenticated has no privilege on factors
+PASS  authenticated has no privilege on recovery codes
+PASS  service_role can read/write factors
+PASS  pending factor can be stored
+PASS  one factor per user
+PASS  active requires activated_at
+PASS  status rejects unknown values
+PASS  recovery code is single row per (user,hash)
+PASS  duplicate recovery hash refused
+PASS  no plaintext secret column exists
+PASS  deleting a user cascades to its factor and recovery-code rows only
+PASS  rollback applies
+PASS  rollback removes only the Phase 16 tables
+PASS  rollback leaves users intact
+PASS  rollback is idempotent
+
+RESULT pass=23 fail=0

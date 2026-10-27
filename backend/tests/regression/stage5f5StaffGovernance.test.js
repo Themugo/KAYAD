@@ -36,8 +36,8 @@ jest.unstable_mockModule("../../models/User.js", () => ({
   },
 }));
 const authCreate = jest.fn(async () => ({}));
-jest.unstable_mockModule("../../models/UserAuth.js", () => ({ default: { findOne: jest.fn(() => chain({ tokenVersion: 0 })), create: authCreate } }));
-jest.unstable_mockModule("../../models/RefreshToken.js", () => ({ default: { findActiveSessionById: jest.fn(async () => ({})) } }));
+jest.unstable_mockModule("../../models/UserAuth.js", () => ({ default: { findOne: jest.fn(() => chain({ tokenVersion: 0 })), findOneAndUpdate: jest.fn(async () => ({})), create: authCreate } }));
+jest.unstable_mockModule("../../models/RefreshToken.js", () => ({ default: { findActiveSessionById: jest.fn(async () => ({})), revokeAllForUser: jest.fn(async () => 0) } }));
 jest.unstable_mockModule("../../models/PlatformConfig.js", () => ({ default: { findOne: jest.fn(() => chain({})), create: jest.fn(async () => ({ toObject: () => ({}) })) } }));
 const auditCreate = jest.fn(async () => ({}));
 jest.unstable_mockModule("../../models/AuditLog.js", () => ({ default: { create: auditCreate } }));

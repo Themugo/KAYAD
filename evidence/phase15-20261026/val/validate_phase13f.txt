@@ -1,0 +1,28 @@
+PASS visibility event table preserves car and seller identity
+PASS only live approved listings are hidden
+PASS suspended and revoked transitions trigger hiding
+PASS restoration only occurs on approval after suspension or revocation
+PASS restoration checks same owner and hidden status
+PASS visibility event table has RLS enabled and no client grants
+PASS legacy suspended/revoked listings are reconciled at migration time
+PASS rollback restores only policy-hidden records and drops trigger/table
+PASS capability decisions invalidate public listing caches on hide/restore
+PASS admin UI lists and decides applications through existing capability API
+PASS admin route is registered
+PASS admin sidebar links to application review
+PASS route is permission guarded
+PASS admin UI requires reasons and confirms destructive transitions
+
+14/14 checks passed
+Migration hygiene: 188 migration files scanned.
+PASS exact duplicate migration bodies: none
+PASS duplicate table creators: none
+Migration hygiene gate: PASS
+(node:10301) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+Test Suites: 2 passed, 2 total
+Tests:       20 passed, 20 total
+Snapshots:   0 total
+Time:        0.388 s, estimated 1 s
+Ran all test suites matching tests/regression/phase13fCapabilityHardening|tests/regression/phaseC1PublicListingCacheInvalidation.

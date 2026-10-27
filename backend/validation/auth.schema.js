@@ -24,6 +24,8 @@ export const registerSchema = z.object({
 export const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(1, "Password is required"),
+  // Phase 16: optional owner second-factor code (authenticator code or recovery code). Ignored unless the account is an owner with an active factor.
+  mfaCode: z.string().trim().max(32).optional(),
 });
 
 export const changePasswordSchema = z.object({

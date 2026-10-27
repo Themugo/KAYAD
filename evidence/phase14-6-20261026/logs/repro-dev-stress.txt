@@ -1,0 +1,1 @@
+{"iterations":25,"interrupted":0,"ok":25,"mainFrameNavigationsPerLoad":[2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2]}

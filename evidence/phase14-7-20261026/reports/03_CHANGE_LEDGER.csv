@@ -1,0 +1,22 @@
+path,change,reason
+backend/utils/carDeletionGuard.js,added,Order 6 deletion rule (sold/live/ended/bids)
+backend/models/Car.js,modified,softDeleteGuarded single conditional UPDATE + countBidRows; platform softDelete unchanged
+backend/controllers/carController.js,modified,deleteCar 409 guard + idempotent already-deleted
+backend/middleware/dealerOrgAccess.js,modified,fail closed on membership in more than one dealership
+backend/routes/dealerPlatformRoutes.js,modified,GET /team requires canManageTeam
+backend/controllers/dealerPlatformController.js,modified,owner-only manager invite/change/remove; no proxy escalation
+backend/routes/dealerRoutes.js,modified,PUT /onboarding locked (409) before any write for approved/suspended dealers
+src/pages/dealer/dashboard/DealerDashboard.tsx,modified,sold listings have no Remove + note
+src/pages/dealer/DealerOnboarding.jsx,modified,truthful rejected/suspended completion screen; removed duplicate toast branch
+src/pages/admin/AdminPrivateSellerApplications.tsx,modified,legacy amber/orange status colours -> brand tokens (validator defect)
+backend/tests/regression/listingDeletionGuard.test.js,added,18 tests
+backend/tests/regression/carSoftDeleteGuardedQuery.test.js,added,2 tests
+backend/tests/regression/dealerTeamLeastPrivilege.test.js,added,32 tests
+backend/tests/regression/dealerOnboardingWriteOrder.test.js,added,6 tests
+backend/tests/regression/stage1ListingWriteBoundaries.test.js,modified,mock extended for softDeleteGuarded/countBidRows; assertions follow the new call
+backend/tests/regression/dealerTeamRoutePolicyMatrix.test.js,modified,known-gap tests replaced by the new fail-closed policy
+backend/tests/regression/phase13dDealerIsolation.test.js,modified,roster test follows canManageTeam rule
+src/__tests__/pages/dealer/DealerWorkflowWrites.test.tsx,modified,+2 tests (sold hides Remove; 409 reason shown)
+src/__tests__/pages/dealerOnboardingTruth.test.jsx,modified,rejected asserts truthful screen; +suspended test
+runbooks/phase14-7-20261026/*,added,browser check + nav repro (from 14.6) and PROPOSED RLS SQL (not applied)
+evidence/phase14-7-20261026/*,added,reports, logs, screenshots

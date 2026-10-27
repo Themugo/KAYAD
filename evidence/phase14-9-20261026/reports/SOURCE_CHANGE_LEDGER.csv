@@ -1,0 +1,26 @@
+file,change_type,summary,protected_domain,verification
+backend/utils/accountDeletionGuard.js,new,Dependency inspection (56 FK-derived entries) that fails closed; builds 409 ACCOUNT_DELETE_BLOCKED body,no,jest + DB E2E account security (incl. FK drift guard D1)
+backend/utils/stepUp.js,new,Password step-up helper for payout-capable roles (dealer individual_seller),no,jest + DB E2E
+backend/routes/adminRoutes.js,modified,DELETE /users/:id: preflight guard + freeze + re-check + FK-safe delete + audit; staff soft delete revokes sessions; cache invalidation kept,no,DB E2E 47/47; jest stage5f5 updated
+backend/middleware/auth.js,modified,protect/optionalAuth reject soft-deleted users (owner exempt),no,DB E2E + jest
+backend/controllers/authController.js,modified,login/refresh/forgot reject soft-deleted; phone change step-up for dealer/individual_seller,no,DB E2E
+backend/middleware/rateLimiter.js,modified,passwordChangeLimiter and stepUpLimiter added,no,DB E2E + jest
+backend/routes/authRoutes.js,modified,limiters wired to change-password and profile,no,jest
+backend/controllers/dealerPlatformController.js,modified,dealer profile phone change requires step-up before any write,no,jest + DB E2E
+backend/routes/dealerPlatformRoutes.js,modified,stepUpLimiter on PUT profile,no,jest
+backend/routes/dealerRoutes.js,modified,settlement field validation; earnings payments explicit column projection (no buyer phone/user id/checkout id/metadata),adjacent (payment read path),DB E2E 73/73
+backend/infrastructure/logging/index.js,modified,pino redaction: phones masked to last 3 digits; passwords/passkey/secrets redacted,no,jest + DB E2E log scan
+backend/server.js,modified,auctionSetupRoutes mounted before dealerRoutes catch-all (ACTIVATES previously unreachable dealer auction setup/publish/amend endpoints),auction,DB E2E + jest wiring test
+backend/services/auctionSetup.service.js,modified,assertAuctionSetupAllowed state guard (deleted/sold/reserved/active/closed/bids); deleted listing = not found,auction,DB E2E
+backend/controllers/paymentController.js,modified,purchase initiation: deleted 404; own listing 403; sold 409; non-purchasable status 404,payment initiation guard only,DB E2E
+backend/services/paymentCallback.service.js,modified,receipt payload carries user id and car title (receipt previously failed after every success),payment callback (receipt only; state machine untouched),DB E2E
+backend/services/paymentService.js,modified,confirmPayment receipt user id,payment (receipt only),DB E2E
+backend/services/receiptService.js,modified,in-app notification includes NOT NULL title,no,DB E2E
+src/pages/dealer/dashboard/DealerSettingsPanel.tsx,modified,Current password field when phone changes; 429/403 messaging,no,vitest + browser
+src/pages/Profile.tsx,modified,Current password field for dealer/individual_seller phone edits; server error messages,no,tsc + build
+src/__tests__/pages/dealer/DealerSettingsPhoneStepUp.test.tsx,new,UI step-up contract,no,vitest 4/4
+src/__tests__/pages/dealer/DealerWorkflowWrites.test.tsx,modified,expectations updated for step-up contract,no,vitest
+backend/tests/regression/accountSecurityPaymentReadiness.test.js,new,13 unit regressions (guard fail-closed; step-up; redaction; wiring),no,jest 13/13
+backend/tests/regression/dealerProfileAndTeamAuthorization.test.js,modified,step-up expectations (403 STEP_UP_REQUIRED/FAILED; no writes),no,jest
+backend/tests/regression/stage5f5StaffGovernance.test.js,modified,mocks for session revocation on staff soft delete,no,jest
+runbooks/phase14-9-20261026/**,new,real-DB E2E harness (account security 47; payments 73) + carried 14.8 scripts + browser scripts,no,executed

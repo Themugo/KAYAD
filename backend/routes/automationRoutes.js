@@ -1,5 +1,5 @@
 import express from "express";
-import { protect, allowRoles } from "../middleware/auth.js";
+import { protect, adminOnly, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 import {
@@ -61,7 +61,9 @@ import {
 const router = express.Router();
 
 // All routes require authentication
-router.use(protect);
+// Phase 15: this router only serves the Super Admin / staff workspaces. Reads were open to ANY signed-in account (buyers, sellers,
+// dealers could read platform internals); every consumer in the SPA lives under /admin. Staff gate added at router level.
+router.use(protect, adminOnly);
 
 // Dashboard & Stats
 router.get("/stats", asyncHandler(getAutomationStats));

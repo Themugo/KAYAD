@@ -1,0 +1,8 @@
+# 09 Photo management and listing deletion
+Existing backend contracts confirmed from source (no backend change):
+- POST /api/cars/:id/images: multipart field images, <=10 per request, <=20 per listing, JPG/PNG/WEBP (content sniffed), 5 MB each, owner-or-staff, requires Cloudinary configuration (otherwise 500 "Cloud storage not configured"), response data.images.
+- DELETE /api/cars/:id/images/:index: owner-or-staff, index into current array, adjusts cover image, returns images.
+- DELETE /api/cars/:id: owner-or-staff, SOFT delete, decrements listing count, audit logged.
+- PUT /api/cars/:id: edit without images leaves existing images untouched (browser test: body contains no images).
+UI (src/pages/dealer/dashboard/DealerListingPhotos.tsx, DealerListingForm.tsx, DealerDashboard.tsx; client calls in src/services/vehicleApi.ts): current photos, add with client checks for type/size/count and pending state, failure message with retry keeping the selection, removal after confirmation, last photo cannot be removed (UI rule; the server does not enforce a minimum), list refreshed after photo changes, listing removal with confirmation, pending, failure/retry, nothing shown as saved until the server answers. 14 new unit tests plus browser flows.
+Blocked / gap (recorded): the server delete route has NO guard for listings with an active auction or bids. Because auction/settlement code must not be altered here, the UI hides Remove for any listing with auction state or bids and says so; this is a client-side protection only. Recommended: a server-side guard in an auction-domain phase. Reordering/cover selection: no backend route exists, not offered.

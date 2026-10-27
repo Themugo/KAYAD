@@ -1,0 +1,239 @@
+{
+ "results": [
+  {
+   "name": "A1 a non-admin cannot delete accounts (403) - identifier substitution against an admin",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "A2 deletion without a CSRF token is refused and the account survives",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "A3 an admin cannot delete themselves",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "A4 a dealer owner with a dealership, team and listings cannot be deleted: 409 ACCOUNT_DELETE_BLOCKED",
+   "ok": true,
+   "detail": "409 {\"success\":false,\"code\":\"ACCOUNT_DELETE_BLOCKED\",\"message\":\"This account cannot be permanently deleted because retained records depend on it. Deactivate the account instead (PUT /api/admin/users/:id/d"
+  },
+  {
+   "name": "A4 nothing was changed by the refused deletion (user, dealership, team, both listings; no partial listing deletion)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "A4 the 409 does not leak emails, phones or token material",
+   "ok": true,
+   "detail": "{\"success\":false,\"code\":\"ACCOUNT_DELETE_BLOCKED\",\"message\":\"This account cannot be permanently deleted because retained records depend on it. Deactivate the account instead (PUT /api/admin/users/:id/d"
+  },
+  {
+   "name": "A4 the refusal is audited (no sensitive payload)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "A5 a payment record blocks deletion (409) and the record is preserved",
+   "ok": true,
+   "detail": "409 {\"success\":false,\"code\":\"ACCOUNT_DELETE_BLOCKED\",\"message\":\"This account cannot be permanently deleted because retained "
+  },
+  {
+   "name": "A5 a bid blocks deletion (409) and the record is preserved",
+   "ok": true,
+   "detail": "409 {\"success\":false,\"code\":\"ACCOUNT_DELETE_BLOCKED\",\"message\":\"This account cannot be permanently deleted because retained "
+  },
+  {
+   "name": "A5 a team membership blocks deletion (409) and the record is preserved",
+   "ok": true,
+   "detail": "409 {\"success\":false,\"code\":\"ACCOUNT_DELETE_BLOCKED\",\"message\":\"This account cannot be permanently deleted because retained "
+  },
+  {
+   "name": "A5 an escrow as buyer blocks deletion (409) and the record is preserved",
+   "ok": true,
+   "detail": "409 {\"success\":false,\"code\":\"ACCOUNT_DELETE_BLOCKED\",\"message\":\"This account cannot be permanently deleted because retained "
+  },
+  {
+   "name": "A5 a ledger entry blocks deletion (409) and the record is preserved",
+   "ok": true,
+   "detail": "409 {\"success\":false,\"code\":\"ACCOUNT_DELETE_BLOCKED\",\"message\":\"This account cannot be permanently deleted because retained "
+  },
+  {
+   "name": "A6 a clean account is deleted; concurrent duplicate requests give exactly one 200 and no 5xx",
+   "ok": true,
+   "detail": "200,404"
+  },
+  {
+   "name": "A6 the deleted account is gone and its old session no longer authenticates",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "A6 repeating the deletion is a safe 404",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "name": "A7 staff deletion is a soft delete (row retained with deleted_at)",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "A7 an existing session of the soft-deleted account is rejected",
+   "ok": true,
+   "detail": "200->401"
+  },
+  {
+   "name": "A7 the soft-deleted account cannot log in again",
+   "ok": true,
+   "detail": "401"
+  },
+  {
+   "name": "A7 the soft-deleted account cannot refresh a session",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "A8 a platform-owner account cannot be deleted by an administrator",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "B1 wrong current password -> 400, password unchanged",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "B2 weak new password rejected",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "B3 change-password without CSRF is refused",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "B4 unauthenticated change-password is refused",
+   "ok": true,
+   "detail": "401"
+  },
+  {
+   "name": "B5 repeated wrong current-password guesses are rate limited (429) - brute force of the current password through a stolen session is throttled",
+   "ok": true,
+   "detail": "400,400,400,400,400,400,429,429,429,429,429,429,429,429"
+  },
+  {
+   "name": "B6 a successful change revokes the previous session and refresh tokens",
+   "ok": true,
+   "detail": "200 200->401"
+  },
+  {
+   "name": "B6 the new password works and the old one does not",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "B6 response never carries password material",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "B7 forgot-password gives an identical response for registered and unknown emails (no enumeration)",
+   "ok": true,
+   "detail": "200/200"
+  },
+  {
+   "name": "B8 reset tokens are stored hashed, never raw",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "B9 concurrent resets with one token: exactly one succeeds",
+   "ok": true,
+   "detail": "200,400,400"
+  },
+  {
+   "name": "B9 a used token cannot be replayed",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "B10 an expired token is refused",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "B10 an unknown token is refused",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "B11 reset enforces the password policy and keeps the token usable",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "B12 a reset revokes existing sessions",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "B13 a token only changes the password of the account it was issued to",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "C1 privileged/identity fields sent to the profile endpoint are ignored",
+   "ok": true,
+   "detail": "{\"success\":true,\"user\":{\"_id\":\"8d777210-cd8a-469c-afe3-4c97b79e2a8f\",\"id\":\"8d777210-cd8a-469c-afe3-4"
+  },
+  {
+   "name": "C2 re-saving the same phone keeps phone verification",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "C2 changing the phone invalidates phone verification (14.6 protection preserved)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "C3 an invalid phone is refused and nothing is stored",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "C4 payout details are refused on the personal profile",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "C5 profile write without CSRF refused",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "C5 unauthenticated profile write refused",
+   "ok": true,
+   "detail": "401"
+  },
+  {
+   "name": "C6 the personal profile endpoint cannot rewrite the verified dealer business identity",
+   "ok": true,
+   "detail": "Real Motors Ltd"
+  },
+  {
+   "name": "C7 a private seller has no dealer settlement identity (cannot create one)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "D1 every blocking/cascading foreign key to users/profiles is in the account-deletion guard list or the personal-data allowlist",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

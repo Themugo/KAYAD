@@ -209,9 +209,10 @@ describe("Workstream A — /api/dealer-platform business routes", () => {
     });
   }
   test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
-  test("organisation team routes: owner and active member allowed; private seller, buyer and suspended/unrelated denied", async () => {
+  test("organisation team routes: owner allowed, member without canManageTeam refused (14.7); private seller, buyer and suspended/unrelated denied", async () => {
     expect(passedGuard(await call("GET", "/api/dealer-platform/team", D1))).toBe(true);
-    expect(passedGuard(await call("GET", "/api/dealer-platform/team", M1))).toBe(true); // authorized team member keeps team access
+    // 14.7: the roster exposes invite emails and permission sets, so it needs canManageTeam; M1 holds only canListCars.
+    expect((await call("GET", "/api/dealer-platform/team", M1)).status).toBe(403);
     for (const id of [S_APPROVED, S_PENDING, S_SUSPENDED, B1, U_REVOKED]) expect((await call("GET", "/api/dealer-platform/team", id)).status).toBe(403);
   });
   test("team member cannot perform an owner-permission operation without canManageTeam", async () => {
@@ -219,7 +220,8 @@ describe("Workstream A — /api/dealer-platform business routes", () => {
   });
   test("a client-supplied dealer id never selects the organisation (member of D1 cannot act for D2)", async () => {
     const r = await call("GET", `/api/dealer-platform/team?dealerId=${D2}`, M1);
-    expect(passedGuard(r)).toBe(true); // resolved from membership; the controller is keyed to req.dealerId=D1 (verified separately in source)
+    // 14.7: M1 lacks canManageTeam, so the roster is refused; the client-supplied dealerId is never consulted either way.
+    expect(r.status).toBe(403);
   });
 });
 

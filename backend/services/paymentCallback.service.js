@@ -199,11 +199,18 @@ export const handleMpesaCallback = async (callbackData) => {
     try {
       userDoc = await findById("users", payment.user, "email name phone");
     } catch (e) { logWarn("Payment callback user lookup failed", { error: e.message }); }
+    // Phase 14.9: the user lookup selects only contact fields, so the row has no id; receiptService derives the recipient from
+    // user.id and fell back to the whole object, so every receipt and in-app payment notification failed with "invalid uuid".
+    // The receipt also named the vehicle by its UUID; use the listing title when it can be read (best effort).
+    let receiptCarTitle = "Vehicle";
+    if (payment.car) {
+      try { receiptCarTitle = (await findById("cars", payment.car, "title"))?.title || "Vehicle"; } catch { /* receipt wording only */ }
+    }
     sendDigitalReceipt({
       amount: payment.amount,
-      carTitle: payment.car?.toString() || "Vehicle",
+      carTitle: receiptCarTitle,
       mpesaReceipt: receipt || String(payment.id).slice(-8),
-      user: userDoc || { email: null, phone: null, id: payment.user },
+      user: { ...(userDoc || { email: null, phone: null }), id: payment.user },
     }).catch((e) => logWarn("Digital receipt failed", { error: e.message }));
 
     if (payment.type === "bid") {

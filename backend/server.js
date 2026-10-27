@@ -826,8 +826,11 @@ app.use("/api/auth", authLimiter, authRoutes);
 app.use("/api/cars", carRoutes);
 app.use("/api/valuation", valuationRoutes);
 app.use("/api/bids", idempotencyCheck, csrfProtection, bidRoutes); // Idempotency + CSRF for state-changing bid operations
-app.use("/api/dealer", dealerRoutes);
+// Phase 14.9: auctionSetupRoutes must be mounted BEFORE dealerRoutes - dealerRoutes ends with a catch-all 404 ("Dealer route not found"),
+// which previously shadowed every /api/dealer/cars/:id/auction/{setup,publish,amendments} request. Its handlers carry their own
+// guards (protect + allowRoles("dealer") + requireDealerVerification) and unmatched paths fall through to dealerRoutes unchanged.
 app.use("/api/dealer", auctionSetupRoutes);
+app.use("/api/dealer", dealerRoutes);
 app.use("/api/auctions", auctionRoutes);
 app.use("/api/auctions", auctionRegistrationRoutes);
 app.use("/api/private-seller-capability", privateSellerCapabilityRoutes); // Phase 13E: personal-account seller application / review

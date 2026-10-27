@@ -17,11 +17,12 @@ const BOX = { padding: '10px 14px', borderRadius: 8, fontSize: 13, marginBottom:
 const fmt = (v) => (v ? new Date(v).toLocaleString() : '—');
 const input = { width: '100%', maxWidth: 420, padding: '10px 12px', fontSize: 14, border: '1px solid #94A3B8', borderRadius: 8, background: '#fff' };
 
-function ActionDialog({ action, target, onCancel, onDone }) {
+function ActionDialog({ action, target, onCancel, onDone, mfaEnrolled }) {
   const cfg = ACTIONS[action];
   const [email, setEmail] = useState('');
   const [confirmEmail, setConfirmEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [mfaCode, setMfaCode] = useState('');
   const [reason, setReason] = useState('');
   const [note, setNote] = useState('');
   const [via, setVia] = useState('in_person');
@@ -34,17 +35,17 @@ function ActionDialog({ action, target, onCancel, onDone }) {
     e.preventDefault();
     setBusy(true); setError(null);
     try {
-      const base = { confirmEmail, password };
+      const base = { confirmEmail, password, ...(mfaCode.trim() ? { mfaCode: mfaCode.trim() } : {}) };
       let res;
       if (action === 'invite') res = await ownerAPI.invite({ email, ...base, note });
       else if (action === 'resend') res = await ownerAPI.resend(target.id, base);
       else if (action === 'revokeInvitation') res = await ownerAPI.revokeInvitation(target.id, { ...base, reason });
       else if (action === 'remove') res = await ownerAPI.removeMember(target.userId, { ...base, reason });
       else res = await ownerAPI.recover(target.userId, { ...base, verifiedVia: via, note });
-      setPassword('');
+      setPassword(''); setMfaCode('');
       onDone(res, action);
     } catch (err) {
-      setPassword('');
+      setPassword(''); setMfaCode('');
       const d = err?.response?.data || {};
       setError(d.message || 'The change was not made.');
     } finally { setBusy(false); }
@@ -92,12 +93,72 @@ function ActionDialog({ action, target, onCancel, onDone }) {
         <label htmlFor="own-pw" style={{ display: 'block', fontWeight: 600, fontSize: 13 }}>Your password (to confirm it is really you)</label>
         <input id="own-pw" type="password" autoComplete="current-password" style={input} value={password} onChange={(e) => setPassword(e.target.value)} required />
       </div>
+      {mfaEnrolled && (
+          <div style={{ marginBottom: 12 }}>
+            <label htmlFor="own-mfa" style={{ display: 'block', fontWeight: 600, fontSize: 13 }}>Authenticator code (or a recovery code)</label>
+            <input id="own-mfa" type="text" inputMode="text" autoComplete="one-time-code" style={input} value={mfaCode} onChange={(e) => setMfaCode(e.target.value)} required />
+          </div>
+        )}
       {error && <div role="alert" style={{ ...BOX, background: 'var(--admin-status-danger-bg)', border: '1px solid var(--admin-status-danger-border)', color: 'var(--admin-status-danger)' }}>{error}</div>}
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <Button type="submit" variant={cfg.danger ? 'danger' : 'primary'} disabled={busy || !confirmOk || !password}>{busy ? 'Working…' : cfg.cta}</Button>
+        <Button type="submit" variant={cfg.danger ? 'danger' : 'primary'} disabled={busy || !confirmOk || !password || (mfaEnrolled && !mfaCode.trim())}>{busy ? 'Working…' : cfg.cta}</Button>
         <Button type="button" variant="outline" onClick={onCancel} disabled={busy}>Cancel</Button>
       </div>
     </form>
+  );
+}
+
+
+// PHASE 16 - the owner's own authenticator. Secrets are shown once, never stored in the browser; nothing here is trusted without the server.
+function MfaPanel({ mfa, onChanged }) {
+  const [step, setStep] = useState('idle'); // idle | password | scan | codes
+  const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  const [enroll, setEnroll] = useState(null);
+  const [codes, setCodes] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+  const fail = (err) => setError(err?.response?.data?.message || 'That did not work.');
+  if (!mfa) return null;
+  if (mfa.installed === false) return <div role="status" style={{ ...BOX, background: 'var(--admin-status-info-bg)', border: '1px solid var(--admin-status-info-border)', color: 'var(--admin-status-info)' }}>Two-factor sign-in needs the Phase 16 database migration, which has not been applied here. Nothing has been changed.</div>;
+  if (mfa.keyConfigured === false) return <div role="alert" style={{ ...BOX, background: 'var(--admin-status-danger-bg)', border: '1px solid var(--admin-status-danger-border)', color: 'var(--admin-status-danger)' }}>Two-factor sign-in is not configured on this server (the encryption key is missing), so it cannot be turned on.</div>;
+  const start = async (e) => { e.preventDefault(); setBusy(true); setError(null); try { const r = await ownerAPI.mfaEnroll({ password }); setEnroll(r); setStep('scan'); } catch (err) { fail(err); } finally { setPassword(''); setBusy(false); } };
+  const activate = async (e) => { e.preventDefault(); setBusy(true); setError(null); try { const r = await ownerAPI.mfaActivate({ code: code.trim() }); setCodes(r.recoveryCodes || []); setEnroll(null); setCode(''); setStep('codes'); onChanged(); } catch (err) { fail(err); } finally { setBusy(false); } };
+  const finish = () => { setCodes(null); setStep('idle'); };
+  return (
+    <section aria-label="Two-factor sign-in" style={{ border: '1px solid #CBD5E1', borderRadius: 10, padding: 16, marginBottom: 20 }}>
+      <h4 style={{ marginBottom: 6 }}>Your two-factor sign-in</h4>
+      <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 10 }}>
+        {mfa.enrolled ? `Authenticator app is on. ${mfa.recoveryCodesRemaining} recovery code${mfa.recoveryCodesRemaining === 1 ? '' : 's'} left.` : 'Authenticator app is off. Turn it on so a stolen password alone cannot open an owner session.'}
+        {mfa.policy === 'required' && !mfa.enrolled ? ' This deployment requires owners to enrol before they can change owners.' : ''}
+      </p>
+      {error && <div role="alert" style={{ ...BOX, background: 'var(--admin-status-danger-bg)', border: '1px solid var(--admin-status-danger-border)', color: 'var(--admin-status-danger)' }}>{error}</div>}
+      {step === 'idle' && !mfa.enrolled && <Button variant="primary" onClick={() => { setError(null); setStep('password'); }}>Set up authenticator</Button>}
+      {step === 'password' && (
+        <form onSubmit={start} aria-label="Confirm password to start enrolment">
+          <label htmlFor="mfa-pw" style={{ display: 'block', fontWeight: 600, fontSize: 13 }}>Your password</label>
+          <input id="mfa-pw" type="password" autoComplete="current-password" style={input} value={password} onChange={(e) => setPassword(e.target.value)} required />
+          <div style={{ marginTop: 10, display: 'flex', gap: 10 }}><Button type="submit" variant="primary" disabled={busy || !password}>{busy ? 'Working…' : 'Continue'}</Button><Button variant="outline" onClick={() => setStep('idle')}>Cancel</Button></div>
+        </form>
+      )}
+      {step === 'scan' && enroll && (
+        <form onSubmit={activate} aria-label="Activate authenticator">
+          <p style={{ fontSize: 13 }}>In your authenticator app choose “Enter a setup key” and type this key (shown only now):</p>
+          <code data-testid="mfa-secret" style={{ display: 'block', padding: 10, background: '#F1F5F9', borderRadius: 6, letterSpacing: 2, wordBreak: 'break-all', margin: '8px 0' }}>{enroll.secret}</code>
+          <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Account: {mfa.account || 'your owner address'} · Type: time-based · 6 digits · 30 seconds.</p>
+          <label htmlFor="mfa-code" style={{ display: 'block', fontWeight: 600, fontSize: 13, marginTop: 8 }}>Enter the 6-digit code it shows</label>
+          <input id="mfa-code" inputMode="numeric" autoComplete="one-time-code" style={input} value={code} onChange={(e) => setCode(e.target.value)} required />
+          <div style={{ marginTop: 10 }}><Button type="submit" variant="primary" disabled={busy || code.trim().length < 6}>{busy ? 'Checking…' : 'Turn on'}</Button></div>
+        </form>
+      )}
+      {step === 'codes' && codes && (
+        <div role="status">
+          <p style={{ fontSize: 13, fontWeight: 600 }}>Save these recovery codes now. Each works once, and they will not be shown again.</p>
+          <ul data-testid="mfa-recovery-codes" style={{ columns: 2, fontFamily: 'monospace', margin: '8px 0 12px', paddingLeft: 18 }}>{codes.map((c) => <li key={c}>{c}</li>)}</ul>
+          <Button variant="primary" onClick={finish}>I have saved them</Button>
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -107,6 +168,7 @@ export default function AdminOwnerManagement() {
   const [dialog, setDialog] = useState(null); // { action, target }
   const [notice, setNotice] = useState(null);
   const [showAll, setShowAll] = useState(false);
+  const [mfa, setMfa] = useState(null);
 
   const load = useCallback(async () => {
     try {
@@ -116,6 +178,7 @@ export default function AdminOwnerManagement() {
         return;
       }
       setData(res); setState({ status: 'ready' });
+      try { const m = await ownerAPI.mfaStatus(); setMfa(m?.mfa || null); } catch { setMfa(null); }
     } catch (err) {
       const d = err?.response?.data || {};
       setState({ status: 'error', message: d.message || 'Could not load owner management.' });
@@ -155,7 +218,8 @@ export default function AdminOwnerManagement() {
         </div>
       )}
       {notice && <div role="status" style={{ ...BOX, background: 'var(--admin-status-success-bg)', border: '1px solid var(--admin-status-success-border)', color: 'var(--admin-status-success)' }}>{notice.text}</div>}
-      {dialog && <ActionDialog action={dialog.action} target={dialog.target} onCancel={() => setDialog(null)} onDone={done} />}
+      <MfaPanel mfa={mfa} onChanged={load} />
+      {dialog && <ActionDialog action={dialog.action} target={dialog.target} onCancel={() => setDialog(null)} onDone={done} mfaEnrolled={!!mfa?.enrolled} />}
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginBottom: 8 }}>
         <h4>Owners</h4>
@@ -167,11 +231,12 @@ export default function AdminOwnerManagement() {
           <tbody>
             {data.members.filter((m) => m.status === 'active').map((m) => (
               <tr key={m.id} data-testid={`owner-${m.email}`}>
-                <td>{m.name ? `${m.name} · ` : ''}{m.email}{m.userId === data.self?.id ? ' (you)' : ''}</td>
+                <td>{m.name ? `${m.name} · ` : ''}{m.email}{m.primary ? ' · Primary owner' : ''}{m.userId === data.self?.id ? ' (you)' : ''}</td>
                 <td>{m.usable ? 'Active · verified' : `Blocked — ${m.blockedReason || 'not usable'}`}</td>
                 <td>{fmt(m.activatedAt)}</td><td>{m.addedBy || '—'}</td>
                 <td style={{ whiteSpace: 'nowrap' }}>
-                  {data.canManage && m.userId !== data.self?.id && <Button size="sm" variant="outline" onClick={() => { setNotice(null); setDialog({ action: 'remove', target: m }); }}>Remove</Button>}
+                  {data.canManage && m.userId !== data.self?.id && !(m.primary && !data.self?.primary && data.primaryProtection !== false) && <Button size="sm" variant="outline" onClick={() => { setNotice(null); setDialog({ action: 'remove', target: m }); }}>Remove</Button>}
+                  {data.canManage && m.primary && !data.self?.primary && data.primaryProtection !== false && <span style={{ color: 'var(--text-muted)' }}>Protected — only the primary owner can leave</span>}
                   {data.canManage && !m.usable && m.userId !== data.self?.id && <Button size="sm" variant="outline" onClick={() => { setNotice(null); setDialog({ action: 'recover', target: m }); }}>Recover</Button>}
                   {data.canManage && m.userId === data.self?.id && usableCount > 1 && <Button size="sm" variant="outline" onClick={() => { setNotice(null); setDialog({ action: 'remove', target: m }); }}>Leave</Button>}
                   {m.userId === data.self?.id && usableCount <= 1 && <span style={{ color: 'var(--text-muted)' }}>Last owner — add another before leaving</span>}

@@ -1,0 +1,304 @@
+{
+ "results": [
+  {
+   "name": "A draft listing without an auction is deleted (soft) with actor recorded",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "A repeated delete is idempotent (200 alreadyDeleted, stamp unchanged)",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "A second repeat does not rewrite the deletion stamp",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "A available non-auction listing is deletable",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "A sold listing: 409 LISTING_SOLD, not deleted",
+   "ok": true,
+   "detail": "409{\"success\":false,\"code\":\"LISTING_DELETE_BLOCKED\",\"reason\":\"LISTING_SOLD\",\"message\":\"This vehicle has been sold. A comple"
+  },
+  {
+   "name": "A reserved listing: 409 LISTING_RESERVED, not deleted",
+   "ok": true,
+   "detail": "409{\"success\":false,\"code\":\"LISTING_DELETE_BLOCKED\",\"reason\":\"LISTING_RESERVED\",\"message\":\"This vehicle is reserved for a b"
+  },
+  {
+   "name": "A liveAuction listing: 409 AUCTION_ACTIVE, not deleted",
+   "ok": true,
+   "detail": "409{\"success\":false,\"code\":\"LISTING_DELETE_BLOCKED\",\"reason\":\"AUCTION_ACTIVE\",\"message\":\"This listing has a live auction an"
+  },
+  {
+   "name": "A endedAuction listing: 409 AUCTION_CLOSED, not deleted",
+   "ok": true,
+   "detail": "409{\"success\":false,\"code\":\"LISTING_DELETE_BLOCKED\",\"reason\":\"AUCTION_CLOSED\",\"message\":\"This listing has a closed auction "
+  },
+  {
+   "name": "A bidsCounter listing: 409 BIDS_PRESENT, not deleted",
+   "ok": true,
+   "detail": "409{\"success\":false,\"code\":\"LISTING_DELETE_BLOCKED\",\"reason\":\"BIDS_PRESENT\",\"message\":\"This listing has bids and cannot be "
+  },
+  {
+   "name": "A a bid row with a stale (zero) counter still blocks deletion",
+   "ok": true,
+   "detail": "409"
+  },
+  {
+   "name": "A a highest bidder with a zero counter blocks deletion",
+   "ok": true,
+   "detail": "409"
+  },
+  {
+   "name": "A bid rows are intact after the refused deletion",
+   "ok": true,
+   "detail": "1"
+  },
+  {
+   "name": "A non-owner cannot delete another dealer's listing (403) and it stays",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "A unknown id -> 404",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "name": "A unauthenticated delete -> 401",
+   "ok": true,
+   "detail": "401"
+  },
+  {
+   "name": "A delete without a valid CSRF token -> 403 and the listing stays",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "A 10 concurrent deletes: all succeed, exactly one deletion stamp",
+   "ok": true,
+   "detail": "200,200,200,200,200,200,200,200,200,200"
+  },
+  {
+   "name": "A race: a reservation committing during the delete makes the delete fail (409), not silently succeed",
+   "ok": true,
+   "detail": "409 {\"success\":false,\"code\":\"LISTING_DELETE_BLOCKED\",\"reason\":\"LISTING_RESERVED\",\"message\":\"This vehicle is reserved for a b[\"-\",\"reserved\",\"-\"]"
+  },
+  {
+   "name": "A race: a bid counter committing during the delete makes the delete fail (409)",
+   "ok": true,
+   "detail": "409"
+  },
+  {
+   "name": "A bulk delete soft-deletes only eligible own listings and reports the rest",
+   "ok": true,
+   "detail": "200{\"success\":true,\"deletedCount\":1,\"skipped\":[{\"id\":\"b3244bcb-3da8-4dff-9f21-e928769d2837\",\"code\":\"LISTING_SOLD\",\"reason\":\"This vehicle has been sold. A completed sale is unwound through the escrow/refu"
+  },
+  {
+   "name": "A bulk delete never removes rows (history preserved)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "A bulk delete of only protected listings -> 409 with reasons",
+   "ok": true,
+   "detail": "409"
+  },
+  {
+   "name": "B a seller cannot set the reserved state themselves (400)",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "C an active listing is visible publicly before deletion",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "C and in the owner inventory",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "C after deletion it disappears from public search",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "C public detail -> 404",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "name": "C owner detail -> 404 (history is admin-only)",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "name": "C owner inventory no longer lists it",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "C my-listings no longer lists it",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "C dealer my-cars no longer lists it",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "C /api/dealer/cars no longer lists it",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "C owner cannot edit a deleted listing (404) and the row is unchanged",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "name": "C owner cannot add photos to a deleted listing (404)",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "name": "C owner cannot remove photos from a deleted listing (404)",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "name": "C click/favourite counters do not move for a deleted listing",
+   "ok": true,
+   "detail": "0|0"
+  },
+  {
+   "name": "C a deleted listing cannot be newly favourited",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "name": "C admin retains historical access to deleted listings (admin list)",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "D a user with no membership gets 403 (not 500) from organisation routes",
+   "ok": true,
+   "detail": "403{\"success\":false,\"code\":\"DEALER_ORG_ACCESS_REQUIRED\",\"message\":\"Active dealer or"
+  },
+  {
+   "name": "D owner invites a member; invitation secrets are not returned",
+   "ok": true,
+   "detail": "201"
+  },
+  {
+   "name": "D owner team list never exposes invitation secrets",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "D legacy team list never exposes invitation secrets",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "D legacy invite route is retired (410) instead of failing with 500",
+   "ok": true,
+   "detail": "410"
+  },
+  {
+   "name": "D invitee accepts once",
+   "ok": true,
+   "detail": "200{\"success\":true,\"data\":{\"id\":\"c2923f26-6737-45ca-a37a-5b5b21190f29\",\"dealer\":\"5cc1dda3-7942-46e2-b23"
+  },
+  {
+   "name": "D replaying the invitation token fails",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "name": "D an active member WITHOUT canManageTeam is refused the roster (403)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "D member cannot self-promote through the API (403)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "D member cannot self-grant permissions through the API (403)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "D a member granted canManageTeam can list their own organisation roster only",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "D a manager-permission member cannot mint a manager (403 TEAM_ROLE_OWNER_ONLY)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "D organisation-id substitution: A's member cannot modify B's team row (404)",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "name": "D ...nor remove it (404)",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "name": "D a client-supplied dealerId never selects the organisation",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "D a member cannot remove themselves",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "D owner removes the member",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "D revocation applies on the very next request (existing session loses access)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "D a revoked invitation cannot be re-accepted",
+   "ok": true,
+   "detail": "404"
+  },
+  {
+   "name": "E a session issued before a token-version bump is rejected (401)",
+   "ok": true,
+   "detail": "200/401"
+  },
+  {
+   "name": "E a banned account's existing session is refused",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "E a forged/tampered token is rejected (401)",
+   "ok": true,
+   "detail": "401"
+  }
+ ]
+}

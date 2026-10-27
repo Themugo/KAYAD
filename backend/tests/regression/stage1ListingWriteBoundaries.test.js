@@ -27,8 +27,11 @@ const makeCarDoc = () => {
   return doc;
 };
 const softDelete = jest.fn(async () => ({}));
+// Phase 14.7: deleteCar now writes through the race-safe guarded method (same actor/id arguments) and pre-checks bid rows.
+const softDeleteGuarded = jest.fn(async () => ({ modifiedCount: 1 }));
+const countBidRows = jest.fn(async () => 0);
 jest.unstable_mockModule("../../models/Car.js", () => ({
-  default: { findById: jest.fn(async () => (carRow ? makeCarDoc() : null)), softDelete },
+  default: { findById: jest.fn(async () => (carRow ? makeCarDoc() : null)), softDelete, softDeleteGuarded, countBidRows },
 }));
 jest.unstable_mockModule("../../models/User.js", () => ({
   default: {
@@ -179,12 +182,13 @@ describe("S1-LIST-03 cross-owner edit/delete requires listing-management authori
     const res = mkRes();
     await deleteCar({ params: { id: "car-1" }, user: GHOST }, res);
     expect(res.code).toBe(403);
+    expect(softDeleteGuarded).not.toHaveBeenCalled();
     expect(softDelete).not.toHaveBeenCalled();
   });
   test("admin can delete it", async () => {
     const res = mkRes();
     await deleteCar({ params: { id: "car-1" }, user: ADMIN }, res);
-    expect(softDelete).toHaveBeenCalledWith("car-1", "admin-1");
+    expect(softDeleteGuarded).toHaveBeenCalledWith("car-1", "admin-1");
   });
 });
 

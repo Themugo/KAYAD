@@ -1,0 +1,13 @@
+# 05 Browser investigation and rerun
+Tier: [B] real frontend bundle, MOCKED API. Not local-backend, not live staging.
+## The 14.5 "page.goto interrupted by another navigation" failure
+- Observed once, at section=customers, while a backend test run and the frontend build ran in parallel on a 2-core machine; the rerun on an idle machine passed.
+- Evidence gathered: every load produces 2 main-frame navigation events (the document load plus the app's own history.replaceState + popstate in src/App.tsx, lines ~138-141 and ~472). A cold Vite dev server also prints optimiser activity ("Forced re-optimization of dependencies", evidence logs/vite-dev-cold.log) which can reload a page mid-navigation.
+- Reproduction attempts: runbooks/phase14-6-20261026/nav_interruption_repro.cjs, 15 loads idle and 25 loads with 6 CPU-burning processes on 2 cores, against a cold (--force) dev server: 0 interruptions (logs/repro-dev-idle.txt, repro-dev-stress.txt). The full 48-view run on the dev server and on the production build also had 0.
+- Conclusion: NOT reproduced, so the root cause is not proven. Most probable cause: a race between the page load and a same-document or dev-optimiser navigation under heavy CPU contention. No application defect was found; the app code was not changed for this.
+- Test synchronisation changed (justified by the above): fixed 2200 ms sleeps replaced by waiting for the "Dealer workspace" landmark and network idle; one retry only for that specific error, and every occurrence is recorded in navInterruptions (empty in all 14.6 runs). No assertion was removed; many were added.
+## Final run (production build via vite preview, mocked API): exit 0
+- 14 sections + new/edit form x desktop/tablet/mobile = 48 views: 0 crashes, 0 px horizontal overflow, 0 serious/critical axe violations, 0 page errors, 0 console errors, 0 non-API failed responses.
+- A first preview run found 3 real axe serious color-contrast violations (leads stage badge) - fixed in the app, rerun clean. A mobile photo grid overflowed its card - fixed (min-w-0), rerun clean.
+- Flows (desktop and mobile; tablet runs navigation/keyboard): direct URL, reload, sidebar active state, Back/Forward; listing create (multipart, validation); edit (existing images not sent or dropped); photo add (multipart) / remove after confirmation; listing remove after confirmation and empty state; settings save then reload persistence; settings 403 state; team invite, team remove with Escape-cancel and focus; team 403 denial; empty and 500 states with retry recovery; keyboard focus ring (3px outline).
+- Results: evidence/phase14-6-20261026/workflow-browser-results.json, logs/browser-preview.txt. Screenshots at 1280, 768, 390.

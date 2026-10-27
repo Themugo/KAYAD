@@ -783,8 +783,8 @@ function AppInner() {
               K
             </div>
             <div>
-              <p className="font-bold text-white">KAYAD Automotive Marketplace East Africa</p>
-              <p className="text-[11px] text-[#94A3B8]">Verified Automotive & Escrow Platform East Africa</p>
+              <p className="font-bold text-white">KAYAD KE Automotive Marketplace</p>
+              <p className="text-[11px] text-[#94A3B8]">Verified Automotive & Escrow Platform · Kenya</p>
             </div>
           </div>
 

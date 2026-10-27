@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 import * as dealerApi from '../../../services/dealerPlatformApi';
 
@@ -18,6 +18,12 @@ export const TEAM_ROLES = [
   { id: 'finance_officer', label: 'Finance officer' },
   { id: 'viewer', label: 'Viewer' },
 ];
+
+const STATUS_LABELS: Record<string, { label: string; cls: string }> = {
+  active: { label: 'Active', cls: 'bg-emerald-100 text-emerald-800' },
+  invited: { label: 'Pending invitation', cls: 'bg-[#FFF4D6] text-[#7A4B00]' },
+  suspended: { label: 'Suspended', cls: 'bg-[#FEF3F2] text-[#7A271A]' },
+};
 
 const inputCls = 'px-3 py-2 border border-[#B9D3CF] rounded-lg text-sm text-[#0A3340] bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#0A3340]';
 const btnCls = 'px-3 py-1 text-xs font-bold text-[#176B87] border border-[#B9D3CF] rounded-lg hover:bg-white disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]';
@@ -43,6 +49,8 @@ export default function DealerTeamPanel({ team, onChanged }: Props) {
   const [notice, setNotice] = useState<string | null>(null);
   const [confirmId, setConfirmId] = useState<string | null>(null);
   const lock = useRef(false);
+  const confirmRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => { if (confirmId) confirmRef.current?.focus(); }, [confirmId]);
 
   const run = async (id: string | null, fn: () => Promise<any>, ok: string) => {
     if (lock.current) return false;
@@ -116,7 +124,8 @@ export default function DealerTeamPanel({ team, onChanged }: Props) {
               <li key={member.id} className="p-4 bg-[#F6FAF9] rounded-xl flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
                 <div className="min-w-0">
                   <p className="font-medium text-[#0A3340] truncate">{name}</p>
-                  <span className="px-2 py-0.5 rounded-full bg-[#EEF7F5] text-[#475569] text-xs capitalize">{member.status}</span>
+                  <span className={`px-2 py-0.5 rounded-full text-xs ${(STATUS_LABELS[member.status] || { cls: 'bg-[#EEF7F5] text-[#475569]' }).cls}`}>{(STATUS_LABELS[member.status] || { label: String(member.status || 'Unknown') }).label}</span>
+                  {member.status === 'invited' && <p className="text-xs text-[#475569] mt-1">Waiting for the invitee to accept. They cannot be activated from here.</p>}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
                   <label className="sr-only" htmlFor={`role-${member.id}`}>Role for {name}</label>
@@ -133,12 +142,13 @@ export default function DealerTeamPanel({ team, onChanged }: Props) {
                     <button type="button" className={btnCls} disabled={busy} onClick={() => run(member.id, () => dealerApi.updateTeamMember(member.id, { status: 'active' }), `${name} reactivated.`)}>Reactivate</button>
                   )}
                   {confirmId === member.id ? (
-                    <>
-                      <button type="button" className={`${btnCls} !text-[#B42318]`} disabled={busy} onClick={async () => { await run(member.id, () => dealerApi.removeTeamMember(member.id), `${name} removed.`); setConfirmId(null); }}>Confirm remove</button>
+                    <div role="group" aria-label={`Confirm removal of ${name}`} onKeyDown={(e) => { if (e.key === 'Escape') setConfirmId(null); }} className="flex flex-wrap items-center gap-2 p-2 rounded-lg bg-[#FEF3F2] border border-[#FDA29B]">
+                      <span className="text-xs text-[#7A271A]">Remove {name}? They will lose access to this dealership.</span>
+                      <button ref={confirmRef} type="button" className={`${btnCls} !text-[#B42318]`} disabled={busy} onClick={async () => { await run(member.id, () => dealerApi.removeTeamMember(member.id), `${name} removed.`); setConfirmId(null); }}>Confirm remove</button>
                       <button type="button" className={btnCls} onClick={() => setConfirmId(null)}>Keep</button>
-                    </>
+                    </div>
                   ) : (
-                    <button type="button" className={btnCls} disabled={busy} onClick={() => setConfirmId(member.id)}>Remove</button>
+                    <button type="button" className={btnCls} disabled={busy} onClick={() => setConfirmId(member.id)} aria-label={`Remove ${name}`}>Remove</button>
                   )}
                   {busy && <Loader2 className="w-4 h-4 animate-spin text-[#176B87]" aria-label="Working" />}
                 </div>

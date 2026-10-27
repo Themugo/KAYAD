@@ -62,7 +62,7 @@ export interface AuthResponse {
  * between, rather than a single generic "it failed" - a login attempt
  * needs to tell "wrong password" apart from "server unreachable" to
  * show the right message. */
-export type AuthErrorKind = 'invalid_credentials' | 'email_verification_required' | 'owner_identity_unverified' | 'forbidden' | 'rate_limited' | 'csrf' | 'validation' | 'conflict' | 'network' | 'server' | 'unknown';
+export type AuthErrorKind = 'invalid_credentials' | 'email_verification_required' | 'owner_identity_unverified' | 'mfa_required' | 'forbidden' | 'rate_limited' | 'csrf' | 'validation' | 'conflict' | 'network' | 'server' | 'unknown';
 
 export class AuthApiError extends Error {
   kind: AuthErrorKind;
@@ -85,6 +85,8 @@ async function authFetch(path: string, options: RequestInit & { timeout?: number
     const responseCode = (error.responseData as { code?: unknown } | undefined)?.code;
     const kind: AuthErrorKind = error.status === 403 && responseCode === 'OWNER_IDENTITY_UNVERIFIED'
       ? 'owner_identity_unverified'
+      : error.status === 401 && responseCode === 'MFA_REQUIRED'
+      ? 'mfa_required'
       : error.status === 403 && /csrf/i.test(error.message)
       ? 'csrf'
       : error.status === 403 && /verify your email/i.test(error.message)
@@ -143,10 +145,10 @@ export async function logout(): Promise<void> {
   await authFetch('/api/v1/auth/logout', { method: 'POST' });
 }
 
-export async function login(email: string, password: string): Promise<BackendUser> {
+export async function login(email: string, password: string, mfaCode?: string): Promise<BackendUser> {
   const res = await authFetch('/api/v1/auth/login', {
     method: 'POST',
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(mfaCode ? { email, password, mfaCode } : { email, password }),
   });
   if (!res.user) throw new AuthApiError(res.message || 'Login failed.', 'unknown', 500);
   return res.user;

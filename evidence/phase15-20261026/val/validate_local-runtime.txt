@@ -1,0 +1,2 @@
+PASS local runtime startup/health/degraded API contract
+{"live":200,"health":200,"ready":503,"cars":503}

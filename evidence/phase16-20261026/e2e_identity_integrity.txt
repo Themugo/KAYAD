@@ -1,0 +1,14 @@
+PASS dealer registration succeeds
+PASS same address in another case/whitespace is refused ("MIXED.CASE_1793043984391_1@EX)
+PASS same address in another case/whitespace is refused ("mixed.case_1793043984391_1@ex)
+PASS same address in another case/whitespace is refused (" Mixed.Case_1793043984391_1@e)
+PASS exactly one users row exists for that address (case-insensitive)
+PASS exactly one auth row and one profile row
+PASS unverified+pending dealer session (verification not enforced locally) cannot create listings or reach owner routes
+PASS verified-but-pending dealer cannot create listings
+PASS pending dealer cannot reach owner or admin routes
+PASS dealer capability is derived from the dealers record, not from the role label alone (no approved dealers row)
+PASS designated owner address cannot be registered as a dealer (any case)
+PASS no profile or auth row is orphaned
+
+RESULT pass=12 fail=0

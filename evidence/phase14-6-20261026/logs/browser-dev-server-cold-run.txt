@@ -1,0 +1,78 @@
+desktop overview crash=false overflow=0 axe=none errs=0
+desktop inventory crash=false overflow=0 axe=none errs=0
+desktop leads crash=false overflow=0 axe=none errs=0
+desktop pipeline crash=false overflow=0 axe=none errs=0
+desktop customers crash=false overflow=0 axe=none errs=0
+desktop analytics crash=false overflow=0 axe=none errs=0
+desktop finance crash=false overflow=0 axe=none errs=0
+desktop inspections crash=false overflow=0 axe=none errs=0
+desktop auctions crash=false overflow=0 axe=none errs=0
+desktop escrow crash=false overflow=0 axe=none errs=0
+desktop marketing crash=false overflow=0 axe=none errs=0
+desktop reputation crash=false overflow=0 axe=none errs=0
+desktop team crash=false overflow=0 axe=none errs=0
+desktop settings crash=false overflow=0 axe=none errs=0
+desktop inventory-new crash=false overflow=0 axe=none errs=0
+desktop inventory-edit crash=false overflow=0 axe=none errs=0
+tablet overview crash=false overflow=0 axe=none errs=0
+tablet inventory crash=false overflow=0 axe=none errs=0
+tablet leads crash=false overflow=0 axe=none errs=0
+tablet pipeline crash=false overflow=0 axe=none errs=0
+tablet customers crash=false overflow=0 axe=none errs=0
+tablet analytics crash=false overflow=0 axe=none errs=0
+tablet finance crash=false overflow=0 axe=none errs=0
+tablet inspections crash=false overflow=0 axe=none errs=0
+tablet auctions crash=false overflow=0 axe=none errs=0
+tablet escrow crash=false overflow=0 axe=none errs=0
+tablet marketing crash=false overflow=0 axe=none errs=0
+tablet reputation crash=false overflow=0 axe=none errs=0
+tablet team crash=false overflow=0 axe=none errs=0
+tablet settings crash=false overflow=0 axe=none errs=0
+tablet inventory-new crash=false overflow=0 axe=none errs=0
+tablet inventory-edit crash=false overflow=0 axe=none errs=0
+mobile overview crash=false overflow=0 axe=none errs=0
+mobile inventory crash=false overflow=0 axe=none errs=0
+mobile leads crash=false overflow=0 axe=none errs=0
+mobile pipeline crash=false overflow=0 axe=none errs=0
+mobile customers crash=false overflow=0 axe=none errs=0
+mobile analytics crash=false overflow=0 axe=none errs=0
+mobile finance crash=false overflow=0 axe=none errs=0
+mobile inspections crash=false overflow=0 axe=none errs=0
+mobile auctions crash=false overflow=0 axe=none errs=0
+mobile escrow crash=false overflow=0 axe=none errs=0
+mobile marketing crash=false overflow=0 axe=none errs=0
+mobile reputation crash=false overflow=0 axe=none errs=0
+mobile team crash=false overflow=0 axe=none errs=0
+mobile settings crash=false overflow=0 axe=none errs=0
+mobile inventory-new crash=false overflow=0 axe=none errs=0
+mobile inventory-edit crash=false overflow=0 axe=none errs=0
+FLOW {"viewport":"desktop","flow":"navigation-history","activePipeline":true,"backLeads":true,"fwdPipeline":true,"afterReload":true,"pipelineStageHeadings":["New","Contacted","Negotiating","Sold"],"otherStageNote":false}
+FLOW {"viewport":"desktop","flow":"keyboard-focus","focus":{"tag":"A","outline":"solid 3px"}}
+FLOW {"viewport":"desktop","flow":"listing-create","validationShown":true,"requests":1,"multipart":true,"urlAfter":"/?nav=dealer-dashboard&section=inventory"}
+FLOW {"viewport":"desktop","flow":"listing-edit","photosShownBeforeSave":2,"requests":1,"path":"/api/cars/c1","bodyHasImages":false,"body":"{\"title\":\"Prado TX\",\"brand\":\"Toyota\",\"model\":\"Prado\",\"year\":2018,\"price\":4700000,\"city\":\"Nairobi\"}"}
+FLOW {"viewport":"desktop","flow":"photo-management","uploadRequests":1,"multipart":true,"afterAdd":3,"noRequestBeforeConfirm":true,"afterRemove":2,"deleteRequest":["/api/cars/c1/images/0"]}
+FLOW {"viewport":"desktop","flow":"listing-remove","noDeleteBeforeConfirm":true,"delete":["/api/cars/c1"],"emptyStateShown":true}
+FLOW {"viewport":"desktop","flow":"settings-save-and-reload","verificationCard":"Pending KAYAD review","put":["/api/dealer-platform/profile/d1 {\"businessName\":\"Amani Motors Ltd\",\"location\":\"Nairobi\",\"bio\":\"Hi\",\"phone\":\"0700000000\"}"],"reverifyNotice":true,"persistedAfterReload":"Amani Motors Ltd"}
+FLOW {"viewport":"desktop","flow":"settings-forbidden","errorShown":true}
+FLOW {"viewport":"desktop","flow":"team-invite","post":["/api/dealer-platform/team/invite {\"email\":\"new@amani.test\",\"role\":\"sales_agent\"}"]}
+FLOW {"viewport":"desktop","flow":"team-remove-confirm","confirmFocused":true,"cancelledNoRequest":true,"delete":["/api/dealer-platform/team/m1"]}
+FLOW {"viewport":"desktop","flow":"team-invite-denied","denialShown":true}
+FLOW {"viewport":"desktop","flow":"empty-and-error-states","emptyInventory":true,"emptyLeads":true,"inventoryErrorWithRetry":true,"retryRecovered":true}
+FLOW {"viewport":"desktop","flow":"console-and-network","pageErrors":[],"consoleErrors":[],"nonApiFailedResponses":[]}
+FLOW {"viewport":"tablet","flow":"navigation-history","activePipeline":true,"backLeads":true,"fwdPipeline":true,"afterReload":true,"pipelineStageHeadings":["New","Contacted","Negotiating","Sold"],"otherStageNote":false}
+FLOW {"viewport":"tablet","flow":"keyboard-focus","focus":{"tag":"A","outline":"solid 3px"}}
+FLOW {"viewport":"tablet","flow":"console-and-network","pageErrors":[],"consoleErrors":[],"nonApiFailedResponses":[]}
+FLOW {"viewport":"mobile","flow":"navigation-history","activePipeline":true,"backLeads":true,"fwdPipeline":true,"afterReload":true,"pipelineStageHeadings":["New","Contacted","Negotiating","Sold"],"otherStageNote":false}
+FLOW {"viewport":"mobile","flow":"keyboard-focus","focus":{"tag":"A","outline":"solid 3px"}}
+FLOW {"viewport":"mobile","flow":"listing-create","validationShown":true,"requests":1,"multipart":true,"urlAfter":"/?nav=dealer-dashboard&section=inventory"}
+FLOW {"viewport":"mobile","flow":"listing-edit","photosShownBeforeSave":2,"requests":1,"path":"/api/cars/c1","bodyHasImages":false,"body":"{\"title\":\"Prado TX\",\"brand\":\"Toyota\",\"model\":\"Prado\",\"year\":2018,\"price\":4700000,\"city\":\"Nairobi\"}"}
+FLOW {"viewport":"mobile","flow":"photo-management","uploadRequests":1,"multipart":true,"afterAdd":3,"noRequestBeforeConfirm":true,"afterRemove":2,"deleteRequest":["/api/cars/c1/images/0"]}
+FLOW {"viewport":"mobile","flow":"listing-remove","noDeleteBeforeConfirm":true,"delete":["/api/cars/c1"],"emptyStateShown":true}
+FLOW {"viewport":"mobile","flow":"settings-save-and-reload","verificationCard":"Pending KAYAD review","put":["/api/dealer-platform/profile/d1 {\"businessName\":\"Amani Motors Ltd\",\"location\":\"Nairobi\",\"bio\":\"Hi\",\"phone\":\"0700000000\"}"],"reverifyNotice":true,"persistedAfterReload":"Amani Motors Ltd"}
+FLOW {"viewport":"mobile","flow":"settings-forbidden","errorShown":true}
+FLOW {"viewport":"mobile","flow":"team-invite","post":["/api/dealer-platform/team/invite {\"email\":\"new@amani.test\",\"role\":\"sales_agent\"}"]}
+FLOW {"viewport":"mobile","flow":"team-remove-confirm","confirmFocused":true,"cancelledNoRequest":true,"delete":["/api/dealer-platform/team/m1"]}
+FLOW {"viewport":"mobile","flow":"team-invite-denied","denialShown":true}
+FLOW {"viewport":"mobile","flow":"empty-and-error-states","emptyInventory":true,"emptyLeads":true,"inventoryErrorWithRetry":true,"retryRecovered":true}
+FLOW {"viewport":"mobile","flow":"console-and-network","pageErrors":[],"consoleErrors":[],"nonApiFailedResponses":[]}
+NAV_INTERRUPTIONS []

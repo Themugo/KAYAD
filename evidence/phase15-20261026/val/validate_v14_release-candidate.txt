@@ -1,0 +1,19 @@
+PASS package Node engine >=22.22.2
+PASS npm script lint
+PASS npm script test
+PASS npm script build
+PASS npm script validate:release
+PASS npm script validate:v14:holistic
+PASS npm script validate:v14:live-certification-contract
+PASS npm script certify:v14:live-api
+PASS npm script verify:production
+PASS no service-role/secret credentials in frontend/public source
+FAIL backend placeholder scan: backend/routes/adminRoutes.js
+PASS CI pins Node 22.22.2
+PASS deployment pins Node 22.22.2
+PASS production deployment refuses missing Vercel credentials and verifies deployment
+PASS Vercel uses reproducible npm ci/build commands
+FAIL executed validate:v14:holistic: FAIL no backend 501 placeholders | PASS live certification contract converged | V14 holistic source gate: 17/18 PASS
+PASS executed validate:v14:live-certification-contract
+
+V14 release-candidate gate: 15 PASS, 2 FAIL

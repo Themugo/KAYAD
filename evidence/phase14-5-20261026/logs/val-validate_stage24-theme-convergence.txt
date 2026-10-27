@@ -1,0 +1,16 @@
+PASS canonical theme stylesheet exists
+PASS theme stylesheet imported by canonical index
+PASS hero background uses canonical dark-teal token
+PASS hero accent uses canonical brand token
+PASS surface and border tokens reuse established theme
+PASS Support uses shared branded hero
+PASS public inspections hero uses shared branded hero
+PASS account inspections hero uses shared branded hero
+PASS public surface scope preserved
+PASS keyboard focus treatment included
+PASS reduced-motion preference included
+PASS role and status color behavior not globally overridden
+PASS homepage full-bleed hero composition remains unflattened
+FAIL theme audit created before change
+
+Stage 24 theme convergence: 13/14 PASS

@@ -1,0 +1,282 @@
+{
+ "cars": {
+  "ACT-available": "18b7db9e-30dc-4e17-ab6a-2d81c3ff8405",
+  "DEL-available": "861ff0fd-da76-4266-95a8-59a641b6df65",
+  "ACT-pending": "cd691de7-ae19-4339-ab83-5f3fe16416e8",
+  "DEL-pending": "32096cb4-2eec-42ce-8931-644d8b988e68",
+  "ACT-draft": "23e8f709-1e83-4829-9178-271ac79a9884",
+  "DEL-draft": "f4eb341d-6a9a-42e8-bbb1-badbd2fa14e4",
+  "ACT-hidden": "75db0f9b-c5ef-43b6-82b9-64422bed05f6",
+  "DEL-hidden": "34654b3a-c305-40e3-a859-aabcc18942f7",
+  "ACT-reserved": "493fe129-352c-45a5-b6bc-edacaaa79ad1",
+  "DEL-reserved": "6f0b7edd-8637-432d-8e7e-019fbaacb4b2",
+  "ACT-sold": "ac9af874-bbd3-41f9-81a9-6fb1d58a4ac7",
+  "DEL-sold": "17966cb9-1b27-4607-94c2-8b52bbd9045f",
+  "DEL-live-auction": "223d9071-c873-4573-888e-6c9b8e148fc4",
+  "ACT-live-auction": "df66d7d1-d325-4708-880e-7272bf04ea0d"
+ },
+ "out": [
+  {
+   "label": "public list",
+   "method": "GET",
+   "path": "/api/cars?limit=100",
+   "status": 200,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "public list (search term)",
+   "method": "GET",
+   "path": "/api/cars?search=84de&limit=100",
+   "status": 200,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "public list (include status filter)",
+   "method": "GET",
+   "path": "/api/cars?status=hidden&limit=100",
+   "status": 400,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "public list by dealer",
+   "method": "GET",
+   "path": "/api/cars?dealer=:id&limit=100",
+   "status": 200,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "detail DEL-available anon",
+   "method": "GET",
+   "path": "/api/cars/:id",
+   "status": 404,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "detail DEL-pending anon",
+   "method": "GET",
+   "path": "/api/cars/:id",
+   "status": 404,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "detail DEL-draft anon",
+   "method": "GET",
+   "path": "/api/cars/:id",
+   "status": 404,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "detail DEL-hidden anon",
+   "method": "GET",
+   "path": "/api/cars/:id",
+   "status": 404,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "detail DEL-reserved anon",
+   "method": "GET",
+   "path": "/api/cars/:id",
+   "status": 404,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "detail DEL-sold anon",
+   "method": "GET",
+   "path": "/api/cars/:id",
+   "status": 404,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "detail DEL-live-auction anon",
+   "method": "GET",
+   "path": "/api/cars/:id",
+   "status": 404,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "price-history of deleted",
+   "method": "GET",
+   "path": "/api/cars/:id/price-history",
+   "status": 404,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "insights of deleted",
+   "method": "GET",
+   "path": "/api/cars/:id/insights",
+   "status": 404,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "valuation of deleted",
+   "method": "GET",
+   "path": "/api/cars/:id/valuation",
+   "status": 404,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "click on deleted",
+   "method": "POST",
+   "path": "/api/cars/:id/click",
+   "status": 200,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "favorite via car route",
+   "method": "POST",
+   "path": "/api/cars/:id/favorite",
+   "status": 200,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "favorite add deleted",
+   "method": "POST",
+   "path": "/api/favorites/:id",
+   "status": 404,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "favorite toggle deleted",
+   "method": "POST",
+   "path": "/api/favorites/:id/toggle",
+   "status": 200,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "market pulse deleted",
+   "method": "GET",
+   "path": "/api/market/pulse/:id",
+   "status": 404,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "auctions list",
+   "method": "GET",
+   "path": "/api/auctions?limit=100",
+   "status": 200,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "auctions live",
+   "method": "GET",
+   "path": "/api/auctions/live?limit=100",
+   "status": 400,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "auction detail deleted",
+   "method": "GET",
+   "path": "/api/auctions/:id",
+   "status": 404,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "search suggestions",
+   "method": "GET",
+   "path": "/api/search?q=84de",
+   "status": 200,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "dealer my-listings",
+   "method": "GET",
+   "path": "/api/cars/my-listings",
+   "status": 200,
+   "deletedRowsReturned": [
+    "DEL-available",
+    "DEL-pending",
+    "DEL-draft",
+    "DEL-hidden",
+    "DEL-reserved",
+    "DEL-sold",
+    "DEL-live-auction"
+   ]
+  },
+  {
+   "label": "dealer my-cars",
+   "method": "GET",
+   "path": "/api/cars/dealer/my-cars",
+   "status": 200,
+   "deletedRowsReturned": [
+    "DEL-live-auction",
+    "DEL-sold",
+    "DEL-reserved",
+    "DEL-hidden",
+    "DEL-draft",
+    "DEL-pending",
+    "DEL-available"
+   ]
+  },
+  {
+   "label": "dealer /api/dealer/cars",
+   "method": "GET",
+   "path": "/api/dealer/cars?limit=100",
+   "status": 200,
+   "deletedRowsReturned": [
+    "DEL-available",
+    "DEL-pending",
+    "DEL-draft",
+    "DEL-hidden",
+    "DEL-reserved",
+    "DEL-sold",
+    "DEL-live-auction"
+   ]
+  },
+  {
+   "label": "dealer-platform inventory",
+   "method": "GET",
+   "path": "/api/dealer-platform/inventory?limit=100",
+   "status": 200,
+   "deletedRowsReturned": [
+    "DEL-available",
+    "DEL-pending",
+    "DEL-draft",
+    "DEL-hidden",
+    "DEL-reserved",
+    "DEL-sold",
+    "DEL-live-auction"
+   ]
+  },
+  {
+   "label": "dealer-platform dashboard",
+   "method": "GET",
+   "path": "/api/dealer-platform/dashboard",
+   "status": 200,
+   "deletedRowsReturned": [
+    "DEL-available"
+   ]
+  },
+  {
+   "label": "owner detail of own deleted listing",
+   "method": "GET",
+   "path": "/api/cars/:id",
+   "status": 404,
+   "deletedRowsReturned": []
+  },
+  {
+   "label": "owner edits a deleted listing",
+   "method": "PUT",
+   "path": "/api/cars/:id",
+   "status": 200,
+   "deletedRowsReturned": [
+    "DEL-available"
+   ]
+  },
+  {
+   "label": "edit-after-delete result",
+   "status": 200,
+   "titleNow": "Edited after delete"
+  },
+  {
+   "label": "delete of already-deleted",
+   "status": 200,
+   "body": "{\"success\":true,\"message\":\"Already deleted\",\"alreadyDeleted\":true}"
+  },
+  {
+   "label": "BULK DELETE sold+reserved+live-auction",
+   "status": 200,
+   "body": "{\"success\":true,\"deletedCount\":3}",
+   "rowsRemainingInTable": "0"
+  }
+ ]
+}

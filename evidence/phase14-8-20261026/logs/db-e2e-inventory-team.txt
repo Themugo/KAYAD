@@ -1,0 +1,62 @@
+PASS A draft listing without an auction is deleted (soft) with actor recorded
+PASS A repeated delete is idempotent (200 alreadyDeleted, stamp unchanged)
+PASS A second repeat does not rewrite the deletion stamp
+PASS A available non-auction listing is deletable
+PASS A sold listing: 409 LISTING_SOLD, not deleted
+PASS A reserved listing: 409 LISTING_RESERVED, not deleted
+PASS A liveAuction listing: 409 AUCTION_ACTIVE, not deleted
+PASS A endedAuction listing: 409 AUCTION_CLOSED, not deleted
+PASS A bidsCounter listing: 409 BIDS_PRESENT, not deleted
+PASS A a bid row with a stale (zero) counter still blocks deletion
+PASS A a highest bidder with a zero counter blocks deletion
+PASS A bid rows are intact after the refused deletion
+PASS A non-owner cannot delete another dealer's listing (403) and it stays
+PASS A unknown id -> 404
+PASS A unauthenticated delete -> 401
+PASS A delete without a valid CSRF token -> 403 and the listing stays
+PASS A 10 concurrent deletes: all succeed, exactly one deletion stamp
+PASS A race: a reservation committing during the delete makes the delete fail (409), not silently succeed
+PASS A race: a bid counter committing during the delete makes the delete fail (409)
+PASS A bulk delete soft-deletes only eligible own listings and reports the rest
+PASS A bulk delete never removes rows (history preserved)
+PASS A bulk delete of only protected listings -> 409 with reasons
+PASS B a seller cannot set the reserved state themselves (400)
+PASS C an active listing is visible publicly before deletion
+PASS C and in the owner inventory
+PASS C after deletion it disappears from public search
+PASS C public detail -> 404
+PASS C owner detail -> 404 (history is admin-only)
+PASS C owner inventory no longer lists it
+PASS C my-listings no longer lists it
+PASS C dealer my-cars no longer lists it
+PASS C /api/dealer/cars no longer lists it
+PASS C owner cannot edit a deleted listing (404) and the row is unchanged
+PASS C owner cannot add photos to a deleted listing (404)
+PASS C owner cannot remove photos from a deleted listing (404)
+PASS C click/favourite counters do not move for a deleted listing
+PASS C a deleted listing cannot be newly favourited
+PASS C admin retains historical access to deleted listings (admin list)
+PASS D a user with no membership gets 403 (not 500) from organisation routes
+PASS D owner invites a member; invitation secrets are not returned
+PASS D owner team list never exposes invitation secrets
+PASS D legacy team list never exposes invitation secrets
+PASS D legacy invite route is retired (410) instead of failing with 500
+PASS D invitee accepts once
+PASS D replaying the invitation token fails
+PASS D an active member WITHOUT canManageTeam is refused the roster (403)
+PASS D member cannot self-promote through the API (403)
+PASS D member cannot self-grant permissions through the API (403)
+PASS D a member granted canManageTeam can list their own organisation roster only
+PASS D a manager-permission member cannot mint a manager (403 TEAM_ROLE_OWNER_ONLY)
+PASS D organisation-id substitution: A's member cannot modify B's team row (404)
+PASS D ...nor remove it (404)
+PASS D a client-supplied dealerId never selects the organisation
+PASS D a member cannot remove themselves
+PASS D owner removes the member
+PASS D revocation applies on the very next request (existing session loses access)
+PASS D a revoked invitation cannot be re-accepted
+PASS E a session issued before a token-version bump is rejected (401)
+PASS E a banned account's existing session is refused
+PASS E a forged/tampered token is rejected (401)
+
+60/60 passed

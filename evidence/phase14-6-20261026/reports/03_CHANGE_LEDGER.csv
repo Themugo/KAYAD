@@ -1,0 +1,25 @@
+path,change,purpose
+backend/controllers/authController.js,modified,Workstream E: phone validation and phoneVerified reset in updateProfile
+backend/tests/regression/authProfilePhoneVerification.test.js,added,9 tests for E
+backend/tests/regression/dealerTeamRoutePolicyMatrix.test.js,added,12 tests for G
+scripts/validate-v14-live-certification-contract.mjs,modified,Stale guard-name check updated; lint errors fixed
+src/services/vehicleApi.ts,modified,"addCarImages, deleteCarImage, deleteCar and image limits"
+src/pages/dealer/dashboard/DealerListingPhotos.tsx,added,Photo management component
+src/pages/dealer/dashboard/DealerListingForm.tsx,modified,Uses photo component; accepted image types
+src/pages/dealer/dashboard/DealerDashboard.tsx,modified,"Inventory card, listing removal, pipeline, contrast, unavailable values"
+src/pages/dealer/dashboard/DealerSettingsPanel.tsx,modified,Required/read-only note
+src/__tests__/pages/dealer/DealerWorkflowWrites.test.tsx,modified,"Photo, removal, pipeline, overview tests"
+src/__tests__/services/vehicleApi.test.ts,modified,Tests for the three new client calls
+runbooks/phase14-6-20261026/dealer_workflows_browser_check.cjs,added,14.6 browser verification
+runbooks/phase14-6-20261026/nav_interruption_repro.cjs,added,Navigation interruption reproduction
+evidence/phase14-6-20261026/reports/01_FOUNDATION_INTEGRITY_AND_PROVENANCE.md,added,14.6 report
+evidence/phase14-6-20261026/reports/02_DESIGN_AUDIT.md,added,14.6 report
+evidence/phase14-6-20261026/reports/04_ESLINT_COMPARISON.md,added,14.6 report
+evidence/phase14-6-20261026/reports/05_BROWSER_INVESTIGATION_AND_RERUN.md,added,14.6 report
+evidence/phase14-6-20261026/reports/06_SEVEN_VALIDATOR_RECONCILIATION.md,added,14.6 report
+evidence/phase14-6-20261026/reports/07_PROFILE_PHONE_REPORT.md,added,14.6 report
+evidence/phase14-6-20261026/reports/08_TEAM_PERMISSION_AND_LIFECYCLE_REPORT.md,added,14.6 report
+evidence/phase14-6-20261026/reports/09_PHOTO_AND_DELETION_CAPABILITY_REPORT.md,added,14.6 report
+evidence/phase14-6-20261026/reports/12_LIVE_STAGING_STATUS.md,added,14.6 report
+evidence/phase14-6-20261026/reports/13_KNOWN_GAPS_AND_RELEASE_DECISION.md,added,14.6 report
+evidence/phase14-6-20261026/workflow-browser-results.json,added,Browser results

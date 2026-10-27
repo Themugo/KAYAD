@@ -1,0 +1,27 @@
+PASS dashboard retry re-enters loading state
+PASS dashboard loading always settles in finally
+PASS lead pipeline does not invent zero for missing stage data
+PASS conversion metrics distinguish unavailable from zero
+PASS revenue uses a full locale-formatted amount instead of unconditional millions rounding
+PASS inventory cards handle missing price and view data honestly
+PASS team empty state does not direct users to an unrelated invitation flow
+PASS pipeline stage type accepts unavailable marker
+PASS analytics KPI grid collapses responsively on mobile
+PASS inventory retry always triggers another request
+PASS customers retry always triggers another request
+PASS team retry always triggers another request
+PASS reputation retry always triggers another request
+PASS analytics distinguishes unavailable values from zero
+PASS top vehicle cards avoid fabricated price and engagement values
+PASS overview presents explicit empty states for activity and vehicle performance
+PASS overview lower cards stack on mobile
+PASS inventory does not infer draft status when status is missing
+PASS dealer navigation identifies the active section accessibly
+PASS sidebar is grouped into the four audited navigation groups
+PASS dealer section is URL-backed with popstate support
+PASS header notification control is wired to the existing notifications route
+PASS auctions section links to the existing dealer auction routes
+PASS no dealer control routes to the seller platform (which re-renders this dashboard for dealers)
+PASS dashboard payload and list reads use the { success, data } response body
+PASS KPI labels match backend meaning
+RESULT 26/26 PASS

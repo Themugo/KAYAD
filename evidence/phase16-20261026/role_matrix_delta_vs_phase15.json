@@ -1,0 +1,528 @@
+[
+ [
+  "GET",
+  "/api/communications/admin/rollout",
+  {
+   "ghost_checker": [
+    200,
+    403
+   ],
+   "moderator": [
+    200,
+    403
+   ],
+   "ad_manager": [
+    200,
+    403
+   ],
+   "marketing": [
+    200,
+    403
+   ],
+   "escrow_officer": [
+    200,
+    403
+   ],
+   "hr": [
+    200,
+    403
+   ],
+   "accounts": [
+    200,
+    403
+   ]
+  }
+ ],
+ [
+  "PATCH",
+  "/api/communications/admin/rollout/channels/:channel",
+  {
+   "ghost_checker": [
+    500,
+    403
+   ],
+   "moderator": [
+    500,
+    403
+   ],
+   "ad_manager": [
+    500,
+    403
+   ],
+   "marketing": [
+    500,
+    403
+   ],
+   "escrow_officer": [
+    500,
+    403
+   ],
+   "technical_support": [
+    500,
+    403
+   ],
+   "hr": [
+    500,
+    403
+   ],
+   "accounts": [
+    500,
+    403
+   ]
+  }
+ ],
+ [
+  "PATCH",
+  "/api/communications/admin/rollout/events/:eventType/:channel",
+  {
+   "ghost_checker": [
+    500,
+    403
+   ],
+   "moderator": [
+    500,
+    403
+   ],
+   "ad_manager": [
+    500,
+    403
+   ],
+   "marketing": [
+    500,
+    403
+   ],
+   "escrow_officer": [
+    500,
+    403
+   ],
+   "technical_support": [
+    500,
+    403
+   ],
+   "hr": [
+    500,
+    403
+   ],
+   "accounts": [
+    500,
+    403
+   ]
+  }
+ ],
+ [
+  "GET",
+  "/api/communications/admin/templates",
+  {
+   "ghost_checker": [
+    200,
+    403
+   ],
+   "moderator": [
+    200,
+    403
+   ],
+   "ad_manager": [
+    200,
+    403
+   ],
+   "marketing": [
+    200,
+    403
+   ],
+   "escrow_officer": [
+    200,
+    403
+   ],
+   "hr": [
+    200,
+    403
+   ],
+   "accounts": [
+    200,
+    403
+   ]
+  }
+ ],
+ [
+  "POST",
+  "/api/communications/admin/templates",
+  {
+   "ghost_checker": [
+    500,
+    403
+   ],
+   "moderator": [
+    500,
+    403
+   ],
+   "ad_manager": [
+    500,
+    403
+   ],
+   "marketing": [
+    500,
+    403
+   ],
+   "escrow_officer": [
+    500,
+    403
+   ],
+   "technical_support": [
+    500,
+    403
+   ],
+   "hr": [
+    500,
+    403
+   ],
+   "accounts": [
+    500,
+    403
+   ]
+  }
+ ],
+ [
+  "PATCH",
+  "/api/communications/admin/templates/:id",
+  {
+   "ghost_checker": [
+    500,
+    403
+   ],
+   "moderator": [
+    500,
+    403
+   ],
+   "ad_manager": [
+    500,
+    403
+   ],
+   "marketing": [
+    500,
+    403
+   ],
+   "escrow_officer": [
+    500,
+    403
+   ],
+   "technical_support": [
+    500,
+    403
+   ],
+   "hr": [
+    500,
+    403
+   ],
+   "accounts": [
+    500,
+    403
+   ]
+  }
+ ],
+ [
+  "GET",
+  "/api/communications/admin/analytics",
+  {
+   "ghost_checker": [
+    200,
+    403
+   ],
+   "moderator": [
+    200,
+    403
+   ],
+   "ad_manager": [
+    200,
+    403
+   ],
+   "marketing": [
+    200,
+    403
+   ],
+   "escrow_officer": [
+    200,
+    403
+   ],
+   "hr": [
+    200,
+    403
+   ],
+   "accounts": [
+    200,
+    403
+   ]
+  }
+ ],
+ [
+  "GET",
+  "/api/communications/admin/provider-health",
+  {
+   "ghost_checker": [
+    200,
+    403
+   ],
+   "moderator": [
+    200,
+    403
+   ],
+   "ad_manager": [
+    200,
+    403
+   ],
+   "marketing": [
+    200,
+    403
+   ],
+   "escrow_officer": [
+    200,
+    403
+   ],
+   "hr": [
+    200,
+    403
+   ],
+   "accounts": [
+    200,
+    403
+   ]
+  }
+ ],
+ [
+  "GET",
+  "/api/communications/admin/history",
+  {
+   "ghost_checker": [
+    200,
+    403
+   ],
+   "moderator": [
+    200,
+    403
+   ],
+   "ad_manager": [
+    200,
+    403
+   ],
+   "marketing": [
+    200,
+    403
+   ],
+   "escrow_officer": [
+    200,
+    403
+   ],
+   "hr": [
+    200,
+    403
+   ],
+   "accounts": [
+    200,
+    403
+   ]
+  }
+ ],
+ [
+  "POST",
+  "/api/communications/admin/deliveries/:id/retry",
+  {
+   "ghost_checker": [
+    500,
+    403
+   ],
+   "moderator": [
+    500,
+    403
+   ],
+   "ad_manager": [
+    500,
+    403
+   ],
+   "marketing": [
+    500,
+    403
+   ],
+   "escrow_officer": [
+    500,
+    403
+   ],
+   "hr": [
+    500,
+    403
+   ],
+   "accounts": [
+    500,
+    403
+   ]
+  }
+ ],
+ [
+  "GET",
+  "/api/ledger/balance-sheet",
+  {
+   "ghost_checker": [
+    200,
+    403
+   ],
+   "moderator": [
+    200,
+    403
+   ],
+   "ad_manager": [
+    200,
+    403
+   ],
+   "marketing": [
+    200,
+    403
+   ],
+   "escrow_officer": [
+    200,
+    403
+   ],
+   "technical_support": [
+    200,
+    403
+   ],
+   "hr": [
+    200,
+    403
+   ]
+  }
+ ],
+ [
+  "GET",
+  "/api/ledger/trial-balance",
+  {
+   "ghost_checker": [
+    200,
+    403
+   ],
+   "moderator": [
+    200,
+    403
+   ],
+   "ad_manager": [
+    200,
+    403
+   ],
+   "marketing": [
+    200,
+    403
+   ],
+   "escrow_officer": [
+    200,
+    403
+   ],
+   "technical_support": [
+    200,
+    403
+   ],
+   "hr": [
+    200,
+    403
+   ]
+  }
+ ],
+ [
+  "GET",
+  "/api/ledger/reconciliation",
+  {
+   "ghost_checker": [
+    200,
+    403
+   ],
+   "moderator": [
+    200,
+    403
+   ],
+   "ad_manager": [
+    200,
+    403
+   ],
+   "marketing": [
+    200,
+    403
+   ],
+   "escrow_officer": [
+    200,
+    403
+   ],
+   "technical_support": [
+    200,
+    403
+   ],
+   "hr": [
+    200,
+    403
+   ]
+  }
+ ],
+ [
+  "GET",
+  "/api/ledger",
+  {
+   "ghost_checker": [
+    200,
+    403
+   ],
+   "moderator": [
+    200,
+    403
+   ],
+   "ad_manager": [
+    200,
+    403
+   ],
+   "marketing": [
+    200,
+    403
+   ],
+   "escrow_officer": [
+    200,
+    403
+   ],
+   "technical_support": [
+    200,
+    403
+   ],
+   "hr": [
+    200,
+    403
+   ]
+  }
+ ],
+ [
+  "GET",
+  "/api/ledger/:id",
+  {
+   "ghost_checker": [
+    404,
+    403
+   ],
+   "moderator": [
+    404,
+    403
+   ],
+   "ad_manager": [
+    404,
+    403
+   ],
+   "marketing": [
+    404,
+    403
+   ],
+   "escrow_officer": [
+    404,
+    403
+   ],
+   "technical_support": [
+    404,
+    403
+   ],
+   "hr": [
+    404,
+    403
+   ]
+  }
+ ]
+]

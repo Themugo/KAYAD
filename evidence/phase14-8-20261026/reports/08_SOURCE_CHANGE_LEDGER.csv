@@ -1,0 +1,14 @@
+file,change,reason
+backend/middleware/dealerOrgAccess.js,select real columns only,500 on every member request (real DB)
+backend/models/Car.js,softDeleteGuarded selects filtered columns + excludes reserved,42703 on every guarded delete; reserved protection
+backend/utils/carDeletionGuard.js,LISTING_RESERVED code and pre-check,reserved deletion policy
+backend/controllers/carController.js,my-listings excludes deleted; deleted listing read-only for owner edit/photos,soft-delete exposure
+backend/controllers/dealerPlatformController.js,inventory/lists exclude deleted; team rows strip token hashes,exposure + secret leak
+backend/controllers/favoriteController.js,404 favorite on deleted listing,exposure
+backend/routes/carRoutes.js,dealer my-cars excludes deleted; click/favorite 404 on deleted,exposure
+backend/routes/dealerRoutes.js,bulk-delete uses guarded soft delete; legacy invite 410; list sanitised; counts exclude deleted,hard delete bypass + token leak
+eslint.config.js,ignore runbooks/**/localdb/**,harness scripts are not application source
+runbooks/phase14-7-20261026/PROPOSED_dealer_teams_member_update_restriction.sql,marked SUPERSEDED,policy already owner-only
+backend/tests/regression/*,carSoftDeleteGuardedQuery listingDeletionGuard (updated); softDeletedListingReadOnly dealerOrgAccessColumnContract (new),regressions
+root docs,restored STAGE24 and STAGE5F7 authentic documents,validators
+runbooks/phase14-8-20261026/,local DB harness + browser scripts,evidence

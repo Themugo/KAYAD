@@ -1,0 +1,51 @@
+PASS canonical public palette remains centralized
+PASS public shell uses shared soft surface and avoids width overflow
+PASS public controls retain visible keyboard focus
+PASS public shell respects reduced-motion preferences
+PASS shared loading spinner uses KAYAD mint instead of legacy amber
+PASS public dealer page defaults to directory, not management console
+PASS dealer management switch is shown only to dealer/admin roles
+PASS App passes the current authenticated role into dealer view
+PASS public dealer copy does not promise universal verification
+PASS empty directory does not fabricate seller profiles
+PASS dealer management remains in existing component, not a duplicate portal
+PASS vehicle detail no longer creates client-only escrow records
+PASS purchase CTA routes eligible listings to escrow explainer and other listings to seller chat
+PASS purchase CTA says it does not initiate payment
+PASS purchase CTA avoids claiming all listings are escrow-protected
+PASS escrow badge includes the current preview/live label
+PASS inspection score uses its actual 0–100 scale
+PASS vehicle inspection panel avoids fabricated certificate/pass claims
+PASS vehicle trust panel gives verification steps rather than guarantees
+PASS inspection CTA copy defers scope and pricing to the selected provider
+PASS marketplace inventory copy avoids universal verified-listing claims
+PASS marketplace auction teaser asks visitors to review listing details
+PASS inspection marketing does not promise permanent report sharing
+PASS seller CTA describes the existing Seller Studio workflow
+PASS legacy gallery removes guaranteed escrow claims
+PASS legacy home hero uses neutral, verifiable marketplace copy
+PASS home feature pillars do not promise escrow, licensing or KRA vetting
+PASS escrow workflow no longer promises instant payout, GPS dispatch or regulated custody
+PASS comparison page avoids calling KAYAD a regulated marketplace
+PASS legacy escrow banner avoids bank custody and instant payout claims
+PASS legacy seller banner avoids invented popularity and blanket escrow promises
+PASS public trust strip no longer animates fabricated financial or satisfaction statistics
+PASS live-auction section only renders backend-confirmed live auctions
+PASS final public CTA avoids invented inventory totals and universal verification claims
+PASS global search does not claim direct KRA/NTSA integration
+PASS legacy homepage hero avoids blanket verified-dealer and escrow claims
+PASS category discovery copy avoids universal verification and absolute EV claims
+PASS vehicle collection card no longer claims franchise warranty without listing evidence
+PASS dealer profile language avoids guaranteed or instant transfer promises
+PASS dealer profile metrics no longer fabricate escrow counts, satisfaction or fraud guarantees
+PASS dealer profile no longer invents KRA credentials, response rates or service details
+PASS test-drive modal does not claim to submit a booking without a service
+PASS seller follow state is not simulated as a persisted subscription
+PASS public escrow explainer preserves eligibility and non-bank disclosures
+PASS public breadcrumbs do not label escrow as a bank product
+PASS public financing remains public-mode and does not render lender offers
+PASS support public entry remains the existing Support workflow
+PASS admin-managed ticker and homepage commercial controls remain intact
+PASS validator is registered as a package script
+
+Public-facing convergence: 49/49 PASS

@@ -1,0 +1,239 @@
+method,path,class,detail,roles_that_saw_500,admin_status
+GET,/api/admin/ads,missing_schema:table,ads (absent in hosted production too),ad_manager|marketing|admin|superadmin,500
+POST,/api/admin/ads,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""b01c51bdcb62"",""path"":""/api/admin/ads"",""method"":""POST""}",admin,500
+PUT,/api/admin/ads/:id,missing_schema:table,ads (absent in hosted production too),admin,500
+DELETE,/api/admin/ads/:id,missing_schema:table,ads (absent in hosted production too),admin,500
+GET,/api/admin/referrals/stats,missing_schema:table,transactions (EXISTS in hosted production - repository migration drift),admin|superadmin,500
+GET,/api/admin/market-data,missing_schema:table,market_data (EXISTS in hosted production - repository migration drift),ad_manager|marketing|accounts|admin|superadmin,500
+GET,/api/admin/market-data/:id,missing_schema:table,market_data (EXISTS in hosted production - repository migration drift),ad_manager|marketing|accounts|admin|superadmin,500
+PUT,/api/admin/market-data/:id,application_exception,MarketData.findByIdAndUpdate(...).lean is not a function,admin,500
+DELETE,/api/admin/market-data/:id,missing_schema:table,market_data (EXISTS in hosted production - repository migration drift),admin,500
+POST,/api/admin/escrow/accounts,application_exception,"Escrow bank account name, bank name and account number are required",admin,500
+PATCH,/api/admin/escrow/accounts/:id,application_exception,"Escrow bank account name, bank name and account number are required",admin,500
+DELETE,/api/admin/escrow/accounts/:id,application_exception,Escrow account not found,admin,500
+GET,/api/escrow/operations/dashboard,application_exception,'issue_details' is not an embedded resource in this request,escrow_officer|accounts|admin|superadmin,500
+POST,/api/escrow/operations/reconcile,invalid_fixture:empty body / constraint,violates not-null constraint,accounts|admin,500
+PATCH,/api/communications/admin/rollout/channels/:channel,application_exception,Unknown communication channel: 00000000-0000-0000-0000-000000000000,admin,500
+PATCH,/api/communications/admin/rollout/events/:eventType/:channel,application_exception,Unknown communication event/channel: 00000000-0000-0000-0000-000000000000/00000000-0000-0000-0000-000000000000,admin,500
+POST,/api/communications/admin/templates,application_exception,"Template code, name and body are required",admin,500
+PATCH,/api/communications/admin/templates/:id,application_exception,"Template code, name and body are required",admin,500
+POST,/api/communications/admin/deliveries/:id/retry,application_exception,Delivery not found,technical_support|admin,500
+POST,/api/auction-admin/:carId/end,application_exception,"no logged cause; response {""success"":false,""message"":""Failed to end auction""}",admin,500
+GET,/api/ntsa-verification/car/:carId/status,missing_schema:table,ntsa_verification_requests (EXISTS in hosted production - repository migration drift),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/security-logs,missing_schema:table,security_logs (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/security-logs/summary,missing_schema:table,security_logs (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/security-logs/my,missing_schema:table,security_logs (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/fraud/analytics,missing_schema:table,fraud_detection (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/fraud/all,missing_schema:table,fraud_detection (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/fraud/check/user/:userId,application_exception,TypeError: s.replace is not a function,ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/fraud/check/auction/:carId,application_exception,TypeError: s.replace is not a function,ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/duplicates/all,missing_schema:table,duplicate_vehicle_logs (absent in hosted production too),admin|superadmin,500
+GET,/api/duplicates/:id,missing_schema:table,duplicate_vehicle_logs (absent in hosted production too),admin|superadmin,500
+POST,/api/duplicates/:id/false-positive,missing_schema:table,duplicate_vehicle_logs (absent in hosted production too),admin,500
+POST,/api/duplicates/:id/confirm,missing_schema:table,duplicate_vehicle_logs (absent in hosted production too),admin,500
+POST,/api/duplicates/:id/under-review,missing_schema:table,duplicate_vehicle_logs (absent in hosted production too),admin,500
+GET,/api/dealer-health-score/:dealerId,missing_schema:table,dealer_health_scores (EXISTS in hosted production - repository migration drift),anon|user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/dealer-health-score/:dealerId/details,missing_schema:table,dealer_health_scores (EXISTS in hosted production - repository migration drift),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/dealer-health-score/ranking/list,application_exception,TypeError: DealerHealthScore.getTopDealers is not a function,anon|user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/dealer-health-score/top/:category,application_exception,TypeError: DealerHealthScore.getTopDealers is not a function,anon|user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/dealer-health-score/:dealerId/trends,missing_schema:table,dealer_health_scores (EXISTS in hosted production - repository migration drift),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/dealer-health-score/admin/recalculate/:dealerId,application_exception,Error: Dealer not found,ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+GET,/api/dealer-health-score/admin/distribution,application_exception,TypeError: DealerHealthScore.getScoreDistribution is not a function,ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/dealer-health-score/admin/alerts,missing_schema:table,dealer_health_scores (EXISTS in hosted production - repository migration drift),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/marketplace-health/summary,missing_schema:table,marketplace_health (EXISTS in hosted production - repository migration drift),admin|superadmin,500
+GET,/api/marketplace-health/alerts,application_exception,ReferenceError: MarketplaceHealth is not defined,admin|superadmin,500
+POST,/api/marketplace-health/alerts/:alertId/resolve,missing_schema:table,marketplace_health (EXISTS in hosted production - repository migration drift),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+GET,/api/marketplace-health/metrics,missing_schema:table,marketplace_health (EXISTS in hosted production - repository migration drift),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/marketplace-health/admin/all,missing_schema:table,marketplace_health (EXISTS in hosted production - repository migration drift),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/feature-flags/user,application_exception,ReferenceError: FeatureFlag is not defined,user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/feature-flags,missing_schema:table,error_budgets (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/feature-flags/:key,missing_schema:table,error_budgets (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/feature-flags,missing_schema:table,feature_flags (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+PUT,/api/feature-flags/:key,missing_schema:table,feature_flags (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+DELETE,/api/feature-flags/:key,missing_schema:table,feature_flags (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+POST,/api/feature-flags/:key/toggle,application_exception,ReferenceError: FeatureFlag is not defined,ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+GET,/api/feature-flags/:key/stats,application_exception,ReferenceError: FeatureFlag is not defined,ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/feature-flags/category/:category,application_exception,ReferenceError: FeatureFlag is not defined,ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/feature-flags/environment/:environment,application_exception,ReferenceError: FeatureFlag is not defined,ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/feature-flags/role/:role,application_exception,ReferenceError: FeatureFlag is not defined,ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/feature-flags/meta/categories,application_exception,ReferenceError: FeatureFlag is not defined,ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/feature-flags/batch/evaluate,application_exception,TypeError: keys is not iterable,ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+GET,/api/organizations/platform-stats,missing_schema:table,organizations (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/organizations,missing_schema:table,organizations (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+GET,/api/organizations/:id,missing_schema:table,organizations (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+PUT,/api/organizations/:id,missing_schema:table,organizations (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+DELETE,/api/organizations/:id,missing_schema:table,organizations (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+GET,/api/organizations/:id/users,missing_schema:table,organizations (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/organizations/:id/admins,missing_schema:table,organizations (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+DELETE,/api/organizations/:id/admins/:userId,missing_schema:table,organizations (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+POST,/api/organizations/:id/branches,missing_schema:table,organizations (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+GET,/api/organizations/:id/branches,missing_schema:table,branches (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/organizations/:id/stats,missing_schema:table,organizations (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/finance/issues,application_exception,"no logged cause; response {""success"":false,""message"":""Failed to fetch unresolved issues""}",admin|superadmin,500
+POST,/api/finance/reports/:reportId/issues/:issueIndex/resolve,application_exception,Error: Report not found,admin,500
+POST,/api/reconciliation/reports/:reportId/resolve,application_exception,Error: Report not found,accounts|admin,500
+POST,/api/reconciliation/alerts/:id/read,application_exception,TypeError: AdminAlert.findByIdAndUpdate(...).lean is not a function,accounts|admin,500
+GET,/api/admin/queue/statistics,application_exception,ReferenceError: JobFailure is not defined,ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/admin/queue/failures,missing_schema:table,job_failures (EXISTS in hosted production - repository migration drift),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/admin/queue/failures/:failureId,missing_schema:table,job_failures (EXISTS in hosted production - repository migration drift),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/admin/queue/failures/:failureId/resolve,missing_schema:table,job_failures (EXISTS in hosted production - repository migration drift),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+GET,/api/reliability/error-budgets,missing_schema:table,error_budgets (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/reliability/error-budgets/:sloId,missing_schema:table,error_budgets (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/reliability/alerts/evaluate,missing_schema:table,error_budgets (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+GET,/api/reliability/report,missing_schema:table,error_budgets (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/reliability/health,missing_schema:table,error_budgets (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/new-admin/auction-integrity/dashboard,missing_schema:table,auction_integrity_flags (EXISTS in hosted production - repository migration drift),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/new-admin/auction-integrity,missing_schema:table,auction_integrity_flags (EXISTS in hosted production - repository migration drift),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/new-admin/auction-integrity/risk-profiles,missing_schema:table,auction_risk_profiles (EXISTS in hosted production - repository migration drift),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/new-admin/auction-integrity/:id,missing_schema:table,auction_integrity_flags (EXISTS in hosted production - repository migration drift),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+PATCH,/api/new-admin/auction-integrity/:id/status,application_exception,TypeError: AuctionIntegrityFlag.findByIdAndUpdate(...).populate is not a function,ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+GET,/api/reports/my,missing_schema:table,reports (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/reports/admin/all,missing_schema:table,reports (absent in hosted production too),moderator|admin|superadmin,500
+GET,/api/reports/admin/:id,missing_schema:table,reports (absent in hosted production too),moderator|admin|superadmin,500
+PATCH,/api/reports/admin/:id/status,missing_schema:table,reports (absent in hosted production too),moderator|admin,500
+POST,/api/announcements,application_exception,"no logged cause; response {""success"":false,""message"":""Failed to create announcement""}",admin,500
+POST,/api/announcements/:id/send,missing_schema:table,announcements (absent in hosted production too),admin,500
+GET,/api/announcements,missing_schema:table,announcements (absent in hosted production too),admin|superadmin,500
+GET,/api/announcements/:id,missing_schema:table,announcements (absent in hosted production too),admin|superadmin,500
+DELETE,/api/announcements/:id,missing_schema:table,announcements (absent in hosted production too),admin,500
+POST,/api/cms/analytics/track,invalid_fixture:empty body / constraint,violates not-null constraint,anon|user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+POST,/api/cms/pages,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+POST,/api/cms/pages/:id/rollback,invalid_fixture:empty body / constraint,invalid input syntax for type integer: ,admin,500
+POST,/api/cms/content,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+POST,/api/cms/faqs,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+POST,/api/cms/campaigns,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+POST,/api/cms/banners,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+POST,/api/cms/banners/reorder,application_exception,Cannot read properties of undefined (reading 'length'),admin,500
+POST,/api/cms/media,missing_schema:column,alt,admin,500
+POST,/api/cms/taxonomies,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+POST,/api/cms/ab-tests,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+GET,/api/automation/stats,missing_schema:table,workflows (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/automation/logs,missing_schema:table,workflow_logs (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/automation/workflows,missing_schema:table,workflows (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/automation/workflows/:id,missing_schema:table,workflows (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/automation/workflows,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""c2d26803b958"",""path"":""/api/automation/workflows"",""method"":""POST""}",admin,500
+PUT,/api/automation/workflows/:id,missing_schema:table,workflows (absent in hosted production too),admin,500
+DELETE,/api/automation/workflows/:id,missing_schema:table,workflows (absent in hosted production too),admin,500
+POST,/api/automation/workflows/:id/publish,missing_schema:table,workflows (absent in hosted production too),admin,500
+POST,/api/automation/workflows/:id/pause,missing_schema:table,workflows (absent in hosted production too),admin,500
+POST,/api/automation/workflows/:id/simulate,missing_schema:table,workflows (absent in hosted production too),admin,500
+POST,/api/automation/rules,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+GET,/api/automation/approvals,missing_schema:table,approval_chains (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/automation/approvals/:id,missing_schema:table,approval_chains (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/automation/approvals,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""c0c254968274"",""path"":""/api/automation/approvals"",""method"":""POST""}",admin,500
+PUT,/api/automation/approvals/:id,missing_schema:table,approval_chains (absent in hosted production too),admin,500
+DELETE,/api/automation/approvals/:id,missing_schema:table,approval_chains (absent in hosted production too),admin,500
+GET,/api/automation/tasks,missing_schema:table,automation_tasks (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/automation/tasks/:id,missing_schema:table,automation_tasks (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/automation/tasks,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""a8b7f3f7d39c"",""path"":""/api/automation/tasks"",""method"":""POST""}",ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+PUT,/api/automation/tasks/:id,missing_schema:table,automation_tasks (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+POST,/api/automation/tasks/:id/complete,missing_schema:table,automation_tasks (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+POST,/api/automation/tasks/:id/escalate,missing_schema:table,automation_tasks (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+GET,/api/automation/templates/notifications,missing_schema:table,notification_templates (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/automation/templates/notifications/:id,missing_schema:table,notification_templates (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/automation/templates/notifications,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""8eaca8062258"",""path"":""/api/automation/templates/notifications"",""method"":""POST""}",admin,500
+PUT,/api/automation/templates/notifications/:id,missing_schema:table,notification_templates (absent in hosted production too),admin,500
+DELETE,/api/automation/templates/notifications/:id,missing_schema:table,notification_templates (absent in hosted production too),admin,500
+GET,/api/automation/scheduled,missing_schema:table,scheduled_jobs (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/automation/scheduled,application_exception,Cannot destructure property 'frequency' of 'schedule' as it is undefined.,admin,500
+PUT,/api/automation/scheduled/:id,missing_schema:table,scheduled_jobs (absent in hosted production too),admin,500
+DELETE,/api/automation/scheduled/:id,missing_schema:table,scheduled_jobs (absent in hosted production too),admin,500
+POST,/api/automation/scheduled/:id/run,missing_schema:table,scheduled_jobs (absent in hosted production too),admin,500
+GET,/api/config/stats,missing_schema:table,config_entries (absent in hosted production too),admin|superadmin,500
+GET,/api/config/entries,missing_schema:table,config_entries (absent in hosted production too),admin|superadmin,500
+GET,/api/config/entries/:id,missing_schema:table,config_entries (absent in hosted production too),admin|superadmin,500
+POST,/api/config/entries,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""a449469590e5"",""path"":""/api/config/entries"",""method"":""POST""}",admin,500
+PUT,/api/config/entries/:id,missing_schema:table,config_entries (absent in hosted production too),admin,500
+DELETE,/api/config/entries/:id,missing_schema:table,config_entries (absent in hosted production too),admin,500
+POST,/api/config/entries/bulk,application_exception,entries is not iterable,admin,500
+GET,/api/config/features,missing_schema:table,feature_flags (absent in hosted production too),admin|superadmin,500
+GET,/api/config/features/:id,missing_schema:table,feature_flags (absent in hosted production too),admin|superadmin,500
+POST,/api/config/features,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""7bc44b57c1ad"",""path"":""/api/config/features"",""method"":""POST""}",admin,500
+PUT,/api/config/features/:id,missing_schema:table,feature_flags (absent in hosted production too),admin,500
+DELETE,/api/config/features/:id,missing_schema:table,feature_flags (absent in hosted production too),admin,500
+POST,/api/config/features/:id/toggle,missing_schema:table,feature_flags (absent in hosted production too),admin,500
+GET,/api/config/features/check/:key,missing_schema:table,feature_flags (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/config/reference,missing_schema:table,reference_data (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/config/reference/:id,missing_schema:table,reference_data (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/config/reference,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""2cf598bee6d1"",""path"":""/api/config/reference"",""method"":""POST""}",admin,500
+PUT,/api/config/reference/:id,missing_schema:table,reference_data (absent in hosted production too),admin,500
+DELETE,/api/config/reference/:id,missing_schema:table,reference_data (absent in hosted production too),admin,500
+GET,/api/config/vehicle,missing_schema:table,vehicle_master_data (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/config/vehicle/makes,missing_schema:table,vehicle_master_data (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/config/vehicle/models,missing_schema:table,vehicle_master_data (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/config/vehicle/:id,missing_schema:table,vehicle_master_data (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/config/vehicle,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""1e0b77faec36"",""path"":""/api/config/vehicle"",""method"":""POST""}",admin,500
+PUT,/api/config/vehicle/:id,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""6d494d2e23b0"",""path"":""/api/config/vehicle/00000000-0000-0000-0000-000000000000"",""method"":""PUT""}",admin,500
+DELETE,/api/config/vehicle/:id,missing_schema:table,vehicle_master_data (absent in hosted production too),admin,500
+GET,/api/config/location,missing_schema:table,location_master_data (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/config/location/countries,missing_schema:table,location_master_data (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/config/location/regions,missing_schema:table,location_master_data (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/config/location/cities,missing_schema:table,location_master_data (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/config/location,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""cb36f1ce8f85"",""path"":""/api/config/location"",""method"":""POST""}",admin,500
+PUT,/api/config/location/:id,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""0ecb05bb8f48"",""path"":""/api/config/location/00000000-0000-0000-0000-000000000000"",""method"":""PUT""}",admin,500
+DELETE,/api/config/location/:id,missing_schema:table,location_master_data (absent in hosted production too),admin,500
+GET,/api/config/countries,missing_schema:table,country_configs (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/config/countries/:id,missing_schema:table,country_configs (absent in hosted production too),user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/config/countries,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""d75d492218b5"",""path"":""/api/config/countries"",""method"":""POST""}",admin,500
+PUT,/api/config/countries/:id,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""6bb9aad59513"",""path"":""/api/config/countries/00000000-0000-0000-0000-000000000000"",""method"":""PUT""}",admin,500
+DELETE,/api/config/countries/:id,missing_schema:table,country_configs (absent in hosted production too),admin,500
+GET,/api/config/audit,missing_schema:table,config_audit_logs (absent in hosted production too),admin|superadmin,500
+POST,/api/config/audit/:logId/rollback,missing_schema:table,config_audit_logs (absent in hosted production too),admin,500
+GET,/api/config/export,missing_schema:table,config_entries (absent in hosted production too),admin|superadmin,500
+POST,/api/config/import,application_exception,importData is not iterable,admin,500
+GET,/api/lowcode/stats,missing_schema:table,business_objects (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/lowcode/objects,missing_schema:table,business_objects (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/lowcode/objects/:id,missing_schema:table,business_objects (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/lowcode/objects,application_exception,Cannot read properties of undefined (reading 'toLowerCase'),admin,500
+PUT,/api/lowcode/objects/:id,missing_schema:table,business_objects (absent in hosted production too),admin,500
+DELETE,/api/lowcode/objects/:id,missing_schema:table,business_objects (absent in hosted production too),admin,500
+POST,/api/lowcode/objects/:id/publish,missing_schema:table,business_objects (absent in hosted production too),admin,500
+POST,/api/lowcode/objects/:id/clone,missing_schema:table,business_objects (absent in hosted production too),admin,500
+GET,/api/lowcode/objects/:id/api,missing_schema:table,business_objects (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/lowcode/objects/:objectId/fields,missing_schema:table,object_fields (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+PUT,/api/lowcode/fields/:id,missing_schema:table,object_fields (absent in hosted production too),admin,500
+DELETE,/api/lowcode/fields/:id,missing_schema:table,object_fields (absent in hosted production too),admin,500
+POST,/api/lowcode/objects/:objectId/fields/reorder,application_exception,fields is not iterable,admin,500
+GET,/api/lowcode/objects/:objectId/relationships,missing_schema:table,object_relationships (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/lowcode/relationships,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""3b776f3d5283"",""path"":""/api/lowcode/relationships"",""method"":""POST""}",admin,500
+PUT,/api/lowcode/relationships/:id,missing_schema:table,object_relationships (absent in hosted production too),admin,500
+DELETE,/api/lowcode/relationships/:id,missing_schema:table,object_relationships (absent in hosted production too),admin,500
+GET,/api/lowcode/objects/:objectId/forms,missing_schema:table,form_definitions (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/lowcode/forms,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""71dc6fddd4ff"",""path"":""/api/lowcode/forms"",""method"":""POST""}",admin,500
+PUT,/api/lowcode/forms/:id,missing_schema:table,form_definitions (absent in hosted production too),admin,500
+DELETE,/api/lowcode/forms/:id,missing_schema:table,form_definitions (absent in hosted production too),admin,500
+GET,/api/lowcode/objects/:objectId/views,missing_schema:table,view_definitions (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/lowcode/views,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""fe60d7bbd6e7"",""path"":""/api/lowcode/views"",""method"":""POST""}",admin,500
+PUT,/api/lowcode/views/:id,missing_schema:table,view_definitions (absent in hosted production too),admin,500
+DELETE,/api/lowcode/views/:id,missing_schema:table,view_definitions (absent in hosted production too),admin,500
+GET,/api/lowcode/objects/:objectId/permissions,missing_schema:table,object_permissions (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+GET,/api/lowcode/dashboards,missing_schema:table,custom_dashboards (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/lowcode/dashboards,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""d5da6494ee66"",""path"":""/api/lowcode/dashboards"",""method"":""POST""}",admin,500
+PUT,/api/lowcode/dashboards/:id,missing_schema:table,custom_dashboards (absent in hosted production too),admin,500
+DELETE,/api/lowcode/dashboards/:id,missing_schema:table,custom_dashboards (absent in hosted production too),admin,500
+GET,/api/lowcode/objects/:objectId/versions,missing_schema:table,object_versions (absent in hosted production too),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin|superadmin,500
+POST,/api/lowcode/versions/:versionId/rollback,missing_schema:table,object_versions (absent in hosted production too),admin,500
+POST,/api/lowcode/ai/suggest,application_exception,Cannot read properties of undefined (reading 'split'),ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+POST,/api/governance/policies,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+PUT,/api/governance/policies/:id,application_exception,"JSON object requested, multiple (or no) rows returned",admin,500
+POST,/api/governance/changes,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+POST,/api/governance/changes/:id/submit,application_exception,"JSON object requested, multiple (or no) rows returned",admin,500
+POST,/api/governance/approvals,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+PUT,/api/governance/approvals/:id,application_exception,"JSON object requested, multiple (or no) rows returned",admin,500
+POST,/api/governance/features,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+PUT,/api/governance/features/:id/stage,application_exception,"JSON object requested, multiple (or no) rows returned",admin,500
+POST,/api/governance/risks,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+POST,/api/governance/standards,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+POST,/api/governance/countries,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+POST,/api/governance/partners,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+POST,/api/governance/releases,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+POST,/api/governance/decisions,invalid_fixture:empty body / constraint,violates not-null constraint,admin,500
+GET,/api/intelligence/inspections,missing_schema:table,inspections (absent in hosted production too),admin|superadmin,500
+GET,/api/intelligence/countries,application_exception,"no logged cause; response {""success"":false,""code"":""INTELLIGENCE_ERROR"",""message"":""column users.country does not exist""}",admin|superadmin,500
+POST,/api/command-center/war-room/activate,invalid_fixture:empty body / constraint,violates unique constraint ,admin,500
+POST,/api/command-center/war-room/deactivate,invalid_fixture:empty body / constraint,violates foreign key constraint ,admin,500
+POST,/api/improvement/ideas/:ideaId/vote,invalid_fixture:empty body / constraint,violates foreign key constraint ,ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500
+POST,/api/platform-factory/generate,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""1653e371bb74"",""path"":""/api/platform-factory/generate"",""method"":""POST""}",admin,500
+PUT,/api/platform-factory/products/:productId,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""ba1c07bbb5cf"",""path"":""/api/platform-factory/products/00000000-0000-0000-0000-000000000000"",""method"":""PUT""}",admin,500
+PUT,/api/platform-factory/brands/:brandId,application_exception,"no logged cause; response {""success"":false,""message"":""Server Error"",""requestId"":""ce7cfb2443c6"",""path"":""/api/platform-factory/brands/00000000-0000-0000-0000-000000000000"",""method"":""PUT""}",admin,500
+POST,/api/ownership/vehicles,invalid_fixture:empty body / constraint,violates not-null constraint,user|dealer_team_member|individual_seller|dealer|broker|ghost_checker|moderator|ad_manager|marketing|escrow_officer|technical_support|hr|accounts|admin,500

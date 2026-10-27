@@ -1,0 +1,9 @@
+
+ RUN  v4.1.11 /home/claude/work/p15/KAYAD
+
+
+ Test Files  116 passed (116)
+      Tests  950 passed | 1 skipped (951)
+   Start at  21:09:44
+   Duration  214.01s (transform 6.12s, setup 14.32s, import 21.22s, tests 70.72s, environment 89.46s)
+

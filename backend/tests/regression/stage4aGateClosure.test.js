@@ -39,6 +39,7 @@ jest.unstable_mockModule("../../middleware/auth.js", () => ({
 }));
 jest.unstable_mockModule("../../middleware/rbac.js", () => ({
   requirePermission: () => (req, res, next) => (req.user?.role === "accounts" ? next() : res.status(403).json({ success: false })),
+  requireAnyPermission: () => (req, res, next) => (["accounts", "admin", "superadmin"].includes(req.user?.role) ? next() : res.status(403).json({ success: false })),
 }));
 jest.unstable_mockModule("../../middleware/validate.js", () => ({
   validateObjectId: (r, s, n) => n(), validate: () => (r, s, n) => n(), validateQuery: () => (r, s, n) => n(),

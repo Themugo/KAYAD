@@ -63,9 +63,24 @@ export const initiatePayment = async (req, res) => {
     // determines settlement on its own.
     let settlementAmount = parsedAmount;
     if ((normalizedType === "escrow" || normalizedType === "auction_win" || normalizedType === "purchase") && carId) {
-      const carForAmount = await findById("cars", carId, "price,winner");
-      if (!carForAmount) {
+      const carForAmount = await findById("cars", carId, "price,winner,status,dealer,deletedAt");
+      if (!carForAmount || carForAmount.deletedAt || carForAmount.deleted_at) {
         return res.status(404).json({ success: false, message: "Car not found" });
+      }
+      if (normalizedType === "purchase") {
+        // Phase 14.9: a direct purchase payment is only valid for a live, unsold listing that belongs to someone else. Anything the
+        // public cannot see (pending review, draft, hidden) answers like a missing car; a sold car is a conflict; a dealer cannot pay
+        // themselves. "reserved" is a dealer-set status whose purchase rule is an open product decision, so it is not changed here.
+        const listingStatus = String(carForAmount.status ?? "").toLowerCase();
+        if (String(carForAmount.dealer ?? carForAmount.dealer_id ?? "") === String(req.user.id)) {
+          return res.status(403).json({ success: false, code: "PURCHASE_OWN_LISTING", message: "You cannot purchase your own listing." });
+        }
+        if (listingStatus === "sold") {
+          return res.status(409).json({ success: false, code: "LISTING_NOT_AVAILABLE", message: "This vehicle has already been sold." });
+        }
+        if (!["available", "reserved"].includes(listingStatus)) {
+          return res.status(404).json({ success: false, message: "Car not found" });
+        }
       }
       const winnerUser = carForAmount.winner?.user?.toString?.() || carForAmount.winner?.user;
       const winnerAmount = Number(carForAmount.winner?.amount);

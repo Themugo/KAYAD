@@ -1,0 +1,14 @@
+PASS - cacheDelPattern uses the ioredis positional SCAN signature ([cursor, keys])
+PASS - public listing cache helper covers vehicle_search, cars:list, facets and suggestions
+PASS - carController: every listing mutation invalidates public listing caches (5 sites)
+PASS - carController: no listing mutation still uses the partial cars:list-only invalidation
+PASS - bulk admin moderation invalidates public listing caches
+PASS - admin car delete and admin user delete invalidate public listing caches
+PASS - duplicate removal invalidates public listing caches
+PASS - opt-in disposable-database/Redis integration tests are excluded from the default Jest run
+PASS - backend exposes opt-in runners for both integration tests
+PASS - backend/tests/integration/soft-delete-integrity.integration.test.js refuses non-loopback targets
+PASS - backend/tests/integration/cache-invalidation.integration.test.js refuses non-loopback targets
+PASS - disposable-database harness ships Supabase default privileges and the rest-v1 proxy
+
+Phase C.1 runtime-integrity guard: 12/12 passed.

@@ -1,0 +1,14 @@
+PASS mobile hero renders a two-vehicle pair, not a single-car carousel
+PASS vehicle images use contain semantics and no crop utility
+PASS both car images have independent accessible labels
+PASS desktop hero markup remains a separate lg-only composition
+PASS showcase art is not priced or opened as a listing
+PASS real featured inventory takes precedence when two or more records exist
+PASS showcase fallback is admin-configurable
+PASS showcase vehicle identity and image paths are editable by admin
+PASS showcase configuration is persisted via existing platform config endpoint
+PASS database migration seeds/repairs existing JSONB showcase config without creating fake cars
+PASS approved Land Cruiser and Mercedes mobile transparent assets are referenced
+PASS tests cover paired cars and explicit visual-showcase semantics
+
+Stage 35 Home Hero Pair: 12/12 PASS

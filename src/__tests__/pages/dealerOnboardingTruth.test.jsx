@@ -24,7 +24,16 @@ describe('DealerOnboarding completion screen', () => {
   it('the ?complete=1 flag alone never claims approval', () => {
     mockUser = { id: 'd1', role: 'dealer', status: 'rejected' };
     show();
-    expect(screen.getByText('Submitted for review')).toBeInTheDocument();
+    // 14.7: a rejected account is told the truth instead of "Submitted for review".
+    expect(screen.getByText('Your dealer application was not approved')).toBeInTheDocument();
+    expect(screen.queryByText('Your dealer account is approved')).toBeNull();
+    expect(screen.queryByText('Submitted for review')).toBeNull();
+  });
+  it('a suspended account is told it is suspended and cannot list', () => {
+    mockUser = { id: 'd1', role: 'dealer', status: 'suspended' };
+    show();
+    expect(screen.getByText('Your dealer account is suspended')).toBeInTheDocument();
+    expect(screen.getByText(/cannot list vehicles until KAYAD reinstates/i)).toBeInTheDocument();
     expect(screen.queryByText('Your dealer account is approved')).toBeNull();
   });
   it('an approved account is told so', () => {

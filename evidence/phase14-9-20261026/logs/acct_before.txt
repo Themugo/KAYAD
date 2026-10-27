@@ -1,0 +1,49 @@
+PASS A1 a non-admin cannot delete accounts (403) - identifier substitution against an admin
+PASS A2 deletion without a CSRF token is refused and the account survives
+PASS A3 an admin cannot delete themselves
+FAIL A4 a dealer owner with a dealership, team and listings cannot be deleted: 409 ACCOUNT_DELETE_BLOCKED  -> 500 {"success":false,"message":"update or delete on table \"users\" violates foreign key constraint \"cars_dealer_id_fkey\" on table \"cars\"","requestId":"bb65b846c51f","details":"Key (id)=(15a9453a-a32d
+FAIL A4 nothing was changed by the refused deletion (user, dealership, team, both listings; no partial listing deletion)  -> 
+PASS A4 the 409 does not leak emails, phones or token material
+FAIL A4 the refusal is audited (no sensitive payload)  -> 
+FAIL A5 a payment record blocks deletion (409) and the record is preserved  -> 200 {"success":true,"message":"User and all associated data deleted"}
+FAIL A5 a bid blocks deletion (409) and the record is preserved  -> 500 {"success":false,"message":"update or delete on table \"users\" violates foreign key constraint \"bids_user_id_fkey\" on
+FAIL A5 a team membership blocks deletion (409) and the record is preserved  -> 200 {"success":true,"message":"User and all associated data deleted"}
+FAIL A5 an escrow as buyer blocks deletion (409) and the record is preserved  -> 500 {"success":false,"message":"update or delete on table \"users\" violates foreign key constraint \"escrows_buyer_fkey\" o
+FAIL A5 a ledger entry blocks deletion (409) and the record is preserved  -> 500 {"success":false,"message":"ledger_entries are append-only; use a compensating reversal entry","requestId":"2c5b0833ea78
+FAIL A6 a clean account is deleted; concurrent duplicate requests give exactly one 200 and no 5xx  -> 200,200
+PASS A6 the deleted account is gone and its old session no longer authenticates
+PASS A6 repeating the deletion is a safe 404
+PASS A7 staff deletion is a soft delete (row retained with deleted_at)
+FAIL A7 an existing session of the soft-deleted account is rejected  -> 200->200
+FAIL A7 the soft-deleted account cannot log in again  -> 200
+FAIL A7 the soft-deleted account cannot refresh a session  -> 200
+PASS A8 a platform-owner account cannot be deleted by an administrator
+PASS B1 wrong current password -> 400, password unchanged
+PASS B2 weak new password rejected
+PASS B3 change-password without CSRF is refused
+PASS B4 unauthenticated change-password is refused
+FAIL B5 repeated wrong current-password guesses are rate limited (429) - brute force of the current password through a stolen session is throttled  -> 400,400,400,400,400,400,400,400,400,400,400,400,400,400
+PASS B6 a successful change revokes the previous session and refresh tokens
+PASS B6 the new password works and the old one does not
+PASS B6 response never carries password material
+PASS B7 forgot-password gives an identical response for registered and unknown emails (no enumeration)
+PASS B8 reset tokens are stored hashed, never raw
+PASS B9 concurrent resets with one token: exactly one succeeds
+PASS B9 a used token cannot be replayed
+PASS B10 an expired token is refused
+PASS B10 an unknown token is refused
+PASS B11 reset enforces the password policy and keeps the token usable
+PASS B12 a reset revokes existing sessions
+PASS B13 a token only changes the password of the account it was issued to
+PASS C1 privileged/identity fields sent to the profile endpoint are ignored
+PASS C2 re-saving the same phone keeps phone verification
+PASS C2 changing the phone invalidates phone verification (14.6 protection preserved)
+PASS C3 an invalid phone is refused and nothing is stored
+PASS C4 payout details are refused on the personal profile
+PASS C5 profile write without CSRF refused
+PASS C5 unauthenticated profile write refused
+PASS C6 the personal profile endpoint cannot rewrite the verified dealer business identity
+PASS C7 a private seller has no dealer settlement identity (cannot create one)
+PASS D1 every blocking/cascading foreign key to users/profiles is in the account-deletion guard list or the personal-data allowlist
+
+34/47 passed

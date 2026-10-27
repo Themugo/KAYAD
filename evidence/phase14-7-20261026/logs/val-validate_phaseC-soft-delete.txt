@@ -1,0 +1,5 @@
+Phase C soft-delete integrity: PASS (725 backend source files scanned)
+- No active backend source call sites use deletedAt: null
+- Shared database helper and model adapter translate explicit null to IS NULL
+- $or null branches use PostgREST is.null
+- Model adapter $ne: null is IS NOT NULL; public listing, detail, sitemap and search exclude soft-deleted vehicles

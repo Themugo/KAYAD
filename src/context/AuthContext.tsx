@@ -212,13 +212,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return () => window.removeEventListener('online', onOnline);
   }, [sessionStatus, retrySession]);
 
-  const login = useCallback(async (credentialsOrEmail: { email: string; password: string } | string, passwordArg?: string) => {
+  const login = useCallback(async (credentialsOrEmail: { email: string; password: string; mfaCode?: string } | string, passwordArg?: string) => {
     const email = typeof credentialsOrEmail === 'string' ? credentialsOrEmail : credentialsOrEmail.email;
     const password = typeof credentialsOrEmail === 'string' ? (passwordArg || '') : credentialsOrEmail.password;
+    const mfaCode = typeof credentialsOrEmail === 'string' ? undefined : credentialsOrEmail.mfaCode;
     const mySeq = ++authActionSeq.current;
     let user;
     try {
-      user = await authLogin(email, password);
+      user = await authLogin(email, password, mfaCode);
     } catch (err) {
       // Bumping the sequence discarded any in-flight bootstrap probe; do not
       // leave the app stuck in `loading` when the sign-in attempt itself fails.

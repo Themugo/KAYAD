@@ -1,0 +1,3 @@
+# 06 Notifications / providers (Order 9)
+Audit only; no code changes needed. Verification email is dispatched non-blocking after the atomic registration; resend is behind verificationLimiter + authLimiter and commits only on provider acceptance; recovery uses recoveryLimiter; OTP uses otpLimiter. Existing tests (stage5e1BrevoResendIntegration, stage5e1VerificationRateLimit, stage5eResendCommitOnProviderAcceptance, onboardingEmailWorkflow) use mocks and cover duplicates, rate limits, retry safety and provider failure. No real message was sent and no credential was read or printed.
+`communications:providers` fails because email/sms provider credentials are not in this environment; it is reported as failed/environment-dependent, not passed.

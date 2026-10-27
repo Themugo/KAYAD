@@ -1,0 +1,16 @@
+PASS visibility event table preserves car and seller identity
+PASS only live approved listings are hidden
+PASS suspended and revoked transitions trigger hiding
+PASS restoration only occurs on approval after suspension or revocation
+PASS restoration checks same owner and hidden status
+PASS visibility event table has RLS enabled and no client grants
+PASS legacy suspended/revoked listings are reconciled at migration time
+PASS rollback restores only policy-hidden records and drops trigger/table
+PASS capability decisions invalidate public listing caches on hide/restore
+PASS admin UI lists and decides applications through existing capability API
+PASS admin route is registered
+PASS admin sidebar links to application review
+PASS route is permission guarded
+PASS admin UI requires reasons and confirms destructive transitions
+
+14/14 checks passed

@@ -1,0 +1,6 @@
+PASS no Windows-illegal or reserved file/folder names
+PASS no path longer than 200 characters
+PASS no symlinks in the tree
+PASS no case-insensitive duplicate paths
+PASS no phase-numbered / temporary application source directories
+RESULT 5/5 PASS

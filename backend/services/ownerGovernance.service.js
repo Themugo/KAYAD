@@ -11,8 +11,9 @@ import crypto from "crypto";
 import bcrypt from "bcryptjs";
 import { getSupabase } from "../utils/supabase.js";
 import UserAuth from "../models/UserAuth.js";
-import { OWNER_EMAILS, normalizeOwnerEmail } from "../config/owners.js";
+import { OWNER_EMAILS, normalizeOwnerEmail, isMainOwnerEmail } from "../config/owners.js";
 import * as registry from "./ownerRegistry.service.js";
+import * as mfa from "./ownerMfa.service.js";
 import { deliver } from "./communicationGateway.service.js";
 import { COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
 import { invalidateUserCache } from "../middleware/auth.js";
@@ -42,6 +43,7 @@ const MESSAGES = {
   OWNER_ACCOUNT_BLOCKED: [403, "That account is suspended or otherwise blocked; it cannot become an owner."],
   OWNER_PASSWORD_REQUIRED: [400, "Choose a password that meets the policy."],
   OWNER_NOT_MEMBER: [404, "That identity is not an active owner."],
+  OWNER_PRIMARY_PROTECTED: [403, "The primary owner can only be removed by the primary owner. If the primary owner lost access, use Recover (out-of-band verified) or the emergency procedure."],
   OWNER_LAST_USABLE: [409, "Blocked: this would leave KAYAD with no verified, active owner. Add and activate another owner first."],
   OWNER_NONE_ESTABLISHED: [409, "No verified, active owner exists yet."],
 };
@@ -83,7 +85,27 @@ export async function logEvent(action, result, { actor = null, actorLabelText = 
 // ───────────── step-up: fresh authentication for sensitive membership changes ─────────────
 const stepUpFailures = new Map(); // userId -> { n, first }
 const STEP_UP_MAX = 5, STEP_UP_WINDOW_MS = 15 * 60 * 1000;
-export async function requireStepUp(actor, password) {
+/** Phase 16: when the acting owner has an ACTIVE second factor, a valid TOTP/recovery code is required as well; under OWNER_MFA_POLICY=required an owner
+ *  without a factor cannot perform owner-management changes at all (sign-in is not blocked, so nobody can be locked out by the policy itself). */
+async function requireSecondFactor(actor, mfaCode) {
+  if (mfa.mfaPolicy() === "off") return;
+  let enforced;
+  try { enforced = await mfa.isEnforcedFor(actor.id); }
+  catch (e) { throw new OwnerError(e?.code || "OWNER_MFA_STORE_UNAVAILABLE", e?.message || "The second-factor store is unavailable.", e?.status || 503); }
+  if (!enforced) {
+    if (mfa.mfaPolicy() === "required") throw new OwnerError("OWNER_MFA_ENROLLMENT_REQUIRED", "Owner-management changes require an enrolled second factor. Enrol an authenticator app first.", 403);
+    return;
+  }
+  if (!mfaCode) throw new OwnerError("OWNER_MFA_REQUIRED", "Enter the 6-digit code from your authenticator app (or a recovery code) to confirm this change.", 403);
+  try { await mfa.verifyCode(actor.id, mfaCode, { actorEmail: actor.email }); }
+  catch (e) { throw new OwnerError(e?.code || "OWNER_MFA_INVALID", e?.message || "The code is not valid.", e?.status || 403); }
+}
+export async function requireStepUp(actor, password, mfaCode) {
+  await passwordStepUp(actor, password);
+  await requireSecondFactor(actor, mfaCode);
+}
+/** Password re-entry only (used by second-factor enrolment itself, which cannot require a factor that does not exist yet). */
+export async function passwordStepUp(actor, password) {
   const now = Date.now();
   const rec = stepUpFailures.get(actor.id);
   if (rec && now - rec.first > STEP_UP_WINDOW_MS) stepUpFailures.delete(actor.id);
@@ -158,7 +180,7 @@ export async function listGovernance({ eventLimit = 100 } = {}) {
     const verified = u?.email_verified === true;
     const blocked = !u || u.is_banned === true || !!u.deactivated_at || ["suspended", "banned", "deactivated", "rejected"].includes(u.status);
     const emailMatches = !!u && normalizeOwnerEmail(u.email) === x.email;
-    return { id: x.id, userId: x.user_id, name: u?.name || null, email: x.email, status: x.status, verified, usable: x.status === "active" && verified && !blocked && emailMatches,
+    return { id: x.id, userId: x.user_id, name: u?.name || null, email: x.email, primary: isMainOwnerEmail(x.email), status: x.status, verified, usable: x.status === "active" && verified && !blocked && emailMatches,
       blockedReason: x.status !== "active" ? null : !verified ? "email not verified" : blocked ? "account suspended or deactivated" : !emailMatches ? "account e-mail changed" : null,
       addedVia: x.added_via, addedBy: x.added_by_label, activatedAt: x.activated_at, revokedAt: x.revoked_at, revokedBy: x.revoked_by_label, revokeReason: x.revoke_reason };
   });
@@ -169,11 +191,11 @@ export async function listGovernance({ eventLimit = 100 } = {}) {
 }
 
 // ───────────── mutations (owner-initiated) ─────────────
-export async function inviteOwner({ actor, email, confirmEmail, password, note, kind = "invitation" }) {
+export async function inviteOwner({ actor, email, confirmEmail, password, mfaCode, note, kind = "invitation" }) {
   const target = normalizeOwnerEmail(email);
   if (!EMAIL_RE.test(target)) throw ownerError("OWNER_INVALID_REQUEST");
   requireTypedConfirmation(confirmEmail, target);
-  await requireStepUp(actor, password);
+  await requireStepUp(actor, password, mfaCode);
   const token = newToken();
   const r = unwrap(await rpc("kayad_owner_issue_invitation", { p_email: target, p_kind: kind, p_token_hash: sha(token), p_expires: new Date(Date.now() + inviteTtlMs()).toISOString(), p_actor: actor.id, p_actor_label: label(actor), p_note: note ? String(note).slice(0, 500) : null }));
   registry.invalidate({ taint: false }); // invitation only: no privilege changed
@@ -190,10 +212,10 @@ async function invitationRow(id) {
   return data;
 }
 
-export async function resendInvitation({ actor, invitationId, confirmEmail, password }) {
+export async function resendInvitation({ actor, invitationId, confirmEmail, password, mfaCode }) {
   const row = await invitationRow(invitationId);
   requireTypedConfirmation(confirmEmail, row.email);
-  await requireStepUp(actor, password);
+  await requireStepUp(actor, password, mfaCode);
   const token = newToken();
   const r = unwrap(await rpc("kayad_owner_resend_invitation", { p_invitation_id: invitationId, p_token_hash: sha(token), p_expires: new Date(Date.now() + inviteTtlMs()).toISOString(), p_actor: actor.id, p_actor_label: label(actor), p_cooldown_seconds: Number(process.env.OWNER_INVITE_RESEND_COOLDOWN_SECONDS ?? 60) }));
   registry.invalidate({ taint: false });
@@ -201,10 +223,10 @@ export async function resendInvitation({ actor, invitationId, confirmEmail, pass
   return { invitation: { id: r.id, email: r.email, kind: r.kind, expiresAt: r.expires_at }, emailDelivered: mail.delivered, emailStatus: mail.status };
 }
 
-export async function revokeInvitation({ actor, invitationId, confirmEmail, password, reason }) {
+export async function revokeInvitation({ actor, invitationId, confirmEmail, password, mfaCode, reason }) {
   const row = await invitationRow(invitationId);
   requireTypedConfirmation(confirmEmail, row.email);
-  await requireStepUp(actor, password);
+  await requireStepUp(actor, password, mfaCode);
   unwrap(await rpc("kayad_owner_revoke_invitation", { p_invitation_id: invitationId, p_actor: actor.id, p_actor_label: label(actor), p_reason: String(reason || "revoked by owner").slice(0, 500) }));
   registry.invalidate({ taint: false });
   return { revoked: true };
@@ -223,12 +245,17 @@ function afterRevocation(userId) {
   try { getIO()?.in(`user_${userId}`).disconnectSockets(true); } catch (e) { logWarn("socket disconnect after owner revocation failed", { error: e?.message }); }
 }
 
-export async function removeOwner({ actor, targetUserId, confirmEmail, password, reason }) {
+export async function removeOwner({ actor, targetUserId, confirmEmail, password, mfaCode, reason }) {
   const m = await memberRow(targetUserId);
+  // Phase 16A: the primary owner (first designated address) is not removable by a peer owner. Recovery remains possible. OWNER_PRIMARY_PROTECTION=off disables the rule.
+  if (process.env.OWNER_PRIMARY_PROTECTION !== "off" && isMainOwnerEmail(m.email) && !isMainOwnerEmail(actor?.email)) {
+    await logEvent("owner.remove", "denied", { actor: actor?.id || null, actorLabelText: label(actor), email: m.email, target: targetUserId, reason: "primary owner is protected from removal by a peer" });
+    throw ownerError("OWNER_PRIMARY_PROTECTED");
+  }
   requireTypedConfirmation(confirmEmail, m.email);
   const why = String(reason || "").trim();
   if (why.length < 3) throw new OwnerError("REASON_REQUIRED", "Give a short reason; it is recorded in the audit history.", 400);
-  await requireStepUp(actor, password);
+  await requireStepUp(actor, password, mfaCode);
   const r = unwrap(await rpc("kayad_owner_revoke_membership_atomic", { p_target_user: targetUserId, p_actor: actor.id, p_actor_label: label(actor), p_reason: why.slice(0, 500) }));
   afterRevocation(targetUserId);
   await registry.ensureFresh();
@@ -250,17 +277,20 @@ async function interruptedRecovery(userId) {
 }
 
 /** One owner recovers another whose mailbox/credentials are lost: end their access now, then re-invite with a credential reset. */
-export async function recoverOwner({ actor, targetUserId, confirmEmail, password, verifiedVia, note }) {
+export async function recoverOwner({ actor, targetUserId, confirmEmail, password, mfaCode, verifiedVia, note }) {
   let m; let resumed = false;
   try { m = await memberRow(targetUserId); } catch (e) { if (e?.code !== "OWNER_NOT_MEMBER") throw e; m = await interruptedRecovery(targetUserId); resumed = !!m; if (!m) throw e; }
   if (m.user_id === actor.id) throw new OwnerError("RECOVERY_SELF", "Recover another owner; to change your own credentials use the normal password change.", 400);
   requireTypedConfirmation(confirmEmail, m.email);
   if (!VERIFIED_VIA.has(verifiedVia) || String(note || "").trim().length < 10) throw new OwnerError("RECOVERY_EVIDENCE_REQUIRED", "Record how the person's identity was verified out of band (not by e-mail alone) and a short note.", 400);
-  await requireStepUp(actor, password);
+  await requireStepUp(actor, password, mfaCode);
   if (!resumed) {
     unwrap(await rpc("kayad_owner_revoke_membership_atomic", { p_target_user: targetUserId, p_actor: actor.id, p_actor_label: label(actor), p_reason: `recovery: ${verifiedVia}: ${String(note).trim()}`.slice(0, 500) }));
     afterRevocation(targetUserId);
   }
+  // Phase 16: the recovered owner may have lost their authenticator device; their second factor is removed now and re-enrolled after they accept.
+  try { await mfa.resetFactor(targetUserId, { by: actor.id, byEmail: actor.email, targetEmail: m.email, reason: "owner recovery" }); }
+  catch (e) { logWarn("owner recovery: second factor reset deferred to acceptance", { event: "owner.mfa_reset_deferred", code: e?.code }); }
   const token = newToken();
   let r;
   try {
@@ -300,6 +330,8 @@ export async function acceptInvitation({ token, name, password, authUserId }) {
   invalidateUserCache(r.user_id);
   registry.invalidate();
   await registry.ensureFresh();
+  // Phase 16: a recovery invitation means the previous credentials are void, which includes the authenticator device.
+  if (r.kind === "recovery") { try { await mfa.resetFactor(r.user_id, { byEmail: r.email, targetEmail: r.email, reason: "recovery invitation accepted" }); } catch (e) { logWarn("second factor reset after recovery failed", { event: "owner.mfa_reset_failed", code: e?.code }); } }
   // bootstrap switches itself off once every designated identity is established
   try {
     const established = new Set(registry.currentOwners().map(([e]) => e));
@@ -367,6 +399,8 @@ export async function emergencyRecovery({ operator, incident }) {
   const label_ = `emergency-cli:${String(operator).trim().slice(0, 60)}:${String(incident).trim().slice(0, 40)}`;
   const out = [];
   for (const email of OWNER_EMAILS) {
+    // Phase 16: with no usable owner (database refuses otherwise) a designated owner may have lost their authenticator too: clear it so the recovery invitation can complete.
+    try { const u = (await getSupabase().from("users").select("id").eq("email", email).maybeSingle()).data; if (u?.id) await mfa.resetFactor(u.id, { byEmail: label_, targetEmail: email, reason: "emergency recovery" }); } catch (e) { logWarn("emergency recovery: second factor reset failed", { event: "owner.mfa_reset_failed", code: e?.code }); }
     const token = newToken();
     const { data: pend } = await getSupabase().from("owner_invitations").select("id").eq("email", email).eq("status", "pending").maybeSingle();
     const r = pend

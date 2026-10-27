@@ -1,0 +1,14 @@
+PASS backend Node engine
+PASS Render uses canonical Dockerfile
+PASS Render health path
+PASS Dockerfile has no stale realtime copy
+PASS Docker context includes backend
+PASS response facade exists
+PASS auth compatibility aliases exist
+PASS atomic auction adapters exist
+PASS email compatibility export exists
+PASS subscription entitlement gate exists
+PASS Supabase service client is backend-only
+PASS no HTTP 501 placeholders
+
+Production backend validation: 12/12 PASS

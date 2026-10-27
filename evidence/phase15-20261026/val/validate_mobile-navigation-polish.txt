@@ -1,0 +1,38 @@
+PASS mobile menu remains the canonical Navbar drawer
+PASS drawer is an accessible modal dialog
+PASS drawer measures the visual viewport
+PASS drawer retains safe-area bottom padding
+PASS drawer primary destinations use grouped grid
+PASS drawer category icons remain sourced from canonical nav config
+PASS drawer child destinations show canonical icons
+PASS drawer child active state is exposed
+PASS drawer support group spans the grid
+PASS narrow phone uses single-column destination groups
+PASS small tablet drawer uses three columns
+PASS menu overlay hides canonical mobile dock
+PASS menu overlay hides legacy mobile dock
+PASS menu overlay prevents dock hit-testing
+PASS drawer links have high-visibility keyboard focus
+PASS drawer respects reduced motion
+PASS bottom dock retains five canonical actions
+PASS bottom dock labels retain explicit text
+PASS bottom dock no longer duplicates the header menu
+PASS saved dock item uses the real Heart icon and active state
+PASS mobile menu destination cards remain compact instead of stretching
+PASS bottom dock uses touch-sized targets
+PASS bottom dock icon sizing is normalized
+PASS bottom dock uses KAYAD palette
+PASS bottom dock uses semantic color-coded real icons
+PASS phone header reserves readable brand descriptor beside logo
+PASS narrow header actions are compacted
+PASS focus ring uses theme mint
+PASS navigation still derives child destinations from visibleChildren
+PASS navigation configuration remains admin-controlled
+PASS seller CTA remains existing authenticated navigation action
+PASS saved and messaging shortcuts remain in the same drawer
+PASS notifications remain reachable in the drawer
+PASS role-specific dealer tools remain role-gated
+PASS role-specific admin tools remain role-gated
+PASS source still contains escape and viewport cleanup hooks
+
+Mobile navigation polish: 36/36 PASS

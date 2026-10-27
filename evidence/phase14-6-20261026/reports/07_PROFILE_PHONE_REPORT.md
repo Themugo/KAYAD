@@ -1,0 +1,6 @@
+# 07 Profile / phone verification (PUT /api/auth/profile)
+Defect: a changed phone kept phoneVerified=true (bidding gate in bidController.js uses it).
+Fix (backend/controllers/authController.js updateProfile): phone must normalise through formatPhone (same Kenyan rule as the dealer profile; invalid/empty -> 400 VALIDATION_FAILED, no write; previously raw text was stored). When the normalised number differs from the stored one, phoneVerified:false is set in the same single findByIdAndUpdate (atomic). Unrelated updates, an omitted phone, and the same number in another format leave verification unchanged. The existing OTP verification workflow is untouched.
+Consistency: dealer profile PUT (14.5) and account profile PUT now follow the same rule.
+Tests: backend/tests/regression/authProfilePhoneVerification.test.js (9): unrelated field, omitted phone, same number other format, changed phone in one write, invalid phones, unknown user 404, failed write, protected payout fields still refused, no sensitive fields in response. Unauthorized requests are rejected earlier by the protect middleware (route-level, unchanged).
+Behaviour change to note: callers that sent a non-Kenyan phone string previously got it stored; they now get 400 (the only frontend caller, Profile.tsx, edits one field and displays server errors).

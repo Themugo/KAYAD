@@ -1,0 +1,75 @@
+PASS E1 a non-numeric Paybill/Till is refused (400) and nothing is stored
+PASS E1 an invalid M-Pesa phone is refused (400)
+PASS E1 markup / control characters in settlement text are refused
+PASS E2 valid settlement details are saved
+PASS E2 a field can still be cleared with an empty string
+PASS E3 identifier substitution in the body cannot change another dealer's settlement details
+PASS E3 a buyer cannot write dealer settlement details
+PASS E3 settlement write without CSRF is refused
+PASS E4 changing the payout phone without the current password is refused (403 STEP_UP_REQUIRED) and nothing changes
+PASS E4 a wrong current password is refused (403 STEP_UP_FAILED)
+PASS E4 the account-profile endpoint enforces the same step-up (no bypass route)
+PASS E4 with the correct password the phone changes and verification is reset (14.6 protection preserved)
+PASS E4 an unchanged phone or non-phone edit needs no password
+PASS E5 other profile edits are unaffected by the step-up
+PASS E5 a dealer cannot edit another dealer's profile (403)
+PASS E6 repeated wrong step-up passwords are rate limited (429)
+PASS E7 non-payout roles (buyer) keep changing their phone without a password
+PASS E8 dealer earnings list the sale and its receipt
+PASS E8 dealer earnings never expose the buyer's phone number, user id or checkout id
+PASS F1 the owner can save an auction setup for an available listing
+PASS F1 another dealer cannot read-modify the setup (403) and the saved config is unchanged
+PASS F1 another dealer cannot read the setup (403)
+PASS F1 another dealer cannot request an amendment (403)
+PASS F1 another dealer cannot publish (403)
+PASS F1 a buyer cannot configure an auction (403)
+PASS F2 saving an auction setup for a soft-deleted listing is refused (404/409) and nothing is written
+PASS F2 publishing for a soft-deleted listing is refused
+PASS F2 saving an auction setup for a sold listing is refused (409) and nothing is written
+PASS F2 publishing for a sold listing is refused
+PASS F2 saving an auction setup for a reserved listing is refused (409) and nothing is written
+PASS F2 publishing for a reserved listing is refused
+PASS F2 saving an auction setup for a listing whose auction is live is refused (409) and nothing is written
+PASS F2 publishing for a listing whose auction is live is refused
+PASS F2 saving an auction setup for a listing whose auction has ended is refused (409) and nothing is written
+PASS F2 publishing for a listing whose auction has ended is refused
+PASS F3 a published auction setup is immutable (409) and its terms are untouched
+PASS F3 the owner can only request a controlled amendment (201), which does not change the live terms
+PASS F3 an amendment requires a reason (400)
+PASS G1 an available listing reaches the provider stage (local Daraja is unconfigured, so the request fails AFTER validation and the payment is marked failed - never pending/success)
+PASS G2 a client-supplied amount that differs from the listing price is refused (400)
+PASS G3 payment initiation for a soft-deleted listing is refused (404) and no payment row is created
+PASS G3 payment initiation for a sold listing is refused (409) and no payment row is created
+PASS G3 payment initiation for a pending-review listing is refused (404) and no payment row is created
+PASS G3 payment initiation for a hidden listing is refused (404) and no payment row is created
+PASS G3 payment initiation for a draft listing is refused (404) and no payment row is created
+PASS G4 a dealer cannot pay for their own listing (403/409) and no payment row is created
+PASS G5 a malformed phone is refused by validation (400)
+PASS G5 initiation without CSRF is refused (403)
+PASS G5 unauthenticated initiation is refused (401)
+PASS G5 types without a server-authoritative amount stay refused
+PASS G6 the backend log contains no full customer phone numbers from payment initiation
+PASS H1 five concurrent identical success callbacks all acknowledge (200) and the payment succeeds exactly once with the provider receipt
+PASS H1 payment events are not duplicated by the replay (one callback_received, at most one amount_verified)
+PASS H1 the customer receipt is delivered: an in-app payment notification exists for the payer
+PASS H2 a later replay with a different receipt cannot overwrite the recorded receipt
+PASS H3 a failure callback arriving after success cannot downgrade the payment (reordered delivery)
+PASS H4 a cancelled/failed callback marks the payment failed with no receipt
+PASS H4 a success callback after a recorded failure does not silently flip the state (documented reconciliation case: provider says paid, platform says failed)
+PASS H5 an amount that differs from the server-recorded amount fails the payment and records no success receipt
+PASS H6 a callback for an unknown checkout id changes nothing and still acknowledges
+PASS H7 a callback that is not JSON is rejected without processing
+PASS H7 a structurally invalid callback is rejected
+PASS H7 a callback with an old timestamp is rejected as a replay and the payment stays pending
+PASS H8 concurrent success and failure callbacks for one checkout end in exactly one terminal state with no 5xx
+PASS H9 a pending purchase does not fulfil the sale (listing stays available)
+PASS H9 a failed purchase does not fulfil the sale
+PASS H9 a verified successful purchase callback (sent twice) settles the payment once
+PASS H9 the sale is recorded against the listing exactly once (escrow or direct settlement per the listing configuration)
+PASS I1 a customer's payment history contains only their own payments
+PASS I1 the payer sees their own payments
+PASS I2 another customer cannot read a payment by checkout id
+PASS I2 the payer can read their own payment status
+PASS I3 a dealer cannot read a customer's payment record through the customer status route
+
+73/73 passed

@@ -1,0 +1,75 @@
+PASS a designated owner address cannot be claimed through public registration
+PASS owner can open owner management in database mode
+PASS role admin: owner list/invite/mfa all refused
+PASS role accounts: owner list/invite/mfa all refused
+PASS role hr: owner list/invite/mfa all refused
+PASS role marketing: owner list/invite/mfa all refused
+PASS role moderator: owner list/invite/mfa all refused
+PASS role dealer: owner list/invite/mfa all refused
+PASS role user: owner list/invite/mfa all refused
+PASS role individual_seller: owner list/invite/mfa all refused
+PASS anonymous owner list refused
+PASS rank admin: ban/deactivate/delete/role-change of owner all refused and owner row unchanged
+PASS rank accounts: ban/deactivate/delete/role-change of owner all refused and owner row unchanged
+PASS rank hr: ban/deactivate/delete/role-change of owner all refused and owner row unchanged
+PASS rank moderator: ban/deactivate/delete/role-change of owner all refused and owner row unchanged
+PASS invitation refused on wrong password / mismatched typed e-mail
+PASS owner issues invitation (no provider: delivery honestly reported, nothing fabricated)
+PASS invitation response never contains the token
+PASS a second pending invitation for the same address does not create a second pending row
+PASS invitation preview valid, address masked
+PASS a different signed-in account cannot accept the invitation
+PASS anonymous accept of a verified account is refused (must be signed in)
+PASS mailbox owner accepts while signed in
+PASS invitation link is single use
+PASS second owner sees owner management; two active owners
+PASS users row of owner 1 and 2 still single canonical rows (no duplicate identity created)
+PASS expired invitation cannot be accepted
+PASS invitee with an unverified account becomes owner only through the mailbox-bound link (token proves mailbox), and is verified by it
+PASS admin cannot ban/delete the second owner either
+PASS MFA status reports installed + not enrolled
+PASS enrolment needs the password
+PASS enrolment returns secret + otpauth URI once
+PASS secret stored encrypted, never plaintext
+PASS wrong activation code refused
+PASS correct code activates; 10 recovery codes shown once
+PASS recovery codes stored only as hashes
+PASS cannot silently re-enrol over an active factor
+PASS owner login without a code -> MFA_REQUIRED, no session issued
+PASS a valid code never rescues a wrong password
+PASS password + next-step code logs in
+PASS the same code cannot be replayed
+PASS an earlier-step code is refused after a later one was used
+PASS non-owner accounts are not challenged
+PASS a recovery code logs in
+PASS a recovery code is single use
+PASS enrolled owner cannot invite without the second factor
+PASS with a recovery code the invitation proceeds
+PASS owner without a factor is not locked out under enrolled_only
+PASS 5 wrong codes lock the factor for 15 minutes, even a right code is then refused
+PASS lockout does not lock the password account for anyone else
+PASS other owner recovers a lost-device owner
+PASS recovery resets the second factor and recovery codes
+PASS recovered owner loses privilege until the recovery invitation is accepted
+PASS old sessions of the recovered owner are dead
+PASS an owner can remove another owner while a usable owner remains
+PASS deleting a former owner is refused with ACCOUNT_DELETE_BLOCKED / OWNER_GOVERNANCE (no FK 500, user row intact)
+PASS the last usable owner cannot be removed
+PASS append-only ledger recorded invite, accept, mfa and recovery events
+PASS ledger contains no secret, token or recovery code
+PASS ledger read accounts: 200
+PASS ledger read admin: 200
+PASS ledger read hr: 403
+PASS ledger read marketing: 403
+PASS ledger read moderator: 403
+PASS ledger read dealer: 403
+PASS ledger read user: 403
+PASS communications config read refused for hr
+PASS communications config read refused for marketing
+PASS communications config read refused for accounts
+PASS communications config read refused for moderator
+PASS communications config read refused for dealer
+PASS communications config read refused for user
+PASS communications config read allowed for admin
+
+RESULT pass=73 fail=0

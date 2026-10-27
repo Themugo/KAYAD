@@ -3,6 +3,7 @@
 // Visual workflow builder, business rules, approvals, tasks
 // ============================================================
 
+import { getSupabase } from "../utils/supabase.js";
 import Workflow from "../models/Workflow.js";
 import WorkflowTrigger from "../models/WorkflowTrigger.js";
 import WorkflowAction from "../models/WorkflowAction.js";
@@ -826,42 +827,40 @@ export async function getActionTypes(req, res) {
 // ============================================
 
 export async function getAISuggestions(req, res) {
-  // Analyze patterns and suggest automations
-  const suggestions = [
-    {
-      id: "sug_1",
-      type: "repetitive_task",
-      title: "Automate Dealer Verification Reminders",
-      description: "You have 47 pending dealer verifications. Create a daily reminder workflow.",
-      potential: { timeSaved: "2.5 hours/day", efficiency: "+35%" },
-      workflowTemplate: "dealer_onboarding",
-    },
-    {
-      id: "sug_2",
-      type: "bottleneck",
-      title: "Slow Approval Process Detected",
-      description: "Auction approvals take an average of 4.2 hours. Automate pre-approval checks.",
-      potential: { timeSaved: "3 hours/day", efficiency: "+45%" },
-      workflowTemplate: "auction_setup",
-    },
-    {
-      id: "sug_3",
-      type: "suggestion",
-      title: "Vehicle Expiry Notifications",
-      description: "Listings without updates in 30 days have 60% lower engagement. Send reminders.",
-      potential: { timeSaved: "1 hour/day", efficiency: "+25%" },
-      workflowTemplate: "vehicle_publishing",
-    },
-    {
-      id: "sug_4",
-      type: "improvement",
-      title: "Finance Application Status Updates",
-      description: "Users frequently inquire about finance status. Automate status notifications.",
-      potential: { timeSaved: "1.5 hours/day", efficiency: "+40%" },
-    },
-  ];
-
-  res.json({ success: true, data: suggestions });
+  // Phase 15: this used to return four hard-coded "insights" ("47 pending dealer verifications", "approvals take 4.2 hours",
+  // invented time-saved percentages) to the Super Admin UI. Only evidence-backed suggestions are returned now; with no
+  // evidence the list is empty and says why. No savings or efficiency figures are estimated.
+  const suggestions = [];
+  try {
+    const sb = getSupabase();
+    const [pendingVerifications, pendingListings] = await Promise.all([
+      sb.from("dealer_verifications").select("*", { count: "exact", head: true }).eq("status", "pending"),
+      sb.from("cars").select("*", { count: "exact", head: true }).eq("status", "pending").is("deleted_at", null),
+    ]);
+    if (!pendingVerifications.error && pendingVerifications.count > 0) {
+      suggestions.push({
+        id: "pending_dealer_verifications",
+        type: "operations",
+        title: "Pending dealer verifications",
+        description: `${pendingVerifications.count} dealer verification(s) are waiting for review.`,
+        evidence: { pendingDealerVerifications: pendingVerifications.count },
+        workflowTemplate: "dealer_onboarding",
+      });
+    }
+    if (!pendingListings.error && pendingListings.count > 0) {
+      suggestions.push({
+        id: "pending_listing_moderation",
+        type: "operations",
+        title: "Listings awaiting moderation",
+        description: `${pendingListings.count} listing(s) are waiting for review.`,
+        evidence: { pendingListings: pendingListings.count },
+        workflowTemplate: "vehicle_publishing",
+      });
+    }
+  } catch {
+    return res.json({ success: true, data: [], meta: { source: "unavailable", message: "Suggestions could not be computed from live data." } });
+  }
+  res.json({ success: true, data: suggestions, meta: { source: "live-counts", message: suggestions.length ? undefined : "No evidence-backed suggestions at this time." } });
 }
 
 // ============================================

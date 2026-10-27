@@ -1,0 +1,10 @@
+PASS notification controller uses canonical db
+PASS notification controller has owner-scoped read
+PASS notification service writes canonical notifications
+PASS chat blocked state enforced
+PASS chat create contract uses recipientId
+PASS preferences use canonical db
+PASS frontend notifications do not synthesize domain IDs
+PASS canonical chat surface has no simulated dealer response
+PASS communications polling is API-backed
+Communications initiative static gate complete.

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, waitFor, within } from '@testing-library/react';
 
 // MOCKED write-path tests (Phase 14.4). These prove the UI contract against the
 // documented backend envelopes; they are NOT live-session certification.
@@ -15,7 +15,11 @@ const veh = vi.hoisted(() => {
     kind: string; status?: number;
     constructor(message: string, kind: string, status?: number) { super(message); this.kind = kind; this.status = status; }
   }
-  return { getMyListings: vi.fn(), createCar: vi.fn(), updateCar: vi.fn(), VehicleApiError };
+  return {
+    getMyListings: vi.fn(), createCar: vi.fn(), updateCar: vi.fn(), addCarImages: vi.fn(), deleteCarImage: vi.fn(), deleteCar: vi.fn(), VehicleApiError,
+    LISTING_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/webp'], LISTING_IMAGE_MAX_BYTES: 5 * 1024 * 1024,
+    LISTING_IMAGE_MAX_PER_REQUEST: 10, LISTING_IMAGE_MAX_PER_LISTING: 20,
+  };
 });
 vi.mock('../../../services/dealerPlatformApi', () => api);
 vi.mock('../../../services/vehicleApi', () => veh);
@@ -123,10 +127,10 @@ describe('Dealer settings write path (Phase 14.4, mocked)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
     expect(await screen.findByText('Business name is required.')).toBeTruthy();
     expect(api.updateDealerProfile).not.toHaveBeenCalled();
-    fill(/Business name/, 'Amani Motors Ltd'); fill(/Contact phone/, '+254700000000');
+    fill(/Business name/, 'Amani Motors Ltd'); fill(/Contact phone/, '+254700000000'); fill(/Current password/, 'Secret#123');
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
-    expect(await screen.findByText('Profile saved.')).toBeTruthy();
-    expect(api.updateDealerProfile).toHaveBeenCalledWith('d1', { businessName: 'Amani Motors Ltd', location: 'Nairobi', bio: 'Hello', phone: '+254700000000' });
+    expect(await screen.findByText(/Profile saved\./)).toBeTruthy();
+    expect(api.updateDealerProfile).toHaveBeenCalledWith('d1', { businessName: 'Amani Motors Ltd', location: 'Nairobi', bio: 'Hello', phone: '+254700000000', currentPassword: 'Secret#123' });
   });
 
   it('a save failure keeps the entries and shows the server message', async () => {
@@ -137,6 +141,36 @@ describe('Dealer settings write path (Phase 14.4, mocked)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
     expect((await screen.findByRole('alert')).textContent).toContain('only update your own');
     expect((screen.getByLabelText(/Business name/) as HTMLInputElement).value).toBe('Changed');
+  });
+
+  it('phone is prefilled for the owner, omitted from the request when unchanged, validated when changed, and shows the re-verify notice', async () => {
+    api.getDealerProfile.mockResolvedValue({ success: true, data: { id: 'd1', businessName: 'Amani Motors', location: 'Nairobi', bio: 'Hello', phone: '254711111111' } });
+    api.updateDealerProfile.mockResolvedValue({ success: true, data: { id: 'd1', businessName: 'Amani Motors', location: 'Mombasa', bio: 'Hello', phone: '254700000001' } });
+    await open('section=settings');
+    expect(((await screen.findByLabelText(/Contact phone/)) as HTMLInputElement).value).toBe('254711111111');
+    expect(screen.queryByTestId('unsaved-indicator')).toBeNull();
+    fill(/^Location/, 'Mombasa');
+    expect(screen.getByTestId('unsaved-indicator')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await screen.findByText(/Profile saved/);
+    expect(api.updateDealerProfile).toHaveBeenLastCalledWith('d1', { businessName: 'Amani Motors', location: 'Mombasa', bio: 'Hello' });
+    fill(/Contact phone/, '12345');
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    expect(await screen.findByText(/valid Kenyan mobile number/)).toBeTruthy();
+    fill(/Contact phone/, '0700 000 001'); fill(/Current password/, 'Secret#123');
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    expect(await screen.findByText(/needs to be verified again/)).toBeTruthy();
+    expect(api.updateDealerProfile).toHaveBeenLastCalledWith('d1', expect.objectContaining({ phone: '0700 000 001' }));
+  });
+
+  it('server-side field errors (400) are shown on the matching field and the entries are kept', async () => {
+    api.updateDealerProfile.mockRejectedValue({ response: { status: 400, data: { message: 'Profile details are invalid', errors: { businessName: 'Business name is required' } } } });
+    await open('section=settings');
+    await screen.findByLabelText(/Business name/);
+    fill(/^Location/, 'Kisumu');
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    expect(await screen.findByText('Business name is required')).toBeTruthy();
+    expect((screen.getByLabelText(/^Location/) as HTMLInputElement).value).toBe('Kisumu');
   });
 
   it('verification status failure degrades to an unavailable note, not a fabricated status', async () => {
@@ -192,9 +226,161 @@ describe('Dealer team write path (Phase 14.4, mocked)', () => {
     await waitFor(() => expect(api.updateTeamMember).toHaveBeenCalledWith('m1', { role: 'manager' }));
     fireEvent.click(screen.getAllByRole('button', { name: 'Suspend' })[0]);
     await waitFor(() => expect(api.updateTeamMember).toHaveBeenCalledWith('m1', { status: 'suspended' }));
-    fireEvent.click(screen.getAllByRole('button', { name: 'Remove' })[0]);
+    fireEvent.click(screen.getAllByRole('button', { name: /^Remove / })[0]);
     expect(api.removeTeamMember).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole('button', { name: 'Confirm remove' }));
     await waitFor(() => expect(api.removeTeamMember).toHaveBeenCalledWith('m1'));
+  });
+});
+
+describe('Dealer photo management and listing removal (Phase 14.6, mocked)', () => {
+  const imgs = [{ url: 'https://img/1.jpg', public_id: 'p1' }, { url: 'https://img/2.jpg', public_id: 'p2' }];
+  beforeEach(() => {
+    api.getDealerDashboard.mockResolvedValue({ success: true, data: { overview: {} } });
+    veh.getMyListings.mockResolvedValue([{ id: 'c1', title: 'Prado TX', brand: 'Toyota', model: 'Prado', year: 2018, price: 5000000, status: 'available', images: imgs, updatedAt: '2026-10-20T10:00:00Z' }]);
+  });
+  afterEach(() => { cleanup(); vi.clearAllMocks(); });
+
+  it('edit shows existing photos and saving details does not send or drop images', async () => {
+    veh.updateCar.mockResolvedValue({ success: true, data: { id: 'c1' } });
+    await open('section=inventory&mode=edit&id=c1');
+    expect(screen.getByRole('list', { name: 'Current photos' }).querySelectorAll('li')).toHaveLength(2);
+    fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+    await waitFor(() => expect(veh.updateCar).toHaveBeenCalled());
+    expect(veh.updateCar.mock.calls[0][1]).not.toHaveProperty('images');
+    expect(veh.deleteCarImage).not.toHaveBeenCalled();
+  });
+
+  it('uploads photos, shows pending, applies the server list, and never fakes success on failure (retry works)', async () => {
+    await open('section=inventory&mode=edit&id=c1');
+    fireEvent.change(screen.getByLabelText('Add photos'), { target: { files: [new File(['x'], 'a.png', { type: 'image/png' })] } });
+    veh.addCarImages.mockRejectedValueOnce(new veh.VehicleApiError('Cloud storage not configured.', 'server', 500));
+    fireEvent.click(screen.getByRole('button', { name: /Upload 1/ }));
+    expect((await screen.findByRole('alert')).textContent).toContain('Cloud storage not configured.');
+    expect(screen.getByRole('list', { name: 'Current photos' }).querySelectorAll('li')).toHaveLength(2);
+    veh.addCarImages.mockResolvedValueOnce({ success: true, data: { images: [...imgs, { url: 'https://img/3.jpg', public_id: 'p3' }] } });
+    fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    await waitFor(() => expect(screen.getByRole('list', { name: 'Current photos' }).querySelectorAll('li')).toHaveLength(3));
+    expect(veh.addCarImages).toHaveBeenCalledTimes(2);
+    expect(veh.addCarImages.mock.calls[1][0]).toBe('c1');
+  });
+
+  it('rejects wrong type / oversize / over-limit files client-side without calling the API', async () => {
+    await open('section=inventory&mode=edit&id=c1');
+    fireEvent.change(screen.getByLabelText('Add photos'), { target: { files: [new File(['x'], 'a.gif', { type: 'image/gif' })] } });
+    fireEvent.click(screen.getByRole('button', { name: /Upload 1/ }));
+    expect((await screen.findByRole('alert')).textContent).toMatch(/only JPG, PNG or WEBP/);
+    const big = new File(['x'], 'big.jpg', { type: 'image/jpeg' });
+    Object.defineProperty(big, 'size', { value: 6 * 1024 * 1024 });
+    fireEvent.change(screen.getByLabelText('Add photos'), { target: { files: [big] } });
+    fireEvent.click(screen.getByRole('button', { name: /Upload 1/ }));
+    expect((await screen.findByRole('alert')).textContent).toMatch(/5 MB/);
+    expect(veh.addCarImages).not.toHaveBeenCalled();
+  });
+
+  it('removes a photo only after confirmation; the last photo cannot be removed', async () => {
+    veh.deleteCarImage.mockResolvedValue({ success: true, data: { images: [imgs[1]] } });
+    await open('section=inventory&mode=edit&id=c1');
+    fireEvent.click(screen.getByRole('button', { name: 'Remove photo 1' }));
+    expect(veh.deleteCarImage).not.toHaveBeenCalled();
+    fireEvent.click(within(screen.getByRole('group', { name: 'Confirm removing photo 1' })).getByRole('button', { name: /Remove/ }));
+    await waitFor(() => expect(veh.deleteCarImage).toHaveBeenCalledWith('c1', 0));
+    await waitFor(() => expect(screen.getByRole('list', { name: 'Current photos' }).querySelectorAll('li')).toHaveLength(1));
+    expect((screen.getByRole('button', { name: 'Remove photo 1' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('a failed photo removal keeps the photo and offers retry', async () => {
+    veh.deleteCarImage.mockRejectedValue(new veh.VehicleApiError('Not authorized to edit this listing', 'server', 403));
+    await open('section=inventory&mode=edit&id=c1');
+    fireEvent.click(screen.getByRole('button', { name: 'Remove photo 2' }));
+    fireEvent.click(within(screen.getByRole('group', { name: 'Confirm removing photo 2' })).getByRole('button', { name: /Remove/ }));
+    expect((await screen.findByRole('alert')).textContent).toContain('Not authorized');
+    expect(screen.getByRole('list', { name: 'Current photos' }).querySelectorAll('li')).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeTruthy();
+  });
+
+  it('listing removal needs confirmation, shows pending, and updates only after the server confirms', async () => {
+    let resolve: (v: unknown) => void = () => {};
+    veh.deleteCar.mockReturnValue(new Promise((r) => { resolve = r; }));
+    await open('section=inventory');
+    expect(await screen.findByText(/Updated 20 Oct 2026/)).toBeTruthy();
+    fireEvent.click(await screen.findByRole('button', { name: 'Remove Prado TX' }));
+    expect(veh.deleteCar).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Remove listing' }));
+    expect(await screen.findByRole('button', { name: /Removing/ })).toBeTruthy();
+    veh.getMyListings.mockResolvedValue([]);
+    resolve({ success: true });
+    expect(await screen.findByText('Listing removed from your inventory.')).toBeTruthy();
+    expect(veh.deleteCar).toHaveBeenCalledWith('c1');
+    expect(veh.deleteCar).toHaveBeenCalledTimes(1);
+  });
+
+  it('a failed removal keeps the listing and shows the reason; 403 is permission-specific', async () => {
+    veh.deleteCar.mockRejectedValue(new veh.VehicleApiError('Not authorized to delete this listing', 'server', 403));
+    await open('section=inventory');
+    fireEvent.click(await screen.findByRole('button', { name: 'Remove Prado TX' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove listing' }));
+    expect((await screen.findByRole('alert')).textContent).toContain('do not have permission');
+    expect(screen.getByText('Prado TX')).toBeTruthy();
+    expect(screen.queryByText('Listing removed from your inventory.')).toBeNull();
+  });
+
+  it('sold listings offer no Remove button and explain why (14.7)', async () => {
+    veh.getMyListings.mockResolvedValue([{ id: 's1', title: 'Sold Corolla', status: 'sold', images: imgs }]);
+    await open('section=inventory');
+    expect(await screen.findByText('Sold Corolla')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Remove Sold Corolla/ })).toBeNull();
+    expect(screen.getByText(/Sold listings cannot be removed/)).toBeTruthy();
+  });
+
+  it('a server-side delete block (409) keeps the listing and shows the reason (14.7)', async () => {
+    veh.deleteCar.mockRejectedValue(new veh.VehicleApiError('This listing has bids and cannot be deleted.', 'server', 409));
+    await open('section=inventory');
+    fireEvent.click(await screen.findByRole('button', { name: 'Remove Prado TX' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Remove listing' }));
+    expect((await screen.findByRole('alert')).textContent).toContain('has bids');
+    expect(screen.getByText('Prado TX')).toBeTruthy();
+  });
+
+  it('auction listings are not removable from this screen', async () => {
+    veh.getMyListings.mockResolvedValue([{ id: 'a1', title: 'Auction Hilux', status: 'available', auctionStatus: 'active', bidsCount: 3, images: imgs }]);
+    await open('section=inventory');
+    expect(await screen.findByText('Auction Hilux')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Remove Auction Hilux/ })).toBeNull();
+    expect(screen.getByText(/cannot be removed from this screen/)).toBeTruthy();
+  });
+});
+
+describe('Dealer leads and pipeline presentation (Phase 14.6, mocked)', () => {
+  const items = [
+    { id: 'l1', stage: 'new', buyer: { name: 'Wanjiku' }, vehicle: { title: 'Prado' }, source: 'web', createdAt: '2026-10-20T10:00:00Z' },
+    { id: 'l2', stage: 'test_drive', buyer: { name: 'Kamau' }, vehicle: { title: 'Prado' }, source: 'web', createdAt: '2026-10-20T10:00:00Z' },
+  ];
+  beforeEach(() => {
+    api.getDealerDashboard.mockResolvedValue({ success: true, data: { overview: {} } });
+    api.getLeads.mockResolvedValue({ success: true, data: { items } });
+    veh.getMyListings.mockResolvedValue([]);
+  });
+  afterEach(() => { cleanup(); vi.clearAllMocks(); });
+
+  it('pipeline shows readable stage headings with separate counts and notes leads in stages it does not show', async () => {
+    await open('section=pipeline');
+    expect(await screen.findByRole('heading', { name: /^new$/i, level: 4 })).toBeTruthy();
+    expect(screen.getByLabelText('1 lead')).toBeTruthy();
+    expect(screen.getAllByLabelText('0 leads').length).toBe(3);
+    expect(screen.getByText(/1 lead is in other stages/)).toBeTruthy();
+  });
+
+  it('leads table humanises stage names (no raw underscores)', async () => {
+    await open('section=leads');
+    expect(await screen.findByText('test drive')).toBeTruthy();
+    expect(screen.queryByText('test_drive')).toBeNull();
+  });
+
+  it('overview distinguishes unavailable from zero', async () => {
+    api.getDealerDashboard.mockResolvedValue({ success: true, data: { overview: { totalListings: 0 } } });
+    await open('section=overview');
+    expect(await screen.findByText('0')).toBeTruthy();
+    expect(screen.getAllByRole('img', { name: 'Unavailable' }).length).toBeGreaterThan(0);
   });
 });

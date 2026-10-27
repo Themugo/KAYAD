@@ -119,7 +119,7 @@ export const protect = async (req, res, next) => {
     // Security state is deliberately read fresh on every protected request. The
     // lightweight user cache may serve non-security profile fields, but must not
     // allow a banned/deactivated/role-revoked identity to remain authorized.
-    const securityUser = await User.findById(decoded.id).select("_id,email,role,status,isBanned,deactivatedAt,emailVerified,grantedPermissions,revokedPermissions").lean();
+    const securityUser = await User.findById(decoded.id).select("_id,email,role,status,isBanned,deactivatedAt,deletedAt,emailVerified,grantedPermissions,revokedPermissions").lean();
     const userAuth = await UserAuth.findOne({ user: decoded.id }).select("+tokenVersion +mustChangePassword").lean();
     if (!securityUser || !userAuth) {
       return res.status(401).json({ success: false, code: "AUTH_SESSION_EXPIRED", message: "Session invalid" });
@@ -145,6 +145,10 @@ export const protect = async (req, res, next) => {
     }
     if (user.deactivatedAt && !isOwnerUser(user)) {
       return res.status(403).json({ success: false, code: "AUTH_FORBIDDEN", message: "Account deactivated" });
+    }
+    // Phase 14.9: soft-deleted accounts (staff deletion) have no valid session.
+    if (user.deletedAt && !isOwnerUser(user)) {
+      return res.status(401).json({ success: false, code: "AUTH_SESSION_EXPIRED", message: "Session invalid" });
     }
 
     // STAGE 5A (Gate A): the owner exemptions above and below apply ONLY to a verified owner identity.
@@ -332,7 +336,7 @@ export const optionalAuth = async (req, res, next) => {
     const user = await User.findById(decoded.id).lean();
 
     // 🚫 Don't attach banned/deactivated users on public routes
-    if (user && !user.isBanned && !user.deactivatedAt) {
+    if (user && !user.isBanned && !user.deactivatedAt && !user.deletedAt) {
       // A token that protect() would reject as revoked (logout, password
       // change, session revocation → tokenVersion/session mismatch) must not
       // still identify the caller — or their staff role, which unlocks

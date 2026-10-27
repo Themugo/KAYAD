@@ -13,7 +13,8 @@ import * as dealerApi from '../../../services/dealerPlatformApi';
 import DealerListingForm from './DealerListingForm';
 import DealerSettingsPanel from './DealerSettingsPanel';
 import DealerTeamPanel from './DealerTeamPanel';
-import { getMyListings } from '../../../services/vehicleApi';
+import { getMyListings, deleteCar } from '../../../services/vehicleApi';
+import type { BackendCar } from '../../../services/vehicleApi';
 import { ParticipantEscrowDesk } from '../../../features/escrow/ParticipantEscrowDesk';
 
 // ============================================================
@@ -56,7 +57,7 @@ const StatCard = ({ title, value, change, icon: Icon, color = colors.navy, onOpe
     <div className="flex items-start justify-between">
       <div>
         <p className="text-sm text-[#64748B] mb-1">{title}</p>
-        <p className="text-2xl font-bold text-[#0A3340]">{value}</p>
+        <p className="text-2xl font-bold text-[#0A3340]">{value === '—' ? <span aria-label="Unavailable" role="img">—</span> : value}</p>
         {change !== undefined && (
           <div className={`flex items-center gap-1 mt-2 ${change >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
             {change >= 0 ? <ArrowUpRight className="w-4 h-4" aria-hidden="true" /> : <ArrowDownRight className="w-4 h-4" aria-hidden="true" />}
@@ -87,7 +88,7 @@ const PipelineStage = ({ stage, count, value, color }: { stage: string; count: n
       <span className="font-medium text-[#12576D]">{stage}</span>
     </div>
     <div className="text-right">
-      <p className="font-bold text-[#0A3340]">{count}</p>
+      <p className="font-bold text-[#0A3340]">{count === '—' ? <span aria-label="Unavailable" role="img">—</span> : count}</p>
     </div>
   </div>
 );
@@ -321,6 +322,27 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const [listingsError, setListingsError] = useState(null);
   const [listingsLoaded, setListingsLoaded] = useState(false);
   const [listingsRetry, setListingsRetry] = useState(0);
+  const photosChangedRef = React.useRef(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const confirmDeleteListing = async (car: BackendCar) => {
+    const id = String(car.id || car._id);
+    if (deletingId) return;
+    setDeletingId(id); setDeleteError(null);
+    try {
+      const res = await deleteCar(id);
+      if (res && res.success === false) throw new Error(res.message || 'The listing could not be removed.');
+      setMyListings((prev) => prev.filter((c) => String(c.id || c._id) !== id));
+      setDeleteTargetId(null);
+      setListingNotice('Listing removed from your inventory.');
+      setListingsLoaded(false);
+    } catch (err) {
+      const status = (err as { status?: number })?.status;
+      setDeleteError(status === 403 ? 'You do not have permission to remove this listing.' : status === 404 ? 'This listing no longer exists. Refresh your inventory.' : ((err as Error)?.message && status ? (err as Error).message : 'The listing could not be removed. Nothing was changed — please try again.'));
+    } finally { setDeletingId(null); }
+  };
 
   useEffect(() => {
     if (user) loadDashboard();
@@ -799,8 +821,10 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                     key={`${listingForm.mode}-${listingForm.id || 'new'}`}
                     mode={listingForm.mode}
                     car={listingForm.mode === 'edit' ? myListings.find((c) => String(c.id || c._id) === listingForm.id) : null}
-                    onCancel={() => openListingForm(null)}
+                    onPhotosChanged={() => { photosChangedRef.current = true; }}
+                    onCancel={() => { if (photosChangedRef.current) { photosChangedRef.current = false; setListingsLoaded(false); } openListingForm(null); }}
                     onSaved={() => {
+                      photosChangedRef.current = false;
                       setListingsLoaded(false);
                       setListingNotice(listingForm.mode === 'create' ? 'Vehicle submitted. It now appears in your inventory.' : 'Changes saved.');
                       setListingFormState(null);
@@ -842,23 +866,55 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                       <p className="text-sm text-[#64748B] text-center py-8">You haven't listed any vehicles yet.</p>
                     ) : myListings.map((car) => {
                       const image = car.images?.[0]?.thumb || car.images?.[0]?.url;
+                      const carId = String(car.id || car._id);
+                      const label = car.title || `${car.year} ${car.brand} ${car.model}`;
+                      const updatedRaw = car.updatedAt || car.updated_at;
+                      const updated = updatedRaw && !Number.isNaN(Date.parse(String(updatedRaw))) ? new Date(String(updatedRaw)).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }) : null;
+                      const bids = Number(car.bidsCount ?? car.bids_count ?? 0);
+                      const aStatus = String(car.auctionStatus ?? car.auction_status ?? '');
+                      const isAuctionListing = Boolean(car.isAuction || car.hasAuction || car.has_auction || (aStatus && aStatus !== 'none' && aStatus !== 'draft') || bids > 0);
+                      const isSoldListing = car.status === 'sold';
+                      const statusText = car.status ? String(car.status).replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()) : 'Status unavailable';
+                      const confirming = deleteTargetId === carId;
                       return (
-                        <div key={car.id} className="flex items-center gap-4 p-4 bg-[#F6FAF9] rounded-xl">
-                          <div className="w-16 h-12 bg-[#DDF4F0] rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-                            {image ? <img src={image} alt={car.title} className="w-full h-full object-cover" /> : <Car className="w-6 h-6 text-[#64748B]" />}
+                        <div key={car.id} className="p-4 bg-[#F6FAF9] rounded-xl">
+                          <div className="flex flex-wrap sm:flex-nowrap items-center gap-4">
+                            <div className="w-20 h-14 bg-[#DDF4F0] rounded-lg flex items-center justify-center overflow-hidden shrink-0">
+                              {image ? <img src={image} alt={label} className="w-full h-full object-cover" /> : <Car className="w-6 h-6 text-[#64748B]" aria-hidden="true" />}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-[#0A3340] truncate">{label}</p>
+                              <p className="text-sm text-[#475569]">{car.price == null ? 'Price unavailable' : `Ksh ${Number(car.price).toLocaleString('en-KE')}`} • {car.views == null ? 'Views unavailable' : `${Number(car.views).toLocaleString('en-KE')} views`}</p>
+                              {updated && <p className="text-xs text-[#475569]">Updated {updated}</p>}
+                            </div>
+                            <span className={`px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap ${
+                              car.status === 'available' || car.status === 'active' ? 'bg-emerald-100 text-emerald-800' :
+                              car.status === 'reserved' ? 'bg-[#DDF4F0] text-[#12576D]' :
+                              'bg-[#EEF7F5] text-[#475569]'
+                            }`}>
+                              {statusText}
+                            </span>
+                            <div className="flex gap-2">
+                              <button type="button" onClick={() => openListingForm({ mode: 'edit', id: carId })} className="px-3 py-1 text-xs font-bold text-[#176B87] border border-[#B9D3CF] rounded-lg hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Edit ${car.title || 'vehicle'}`}>Edit</button>
+                              {!isAuctionListing && !isSoldListing && (
+                                <button type="button" disabled={Boolean(deletingId)} onClick={() => { setDeleteError(null); setDeleteTargetId(carId); }} className="px-3 py-1 text-xs font-bold text-[#B42318] border border-[#B9D3CF] rounded-lg hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Remove ${car.title || 'vehicle'}`}>Remove</button>
+                              )}
+                            </div>
                           </div>
-                          <div className="flex-1">
-                            <p className="font-medium text-[#0A3340]">{car.title || `${car.year} ${car.brand} ${car.model}`}</p>
-                            <p className="text-sm text-[#64748B]">{car.price == null ? 'Price unavailable' : `Ksh ${Number(car.price).toLocaleString('en-KE')}`} • {car.views == null ? 'Views unavailable' : `${Number(car.views).toLocaleString('en-KE')} views`}</p>
-                          </div>
-                          <button type="button" onClick={() => openListingForm({ mode: 'edit', id: String(car.id || car._id) })} className="px-3 py-1 text-xs font-bold text-[#176B87] border border-[#B9D3CF] rounded-lg hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Edit ${car.title || 'vehicle'}`}>Edit</button>
-                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${
-                            car.status === 'available' || car.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
-                            car.status === 'reserved' ? 'bg-[#DDF4F0] text-[#12576D]' :
-                            'bg-[#EEF7F5] text-[#64748B]'
-                          }`}>
-                            {car.status || 'Status unavailable'}
-                          </span>
+                          {isAuctionListing && <p className="mt-2 text-xs text-[#475569]">Listings with an auction cannot be removed from this screen.</p>}
+                          {isSoldListing && !isAuctionListing && <p className="mt-2 text-xs text-[#475569]">Sold listings cannot be removed; completed sales are handled through escrow.</p>}
+                          {confirming && (
+                            <div role="alertdialog" aria-label={`Confirm removing ${label}`} className="mt-3 p-3 rounded-lg bg-[#FEF3F2] border border-[#FDA29B] text-sm text-[#7A271A]">
+                              <p>Remove “{label}” from your inventory? It will no longer appear to buyers.</p>
+                              {deleteError && <p role="alert" className="mt-2 font-medium">{deleteError}</p>}
+                              <div className="mt-2 flex gap-2">
+                                <button type="button" autoFocus disabled={Boolean(deletingId)} onClick={() => confirmDeleteListing(car)} aria-busy={deletingId === carId} className="px-3 py-1 text-xs font-bold rounded-lg bg-[#B42318] text-white disabled:opacity-60 flex items-center gap-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]">
+                                  {deletingId === carId && <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />}{deletingId === carId ? 'Removing…' : deleteError ? 'Try again' : 'Remove listing'}
+                                </button>
+                                <button type="button" disabled={Boolean(deletingId)} onClick={() => { setDeleteTargetId(null); setDeleteError(null); }} className="px-3 py-1 text-xs font-bold rounded-lg border border-[#B9D3CF] text-[#0A3340] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]">Keep listing</button>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       );
                     })}
@@ -921,9 +977,9 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                               lead.stage === 'contacted' ? 'bg-[#DDF4F0] text-[#12576D]' :
                               lead.stage === 'negotiating' ? 'bg-[#DDF4F0] text-[#12576D]' :
                               lead.stage === 'sold' ? 'bg-emerald-100 text-emerald-700' :
-                              'bg-[#EEF7F5] text-[#64748B]'
+                              'bg-[#EEF7F5] text-[#475569]'
                             }`}>
-                              {(lead.stage || 'new').replace(/([A-Z])/g, ' $1').trim()}
+                              {(lead.stage || 'new').replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim()}
                             </span>
                           </td>
                           <td className="py-3 px-4 text-[#64748B]">{lead.last_activity_at ? new Date(lead.last_activity_at).toLocaleDateString() : 'Never'}</td>
@@ -957,25 +1013,35 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   <button onClick={loadLeads} className="text-xs font-bold text-[#176B87]">Try Again</button>
                 </div>
               ) : (
+                <>
+                {(() => {
+                  const shown = ['new', 'contacted', 'negotiating', 'sold'];
+                  const other = leads.filter((l) => !shown.includes(l.stage || 'new')).length;
+                  return other > 0 ? <p className="mb-3 text-xs text-[#475569]">{other} {other === 1 ? 'lead is' : 'leads are'} in other stages (test drive, escrow started or lost) and appear in the Leads table.</p> : null;
+                })()}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   {['new', 'contacted', 'negotiating', 'sold'].map((stage, stageIdx) => {
                     const nextStage = ['new', 'contacted', 'negotiating', 'sold'][stageIdx + 1];
                     const stageLeads = leads.filter((l) => (l.stage || 'new') === stage);
                     return (
                       <div key={stage} className="bg-[#F6FAF9] rounded-xl p-3">
-                        <h4 className="text-xs font-bold text-[#64748B] uppercase mb-3">{stage} ({stageLeads.length})</h4>
+                        <div className="flex items-center justify-between gap-2 mb-3">
+                          <h4 className="text-sm font-bold text-[#0A3340] capitalize">{stage}</h4>
+                          <span className="min-w-6 px-2 py-0.5 rounded-full bg-white border border-[#D7E7E4] text-xs font-bold text-[#176B87] text-center" aria-label={`${stageLeads.length} ${stageLeads.length === 1 ? 'lead' : 'leads'}`}>{stageLeads.length}</span>
+                        </div>
                         <div className="space-y-2">
                           {stageLeads.length === 0 ? (
                             <p className="text-xs text-[#64748B]">Empty</p>
                           ) : stageLeads.map((lead) => (
                             <div key={lead.id} className="bg-white rounded-lg p-3 border border-[#D7E7E4] shadow-xs">
-                              <p className="text-xs font-bold text-[#0A3340]">{lead.buyer?.name || 'Unknown'}</p>
-                              <p className="text-[11px] text-[#64748B] mb-2">{lead.vehicle?.title || 'Vehicle'}</p>
+                              <p className="text-sm font-bold text-[#0A3340] break-words">{lead.buyer?.name || 'Unknown'}</p>
+                              <p className="text-xs text-[#475569] mb-2 break-words">{lead.vehicle?.title || 'Vehicle'}</p>
                               {nextStage && (
                                 <button
                                   onClick={() => advanceLeadStage(lead.id, nextStage)}
                                   disabled={leadUpdating === lead.id}
-                                  className="text-[10px] font-bold text-[#176B87] disabled:opacity-50"
+                                  aria-label={`Move ${lead.buyer?.name || 'lead'} to ${nextStage}`}
+                                  className="text-xs font-bold text-[#176B87] disabled:opacity-50 py-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]"
                                 >
                                   {leadUpdating === lead.id ? 'Moving…' : `Move to ${nextStage} →`}
                                 </button>
@@ -987,6 +1053,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                     );
                   })}
                 </div>
+                </>
               )}
             </div>
           )}
@@ -1082,7 +1149,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                       </div>
                       <span className={`px-3 py-1 text-xs font-medium rounded-full ${
                         c.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
-                        c.status === 'draft' ? 'bg-[#EEF7F5] text-[#64748B]' :
+                        c.status === 'draft' ? 'bg-[#EEF7F5] text-[#475569]' :
                         'bg-[#DDF4F0] text-[#12576D]'
                       }`}>
                         {c.status}

@@ -1,0 +1,8 @@
+validate:production-backend exit=0
+validate:release exit=0
+validate:v14:holistic exit=0
+validate:v14:runtime-preflight exit=0
+validate:v14:release-candidate exit=0
+validate:communications:providers exit=1
+validate:live-runtime exit=1
+validate:repository-naming exit=0

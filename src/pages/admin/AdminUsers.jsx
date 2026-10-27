@@ -68,11 +68,13 @@ export default function AdminUsers() {
     if (!window.confirm(`${action} ${u.name}?`)) return;
     setActionId(u._id + '-ban');
     try {
-      await adminAPI.toggleBan(u._id);
-      setUsers(prev => prev.map(x => x._id === u._id ? { ...x, isBanned: !x.isBanned } : x));
-      if (selected?._id === u._id) setSelected(prev => prev ? { ...prev, isBanned: !prev.isBanned } : prev);
-      toast(u.isBanned ? 'User unbanned' : 'User banned', 'success');
-    } catch { toast('Failed', 'error'); }
+      // Explicit target state (idempotent on the server) and the UI adopts the state the SERVER confirms.
+      const res = await adminAPI.toggleBan(u._id, !u.isBanned);
+      const confirmed = typeof res?.isBanned === 'boolean' ? res.isBanned : !u.isBanned;
+      setUsers(prev => prev.map(x => x._id === u._id ? { ...x, isBanned: confirmed } : x));
+      if (selected?._id === u._id) setSelected(prev => prev ? { ...prev, isBanned: confirmed } : prev);
+      toast(confirmed ? 'User banned' : 'User unbanned', 'success');
+    } catch (err) { toast(err?.response?.data?.message || 'Could not change the ban status. Nothing was changed on screen.', 'error'); }
     finally { setActionId(null); }
   }, [selected, toast]);
 

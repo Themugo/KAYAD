@@ -1,0 +1,12 @@
+Files REF/backend/controllers/authController.js and backend/controllers/authController.js differ
+Only in backend/tests/regression: authProfilePhoneVerification.test.js
+Only in backend/tests/regression: dealerTeamRoutePolicyMatrix.test.js
+Only in runbooks: phase14-6-20261026
+Files REF/scripts/validate-v14-live-certification-contract.mjs and scripts/validate-v14-live-certification-contract.mjs differ
+Files REF/src/__tests__/pages/dealer/DealerWorkflowWrites.test.tsx and src/__tests__/pages/dealer/DealerWorkflowWrites.test.tsx differ
+Files REF/src/__tests__/services/vehicleApi.test.ts and src/__tests__/services/vehicleApi.test.ts differ
+Files REF/src/pages/dealer/dashboard/DealerDashboard.tsx and src/pages/dealer/dashboard/DealerDashboard.tsx differ
+Files REF/src/pages/dealer/dashboard/DealerListingForm.tsx and src/pages/dealer/dashboard/DealerListingForm.tsx differ
+Only in src/pages/dealer/dashboard: DealerListingPhotos.tsx
+Files REF/src/pages/dealer/dashboard/DealerSettingsPanel.tsx and src/pages/dealer/dashboard/DealerSettingsPanel.tsx differ
+Files REF/src/services/vehicleApi.ts and src/services/vehicleApi.ts differ

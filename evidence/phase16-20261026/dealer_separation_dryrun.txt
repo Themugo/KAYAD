@@ -1,0 +1,12 @@
+PASS  fixture: owner row is a dealer with dealer metadata and no dealers/verification rows
+PASS  exactly the owner row changed to superadmin/super_admin=true
+PASS  business_name and status untouched by default (clearing is a separate, optional decision)
+PASS  dependent row counts unchanged (1/1/38/4)
+PASS  the other account (test dealer) is byte-identical
+PASS  no users row was created or removed
+PASS  DB constraint is satisfied (role='superadmin' <=> super_admin)
+PASS  guard: re-running the operation changes nothing (idempotent)
+PASS  a partial change (role without flag) is rejected by the database constraint
+PASS  rollback restores the exact original role/flag/business/status
+
+RESULT pass=10 fail=0

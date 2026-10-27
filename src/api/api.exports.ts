@@ -194,7 +194,7 @@ export const communicationsAPI = {
 export const adminAPI = {
   stats:         ()          => api.get('/admin/stats').then(unwrap),
   users:         (params: any)    => api.get('/admin/users', { params }).then(unwrap),
-  toggleBan:     (userId: string)    => api.post(`/admin/users/${userId}/toggle-ban`).then(unwrap),
+  toggleBan:     (userId: string, banned?: boolean) => api.post(`/admin/users/${userId}/toggle-ban`, typeof banned === 'boolean' ? { banned } : undefined).then(unwrap),
   approveDealer: (userId: string)    => api.post(`/admin/users/${userId}/approve-dealer`).then(unwrap),
   cars:          (params: any)    => api.get('/admin/cars', { params }).then(unwrap),
   deleteCar:     (carId: string)     => api.delete(`/admin/cars/${carId}`).then(unwrap),
@@ -652,11 +652,17 @@ export const BRANDS = [
 // STAGE 5B — owner governance. The server is the authority; every mutation carries the owner's password (step-up) and a typed confirmation.
 export const ownerAPI = {
   overview: () => api.get('/owner').then(unwrap),
-  invite: (body: { email: string; confirmEmail: string; password: string; note?: string }) => api.post('/owner/invitations', body).then(unwrap),
-  resend: (id: string, body: { confirmEmail: string; password: string }) => api.post(`/owner/invitations/${encodeURIComponent(id)}/resend`, body).then(unwrap),
-  revokeInvitation: (id: string, body: { confirmEmail: string; password: string; reason: string }) => api.delete(`/owner/invitations/${encodeURIComponent(id)}`, { data: body }).then(unwrap),
-  removeMember: (userId: string, body: { confirmEmail: string; password: string; reason: string }) => api.delete(`/owner/members/${encodeURIComponent(userId)}`, { data: body }).then(unwrap),
-  recover: (userId: string, body: { confirmEmail: string; password: string; verifiedVia: string; note: string }) => api.post(`/owner/members/${encodeURIComponent(userId)}/recovery`, body).then(unwrap),
+  invite: (body: { email: string; confirmEmail: string; password: string; mfaCode?: string; note?: string }) => api.post('/owner/invitations', body).then(unwrap),
+  resend: (id: string, body: { confirmEmail: string; password: string; mfaCode?: string }) => api.post(`/owner/invitations/${encodeURIComponent(id)}/resend`, body).then(unwrap),
+  revokeInvitation: (id: string, body: { confirmEmail: string; password: string; mfaCode?: string; reason: string }) => api.delete(`/owner/invitations/${encodeURIComponent(id)}`, { data: body }).then(unwrap),
+  removeMember: (userId: string, body: { confirmEmail: string; password: string; mfaCode?: string; reason: string }) => api.delete(`/owner/members/${encodeURIComponent(userId)}`, { data: body }).then(unwrap),
+  recover: (userId: string, body: { confirmEmail: string; password: string; mfaCode?: string; verifiedVia: string; note: string }) => api.post(`/owner/members/${encodeURIComponent(userId)}/recovery`, body).then(unwrap),
+  // PHASE 16 - owner second factor (TOTP). The secret is returned once by mfaEnroll and never again.
+  mfaStatus: () => api.get('/owner/mfa').then(unwrap),
+  mfaEnroll: (body: { password: string }) => api.post('/owner/mfa/enroll', body).then(unwrap),
+  mfaActivate: (body: { code: string }) => api.post('/owner/mfa/activate', body).then(unwrap),
+  mfaRecoveryCodes: (body: { password: string; mfaCode?: string }) => api.post('/owner/mfa/recovery-codes', body).then(unwrap),
+  mfaDisable: (body: { password: string; mfaCode?: string }) => api.delete('/owner/mfa', { data: body }).then(unwrap),
   previewInvitation: (token: string) => api.get('/owner-access/invitation', { params: { token } }).then(unwrap),
   acceptInvitation: (body: { token: string; name?: string; password?: string }) => api.post('/owner-access/accept', body).then(unwrap),
 };

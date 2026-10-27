@@ -1,0 +1,2 @@
+# Manifest verification
+`KAYAD_PHASE14_9_SOURCE_MANIFEST.sha256` (sha256sum format, no self-reference) lists every file in this archive. Verify after extraction: `sha256sum -c KAYAD_PHASE14_9_SOURCE_MANIFEST.sha256` from the archive root, and check the zip against the `.zip.sha256` sidecar. The recorded results of those checks for the delivered zip are in the sidecar `.integrity.log` shipped next to the zip (a file inside the zip cannot hold its own checksum).

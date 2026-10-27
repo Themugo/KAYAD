@@ -1,0 +1,27 @@
+  ℹ️  M-Pesa unavailable — optional integration is not configured
+  ℹ️  Africa's Talking unavailable — optional integration is not configured
+  ℹ️  Twilio WhatsApp unavailable — optional integration is not configured
+  ✅ Env validated
+PASS production starts with optional M-Pesa/SMS/WhatsApp integrations absent
+  ❌ REQUIRE_MPESA=true but MPESA_CONSUMER_KEY is missing (M-Pesa consumer key)
+  ❌ REQUIRE_MPESA=true but MPESA_CONSUMER_SECRET is missing (M-Pesa consumer secret)
+  ❌ REQUIRE_MPESA=true but MPESA_SHORTCODE is missing (M-Pesa shortcode)
+  ❌ REQUIRE_MPESA=true but MPESA_PASSKEY is missing (M-Pesa passkey)
+  ℹ️  M-Pesa unavailable — optional integration is not configured
+  ℹ️  Africa's Talking unavailable — optional integration is not configured
+  ℹ️  Twilio WhatsApp unavailable — optional integration is not configured
+PASS REQUIRE_MPESA=true fails closed without credentials
+  ❌ REQUIRE_SMS=true but AT_API_KEY is missing (Africa's Talking API key)
+  ❌ REQUIRE_SMS=true but AT_USERNAME is missing (Africa's Talking username)
+  ℹ️  M-Pesa unavailable — optional integration is not configured
+  ℹ️  Africa's Talking unavailable — optional integration is not configured
+  ℹ️  Twilio WhatsApp unavailable — optional integration is not configured
+PASS REQUIRE_SMS=true fails closed without credentials
+  ❌ REQUIRE_WHATSAPP=true but TWILIO_ACCOUNT_SID is missing (Twilio account SID)
+  ❌ REQUIRE_WHATSAPP=true but TWILIO_AUTH_TOKEN is missing (Twilio auth token)
+  ❌ REQUIRE_WHATSAPP=true but TWILIO_WHATSAPP_NUMBER is missing (Twilio WhatsApp sender)
+  ℹ️  M-Pesa unavailable — optional integration is not configured
+  ℹ️  Africa's Talking unavailable — optional integration is not configured
+  ℹ️  Twilio WhatsApp unavailable — optional integration is not configured
+PASS REQUIRE_WHATSAPP=true fails closed without credentials
+PRODUCTION OPTIONAL-INTEGRATION VALIDATION: 4/4 PASS

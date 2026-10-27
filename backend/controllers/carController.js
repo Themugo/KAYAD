@@ -18,6 +18,7 @@ import { randomUUID } from "node:crypto";
 import { registerMediaUploadJob, registerMediaUploadFailure, completeMediaUpload } from "../services/mediaRecovery.service.js";
 import { getOnboardingPolicy, isPolicyTrusted } from "../services/onboardingPolicy.service.js"; // STAGE 5
 import { getEscrowEnabledForNewOrEditedCar, getEffectiveEscrowForCar } from "../services/escrowCapability.service.js";
+import { listingDeletionBlock, DELETE_BLOCK_CODES } from "../utils/carDeletionGuard.js";
 import { toPublicVehicleDetail, PUBLIC_VEHICLE_POLICY } from "../utils/publicVehicleProjection.js"; // Phase 13K: public responses are allowlisted, never raw rows
 
 const DEALER_ROLES = SELLER_ROLES; // backward compat
@@ -322,7 +323,7 @@ export const getCars = async (req, res) => {
 // private draft/pending listings without authentication).
 export const getMyListings = async (req, res) => {
   try {
-    const cars = await Car.find({ dealer: req.user.id })
+    const cars = await Car.find({ dealer: req.user.id, deletedAt: { $exists: false } }) // 14.8: soft-deleted listings are not inventory
       .populate("dealer", "name businessName avatar")
       .sort({ createdAt: -1 });
     res.json({ success: true, data: cars });
@@ -650,6 +651,10 @@ export const updateCar = async (req, res) => {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
     }
 
+    // 14.8: a soft-deleted listing is read-only history. Owners cannot edit it or change its photos (404, as for any missing
+    // listing); staff keep administrative access.
+    if ((car.deletedAt || car.deleted_at) && !isStaff) return res.status(404).json({ success: false, message: "Car not found" });
+
     // ── ESCROW ENFORCEMENT ON UPDATE ─────────────────────
     // STAGE 9: see createCar's identical comment — this is now derived
     // from the admin-grantable escrow_capability_status authority instead
@@ -902,9 +907,29 @@ export const deleteCar = async (req, res) => {
       return res.status(403).json({ success: false, message: "Not authorized to delete this listing" });
     }
 
-    await Car.softDelete(req.params.id, req.user.id);
+    // Phase 14.7: repeated deletion is idempotent - an already-deleted listing is a success that changes nothing (no second
+    // listing-count decrement, no second audit entry).
+    if (car.deletedAt || car.deleted_at) {
+      return res.json({ success: true, message: "Already deleted", alreadyDeleted: true });
+    }
 
-    // Decrement listing counts
+    // Phase 14.7: the backend, not the UI, refuses to delete a listing that is part of an auction/settlement record.
+    // Readable pre-check first (precise error); the write below re-enforces the same rule atomically.
+    const blockedBefore = listingDeletionBlock(car, await Car.countBidRows(req.params.id));
+    if (blockedBefore) {
+      return res.status(409).json({ success: false, code: "LISTING_DELETE_BLOCKED", reason: blockedBefore.code, message: blockedBefore.message });
+    }
+
+    const deletion = await Car.softDeleteGuarded(req.params.id, req.user.id);
+    if (deletion?.modifiedCount === 0) {
+      // Lost a race: a bid/auction change or a concurrent delete landed between the pre-check and the write.
+      const fresh = await Car.findById(req.params.id);
+      if (!fresh || fresh.deletedAt || fresh.deleted_at) return res.json({ success: true, message: "Already deleted", alreadyDeleted: true });
+      const blockedNow = listingDeletionBlock(fresh) || { code: DELETE_BLOCK_CODES.BIDS_PRESENT, message: "This listing changed and can no longer be deleted." };
+      return res.status(409).json({ success: false, code: "LISTING_DELETE_BLOCKED", reason: blockedNow.code, message: blockedNow.message });
+    }
+
+    // Decrement listing counts (only reached when this request performed the deletion)
     if (car.dealer) {
       const owner = await User.findById(car.dealer).select("listingCount");
       if (owner && owner.listingCount > 0) {
@@ -953,6 +978,10 @@ export const deleteCarImage = async (req, res) => {
     if (!isOwner && !isStaff) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
     }
+
+    // 14.8: a soft-deleted listing is read-only history. Owners cannot edit it or change its photos (404, as for any missing
+    // listing); staff keep administrative access.
+    if ((car.deletedAt || car.deleted_at) && !isStaff) return res.status(404).json({ success: false, message: "Car not found" });
 
     const imageIndex = Number(req.params.imageIndex);
     if (isNaN(imageIndex) || imageIndex < 0 || imageIndex >= (car.images || []).length) {
@@ -1011,6 +1040,10 @@ export const addCarImages = async (req, res) => {
     if (!isOwner && !isStaff) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
     }
+
+    // 14.8: a soft-deleted listing is read-only history. Owners cannot edit it or change its photos (404, as for any missing
+    // listing); staff keep administrative access.
+    if ((car.deletedAt || car.deleted_at) && !isStaff) return res.status(404).json({ success: false, message: "Car not found" });
 
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ success: false, message: "No images provided" });

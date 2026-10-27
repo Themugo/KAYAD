@@ -1,0 +1,3461 @@
+[
+ {
+  "method": "GET",
+  "path": "/api/admin/ads",
+  "rolesWith500": [
+   "ad_manager",
+   "marketing",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "ads (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/admin/ads",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"b01c51bdcb62\",\"path\":\"/api/admin/ads\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/admin/ads/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "ads (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/admin/ads/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "ads (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/admin/referrals/stats",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "transactions (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/admin/market-data",
+  "rolesWith500": [
+   "ad_manager",
+   "marketing",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "market_data (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/admin/market-data/:id",
+  "rolesWith500": [
+   "ad_manager",
+   "marketing",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "market_data (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/admin/market-data/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "MarketData.findByIdAndUpdate(...).lean is not a function"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/admin/market-data/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "market_data (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/admin/escrow/accounts",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Escrow bank account name, bank name and account number are required"
+ },
+ {
+  "method": "PATCH",
+  "path": "/api/admin/escrow/accounts/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Escrow bank account name, bank name and account number are required"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/admin/escrow/accounts/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Escrow account not found"
+ },
+ {
+  "method": "GET",
+  "path": "/api/escrow/operations/dashboard",
+  "rolesWith500": [
+   "escrow_officer",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "'issue_details' is not an embedded resource in this request"
+ },
+ {
+  "method": "POST",
+  "path": "/api/escrow/operations/reconcile",
+  "rolesWith500": [
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "PATCH",
+  "path": "/api/communications/admin/rollout/channels/:channel",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Unknown communication channel: 00000000-0000-0000-0000-000000000000"
+ },
+ {
+  "method": "PATCH",
+  "path": "/api/communications/admin/rollout/events/:eventType/:channel",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Unknown communication event/channel: 00000000-0000-0000-0000-000000000000/00000000-0000-0000-0000-000000000000"
+ },
+ {
+  "method": "POST",
+  "path": "/api/communications/admin/templates",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Template code, name and body are required"
+ },
+ {
+  "method": "PATCH",
+  "path": "/api/communications/admin/templates/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Template code, name and body are required"
+ },
+ {
+  "method": "POST",
+  "path": "/api/communications/admin/deliveries/:id/retry",
+  "rolesWith500": [
+   "technical_support",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Delivery not found"
+ },
+ {
+  "method": "POST",
+  "path": "/api/auction-admin/:carId/end",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Failed to end auction\"}"
+ },
+ {
+  "method": "GET",
+  "path": "/api/ntsa-verification/car/:carId/status",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "ntsa_verification_requests (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/security-logs",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "security_logs (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/security-logs/summary",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "security_logs (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/security-logs/my",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "security_logs (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/fraud/analytics",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "fraud_detection (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/fraud/all",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "fraud_detection (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/fraud/check/user/:userId",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "TypeError: s.replace is not a function"
+ },
+ {
+  "method": "GET",
+  "path": "/api/fraud/check/auction/:carId",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "TypeError: s.replace is not a function"
+ },
+ {
+  "method": "GET",
+  "path": "/api/duplicates/all",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "duplicate_vehicle_logs (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/duplicates/:id",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "duplicate_vehicle_logs (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/duplicates/:id/false-positive",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "duplicate_vehicle_logs (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/duplicates/:id/confirm",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "duplicate_vehicle_logs (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/duplicates/:id/under-review",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "duplicate_vehicle_logs (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/dealer-health-score/:dealerId",
+  "rolesWith500": [
+   "anon",
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "dealer_health_scores (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/dealer-health-score/:dealerId/details",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "dealer_health_scores (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/dealer-health-score/ranking/list",
+  "rolesWith500": [
+   "anon",
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "TypeError: DealerHealthScore.getTopDealers is not a function"
+ },
+ {
+  "method": "GET",
+  "path": "/api/dealer-health-score/top/:category",
+  "rolesWith500": [
+   "anon",
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "TypeError: DealerHealthScore.getTopDealers is not a function"
+ },
+ {
+  "method": "GET",
+  "path": "/api/dealer-health-score/:dealerId/trends",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "dealer_health_scores (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/dealer-health-score/admin/recalculate/:dealerId",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Error: Dealer not found"
+ },
+ {
+  "method": "GET",
+  "path": "/api/dealer-health-score/admin/distribution",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "TypeError: DealerHealthScore.getScoreDistribution is not a function"
+ },
+ {
+  "method": "GET",
+  "path": "/api/dealer-health-score/admin/alerts",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "dealer_health_scores (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/marketplace-health/summary",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "marketplace_health (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/marketplace-health/alerts",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "ReferenceError: MarketplaceHealth is not defined"
+ },
+ {
+  "method": "POST",
+  "path": "/api/marketplace-health/alerts/:alertId/resolve",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "marketplace_health (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/marketplace-health/metrics",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "marketplace_health (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/marketplace-health/admin/all",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "marketplace_health (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags/user",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "ReferenceError: FeatureFlag is not defined"
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "error_budgets (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags/:key",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "error_budgets (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/feature-flags",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "feature_flags (absent in hosted production too)"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/feature-flags/:key",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "feature_flags (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/feature-flags/:key",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "feature_flags (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/feature-flags/:key/toggle",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "ReferenceError: FeatureFlag is not defined"
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags/:key/stats",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "ReferenceError: FeatureFlag is not defined"
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags/category/:category",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "ReferenceError: FeatureFlag is not defined"
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags/environment/:environment",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "ReferenceError: FeatureFlag is not defined"
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags/role/:role",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "ReferenceError: FeatureFlag is not defined"
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags/meta/categories",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "ReferenceError: FeatureFlag is not defined"
+ },
+ {
+  "method": "POST",
+  "path": "/api/feature-flags/batch/evaluate",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "TypeError: keys is not iterable"
+ },
+ {
+  "method": "GET",
+  "path": "/api/organizations/platform-stats",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "organizations (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/organizations",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "organizations (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/organizations/:id",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "organizations (absent in hosted production too)"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/organizations/:id",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "organizations (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/organizations/:id",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "organizations (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/organizations/:id/users",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "organizations (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/organizations/:id/admins",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "organizations (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/organizations/:id/admins/:userId",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "organizations (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/organizations/:id/branches",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "organizations (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/organizations/:id/branches",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "branches (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/organizations/:id/stats",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "organizations (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/finance/issues",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Failed to fetch unresolved issues\"}"
+ },
+ {
+  "method": "POST",
+  "path": "/api/finance/reports/:reportId/issues/:issueIndex/resolve",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Error: Report not found"
+ },
+ {
+  "method": "POST",
+  "path": "/api/reconciliation/reports/:reportId/resolve",
+  "rolesWith500": [
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Error: Report not found"
+ },
+ {
+  "method": "POST",
+  "path": "/api/reconciliation/alerts/:id/read",
+  "rolesWith500": [
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "TypeError: AdminAlert.findByIdAndUpdate(...).lean is not a function"
+ },
+ {
+  "method": "GET",
+  "path": "/api/admin/queue/statistics",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "ReferenceError: JobFailure is not defined"
+ },
+ {
+  "method": "GET",
+  "path": "/api/admin/queue/failures",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "job_failures (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/admin/queue/failures/:failureId",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "job_failures (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/admin/queue/failures/:failureId/resolve",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "job_failures (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/reliability/error-budgets",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "error_budgets (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/reliability/error-budgets/:sloId",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "error_budgets (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/reliability/alerts/evaluate",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "error_budgets (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/reliability/report",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "error_budgets (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/reliability/health",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "error_budgets (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/new-admin/auction-integrity/dashboard",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "auction_integrity_flags (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/new-admin/auction-integrity",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "auction_integrity_flags (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/new-admin/auction-integrity/risk-profiles",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "auction_risk_profiles (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/new-admin/auction-integrity/:id",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "auction_integrity_flags (EXISTS in hosted production - repository migration drift)"
+ },
+ {
+  "method": "PATCH",
+  "path": "/api/new-admin/auction-integrity/:id/status",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "TypeError: AuctionIntegrityFlag.findByIdAndUpdate(...).populate is not a function"
+ },
+ {
+  "method": "GET",
+  "path": "/api/reports/my",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "reports (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/reports/admin/all",
+  "rolesWith500": [
+   "moderator",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "reports (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/reports/admin/:id",
+  "rolesWith500": [
+   "moderator",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "reports (absent in hosted production too)"
+ },
+ {
+  "method": "PATCH",
+  "path": "/api/reports/admin/:id/status",
+  "rolesWith500": [
+   "moderator",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "reports (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/announcements",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Failed to create announcement\"}"
+ },
+ {
+  "method": "POST",
+  "path": "/api/announcements/:id/send",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "announcements (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/announcements",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "announcements (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/announcements/:id",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "announcements (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/announcements/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "announcements (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/cms/analytics/track",
+  "rolesWith500": [
+   "anon",
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "POST",
+  "path": "/api/cms/pages",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "POST",
+  "path": "/api/cms/pages/:id/rollback",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "invalid input syntax for type integer: "
+ },
+ {
+  "method": "POST",
+  "path": "/api/cms/content",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "POST",
+  "path": "/api/cms/faqs",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "POST",
+  "path": "/api/cms/campaigns",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "POST",
+  "path": "/api/cms/banners",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "POST",
+  "path": "/api/cms/banners/reorder",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Cannot read properties of undefined (reading 'length')"
+ },
+ {
+  "method": "POST",
+  "path": "/api/cms/media",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:column",
+  "detail": "alt"
+ },
+ {
+  "method": "POST",
+  "path": "/api/cms/taxonomies",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "POST",
+  "path": "/api/cms/ab-tests",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "GET",
+  "path": "/api/automation/stats",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "workflows (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/automation/logs",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "workflow_logs (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/automation/workflows",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "workflows (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/automation/workflows/:id",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "workflows (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/workflows",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"c2d26803b958\",\"path\":\"/api/automation/workflows\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/automation/workflows/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "workflows (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/automation/workflows/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "workflows (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/workflows/:id/publish",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "workflows (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/workflows/:id/pause",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "workflows (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/workflows/:id/simulate",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "workflows (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/rules",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "GET",
+  "path": "/api/automation/approvals",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "approval_chains (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/automation/approvals/:id",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "approval_chains (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/approvals",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"c0c254968274\",\"path\":\"/api/automation/approvals\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/automation/approvals/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "approval_chains (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/automation/approvals/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "approval_chains (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/automation/tasks",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "automation_tasks (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/automation/tasks/:id",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "automation_tasks (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/tasks",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"a8b7f3f7d39c\",\"path\":\"/api/automation/tasks\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/automation/tasks/:id",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "automation_tasks (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/tasks/:id/complete",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "automation_tasks (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/tasks/:id/escalate",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "automation_tasks (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/automation/templates/notifications",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "notification_templates (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/automation/templates/notifications/:id",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "notification_templates (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/templates/notifications",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"8eaca8062258\",\"path\":\"/api/automation/templates/notifications\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/automation/templates/notifications/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "notification_templates (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/automation/templates/notifications/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "notification_templates (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/automation/scheduled",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "scheduled_jobs (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/scheduled",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Cannot destructure property 'frequency' of 'schedule' as it is undefined."
+ },
+ {
+  "method": "PUT",
+  "path": "/api/automation/scheduled/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "scheduled_jobs (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/automation/scheduled/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "scheduled_jobs (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/scheduled/:id/run",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "scheduled_jobs (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/stats",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "config_entries (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/entries",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "config_entries (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/entries/:id",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "config_entries (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/entries",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"a449469590e5\",\"path\":\"/api/config/entries\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/config/entries/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "config_entries (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/config/entries/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "config_entries (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/entries/bulk",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "entries is not iterable"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/features",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "feature_flags (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/features/:id",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "feature_flags (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/features",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"7bc44b57c1ad\",\"path\":\"/api/config/features\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/config/features/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "feature_flags (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/config/features/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "feature_flags (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/features/:id/toggle",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "feature_flags (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/features/check/:key",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "feature_flags (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/reference",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "reference_data (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/reference/:id",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "reference_data (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/reference",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"2cf598bee6d1\",\"path\":\"/api/config/reference\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/config/reference/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "reference_data (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/config/reference/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "reference_data (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/vehicle",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "vehicle_master_data (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/vehicle/makes",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "vehicle_master_data (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/vehicle/models",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "vehicle_master_data (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/vehicle/:id",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "vehicle_master_data (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/vehicle",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"1e0b77faec36\",\"path\":\"/api/config/vehicle\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/config/vehicle/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"6d494d2e23b0\",\"path\":\"/api/config/vehicle/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/config/vehicle/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "vehicle_master_data (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/location",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "location_master_data (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/location/countries",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "location_master_data (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/location/regions",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "location_master_data (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/location/cities",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "location_master_data (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/location",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"cb36f1ce8f85\",\"path\":\"/api/config/location\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/config/location/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"0ecb05bb8f48\",\"path\":\"/api/config/location/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/config/location/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "location_master_data (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/countries",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "country_configs (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/countries/:id",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "country_configs (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/countries",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"d75d492218b5\",\"path\":\"/api/config/countries\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/config/countries/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"6bb9aad59513\",\"path\":\"/api/config/countries/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/config/countries/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "country_configs (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/audit",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "config_audit_logs (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/audit/:logId/rollback",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "config_audit_logs (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/config/export",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "config_entries (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/import",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "importData is not iterable"
+ },
+ {
+  "method": "GET",
+  "path": "/api/lowcode/stats",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "business_objects (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/lowcode/objects",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "business_objects (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/lowcode/objects/:id",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "business_objects (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/objects",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Cannot read properties of undefined (reading 'toLowerCase')"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/lowcode/objects/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "business_objects (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/lowcode/objects/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "business_objects (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/objects/:id/publish",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "business_objects (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/objects/:id/clone",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "business_objects (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/lowcode/objects/:id/api",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "business_objects (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/lowcode/objects/:objectId/fields",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "object_fields (absent in hosted production too)"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/lowcode/fields/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "object_fields (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/lowcode/fields/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "object_fields (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/objects/:objectId/fields/reorder",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "fields is not iterable"
+ },
+ {
+  "method": "GET",
+  "path": "/api/lowcode/objects/:objectId/relationships",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "object_relationships (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/relationships",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"3b776f3d5283\",\"path\":\"/api/lowcode/relationships\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/lowcode/relationships/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "object_relationships (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/lowcode/relationships/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "object_relationships (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/lowcode/objects/:objectId/forms",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "form_definitions (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/forms",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"71dc6fddd4ff\",\"path\":\"/api/lowcode/forms\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/lowcode/forms/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "form_definitions (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/lowcode/forms/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "form_definitions (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/lowcode/objects/:objectId/views",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "view_definitions (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/views",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"fe60d7bbd6e7\",\"path\":\"/api/lowcode/views\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/lowcode/views/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "view_definitions (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/lowcode/views/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "view_definitions (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/lowcode/objects/:objectId/permissions",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "object_permissions (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/lowcode/dashboards",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "custom_dashboards (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/dashboards",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"d5da6494ee66\",\"path\":\"/api/lowcode/dashboards\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/lowcode/dashboards/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "custom_dashboards (absent in hosted production too)"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/lowcode/dashboards/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "custom_dashboards (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/lowcode/objects/:objectId/versions",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "object_versions (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/versions/:versionId/rollback",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "object_versions (absent in hosted production too)"
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/ai/suggest",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "Cannot read properties of undefined (reading 'split')"
+ },
+ {
+  "method": "POST",
+  "path": "/api/governance/policies",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/governance/policies/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "JSON object requested, multiple (or no) rows returned"
+ },
+ {
+  "method": "POST",
+  "path": "/api/governance/changes",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "POST",
+  "path": "/api/governance/changes/:id/submit",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "JSON object requested, multiple (or no) rows returned"
+ },
+ {
+  "method": "POST",
+  "path": "/api/governance/approvals",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/governance/approvals/:id",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "JSON object requested, multiple (or no) rows returned"
+ },
+ {
+  "method": "POST",
+  "path": "/api/governance/features",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/governance/features/:id/stage",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "JSON object requested, multiple (or no) rows returned"
+ },
+ {
+  "method": "POST",
+  "path": "/api/governance/risks",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "POST",
+  "path": "/api/governance/standards",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "POST",
+  "path": "/api/governance/countries",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "POST",
+  "path": "/api/governance/partners",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "POST",
+  "path": "/api/governance/releases",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "POST",
+  "path": "/api/governance/decisions",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ },
+ {
+  "method": "GET",
+  "path": "/api/intelligence/inspections",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "missing_schema:table",
+  "detail": "inspections (absent in hosted production too)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/intelligence/countries",
+  "rolesWith500": [
+   "admin",
+   "superadmin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"code\":\"INTELLIGENCE_ERROR\",\"message\":\"column users.country does not exist\"}"
+ },
+ {
+  "method": "POST",
+  "path": "/api/command-center/war-room/activate",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates unique constraint "
+ },
+ {
+  "method": "POST",
+  "path": "/api/command-center/war-room/deactivate",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates foreign key constraint "
+ },
+ {
+  "method": "POST",
+  "path": "/api/improvement/ideas/:ideaId/vote",
+  "rolesWith500": [
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates foreign key constraint "
+ },
+ {
+  "method": "POST",
+  "path": "/api/platform-factory/generate",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"1653e371bb74\",\"path\":\"/api/platform-factory/generate\",\"method\":\"POST\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/platform-factory/products/:productId",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"ba1c07bbb5cf\",\"path\":\"/api/platform-factory/products/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}"
+ },
+ {
+  "method": "PUT",
+  "path": "/api/platform-factory/brands/:brandId",
+  "rolesWith500": [
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "application_exception",
+  "detail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"ce7cfb2443c6\",\"path\":\"/api/platform-factory/brands/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}"
+ },
+ {
+  "method": "POST",
+  "path": "/api/ownership/vehicles",
+  "rolesWith500": [
+   "user",
+   "dealer_team_member",
+   "individual_seller",
+   "dealer",
+   "broker",
+   "ghost_checker",
+   "moderator",
+   "ad_manager",
+   "marketing",
+   "escrow_officer",
+   "technical_support",
+   "hr",
+   "accounts",
+   "admin"
+  ],
+  "adminStatus": 500,
+  "class": "invalid_fixture:empty body / constraint",
+  "detail": "violates not-null constraint"
+ }
+]

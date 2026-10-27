@@ -26,6 +26,10 @@ import { startAuction, extendAuction, closeAuction } from "../services/auctionLi
 import { disburseB2C } from "../services/mpesaB2C.service.js";
 import { dealerOnboardingSchema } from "../validation/dealerOnboarding.schema.js";
 import { submitDealerVerification } from "../services/dealerVerificationService.js";
+import Car from "../models/Car.js"; // 14.8 guarded bulk delete
+import User from "../models/User.js";
+import { listingDeletionBlock, DELETE_BLOCK_CODES } from "../utils/carDeletionGuard.js";
+import { invalidatePublicListingCaches } from "../utils/publicListingCache.js";
 
 const router = express.Router();
 
@@ -56,6 +60,18 @@ router.put("/onboarding", protect, allowRoles("dealer"), asyncHandler(async (req
   let dealer = await findOne("dealers", { user: req.user.id });
   if (!dealer) {
     dealer = await create("dealers", { user: req.user.id, approved: false, isSuspended: false });
+  }
+
+  // 14.7: decide BEFORE writing. An approved or suspended dealer cannot resubmit onboarding; previously the profile
+  // and payment details were written first and only restored by compensation after submitDealerVerification refused.
+  const existingVerification = await findOne("dealer_verifications", { user: req.user.id });
+  if (existingVerification && !["pending", "rejected"].includes(existingVerification.verificationStatus)) {
+    return res.status(409).json({
+      success: false,
+      code: "DEALER_ONBOARDING_LOCKED",
+      message: `Onboarding cannot be resubmitted while verification is ${existingVerification.verificationStatus}.`,
+      verificationStatus: existingVerification.verificationStatus,
+    });
   }
 
   const previousDealer = dealer;
@@ -137,7 +153,9 @@ router.get(
     const { data: ownCars } = must(await sb.from("cars").select("id").eq("dealer_id", req.user.id));
     const ownCarIds = (ownCars || []).map((r) => r.id);
     const empty = { data: [], count: 0 };
-    let listQuery = ownCarIds.length ? sb.from("payments").select("*", { count: 'exact' }).in("car_id", ownCarIds).eq("status", "success").order("created_at", { ascending: false }).range(skip, skip + limit - 1) : null;
+    // Phase 14.9: explicit projection - the buyer's phone number, user id, checkout id and free-form metadata are not dealer data.
+    const DEALER_PAYMENT_COLUMNS = "id,car_id,amount,type,status,mpesa_receipt,paid_at,created_at,platform_fee,dealer_amount,reference_id,reference_model,mode";
+    let listQuery = ownCarIds.length ? sb.from("payments").select(DEALER_PAYMENT_COLUMNS, { count: 'exact' }).in("car_id", ownCarIds).eq("status", "success").order("created_at", { ascending: false }).range(skip, skip + limit - 1) : null;
     if (listQuery && dateFrom) listQuery = listQuery.gte("created_at", dateFrom);
     if (listQuery && dateTo) listQuery = listQuery.lte("created_at", dateTo);
     const { data: rawPayments, count: total } = listQuery ? must(await listQuery) : empty;
@@ -185,7 +203,7 @@ router.get(
     const { page, limit, skip } = getPagination(req);
 
     const sb = getSupabase();
-    let query = sb.from("cars").select("*", { count: 'exact' }).eq("dealer_id", req.user.id).order("created_at", { ascending: false }).range(skip, skip + limit - 1);
+    let query = sb.from("cars").select("*", { count: 'exact' }).eq("dealer_id", req.user.id).is("deleted_at", null).order("created_at", { ascending: false }).range(skip, skip + limit - 1);
     if (req.query.sold === "true") query = query.eq("sold", true);
     if (req.query.active === "true") query = query.eq("sold", false);
     if (req.query.status) query = query.eq("status", req.query.status);
@@ -238,7 +256,7 @@ router.get(
       dealerCarIds.length > 0
         ? sb.from("favorites").select("id", { count: 'exact', head: true }).in("car_id", dealerCarIds).gte("created_at", fromStr).then(countOf)
         : 0,
-      sb.from("cars").select("title,views,bids_count,favorites_count,current_bid,price,auction_status,status,created_at").eq("dealer_id", dealerId).order("views", { ascending: false }).order("bids_count", { ascending: false }).limit(10).then((r) => must(r).data || []).then((rows) => rows.map((c) => ({ title: c.title, views: c.views, bidsCount: c.bids_count, favoritesCount: c.favorites_count, currentBid: c.current_bid, price: c.price, auctionStatus: c.auction_status, status: c.status, createdAt: c.created_at }))),
+      sb.from("cars").select("title,views,bids_count,favorites_count,current_bid,price,auction_status,status,created_at").eq("dealer_id", dealerId).is("deleted_at", null).order("views", { ascending: false }).order("bids_count", { ascending: false }).limit(10).then((r) => must(r).data || []).then((rows) => rows.map((c) => ({ title: c.title, views: c.views, bidsCount: c.bids_count, favoritesCount: c.favorites_count, currentBid: c.current_bid, price: c.price, auctionStatus: c.auction_status, status: c.status, createdAt: c.created_at }))),
     ]);
 
     // ── Price comparison ──────────────────────────────────────
@@ -346,16 +364,16 @@ router.get(
       totalFavorites,
       unreadMessages,
     ] = await Promise.all([
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).then(countOf),
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).eq("sold", true).then(countOf),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).is("deleted_at", null).then(countOf),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).is("deleted_at", null).eq("sold", true).then(countOf),
 
       dealerCarIds.length > 0
         ? sb.from("payments").select("dealer_amount").in("car_id", dealerCarIds).eq("status", "success").then((r) => (must(r).data || []).reduce((s, p) => s + Number(p.dealer_amount || 0), 0))
         : 0,
 
-      sb.from("cars").select("views").eq("dealer_id", dealerId).then((r) => (must(r).data || []).reduce((s, c) => s + (c.views || 0), 0)),
+      sb.from("cars").select("views").eq("dealer_id", dealerId).is("deleted_at", null).then((r) => (must(r).data || []).reduce((s, c) => s + (c.views || 0), 0)),
 
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).eq("auction_status", "live").then(countOf),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).is("deleted_at", null).eq("auction_status", "live").then(countOf),
 
       sb.from("escrows").select("id", { count: 'exact', head: true }).eq("seller", dealerId).in("status", ["funded", "vehicle_confirmed", "delivered"]).then(countOf),
 
@@ -363,7 +381,7 @@ router.get(
         ? sb.from("bids").select("id", { count: 'exact', head: true }).in("car_id", dealerCarIds).eq("status", "pending").then(countOf)
         : 0,
 
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).eq("auction_status", "draft").then(countOf),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).is("deleted_at", null).eq("auction_status", "draft").then(countOf),
 
       dealerCarIds.length > 0
         ? sb.from("chats").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).then(countOf)
@@ -411,8 +429,8 @@ router.get(
   asyncHandler(async (req, res) => {
     const sb = getSupabase();
     const [cars, sold] = await Promise.all([
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", req.user.id).then(countOf),
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", req.user.id).eq("sold", true).then(countOf),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", req.user.id).is("deleted_at", null).then(countOf),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", req.user.id).is("deleted_at", null).eq("sold", true).then(countOf),
     ]);
 
     res.json({
@@ -447,15 +465,15 @@ router.get(
     });
 
     const [totalCars, dealerProfile, verification, healthScore, totalInquiries, liveAuctions, soldAuctions] = await Promise.all([
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).then((r) => must(r).count || 0),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).is("deleted_at", null).then((r) => must(r).count || 0),
       findOne("dealers", { user: dealerId }),
       findOne("dealer_verifications", { user: dealerId }),
       optionalHealthScore,
       dealerCarIds.length > 0
         ? sb.from("chats").select("id", { count: 'exact', head: true }).in("car", dealerCarIds).then((r) => must(r).count || 0)
         : 0,
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).eq("auction_status", "live").then((r) => must(r).count || 0),
-      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).eq("auction_status", "sold").then((r) => must(r).count || 0),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).is("deleted_at", null).eq("auction_status", "live").then((r) => must(r).count || 0),
+      sb.from("cars").select("id", { count: 'exact', head: true }).eq("dealer_id", dealerId).is("deleted_at", null).eq("auction_status", "sold").then((r) => must(r).count || 0),
     ]);
 
     const milestones = [
@@ -625,6 +643,23 @@ router.put(
     }
     if (!Object.keys(incoming).length) return res.status(400).json({ success: false, message: "No settlement fields supplied" });
 
+    // Phase 14.9: stored settlement details are shown to dealers / staff, so they must look like what they claim to be. Empty = clear.
+    const SETTLEMENT_FORMATS = {
+      paybillNumber: [/^\d{5,7}$/, "Enter a 5 to 7 digit Paybill or Till number"],
+      mpesaPhone: [/^(?:\+?254|0)[17]\d{8}$/, "Enter a valid Kenyan M-Pesa phone number"],
+      accountNumber: [/^[A-Za-z0-9][A-Za-z0-9 \-/]{3,33}$/, "Enter a valid bank account number"],
+    };
+    const settlementErrors = {};
+    for (const [key, value] of Object.entries(incoming)) {
+      if (value === "") continue;
+      if (/[<>\u0000-\u001f]/.test(value)) { settlementErrors[key] = "Contains characters that are not allowed"; continue; }
+      const rule = SETTLEMENT_FORMATS[key];
+      if (rule && !rule[0].test(value)) settlementErrors[key] = rule[1];
+    }
+    if (Object.keys(settlementErrors).length) {
+      return res.status(400).json({ success: false, code: "VALIDATION_FAILED", message: "Settlement details are invalid", errors: settlementErrors, fields: Object.keys(settlementErrors) });
+    }
+
     const merged = { ...(dealer.paymentDetails || {}), ...incoming };
     const saved = await update("dealers", dealer.id, { paymentDetails: merged });
     await logActionFromReq(req, "update_settlement", { details: { fields: Object.keys(incoming) } });
@@ -687,9 +722,11 @@ router.get(
       .order("created_at", { ascending: false })
       .range(skip, skip + limit - 1));
 
+    // 14.8: never return invitation token material (the row carries both snake_case and camelCase spellings).
+    const safeMembers = (members || []).map(({ invite_token_hash, inviteTokenHash, invite_token, inviteToken, ...rest }) => rest); // eslint-disable-line no-unused-vars
     res.json({
       success: true,
-      members,
+      members: safeMembers,
       pagination: { page, limit, total: total || 0, pages: Math.ceil((total || 0) / limit) },
     });
   }),
@@ -699,6 +736,9 @@ router.get(
 router.post(
   "/team/invite",
   dealerBusinessOnly, // PHASE 13D
+  // 14.8: this legacy invite wrote columns that do not exist (invite_token) and returned a raw token, so it always failed
+  // with 500 on the real schema. The canonical hashed, expiring, role-restricted flow is POST /api/dealer-platform/team/invite.
+  (req, res) => res.status(410).json({ success: false, code: "TEAM_INVITE_ROUTE_MOVED", message: "Use POST /api/dealer-platform/team/invite." }),
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const { email, role = "sales_agent", permissions = {} } = req.body;
@@ -851,18 +891,38 @@ router.post(
       return res.status(400).json({ success: false, message: "No IDs provided" });
     }
 
+    // 14.8: this route used to HARD-DELETE rows (`delete().in("id", ids)`), erasing sold, reserved, live-auction and bid-bearing
+    // listings and bypassing the soft-delete convention and the 14.7 deletion guard. Each owned listing now goes through the same
+    // owner-scoped, state-guarded soft delete as DELETE /api/cars/:id; blocked listings are reported, never erased.
     const sb = getSupabase();
-    const { data: toDelete } = await sb.from("cars").select("id").in("id", ids).eq("dealer_id", req.user.id); // STAGE 5A: physical column is dealer_id
-    const deleteIds = (toDelete || []).map((r) => r.id);
-    if (deleteIds.length > 0) {
-      await sb.from("cars").delete().in("id", deleteIds);
+    const { data: toDelete } = await sb.from("cars").select("*").in("id", ids).eq("dealer_id", req.user.id).is("deleted_at", null); // STAGE 5A: physical column is dealer_id
+    const deleteIds = [];
+    const skipped = [];
+    for (const row of toDelete || []) {
+      const block = listingDeletionBlock(row, await Car.countBidRows(row.id));
+      if (block) { skipped.push({ id: row.id, code: block.code, reason: block.message }); continue; }
+      const result = await Car.softDeleteGuarded(row.id, req.user.id);
+      if (result?.modifiedCount === 0) {
+        const fresh = await Car.findById(row.id);
+        if (fresh?.deletedAt || fresh?.deleted_at) { deleteIds.push(row.id); continue; }
+        const raced = listingDeletionBlock(fresh, await Car.countBidRows(row.id));
+        skipped.push({ id: row.id, code: raced?.code || DELETE_BLOCK_CODES.BIDS_PRESENT, reason: raced?.message || "The listing changed state and can no longer be deleted." });
+        continue;
+      }
+      deleteIds.push(row.id);
+      const owner = await User.findById(req.user.id).select("listingCount");
+      if (owner && owner.listingCount > 0) await User.findByIdAndUpdate(req.user.id, { listingCount: owner.listingCount - 1 });
     }
+    if (deleteIds.length > 0) await invalidatePublicListingCaches();
 
     await logActionFromReq(req, "bulk_delete_listings", {
       details: { count: deleteIds.length, ids },
     });
 
-    res.json({ success: true, deletedCount: deleteIds.length });
+    if (deleteIds.length === 0 && skipped.length > 0) {
+      return res.status(409).json({ success: false, code: "LISTING_DELETE_BLOCKED", message: "None of the selected listings can be deleted.", deletedCount: 0, skipped });
+    }
+    res.json({ success: true, deletedCount: deleteIds.length, ...(skipped.length ? { skipped } : {}) });
   }),
 );
 
@@ -1275,7 +1335,7 @@ router.get(
     const sb = getSupabase();
     // STAGE 5C: public.cars has no `wholesale` column in the repository schema, so this query used to fail inside PostgREST and the route
     // answered 200 with `cars` undefined. Say so explicitly instead of pretending the trade marketplace is empty.
-    let qb = sb.from("cars").select("*, dealer:users!cars_dealer_id_fkey(name, business_name, location)", { count: 'exact' }).eq("wholesale", true).order("created_at", { ascending: false }).range(skip, skip + limit - 1);
+    let qb = sb.from("cars").select("*, dealer:users!cars_dealer_id_fkey(name, business_name, location)", { count: 'exact' }).eq("wholesale", true).is("deleted_at", null).order("created_at", { ascending: false }).range(skip, skip + limit - 1);
     if (req.query.search) {
       const s = `%${req.query.search}%`;
       qb = qb.or(`title.ilike.${s},brand.ilike.${s},model.ilike.${s}`);
