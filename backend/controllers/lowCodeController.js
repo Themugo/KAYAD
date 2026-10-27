@@ -126,6 +126,10 @@ export async function createBusinessObject(req, res) {
     settings = {},
   } = req.body;
 
+  // PHASE 16B: validate before use (was TypeError reading toLowerCase of undefined -> HTTP 500)
+  if (typeof name !== 'string' || !name.trim()) return res.status(400).json({ success: false, message: "name is required" });
+  if (!Array.isArray(fields) || fields.some((f) => !f || typeof f.name !== 'string' || !f.name.trim())) return res.status(400).json({ success: false, message: "fields must be an array of objects with a name" });
+
   // Generate object key from name
   const key = generateObjectKey(name);
 
@@ -396,6 +400,7 @@ export async function deleteObjectField(req, res) {
 
 export async function reorderObjectFields(req, res) {
   const { fields } = req.body; // Array of { id, displayOrder }
+  if (!Array.isArray(fields)) return res.status(400).json({ success: false, message: "fields must be an array of { id, displayOrder }" }); // PHASE 16B: was a TypeError -> HTTP 500
 
   for (const item of fields) {
     await ObjectField.update(item.id, { displayOrder: item.displayOrder });
@@ -699,6 +704,7 @@ export async function suggestBusinessObject(req, res) {
   const { description } = req.body;
 
   // Parse natural language description and suggest schema
+  if (typeof description !== 'string' || !description.trim()) return res.status(400).json({ success: false, message: "description is required" }); // PHASE 16B: was a TypeError -> HTTP 500
   const suggestions = analyzeDescription(description);
 
   res.json({ success: true, data: suggestions });

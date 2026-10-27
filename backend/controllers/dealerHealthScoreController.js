@@ -222,6 +222,9 @@ export const recalculateDealerScore = async (req, res) => {
       result,
     });
   } catch (err) {
+    if (err?.statusCode === 404) {
+      return res.status(404).json({ success: false, code: "DEALER_NOT_FOUND", message: "Dealer not found" });
+    }
     logError("Failed to recalculate dealer score", err);
     res.status(500).json({
       success: false,

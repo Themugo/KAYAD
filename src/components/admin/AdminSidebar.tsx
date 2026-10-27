@@ -1,7 +1,7 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
-  LayoutDashboard, Users, Car, ShieldCheck, Gavel, Lock, DollarSign, UserCheck, Star, Shield, Crown, PanelRight, ChevronLeft,
+  LayoutDashboard, Users, Car, ShieldCheck, LifeBuoy, Gavel, Lock, DollarSign, UserCheck, Star, Shield, Crown, PanelRight, ChevronLeft,
   Activity, Megaphone, Settings, AlertTriangle, ClipboardCheck, BarChart3,
   Gift, MessageSquare, TrendingUp, Bell, X, type LucideIcon, Flag, TicketCheck,
   Radio, ChevronDown, BriefcaseBusiness, Building2, Wrench,
@@ -72,6 +72,7 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
       { to: '/admin/staff', icon: Crown, label: 'Staff', superadmin: true },
       { to: '/admin/staff-permissions', icon: KeyRound, label: 'Staff Permissions', superadmin: true },
       { to: '/admin/panic-room', icon: AlertTriangle, label: 'Panic Room', danger: true },
+      { to: '/admin/platform-recovery', icon: LifeBuoy, label: 'Platform Recovery' },
       { to: '/admin/webhoist', icon: Server, label: 'Webhoist', superadmin: true },
     ],
   },

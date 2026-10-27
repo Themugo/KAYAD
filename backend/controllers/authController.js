@@ -31,6 +31,8 @@ import { logError, logWarn } from '../infrastructure/logging/index.js';
 import { getSupabase } from '../utils/supabase.js';
 import { mapRowIn } from '../utils/fieldMap.js';
 import { isOwnerUser, isReservedOwnerEmail, isUnverifiedOwner, OWNER_IDENTITY_UNVERIFIED_RESPONSE } from '../config/owners.js'; // STAGE 5A/5B: owner identity gate
+import { enforceMaintenance } from '../middleware/maintenanceEnforcement.js'; // central maintenance policy (scope + audience)
+import { hasTechnicalRecovery } from '../config/maintenancePolicy.js';
 import { getOnboardingPolicy, isPolicyTrusted } from '../services/onboardingPolicy.service.js'; // STAGE 5
 import { parseReferralCode, referrerEligible } from '../utils/referralGuards.js'; // STAGE 4A (G9): string-only code; self/suspended referrer excluded
 const STAFF_ROLES = [
@@ -92,6 +94,8 @@ export const serializeUser = (user, authState = null) => {
     safe.mustChangePassword = Boolean(authState.mustChangePassword);
   }
   safe.isOwner = isOwnerUser(raw);
+  // Display hint only (the server re-checks on every maintenance-control request): this account holds the explicit, owner-granted platform_recovery permission.
+  if (!safe.isOwner && hasTechnicalRecovery(raw)) safe.platformRecovery = true;
   return safe;
 };
 
@@ -540,6 +544,10 @@ export const login = async (req, res) => {
       return res.status(403).json(OWNER_IDENTITY_UNVERIFIED_RESPONSE);
     }
 
+    // Maintenance lets sign-in reach this handler so owners / authorised recovery staff can end it; the central policy refuses every
+    // restricted audience here, after the password was verified and before any session, cookie or token exists (MFA comes later, unchanged).
+    if (await enforceMaintenance(req, res, user, isOwnerUser(user))) return;
+
     // ─── Email verification gate ────────────────────────────────
     // Only enforce when verification can actually be completed. If Brevo
     // isn't configured there is no way to receive the
@@ -620,6 +628,7 @@ export const refreshToken = async (req, res) => {
       return R.errorCode(res, user.isBanned ? "Account suspended" : "Account deactivated", 403, "AUTH_FORBIDDEN");
     }
     if (isUnverifiedOwner(user)) return res.status(403).json(OWNER_IDENTITY_UNVERIFIED_RESPONSE); // STAGE 5A (Gate A)
+    if (await enforceMaintenance(req, res, user, isOwnerUser(user))) return; // a stale refresh token cannot mint a session for a restricted audience
     if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== (userAuth.tokenVersion ?? 0)) {
       return R.errorCode(res, "Session invalidated — please login again", 403, "AUTH_SESSION_EXPIRED");
     }

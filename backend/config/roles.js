@@ -79,6 +79,9 @@ export const PERM = {
   MANAGE_INSPECTIONS: "manage_inspections",
   MANAGE_PLATFORM: "manage_platform",
   BYPASS_RATE_LIMIT: "bypass_rate_limit",
+  // Explicit, per-account technical recovery authority (see config/maintenancePolicy.js). Never part of any role default; only a verified
+  // System Owner can grant it, and it permits ONLY maintenance status + ending maintenance (never activating or scoping it).
+  PLATFORM_RECOVERY: "platform_recovery",
   FULL_ACCESS: "full_access", // superadmin + webhoist only
 };
 
@@ -224,6 +227,7 @@ export const ASSIGNABLE_PERMISSIONS = [
   PERM.MANAGE_INSPECTIONS,
   PERM.MANAGE_PLATFORM,
   PERM.BYPASS_RATE_LIMIT,
+  PERM.PLATFORM_RECOVERY,
 ];
 
 // Human-readable labels + descriptions for the superadmin assignment UI.
@@ -261,6 +265,7 @@ export const PERM_LABELS = {
   [PERM.VIEW_LOGS]: { label: "View Security Logs", desc: "Read audit and security logs", group: "Operations" },
   [PERM.MANAGE_PLATFORM]: { label: "Platform Settings", desc: "Edit platform-wide settings", group: "System" },
   [PERM.BYPASS_RATE_LIMIT]: { label: "Bypass Rate Limit", desc: "Exempt from API rate limiting", group: "System" },
+  [PERM.PLATFORM_RECOVERY]: { label: "Platform Recovery", desc: "Sign in during maintenance and end it (status + recover only; cannot start or scope maintenance)", group: "System" },
 };
 
 /**

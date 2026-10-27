@@ -1,15 +1,13 @@
 import { getSupabase, isSupabaseConnected } from "../utils/supabase.js";
+import {
+  MAINTENANCE_CODE, MAINTENANCE_SCOPES, normalizeSystemStatus, classifyRoute, decide, maintenanceResponse,
+} from "../config/maintenancePolicy.js";
+
+export { MAINTENANCE_CODE, maintenanceResponse };
 
 let cachedSettings = null;
 let cachedAt = 0;
 const SETTINGS_TTL_MS = 10_000;
-const DEFAULT_SYSTEM_STATUS = {
-  isAuctionActive: true,
-  isPaymentsActive: true,
-  isGhostCheckActive: true,
-  isMaintenanceMode: false,
-  emergencyMessage: "System under scheduled maintenance.",
-};
 
 const loadSystemStatus = async () => {
   const { data, error } = await getSupabase()
@@ -19,8 +17,10 @@ const loadSystemStatus = async () => {
     .maybeSingle();
 
   if (error) throw error;
-  return { ...DEFAULT_SYSTEM_STATUS, ...(data?.value || {}) };
+  return normalizeSystemStatus(data?.value);
 };
+
+const messageFor = (settings) => settings.emergencyMessage || MAINTENANCE_SCOPES[settings.maintenanceScope]?.defaultMessage;
 
 export const checkSystemStatus = async (req, res, next) => {
   // In intentionally degraded/local mode there is no control-plane database
@@ -37,11 +37,18 @@ export const checkSystemStatus = async (req, res, next) => {
 
     const settings = cachedSettings;
     if (settings.isMaintenanceMode) {
-      res.setHeader("Retry-After", "60");
-      return res.status(503).json({
-        success: false,
-        message: settings.emergencyMessage || DEFAULT_SYSTEM_STATUS.emergencyMessage,
-      });
+      const scope = settings.maintenanceScope;
+      const message = messageFor(settings);
+      req.maintenance = { active: true, scope, message };
+      // Pre-authentication decision (identity unknown): global shutdown refuses everything except the session endpoints and the
+      // control plane, which authenticate the caller themselves; scoped maintenance pauses only anonymous registration here.
+      // Identity-based decisions are made where identity is known: protect(), login and refresh (middleware/maintenanceEnforcement.js).
+      const d = decide({ scope, route: classifyRoute(req.method, req.path), identity: null });
+      if (!d.allow) {
+        res.setHeader("Retry-After", "60");
+        return res.status(503).json(maintenanceResponse(message, scope));
+      }
+      return next();
     }
 
     if (req.path?.includes("/bid") && !settings.isAuctionActive) {
@@ -55,7 +62,8 @@ export const checkSystemStatus = async (req, res, next) => {
     next();
   } catch (err) {
     console.error("systemCheck error:", err.message);
-    // Availability of the control-plane setting must never take the marketplace offline.
+    // Availability of the control-plane setting must never take the marketplace offline. The control API (GET status) reports an
+    // unreadable state honestly instead of pretending the platform is operational.
     next();
   }
 };

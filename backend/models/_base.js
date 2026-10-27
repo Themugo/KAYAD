@@ -745,7 +745,34 @@ export function createModel(name) {
       return wrapDoc(created, table, sb);
     },
 
-    async findByIdAndUpdate(id, update, options = {}) {
+    // PHASE 16B: Mongoose callers write `findByIdAndUpdate(...).lean()` / `.populate(...)` / `.select(...)`. This method was a plain
+    // async function, so those chains threw "x.lean is not a function" (HTTP 500 on PUT /api/admin/market-data/:id,
+    // POST /api/reconciliation/alerts/:id/read, PATCH /api/new-admin/auction-integrity/:id/status and PUT /api/users/settings).
+    // The returned object is now a thenable that still starts the update immediately (next microtask, so fire-and-forget callers keep
+    // working) and resolves to EXACTLY the previous value when no chain method is used. When a chain method is used, the updated row is
+    // re-read once through the normal query path with those modifiers applied.
+    findByIdAndUpdate(id, update, options = {}) {
+      const mods = [];
+      const exec = async () => {
+        const updated = await model._updateByIdExec(id, update, options);
+        if (!updated || mods.length === 0) return updated;
+        let q = model.findById(id);
+        for (const [m, args] of mods) q = q[m](...args);
+        return await q;
+      };
+      const started = Promise.resolve().then(exec);
+      const chain = {
+        lean(...a) { mods.push(["lean", a]); return chain; },
+        populate(...a) { mods.push(["populate", a]); return chain; },
+        select(...a) { mods.push(["select", a]); return chain; },
+        then: (res, rej) => started.then(res, rej),
+        catch: (rej) => started.catch(rej),
+        finally: (fn) => started.finally(fn),
+      };
+      return chain;
+    },
+
+    async _updateByIdExec(id, update, options = {}) {
       if (!id) return null;
       const client = sb();
       let updateData = {};

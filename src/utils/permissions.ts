@@ -32,6 +32,7 @@ export const PERM = {
   MANAGE_INSPECTIONS: "manage_inspections",
   MANAGE_PLATFORM:    "manage_platform",
   BYPASS_RATE_LIMIT:  "bypass_rate_limit",
+  PLATFORM_RECOVERY:  "platform_recovery",
   FULL_ACCESS:        "full_access",
 } as const;
 
@@ -71,7 +72,7 @@ export const ASSIGNABLE_PERMISSIONS: Permission[] = [
   PERM.EMERGENCY_ESCROW_CONTROL,
   PERM.MANAGE_ADS, PERM.MANAGE_MODERATION, PERM.MANAGE_SUPPORT, PERM.SUPPORT_AGENT, PERM.SUPPORT_OVERSIGHT, PERM.MANAGE_FINANCE,
   PERM.MANAGE_STAFF, PERM.VIEW_LOGS, PERM.VIEW_ANALYTICS, PERM.MANAGE_INSPECTIONS,
-  PERM.MANAGE_PLATFORM, PERM.BYPASS_RATE_LIMIT,
+  PERM.MANAGE_PLATFORM, PERM.BYPASS_RATE_LIMIT, PERM.PLATFORM_RECOVERY,
 ];
 
 export interface PermLabel {
@@ -106,6 +107,7 @@ export const PERM_LABELS: Record<Permission, PermLabel> = {
   [PERM.VIEW_LOGS]:          { label: "View Security Logs", desc: "Read audit and security logs",              group: "Operations" },
   [PERM.MANAGE_PLATFORM]:    { label: "Platform Settings",  desc: "Edit platform-wide settings",               group: "System" },
   [PERM.BYPASS_RATE_LIMIT]:  { label: "Bypass Rate Limit",  desc: "Exempt from API rate limiting",             group: "System" },
+  [PERM.PLATFORM_RECOVERY]:  { label: "Platform Recovery",  desc: "Sign in during maintenance and end it (status + recover only; cannot start or scope maintenance)", group: "System" },
   [PERM.FULL_ACCESS]:        { label: "Full Access",        desc: "Unrestricted access to all features",       group: "System" },
 };
 
@@ -118,6 +120,8 @@ export interface UserPermissions {
   role?: string;
   grantedPermissions?: string[];
   revokedPermissions?: string[];
+  /** Server-derived hint: the account holds the explicit platform_recovery grant (granted permissions are not otherwise sent to the browser). */
+  platformRecovery?: boolean;
 }
 
 export function getEffectivePermissions(user: UserPermissions | null | undefined): Permission[] {
@@ -126,6 +130,7 @@ export function getEffectivePermissions(user: UserPermissions | null | undefined
   const base = new Set<Permission>(ROLE_PERMISSIONS[user.role || ""] || []);
   for (const p of (user.grantedPermissions || [])) base.add(p as Permission);
   for (const p of (user.revokedPermissions || [])) base.delete(p as Permission);
+  if (user.platformRecovery === true) base.add(PERM.PLATFORM_RECOVERY);
   return [...base] as Permission[];
 }
 
@@ -157,6 +162,7 @@ export const PAGE_PERMISSIONS: Record<string, Permission> = {
   "/admin/security-log":  PERM.VIEW_LOGS,
   "/admin/ads":           PERM.MANAGE_ADS,
   "/admin/settings":      PERM.MANAGE_PLATFORM,
+  "/admin/platform-recovery": PERM.PLATFORM_RECOVERY,
 };
 
 // Superadmin-only pages — never unlocked by a granted permission.

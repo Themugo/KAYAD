@@ -22,11 +22,14 @@ const expectedPaths = [
   // Phase 13H: destination added by the approved Phase 13E private-seller review work. The 29 original destinations are all still
   // required; the match stays exact, so any further unplanned addition or any removal still fails this check.
   '/admin/private-seller-applications',
+  // Maintenance-scope work: permission-only destination. It is visible solely to staff holding the explicit platform_recovery grant
+  // (ADMIN_PAGE_ROLES gives no role access), so the 30 established destinations are unchanged for everyone else. Match stays exact.
+  '/admin/platform-recovery',
 ];
 const actualPaths = [...sidebar.matchAll(/\{ to: '(\/admin[^']*)'/g)].map(match => match[1]);
 const routeSurface = read('src/components/admin/AdminRouteSurface.tsx');
 const registeredPaths = new Set([...routeSurface.matchAll(/'((?:\/admin)[^']*)': \{ component:/g)].map(match => match[1]));
-add('All 30 established sidebar destinations (29 original + approved private-seller review) remain present exactly once', actualPaths.length === expectedPaths.length && new Set(actualPaths).size === expectedPaths.length && expectedPaths.every(path => actualPaths.includes(path)));
+add('All 31 established sidebar destinations (29 original + approved private-seller review + permission-only platform recovery) remain present exactly once', actualPaths.length === expectedPaths.length && new Set(actualPaths).size === expectedPaths.length && expectedPaths.every(path => actualPaths.includes(path)));
 add('Every sidebar destination remains registered or resolves to the canonical command centre', actualPaths.every(path => path === '/admin' || registeredPaths.has(path)));
 add('Four approved visual navigation groups are present', ['Command Centre', 'Business Operations', 'Business Management', 'System Administration'].every(label => sidebar.includes(`label: '${label}'`)));
 add('Expandable groups expose aria-expanded and aria-controls', sidebar.includes('aria-expanded={isExpanded}') && sidebar.includes('aria-controls={`admin-nav-group-${group.id}`}'));

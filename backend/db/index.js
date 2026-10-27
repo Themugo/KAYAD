@@ -129,6 +129,12 @@ const applyOrdering = (query, orderBy, ascending = false, table) => {
         if (typeof order === 'string') query = query.order(mapKeyOut(table, order), { ascending });
         else query = query.order(mapKeyOut(table, order.field), { ascending: order.ascending ?? false });
       }
+    } else if (typeof orderBy === 'object') {
+      // PHASE 16B: Mongo-style sort objects ({ createdAt: -1 }) were passed by fraudDetectionService/featureFlagService and made
+      // mapKeyOut() throw "s.replace is not a function" (HTTP 500 on GET /api/fraud/check/*). 1/'asc' = ascending, anything else descending.
+      for (const [field, dir] of Object.entries(orderBy)) {
+        query = query.order(mapKeyOut(table, field), { ascending: dir === 1 || dir === '1' || dir === 'asc' });
+      }
     } else {
       query = query.order(mapKeyOut(table, orderBy), { ascending });
     }

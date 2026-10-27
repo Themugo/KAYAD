@@ -1,3 +1,4 @@
+import { AppError } from "../utils/AppError.js"; // PHASE 16B: request-caused conditions are 4xx, not 500
 import crypto from "crypto";
 import { findAll, findOne, create, update } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
@@ -69,7 +70,7 @@ export const saveTemplate = async (actor, payload, id = null) => {
   if (!STAFF.has(actor?.role)) throw new Error("Admin access required");
   const allowed = ["code", "name", "description", "category", "channel", "subjectTemplate", "bodyTemplate", "variables", "enabled"];
   const data = Object.fromEntries(allowed.filter(k => payload?.[k] !== undefined).map(k => [k, payload[k]]));
-  if (!data.code || !data.name || !data.bodyTemplate) throw new Error("Template code, name and body are required");
+  if (!data.code || !data.name || !data.bodyTemplate) throw AppError.badRequest("Template code, name and body are required");
   if (id) return update("communication_templates", id, { ...data, updatedBy: actor.id, updatedAt: new Date().toISOString() });
   return create("communication_templates", { ...data, createdBy: actor.id, updatedBy: actor.id });
 };
@@ -152,7 +153,7 @@ export const getCommunicationAnalytics = async ({ hours = 24 } = {}) => {
 
 export const retryDelivery = async (id) => {
   const row = (await findAll("communication_deliveries", { filters: { id }, limit: 1 }))[0];
-  if (!row) throw new Error("Delivery not found");
+  if (!row) throw AppError.notFound("Delivery not found");
   if (row.status !== "failed") throw new Error("Only failed deliveries can be retried");
   const metadata = row.metadata || {};
   if (!metadata.message && !metadata.text && !metadata.body) throw new Error("Delivery does not contain retryable message content");
@@ -172,13 +173,13 @@ export const getRolloutControls = async () => {
 export const updateChannelControl = async (actor, channel, enabled) => {
   if (!STAFF.has(actor?.role)) throw new Error("Admin access required");
   const row = await findOne("communication_channel_controls", { channel });
-  if (!row) throw new Error(`Unknown communication channel: ${channel}`);
+  if (!row) throw AppError.notFound("Unknown communication channel");
   return update("communication_channel_controls", row.id, { enabled: Boolean(enabled), updatedBy: actor.id, updatedAt: new Date().toISOString() });
 };
 
 export const updateEventControl = async (actor, eventType, channel, enabled) => {
   if (!STAFF.has(actor?.role)) throw new Error("Admin access required");
   const row = await findOne("communication_event_controls", { eventType, channel });
-  if (!row) throw new Error(`Unknown communication event/channel: ${eventType}/${channel}`);
+  if (!row) throw AppError.notFound("Unknown communication event/channel");
   return update("communication_event_controls", row.id, { enabled: Boolean(enabled), updatedBy: actor.id, updatedAt: new Date().toISOString() });
 };

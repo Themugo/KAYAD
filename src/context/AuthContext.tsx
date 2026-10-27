@@ -392,6 +392,7 @@ export function RequireAdmin({ children }: RequireAuthProps) {
 // Granular admin guard — restricts specific admin pages to allowed roles
 const ADMIN_PAGE_ROLES: Record<string, string[]> = {
   '/admin/panic-room':     ['superadmin'],
+  '/admin/platform-recovery': [], // no role opens this page; only the explicit platform_recovery permission does (the server decides again)
   '/admin/control-room':   ['superadmin', 'admin'],
   '/admin/webhoist':       ['superadmin'],
   '/admin/staff':          ['superadmin', 'admin', 'hr'],

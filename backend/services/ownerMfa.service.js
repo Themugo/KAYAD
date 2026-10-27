@@ -106,10 +106,33 @@ export async function verifyCode(userId, code, { actorEmail = "", allowRecovery 
   if (missing || !row || (row.status !== "active" && !(pendingOk && row.status === "pending"))) throw new MfaError("OWNER_MFA_NOT_ENROLLED", "No active second factor.", 400);
   if (row.locked_until && new Date(row.locked_until) > new Date()) throw new MfaError("OWNER_MFA_LOCKED", "Too many incorrect codes. Try again in 15 minutes.", 429);
   const sb = getSupabase();
+  const lockedErr = () => new MfaError("OWNER_MFA_LOCKED", "Too many incorrect codes. Try again in 15 minutes.", 429);
+  // PHASE 16B: the attempt is CHARGED before the code is evaluated, with a compare-and-set on (failed_attempts, locked_until).
+  // The earlier read-modify-write let N concurrent requests all read "0 failures" and all be evaluated (40 parallel wrong codes -> 25 evaluated
+  // against a limit of 5). Now only the request that wins each counter step is evaluated, so at most MAX_FAILURES codes are tried per window.
+  // A success resets the counter below. No schema change.
+  let willLock = false;
+  {
+    let cur = row;
+    for (let i = 0; ; i++) {
+      if (cur.locked_until && new Date(cur.locked_until) > new Date()) throw lockedErr();
+      if (i >= 80) throw new MfaError("OWNER_MFA_STORE_UNAVAILABLE", "The second-factor store is busy. Try again shortly.", 503);
+      const n = (cur.failed_attempts || 0) + 1;
+      willLock = n >= MAX_FAILURES;
+      const patch = willLock ? { failed_attempts: 0, locked_until: new Date(Date.now() + LOCK_MS).toISOString() } : { failed_attempts: n, locked_until: null };
+      let q = sb.from("owner_mfa_factors").update(patch).eq("user_id", userId).eq("failed_attempts", cur.failed_attempts || 0);
+      q = cur.locked_until ? q.eq("locked_until", cur.locked_until) : q.is("locked_until", null);
+      const { data, error } = await q.select("user_id");
+      if (error) throw new MfaError("OWNER_MFA_STORE_UNAVAILABLE", "The second-factor store is temporarily unavailable.", 503);
+      if (data?.length) break;
+      await new Promise((r) => setTimeout(r, 5 + Math.floor(Math.random() * 20)));
+      const re = await factorRow(userId);
+      if (re.missing || !re.row) throw new MfaError("OWNER_MFA_NOT_ENROLLED", "No active second factor.", 400);
+      cur = re.row;
+    }
+  }
   const fail = async () => {
-    const n = (row.failed_attempts || 0) + 1;
-    await sb.from("owner_mfa_factors").update(n >= MAX_FAILURES ? { failed_attempts: 0, locked_until: new Date(Date.now() + LOCK_MS).toISOString() } : { failed_attempts: n }).eq("user_id", userId);
-    await audit("code_failed", "denied", { actor: userId, email: actorEmail, reason: n >= MAX_FAILURES ? "locked" : undefined });
+    await audit("code_failed", "denied", { actor: userId, email: actorEmail, reason: willLock ? "locked" : undefined });
     throw new MfaError("OWNER_MFA_INVALID", "The code is not valid.", 403);
   };
   if (allowRecovery && looksLikeRecovery(code)) {

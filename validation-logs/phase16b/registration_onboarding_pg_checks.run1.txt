@@ -1,0 +1,48 @@
+PASS BEFORE: register function absent
+PASS BEFORE: dealers lacks the 4 onboarding columns
+PASS BEFORE: CHECK refuses suspended
+PASS PREFLIGHT: refuses when user_auth.token_version is missing
+PASS PREFLIGHT: nothing changed by the refused run
+PASS APPLY: exit 0
+PASS APPLY: pre-existing user rows byte-identical
+PASS APPLY: 4 columns present
+PASS APPLY: onboarding_complete defaults false, NOT NULL
+PASS APPLY: suspended now allowed
+PASS APPLY: unknown status still refused
+PASS APPLY: function is SECURITY DEFINER with pg_temp last
+PASS GRANT: anon cannot execute
+PASS GRANT: authenticated cannot execute
+PASS GRANT: PUBLIC cannot execute
+PASS GRANT: service_role can execute
+PASS FN: user role registers approved/unverified
+PASS FN: e-mail stored lower-cased
+PASS FN: auth row created atomically with token_version 0
+PASS FN: dealer registers pending with business name
+PASS FN: individual_seller registers pending
+PASS FN: role 'superadmin' refused (22023)
+PASS FN: refused 'superadmin' left no user row
+PASS FN: role 'admin' refused (22023)
+PASS FN: refused 'admin' left no user row
+PASS FN: role 'webhoist' refused (22023)
+PASS FN: refused 'webhoist' left no user row
+PASS FN: role 'moderator' refused (22023)
+PASS FN: refused 'moderator' left no user row
+PASS FN: role 'accounts' refused (22023)
+PASS FN: refused 'accounts' left no user row
+PASS FN: duplicate e-mail differing only by case is refused
+PASS FN: failed duplicate left no orphan auth row
+PASS FN: user_auth failure rolls the user back (atomic)
+PASS FN: atomic rollback left no user row
+PASS FN: owner-reserved style address is NOT blocked at DB layer (application layer reserves it)
+PASS REAPPLY: exit 0 (idempotent)
+PASS REAPPLY: still one function
+PASS ROLLBACK: refused when onboarding data exists
+PASS ROLLBACK: refusal changed nothing
+PASS ROLLBACK: exit 0 when clean
+PASS ROLLBACK: function gone
+PASS ROLLBACK: columns gone
+PASS ROLLBACK: CHECK back to 3 values
+PASS ROLLBACK: pre-existing user rows byte-identical
+PASS ROLL-FORWARD: candidate re-applies after rollback
+PASS ROLL-FORWARD: rows still identical
+pass=47 fail=0

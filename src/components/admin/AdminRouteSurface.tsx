@@ -34,6 +34,7 @@ const OperationsControlRoom = lazy(() => import('../../pages/admin/OperationsCon
 const AdminStaff = lazy(() => import('../../pages/admin/AdminStaff'));
 const AdminStaffPermissions = lazy(() => import('../../pages/admin/AdminStaffPermissions'));
 const PanicRoom = lazy(() => import('../../pages/admin/PanicRoom'));
+const PlatformRecovery = lazy(() => import('../../pages/admin/PlatformRecovery'));
 const WebhoistOverview = lazy(() => import('../../pages/admin/WebhoistOverview'));
 const ContentStudio = lazy(() => import('../../pages/admin/cms/ContentStudio'));
 const AutomationStudio = lazy(() => import('../../pages/admin/automation/AutomationStudio'));
@@ -94,6 +95,7 @@ export const ADMIN_ROUTE_COMPONENTS: Record<string, AdminRouteDefinition> = {
   '/admin/staff': { component: AdminStaff, superadminOnly: true },
   '/admin/staff-permissions': { component: AdminStaffPermissions, superadminOnly: true },
   '/admin/panic-room': { component: PanicRoom, superadminOnly: true },
+  '/admin/platform-recovery': { component: PlatformRecovery }, // permission-gated (platform_recovery); never role-gated
   '/admin/webhoist': { component: WebhoistOverview, superadminOnly: true },
   '/admin/cms': { component: ContentStudio },
   '/admin/automation': { component: AutomationStudio },

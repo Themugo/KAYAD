@@ -1,0 +1,12 @@
+
+/home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/db/index.js
+  56:55  error  Unexpected control character(s) in regular expression: \x00  no-control-regex
+
+/home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/models/_base.js
+   74:3   error  Duplicate key 'FeatureFlag'                                  no-dupe-keys
+  173:3   error  Duplicate key 'DealerSubscription'                           no-dupe-keys
+  534:46  error  Unexpected control character(s) in regular expression: \x00  no-control-regex
+  557:81  error  Unexpected control character(s) in regular expression: \x00  no-control-regex
+
+✖ 5 problems (5 errors, 0 warnings)
+

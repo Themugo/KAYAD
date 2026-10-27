@@ -15,7 +15,8 @@ export const calculateHealthScore = async (dealerId) => {
   try {
     const dealer = await findOne("dealers", { user: dealerId });
     if (!dealer) {
-      throw new Error("Dealer not found");
+      // Phase 16C: a missing dealer is a request problem (404), not a server fault; the controller maps statusCode to the response.
+      throw Object.assign(new Error("Dealer not found"), { statusCode: 404, code: "DEALER_NOT_FOUND" });
     }
 
     // Calculate all factor scores

@@ -380,7 +380,7 @@ export default function DealerOnboarding() {
               <button onClick={handleNext} disabled={!canNext()} style={{
                 padding: '10px 24px', borderRadius: 10,
                 background: canNext() ? 'var(--brand)' : 'rgba(10, 51, 64, 0.08)',
-                border: 'none', color: canNext() ? '#0a3340' : 'rgba(10, 51, 64, 0.2)',
+                border: 'none', color: canNext() ? '#ffffff' : 'rgba(10, 51, 64, 0.2)',
                 cursor: canNext() ? 'pointer' : 'not-allowed',
                 fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6,
               }}>
@@ -389,7 +389,7 @@ export default function DealerOnboarding() {
             ) : (
               <button onClick={handleSubmit} disabled={saving} style={{
                 padding: '10px 28px', borderRadius: 10,
-                background: 'var(--brand)', border: 'none', color: '#0a3340',
+                background: 'var(--brand)', border: 'none', color: '#ffffff',
                 cursor: saving ? 'not-allowed' : 'pointer',
                 fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6,
                 opacity: saving ? 0.6 : 1,

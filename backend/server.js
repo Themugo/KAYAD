@@ -26,6 +26,7 @@ import { globalLimiter, authLimiter, adminLimiter, webhookLimiter, socketRateLim
 import { mongoSanitize as sanitizeInput, xssProtection, paginationCap, extraHeaders, bodyGuard, hppProtection } from "./middleware/security.js";
 import { mpesaIpWhitelist, validateMpesaCallback } from "./middleware/mpesaSecurity.js";
 import { checkSystemStatus } from "./middleware/systemCheck.js";
+import maintenanceControlRoutes from "./routes/maintenanceControlRoutes.js";
 import { csrfProtection, csrfToken } from "./middleware/csrf.js";
 import { idempotencyCheck } from "./middleware/idempotency.js";
 import { protect, adminOnly } from "./middleware/auth.js";
@@ -837,6 +838,7 @@ app.use("/api/private-seller-capability", privateSellerCapabilityRoutes); // Pha
 app.use("/api/private-seller-auctions", privateSellerAuctionRoutes); // Stage 5F.10: proposal / verification / custody lifecycle
 app.use("/api/auctions", auctionSettlementRoutes);
 app.use("/api/auctions", auctionFulfilmentRoutes);
+app.use("/api/admin/system/maintenance", maintenanceControlRoutes); // maintenance control plane (owner / authorised technical recovery); must precede /api/admin
 app.use("/api/admin", adminLimiter, adminRoutes);
 app.use("/api/owner-access", authLimiter, ownerAccessRouter); // STAGE 5B: public, token-gated invitation preview/accept
 app.use("/api/owner", adminLimiter, ownerRouter); // STAGE 5B: owner-only governance

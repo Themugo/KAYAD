@@ -991,3 +991,18 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
     transition-duration: .01ms !important;
   }
 }
+
+/* Phase 16C: owner management tables (owners, invitations, audit history) stack as labelled rows on narrow screens.
+   Table roles are kept in the markup (explicit ARIA roles) so assistive technology still announces a table. */
+.owner-tbl th, .owner-tbl td { padding: 6px 10px 6px 0; vertical-align: top; overflow-wrap: anywhere; }
+.owner-tbl-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+@media (max-width: 640px) {
+  .owner-tbl, .owner-tbl tbody, .owner-tbl tr, .owner-tbl td { display: block; width: 100%; }
+  .owner-tbl thead { position: absolute; width: 1px; height: 1px; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .owner-tbl tr { padding: 10px 0; border-bottom: 1px solid var(--border, rgba(127, 127, 127, .35)); }
+  .owner-tbl td { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 8px; padding: 3px 0; }
+  .owner-tbl td::before { content: attr(data-label); color: var(--text-muted, #6b7280); font-weight: 600; }
+  .owner-tbl td.owner-tbl-actions { display: flex; }
+  .owner-tbl td.owner-tbl-actions::before { flex: 0 0 7.5rem; }
+}
+@media (max-width: 640px) { .owner-tbl td:empty { display: none; } }

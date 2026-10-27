@@ -1,0 +1,623 @@
+[
+ {
+  "method": "POST",
+  "path": "/api/admin/ads",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"899c626ef76e\",\"path\":\"/api/admin/ads\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"bd323c665515\",\"path\":\"/api/admin/ads\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"bd323c665515\" |     path: \"/api/admin/ads\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:13] INFO: Request Completed |     requestId: \"bd323c665515\" |     method: \"POST\""
+ },
+ {
+  "method": "PUT",
+  "path": "/api/admin/market-data/:id",
+  "baselineClass": "application_exception",
+  "baselineDetail": "MarketData.findByIdAndUpdate(...).lean is not a function",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"8bcb65253743\",\"path\":\"/api/admin/market-data/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"8bcb65253743\" |     path: \"/api/admin/market-data/00000000-0000-0000-0000-000000000000\" |     method: \"PUT\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:13] INFO: Request Completed |     requestId: \"8bcb65253743\" |     method: \"PUT\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/admin/escrow/accounts",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Escrow bank account name, bank name and account number are required",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Escrow bank account name, bank name and account number are required\",\"requestId\":\"fe5c79e6c91a\",\"stack\":\"Error: Escrow bank account name, bank name and account number are required\\n    at save",
+  "errorBlock": "] ERROR: Server error |     requestId: \"fe5c79e6c91a\" |     message: \"Escrow bank account name, bank name and account number are required\" |     path: \"/api/admin/escrow/accounts\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | POST /api/admin/escrow/accounts 500 18.096 ms - - | [06:23:13] INFO: Request Completed"
+ },
+ {
+  "method": "PATCH",
+  "path": "/api/admin/escrow/accounts/:id",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Escrow bank account name, bank name and account number are required",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Escrow bank account name, bank name and account number are required\",\"requestId\":\"14c315cc236d\",\"stack\":\"Error: Escrow bank account name, bank name and account number are required\\n    at save",
+  "errorBlock": "] ERROR: Server error |     requestId: \"14c315cc236d\" |     message: \"Escrow bank account name, bank name and account number are required\" |     path: \"/api/admin/escrow/accounts/00000000-0000-0000-0000-000000000000\" |     method: \"PATCH\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | PATCH /api/admin/escrow/accounts/00000000-0000-0000-0000-000000000000 500 12.911 ms - - | [06:23:14] INFO: Request Completed"
+ },
+ {
+  "method": "DELETE",
+  "path": "/api/admin/escrow/accounts/:id",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Escrow account not found",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Escrow account not found\",\"requestId\":\"558a821fa9cd\",\"stack\":\"Error: Escrow account not found\\n    at removeEscrowAccount (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER",
+  "errorBlock": "] ERROR: Server error |     requestId: \"558a821fa9cd\" |     message: \"Escrow account not found\" |     path: \"/api/admin/escrow/accounts/00000000-0000-0000-0000-000000000000\" |     method: \"DELETE\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:14] INFO: Request Completed |     requestId: \"558a821fa9cd\""
+ },
+ {
+  "method": "GET",
+  "path": "/api/escrow/operations/dashboard",
+  "baselineClass": "application_exception",
+  "baselineDetail": "'issue_details' is not an embedded resource in this request",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"'issue_details' is not an embedded resource in this request\",\"requestId\":\"ad7e9bc166b8\",\"path\":\"/api/escrow/operations/dashboard\",\"method\":\"GET\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"ad7e9bc166b8\" |     message: \"'issue_details' is not an embedded resource in this request\" |     dbCode: \"PGRST108\" |     path: \"/api/escrow/operations/dashboard\" |     method: \"GET\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:14] INFO: Request Completed"
+ },
+ {
+  "method": "PATCH",
+  "path": "/api/communications/admin/rollout/channels/:channel",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Unknown communication channel: 00000000-0000-0000-0000-000000000000",
+  "status": 404,
+  "body": "{\"success\":false,\"message\":\"Unknown communication channel\",\"requestId\":\"fcfc27bcb11a\",\"stack\":\"Error: Unknown communication channel\\n    at AppError.notFound (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECO",
+  "errorBlock": ""
+ },
+ {
+  "method": "PATCH",
+  "path": "/api/communications/admin/rollout/events/:eventType/:channel",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Unknown communication event/channel: 00000000-0000-0000-0000-000000000000/00000000-0000-0000-0000-000000000000",
+  "status": 404,
+  "body": "{\"success\":false,\"message\":\"Unknown communication event/channel\",\"requestId\":\"f57541a79802\",\"stack\":\"Error: Unknown communication event/channel\\n    at AppError.notFound (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMAR",
+  "errorBlock": ""
+ },
+ {
+  "method": "POST",
+  "path": "/api/communications/admin/templates",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+  "status": 400,
+  "body": "{\"success\":false,\"message\":\"Template code, name and body are required\",\"requestId\":\"62d24c68ca72\",\"stack\":\"Error: Template code, name and body are required\\n    at AppError.badRequest (file:///home/claude/p16b/ws/KAYAD-P",
+  "errorBlock": ""
+ },
+ {
+  "method": "PATCH",
+  "path": "/api/communications/admin/templates/:id",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Template code, name and body are required",
+  "status": 400,
+  "body": "{\"success\":false,\"message\":\"Template code, name and body are required\",\"requestId\":\"954e780eb6a7\",\"stack\":\"Error: Template code, name and body are required\\n    at AppError.badRequest (file:///home/claude/p16b/ws/KAYAD-P",
+  "errorBlock": ""
+ },
+ {
+  "method": "POST",
+  "path": "/api/communications/admin/deliveries/:id/retry",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Delivery not found",
+  "status": 404,
+  "body": "{\"success\":false,\"message\":\"Delivery not found\",\"requestId\":\"959336e81199\",\"stack\":\"Error: Delivery not found\\n    at AppError.notFound (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-P",
+  "errorBlock": ""
+ },
+ {
+  "method": "POST",
+  "path": "/api/auction-admin/:carId/end",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to end auction\"}",
+  "errorBlock": "] ERROR: CLOSE AUCTION ERROR |     code: \"P0001\" |     details: null |     hint: null |     message: \"Car not found\" |     carId: \"00000000-0000-0000-0000-000000000000\" |     reason: \"admin_force_end\" | [06:23:15] INFO: Request Completed |     requestId: \"2864c7482009\""
+ },
+ {
+  "method": "GET",
+  "path": "/api/fraud/check/user/:userId",
+  "baselineClass": "application_exception",
+  "baselineDetail": "TypeError: s.replace is not a function",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to check user fraud\"}",
+  "errorBlock": "] ERROR: Error checking user fraud |     code: \"42P01\" |     details: null |     hint: null |     message: \"relation \\\"public.disputes\\\" does not exist\" | [06:23:15] INFO: Request Completed |     requestId: \"a278c2e715d2\" |     method: \"GET\" |     url: \"/api/fraud/check/user/00000000-0000-0000-0000-000000000000\""
+ },
+ {
+  "method": "GET",
+  "path": "/api/fraud/check/auction/:carId",
+  "baselineClass": "application_exception",
+  "baselineDetail": "TypeError: s.replace is not a function",
+  "status": 200,
+  "body": "{\"success\":true,\"fraudDetected\":false,\"results\":{\"selfBidding\":null,\"bidRing\":null,\"bidSpike\":null}}",
+  "errorBlock": ""
+ },
+ {
+  "method": "GET",
+  "path": "/api/dealer-health-score/ranking/list",
+  "baselineClass": "application_exception",
+  "baselineDetail": "TypeError: DealerHealthScore.getTopDealers is not a function",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to get ranking\"}",
+  "errorBlock": "] ERROR: Failed to get dealer ranking |     err: { |       \"message\": \"DealerHealthScore.getTopDealers is not a function\", |       \"stack\": |           TypeError: DealerHealthScore.getTopDealers is not a function |               at getDealerRanking (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/dealerHealthScoreController.js:136:48) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/middleware/asyncHandler.js:7:29 |               at Layer.handleRequest (/home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/b"
+ },
+ {
+  "method": "GET",
+  "path": "/api/dealer-health-score/top/:category",
+  "baselineClass": "application_exception",
+  "baselineDetail": "TypeError: DealerHealthScore.getTopDealers is not a function",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to get top dealers\"}",
+  "errorBlock": "] ERROR: Failed to get top dealers by category |     err: { |       \"message\": \"DealerHealthScore.getTopDealers is not a function\", |       \"stack\": |           TypeError: DealerHealthScore.getTopDealers is not a function |               at getTopDealersByCategory (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/dealerHealthScoreController.js:161:48) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/middleware/asyncHandler.js:7:29 |               at Layer.handleRequest (/home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERV"
+ },
+ {
+  "method": "POST",
+  "path": "/api/dealer-health-score/admin/recalculate/:dealerId",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Error: Dealer not found",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to recalculate health score\"}",
+  "errorBlock": "] ERROR: Failed to calculate health score |     dealerId: \"00000000-0000-0000-0000-000000000000\" |     err: { |       \"message\": \"Dealer not found\", |       \"stack\": |           Error: Dealer not found |               at calculateHealthScore (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/dealerHealthScoreService.js:18:13) |               at process.processTicksAndRejections (node:internal/process/task_queues:103:5) |               at async recalculateDealerScore (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/dealerHealthScoreController.js:215:20)"
+ },
+ {
+  "method": "GET",
+  "path": "/api/dealer-health-score/admin/distribution",
+  "baselineClass": "application_exception",
+  "baselineDetail": "TypeError: DealerHealthScore.getScoreDistribution is not a function",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to get score distribution\"}",
+  "errorBlock": "] ERROR: Failed to get score distribution |     err: { |       \"message\": \"DealerHealthScore.getScoreDistribution is not a function\", |       \"stack\": |           TypeError: DealerHealthScore.getScoreDistribution is not a function |               at getScoreDistribution (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/dealerHealthScoreController.js:337:50) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/middleware/asyncHandler.js:7:29 |               at Layer.handleRequest (/home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-P"
+ },
+ {
+  "method": "GET",
+  "path": "/api/marketplace-health/alerts",
+  "baselineClass": "application_exception",
+  "baselineDetail": "ReferenceError: MarketplaceHealth is not defined",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to get alerts\"}",
+  "errorBlock": "] ERROR: Failed to get active alerts |     err: { |       \"message\": \"MarketplaceHealth is not defined\", |       \"stack\": |           ReferenceError: MarketplaceHealth is not defined |               at getActiveAlerts (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/marketplaceHealthService.js:383:20) |               at getAlertsHandler (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/marketplaceHealthController.js:81:26) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/middlewa"
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags/user",
+  "baselineClass": "application_exception",
+  "baselineDetail": "ReferenceError: FeatureFlag is not defined",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to get enabled flags for user\"}",
+  "errorBlock": "] ERROR: Failed to get enabled flags for user |     err: { |       \"message\": \"FeatureFlag is not defined\", |       \"stack\": |           ReferenceError: FeatureFlag is not defined |               at getEnabledFlagsForUser (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/featureFlagService.js:282:22) |               at getEnabledFlagsForUserHandler (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/featureFlagController.js:334:25) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/mi"
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags",
+  "baselineClass": "application_exception",
+  "baselineDetail": "TypeError: s.replace is not a function",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to get all flags\"}",
+  "errorBlock": "] ERROR: Failed to get all flags |     code: \"42P01\" |     details: null |     hint: null |     message: \"relation \\\"public.feature_flags\\\" does not exist\" | [06:23:17] ERROR: Failed to get all flags |     code: \"42P01\" |     details: null |     hint: null"
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags/:key",
+  "baselineClass": "application_exception",
+  "baselineDetail": "ReferenceError: FeatureFlag is not defined",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to get flag\"}",
+  "errorBlock": "] ERROR: Failed to get flag |     err: { |       \"message\": \"FeatureFlag is not defined\", |       \"stack\": |           ReferenceError: FeatureFlag is not defined |               at getFlag (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/featureFlagService.js:17:18) |               at getFlagHandler (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/featureFlagController.js:61:24) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/middleware/asyncHandler.js:7:29 |               at Lay"
+ },
+ {
+  "method": "POST",
+  "path": "/api/feature-flags/:key/toggle",
+  "baselineClass": "application_exception",
+  "baselineDetail": "ReferenceError: FeatureFlag is not defined",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to toggle flag\"}",
+  "errorBlock": "] ERROR: Failed to toggle flag |     err: { |       \"message\": \"FeatureFlag is not defined\", |       \"stack\": |           ReferenceError: FeatureFlag is not defined |               at toggleFlag (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/featureFlagService.js:175:18) |               at toggleFlagHandler (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/featureFlagController.js:172:24) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/middleware/asyncHandler.js:7:29 |          "
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags/:key/stats",
+  "baselineClass": "application_exception",
+  "baselineDetail": "ReferenceError: FeatureFlag is not defined",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to get flag stats\"}",
+  "errorBlock": "] ERROR: Failed to get flag stats |     err: { |       \"message\": \"FeatureFlag is not defined\", |       \"stack\": |           ReferenceError: FeatureFlag is not defined |               at getFlagStats (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/featureFlagService.js:190:18) |               at getFlagStatsHandler (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/featureFlagController.js:195:25) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/middleware/asyncHandler.js:7:29 |   "
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags/category/:category",
+  "baselineClass": "application_exception",
+  "baselineDetail": "ReferenceError: FeatureFlag is not defined",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to get flags by category\"}",
+  "errorBlock": "] ERROR: Failed to get flags by category |     err: { |       \"message\": \"FeatureFlag is not defined\", |       \"stack\": |           ReferenceError: FeatureFlag is not defined |               at getFlagsByCategory (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/featureFlagService.js:98:19) |               at getFlagsByCategoryHandler (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/featureFlagController.js:217:25) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/middleware/async"
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags/environment/:environment",
+  "baselineClass": "application_exception",
+  "baselineDetail": "ReferenceError: FeatureFlag is not defined",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to get flags by environment\"}",
+  "errorBlock": "] ERROR: Failed to get flags by environment |     err: { |       \"message\": \"FeatureFlag is not defined\", |       \"stack\": |           ReferenceError: FeatureFlag is not defined |               at getFlagsByEnvironment (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/featureFlagService.js:221:19) |               at getFlagsByEnvironmentHandler (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/featureFlagController.js:240:25) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/middle"
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags/role/:role",
+  "baselineClass": "application_exception",
+  "baselineDetail": "ReferenceError: FeatureFlag is not defined",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to get flags by role\"}",
+  "errorBlock": "] ERROR: Failed to get flags by role |     err: { |       \"message\": \"FeatureFlag is not defined\", |       \"stack\": |           ReferenceError: FeatureFlag is not defined |               at getFlagsByRole (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/featureFlagService.js:235:19) |               at getFlagsByRoleHandler (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/featureFlagController.js:263:25) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/middleware/asyncHandler.js:"
+ },
+ {
+  "method": "GET",
+  "path": "/api/feature-flags/meta/categories",
+  "baselineClass": "application_exception",
+  "baselineDetail": "ReferenceError: FeatureFlag is not defined",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to get flag categories\"}",
+  "errorBlock": "] ERROR: Failed to get flag categories |     err: { |       \"message\": \"FeatureFlag is not defined\", |       \"stack\": |           ReferenceError: FeatureFlag is not defined |               at getFlagCategories (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/featureFlagService.js:249:24) |               at getFlagCategoriesHandler (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/featureFlagController.js:285:30) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/middleware/asyncHan"
+ },
+ {
+  "method": "POST",
+  "path": "/api/feature-flags/batch/evaluate",
+  "baselineClass": "application_exception",
+  "baselineDetail": "TypeError: keys is not iterable",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to batch evaluate flags\"}",
+  "errorBlock": "] ERROR: Failed to batch evaluate flags |     err: { |       \"message\": \"keys is not iterable\", |       \"stack\": |           TypeError: keys is not iterable |               at batchEvaluateFlags (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/featureFlagService.js:265:23) |               at batchEvaluateFlagsHandler (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/featureFlagController.js:310:27) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/middleware/asyncHandler.js:7:29 |  "
+ },
+ {
+  "method": "GET",
+  "path": "/api/finance/issues",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Failed to fetch unresolved issues\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to fetch unresolved issues\"}",
+  "errorBlock": "] ERROR: Get unresolved issues error |     code: \"PGRST108\" |     details: null |     hint: \"Verify that 'issue_details' is included in the 'select' query parameter.\" |     message: \"'issue_details' is not an embedded resource in this request\" | [06:23:18] INFO: Request Completed |     requestId: \"0b527efa7b70\" |     method: \"GET\" |     url: \"/api/finance/issues\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/finance/reports/:reportId/issues/:issueIndex/resolve",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Error: Report not found",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Report not found\"}",
+  "errorBlock": "] ERROR: Resolve issue failed |     err: { |       \"message\": \"Report not found\", |       \"stack\": |           Error: Report not found |               at resolveIssue (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/reconciliationService.js:1258:24) |               at process.processTicksAndRejections (node:internal/process/task_queues:103:5) |               at async resolveIssue (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/financeController.js:136:20) |               at async file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER"
+ },
+ {
+  "method": "POST",
+  "path": "/api/reconciliation/reports/:reportId/resolve",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Error: Report not found",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to resolve reconciliation issue\"}",
+  "errorBlock": "] ERROR: Resolve issue failed |     err: { |       \"message\": \"Report not found\", |       \"stack\": |           Error: Report not found |               at resolveIssue (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/reconciliationService.js:1258:24) |               at process.processTicksAndRejections (node:internal/process/task_queues:103:5) |               at async resolveReconciliationIssue (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/reconciliationController.js:291:20) |               at async file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SEC"
+ },
+ {
+  "method": "POST",
+  "path": "/api/reconciliation/alerts/:id/read",
+  "baselineClass": "application_exception",
+  "baselineDetail": "TypeError: AdminAlert.findByIdAndUpdate(...).lean is not a function",
+  "status": 404,
+  "body": "{\"success\":false,\"message\":\"Alert not found\"}",
+  "errorBlock": ""
+ },
+ {
+  "method": "GET",
+  "path": "/api/admin/queue/statistics",
+  "baselineClass": "application_exception",
+  "baselineDetail": "ReferenceError: JobFailure is not defined",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to get queue statistics\"}",
+  "errorBlock": "] ERROR: Failed to get all queue statistics |     err: { |       \"message\": \"JobFailure is not defined\", |       \"stack\": |           ReferenceError: JobFailure is not defined |               at getAllQueueStatistics (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/queueMetricsService.js:155:19) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/queueController.js:64:30 |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/middleware/asyncHandler.js:7:29 |              "
+ },
+ {
+  "method": "GET",
+  "path": "/api/admin/queue/aggregated",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to get aggregated metrics\"}",
+  "errorBlock": "] ERROR: Failed to get all queue statistics |     err: { |       \"message\": \"JobFailure is not defined\", |       \"stack\": |           ReferenceError: JobFailure is not defined |               at getAllQueueStatistics (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/queueMetricsService.js:155:19) |               at getAggregatedMetrics (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/services/queueMetricsService.js:233:30) |               at file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/backend/controllers/queueCon"
+ },
+ {
+  "method": "PATCH",
+  "path": "/api/new-admin/auction-integrity/:id/status",
+  "baselineClass": "application_exception",
+  "baselineDetail": "TypeError: AuctionIntegrityFlag.findByIdAndUpdate(...).populate is not a function",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to update flag\"}",
+  "errorBlock": "] ERROR: Update flag failed | [06:23:19] INFO: Request Completed |     requestId: \"18a9b42879c1\" |     method: \"PATCH\" |     url: \"/api/new-admin/auction-integrity/00000000-0000-0000-0000-000000000000/status\" |     status: 500 |     duration: \"36ms\" | "
+ },
+ {
+  "method": "POST",
+  "path": "/api/announcements",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Failed to create announcement\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Failed to create announcement\"}",
+  "errorBlock": "] ERROR: Create announcement error | [06:23:19] INFO: Request Completed |     requestId: \"c0cff5154930\" |     method: \"POST\" |     url: \"/api/announcements\" |     status: 500 |     duration: \"20ms\" | "
+ },
+ {
+  "method": "POST",
+  "path": "/api/cms/banners/reorder",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Cannot read properties of undefined (reading 'length')",
+  "status": 400,
+  "body": "{\"success\":false,\"message\":\"banners must be an array of banner ids\"}",
+  "errorBlock": ""
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/workflows",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"b871ba7d65d2\",\"path\":\"/api/automation/workflows\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"e8bc4b1acc6e\",\"path\":\"/api/automation/workflows\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"e8bc4b1acc6e\" |     path: \"/api/automation/workflows\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:20] INFO: Request Completed |     requestId: \"e8bc4b1acc6e\" |     method: \"POST\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/approvals",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"224126826a42\",\"path\":\"/api/automation/approvals\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"46fbed580554\",\"path\":\"/api/automation/approvals\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"46fbed580554\" |     path: \"/api/automation/approvals\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:20] INFO: Request Completed |     requestId: \"46fbed580554\" |     method: \"POST\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/tasks",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"3c84c69753ce\",\"path\":\"/api/automation/tasks\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"a8150f3360eb\",\"path\":\"/api/automation/tasks\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"a8150f3360eb\" |     path: \"/api/automation/tasks\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:20] INFO: Request Completed |     requestId: \"a8150f3360eb\" |     method: \"POST\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/templates/notifications",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"f2957f8a2eca\",\"path\":\"/api/automation/templates/notifications\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"6e0556840c9a\",\"path\":\"/api/automation/templates/notifications\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"6e0556840c9a\" |     path: \"/api/automation/templates/notifications\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:20] INFO: Request Completed |     requestId: \"6e0556840c9a\" |     method: \"POST\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/automation/scheduled",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Cannot destructure property 'frequency' of 'schedule' as it is undefined.",
+  "status": 400,
+  "body": "{\"success\":false,\"message\":\"schedule with a frequency is required\"}",
+  "errorBlock": ""
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/entries",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"8f4cb52905aa\",\"path\":\"/api/config/entries\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"ca45d7b8dc29\",\"path\":\"/api/config/entries\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"ca45d7b8dc29\" |     path: \"/api/config/entries\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:21] INFO: Request Completed |     requestId: \"ca45d7b8dc29\" |     method: \"POST\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/entries/bulk",
+  "baselineClass": "application_exception",
+  "baselineDetail": "entries is not iterable",
+  "status": 400,
+  "body": "{\"success\":false,\"message\":\"entries must be an array\"}",
+  "errorBlock": ""
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/features",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"c0d04875fdb8\",\"path\":\"/api/config/features\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"830db6fa0b9a\",\"path\":\"/api/config/features\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"830db6fa0b9a\" |     path: \"/api/config/features\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:21] INFO: Request Completed |     requestId: \"830db6fa0b9a\" |     method: \"POST\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/reference",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Error: connect ECONNREFUSED 127.0.0.1:6379",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"9bce9a437224\",\"path\":\"/api/config/reference\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"9bce9a437224\" |     path: \"/api/config/reference\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:21] INFO: Request Completed |     requestId: \"9bce9a437224\" |     method: \"POST\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/vehicle",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"7e6e0e1833b0\",\"path\":\"/api/config/vehicle\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"64ad221a435d\",\"path\":\"/api/config/vehicle\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"64ad221a435d\" |     path: \"/api/config/vehicle\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:21] INFO: Request Completed |     requestId: \"64ad221a435d\" |     method: \"POST\""
+ },
+ {
+  "method": "PUT",
+  "path": "/api/config/vehicle/:id",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"7fbbe57647f8\",\"path\":\"/api/config/vehicle/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"a21e7df1ac4c\",\"path\":\"/api/config/vehicle/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"a21e7df1ac4c\" |     path: \"/api/config/vehicle/00000000-0000-0000-0000-000000000000\" |     method: \"PUT\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:21] INFO: Request Completed |     requestId: \"a21e7df1ac4c\" |     method: \"PUT\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/location",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"5d4bf1729d6e\",\"path\":\"/api/config/location\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"0eefaf38a27c\",\"path\":\"/api/config/location\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"0eefaf38a27c\" |     path: \"/api/config/location\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:22] INFO: Request Completed |     requestId: \"0eefaf38a27c\" |     method: \"POST\""
+ },
+ {
+  "method": "PUT",
+  "path": "/api/config/location/:id",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"58116c950e9c\",\"path\":\"/api/config/location/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"062921d7d5ff\",\"path\":\"/api/config/location/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"062921d7d5ff\" |     path: \"/api/config/location/00000000-0000-0000-0000-000000000000\" |     method: \"PUT\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:22] INFO: Request Completed |     requestId: \"062921d7d5ff\" |     method: \"PUT\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/countries",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"267932fbbce5\",\"path\":\"/api/config/countries\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"0f306df800c4\",\"path\":\"/api/config/countries\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"0f306df800c4\" |     path: \"/api/config/countries\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:22] INFO: Request Completed |     requestId: \"0f306df800c4\" |     method: \"POST\""
+ },
+ {
+  "method": "PUT",
+  "path": "/api/config/countries/:id",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"3efa4dec46a2\",\"path\":\"/api/config/countries/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"1de5295e8538\",\"path\":\"/api/config/countries/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"1de5295e8538\" |     path: \"/api/config/countries/00000000-0000-0000-0000-000000000000\" |     method: \"PUT\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:22] INFO: Request Completed |     requestId: \"1de5295e8538\" |     method: \"PUT\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/config/import",
+  "baselineClass": "application_exception",
+  "baselineDetail": "importData is not iterable",
+  "status": 400,
+  "body": "{\"success\":false,\"message\":\"data must be an array of config items\"}",
+  "errorBlock": ""
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/objects",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Cannot read properties of undefined (reading 'toLowerCase')",
+  "status": 400,
+  "body": "{\"success\":false,\"message\":\"name is required\"}",
+  "errorBlock": ""
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/objects/:objectId/fields/reorder",
+  "baselineClass": "application_exception",
+  "baselineDetail": "fields is not iterable",
+  "status": 400,
+  "body": "{\"success\":false,\"message\":\"fields must be an array of { id, displayOrder }\"}",
+  "errorBlock": ""
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/relationships",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"31e8a886ca23\",\"path\":\"/api/lowcode/relationships\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"190b73e0072a\",\"path\":\"/api/lowcode/relationships\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"190b73e0072a\" |     path: \"/api/lowcode/relationships\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:23] INFO: Request Completed |     requestId: \"190b73e0072a\" |     method: \"POST\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/forms",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"e117bf4c07da\",\"path\":\"/api/lowcode/forms\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"824f4e798f65\",\"path\":\"/api/lowcode/forms\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"824f4e798f65\" |     path: \"/api/lowcode/forms\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:23] INFO: Request Completed |     requestId: \"824f4e798f65\" |     method: \"POST\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/views",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"d87fe8c1eddf\",\"path\":\"/api/lowcode/views\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"470b7287401d\",\"path\":\"/api/lowcode/views\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"470b7287401d\" |     path: \"/api/lowcode/views\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:23] INFO: Request Completed |     requestId: \"470b7287401d\" |     method: \"POST\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/dashboards",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"a4309b9be40c\",\"path\":\"/api/lowcode/dashboards\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"62b71f49bfe3\",\"path\":\"/api/lowcode/dashboards\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"62b71f49bfe3\" |     path: \"/api/lowcode/dashboards\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:23] INFO: Request Completed |     requestId: \"62b71f49bfe3\" |     method: \"POST\""
+ },
+ {
+  "method": "POST",
+  "path": "/api/lowcode/ai/suggest",
+  "baselineClass": "application_exception",
+  "baselineDetail": "Cannot read properties of undefined (reading 'split')",
+  "status": 400,
+  "body": "{\"success\":false,\"message\":\"description is required\"}",
+  "errorBlock": ""
+ },
+ {
+  "method": "PUT",
+  "path": "/api/governance/policies/:id",
+  "baselineClass": "application_exception",
+  "baselineDetail": "JSON object requested, multiple (or no) rows returned",
+  "status": 404,
+  "body": "{\"success\":false,\"message\":\"Not found\",\"requestId\":\"a1b20a9dc7ac\",\"stack\":\"Error: Not found\\n    at errorHandler (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/ba",
+  "errorBlock": ""
+ },
+ {
+  "method": "POST",
+  "path": "/api/governance/changes/:id/submit",
+  "baselineClass": "application_exception",
+  "baselineDetail": "JSON object requested, multiple (or no) rows returned",
+  "status": 404,
+  "body": "{\"success\":false,\"message\":\"Not found\",\"requestId\":\"d2d2c64bda34\",\"stack\":\"Error: Not found\\n    at errorHandler (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/ba",
+  "errorBlock": ""
+ },
+ {
+  "method": "PUT",
+  "path": "/api/governance/approvals/:id",
+  "baselineClass": "application_exception",
+  "baselineDetail": "JSON object requested, multiple (or no) rows returned",
+  "status": 404,
+  "body": "{\"success\":false,\"message\":\"Not found\",\"requestId\":\"7e7e1fe2dedd\",\"stack\":\"Error: Not found\\n    at errorHandler (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/ba",
+  "errorBlock": ""
+ },
+ {
+  "method": "PUT",
+  "path": "/api/governance/features/:id/stage",
+  "baselineClass": "application_exception",
+  "baselineDetail": "JSON object requested, multiple (or no) rows returned",
+  "status": 404,
+  "body": "{\"success\":false,\"message\":\"Not found\",\"requestId\":\"9e0dfbbf8ea6\",\"stack\":\"Error: Not found\\n    at errorHandler (file:///home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/ba",
+  "errorBlock": ""
+ },
+ {
+  "method": "GET",
+  "path": "/api/intelligence/countries",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"code\":\"INTELLIGENCE_ERROR\",\"message\":\"column users.country does not exist\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"code\":\"INTELLIGENCE_ERROR\",\"message\":\"column users.country does not exist\"}",
+  "errorBlock": ""
+ },
+ {
+  "method": "POST",
+  "path": "/api/platform-factory/generate",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"e0f6e3a7f782\",\"path\":\"/api/platform-factory/generate\",\"method\":\"POST\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"c1c7db754d44\",\"path\":\"/api/platform-factory/generate\",\"method\":\"POST\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"c1c7db754d44\" |     path: \"/api/platform-factory/generate\" |     method: \"POST\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:24] INFO: Request Completed |     requestId: \"c1c7db754d44\" |     method: \"POST\""
+ },
+ {
+  "method": "PUT",
+  "path": "/api/platform-factory/products/:productId",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"404d7b0e5a55\",\"path\":\"/api/platform-factory/products/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"be01b4baa6c0\",\"path\":\"/api/platform-factory/products/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"be01b4baa6c0\" |     path: \"/api/platform-factory/products/00000000-0000-0000-0000-000000000000\" |     method: \"PUT\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:25] INFO: Request Completed |     requestId: \"be01b4baa6c0\" |     method: \"PUT\""
+ },
+ {
+  "method": "PUT",
+  "path": "/api/platform-factory/brands/:brandId",
+  "baselineClass": "application_exception",
+  "baselineDetail": "no logged cause; response {\"success\":false,\"message\":\"Server Error\",\"requestId\":\"0ebb87f1de92\",\"path\":\"/api/platform-factory/brands/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}",
+  "status": 500,
+  "body": "{\"success\":false,\"message\":\"Server Error\",\"requestId\":\"1bdc39de29ab\",\"path\":\"/api/platform-factory/brands/00000000-0000-0000-0000-000000000000\",\"method\":\"PUT\"}",
+  "errorBlock": "] ERROR: Server error |     requestId: \"1bdc39de29ab\" |     path: \"/api/platform-factory/brands/00000000-0000-0000-0000-000000000000\" |     method: \"PUT\" |     user: \"17a384ce-e3b9-4b6c-bbb4-90419623259e\" |     statusCode: 500 | [06:23:25] INFO: Request Completed |     requestId: \"1bdc39de29ab\" |     method: \"PUT\""
+ }
+]

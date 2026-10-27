@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ownerAPI } from '../../api/api';
 import { Button } from '../../components/ui';
 
@@ -28,6 +28,15 @@ function ActionDialog({ action, target, onCancel, onDone, mfaEnrolled }) {
   const [via, setVia] = useState('in_person');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const formRef = useRef(null);
+  // Phase 16C keyboard access: opening the inline form moves focus to its first field (so a keyboard or screen-reader user lands in it
+  // instead of tabbing through the page) and Escape cancels it without submitting anything.
+  useEffect(() => {
+    const el = formRef.current;
+    if (!el) return;
+    el.querySelector('input:not([type=hidden]), select, textarea')?.focus();
+    el.scrollIntoView?.({ block: 'nearest' });
+  }, []);
   const addr = action === 'invite' ? email : target.email;
   const confirmOk = confirmEmail.trim().toLowerCase() === String(addr || '').trim().toLowerCase() && !!addr;
 
@@ -51,7 +60,7 @@ function ActionDialog({ action, target, onCancel, onDone, mfaEnrolled }) {
     } finally { setBusy(false); }
   };
   return (
-    <form onSubmit={submit} aria-label={cfg.title} className="card" style={{ padding: 20, border: '2px solid #94A3B8', marginBottom: 16 }}>
+    <form ref={formRef} onKeyDown={(e) => { if (e.key === 'Escape' && !busy) { e.stopPropagation(); onCancel(); } }} onSubmit={submit} aria-label={cfg.title} className="card" style={{ padding: 20, border: '2px solid #94A3B8', marginBottom: 16 }}>
       <h4 style={{ marginBottom: 8 }}>{cfg.title}</h4>
       {action === 'invite' ? (
         <div style={{ marginBottom: 12 }}>
@@ -226,15 +235,15 @@ export default function AdminOwnerManagement() {
         {data.canManage && <Button variant="primary" onClick={() => { setNotice(null); setDialog({ action: 'invite', target: {} }); }}>Invite owner</Button>}
       </div>
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }} aria-label="Owners">
-          <thead><tr style={{ textAlign: 'left' }}><th>Owner</th><th>State</th><th>Added</th><th>By</th><th /></tr></thead>
-          <tbody>
+        <table className="owner-tbl" style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }} aria-label="Owners">
+          <thead role="rowgroup"><tr role="row" style={{ textAlign: 'left' }}><th role="columnheader">Owner</th><th role="columnheader">State</th><th role="columnheader">Added</th><th role="columnheader">By</th><th role="columnheader" /></tr></thead>
+          <tbody role="rowgroup">
             {data.members.filter((m) => m.status === 'active').map((m) => (
-              <tr key={m.id} data-testid={`owner-${m.email}`}>
-                <td>{m.name ? `${m.name} · ` : ''}{m.email}{m.primary ? ' · Primary owner' : ''}{m.userId === data.self?.id ? ' (you)' : ''}</td>
-                <td>{m.usable ? 'Active · verified' : `Blocked — ${m.blockedReason || 'not usable'}`}</td>
-                <td>{fmt(m.activatedAt)}</td><td>{m.addedBy || '—'}</td>
-                <td style={{ whiteSpace: 'nowrap' }}>
+              <tr role="row" key={m.id} data-testid={`owner-${m.email}`}>
+                <td role="cell" data-label="Owner">{m.name ? `${m.name} · ` : ''}{m.email}{m.primary ? ' · Primary owner' : ''}{m.userId === data.self?.id ? ' (you)' : ''}</td>
+                <td role="cell" data-label="State">{m.usable ? 'Active · verified' : `Blocked — ${m.blockedReason || 'not usable'}`}</td>
+                <td role="cell" data-label="Added">{fmt(m.activatedAt)}</td><td role="cell" data-label="By">{m.addedBy || '—'}</td>
+                <td role="cell" className="owner-tbl-actions" data-label="Actions">
                   {data.canManage && m.userId !== data.self?.id && !(m.primary && !data.self?.primary && data.primaryProtection !== false) && <Button size="sm" variant="outline" onClick={() => { setNotice(null); setDialog({ action: 'remove', target: m }); }}>Remove</Button>}
                   {data.canManage && m.primary && !data.self?.primary && data.primaryProtection !== false && <span style={{ color: 'var(--text-muted)' }}>Protected — only the primary owner can leave</span>}
                   {data.canManage && !m.usable && m.userId !== data.self?.id && <Button size="sm" variant="outline" onClick={() => { setNotice(null); setDialog({ action: 'recover', target: m }); }}>Recover</Button>}
@@ -250,13 +259,13 @@ export default function AdminOwnerManagement() {
       <h4 style={{ margin: '20px 0 8px' }}>Invitations</h4>
       {data.invitations.length === 0 ? <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>No invitations.</p> : (
         <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }} aria-label="Invitations">
-            <thead><tr style={{ textAlign: 'left' }}><th>Address</th><th>Status</th><th>Expires</th><th>Sent</th><th>Invited by</th><th /></tr></thead>
-            <tbody>
+          <table className="owner-tbl" style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }} aria-label="Invitations">
+            <thead role="rowgroup"><tr role="row" style={{ textAlign: 'left' }}><th role="columnheader">Address</th><th role="columnheader">Status</th><th role="columnheader">Expires</th><th role="columnheader">Sent</th><th role="columnheader">Invited by</th><th role="columnheader" /></tr></thead>
+            <tbody role="rowgroup">
               {data.invitations.map((i) => (
-                <tr key={i.id} data-testid={`invitation-${i.email}`}>
-                  <td>{i.email}</td><td>{i.status}</td><td>{fmt(i.expiresAt)}</td><td>{i.resendCount + 1}×, last {fmt(i.lastSentAt)}</td><td>{i.invitedBy || '—'}</td>
-                  <td style={{ whiteSpace: 'nowrap' }}>
+                <tr role="row" key={i.id} data-testid={`invitation-${i.email}`}>
+                  <td role="cell" data-label="Address">{i.email}</td><td role="cell" data-label="Status">{i.status}</td><td role="cell" data-label="Expires">{fmt(i.expiresAt)}</td><td role="cell" data-label="Sent">{i.resendCount + 1}×, last {fmt(i.lastSentAt)}</td><td role="cell" data-label="Invited by">{i.invitedBy || '—'}</td>
+                  <td role="cell" className="owner-tbl-actions" data-label="Actions">
                     {data.canManage && (i.status === 'pending' || i.status === 'expired') && <Button size="sm" variant="outline" onClick={() => { setNotice(null); setDialog({ action: 'resend', target: i }); }}>Resend</Button>}
                     {data.canManage && i.status === 'pending' && <Button size="sm" variant="outline" onClick={() => { setNotice(null); setDialog({ action: 'revokeInvitation', target: i }); }}>Revoke</Button>}
                   </td>
@@ -269,10 +278,10 @@ export default function AdminOwnerManagement() {
 
       <h4 style={{ margin: '20px 0 8px' }}>Who changed what</h4>
       <div style={{ overflowX: 'auto' }}>
-        <table style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }} aria-label="Owner audit history">
-          <thead><tr style={{ textAlign: 'left' }}><th>When</th><th>Action</th><th>Result</th><th>By</th><th>Target</th><th>Reason</th></tr></thead>
-          <tbody>
-            {(showAll ? data.events : data.events.slice(0, 20)).map((e) => (<tr key={e.id}><td>{fmt(e.at)}</td><td>{e.action}</td><td>{e.result}</td><td>{e.actor}</td><td>{e.targetEmail || '—'}</td><td>{e.reason || '—'}</td></tr>))}
+        <table className="owner-tbl" style={{ width: '100%', fontSize: 12, borderCollapse: 'collapse' }} aria-label="Owner audit history">
+          <thead role="rowgroup"><tr role="row" style={{ textAlign: 'left' }}><th role="columnheader">When</th><th role="columnheader">Action</th><th role="columnheader">Result</th><th role="columnheader">By</th><th role="columnheader">Target</th><th role="columnheader">Reason</th></tr></thead>
+          <tbody role="rowgroup">
+            {(showAll ? data.events : data.events.slice(0, 20)).map((e) => (<tr role="row" key={e.id}><td role="cell" data-label="When">{fmt(e.at)}</td><td role="cell" data-label="Action">{e.action}</td><td role="cell" data-label="Result">{e.result}</td><td role="cell" data-label="By">{e.actor}</td><td role="cell" data-label="Target">{e.targetEmail || '—'}</td><td role="cell" data-label="Reason">{e.reason || '—'}</td></tr>))}
           </tbody>
         </table>
       </div>

@@ -16,7 +16,15 @@ const errorHandler = (err, req, res, next) => {
   //   PGRST116 — `.single()` matched no row for the requested id → 404
   // Missing tables/columns (42P01/42703/PGRST205) deliberately stay 500: they are deployment/schema defects.
   const dbCode = err?.code || err?.cause?.code;
-  if (statusCode === 500 && !err.statusCode && !err.status) {
+  // PHASE 16B: asyncHandler stamps `err.statusCode = err.status || 500` on EVERY error, so `!err.statusCode` was never true for a
+  // route wrapped in asyncHandler and the two mappings below were dead code there (GET/PUT/POST .../<unknown id> on governance,
+  // dealer-health and similar routes still answered 500). An error that carries a database code and no explicit `status` is
+  // request-caused regardless of that default stamp; AppError/status-bearing errors are untouched.
+  const financialPath = /\/(payments?|mpesa|webhooks?|escrow|escrows|ledger|finance|reconciliation|auctions?|auction-admin|bids?|refunds?|payouts?|settlements?|wallets?|deposits?|commissions?|forfeit\w*)(\/|$|\?)/i.test(String(req.originalUrl || "").split("?")[0] + "/"); // any path segment
+  // Financial/settlement/webhook paths keep EXACTLY the pre-16B rule (mapping only when nothing at all assigned a status), so provider
+  // retry behaviour and operator alerting on those surfaces do not change in this phase.
+  const unassigned = statusCode === 500 && !err.status && (!financialPath || !err.statusCode);
+  if (unassigned) {
     if (dbCode === "22P02") { err = Object.assign(new Error("Invalid identifier"), { details: undefined }); statusCode = 400; }
     else if (dbCode === "PGRST116") { err = Object.assign(new Error("Not found"), { details: undefined }); statusCode = 404; }
   }
@@ -25,6 +33,7 @@ const errorHandler = (err, req, res, next) => {
   const logData = {
     requestId,
     message: err.message,
+    ...(dbCode && { dbCode }),
     path: req.originalUrl,
     method: req.method,
     user: req.user?.id || "guest",

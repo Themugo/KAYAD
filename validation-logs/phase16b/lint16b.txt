@@ -1,0 +1,14 @@
+(node:14464) ESLintIgnoreWarning: The ".eslintignore" file is no longer supported. Switch to using the "ignores" property in "eslint.config.js": https://eslint.org/docs/latest/use/configure/migration-guide#ignoring-files
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+/home/claude/p16b/ws/KAYAD-PHASE16A-PRIMARY-OWNER-SECOND-OWNER-TEST-DEALER-PRESERVATION-20261026/runbooks/phase16b-20261027/http/e2e_phase16b_owner_dealer_separation.cjs
+   23:28   error  'setTimeout' is not defined  no-undef
+   82:28   error  'setTimeout' is not defined  no-undef
+   85:118  error  'setTimeout' is not defined  no-undef
+  115:3    error  'console' is not defined     no-undef
+  121:3    error  'console' is not defined     no-undef
+  122:21   error  'console' is not defined     no-undef
+  122:48   error  'process' is not defined     no-undef
+
+✖ 7 problems (7 errors, 0 warnings)
+

@@ -3,6 +3,7 @@ import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { Shield, ShieldOff, Activity, DollarSign, AlertTriangle, Wifi, WifiOff } from 'lucide-react';
+import MaintenanceControl from '../../components/admin/MaintenanceControl';
 
 const KILL_SWITCHES = [
   {
@@ -46,7 +47,6 @@ const KILL_SWITCHES = [
 export default function PanicRoom() {
   const { toast } = useToast();
   const { isSuperAdmin } = useAuth();
-  const [msg, setMsg] = useState('');
   const [loading, setLoading] = useState(null);
   const [health, setHealth] = useState(null);
 
@@ -54,13 +54,14 @@ export default function PanicRoom() {
     adminAPI.systemHealth().then(d => setHealth(d.health || d)).catch(() => {});
   }, []);
 
-  const handleKillSwitch = async (type, extra = {}) => {
+  // Feature kill-switches only. Maintenance (global or scoped) has its own server-confirmed control below; the legacy endpoint refuses it.
+  const handleKillSwitch = async (type) => {
     const sw = KILL_SWITCHES.find(s => s.id === type);
     const label = sw?.label || type;
     if (!window.confirm(`DANGER: This will immediately stop ${label}. Proceed?`)) return;
     setLoading(type);
     try {
-      await adminAPI.systemKillSwitch({ type, ...extra });
+      await adminAPI.systemKillSwitch({ type });
       toast(`${label} DISABLED`, 'error');
     } catch { toast('Failed to execute', 'error'); }
     finally { setLoading(null); }
@@ -138,25 +139,8 @@ export default function PanicRoom() {
           ))}
         </div>
 
-        {/* Maintenance Mode */}
-        <div style={{ border: '1px solid rgba(10, 51, 64, 0.05)', background: '#FFFFFF', borderRadius: 16, padding: 28 }}>
-          <h4 style={{ color: '#0a3340', fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <AlertTriangle size={16} style={{ color: '#176b87' }} /> Maintenance Mode (Total Blackout)
-          </h4>
-          <input placeholder="Emergency message for users..."
-            value={msg} onChange={e => setMsg(e.target.value)}
-            style={{ width: '100%', background: '#f6faf9', border: '1px solid rgba(10, 51, 64, 0.1)', padding: 14, borderRadius: 10, marginBottom: 16, color: '#0a3340', fontSize: 13, outline: 'none' }} />
-          <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={() => handleKillSwitch('full_maintenance', { message: msg })} disabled={loading === 'full_maintenance'}
-              style={{ flex: 1, padding: '14px 0', border: '1px solid rgba(10, 51, 64, 0.15)', color: '#0a3340', fontWeight: 700, fontSize: 13, borderRadius: 10, background: 'transparent', cursor: 'pointer' }}>
-              {loading === 'full_maintenance' ? '...' : 'ACTIVATE GLOBAL MAINTENANCE'}
-            </button>
-            <button onClick={() => handleRecover('maintenance')} disabled={loading === 'recover_maintenance'}
-              style={{ flex: 1, padding: '14px 0', background: '#13B8A6', color: '#0a3340', fontWeight: 700, fontSize: 13, borderRadius: 10, border: 'none', cursor: 'pointer' }}>
-              {loading === 'recover_maintenance' ? '...' : 'END MAINTENANCE'}
-            </button>
-          </div>
-        </div>
+        {/* Maintenance control: scope selection, impact preview, reason, step-up, server-confirmed state */}
+        <MaintenanceControl mode="owner" />
       </div>
     </div>
   );

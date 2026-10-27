@@ -1,0 +1,17 @@
+[
+ {
+  "id": "landmark-one-main",
+  "impact": "moderate",
+  "n": 1
+ },
+ {
+  "id": "page-has-heading-one",
+  "impact": "moderate",
+  "n": 1
+ },
+ {
+  "id": "region",
+  "impact": "moderate",
+  "n": 6
+ }
+]

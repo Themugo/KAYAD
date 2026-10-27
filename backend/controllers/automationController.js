@@ -546,6 +546,7 @@ export async function getScheduledJobs(req, res) {
 
 export async function createScheduledJob(req, res) {
   const { name, description, type, schedule, workflowId, config, status } = req.body;
+  if (!schedule || typeof schedule !== 'object' || !schedule.frequency) return res.status(400).json({ success: false, message: "schedule with a frequency is required" }); // PHASE 16B: was a TypeError -> HTTP 500
 
   const job = await ScheduledJob.create({
     name,

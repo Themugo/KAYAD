@@ -26,7 +26,7 @@ import Bid from "../models/Bid.js";
 import Escrow from "../models/Escrow.js";
 import Ad from "../models/Ad.js";
 import AdminAlert from "../models/AdminAlert.js";
-import { invalidateSystemStatusCache } from "../middleware/systemCheck.js";
+import * as maintenanceControl from "../services/maintenanceControl.service.js";
 import Referral from "../models/Referral.js";
 import { listAdminReviews, moderateReview, deleteReview as deleteDealerReview } from "../services/review.service.js";
 import Transaction from "../models/Transaction.js";
@@ -1037,105 +1037,51 @@ router.post(
   authorize("superadmin"),
   asyncHandler(async (req, res) => {
     const { type } = req.body;
+    const SWITCHES = { auctions: "isAuctionActive", payments: "isPaymentsActive", ghost_check: "isGhostCheckActive" };
 
-    const { data: existing, error: readError } = await getSupabase()
-      .from("system_settings")
-      .select("value")
-      .eq("key", "system_status")
-      .maybeSingle();
-    if (readError) throw readError;
-
-    const systemStatus = {
-      isAuctionActive: true,
-      isPaymentsActive: true,
-      isGhostCheckActive: true,
-      isMaintenanceMode: false,
-      emergencyMessage: "System under scheduled maintenance.",
-      ...(existing?.value || {}),
-    };
-
-    if (type === "auctions") {
-      systemStatus.isAuctionActive = false;
-    } else if (type === "payments") {
-      systemStatus.isPaymentsActive = false;
-    } else if (type === "ghost_check") {
-      systemStatus.isGhostCheckActive = false;
-    } else if (type === "full_maintenance") {
-      systemStatus.isMaintenanceMode = true;
-      if (req.body.message) systemStatus.emergencyMessage = req.body.message;
-    } else {
-      return res.status(400).json({ success: false, message: "Invalid kill-switch type" });
+    if (type === "full_maintenance") {
+      // Platform-wide / scoped maintenance has its own audited control plane (scope, reason, step-up, owner-only):
+      // /api/admin/system/maintenance. It cannot be started through this legacy endpoint.
+      return res.status(400).json({ success: false, code: "MAINTENANCE_USE_SCOPED_CONTROL", message: "Maintenance is now started from the Panic Room maintenance control (scope, reason and confirmation required): POST /api/admin/system/maintenance/activate." });
     }
+    if (!SWITCHES[type]) return res.status(400).json({ success: false, message: "Invalid kill-switch type" });
 
-    const { error: writeError } = await getSupabase()
-      .from("system_settings")
-      .upsert({ key: "system_status", value: systemStatus }, { onConflict: "key" });
-    if (writeError) throw writeError;
-    invalidateSystemStatusCache();
+    const out = await maintenanceControl.setFeatureSwitch(SWITCHES[type], false);
     await auditAfterCommit({
       action: `Kill-switch activated: ${type}`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
     });
 
-    res.json({ success: true, message: `${type} disabled globally` });
+    res.json({ success: true, changed: out.changed, message: `${type} disabled globally` });
   }),
 );
 
 // =============================
-// 🚨 SYSTEM RECOVERY (superadmin only)
+// 🚨 SYSTEM RECOVERY (superadmin only) - feature switches only; ending maintenance is the control plane's job
 // =============================
 router.post(
   "/system/recover",
   authorize("superadmin"),
   asyncHandler(async (req, res) => {
     const { type } = req.body;
+    const SWITCHES = { auctions: "isAuctionActive", payments: "isPaymentsActive" };
 
-    const { data: existing, error: readError } = await getSupabase()
-      .from("system_settings")
-      .select("value")
-      .eq("key", "system_status")
-      .maybeSingle();
-    if (readError) throw readError;
-
-    const systemStatus = {
-      isAuctionActive: true,
-      isPaymentsActive: true,
-      isGhostCheckActive: true,
-      isMaintenanceMode: false,
-      emergencyMessage: "System under scheduled maintenance.",
-      ...(existing?.value || {}),
-    };
-
-    if (type === "all") {
-      Object.assign(systemStatus, {
-        isAuctionActive: true,
-        isPaymentsActive: true,
-        isGhostCheckActive: true,
-        isMaintenanceMode: false,
-      });
-    } else if (type === "auctions") {
-      systemStatus.isAuctionActive = true;
-    } else if (type === "payments") {
-      systemStatus.isPaymentsActive = true;
-    } else if (type === "maintenance") {
-      systemStatus.isMaintenanceMode = false;
-    } else {
-      return res.status(400).json({ success: false, message: "Invalid recovery type" });
+    if (type === "maintenance") {
+      return res.status(400).json({ success: false, code: "MAINTENANCE_USE_SCOPED_CONTROL", message: "End maintenance with POST /api/admin/system/maintenance/recover (owner or authorised technical recovery, with step-up)." });
     }
+    let out;
+    if (type === "all") out = await maintenanceControl.recoverAllFeatureSwitches(); // feature switches only; an active maintenance is left to its own control
+    else if (SWITCHES[type]) out = await maintenanceControl.setFeatureSwitch(SWITCHES[type], true);
+    else return res.status(400).json({ success: false, message: "Invalid recovery type" });
 
-    const { error: writeError } = await getSupabase()
-      .from("system_settings")
-      .upsert({ key: "system_status", value: systemStatus }, { onConflict: "key" });
-    if (writeError) throw writeError;
-    invalidateSystemStatusCache();
     await auditAfterCommit({
       action: `System recovered: ${type}`,
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
     });
 
-    res.json({ success: true, message: `${type} re-enabled globally` });
+    res.json({ success: true, changed: out.changed, maintenanceActive: out.state.isMaintenanceMode, message: `${type} re-enabled globally` });
   }),
 );
 

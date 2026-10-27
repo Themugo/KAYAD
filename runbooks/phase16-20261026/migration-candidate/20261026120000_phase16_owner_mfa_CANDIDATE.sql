@@ -30,7 +30,9 @@ CREATE INDEX IF NOT EXISTS owner_mfa_recovery_codes_user_idx ON public.owner_mfa
 
 ALTER TABLE public.owner_mfa_factors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.owner_mfa_recovery_codes ENABLE ROW LEVEL SECURITY;
-REVOKE ALL ON public.owner_mfa_factors, public.owner_mfa_recovery_codes FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON public.owner_mfa_factors, public.owner_mfa_recovery_codes FROM PUBLIC, anon, authenticated, service_role;
+-- Phase 16C: service_role is also revoked first so Supabase default privileges (ALL on new tables)
+-- do not leave TRUNCATE/REFERENCES/TRIGGER behind; only the CRUD below is granted.
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.owner_mfa_factors, public.owner_mfa_recovery_codes TO service_role;
 
 NOTIFY pgrst, 'reload schema';

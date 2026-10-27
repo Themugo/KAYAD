@@ -100,6 +100,7 @@ export async function deleteConfigEntry(req, res) {
 
 export async function bulkUpdateConfigEntries(req, res) {
   const { entries } = req.body;
+  if (!Array.isArray(entries)) return res.status(400).json({ success: false, message: "entries must be an array" }); // PHASE 16B: was a TypeError -> HTTP 500
   const results = [];
 
   for (const entry of entries) {
@@ -764,6 +765,7 @@ export async function exportConfig(req, res) {
 
 export async function importConfig(req, res) {
   const { format = 'json', category, data: importData, overwrite = false } = req.body;
+  if (!Array.isArray(importData)) return res.status(400).json({ success: false, message: "data must be an array of config items" }); // PHASE 16B: was a TypeError -> HTTP 500
 
   let results = { created: 0, updated: 0, errors: [] };
 

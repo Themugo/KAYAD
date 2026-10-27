@@ -1,0 +1,10 @@
+owner_identity_governance	owner	runbooks/phase16-20261026/e2e_owner_identity_governance.cjs	pass=73	fail=0	exit=0
+phase16a_arrangement	owner	runbooks/phase16a-20261026/e2e_phase16a_arrangement.cjs	pass=58	fail=0	exit=0
+account_security_owner_tables	owner	runbooks/phase16-20261026/e2e_account_security.cjs	pass=46	fail=1	exit=1
+account_security_legacy	legacy	runbooks/phase16-20261026/e2e_account_security.cjs	pass=46	fail=1	exit=1
+identity_integrity	legacy	runbooks/phase16-20261026/e2e_identity_integrity.cjs	pass=12	fail=0	exit=0
+dealer_lifecycle	legacy	runbooks/phase16-20261026/e2e_dealer_lifecycle.cjs	pass=50	fail=0	exit=0
+dealer_payments	legacy	runbooks/phase16-20261026/e2e_dealer_payments.cjs	pass=73	fail=0	exit=0
+inventory_team	legacy	runbooks/phase16-20261026/e2e_inventory_team.cjs	pass=60	fail=0	exit=0
+superadmin_governance	legacy	runbooks/phase16-20261026/e2e_superadmin_governance.cjs	pass=73	fail=0	exit=0
+phase16b_owner_dealer_separation	owner	runbooks/phase16b-20261027/http/e2e_phase16b_owner_dealer_separation.cjs	pass=40	fail=1	exit=0

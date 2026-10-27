@@ -303,7 +303,11 @@ export const getFlagCategoriesHandler = async (req, res) => {
 
 export const batchEvaluateFlagsHandler = async (req, res) => {
   try {
-    const { keys } = req.body;
+    const { keys } = req.body || {};
+    // Phase 16C: malformed input is a 400, not an unhandled "keys is not iterable" 500.
+    if (!Array.isArray(keys) || keys.length === 0 || keys.length > 100 || keys.some((k) => typeof k !== "string" || !k)) {
+      return res.status(400).json({ success: false, code: "INVALID_KEYS", message: "keys must be a non-empty array (max 100) of flag keys" });
+    }
     const user = req.user || null;
     const dealer = req.dealer || null;
 

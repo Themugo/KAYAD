@@ -6,6 +6,7 @@ import UserAuth from "../models/UserAuth.js";
 import RefreshToken from "../models/RefreshToken.js";
 import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
 import { OWNER_EMAILS, isOwnerEmail, isOwnerUser, isUnverifiedOwner, OWNER_IDENTITY_UNVERIFIED_RESPONSE } from "../config/owners.js";
+import { enforceMaintenance } from "./maintenanceEnforcement.js";
 import { ensureFresh as ensureOwnerRegistryFresh } from "../services/ownerRegistry.service.js"; // STAGE 5B
 import { logError, logWarn } from "../utils/logger.js";
 
@@ -178,6 +179,9 @@ export const protect = async (req, res, next) => {
     );
 
     const isOwner = isOwnerUser(user);
+    // Central maintenance policy: every authenticated route (any stale session, direct API call or alternative path) is judged here with the
+    // caller's fresh server-side identity. No-op unless maintenance is active.
+    if (await enforceMaintenance(req, res, user, isOwner)) return;
     req.user = {
       id: String(user._id ?? user.id),
       role: isOwner ? "superadmin" : user.role,

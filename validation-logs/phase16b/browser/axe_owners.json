@@ -1,0 +1,12 @@
+[
+ {
+  "id": "empty-table-header",
+  "impact": "minor",
+  "n": 1
+ },
+ {
+  "id": "page-has-heading-one",
+  "impact": "moderate",
+  "n": 1
+ }
+]

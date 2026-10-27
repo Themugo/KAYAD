@@ -655,6 +655,7 @@ export async function deleteBanner(req, res) {
 
 export async function reorderBanners(req, res) {
   const { banners } = req.body;
+  if (!Array.isArray(banners)) return res.status(400).json({ success: false, message: "banners must be an array of banner ids" }); // PHASE 16B: was a TypeError -> HTTP 500
 
   for (let i = 0; i < banners.length; i++) {
     await CMSBanner.findByIdAndUpdate(banners[i], { $set: { order: i } });

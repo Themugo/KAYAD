@@ -226,6 +226,10 @@ export const adminAPI = {
   testMpesa:      (body: any)      => api.post('/admin/daraja/test', body).then(unwrap),
   systemKillSwitch: (body: any) => api.post('/admin/system/kill-switch', body).then(unwrap),
   systemRecover:    (body: any) => api.post('/admin/system/recover', body).then(unwrap),
+  // Maintenance control plane (owner / authorised technical recovery). The server is the only source of truth for the state.
+  maintenanceStatus:   ()            => api.get('/admin/system/maintenance/status').then(unwrap),
+  maintenanceActivate: (body: any)   => api.post('/admin/system/maintenance/activate', body).then(unwrap),
+  maintenanceRecover:  (body: any)   => api.post('/admin/system/maintenance/recover', body).then(unwrap),
   verifyDealer:    (userId: string, body: any) => api.post(`/admin/users/${userId}/verify-dealer`, body).then(unwrap),
   verifyCar:       (carId: string, body: any) => api.post(`/admin/cars/${carId}/verify`, body).then(unwrap),
   moderateCar:     (carId: string, body: any) => api.post(`/admin/cars/${carId}/moderate`, body).then(unwrap),
