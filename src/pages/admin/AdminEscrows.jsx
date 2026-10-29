@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { escrowAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
@@ -22,7 +22,7 @@ const figure = (v) => (Number.isFinite(v) ? v : 'Unavailable');
 const Queue = ({ title, count, amount, tone, children, onOpen }) => (
   <div className="card" style={{ padding: 18, borderTop: `3px solid ${tone}` }}>
     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start' }}>
-      <div><div className="stat-label">{title}</div><div style={{ fontSize: 25, fontWeight: 700, marginTop: 4 }}>{count}</div>{amount !== undefined && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{Number.isFinite(amount) ? `${formatKES(amount)} exposed` : 'Exposure unavailable'}</div>}</div>
+      <div><div className="stat-label">{title}</div><div style={{ fontSize: 25, fontWeight: 700, marginTop: 4 }}>{count}</div>{amount !== undefined && <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>{typeof amount === 'number' && Number.isFinite(amount) ? `${formatKES(amount)} exposed` : 'Exposure unavailable'}</div>}</div>
       {onOpen && <button className="btn btn-outline btn-sm" onClick={onOpen}>Open</button>}
     </div>
     {children}
@@ -45,31 +45,69 @@ export default function AdminEscrows() {
   const [selected, setSelected] = useState(null);
   const [caseData, setCaseData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [caseError, setCaseError] = useState('');
+  const [lastLoadedAt, setLastLoadedAt] = useState(null);
   const [busy, setBusy] = useState('');
+  const requestSequence = useRef(0);
+  const caseSequence = useRef(0);
 
-  const load = async () => {
+  const load = useCallback(async ({ silent = false } = {}) => {
     if (!canView) return;
-    setLoading(true);
+    const sequence = ++requestSequence.current;
+    if (!silent) setLoading(true);
+    setLoadError('');
     try {
-      const [ops, list] = await Promise.all([escrowAPI.operationsDashboard({ limit: 15 }), escrowAPI.all({ status: filter === 'all' ? undefined : filter, page: 1, limit: 30 })]);
-      setDashboard(ops.data || ops);
-      setEscrows(list.data || list.escrows || []);
-    } catch (err) { toast(err.response?.data?.message || 'Failed to load escrow operations', 'error'); }
-    finally { setLoading(false); }
-  };
+      const [opsResponse, listResponse] = await Promise.all([
+        escrowAPI.operationsDashboard({ limit: 15 }),
+        escrowAPI.all({ status: filter === 'all' ? undefined : filter, page: 1, limit: 30 }),
+      ]);
+      const ops = opsResponse?.data ?? opsResponse;
+      if (!ops || typeof ops !== 'object' || Array.isArray(ops) || ops.success === false) throw new Error(ops?.message || 'Escrow dashboard returned an unexpected response.');
+      const listRoot = listResponse?.data ?? listResponse;
+      const rows = Array.isArray(listRoot) ? listRoot : Array.isArray(listRoot?.escrows) ? listRoot.escrows : Array.isArray(listRoot?.data) ? listRoot.data : null;
+      if (!rows) throw new Error(listRoot?.message || 'Escrow queue returned an unexpected response.');
+      if (sequence !== requestSequence.current) return;
+      setDashboard(ops);
+      setEscrows(rows);
+      setLastLoadedAt(new Date());
+    } catch (err) {
+      if (sequence !== requestSequence.current) return;
+      const message = err?.response?.data?.message || err?.message || 'Failed to load escrow operations. Existing results, if any, have been retained.';
+      setLoadError(message);
+      toast('Could not refresh escrow operations. Existing results, if any, have been retained.', 'error');
+    } finally {
+      if (sequence === requestSequence.current) setLoading(false);
+    }
+  }, [canView, filter, toast]);
 
-  useEffect(() => { load(); }, [filter, canView]);
+  useEffect(() => { load(); return () => { requestSequence.current += 1; }; }, [load]);
 
   const openCase = async (id) => {
-    setSelected(id); setCaseData(null);
-    try { const r = await escrowAPI.operationsCase(id); setCaseData(r.data || r); }
-    catch (err) { toast(err.response?.data?.message || 'Failed to load case', 'error'); }
+    const sequence = ++caseSequence.current;
+    setSelected(id); setCaseData(null); setCaseError('');
+    try {
+      const response = await escrowAPI.operationsCase(id);
+      const data = response?.data ?? response;
+      if (!data || typeof data !== 'object' || Array.isArray(data) || data.success === false || !data.escrow) throw new Error(data?.message || 'Case details returned an unexpected response.');
+      if (sequence !== caseSequence.current) return;
+      setCaseData(data);
+    } catch (err) {
+      if (sequence !== caseSequence.current) return;
+      setCaseError(err?.response?.data?.message || err?.message || 'Failed to load case details.');
+      toast('Could not load escrow case details.', 'error');
+    }
   };
 
   const act = async (key, fn, success) => {
+    if (busy) return;
     setBusy(key);
-    try { await fn(); toast(success, 'success'); await load(); if (selected) await openCase(selected); }
-    catch (err) { toast(err.response?.data?.message || 'Operation failed', 'error'); }
+    try {
+      await fn();
+      toast(success, 'success');
+      await load({ silent: true });
+      if (selected) await openCase(selected);
+    } catch (err) { toast(err.response?.data?.message || 'Operation failed', 'error'); }
     finally { setBusy(''); }
   };
 
@@ -120,10 +158,16 @@ export default function AdminEscrows() {
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 20, alignItems: 'flex-end', marginBottom: 22, flexWrap: 'wrap' }}>
           <div><div className="section-eyebrow">Escrow Operations Center</div><h2 style={{ marginTop: 4 }}>Custody Control Room</h2><p style={{ color: 'var(--text-muted)', maxWidth: 760 }}>One operational view for funded custody, disputes, refunds, payouts, reconciliation exceptions and anomaly review. Money movement remains inside the canonical escrow state machine.</p></div>
           <div style={{ display: 'flex', gap: 8 }}>
-            {canReconcile && <button className="btn btn-outline" disabled={busy === 'reconcile'} onClick={reconcile}>{busy === 'reconcile' ? 'Reconciling…' : '↻ Reconcile'}</button>}
-            {canOperate && <button className="btn btn-outline" disabled={busy === 'scan'} onClick={scan}>{busy === 'scan' ? 'Scanning…' : '◈ Scan Anomalies'}</button>}
+            {canReconcile && <button className="btn btn-outline" disabled={!!busy} onClick={reconcile}>{busy === 'reconcile' ? 'Reconciling…' : '↻ Reconcile'}</button>}
+            {canOperate && <button className="btn btn-outline" disabled={!!busy} onClick={scan}>{busy === 'scan' ? 'Scanning…' : '◈ Scan Anomalies'}</button>}
           </div>
         </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', margin: '-6px 0 16px', fontSize: 12, color: 'var(--text-muted)' }} aria-live="polite">
+          <span>{lastLoadedAt ? `Last successful refresh: ${lastLoadedAt.toLocaleString('en-KE')}` : 'Escrow data has not yet refreshed successfully.'}</span>
+          <button className="btn btn-outline btn-sm" onClick={() => load()} disabled={loading || !!busy}>{loading ? 'Refreshing…' : 'Refresh data'}</button>
+        </div>
+        {loadError && <div role="alert" className="card" style={{ padding: 14, marginBottom: 16, borderColor: 'var(--red)' }}><strong>Escrow data could not be verified</strong><p style={{ margin: '6px 0 10px', color: 'var(--text-muted)' }}>{loadError}. Empty queues and zero balances are not confirmed.</p><button className="btn btn-outline btn-sm" onClick={() => load()} disabled={loading || !!busy}>Retry loading</button></div>}
 
         <div className="card" style={{ padding: 14, marginBottom: 18 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -152,13 +196,13 @@ export default function AdminEscrows() {
         <div style={{ display: 'grid', gridTemplateColumns: selected ? 'minmax(0,1fr) minmax(360px, 460px)' : '1fr', gap: 18, alignItems: 'start' }}>
           <div className="card">
             <div style={{ padding: 18, borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between' }}><div><div className="section-eyebrow">Queue</div><strong>{filter === 'all' ? 'All Escrows' : `${STATUS[filter]?.[0] || filter} Cases`}</strong></div><span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{escrows.length} visible</span></div>
-            {loading ? <div className="loading-center" style={{ minHeight: 180 }}><div className="spinner" /></div> : escrows.length === 0 ? <div className="empty-state"><h3>Queue clear</h3><p>No cases currently match this queue.</p></div> : <div className="table-wrap"><table className="data-table"><thead><tr><th>Case</th><th>Vehicle</th><th>Amount</th><th>Status</th><th>Age</th><th>Action</th></tr></thead><tbody>{escrows.map(e => { const meta = STATUS[e.status] || [e.status, 'badge-muted']; const id=e.id||e._id; return <tr key={id}><td><button className="btn btn-outline btn-sm" onClick={() => openCase(id)}>#{String(id).slice(-8)}</button></td><td><div style={{ fontWeight: 600 }}>{e.car?.title || 'Vehicle'}</div><div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{e.buyer?.name || 'Buyer'} → {e.seller?.name || 'Seller'}</div></td><td>{formatKES(e.amount)}</td><td><span className={`badge ${meta[1]}`}>{meta[0]}</span></td><td style={{ fontSize: 11, color: 'var(--text-muted)' }}>{e.createdAt ? new Date(e.createdAt).toLocaleDateString('en-KE') : '—'}</td><td><button className="btn btn-sm" onClick={() => openCase(id)}>Open Case</button></td></tr>; })}</tbody></table></div>}
+            {loading && escrows.length === 0 ? <div className="loading-center" style={{ minHeight: 180 }}><div className="spinner" /></div> : escrows.length === 0 && !loadError ? <div className="empty-state"><h3>Queue clear</h3><p>No cases currently match this queue.</p></div> : escrows.length === 0 ? <div className="empty-state"><h3>Queue unavailable</h3><p>The queue could not be verified. Retry the request before treating this as an empty queue.</p></div> : <>{loadError && <div role="status" style={{ padding: '10px 18px', color: 'var(--text-muted)', fontSize: 12 }}>Showing last successfully loaded records; refresh failed.</div>}<div className="table-wrap"><table className="data-table"><thead><tr><th>Case</th><th>Vehicle</th><th>Amount</th><th>Status</th><th>Age</th><th>Action</th></tr></thead><tbody>{escrows.map(e => { const meta = STATUS[e.status] || [e.status, 'badge-muted']; const id=e.id||e._id; return <tr key={id}><td><button className="btn btn-outline btn-sm" onClick={() => openCase(id)}>#{String(id).slice(-8)}</button></td><td><div style={{ fontWeight: 600 }}>{e.car?.title || 'Vehicle'}</div><div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{e.buyer?.name || 'Buyer'} → {e.seller?.name || 'Seller'}</div></td><td>{e.amount !== null && e.amount !== undefined && e.amount !== '' && Number.isFinite(Number(e.amount)) ? formatKES(Number(e.amount)) : 'Unavailable'}</td><td><span className={`badge ${meta[1]}`}>{meta[0]}</span></td><td style={{ fontSize: 11, color: 'var(--text-muted)' }}>{e.createdAt ? new Date(e.createdAt).toLocaleDateString('en-KE') : '—'}</td><td><button className="btn btn-sm" onClick={() => openCase(id)}>Open Case</button></td></tr>; })}</tbody></table></div></>}
           </div>
 
           {selected && <div className="card" style={{ padding: 18, position: 'sticky', top: 18 }}>
-            {!caseData ? <div className="loading-center" style={{ minHeight: 220 }}><div className="spinner" /></div> : <>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}><div><div className="section-eyebrow">Case #{String(selected).slice(-10)}</div><h3>{selectedEscrow?.car?.title || 'Escrow case'}</h3></div><button className="btn btn-outline btn-sm" onClick={() => { setSelected(null); setCaseData(null); }}>Close</button></div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, margin: '18px 0' }}>{[['Status', selectedEscrow?.status],['Amount', formatKES(selectedEscrow?.amount)],['Buyer', selectedEscrow?.buyer?.name],['Seller', selectedEscrow?.seller?.name]].map(([k,v]) => <div key={k}><div className="stat-label">{k}</div><div style={{ fontWeight: 600, marginTop: 3 }}>{v || '—'}</div></div>)}</div>
+            {!caseData ? caseError ? <div role="alert" style={{ padding: 18 }}><h3>Case details unavailable</h3><p style={{ color: 'var(--text-muted)' }}>{caseError}</p><button className="btn btn-outline btn-sm" onClick={() => openCase(selected)}>Retry case details</button><button className="btn btn-outline btn-sm" style={{ marginLeft: 8 }} onClick={() => { caseSequence.current += 1; setSelected(null); setCaseData(null); setCaseError(''); }}>Close</button></div> : <div className="loading-center" style={{ minHeight: 220 }}><div className="spinner" /></div> : <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}><div><div className="section-eyebrow">Case #{String(selected).slice(-10)}</div><h3>{selectedEscrow?.car?.title || 'Escrow case'}</h3></div><button className="btn btn-outline btn-sm" onClick={() => { caseSequence.current += 1; setSelected(null); setCaseData(null); setCaseError(''); }}>Close</button></div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, margin: '18px 0' }}>{[['Status', selectedEscrow?.status],['Amount', selectedEscrow?.amount !== null && selectedEscrow?.amount !== undefined && selectedEscrow?.amount !== '' && Number.isFinite(Number(selectedEscrow.amount)) ? formatKES(Number(selectedEscrow.amount)) : 'Unavailable'],['Buyer', selectedEscrow?.buyer?.name],['Seller', selectedEscrow?.seller?.name]].map(([k,v]) => <div key={k}><div className="stat-label">{k}</div><div style={{ fontWeight: 600, marginTop: 3 }}>{v || '—'}</div></div>)}</div>
               <div style={{ padding: 12, borderRadius: 8, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>{actionHint}</div>
               {selectedEscrow?.status === 'pending' && canReconcile && <div style={{ marginBottom: 18, padding: 12, border: '1px solid var(--border)', borderRadius: 8, background: 'var(--surface)' }}><strong style={{ fontSize: 12 }}>Funding verification</strong><div style={{ fontSize: 11, color: 'var(--text-muted)', margin: '4px 0 10px' }}>Verify the custody deposit against the provider/bank reference. This is the canonical transition from pending to funded.</div><button className="btn btn-outline btn-full" disabled={!!busy} onClick={() => verifyFunding(selected)}>{busy === `verify:${selected}` ? 'Verifying…' : 'Verify Funding Reference'}</button></div>}
               {['funded','vehicle_confirmed','delivered','disputed'].includes(selectedEscrow?.status) && <div style={{ display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' }}>{canRelease && selectedEscrow?.status !== 'disputed' && <button className="btn btn-gold btn-full" disabled={!!busy} onClick={() => window.confirm('Release funds through the canonical escrow workflow?') && release(selected)}>{busy === `release:${selected}` ? 'Releasing…' : 'Release Funds'}</button>}{canRefund && <button className="btn btn-danger btn-full" disabled={!!busy} onClick={() => refund(selected)}>{busy === `refund:${selected}` ? 'Initiating…' : 'Initiate Refund'}</button>}</div>}

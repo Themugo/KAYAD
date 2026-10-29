@@ -1,10 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminVerificationAPI } from '../../api/api';
 import { ShieldCheck, Search, CheckCircle, XCircle, Eye, FileText, X, AlertTriangle } from 'lucide-react';
 
 const STATUS_COLORS = {
   pending: { bg: 'rgba(19, 184, 166, 0.1)', color: '#176b87', label: 'Pending' },
-  under_review: { bg: 'rgba(23, 107, 135, 0.1)', color: '#176B87', label: 'Under Review' },
   approved: { bg: 'rgba(34,197,94,0.1)', color: 'var(--admin-status-success)', label: 'Approved' },
   rejected: { bg: 'rgba(239,68,68,0.1)', color: 'var(--admin-status-danger)', label: 'Rejected' },
   suspended: { bg: 'rgba(107,114,128,0.1)', color: 'var(--admin-status-neutral)', label: 'Suspended' },
@@ -45,17 +44,26 @@ export default function AdminDealerVerifications() {
   const [actionModal, setActionModal] = useState(null);
   const [actionNotes, setActionNotes] = useState('');
   const [processing, setProcessing] = useState(false);
+  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, pages: 0 });
+  const [summary, setSummary] = useState({ pending: 0, approved: 0, rejected: 0, suspended: 0, total: 0 });
+  const requestSequence = useRef(0);
 
   const load = useCallback(async () => {
+    const sequence = ++requestSequence.current;
     setLoading(true);
     setLoadError('');
     try {
-      const params = filter ? { status: filter } : {};
+      const params = { page: pagination.page, limit: pagination.limit, ...(filter ? { status: filter } : {}) };
       const data = await adminVerificationAPI.list(params);
-      setItems(data.verifications || []);
-    } catch { setLoadError('Dealer verification records could not be loaded. Check access or connectivity and retry.'); }
-    finally { setLoading(false); }
-  }, [filter]);
+      if (!Array.isArray(data?.verifications)) throw new Error('Unexpected dealer verification response');
+      if (sequence !== requestSequence.current) return;
+      setItems(data.verifications);
+      if (data.pagination) setPagination(current => ({ ...current, ...data.pagination }));
+      if (data.summary) setSummary(current => ({ ...current, ...data.summary }));
+    } catch (err) {
+      if (sequence === requestSequence.current) setLoadError(err?.response?.data?.message || 'Dealer verification records could not be loaded. Check access or connectivity and retry.');
+    } finally { if (sequence === requestSequence.current) setLoading(false); }
+  }, [filter, pagination.page, pagination.limit]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -74,8 +82,8 @@ export default function AdminDealerVerifications() {
 
   const handleAction = async () => {
     if (!actionModal) return;
-    if (actionModal.action === 'reject' && !actionNotes.trim()) {
-      setActionError('A specific rejection reason is required.');
+    if (['reject', 'suspend'].includes(actionModal.action) && !actionNotes.trim()) {
+      setActionError(actionModal.action === 'reject' ? 'A specific rejection reason is required.' : 'A specific suspension reason is required.');
       return;
     }
     setActionError('');
@@ -85,7 +93,11 @@ export default function AdminDealerVerifications() {
       if (action === 'approve') {
         await adminVerificationAPI.approve(id, { adminNotes: actionNotes });
       } else if (action === 'reject') {
-        await adminVerificationAPI.reject(id, { rejectionReason: actionNotes || 'Rejected by admin' });
+        await adminVerificationAPI.reject(id, { rejectionReason: actionNotes.trim() });
+      } else if (action === 'suspend') {
+        await adminVerificationAPI.suspend(id, { suspensionReason: actionNotes.trim() });
+      } else if (action === 'reinstate') {
+        await adminVerificationAPI.reinstate(id);
       }
       setActionModal(null);
       setSelected(null);
@@ -96,7 +108,7 @@ export default function AdminDealerVerifications() {
     } finally { setProcessing(false); }
   };
 
-  const countByStatus = (status) => items.filter(v => v.verificationStatus === status).length;
+  const countByStatus = (status) => Number(summary[status] || 0);
 
   return (
     <div style={{ padding: '32px 32px' }}>
@@ -123,10 +135,9 @@ export default function AdminDealerVerifications() {
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         {[
           { label: 'Pending', count: countByStatus('pending'), color: '#176b87' },
-          { label: 'Under Review', count: countByStatus('under_review'), color: '#176B87' },
-          { label: 'Approved', count: countByStatus('approved'), color: 'var(--admin-status-success)' },
+                    { label: 'Approved', count: countByStatus('approved'), color: 'var(--admin-status-success)' },
           { label: 'Rejected', count: countByStatus('rejected'), color: 'var(--admin-status-danger)' },
-          { label: 'Total', count: items.length, color: 'var(--admin-ink)' },
+          { label: 'Total', count: Number(summary.total || pagination.total || 0), color: 'var(--admin-ink)' },
         ].map(stat => (
           <div key={stat.label} style={{
             background: 'var(--card)', border: '1px solid var(--border)',
@@ -153,17 +164,17 @@ export default function AdminDealerVerifications() {
             }}
           />
         </div>
-        <select aria-label="Filter dealer verifications by status" value={filter} onChange={e => setFilter(e.target.value)} style={{
+        <select aria-label="Filter dealer verifications by status" value={filter} onChange={e => { setFilter(e.target.value); setPagination(p => ({ ...p, page: 1 })); }} style={{
           padding: '9px 14px', background: 'var(--card)', border: '1px solid var(--border)',
           borderRadius: 8, color: 'var(--admin-ink)', fontSize: 13, outline: 'none',
         }}>
           <option value="">All Statuses</option>
           <option value="pending">Pending</option>
-          <option value="under_review">Under Review</option>
           <option value="approved">Approved</option>
           <option value="rejected">Rejected</option>
           <option value="suspended">Suspended</option>
         </select>
+        <button type="button" onClick={load} disabled={loading} style={{ padding: '9px 14px', background: 'var(--admin-surface-muted)', border: '1px solid var(--admin-border)', borderRadius: 8, color: 'var(--admin-ink)', cursor: loading ? 'wait' : 'pointer' }}>Refresh</button>
       </div>
 
       {/* Table */}
@@ -181,11 +192,11 @@ export default function AdminDealerVerifications() {
               {loading ? (
                 <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40 }}><div className="spinner" /></td></tr>
               ) : filtered.length === 0 ? (
-                <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40, color: 'var(--admin-muted-content)' }}>No verification requests found</td></tr>
+                <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40, color: 'var(--admin-muted-content)' }}>{loadError ? 'Records unavailable until the request succeeds.' : 'No verification requests match this filter.'}</td></tr>
               ) : filtered.map(v => {
                 const sc = STATUS_COLORS[v.verificationStatus] || STATUS_COLORS.pending;
                 return (
-                  <tr key={v._id} style={{ borderBottom: '1px solid var(--admin-border)' }}>
+                  <tr key={v.id || v._id} style={{ borderBottom: '1px solid var(--admin-border)' }}>
                     <td style={{ padding: '12px 16px' }}>
                       <span style={{ fontWeight: 600, color: 'var(--admin-ink)' }}>{v.user?.name || 'N/A'}</span>
                     </td>
@@ -210,17 +221,23 @@ export default function AdminDealerVerifications() {
                           padding: '6px 10px', background: 'var(--admin-surface-muted)', border: '1px solid var(--admin-border)',
                           borderRadius: 6, color: 'var(--admin-ink)', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
                         }}><Eye size={12} /> View</button>
-                        {v.verificationStatus !== 'approved' && (
-                          <button onClick={() => openAction(v._id, 'approve')} style={{
+                        {v.verificationStatus === 'pending' && (
+                          <button onClick={() => openAction(v.id || v._id, 'approve')} style={{
                             padding: '6px 10px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)',
                             borderRadius: 6, color: 'var(--admin-status-success)', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
                           }}><CheckCircle size={12} /> Approve</button>
                         )}
-                        {v.verificationStatus !== 'rejected' && v.verificationStatus !== 'approved' && (
-                          <button onClick={() => openAction(v._id, 'reject')} style={{
+                        {v.verificationStatus === 'pending' && (
+                          <button onClick={() => openAction(v.id || v._id, 'reject')} style={{
                             padding: '6px 10px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
                             borderRadius: 6, color: 'var(--admin-status-danger)', fontSize: 11, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
                           }}><XCircle size={12} /> Reject</button>
+                        )}
+                        {v.verificationStatus === 'approved' && (
+                          <button onClick={() => openAction(v.id || v._id, 'suspend')} style={{ padding: '6px 10px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 6, color: 'var(--admin-status-danger)', fontSize: 11, cursor: 'pointer' }}>Suspend</button>
+                        )}
+                        {v.verificationStatus === 'suspended' && (
+                          <button onClick={() => openAction(v.id || v._id, 'reinstate')} style={{ padding: '6px 10px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 6, color: 'var(--admin-status-success)', fontSize: 11, cursor: 'pointer' }}>Reinstate</button>
                         )}
                       </div>
                     </td>
@@ -229,6 +246,14 @@ export default function AdminDealerVerifications() {
               })}
             </tbody>
           </table>
+        </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', padding: '12px 2px', color: 'var(--admin-muted-content)', fontSize: 12 }}>
+        <span>Showing {items.length ? ((pagination.page - 1) * pagination.limit + 1) : 0}–{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} verification records</span>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button type="button" disabled={loading || pagination.page <= 1} onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))} style={{ padding: '7px 12px', border: '1px solid var(--admin-border)', borderRadius: 7, background: 'var(--card)', color: 'var(--admin-ink)', cursor: pagination.page <= 1 ? 'not-allowed' : 'pointer' }}>Previous</button>
+          <span style={{ alignSelf: 'center' }}>Page {pagination.page} of {Math.max(1, pagination.pages)}</span>
+          <button type="button" disabled={loading || pagination.page >= pagination.pages} onClick={() => setPagination(p => ({ ...p, page: p.page + 1 }))} style={{ padding: '7px 12px', border: '1px solid var(--admin-border)', borderRadius: 7, background: 'var(--card)', color: 'var(--admin-ink)', cursor: pagination.page >= pagination.pages ? 'not-allowed' : 'pointer' }}>Next</button>
         </div>
       </div>
 
@@ -259,24 +284,16 @@ export default function AdminDealerVerifications() {
                 }}>{STATUS_COLORS[selected.verificationStatus]?.label || selected.verificationStatus}</span>
               </p>
             </div>
-            {selected.documents?.length > 0 && (
+            {selected.documents && Object.keys(selected.documents).length > 0 && (
               <div>
                 <label style={{ fontSize: 10, color: 'var(--admin-muted-content)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8, display: 'block' }}>
-                  <FileText size={12} style={{ display: 'inline', marginRight: 4, verticalAlign: -1 }} /> Documents ({selected.documents.length})
+                  <FileText size={12} style={{ display: 'inline', marginRight: 4, verticalAlign: -1 }} /> Documents ({Object.keys(selected.documents).length})
                 </label>
-                {selected.documents.map((doc, i) => (
-                  <div key={i} style={{
-                    background: 'var(--admin-surface-muted)', borderRadius: 8,
-                    padding: '8px 12px', marginBottom: 6, fontSize: 12,
-                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  }}>
-                    <span style={{ color: 'var(--admin-ink)' }}>{doc.type || doc.documentType || `Document ${i + 1}`}</span>
-                    {doc.url && (
-                      <a href={doc.url} target="_blank" rel="noopener noreferrer" style={{
-                        color: 'var(--brand)', padding: '4px 10px', borderRadius: 6,
-                        background: 'rgba(23, 107, 135, 0.1)', textDecoration: 'none', fontSize: 11, fontWeight: 600,
-                      }}><Eye size={11} style={{ display: 'inline', marginRight: 4, verticalAlign: -1 }} /> View</a>
-                    )}
+                {Object.entries(selected.documents).map(([key, doc], i) => (
+                  <div key={key} style={{ background: 'var(--admin-surface-muted)', borderRadius: 8, padding: '8px 12px', marginBottom: 6, fontSize: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ color: 'var(--admin-ink)' }}>{key.replace(/([A-Z])/g, ' $1').replace(/^./, c => c.toUpperCase())}</span>
+                    {doc?.url && <a href={doc.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--brand)', padding: '4px 10px', borderRadius: 6, background: 'rgba(23, 107, 135, 0.1)', textDecoration: 'none', fontSize: 11, fontWeight: 600 }}><Eye size={11} style={{ display: 'inline', marginRight: 4, verticalAlign: -1 }} /> View</a>}
+                    {doc?.verified === true && <span style={{ color: 'var(--admin-status-success)', fontWeight: 700 }}>Verified</span>}
                   </div>
                 ))}
               </div>
@@ -301,14 +318,12 @@ export default function AdminDealerVerifications() {
 
       {/* Action Confirmation Modal */}
       {actionModal && (
-        <Modal title={`${actionModal.action === 'approve' ? 'Approve' : 'Reject'} Verification`} onClose={() => setActionModal(null)}>
+        <Modal title={`${({ approve: 'Approve', reject: 'Reject', suspend: 'Suspend', reinstate: 'Reinstate' })[actionModal.action]} Dealer Verification`} onClose={() => setActionModal(null)}>
           <p style={{ color: 'var(--admin-body)', fontSize: 13, marginBottom: 16 }}>
-            {actionModal.action === 'approve'
-              ? 'This will approve the dealer, publish all their pending listings, and notify them.'
-              : 'This will reject the dealer application and notify them.'}
+            {actionModal.action === 'approve' ? 'This approves the dealer verification and marks the dealer as verified. Listings remain subject to their own review workflow.' : actionModal.action === 'reject' ? 'This rejects the dealer application and notifies the dealer. A specific reason is required.' : actionModal.action === 'suspend' ? 'This suspends the approved dealer. Enter a clear reason for the audit trail.' : 'This reinstates the suspended dealer and restores approved verification status.'}
           </p>
           <textarea
-            placeholder={actionModal.action === 'approve' ? 'Optional admin notes...' : 'Reason for rejection (required)...'}
+            placeholder={actionModal.action === 'approve' ? 'Optional admin notes...' : actionModal.action === 'reject' ? 'Reason for rejection (required)...' : actionModal.action === 'suspend' ? 'Reason for suspension (required)...' : 'Optional admin notes...'}
             value={actionNotes}
             onChange={e => setActionNotes(e.target.value)}
             rows={3}
@@ -326,11 +341,11 @@ export default function AdminDealerVerifications() {
             }}>Cancel</button>
             <button onClick={handleAction} disabled={processing} style={{
               padding: '9px 18px', borderRadius: 8, border: 'none',
-              background: actionModal.action === 'approve' ? 'var(--admin-status-success)' : 'var(--admin-status-danger)',
+              background: ['approve', 'reinstate'].includes(actionModal.action) ? 'var(--admin-status-success)' : 'var(--admin-status-danger)',
               color: 'var(--admin-surface)', fontSize: 12, fontWeight: 700, cursor: processing ? 'not-allowed' : 'pointer',
               opacity: processing ? 0.6 : 1,
             }}>
-              {processing ? 'Processing...' : actionModal.action === 'approve' ? 'Approve & Publish' : 'Reject'}
+              {processing ? 'Processing...' : ({ approve: 'Approve Verification', reject: 'Reject Application', suspend: 'Suspend Dealer', reinstate: 'Reinstate Dealer' })[actionModal.action]}
             </button>
           </div>
         </Modal>

@@ -642,7 +642,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   <span>Vehicle Overview</span>
                 </div>
                 <p className="text-[#64748B] leading-relaxed text-xs">
-                  {vehicle.description || `Pristine ${vehicle.year} ${vehicle.make} ${vehicle.model} presented in immaculate mechanical state in ${vehicle.location}. Inspected for long-distance durability across East African roads.`}
+                  {vehicle.description || `Pristine ${vehicle.year} ${vehicle.make} ${vehicle.model} presented in immaculate mechanical state in ${vehicle.location}. Review available inspection records and seller details before purchase in Kenya.`}
                 </p>
               </Card>
 

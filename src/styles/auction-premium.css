@@ -84,3 +84,35 @@
   .auction-premium-page .auction-segment, .auction-premium-page .auction-card, .auction-premium-page .auction-card-media img { transition: none !important; animation: none !important; }
   .auction-premium-page .auction-card:hover { transform: none !important; }
 }
+
+
+/* Auction 360 hardening: status truth, narrow-screen controls and dock clearance. */
+.auction-status-indicator{display:inline-block;width:8px;height:8px;flex:0 0 8px;border-radius:50%;background:#9aaeb3;box-shadow:none}
+.auction-status-indicator.is-loading{background:#f4c56a}
+.auction-status-indicator.is-unavailable{background:#ffb3a7}
+.auction-status-indicator.is-live{background:#59e0cb;box-shadow:0 0 0 4px rgba(89,224,203,.12)}
+.auction-status-indicator.is-idle{background:#a6c1c4}
+.auction-refresh-meta{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:0 3px;color:#d7e9e8;font-size:11px;line-height:1.45}
+.auction-market-header.has-auction-error .auction-live-pulse{animation:none;box-shadow:none;background:#ffb3a7}
+.auction-searchbar .relative{min-width:0}
+.auction-searchbar input{width:100%;min-width:0;max-width:100%;text-overflow:ellipsis}
+.auction-segment:focus-visible,.auction-refresh-btn:focus-visible{outline:3px solid #8ee7da;outline-offset:3px}
+@media(max-width:640px){
+  .auction-premium-page{padding-bottom:calc(7.5rem + env(safe-area-inset-bottom, 0px))}
+  .auction-market-header.has-auction-error{padding-bottom:14px}
+  .auction-segment-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible;scroll-snap-type:none;margin:0;padding:0;gap:8px}
+  .auction-segment{width:100%;min-width:0;min-height:64px;gap:8px;padding:9px 8px;scroll-snap-align:none}
+  .auction-segment-label{font-size:9px;letter-spacing:.035em;overflow-wrap:anywhere}
+  .auction-segment-value{font-size:18px}
+  .auction-refresh-meta{align-items:flex-start;font-size:10px}
+  .auction-refresh-meta button{width:100%}
+  .auction-searchbar input{font-size:14px!important}
+  .auction-market-header.has-auction-error .auction-market-subcopy{margin-bottom:12px}
+}
+@media(min-width:641px) and (max-width:900px){
+  .auction-segment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .auction-segment{min-width:0}
+}
+@media(prefers-reduced-motion:reduce){
+  .auction-status-indicator,.auction-market-header .auction-live-pulse{animation:none!important;transition:none!important}
+}

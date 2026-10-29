@@ -1,0 +1,3 @@
+scripts/validate-stage31-auto-services-mobile-polish.mjs: PASS 
+scripts/validate-stage32-auto-services-business-hardening.mjs: PASS 
+src/features/InspectionMarketplace/services/api.ts: NOT RUN (TypeScript syntax check requires project toolchain)

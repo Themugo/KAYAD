@@ -31,6 +31,12 @@ const authorizeControl = (control) => (req, res, next) => {
   next();
 };
 
+const requireExpectedVersion = (body = {}) => {
+  if (!Number.isSafeInteger(body.expectedVersion) || body.expectedVersion < 0) {
+    throw new svc.MaintenanceError("MAINTENANCE_VERSION_REQUIRED", "Refresh the maintenance state before making a change, then try again.", 428);
+  }
+};
+
 const stepUp = async (req) => {
   const b = req.body || {};
   // Owners: password + authenticator/recovery code when a second factor is enrolled (same rule as every other owner change).
@@ -63,6 +69,7 @@ router.post("/activate", protect, authorizeControl("activate"), stepUpLimiter, w
   noStore(res);
   const b = req.body || {};
   const input = svc.validateActivation(b);
+  requireExpectedVersion(b);
   if (MAINTENANCE_SCOPES[input.scope].requiresTypedConfirmation && b.confirmation !== GLOBAL_CONFIRM) {
     return res.status(400).json({ success: false, code: "MAINTENANCE_CONFIRMATION_REQUIRED", message: `Global shutdown refuses every visitor, buyer, seller, dealer and staff member. Type ${GLOBAL_CONFIRM} to confirm.` });
   }
@@ -74,7 +81,8 @@ router.post("/activate", protect, authorizeControl("activate"), stepUpLimiter, w
 router.post("/recover", protect, authorizeControl("recover"), stepUpLimiter, wrap(async (req, res) => {
   noStore(res);
   const b = req.body || {};
-  const input = svc.validateRecovery(b, { reasonRequired: !req.maintenanceActor.isOwner });
+  const input = svc.validateRecovery(b);
+  requireExpectedVersion(b);
   await stepUp(req);
   const out = await svc.recover({ actor: req.maintenanceActor, ...input, expectedVersion: b.expectedVersion, ip: req.ip });
   res.json({ success: true, changed: out.changed, transition: out.transition, state: out.state });

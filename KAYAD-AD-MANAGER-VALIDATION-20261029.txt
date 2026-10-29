@@ -1,0 +1,30 @@
+PASS: admin route uses canonical AdSlot control panel
+PASS: legacy /admin/ads API is not used by page
+PASS: page includes the existing admin surface
+PASS: embedded panel prop is supported
+PASS: campaign list uses canonical API
+PASS: statistics are loaded independently
+PASS: queue failure is visible
+PASS: retry action is available
+PASS: real empty state only renders after successful load
+PASS: create flow calls persisted API
+PASS: update flow sends visibility and scheduling
+PASS: delete flow requires confirmation
+PASS: status control includes draft
+PASS: status control includes paused
+PASS: schedule start control exists
+PASS: schedule end control exists
+PASS: placement controls are grounded in known placements
+PASS: API rejects malformed list envelopes
+PASS: API rejects unconfirmed create response
+PASS: API rejects unconfirmed update response
+PASS: API rejects unconfirmed delete response
+PASS: backend restricts mutable fields
+PASS: backend validates destination URL protocols
+PASS: backend validates color values
+PASS: backend validates schedule ordering
+PASS: backend supports the persisted status vocabulary
+PASS: admin endpoints are protected
+PASS: advertising table RLS remains enabled
+PASS: regression tests cover load failure and create workflow
+Ad Manager validator: 29/29 PASS

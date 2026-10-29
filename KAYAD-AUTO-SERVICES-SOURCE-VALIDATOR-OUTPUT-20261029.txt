@@ -1,0 +1,186 @@
+$ node scripts/validate-public-auto-services-boundary-20261012.mjs
+EXIT=0
+PASS public mode is explicit and account mode is separate
+PASS public page does not render personal record tabs
+PASS public page directs signed-in customers to their account workspace
+PASS customer record workspace is embedded in My Garage
+PASS inspection deep links to private history open buyer dashboard
+PASS navigation entry for personal records targets buyer dashboard
+PASS inspection records are bound to a stable account identity
+PASS prior account data is masked before the next request resolves
+PASS stale inspection request responses are sequence guarded
+PASS private record API errors do not echo raw backend messages
+PASS customer bookings require authentication
+PASS customer booking detail requires authentication
+PASS provider management endpoints require authentication and ownership
+PASS public provider search enforces server-side verification status
+PASS public provider search output is projected through public DTO
+PASS public provider profile rejects ineligible providers
+PASS regression tests cover public tab hiding and account switching
+
+17/17 checks passed
+
+
+$ node scripts/validate-inspection-qa-contract.mjs
+EXIT=0
+PASS QA report-version migration exists
+PASS report_versions is migration-backed
+PASS report_corrections is migration-backed
+PASS generated reports enter canonical QA version lifecycle
+PASS PDF generation creates a real uploaded artifact
+PASS PDF artifacts use authenticated raw storage
+PASS authenticated report PDF download route exists
+PASS QA review uses canonical inspection_staff identity
+PASS QA approval resolves report by report ID
+PASS delivery does not falsely mark buyer review complete
+Inspection QA contract: PASS
+
+
+$ node scripts/validate-stage5f14-provider-business-center.mjs
+EXIT=0
+PASS provider dashboard exposes load errors
+PASS provider dashboard has retry/refresh action
+PASS earnings unknown state is not coerced to zero
+PASS new booking CTA routes to existing bookings tab
+PASS placeholder tabs disclose unconnected state
+PASS provider application states submission does not grant access
+PASS provider capability declarations distinguished from verified capability
+PASS provider ownership middleware exists
+PASS inspection marketplace regression validator exists
+
+Stage 5F.14 source checks: 9/9 PASS
+
+
+$ node scripts/validate-inspection-marketplace.mjs
+EXIT=0
+PASS inspection services use the real DB adapter
+PASS canonical singular inspection API is mounted
+PASS plural inspection API remains backward compatible
+PASS provider routes enforce ownership
+PASS private report lookup requires authentication
+PASS customer booking lookup is access checked
+PASS customer cancellation passes the correct argument order
+PASS provider booking mutations verify provider ownership
+PASS report mutations verify provider/customer/admin access
+PASS booking slots are provider-aware
+PASS booking race is backed by a DB unique active-slot index
+PASS payment double-processing is backed by a DB unique index
+PASS settlement writes have matching payment columns
+PASS inspection API unwraps the shared response envelope
+PASS provider search returns the shape consumed by the marketplace UI
+PASS provider starting price is real and null-safe (never invented)
+PASS provider starting price stays synchronized with active packages
+PASS provider search does not query a nonexistent deleted_at column
+PASS marketplace is reachable from the main inspection view
+PASS provider card uses an in-app selection callback instead of a dead href
+PASS fake marketplace headline stats were removed
+PASS public provider search defaults to verified profiles
+PASS public provider profile rejects inactive or unverified providers
+PASS marketplace selection opens provider profile before booking
+PASS booking request has no client discount authority
+PASS booking total is derived only from canonical package price plus server mobile fee
+PASS stored booking discount is server-controlled
+PASS payment initiation derives amount from stored booking
+PASS booking route validates customer input before service execution
+PASS booking schema excludes client-controlled monetary fields
+PASS booking requires active verified provider
+PASS mobile booking respects provider mobile capability
+PASS workshop booking respects provider workshop capability
+PASS booking rejects invalid canonical package price
+PASS booking UI surfaces payment or booking errors
+PASS booking UI treats displayed total as a pre-booking estimate
+PASS booking date generation avoids UTC rollover
+
+Inspection marketplace validation: 37/37 PASS
+
+
+$ node scripts/validate-inspection-marketplace-activation.mjs
+EXIT=0
+PASS canonical inspection router imported
+PASS canonical inspection router mounted at /api/inspection
+PASS backward-compatible inspection alias mounted at /api/inspections
+PASS inspection payment supports booking binding
+PASS inspection payment amount is server derived
+PASS inspection callback uses atomic settlement RPC
+PASS inspection callback is payment-state idempotent
+PASS inspection payment history type is supported
+PASS frontend booking flow pays through the shared settlement helper
+PASS booking retry reuses the created booking instead of creating another
+PASS shared helper initiates payment for an existing booking
+PASS shared helper waits for authoritative payment success
+PASS frontend uses M-Pesa-only truthful copy
+PASS inspection API exposes booking payment
+PASS inspection payment schema requires bookingId
+PASS inspection settlement service delegates to atomic RPC
+Inspection marketplace activation validation passed: 16/16
+
+
+$ node scripts/validate-stage31-auto-services-mobile-polish.mjs
+EXIT=0
+PASS Auto Services public page uses a dedicated styling scope
+PASS Service discovery keeps existing matched-inspection and provider-selection actions
+PASS Provider discovery remains on canonical search API
+PASS Provider discovery preserves loading, stale-result, error and true-empty states
+PASS Filters still use canonical service taxonomy and backend parameters
+PASS Provider application registration uses canonical existing API
+PASS Provider capabilities remain declared through canonical taxonomy API
+PASS Provider onboarding explains account, business and review steps
+PASS Provider phone field is semantically required and validated
+PASS Application errors do not expose raw backend exception messages
+PASS Mobile refinements are scoped to max-width 639px
+PASS Desktop provider marketplace and shared KAYAD theme remain the base
+PASS Reduced-motion preference is respected for the Auto Services surface
+PASS Provider registration and booking API contract file remains present
+
+Stage 31 Auto Services mobile source checks: 14/14 PASS
+
+
+$ node scripts/validate-stage32-auto-services-business-hardening.mjs
+EXIT=0
+PASS Public services hero identifies the Kenya service market
+PASS Hero communicates independent provider responsibility
+PASS Hero has accessible, non-decorative trust cues
+PASS Canonical matched inspection action remains wired
+PASS Canonical provider finder actions remain wired
+PASS Provider search validates response envelope and record identity
+PASS Failed refresh preserves previous providers
+PASS Stale results are visibly labelled and retry is available
+PASS Last successful directory refresh is visible
+PASS Provider profile response is identity-validated and race-guarded
+PASS Bottom dock clearance respects device safe area
+PASS Trust chips and service cards use shared KAYAD brand colors
+PASS Reduced-motion and visible focus treatment are present
+PASS Regression tests cover malformed response and failed refresh
+PASS Provider search remains connected to the canonical API
+PASS Booking success remains server-confirmed
+\nStage 32 Auto Services hardening: 16/16 PASS
+
+
+$ node scripts/validate-inspection-settlement-ledger.mjs
+EXIT=0
+PASS ledger has provider payable account
+PASS inspection payment posts to canonical ledger
+PASS inspection refunds have dedicated audit rows
+PASS refunds post compensating ledger entries
+PASS settlement generation requires closed bookings
+PASS settlement periods are idempotent
+PASS payout posts to canonical ledger
+PASS paid settlement is idempotent
+PASS admin payout route exists
+PASS RLS hardened on inspection financial tables
+
+10/10 PASS
+
+
+$ node scripts/validate-inspection-domain-rls-enablement.mjs
+EXIT=0
+INSPECTION DOMAIN RLS ENABLEMENT: PASS (8/8 tables enabled, 0 inert-policy tables found tree-wide)
+- inspection_bookings: RLS enabled
+- inspection_disputes: RLS enabled
+- inspection_quality_audits: RLS enabled
+- inspection_report_amendments: RLS enabled
+- inspection_reports: RLS enabled
+- inspection_reviews: RLS enabled
+- inspection_staff: RLS enabled
+- inspection_status_history: RLS enabled
+

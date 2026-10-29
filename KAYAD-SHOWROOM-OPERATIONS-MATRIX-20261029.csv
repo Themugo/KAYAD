@@ -1,0 +1,13 @@
+area,files,expected_behavior,result
+Default location,App.tsx / VehicleMarketplace.tsx,"All Kenya default, reset and no-city query behavior",PASS — source contract; runtime tests blocked
+Hero/ticker region copy,VehicleMarketplace.tsx / TopNoticeStrip.tsx / HeroEditorPanel.tsx,Kenya-specific default copy,PASS — source contract
+Navigation/compare/detail copy,navConfig.ts / CompareModal.tsx / VehicleDetailModal.tsx,Kenya marketplace copy; no blanket inspection claim,PASS — source review
+Search bridge,VehicleMarketplace.tsx / kayad-theme-convergence.css,Search spans row; remaining controls use responsive 2-column layout on mobile,PASS — static CSS/source checks
+Sort control,VehicleMarketplace.tsx / kayad-theme-convergence.css,"Explicit selected-value color, accessible label, keyboard focus",PASS — source contract; browser visual check blocked
+Show/page size,VehicleMarketplace.tsx / kayad-theme-convergence.css,Existing 12/24/48 action handlers preserved,PASS — handlers preserved; runtime click test blocked
+Grid/list view,VehicleMarketplace.tsx / kayad-theme-convergence.css,Existing state handlers preserved; controls aligned with Filters,PASS — handlers preserved; runtime click test blocked
+Mobile Filters drawer,VehicleMarketplace.tsx,"Existing drawer handler preserved, accessible name added",PASS — source contract; browser test blocked
+Maintenance/error state,VehicleMarketplace.tsx / kayad-theme-convergence.css,Truthful status remains visible; bottom clearance increased,"PARTIAL — source only, browser check blocked"
+Finance eligibility copy,FinancingView.tsx,Display wording localized; underwriting logic unchanged,REVIEW REQUIRED — verify provider policy
+Build/typecheck,Project scripts,"Node >=22.22.2, dependencies and toolchain required",BLOCKED
+Browser/responsive,Playwright / real browser,All requested viewports and operations,NOT TESTED — browser execution unavailable

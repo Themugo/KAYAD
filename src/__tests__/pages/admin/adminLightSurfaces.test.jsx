@@ -31,6 +31,16 @@ describe('Webhoist overview', () => {
     expect(screen.queryByText('No recent activity')).toBeNull();
   });
 
+  test('uses clear platform-owner terminology and reports partial metric failures', async () => {
+    h.stats.mockResolvedValue({ success: true, stats: { totalUsers: 4, totalCars: 1, activeAuctions: 0, totalBids: 2, totalEscrows: 0 }, unavailable: ['totalRevenue'] });
+    h.audit.mockResolvedValue({ success: true, entries: [] });
+    render(<MemoryRouter><WebhoistOverview /></MemoryRouter>);
+    expect(await screen.findByText('Platform Owner')).toBeTruthy();
+    expect(screen.getByText(/Some statistics are unavailable: totalRevenue/)).toBeTruthy();
+    expect(screen.queryByText('Webhoist · Owner')).toBeNull();
+    expect(screen.getByText('Platform Owner Access')).toBeTruthy();
+  });
+
   test('real figures render, a genuine zero stays 0, and a missing actor is not called "System"', async () => {
     h.stats.mockResolvedValue({ stats: { totalUsers: 120, totalCars: 0, activeAuctions: 3, totalBids: 9, totalEscrows: 2, totalRevenue: 2500000, totalDealers: 10, individualSellers: 5 } });
     h.audit.mockResolvedValue({ entries: [{ _id: 'a1', action: 'car.moderate', createdAt: '2026-10-24T09:00:00Z' }] });

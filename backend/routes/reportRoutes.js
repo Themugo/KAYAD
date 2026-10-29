@@ -6,7 +6,7 @@
 import express from "express";
 import { protect, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { validateObjectId } from "../middleware/validate.js";
+import { validateObjectId, validateQuery, reportListQuerySchema } from "../middleware/validate.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 
@@ -53,6 +53,7 @@ router.get("/my", asyncHandler(getMyReports));
 router.get(
   "/admin/all",
   allowRoles("admin", "superadmin", "moderator"),
+  validateQuery(reportListQuerySchema),
   asyncHandler(getAllReports),
 );
 

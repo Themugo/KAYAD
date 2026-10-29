@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { adminAPI } from '../../api/api';
 import { Crown, Activity, ShieldCheck, RefreshCw, Users, Car, Gavel, Lock, Tag, Wallet } from 'lucide-react';
@@ -8,25 +8,43 @@ export default function WebhoistOverview() {
   const [stats, setStats] = useState(null);
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [unavailableMetrics, setUnavailableMetrics] = useState([]);
+  const requestSequence = useRef(0);
   // A failed request is reported as unavailable; it is never turned into zero counts or an empty activity feed.
   const [statsFailed, setStatsFailed] = useState(false);
   const [logsFailed, setLogsFailed] = useState(false);
 
-  const load = () => {
-    setLoading(true);
-    Promise.allSettled([
-      adminAPI.stats(),
-      adminAPI.getAuditLog({ limit: 20 }),
-    ]).then(([sr, lr]) => {
-      // /admin/stats responds { success, stats: {...} } — read the nested object
-      const body = sr.status === 'fulfilled' ? (sr.value?.stats || sr.value) : null;
-      const okStats = body && typeof body === 'object' && !Array.isArray(body);
+  const load = async () => {
+    const requestId = ++requestSequence.current;
+    const isInitialLoad = stats === null && logs.length === 0 && !statsFailed && !logsFailed;
+    if (isInitialLoad) setLoading(true);
+    else setRefreshing(true);
+    try {
+      const [sr, lr] = await Promise.allSettled([
+        adminAPI.stats(),
+        adminAPI.getAuditLog({ limit: 20 }),
+      ]);
+      // The canonical endpoint returns { success, stats, unavailable }. Keep the
+      // per-metric unavailable list instead of treating a partial response as complete.
+      if (requestId !== requestSequence.current) return;
+      const response = sr.status === 'fulfilled' ? sr.value : null;
+      const body = response?.stats || response?.data?.stats || response?.data || response;
+      const okStats = response?.success !== false && body && typeof body === 'object' && !Array.isArray(body);
       setStatsFailed(!okStats);
       setStats(okStats ? body : null);
-      const entries = lr.status === 'fulfilled' ? (lr.value?.entries || lr.value?.logs) : null;
-      setLogsFailed(!Array.isArray(entries));
+      setUnavailableMetrics(okStats && Array.isArray(response?.unavailable) ? response.unavailable : []);
+
+      const logResponse = lr.status === 'fulfilled' ? lr.value : null;
+      const entries = Array.isArray(logResponse) ? logResponse : (logResponse?.entries || logResponse?.logs || logResponse?.data?.entries || logResponse?.data?.logs);
+      setLogsFailed(!Array.isArray(entries) || logResponse?.success === false);
       setLogs(Array.isArray(entries) ? entries : []);
-    }).finally(() => setLoading(false));
+    } finally {
+      if (requestId === requestSequence.current) {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    }
   };
 
   useEffect(() => { load(); }, []);
@@ -45,7 +63,7 @@ export default function WebhoistOverview() {
     { icon: <Gavel size={20} aria-hidden="true" />, label: 'Active Auctions', value: num(s.activeAuctions), color: 'var(--admin-brand-dark)', to: '/admin/auctions' },
     { icon: <Lock size={20} aria-hidden="true" />, label: 'Open Escrows',    value: num(s.openEscrows ?? s.totalEscrows), color: 'var(--admin-status-danger)', to: '/admin/escrows' },
     { icon: <Tag size={20} aria-hidden="true" />, label: 'Total Bids',      value: num(s.totalBids),      color: 'var(--admin-accent)', to: '/admin/bids' },
-    { icon: <Wallet size={20} aria-hidden="true" />, label: 'Total Revenue',   value: num(s.totalRevenue),   color: 'var(--admin-status-success)', to: '/admin/reports', kes: true },
+    { icon: <Wallet size={20} aria-hidden="true" />, label: 'Recorded Commission Revenue', value: num(s.totalRevenue),   color: 'var(--admin-status-success)', to: '/admin/reports', kes: true },
   ];
 
   const dealers = num(s.totalDealers);
@@ -74,7 +92,7 @@ export default function WebhoistOverview() {
         <div>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(23, 107, 135, 0.08)', border: '1px solid rgba(23, 107, 135, 0.15)', borderRadius: 9999, padding: '4px 12px', marginBottom: 10 }}>
             <Crown size={13} style={{ color: 'var(--admin-brand)' }} />
-            <span style={{ fontSize: 10, color: 'var(--admin-brand)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Webhoist · Owner</span>
+            <span style={{ fontSize: 10, color: 'var(--admin-brand)', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Platform Owner</span>
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontStyle: 'italic', fontSize: 'clamp(1.5rem,2.6vw,2.2rem)', color: 'var(--admin-ink)', margin: 0 }}>
             System Overview
@@ -83,14 +101,14 @@ export default function WebhoistOverview() {
             Platform-wide statistics &amp; activity — visible to the platform owner only
           </p>
         </div>
-        <button onClick={load} style={{ padding: '8px 16px', borderRadius: 10, background: 'var(--admin-surface)', border: '1px solid var(--admin-border)', color: 'var(--admin-ink)', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
-          <RefreshCw size={13} /> Refresh
+        <button onClick={load} disabled={refreshing} aria-busy={refreshing} style={{ padding: '8px 16px', borderRadius: 10, background: 'var(--admin-surface)', border: '1px solid var(--admin-border)', color: 'var(--admin-ink)', fontSize: 12, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <RefreshCw size={13} className={refreshing ? 'animate-spin' : undefined} /> {refreshing ? 'Refreshing…' : 'Refresh'}
         </button>
       </div>
 
       {(statsFailed || logsFailed) && (
         <p role="alert" style={{ margin: '0 0 16px', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--admin-status-warning-border)', background: 'var(--admin-status-warning-bg)', color: 'var(--admin-status-warning)', fontSize: 13 }}>
-          {statsFailed && 'Platform statistics could not be loaded, so those figures are shown as Unavailable. '}{logsFailed && 'Admin activity could not be loaded.'}
+          {statsFailed && 'Platform statistics could not be loaded, so those figures are shown as Unavailable. '}{!statsFailed && unavailableMetrics.length > 0 && `Some statistics are unavailable: ${unavailableMetrics.join(', ')}. `}{logsFailed && 'Admin activity could not be loaded.'}
         </p>
       )}
 
@@ -147,11 +165,10 @@ export default function WebhoistOverview() {
       {/* Access note */}
       <div style={{ padding: '16px 20px', background: 'rgba(23, 107, 135, 0.05)', borderRadius: 12, border: '1px solid rgba(23, 107, 135, 0.15)' }}>
         <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 13, color: 'var(--admin-brand)', fontWeight: 600, marginBottom: 8 }}>
-          <ShieldCheck size={15} /> Webhoist Access
+          <ShieldCheck size={15} /> Platform Owner Access
         </div>
         <p style={{ fontSize: 12, color: 'var(--admin-muted-content)', margin: 0, lineHeight: 1.6 }}>
-          You are logged in as the platform owner (<strong>webhoist</strong>). You have full system access: all admin panels,
-          all security logs, all user data, and the ability to override any permission check.
+          This view is restricted to the designated platform owner account. Access remains subject to server-side authentication, owner verification, maintenance policy and audit controls; this page does not bypass authorization checks.
         </p>
       </div>
     </div>

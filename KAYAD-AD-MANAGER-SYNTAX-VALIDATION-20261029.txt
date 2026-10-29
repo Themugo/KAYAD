@@ -1,0 +1,8 @@
+$ node --check backend/services/advertising.service.js
+exit=0
+
+$ node --check backend/controllers/adSlotController.js
+exit=0
+
+$ node --check backend/routes/adSlotRoutes.js
+exit=0

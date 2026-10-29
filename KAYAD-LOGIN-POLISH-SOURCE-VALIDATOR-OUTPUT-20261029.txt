@@ -1,0 +1,108 @@
+$ node scripts/validate-premium-auth-surfaces.mjs
+EXIT=0
+PASS shared premium auth shell exists
+PASS login uses shared premium shell
+PASS registration uses shared premium shell
+PASS login remains canonical /login route
+PASS registration remains canonical /register route
+PASS no advertising panel on auth screens (one task per screen)
+PASS forgot, reset and verify pages use the shared shell
+PASS shell does not own form submission
+PASS responsive auth styling exists
+PASS reduced motion support exists
+Premium auth surface validation: 10/10 PASS
+
+
+$ node scripts/validate-explicit-auth-flows.mjs
+EXIT=0
+Explicit auth-flow contract: 19/19 PASS
+PASS standalone login route exists
+PASS standalone registration route exists
+PASS navbar guest auth action navigates to canonical /login
+PASS navbar guest auth surface explicitly offers sign-in/sign-up entry
+PASS navbar guest auth action does not directly open a legacy auth modal
+PASS app shell has no rendered authentication modal
+PASS app shell routes all auth prompts to standalone login
+PASS app shell preserves the full current path (validated) as login return context
+PASS compatibility auth modal is only a redirect shim (no second sign-in form)
+PASS auth modal forwards to the canonical /login route
+PASS login links to password recovery
+PASS registration surface links to sign in, carrying the validated return path
+PASS registration conflict has sign-in recovery action
+PASS registration conflict has password reset action
+PASS login uses canonical post-auth routing
+PASS login has registration CTA that carries next/intent
+PASS auth API maps 409 to conflict
+PASS backend normalizes registration email
+PASS backend preserves duplicate-email 409
+
+
+$ node scripts/validate-advanced-auth-sweep.mjs
+EXIT=0
+PASS refresh tokens are hashed before persistence
+PASS refresh token plaintext column is removed by migration
+PASS refresh rotation is atomic in PostgreSQL
+PASS refresh reuse revokes the family
+PASS access token carries session identity
+PASS session inventory does not expose refresh token
+PASS session revocation is server-side
+PASS security state bypasses profile cache
+PASS Authorization header is not a CSRF bypass
+PASS explicit machine CSRF bypass is available
+PASS account-aware auth limiters exist
+PASS verification token consumption is atomic
+PASS password reset consumption is atomic
+PASS OTP verification consumption is atomic
+PASS communication idempotency key is persisted
+PASS communication provider status is monotonic
+PASS dead-letter state is explicit
+PASS stable machine-readable response codes supported
+PASS normalized email uniqueness migration exists
+
+Advanced auth sweep source gate: 19/19 PASS
+
+
+$ node scripts/validate-premium-sell-auth-public-convergence-20261012.mjs
+EXIT=0
+PASS signed-out sell entry is a premium role-choice surface
+PASS private seller and dealership have distinct, accessible selections
+PASS seller CTA uses existing registration and signed-in users are routed to support for role access
+PASS existing account has a canonical sign-in path with seller intent preserved
+PASS seller entry is honest about review and does not claim automatic approval
+PASS obsolete SellPage no longer simulates account/listing success
+PASS legacy sell URLs canonicalize to the existing seller workspace
+PASS seller dashboard no longer hardcodes a trust score or unverified approval state
+PASS seller workspace is role-gated and dealers open their existing dealer dashboard
+PASS login retains canonical shared premium shell
+PASS signup role matrix remains canonical and backend-backed
+PASS auth screens remain advertising-free
+PASS public pages share the canonical shell and palette tokens
+PASS buyer, seller, dealer, professional and operations portal identities are defined
+PASS dashboard role accents use KAYAD palette rather than unrelated purple/green accents
+PASS unknown saved-vehicle count is not displayed as a fabricated zero
+PASS dealer portal has its own KAYAD-aligned identity and header uses deep teal rather than near-black
+PASS Escrow dropdown has real public and authenticated destinations
+PASS escrow deal shortcut is authentication-gated in the navigation
+PASS public commercial ticker remains admin-managed and excluded from private workspaces
+PASS homepage commercial/hero controls continue using existing admin configuration
+PASS reduced-motion support covers new seller interactions
+PASS keyboard focus styling exists for seller workflow actions
+Premium sell/auth/public convergence: 23/23 PASS
+
+
+$ node scripts/validate-stage33-login-surface-polish.mjs
+EXIT=0
+PASS Login stays on canonical page and shared shell
+PASS Return-path handling and canonical post-auth routing remain intact
+PASS Email verification resend flow remains available
+PASS MFA step remains in the same canonical form
+PASS Password recovery remains linked from sign-in
+PASS Registration CTA preserves auth intent
+PASS Submit button exposes busy state while preserving disabled behavior
+PASS Shared shell exposes page mode for scoped styling
+PASS Sign-in page uses focused single-column card layout
+PASS Forgot-password link is placed after the password control
+PASS Mobile sizing and safe-area padding are responsive
+PASS Keyboard focus styles and reduced-motion support remain present
+PASS No new authentication form or route was introduced
+\nStage 33 Login UI contract: 13/13 PASS

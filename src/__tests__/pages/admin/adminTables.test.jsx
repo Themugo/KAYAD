@@ -36,6 +36,31 @@ describe('admin tables render every declared column and keep their actions reach
     await waitFor(() => expect(within(screen.getByText('Buyer One').closest('tr')).queryByText('banned')).toBeNull()); // UI adopts the server-confirmed state
   });
 
+  test('Users: renders authoritative global summary and distinguishes unavailable counts from zero', async () => {
+    api.users.mockResolvedValue({
+      users: [{ _id: 'u2', name: 'Sample User', email: 'sample@x.test', role: 'user', status: 'approved' }],
+      pagination: { total: 1, page: 1, limit: 20, pages: 1 },
+      summary: { totalUsers: 83, admins: 3, dealers: 21, banned: 2, pendingApproval: 4 },
+    });
+    render(<AdminUsers />);
+    expect(await screen.findByText('Sample User')).toBeTruthy();
+    expect(screen.getByText('83')).toBeTruthy();
+    expect(screen.getByText('21')).toBeTruthy();
+    expect(screen.getByText('4')).toBeTruthy();
+  });
+
+  test('Users: failed request is not presented as an empty user list or zero counts and can be retried', async () => {
+    api.users.mockRejectedValueOnce(new Error('Service unavailable'))
+      .mockResolvedValueOnce({ users: [], pagination: { total: 0 }, summary: { totalUsers: 0, admins: 0, dealers: 0, banned: 0, pendingApproval: 0 } });
+    render(<AdminUsers />);
+    expect(await screen.findByRole('alert')).toBeTruthy();
+    expect(screen.getByText('Service unavailable')).toBeTruthy();
+    expect(screen.queryByText('No user records returned')).toBeNull();
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    expect(await screen.findByText('No user records returned')).toBeTruthy();
+  });
+
   test('Listings: seven cells per row, a missing price is Unavailable, Delete passes the listing', async () => {
     api.cars.mockResolvedValue({ cars: [{ _id: 'c1', title: '2019 Prado', status: 'live', year: 2019 }], total: 1 });
     api.deleteCar.mockResolvedValue({});

@@ -1,0 +1,22 @@
+Admin escrow operations polish: 20/20 PASS
+PASS escrow view permission remains required
+PASS canonical escrow API remains in use
+PASS queue response shape is validated
+PASS dashboard response shape is validated
+PASS load failures have a visible error state
+PASS empty queue is not shown after load failure
+PASS retry and refresh controls exist
+PASS last successful refresh is visible
+PASS request sequence prevents stale queue updates
+PASS case response requires an escrow record
+PASS case errors can be retried
+PASS case request sequence prevents stale detail updates
+PASS missing exposure is not rendered as zero
+PASS missing amounts are not rendered as zero
+PASS money-moving actions remain guarded against concurrent requests
+PASS reconciliation permission remains enforced in UI
+PASS anomaly scan remains permission-gated
+PASS canonical release/refund/payout endpoints retained
+PASS emergency close remains permission and reason controlled
+PASS no new backend route or data store added by page polish
+Escrow Operations Center: 16/16 PASS

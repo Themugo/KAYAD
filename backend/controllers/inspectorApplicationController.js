@@ -244,7 +244,7 @@ export const approveApplication = async (req, res) => {
 
     // The admin approved this person specifically to perform pre-purchase inspections,
     // so record exactly that (and nothing broader) as a verified capability.
-    const { data: capRow } = await sb
+    const { data: capRow, error: capabilityLookupError } = await sb
       .from("provider_service_capabilities")
       .select("id")
       .eq("provider_id", provider.id)
@@ -252,12 +252,14 @@ export const approveApplication = async (req, res) => {
       .is("subcategory_code", null)
       .is("staff_id", null)
       .maybeSingle();
+    if (capabilityLookupError) throw capabilityLookupError;
     if (!capRow) {
-      await sb.from("provider_service_capabilities").insert({
+      const { error: capabilityInsertError } = await sb.from("provider_service_capabilities").insert({
         provider_id: provider.id, category_code: "pre_purchase_inspection", status: "verified", all_makes: true,
         reviewed_by: req.user.id, reviewed_at: new Date().toISOString(), declared_by: req.user.id,
         review_notes: "Verified through administrator approval of the inspector application",
       });
+      if (capabilityInsertError) throw capabilityInsertError;
     }
 
     Object.assign(application, approvalPatch);
@@ -310,6 +312,12 @@ export const rejectApplication = async (req, res) => {
 
     const application = await InspectorApplication.findById(id);
     if (!application) return res.status(404).json({ success: false, message: "Application not found" });
+    if (application.status !== "pending") {
+      return res.status(409).json({ success: false, code: "INSPECTOR_APPLICATION_ALREADY_REVIEWED", message: `This application is already ${application.status} and cannot be rejected again.` });
+    }
+    if (application.user?.toString() === req.user.id) {
+      return res.status(403).json({ success: false, message: "Cannot reject your own application" });
+    }
 
     application.status = "rejected";
     application.reviewedBy = req.user.id;
@@ -339,30 +347,34 @@ export const rejectApplication = async (req, res) => {
 // =============================
 export const listApplications = async (req, res) => {
   try {
-    const { status, page = 1, limit = 20 } = req.query;
-    const filter = {};
-    if (status) filter.status = status;
+    const allowedStatuses = new Set(["pending", "approved", "rejected"]);
+    const requestedStatus = typeof req.query.status === "string" ? req.query.status.trim().toLowerCase() : "";
+    if (requestedStatus && !allowedStatuses.has(requestedStatus)) {
+      return res.status(400).json({ success: false, code: "INVALID_INSPECTOR_STATUS", message: "Status must be pending, approved, or rejected." });
+    }
+    const requestedPage = Number.parseInt(String(req.query.page ?? "1"), 10);
+    const requestedLimit = Number.parseInt(String(req.query.limit ?? "20"), 10);
+    if (!Number.isFinite(requestedPage) || requestedPage < 1 || !Number.isFinite(requestedLimit) || requestedLimit < 1) {
+      return res.status(400).json({ success: false, code: "INVALID_PAGINATION", message: "Page and limit must be positive integers." });
+    }
+    const page = requestedPage;
+    const limit = Math.min(requestedLimit, 50);
+    const filter = requestedStatus ? { status: requestedStatus } : {};
+    const skip = (page - 1) * limit;
 
-    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
-
-    const [applications, total] = await Promise.all([
-      InspectorApplication.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(Math.min(Number(limit), 50))
-        .lean(),
+    const [applications, total, pending, approved, rejected] = await Promise.all([
+      InspectorApplication.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
       InspectorApplication.countDocuments(filter),
+      InspectorApplication.countDocuments({ status: "pending" }),
+      InspectorApplication.countDocuments({ status: "approved" }),
+      InspectorApplication.countDocuments({ status: "rejected" }),
     ]);
 
     res.json({
       success: true,
       applications,
-      pagination: {
-        page: Number(page),
-        limit: Math.min(Number(limit), 50),
-        total,
-        pages: Math.ceil(total / Math.min(Number(limit), 50)),
-      },
+      statusCounts: { pending, approved, rejected, total: pending + approved + rejected },
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (err) {
     logError("❌ LIST INSPECTOR APPS ERROR:", err);

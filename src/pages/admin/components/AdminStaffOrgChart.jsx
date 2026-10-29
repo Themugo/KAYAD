@@ -11,6 +11,7 @@ const ORG = [
   { role: 'ad_manager', title: 'Ad Manager', icon: Target, color: '#5aafa4', bg: 'rgba(168,85,247,0.08)', desc: 'Creates and manages sponsored listings and banner ads.', level: 3 },
   { role: 'technical_support', title: 'Tech Support', icon: Wrench, color: '#64748b', bg: 'rgba(100,116,139,0.08)', desc: 'User account management and car listing assistance.', level: 2 },
   { role: 'moderator', title: 'Moderator', icon: ShieldCheck, color: '#64748b', bg: 'rgba(71,85,105,0.08)', desc: 'Content review, listing moderation and compliance.', level: 3 },
+  { role: 'ghost_checker', title: 'Ghost Checker', icon: ShieldCheck, color: '#0f766e', bg: 'rgba(15,118,110,0.08)', desc: 'Vehicle inspection and NTSA verification workflows.', level: 3 },
 ];
 
 export { ORG };

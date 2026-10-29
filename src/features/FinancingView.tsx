@@ -678,7 +678,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
               General Requirements
             </div>
             <ul className="space-y-2 text-[#64748B] list-disc list-inside">
-              <li>Kenyan Citizen or legal East Africa Resident</li>
+              <li>Kenyan citizen or legal resident in Kenya</li>
               <li>Minimum 21 years of age (max 65 at loan maturity)</li>
               <li>Valid KRA PIN Certificate & National ID</li>
               <li>Clean Credit Reference Bureau (CRB) standing</li>

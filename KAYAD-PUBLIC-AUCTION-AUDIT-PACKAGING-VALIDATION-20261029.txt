@@ -1,0 +1,4 @@
+KAYAD PUBLIC AUCTION READ-ONLY AUDIT CHECKPOINT — PACKAGING VALIDATION
+Archive integrity and fresh-extraction checks are recorded in the accompanying external packaging validation report.
+This is a report-only audit checkpoint; no application source behavior was changed.
+Excluded: .git, node_modules, dist, coverage, .next, .vite, Playwright outputs, and real environment secrets.

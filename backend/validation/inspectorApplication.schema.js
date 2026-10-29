@@ -25,5 +25,5 @@ export const approveApplicationSchema = z.object({
 });
 
 export const rejectApplicationSchema = z.object({
-  reviewNotes: z.string().trim().max(1000).optional(),
+  reviewNotes: z.string().trim().min(3, "Provide a rejection reason of at least 3 characters.").max(1000),
 });

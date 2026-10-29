@@ -1,0 +1,11 @@
+role_or_boundary,source_evidence,static_status,runtime_negative_tests,notes
+anonymous,"Middleware, role gates and existing regression tests inspected where present",PARTIAL — source contracts only,BLOCKED — no test backend or credentials,Static source does not prove runtime authorization.
+authenticated buyer,"Middleware, role gates and existing regression tests inspected where present",PARTIAL — source contracts only,BLOCKED — no test backend or credentials,Static source does not prove runtime authorization.
+dealer,"Middleware, role gates and existing regression tests inspected where present",PARTIAL — source contracts only,BLOCKED — no test backend or credentials,Static source does not prove runtime authorization.
+seller/private seller,"Middleware, role gates and existing regression tests inspected where present",PARTIAL — source contracts only,BLOCKED — no test backend or credentials,Static source does not prove runtime authorization.
+inspector,"Middleware, role gates and existing regression tests inspected where present",PARTIAL — source contracts only,BLOCKED — no test backend or credentials,Static source does not prove runtime authorization.
+moderator,"Middleware, role gates and existing regression tests inspected where present",PARTIAL — source contracts only,BLOCKED — no test backend or credentials,Static source does not prove runtime authorization.
+admin,"Middleware, role gates and existing regression tests inspected where present",PARTIAL — source contracts only,BLOCKED — no test backend or credentials,Static source does not prove runtime authorization.
+superadmin/platform owner,"Middleware, role gates and existing regression tests inspected where present",PARTIAL — source contracts only,BLOCKED — no test backend or credentials,Static source does not prove runtime authorization.
+technical support,"Middleware, role gates and existing regression tests inspected where present",PARTIAL — source contracts only,BLOCKED — no test backend or credentials,Static source does not prove runtime authorization.
+accounts/escrow staff,"Middleware, role gates and existing regression tests inspected where present",PARTIAL — source contracts only,BLOCKED — no test backend or credentials,Static source does not prove runtime authorization.

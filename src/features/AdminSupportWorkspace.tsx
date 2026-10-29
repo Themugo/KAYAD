@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2, RefreshCw, Send, Lock } from 'lucide-react';
 import { Badge, Button, Card } from '../components/ui';
 import {
@@ -30,7 +30,12 @@ export const AdminSupportWorkspace: React.FC = () => {
   const [metrics, setMetrics] = useState<SupportMetrics | null>(null);
   const [rows, setRows] = useState<StaffCaseSummary[]>([]);
   const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(0);
+  const pageSize = 50;
+  const queueRequestSeq = useRef(0);
   const [team, setTeam] = useState<StaffPerson[]>([]);
+  const [teamError, setTeamError] = useState<string | null>(null);
+  const [metricsError, setMetricsError] = useState<string | null>(null);
   const [filters, setFilters] = useState({ status: 'active', priority: '', category: '', assignedTo: '', q: '' });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,21 +52,56 @@ export const AdminSupportWorkspace: React.FC = () => {
   const [reason, setReason] = useState('');
 
   const load = useCallback(async () => {
+    const requestId = ++queueRequestSeq.current;
     setLoading(true);
     setError(null);
-    try {
-      const [q, m] = await Promise.all([getStaffQueue({ ...filters, limit: 50 }), getStaffMetrics(30)]);
-      setRows(Array.isArray(q.cases) ? q.cases : []); setTotal(Number.isFinite(q.total) ? q.total : 0); setCapability(q.capability === 'oversight' ? 'oversight' : 'agent'); setMetrics(m.metrics); setForbidden(false);
-    } catch (e) {
+    setMetricsError(null);
+    const [queueResult, metricsResult] = await Promise.allSettled([
+      getStaffQueue({ ...filters, limit: pageSize, offset: page * pageSize }),
+      getStaffMetrics(30),
+    ]);
+    if (requestId !== queueRequestSeq.current) return;
+
+    if (queueResult.status === 'fulfilled') {
+      const q = queueResult.value;
+      if (q && Array.isArray(q.cases) && Number.isFinite(q.total) && q.total >= 0) {
+        setRows(q.cases);
+        setTotal(q.total);
+        setCapability(q.capability === 'oversight' ? 'oversight' : 'agent');
+        setForbidden(false);
+      } else {
+        setError('The support queue returned an unexpected response. Retry loading the queue.');
+      }
+    } else {
+      const e = queueResult.reason;
       if (e instanceof SupportApiError && e.kind === 'forbidden') setForbidden(true);
-      setError(errText(e, 'Unable to load the support queue.'));
-    } finally {
-      setLoading(false);
+      setError(errText(e, 'Unable to load the support queue. Existing records have been retained; retry when service is available.'));
     }
-  }, [filters]);
+
+    if (metricsResult.status === 'fulfilled' && metricsResult.value?.metrics && typeof metricsResult.value.metrics === 'object') {
+      setMetrics(metricsResult.value.metrics);
+    } else {
+      setMetrics(null);
+      setMetricsError('Support metrics are temporarily unavailable. Queue operations can still be used.');
+    }
+    setLoading(false);
+  }, [filters, page]);
 
   useEffect(() => { void load(); }, [load]);
-  useEffect(() => { getStaffTeam().then((r) => setTeam(Array.isArray(r.staff) ? r.staff : [])).catch(() => setTeam([])); }, []);
+  useEffect(() => {
+    let active = true;
+    getStaffTeam().then((r) => {
+      if (!active) return;
+      if (r && Array.isArray(r.staff)) { setTeam(r.staff); setTeamError(null); }
+      else setTeamError('The support team directory returned an unexpected response.');
+    }).catch(() => { if (active) setTeamError('The support team directory is unavailable; assignment controls may be limited.'); });
+    return () => { active = false; };
+  }, []);
+
+  const updateFilter = (key: keyof typeof filters, value: string) => {
+    setPage(0);
+    setFilters((current) => ({ ...current, [key]: value }));
+  };
 
   const open = async (id: string, why?: string) => {
     setReply(''); setInternal(false); setNextStatus(''); setResolution(''); setDetailError(null);
@@ -90,30 +130,32 @@ export const AdminSupportWorkspace: React.FC = () => {
           ['Median resolution', metrics ? mins(metrics.medianResolutionMinutes) : undefined],
           ['Avg rating', metrics ? (metrics.averageRating ?? 'No ratings') : undefined],
         ].map(([label, value]) => (
-          <Card key={String(label)} className="p-3"><p className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">{label}</p><p className="mt-1 text-lg font-black text-[#0A3340]">{value ?? '…'}</p></Card>
+          <Card key={String(label)} className="p-3"><p className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">{label}</p><p className="mt-1 text-lg font-black text-[#0A3340]">{value ?? (metricsError ? 'Unavailable' : '…')}</p></Card>
         ))}
       </div>
       {metrics && <p className="text-[11px] text-[#64748B]">Last {metrics.windowDays} days · {metrics.total} cases · {metrics.slaConfigured ? `Within first-reply target: ${metrics.firstResponseWithinTarget ?? 'n/a'}` : 'No response targets are configured, so no target compliance is reported.'}</p>}
+      {metricsError && <p className="text-xs text-amber-800" role="status">{metricsError}</p>}
+      {teamError && <p className="text-xs text-amber-800" role="status">{teamError}</p>}
 
       <Card className="p-4">
         <div className="flex flex-wrap gap-2 items-end">
           <label className="text-xs font-bold text-[#64748B]">Status
-            <select className="mt-1 block rounded-lg border border-[#D7E7E4] px-2 py-2 text-sm" value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}>
+            <select className="mt-1 block rounded-lg border border-[#D7E7E4] px-2 py-2 text-sm" value={filters.status} onChange={(e) => updateFilter('status', e.target.value)}>
               <option value="active">Active</option><option value="">All</option>
               {Object.entries(STATUS_LABEL).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
             </select></label>
           <label className="text-xs font-bold text-[#64748B]">Priority
-            <select className="mt-1 block rounded-lg border border-[#D7E7E4] px-2 py-2 text-sm" value={filters.priority} onChange={(e) => setFilters({ ...filters, priority: e.target.value })}>
+            <select className="mt-1 block rounded-lg border border-[#D7E7E4] px-2 py-2 text-sm" value={filters.priority} onChange={(e) => updateFilter('priority', e.target.value)}>
               <option value="">Any</option>{PRIORITIES.map((p) => <option key={p} value={p}>{p}</option>)}
             </select></label>
           <label className="text-xs font-bold text-[#64748B]">Assignee
-            <select className="mt-1 block rounded-lg border border-[#D7E7E4] px-2 py-2 text-sm" value={filters.assignedTo} onChange={(e) => setFilters({ ...filters, assignedTo: e.target.value })}>
+            <select className="mt-1 block rounded-lg border border-[#D7E7E4] px-2 py-2 text-sm" value={filters.assignedTo} onChange={(e) => updateFilter('assignedTo', e.target.value)}>
               <option value="">Anyone</option><option value="unassigned">Unassigned</option>
               {team.map((t) => <option key={t.id} value={t.id}>{t.name || t.id.slice(0, 8)}</option>)}
             </select></label>
           <label className="text-xs font-bold text-[#64748B]">Case number
-            <input className="mt-1 block rounded-lg border border-[#D7E7E4] px-2 py-2 text-sm" value={filters.q} onChange={(e) => setFilters({ ...filters, q: e.target.value })} placeholder="SUP-2026…" /></label>
-          <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}><RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> Refresh</Button>
+            <input className="mt-1 block rounded-lg border border-[#D7E7E4] px-2 py-2 text-sm" value={filters.q} onChange={(e) => updateFilter('q', e.target.value)} placeholder="SUP-2026…" /></label>
+          <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}><RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} /> {error ? 'Retry loading cases' : 'Refresh'}</Button>
         </div>
         {error && <p className="mt-3 text-xs font-semibold text-rose-700" role="alert">{error}</p>}
       </Card>
@@ -132,9 +174,17 @@ export const AdminSupportWorkspace: React.FC = () => {
                 </button>
               </li>
             ))}
-            {!rows.length && !loading && <li className="px-4 py-8 text-center text-xs text-[#64748B]">No cases match these filters.</li>}
+            {!rows.length && !loading && !error && <li className="px-4 py-8 text-center text-xs text-[#64748B]">{total === 0 ? 'No cases match these filters.' : 'No cases are available on this page.'}</li>}
+            {error && !rows.length && !loading && <li className="px-4 py-8 text-center text-xs text-[#64748B]">Queue unavailable. Use Retry to load cases.</li>}
             {loading && <li className="px-4 py-8 text-center text-xs text-[#64748B]"><Loader2 className="w-4 h-4 animate-spin inline" /> Loading…</li>}
           </ul>
+          <div className="flex items-center justify-between gap-3 border-t border-[#D7E7E4] px-4 py-3">
+            <span className="text-[11px] text-[#64748B]">{total === 0 ? '0 cases' : `Showing ${page * pageSize + 1}–${Math.min((page + 1) * pageSize, total)} of ${total}`}</span>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" disabled={loading || page === 0} onClick={() => setPage((p) => Math.max(0, p - 1))}>Previous</Button>
+              <Button size="sm" variant="outline" disabled={loading || (page + 1) * pageSize >= total} onClick={() => setPage((p) => p + 1)}>Next</Button>
+            </div>
+          </div>
         </Card>
 
         <Card className="p-4">

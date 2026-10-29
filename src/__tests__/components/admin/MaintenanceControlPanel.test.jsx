@@ -134,10 +134,10 @@ describe('recovery', () => {
     h.recover.mockResolvedValue({ success: true, changed: true });
     render(<MaintenanceControl mode="owner" />);
     await screen.findByText(/MAINTENANCE ACTIVE — Global shutdown/);
-    type('Your password', 'pw'); type(/Authenticator or recovery code/, '123456');
+    type('Reason (required)', 'Incident resolved and services verified'); type('Your password', 'pw'); type(/Authenticator or recovery code/, '123456');
     fireEvent.click(screen.getByText('END MAINTENANCE'));
     await waitFor(() => expect(h.recover).toHaveBeenCalledTimes(1));
-    expect(h.recover.mock.calls[0][0]).toMatchObject({ password: 'pw', mfaCode: '123456', expectedVersion: 4 });
+    expect(h.recover.mock.calls[0][0]).toMatchObject({ reason: 'Incident resolved and services verified', password: 'pw', mfaCode: '123456', expectedVersion: 4 });
     expect(await screen.findByText('MAINTENANCE NOT ACTIVE')).toBeTruthy();
     expect(h.toast).toHaveBeenCalledWith('Maintenance ended — confirmed by the server.', 'success');
   });
@@ -151,6 +151,22 @@ describe('recovery', () => {
     fireEvent.click(screen.getByText('END MAINTENANCE'));
     expect(await screen.findByText(/State why maintenance is being ended/)).toBeTruthy();
     expect(h.recover).not.toHaveBeenCalled();
+  });
+  test('recovery action is unavailable when maintenance is already inactive', async () => {
+    h.status.mockResolvedValue(payload(inactive(5), { canActivate: false, role: 'technical_recovery' }));
+    render(<MaintenanceControl mode="recovery" />);
+    await screen.findByText('MAINTENANCE NOT ACTIVE');
+    expect(screen.getByText('MAINTENANCE ALREADY ENDED').disabled).toBe(true);
+    expect(screen.getByText(/Maintenance is already inactive/)).toBeTruthy();
+    expect(h.recover).not.toHaveBeenCalled();
+  });
+  test('stale confirmed state cannot be used after a failed refresh', async () => {
+    h.status.mockResolvedValueOnce(payload(active('global', 4))).mockRejectedValueOnce(httpErr(503, { message: 'store unavailable' }));
+    render(<MaintenanceControl mode="recovery" />);
+    await screen.findByText(/MAINTENANCE ACTIVE — Global shutdown/);
+    fireEvent.click(screen.getByRole('button', { name: /Refresh maintenance state/ }));
+    await screen.findByText(/Actions are disabled until the maintenance state can be refreshed successfully/);
+    expect(screen.getByText('END MAINTENANCE').disabled).toBe(true);
   });
   test('owner mode never shows the start form to a caller the server says cannot activate', async () => {
     h.status.mockResolvedValue(payload(inactive(), { canActivate: false }));

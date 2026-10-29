@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { formatKES } from '../../api/api';
 import { fetchAdminBids, fetchSuspiciousBids, setBidWinner } from '../../services/bidApi';
@@ -17,6 +17,10 @@ export default function AdminBids() {
   const [bids, setBids]             = useState([]);
   const [suspicious, setSuspicious] = useState([]);
   const [loading, setLoading]       = useState(true);
+  const [loadError, setLoadError]   = useState('');
+  const [suspiciousError, setSuspiciousError] = useState('');
+  const [lastLoadedAt, setLastLoadedAt] = useState(null);
+  const requestSequence = useRef(0);
   const [tab, setTab]               = useState('all');
   const [page, setPage]             = useState(1);
   const [total, setTotal]           = useState(0);
@@ -26,32 +30,63 @@ export default function AdminBids() {
   const [selected, setSelected]     = useState(null);
 
   const load = useCallback(async () => {
+    const sequence = ++requestSequence.current;
     setLoading(true);
-    try {
-      const params = { page, limit: 20 };
-      if (search) params.search = search;
-      if (paidFilter !== 'all') params.status = paidFilter === 'paid' ? 'paid' : 'pending';
-      const [allRes, suspRes] = await Promise.all([
-        fetchAdminBids(params),
-        fetchSuspiciousBids().catch(() => ({ bids: [] })),
-      ]);
-      setBids(allRes.bids || allRes.data || []);
-      setTotal(allRes.pagination?.total || allRes.total || 0);
-      setSuspicious(suspRes.bids || suspRes.data || []);
-    } catch { toast('Failed to load bids', 'error'); }
-    finally { setLoading(false); }
-  }, [page, search, paidFilter]);
+    setLoadError('');
+    setSuspiciousError('');
+    const params = { page, limit: 20 };
+    if (search.trim()) params.search = search.trim();
+    if (paidFilter !== 'all') params.status = paidFilter === 'paid' ? 'paid' : 'pending';
 
-  useEffect(() => { load(); }, [load]);
+    const readList = (response, label) => {
+      if (Array.isArray(response)) return response;
+      if (!response || typeof response !== 'object') throw new Error(`${label} returned an unexpected response.`);
+      if (response.success === false) throw new Error(response.message || `${label} request was rejected.`);
+      const rows = response.bids ?? response.data;
+      if (Array.isArray(rows)) return rows;
+      if (rows && typeof rows === 'object' && Array.isArray(rows.bids)) return rows.bids;
+      throw new Error(`${label} returned an unexpected response.`);
+    };
+
+    try {
+      const allRes = await fetchAdminBids(params);
+      const rows = readList(allRes, 'Bid list');
+      const reportedTotal = Number(allRes?.pagination?.total ?? allRes?.total ?? rows.length);
+      if (!Number.isFinite(reportedTotal) || reportedTotal < 0) throw new Error('Bid list returned an invalid total count.');
+      if (sequence !== requestSequence.current) return;
+      setBids(rows);
+      setTotal(reportedTotal);
+      setLastLoadedAt(new Date());
+    } catch (err) {
+      if (sequence !== requestSequence.current) return;
+      setLoadError(err?.message || 'Unable to load bids. Your existing results have been retained.');
+      toast('Failed to load bids', 'error');
+    } finally {
+      if (sequence === requestSequence.current) setLoading(false);
+    }
+
+    try {
+      const suspRes = await fetchSuspiciousBids();
+      const rows = readList(suspRes, 'Suspicious-bid queue');
+      if (sequence !== requestSequence.current) return;
+      setSuspicious(rows);
+    } catch (err) {
+      if (sequence !== requestSequence.current) return;
+      setSuspiciousError(err?.message || 'Unable to load suspicious bids.');
+    }
+  }, [page, search, paidFilter, toast]);
+
+  useEffect(() => { load(); return () => { requestSequence.current += 1; }; }, [load]);
 
   const handleSetWinner = async (bid) => {
     if (!window.confirm(`Set ${bid.user?.name || 'this bidder'} (${formatKES(bid.amount)}) as winner?`)) return;
+    if (actionId) return;
     setActionId(bid._id);
     try {
       await setBidWinner(bid._id);
       toast('Winner recorded. Settlement follows the published auction mode.', 'success');
       setSelected(null);
-      load();
+      await load();
     } catch (err) {
       toast(err.response?.data?.message || 'Failed', 'error');
     } finally { setActionId(null); }
@@ -61,8 +96,8 @@ export default function AdminBids() {
   const totalPages = Math.ceil(total / 20);
 
   // Summary stats
-  const paidTotal   = bids.filter(b => b.status === 'paid').reduce((s, b) => s + (b.amount || 0), 0);
-  const unpaidCount = bids.filter(b => b.status !== 'paid').length;
+  const paidTotal   = bids.filter(b => String(b.status || '').toLowerCase() === 'paid').reduce((sum, bid) => sum + (Number.isFinite(Number(bid.amount)) ? Number(bid.amount) : 0), 0);
+  const unpaidCount = bids.filter(b => String(b.status || '').toLowerCase() !== 'paid').length;
 
   return (
     <div className="page">
@@ -71,15 +106,27 @@ export default function AdminBids() {
         <div style={{ marginBottom: 24 }}>
           <div className="section-eyebrow">Admin</div>
           <h2>Bid Management</h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginTop: 8 }}>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }} aria-live="polite">
+              {lastLoadedAt ? `Last successful bid-list refresh: ${lastLoadedAt.toLocaleTimeString()}` : 'Bid data has not yet loaded successfully.'}
+            </div>
+            <button className="btn btn-outline btn-sm" type="button" onClick={load} disabled={loading}>
+              {loading ? 'Refreshing…' : 'Refresh bids'}
+            </button>
+          </div>
         </div>
+        {loadError && <div role="alert" style={{ border: '1px solid rgba(239,68,68,0.35)', background: 'rgba(239,68,68,0.06)', borderRadius: 'var(--radius)', padding: '12px 16px', marginBottom: 20 }}>
+          <strong style={{ color: 'var(--red)' }}>Bid list unavailable.</strong> {loadError} {bids.length > 0 ? 'Showing the last successfully loaded results.' : 'The empty state is not being treated as a successful response.'}
+          <button className="btn btn-outline btn-sm" style={{ marginLeft: 12 }} type="button" onClick={load} disabled={loading}>Retry</button>
+        </div>}
 
         {/* Stats row */}
         <div className="grid-4" style={{ marginBottom: 24 }}>
           {[
             { label: 'Total Bids',    val: total.toLocaleString(),   icon: Zap, color: 'var(--brand)' },
-            { label: 'M-Pesa Paid',   val: formatKES(paidTotal),     icon: CheckCircle2, color: 'var(--green)' },
-            { label: 'Unpaid Bids',   val: unpaidCount,              icon: Clock, color: 'var(--orange)' },
-            { label: 'Suspicious',    val: suspicious.length,        icon: AlertTriangle, color: 'var(--red)' },
+            { label: 'Paid bid value · this page', val: formatKES(paidTotal), icon: CheckCircle2, color: 'var(--green)' },
+            { label: 'Unpaid · this page', val: unpaidCount, icon: Clock, color: 'var(--orange)' },
+            { label: 'Suspicious', val: suspiciousError ? '—' : suspicious.length, icon: AlertTriangle, color: 'var(--red)' },
           ].map(s => (
             <div key={s.label} className="stat-box">
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -99,12 +146,17 @@ export default function AdminBids() {
             <div>
               <div style={{ color: 'var(--red)', fontWeight: 700 }}>{suspicious.length} bid{suspicious.length > 1 ? 's' : ''} flagged by fraud engine</div>
               <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 3 }}>
-                High fraud scores detected. Review immediately before releasing funds.
+                Flagged bids need review before any settlement decision.
               </div>
             </div>
             <button className="btn btn-danger btn-sm" onClick={() => setTab('suspicious')}>Review Now</button>
           </div>
         )}
+
+        {suspiciousError && <div role="alert" style={{ border: '1px solid rgba(239,68,68,0.3)', borderRadius: 'var(--radius)', padding: '10px 14px', marginBottom: 16, color: 'var(--text-muted)', fontSize: 13 }}>
+          Suspicious-bid queue could not be verified: {suspiciousError}. Its count is unavailable, not zero.
+          <button className="btn btn-outline btn-sm" style={{ marginLeft: 12 }} type="button" onClick={load} disabled={loading}>Retry</button>
+        </div>}
 
         {/* Tabs + Filters */}
         <div className="tabs">
@@ -112,7 +164,7 @@ export default function AdminBids() {
             All Bids ({total})
           </button>
           <button className={`tab-btn ${tab === 'suspicious' ? 'active' : ''}`} onClick={() => setTab('suspicious')}>
-            Suspicious ({suspicious.length})
+            Suspicious ({suspiciousError ? '—' : suspicious.length})
           </button>
         </div>
 
@@ -138,7 +190,8 @@ export default function AdminBids() {
             ) : display.length === 0 ? (
               <div className="empty-state" style={{ padding: 48 }}>
                 <div className="empty-icon"><Zap size={32} aria-hidden="true" /></div>
-                <h3>No bids found</h3>
+                <h3>{loadError && bids.length === 0 && tab === 'all' ? 'Bid data unavailable' : tab === 'suspicious' && suspiciousError ? 'Suspicious queue unavailable' : tab === 'suspicious' ? 'No suspicious bids reported' : 'No bids match these filters'}</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 8 }}>{loadError && bids.length === 0 && tab === 'all' ? 'Retry the request before concluding that no bids exist.' : tab === 'suspicious' && suspiciousError ? 'Retry to verify the current fraud-review queue.' : 'Try changing the search or payment filter, or refresh the list.'}</p>
               </div>
             ) : (
               <table className="data-table">
@@ -156,6 +209,9 @@ export default function AdminBids() {
                       <tr key={bid._id}
                         style={{ background: bid.suspicious ? 'rgba(239,68,68,0.02)' : '', cursor: 'pointer' }}
                         onClick={() => setSelected(bid)}
+                        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(bid); } }}
+                        tabIndex={0}
+                        aria-label={`View bid details for ${bid.user?.name || 'bidder'}`}
                       >
                         <td>
                           <div style={{ fontWeight: 500, fontSize: 13 }}>{bid.user?.name || '—'}</div>
@@ -193,7 +249,7 @@ export default function AdminBids() {
                           {bid.createdAt ? timeAgo(bid.createdAt) : '—'}
                         </td>
                         <td onClick={e => e.stopPropagation()}>
-                          <button className="btn btn-gold btn-sm" disabled={actionId === bid._id}
+                          <button className="btn btn-gold btn-sm" disabled={Boolean(actionId)}
                             aria-label="Declare as auction winner" title="Declare as auction winner"
                             onClick={() => handleSetWinner(bid)}>
                             {actionId === bid._id ? '...' : <Trophy size={14} aria-hidden="true" />}
@@ -257,7 +313,7 @@ export default function AdminBids() {
               ))}
             </div>
 
-            <button className="btn btn-gold btn-full" disabled={actionId === selected._id}
+            <button className="btn btn-gold btn-full" disabled={Boolean(actionId)}
               onClick={() => handleSetWinner(selected)}>
               {actionId === selected._id ? 'Setting winner...' : 'Declare as Auction Winner'}
             </button>

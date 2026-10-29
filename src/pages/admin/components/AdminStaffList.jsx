@@ -1,4 +1,4 @@
-import { Users, Edit3, User } from 'lucide-react';
+import { Users, Edit3, User, Trash2 } from 'lucide-react';
 import { ORG } from './AdminStaffOrgChart';
 
 export default function AdminStaffList({ staff, loading, isSuperAdmin, onEdit, onToggleBan, onDelete, onShowAdd }) {
@@ -36,7 +36,7 @@ export default function AdminStaffList({ staff, loading, isSuperAdmin, onEdit, o
             <div style={{ fontSize: 11, color: 'var(--admin-muted-content)' }}>
               {m.lastLogin ? new Date(m.lastLogin).toLocaleDateString('en-KE') : 'Never logged in'}
             </div>
-            {isSuperAdmin && m.role !== 'superadmin' && (
+            {isSuperAdmin && m.role !== 'superadmin' && m.isOwner !== true && (
               <div style={{ display: 'flex', gap: 6 }}>
                 <button type="button" aria-label={`Edit ${m.name}`} onClick={() => onEdit(m)} style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(10, 51, 64, 0.05)', border: '1px solid rgba(10, 51, 64, 0.08)', color: 'var(--admin-muted-content)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Edit3 size={13} />
@@ -44,6 +44,7 @@ export default function AdminStaffList({ staff, loading, isSuperAdmin, onEdit, o
                 <button type="button" aria-label={m.isBanned ? `Restore access for ${m.name}` : `Suspend access for ${m.name}`} onClick={() => onToggleBan(m._id, m.isBanned)} style={{ width: 32, height: 32, borderRadius: 8, background: m.isBanned ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)', border: `1px solid ${m.isBanned ? 'rgba(34,197,94,0.15)' : 'rgba(239,68,68,0.15)'}`, color: m.isBanned ? '#22c55e' : '#ef4444', cursor: 'pointer', fontSize: 11, fontWeight: 700 }}>
                   {m.isBanned ? '↑' : '⊘'}
                 </button>
+                {onDelete && <button type="button" aria-label={`Remove staff account for ${m.name}`} title="Remove staff account" onClick={() => onDelete(m)} style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.15)', color: '#ef4444', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Trash2 size={13} /></button>}
               </div>
             )}
           </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
@@ -21,24 +21,39 @@ export default function AdminStaffPermissions() {
   const [draftPerms, setDraftPerms] = useState(new Set()); // desired effective perms
   const [saving, setSaving] = useState(false);
   const [loadError, setLoadError] = useState('');
+  const [maintenanceBlocked, setMaintenanceBlocked] = useState(false);
+  const requestId = useRef(0);
 
   const load = useCallback(async () => {
+    const request = ++requestId.current;
     setLoading(true);
     setLoadError('');
+    setMaintenanceBlocked(false);
     try {
       const [s, c] = await Promise.all([adminAPI.getStaff(), adminAPI.getPermCatalog()]);
-      setStaff(s.staff || []);
-      setCatalog(c.catalog || []);
+      if (request !== requestId.current) return;
+      // Never turn an unexpected API envelope into a misleading empty directory/catalog.
+      if (!Array.isArray(s?.staff) || !Array.isArray(c?.catalog)) {
+        throw new Error('The server returned an unexpected staff or permission-catalog response. No changes are available until the response is corrected.');
+      }
+      setStaff(s.staff);
+      setCatalog(c.catalog);
     } catch (_e) {
-      const message = _e?.response?.data?.message || 'Failed to load staff & permissions';
+      if (request !== requestId.current) return;
+      const code = _e?.response?.data?.code;
+      const isMaintenance = code === 'SYSTEM_MAINTENANCE' || _e?.response?.data?.maintenance === true;
+      const message = _e?.response?.data?.message || _e?.message || 'Failed to load staff & permissions';
+      setMaintenanceBlocked(isMaintenance);
       setLoadError(message);
+      setStaff([]);
+      setCatalog([]);
       toast(message, 'error');
     } finally {
-      setLoading(false);
+      if (request === requestId.current) setLoading(false);
     }
   }, [toast]);
 
-  useEffect(() => { if (me?.isOwner === true) load(); else setLoading(false); }, [load, me?.isOwner]);
+  useEffect(() => { if (me?.isOwner === true) load(); else setLoading(false); return () => { requestId.current += 1; }; }, [load, me?.isOwner]);
 
   const groups = useMemo(() => {
     const g = {};
@@ -76,9 +91,13 @@ export default function AdminStaffPermissions() {
       if (!reason?.trim()) { toast('A reason is required; no permissions were changed.', 'info'); return; }
       if (!window.confirm(`Confirm permission change for ${editing.email}?\n\nGrant: ${added.length}\nRevoke: ${removed.length}\n\nThis changes backend authorization on subsequent requests.`)) return;
       const res = await adminAPI.setStaffPerms(editing._id, { grantedPermissions, revokedPermissions, reason: reason.trim().slice(0, 500) });
+      if (!Array.isArray(res?.permissions?.effectivePermissions)) {
+        // The write may have committed even if the response is malformed; reload canonical state instead of guessing.
+        await load();
+        throw new Error('The server response did not include effective permissions. The directory was reloaded; verify the saved state before retrying.');
+      }
       toast(`Permissions updated for ${editing.name}`, 'success');
 
-      // Update local state
       setStaff(prev => prev.map(s => s._id === editing._id
         ? { ...s, grantedPermissions, revokedPermissions, effectivePermissions: res.permissions.effectivePermissions }
         : s));
@@ -121,11 +140,17 @@ export default function AdminStaffPermissions() {
         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>Loading staff…</div>
       ) : loadError ? (
         <div role="alert" style={{ padding: 16, border: '1px solid #fecaca', borderRadius: 12, background: '#fff1f2', color: '#9f1239' }}>
-          <p style={{ margin: '0 0 10px' }}>{loadError}. Staff and permissions are not being shown as an empty successful result.</p>
-          <button type="button" onClick={load} style={{ padding: '7px 12px', border: '1px solid currentColor', borderRadius: 8, background: 'transparent', color: 'inherit', fontWeight: 700, cursor: 'pointer' }}>Retry loading</button>
+          <p style={{ margin: '0 0 10px' }}>{loadError}. Staff and permissions are not being shown as an empty successful result, and permission changes remain unavailable until the server responds successfully.</p>
+          {maintenanceBlocked && <p style={{ margin: '0 0 12px' }}>Maintenance policy blocks staff-permission operations while this maintenance scope is active. This page cannot override that policy. Use the authorized recovery workflow to inspect and resolve maintenance first.</p>}
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button type="button" onClick={load} disabled={loading} style={{ padding: '7px 12px', border: '1px solid currentColor', borderRadius: 8, background: 'transparent', color: 'inherit', fontWeight: 700, cursor: loading ? 'wait' : 'pointer' }}>{loading ? 'Retrying…' : 'Retry loading'}</button>
+            {maintenanceBlocked && <a href="/admin/platform-recovery" style={{ display: 'inline-flex', alignItems: 'center', padding: '7px 12px', border: '1px solid currentColor', borderRadius: 8, color: 'inherit', fontWeight: 700, textDecoration: 'none' }}>Open Platform Recovery</a>}
+          </div>
         </div>
+      ) : catalog.length === 0 ? (
+        <div role="alert" style={{ padding: 16, border: '1px solid #fde68a', borderRadius: 12, background: '#fffbeb', color: '#92400e' }}>The permission catalog is empty. Editing is disabled because no assignable permissions were verified. Retry loading or check the backend role catalog.</div>
       ) : filtered.length === 0 ? (
-        <div style={{ padding: '2rem 1rem', textAlign: 'center', border: '1px solid var(--border)', borderRadius: 12, color: 'var(--text-muted)' }}>No matching staff records were returned.</div>
+        <div style={{ padding: '2rem 1rem', textAlign: 'center', border: '1px solid var(--border)', borderRadius: 12, color: 'var(--text-muted)' }}>{staff.length === 0 ? 'No staff accounts were returned by the server.' : 'No staff records match this search.'}</div>
       ) : (
         <div style={{ display: 'grid', gap: 12 }}>
           {filtered.map(member => {
@@ -148,7 +173,7 @@ export default function AdminStaffPermissions() {
                     <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{(member.effectivePermissions || []).length} duties</span>
                   )}
                   {!isSuper && (
-                    <button onClick={() => openEditor(member)} className="btn-outline"
+                    <button onClick={() => openEditor(member)} disabled={!catalog.length || loading} className="btn-outline"
                       style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 9, border: '1px solid var(--border-soft)', background: 'transparent', color: 'var(--text)', fontWeight: 600, fontSize: 12, cursor: 'pointer' }}>
                       <Shield size={13} /> Manage duties
                     </button>
@@ -210,7 +235,7 @@ export default function AdminStaffPermissions() {
               <div style={{ display: 'flex', gap: 10 }}>
                 <button onClick={() => setEditing(null)} disabled={saving}
                   style={{ padding: '9px 18px', borderRadius: 10, border: '1px solid var(--border-soft)', background: 'transparent', color: 'var(--text)', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
-                <button onClick={save} disabled={saving}
+                <button onClick={save} disabled={saving || !catalog.length}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 20px', borderRadius: 10, border: 'none', background: 'linear-gradient(145deg,var(--brand),var(--brand-dark))', color: '#0a3340', fontWeight: 700, fontSize: 13, cursor: saving ? 'wait' : 'pointer', boxShadow: '0 4px 15px var(--brand-glow)' }}>
                   <Save size={14} /> {saving ? 'Saving…' : 'Save duties'}
                 </button>

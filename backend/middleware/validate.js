@@ -153,6 +153,15 @@ export const validate = (schema) => (req, res, next) => {
   next();
 };
 
+export const reportListQuerySchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(50).default(20),
+  status: z.enum(["pending", "under_review", "reviewed", "dismissed", "action_taken", "open", "resolved"]).optional(),
+  targetType: z.string().trim().min(1).max(60).optional(),
+  category: z.string().trim().min(1).max(100).optional(),
+  search: z.string().trim().max(100).optional(),
+});
+
 export const validateQuery = (schema) => (req, res, next) => {
   const result = schema.safeParse(req.query);
   if (!result.success) {
@@ -194,7 +203,7 @@ export const validateParams = (schema) => (req, res, next) => {
   next();
 };
 
-const OBJECT_ID_KEYS = ["id", "chatId", "carId", "bidId", "userId", "reviewId", "dealerId", "escrowId", "fraudId", "auditId", "jobId", "failureId", "reportId", "agentId", "ticketId", "carId", "alertId", "inspectorId", "dealerId", "reportId", "issueIndex"];
+const OBJECT_ID_KEYS = ["id", "chatId", "messageId", "carId", "bidId", "userId", "reviewId", "dealerId", "escrowId", "fraudId", "auditId", "jobId", "failureId", "reportId", "agentId", "ticketId", "carId", "alertId", "inspectorId", "dealerId", "reportId", "issueIndex"];
 
 // Supabase/Postgres primary keys are UUIDs (36 chars, e.g.
 // 550e8400-e29b-41d4-a716-446655440000), not MongoDB's 24-hex-char

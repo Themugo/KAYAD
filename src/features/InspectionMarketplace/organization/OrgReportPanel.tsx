@@ -27,7 +27,7 @@ export const OrgReportPanel: React.FC<{ org: OrgSummary }> = ({ org }) => {
     <section aria-labelledby="org-report" className="space-y-4">
       <div>
         <h2 id="org-report" className="text-lg font-bold text-[#0A3340]">Report</h2>
-        <p className="text-sm text-[#64748B]">Consolidated across {org.you.role === 'branch_manager' ? 'your branch' : 'branches'}. Each booking and each payment is counted once. Dates are in East Africa time.</p>
+        <p className="text-sm text-[#64748B]">Consolidated across {org.you.role === 'branch_manager' ? 'your branch' : 'branches'}. Each booking and each payment is counted once. Dates are shown in Kenya time (EAT).</p>
       </div>
       <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); if (!invalid) setApplied(range); }}>
         <div><label className="text-xs font-bold block" htmlFor="rp-from">From</label><input id="rp-from" type="date" className={field} value={range.from} max={range.to} onChange={(e) => setRange({ ...range, from: e.target.value })} /></div>

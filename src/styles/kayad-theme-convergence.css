@@ -131,6 +131,85 @@
 }
 
 
+
+/* Stage 32 — Automotive services premium polish and truthful directory recovery. */
+.kayad-auto-services-view .kayad-auto-services-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background-image:
+    radial-gradient(circle at 88% 12%, rgba(19,184,166,.22), transparent 30%),
+    radial-gradient(circle at 8% 100%, rgba(255,255,255,.07), transparent 38%),
+    linear-gradient(118deg, #0A3340 0%, #12576D 54%, #176B87 100%);
+}
+.kayad-auto-services-view .kayad-auto-services-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: min(34%, 280px);
+  z-index: -1;
+  opacity: .2;
+  background: radial-gradient(circle, rgba(184,238,231,.5) 1px, transparent 1.5px);
+  background-size: 17px 17px;
+  mask-image: linear-gradient(90deg, transparent, #000);
+  pointer-events: none;
+}
+.kayad-services-trust-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 6px 11px;
+  border: 1px solid rgba(221,244,240,.22);
+  border-radius: 999px;
+  background: rgba(255,255,255,.075);
+  color: #E8F5F3;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+.kayad-auto-services-view .kayad-service-lane {
+  position: relative;
+  overflow: hidden;
+  border-color: #D7E7E4;
+  box-shadow: 0 12px 32px rgba(10,51,64,.055);
+  transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+.kayad-auto-services-view .kayad-service-lane::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, #13B8A6, #176B87);
+}
+.kayad-auto-services-view .kayad-service-lane:hover {
+  border-color: #BDE5DE;
+  box-shadow: 0 16px 38px rgba(10,51,64,.09);
+}
+.kayad-auto-services-view .kayad-service-lane button {
+  gap: 8px;
+}
+.kayad-auto-services-marketplace .kayad-services-finder-hero {
+  background-image:
+    radial-gradient(circle at 92% 4%, rgba(19,184,166,.2), transparent 31%),
+    linear-gradient(118deg, #0A3340 0%, #12576D 58%, #176B87 100%) !important;
+}
+.kayad-auto-services-marketplace .kayad-services-finder-trust {
+  border: 1px solid rgba(221,244,240,.2);
+  box-shadow: 0 10px 28px rgba(0,0,0,.08);
+}
+.kayad-auto-services-marketplace .kayad-provider-results article,
+.kayad-auto-services-marketplace .kayad-provider-results [class*="rounded-xl"] {
+  min-width: 0;
+}
+.kayad-auto-services-view button:focus-visible,
+.kayad-auto-services-marketplace button:focus-visible,
+.kayad-auto-services-marketplace select:focus-visible,
+.kayad-auto-services-marketplace input:focus-visible {
+  outline: 3px solid #13B8A6;
+  outline-offset: 3px;
+}
+
 /* Stage 31 — Auto Services mobile foundation. All overrides are phone-only;
    desktop layout, provider APIs, booking contracts and account flows stay canonical. */
 .kayad-auto-services-view .kayad-auto-services-hero,
@@ -177,7 +256,7 @@
 .kayad-onboarding-steps li.is-current { border-color: #13B8A6; background: #E8F5F3; }
 
 @media (max-width: 639px) {
-  .kayad-auto-services-view { gap: 20px !important; padding-bottom: 88px !important; }
+  .kayad-auto-services-view { gap: 20px !important; padding-bottom: calc(148px + env(safe-area-inset-bottom, 0px)) !important; }
   .kayad-auto-services-view .kayad-auto-services-hero {
     padding: 24px 21px !important;
     border-radius: 26px !important;
@@ -198,6 +277,7 @@
   .kayad-auto-services-view ul,
   .kayad-auto-services-view ol { overflow-wrap: anywhere; }
 
+  .kayad-auto-services-marketplace { padding-bottom: calc(132px + env(safe-area-inset-bottom, 0px)); }
   .kayad-auto-services-marketplace .kayad-services-finder-hero { padding: 28px 18px !important; }
   .kayad-auto-services-marketplace .kayad-services-finder-hero h1 { font-size: clamp(26px, 7vw, 32px) !important; line-height: 1.13 !important; letter-spacing: -.03em; }
   .kayad-auto-services-marketplace .kayad-services-finder-hero p { font-size: 14px !important; line-height: 1.55 !important; }
@@ -234,4 +314,108 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .kayad-auto-services-view *, .kayad-auto-services-marketplace * { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+
+/* Stage 32 — Kenya-only showroom refinement.
+   Keep the current marketplace state and API contracts while tightening the
+   phone toolbar, making native controls legible, and protecting the last
+   content rows from the fixed mobile navigation dock. */
+.kayad-homepage .kayad-market-toolbar-controls > * {
+  min-width: 0;
+}
+.kayad-homepage .kayad-market-toolbar-controls select {
+  color: #0A3340;
+  background-color: transparent;
+}
+.kayad-homepage .kayad-market-toolbar-controls button:focus-visible,
+.kayad-homepage .kayad-search-bridge button:focus-visible,
+.kayad-homepage .kayad-search-bridge input:focus-visible,
+.kayad-homepage .kayad-search-bridge select:focus-visible {
+  outline: 3px solid rgba(19,184,166,.65);
+  outline-offset: 2px;
+}
+.kayad-homepage .kayad-search-bridge input,
+.kayad-homepage .kayad-search-bridge select {
+  min-height: 44px;
+  min-width: 0;
+  color: #0A3340;
+}
+.kayad-homepage .kayad-inventory-results [role="status"] {
+  scroll-margin-bottom: 9rem;
+}
+@media (max-width: 639px) {
+  .kayad-homepage .kayad-market-toolbar-controls {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+    gap: 8px !important;
+    width: 100%;
+  }
+  .kayad-homepage .kayad-market-toolbar-controls [aria-label="Results per page"],
+  .kayad-homepage .kayad-market-toolbar-controls label.kayad-toolbar-control {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+  .kayad-homepage .kayad-market-toolbar-controls label.kayad-toolbar-control {
+    min-width: 0;
+    padding-inline: 12px;
+  }
+  .kayad-homepage .kayad-market-toolbar-controls label.kayad-toolbar-control select {
+    width: auto !important;
+    min-width: 0;
+    flex: 1 1 0;
+    font-size: 13px;
+    color: #0A3340 !important;
+    opacity: 1 !important;
+  }
+  .kayad-homepage .kayad-market-toolbar-controls [aria-label="Inventory view"] {
+    grid-column: 1;
+    width: 100%;
+  }
+  .kayad-homepage .kayad-market-toolbar-controls [aria-label="Open inventory filters"],
+  .kayad-homepage .kayad-market-toolbar-controls button:has(svg.lucide-filter) {
+    grid-column: 2;
+    justify-content: center;
+    width: 100%;
+    min-height: 48px;
+  }
+  .kayad-homepage .kayad-search-bridge > div {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .kayad-homepage .kayad-search-bridge > div > div:first-child,
+  .kayad-homepage .kayad-search-bridge > div > button {
+    grid-column: 1 / -1;
+  }
+  .kayad-homepage .kayad-inventory-results > [role="status"] {
+    padding: 2rem 1.25rem 3.5rem;
+    border-radius: 1.25rem;
+  }
+  .kayad-homepage .kayad-inventory-results > [role="status"] h3 {
+    line-height: 1.3;
+    text-wrap: balance;
+  }
+  .kayad-homepage .kayad-inventory-results > [role="status"] p {
+    line-height: 1.65;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kayad-homepage .kayad-market-toolbar-controls *,
+  .kayad-homepage .kayad-search-bridge * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kayad-auto-services-view .kayad-service-lane,
+  .kayad-auto-services-marketplace * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

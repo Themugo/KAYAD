@@ -55,7 +55,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
         {/* Toggle Highlight Differences Bar */}
         <div className="flex items-center justify-between bg-[#F6FAF9] p-3 rounded-xl border border-[#D7E7E4] text-xs">
           <span className="text-[#64748B] font-medium">
-            Comparing specifications side-by-side across East Africa certified inventory
+            Compare vehicle specifications side-by-side across Kenya's marketplace
           </span>
 
           <label className="flex items-center gap-2 font-bold text-[#176B87] cursor-pointer select-none">

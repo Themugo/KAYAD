@@ -103,6 +103,43 @@ function legacyOrder(inspection, car, buyer = null, inspector = null) {
 // same projection. Scope is unchanged (own rows only, requester_id = caller);
 // the projection omits the raw `notes` blob (which carried the phone number).
 // Only the assigned inspector's id and display name are exposed, never email.
+// Super-admin queue: unlike listMine(), this is explicitly admin-scoped and
+// returns the records needed by the existing /admin/inspections surface.
+// `requested` is the canonical persisted state; no payment has been initiated
+// for this legacy vehicle_inspections flow, so it must not be represented as paid.
+export const listAdmin = asyncHandler(async (req, res) => {
+  if (!['admin', 'superadmin'].includes(req.user.role)) return res.status(403).json({ success: false, message: 'Admin access required' });
+  const requestedStatus = String(req.query?.status || '').trim();
+  const allowedStatuses = new Set(['requested', 'assigned', 'in_progress', 'completed', 'cancelled']);
+  if (requestedStatus && !allowedStatuses.has(requestedStatus)) {
+    return res.status(400).json({ success: false, message: 'Unsupported inspection status filter' });
+  }
+  let query = getSupabase().from('vehicle_inspections').select('*').order('created_at', { ascending: false }).limit(200);
+  if (requestedStatus) query = query.eq('status', requestedStatus);
+  const { data, error } = await query;
+  if (error) throw new AppError(error.message, 500);
+  const rows = data || [];
+  const carIds = [...new Set(rows.map((row) => row.car_id).filter(Boolean).map(String))];
+  const buyerIds = [...new Set(rows.map((row) => row.requester_id).filter(Boolean).map(String))];
+  const inspectorIds = [...new Set(rows.map((row) => row.inspector_id).filter(Boolean).map(String))];
+  const [carEntries, buyerEntries, inspectorEntries] = await Promise.all([
+    Promise.all(carIds.map(async (id) => [id, await Car.findById(id).catch(() => null)])),
+    Promise.all(buyerIds.map(async (id) => [id, await User.findById(id).catch(() => null)])),
+    Promise.all(inspectorIds.map(async (id) => [id, await User.findById(id).catch(() => null)])),
+  ]);
+  const cars = new Map(carEntries);
+  const buyers = new Map(buyerEntries);
+  const inspectors = new Map(inspectorEntries);
+  const businesses = await businessNamesByUser(inspectorIds);
+  const orders = rows.map((row) => legacyOrder(
+    row,
+    cars.get(String(row.car_id)) || null,
+    (() => { const u = buyers.get(String(row.requester_id)); return u ? { id: u.id || u._id, _id: u.id || u._id, name: u.name, email: u.email } : null; })(),
+    (() => { const u = inspectors.get(String(row.inspector_id)); return u ? publicInspector(u, businesses.get(String(row.inspector_id))) : null; })(),
+  )).map((order, index) => ({ ...order, status: rows[index].status }));
+  res.json({ success: true, orders, count: orders.length, limit: 200, truncated: orders.length === 200 });
+});
+
 export const listMine = asyncHandler(async (req, res) => {
   const { data, error } = await getSupabase().from('vehicle_inspections').select('*').eq('requester_id', req.user.id).order('created_at', { ascending: false });
   if (error) throw new AppError(error.message, 500);
@@ -331,4 +368,4 @@ export const confirmPayment = asyncHandler(async (req, res) => {
   res.json({ success: true, order: legacyOrder(rows[0]) });
 });
 
-export default { protect, adminOnly, listMine, listAssigned, createOrder, getById, getByCar, assign, start, submit, availableInspectors, confirmPayment };
+export default { protect, adminOnly, listMine, listAdmin, listAssigned, createOrder, getById, getByCar, assign, start, submit, availableInspectors, confirmPayment };

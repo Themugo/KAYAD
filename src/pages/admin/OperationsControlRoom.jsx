@@ -44,6 +44,30 @@ const SUMMARY_GROUPS = [
 ];
 
 const isRecord = (value) => value !== null && typeof value === 'object' && !Array.isArray(value);
+const unwrapPayload = (value) => {
+  let payload = value;
+  // Accept the shared API facade's normal response and one additional server envelope,
+  // without treating an empty or malformed response as verified data.
+  for (let depth = 0; depth < 2 && isRecord(payload?.data); depth += 1) {
+    if (payload.stats || payload.alerts || payload.entries || payload.services) break;
+    payload = payload.data;
+  }
+  return payload;
+};
+const normalizeHealth = (response) => {
+  const payload = unwrapPayload(response);
+  const health = payload?.health || payload?.data?.health || payload;
+  const rawServices = Array.isArray(health?.services) ? health.services : [];
+  const services = rawServices
+    .filter((service) => service && typeof service.name === 'string' && service.name.trim())
+    .map((service) => {
+      const rawStatus = typeof service.status === 'string' ? service.status.toLowerCase() : '';
+      const status = ['healthy', 'degraded', 'down', 'unavailable'].includes(rawStatus) ? rawStatus : 'unknown';
+      const latency = service.latency != null && Number.isFinite(Number(service.latency)) && Number(service.latency) >= 0 ? Number(service.latency) : null;
+      return { label: service.name.replace(/[-_]/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()), status, latency };
+    });
+  return { services, checkedAt: safeDate(health?.checkedAt || payload?.timestamp || response?.timestamp) };
+};
 const safeDate = (value) => {
   if (typeof value !== 'string' && !(value instanceof Date) && typeof value !== 'number') return null;
   const date = new Date(value);
@@ -88,8 +112,9 @@ export default function OperationsControlRoom() {
         adminAPI.getInfrastructureHealth(),
       ]);
 
-      if (metricsResult.status === 'fulfilled' && isRecord(metricsResult.value?.stats)) {
-        setMetrics(metricsResult.value);
+      const metricsPayload = metricsResult.status === 'fulfilled' ? unwrapPayload(metricsResult.value) : null;
+      if (metricsResult.status === 'fulfilled' && isRecord(metricsPayload?.stats)) {
+        setMetrics(metricsPayload);
         setMetricsError('');
         setMetricsStale(false);
         hasMetricsSuccess.current = true;
@@ -99,8 +124,9 @@ export default function OperationsControlRoom() {
         setMetricsStale(hasMetricsSuccess.current);
       }
 
-      if (alertsResult.status === 'fulfilled' && Array.isArray(alertsResult.value?.alerts)) {
-        setAlerts(alertsResult.value.alerts.filter(isRecord));
+      const alertsPayload = alertsResult.status === 'fulfilled' ? unwrapPayload(alertsResult.value) : null;
+      if (alertsResult.status === 'fulfilled' && Array.isArray(alertsPayload?.alerts)) {
+        setAlerts(alertsPayload.alerts.filter(isRecord));
         setAlertsError('');
         setAlertsStale(false);
         hasAlertsSuccess.current = true;
@@ -109,8 +135,9 @@ export default function OperationsControlRoom() {
         setAlertsStale(hasAlertsSuccess.current);
       }
 
-      if (activityResult.status === 'fulfilled' && Array.isArray(activityResult.value?.entries)) {
-        setActivity(activityResult.value.entries.filter(isRecord));
+      const activityPayload = activityResult.status === 'fulfilled' ? unwrapPayload(activityResult.value) : null;
+      if (activityResult.status === 'fulfilled' && Array.isArray(activityPayload?.entries)) {
+        setActivity(activityPayload.entries.filter(isRecord));
         setActivityError('');
         setActivityStale(false);
         hasActivitySuccess.current = true;
@@ -120,27 +147,10 @@ export default function OperationsControlRoom() {
       }
 
       if (healthResult.status === 'fulfilled') {
-        const response = healthResult.value;
-        const health = response?.data?.health || response?.health || response?.data || response;
-        const rawServices = Array.isArray(health?.services) ? health.services : [];
-        const services = rawServices
-          .filter((service) => service && typeof service.name === 'string' && service.name.trim())
-          .map((service) => {
-            const rawStatus = typeof service.status === 'string' ? service.status.toLowerCase() : '';
-            const status = ['healthy', 'degraded', 'down', 'unavailable'].includes(rawStatus) ? rawStatus : 'unknown';
-            const latency = service.latency != null && Number.isFinite(Number(service.latency)) && Number(service.latency) >= 0
-              ? Number(service.latency)
-              : null;
-            return {
-              label: service.name.replace(/[-_]/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase()),
-              status,
-              latency,
-            };
-          });
-
+        const { services, checkedAt } = normalizeHealth(healthResult.value);
         if (services.length > 0) {
           setSystemHealth(services);
-          setHealthCheckedAt(safeDate(health?.checkedAt || response?.timestamp));
+          setHealthCheckedAt(checkedAt);
           setHealthError('');
           setHealthStale(false);
           hasHealthSuccess.current = true;
@@ -159,6 +169,30 @@ export default function OperationsControlRoom() {
       setRefreshing(false);
     }
   }, []);
+
+  const refreshHealth = useCallback(async () => {
+    if (healthLoading) return;
+    setHealthLoading(true);
+    try {
+      const response = await adminAPI.getInfrastructureHealth();
+      const { services, checkedAt } = normalizeHealth(response);
+      if (!services.length) {
+        setHealthError('The health endpoint returned no verifiable service checks. The current service state is unknown.');
+        setHealthStale(hasHealthSuccess.current);
+        return;
+      }
+      setSystemHealth(services);
+      setHealthCheckedAt(checkedAt);
+      setHealthError('');
+      setHealthStale(false);
+      hasHealthSuccess.current = true;
+    } catch {
+      setHealthError('System health could not be checked. The current service state is unknown.');
+      setHealthStale(hasHealthSuccess.current);
+    } finally {
+      setHealthLoading(false);
+    }
+  }, [healthLoading]);
 
   useEffect(() => {
     void loadMetrics();
@@ -338,7 +372,7 @@ export default function OperationsControlRoom() {
               </div>
             )}
             <p style={{ color: 'var(--admin-muted-content)', fontSize: 11, marginTop: 12 }}>Last checked: {healthCheckedAt ? formatTime(healthCheckedAt) : 'time unavailable'}</p>
-            <button type="button" className="btn btn-outline" onClick={() => void loadMetrics()} disabled={refreshing || healthLoading} style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <button type="button" className="btn btn-outline" onClick={() => void refreshHealth()} disabled={healthLoading} style={{ marginTop: 12, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
               <RefreshCw size={14} /> Refresh health
             </button>
           </div>

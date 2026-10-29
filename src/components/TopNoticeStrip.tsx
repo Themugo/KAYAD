@@ -6,12 +6,14 @@ import { adminAPI } from '../api/api';
  * KAYAD's broadcast notice board. Content, ordering, colors, visibility and
  * animation behavior are persisted through the admin Ad Manager.
  */
+const kenyaOnlyTickerCopy = (value?: string | null) => (value || '').replace(/East Africa/gi, 'Kenya');
+
 export const TopNoticeStrip: React.FC = () => {
   const [slots, setSlots] = useState<AdSlot[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [fadeIndex, setFadeIndex] = useState(0);
   const [fadeVisible, setFadeVisible] = useState(true);
-  const [heroTickerConfig, setHeroTickerConfig] = useState({ enabled: true, fallbackText: 'KAYAD · Verified vehicles across East Africa · Live auctions · Transparent bidding · Protected transactions', backgroundColor: '#0A3340', textColor: '#FFFFFF', heightPx: 36, scrollSeconds: 34, direction: 'left' as 'left' | 'right', transition: 'scroll' as 'scroll' | 'fade' | 'pop' | 'slide' });
+  const [heroTickerConfig, setHeroTickerConfig] = useState({ enabled: true, fallbackText: 'KAYAD · Verified vehicles across Kenya · Live auctions · Transparent bidding · Protected transactions', backgroundColor: '#0A3340', textColor: '#FFFFFF', heightPx: 36, scrollSeconds: 34, direction: 'left' as 'left' | 'right', transition: 'scroll' as 'scroll' | 'fade' | 'pop' | 'slide' });
 
   useEffect(() => {
     let cancelled = false;
@@ -25,7 +27,7 @@ export const TopNoticeStrip: React.FC = () => {
           setHeroTickerConfig((prev) => ({
             ...prev,
             enabled: hp.tickerEnabled !== false,
-            fallbackText: hp.tickerFallbackText || prev.fallbackText,
+            fallbackText: kenyaOnlyTickerCopy(hp.tickerFallbackText || prev.fallbackText),
             backgroundColor: hp.tickerBackgroundColor || prev.backgroundColor,
             textColor: hp.tickerTextColor || prev.textColor,
             heightPx: Math.max(28, Math.min(60, Number(hp.tickerHeightPx) || prev.heightPx)),
@@ -87,15 +89,15 @@ export const TopNoticeStrip: React.FC = () => {
   const renderSlot = (slot: AdSlot, extraClass = '') => {
     const content = (
       <span className={`flex items-center justify-center gap-2 px-5 sm:px-8 py-2 text-[11px] sm:text-xs font-semibold tracking-[0.01em] ${extraClass}`}>
-        <span className="font-bold">{slot.title}</span>
-        {slot.tagline && <span className="opacity-80 font-normal">— {slot.tagline}</span>}
-        {slot.priceTag && <span className="font-bold">{slot.priceTag}</span>}
-        {slot.buttonText && <span className="font-bold underline underline-offset-2">{slot.buttonText}</span>}
+        <span className="font-bold">{kenyaOnlyTickerCopy(slot.title)}</span>
+        {slot.tagline && <span className="opacity-80 font-normal">— {kenyaOnlyTickerCopy(slot.tagline)}</span>}
+        {slot.priceTag && <span className="font-bold">{kenyaOnlyTickerCopy(slot.priceTag)}</span>}
+        {slot.buttonText && <span className="font-bold underline underline-offset-2">{kenyaOnlyTickerCopy(slot.buttonText)}</span>}
       </span>
     );
 
     return slot.buttonUrl ? (
-      <a href={slot.buttonUrl} className="block" aria-label={slot.title}>{content}</a>
+      <a href={slot.buttonUrl} className="block" aria-label={kenyaOnlyTickerCopy(slot.title)}>{content}</a>
     ) : content;
   };
 

@@ -182,6 +182,7 @@ router.get('/reports/:reportId', requireAuth, controller.getReport);
  * canonical vehicle_inspections execution record. No legacy model or
  * digital-inspection storage is used.
  */
+router.get('/', requireAuth, requireRole(['admin', 'superadmin']), legacy.listAdmin);
 router.get('/my', requireAuth, legacy.listMine);
 router.get('/assigned', requireAuth, legacy.listAssigned); // STAGE 5C: inspector worklist (inspector_id = caller)
 router.post('/order', requireAuth, legacy.createOrder);

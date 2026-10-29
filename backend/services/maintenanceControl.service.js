@@ -117,9 +117,9 @@ export function validateActivation(body = {}) {
   const message = cleanText(body.message, 280);
   return { scope, reason, incidentRef, message };
 }
-export function validateRecovery(body = {}, { reasonRequired = false } = {}) {
+export function validateRecovery(body = {}) {
   const reason = cleanText(body.reason, 300);
-  if (reasonRequired && reason.length < 8) throw new MaintenanceError("MAINTENANCE_REASON_REQUIRED", "State why maintenance is being ended (at least 8 characters).", 400);
+  if (reason.length < 8) throw new MaintenanceError("MAINTENANCE_REASON_REQUIRED", "State why maintenance is being ended (at least 8 characters).", 400);
   const incidentRef = cleanText(body.incidentRef, 64);
   if (incidentRef && !/^[A-Za-z0-9._\-/# ]+$/.test(incidentRef)) throw new MaintenanceError("MAINTENANCE_INVALID_INCIDENT_REF", "The incident reference may contain letters, digits and . _ - / # only.", 400);
   return { reason, incidentRef };

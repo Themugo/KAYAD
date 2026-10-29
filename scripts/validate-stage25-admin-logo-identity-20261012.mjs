@@ -22,10 +22,10 @@ const checks = [
   ['column footer supports uploaded logo', footer.includes("width: 'min(220px, 100%)'") && footer.includes("objectPosition: 'left center'")],
   ['footer preserves text/icon fallback', footer.includes("branding.logoText || 'KAYAD'") && footer.includes('colors.footerAccent')],
   ['admin preview uses object-contain instead of cropping', admin.includes("objectFit: 'contain'") && admin.includes('Logo preview')],
-  ['admin upload accepts explicit supported image types', admin.includes('image/png,image/jpeg,image/webp,image/svg+xml')],
+  ['admin upload accepts only supported secure image types', admin.includes('image/png,image/jpeg,image/webp') && admin.includes("['image/png', 'image/jpeg', 'image/webp']") && admin.includes('SVG uploads are not supported by the current secure upload service')],
   ['admin client rejects files over 5 MB', admin.includes('file.size > 5 * 1024 * 1024')],
   ['upload endpoint remains protected by admin authorization', /"\/upload-logo",\s*protect,\s*adminOnly,\s*uploadMemory\.single\("logo"\)/s.test(route)],
-  ['server persists logo URL and image mode', route.includes('config.branding.logoType = "image"') && route.includes('config.branding.logoUrl = result.url')],
+  ['server persists logo URL and image mode', /config\.branding = \{ \.\.\.existingBranding, logoType: \"image\", logoUrl: result\.url \}/.test(route) && route.includes('await config.save()')],
   ['branding context normalizes saved config', context.includes('normalizeBrandingConfig(configBranding)')],
 ];
 let failed = 0;

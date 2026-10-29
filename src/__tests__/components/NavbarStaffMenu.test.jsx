@@ -13,7 +13,7 @@ vi.mock('../../utils/authRoutes', async (orig) => ({ ...(await orig()), isSeller
 vi.mock('../../components/features/common/NotificationCenter', () => ({ default: () => null }));
 vi.mock('framer-motion', () => ({ motion: { div: ({ children, ...p }) => <div {...p}>{children}</div> }, AnimatePresence: ({ children }) => children }));
 
-const props = { savedCount: 0, activeNav: 'dashboard', onNavClick: vi.fn(), selectedCounty: 'All East Africa', onCountyChange: vi.fn(), onOpenAuth: vi.fn(), onOpenAlerts: vi.fn(), onLogout: vi.fn(), unreadCount: 0 };
+const props = { savedCount: 0, activeNav: 'dashboard', onNavClick: vi.fn(), selectedCounty: 'All Kenya', onCountyChange: vi.fn(), onOpenAuth: vi.fn(), onOpenAlerts: vi.fn(), onLogout: vi.fn(), unreadCount: 0 };
 const open = (role) => {
   render(<MemoryRouter><Navbar {...props} user={{ id: 'u1', name: 'James Mugo', email: 'owner@example.test', role }} /></MemoryRouter>);
   const panelToggle = document.querySelector('[aria-controls="kayad-account-panel"]');

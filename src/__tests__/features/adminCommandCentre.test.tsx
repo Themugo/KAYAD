@@ -69,6 +69,30 @@ describe('Command centre — truthful figures', () => {
   });
 });
 
+describe('Command centre — business lifecycle hand-offs', () => {
+  it('shows a business flow that links to existing authorized workspaces without inventing status', async () => {
+    authUser = { id: 'u1', role: 'superadmin', isOwner: false };
+    mount();
+    await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
+    const flow = screen.getByTestId('business-flow-map');
+    expect(flow.textContent).toContain('Business flow & operational hand-offs');
+    const expected = [
+      ['Dealer onboarding', '/admin/dealer-verifications'],
+      ['Vehicle listings', '/admin/moderation'],
+      ['Inspection & NTSA', '/admin/ntsa-queue'],
+      ['Auctions & bids', '/admin/auctions'],
+      ['Escrow', '/admin/escrows'],
+      ['Transactions', '/admin/transactions'],
+    ];
+    for (const [label, href] of expected) {
+      const link = screen.getByRole('link', { name: new RegExp(label) });
+      expect(link.getAttribute('href')).toBe(href);
+      expect(flow.contains(link)).toBe(true);
+    }
+    expect(flow.textContent).toContain('These are navigation shortcuts, not a new workflow or source of business status.');
+  });
+});
+
 describe('Command centre — canonical destinations', () => {
   it('KPI cards link to their existing workspaces and the queue counts are the real API values', async () => {
     authUser = { id: 'u1', role: 'superadmin', isOwner: false };
@@ -99,6 +123,49 @@ describe('Command centre — canonical destinations', () => {
   });
 });
 
+
+describe('Command centre — search and operational controls', () => {
+  it('submits a trimmed search to the existing users and vehicles API requests', async () => {
+    mount();
+    await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
+    openTools();
+    fireEvent.click(screen.getByRole('button', { name: 'User review module' }));
+    openTools();
+    const input = screen.getByRole('textbox', { name: 'Search administration records' });
+    fireEvent.change(input, { target: { value: '  Dealer One  ' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Search' }));
+    await waitFor(() => expect(api.users).toHaveBeenCalledWith(expect.objectContaining({ search: 'Dealer One' })));
+  });
+
+  it('keeps a data-source failure visible and retryable when a separate admin action also fails', async () => {
+    api.stats.mockRejectedValue(Object.assign(new Error('stats unavailable'), { response: { status: 503 } }));
+    api.toggleBan.mockRejectedValue(Object.assign(new Error('ban rejected'), { response: { status: 403, data: { message: 'Forbidden' } } }));
+    mount();
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('dashboard statistics'));
+    openTools();
+    fireEvent.click(screen.getByRole('button', { name: 'User review module' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: /Ban/ })).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: /Ban/ }));
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toContain('Action failed:'));
+    expect(screen.getByRole('alert').textContent).toContain('dashboard statistics');
+    expect(screen.getByRole('button', { name: 'Retry loading unavailable data' })).toBeTruthy();
+  });
+
+  it('filters the currently returned audit records without claiming the server searched all history', async () => {
+    api.getAuditLog.mockResolvedValue({ entries: [
+      { id: 'a1', action: 'dealer.approved', module: 'dealers', actor: { email: 'reviewer@example.test' } },
+      { id: 'a2', action: 'vehicle.hidden', module: 'vehicles', actor: { email: 'moderator@example.test' } },
+    ] });
+    mount();
+    await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
+    openTools();
+    fireEvent.click(screen.getByRole('button', { name: 'Audit records module' }));
+    openTools();
+    fireEvent.change(screen.getByRole('textbox', { name: 'Search administration records' }), { target: { value: 'dealer.approved' } });
+    expect(screen.getByText('dealer.approved')).toBeTruthy();
+    expect(screen.queryByText('vehicle.hidden')).toBeNull();
+  });
+});
 
 describe('Command centre — responsive and accessible presentation', () => {
   it('provides a named administration navigation region and identifies the active module', async () => {
@@ -344,6 +411,14 @@ describe('Command centre — unavailable causes and retry', () => {
     mount();
     await waitFor(() => expect(screen.getByRole('alert').textContent).toMatch(/could not reach the API/));
     expect(screen.getByRole('alert').textContent).toMatch(/not found \(HTTP 404\)/);
+  });
+
+  it('identifies malformed successful API responses as an invalid response contract', async () => {
+    api.stats.mockResolvedValue({ stats: null });
+    mount();
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toMatch(/unexpected format/));
+    expect(screen.getByRole('alert').textContent).toMatch(/dashboard statistics returned an invalid response/);
+    expect(screen.getByRole('alert').textContent).not.toMatch(/platform is in maintenance/);
   });
 
   it('Retry reloads and clears the warning once the sources recover', async () => {

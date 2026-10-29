@@ -1,0 +1,129 @@
+PASS continuous hero stage remains canonical
+PASS full Nairobi background remains configurable
+PASS Drive Your Dream headline remains canonical
+PASS desktop featured vehicle subjects remain data-driven
+PASS approved cutout showcase assets are configured
+PASS vehicle info cards are contained within vehicle stages
+PASS center card remains configurable
+PASS admin-controlled vehicle positioning remains wired
+PASS existing carousel controls remain wired
+PASS mobile hero has its own responsive composition
+PASS mobile hero preserves the canonical headline and CTAs
+PASS existing search bridge remains below hero
+
+Premium homepage hero validation: 12/12 PASS
+PASS homepage uses canonical VehicleMarketplace surface
+PASS homepage passes real user/admin context
+PASS hero prefers real featured inventory and keeps curated artwork presentation-only
+PASS hero has no remote background dependency
+PASS homepage has real live market signals
+PASS how-it-works action stays inside existing journey
+PASS featured picks use current server result source
+PASS no known demo identities in active homepage source
+PASS production env contract exists
+
+Homepage convergence validation: PASS
+PASS HeroPresentationConfig: every field has an admin control
+PASS HeroFloatingCard: every field has an admin control
+PASS curated showcase pair and fallback are admin-editable
+PASS backend persists heroPresentation
+PASS backend persists heroCardContent
+PASS backend persists heroFeaturedMode
+PASS backend persists heroCarIds
+PASS public page and admin save share normalizeHeroExtras
+PASS mobile headline comes from admin hero slide
+PASS mobile eyebrow comes from admin hero slide
+PASS mobile supporting copy comes from admin config
+PASS desktop and mobile CTA labels are admin-controlled
+PASS admin headline is never rewritten (no includes() hack)
+PASS no literal 6500ms rotation timer
+PASS rotation timers use admin rotationSeconds
+PASS mobile stage height uses admin min/max
+PASS mobile pair image stage uses admin min/max bounds
+PASS hero colors come from admin config
+
+Hero admin-control contract: PASS
+PASS canonical showcase config declares mobileImage for 2 vehicles
+PASS showcase-land-cruiser: legacy desktop hero asset retained (/hero/kayad-land-cruiser-cutout.png)
+PASS showcase-land-cruiser: valid WebP container
+PASS showcase-land-cruiser: WebP has an alpha channel (transparent background)
+PASS showcase-land-cruiser: 163 KB within 100-320 KB budget
+PASS showcase-mercedes-gle: legacy desktop hero asset retained (/hero/kayad-mercedes-gle-cutout.png)
+PASS showcase-mercedes-gle: valid WebP container
+PASS showcase-mercedes-gle: WebP has an alpha channel (transparent background)
+PASS showcase-mercedes-gle: 173 KB within 100-320 KB budget
+PASS no mandatory mobile-specific hero asset: real featured inventory may use its canonical image on mobile
+PASS slide transition defaults to 320ms (admin-controlled via mobileTransitionMs)
+PASS reduced motion disables the slide animation
+PASS no autoplay in the mobile hero block
+
+Hero mobile asset contract: PASS
+PASS mobile hero renders a two-vehicle pair, not a single-car carousel
+PASS vehicle images use contain semantics and no crop utility
+PASS both car images have independent accessible labels
+PASS desktop hero markup remains a separate lg-only composition
+PASS showcase art is not priced or opened as a listing
+PASS real featured inventory takes precedence when two or more records exist
+PASS showcase fallback is admin-configurable
+PASS showcase vehicle identity and image paths are editable by admin
+PASS showcase configuration is persisted via existing platform config endpoint
+PASS database migration seeds/repairs existing JSONB showcase config without creating fake cars
+PASS approved Land Cruiser and Mercedes mobile transparent assets are referenced
+PASS tests cover paired cars and explicit visual-showcase semantics
+
+Stage 35 Home Hero Pair: 12/12 PASS
+PASS canonical VehicleMarketplace hero remains in place
+PASS real featured inventory remains the hero source
+PASS hero copy remains admin-configurable
+PASS desktop and mobile primary CTAs are real buttons
+PASS desktop and mobile secondary CTAs use accessible play icon
+PASS hero carousel respects reduced-motion preference
+PASS vehicle pair controls retain accessible names
+PASS mobile image failures have an explicit fallback
+PASS inventory retry remains wired to existing retry operation
+PASS search and filter controls remain in the existing search bridge
+PASS premium mobile hero styles are scoped to the homepage
+PASS search controls have accessible focus treatment
+PASS narrow phone typography is handled
+PASS reduced-motion CSS avoids nonessential control transitions
+PASS no duplicate homepage implementation introduced
+
+Public homepage premium refinement: 15/15 PASS
+PASS mobile menu remains the canonical Navbar drawer
+PASS drawer is an accessible modal dialog
+PASS drawer measures the visual viewport
+PASS drawer retains safe-area bottom padding
+PASS drawer primary destinations use grouped grid
+PASS drawer category icons remain sourced from canonical nav config
+PASS drawer child destinations show canonical icons
+PASS drawer child active state is exposed
+PASS drawer support group spans the grid
+PASS narrow phone uses single-column destination groups
+PASS small tablet drawer uses three columns
+PASS menu overlay hides canonical mobile dock
+PASS menu overlay hides legacy mobile dock
+PASS menu overlay prevents dock hit-testing
+PASS drawer links have high-visibility keyboard focus
+PASS drawer respects reduced motion
+PASS bottom dock retains five canonical actions
+PASS bottom dock labels retain explicit text
+PASS bottom dock no longer duplicates the header menu
+PASS saved dock item uses the real Heart icon and active state
+PASS mobile menu destination cards remain compact instead of stretching
+PASS bottom dock uses touch-sized targets
+PASS bottom dock icon sizing is normalized
+PASS bottom dock uses KAYAD palette
+PASS bottom dock uses semantic color-coded real icons
+PASS phone header reserves readable brand descriptor beside logo
+PASS narrow header actions are compacted
+PASS focus ring uses theme mint
+PASS navigation still derives child destinations from visibleChildren
+PASS navigation configuration remains admin-controlled
+PASS seller CTA remains existing authenticated navigation action
+PASS saved and messaging shortcuts remain in the same drawer
+PASS notifications remain reachable in the drawer
+PASS role-specific dealer tools remain role-gated
+PASS role-specific admin tools remain role-gated
+PASS source still contains escape and viewport cleanup hooks
+
+Mobile navigation polish: 36/36 PASS

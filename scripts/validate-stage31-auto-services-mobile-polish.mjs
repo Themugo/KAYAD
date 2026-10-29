@@ -9,7 +9,7 @@ const checks = [
  ['Auto Services public page uses a dedicated styling scope', /kayad-auto-services-view/.test(inspections) && /data-kayad-surface="auto-services"/.test(inspections)],
  ['Service discovery keeps existing matched-inspection and provider-selection actions', /onClick=\{startRequest\}/.test(inspections) && /onOpenInspectionMarketplace\?\.\('pre_purchase_inspection'\)/.test(inspections)],
  ['Provider discovery remains on canonical search API', /inspectionApi\.searchProviders\(filters\)/.test(marketplace)],
- ['Provider discovery preserves separate loading, error and empty states', /setLoadError\('We could not load businesses right now\.'\)/.test(marketplace) && /Businesses could not be loaded/.test(marketplace) && /providers\.length === 0/.test(marketplace)],
+ ['Provider discovery preserves loading, stale-result, error and true-empty states', /setLoadError\('We could not refresh the business directory/.test(marketplace) && /Showing previously loaded businesses/.test(marketplace) && /Businesses could not be loaded/.test(marketplace) && /providers\.length === 0/.test(marketplace) && /Array\.isArray\(response\.items\)/.test(marketplace)],
  ['Filters still use canonical service taxonomy and backend parameters', /automotiveApi\.getServiceTaxonomy\(\)/.test(marketplace) && /ProviderFilters filters=\{filters\}/.test(marketplace)],
  ['Provider application registration uses canonical existing API', /inspectionApi\.registerProvider\(/.test(modal)],
  ['Provider capabilities remain declared through canonical taxonomy API', /automotiveApi\.declareCapability\(/.test(modal) && /taxonomy\?\.categories/.test(modal)],

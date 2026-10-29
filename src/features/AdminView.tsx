@@ -179,7 +179,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
     try { window.sessionStorage.setItem(COMMAND_VIEW_KEY, JSON.stringify({ module, search, queue })); } catch { /* storage unavailable: nothing to restore */ }
   }, [module, search, queue]);
 
-  const load = async (activeQueue: QueueFilter = queue) => {
+  const load = async (activeQueue: QueueFilter = queue, searchTerm: string = search) => {
     const sequence = ++loadSequence.current;
     setLoading(true);
     setError(null);
@@ -190,8 +190,8 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
     const results = await Promise.allSettled([
       adminAPI.stats(),
       adminAPI.users({ page: 1, limit: 4, role: 'dealer', pendingApproval: true }),
-      adminAPI.users({ page: 1, limit: 50, search: search || undefined, ...(activeQueue === 'pendingDealers' ? { role: 'dealer', pendingApproval: true } : {}) }),
-      adminAPI.cars({ page: 1, limit: 50, search: search || undefined, ...(activeQueue === 'pendingVehicles' ? { status: 'pending' } : {}) }),
+      adminAPI.users({ page: 1, limit: 50, search: searchTerm.trim() || undefined, ...(activeQueue === 'pendingDealers' ? { role: 'dealer', pendingApproval: true } : {}) }),
+      adminAPI.cars({ page: 1, limit: 50, search: searchTerm.trim() || undefined, ...(activeQueue === 'pendingVehicles' ? { status: 'pending' } : {}) }),
       adminAPI.getAuditLog({ page: 1, limit: 25 }),
     ] as const);
 
@@ -207,6 +207,12 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       failures.push(failLabel);
       causes.add(classifyFailure((r as PromiseRejectedResult).reason));
     };
+    // Malformed successful responses are a distinct contract failure, not an
+    // unexplained outage. Keep the panel unavailable and make the cause visible.
+    const noteInvalid = (label: string) => {
+      failures.push(label);
+      causes.add('invalid');
+    };
 
     if (statsResult.status === 'fulfilled') {
       const payload = unwrap<any>(statsResult.value);
@@ -216,7 +222,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
         setStatsStatus('ready');
       } else {
         setStatsStatus((current) => current === 'stale' ? 'stale' : 'error');
-        failures.push('dashboard statistics returned an invalid response');
+        noteInvalid('dashboard statistics returned an invalid response');
       }
     } else {
       setStatsStatus((current) => current === 'stale' ? 'stale' : 'error');
@@ -229,7 +235,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
         // The API returns `id` in some deployments rather than Mongo-style `_id`.
         setUsers(payload.users.map((u: any) => ({ ...u, _id: u._id ?? u.id })));
       } else {
-        failures.push('user records (invalid response)');
+        noteInvalid('user records (invalid response)');
       }
     } else {
       note(usersResult, 'user records', 'user records');
@@ -242,7 +248,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
           .filter((u: any) => u && u.role === 'dealer' && u.status === 'pending')
           .map((u: any) => ({ ...u, _id: u._id ?? u.id })));
       } else {
-        failures.push('pending dealer queue (invalid response)');
+        noteInvalid('pending dealer queue (invalid response)');
       }
     } else {
       note(pendingDealersResult, 'pending dealer queue', 'pending dealer queue');
@@ -253,7 +259,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       if (Array.isArray(payload?.cars)) {
         setCars(payload.cars.map((c: any) => ({ ...c, _id: c._id ?? c.id })));
       } else {
-        failures.push('vehicle records (invalid response)');
+        noteInvalid('vehicle records (invalid response)');
       }
     } else {
       note(carsResult, 'vehicle records', 'vehicle records');
@@ -263,7 +269,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       const payload = unwrap<any>(auditResult.value);
       const entries = payload?.entries ?? payload?.logs ?? payload?.auditLogs;
       if (Array.isArray(entries)) setAuditLogs(entries);
-      else failures.push('audit log (invalid response)');
+      else noteInvalid('audit log (invalid response)');
     } else {
       note(auditResult, 'audit log', 'audit log');
     }
@@ -295,6 +301,14 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
     if (!q) return cars;
     return cars.filter((c) => `${c.title || ''} ${c._id} ${c.status || ''}`.toLowerCase().includes(q));
   }, [cars, search]);
+
+  // Audit search is intentionally local to the records already returned by the existing
+  // audit endpoint; that endpoint does not currently implement server-side search.
+  const filteredAuditLogs = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return auditLogs;
+    return auditLogs.filter((log) => `${log.action || ''} ${log.module || ''} ${log.targetId || ''} ${log.actor?.name || ''} ${log.actor?.email || ''} ${log.user?.name || ''} ${log.user?.email || ''}`.toLowerCase().includes(q));
+  }, [auditLogs, search]);
 
   const toggleBan = async (user: AdminUser) => {
     setBusyId(user._id);
@@ -383,19 +397,22 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
         <div className="kayad-command-actions" aria-label="Quick Actions">
           <div className="kayad-command-actions-heading"><strong>Quick Actions</strong><span>Common workspaces</span></div>
           <div className="kayad-command-actions-grid">
-            {canOpen('/admin/staff') && <Link to="/admin/staff">Add Staff <ChevronRight size={14} aria-hidden="true" /></Link>}
-            {canOpen('/admin/dealer-verifications') && <Link to="/admin/dealer-verifications">Approve Dealer <ChevronRight size={14} aria-hidden="true" /></Link>}
-            {canOpen('/admin/cars') && <Link to="/admin/cars">View Vehicles <ChevronRight size={14} aria-hidden="true" /></Link>}
-            {canOpen('/admin/reports') && <Link to="/admin/reports">View Reports <ChevronRight size={14} aria-hidden="true" /></Link>}
-</div>
+            {canOpen('/admin/staff') && <Link className="kayad-command-action-link is-staff" to="/admin/staff"><span className="kayad-command-action-icon"><Users size={16} aria-hidden="true" /></span><span className="kayad-command-action-label">Add Staff</span><ChevronRight className="kayad-command-action-chevron" size={14} aria-hidden="true" /></Link>}
+            {canOpen('/admin/dealer-verifications') && <Link className="kayad-command-action-link is-approval" to="/admin/dealer-verifications"><span className="kayad-command-action-icon"><CheckCircle2 size={16} aria-hidden="true" /></span><span className="kayad-command-action-label">Approve Dealer</span><ChevronRight className="kayad-command-action-chevron" size={14} aria-hidden="true" /></Link>}
+            {canOpen('/admin/cars') && <Link className="kayad-command-action-link is-vehicles" to="/admin/cars"><span className="kayad-command-action-icon"><Car size={16} aria-hidden="true" /></span><span className="kayad-command-action-label">View Vehicles</span><ChevronRight className="kayad-command-action-chevron" size={14} aria-hidden="true" /></Link>}
+            {canOpen('/admin/reports') && <Link className="kayad-command-action-link is-reports" to="/admin/reports"><span className="kayad-command-action-icon"><Compass size={16} aria-hidden="true" /></span><span className="kayad-command-action-label">View Reports</span><ChevronRight className="kayad-command-action-chevron" size={14} aria-hidden="true" /></Link>}
+          </div>
         </div>
       </section>
       <div className="kayad-command-toolbar"><span>{statsStatus === 'stale' ? 'Showing last successful statistics' : statsStatus === 'ready' ? 'Values reflect the latest API response' : 'Live data pending'}</span><Button variant="outline" size="sm" onClick={() => void load()} disabled={loading} aria-label="Refresh administration data"><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh</Button></div>
       {(error || actionError) && (
-        <Card role="alert" className="flex items-start gap-2 border-[#BDE5DE] bg-[#F3FAF9] p-4 text-sm text-[#0A3340]">
+        <Card role="alert" className={`kayad-command-alert flex items-start gap-2 p-4 text-sm ${actionError ? 'is-error' : 'is-warning'}`}>
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
-          <span className="flex-1">{actionError || error}</span>
-          {error && !actionError && <Button size="sm" variant="outline" onClick={() => void load()} disabled={loading} aria-label="Retry loading unavailable data">Retry</Button>}
+          <span className="flex-1">
+            {actionError && <span className="block"><strong>Action failed:</strong> {actionError}</span>}
+            {error && <span className={actionError ? 'mt-1 block' : 'block'}>{error}</span>}
+          </span>
+          {error && <Button size="sm" variant="outline" onClick={() => void load()} disabled={loading} aria-label="Retry loading unavailable data">Retry</Button>}
         </Card>
       )}
 
@@ -407,22 +424,55 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
         <button type="button" onClick={() => setToolsOpen(!toolsOpen)} aria-expanded={toolsOpen} aria-controls="kayad-specialist-tools">{toolsOpen ? 'Hide' : 'Show'} specialist tools <ChevronRight className="inline h-4 w-4" /></button>
         {toolsOpen && <nav id="kayad-specialist-tools" className="kayad-command-tool-links" aria-label="Administration modules">
           {([['overview', 'Dashboard'], ['users', 'User review'], ['cars', 'Vehicle review'], ['audit', 'Audit records'], ['communications', 'Communications'], ['navigation', 'Navigation settings'], ['providers', 'Providers'], ['support', 'Support'], ['onboarding', 'Onboarding'], ['auctions', 'Auction verification'], ...(isOwner ? [['owners', 'Owner management'], ['departments', 'Departments']] : [])] as [typeof module, string][]).map(([key, label]) => <button type="button" key={key} className={module === key ? 'selected' : ''} aria-label={`${label} module`} aria-current={module === key ? 'page' : undefined} onClick={() => { setModule(key); setToolsOpen(false); }}>{label}</button>)}
-          {module !== 'overview' && <Input aria-label="Search administration records" placeholder="Search live records…" value={search} onChange={(e) => setSearch(e.target.value)} />}
+          {module !== 'overview' && <form className="kayad-command-search" role="search" aria-label="Search administration records" onSubmit={(event) => { event.preventDefault(); if (module !== 'audit') void load(queue); }}>
+            <Input aria-label="Search administration records" placeholder={module === 'audit' ? 'Search loaded audit records…' : 'Search records on server…'} value={search} onChange={(e) => setSearch(e.target.value)} />
+            {module !== 'audit' && <Button type="submit" size="sm" variant="primary" disabled={loading}><Search className="h-4 w-4" aria-hidden="true" /> Search</Button>}
+            {search && <Button type="button" size="sm" variant="outline" onClick={() => { setSearch(''); if (module !== 'audit') void load(queue, ''); }} aria-label="Clear administration search">Clear</Button>}
+          </form>}
         </nav>}
       </div>
       {module === 'overview' && (
         <div className="kayad-command-overview">
           <section aria-label="Marketplace metrics" className="kayad-command-kpis">
             {[
-              { label: 'Total Users', value: stat('totalUsers'), icon: <Users size={22} />, to: '/admin/users' },
-              { label: 'Active Staff', value: canOpen('/admin/staff') ? 'View staff' : 'Super Admin only', icon: <ShieldCheck size={22} />, to: '/admin/staff' },
-              { label: 'Verified Dealers', value: stat('verifiedDealers'), icon: <Building2 size={22} />, to: '/admin/dealer-verifications' },
-              { label: 'Vehicles', value: stat('totalCars'), icon: <Car size={22} />, to: '/admin/cars' },
-              { label: 'Live Auctions', value: stat('activeAuctions'), icon: <FileCheck size={22} />, to: '/admin/auctions' },
-              { label: 'Open Escrows', value: stat('openEscrows'), icon: <ShieldCheck size={22} />, to: '/admin/escrows' },
+              { label: 'Total Users', value: stat('totalUsers'), icon: <Users size={22} />, tone: 'blue', to: '/admin/users' },
+              { label: 'Active Staff', value: canOpen('/admin/staff') ? 'View staff' : 'Super Admin only', icon: <ShieldCheck size={22} />, tone: 'teal', to: '/admin/staff' },
+              { label: 'Verified Dealers', value: stat('verifiedDealers'), icon: <Building2 size={22} />, tone: 'violet', to: '/admin/dealer-verifications' },
+              { label: 'Vehicles', value: stat('totalCars'), icon: <Car size={22} />, tone: 'cyan', to: '/admin/cars' },
+              { label: 'Live Auctions', value: stat('activeAuctions'), icon: <FileCheck size={22} />, tone: 'green', to: '/admin/auctions' },
+              { label: 'Open Escrows', value: stat('openEscrows'), icon: <ShieldCheck size={22} />, tone: 'amber', to: '/admin/escrows' },
             ].map(item => canOpen(item.to)
-              ? <Link to={item.to} className="kayad-command-kpi" key={item.label}><div className="kayad-command-kpi-icon">{item.icon}</div><div><small>{item.label}</small><strong className={kpiValueClass(item.value)}>{item.value}</strong></div></Link>
-              : <div className="kayad-command-kpi is-restricted" key={item.label}><div className="kayad-command-kpi-icon">{item.icon}</div><div><small>{item.label}</small><strong className={kpiValueClass(item.value)}>{item.value}</strong></div></div>)}
+              ? <Link to={item.to} className="kayad-command-kpi" key={item.label}><div className={`kayad-command-kpi-icon tone-${item.tone}`} aria-hidden="true">{item.icon}</div><div><small>{item.label}</small><strong className={kpiValueClass(item.value)}>{item.value}</strong></div></Link>
+              : <div className="kayad-command-kpi is-restricted" key={item.label}><div className={`kayad-command-kpi-icon tone-${item.tone}`} aria-hidden="true">{item.icon}</div><div><small>{item.label}</small><strong className={kpiValueClass(item.value)}>{item.value}</strong></div></div>)}
+          </section>
+          <section className="kayad-command-business-flow" aria-labelledby="business-flow-heading" data-testid="business-flow-map">
+            <div className="kayad-command-business-flow-heading">
+              <div>
+                <span className="kayad-command-business-flow-eyebrow">MARKETPLACE LIFECYCLE</span>
+                <h2 id="business-flow-heading">Business flow &amp; operational hand-offs</h2>
+                <p>Follow each record through the existing authorized workspace. These are navigation shortcuts, not a new workflow or source of business status.</p>
+              </div>
+              <span className="kayad-command-flow-note"><ShieldCheck size={15} aria-hidden="true" /> Existing permissions apply</span>
+            </div>
+            <div className="kayad-command-flow-steps">
+              {[
+                { title: 'Dealer onboarding', detail: 'Applications & verification', to: '/admin/dealer-verifications', icon: <Building2 size={19} aria-hidden="true" /> },
+                { title: 'Vehicle listings', detail: 'Review & moderation', to: '/admin/moderation', icon: <Car size={19} aria-hidden="true" /> },
+                { title: 'Inspection & NTSA', detail: 'Documents & inspections', to: '/admin/ntsa-queue', icon: <FileCheck size={19} aria-hidden="true" /> },
+                { title: 'Auctions & bids', detail: 'Auction operations', to: '/admin/auctions', icon: <History size={19} aria-hidden="true" /> },
+                { title: 'Escrow', detail: 'Protected transactions', to: '/admin/escrows', icon: <ShieldCheck size={19} aria-hidden="true" /> },
+                { title: 'Transactions', detail: 'Payment & transaction records', to: '/admin/transactions', icon: <Send size={19} aria-hidden="true" /> },
+              ].filter((step) => canOpen(step.to)).map((step, index, steps) => (
+                <React.Fragment key={step.title}>
+                  <Link to={step.to} className="kayad-command-flow-step">
+                    <span className="kayad-command-flow-icon">{step.icon}</span>
+                    <span className="kayad-command-flow-copy"><strong>{step.title}</strong><small>{step.detail}</small></span>
+                    <ChevronRight className="kayad-command-flow-chevron" size={15} aria-hidden="true" />
+                  </Link>
+                  {index < steps.length - 1 && <span className="kayad-command-flow-connector" aria-hidden="true" />}
+                </React.Fragment>
+              ))}
+            </div>
           </section>
           <div className="kayad-command-main-grid">
             <section className="kayad-command-panel" aria-labelledby="approval-workflows-heading" data-testid="approval-workbench">
@@ -581,14 +631,14 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
           <Table>
             <TableHeader><TableRow><TableHead>Time</TableHead><TableHead>Action</TableHead><TableHead>Module</TableHead><TableHead>Target</TableHead><TableHead>Actor</TableHead></TableRow></TableHeader>
             <TableBody>
-              {auditLogs.map((log, i) => <TableRow key={log._id || log.id || i}>
+              {filteredAuditLogs.map((log, i) => <TableRow key={log._id || log.id || i}>
                 <TableCell className="text-xs">{log.createdAt || log.timestamp || 'Not provided'}</TableCell>
                 <TableCell className="font-semibold">{log.action || 'Unknown action'}</TableCell>
                 <TableCell>{log.module || '—'}</TableCell>
                 <TableCell className="font-mono text-xs">{log.targetId || '—'}</TableCell>
                 <TableCell>{log.actor?.email || log.user?.email || 'Server record'}</TableCell>
               </TableRow>)}
-              {!auditLogs.length && <TableRow><TableCell colSpan={5} className="text-center py-8 text-[#64748B]">{restricted.includes('audit log') ? 'Audit records are restricted for this role.' : down('audit log') ? 'Audit records are unavailable. Refresh or use an authorized workspace.' : 'No audit records returned by the server.'}</TableCell></TableRow>}
+              {!filteredAuditLogs.length && <TableRow><TableCell colSpan={5} className="text-center py-8 text-[#64748B]">{restricted.includes('audit log') ? 'Audit records are restricted for this role.' : down('audit log') ? 'Audit records are unavailable. Refresh or use an authorized workspace.' : search.trim() ? 'No loaded audit records match this search. Search covers the records returned by the current audit response.' : 'No audit records returned by the server.'}</TableCell></TableRow>}
             </TableBody>
           </Table>
         </Card>

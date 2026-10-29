@@ -1,0 +1,5 @@
+KAYAD AUCTION 360 CHECKPOINT — PACKAGING VALIDATION
+The final archive checksum, archive integrity, fresh extraction and exclusion scan are recorded in the accompanying external packaging validation report.
+This checkpoint includes full project source plus the Auction 360 execution report, API diagnostic matrix, business journey matrix, source validator output, and read-only diagnostic output.
+Excluded from the archive: .git, node_modules, dist, coverage, framework caches, Playwright output directories and real environment secret files.
+No production changes, migrations, commits, pushes or deployments were performed.

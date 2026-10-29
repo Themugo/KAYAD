@@ -1,0 +1,13 @@
+operation,status,evidence,limitation
+Refresh,PASS_SOURCE_REVIEW,"Existing load() handler; disabled while loading; source validators pass",Browser not executed
+Retry,PASS_SOURCE_REVIEW,"Existing load() handler; still shown when data error coexists with action error",Browser not executed
+Quick Actions,PASS_SOURCE_REVIEW,"Four canonical destinations preserved and canOpen() gating retained",Browser not executed
+Specialist navigation,PASS_SOURCE_REVIEW,"Existing module buttons and role-gated owner tabs preserved",Browser not executed
+User search,PASS_SOURCE_REVIEW,"Search submit calls existing API loader with trimmed query",Backend runtime not executed
+Vehicle search,PASS_SOURCE_REVIEW,"Search submit calls existing API loader with trimmed query",Backend runtime not executed
+Audit search,PASS_SOURCE_REVIEW,"Filters only current audit response; limitation stated in empty state",No server-side audit search contract exists
+Dealer approve/reject,PASS_SOURCE_REVIEW,"Existing adminAPI handlers and busy state preserved",Mutation tests not executed
+User ban/unban,PASS_SOURCE_REVIEW,"Existing adminAPI handler and busy state preserved",Mutation tests not executed
+Vehicle approve/hide/verify,PASS_SOURCE_REVIEW,"Existing adminAPI handlers and busy state preserved",Mutation tests not executed
+Role boundaries,PASS_SOURCE_REVIEW,"canOpen(), existing route guards and authorization validators retained",Live negative API tests not executed
+Partial data warnings,PASS_SOURCE_REVIEW,"Independent Promise.allSettled handling and truthful unavailable states retained",Browser not executed

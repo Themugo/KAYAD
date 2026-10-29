@@ -211,3 +211,136 @@
 [data-testid="admin-command-centre"] [role="alert"]{line-height:1.5}
 [data-testid="admin-command-centre"] [role="alert"]{font-size:13px}
 @media(max-width:520px){[data-testid="admin-command-centre"] [role="alert"]{flex-wrap:wrap;padding:12px;font-size:12.5px}[data-testid="admin-command-centre"] [role="alert"] button{margin-left:auto}}
+
+
+/* Dashboard page-by-page polish: business lifecycle shortcuts reuse canonical routes only. */
+.kayad-command-business-flow{min-width:0;padding:18px;margin:0 0 16px;border:1px solid var(--admin-border);border-radius:var(--admin-radius-lg);background:linear-gradient(135deg,var(--admin-surface) 0%,var(--admin-surface-soft) 100%);box-shadow:var(--admin-shadow-card)}
+.kayad-command-business-flow-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:15px}
+.kayad-command-business-flow-eyebrow{display:block;margin-bottom:5px;color:var(--admin-brand);font-size:9px;font-weight:850;letter-spacing:.14em}
+.kayad-command-business-flow-heading h2{margin:0;color:var(--admin-ink);font-size:16px;font-weight:800;line-height:1.35}
+.kayad-command-business-flow-heading p{max-width:72ch;margin:5px 0 0;color:var(--admin-muted-content);font-size:11px;line-height:1.6}
+.kayad-command-flow-note{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;padding:7px 9px;border:1px solid var(--admin-border);border-radius:999px;color:var(--admin-muted-content);background:var(--admin-surface);font-size:10px;font-weight:700}
+.kayad-command-flow-steps{display:flex;align-items:stretch;gap:0;min-width:0}
+.kayad-command-flow-step{display:flex;align-items:center;gap:9px;flex:1 1 0;min-width:0;padding:11px 9px;border:1px solid var(--admin-border);border-radius:var(--admin-radius-md);background:var(--admin-surface);color:var(--admin-ink);text-decoration:none;transition:border-color .15s ease,background-color .15s ease,transform .15s ease}
+.kayad-command-flow-step:hover{border-color:var(--admin-accent);background:var(--admin-surface-hover);transform:translateY(-1px)}
+.kayad-command-flow-step:focus-visible{outline:3px solid var(--admin-accent);outline-offset:3px}
+.kayad-command-flow-icon{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border-radius:10px;background:var(--admin-brand-soft);color:var(--admin-brand)}
+.kayad-command-flow-copy{display:grid;gap:3px;min-width:0}
+.kayad-command-flow-copy strong{font-size:10px;font-weight:800;line-height:1.35;overflow-wrap:anywhere}
+.kayad-command-flow-copy small{font-size:9px;line-height:1.4;color:var(--admin-muted-content);overflow-wrap:anywhere}
+.kayad-command-flow-chevron{flex:0 0 auto;margin-left:auto;color:var(--admin-muted-content)}
+.kayad-command-flow-connector{align-self:center;flex:0 0 10px;height:1px;margin:0 3px;background:var(--admin-border-strong,var(--admin-border))}
+@media(max-width:1180px){.kayad-command-flow-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.kayad-command-flow-connector{display:none}.kayad-command-flow-step{min-height:64px}}
+@media(max-width:640px){.kayad-command-business-flow{padding:14px}.kayad-command-business-flow-heading{display:grid;gap:10px}.kayad-command-flow-note{justify-self:start}.kayad-command-flow-steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.kayad-command-flow-step{padding:10px 8px;gap:7px}.kayad-command-flow-icon{flex-basis:30px;width:30px;height:30px}.kayad-command-flow-copy strong{font-size:10px}.kayad-command-flow-copy small{font-size:9px}.kayad-command-flow-chevron{width:12px}}
+@media(max-width:360px){.kayad-command-flow-steps{grid-template-columns:minmax(0,1fr)}.kayad-command-flow-step{min-height:54px}}
+@media(prefers-reduced-motion:reduce){.kayad-command-flow-step{transition:none}.kayad-command-flow-step:hover{transform:none}}
+
+/* Final mobile-first command-centre refinement — scoped to the existing dashboard. */
+.kayad-command-hero{min-width:0;gap:18px;align-items:stretch}
+.kayad-command-hero-content{min-width:0;flex:1 1 auto}
+.kayad-command-actions{box-sizing:border-box;min-width:0;border:1px solid rgba(221,246,248,.14);box-shadow:inset 0 1px 0 rgba(255,255,255,.035)}
+.kayad-command-actions-heading{display:flex!important;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.kayad-command-actions-heading strong{margin:0!important;font-size:13px!important;letter-spacing:-.01em}
+.kayad-command-actions-heading>span{font-size:10px;line-height:1.4;text-align:right}
+.kayad-command-actions .kayad-command-actions-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.kayad-command-actions .kayad-command-actions-grid a{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;min-height:42px;box-sizing:border-box;padding:10px 11px;border:1px solid rgba(10,51,64,.08);border-radius:10px;background:var(--admin-surface);font-size:11px;line-height:1.35;text-align:left;transition:background-color .15s ease,border-color .15s ease,transform .15s ease}
+.kayad-command-actions .kayad-command-actions-grid a svg{flex:0 0 auto}
+.kayad-command-actions .kayad-command-actions-grid a:hover{border-color:var(--admin-accent);background:var(--admin-surface-soft);transform:translateY(-1px)}
+.kayad-command-actions .kayad-command-actions-grid a:focus-visible{outline:3px solid var(--admin-accent);outline-offset:2px}
+.kayad-command-identity{margin-top:12px}
+.kayad-command-meta{gap:10px 16px;margin-top:13px}
+.kayad-command-data-state{font-size:11px;overflow-wrap:anywhere}
+.kayad-command-toolbar{flex-wrap:wrap;min-height:40px;margin:10px 0}
+.kayad-command-toolbar>span{min-width:0;overflow-wrap:anywhere}
+[data-testid="admin-command-centre"] [role="alert"]{align-items:flex-start;gap:10px;border-radius:14px;box-shadow:0 3px 12px rgba(10,51,64,.035)}
+[data-testid="admin-command-centre"] [role="alert"] button{flex:0 0 auto;min-height:38px}
+@media(max-width:850px){
+  .kayad-command-hero{gap:15px}
+  .kayad-command-actions{width:100%;padding:13px}
+}
+@media(max-width:520px){
+  [data-testid="admin-command-centre"]{padding:10px 12px 28px;min-height:100dvh}
+  .kayad-command-hero{gap:14px;padding:17px;border-radius:18px;background-position:58% center}
+  .kayad-command-eyebrow{gap:7px;font-size:9px;letter-spacing:.105em;line-height:1.4}
+  .kayad-command-hero h1{max-width:18ch;margin:8px 0 7px;font-size:clamp(23px,6.3vw,29px);line-height:1.08;letter-spacing:-.035em}
+  .kayad-command-hero .kayad-command-intro{max-width:42ch;font-size:12px;line-height:1.55}
+  .kayad-command-identity{margin-top:11px;padding:6px 10px 6px 6px;gap:9px;border-radius:12px}
+  .kayad-command-identity-mark{width:32px;height:32px;flex-basis:32px;border-radius:9px}
+  .kayad-command-identity-copy strong{font-size:11px}
+  .kayad-command-identity-copy small{font-size:10px}
+  .kayad-command-meta{display:grid;gap:9px;margin-top:12px;font-size:10px}
+  .kayad-command-meta-item{display:grid;gap:3px}
+  .kayad-command-meta-label{font-size:9px;letter-spacing:.09em}
+  .kayad-command-data-state{font-size:10px;line-height:1.45}
+  .kayad-command-actions{padding:12px;border-radius:14px}
+  .kayad-command-actions-heading{margin-bottom:10px;align-items:baseline}
+  .kayad-command-actions-heading strong{font-size:12px!important}
+  .kayad-command-actions-heading>span{font-size:9px}
+  .kayad-command-actions .kayad-command-actions-grid{gap:7px}
+  .kayad-command-actions .kayad-command-actions-grid a{min-height:42px;padding:9px 10px;font-size:10.5px;border-radius:9px}
+  .kayad-command-toolbar{gap:8px;font-size:10px}
+  .kayad-command-toolbar button{min-height:40px}
+  [data-testid="admin-command-centre"] [role="alert"]{padding:12px;font-size:12px}
+  [data-testid="admin-command-centre"] [role="alert"]>span{flex:1 1 180px;min-width:0}
+  [data-testid="admin-command-centre"] [role="alert"] button{margin-left:auto;min-height:40px}
+  .kayad-command-kpi{min-height:76px;padding:10px 9px;gap:8px}
+  .kayad-command-kpi-icon{flex-basis:32px;width:32px;height:32px}
+  .kayad-command-kpi-icon svg{width:18px;height:18px}
+}
+@media(max-width:360px){
+  [data-testid="admin-command-centre"]{padding-right:9px;padding-left:9px}
+  .kayad-command-hero{padding:14px;gap:12px}
+  .kayad-command-eyebrow{font-size:8px;letter-spacing:.08em}
+  .kayad-command-hero h1{font-size:23px}
+  .kayad-command-actions{padding:10px}
+  .kayad-command-actions .kayad-command-actions-grid{grid-template-columns:minmax(0,1fr)}
+  .kayad-command-actions .kayad-command-actions-grid a{min-height:40px;font-size:11px}
+  .kayad-command-actions-heading>span{max-width:42%;}
+}
+@media(min-width:521px) and (max-width:850px){
+  .kayad-command-hero{padding:20px;gap:16px}
+  .kayad-command-hero h1{font-size:clamp(26px,4vw,32px)}
+  .kayad-command-actions .kayad-command-actions-grid a{min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){.kayad-command-actions .kayad-command-actions-grid a{transition:none}.kayad-command-actions .kayad-command-actions-grid a:hover{transform:none}}
+
+/* Final dashboard control and icon convergence: scoped to the existing command centre. */
+[data-testid="admin-command-centre"] .kayad-command-actions .kayad-command-actions-grid a.kayad-command-action-link{
+  display:grid;grid-template-columns:30px minmax(0,1fr) 13px;align-items:center;justify-content:initial;gap:8px;min-height:48px;padding:8px 9px;border:1px solid rgba(156,207,216,.24);border-radius:11px;background:rgba(236,248,248,.97);color:var(--admin-brand-dark);font-size:11px;font-weight:750;line-height:1.3;text-align:left;box-shadow:0 1px 2px rgba(0,20,28,.04);overflow-wrap:anywhere
+}
+[data-testid="admin-command-centre"] .kayad-command-action-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:rgba(19,184,166,.12);color:var(--admin-brand);transition:background-color .15s ease,color .15s ease}
+[data-testid="admin-command-centre"] .kayad-command-action-label{min-width:0;overflow-wrap:anywhere}
+[data-testid="admin-command-centre"] .kayad-command-action-chevron{color:var(--admin-muted-content);justify-self:end}
+[data-testid="admin-command-centre"] .kayad-command-action-link.is-staff .kayad-command-action-icon{background:rgba(37,99,235,.10);color:#2563eb}
+[data-testid="admin-command-centre"] .kayad-command-action-link.is-approval .kayad-command-action-icon{background:rgba(5,150,105,.12);color:#047857}
+[data-testid="admin-command-centre"] .kayad-command-action-link.is-vehicles .kayad-command-action-icon{background:rgba(8,145,178,.12);color:#0e7490}
+[data-testid="admin-command-centre"] .kayad-command-action-link.is-reports .kayad-command-action-icon{background:rgba(124,58,237,.10);color:#6d28d9}
+[data-testid="admin-command-centre"] .kayad-command-actions .kayad-command-actions-grid a.kayad-command-action-link:hover{transform:translateY(-1px);border-color:var(--admin-accent);background:#fff;box-shadow:0 5px 13px rgba(0,35,45,.08)}
+[data-testid="admin-command-centre"] .kayad-command-actions .kayad-command-actions-grid a.kayad-command-action-link:hover .kayad-command-action-icon{background:rgba(19,184,166,.17)}
+[data-testid="admin-command-centre"] .kayad-command-actions .kayad-command-actions-grid a.kayad-command-action-link:focus-visible{outline:3px solid var(--admin-accent-bright);outline-offset:3px}
+[data-testid="admin-command-centre"] .kayad-command-kpi-icon{transition:background-color .15s ease,color .15s ease}
+[data-testid="admin-command-centre"] .kayad-command-kpi-icon.tone-blue{background:rgba(37,99,235,.10);color:#2563eb}
+[data-testid="admin-command-centre"] .kayad-command-kpi-icon.tone-teal{background:rgba(19,184,166,.14);color:#0f766e}
+[data-testid="admin-command-centre"] .kayad-command-kpi-icon.tone-violet{background:rgba(124,58,237,.10);color:#6d28d9}
+[data-testid="admin-command-centre"] .kayad-command-kpi-icon.tone-cyan{background:rgba(8,145,178,.11);color:#0e7490}
+[data-testid="admin-command-centre"] .kayad-command-kpi-icon.tone-green{background:rgba(5,150,105,.12);color:#047857}
+[data-testid="admin-command-centre"] .kayad-command-kpi-icon.tone-amber{background:rgba(217,119,6,.12);color:#b45309}
+[data-testid="admin-command-centre"] .kayad-command-alert.is-warning{border-color:#f1d6a8;background:#fffaf0;color:#75440b}
+[data-testid="admin-command-centre"] .kayad-command-alert.is-warning>svg{color:#b7791f}
+[data-testid="admin-command-centre"] .kayad-command-alert.is-error{border-color:#f2c7c4;background:#fff7f6;color:#8a2d28}
+[data-testid="admin-command-centre"] .kayad-command-alert.is-error>svg{color:#b42318}
+[data-testid="admin-command-centre"] .kayad-command-search{display:flex;align-items:center;flex:1 1 320px;gap:8px;min-width:min(100%,280px);margin-left:auto}
+[data-testid="admin-command-centre"] .kayad-command-search input{min-width:0;width:100%}
+[data-testid="admin-command-centre"] .kayad-command-search button{flex:0 0 auto;min-height:38px}
+[data-testid="admin-command-centre"] .kayad-command-tool-links{align-items:center}
+[data-testid="admin-command-centre"] .kayad-command-specialists>button{display:inline-flex;align-items:center;gap:6px;min-height:38px;padding:7px 10px;border:1px solid var(--admin-border);border-radius:10px;background:var(--admin-surface);text-decoration:none;font-weight:700}
+[data-testid="admin-command-centre"] .kayad-command-specialists>button:focus-visible,
+[data-testid="admin-command-centre"] .kayad-command-search button:focus-visible{outline:3px solid var(--admin-accent);outline-offset:2px}
+@media(max-width:520px){
+  [data-testid="admin-command-centre"] .kayad-command-actions .kayad-command-actions-grid a.kayad-command-action-link{grid-template-columns:28px minmax(0,1fr) 12px;gap:7px;min-height:46px;padding:8px;font-size:10.5px}
+  [data-testid="admin-command-centre"] .kayad-command-action-icon{width:28px;height:28px}
+  [data-testid="admin-command-centre"] .kayad-command-search{flex-basis:100%;margin-left:0;flex-wrap:wrap}
+  [data-testid="admin-command-centre"] .kayad-command-search input{flex:1 1 100%}
+  [data-testid="admin-command-centre"] .kayad-command-search button{flex:1 1 auto}
+}
+@media(prefers-reduced-motion:reduce){[data-testid="admin-command-centre"] .kayad-command-action-icon{transition:none}}

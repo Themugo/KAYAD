@@ -96,6 +96,10 @@ export const verifyDealerOtp = async (userId, otp) => {
 export const listDealerVerifications = async ({ status, page = 1, limit = 20 } = {}) => {
   const p = Math.max(1, Number(page) || 1);
   const l = Math.min(100, Math.max(1, Number(limit) || 20));
+  const supportedStatuses = ["pending", "approved", "rejected", "suspended"];
+  if (status && !supportedStatuses.includes(String(status))) {
+    throw Object.assign(new Error("Unsupported dealer verification status filter"), { statusCode: 400 });
+  }
   const filters = status ? { verificationStatus: status } : {};
   const result = await findAll("dealer_verifications", {
     filters, orderBy: "submittedAt", ascending: false, limit: l, offset: (p - 1) * l, count: true,

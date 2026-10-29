@@ -37,6 +37,8 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
   const [providers, setProviders] = useState<InspectionProvider[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [resultsStale, setResultsStale] = useState(false);
+  const [lastSuccessfulSearchAt, setLastSuccessfulSearchAt] = useState<number | null>(null);
   const [confirmation, setConfirmation] = useState<{ reference?: string } | null>(null);
   const [total, setTotal] = useState(0);
   const [showRefine, setShowRefine] = useState(false);
@@ -51,6 +53,8 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
   const [locationState, setLocationState] = useState<LocationState>('idle');
   const [filters, setFilters] = useState<SearchProvidersParams>({ page: 1, limit: PAGE_SIZE, ...initialFilters });
   const requestSeq = useRef(0);
+  const profileRequestSeq = useRef(0);
+  const hasProvidersRef = useRef(false);
 
   useEffect(() => {
     let alive = true;
@@ -66,15 +70,24 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
     try {
       const response = await inspectionApi.searchProviders(filters);
       if (seq !== requestSeq.current) return; // a newer search superseded this one
-      setProviders(response.items || []);
-      setTotal(response.total || 0);
+      // A fulfilled HTTP response is not necessarily a valid business-search result.
+      if (!response || !Array.isArray(response.items) ||
+          !Number.isFinite(response.total) || response.total < 0 ||
+          response.items.some((item) => !item || typeof item.id !== 'string' || !item.id.trim() ||
+            typeof item.companyName !== 'string' || !item.companyName.trim())) {
+        throw new Error('Invalid provider search response');
+      }
+      setProviders(response.items);
+      setTotal(response.total);
+      hasProvidersRef.current = response.items.length > 0;
+      setResultsStale(false);
+      setLastSuccessfulSearchAt(Date.now());
     } catch (error) {
       if (seq !== requestSeq.current) return;
+      // Keep the last successful snapshot for context; never turn a failed query into a false empty result.
       console.error('Failed to fetch providers:', error);
-      // A failed request is not "no providers": say so and let the customer retry.
-      setProviders([]);
-      setTotal(0);
-      setLoadError('We could not load businesses right now.');
+      setResultsStale(hasProvidersRef.current);
+      setLoadError('We could not refresh the business directory. Try again; previously loaded results may be out of date.');
     } finally {
       if (seq === requestSeq.current) setLoading(false);
     }
@@ -86,16 +99,22 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
   const suggested = useMemo(() => taxonomy?.symptoms.find((s) => s.code === symptom)?.suggests || [], [taxonomy, symptom]);
 
   const handleSelectProvider = async (provider: InspectionProvider) => {
+    const seq = ++profileRequestSeq.current;
     setSelectedProviderLoading(true);
     setSelectedProviderError(null);
     try {
       const full = await inspectionApi.getProviderProfile(provider.id);
+      if (seq !== profileRequestSeq.current) return;
+      if (!full || typeof full.id !== 'string' || full.id !== provider.id) {
+        throw new Error('Invalid provider profile response');
+      }
       setSelectedProvider(full);
     } catch (error) {
+      if (seq !== profileRequestSeq.current) return;
       console.error('Failed to load provider profile:', error);
       setSelectedProviderError('Could not load this business. Please try again.');
     } finally {
-      setSelectedProviderLoading(false);
+      if (seq === profileRequestSeq.current) setSelectedProviderLoading(false);
     }
   };
 
@@ -268,21 +287,39 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
           <p style={{ color: C.soft }}>
             {loading ? 'Searching…' : `${total} ${total === 1 ? 'business' : 'businesses'} found`}
           </p>
-          <p className="text-xs" style={{ color: C.soft }}>
-            Order: {typeof filters.nearLat === 'number' ? 'nearest first, then verified' : 'verified first, then by name'}. Not ranked by popularity or payment.
-          </p>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <p className="text-xs" style={{ color: C.soft }}>
+              Order: {typeof filters.nearLat === 'number' ? 'nearest first, then verified' : 'verified first, then by name'}. Not ranked by popularity or payment.
+            </p>
+            {lastSuccessfulSearchAt !== null && <p className="text-xs text-slate-500">Last successful search: {new Date(lastSuccessfulSearchAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>}
+          </div>
         </div>
 
-        {loading ? (
+        {loading && providers.length > 0 && !loadError && (
+          <p role="status" className="mb-4 text-sm" style={{ color: C.soft }}>Updating results. Previously loaded businesses remain visible until the new search completes.</p>
+        )}
+        {loadError && (
+          <div role="alert" className="mb-5 rounded-xl border px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3" style={{ borderColor: C.line, backgroundColor: '#F3FAF9' }}>
+            <div>
+              <p className="font-semibold" style={{ color: C.navy }}>{resultsStale ? 'Showing previously loaded businesses' : 'Business directory unavailable'}</p>
+              <p className="text-sm" style={{ color: C.soft }}>{loadError}</p>
+            </div>
+            <button type="button" onClick={() => void fetchProviders()} disabled={loading} className="px-4 min-h-[44px] rounded-lg font-semibold text-white disabled:opacity-60" style={{ backgroundColor: C.teal }}>
+              {loading ? 'Refreshing…' : 'Retry search'}
+            </button>
+          </div>
+        )}
+
+        {loading && providers.length === 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" aria-busy="true">
             {[1, 2, 3].map((i) => <div key={i} className="animate-pulse rounded-xl h-80 bg-white" />)}
           </div>
-        ) : loadError ? (
-          <div role="alert" className="text-center py-12">
-            <Wrench className="mx-auto mb-4" size={56} style={{ color: '#5AAFA4' }} aria-hidden />
+        ) : loadError && providers.length === 0 ? (
+          <div className="text-center py-12 rounded-2xl border bg-white" style={{ borderColor: C.line }}>
+            <Wrench className="mx-auto mb-4" size={48} style={{ color: C.teal }} aria-hidden />
             <h3 className="text-xl font-semibold mb-2" style={{ color: C.navy }}>Businesses could not be loaded</h3>
-            <p style={{ color: C.soft }}>{loadError}</p>
-            <button type="button" onClick={() => void fetchProviders()} className="mt-4 px-5 min-h-[44px] rounded-lg font-semibold text-white" style={{ backgroundColor: C.teal }}>Try again</button>
+            <p className="max-w-lg mx-auto px-4" style={{ color: C.soft }}>{loadError}</p>
+            <button type="button" onClick={() => void fetchProviders()} disabled={loading} className="mt-4 px-5 min-h-[44px] rounded-lg font-semibold text-white disabled:opacity-60" style={{ backgroundColor: C.teal }}>Try again</button>
           </div>
         ) : providers.length === 0 ? (
           <EmptyState filters={filters} category={category?.label} onBroaden={update} onClearAll={() => { setLocationState('idle'); setFilters({ page: 1, limit: PAGE_SIZE }); setSymptom(''); }} />

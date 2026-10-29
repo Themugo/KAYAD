@@ -168,7 +168,8 @@
     "validate:phase12-admin-status-tokens": "node scripts/validate-phase12-admin-status-token-convergence.mjs",
     "validate:phase13e-listing-visibility": "node scripts/validate-phase13e-listing-visibility.mjs",
     "validate:phase13f": "npm run validate:phase13e-listing-visibility && npm run validate:migration-hygiene && cd backend && npm run test:jest -- tests/regression/phase13fCapabilityHardening tests/regression/phaseC1PublicListingCacheInvalidation",
-    "validate:repository-naming": "node scripts/validate-repository-naming-and-paths.mjs"
+    "validate:repository-naming": "node scripts/validate-repository-naming-and-paths.mjs",
+    "validate:admin-dashboard-mobile-premium": "node scripts/validate-admin-dashboard-mobile-premium.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

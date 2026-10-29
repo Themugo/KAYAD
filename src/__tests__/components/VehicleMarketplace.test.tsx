@@ -82,12 +82,27 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     onToggleCompare: () => {},
     onQuickView: () => {},
     onStartEscrow: () => {},
-    selectedCounty: 'All East Africa',
+    selectedCounty: 'All Kenya',
     onCountyChange: () => {},
     searchQuery: '',
     onSearchChange: () => {},
     onOpenCompareModal: () => {},
   };
+
+  it('uses Kenya-only marketplace scope and accessible inventory controls', async () => {
+    await renderMarketplace({ ...baseProps });
+    expect(screen.getByText('All Kenya')).toBeInTheDocument();
+    expect(screen.queryByText(/East Africa/i)).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Sort inventory')).toHaveValue('newest');
+    expect(screen.getByRole('button', { name: 'Open inventory filters' })).toBeInTheDocument();
+    expect(screen.getByRole('textbox', { name: 'Search vehicles by make, model or keyword' })).toBeInTheDocument();
+  });
+
+  it('keeps the mobile toolbar controls grouped for responsive layout', async () => {
+    await renderMarketplace({ ...baseProps });
+    expect(document.querySelector('.kayad-market-toolbar-controls')).toBeInTheDocument();
+    expect(document.querySelector('.kayad-search-bridge')).toBeInTheDocument();
+  });
 
 
   it('renders without throwing against the real mock dataset', async () => {
@@ -440,7 +455,7 @@ describe('VehicleMarketplace - consolidated Make selector (space audit)', () => 
     onToggleCompare: () => {},
     onQuickView: () => {},
     onStartEscrow: () => {},
-    selectedCounty: 'All East Africa',
+    selectedCounty: 'All Kenya',
     onCountyChange: () => {},
     searchQuery: '',
     onSearchChange: () => {},
@@ -514,7 +529,7 @@ describe('VehicleMarketplace - toolbar controls (redesigned layout)', () => {
     onToggleCompare: () => {},
     onQuickView: () => {},
     onStartEscrow: () => {},
-    selectedCounty: 'All East Africa',
+    selectedCounty: 'All Kenya',
     onCountyChange: () => {},
     searchQuery: '',
     onSearchChange: () => {},
@@ -555,7 +570,7 @@ describe('VehicleMarketplace - admin home page customization', () => {
     onToggleCompare: () => {},
     onQuickView: () => {},
     onStartEscrow: () => {},
-    selectedCounty: 'All East Africa',
+    selectedCounty: 'All Kenya',
     onCountyChange: () => {},
     searchQuery: '',
     onSearchChange: () => {},
@@ -694,7 +709,7 @@ describe('VehicleMarketplace - Escrow Rules & Activation admin UI (end-to-end th
     onToggleCompare: () => {},
     onQuickView: () => {},
     onStartEscrow: () => {},
-    selectedCounty: 'All East Africa',
+    selectedCounty: 'All Kenya',
     onCountyChange: () => {},
     searchQuery: '',
     onSearchChange: () => {},

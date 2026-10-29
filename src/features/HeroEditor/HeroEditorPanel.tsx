@@ -9,7 +9,7 @@ interface HeroEditorPanelProps {
 const EMPTY_DRAFT: HeroSlideInput = {
   eyebrowText: '',
   headline: 'Drive Your Dream Today',
-  subheadline: 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.',
+  subheadline: 'Discover quality vehicles across Kenya. Find the right car, make your move, and drive with confidence.',
   ctaPrimaryText: '',
   ctaPrimaryLink: '',
   ctaSecondaryText: '',

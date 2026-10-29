@@ -105,7 +105,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [mobileDrawerHeight, setMobileDrawerHeight] = useState(0);
 
   const openMobileMenu = useCallback(() => {
-    const headerBottom = headerRef.current?.getBoundingClientRect().bottom ?? 0;
+    const headerAnchor = headerRef.current?.querySelector('.kayad-header__bar') as HTMLElement | null;
+    const headerBottom = headerAnchor?.getBoundingClientRect().bottom ?? headerRef.current?.getBoundingClientRect().bottom ?? 0;
     const top = Math.max(0, Math.round(headerBottom));
     const viewport = window.visualViewport;
     const viewportBottom = viewport ? viewport.offsetTop + viewport.height : window.innerHeight;
@@ -136,7 +137,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   useEffect(() => {
     if (!mobileMenuOpen) return;
     const syncDrawerViewport = () => {
-      const headerBottom = headerRef.current?.getBoundingClientRect().bottom ?? 0;
+      const headerAnchor = headerRef.current?.querySelector('.kayad-header__bar') as HTMLElement | null;
+      const headerBottom = headerAnchor?.getBoundingClientRect().bottom ?? headerRef.current?.getBoundingClientRect().bottom ?? 0;
       const top = Math.max(0, Math.round(headerBottom));
       // Mobile browser chrome can shrink the visual viewport without a matching
       // layout-viewport resize. Keep the drawer sized to the actually visible area.
@@ -757,7 +759,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <>
           <button type="button" aria-label="Close navigation menu" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-[55] bg-[#031E27]/55 backdrop-blur-[2px] lg:hidden" />
           <aside ref={drawerRef} id="kayad-mobile-drawer" tabIndex={-1} className="kayad-mobile-menu fixed inset-x-0 bottom-0 z-[60] lg:hidden focus:outline-none" style={{ top: `${mobileDrawerTop}px`, height: `${mobileDrawerHeight}px` }} role="dialog" aria-modal="true" aria-label="KAYAD mobile navigation">
-            <div className="kayad-mobile-menu__surface mx-auto flex h-full w-full max-w-[760px] flex-col overflow-hidden rounded-b-[28px] border-x border-b border-[#2C6671] bg-[#062E3A] text-white shadow-[0_30px_90px_rgba(3,30,39,.38)]">
+            <div className="kayad-mobile-menu__surface mx-auto flex h-full w-full max-w-[760px] flex-col overflow-hidden rounded-t-[28px] border-x border-t border-[#2C6671] bg-[#062E3A] text-white shadow-[0_30px_90px_rgba(3,30,39,.38)]">
               <div className="flex min-h-1.5 items-center justify-center bg-[#0A3340]"><span className="h-1 w-10 rounded-full bg-white/20" /></div>
               <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {user ? (

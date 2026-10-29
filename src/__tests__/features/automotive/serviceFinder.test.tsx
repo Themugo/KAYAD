@@ -50,6 +50,27 @@ describe('Service finder (inspection marketplace route)', () => {
   });
   afterEach(() => { vi.unstubAllGlobals(); });
 
+  it('does not turn a malformed fulfilled search response into an empty directory', async () => {
+    search.mockResolvedValueOnce({ items: [{ id: 'p1', companyName: 'Acme Garage' }], total: 1 })
+      .mockResolvedValueOnce({ items: null, total: 0 });
+    render(<InspectionMarketplacePage />);
+    await screen.findByText('Acme Garage');
+    fireEvent.click(await screen.findByRole('button', { name: /Diagnostics and fault assessment/ }));
+    // Changing a category triggers a new request; malformed response must be an error, not an empty state.
+    await waitFor(() => expect(search).toHaveBeenCalledTimes(2));
+    expect(await screen.findByText(/Showing previously loaded businesses|Business directory unavailable/)).toBeTruthy();
+  });
+
+  it('keeps the last successful business results visible when a later search fails', async () => {
+    search.mockResolvedValueOnce({ items: [prov()], total: 1 }).mockRejectedValueOnce(new Error('network unavailable'));
+    render(<InspectionMarketplacePage />);
+    await screen.findByText('Acme Garage');
+    fireEvent.click(screen.getByRole('button', { name: /Diagnostics and fault assessment/ }));
+    expect(await screen.findByText(/Showing previously loaded businesses/)).toBeTruthy();
+    expect(screen.getByText('Acme Garage')).toBeTruthy();
+    expect(screen.queryByText(/No matching businesses/)).toBeNull();
+  });
+
   it('never sends status, verified, sort or rating parameters; those are server decisions', async () => {
     render(<InspectionMarketplacePage />);
     await screen.findByText('Acme Garage');

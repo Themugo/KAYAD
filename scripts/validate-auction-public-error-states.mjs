@@ -11,10 +11,10 @@ const backendVisibilityTests = read('backend/tests/auction/auctionListSoftDelete
 const detailTests = read('src/__tests__/pages/AuctionLivePage.test.jsx');
 const checks = [
   ['discovery does not expose raw server exception text', !discovery.includes('reason?.response?.data?.message') && !discovery.includes('Internal server error')],
-  ['a failed refresh preserves the last successful list snapshot', discovery.includes('applyIfFulfilled(results[0], setLive)') && discovery.includes('applyIfFulfilled(results[1], setScheduled)') && discovery.includes('applyIfFulfilled(results[2], setEnded)')],
+  ['a failed refresh preserves the last successful list snapshot', discovery.includes('if (normalized[0].ok) setLive(normalized[0].rows)') && discovery.includes('if (normalized[1].ok) setScheduled(normalized[1].rows)') && discovery.includes('if (normalized[2].ok) setEnded(normalized[2].rows)') && discovery.includes('readAuctionRows(result.value)')],
   ['headline state follows the selected auction tab and avoids a false empty flash during load', discovery.includes('The headline describes the selected tab only') && !discovery.includes('if (failed.scheduled && live.length === 0)') && discovery.includes('Loading auction activity…')],
   ['auction tabs are connected to an accessible results panel', discovery.includes('aria-controls="auction-results-panel"') && discovery.includes('role="tabpanel"') && discovery.includes('aria-labelledby={`auction-tab-${tab}`}')],
-  ['signed-out saved tab does not show a false zero count', discovery.includes("{user ? favorites.size : '—'}") && discovery.includes('Sign in to view your saved auctions')],
+  ['signed-out saved tab does not show a false zero count', discovery.includes("!user || favoritesStatus === 'loading' || favoritesStatus === 'error' ? '—' : favorites.size") && discovery.includes('Sign in to view your saved auctions')],
   ['detail page distinguishes HTTP 404 from service/network failure', detail.includes("status === 404 ? 'not-found' : 'unavailable'")],
   ['detail page offers retry and a route back to auction discovery', detail.includes('Try again') && detail.includes('Back to auctions') && detail.includes('setLoadAttempt((attempt) => attempt + 1)')],
   ['initial detail load uses the canonical sanitized bid list once', detail.includes('Array.isArray(auctionData.bids)') && !detail.includes('fetchAuctionBids(id)') && controller.includes('bids: bids.map((b) =>') && service.includes('/api/auctions/${encodeURIComponent(carId)}/bids')],

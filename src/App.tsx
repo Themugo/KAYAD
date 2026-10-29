@@ -180,7 +180,7 @@ function AppInner() {
       setActiveNav('marketplace');
     }
   }, [activeNav, authLoading, sessionStatus, isAuth, isAdmin, isDealer, authUser?.role, location, navigate]);
-  const [selectedCounty, setSelectedCounty] = useState<string>('All East Africa');
+  const [selectedCounty, setSelectedCounty] = useState<string>('All Kenya');
   // Where the services finder opens from the global navigation / hub (a canonical taxonomy category, or none).
   const [finderLaunch, setFinderLaunch] = useState<{ category?: string; nonce: number }>({ nonce: 0 });
   const [inspectionLaunch, setInspectionLaunch] = useState<{ vehicle: Vehicle | null; tab: 'service' | 'mine' | 'reports'; action: 'request' | 'apply-provider' | 'manage-business' | null; nonce: number }>({ vehicle: null, tab: 'service', action: null, nonce: 0 });

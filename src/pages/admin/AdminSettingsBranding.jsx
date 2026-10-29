@@ -1,47 +1,34 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
 import { Palette, Leaf, Layers, PenLine, BarChart3 } from 'lucide-react';
 // Color field component with color picker and hex input
-const ColorField = ({ label, value, onChange, description }) => (
-  <div className="input-group">
-    <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <div style={{
-        width: 32,
-        height: 32,
-        borderRadius: 8,
-        background: value,
-        border: '2px solid var(--border)',
-        cursor: 'pointer',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        <input type="color" aria-label={label}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          style={{
-            position: 'absolute',
-            inset: 0,
-            opacity: 0,
-            cursor: 'pointer',
-            width: '100%',
-            height: '100%'
-          }}
-        />
-      </div>
-      <div>
-        <div style={{ fontSize: 13, fontWeight: 600 }}>{label}</div>
-        {description && <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 400 }}>{description}</div>}
-      </div>
-    </label>
-    <input aria-label={`${label} value`} className="input" type="text" value={value}
-      onChange={(e) => onChange(e.target.value)}
-      style={{ height: 38, fontFamily: 'monospace', fontSize: 13, marginTop: 6 }}
-      placeholder="#0a3340"
-    />
-  </div>
-);
+const ColorField = ({ label, value, onChange, description }) => {
+  const [draft, setDraft] = useState(value || '');
+  useEffect(() => setDraft(value || ''), [value]);
+  const isHex = /^#[0-9A-Fa-f]{6}$/.test(String(value || ''));
+  const isAllowedColor = (candidate) => /^#[0-9A-Fa-f]{6}$/.test(candidate) || /^rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*(?:0|1|0?\.\d+))?\s*\)$/.test(candidate);
+  return (
+    <div className="input-group">
+      <label className="input-label" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        {isHex && <div style={{ width: 32, height: 32, borderRadius: 8, background: value, border: '2px solid var(--border)', cursor: 'pointer', position: 'relative', overflow: 'hidden' }}>
+          <input type="color" aria-label={label} value={value} onChange={(e) => { setDraft(e.target.value); onChange(e.target.value); }} style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', width: '100%', height: '100%' }} />
+        </div>}
+        <div>
+          <div style={{ fontSize: 13, fontWeight: 600 }}>{label}</div>
+          {description && <div style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 400 }}>{description}</div>}
+        </div>
+      </label>
+      <input aria-label={`${label} value`} className="input" type="text" value={draft}
+        onChange={(e) => { const next = e.target.value; setDraft(next); if (isAllowedColor(next.trim())) onChange(next.trim()); }}
+        onBlur={() => { if (!isAllowedColor(draft.trim())) setDraft(value || ''); }}
+        style={{ height: 38, fontFamily: 'monospace', fontSize: 13, marginTop: 6 }}
+        placeholder="#0a3340 or rgba(23, 107, 135, 0.22)"
+      />
+    </div>
+  );
+};
 
 // Section card wrapper
 const SectionCard = ({ title, icon, children }) => (
@@ -175,8 +162,9 @@ const BrandingPreview = ({ branding }) => (
   </div>
 );
 
-export default function AdminSettingsBranding({ branding, setBranding, config, setConfig, saveConfig, saving }) {
+export default function AdminSettingsBranding({ branding, setBranding, config, setConfig, saveConfig, saving, canSave = true }) {
   const { toast } = useToast();
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // Handle color change with validation
   const handleColorChange = (key, value) => {
@@ -190,9 +178,9 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
   const autoGenerateVariants = () => {
     const primary = branding.primaryColor;
     // Simple lightening/darkening logic
-    const lightVariant = primary + '80'; // Add transparency
-    const darkVariant = '#12576D'; // Default dark variant
-    const glowVariant = primary + '40'; // Glow effect
+    const lightVariant = '#D9EEF3';
+    const darkVariant = '#0A3340';
+    const glowVariant = 'rgba(23, 107, 135, 0.22)';
 
     setBranding(p => ({
       ...p,
@@ -244,23 +232,28 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
                   ) : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Logo preview · transparent PNG or SVG recommended</span>}
                 </div>
                 <div style={{ display: 'grid', gap: 6, minWidth: 220, flex: 1 }}>
-                  <input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" aria-label="Upload KAYAD logo" onChange={async (e) => {
+                  <input type="file" accept="image/png,image/jpeg,image/webp" aria-label="Upload KAYAD logo" disabled={uploadingLogo} onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (!file) return;
-                    const allowed = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
-                    if (!allowed.includes(file.type)) { toast('Choose a PNG, JPEG, WebP or SVG logo.', 'error'); e.currentTarget.value = ''; return; }
+                    const allowed = ['image/png', 'image/jpeg', 'image/webp'];
+                    if (!allowed.includes(file.type)) { toast('Choose a PNG, JPEG or WebP logo. SVG uploads are not supported by the current secure upload service.', 'error'); e.currentTarget.value = ''; return; }
                     if (file.size > 5 * 1024 * 1024) { toast('Logo must be 5 MB or smaller.', 'error'); e.currentTarget.value = ''; return; }
                     const form = new FormData();
                     form.append('logo', file);
+                    const input = e.currentTarget;
+                    setUploadingLogo(true);
                     try {
                       const res = await adminAPI.uploadLogo(form);
-                      if (res?.url) setBranding(p => ({...p, logoType: 'image', logoUrl: res.url}));
-                      else throw new Error('Upload response did not include a logo URL');
-                      toast('Logo uploaded successfully. Save branding to apply the full configuration.', 'success');
-                    } catch { toast('Logo upload failed. Check the image and try again.', 'error'); }
-                    finally { e.currentTarget.value = ''; }
+                      if (res?.success === false || !res?.url || typeof res.url !== 'string') throw new Error(res?.message || 'Upload response did not include a logo URL');
+                      setBranding(p => ({...p, logoType: 'image', logoUrl: res.url}));
+                      toast('Logo uploaded. Save Branding Settings to confirm the complete branding configuration.', 'success');
+                    } catch (error) {
+                      const message = error?.response?.data?.message || error?.message || 'Check the upload service configuration and try again.';
+                      toast(`Logo upload failed: ${message}`, 'error');
+                    } finally { setUploadingLogo(false); input.value = ''; }
                   }} style={{ fontSize: 13, color: 'var(--text-muted)' }} />
-                  <small style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>Upload the symbol/emblem only (without KAYAD lettering or tagline); the site renders the editable KAYAD wordmark and descriptor beside it. Use a transparent PNG or SVG with no built-in text for the cleanest responsive fit. Maximum upload size: 5 MB.</small>
+                  <small style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>Upload the symbol/emblem only (without KAYAD lettering or tagline); the site renders the editable KAYAD wordmark and descriptor beside it. Use a transparent PNG or WebP with no built-in text for the cleanest responsive fit. Maximum upload size: 5 MB. Supported formats: PNG, JPEG and WebP.</small>
+                  {uploadingLogo && <small role="status" style={{ color: 'var(--brand)' }}>Uploading logo…</small>}
                 </div>
               </div>
             </div>
@@ -440,7 +433,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
       <button
         className="btn"
         onClick={() => saveConfig('branding')}
-        disabled={saving}
+        disabled={saving || !canSave}
         style={{
           width: '100%',
           padding: '14px 24px',
@@ -450,8 +443,8 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
           fontSize: 14,
           border: 'none',
           borderRadius: 12,
-          cursor: saving ? 'not-allowed' : 'pointer',
-          opacity: saving ? 0.7 : 1,
+          cursor: saving || !canSave ? 'not-allowed' : 'pointer',
+          opacity: saving || !canSave ? 0.7 : 1,
           transition: 'all 0.2s ease',
           display: 'flex',
           alignItems: 'center',

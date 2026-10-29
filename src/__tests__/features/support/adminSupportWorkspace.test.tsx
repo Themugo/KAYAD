@@ -38,6 +38,29 @@ describe('AdminSupportWorkspace', () => {
     await screen.findByText(/No response targets are configured/);
   });
 
+  it('keeps the case queue usable when metrics are unavailable', async () => {
+    api.getStaffMetrics.mockRejectedValue(new Error('metrics RPC unavailable'));
+    render(<AdminSupportWorkspace />);
+    await screen.findByText('Escrow stuck');
+    await screen.findByText(/metrics are temporarily unavailable/i);
+    expect(screen.queryByText('No cases match these filters.')).toBeNull();
+  });
+
+  it('does not show a false empty queue when queue loading fails', async () => {
+    api.getStaffQueue.mockRejectedValue(new Error('maintenance'));
+    render(<AdminSupportWorkspace />);
+    await screen.findByRole('alert');
+    expect(screen.queryByText('No cases match these filters.')).toBeNull();
+    expect(screen.getByRole('button', { name: /retry loading cases/i })).toBeTruthy();
+  });
+
+  it('rejects malformed queue responses instead of presenting them as empty', async () => {
+    api.getStaffQueue.mockResolvedValue({ success: true });
+    render(<AdminSupportWorkspace />);
+    await screen.findByRole('alert');
+    expect(screen.queryByText('No cases match these filters.')).toBeNull();
+  });
+
   it('marks internal notes distinctly and sends them with isInternal=true', async () => {
     api.staffReplyToCase.mockResolvedValue({ case: detail });
     render(<AdminSupportWorkspace />);

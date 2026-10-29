@@ -29,6 +29,9 @@ export interface AdSlot {
   scrollDurationSeconds: number;
   fadeDurationMs: number;
   isVisible: boolean;
+  status?: 'draft' | 'active' | 'paused' | 'expired';
+  startAt?: string | null;
+  endAt?: string | null;
   sortOrder: number;
   createdAt: string;
   updatedAt: string;
@@ -48,6 +51,10 @@ export interface AdSlotInput {
   scrollDurationSeconds?: number;
   fadeDurationMs?: number;
   sortOrder?: number;
+  isVisible?: boolean;
+  status?: 'draft' | 'active' | 'paused' | 'expired';
+  startAt?: string | null;
+  endAt?: string | null;
 }
 
 export type AdApiErrorKind = 'network' | 'unauthenticated' | 'forbidden' | 'validation' | 'not_found' | 'server';
@@ -67,7 +74,7 @@ async function adFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
     return await request<T>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string> });
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
-    const kind: AdApiErrorKind = error.status === 401 ? 'unauthenticated' : error.status === 403 ? 'forbidden' : error.status === 404 ? 'not_found' : error.status === 400 ? 'validation' : 'server';
+    const kind: AdApiErrorKind = error.status === 401 ? 'unauthenticated' : error.status === 403 ? 'forbidden' : error.status === 404 ? 'not_found' : error.status === 400 ? 'validation' : error.status ? 'server' : 'network';
     throw new AdApiError(error.message, kind, error.status);
   }
 }
@@ -76,47 +83,61 @@ async function adFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
  * required (every real visitor sees these, signed in or not). */
 export async function getVisibleAdSlots(placement?: AdPlacement): Promise<AdSlot[]> {
   const query = placement ? `?placement=${placement}` : '';
-  const body = await adFetch<{ data: AdSlot[] }>(`/api/ads${query}`);
-  return body.data || [];
+  const body = await adFetch<{ success?: boolean; data?: AdSlot[] }>(`/api/ads${query}`);
+  if (!body || body.success !== true || !Array.isArray(body.data)) {
+    throw new AdApiError('The advertising service returned an unexpected response. Retry loading ads.', 'server');
+  }
+  return body.data;
 }
 
 /** GET /api/ads/all - admin-only, every slot including hidden ones. */
 export async function getAllAdSlots(): Promise<AdSlot[]> {
-  const body = await adFetch<{ data: AdSlot[] }>('/api/ads/all');
-  return body.data || [];
+  const body = await adFetch<{ success?: boolean; data?: AdSlot[] }>('/api/ads/all');
+  if (!body || body.success !== true || !Array.isArray(body.data)) {
+    throw new AdApiError('The advertising service returned an unexpected response. Retry loading ads.', 'server');
+  }
+  return body.data;
 }
 
 /** POST /api/ads - admin-only, create a new ad slot. */
 export async function createAdSlot(input: AdSlotInput): Promise<AdSlot> {
-  const body = await adFetch<{ data: AdSlot }>('/api/ads', {
+  const body = await adFetch<{ success?: boolean; data?: AdSlot }>('/api/ads', {
     method: 'POST',
     body: JSON.stringify(input),
   });
+  if (!body || body.success !== true || !body.data?.id) {
+    throw new AdApiError('The advertising service did not confirm campaign creation.', 'server');
+  }
   return body.data;
 }
 
 /** PUT /api/ads/:id - admin-only, update any field(s) of an existing
  * ad slot (title, tagline, colors, opacity, visibility, order). */
 export async function updateAdSlot(id: string, updates: Partial<AdSlotInput & { isVisible: boolean }>): Promise<AdSlot> {
-  const body = await adFetch<{ data: AdSlot }>(`/api/ads/${id}`, {
+  const body = await adFetch<{ success?: boolean; data?: AdSlot }>(`/api/ads/${encodeURIComponent(id)}`, {
     method: 'PUT',
     body: JSON.stringify(updates),
   });
+  if (!body || body.success !== true || !body.data?.id) {
+    throw new AdApiError('The advertising service did not confirm the campaign update.', 'server');
+  }
   return body.data;
 }
 
 /** DELETE /api/ads/:id - admin-only, permanently remove an ad slot. */
 export async function deleteAdSlot(id: string): Promise<void> {
-  await adFetch<{ success: boolean }>(`/api/ads/${id}`, { method: 'DELETE' });
+  const body = await adFetch<{ success?: boolean }>(`/api/ads/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  if (!body || body.success !== true) throw new AdApiError('The advertising service did not confirm campaign removal.', 'server');
 }
 
 
 /** Record a real delivery event. Best-effort from the public UI; reporting never blocks rendering. */
 export async function recordAdEvent(id: string, type: 'impression' | 'click'): Promise<void> {
-  await adFetch<{ success: boolean }>(`/api/ads/${id}/events`, {
+  const body = await adFetch<{ success?: boolean }>(`/api/ads/${encodeURIComponent(id)}/events`, {
     method: 'POST',
     body: JSON.stringify({ type }),
   });
+  if (!body || body.success !== true) throw new AdApiError('The advertising service did not confirm the delivery event.', 'server');
 }
 
 export interface AdStat {
@@ -125,6 +146,9 @@ export interface AdStat {
 }
 
 export async function getAdStats(): Promise<AdStat[]> {
-  const body = await adFetch<{ data: AdStat[] }>('/api/ads/stats');
-  return body.data || [];
+  const body = await adFetch<{ success?: boolean; data?: AdStat[] }>('/api/ads/stats');
+  if (!body || body.success !== true || !Array.isArray(body.data)) {
+    throw new AdApiError('The advertising service returned unexpected statistics. Retry loading.', 'server');
+  }
+  return body.data;
 }

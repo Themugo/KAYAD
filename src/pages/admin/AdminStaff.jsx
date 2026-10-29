@@ -19,7 +19,8 @@ export default function AdminStaff() {
   const isSystemOwner = me?.isOwner === true;
   const { toast } = useToast();
   const [staff, setStaff] = useState([]);
-  const [roleCatalog, setRoleCatalog] = useState(STAFF_ROLES.map(role => ({ role, permissions: [] }))); 
+  const [roleCatalog, setRoleCatalog] = useState([]);
+  const [permissionCatalog, setPermissionCatalog] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [tab, setTab] = useState('directory');
@@ -55,6 +56,7 @@ export default function AdminStaff() {
     if (isSystemOwner) {
       loadStaff();
       adminAPI.getStaffRoleCatalog().then(result => { if (Array.isArray(result.roles)) setRoleCatalog(result.roles); }).catch(err => { toast(err?.response?.data?.message || 'Canonical role catalog unavailable; role changes must be verified by the backend.', 'error'); });
+      adminAPI.getPermCatalog().then(result => { if (Array.isArray(result.catalog)) setPermissionCatalog(result.catalog); }).catch(err => { toast(err?.response?.data?.message || 'Canonical permission catalog unavailable; the permission matrix cannot be certified.', 'error'); });
     } else setLoading(false);
     return () => { requestId.current += 1; };
   }, [isSystemOwner, loadStaff, toast]);
@@ -73,6 +75,7 @@ export default function AdminStaff() {
     e.preventDefault();
     const name = form.name.trim();
     const email = form.email.trim().toLowerCase();
+    if (!roleCatalog.length) { toast('The canonical staff role catalog is unavailable. Reload it before creating or changing staff roles.', 'error'); return; }
     if (!name || !email || !form.password || !form.role) { toast('Complete all required fields.', 'error'); return; }
     if (name.length > 120 || form.password.length < 12 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       toast('Use a valid email, a name up to 120 characters, and an initial password of at least 12 characters.', 'error'); return;
@@ -118,13 +121,31 @@ export default function AdminStaff() {
     } finally { setSaving(false); }
   };
 
+  const handleDeleteStaff = async (member) => {
+    if (!member?._id || member.role === 'superadmin' || member.isOwner === true) {
+      toast('Protected System Owner / Super Admin identities cannot be removed here.', 'error');
+      return;
+    }
+    const reason = window.prompt(`Reason for removing staff access for ${member.email} (recorded in the audit trail):`);
+    if (!reason?.trim()) { toast('A reason is required; no staff account was removed.', 'info'); return; }
+    if (!window.confirm(`Remove staff account ${member.email}? This soft-deletes the account and revokes active sessions. This cannot be undone from this screen.`)) return;
+    setSaving(true);
+    try {
+      await adminAPI.deleteStaff(member._id, { reason: reason.trim().slice(0, 500) });
+      toast('Staff account removed and active sessions revoked.', 'success');
+      await loadStaff({ quiet: true });
+    } catch (err) {
+      toast(err?.response?.data?.message || 'Staff account could not be removed.', 'error');
+    } finally { setSaving(false); }
+  };
+
   if (!isSystemOwner) return <div role="alert" style={{ maxWidth: 760, margin: '48px auto', padding: 28, background: '#fff', border: '1px solid #dbe7e8', borderRadius: 16, color: '#0a3340' }}><LockKeyhole size={32} /><h2>System Owner governance</h2><p>Only a verified active System Owner can manage staff records and permissions. This page-level check is not a substitute for backend authorization.</p></div>;
 
   return (
     <div style={{ maxWidth: 1320, minWidth: 0, margin: '0 auto', padding: '24px clamp(12px, 3vw, 32px)', color: '#0a3340' }}>
       <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
         <div><div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.14em', color: '#176b87' }}>System Owner · Access governance</div><h1 style={{ fontSize: 'clamp(24px, 3vw, 34px)', margin: '8px 0' }}>Staff directory & access</h1><p style={{ margin: 0, color: '#64748b', maxWidth: 720 }}>Manage existing staff identities, supported roles, suspensions and permission assignments. Role labels describe access policy; they do not certify a separate HR, accounting or sales subsystem.</p></div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><button type="button" onClick={() => loadStaff()} disabled={loading} style={buttonStyle('secondary')}><RefreshCw size={15} /> Refresh</button><button type="button" onClick={() => setShowAdd(true)} style={buttonStyle('primary')}><Plus size={16} /> Create staff account</button></div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><button type="button" onClick={() => loadStaff()} disabled={loading} style={buttonStyle('secondary')}><RefreshCw size={15} /> Refresh</button><button type="button" onClick={() => setShowAdd(true)} disabled={!roleCatalog.length || saving} title={!roleCatalog.length ? 'Canonical role catalog unavailable' : 'Create staff account'} style={{ ...buttonStyle('primary'), opacity: !roleCatalog.length || saving ? 0.55 : 1, cursor: !roleCatalog.length || saving ? 'not-allowed' : 'pointer' }}><Plus size={16} /> Create staff account</button></div>
       </header>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
         {[['directory', 'Staff directory'], ['hierarchy', 'Role overview'], ['permissions', 'Permission matrix']].map(([key, label]) => <button type="button" key={key} onClick={() => setTab(key)} aria-pressed={tab === key} style={{ ...buttonStyle(tab === key ? 'primary' : 'secondary'), background: tab === key ? '#0a3340' : '#fff', color: tab === key ? '#fff' : '#0a3340' }}>{label}</button>)}
@@ -135,13 +156,20 @@ export default function AdminStaff() {
           <label style={labelStyle}>Search staff<input value={query} onChange={e => setQuery(e.target.value)} placeholder="Name, email or role" style={inputStyle} /></label>
           <label style={labelStyle}>Role<select value={roleFilter} onChange={e => setRoleFilter(e.target.value)} style={inputStyle}><option value="all">All roles</option>{roleCatalog.map(({ role }) => <option key={role} value={role}>{role.replaceAll('_', ' ')}</option>)}</select></label>
           <label style={labelStyle}>Account status<select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} style={inputStyle}><option value="all">All statuses</option><option value="active">Not suspended</option><option value="suspended">Suspended</option></select></label>
-          <div style={{ alignSelf: 'end', color: '#64748b', fontSize: 13, padding: '10px 0' }}><Users size={15} style={{ display: 'inline', marginRight: 6 }} />{filteredStaff.length} of {staff.length} staff</div>
+          <div style={{ alignSelf: 'end', color: '#64748b', fontSize: 13, padding: '10px 0' }}><Users size={15} style={{ display: 'inline', marginRight: 6 }} />{error && staff.length === 0 ? 'Directory unavailable' : `${filteredStaff.length} of ${staff.length} staff`}</div>
         </section>
-        {loading ? <div role="status" style={{ padding: 48, textAlign: 'center' }}>Loading staff records…</div> : <AdminStaffList staff={filteredStaff} loading={false} isSuperAdmin onEdit={setEditMember} onToggleBan={(id, banned) => handleUpdate(id, { isBanned: !banned })} onShowAdd={() => setShowAdd(true)} />}
+        {loading ? <div role="status" style={{ padding: 48, textAlign: 'center' }}>Loading staff records…</div> : error && staff.length === 0 ? (
+          <div role="alert" style={{ padding: 24, textAlign: 'center', border: '1px solid #fecaca', borderRadius: 14, background: '#fff1f2', color: '#9f1239' }}>
+            <ShieldAlert size={24} style={{ marginBottom: 8 }} />
+            <h3 style={{ margin: '0 0 6px', fontSize: 16 }}>Staff directory unavailable</h3>
+            <p style={{ margin: '0 0 14px', fontSize: 13 }}>The server did not verify the directory response. No conclusion can be drawn about whether staff accounts exist.</p>
+            <button type="button" onClick={() => loadStaff()} disabled={loading} style={buttonStyle('secondary')}>Retry loading staff</button>
+          </div>
+        ) : <AdminStaffList staff={filteredStaff} loading={false} isSuperAdmin onEdit={setEditMember} onToggleBan={(id, banned) => handleUpdate(id, { isBanned: !banned })} onDelete={handleDeleteStaff} onShowAdd={() => setShowAdd(true)} />}
         <p style={{ color: '#64748b', fontSize: 12, marginTop: 12 }}>Department assignment and email invitations are not currently represented by verified backend contracts. This directory does not fabricate either capability. “Suspended” maps to the existing `isBanned` field.</p>
       </>}
-      {tab === 'hierarchy' && <AdminStaffOrgChart staff={staff} isSuperAdmin onAddStaff={(role) => { setForm(p => ({ ...p, role })); setShowAdd(true); }} />}
-      {tab === 'permissions' && <AdminStaffPermMatrix />}
+      {tab === 'hierarchy' && <AdminStaffOrgChart staff={staff} isSuperAdmin onAddStaff={(role) => { if (!roleCatalog.length) { toast('The canonical staff role catalog is unavailable. Refresh before creating a staff account.', 'error'); return; } setForm(p => ({ ...p, role })); setShowAdd(true); }} />}
+      {tab === 'permissions' && <AdminStaffPermMatrix roles={roleCatalog} catalog={permissionCatalog} />}
       {showAdd && <AdminStaffCreateModal form={form} set={set} roles={roleCatalog} saving={saving} onSubmit={handleCreate} onClose={() => !saving && setShowAdd(false)} />}
       {editMember && <AdminStaffEditModal member={editMember} setMember={setEditMember} roles={roleCatalog} saving={saving} onSave={() => handleUpdate(editMember._id, { name: editMember.name, role: editMember.role })} onClose={() => !saving && setEditMember(null)} />}
     </div>

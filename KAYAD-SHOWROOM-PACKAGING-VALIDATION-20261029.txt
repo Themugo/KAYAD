@@ -1,0 +1,6 @@
+KAYAD SHOWROOM REFINEMENT — PACKAGING VALIDATION
+Archive: KAYAD-SHOWROOM-KENYA-ONLY-PREMIUM-REFINEMENT-20261029.zip
+SHA-256: see the accompanying .sha256 file (computed after archive finalization)
+Archive integrity and fresh-extraction checks are recorded in the external packaging validation report.
+Excluded directories: .git, node_modules, dist, coverage, .next, .vite, playwright-report, test-results
+Real environment files: excluded; only safe example templates may be included

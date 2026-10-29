@@ -152,6 +152,41 @@ describe('admin private-seller application review', () => {
     expect(screen.queryByRole('alert')).toBeNull();
   });
 
+  it('identifies maintenance only when the server explicitly returns the maintenance contract and preserves same-filter data', async () => {
+    const maintenance = Object.assign(new Error('System under scheduled maintenance.'), {
+      status: 503,
+      responseData: { success: false, code: 'SYSTEM_MAINTENANCE', maintenance: true, message: 'System under scheduled maintenance.' },
+    });
+    getPrivateSellerApplications.mockResolvedValueOnce([pending]).mockRejectedValueOnce(maintenance);
+    render(<AdminPrivateSellerApplications />);
+    expect(await screen.findByText(/Sell my own vehicle/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /Refresh applications/ }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Platform maintenance is active');
+    expect(screen.getByRole('alert')).toHaveTextContent('Showing the last successfully loaded results');
+    expect(screen.getByText(/Sell my own vehicle/)).toBeTruthy();
+    expect(screen.queryByText('No applications in this view')).toBeNull();
+  });
+
+  it('does not call an unrelated 503 scheduled maintenance without the maintenance response code', async () => {
+    getPrivateSellerApplications.mockRejectedValueOnce(Object.assign(new Error('Upstream unavailable'), { status: 503 }));
+    render(<AdminPrivateSellerApplications />);
+    expect(await screen.findByRole('alert')).toHaveTextContent('Service temporarily unavailable');
+    expect(screen.queryByText('Platform maintenance is active')).toBeNull();
+    expect(screen.queryByText('No applications in this view')).toBeNull();
+  });
+
+  it('ignores an older filter response that arrives after a newer filter response', async () => {
+    let resolvePending: ((value: typeof pending[]) => void) | undefined;
+    const pendingRequest = new Promise<typeof pending[]>((resolve) => { resolvePending = resolve; });
+    getPrivateSellerApplications.mockReturnValueOnce(pendingRequest).mockResolvedValueOnce([approved]);
+    render(<AdminPrivateSellerApplications />);
+    fireEvent.click(screen.getByRole('button', { name: 'Approved' }));
+    expect(await screen.findByText(`Personal account: ${approved.userId}`)).toBeTruthy();
+    resolvePending?.([pending]);
+    await waitFor(() => expect(screen.getByText(`Personal account: ${approved.userId}`)).toBeTruthy());
+    expect(screen.queryByText(`Personal account: ${pending.userId}`)).toBeNull();
+  });
+
   it('exposes accessible landmarks and labelled controls', async () => {
     getPrivateSellerApplications.mockResolvedValue([pending]);
     render(<AdminPrivateSellerApplications />);

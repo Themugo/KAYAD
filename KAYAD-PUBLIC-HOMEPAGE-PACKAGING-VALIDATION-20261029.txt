@@ -1,0 +1,8 @@
+KAYAD public homepage refinement packaging validation
+Archive: KAYAD-PUBLIC-HOMEPAGE-PREMIUM-REFINEMENT-20261029.zip
+ZIP integrity: PASS (verified after archive creation)
+Source package includes the complete project and audit reports.
+Excluded roots: .git, node_modules, dist, coverage, .vite, .cache, playwright-report, test-results.
+Real .env/secrets files excluded; non-secret example templates may be included.
+Fresh extraction: PASS; expected changed files and reports present.
+Exact SHA-256: see the adjacent KAYAD-PUBLIC-HOMEPAGE-PREMIUM-REFINEMENT-20261029.zip.sha256 file.

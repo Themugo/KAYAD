@@ -20,7 +20,7 @@ export default function PremiumAuthShell({ mode = 'signin', eyebrow, title, desc
   const switchLabel = headerAction?.label ?? (isRegister ? 'Sign in' : 'Create account');
 
   return (
-    <main className="kayad-auth-page" id="main-content">
+    <main className="kayad-auth-page" id="main-content" data-mode={mode}>
       <header className="kayad-auth-header">
         <Link to="/" className="kayad-auth-brand" aria-label="KAYAD home">
           <span className="kayad-auth-brand-mark"><CarFront size={19} strokeWidth={2.4} aria-hidden="true" /></span>

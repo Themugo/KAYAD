@@ -1,0 +1,302 @@
+area,source_path,source_status,static_check,runtime_status,note
+Frontend page/component,src/pages/AuctionDiscoveryNetwork.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/AuctionLivePage.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/Compare.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/Dashboard.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/EscrowPage.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/ForcePasswordChange.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/ForgotPasswordPage.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/Gallery.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/KAYADLive.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/LoginPage.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/NotFoundPage.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/NotificationsPage.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/OwnerInviteAccept.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/PrivateSellerDashboard.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/Profile.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/ResetPasswordPage.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/Sell.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/Showroom.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/Showroom.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/VerifyEmailPage.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdManager.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminAuctions.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminBids.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminBroadcast.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminCarModeration.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminCars.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminChatModeration.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminCommunications.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminDashboard.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminDealerVerifications.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminDisputes.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminEscrowCustody.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminEscrows.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminFeedback.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminInspections.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminInspectorApplications.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminMarketData.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminNtsaQueue.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminOwnerManagement.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminPrivateSellerApplications.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminReferrals.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminReports.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminReviews.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminSecurityLog.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminSellers.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminSettings.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminSettingsBranding.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminSettingsGeneral.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminSettingsOnboarding.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminSettingsPackages.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminSettingsPayments.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminStaff.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminStaffPermissions.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminTransactions.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AdminUsers.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/AuctionIntegrityPage.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/ControlRoom.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/MonetizationCenter.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/OperationsControlRoom.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/OperationsDashboard.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/PanicRoom.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/PlatformRecovery.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/ThemeStudio.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/WebhoistOverview.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/ai/AIPlatformBuilder.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/ai/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/automation/AutomationStudio.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/automation/components/BusinessRulesManager.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/automation/components/VisualWorkflowBuilder.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/automation/components/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/automation/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/cms/ContentStudio.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/cms/components/MediaLibrary.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/cms/components/PublishingCalendar.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/cms/components/SEOManager.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/cms/components/VisualPageBuilder.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/cms/components/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/cms/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/command-center/EnterpriseCommandCenter.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/command-center/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminAlertsPanel.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminChartsRow.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminModuleNav.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminModuleWidgets.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminOperationalOverview.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminPlatformHealth.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminQuickActions.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminQuickStats.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminRecentRegistrations.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminSettingsAuditLog.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminSettingsFees.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminSettingsField.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminSettingsReconciliation.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminStaffCreateModal.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminStaffEditModal.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminStaffList.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminStaffOrgChart.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminStaffPermMatrix.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/components/AdminWidgets.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/config/ConfigurationCenter.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/config/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/control-center/EnterpriseControlCenter.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/control-center/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/digital-twin/DigitalTwinCenter.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/digital-twin/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/governance/GovernanceStudio.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/governance/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/improvement/ContinuousImprovementCenter.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/improvement/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/integration/IntegrationStudio.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/integration/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/intelligence/ExecutiveIntelligenceCenter.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/intelligence/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/lowcode/BusinessObjectStudio.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/lowcode/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/platform-factory/PlatformFactory.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/platform-factory/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/vxp/VisualExperienceStudio.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/vxp/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/xos/ExperienceStudio.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/admin/xos/index.js,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/auction/components/AuctionEffects.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/buyer/components/BuyerBidsTab.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/buyer/components/BuyerEscrowsTab.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/buyer/components/BuyerOverviewTab.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/buyer/components/BuyerWidgets.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/AddCarPage.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/DealerAnalytics.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/DealerAuctionOperationCase.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/DealerAuctionOperations.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/DealerAuctionSetup.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/DealerAuctionSetupWizard.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/DealerAuditLog.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/DealerDashboard.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/DealerOnboarding.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/DealerSettings.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/DealerSettlement.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/DealerSetup.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/DealerTeam.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/EditCarPage.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/AddCarStepBasic.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/AddCarStepIndicator.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/AddCarStepPhotos.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/AddCarStepPricing.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/AddCarStepSpecs.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/AddCarSuccess.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/ConversionFunnelDashboard.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DashboardWidgets.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerAuctionCarIdentity.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerAuctionDraftCard.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerAuctionEndedCard.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerAuctionField.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerAuctionLiveCard.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerAuctionStatusPill.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerBidsTab.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerEarningsTab.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerEscrowsTab.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerKPIWidgets.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerLeadsTab.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerListingsTab.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerMilestoneTracker.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerOverview.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerPackageTab.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/DealerVerificationProgress.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/EditCarAuctionTab.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/EditCarDetailsTab.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/EditCarPhotosTab.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/EditCarPromoteTab.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/components/TeamTab.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/dashboard/DealerDashboard.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/dashboard/DealerListingForm.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/dashboard/DealerListingPhotos.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/dashboard/DealerSettingsPanel.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/dashboard/DealerTeamPanel.tsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/dashboard/index.ts,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/pages/DealerFinancePage.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/pages/DealerInventoryPage.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/dealer/pages/DealerLeadsPage.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/home/components/HomeAnimatedStat.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/home/components/HomeFeaturePillars.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/home/components/HomeHero.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/home/components/HomeLiveAuctions.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/home/components/HomeLiveTicker.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/inspector/components/InspectorChecklistView.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/inspector/components/InspectorStatCard.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/inspector/components/InspectorStatusBadge.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/inspector/components/InspectorTasksView.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/inspector/components/InspectorWorkflowProgress.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/seller/SellerAnalytics.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/seller/SellerGuide.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Frontend page/component,src/pages/showroom/components/ShowroomEmptyState.jsx,PRESENT,TS/TSX/JSX compile not run,BLOCKED,Inventory only; not browser-certified
+Backend route module,backend/routes/adSlotRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/adminInspectionGovernanceRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/adminRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/aiDecisionRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/aiPlatformRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/announcementRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/auctionAdminRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/auctionFulfilmentRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/auctionIntegrityRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/auctionRegistrationRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/auctionRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/auctionSettlementRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/auctionSetupRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/auditRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/authRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/automationRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/bidLogRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/bidRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/bulkAdminRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/carRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/chatRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/cmsRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/commandCenterRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/communicationControlRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/communicationWebhookRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/configurationRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/contactRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/conversionFunnelRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/dealerHealthScoreRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/dealerPlatformRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/dealerRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/digitalTwinRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/disputeRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/duplicateRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/ecpRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/eipRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/escrowRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/eventRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/executiveAnalyticsRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/favoriteRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/featureFlagRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/feedbackRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/financeRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/fraudRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/governanceRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/healthRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/heroPlacementRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/heroSlideRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/improvementRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/inspectionRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/inspectorApplicationRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/intelligenceRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/leadRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/ledgerRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/listingAssistantRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/listingQualityRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/loanApplicationRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/localizationRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/lowCodeRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/maintenanceControlRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/marketRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/marketplaceFulfilmentRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/marketplaceHealthRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/mediaEventRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/metricsRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/notificationAnalyticsRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/notificationRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/ntsaVerificationRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/operationsDashboardRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/operationsRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/organizationRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/ownerRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/ownershipRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/paymentRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/platformFactoryRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/privateSellerAuctionRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/privateSellerCapabilityRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/prometheusMetrics.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/queueRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/realtimeRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/recommendationRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/reconciliationRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/referralRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/regionalConfigurationRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/reliabilityRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/reportRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/reviewRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/salesDashboardRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/savedSearchRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/searchAnalyticsRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/searchRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/securityLogRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/seoRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/smsBiddingRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/subscriptionRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/supportDashboardRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/supportRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/supportTicketAdminRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/transactionRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/uploadRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/userPreferenceRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/userRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/v1.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/v2.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/valuationRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/vehicleAnalyticsRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/verificationRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/vxpRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/webhookRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified
+Backend route module,backend/routes/xosRoutes.js,PRESENT,PASS — node --check,BLOCKED,Module syntax only; endpoint behavior not runtime-certified

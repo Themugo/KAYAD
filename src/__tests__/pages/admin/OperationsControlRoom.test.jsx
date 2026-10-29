@@ -178,4 +178,31 @@ describe('OperationsControlRoom', () => {
     expect(screen.getByText('Check duration unavailable')).toBeInTheDocument();
     expect(screen.getByText('Last checked: time unavailable')).toBeInTheDocument();
   });
+  it('accepts the standard nested API data envelope without showing valid metrics as unavailable', async () => {
+    const { adminAPI } = await import('../../../api/api');
+    adminAPI.stats.mockResolvedValueOnce({ success: true, data: { success: true, stats: { totalUsers: 17, totalDealers: 3, activeListings: 9, openEscrows: 2 }, unavailable: [] } });
+    adminAPI.alerts.mockResolvedValueOnce({ success: true, data: { alerts: [] } });
+    adminAPI.getAuditLog.mockResolvedValueOnce({ success: true, data: { entries: [] } });
+    render(<MemoryRouter><OperationsControlRoom /></MemoryRouter>);
+
+    expect(await screen.findByText('17')).toBeInTheDocument();
+    expect(screen.queryByText('Operations metrics are unavailable')).not.toBeInTheDocument();
+  });
+
+  it('refreshes system health independently without refetching metrics, alerts, or audit activity', async () => {
+    const { adminAPI } = await import('../../../api/api');
+    render(<MemoryRouter><OperationsControlRoom /></MemoryRouter>);
+    await screen.findByText('Database');
+    const metricsCalls = adminAPI.stats.mock.calls.length;
+    const alertCalls = adminAPI.alerts.mock.calls.length;
+    const auditCalls = adminAPI.getAuditLog.mock.calls.length;
+    const healthCalls = adminAPI.getInfrastructureHealth.mock.calls.length;
+
+    fireEvent.click(screen.getByRole('button', { name: /refresh health/i }));
+    await waitFor(() => expect(adminAPI.getInfrastructureHealth).toHaveBeenCalledTimes(healthCalls + 1));
+    expect(adminAPI.stats).toHaveBeenCalledTimes(metricsCalls);
+    expect(adminAPI.alerts).toHaveBeenCalledTimes(alertCalls);
+    expect(adminAPI.getAuditLog).toHaveBeenCalledTimes(auditCalls);
+  });
+
 });

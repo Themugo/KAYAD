@@ -41,7 +41,7 @@ describe('Navbar', () => {
 
   const guestProps = {
     user: null, savedCount: 0, activeNav: 'marketplace', onNavClick: vi.fn(),
-    selectedCounty: 'All East Africa', onCountyChange: vi.fn(), onOpenAuth: vi.fn(),
+    selectedCounty: 'All Kenya', onCountyChange: vi.fn(), onOpenAuth: vi.fn(),
     onOpenAlerts: vi.fn(), onLogout: vi.fn(), unreadCount: 0,
   };
 

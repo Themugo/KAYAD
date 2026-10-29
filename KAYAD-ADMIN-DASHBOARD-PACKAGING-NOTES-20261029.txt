@@ -1,0 +1,7 @@
+KAYAD Admin Dashboard Refinement — Packaging Notes
+
+This checkpoint is based on the verified KAYAD-SECURITY-LOG-MOBILE-POLISHED-20261029.zip source checkpoint.
+The final archive must be tested for ZIP integrity and extracted to a fresh directory after packaging.
+Excluded from packaging: .git, node_modules, dist, coverage, caches and real .env files/secrets.
+Included: complete source, lockfiles, tests, scripts, safe configuration templates, dashboard refinement report, validation summary and operation matrix.
+The exact final ZIP SHA-256 is supplied in the adjacent .sha256 sidecar file.

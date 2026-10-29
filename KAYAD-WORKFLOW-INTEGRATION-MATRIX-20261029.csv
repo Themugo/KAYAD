@@ -1,0 +1,9 @@
+workflow,source/contract evidence,status,required next evidence
+Registration/login/CSRF,Registration/onboarding 47/47; CSRF static contract PASS,PARTIAL,Real isolated account lifecycle and browser/API tests
+Admin seller/listing/moderation,Admin route and related source contracts,PARTIAL,Role-based browser tests with staging records
+NTSA verification,Route/source files present,NOT TESTED END-TO-END,Staging provider or approved sandbox
+Ads/broadcast,Route/source files and UI inventory present,NOT TESTED END-TO-END,Persisted staging lifecycle and placement checks
+Transactions/ledger/escrow,Financial and transaction source validators passed,PARTIAL,"Real PostgreSQL invariants, reconciliation and sandbox callbacks"
+Auction bid/close/settlement,Auction domain integrity 24/24; financial contracts passed,PARTIAL,"Staging concurrency, callback idempotency and settlement tests"
+Platform recovery/System Overview,System Overview 16/16 and recovery contracts partially passed,PARTIAL,Authorized staging health/failure drills
+Production deployment,Deployment readiness source contract PASS,BLOCKED,"Reachable deployment, build identity, read-only API checks"

@@ -84,6 +84,9 @@ const router = express.Router();
 // but only a verified active platform owner may create staff, change staff roles,
 // or grant/revoke staff permissions. Owner identity is resolved by the canonical
 // owner registry; a client-supplied role or email alone is never sufficient.
+const STAFF_GOVERNANCE_ROLES = Object.freeze(["admin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator", "ghost_checker"]);
+const CREATABLE_STAFF_ROLES = Object.freeze(["admin", "marketing", "technical_support", "hr", "accounts", "escrow_officer", "ad_manager", "moderator"]);
+
 const systemOwnerOnly = (req, res, next) => {
   if (!isOwnerUser(req.user)) {
     return res.status(403).json({ success: false, code: "SYSTEM_OWNER_REQUIRED", message: "Only a verified active System Owner may manage staff roles and permissions." });
@@ -218,6 +221,7 @@ const getPagination = (req) => {
 // =============================
 router.get(
   "/stats",
+  staffRole,
   cacheMiddleware(CACHE_TTL.STATS, () => "cache:GET:/api/admin/stats"),
   asyncHandler(async (req, res) => {
     const today = new Date();
@@ -337,10 +341,14 @@ router.get(
     // internal fields like bankAccount, mpesaBusiness, paymentDetails, etc.
     const ADMIN_USER_FIELDS = "_id name email role phone avatar status isBanned location dealerRating bio businessName createdAt lastLoginAt emailVerified phoneVerified dealerPackage subscriptionStatus";
 
-    const [users, total] = await Promise.all([
+    const [users, total, summaryTotal, summaryAdmins, summaryDealers, summaryBanned, summaryPending] = await Promise.all([
       User.find(filter).select(ADMIN_USER_FIELDS).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
-
       User.countDocuments(filter),
+      User.countDocuments({}),
+      User.countDocuments({ role: { $in: ["admin", "superadmin", "webhoist"] } }),
+      User.countDocuments({ role: "dealer" }),
+      User.countDocuments({ isBanned: true }),
+      User.countDocuments({ role: { $in: ["dealer", "individual_seller"] }, status: "pending" }),
     ]);
 
     // STAGE 5A: `approved` / `verificationStatus` / `businessType` / `lastLogin` are not columns of `users` (selecting them made this
@@ -361,6 +369,14 @@ router.get(
         limit,
         total,
         pages: Math.ceil(total / limit),
+      },
+      // Authoritative global counts; do not infer these from the current page or filters.
+      summary: {
+        totalUsers: summaryTotal,
+        admins: summaryAdmins,
+        dealers: summaryDealers,
+        banned: summaryBanned,
+        pendingApproval: summaryPending,
       },
     });
   }),
@@ -776,12 +792,28 @@ router.post(
 // GET CONFIG
 router.get(
   "/config",
+  adminOrSuper,
   asyncHandler(async (req, res) => {
     let config = await PlatformConfig.findOne().lean();
     if (!config) {
       config = await PlatformConfig.create({});
     }
-    res.json({ success: true, config });
+    // Never return payment credentials to the browser. The settings UI receives
+    // presence flags and may submit blank values to retain the stored secret.
+    const safeConfig = { ...config };
+    if (safeConfig.daraja && typeof safeConfig.daraja === "object") {
+      safeConfig.daraja = {
+        ...safeConfig.daraja,
+        consumerKey: "",
+        consumerSecret: "",
+        passkey: "",
+        hasConsumerKey: Boolean(config.daraja.consumerKey),
+        hasConsumerSecret: Boolean(config.daraja.consumerSecret),
+        hasPasskey: Boolean(config.daraja.passkey),
+      };
+    }
+    res.set("Cache-Control", "no-store");
+    res.json({ success: true, config: safeConfig });
   }),
 );
 
@@ -830,6 +862,64 @@ router.put(
       "heroCardContent",
     ];
 
+    // Validate user-editable general settings before persistence. Reject invalid
+    // input rather than silently saving values that break runtime assumptions.
+    const body = req.body || {};
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (body.supportEmail !== undefined && body.supportEmail !== "" && !emailPattern.test(String(body.supportEmail))) {
+      return res.status(400).json({ success: false, message: "Enter a valid support email address." });
+    }
+    if (body.platformName !== undefined && (typeof body.platformName !== "string" || !body.platformName.trim() || body.platformName.length > 100)) {
+      return res.status(400).json({ success: false, message: "Platform name must be 1–100 characters." });
+    }
+    const numericRules = {
+      dealerCommission: [0, 50], bidCommitmentPct: [0, 100], escrowReleaseDays: [1, 30],
+      maxListingImages: [1, 20], dealerTrialDays: [0, 365], fontSizePct: [50, 200],
+    };
+    for (const [key, [min, max]] of Object.entries(numericRules)) {
+      if (body[key] !== undefined && (!Number.isFinite(Number(body[key])) || Number(body[key]) < min || Number(body[key]) > max)) {
+        return res.status(400).json({ success: false, message: `${key} must be between ${min} and ${max}.` });
+      }
+    }
+    if (body.bank !== undefined) {
+      if (!body.bank || typeof body.bank !== "object" || Array.isArray(body.bank)) {
+        return res.status(400).json({ success: false, message: "Invalid bank transfer settings." });
+      }
+      const reconciliationEmail = body.bank.reconciliationEmail;
+      if (reconciliationEmail && !emailPattern.test(String(reconciliationEmail))) {
+        return res.status(400).json({ success: false, message: "Enter a valid reconciliation email address." });
+      }
+    }
+    if (body.daraja !== undefined) {
+      if (!body.daraja || typeof body.daraja !== "object" || Array.isArray(body.daraja)) {
+        return res.status(400).json({ success: false, message: "Invalid Daraja settings." });
+      }
+      if (body.daraja.environment !== undefined && !["sandbox", "production"].includes(body.daraja.environment)) {
+        return res.status(400).json({ success: false, message: "Daraja environment must be sandbox or production." });
+      }
+      const currentDaraja = config.daraja?.toObject?.() || config.daraja || {};
+      body.daraja = { ...body.daraja };
+      for (const key of ["consumerKey", "consumerSecret", "passkey"]) {
+        if (typeof body.daraja[key] !== "string" || body.daraja[key].trim() === "") {
+          if (currentDaraja[key]) body.daraja[key] = currentDaraja[key];
+          else delete body.daraja[key];
+        }
+      }
+      delete body.daraja.hasConsumerKey;
+      delete body.daraja.hasConsumerSecret;
+      delete body.daraja.hasPasskey;
+    }
+    if (body.reconciliation !== undefined) {
+      const r = body.reconciliation;
+      if (!r || typeof r !== "object" || Array.isArray(r)) return res.status(400).json({ success: false, message: "Invalid reconciliation settings." });
+      if (r.matchThresholdMins !== undefined && (!Number.isInteger(Number(r.matchThresholdMins)) || Number(r.matchThresholdMins) < 60 || Number(r.matchThresholdMins) > 10080)) {
+        return res.status(400).json({ success: false, message: "Match threshold must be between 60 and 10080 minutes." });
+      }
+      if (r.schedule !== undefined && !["every hour", "every 6 hours", "every 12 hours", "daily"].includes(r.schedule)) {
+        return res.status(400).json({ success: false, message: "Unsupported reconciliation schedule." });
+      }
+    }
+
     // Navigation presentation state: strictly validated and REPLACED (not
     // shallow-merged) so an item can be un-hidden. Same route, same guards,
     // same audit as every other platform setting.
@@ -847,11 +937,11 @@ router.put(
     }
 
     for (const key of allowed) {
-      if (req.body[key] !== undefined) {
-        if (typeof req.body[key] === "object" && !Array.isArray(req.body[key])) {
-          config[key] = { ...(config[key]?.toObject?.() || config[key] || {}), ...req.body[key] };
+      if (body[key] !== undefined) {
+        if (typeof body[key] === "object" && body[key] !== null && !Array.isArray(body[key])) {
+          config[key] = { ...(config[key]?.toObject?.() || config[key] || {}), ...body[key] };
         } else {
-          config[key] = req.body[key];
+          config[key] = body[key];
         }
       }
     }
@@ -873,7 +963,20 @@ router.put(
       });
     }
 
-    res.json({ success: true, config });
+    const safeConfig = { ...(config.toObject?.() || config) };
+    if (safeConfig.daraja && typeof safeConfig.daraja === "object") {
+      safeConfig.daraja = {
+        ...safeConfig.daraja,
+        consumerKey: "",
+        consumerSecret: "",
+        passkey: "",
+        hasConsumerKey: Boolean(safeConfig.daraja.consumerKey),
+        hasConsumerSecret: Boolean(safeConfig.daraja.consumerSecret),
+        hasPasskey: Boolean(safeConfig.daraja.passkey),
+      };
+    }
+    res.set("Cache-Control", "no-store");
+    res.json({ success: true, config: safeConfig });
   }),
 );
 
@@ -908,6 +1011,7 @@ router.put(
 // GET AUDIT LOG
 router.get(
   "/audit-log",
+  staffRole,
   asyncHandler(async (req, res) => {
     const page = Math.max(Number(req.query.page) || 1, 1);
     const limit = Math.min(Number(req.query.limit) || 50, 200);
@@ -1037,7 +1141,7 @@ router.post(
   authorize("superadmin"),
   asyncHandler(async (req, res) => {
     const { type } = req.body;
-    const SWITCHES = { auctions: "isAuctionActive", payments: "isPaymentsActive", ghost_check: "isGhostCheckActive" };
+    const SWITCHES = { auctions: "isAuctionActive", payments: "isPaymentsActive" };
 
     if (type === "full_maintenance") {
       // Platform-wide / scoped maintenance has its own audited control plane (scope, reason, step-up, owner-only):
@@ -1157,13 +1261,14 @@ router.post(
   "/daraja/test",
   authorize("superadmin"),
   asyncHandler(async (req, res) => {
-    if (process.env.NODE_ENV === "production") {
-      return res.status(403).json({ success: false, message: "STK Push test disabled in production" });
+    const currentPlatformConfig = await PlatformConfig.findOne();
+    if (process.env.NODE_ENV === "production" || currentPlatformConfig?.daraja?.environment === "production") {
+      return res.status(403).json({ success: false, code: "MPESA_TEST_DISABLED_IN_PRODUCTION", message: "STK Push testing is disabled when the backend or Daraja environment is production. Use the Safaricom sandbox configuration." });
     }
     const { phone, amount } = req.body;
 
-    if (!phone || !amount) {
-      return res.status(400).json({ success: false, message: "Phone and amount required" });
+    if (!/^254[17]\d{8}$/.test(String(phone || "")) || !Number.isInteger(Number(amount)) || Number(amount) < 1 || Number(amount) > 1000) {
+      return res.status(400).json({ success: false, message: "Use a valid Kenyan mobile number and an integer test amount from KES 1 to 1,000." });
     }
 
     const result = await stkPush(phone, Number(amount));
@@ -1331,6 +1436,7 @@ router.get(
     // Attach computed effective permissions for the UI
     const enriched = staff.map((s) => ({
       ...s,
+      isOwner: isOwnerUser(s), // safe boolean for the UI; never infer owner authority from a role label
       lastLogin: s.lastLoginAt ?? null, // UI field name (AdminStaffList) kept stable
       effectivePermissions: getEffectivePermissions(s),
       rolePermissions: ROLE_PERMISSIONS[s.role] || [],
@@ -1402,21 +1508,30 @@ router.put(
   auditLog("update_staff_permissions"),
   asyncHandler(async (req, res) => {
     let { grantedPermissions = [], revokedPermissions = [] } = req.body;
-
-    // Validate against the assignable catalog — reject unknown/forbidden keys
+    if (!Array.isArray(grantedPermissions) || !Array.isArray(revokedPermissions)) {
+      return res.status(400).json({ success: false, message: "grantedPermissions and revokedPermissions must be arrays" });
+    }
+    if ([...grantedPermissions, ...revokedPermissions].some((p) => typeof p !== "string")) {
+      return res.status(400).json({ success: false, message: "Permission keys must be strings" });
+    }
+    // Validate against the assignable catalog — reject unknown/forbidden keys rather than silently dropping them.
     const allowed = new Set(ASSIGNABLE_PERMISSIONS);
-    grantedPermissions = [...new Set(grantedPermissions)].filter((p) => allowed.has(p));
-    revokedPermissions = [...new Set(revokedPermissions)].filter((p) => allowed.has(p));
+    const unknown = [...new Set([...grantedPermissions, ...revokedPermissions])].filter((p) => !allowed.has(p));
+    if (unknown.length) return res.status(400).json({ success: false, message: `Unsupported permission key(s): ${unknown.join(", ")}` });
+    grantedPermissions = [...new Set(grantedPermissions)];
+    revokedPermissions = [...new Set(revokedPermissions)];
 
     // A permission can't be both granted and revoked — grant wins, drop from revoked
     revokedPermissions = revokedPermissions.filter((p) => !grantedPermissions.includes(p));
 
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-
-    // Never modify another superadmin's permissions through this endpoint
-    if (user.role === "superadmin") {
-      return res.status(403).json({ success: false, message: "Cannot modify a superadmin's permissions" });
+    // Never modify another superadmin's permissions through this endpoint.
+    if (user.role === "superadmin" || isOwnerUser(user)) {
+      return res.status(403).json({ success: false, message: "Cannot modify a protected System Owner / superadmin identity's permissions" });
+    }
+    if (!STAFF_GOVERNANCE_ROLES.includes(user.role)) {
+      return res.status(409).json({ success: false, code: "STAFF_ACCOUNT_REQUIRED", message: "Permissions can only be assigned to an existing staff account." });
     }
 
     const beforePerms = { granted: user.grantedPermissions || [], revoked: user.revokedPermissions || [] };
@@ -1452,16 +1567,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const { name, password, role } = req.body;
     const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
-    const staffRoles = [
-      "admin",
-      "marketing",
-      "technical_support",
-      "hr",
-      "accounts",
-      "escrow_officer",
-      "ad_manager",
-      "moderator",
-    ];
+    const staffRoles = CREATABLE_STAFF_ROLES;
     if (typeof name !== "string" || !name.trim() || name.trim().length > 120 || !email || typeof password !== "string" || password.length < 12 || !role) {
       return res.status(400).json({ success: false, message: "A valid name (1–120 characters), email, password (at least 12 characters), and role are required." });
     }
@@ -1482,7 +1588,16 @@ router.post(
       return res.status(409).json({ success: false, message: "Email already in use" });
     }
     const user = await User.create({ name: name.trim(), email, role });
-    await UserAuth.create({ user: user.id, password: await bcrypt.hash(password, 12) });
+    try {
+      await UserAuth.create({ user: user.id, password: await bcrypt.hash(password, 12) });
+    } catch (error) {
+      // Do not leave an orphan staff identity when credential creation fails.
+      // Soft-delete is the repository's supported user rollback mechanism.
+      await User.softDelete(user.id, req.user.id).catch((rollbackError) => {
+        console.error("Staff account creation rollback failed", { userId: String(user.id), error: rollbackError?.message });
+      });
+      throw error;
+    }
     await auditAfterCommit({
       action: "Staff governance: account created",
       admin: req.user.name || req.user.email,
@@ -1507,6 +1622,12 @@ router.put(
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
+    if (isOwnerUser(user) || user.role === "superadmin") {
+      return res.status(403).json({ success: false, code: "PROTECTED_OWNER_IDENTITY", message: "System Owner and Super Admin identities cannot be changed through staff editing." });
+    }
+    if (!STAFF_GOVERNANCE_ROLES.includes(user.role)) {
+      return res.status(409).json({ success: false, code: "STAFF_ACCOUNT_REQUIRED", message: "Only an existing staff account can be edited here." });
+    }
     const beforeState = { role: user.role, isBanned: user.isBanned === true };
     if (req.body.role) {
       // Only known staff roles may be assigned — never "superadmin" itself
@@ -1563,8 +1684,11 @@ router.delete(
   asyncHandler(async (req, res) => {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
-    if (user.role === "superadmin")
-      return res.status(400).json({ success: false, message: "Cannot delete superadmin" });
+    if (isOwnerUser(user) || user.role === "superadmin" || String(user.id ?? user._id) === String(req.user.id))
+      return res.status(403).json({ success: false, code: "PROTECTED_STAFF_IDENTITY", message: "System Owner, Super Admin and your own account cannot be removed through staff management." });
+    if (!STAFF_GOVERNANCE_ROLES.includes(user.role)) {
+      return res.status(409).json({ success: false, code: "STAFF_ACCOUNT_REQUIRED", message: "Only an existing staff account can be removed here." });
+    }
     await User.softDelete(req.params.id, req.user.id);
     // Phase 14.9: a soft-deleted identity must not keep a working session (auth also rejects deleted accounts).
     await UserAuth.findOneAndUpdate({ user: req.params.id }, { $inc: { tokenVersion: 1 } });
@@ -1574,7 +1698,7 @@ router.delete(
       action: "Staff governance: account deleted",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
-      details: { targetUserId: String(req.params.id), role: user.role },
+      details: { targetUserId: String(req.params.id), role: user.role, reason: typeof req.body.reason === "string" ? req.body.reason.trim().slice(0, 500) : undefined },
     });
     res.json({ success: true, message: "Staff account deleted" });
   }),
@@ -1873,15 +1997,27 @@ router.post(
   handleUploadError,
   asyncHandler(async (req, res) => {
     if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      return res.status(503).json({ success: false, code: "LOGO_STORAGE_NOT_CONFIGURED", message: "Logo storage is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET in the server environment." });
+    }
     const result = await uploadImage(req.file, "kayad/branding", {
       generateVariants: true,
       preserveOriginal: true,
     });
+    if (!result?.url || typeof result.url !== "string") {
+      return res.status(502).json({ success: false, code: "LOGO_UPLOAD_INVALID_RESPONSE", message: "The image storage provider did not return a usable logo URL." });
+    }
     let config = await PlatformConfig.findOne();
     if (!config) config = new PlatformConfig();
-    config.branding.logoType = "image";
-    config.branding.logoUrl = result.url;
+    const existingBranding = config.branding?.toObject?.() || config.branding || {};
+    config.branding = { ...existingBranding, logoType: "image", logoUrl: result.url };
     await config.save();
+    await auditAfterCommit({
+      action: "Platform logo updated",
+      admin: req.user.name || req.user.email,
+      adminId: req.user.id,
+      details: { logoUrl: result.url },
+    });
     res.json({ success: true, url: result.url, thumb: result.thumb });
   }),
 );
@@ -1895,7 +2031,7 @@ router.get(
   validateQuery(reviewListQuerySchema),
   asyncHandler(async (req, res) => {
     const result = await listAdminReviews(req.query);
-    res.json({ success: true, reviews: result.reviews, pagination: { page: result.page, limit: result.limit, total: result.total, pages: result.pages } });
+    res.json({ success: true, reviews: result.reviews, statusCounts: result.statusCounts, pagination: { page: result.page, limit: result.limit, total: result.total, pages: result.pages } });
   }),
 );
 
@@ -1924,8 +2060,8 @@ router.delete(
 router.get(
   "/referrals/stats",
   adminOrSuper,
-  cacheMiddleware(CACHE_TTL.STATS, () => "cache:GET:/api/admin/referrals/stats"),
   asyncHandler(async (req, res) => {
+    // Referral balances and payouts are operational data: do not serve stale cached totals after a decision.
     const [totalReferrals, pendingCount, creditedCount, expiredCount, totalBonus] = await Promise.all([
       Referral.countDocuments(),
       Referral.countDocuments({ status: "pending" }),
@@ -1937,6 +2073,7 @@ router.get(
       ]).then((r) => r[0]?.total || 0),
     ]);
 
+    res.set("Cache-Control", "no-store");
     res.json({ success: true, stats: { totalReferrals, pendingCount, creditedCount, expiredCount, totalBonus } });
   }),
 );
@@ -1945,33 +2082,41 @@ router.get(
   "/referrals",
   staffRole,
   asyncHandler(async (req, res) => {
-    const { status, referrer, referee, page = 1, limit = 20 } = req.query;
+    const allowedStatuses = new Set(["pending", "credited", "expired"]);
+    const rawPage = req.query.page === undefined ? 1 : Number(req.query.page);
+    const rawLimit = req.query.limit === undefined ? 20 : Number(req.query.limit);
+    if (!Number.isInteger(rawPage) || rawPage < 1 || rawPage > 100000) {
+      return res.status(400).json({ success: false, message: "Page must be a positive integer" });
+    }
+    if (!Number.isInteger(rawLimit) || rawLimit < 1 || rawLimit > 50) {
+      return res.status(400).json({ success: false, message: "Limit must be an integer between 1 and 50" });
+    }
+    const { status, referrer, referee } = req.query;
+    if (status !== undefined && (typeof status !== "string" || !allowedStatuses.has(status))) {
+      return res.status(400).json({ success: false, message: "Unsupported referral status" });
+    }
     const filter = {};
     if (status) filter.status = status;
-    if (referrer) filter.referrer = referrer;
-    if (referee) filter.referee = referee;
+    if (typeof referrer === "string" && referrer.trim()) filter.referrer = referrer.trim();
+    if (typeof referee === "string" && referee.trim()) filter.referee = referee.trim();
 
-    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
+    const skip = (rawPage - 1) * rawLimit;
     const [referrals, total] = await Promise.all([
       Referral.find(filter)
         .populate("referrer", "name email referralCode")
         .populate("referee", "name email")
         .sort({ createdAt: -1 })
         .skip(skip)
-        .limit(Math.min(Number(limit), 50))
+        .limit(rawLimit)
         .lean(),
       Referral.countDocuments(filter),
     ]);
 
+    res.set("Cache-Control", "no-store");
     res.json({
       success: true,
       referrals,
-      pagination: {
-        page: Number(page),
-        limit: Math.min(Number(limit), 50),
-        total,
-        pages: Math.ceil(total / Math.min(Number(limit), 50)),
-      },
+      pagination: { page: rawPage, limit: rawLimit, total, pages: Math.ceil(total / rawLimit) },
     });
   }),
 );
@@ -2004,6 +2149,16 @@ router.post(
     if (referral.status !== "pending")
       return res.status(400).json({ success: false, message: `Referral is already ${referral.status}` });
 
+    const reference = `REF-${referral._id}`;
+    const existingTransaction = await Transaction.findOne({ reference });
+    if (existingTransaction) {
+      return res.status(409).json({
+        success: false,
+        code: "REFERRAL_CREDIT_RECONCILIATION_REQUIRED",
+        message: "A transaction already exists for this referral. Reconcile the referral and referrer balance before retrying.",
+      });
+    }
+
     // Conditional transition: only the request that actually moves pending -> credited may pay out, so two
     // concurrent admin clicks cannot both credit the referrer.
     const claimed = await Referral.findOneAndUpdate(
@@ -2013,25 +2168,60 @@ router.post(
     );
     if (!claimed) return res.status(409).json({ success: false, message: "Referral is no longer pending" });
 
-    await User.findByIdAndUpdate(referral.referrer, {
-      $inc: { credits: amount, referralEarnings: amount, referralCount: 1 },
-    });
+    let balanceUpdated = false;
+    try {
+      const userUpdate = await User.findByIdAndUpdate(referral.referrer, {
+        $inc: { credits: amount, referralEarnings: amount, referralCount: 1 },
+      });
+      if (!userUpdate) throw new Error("Referral owner could not be found; credit was not completed");
+      balanceUpdated = true;
 
-    await Transaction.create({
-      user: referral.referrer,
-      type: "referral_bonus",
-      amount,
-      status: "success",
-      reference: `REF-${referral._id}`,
-      description: `Referral bonus for ${referral.referee}`,
-    });
+      // Stable reference makes the payout traceable and supports recovery after an uncertain write result.
+      await Transaction.create({
+        user: referral.referrer,
+        type: "referral_bonus",
+        amount,
+        status: "success",
+        reference,
+        description: `Referral bonus for ${referral.referee}`,
+      });
 
-    await auditAfterCommit({
-      admin: req.user._id,
-      action: "Credit Referral",
-      target: `Referral ${referral._id}`,
-      details: `Credited KES ${amount} to referrer`,
-    });
+      await auditAfterCommit({
+        admin: req.user._id,
+        action: "Credit Referral",
+        target: `Referral ${referral._id}`,
+        details: `Credited KES ${amount} to referrer`,
+      });
+    } catch (error) {
+      // The persistence adapter does not expose a cross-table transaction. Compensate successful writes
+      // and return a reconciliation error if any compensation itself fails; never report success.
+      const compensationErrors = [];
+      try {
+        // A network error may occur after the database accepted the insert, before create() returned.
+        const persistedTransaction = await Transaction.findOne({ reference: `REF-${referral._id}` });
+        if (persistedTransaction) await Transaction.deleteOne({ reference: `REF-${referral._id}` });
+      } catch (e) { compensationErrors.push(`transaction rollback: ${e.message}`); }
+      try {
+        if (balanceUpdated) await User.findByIdAndUpdate(referral.referrer, {
+          $inc: { credits: -amount, referralEarnings: -amount, referralCount: -1 },
+        });
+      } catch (e) { compensationErrors.push(`balance rollback: ${e.message}`); }
+      try {
+        await Referral.findOneAndUpdate(
+          { _id: referral._id, status: "credited" },
+          { status: "pending", bonusAmount: 0, creditedAt: null },
+          { new: true },
+        );
+      } catch (e) { compensationErrors.push(`referral rollback: ${e.message}`); }
+      req.log?.error?.({ err: error, referralId: String(referral._id), compensationErrors }, "Referral credit failed");
+      return res.status(500).json({
+        success: false,
+        code: compensationErrors.length ? "REFERRAL_CREDIT_RECONCILIATION_REQUIRED" : "REFERRAL_CREDIT_ROLLED_BACK",
+        message: compensationErrors.length
+          ? "Referral credit failed and automatic rollback was incomplete. Reconciliation is required before retrying."
+          : "Referral credit could not be completed. Changes were rolled back; please retry after checking the record.",
+      });
+    }
 
     res.json({ success: true, message: "Referral credited successfully", referral: claimed });
   }),
@@ -2046,8 +2236,13 @@ router.post(
     if (referral.status !== "pending")
       return res.status(400).json({ success: false, message: `Referral is already ${referral.status}` });
 
-    referral.status = "expired";
-    await referral.save();
+    // Conditional state transition prevents concurrent expire/credit requests from both winning.
+    const expired = await Referral.findOneAndUpdate(
+      { _id: referral._id, status: "pending" },
+      { status: "expired" },
+      { new: true },
+    );
+    if (!expired) return res.status(409).json({ success: false, message: "Referral is no longer pending" });
 
     await auditAfterCommit({
       admin: req.user._id,
@@ -2056,7 +2251,7 @@ router.post(
       details: "Expired pending referral",
     });
 
-    res.json({ success: true, message: "Referral expired", referral });
+    res.json({ success: true, message: "Referral expired", referral: expired });
   }),
 );
 
@@ -2064,7 +2259,10 @@ router.get(
   "/users/:id/referrals",
   adminOrSuper,
   asyncHandler(async (req, res) => {
-    const user = await User.findById(req.params.id)
+    if (typeof req.params.id !== "string" || !req.params.id.trim() || req.params.id.length > 128) {
+      return res.status(400).json({ success: false, message: "A valid user ID is required" });
+    }
+    const user = await User.findById(req.params.id.trim())
       .select("name email referralCode referralEarnings referralCount credits")
       .lean();
     if (!user) return res.status(404).json({ success: false, message: "User not found" });
@@ -2088,52 +2286,44 @@ router.get(
 router.get(
   "/chats",
   staffRole,
+  validateQuery(chatListQuerySchema),
   asyncHandler(async (req, res) => {
-    const { page = 1, limit = 20, search, isBlocked } = req.query;
+    const page = Number(req.query.page || 1);
+    const limit = Math.min(Number(req.query.limit || 20), 50);
+    const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
     const filter = {};
-    if (isBlocked !== undefined) filter.isBlocked = isBlocked === "true";
+    if (req.query.isBlocked !== undefined) filter.isBlocked = req.query.isBlocked === "true";
+    const skip = (page - 1) * limit;
 
-    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
-
-    let query = Chat.find(filter)
-      .populate("participants", "name email")
-      .populate("car", "title brand model")
-      .sort({ updatedAt: -1 })
-      .skip(skip)
-      .limit(Math.min(Number(limit), 50))
-      .lean();
-
+    // Keep the resolved user IDs in this scope for both the query and its count.
+    let userIds = null;
     if (search) {
       const safeSearch = escapeRegex(search);
       const users = await User.find({
         $or: [{ name: { $regex: safeSearch, $options: "i" } }, { email: { $regex: safeSearch, $options: "i" } }],
-      })
-        .select("_id")
-        .lean();
-      const userIds = users.map((u) => u._id);
-      query = Chat.find({ participants: { $in: userIds }, ...filter })
+      }).select("_id").lean();
+      userIds = users.map((user) => user._id);
+    }
+    const queryFilter = {
+      ...filter,
+      ...(userIds ? { participants: { $in: userIds } } : {}),
+    };
+    const [chats, total] = await Promise.all([
+      Chat.find(queryFilter)
         .populate("participants", "name email")
         .populate("car", "title brand model")
-        .sort({ updatedAt: -1 })
+        .sort({ updatedAt: -1, _id: -1 })
         .skip(skip)
-        .limit(Math.min(Number(limit), 50))
-        .lean();
-    }
-
-    const [chats, total] = await Promise.all([
-      query,
-      Chat.countDocuments(search ? { participants: { $in: userIds || [] }, ...filter } : filter),
+        .limit(limit)
+        .lean(),
+      Chat.countDocuments(queryFilter),
     ]);
 
+    res.set("Cache-Control", "no-store");
     res.json({
       success: true,
       chats,
-      pagination: {
-        page: Number(page),
-        limit: Math.min(Number(limit), 50),
-        total,
-        pages: Math.ceil(total / Math.min(Number(limit), 50)),
-      },
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   }),
 );
@@ -2141,6 +2331,7 @@ router.get(
 router.get(
   "/chats/:chatId/messages",
   adminOrSuper,
+  validateObjectId("chatId"),
   validateQuery(messageListQuerySchema),
   asyncHandler(async (req, res) => {
     const chat = await Chat.findById(req.params.chatId)
@@ -2165,6 +2356,14 @@ router.get(
 router.delete(
   "/chats/:chatId/messages/:messageId",
   adminOrSuper,
+  validateObjectId("chatId"),
+  (req, res, next) => {
+    const messageId = String(req.params.messageId || "");
+    if (!/^(?:[0-9a-f]{24}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i.test(messageId)) {
+      return res.status(400).json({ success: false, message: "Invalid message ID format" });
+    }
+    next();
+  },
   asyncHandler(async (req, res) => {
     const chat = await Chat.findById(req.params.chatId);
     if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
@@ -2190,6 +2389,7 @@ router.delete(
 router.post(
   "/chats/:chatId/block",
   adminOrSuper,
+  validateObjectId("chatId"),
   asyncHandler(async (req, res) => {
     const chat = await Chat.findByIdAndUpdate(req.params.chatId, { isBlocked: true }, { new: true });
     if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
@@ -2207,6 +2407,7 @@ router.post(
 router.post(
   "/chats/:chatId/unblock",
   adminOrSuper,
+  validateObjectId("chatId"),
   asyncHandler(async (req, res) => {
     const chat = await Chat.findByIdAndUpdate(req.params.chatId, { isBlocked: false }, { new: true });
     if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
@@ -2225,37 +2426,49 @@ router.post(
 // 📊 MARKET DATA MANAGEMENT
 // =============================
 
+const validateMarketDataValues = (value) => {
+  const errors = [];
+  const currentYear = new Date().getFullYear();
+  if (typeof value.brand !== "string" || !value.brand.trim() || value.brand.trim().length > 100) errors.push("brand must be a non-empty string up to 100 characters");
+  if (typeof value.model !== "string" || !value.model.trim() || value.model.trim().length > 120) errors.push("model must be a non-empty string up to 120 characters");
+  const year = Number(value.year);
+  if (!Number.isInteger(year) || year < 1900 || year > currentYear + 1) errors.push("year must be a valid vehicle year");
+  const prices = [Number(value.lowPrice), Number(value.avgPrice), Number(value.highPrice)];
+  if (!prices.every((n) => Number.isFinite(n) && n > 0)) errors.push("lowPrice, avgPrice and highPrice must be positive finite numbers");
+  else if (!(prices[0] <= prices[1] && prices[1] <= prices[2])) errors.push("prices must satisfy lowPrice <= avgPrice <= highPrice");
+  const sampleSize = Number(value.sampleSize ?? 1);
+  if (!Number.isInteger(sampleSize) || sampleSize < 1 || sampleSize > 1000000) errors.push("sampleSize must be a positive whole number");
+  if (value.engineCC != null && value.engineCC !== "" && (!Number.isFinite(Number(value.engineCC)) || Number(value.engineCC) <= 0 || Number(value.engineCC) > 100000)) errors.push("engineCC must be a positive number when provided");
+  for (const field of ["bodyType", "fuel", "transmission", "source"]) {
+    if (value[field] != null && (typeof value[field] !== "string" || value[field].length > 100)) errors.push(`${field} must be text up to 100 characters`);
+  }
+  return errors;
+};
+
 router.get(
   "/market-data",
   staffRole,
   asyncHandler(async (req, res) => {
-    const { brand, model, year, page = 1, limit = 20 } = req.query;
+    const { brand, model, year } = req.query;
+    const page = Number(req.query.page ?? 1);
+    const limit = Number(req.query.limit ?? 20);
+    const currentYear = new Date().getFullYear();
+    if (!Number.isInteger(page) || page < 1 || page > 1000000) return res.status(400).json({ success: false, message: "page must be a positive integer" });
+    if (!Number.isInteger(limit) || limit < 1 || limit > 50) return res.status(400).json({ success: false, message: "limit must be an integer between 1 and 50" });
+    if (brand != null && (typeof brand !== "string" || brand.trim().length > 100)) return res.status(400).json({ success: false, message: "brand filter is invalid" });
+    if (model != null && (typeof model !== "string" || model.trim().length > 120)) return res.status(400).json({ success: false, message: "model filter is invalid" });
+    if (year != null && (!Number.isInteger(Number(year)) || Number(year) < 1900 || Number(year) > currentYear + 1)) return res.status(400).json({ success: false, message: "year filter is invalid" });
     const filter = {};
-    const escapeRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    if (brand) filter.brand = { $regex: escapeRegex(brand), $options: "i" };
-    if (model) filter.model = { $regex: escapeRegex(model), $options: "i" };
-    if (year) filter.year = Number(year);
-
-    const skip = (Math.max(Number(page), 1) - 1) * Math.min(Number(limit), 50);
+    if (brand?.trim()) filter.brand = { $regex: escapeRegex(brand.trim()), $options: "i" };
+    if (model?.trim()) filter.model = { $regex: escapeRegex(model.trim()), $options: "i" };
+    if (year != null && year !== "") filter.year = Number(year);
+    const skip = (page - 1) * limit;
     const [entries, total] = await Promise.all([
-      MarketData.find(filter)
-        .sort({ brand: 1, model: 1, year: -1 })
-        .skip(skip)
-        .limit(Math.min(Number(limit), 50))
-        .lean(),
+      MarketData.find(filter).sort({ brand: 1, model: 1, year: -1 }).skip(skip).limit(limit).lean(),
       MarketData.countDocuments(filter),
     ]);
-
-    res.json({
-      success: true,
-      entries,
-      pagination: {
-        page: Number(page),
-        limit: Math.min(Number(limit), 50),
-        total,
-        pages: Math.ceil(total / Math.min(Number(limit), 50)),
-      },
-    });
+    res.set("Cache-Control", "no-store");
+    res.json({ success: true, entries, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
   }),
 );
 
@@ -2293,19 +2506,13 @@ router.post(
         .json({ success: false, message: "brand, model, year, lowPrice, avgPrice, highPrice are required" });
     }
 
+    const validationErrors = validateMarketDataValues({ brand, model, year, bodyType, fuel, transmission, engineCC, lowPrice, avgPrice, highPrice, sampleSize, source });
+    if (validationErrors.length) return res.status(400).json({ success: false, message: "Market data entry is invalid", errors: validationErrors });
     const entry = await MarketData.create({
-      brand,
-      model,
-      year,
-      bodyType,
-      fuel,
-      transmission,
-      engineCC,
-      lowPrice,
-      avgPrice,
-      highPrice,
-      sampleSize,
-      source,
+      brand: brand.trim(), model: model.trim(), year: Number(year), bodyType, fuel, transmission,
+      engineCC: engineCC == null || engineCC === "" ? undefined : Number(engineCC),
+      lowPrice: Number(lowPrice), avgPrice: Number(avgPrice), highPrice: Number(highPrice),
+      sampleSize: Number(sampleSize ?? 1), source,
     });
 
     await auditAfterCommit({
@@ -2340,6 +2547,16 @@ router.put(
     for (const field of allowed) {
       if (req.body[field] !== undefined) updates[field] = req.body[field];
     }
+    const current = await MarketData.findById(req.params.id).lean();
+    if (!current) return res.status(404).json({ success: false, message: "Market data entry not found" });
+    const candidate = { ...current, ...updates };
+    const validationErrors = validateMarketDataValues(candidate);
+    if (validationErrors.length) return res.status(400).json({ success: false, message: "Market data entry is invalid", errors: validationErrors });
+    for (const field of ["year", "lowPrice", "avgPrice", "highPrice", "sampleSize", "engineCC"]) {
+      if (updates[field] !== undefined && updates[field] !== "") updates[field] = Number(updates[field]);
+    }
+    if (updates.brand !== undefined) updates.brand = updates.brand.trim();
+    if (updates.model !== undefined) updates.model = updates.model.trim();
     updates.lastUpdated = new Date();
 
     const entry = await MarketData.findByIdAndUpdate(req.params.id, updates, { new: true, runValidators: true }).lean();
@@ -2380,12 +2597,17 @@ router.post(
     if (!Array.isArray(entries) || entries.length === 0) {
       return res.status(400).json({ success: false, message: "entries array is required" });
     }
+    if (entries.length > 500) return res.status(400).json({ success: false, message: "A maximum of 500 entries may be imported at once" });
 
     let created = 0;
     const errors = [];
 
     for (let i = 0; i < entries.length; i++) {
       const entry = entries[i];
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+        errors.push({ index: i, message: "Entry must be a JSON object" });
+        continue;
+      }
       if (
         !entry.brand ||
         !entry.model ||
@@ -2400,8 +2622,19 @@ router.post(
         });
         continue;
       }
+      const validationErrors = validateMarketDataValues({ ...entry, source: entry.source || "bulk_import" });
+      if (validationErrors.length) {
+        errors.push({ index: i, message: validationErrors.join("; ") });
+        continue;
+      }
       try {
-        await MarketData.create({ ...entry, source: entry.source || "bulk_import" });
+        await MarketData.create({
+          ...entry, brand: entry.brand.trim(), model: entry.model.trim(), year: Number(entry.year),
+          lowPrice: Number(entry.lowPrice), avgPrice: Number(entry.avgPrice), highPrice: Number(entry.highPrice),
+          sampleSize: Number(entry.sampleSize ?? 1),
+          engineCC: entry.engineCC == null || entry.engineCC === "" ? undefined : Number(entry.engineCC),
+          source: entry.source || "bulk_import",
+        });
         created++;
       } catch (err) {
         errors.push({ index: i, message: err.message });

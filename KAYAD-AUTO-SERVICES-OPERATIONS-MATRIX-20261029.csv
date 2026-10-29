@@ -1,0 +1,11 @@
+area,canonical_source,operation,business_authority,result
+Public Auto Services landing,src/features/InspectionsView.tsx,Request matched inspection,Existing request modal and auth boundary,Preserved; source contract validated
+Public Auto Services landing,src/features/InspectionsView.tsx,Provider finder,Canonical InspectionMarketplacePage navigation,Preserved; source contract validated
+Provider directory,src/features/InspectionMarketplace/pages/InspectionMarketplacePage.tsx,"Search, category, symptom, filters, pagination",inspectionApi.searchProviders + canonical taxonomy,Response validation and stale-data recovery added; runtime test blocked
+Provider profile,src/features/InspectionMarketplace/pages/InspectionMarketplacePage.tsx,Open provider details,inspectionApi.getProviderProfile,Response identity validation and request sequencing added
+Provider application,src/features/InspectionsView/ProviderApplicationModal.tsx,Apply as provider,inspectionApi.registerProvider; admin review controls access,Existing behavior preserved; source validators pass
+Booking,src/features/InspectionMarketplace/pages/BookingFlow,"Choose package, time, customer and vehicle details",Canonical booking API and active verified provider rules,Existing business flow preserved; staging E2E not run
+Payment,Inspection payment services and callback routes,M-Pesa initiation and confirmation,Server-derived amount and atomic/idempotent settlement,Existing financial controls preserved; no live payment attempted
+Reports and privacy,Inspection report access and QA routes,Open customer report,Authenticated report access and QA version lifecycle,Existing contract validators pass; runtime access not exercised
+Provider operations,Provider dashboard/business center routes,"Bookings, capabilities, earnings, ownership",Existing provider ownership middleware and server APIs,No business write paths changed; source validator pass
+Ledger and settlement,Inspection settlement services/migrations,"Provider payable, refunds, payouts","Canonical ledger, idempotent settlement and RLS",Source validators pass; no ledger writes or payout executed

@@ -73,7 +73,7 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
       { to: '/admin/staff-permissions', icon: KeyRound, label: 'Staff Permissions', superadmin: true },
       { to: '/admin/panic-room', icon: AlertTriangle, label: 'Panic Room', danger: true },
       { to: '/admin/platform-recovery', icon: LifeBuoy, label: 'Platform Recovery' },
-      { to: '/admin/webhoist', icon: Server, label: 'Webhoist', superadmin: true },
+      { to: '/admin/webhoist', icon: Server, label: 'System Overview', superadmin: true },
     ],
   },
 ];

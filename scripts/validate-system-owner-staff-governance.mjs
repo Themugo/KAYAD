@@ -9,7 +9,7 @@ const end = routes.indexOf('// 🌱 SEED STAFF ACCOUNTS', start);
 assert(start >= 0 && end > start, 'staff governance route block must exist');
 const block = routes.slice(start, end);
 const endpoints = ['/staff"', '/staff/permissions/catalog', '/staff/:id/permissions', '/staff/:id/permissions"', '/staff/:id"'];
-assert(block.includes('import { isOwnerUser } from "../config/owners.js";') || routes.includes('import { isOwnerUser } from "../config/owners.js";'), 'canonical owner identity helper must be imported');
+assert(/import \{[^}]*\bisOwnerUser\b[^}]*\} from \"\.\.\/config\/owners\.js\";/.test(routes), 'canonical owner identity helper must be imported');
 assert(routes.includes('const systemOwnerOnly = (req, res, next) =>') && routes.includes('if (!isOwnerUser(req.user))'), 'owner middleware must check canonical owner registry');
 for (const path of endpoints) {
   const i = block.indexOf(path);

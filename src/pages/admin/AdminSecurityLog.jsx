@@ -41,6 +41,7 @@ export default function AdminSecurityLog() {
   const [statistics, setStatistics] = useState(null);
   const [showStatistics, setShowStatistics] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [error, setError] = useState('');
 
   const fetchLogs = useCallback(() => {
     setLoading(true);
@@ -48,54 +49,55 @@ export default function AdminSecurityLog() {
     if (filter) params.action = filter;
     if (severityFilter) params.severity = severityFilter;
     if (targetModelFilter) params.targetModel = targetModelFilter;
-    adminAPI.getAuditLogs(params)
+    setError('');
+    adminAPI.getSecurityLogs(params)
       .then(d => {
-        setLogs(d.data || []);
-        setPagination(d.pagination);
+        setLogs(Array.isArray(d.logs) ? d.logs : []);
+        setPagination(d.pagination || null);
       })
-      .catch(() => {})
+      .catch(() => { setLogs([]); setPagination(null); setError('Security logs could not be loaded. Check your admin session and API connection, then retry.'); })
       .finally(() => setLoading(false));
-    // filter is applied manually (Enter key / Apply button), not auto-triggered on change
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, severityFilter, targetModelFilter]);
+  }, [page, filter, severityFilter, targetModelFilter]);
 
   const fetchStatistics = () => {
-    adminAPI.getAuditLogStatistics({ days: 30 })
-      .then(d => {
-        setStatistics(d.statistics);
-      })
-      .catch(() => {});
+    adminAPI.getSecurityLogSummary()
+      .then(d => { setStatistics(d.summary || null); })
+      .catch(() => setError('Security summary could not be loaded. The log list remains available if its request succeeded.'));
   };
 
   const handleExport = async (format = 'json') => {
     setExporting(true);
     try {
-      const params = { format };
+      const params = { page: 1, limit: 200 };
       if (filter) params.action = filter;
       if (severityFilter) params.severity = severityFilter;
       if (targetModelFilter) params.targetModel = targetModelFilter;
 
-      const response = await adminAPI.exportAuditLogs(params);
-
+      const response = await adminAPI.getSecurityLogs(params);
+      const rows = Array.isArray(response.logs) ? response.logs : [];
       if (format === 'csv') {
-        const blob = new Blob([response], { type: 'text/csv' });
+        const columns = ['timestamp', 'severity', 'action', 'actor', 'actorRole', 'target', 'targetModel', 'ip', 'userAgent'];
+        const cell = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
+        const csv = [columns.join(','), ...rows.map(log => columns.map(key => cell(key === 'timestamp' ? (log.timestamp || log.createdAt) : key === 'actor' ? (log.actorName || log.actorEmail || log.actor?.name || log.actor?.email || log.actor) : log[key])).join(','))].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `audit-logs-${Date.now()}.csv`;
+        a.download = `security-logs-${Date.now()}.csv`;
         a.click();
         window.URL.revokeObjectURL(url);
       } else {
-        const blob = new Blob([JSON.stringify(response, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify({ exportedAt: new Date().toISOString(), count: rows.length, limit: 200, logs: rows }, null, 2)], { type: 'application/json' });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `audit-logs-${Date.now()}.json`;
+        a.download = `security-logs-${Date.now()}.json`;
         a.click();
         window.URL.revokeObjectURL(url);
       }
     } catch (err) {
       console.error('Export failed:', err);
+      setError('Export failed. Check your admin session and API connection, then retry.');
     } finally {
       setExporting(false);
     }
@@ -105,16 +107,16 @@ export default function AdminSecurityLog() {
   useEffect(() => { if (showStatistics) fetchStatistics(); }, [showStatistics]);
 
   return (
-    <div className="page" style={{ background: 'var(--bg)' }}>
-      <div className="container" style={{ paddingTop: 32, paddingBottom: 32, maxWidth: 1200 }}>
-        <div style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="page admin-security-log" style={{ background: 'var(--bg)' }}>
+      <div className="container admin-security-log__container" style={{ paddingTop: 32, paddingBottom: 32, maxWidth: 1200 }}>
+        <div className="admin-security-log__header" style={{ marginBottom: 24, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h2>Immutable Audit Trail</h2>
+            <h2>Security Log</h2>
             <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 4 }}>
-              Enterprise-grade audit logging — records cannot be altered or deleted
+              Read-only record of security-relevant activity and administrative actions
             </p>
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
+          <div className="admin-security-log__actions" style={{ display: 'flex', gap: 8 }}>
             <button
               className="btn btn-sm btn-outline"
               onClick={() => setShowStatistics(!showStatistics)}
@@ -140,16 +142,17 @@ export default function AdminSecurityLog() {
 
         {showStatistics && statistics && (
           <div className="card" style={{ marginBottom: 24, padding: 16 }}>
-            <h3 style={{ fontSize: 14, marginBottom: 12 }}>Audit Statistics (Last 30 Days)</h3>
+            <h3 style={{ fontSize: 14, marginBottom: 12 }}>Security Log Summary</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
               <div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Total Logs</div>
-                <div style={{ fontSize: 24, fontWeight: 600, color: 'var(--brand)' }}>{statistics.totalLogs}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Total Security Logs</div>
+                <div style={{ fontSize: 24, fontWeight: 600, color: 'var(--brand)' }}>{statistics.total ?? 0}</div>
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>Critical events: {statistics.criticalCount ?? 0}</div>
               </div>
               <div>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Top Actions</div>
                 <div style={{ fontSize: 12 }}>
-                  {statistics.actionCounts?.slice(0, 3).map((a, i) => (
+                  {statistics.recentActions?.slice(0, 3).map((a, i) => (
                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>{a._id}</span>
                       <span style={{ fontWeight: 600 }}>{a.count}</span>
@@ -157,49 +160,30 @@ export default function AdminSecurityLog() {
                   ))}
                 </div>
               </div>
-              <div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Severity Distribution</div>
-                <div style={{ fontSize: 12 }}>
-                  {statistics.severityCounts?.map((s, i) => (
-                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ color: SEVERITY_COLORS[s._id]?.color || 'var(--text-muted)' }}>{s._id}</span>
-                      <span style={{ fontWeight: 600 }}>{s.count}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>Target Models</div>
-                <div style={{ fontSize: 12 }}>
-                  {statistics.targetModelCounts?.slice(0, 3).map((t, i) => (
-                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span>{t._id}</span>
-                      <span style={{ fontWeight: 600 }}>{t.count}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+
             </div>
           </div>
         )}
 
-        <div className="card" style={{ marginBottom: 24, padding: 16 }}>
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        {error && <div role="alert" className="card" style={{ marginBottom: 16, padding: 12, border: '1px solid rgba(239,68,68,.35)', color: 'var(--red)' }}>{error} <button className="btn btn-sm btn-outline" onClick={() => { fetchLogs(); if (showStatistics) fetchStatistics(); }}>Retry</button></div>}
+
+        <div className="card admin-security-log__filters" style={{ marginBottom: 24, padding: 16 }}>
+          <div className="admin-security-log__filter-grid" style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <select
               aria-label="Filter by severity"
-              className="input"
+              className="input admin-security-log__select"
               style={{ width: 140, fontSize: 12, padding: '6px 10px' }}
               value={severityFilter}
               onChange={e => { setSeverityFilter(e.target.value); setPage(1); }}
             >
               <option value="">All Severity</option>
               <option value="critical">Critical</option>
-              <option value="warning">Warning</option>
+              <option value="warn">Warning</option>
               <option value="info">Info</option>
             </select>
             <select
               aria-label="Filter by target model"
-              className="input"
+              className="input admin-security-log__select"
               style={{ width: 140, fontSize: 12, padding: '6px 10px' }}
               value={targetModelFilter}
               onChange={e => { setTargetModelFilter(e.target.value); setPage(1); }}
@@ -213,14 +197,15 @@ export default function AdminSecurityLog() {
               <option value="Bid">Bid</option>
             </select>
             <input
-              className="input"
+              className="input admin-security-log__search-input"
               style={{ width: 200, fontSize: 12, padding: '6px 10px' }}
+              aria-label="Search security logs by action"
               placeholder="Search by action..."
               value={filter}
               onChange={e => setFilter(e.target.value)}
               onKeyDown={e => { if (e.key === 'Enter') { setPage(1); fetchLogs(); } }}
             />
-            <button className="btn btn-sm btn-gold" onClick={() => { setPage(1); fetchLogs(); }}>
+            <button className="btn btn-sm btn-gold admin-security-log__search-button" onClick={() => { setPage(1); fetchLogs(); }}>
               Search
             </button>
           </div>
@@ -232,8 +217,8 @@ export default function AdminSecurityLog() {
           <>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {logs.length === 0 ? (
-                <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>
-                  No audit logs found
+                <div className="card admin-security-log__empty" style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)' }}>
+                  {error ? 'Security logs are unavailable until the request succeeds.' : 'No security events match these filters'}
                 </div>
               ) : logs.map(log => {
                 const sev = SEVERITY_COLORS[log.severity] || SEVERITY_COLORS.info;
@@ -251,20 +236,20 @@ export default function AdminSecurityLog() {
                         {log.action}
                       </code>
                       <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-                        {log.actorName || log.actorEmail || 'System'} ({log.actorRole || '—'})
+                        {log.actorName || log.actorEmail || log.actor?.name || log.actor?.email || log.actor || 'System'} ({log.actorRole || log.actor?.role || '—'})
                       </span>
-                      {log.targetModel && (
+                      {(log.targetModel || log.target_model || log.targetModelName) && (
                         <span style={{ fontSize: 11, color: 'var(--text-dim)', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: 4 }}>
-                          {log.targetModel}
+                          {log.targetModel || log.target_model || log.targetModelName}
                         </span>
                       )}
-                      {log.targetName && (
+                      {(log.targetName || log.target) && (
                         <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>
-                          → {log.targetName}
+                          → {log.targetName || log.target}
                         </span>
                       )}
                       <span style={{ marginLeft: 'auto', fontSize: 11, color: 'var(--text-dim)' }}>
-                        {new Date(log.createdAt).toLocaleString('en-KE')}
+                        {(log.timestamp || log.createdAt) ? new Date(log.timestamp || log.createdAt).toLocaleString('en-KE') : 'Time unavailable'}
                       </span>
                     </div>
                     {(log.oldValue || log.newValue || log.changes?.length > 0) && (
@@ -288,9 +273,9 @@ export default function AdminSecurityLog() {
                         )}
                       </div>
                     )}
-                    {log.ipAddress && (
+                    {(log.ipAddress || log.ip) && (
                       <div style={{ marginTop: 4, fontSize: 10, color: 'var(--text-dim)' }}>
-                        IP: {log.ipAddress} {log.userAgent && `• ${log.userAgent.substring(0, 50)}...`}
+                        IP: {log.ipAddress || log.ip} {log.userAgent && `• ${log.userAgent.substring(0, 50)}...`}
                       </div>
                     )}
                   </div>

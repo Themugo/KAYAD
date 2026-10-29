@@ -1,0 +1,3 @@
+KAYAD Security Log Mobile Refinement — Packaging Notes
+
+The final archive is generated from this extracted KAYAD source tree. The separate packaging report supplied alongside the ZIP records the archive SHA-256, ZIP integrity result, fresh-extraction result, entry count and exclusions. This file is included as part of the project evidence.

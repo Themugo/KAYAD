@@ -1,6 +1,6 @@
 // KAYAD canonical dealer verification controller.
 // All persistence goes through dealerVerificationService + db adapter.
-import { findById, findAll, updateMany } from "../db/index.js";
+import { findById, findAll, updateMany, count } from "../db/index.js";
 import {
   submitDealerVerification,
   getDealerVerification,
@@ -80,10 +80,23 @@ export const verifyOTP = async (req, res) => {
 export const getAllVerifications = async (req, res) => {
   try {
     const result = await listDealerVerifications(req.query || {});
-    return res.json({ success: true, verifications: result.items, pagination: result.pagination });
+    // The service intentionally returns canonical verification rows. Resolve related records
+    // here so the admin UI never has to guess whether user/dealer are IDs or objects.
+    const verifications = await Promise.all(result.items.map(async (verification) => {
+      const [user, dealer] = await Promise.all([
+        verification.user ? findById("users", verification.user) : null,
+        verification.dealer ? findById("dealers", verification.dealer) : null,
+      ]);
+      return { ...verification, user, dealer };
+    }));
+    const statuses = ["pending", "approved", "rejected", "suspended"];
+    const statusCounts = await Promise.all(statuses.map(async (status) => [status, await count("dealer_verifications", { verificationStatus: status })]));
+    const summary = Object.fromEntries(statusCounts);
+    summary.total = await count("dealer_verifications");
+    return res.json({ success: true, verifications, pagination: result.pagination, summary });
   } catch (err) {
     logError("Get all verifications error", err);
-    return res.status(500).json({ success: false, message: "Failed to get verifications" });
+    return res.status(err.statusCode || 500).json({ success: false, message: err.statusCode ? err.message : "Failed to get verifications" });
   }
 };
 

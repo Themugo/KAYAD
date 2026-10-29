@@ -1,0 +1,14 @@
+KAYAD LOGIN POLISH — RUNTIME ATTEMPTS
+$ npm test -- src/__tests__/pages/LoginPage.test.jsx src/__tests__/pages/LoginPage.ownerMfa.test.jsx src/__tests__/pages/LoginPage.ownerUnverified.test.jsx
+EXIT 127
+vitest: Permission denied
+
+$ npm run typecheck
+EXIT 2
+TypeScript run returned extensive missing dependency/type declaration errors (React, JSX runtime, lucide-react, Sentry, PostHog, web-vitals and other ecosystem types). Environment does not contain usable project dependencies; therefore this run is not considered a valid code regression verdict.
+
+$ npm run build
+EXIT 127
+vite: Permission denied
+
+Environment Node: v22.16.0; required baseline >=22.22.2.

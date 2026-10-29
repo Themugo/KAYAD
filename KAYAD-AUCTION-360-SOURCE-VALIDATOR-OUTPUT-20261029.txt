@@ -1,0 +1,178 @@
+$ node scripts/validate-auction-360-execution.mjs
+EXIT=0
+PASS runtime list envelope validation rejects malformed success payloads
+PASS only validated list sections replace existing snapshots
+PASS out-of-order list refreshes are ignored
+PASS last refresh metadata is shown
+PASS saved list response is validated
+PASS watchlist failure is distinct from an empty watchlist
+PASS watchlist retries use the sequenced loader
+PASS mobile tabs use a complete two-column grid
+PASS mobile page reserves bottom safe-area clearance
+PASS status indicator distinguishes loading, unavailable, live and idle
+PASS search field has an accessible label and concise placeholder
+PASS regression tests cover malformed list and saved-list failures
+PASS read-only endpoint diagnostic masks response payloads
+Auction 360 execution source validation: 13/13 PASS
+
+
+$ node scripts/validate-auction-public-error-states.mjs
+EXIT=0
+PASS discovery does not expose raw server exception text
+PASS a failed refresh preserves the last successful list snapshot
+PASS headline state follows the selected auction tab and avoids a false empty flash during load
+PASS auction tabs are connected to an accessible results panel
+PASS signed-out saved tab does not show a false zero count
+PASS detail page distinguishes HTTP 404 from service/network failure
+PASS detail page offers retry and a route back to auction discovery
+PASS initial detail load uses the canonical sanitized bid list once
+PASS discovery regression tests cover sanitized failures and refresh preservation
+PASS canonical public live list excludes rejected listings and expired/not-yet-started auctions
+PASS scheduled listing, detail and public bid history hide rejected or deleted vehicles
+PASS published future setup remains openable before car lifecycle mirroring
+PASS backend regression tests cover rejected/deleted visibility, live time boundaries and scheduled detail parity
+PASS detail regression tests cover 404, outage and retry recovery
+Auction public error-state validation: 14/14 PASS
+
+
+$ node scripts/validate-auction-transport-convergence.mjs
+EXIT=0
+PASS: canonical auction service uses shared request transport
+PASS: AuctionsView uses canonical auction service transport
+PASS: marketplaceCore uses canonical auction service
+PASS: legacy public auction export removed
+PASS: auction service supports active/list/my/get contracts
+Auction transport convergence: 5/5 PASS
+
+
+$ node scripts/validate-auction-domain-integrity.mjs
+EXIT=0
+PASS admin start uses canonical lifecycle service
+PASS admin extend uses canonical lifecycle service
+PASS dealer start uses canonical lifecycle service
+PASS dealer extend uses canonical lifecycle service
+PASS dealer extend endpoint is unique
+PASS bid payment uses verified profile phone
+PASS legacy winner route converges on canonical settlement
+PASS admin bid filters use canonical bid status
+PASS duplicate carController bid engine removed
+PASS bid confirmation migration has no duplicate variable declaration
+PASS lifecycle delegates to DB-atomic transitions
+PASS atomic transaction wrappers exist
+PASS frontend auction transport is domain-complete
+PASS frontend bid transport covers admin reads/actions
+PASS marketplace context uses canonical bid service
+PASS lifecycle RPC migration present
+PASS hard reserve settlement is enforced atomically
+PASS syntax: backend/routes/auctionAdminRoutes.js
+PASS syntax: backend/routes/dealerRoutes.js
+PASS syntax: backend/routes/bidRoutes.js
+PASS syntax: backend/services/auctionLifecycle.service.js
+PASS syntax: backend/controllers/bidController.js
+PASS syntax: backend/controllers/carController.js
+PASS syntax: backend/utils/atomicTransactions.js
+
+Auction domain integrity: 24/24 checks passed.
+
+
+$ node scripts/validate-auction-bid-surface.mjs
+EXIT=0
+PASS canonical auction discovery uses real auction transport
+PASS canonical live auction page uses canonical bid transport
+PASS bid request sends the real car-scoped endpoint
+PASS successful bid response triggers pending payment confirmation UI
+PASS live auction page consumes sanitized bids from the canonical auction detail response without a duplicate initial request
+PASS legacy audit report does not claim canonical auction UI has no real bid call
+6/6 checks passed
+
+
+$ node scripts/validate-auction-360-hardening-20261007.mjs
+EXIT=0
+PASS scheduled auction discovery is backed by published setup
+PASS scheduled auction response exposes configured start time
+PASS public bid activity excludes pending bids and bidder PII
+PASS public auction response does not expose highest bidder identity
+PASS public auction response does not expose exact reserve price
+PASS public auction bid activity endpoint exists
+PASS auction outcome is participant/admin protected
+PASS scheduled auctions auto-start through canonical lifecycle
+PASS scheduled start preserves the published end time
+PASS published schedule mirrors onto canonical car lifecycle
+PASS backend bid validation uses published configured increment
+PASS DB atomic bid/auto-bid/extension rules use published setup
+PASS confirmed bids and anti-snipe extensions emit canonical realtime events
+PASS live room uses canonical auction transport
+PASS public live room consumes the sanitized bid list already included by the canonical auction detail response
+PASS bidder registration requires explicit terms acceptance
+PASS winner CTA converges on actual settlement path
+PASS socket client handles canonical auction lifecycle events
+PASS public auction realtime is available to signed-out viewers
+PASS auction discovery cards use actual auction status and final bid
+PASS verified organizer presentation uses canonical dealer trust field
+PASS auction discovery four-tab layout is aligned on desktop
+PASS syntax: backend/controllers/auctionController.js
+PASS syntax: backend/routes/auctionRoutes.js
+PASS syntax: backend/routes/auctionSettlementRoutes.js
+PASS syntax: backend/utils/auctionTimer.js
+PASS syntax: backend/services/auctionSetup.service.js
+PASS syntax: backend/controllers/bidController.js
+
+Auction 360 hardening: 28/28 checks passed.
+
+
+$ node scripts/validate-auction-phase-a-financial-integrity.mjs
+EXIT=0
+PASS security-hold table exists
+PASS security-hold settlement is atomic
+PASS security-hold reconciliation is atomic
+PASS commitment application moves liability to settlement payable
+PASS security-hold forfeiture is atomic
+PASS bid confirmation fee is policy-owned
+PASS high-value threshold is policy-owned
+PASS high-value deposit is policy-owned
+PASS bid payment validates the server fee
+PASS bid payment has ledger authority
+PASS bid payment ledger is idempotent
+PASS high-value bid checks canonical hold
+PASS high-value deposit endpoint exists
+PASS commitment creates canonical hold
+PASS commitment callback uses atomic hold settlement
+PASS generic M-Pesa callback recognizes auction security transactions
+PASS security callback verifies provider amount
+PASS security hold can recover missing checkout binding
+PASS legacy bid callback converges to canonical payment callback
+PASS auction outcome records net payment due
+PASS winner default can forfeit security
+PASS direct winner payment uses authoritative payment_due_amount
+PASS escrow is not created before winner payment
+PASS no client direct security-hold writes
+AUCTION PHASE A FINANCIAL INTEGRITY: 24/24 PASS
+
+
+$ node scripts/validate-stage5f7-private-auction-contract.mjs
+EXIT=0
+Stage 5F.7 private-seller contract validator: 23 PASS, 0 FAIL
+PASS contract freeze exists and is substantive
+PASS threat model exists and is substantive
+PASS API authorization matrix exists and is substantive
+PASS contract covers: Physical vehicle custody is mandatory for every private-seller auction
+PASS contract covers: seller pays the disclosed inspection/custody charges
+PASS contract covers: Failed or inconclusive verification blocks auction
+PASS contract covers: `vehicle_custody` capability
+PASS contract covers: existing canonical bid endpoint
+PASS contract covers: Phase B — Backend source-of-truth and persistence integration
+PASS threat model covers: Scheduler bypass
+PASS threat model covers: Bid bypass
+PASS threat model covers: Stale evidence
+PASS threat model covers: Private data leak
+PASS threat model covers: fail-closed
+PASS authorization matrix covers: Place bid
+PASS authorization matrix covers: Accept physical handover
+PASS authorization matrix covers: Approve/reject proposal
+PASS authorization matrix covers: Release vehicle
+PASS source audit target exists: backend/routes/auctionSetupRoutes.js
+PASS source audit target exists: backend/services/auctionSetup.service.js
+PASS source audit target exists: backend/services/auctionSetup.contract.js
+PASS source audit target exists: backend/controllers/bidController.js
+PASS source audit target exists: backend/inspection/services/providerGovernanceService.js
+

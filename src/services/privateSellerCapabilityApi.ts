@@ -1,4 +1,4 @@
-import { request } from '../api/httpRequest';
+import { HttpRequestError, request } from '../api/httpRequest';
 
 export type SellerStatus = 'none' | 'pending' | 'approved' | 'rejected' | 'suspended' | 'revoked' | 'not_applicable';
 
@@ -39,10 +39,36 @@ export type SellerDecision = 'approve' | 'reject' | 'suspend' | 'revoke';
 
 /** Existing RBAC-protected application review surface. */
 export async function getPrivateSellerApplications(status?: SellerStatus): Promise<PrivateSellerApplication[]> {
-  const res = await request<Envelope<PrivateSellerApplication[]>>('/api/private-seller-capability/admin/applications', {
+  const res = await request<unknown>('/api/private-seller-capability/admin/applications', {
     params: status && status !== 'none' && status !== 'not_applicable' ? { status } : undefined,
   });
-  return res.data;
+  const envelope = res && typeof res === 'object' ? res as Partial<Envelope<unknown>> & { code?: unknown; maintenance?: unknown; message?: unknown } : null;
+  // The backend contract is { success: true, data: PrivateSellerApplication[] }. Do not let an unexpected
+  // 200/JSON shape become a false empty queue or a render-time crash.
+  if (envelope?.success !== true || !Array.isArray(envelope.data)) {
+    throw new HttpRequestError(
+      typeof envelope?.message === 'string' ? envelope.message : 'The server returned an unexpected response while loading applications.',
+      undefined,
+      envelope,
+    );
+  }
+  const statuses = new Set<SellerStatus>(['pending', 'approved', 'rejected', 'suspended', 'revoked']);
+  const validRows = envelope.data.every((row) => {
+    if (!row || typeof row !== 'object') return false;
+    const item = row as Partial<PrivateSellerApplication>;
+    return typeof item.userId === 'string'
+      && statuses.has(item.status as SellerStatus)
+      && typeof item.source === 'string'
+      && typeof item.submittedAt === 'string'
+      && (item.contactPhone == null || typeof item.contactPhone === 'string')
+      && (item.intendedUse == null || typeof item.intendedUse === 'string')
+      && (item.reviewedAt == null || typeof item.reviewedAt === 'string')
+      && (item.reviewReason == null || typeof item.reviewReason === 'string');
+  });
+  if (!validRows) {
+    throw new HttpRequestError('The server returned malformed application records. Refresh the page or contact support if the problem continues.');
+  }
+  return envelope.data as PrivateSellerApplication[];
 }
 
 export interface SellerDecisionOutcome {

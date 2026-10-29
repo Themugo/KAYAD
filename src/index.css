@@ -1012,3 +1012,306 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
   .owner-tbl td.owner-tbl-actions > span { flex: 1 1 100%; font-size: 12px; line-height: 1.4; }
 }
 @media (max-width: 640px) { .owner-tbl td:empty { display: none; } }
+
+/* Public homepage premium refinement — scoped to the canonical marketplace.
+   Keep the established KAYAD identity while tightening mobile hierarchy and controls. */
+.kayad-homepage .kayad-public-hero {
+  isolation: isolate;
+  --kayad-hero-ink: #0A3340;
+  --kayad-hero-teal: #0B817A;
+  --kayad-hero-accent: #13B8A6;
+}
+.kayad-homepage .kayad-public-hero__mobile-card {
+  border-color: rgba(255,255,255,.9);
+  box-shadow: 0 18px 42px rgba(3,19,27,.2), 0 2px 8px rgba(10,51,64,.08);
+}
+.kayad-homepage .kayad-public-hero__mobile-card h1 {
+  color: #0A3340;
+  text-wrap: balance;
+}
+.kayad-homepage .kayad-public-hero__mobile-card p {
+  color: #526D77;
+  text-wrap: pretty;
+}
+.kayad-homepage .kayad-public-hero__primary-cta {
+  color: #07313D;
+  border: 1px solid rgba(7,49,61,.08);
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+}
+.kayad-homepage .kayad-public-hero__primary-cta:hover {
+  filter: saturate(1.06) brightness(.98);
+  box-shadow: 0 10px 24px rgba(19,184,166,.26);
+  transform: translateY(-1px);
+}
+.kayad-homepage .kayad-public-hero__secondary-cta {
+  border-color: #C7DAD8;
+  color: #0A3340;
+  transition: background-color .18s ease, border-color .18s ease, transform .18s ease;
+}
+.kayad-homepage .kayad-public-hero__secondary-cta:hover {
+  background: #F3FAF8;
+  border-color: #8BCFC6;
+  transform: translateY(-1px);
+}
+.kayad-homepage .kayad-public-hero__vehicle-card {
+  background: linear-gradient(180deg, rgba(8,45,57,.16), rgba(7,31,42,.4));
+  border-color: rgba(255,255,255,.28);
+  box-shadow: 0 8px 20px rgba(3,19,27,.08);
+}
+.kayad-homepage .kayad-public-hero__vehicle-card > div:last-child {
+  border-color: rgba(255,255,255,.14);
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
+}
+.kayad-homepage #market-journey {
+  min-height: 48px;
+  color: #315D68;
+}
+.kayad-homepage #market-journey [data-inventory-state="loading"] {
+  color: #526D77;
+  background: #F7FBFA;
+}
+.kayad-homepage #market-journey [data-inventory-state]:not([data-inventory-state="loading"]) {
+  max-width: min(54vw, 260px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.kayad-homepage .kayad-search-bridge input:focus-visible,
+.kayad-homepage .kayad-search-bridge select:focus-visible,
+.kayad-homepage .kayad-search-bridge button:focus-visible {
+  outline: 3px solid rgba(19,184,166,.5);
+  outline-offset: 2px;
+}
+.kayad-homepage .kayad-search-bridge input,
+.kayad-homepage .kayad-search-bridge select {
+  min-height: 44px;
+  border-radius: 10px;
+  color: #0A3340;
+}
+.kayad-homepage .kayad-search-bridge input::placeholder {
+  color: #789099;
+  opacity: 1;
+}
+.kayad-homepage [aria-label="Vehicle categories"] button[aria-pressed="true"] {
+  box-shadow: 0 4px 12px rgba(10,51,64,.14);
+}
+@media (max-width: 389px) {
+  .kayad-homepage .kayad-public-hero__mobile-card {
+    border-radius: 20px;
+    padding: 14px 12px;
+  }
+  .kayad-homepage .kayad-public-hero__mobile-card h1 {
+    font-size: clamp(1.65rem, 7vw, 1.9rem);
+    line-height: 1.04;
+  }
+  .kayad-homepage .kayad-public-hero__mobile-card p {
+    font-size: 12px;
+    line-height: 1.4rem;
+  }
+  .kayad-homepage .kayad-public-hero__vehicle-card {
+    border-radius: 13px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kayad-homepage .kayad-public-hero__primary-cta,
+  .kayad-homepage .kayad-public-hero__secondary-cta,
+  .kayad-homepage .kayad-public-hero__vehicle-card {
+    transition: none !important;
+  }
+}
+
+
+/* 2026-10-29 — Stage 33: sign-in surface refinement; presentation only. */
+.kayad-auth-page[data-mode="signin"] .kayad-auth-layout {
+  max-width: 1080px;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-card-wrap {
+  width: min(100%, 700px);
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-card {
+  min-height: 0;
+  padding: clamp(26px, 4.2vw, 46px);
+  border-radius: 30px;
+  background: rgba(255,255,255,.965);
+  box-shadow: 0 28px 76px rgba(10,51,64,.095), 0 3px 12px rgba(10,51,64,.035);
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-intro {
+  max-width: 600px;
+  margin-bottom: 26px;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-eyebrow {
+  min-height: 24px;
+  padding: 0;
+  font-size: 10px;
+  letter-spacing: .17em;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-intro h1 {
+  font-size: clamp(2.2rem, 5vw, 3.15rem);
+  line-height: 1.02;
+  letter-spacing: -.06em;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-intro p {
+  max-width: 570px;
+  font-size: clamp(14px, 1.5vw, 16px);
+  line-height: 1.7;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-form {
+  gap: 18px;
+  max-width: none;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-field {
+  gap: 9px;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-field label {
+  font-size: 12px;
+  letter-spacing: -.01em;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-input {
+  min-height: 56px;
+  border-radius: 16px;
+  background: #fcfefd;
+  font-size: 14px;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-password-wrap .kayad-auth-input {
+  padding-right: 86px;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-password-toggle {
+  right: 7px;
+  top: 7px;
+  bottom: 7px;
+  min-width: 64px;
+  border-radius: 11px;
+  background: #edf7f5;
+  transition: background .16s ease, color .16s ease;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-password-toggle:hover {
+  background: #dff3ef;
+  color: #0a5968;
+}
+.kayad-login-password-group {
+  display: grid;
+  gap: 8px;
+}
+.kayad-login-forgot-row {
+  display: flex;
+  justify-content: flex-end;
+  min-height: 22px;
+  align-items: center;
+}
+.kayad-login-forgot-row a {
+  color: #176b87;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+.kayad-login-forgot-row a:hover { text-decoration: underline; }
+.kayad-auth-page[data-mode="signin"] .kayad-auth-submit {
+  min-height: 58px;
+  border-radius: 16px;
+  font-size: 14px;
+  box-shadow: 0 12px 24px rgba(10,51,64,.15);
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-divider {
+  margin-top: 25px;
+  margin-bottom: 14px;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-secondary-action {
+  min-height: 54px;
+  border-radius: 15px;
+  font-size: 13px;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-trust-row {
+  gap: 12px 22px;
+  margin-top: 22px;
+  font-size: 11px;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-trust-row span {
+  gap: 7px;
+}
+.kayad-auth-page[data-mode="signin"] .kayad-auth-trust-row svg {
+  width: 15px;
+  height: 15px;
+}
+.kayad-auth-page .kayad-auth-brand-mark {
+  width: 42px;
+  height: 42px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 14px;
+}
+.kayad-auth-page .kayad-auth-header-link,
+.kayad-auth-page .kayad-auth-alert-button,
+.kayad-auth-page .kayad-auth-secondary-action,
+.kayad-auth-page .kayad-auth-password-toggle,
+.kayad-auth-page .kayad-auth-submit {
+  -webkit-tap-highlight-color: transparent;
+}
+.kayad-auth-page .kayad-auth-header-link:focus-visible,
+.kayad-auth-page .kayad-auth-alert-button:focus-visible,
+.kayad-auth-page .kayad-auth-secondary-action:focus-visible,
+.kayad-auth-page .kayad-auth-password-toggle:focus-visible,
+.kayad-auth-page .kayad-auth-submit:focus-visible,
+.kayad-auth-page .kayad-login-forgot-row a:focus-visible {
+  outline: 3px solid #13b8a6;
+  outline-offset: 3px;
+}
+@media (max-width: 560px) {
+  .kayad-auth-page[data-mode="signin"] {
+    padding: 12px 12px calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+  .kayad-auth-page[data-mode="signin"] .kayad-auth-header {
+    padding: 3px 2px 18px;
+    align-items: center;
+  }
+  .kayad-auth-page[data-mode="signin"] .kayad-auth-brand {
+    gap: 9px;
+  }
+  .kayad-auth-page[data-mode="signin"] .kayad-auth-brand-mark {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+  .kayad-auth-page[data-mode="signin"] .kayad-auth-brand-copy strong {
+    font-size: 1.18rem;
+  }
+  .kayad-auth-page[data-mode="signin"] .kayad-auth-brand-copy small {
+    max-width: 175px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 6px;
+    letter-spacing: .1em;
+  }
+  .kayad-auth-page[data-mode="signin"] .kayad-auth-card {
+    padding: 25px 21px 23px;
+    border-radius: 25px;
+  }
+  .kayad-auth-page[data-mode="signin"] .kayad-auth-intro {
+    margin-bottom: 25px;
+  }
+  .kayad-auth-page[data-mode="signin"] .kayad-auth-intro h1 {
+    font-size: clamp(2.05rem, 9vw, 2.6rem);
+    line-height: 1.02;
+  }
+  .kayad-auth-page[data-mode="signin"] .kayad-auth-intro p {
+    font-size: 14px;
+    line-height: 1.68;
+  }
+  .kayad-auth-page[data-mode="signin"] .kayad-auth-input {
+    min-height: 54px;
+    font-size: 14px;
+  }
+  .kayad-auth-page[data-mode="signin"] .kayad-auth-submit {
+    min-height: 56px;
+  }
+  .kayad-auth-page[data-mode="signin"] .kayad-auth-trust-row {
+    display: flex;
+    justify-content: flex-start;
+    gap: 10px 16px;
+    line-height: 1.4;
+  }
+  .kayad-auth-page[data-mode="signin"] .kayad-auth-footer {
+    margin-top: 19px;
+    padding-bottom: 2px;
+  }
+}

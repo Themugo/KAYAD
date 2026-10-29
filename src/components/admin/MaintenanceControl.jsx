@@ -37,13 +37,19 @@ export default function MaintenanceControl({ mode = 'owner' }) {
   const [mfaCode, setMfaCode] = useState('');
   const [confirmation, setConfirmation] = useState('');
   const alive = useRef(true);
-  useEffect(() => () => { alive.current = false; }, []);
+  useEffect(() => {
+    alive.current = true;
+    return () => { alive.current = false; };
+  }, []);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
       const res = await adminAPI.maintenanceStatus();
       if (!alive.current) return null;
+      if (!res?.state || typeof res.state.active !== 'boolean' || !Number.isInteger(res.state.version)) {
+        throw Object.assign(new Error('The maintenance status response was incomplete or invalid.'), { code: 'MAINTENANCE_STATUS_INVALID' });
+      }
       setData(res); setLoadError(null);
       return res;
     } catch (err) {
@@ -56,6 +62,9 @@ export default function MaintenanceControl({ mode = 'owner' }) {
   useEffect(() => { refresh(); }, [refresh]);
 
   const state = data?.state;
+  // A previously confirmed value may be stale while a refresh is in flight or after a failed read.
+  // Never allow a high-impact recovery action from stale state.
+  const stateFresh = !!data && !loading && !loadError && Number.isInteger(state?.version);
   const caps = data?.capabilities;
   const scopes = data?.scopes || [];
   const selected = scopes.find((s) => s.id === scope);
@@ -69,7 +78,7 @@ export default function MaintenanceControl({ mode = 'owner' }) {
     if (kind === 'activate') {
       if (reason.trim().length < 8) return setFormError('State the reason for this maintenance (at least 8 characters).');
       if (isGlobal && confirmation !== phrase) return setFormError(`Type ${phrase} exactly to confirm a global shutdown.`);
-    } else if (mode === 'recovery' && reason.trim().length < 8) return setFormError('State why maintenance is being ended (at least 8 characters).');
+    } else if (reason.trim().length < 8) return setFormError('State why maintenance is being ended (at least 8 characters).');
     if (!password) return setFormError('Re-enter your password to confirm this change.');
     setBusy(kind);
     const common = { reason: reason.trim(), incidentRef: incidentRef.trim(), password, mfaCode: mfaCode.trim() || undefined, expectedVersion: state?.version };
@@ -139,6 +148,10 @@ export default function MaintenanceControl({ mode = 'owner' }) {
       </div>
 
       {formError && <div role="alert" style={{ color: '#b91c1c', fontSize: 13, marginBottom: 14 }}>{formError}</div>}
+      {mode === 'recovery' && state && !state.active && !loadError && (
+        <div role="status" style={{ marginBottom: 14, padding: '10px 12px', borderRadius: 10, background: '#f0fdfa', border: '1px solid rgba(15,118,110,0.2)', color: '#115e59', fontSize: 13 }}>Maintenance is already inactive. No recovery action is needed.</div>
+      )}
+      {loadError && data && <div role="alert" style={{ marginBottom: 14, padding: '10px 12px', borderRadius: 10, background: '#fff7ed', border: '1px solid rgba(194,65,12,0.25)', color: '#9a3412', fontSize: 13 }}>Actions are disabled until the maintenance state can be refreshed successfully.</div>}
 
       {canActivate && (
         <fieldset disabled={!!busy} style={{ border: 'none', padding: 0, margin: '0 0 24px' }}>
@@ -210,14 +223,14 @@ export default function MaintenanceControl({ mode = 'owner' }) {
           </div>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             {canActivate && (
-              <button type="button" onClick={() => run('activate')} disabled={!!busy || !data}
+              <button type="button" onClick={() => run('activate')} disabled={!!busy || !stateFresh}
                 style={{ flex: 1, minWidth: 220, padding: '14px 0', border: `1px solid ${isGlobal ? '#b91c1c' : 'rgba(10, 51, 64, 0.15)'}`, color: isGlobal ? '#FFFFFF' : '#0a3340', background: isGlobal ? '#b91c1c' : 'transparent', fontWeight: 700, fontSize: 13, borderRadius: 10, cursor: 'pointer' }}>
                 {busy === 'activate' ? 'Applying — waiting for the server…' : isGlobal ? 'ACTIVATE GLOBAL SHUTDOWN' : state?.active ? 'APPLY NEW SCOPE' : 'ACTIVATE SELECTED MAINTENANCE'}
               </button>
             )}
-            <button type="button" onClick={() => run('recover')} disabled={!!busy || !data}
+            <button type="button" onClick={() => run('recover')} disabled={!!busy || !stateFresh || !state?.active}
               style={{ flex: 1, minWidth: 220, padding: '14px 0', background: '#13B8A6', color: '#0a3340', fontWeight: 700, fontSize: 13, borderRadius: 10, border: 'none', cursor: 'pointer' }}>
-              {busy === 'recover' ? 'Applying — waiting for the server…' : 'END MAINTENANCE'}
+              {busy === 'recover' ? 'Applying — waiting for the server…' : state?.active ? 'END MAINTENANCE' : 'MAINTENANCE ALREADY ENDED'}
             </button>
           </div>
         </fieldset>

@@ -69,14 +69,21 @@ export default function AdminSettings() {
   // request to load config actually failed" — a failed fetch must never be
   // visually indistinguishable from a legitimately empty/default config.
   const [configLoadError, setConfigLoadError] = useState(null);
+  const [configLoaded, setConfigLoaded] = useState(false);
+  const [auditLogLoadError, setAuditLogLoadError] = useState(null);
 
   const loadConfig = async () => {
     setLoading(true);
     setConfigLoadError(null);
+    setConfigLoaded(false);
+    setAuditLogLoadError(null);
     try {
-      const { config: c } = await adminAPI.getConfig();
-      if (c) {
-        setConfig({
+      const response = await adminAPI.getConfig();
+      const c = response?.config;
+      if (!c || typeof c !== 'object' || Array.isArray(c)) {
+        throw new Error('The settings service returned an invalid configuration response.');
+      }
+      setConfig({
           platformName: c.platformName || DEFAULTS.platformName,
           supportEmail: c.supportEmail || DEFAULTS.supportEmail,
           supportPhone: c.supportPhone || DEFAULTS.supportPhone,
@@ -86,33 +93,43 @@ export default function AdminSettings() {
           maxListingImages: c.maxListingImages ?? DEFAULTS.maxListingImages,
           allowGuestBrowsing: c.allowGuestBrowsing ?? DEFAULTS.allowGuestBrowsing,
           requireDealerApproval: c.requireDealerApproval ?? DEFAULTS.requireDealerApproval,
-        });
-        if (c.daraja) setDaraja(c.daraja);
-        if (c.bank) setBank(c.bank);
-        if (c.reconciliation) setReconcile(c.reconciliation);
-        // Load branding config
-        if (c.branding) {
-          setBranding({ ...DEFAULT_BRANDING, ...c.branding });
-        }
+      });
+      setDaraja({ environment: 'sandbox', consumerKey: '', consumerSecret: '', passkey: '', shortCode: '', ...(c.daraja && typeof c.daraja === 'object' && !Array.isArray(c.daraja) ? c.daraja : {}) });
+      setBank({ bankName: '', accountName: '', accountNumber: '', branch: '', swiftCode: '', reconciliationEmail: '', ...(c.bank && typeof c.bank === 'object' && !Array.isArray(c.bank) ? c.bank : {}) });
+      setReconcile({ autoReconcile: true, matchThresholdMins: 1440, schedule: 'every 6 hours', notifyOnMismatch: true, defaultNarration: '', ...(c.reconciliation && typeof c.reconciliation === 'object' && !Array.isArray(c.reconciliation) ? c.reconciliation : {}) });
+      // Load branding config
+      if (c.branding && typeof c.branding === 'object' && !Array.isArray(c.branding)) {
+        setBranding({ ...DEFAULT_BRANDING, ...c.branding });
       }
+      setConfigLoaded(true);
     } catch {
       // The request itself failed (network/auth/server error) — this is NOT
       // the same thing as "no config exists yet". Surface it so an admin
       // never mistakes an unreachable config for a confirmed, saved default.
-      setConfigLoadError('Could not load saved settings from the server. The values shown below may not reflect what is actually configured — fix the connection and reload before saving.');
+      setConfigLoaded(false);
+      setConfigLoadError('Could not load saved settings from the server. The values shown below may not reflect what is actually configured. Saving is disabled until the saved configuration loads successfully. Check the connection and retry.');
     }
 
     try {
-      const { entries } = await adminAPI.getAuditLog({ limit: 100 });
-      setAuditLog(entries || []);
-    } catch { /* audit log is supplementary; its failure doesn't block settings */ }
-
-    setLoading(false);
+      const response = await adminAPI.getAuditLog({ limit: 100 });
+      if (!Array.isArray(response?.entries)) throw new Error('Invalid audit-log response');
+      setAuditLog(response.entries);
+      setAuditLogLoadError(null);
+    } catch {
+      setAuditLogLoadError('Audit log could not be loaded from the server. Retry to distinguish a retrieval failure from an empty log.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { loadConfig(); }, []);
 
   const saveConfig = async (section) => {
+    if (!configLoaded || configLoadError) {
+      toast('Settings have not been loaded from the server. Reload successfully before saving.', 'error');
+      return;
+    }
+    if (saving) return;
     setSaving(true);
     try {
       const body = {};
@@ -139,7 +156,10 @@ export default function AdminSettings() {
       if (!section || section === 'branding') {
         body.branding = branding;
       }
-      await adminAPI.updateConfig(body);
+      const savedResponse = await adminAPI.updateConfig(body);
+      if (!savedResponse || savedResponse.success === false || !savedResponse.config) {
+        throw new Error('The server did not confirm the saved configuration.');
+      }
       toast('Settings saved', 'success');
       await loadConfig();
     } catch {
@@ -150,14 +170,18 @@ export default function AdminSettings() {
   };
 
   const testMpesa = async () => {
-    if (!testPhone || !testAmount) {
-      toast('Phone and amount required', 'error');
+    if (daraja.environment === 'production') {
+      toast('STK testing is disabled while Daraja is set to production. Switch to sandbox before testing.', 'error');
+      return;
+    }
+    if (!/^254[17]\d{8}$/.test(String(testPhone)) || !Number.isFinite(Number(testAmount)) || Number(testAmount) < 1 || Number(testAmount) > 1000) {
+      toast('Enter a valid Kenyan mobile number (2547… or 2541…) and an amount from KES 1 to 1,000.', 'error');
       return;
     }
     setTestingMpesa(true);
     try {
       await adminAPI.testMpesa({ phone: testPhone, amount: Number(testAmount) });
-      toast(`STK push sent to ${testPhone} for KES ${testAmount}`, 'success');
+      toast('Daraja accepted the STK Push request. This does not confirm payment settlement.', 'success');
     } catch {
       toast('M-Pesa test failed — check Daraja config', 'error');
     } finally {
@@ -210,7 +234,10 @@ export default function AdminSettings() {
 
         {configLoadError && (
           <div role="alert" style={{ marginBottom: 20, padding: '12px 16px', borderRadius: 8, background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B', fontSize: 13 }}>
-            {configLoadError}
+            <div>{configLoadError}</div>
+            <button type="button" className="btn btn-sm btn-outline" onClick={loadConfig} disabled={loading || saving} style={{ marginTop: 10 }}>
+              {loading ? 'Reloading…' : 'Retry loading settings'}
+            </button>
           </div>
         )}
 
@@ -235,6 +262,7 @@ export default function AdminSettings() {
             setConfig={setConfig}
             saveConfig={saveConfig}
             saving={saving}
+            canSave={configLoaded && !configLoadError}
           />
         )}
 
@@ -252,7 +280,7 @@ export default function AdminSettings() {
                   <div key={f.key} className="input-group">
                     <label className="input-label">{f.label}</label>
                     <input aria-label={f.label} className="input" type={f.type} value={config[f.key]}
-                      onChange={e => setConfig(p => ({ ...p, [f.key]: e.target.value }))} />
+                      onChange={e => setConfig(p => ({ ...p, [f.key]: f.type === 'number' ? (e.target.value === '' ? '' : Number(e.target.value)) : e.target.value }))} />
                   </div>
                 ))}
               </div>
@@ -270,7 +298,7 @@ export default function AdminSettings() {
                   <div key={f.key} className="input-group">
                     <label className="input-label">{f.label}</label>
                     <input aria-label={f.label} className="input" type={f.type} min={f.min} max={f.max} value={config[f.key]}
-                      onChange={e => setConfig(p => ({ ...p, [f.key]: e.target.value }))} />
+                      onChange={e => setConfig(p => ({ ...p, [f.key]: f.type === 'number' ? (e.target.value === '' ? '' : Number(e.target.value)) : e.target.value }))} />
                   </div>
                 ))}
               </div>
@@ -289,7 +317,7 @@ export default function AdminSettings() {
                 </label>
               ))}
               <div style={{ marginTop: 16 }}>
-                <button className="btn btn-gold" onClick={() => saveConfig('general')} disabled={saving} style={{ width: '100%' }}>
+                <button className="btn btn-gold" onClick={() => saveConfig('general')} disabled={saving || !configLoaded} style={{ width: '100%' }}>
                   {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : 'Save General Settings'}
                 </button>
               </div>
@@ -320,19 +348,22 @@ export default function AdminSettings() {
                 </Field>
 
                 <Field label="Consumer Key" hint="Safaricom Daraja API consumer key">
-                  <input className="input" type="text" value={daraja.consumerKey}
+                  <input className="input" type="password" autoComplete="new-password" value={daraja.consumerKey || ''}
+                    placeholder={daraja.hasConsumerKey ? 'Saved — leave blank to keep current key' : 'Enter consumer key'}
                     onChange={e => setDaraja(p => ({ ...p, consumerKey: e.target.value }))}
                     style={{ width: 280, height: 38 }} />
                 </Field>
 
                 <Field label="Consumer Secret">
-                  <input className="input" type="password" value={daraja.consumerSecret}
+                  <input className="input" type="password" autoComplete="new-password" value={daraja.consumerSecret || ''}
+                    placeholder={daraja.hasConsumerSecret ? 'Saved — leave blank to keep current secret' : 'Enter consumer secret'}
                     onChange={e => setDaraja(p => ({ ...p, consumerSecret: e.target.value }))}
                     style={{ width: 280, height: 38 }} />
                 </Field>
 
                 <Field label="Passkey" hint="Online passkey for STK Push">
-                  <input className="input" type="password" value={daraja.passkey}
+                  <input className="input" type="password" autoComplete="new-password" value={daraja.passkey || ''}
+                    placeholder={daraja.hasPasskey ? 'Saved — leave blank to keep current passkey' : 'Enter passkey'}
                     onChange={e => setDaraja(p => ({ ...p, passkey: e.target.value }))}
                     style={{ width: 280, height: 38 }} />
                 </Field>
@@ -363,12 +394,12 @@ export default function AdminSettings() {
                     </button>
                   </div>
                   <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 8 }}>
-                    Sends a real STK Push to the test phone via Daraja.
+                    Test requests are blocked when the backend NODE_ENV is production. Save Daraja settings first. A successful response confirms an STK request was accepted, not that a payment settled.
                   </p>
                 </div>
 
                 <div style={{ marginTop: 8 }}>
-                  <button className="btn btn-gold" onClick={() => saveConfig('payments')} disabled={saving}>
+                  <button className="btn btn-gold" onClick={() => saveConfig('payments')} disabled={saving || !configLoaded}>
                     {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : 'Save Payment Settings'}
                   </button>
                 </div>
@@ -406,7 +437,7 @@ export default function AdminSettings() {
           <div className="card" style={{ padding: 24 }}>
             <h3 style={{ fontSize: 18, marginBottom: 20 }}>Auto-Reconciliation</h3>
             <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 20 }}>
-              Automatically match M-Pesa and bank deposits to platform transactions.
+              These are saved reconciliation preferences. The currently deployed reconciliation worker runs fixed 15-minute, hourly and daily jobs; changing the schedule here does not reschedule those jobs. Notification and matching preferences also require worker-level integration before they can be treated as operational controls.
             </p>
             <div style={{ display: 'grid', gap: 20, maxWidth: 700 }}>
               <Field label="Auto-Reconciliation">
@@ -451,7 +482,7 @@ export default function AdminSettings() {
               </Field>
             </div>
             <div style={{ marginTop: 20 }}>
-              <button className="btn btn-gold" onClick={() => saveConfig('reconciliation')} disabled={saving}>
+              <button className="btn btn-gold" onClick={() => saveConfig('reconciliation')} disabled={saving || !configLoaded}>
                 {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : 'Save Reconciliation Settings'}
               </button>
             </div>
@@ -465,7 +496,10 @@ export default function AdminSettings() {
               <h3 style={{ fontSize: '1rem' }}>Immutable Audit Log</h3>
               <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{auditLog.length} entries</span>
             </div>
-            <div style={{ maxHeight: 500, overflowY: 'auto' }}>
+            {auditLogLoadError && <div role="alert" style={{ padding: 12, color: '#991B1B', background: '#FEF2F2' }}>
+              {auditLogLoadError} <button type="button" className="btn btn-sm btn-outline" onClick={loadConfig} disabled={loading}>Retry</button>
+            </div>}
+            {!auditLogLoadError && <div style={{ maxHeight: 500, overflowY: 'auto' }}>
               <table className="data-table">
                 <thead>
                   <tr>
@@ -490,7 +524,7 @@ export default function AdminSettings() {
                   ))}
                 </tbody>
               </table>
-            </div>
+            </div>}
           </div>
         )}
       </div>

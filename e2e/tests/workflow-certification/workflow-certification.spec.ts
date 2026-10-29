@@ -38,7 +38,7 @@ test.describe('Workflow certification — environment evidence', () => {
     await expect(page.getByRole('link', { name: 'Marketplace', exact: true }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: 'Auction', exact: true }).first()).toBeVisible();
     // Region selector is part of the browsing workflow
-    await expect(page.locator('text=All East Africa').first()).toBeVisible();
+    await expect(page.locator('text=All Kenya').first()).toBeVisible();
   });
 
   test('auth surface renders (registration/login entry points)', async ({ page }) => {

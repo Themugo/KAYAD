@@ -66,7 +66,7 @@ export const NAV_PRIMARY: NavPrimary[] = [
     href: '/?nav=marketplace',
     match: ['marketplace', 'saved', 'financing', 'finance'],
     children: [
-      { id: 'browse', label: 'Browse vehicles', description: 'Search listed vehicles across East Africa', icon: Car, navId: 'marketplace', href: '/?nav=marketplace' },
+      { id: 'browse', label: 'Browse vehicles', description: 'Search listed vehicles across Kenya', icon: Car, navId: 'marketplace', href: '/?nav=marketplace' },
       { id: 'saved', label: 'Saved vehicles', description: 'The vehicles you have saved', icon: Heart, navId: 'saved', href: '/?nav=saved', requiresAuth: true },
       { id: 'financing', label: 'Vehicle financing', description: 'Explore financing for a vehicle purchase', icon: Landmark, navId: 'financing', href: '/?nav=financing' },
     ],

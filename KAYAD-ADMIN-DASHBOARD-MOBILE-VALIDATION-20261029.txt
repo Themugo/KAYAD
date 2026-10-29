@@ -1,0 +1,13 @@
+PASS mobile hero has compact responsive spacing
+PASS narrow 320px layouts switch quick actions to one column
+PASS quick actions retain two-column layout where supported
+PASS quick action controls retain keyboard focus styling
+PASS reduced-motion preference is respected
+PASS loading and unavailable data state remains represented
+PASS Refresh still invokes existing load behavior
+PASS Retry still invokes existing load behavior
+PASS quick actions retain existing canonical destinations
+PASS responsive alert keeps error content and Retry accessible
+PASS mobile dashboard styles remain scoped to the command centre
+
+Mobile dashboard source-contract checks: 11/11 passed

@@ -159,6 +159,13 @@ describe("owner operations", () => {
     }
     noMutation();
   });
+  test("failed credential creation soft-deletes the new staff identity to avoid an orphan account", async () => {
+    authCreate.mockRejectedValueOnce(new Error("credential store unavailable"));
+    const r = await call("POST", "/api/admin/staff", { as: "owner", body: { name: "New Staff", email: "new-staff@example.test", password: "Str0ngPassw0rd!2026", role: "hr" } });
+    expect(r.status).toBe(500);
+    expect(softDelete).toHaveBeenCalledWith(ID(99), CALLERS.owner);
+    expect(auditCreate).not.toHaveBeenCalled();
+  });
   test("owner addresses are reserved: staff create with the owner email is 409", async () => {
     const r = await call("POST", "/api/admin/staff", { as: "owner", body: { name: "N", email: "owner@example.test", password: "Str0ngPassw0rd!2026", role: "hr" } });
     expect(r.status).toBe(409);
@@ -177,17 +184,33 @@ describe("owner operations", () => {
     expect(stored).toMatch(/^\$2[aby]\$/);
     expect(JSON.stringify(r.body)).not.toContain("Str0ngPassw0rd!2026");
   });
-  test("permission grants are filtered to the assignable catalog; unknown keys are dropped", async () => {
+  test("permission grants reject unknown or privileged keys instead of silently dropping them", async () => {
     const good = ASSIGNABLE_PERMISSIONS[0];
     const r = await call("PUT", `/api/admin/staff/${TARGET}/permissions`, { as: "owner", body: { grantedPermissions: [good, "owner_only", "superadmin", "__proto__"], revokedPermissions: [good] } });
-    expect(r.status).toBe(200);
-    expect(saves.mock.calls[0][1].grantedPermissions).toEqual([good]);
-    expect(saves.mock.calls[0][1].revokedPermissions).toEqual([]); // grant wins
+    expect(r.status).toBe(400);
+    expect(saves).not.toHaveBeenCalled();
+  });
+  test("permission grants reject non-array payloads", async () => {
+    const r = await call("PUT", `/api/admin/staff/${TARGET}/permissions`, { as: "owner", body: { grantedPermissions: "manage_users" } });
+    expect(r.status).toBe(400);
+    expect(saves).not.toHaveBeenCalled();
   });
   test("another superadmin's permissions can't be edited through this endpoint", async () => {
     const r = await call("PUT", `/api/admin/staff/${ID(11)}/permissions`, { as: "owner", body: { grantedPermissions: [ASSIGNABLE_PERMISSIONS[0]] } });
     expect(r.status).toBe(403);
     expect(saves).not.toHaveBeenCalled();
+  });
+  test("a non-staff user cannot be promoted or permissioned through staff-only endpoints", async () => {
+    const roleChange = await call("PUT", `/api/admin/staff/${CALLERS.user}`, { as: "owner", body: { role: "admin" } });
+    const permissionChange = await call("PUT", `/api/admin/staff/${CALLERS.user}/permissions`, { as: "owner", body: { grantedPermissions: [ASSIGNABLE_PERMISSIONS[0]] } });
+    expect(roleChange.status).toBe(409);
+    expect(permissionChange.status).toBe(409);
+    expect(saves).not.toHaveBeenCalled();
+  });
+  test("a non-staff user cannot be removed through the staff endpoint", async () => {
+    const r = await call("DELETE", `/api/admin/staff/${CALLERS.user}`, { as: "owner" });
+    expect(r.status).toBe(409);
+    expect(softDelete).not.toHaveBeenCalled();
   });
   test("superadmin accounts cannot be deleted; regular staff can (soft delete)", async () => {
     expect((await call("DELETE", `/api/admin/staff/${ID(11)}`, { as: "owner" })).status).toBe(400);

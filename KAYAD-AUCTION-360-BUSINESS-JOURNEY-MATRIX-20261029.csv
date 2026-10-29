@@ -1,0 +1,11 @@
+journey,change_or_scope,status,evidence_or_blocker
+Auction discovery live/scheduled/completed,Frontend data-state hardening implemented,BLOCKED,Production endpoints could not be reached; browser tests unavailable
+Malformed list response,Runtime envelope and record validation added,SOURCE VALIDATION PASS,Custom source validator 13/13; Vitest unavailable
+Partial list failure and stale snapshot,Valid sections preserved; failed sections marked unavailable,SOURCE VALIDATION PASS,Existing source validator 14/14
+Saved auction loading/error/retry,Explicit state and response validation added,SOURCE VALIDATION PASS,Regression tests added but Vitest could not run
+Auction room route and detail,Existing route and sanitized bid contract preserved,NOT RUNTIME VERIFIED,No Playwright/browser run
+Bidder registration/eligibility,Existing server-side eligibility preserved,NOT RUNTIME VERIFIED,No staging account or browser environment
+Concurrent bids/idempotency,Existing financial/backend code unchanged,SOURCE VALIDATORS PASS; E2E BLOCKED,No staging DB/provider available
+M-Pesa callbacks/winner payment,No money-moving test performed,NOT EXECUTED,Requires approved sandbox/staging
+Refund/forfeit/escrow reconciliation,Existing financial code unchanged,NOT EXECUTED,Requires approved staging ledger and provider callbacks
+Mobile responsive UX,Source refinements added,NOT VISUALLY CERTIFIED,Playwright/browser tooling unavailable

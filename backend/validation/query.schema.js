@@ -134,6 +134,10 @@ export const notificationListQuerySchema = z.object({
 export const reviewListQuerySchema = z.object({
   carId: z.string().uuid().optional(),
   dealerId: z.string().uuid().optional(),
+  // Shared by public review-list endpoints and the admin moderation queue.
+  // Only the admin service applies this filter; public endpoints continue to
+  // expose approved reviews unless the caller is the review owner.
+  status: z.enum(["pending", "approved", "rejected"]).optional(),
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(20),
   sortBy: z.enum(["createdAt", "rating"]).default("createdAt"),
@@ -145,6 +149,9 @@ export const chatListQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(20),
   unreadOnly: z.coerce.boolean().optional(),
+  // Admin moderation filters; optional so existing user-chat callers remain compatible.
+  search: z.string().trim().max(120).optional(),
+  isBlocked: z.enum(["true", "false"]).optional(),
 });
 
 // Message query validation schemas

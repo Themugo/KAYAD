@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { Vehicle, UserProfile } from '../../../types';
 import VehicleCard from '../../../components/VehicleCard';
-import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon, Gauge, Fuel, MapPin } from 'lucide-react';
+import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon, Gauge, Fuel, MapPin, PlayCircle } from 'lucide-react';
+import { usePrefersReducedMotion } from '../../../hooks/useMediaQuery';
 import { Select, Button, Card, SkeletonGrid } from '../../../components/ui';
 import { isEscrowApplicable } from '../../../utils/escrow';
 import MarketingCard, { MarketingCardData } from '../../../components/MarketingCard';
@@ -18,6 +19,8 @@ import AdManagerPanel from '../../AdManager/AdManagerPanel';
 import HeroEditorPanel from '../../HeroEditor/HeroEditorPanel';
 import type { HeroPresentationConfig, HeroShowcaseVehicle } from '../types/heroPresentation';
 import { HERO_EXTRAS_DEFAULTS, normalizeHeroExtras } from '../types/heroPresentation';
+
+const kenyaOnlyCopy = (value: string) => value.replace(/East Africa/gi, 'Kenya');
 
 interface VehicleMarketplaceProps {
   vehicles: Vehicle[];
@@ -92,6 +95,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // (isHomePage), and its UI only rendered/reachable for admins
   // (user?.role === 'admin'), but the config itself always loads so the
   // page renders correctly regardless of who's viewing it.
+  const prefersReducedMotion = usePrefersReducedMotion();
   const { config: homeConfig, updateConfig: updateHomeConfig, resetConfig: resetHomeConfig } = useHomePageConfig();
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showAdManager, setShowAdManager] = useState(false);
@@ -112,7 +116,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     leftOffsetPct: 0, rightOffsetPct: 0, leftVehicleNudgePct: 28, rightVehicleNudgePct: 28, vehicleScalePct: 100, vehicleTopPct: 50, vehicleWidthPct: 43,
     showVehicleInfoCards: true, showVehicleLabels: true, primaryButtonColor: 'var(--kayad-cyan)', secondaryButtonBorderColor: '#C7DAD8',
     arrowEnabled: true, dotsEnabled: true, tickerEnabled: true,
-    tickerFallbackText: 'KAYAD · Verified vehicles across East Africa · Live auctions · Transparent bidding · Clear transaction workflows', tickerBackgroundColor: 'var(--color-navy-900)', tickerTextColor: '#FFFFFF', tickerHeightPx: 36, tickerScrollSeconds: 34, tickerDirection: 'left', tickerTransition: 'scroll',
+    tickerFallbackText: 'KAYAD · Verified vehicles across Kenya · Live auctions · Transparent bidding · Clear transaction workflows', tickerBackgroundColor: 'var(--color-navy-900)', tickerTextColor: '#FFFFFF', tickerHeightPx: 36, tickerScrollSeconds: 34, tickerDirection: 'left', tickerTransition: 'scroll',
     // Real promoted/featured inventory is the canonical public hero source.
     // Legacy 'showcase' configs are normalized to this source below.
     vehicleSource: 'featured',
@@ -263,7 +267,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     if (searchQuery.trim()) query.keyword = searchQuery.trim();
     if (selectedMake !== 'All') query.brand = selectedMake;
     if (selectedModel !== 'All') query.model = selectedModel;
-    if (selectedCounty !== 'All East Africa') query.city = selectedCounty;
+    if (selectedCounty !== 'All Kenya') query.city = selectedCounty;
     if (minPrice > 0) query.minPrice = minPrice;
     if (maxPrice < 20000000) query.maxPrice = maxPrice;
     if (minYear > 2005) query.yearMin = minYear;
@@ -393,7 +397,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const locations = useMemo(() => {
     const canonical = (canonicalFacets?.locations || []).map((item) => item.value).filter(Boolean);
     const fallback = filterSourceVehicles.map((v) => v.county || v.location).filter(Boolean);
-    return ['All East Africa', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
+    return ['All Kenya', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
   }, [filterSourceVehicles, canonicalFacets]);
 
   const availableYears = useMemo(() => {
@@ -437,7 +441,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     setMaxYear(2026);
     setMaxMileage(250000);
     setOnlyAuction(false);
-    onCountyChange('All East Africa');
+    onCountyChange('All Kenya');
   }, [onSearchChange, onCountyChange]);
 
 
@@ -445,7 +449,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const activeFilters = useMemo(() => {
     const list: { id: string; label: string; onClear: () => void }[] = [];
     if (searchQuery) list.push({ id: 'search', label: `"${searchQuery}"`, onClear: () => onSearchChange('') });
-    if (selectedCounty !== 'All East Africa') list.push({ id: 'county', label: `Location: ${selectedCounty}`, onClear: () => onCountyChange('All East Africa') });
+    if (selectedCounty !== 'All Kenya') list.push({ id: 'county', label: `Location: ${selectedCounty}`, onClear: () => onCountyChange('All Kenya') });
     if (selectedMake !== 'All') list.push({ id: 'make', label: `Make: ${selectedMake}`, onClear: () => { setSelectedMake('All'); setSelectedModel('All'); } });
     if (selectedModel !== 'All') list.push({ id: 'model', label: `Model: ${selectedModel}`, onClear: () => setSelectedModel('All') });
     if (selectedBodyStyle !== 'All') list.push({ id: 'body', label: `Body: ${selectedBodyStyle}`, onClear: () => setSelectedBodyStyle('All') });
@@ -623,13 +627,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
   useEffect(() => {
     // Rotation timing is admin-controlled (0 = no automatic rotation).
-    if (heroSourceVehicles.length < 2 || !heroRotationMs) return;
+    if (prefersReducedMotion || heroSourceVehicles.length < 2 || !heroRotationMs) return;
     const timer = window.setInterval(() => {
       const pairCount = Math.max(1, Math.ceil(heroSourceVehicles.length / 2));
       changeHeroPair((heroPairIndex + 1) % pairCount);
     }, heroRotationMs);
     return () => window.clearInterval(timer);
-  }, [heroSourceVehicles.length, heroPairIndex, heroRotationMs]);
+  }, [heroSourceVehicles.length, heroPairIndex, heroRotationMs, prefersReducedMotion]);
 
   const heroLeftVehicle = heroSourceVehicles.length ? heroSourceVehicles[(heroPairIndex * 2) % heroSourceVehicles.length] : undefined;
   const heroRightVehicle = heroSourceVehicles.length > 1
@@ -668,21 +672,21 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return () => { cancelled = true; };
   }, []);
   useEffect(() => {
-    if (heroSlides.length < 2 || !heroRotationMs) return;
+    if (prefersReducedMotion || heroSlides.length < 2 || !heroRotationMs) return;
     const timer = setInterval(() => setHeroSlideIndex((index) => (index + 1) % heroSlides.length), heroRotationMs);
     return () => clearInterval(timer);
-  }, [heroSlides.length, heroRotationMs]);
+  }, [heroSlides.length, heroRotationMs, prefersReducedMotion]);
   const activeHeroSlide = heroSlides[heroSlideIndex % Math.max(heroSlides.length, 1)];
 
   const heroEyebrow = activeHeroSlide?.eyebrowText?.trim() || 'KAYAD KE · PREMIUM AUTOMOTIVE MARKETPLACE';
-  const heroHeadline = activeHeroSlide?.headline?.trim() || 'Drive Your Dream Today';
+  const heroHeadline = kenyaOnlyCopy(activeHeroSlide?.headline?.trim() || 'Drive Your Dream Today');
   // Single source of truth for hero copy: desktop AND mobile render these, so every admin edit
   // (hero slide eyebrow / headline / subheadline / CTA text, vehicle card content) shows on both.
   // Brand is KAYAD KE (not KAYAD EA): a previously saved hero slide that still carries the legacy default is normalised too.
-  const heroEyebrowDisplay = heroEyebrow === 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE' ? 'KAYAD KE · PREMIUM AUTOMOTIVE MARKETPLACE' : heroEyebrow;
+  const heroEyebrowDisplay = kenyaOnlyCopy(heroEyebrow === 'KAYAD EA · PREMIUM AUTOMOTIVE MARKETPLACE' ? 'KAYAD KE · PREMIUM AUTOMOTIVE MARKETPLACE' : heroEyebrow);
   // Only the canonical default headline gets the designed line break; any admin-authored headline renders exactly as written.
   const heroHeadlineNode: React.ReactNode = heroHeadline === 'Drive Your Dream Today' ? <>Drive Your Dream<br />Today</> : heroHeadline;
-  const heroSubheadline = activeHeroSlide?.subheadline?.trim() || 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.';
+  const heroSubheadline = kenyaOnlyCopy(activeHeroSlide?.subheadline?.trim() || 'Discover quality vehicles across Kenya. Find the right car, make your move, and drive with confidence.');
   const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-nairobi-kicc.jpg';
   const heroAdminBackgroundUrl = heroPresentation.backgroundUrl || KENYA_ROAD_HERO_BACKGROUND;
   const heroBackgroundStyle: React.CSSProperties = {
@@ -727,10 +731,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   };
 
   const activeHeroCard = heroLeftVehicle ? heroCardContent[heroLeftVehicle.id] : undefined;
-  const heroSupportCopy = activeHeroCard?.message || (heroSubheadline === 'Discover quality vehicles across East Africa. Find the right car, make your move, and drive with confidence.' ? 'Verified vehicles, transparent pricing and clear transaction workflows — from discovery to ownership.' : heroSubheadline);
+  const heroSupportCopy = kenyaOnlyCopy(activeHeroCard?.message || (heroSubheadline === 'Discover quality vehicles across Kenya. Find the right car, make your move, and drive with confidence.' ? 'Verified vehicles, transparent pricing and clear transaction workflows — from discovery to ownership.' : heroSubheadline));
   // CTA labels: vehicle card content first (existing behaviour), then the admin hero slide's own button text, then the default.
-  const heroPrimaryLabel = activeHeroCard?.ctaLabel || activeHeroSlide?.ctaPrimaryText?.trim() || 'Explore Vehicles';
-  const heroSecondaryLabel = activeHeroSlide?.ctaSecondaryText?.trim() || 'How It Works';
+  const heroPrimaryLabel = kenyaOnlyCopy(activeHeroCard?.ctaLabel || activeHeroSlide?.ctaPrimaryText?.trim() || 'Explore Vehicles');
+  const heroSecondaryLabel = kenyaOnlyCopy(activeHeroSlide?.ctaSecondaryText?.trim() || 'How It Works');
   const heroAuctionMeta = (vehicle?: Vehicle) => {
     if (!vehicle?.isAuction) return '';
     const bid = vehicle.currentBid || vehicle.price || 0;
@@ -904,7 +908,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }, [paginatedVehicles, homeConfig.sectionVisibility.sponsorCardsInGrid, midGridAds]);
 
   return (
-    <div className="kayad-homepage w-full min-w-0 space-y-0 pb-16">
+    <div className="kayad-homepage w-full min-w-0 space-y-0 pb-32 sm:pb-20">
       {/* TOAST NOTIFICATION FLOATER */}
       {toastMessage && (
         <div className="fixed top-20 right-4 z-50 bg-navy-900 text-white px-4 py-3 rounded-xl shadow-2xl border border-white/20 flex items-center gap-2.5 text-xs font-bold animate-slide-down">
@@ -937,7 +941,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {/* 1. HERO - one continuous commercial composition. */}
       {!savedOnly && homeConfig.sectionVisibility.searchTrustCard && (
-        <section className="relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#C7DDDA] bg-[#EEF7F5] text-white">
+        <section className="kayad-public-hero relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#C7DDDA] bg-[#EEF7F5] text-white">
           <div
             className="absolute inset-0 transition-transform duration-500"
             style={{
@@ -1053,11 +1057,11 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                       <h1 className="mt-4 font-display text-[clamp(2rem,3.4vw,3.25rem)] font-black leading-[1.02] tracking-[-.045em]">{heroHeadlineNode}</h1>
                       <p className="mx-auto mt-4 max-w-[430px] text-sm font-medium leading-6 text-[#58717B]">{heroSupportCopy}</p>
                       <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
-                        <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} className="inline-flex items-center rounded-full px-6 py-3 text-xs font-black text-[#07313D] shadow-[0_12px_28px_rgba(19,184,166,.22)]">{heroPrimaryLabel} <ChevronRight className="ml-1 h-4 w-4" /></button>
-                        <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} className="inline-flex items-center rounded-full border bg-white px-6 py-3 text-xs font-black text-navy-900 shadow-sm">{heroSecondaryLabel} <span className="ml-2 text-sm">▶</span></button>
+                        <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} type="button" aria-label={`${heroPrimaryLabel} — browse KAYAD inventory`} className="inline-flex min-h-[44px] items-center rounded-full px-6 py-3 text-xs font-black text-[#07313D] shadow-[0_12px_28px_rgba(19,184,166,.22)]">{heroPrimaryLabel} <ChevronRight className="ml-1 h-4 w-4" /></button>
+                        <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} type="button" aria-label={`${heroSecondaryLabel} — learn about KAYAD`} className="inline-flex min-h-[44px] items-center rounded-full border bg-white px-6 py-3 text-xs font-black text-navy-900 shadow-sm">{heroSecondaryLabel} <PlayCircle className="ml-2 h-4 w-4" aria-hidden="true" /></button>
                       </div>
                       <dl className="mt-6 grid grid-cols-4 border-t border-[#D7E7E4] pt-5">
-                        {[['VERIFIED','Listings'],['INSPECTED','Vehicles'],['PROTECTED','Transactions'],['EAST AFRICA','Marketplace']].map(([a,b]) => <div key={a}><dt className="text-[8px] font-black uppercase tracking-[.13em] text-navy-600">{a}</dt><dd className="mt-1 text-[9px] text-[#6D858D]">{b}</dd></div>)}
+                        {[['VERIFIED','Listings'],['INSPECTED','Vehicles'],['PROTECTED','Transactions'],['KENYA','Marketplace']].map(([a,b]) => <div key={a}><dt className="text-[8px] font-black uppercase tracking-[.13em] text-navy-600">{a}</dt><dd className="mt-1 text-[9px] text-[#6D858D]">{b}</dd></div>)}
                       </dl>
                     </div>
                   </div>
@@ -1080,13 +1084,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </div>
 
               <div className="relative px-3 pb-4 pt-3 lg:hidden" aria-label="KAYAD mobile hero">
-                <div className="mx-auto w-full max-w-[460px] rounded-[24px] border border-white/75 bg-white/95 px-3.5 py-4 text-center shadow-[0_20px_48px_rgba(3,19,27,.22)] backdrop-blur-xl min-[390px]:px-4 min-[390px]:py-4">
+                <div className="kayad-public-hero__mobile-card mx-auto w-full max-w-[460px] rounded-[24px] border border-white/75 bg-white/95 px-3.5 py-4 text-center shadow-[0_20px_48px_rgba(3,19,27,.22)] backdrop-blur-xl min-[390px]:px-4 min-[390px]:py-4">
                   <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-2.5 py-1.5 text-[9px] font-bold uppercase leading-tight tracking-[.06em] text-navy-600 min-[430px]:text-[10px] min-[430px]:tracking-[.1em]"><span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--kayad-cyan)]" /><span className="min-w-0 text-balance">{heroEyebrowDisplay}</span></span>
                   <h1 className="mt-3 text-balance font-display text-[clamp(1.75rem,7.2vw,2.25rem)] font-black leading-[1.05] tracking-[-.045em] text-navy-900">{heroHeadlineNode}</h1>
                   <p className="mx-auto mt-2 max-w-[330px] text-[12px] font-medium leading-[1.45rem] text-[#58717B] min-[390px]:text-[13px]">{heroSupportCopy}</p>
                   <div className="mt-3 flex flex-col items-stretch justify-center gap-2 min-[390px]:flex-row min-[390px]:items-center">
-                    <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} className="inline-flex min-h-[44px] items-center justify-center rounded-full px-4 text-[11px] font-black text-[#07313D] shadow-[0_8px_18px_rgba(19,184,166,.22)]">{heroPrimaryLabel} <ChevronRight className="ml-1 h-3.5 w-3.5 shrink-0" /></button>
-                    <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} className="inline-flex min-h-[44px] items-center justify-center rounded-full border bg-white px-4 text-[11px] font-black text-navy-900 shadow-sm">{heroSecondaryLabel} <span className="ml-1.5 text-xs">▶</span></button>
+                    <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} type="button" aria-label={`${heroPrimaryLabel} — browse KAYAD inventory`} className="kayad-public-hero__primary-cta inline-flex min-h-[46px] items-center justify-center rounded-full px-4 text-[11px] font-black text-[#07313D] shadow-[0_8px_18px_rgba(19,184,166,.22)]">{heroPrimaryLabel} <ChevronRight className="ml-1 h-3.5 w-3.5 shrink-0" /></button>
+                    <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} type="button" aria-label={`${heroSecondaryLabel} — learn about KAYAD`} className="kayad-public-hero__secondary-cta inline-flex min-h-[46px] items-center justify-center rounded-full border bg-white px-4 text-[11px] font-black text-navy-900 shadow-sm">{heroSecondaryLabel} <PlayCircle className="ml-1.5 h-4 w-4" aria-hidden="true" /></button>
                   </div>
                 </div>
 
@@ -1095,7 +1099,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 {(heroLeftVehicle || heroRightVehicle) && <div className="mx-auto mt-2.5 w-full max-w-[460px]">
                   <div className="grid grid-cols-2 items-stretch gap-1 min-[390px]:gap-2" aria-label="Featured vehicle pair">
                     {[heroLeftVehicle, heroRightVehicle].map((vehicle, index) => vehicle && heroImageForVehicle(vehicle) ? (
-                      <button key={`${vehicle.id}-${index}`} type="button" onClick={() => handleHeroVehicleSelect(vehicle)} className="group flex h-full min-w-0 flex-col justify-end rounded-2xl border border-white/20 bg-[#082D39]/22 px-1.5 pt-1.5 text-center transition-colors hover:bg-[#082D39]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]" aria-label={isShowcaseHeroVehicle(vehicle) ? `Browse vehicles; visual showcase ${vehicle.make} ${vehicle.model}` : `View ${vehicle.make} ${vehicle.model}`}>
+                      <button key={`${vehicle.id}-${index}`} type="button" onClick={() => handleHeroVehicleSelect(vehicle)} className="kayad-public-hero__vehicle-card group flex h-full min-w-0 flex-col justify-end rounded-2xl border border-white/20 bg-[#082D39]/22 px-1.5 pt-1.5 text-center transition-colors hover:bg-[#082D39]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]" aria-label={isShowcaseHeroVehicle(vehicle) ? `Browse vehicles; visual showcase ${vehicle.make} ${vehicle.model}` : `View ${vehicle.make} ${vehicle.model}`}>
                         <div className="flex items-end justify-center overflow-visible" style={{ height: `clamp(${Math.min(140, heroPresentation.mobileStageMinPx)}px, 40vw, ${Math.min(180, heroPresentation.mobileStageMaxPx)}px)` }} data-testid="hero-pair-image-stage">
                           {brokenHeroImages[vehicle.id] ? (
                             <div className="grid h-full w-full place-items-center text-white/70" role="img" aria-label={`Photo of ${vehicle.make} ${vehicle.model} is unavailable`}><ImageIcon className="h-8 w-8" aria-hidden="true" /></div>
@@ -1170,8 +1174,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       {/* 2. SEARCH BRIDGE - overlaps the hero, real, wired filter fields */}
       {!savedOnly && homeConfig.sectionVisibility.searchTrustCard && (
       <div className="kayad-search-bridge relative z-10 -mt-10 w-full px-3 sm:-mt-12 sm:px-5 lg:px-8">
-        <div className="w-full rounded-2xl border border-[#D7E7E4] bg-white p-3.5 shadow-[0_18px_45px_rgba(11,29,58,.10)] sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
-          <div className="lg:col-span-1 flex flex-col gap-1.5 min-w-0">
+        <div className="w-full rounded-2xl border border-[#D7E7E4] bg-white p-3.5 shadow-[0_18px_45px_rgba(11,29,58,.10)] sm:p-5 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
+          <div className="col-span-2 lg:col-span-1 flex flex-col gap-1.5 min-w-0">
             <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Search</label>
             <div className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 flex items-center gap-2 bg-[#F6FAF9]">
               <Search className="w-3.5 h-3.5 text-[#94A3B8] shrink-0" />
@@ -1179,6 +1183,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
                 placeholder="Make, model or keyword…"
+                aria-label="Search vehicles by make, model or keyword"
                 className="w-full bg-transparent text-xs outline-none min-w-0"
               />
             </div>
@@ -1243,7 +1248,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           </div>
           <button
             onClick={() => document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })}
-            className="bg-navy-600 hover:bg-navy-700 text-white font-bold text-xs px-5 py-2.5 rounded-lg transition-colors whitespace-nowrap"
+            type="button"
+            aria-label="Apply vehicle filters and view inventory"
+            className="col-span-2 lg:col-span-1 min-h-11 bg-navy-600 hover:bg-navy-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]"
           >
             Filter Vehicles
           </button>
@@ -1330,11 +1337,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="kayad-market-toolbar-controls flex flex-wrap items-center gap-2">
               <div className="kayad-toolbar-control flex h-10 items-center gap-1 rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-1" aria-label="Results per page">
                 <span className="px-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#64748B]">Show</span>
                 {[12, 24, 48].map((n) => (
                   <button
+                    type="button"
                     key={n}
                     onClick={() => setPageSize(n)}
                     aria-pressed={pageSize === n}
@@ -1351,7 +1359,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
                   aria-label="Sort inventory"
-                  className="min-w-[145px] bg-transparent text-xs font-bold text-navy-900 outline-none"
+                  className="min-w-0 flex-1 bg-transparent text-xs font-bold text-navy-900 outline-none focus-visible:ring-2 focus-visible:ring-[#13B8A6]"
                 >
                   <option value="newest">Newest First</option>
                   <option value="price-asc">Price: low to high</option>
@@ -1382,6 +1390,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
               <div className="kayad-toolbar-control flex h-10 items-center rounded-xl border border-[#D7E7E4] bg-white p-1" role="group" aria-label="Inventory view">
                 <button
+                  type="button"
                   onClick={() => setViewMode('grid')}
                   aria-pressed={viewMode === 'grid'}
                   title="Grid view"
@@ -1390,6 +1399,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   <Grid className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Grid</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => setViewMode('list')}
                   aria-pressed={viewMode === 'list'}
                   title="List view"
@@ -1402,6 +1412,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
 
               <button
+                type="button"
+                aria-label="Open inventory filters"
                 onClick={() => setShowMobileFilterDrawer(true)}
                 className="lg:hidden flex h-10 items-center gap-1.5 rounded-xl border border-[#D7E7E4] bg-white px-3 text-[11px] font-bold text-[#64748B]"
               >
@@ -1614,7 +1626,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                         fix only, not a lifecycle-accuracy fix. */}
                     <span className="self-start inline-flex items-center gap-1 bg-rose-600 text-[10px] font-bold px-2.5 py-1 rounded-md mb-3"><Gavel className="w-3 h-3" aria-hidden="true" /> LIVE AUCTIONS</span>
                     <h3 className="text-lg font-bold mb-2">Live Vehicle Auctions</h3>
-                    <p className="text-xs text-[#BDE5DE] mb-4">Explore vehicles listed for auction across East Africa. Review each listing and seller details before bidding.</p>
+                    <p className="text-xs text-[#BDE5DE] mb-4">Explore vehicles listed for auction across Kenya. Review each listing and seller details before bidding.</p>
                     <button onClick={() => onNavigate('discovery')} className="self-start bg-navy-600 hover:bg-navy-700 text-white text-xs font-bold px-4 py-2 rounded-lg mt-auto">
                       View Auctions →
                     </button>

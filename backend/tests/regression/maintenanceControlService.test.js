@@ -88,7 +88,8 @@ describe("validation", () => {
     expect(() => svc.validateActivation({ scope: "global", reason: REASON, incidentRef: "<script>" })).toThrow(/incident/i);
     expect(svc.validateActivation({ scope: "dealers", reason: `  ${REASON}  `, incidentRef: "INC-9" })).toMatchObject({ scope: "dealers", reason: REASON, incidentRef: "INC-9" });
     expect(() => svc.validateRecovery({}, { reasonRequired: true })).toThrow(/why/i);
-    expect(svc.validateRecovery({}, { reasonRequired: false }).reason).toBe("");
+    expect(() => svc.validateRecovery({})).toThrow(/why/i);
+    expect(svc.validateRecovery({ reason: "incident resolved" }).reason).toBe("incident resolved");
   });
 });
 

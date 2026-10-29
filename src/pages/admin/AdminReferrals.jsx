@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 
@@ -15,49 +15,71 @@ export default function AdminReferrals() {
   const [referrals, setReferrals] = useState([]);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const requestSequence = useRef(0);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [statusFilter, setStatusFilter] = useState('');
   const [actionId, setActionId] = useState(null);
   const [selected, setSelected] = useState(null);
-  const [creditAmount, _setCreditAmount] = useState(500);
+  const [creditAmount, setCreditAmount] = useState('500');
   const [userTree, setUserTree] = useState(null);
   const [userSearch, setUserSearch] = useState('');
+  const [submittedUserSearch, setSubmittedUserSearch] = useState('');
 
   const load = useCallback(async () => {
+    const requestId = ++requestSequence.current;
     setLoading(true);
+    setError('');
     try {
       if (tab === 'stats') {
         const d = await adminAPI.referralStats();
-        setStats(d.stats);
+        if (!d || !d.stats || typeof d.stats !== 'object') throw new Error('Unexpected referral statistics response');
+        if (requestId === requestSequence.current) setStats(d.stats);
       } else if (tab === 'user-tree') {
-        if (userSearch) {
-          const d = await adminAPI.userReferrals(userSearch);
-          setUserTree(d);
+        if (!submittedUserSearch) {
+          if (requestId === requestSequence.current) setUserTree(null);
+          return;
         }
+        const d = await adminAPI.userReferrals(submittedUserSearch);
+        if (!d || !d.user || !Array.isArray(d.referred)) throw new Error('Unexpected referral tree response');
+        if (requestId === requestSequence.current) setUserTree(d);
       } else {
         const params = { page, limit: 20 };
         if (statusFilter) params.status = statusFilter;
         const d = await adminAPI.referrals(params);
-        setReferrals(d.referrals || []);
-        setTotal(d.pagination?.total || 0);
+        if (!d || !Array.isArray(d.referrals) || !d.pagination || !Number.isFinite(Number(d.pagination.total))) {
+          throw new Error('Unexpected referrals response');
+        }
+        if (requestId === requestSequence.current) {
+          setReferrals(d.referrals);
+          setTotal(Number(d.pagination.total));
+        }
       }
-    } catch { toast('Failed to load', 'error'); }
-    finally { setLoading(false); }
-  }, [tab, page, statusFilter, userSearch, toast]);
+    } catch (err) {
+      if (requestId === requestSequence.current) {
+        setError(err.response?.data?.message || err.message || 'Referral records could not be loaded. Existing decisions have not been changed.');
+        toast(err.response?.data?.message || 'Referral records could not be loaded', 'error');
+      }
+    } finally {
+      if (requestId === requestSequence.current) setLoading(false);
+    }
+  }, [tab, page, statusFilter, submittedUserSearch, toast]);
 
   useEffect(() => { load(); }, [load]);
-  useEffect(() => { setPage(1); }, [statusFilter, tab]);
+  useEffect(() => { setPage(1); setSelected(null); }, [statusFilter, tab]);
 
   const handleCredit = async (id) => {
-    if (!window.confirm(`Credit this referral with KES ${creditAmount}?`)) return;
+    const amount = Number(creditAmount);
+    if (!Number.isFinite(amount) || amount <= 0) { toast('Enter a valid positive credit amount', 'error'); return; }
+    if (!window.confirm(`Credit this referral with KES ${amount}? This changes the referrer balance and creates a transaction record.`)) return;
     setActionId(id);
     try {
-      await adminAPI.creditReferral(id, { amount: Number(creditAmount) });
+      await adminAPI.creditReferral(id, { amount });
       toast('Referral credited', 'success');
-      load();
+      await load();
     } catch (err) {
-      toast(err.response?.data?.message || 'Credit failed', 'error');
+      toast(err.response?.data?.message || 'Credit failed. Check the referral and transaction records before retrying.', 'error');
     } finally { setActionId(null); }
   };
 
@@ -67,7 +89,7 @@ export default function AdminReferrals() {
     try {
       await adminAPI.expireReferral(id);
       toast('Referral expired', 'success');
-      load();
+      await load();
     } catch (err) {
       toast(err.response?.data?.message || 'Expire failed', 'error');
     } finally { setActionId(null); }
@@ -92,9 +114,16 @@ export default function AdminReferrals() {
           ))}
         </div>
 
+        {error && (
+          <div role="alert" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', padding: '14px 16px', marginBottom: 18, border: '1px solid rgba(220,38,38,.22)', borderRadius: 10, background: '#fff7f7', color: '#991b1b', fontSize: 13 }}>
+            <span>{error}</span>
+            <button className="btn btn-outline btn-sm" onClick={load} disabled={loading}>{loading ? 'Retrying…' : 'Retry loading'}</button>
+          </div>
+        )}
+
         {tab === 'stats' && (
           loading ? <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}><div className="spinner" /></div>
-          : stats ? (
+          : stats && !error ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 14 }}>
               {[
                 { label: 'Total Referrals', value: stats.totalReferrals, color: '#176B87' },
@@ -109,14 +138,18 @@ export default function AdminReferrals() {
                 </div>
               ))}
             </div>
-          ) : null
+          ) : !error ? <div className="empty-state" style={{ padding: 32 }}><h3>Statistics unavailable</h3></div> : null
         )}
 
         {tab === 'user-tree' && (
           <div>
-            <input placeholder="Enter user ID to look up referral tree…"
-              value={userSearch} onChange={e => setUserSearch(e.target.value)}
-              style={{ width: '100%', maxWidth: 400, background: 'rgba(10, 51, 64, 0.04)', border: '1px solid rgba(10, 51, 64, 0.1)', borderRadius: 8, padding: '10px 14px', color: '#0a3340', fontSize: 13, outline: 'none', marginBottom: 24 }} />
+            <form onSubmit={e => { e.preventDefault(); setUserTree(null); setSubmittedUserSearch(userSearch.trim()); }} style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 24 }}>
+              <input placeholder="Enter user ID to look up referral tree…"
+                value={userSearch} onChange={e => setUserSearch(e.target.value)}
+                aria-label="User ID for referral tree"
+                style={{ width: '100%', maxWidth: 400, background: 'rgba(10, 51, 64, 0.04)', border: '1px solid rgba(10, 51, 64, 0.1)', borderRadius: 8, padding: '10px 14px', color: '#0a3340', fontSize: 13, outline: 'none' }} />
+              <button className="btn btn-gold btn-sm" type="submit" disabled={loading || !userSearch.trim()}>{loading ? 'Loading…' : 'Load referral tree'}</button>
+            </form>
             {loading ? <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}><div className="spinner" /></div>
             : userTree ? (
               <div>
@@ -142,18 +175,18 @@ export default function AdminReferrals() {
                 ) : (
                   <div style={{ display: 'grid', gap: 8 }}>
                     {userTree.referred?.map(r => (
-                      <div key={r._id} style={{ background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.07)', borderRadius: 10, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div key={r._id || r.id} style={{ background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.07)', borderRadius: 10, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
                           <div style={{ fontSize: 13, color: '#0a3340', fontWeight: 600 }}>{r.referee?.name || '—'}</div>
                           <div style={{ fontSize: 11, color: 'var(--admin-muted-content)' }}>{r.referee?.email} · {new Date(r.createdAt).toLocaleDateString()}</div>
                         </div>
-                        <span style={{ fontSize: 11, fontWeight: 600, color: STATUS_META[r.status]?.color || '#fff' }}>{(() => { const I = STATUS_META[r.status]?.icon; return I ? <I size={12} aria-hidden="true" style={{ verticalAlign: '-2px', marginRight: 4 }} /> : null; })()}{STATUS_META[r.status]?.label}</span>
+                        <span style={{ fontSize: 11, fontWeight: 600, color: STATUS_META[r.status]?.color || '#fff' }}>{(() => { const I = STATUS_META[r.status]?.icon; return I ? <I size={12} aria-hidden="true" style={{ verticalAlign: '-2px', marginRight: 4 }} /> : null; })()}{STATUS_META[r.status]?.label || r.status || 'Unknown'}</span>
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-            ) : userSearch ? <div className="empty-state" style={{ padding: 32 }}><div className="empty-icon"><Search size={32} aria-hidden="true" /></div><h3>Enter a user ID and press load</h3></div> : null}
+            ) : !submittedUserSearch ? <div className="empty-state" style={{ padding: 32 }}><div className="empty-icon"><Search size={32} aria-hidden="true" /></div><h3>Enter a user ID and load the referral tree</h3></div> : error ? null : <div className="empty-state" style={{ padding: 32 }}><h3>No referral tree data available</h3></div>}
           </div>
         )}
 
@@ -167,18 +200,24 @@ export default function AdminReferrals() {
                 </button>
               ))}
             </div>
+            <div style={{ fontSize: 12, color: 'var(--admin-muted-content)', marginBottom: 10 }}>{total} referral records · Page {page}</div>
 
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 16, fontSize: 12, color: 'var(--admin-muted-content)' }}>
+              <label htmlFor="referral-credit-amount">Manual credit amount (KES)</label>
+              <input id="referral-credit-amount" type="number" min="0.01" step="0.01" value={creditAmount} onChange={e => setCreditAmount(e.target.value)} style={{ width: 140, padding: '8px 10px', border: '1px solid rgba(10,51,64,.15)', borderRadius: 8, background: '#fff', color: '#0a3340' }} />
+            </div>
             {loading ? (
               <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}><div className="spinner" /></div>
-            ) : referrals.length === 0 ? (
+            ) : error ? null : referrals.length === 0 ? (
               <div className="empty-state" style={{ padding: 48 }}><div className="empty-icon"><Users size={32} aria-hidden="true" /></div><h3>No referrals found</h3></div>
             ) : (
               <>
                 <div style={{ display: 'grid', gap: 12 }}>
                   {referrals.map(r => {
-                    const meta = STATUS_META[r.status] || { label: r.status, icon: Users, color: '#0a3340' };
+                    const referralId = r._id || r.id;
+                    const meta = STATUS_META[r.status] || { label: r.status || 'Unknown', icon: Users, color: '#0a3340' };
                     return (
-                      <div key={r._id} style={{ background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.07)', borderRadius: 14, padding: '18px 22px' }}>
+                      <div key={referralId || `${r.referrer?.email || 'referrer'}-${r.referee?.email || 'referee'}-${r.createdAt || ''}`} style={{ background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.07)', borderRadius: 14, padding: '18px 22px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                           <div>
                             <div style={{ fontSize: 14, fontWeight: 700, color: '#0a3340', marginBottom: 4 }}>
@@ -193,23 +232,23 @@ export default function AdminReferrals() {
                           <span style={{ fontSize: 11, fontWeight: 600, color: meta.color }}><meta.icon size={12} aria-hidden="true" style={{ verticalAlign: '-2px', marginRight: 4 }} />{meta.label}</span>
                         </div>
                         <div style={{ display: 'flex', gap: 8 }}>
-                          <button className="btn btn-outline btn-sm" style={{ fontSize: 10 }} onClick={() => setSelected(selected?._id === r._id ? null : r)}>
-                            {selected?._id === r._id ? 'Less' : 'Details'}
+                          <button className="btn btn-outline btn-sm" style={{ fontSize: 10 }} onClick={() => setSelected((selected?._id || selected?.id) === referralId ? null : r)}>
+                            {(selected?._id || selected?.id) === referralId ? 'Less' : 'Details'}
                           </button>
                           {r.status === 'pending' && (
                             <>
-                              {creditAmount > 0 && (
-                                <button className="btn btn-gold btn-sm" style={{ fontSize: 10 }} disabled={actionId === r._id} onClick={() => handleCredit(r._id)}>
-                                  {actionId === r._id ? '…' : `Credit KES ${creditAmount}`}
+                              {Number.isFinite(Number(creditAmount)) && Number(creditAmount) > 0 && (
+                                <button className="btn btn-gold btn-sm" style={{ fontSize: 10 }} disabled={actionId !== null || !referralId} onClick={() => handleCredit(referralId)}>
+                                  {actionId === (r._id || r.id) ? '…' : `Credit KES ${creditAmount}`}
                                 </button>
                               )}
-                              <button className="btn btn-outline btn-sm" style={{ fontSize: 10, color: 'var(--red)', borderColor: 'rgba(239,68,68,0.3)' }} disabled={actionId === r._id} onClick={() => handleExpire(r._id)}>
-                                {actionId === r._id ? '…' : 'Expire'}
+                              <button className="btn btn-outline btn-sm" style={{ fontSize: 10, color: 'var(--red)', borderColor: 'rgba(239,68,68,0.3)' }} disabled={actionId !== null || !referralId} onClick={() => handleExpire(referralId)}>
+                                {actionId === (r._id || r.id) ? '…' : 'Expire'}
                               </button>
                             </>
                           )}
                         </div>
-                        {selected?._id === r._id && (
+                        {(selected?._id || selected?.id) === referralId && (
                           <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(10, 51, 64, 0.06)', fontSize: 11, color: 'var(--admin-muted-content)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
                             <div>Referrer Code: {r.referrer?.referralCode || '—'}</div>
                             <div>Referrer ID: {r.referrer?._id}</div>
@@ -223,12 +262,10 @@ export default function AdminReferrals() {
                 </div>
 
                 {pages > 1 && (
-                  <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 24, flexWrap: 'wrap' }}>
-                    {Array.from({ length: Math.min(pages, 10) }, (_, i) => (
-                      <button key={i} onClick={() => setPage(i + 1)}
-                        className={`btn btn-sm ${page === i + 1 ? 'btn-gold' : 'btn-outline'}`}
-                        style={{ fontSize: 11 }}>{i + 1}</button>
-                    ))}
+                  <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 10, marginTop: 24, flexWrap: 'wrap' }}>
+                    <button className="btn btn-outline btn-sm" disabled={page <= 1 || loading} onClick={() => setPage(p => Math.max(1, p - 1))}>Previous</button>
+                    <span style={{ fontSize: 12, color: 'var(--admin-muted-content)' }}>Page {page} of {pages} · {total} referrals</span>
+                    <button className="btn btn-outline btn-sm" disabled={page >= pages || loading} onClick={() => setPage(p => Math.min(pages, p + 1))}>Next</button>
                   </div>
                 )}
               </>

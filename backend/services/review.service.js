@@ -74,13 +74,35 @@ export async function listMyReviews(reviewerId, { page = 1, limit = 20 } = {}) {
   return { reviews: await enrichReviews(result.data), total: result.count || 0, pages: Math.ceil((result.count || 0) / safeLimit), page: safePage, limit: safeLimit };
 }
 
-export async function listAdminReviews({ status, dealerId, page = 1, limit = 20 } = {}) {
-  const safePage = Math.max(Number(page) || 1, 1); const safeLimit = Math.min(Math.max(Number(limit) || 20, 1), 50);
+export async function listAdminReviews({ status, dealerId, page = 1, limit = 20, sortBy = 'createdAt', sortOrder = 'desc' } = {}) {
+  const safePage = Math.max(Number(page) || 1, 1);
+  const safeLimit = Math.min(Math.max(Number(limit) || 20, 1), 50);
   const filters = {};
-  if (status) filters.status = status;
+  if (status && ADMIN_STATUSES.includes(status)) filters.status = status;
   if (dealerId) filters.dealerId = normalizeId(dealerId);
-  const result = await db.findAll('reviews', { filters, orderBy: 'createdAt', ascending: false, limit: safeLimit, offset: (safePage - 1) * safeLimit, count: true });
-  return { reviews: await enrichReviews(result.data), total: result.count || 0, pages: Math.ceil((result.count || 0) / safeLimit), page: safePage, limit: safeLimit };
+  const orderBy = sortBy === 'rating' ? 'rating' : 'createdAt';
+  const ascending = sortOrder === 'asc';
+  const [result, allResult, pendingResult, approvedResult, rejectedResult] = await Promise.all([
+    db.findAll('reviews', { filters, orderBy, ascending, limit: safeLimit, offset: (safePage - 1) * safeLimit, count: true }),
+    db.findAll('reviews', { filters: dealerId ? { dealerId: normalizeId(dealerId) } : {}, select: 'id', limit: 1, count: true }),
+    db.findAll('reviews', { filters: { ...(dealerId ? { dealerId: normalizeId(dealerId) } : {}), status: 'pending' }, select: 'id', limit: 1, count: true }),
+    db.findAll('reviews', { filters: { ...(dealerId ? { dealerId: normalizeId(dealerId) } : {}), status: 'approved' }, select: 'id', limit: 1, count: true }),
+    db.findAll('reviews', { filters: { ...(dealerId ? { dealerId: normalizeId(dealerId) } : {}), status: 'rejected' }, select: 'id', limit: 1, count: true }),
+  ]);
+  const total = Number(result.count) || 0;
+  return {
+    reviews: await enrichReviews(result.data),
+    total,
+    pages: Math.ceil(total / safeLimit),
+    page: safePage,
+    limit: safeLimit,
+    statusCounts: {
+      total: Number(allResult.count) || 0,
+      pending: Number(pendingResult.count) || 0,
+      approved: Number(approvedResult.count) || 0,
+      rejected: Number(rejectedResult.count) || 0,
+    },
+  };
 }
 
 export async function moderateReview(reviewId, status, moderatorId) {

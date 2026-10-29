@@ -1,0 +1,11 @@
+KAYAD FINAL AUDIT PACKAGE — PRE-PACKAGING VALIDATION
+Date: 2026-10-29
+
+This package is labeled CONDITIONAL because build/runtime/browser/live integration certification remains blocked.
+
+Required exclusions: .git, node_modules, dist, coverage, cache directories, real .env files and credentials.
+Safe environment templates (.env.example, .env.production.example, backend/.env.example) are included as non-secret configuration contracts with placeholder values.
+
+The project includes the executive report, technical report, route inventory, admin-page matrix, role/authorization matrix, workflow matrix, validation logs and validation summary.
+
+After creating the ZIP, verify the archive with testzip(), extract it into a fresh directory, confirm the source reports and lockfiles exist, inspect excluded paths and calculate SHA-256. The exact ZIP hash is provided in the adjacent .sha256 file and external packaging validation report.

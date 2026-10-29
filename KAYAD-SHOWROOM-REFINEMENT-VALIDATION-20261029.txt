@@ -1,0 +1,222 @@
+KAYAD SHOWROOM REFINEMENT — VALIDATION SUMMARY
+Date: 2026-10-29
+Foundation: KAYAD-PUBLIC-HOMEPAGE-PREMIUM-REFINEMENT-20261029.zip
+Foundation SHA-256: 6f758aa8bd1cef6b2121922e03f6c86ba50e1c8ec413155891f5691123e7fe2d
+
+FOCUSED SOURCE VALIDATORS: 10/10 passed.
+Kenya-only showroom source contract: 22/22 passed.
+ZIP extraction and archive integrity of source foundation: passed before edits.
+
+
+
+FOCUSED VALIDATOR OUTPUTS
+
+### validate-homepage-convergence.mjs: PASS
+```text
+PASS homepage uses canonical VehicleMarketplace surface
+PASS homepage passes real user/admin context
+PASS hero prefers real featured inventory and keeps curated artwork presentation-only
+PASS hero has no remote background dependency
+PASS homepage has real live market signals
+PASS how-it-works action stays inside existing journey
+PASS featured picks use current server result source
+PASS no known demo identities in active homepage source
+PASS production env contract exists
+
+Homepage convergence validation: PASS
+```
+
+### validate-hero-admin-control.mjs: PASS
+```text
+PASS HeroPresentationConfig: every field has an admin control
+PASS HeroFloatingCard: every field has an admin control
+PASS curated showcase pair and fallback are admin-editable
+PASS backend persists heroPresentation
+PASS backend persists heroCardContent
+PASS backend persists heroFeaturedMode
+PASS backend persists heroCarIds
+PASS public page and admin save share normalizeHeroExtras
+PASS mobile headline comes from admin hero slide
+PASS mobile eyebrow comes from admin hero slide
+PASS mobile supporting copy comes from admin config
+PASS desktop and mobile CTA labels are admin-controlled
+PASS admin headline is never rewritten (no includes() hack)
+PASS no literal 6500ms rotation timer
+PASS rotation timers use admin rotationSeconds
+PASS mobile stage height uses admin min/max
+PASS mobile pair image stage uses admin min/max bounds
+PASS hero colors come from admin config
+
+Hero admin-control contract: PASS
+```
+
+### validate-hero-mobile-assets.mjs: PASS
+```text
+PASS canonical showcase config declares mobileImage for 2 vehicles
+PASS showcase-land-cruiser: legacy desktop hero asset retained (/hero/kayad-land-cruiser-cutout.png)
+PASS showcase-land-cruiser: valid WebP container
+PASS showcase-land-cruiser: WebP has an alpha channel (transparent background)
+PASS showcase-land-cruiser: 163 KB within 100-320 KB budget
+PASS showcase-mercedes-gle: legacy desktop hero asset retained (/hero/kayad-mercedes-gle-cutout.png)
+PASS showcase-mercedes-gle: valid WebP container
+PASS showcase-mercedes-gle: WebP has an alpha channel (transparent background)
+PASS showcase-mercedes-gle: 173 KB within 100-320 KB budget
+PASS no mandatory mobile-specific hero asset: real featured inventory may use its canonical image on mobile
+PASS slide transition defaults to 320ms (admin-controlled via mobileTransitionMs)
+PASS reduced motion disables the slide animation
+PASS no autoplay in the mobile hero block
+
+Hero mobile asset contract: PASS
+```
+
+### validate-stage34-showroom-icons.mjs: PASS
+```text
+Stage 34 Showroom & Real-Meaning Icons: 16/16 PASS
+```
+
+### validate-stage35-home-hero-pair.mjs: PASS
+```text
+PASS mobile hero renders a two-vehicle pair, not a single-car carousel
+PASS vehicle images use contain semantics and no crop utility
+PASS both car images have independent accessible labels
+PASS desktop hero markup remains a separate lg-only composition
+PASS showcase art is not priced or opened as a listing
+PASS real featured inventory takes precedence when two or more records exist
+PASS showcase fallback is admin-configurable
+PASS showcase vehicle identity and image paths are editable by admin
+PASS showcase configuration is persisted via existing platform config endpoint
+PASS database migration seeds/repairs existing JSONB showcase config without creating fake cars
+PASS approved Land Cruiser and Mercedes mobile transparent assets are referenced
+PASS tests cover paired cars and explicit visual-showcase semantics
+
+Stage 35 Home Hero Pair: 12/12 PASS
+```
+
+### validate-stage24-theme-convergence-20261012.mjs: PASS
+```text
+PASS canonical theme stylesheet exists
+PASS theme stylesheet imported by canonical index
+PASS hero background uses canonical dark-teal token
+PASS hero accent uses canonical brand token
+PASS surface and border tokens reuse established theme
+PASS Support uses shared branded hero
+PASS public inspections hero uses shared branded hero
+PASS account inspections hero uses shared branded hero
+PASS public surface scope preserved
+PASS keyboard focus treatment included
+PASS reduced-motion preference included
+PASS role and status color behavior not globally overridden
+PASS homepage full-bleed hero composition remains unflattened
+PASS theme audit created before change
+
+Stage 24 theme convergence: 14/14 PASS
+```
+
+### validate-stage-master-polish-regression-20261012.mjs: PASS
+```text
+PASS NotificationContext.errorKind keeps an explicit literal-union type (fixes tsc TS2322)
+PASS InspectionsView guards kayad.value the same way it guards provider.value (fixes unhandled rejection)
+PASS Public escrow page does not render two buttons both named "Open your dashboard"
+PASS SupportFAQ category filter uses role="tablist"/"tab" with aria-selected
+PASS supportFaq tests query the filter by role=tab, not the ambiguous role=button
+PASS Public EscrowView still never references getMyEscrowOverview or escrowId (privacy boundary intact)
+PASS escrowDeepLink test asserts the public page renders no participant deal data
+PASS auctionListSoftDelete timestamp assertions are directionally consistent (both toBeLessThanOrEqual)
+
+Master polish regression guard: 8/8 PASS
+```
+
+### validate-polish-regressions.mjs: PASS
+```text
+PASS render counter is dev-only
+PASS lazy image shell uses light surface
+PASS feature lazy image shell uses light surface
+PASS service worker has no console logging
+Polish regressions: 4/4 PASS
+```
+
+### validate-navigation-convergence.mjs: PASS
+```text
+PASS: nav destination "marketplace" resolves to an existing App.tsx surface/tab
+PASS: nav destination "saved" resolves to an existing App.tsx surface/tab
+PASS: nav destination "financing" resolves to an existing App.tsx surface/tab
+PASS: nav destination "discovery" resolves to an existing App.tsx surface/tab
+PASS: nav destination "auctions:live" resolves to an existing App.tsx surface/tab
+PASS: nav destination "auctions:scheduled" resolves to an existing App.tsx surface/tab
+PASS: nav destination "auctions:ended" resolves to an existing App.tsx surface/tab
+PASS: nav destination "auctions:saved" resolves to an existing App.tsx surface/tab
+PASS: nav destination "inspections" resolves to an existing App.tsx surface/tab
+PASS: nav destination "services:inspect" resolves to an existing App.tsx surface/tab
+PASS: nav destination "services:find" resolves to an existing App.tsx surface/tab
+PASS: nav destination "services:roadside" resolves to an existing App.tsx surface/tab
+PASS: nav destination "services:mine" resolves to an existing App.tsx surface/tab
+PASS: nav destination "escrow:journey" resolves to an existing App.tsx surface/tab
+PASS: nav destination "escrow:deals" resolves to an existing App.tsx surface/tab
+PASS: nav destination "escrow:create" resolves to an existing App.tsx surface/tab
+PASS: nav destination "support" resolves to an existing App.tsx surface/tab
+PASS: primary nav is exactly Marketplace, Auction, Auto Services, Escrow, Support
+PASS: Support stays a direct link (no invented submenu)
+PASS: auth-gated entries are presentation only (App protectedNavs + backend remain authority)
+PASS: ticker is still rendered above the navigation
+PASS: navigation adds no network call
+PASS: dropdowns are disclosure buttons with aria-expanded/aria-controls, not ARIA menus
+PASS: Escape closes dropdowns, account menu and drawer
+PASS: mobile drawer is a labelled modal dialog with focus handling
+PASS: primary nav is a labelled landmark of real links
+PASS: single mobile navigation system retained (bottom dock + one drawer)
+PASS: deleted MobileCarCard architecture not resurrected
+PASS: reduced-motion rules cover the new header
+PASS: sign-in/sign-up routes keep canonical /login entry
+PASS: 14A backend registry mirrors frontend navConfig ids exactly (no drift)
+PASS: 14A locked-visible set matches frontend and covers marketplace + support
+PASS: 14A authority lives in the existing platform_config via the existing PUT /config (no second config system / route)
+PASS: 14A navigation mutation is validated before persistence and audited through the existing AuditLog
+PASS: 14A public projection exposes navigation only through the existing whitelist, normalised
+PASS: 14A public projection does not whitelist secrets/admin fields
+PASS: 14A the public-config GET is defined before the global admin guard; mutation is after it
+PASS: 14A frontend consumes navigation via the existing BrandingContext fetch (no new request)
+PASS: 14A Navbar renders from applyNavigationConfig, never directly from raw config
+PASS: 14A resolver is total and falls back to canonical NAV_PRIMARY
+PASS: 14A admin editor is mounted in the reachable admin console (AdminView), not the orphaned legacy settings page
+PASS: 14A admin editor lives in the reachable admin console (AdminView) and saves through the existing adminAPI.updateConfig only
+PASS: 14A migration is the smallest possible: one JSONB column with a default, no policy changes
+Navigation convergence: 43/43 PASS
+```
+
+### validate-kenya-only-showroom-refinement.mjs: PASS
+```text
+PASS App defaults to Kenya-wide inventory
+PASS Marketplace default region uses All Kenya
+PASS County filter sends a city only for a selected Kenyan location
+PASS Clearing location filter resets to All Kenya
+PASS Public source copy no longer advertises East Africa coverage
+PASS Hero coverage stat says Kenya
+PASS Ticker fallback is Kenya-specific
+PASS Saved ticker config is localized to Kenya at display time
+PASS Hero editor fallback is Kenya-specific
+PASS Saved hero subheadline is localized to Kenya at display time
+PASS Navigation description is Kenya-specific
+PASS Compare copy is Kenya marketplace-specific
+PASS Mobile inventory toolbar has a scoped layout class
+PASS Sort select has an accessible label
+PASS Filter drawer button has an accessible label
+PASS Vehicle search has an accessible label
+PASS Mobile toolbar uses a two-column responsive grid
+PASS Mobile search bridge groups controls into two columns
+PASS Bottom navigation has additional mobile content clearance
+PASS Search bridge applies filter button as a real button
+PASS Responsive reduced-motion styles exist
+PASS Showroom regression tests assert Kenya-only scope
+\nKenya-only showroom refinement: 22/22 PASS
+```
+
+
+BLOCKED / FAILED EXECUTION CHECKS:
+- Node.js is v22.16.0; package.json requires >=22.22.2.
+- `npm run typecheck -- --pretty false` exited 2. TypeScript reported missing installed modules/types including react/jsx-runtime, @sentry/react, posthog-js and web-vitals, plus environment typing issues. Full typecheck is not certified.
+- `npm test -- --run src/__tests__/components/VehicleMarketplace.test.tsx` exited 127 because the Vitest executable could not run (`Permission denied`). The newly added tests were not executed.
+- `npm run build` exited 127 because the Vite executable could not run (`Permission denied`). Production build is not certified.
+- Real browser, responsive screenshot, API/database and production integration checks were not run.
+
+No production API mutations, database migrations, commits, pushes or deployments were performed.
+No real `.env` files were added.

@@ -110,12 +110,12 @@ export function LoginPage() {
           label="Email address" type="email" placeholder="you@example.com" required autoComplete="email"
           value={form.email} onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
         />
-        <div>
-          <div className="mb-1 text-right text-xs"><Link to="/forgot-password">Forgot password?</Link></div>
+        <div className="kayad-login-password-group">
           <PasswordField
             label="Password" placeholder="Enter your password" required autoComplete="current-password"
             value={form.password} onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
           />
+          <div className="kayad-login-forgot-row"><Link to="/forgot-password">Forgot password?</Link></div>
         </div>
         {mfaRequired && (
           <TextField
@@ -123,7 +123,7 @@ export function LoginPage() {
             value={form.mfaCode} onChange={(e) => setForm((p) => ({ ...p, mfaCode: e.target.value }))}
           />
         )}
-        <button className="kayad-auth-submit" type="submit" disabled={loading}>
+        <button className="kayad-auth-submit" type="submit" disabled={loading} aria-busy={loading}>
           {loading ? <><span className="kayad-auth-spinner" /> Signing in…</> : <>Continue to KAYAD <ArrowRight size={16} /></>}
         </button>
       </form>

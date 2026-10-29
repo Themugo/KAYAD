@@ -17,7 +17,7 @@ const checks = [
   ['staff creation normalizes email and validates password length', /trim\(\)\.toLowerCase\(\)/.test(routes) && /password\.length < 12/.test(routes)],
   ['creation and updates record optional audit reason', /Staff governance: account created[\s\S]*?reason: typeof req\.body\.reason/.test(routes) && /Staff governance: staff record updated[\s\S]*?reason: typeof req\.body\.reason/.test(routes)],
   ['staff directory supports search, role and suspension filters', /const matchesQuery/.test(page) && /const matchesRole/.test(page) && /const matchesStatus/.test(page)],
-  ['UI does not expose staff account deletion control', !/Trash2|onDelete\(m\._id/.test(list)],
+  ['staff removal uses a reasoned, confirmed soft-delete flow', /Trash2/.test(list) && /onDelete\(m\)/.test(list) && /Reason for removing staff access/.test(page) && /window\.confirm/.test(page) && /deleteStaff:/.test(api)],
   ['UI explicitly distinguishes password creation from email invitation', /not an email invitation/.test(page)],
   ['role selection uses backend role catalog API', /getStaffRoleCatalog/.test(page) && /getStaffRoleCatalog:/.test(api)],
   ['staff create UI excludes ghost_checker because the existing POST contract rejects it', page.includes("CREATABLE_STAFF_ROLES = STAFF_ROLES.filter(role => role !== 'ghost_checker')") && create.includes("role !== 'ghost_checker'") && /if \(!staffRoles\.includes\(role\)\)/.test(routes)],

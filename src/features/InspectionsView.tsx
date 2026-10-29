@@ -190,12 +190,21 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
   return (
     <div className={`space-y-8 pb-16 ${viewMode === 'public' ? 'kayad-auto-services-view' : 'kayad-inspection-account-view'}`} data-kayad-surface="auto-services">
       {viewMode === 'public' ? <section className="kayad-brand-hero kayad-auto-services-hero rounded-3xl text-white p-6 sm:p-10" aria-labelledby="insp-title">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#B8EEE7]">Automotive services</p>
-        <h1 id="insp-title" className="mt-2 text-2xl sm:text-4xl font-black font-display max-w-2xl">Find the right independent expert for your car</h1>
-        <p className="mt-3 text-sm sm:text-base text-[#EEF7F5] max-w-2xl">KAYAD is the platform that connects you with independent, verified inspection businesses, garages and specialists. They carry out the work, not KAYAD, and you see who they are before you act.</p>
-        <div className="mt-6 flex flex-col sm:flex-row gap-3">
-          <Button variant="accent" size="lg" className="font-bold" onClick={startRequest}>Inspect a car before you buy</Button>
-          <Button variant="outline" size="lg" className="!text-white !border-white/60" onClick={() => onOpenInspectionMarketplace?.()}>Find a mechanic or garage</Button>
+        <div className="kayad-services-hero-copy">
+          <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.16em] text-[#B8EEE7]">
+            <Wrench className="h-4 w-4" aria-hidden="true" /> Automotive services · Kenya
+          </p>
+          <h1 id="insp-title" className="mt-3 text-2xl sm:text-4xl font-black font-display max-w-2xl">Find the right independent expert for your car</h1>
+          <p className="mt-4 text-sm sm:text-base text-[#EEF7F5] max-w-2xl">KAYAD is the platform connecting you with independent inspection businesses, garages and specialists. They carry out the work, not KAYAD. Review each business and its service verification before you decide.</p>
+          <div className="kayad-services-trust-row mt-5 flex flex-wrap gap-2" aria-label="How automotive services work">
+            <span><ShieldCheck className="h-4 w-4" aria-hidden="true" /> Evidence reviewed</span>
+            <span><UserCheck className="h-4 w-4" aria-hidden="true" /> Independent providers</span>
+            <span><ClipboardCheck className="h-4 w-4" aria-hidden="true" /> Clear booking steps</span>
+          </div>
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <Button variant="accent" size="lg" className="font-bold" onClick={startRequest}>Inspect a car before you buy <ArrowRight className="h-4 w-4" aria-hidden="true" /></Button>
+            <Button variant="outline" size="lg" className="!text-white !border-white/60" onClick={() => onOpenInspectionMarketplace?.()}>Find a mechanic or garage</Button>
+          </div>
         </div>
       </section> : (
         <section className="kayad-brand-hero rounded-3xl text-white p-6 sm:p-8" aria-labelledby="insp-account-title">
@@ -229,7 +238,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
         {viewMode === 'public' ? (
           <div className="space-y-8">
             <div className="grid md:grid-cols-2 gap-5">
-              <article className="kayad-service-lane rounded-2xl border border-[#D7E7E4] bg-white p-6 flex flex-col" aria-labelledby="lane-inspect">
+              <article className="kayad-service-lane rounded-2xl border border-[#D7E7E4] bg-white p-6 sm:p-7 flex flex-col" aria-labelledby="lane-inspect">
                 <ShieldCheck className="w-6 h-6 text-[#176B87]" aria-hidden="true" />
                 <h2 id="lane-inspect" className="mt-3 text-lg font-black text-[#12576d]">Inspect a car before you buy</h2>
                 <p className="mt-1.5 text-sm text-[#64748B]">An independent inspector checks the vehicle for you. Two ways to arrange it:</p>
@@ -242,7 +251,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                   <Button variant="secondary" className="min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.('pre_purchase_inspection')}>Choose a provider <ArrowRight className="w-4 h-4" aria-hidden="true" /></Button>
                 </div>
               </article>
-              <article className="kayad-service-lane rounded-2xl border border-[#D7E7E4] bg-white p-6 flex flex-col" aria-labelledby="lane-fix">
+              <article className="kayad-service-lane rounded-2xl border border-[#D7E7E4] bg-white p-6 sm:p-7 flex flex-col" aria-labelledby="lane-fix">
                 <Wrench className="w-6 h-6 text-[#176B87]" aria-hidden="true" />
                 <h2 id="lane-fix" className="mt-3 text-lg font-black text-[#12576d]">Repairs, diagnostics and roadside help</h2>
                 <p className="mt-1.5 text-sm text-[#64748B] flex-1">Find verified independent garages, mechanics and specialists by service, vehicle make and location. Not sure what is wrong? Describe the symptom and see which kind of specialist to look for. KAYAD lists providers; it does not take repair bookings, take payments for them or dispatch roadside help yet, so you contact the provider yourself.</p>

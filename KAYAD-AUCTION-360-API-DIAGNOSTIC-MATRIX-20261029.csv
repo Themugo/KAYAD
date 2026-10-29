@@ -1,0 +1,5 @@
+check,request,status,http_result,evidence,next_step
+health,GET /health,BLOCKED,No HTTP response,curl exit 6: could not resolve api.kayad.space; Node fetch failed,No status/body/request ID/logs; retry from network with API DNS
+live,GET /api/auctions?page=1&limit=1&status=live,BLOCKED,No HTTP response,curl exit 6 / Node fetch failed,Cannot identify deployed API or backend root cause
+scheduled,GET /api/auctions?page=1&limit=1&status=draft,BLOCKED,No HTTP response,curl exit 6 / Node fetch failed,Do not assume auction_setups is root cause without live logs
+completed,GET /api/auctions?page=1&limit=1&status=ended,BLOCKED,No HTTP response,curl exit 6 / Node fetch failed,Independent status result unavailable due shared reachability blocker

@@ -1,0 +1,28 @@
+PASS: existing broadcast route uses canonical announcement API
+PASS: history loads from existing announcement API
+PASS: history validates the response envelope
+PASS: history failures have a visible alert
+PASS: history retry action exists
+PASS: title is trimmed and bounded
+PASS: message is bounded
+PASS: audience confirmation happens before send
+PASS: recipient audience is shown in confirmation
+PASS: sending disables duplicate button submissions
+PASS: create response ID is validated before sending
+PASS: partial result is represented in the UI
+PASS: in-app record counts are not presented as provider delivery proof
+PASS: recent broadcast history shows recorded stats
+PASS: server trims and validates title
+PASS: server trims and validates message
+PASS: server validates supported audiences
+PASS: server validates specific-user audience input
+PASS: dealer audience includes individual sellers
+PASS: notification null results count as failures
+PASS: partial delivery is persisted distinctly
+PASS: partial and sent announcements cannot be sent again automatically
+PASS: scheduled announcements cannot be manually sent early
+PASS: broadcast batch size is bounded
+PASS: announcement endpoints require authenticated admin roles
+PASS: existing announcement API exports are preserved
+PASS: tests cover history failure, confirmation, and partial outcomes
+Admin Broadcast validator: 27/27 PASS

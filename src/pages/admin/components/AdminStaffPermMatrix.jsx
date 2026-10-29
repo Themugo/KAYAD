@@ -1,82 +1,92 @@
-import { Crown, Settings, Users, Wallet, Lock, Megaphone, Target, Wrench, ShieldCheck } from 'lucide-react';
-const ORG_DATA = [
-  { role: 'superadmin', title: 'Super Admin', icon: Crown, color: 'var(--brand)', level: 0 },
-  { role: 'admin', title: 'Admin', icon: Settings, color: '#176B87', level: 1 },
-  { role: 'hr', title: 'HR Manager', icon: Users, color: '#176b87', level: 2 },
-  { role: 'accounts', title: 'Accounts & Finance', icon: Wallet, color: '#22c55e', level: 2 },
-  { role: 'escrow_officer', title: 'Escrow Officer', icon: Lock, color: '#13B8A6', level: 2 },
-  { role: 'marketing', title: 'Marketing', icon: Megaphone, color: '#5aafa4', level: 2 },
-  { role: 'ad_manager', title: 'Ad Manager', icon: Target, color: '#5aafa4', level: 3 },
-  { role: 'technical_support', title: 'Tech Support', icon: Wrench, color: '#64748b', level: 2 },
-  { role: 'moderator', title: 'Moderator', icon: ShieldCheck, color: '#64748b', level: 3 },
-];
+import { useMemo } from 'react';
+import { Crown, ShieldCheck } from 'lucide-react';
 
-const PERMISSIONS = {
-  superadmin: { users: 'full', cars: 'full', payments: 'full', escrow: 'full', config: 'full', staff: 'full', ads: 'full', auctions: 'full' },
-  admin: { users: 'full', cars: 'full', payments: 'view', escrow: 'view', config: 'view', staff: 'none', ads: 'full', auctions: 'full' },
-  hr: { users: 'approve', cars: 'none', payments: 'none', escrow: 'none', config: 'none', staff: 'none', ads: 'none', auctions: 'none' },
-  accounts: { users: 'none', cars: 'none', payments: 'full', escrow: 'full', config: 'none', staff: 'none', ads: 'none', auctions: 'none' },
-  escrow_officer: { users: 'none', cars: 'none', payments: 'view', escrow: 'full', config: 'none', staff: 'none', ads: 'none', auctions: 'none' },
-  marketing: { users: 'none', cars: 'none', payments: 'none', escrow: 'none', config: 'partial', staff: 'none', ads: 'full', auctions: 'none' },
-  ad_manager: { users: 'none', cars: 'none', payments: 'none', escrow: 'none', config: 'none', staff: 'none', ads: 'full', auctions: 'none' },
-  technical_support: { users: 'view', cars: 'edit', payments: 'none', escrow: 'none', config: 'none', staff: 'none', ads: 'none', auctions: 'none' },
-  moderator: { users: 'view', cars: 'moderate', payments: 'none', escrow: 'none', config: 'none', staff: 'none', ads: 'none', auctions: 'none' },
+const ROLE_LABELS = {
+  superadmin: 'Super Admin', admin: 'Admin', marketing: 'Marketing',
+  technical_support: 'Technical Support', hr: 'HR', accounts: 'Accounts & Finance',
+  escrow_officer: 'Escrow Officer', ad_manager: 'Ad Manager',
+  moderator: 'Moderator', ghost_checker: 'Ghost Checker',
 };
 
-function PermBadge({ level }) {
-  const cfg = {
-    full: { label: 'Full', color: '#22c55e', bg: 'rgba(34,197,94,0.1)' },
-    view: { label: 'View', color: '#176B87', bg: 'rgba(23, 107, 135, 0.1)' },
-    approve: { label: 'Approve', color: '#176b87', bg: 'rgba(19, 184, 166, 0.1)' },
-    edit: { label: 'Edit', color: '#13b8a6', bg: 'rgba(234,179,8,0.1)' },
-    partial: { label: 'Partial', color: '#5aafa4', bg: 'rgba(139,92,246,0.1)' },
-    moderate: { label: 'Moderate', color: '#64748b', bg: 'rgba(100,116,139,0.1)' },
-    none: { label: '—', color: 'var(--admin-muted-content)', bg: 'transparent' },
-  };
-  const c = cfg[level] || cfg.none;
+/**
+ * This matrix intentionally renders the backend's canonical role/permission
+ * catalogs. It describes role defaults only; per-account grants/revokes live
+ * in the Staff Permissions editor and are not inferred here.
+ */
+export default function AdminStaffPermMatrix({ roles = [], catalog = [] }) {
+  const matrixRoles = useMemo(() => {
+    const normalized = Array.isArray(roles) ? roles : [];
+    const rows = normalized.map((item) => ({
+      role: item.role,
+      permissions: Array.isArray(item.permissions) ? item.permissions : [],
+    }));
+    if (!rows.some((item) => item.role === 'superadmin')) {
+      rows.unshift({ role: 'superadmin', permissions: Array.isArray(catalog) ? catalog.map((p) => p.key) : [] });
+    }
+    return rows;
+  }, [roles, catalog]);
+
+  const permissionGroups = useMemo(() => {
+    const grouped = {};
+    (Array.isArray(catalog) ? catalog : []).forEach((permission) => {
+      const group = permission.group || 'Other';
+      (grouped[group] ||= []).push(permission);
+    });
+    return grouped;
+  }, [catalog]);
+
+  if (!catalog.length || !roles.length) {
+    return (
+      <div role="alert" style={{ padding: 20, border: '1px solid #fed7aa', borderRadius: 12, background: '#fff7ed', color: '#9a3412' }}>
+        <strong>Canonical permission matrix unavailable.</strong>
+        <p style={{ margin: '6px 0 0', fontSize: 13 }}>The server did not return both role and permission catalogs. A static matrix is intentionally not shown because it could misrepresent access policy.</p>
+      </div>
+    );
+  }
+
   return (
-    <span style={{ padding: '2px 8px', borderRadius: 4, fontSize: 9, fontWeight: 700, background: c.bg, color: c.color, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-      {c.label}
-    </span>
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, color: '#64748b', fontSize: 12 }}>
+        <ShieldCheck size={15} /> Canonical backend role defaults · Individual staff grants and revocations are shown in Staff Permissions.
+      </div>
+      {Object.entries(permissionGroups).map(([group, permissions]) => (
+        <section key={group} aria-label={`${group} role permissions`} style={{ marginBottom: 18, border: '1px solid rgba(10, 51, 64, 0.08)', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
+          <div style={{ padding: '12px 16px', background: '#f8fafc', borderBottom: '1px solid rgba(10, 51, 64, 0.08)', fontSize: 11, fontWeight: 800, letterSpacing: '.1em', textTransform: 'uppercase', color: '#475569' }}>{group}</div>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', minWidth: 680, borderCollapse: 'collapse' }}>
+              <thead><tr>
+                <th scope="col" style={thStyle(true)}>Role</th>
+                {permissions.map((permission) => <th scope="col" key={permission.key} style={thStyle(false)} title={permission.desc}>{permission.label}</th>)}
+              </tr></thead>
+              <tbody>
+                {matrixRoles.map((role, index) => {
+                  const superadmin = role.role === 'superadmin';
+                  return <tr key={role.role}>
+                    <th scope="row" style={{ ...tdStyle(true), borderBottom: index === matrixRoles.length - 1 ? 0 : '1px solid #f1f5f9', whiteSpace: 'nowrap' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, fontSize: 12, fontWeight: 700, color: '#0a3340' }}>
+                        {superadmin && <Crown size={13} />}{ROLE_LABELS[role.role] || role.role.replaceAll('_', ' ')}
+                      </span>
+                    </th>
+                    {permissions.map((permission) => {
+                      const enabled = superadmin || role.permissions.includes(permission.key);
+                      return <td key={permission.key} style={{ ...tdStyle(false), borderBottom: index === matrixRoles.length - 1 ? 0 : '1px solid #f1f5f9', textAlign: 'center' }}>
+                        <span aria-label={`${ROLE_LABELS[role.role] || role.role}: ${permission.label}: ${enabled ? 'enabled by role' : 'not enabled by role'}`} title={enabled ? 'Enabled by role defaults' : 'Not enabled by role defaults'} style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 58, padding: '3px 7px', borderRadius: 6, fontSize: 9, fontWeight: 800, letterSpacing: '.04em', color: enabled ? '#166534' : '#64748b', background: enabled ? '#dcfce7' : '#f1f5f9' }}>{enabled ? 'ENABLED' : '—'}</span>
+                      </td>;
+                    })}
+                  </tr>;
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ))}
+    </div>
   );
 }
 
-export default function AdminStaffPermMatrix() {
-  return (
-    <div style={{ overflowX: 'auto' }}>
-      <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: 0, background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.07)', borderRadius: 14, overflow: 'hidden' }}>
-        <thead>
-          <tr>
-            <th style={{ padding: '14px 18px', textAlign: 'left', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: 'var(--admin-muted-content)', background: '#FFFFFF', borderBottom: '1px solid rgba(10, 51, 64, 0.06)' }}>Role</th>
-            {['Users', 'Cars', 'Payments', 'Escrow', 'Config', 'Staff', 'Ads', 'Auctions'].map(h => (
-              <th key={h} style={{ padding: '14px 12px', textAlign: 'center', fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: 'var(--admin-muted-content)', background: '#FFFFFF', borderBottom: '1px solid rgba(10, 51, 64, 0.06)', whiteSpace: 'nowrap' }}>{h}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {ORG_DATA.map((r, i) => {
-            const perms = PERMISSIONS[r.role] || {};
-            return (
-              <tr key={r.role}>
-                <td style={{ padding: '12px 18px', borderBottom: i < ORG_DATA.length - 1 ? '1px solid rgba(10, 51, 64, 0.04)' : 'none' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <r.icon size={16} aria-hidden="true" />
-                    <div>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: r.color }}>{r.title}</div>
-                      <div style={{ fontSize: 10, color: 'var(--admin-muted-content)' }}>Level {r.level}</div>
-                    </div>
-                  </div>
-                </td>
-                {['users', 'cars', 'payments', 'escrow', 'config', 'staff', 'ads', 'auctions'].map(k => (
-                  <td key={k} style={{ padding: '12px', textAlign: 'center', borderBottom: i < ORG_DATA.length - 1 ? '1px solid rgba(10, 51, 64, 0.04)' : 'none' }}>
-                    <PermBadge level={perms[k] || 'none'} />
-                  </td>
-                ))}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
-  );
+function thStyle(first) {
+  return { padding: '10px 12px', textAlign: first ? 'left' : 'center', verticalAlign: 'bottom', borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: 10, fontWeight: 800, background: '#fff', whiteSpace: 'normal', minWidth: first ? 155 : 105 };
+}
+function tdStyle(first) {
+  return { padding: '10px 12px', textAlign: first ? 'left' : 'center', verticalAlign: 'middle' };
 }

@@ -21,7 +21,7 @@ export default function AdminStaffEditModal({ member, setMember, roles = [], onS
         </div>
         <Field label="Full Name"><input value={member.name || ''} maxLength={120} onChange={e => setMember(p => ({ ...p, name: e.target.value }))} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 9, border: '1px solid rgba(10,51,64,.15)', background: '#fff', color: '#0a3340', fontSize: 13 }} /></Field>
         <Field label="Change Role">
-          <select defaultValue={member.role}
+          <select defaultValue={member.role} disabled={!roles.length}
             onChange={e => setMember(p => ({ ...p, role: e.target.value }))}
             style={{ width: '100%', padding: '10px 12px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.09)', background: '#0a3340', color: '#fff', fontSize: 13, outline: 'none' }}>
             {roles.filter(({ role }) => role !== 'superadmin' && role !== 'webhoist' && role !== 'owner').map(({ role: r }) => {
