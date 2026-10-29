@@ -472,7 +472,7 @@
   border: 0;
   border-radius: 14px;
   background: transparent;
-  color: #71858A;
+  color: #58717B;
   font-size: 9px;
   font-weight: 800;
   letter-spacing: 0.01em;
@@ -913,11 +913,14 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
   .kayad-mobile-bottom-nav__icon { width:24px;height:22px; }
   .kayad-mobile-bottom-nav__icon svg { width:23px;height:23px; }
   .kayad-mobile-bottom-nav__item.is-active { box-shadow:inset 0 0 0 1px #B9E4DC; }
-  .kayad-header__bar { min-height:68px; }
-  .kayad-brand { gap:6px; max-width:42%; }
-  .kayad-brand > img { width:clamp(72px,22vw,104px); height:auto; max-height:48px; object-fit:contain; object-position:left center; }
-  .kayad-brand__text { max-width:108px; }
-  .kayad-brand__tag--reserved { display:block!important; max-width:108px; white-space:normal; font-size:7px; line-height:1.15; letter-spacing:.035em; margin-top:3px; }
+  .kayad-header__bar { min-height:58px; }
+  .kayad-cta { min-height:44px; }
+  /* Phase 17: the brand takes the space the (non-shrinking) Sell Vehicle + menu controls leave free, so the
+     descriptor wraps onto two readable lines instead of four 7px lines inside a fixed 42% box. */
+  .kayad-brand { gap:6px; flex:1 1 0; width:auto; max-width:none; min-width:0; }
+  .kayad-brand > img { width:clamp(64px,19vw,92px); height:auto; max-height:44px; object-fit:contain; object-position:left center; }
+  .kayad-brand__text { max-width:none; }
+  .kayad-brand__tag--reserved { display:block!important; max-width:none; white-space:normal; font-size:8px; line-height:1.2; letter-spacing:.02em; margin-top:2px; text-wrap:balance; }
 }
 @media(max-width:360px) {
   .kayad-mobile-bottom-nav { left:6px;right:6px;bottom:max(6px,env(safe-area-inset-bottom)); }
@@ -1002,7 +1005,10 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
   .owner-tbl tr { padding: 10px 0; border-bottom: 1px solid var(--border, rgba(127, 127, 127, .35)); }
   .owner-tbl td { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 8px; padding: 3px 0; }
   .owner-tbl td::before { content: attr(data-label); color: var(--text-muted, #6b7280); font-weight: 600; }
-  .owner-tbl td.owner-tbl-actions { display: flex; }
-  .owner-tbl td.owner-tbl-actions::before { flex: 0 0 7.5rem; }
+  .owner-tbl td { grid-template-columns: 6.25rem minmax(0, 1fr); }
+  /* Action cells hold buttons/notes, not a label/value pair: use the full row so nothing wraps under an empty label. */
+  .owner-tbl td.owner-tbl-actions { display: flex; align-items: center; padding-top: 8px; }
+  .owner-tbl td.owner-tbl-actions::before { display: none; }
+  .owner-tbl td.owner-tbl-actions > span { flex: 1 1 100%; font-size: 12px; line-height: 1.4; }
 }
 @media (max-width: 640px) { .owner-tbl td:empty { display: none; } }

@@ -21,7 +21,8 @@ type Mode = 'independent' | 'employed';
 type Outcome =
   | { kind: 'account'; email: string }
   | { kind: 'application' }
-  | { kind: 'exists' }
+  | { kind: 'exists'; recovered?: boolean }
+  | { kind: 'unavailable' }
   | { kind: 'pending-application' }
   | { kind: 'unknown' };
 
@@ -30,9 +31,16 @@ const emptyForm = {
   idNumber: '', yearsOfExperience: '', specialties: '', preferredRegions: '', toolsAvailable: '',
 };
 
-/** True when the request may or may not have reached the server. */
+/** True when the request may or may not have reached the server.
+ * A 503 that carries a backend machine code (e.g. DATABASE_MIGRATION_REQUIRED,
+ * ONBOARDING_POLICY_UNAVAILABLE) was produced by the KAYAD API itself *before*
+ * anything was written, so that outcome is known: nothing was created. Only a
+ * bare gateway/proxy 502/503/504, a 408, or no response at all is uncertain. */
 const outcomeUnknown = (err: unknown) => {
-  if (err instanceof AuthApiError) return err.kind === 'network' || err.status === 408 || err.status === 502 || err.status === 503 || err.status === 504;
+  if (err instanceof AuthApiError) {
+    if (err.kind === 'network' || err.status === 408 || err.status === 502 || err.status === 504) return true;
+    return err.status === 503 && !err.code;
+  }
   const e = err as { response?: { status?: number }; code?: string } | null;
   return !!e && !e.response;
 };
@@ -60,6 +68,9 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [resend, setResend] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
   const inFlight = useRef(false);
+  // Set when an earlier attempt ended with an unknown outcome. A later 409 for the same
+  // email is then most likely OUR OWN first request having succeeded, so say that.
+  const earlierUncertain = useRef(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const refs = useRef<Record<string, HTMLInputElement | null>>({});
 
@@ -123,9 +134,10 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
       onComplete?.(result?.user);
     } catch (err) {
       const status = statusOf(err);
-      if (status === 409 && !independent) setOutcome({ kind: 'exists' });
+      if (status === 409 && !independent) setOutcome({ kind: 'exists', recovered: earlierUncertain.current });
+      else if (status === 503 && !independent && err instanceof AuthApiError && err.code) setOutcome({ kind: 'unavailable' });
       else if (independent && status === 400 && /pending application/i.test(messageOf(err))) setOutcome({ kind: 'pending-application' });
-      else if (outcomeUnknown(err)) setOutcome({ kind: 'unknown' });
+      else if (outcomeUnknown(err)) { earlierUncertain.current = true; setOutcome({ kind: 'unknown' }); }
       else if (status === 429) setServerError('Too many attempts. Please wait a few minutes and try again.');
       else setServerError(messageOf(err));
     } finally {
@@ -201,7 +213,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
     }
     if (outcome.kind === 'exists') {
       return (
-        <PremiumAuthShell {...common} eyebrow="Existing account" title="This email already has an account." description="You can use it: sign in, finish verifying, or reset the password.">
+        <PremiumAuthShell {...common} eyebrow={outcome.recovered ? 'Account found' : 'Existing account'} title={outcome.recovered ? 'Your earlier attempt went through.' : 'This email already has an account.'} description={outcome.recovered ? 'Your first request reached KAYAD even though the reply was lost. Nothing was duplicated: verify your email, then sign in.' : 'You can use it: sign in, finish verifying, or reset the password.'}>
           <div className="space-y-4">
             <div className="flex flex-wrap gap-3">
               <Link to={buildAuthPath('login', { next: destination, intent: role?.intent })} state={{ email: form.email.trim() }} className="kayad-auth-submit inline-flex items-center justify-center px-6 no-underline">Sign in</Link>
@@ -216,13 +228,26 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
         </PremiumAuthShell>
       );
     }
+    if (outcome.kind === 'unavailable') {
+      return (
+        <PremiumAuthShell {...common} eyebrow="Temporarily unavailable" title="We couldn’t create your account right now." description="KAYAD answered, but registration is paused for a moment. Nothing was created.">
+          <div className="space-y-4" role="alert">
+            <p className="m-0 text-sm text-[#12576D]">Your details are still in the form. Please try again in a few minutes.</p>
+            <div className="flex flex-wrap gap-3">
+              <button type="button" className="kayad-auth-submit px-6" onClick={() => setOutcome(null)}>Go back and try again</button>
+              <Link to="/" className="kayad-auth-secondary-action px-5 no-underline">Back to KAYAD</Link>
+            </div>
+          </div>
+        </PremiumAuthShell>
+      );
+    }
     return (
       <PremiumAuthShell {...common} eyebrow="Connection problem" title="We couldn’t confirm that went through." description="Your connection dropped before we heard back, so we don’t know whether your details were received.">
         <div className="space-y-4" role="alert">
           <p className="m-0 text-sm text-[#12576D]">Nothing is duplicated if you try again: KAYAD refuses a second account or application for the same email. If you already received a verification email, you are done - just sign in.</p>
           <div className="flex flex-wrap gap-3">
             <button type="button" className="kayad-auth-submit px-6" onClick={() => setOutcome(null)}>Go back and try again</button>
-            <Link to={buildAuthPath('login', { next: destination })} state={{ email: form.email.trim() }} className="kayad-auth-secondary-action px-5 no-underline">I may already have an account</Link>
+            <Link to={buildAuthPath('login', { next: destination, intent: role?.intent })} state={{ email: form.email.trim() }} className="kayad-auth-secondary-action px-5 no-underline">I may already have an account</Link>
           </div>
         </div>
       </PremiumAuthShell>

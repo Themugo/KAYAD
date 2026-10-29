@@ -123,8 +123,8 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
   .kayad-brand__mark { width:35px;height:35px; }
   .kayad-brand__word { font-size:1.18rem; }
   .kayad-brand__ea { font-size:8px;padding:2px 5px; }
-  .kayad-cta { min-height:38px;padding-inline:9px;gap:5px;font-size:11px; }
-  .kayad-hamburger { width:38px;height:40px; }
+  .kayad-cta { min-height:44px;padding-inline:9px;gap:5px;font-size:11px; }
+  .kayad-hamburger { width:42px;height:44px; }
   .kayad-mobile-drawer-primary { gap:7px; }
   .kayad-mobile-drawer-primary .kayad-drawer-group__head { min-height:64px;padding:8px;gap:7px;font-size:11px; }
   .kayad-mobile-drawer-primary .kayad-drawer-group__icon { width:32px;height:32px; }

@@ -98,7 +98,7 @@
   {
    "name": "A bulk delete soft-deletes only eligible own listings and reports the rest",
    "ok": true,
-   "detail": "200{\"success\":true,\"deletedCount\":1,\"skipped\":[{\"id\":\"b66bc99e-0a1c-4b2f-a518-89614ad53820\",\"code\":\"LISTING_SOLD\",\"reason\":\"This vehicle has been sold. A completed sale is unwound through the escrow/refu"
+   "detail": "200{\"success\":true,\"deletedCount\":1,\"skipped\":[{\"id\":\"ab0a4522-664b-4f97-a739-820e08dc0bf8\",\"code\":\"LISTING_SOLD\",\"reason\":\"This vehicle has been sold. A completed sale is unwound through the escrow/refu"
   },
   {
    "name": "A bulk delete never removes rows (history preserved)",
@@ -218,7 +218,7 @@
   {
    "name": "D invitee accepts once",
    "ok": true,
-   "detail": "200{\"success\":true,\"data\":{\"id\":\"61bb143a-2c1d-4678-9d0c-7a0725db2ece\",\"dealer\":\"73874e44-dc11-4492-853"
+   "detail": "200{\"success\":true,\"data\":{\"id\":\"16b04218-5299-446a-853d-20cc930531c9\",\"dealer\":\"47421059-2a2c-475e-bdc"
   },
   {
    "name": "D replaying the invitation token fails",

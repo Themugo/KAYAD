@@ -1,0 +1,5 @@
+tsc exit 0
+build exit 0
+eslint exit 0 (after fixing global declarations in the two new scripts)
+vitest exit 0
+backend jest exit 0

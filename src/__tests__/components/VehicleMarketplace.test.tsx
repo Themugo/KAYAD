@@ -124,7 +124,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     vehicleApiMocks.getCars.mockResolvedValueOnce({ success: true, data: [], pagination: { page: 1, limit: 24, total: 0, pages: 1 } });
     await renderMarketplace({ ...baseProps, vehicles: [] });
     await waitFor(() => {
-      expect(screen.getByText(/No vehicles match your filters/i)).toBeTruthy();
+      expect(screen.getByText(/No vehicles are listed right now/i)).toBeTruthy();
     }, { timeout: 2000 });
   });
 
@@ -144,6 +144,47 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     const glance = screen.getByLabelText(/Marketplace at a glance/i);
     expect(glance.textContent).toContain('Inventory unavailable');
     expect(glance.textContent).not.toMatch(/\b0\b/);
+  });
+
+  it('names a maintenance pause (HTTP 503 + maintenance body) instead of calling it a brief outage, and the status pill retries', async () => {
+    vehicleApiMocks.getCars.mockReset();
+    const { VehicleApiError } = await import('../../services/vehicleApi');
+    const emptyPage = { success: true, data: [], pagination: { page: 1, limit: 24, total: 0, pages: 1 } };
+    let maintenance = true;
+    // The featured-vehicle request is separate from the inventory request; only the latter is paused.
+    vehicleApiMocks.getCars.mockImplementation((params?: { featured?: boolean }) => (
+      maintenance && !params?.featured
+        ? Promise.reject(new VehicleApiError('System under scheduled maintenance.', 'server', 503, { code: 'MAINTENANCE', maintenance: true, scope: 'global' }))
+        : Promise.resolve(emptyPage)
+    ));
+    await renderMarketplace({ ...baseProps, vehicles: [] });
+    await waitFor(() => expect(screen.getByText(/Inventory is paused for maintenance/i)).toBeTruthy(), { timeout: 3000 });
+    expect(screen.queryByText(/usually brief/i)).toBeNull();
+    expect(screen.getByText(/Reference: HTTP 503/i)).toBeTruthy();
+    const glance = screen.getByLabelText(/Marketplace at a glance/i);
+    expect(glance.textContent).toContain('Inventory paused');
+    // Recovery: the compact status pill is itself a retry control.
+    maintenance = false;
+    fireEvent.click(within(glance).getByRole('button', { name: /Retry loading vehicles/i }));
+    await waitFor(() => expect(screen.queryByText(/Inventory is paused for maintenance/i)).toBeNull(), { timeout: 3000 });
+  });
+
+  it('a successful empty response with no filters is "no vehicles listed", not an outage and not a filter miss', async () => {
+    vehicleApiMocks.getCars.mockReset();
+    vehicleApiMocks.getCars.mockResolvedValue({ success: true, data: [], pagination: { page: 1, limit: 24, total: 0, pages: 1 } });
+    await renderMarketplace({ ...baseProps, vehicles: [] });
+    await waitFor(() => expect(screen.getByText(/No vehicles are listed right now/i)).toBeTruthy(), { timeout: 3000 });
+    expect(screen.queryByText(/temporarily unavailable/i)).toBeNull();
+    expect(screen.queryByText(/No vehicles match your filters/i)).toBeNull();
+  });
+
+  it('a featured card whose image fails keeps its label over a neutral placeholder (no broken-image icon)', async () => {
+    await renderMarketplace({ ...baseProps });
+    const pair = within(screen.getByLabelText('KAYAD mobile hero'));
+    const name = `${INITIAL_VEHICLES[0].make} ${INITIAL_VEHICLES[0].model}`;
+    fireEvent.error(pair.getByRole('img', { name: new RegExp(name) }));
+    await waitFor(() => expect(pair.getByRole('img', { name: new RegExp(`Photo of ${name} is unavailable`) })).toBeTruthy());
+    expect(pair.getByText(name)).toBeTruthy();
   });
 
   describe('mobile hero pair composition (canonical hero collection)', () => {

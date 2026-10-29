@@ -172,6 +172,37 @@
   font-size: 11px;
   font-weight: 800;
 }
+/* Account menu (header). Reuses shell tokens; no new palette. */
+.kayad-admin-account { position: relative; display: flex; align-items: center; }
+.kayad-admin-account__trigger {
+  display: flex; min-height: 44px; align-items: center; gap: 11px; padding: 4px 8px;
+  border: 1px solid transparent; border-radius: 10px; background: transparent; color: inherit; cursor: pointer; font: inherit;
+}
+.kayad-admin-account__trigger:hover, .kayad-admin-account__trigger[aria-expanded="true"] { border-color: var(--admin-sidebar-border); background: var(--admin-shell-hover); }
+.kayad-admin-account__trigger:focus-visible, .kayad-admin-account__item:focus-visible { outline: 2px solid var(--admin-shell-focus); outline-offset: 2px; }
+.kayad-admin-account__chevron { color: var(--admin-muted); transition: transform 160ms ease; }
+.kayad-admin-account__trigger[aria-expanded="true"] .kayad-admin-account__chevron { transform: rotate(180deg); }
+.kayad-admin-account__menu {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 40; display: flex; min-width: 230px; max-width: min(300px, calc(100vw - 24px)); flex-direction: column; gap: 2px; padding: 6px;
+  border: 1px solid var(--admin-sidebar-border); border-radius: 12px; background: var(--admin-sidebar-bg); box-shadow: 0 14px 34px rgba(0, 14, 20, 0.38);
+}
+.kayad-admin-account__summary { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px 10px; border-bottom: 1px solid var(--admin-sidebar-border); margin-bottom: 4px; }
+.kayad-admin-account__summary strong { overflow: hidden; color: var(--admin-text); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.kayad-admin-account__summary small { color: var(--admin-muted); font-size: 11px; }
+.kayad-admin-account__item {
+  display: flex; min-height: 40px; width: 100%; align-items: center; gap: 10px; padding: 0 10px; border: 0; border-radius: 8px;
+  background: transparent; color: var(--admin-text); cursor: pointer; font: inherit; font-size: 13px; text-align: left; text-decoration: none;
+}
+.kayad-admin-account__item:hover { background: var(--admin-shell-hover); }
+.kayad-admin-account__item.is-danger { color: var(--admin-shell-danger); }
+.kayad-admin-account__item.is-danger:hover { background: var(--admin-shell-danger-bg); color: var(--admin-shell-danger-hover); }
+.kayad-admin-account__item:disabled { cursor: progress; opacity: 0.7; }
+.kayad-admin-account__error { margin: 4px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--admin-shell-danger-bg); color: var(--admin-shell-danger-hover); font-size: 12px; line-height: 1.4; }
+@media (max-width: 480px) {
+  .kayad-admin-account__chevron { display: none; }
+  .kayad-admin-account__menu { position: fixed; top: 60px; right: 12px; left: 12px; max-width: none; }
+}
+
 .kayad-admin-shell .sidebar-toggle-btn {
   display: none;
   align-items: center;
@@ -271,6 +302,9 @@
 .admin-sidebar__group-toggle:hover { background: rgba(221, 246, 248, 0.045); color: var(--admin-text); }
 .admin-sidebar__group-chevron { flex-shrink: 0; transition: transform 160ms ease; }
 .admin-sidebar__group-toggle[aria-expanded="false"] .admin-sidebar__group-chevron { transform: rotate(-90deg); }
+.admin-sidebar__links[hidden] { display: none; }
+.admin-sidebar__group.has-active-route > .admin-sidebar__group-toggle { color: var(--admin-accent-bright); }
+.admin-sidebar__group-toggle:focus-visible { outline: 2px solid var(--admin-shell-focus); outline-offset: 2px; }
 .admin-sidebar__links { display: grid; gap: 2px; padding: 2px 0 5px; }
 .admin-sidebar__link {
   position: relative;

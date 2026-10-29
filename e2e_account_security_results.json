@@ -188,7 +188,7 @@
   {
    "name": "C1 privileged/identity fields sent to the profile endpoint are ignored",
    "ok": true,
-   "detail": "{\"success\":true,\"user\":{\"_id\":\"744f7984-4b3d-4592-a237-61719e8597b2\",\"id\":\"744f7984-4b3d-4592-a237-6"
+   "detail": "{\"success\":true,\"user\":{\"_id\":\"91c2f052-623b-43f0-912f-898c95ea7f71\",\"id\":\"91c2f052-623b-43f0-912f-8"
   },
   {
    "name": "C2 re-saving the same phone keeps phone verification",

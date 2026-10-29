@@ -10,6 +10,7 @@ import {
 } from '../services/authApi';
 import { setPostHogUser, clearPostHogUser } from '../utils/posthog';
 import { clearCSRFToken } from '../utils/csrf';
+import { clearAdminViewState } from '../utils/adminViewState';
 import { loginPathFor } from '../utils/authIntent';
 import { STAFF_ROLES, isSellerRole, type User } from '../utils/authRoutes';
 import { ShieldAlert, Lock } from 'lucide-react';
@@ -66,7 +67,10 @@ interface AuthContextValue {
     (email: string, password: string): Promise<any>;
   };
   register: (body: any) => Promise<any>;
-  logout: () => Promise<void>;
+  /** Server-confirmed sign-out. On failure the session is kept and a visible notice explains why. */
+  logout: () => Promise<{ ok: boolean; message?: string }>;
+  /** Server-confirmed sign-out: only clears the client session when the backend revoked it (or reports it already gone). */
+  signOut: () => Promise<{ ok: boolean; message?: string }>;
   setUser: (user: User | null) => void;
   updateProfile: (body: any) => Promise<any>;
 }
@@ -242,15 +246,30 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return { success: true, user };
   }, []);
 
-  const logout = useCallback(async () => {
+  const signOut = useCallback(async (): Promise<{ ok: boolean; message?: string }> => {
     const mySeq = ++authActionSeq.current;
-    try { await authLogout(); } catch (error) { console.error('Logout failed:', error); }
-    clearCSRFToken();
-    if (authActionSeq.current === mySeq) {
-      settleUnauthenticated();
+    try {
+      await authLogout();
+    } catch (error: any) {
+      // 401 = the server already considers this session gone; that is a confirmed sign-out.
+      if (error?.status !== 401) {
+        return { ok: false, message: error?.message || 'Sign-out could not be confirmed by the server. You are still signed in.' };
+      }
     }
+    clearCSRFToken();
+    clearAdminViewState();
+    if (authActionSeq.current === mySeq) settleUnauthenticated();
+    return { ok: true };
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const [signOutError, setSignOutError] = useState<string | null>(null);
+  // Shared by every sign-out entry point (Navbar, Profile, inspector): a failed sign-out is never silent.
+  const logout = useCallback(async () => {
+    const result = await signOut();
+    setSignOutError(result.ok ? null : (result.message || 'Sign-out could not be confirmed by the server. You are still signed in.'));
+    return result;
+  }, [signOut]);
 
   const updateProfile = useCallback(async (body: any) => {
     const user = await authUpdateProfile(body);
@@ -283,11 +302,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAdmin, isDealer, isSuperAdmin, isBroker, isSeller,
     isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager,
     permissions, can,
-    login, register, logout, setUser, updateProfile,
-  }), [user, loading, sessionStatus, sessionError, retrySession, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, setUser, updateProfile]);
+    login, register, logout, signOut, setUser, updateProfile,
+  }), [user, loading, sessionStatus, sessionError, retrySession, isAuth, isEmailVerified, isAdmin, isDealer, isSuperAdmin, isBroker, isSeller, isMarketing, isTechSupport, isHR, isAccounts, isEscrowOfficer, isAdManager, permissions, can, login, register, logout, signOut, setUser, updateProfile]);
 
   return (
     <AuthCtx.Provider value={value}>
+      {signOutError && (
+        <div
+          role="alert"
+          data-testid="signout-failure-notice"
+          style={{ position: 'fixed', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 10000, maxWidth: 'min(520px, calc(100vw - 24px))', display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 14px', borderRadius: 10, background: '#7F1D1D', color: '#FFF', fontSize: 14, lineHeight: 1.4, boxShadow: '0 10px 30px rgba(10,51,64,0.3)' }}
+        >
+          <span>{signOutError}</span>
+          <button type="button" onClick={() => setSignOutError(null)} aria-label="Dismiss sign-out message" style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.5)', color: '#FFF', borderRadius: 6, padding: '2px 8px', cursor: 'pointer' }}>Dismiss</button>
+        </div>
+      )}
       {children}
     </AuthCtx.Provider>
   );

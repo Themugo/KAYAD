@@ -1,0 +1,324 @@
+[
+ {
+  "w": 360,
+  "scrollW": 360,
+  "clientW": 360,
+  "header": {
+   "top": 30,
+   "h": 59,
+   "w": 360
+  },
+  "bottomNav": {
+   "top": 736,
+   "h": 58,
+   "w": 348
+  },
+  "overflowers": [
+   "flex min-w-max h-full animate-marquee whitespace-n",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "text-white/25",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "h-1.5 w-1.5 rounded-full bg-[#13B8A6]"
+  ],
+  "status": [
+   "KAYAD MARKETPLACE · VERIFIED INVENTORY",
+   "3 vehicles"
+  ],
+  "h1": "Drive Your DreamToday",
+  "bodyPadBottom": "84px",
+  "errors": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "failed": [
+   "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;9",
+   "401 http://127.0.0.1:4181/api/v1/auth/me",
+   "401 http://127.0.0.1:4181/api/v1/auth/refresh",
+   "https://api.kayad.space/socket.io/socket.io.js"
+  ]
+ },
+ {
+  "w": 375,
+  "scrollW": 375,
+  "clientW": 375,
+  "header": {
+   "top": 30,
+   "h": 59,
+   "w": 375
+  },
+  "bottomNav": {
+   "top": 730,
+   "h": 60,
+   "w": 359
+  },
+  "overflowers": [
+   "flex min-w-max h-full animate-marquee whitespace-n",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "text-white/25",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "h-1.5 w-1.5 rounded-full bg-[#13B8A6]"
+  ],
+  "status": [
+   "KAYAD MARKETPLACE · VERIFIED INVENTORY",
+   "3 vehicles"
+  ],
+  "h1": "Drive Your DreamToday",
+  "bodyPadBottom": "84px",
+  "errors": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "failed": [
+   "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;9",
+   "401 http://127.0.0.1:4181/api/v1/auth/me",
+   "401 http://127.0.0.1:4181/api/v1/auth/refresh",
+   "https://api.kayad.space/socket.io/socket.io.js"
+  ]
+ },
+ {
+  "w": 390,
+  "scrollW": 390,
+  "clientW": 390,
+  "header": {
+   "top": 30,
+   "h": 59,
+   "w": 390
+  },
+  "bottomNav": {
+   "top": 730,
+   "h": 60,
+   "w": 374
+  },
+  "overflowers": [
+   "flex min-w-max h-full animate-marquee whitespace-n",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "text-white/25",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "h-1.5 w-1.5 rounded-full bg-[#13B8A6]"
+  ],
+  "status": [
+   "KAYAD MARKETPLACE · VERIFIED INVENTORY",
+   "3 vehicles"
+  ],
+  "h1": "Drive Your DreamToday",
+  "bodyPadBottom": "84px",
+  "errors": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "failed": [
+   "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;9",
+   "401 http://127.0.0.1:4181/api/v1/auth/me",
+   "401 http://127.0.0.1:4181/api/v1/auth/refresh",
+   "https://api.kayad.space/socket.io/socket.io.js"
+  ]
+ },
+ {
+  "w": 412,
+  "scrollW": 412,
+  "clientW": 412,
+  "header": {
+   "top": 30,
+   "h": 59,
+   "w": 412
+  },
+  "bottomNav": {
+   "top": 730,
+   "h": 60,
+   "w": 396
+  },
+  "overflowers": [
+   "flex min-w-max h-full animate-marquee whitespace-n",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "h-1.5 w-1.5 rounded-full bg-[#13B8A6]",
+   "text-white/25"
+  ],
+  "status": [
+   "KAYAD MARKETPLACE · VERIFIED INVENTORY",
+   "3 vehicles"
+  ],
+  "h1": "Drive Your DreamToday",
+  "bodyPadBottom": "84px",
+  "errors": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "failed": [
+   "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;9",
+   "401 http://127.0.0.1:4181/api/v1/auth/me",
+   "403 http://127.0.0.1:4181/api/v1/auth/refresh",
+   "403 http://127.0.0.1:4181/api/v1/auth/refresh",
+   "https://api.kayad.space/socket.io/socket.io.js"
+  ]
+ },
+ {
+  "w": 430,
+  "scrollW": 430,
+  "clientW": 430,
+  "header": {
+   "top": 30,
+   "h": 59,
+   "w": 430
+  },
+  "bottomNav": {
+   "top": 730,
+   "h": 60,
+   "w": 410
+  },
+  "overflowers": [
+   "flex min-w-max h-full animate-marquee whitespace-n",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "h-1.5 w-1.5 rounded-full bg-[#13B8A6]",
+   "text-white/25"
+  ],
+  "status": [
+   "KAYAD MARKETPLACE · VERIFIED INVENTORY",
+   "3 vehicles"
+  ],
+  "h1": "Drive Your DreamToday",
+  "bodyPadBottom": "84px",
+  "errors": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "failed": [
+   "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;9",
+   "401 http://127.0.0.1:4181/api/v1/auth/me",
+   "401 http://127.0.0.1:4181/api/v1/auth/refresh",
+   "https://api.kayad.space/socket.io/socket.io.js"
+  ]
+ },
+ {
+  "w": 768,
+  "scrollW": 768,
+  "clientW": 768,
+  "header": {
+   "top": 36,
+   "h": 61,
+   "w": 768
+  },
+  "bottomNav": {
+   "top": 826,
+   "h": 64,
+   "w": 748
+  },
+  "overflowers": [
+   "flex min-w-max h-full animate-marquee whitespace-n",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "text-white/25",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "h-1.5 w-1.5 rounded-full bg-[#13B8A6]"
+  ],
+  "status": [
+   "KAYAD MARKETPLACE · VERIFIED INVENTORY",
+   "3 vehicles"
+  ],
+  "h1": "Drive Your DreamToday",
+  "bodyPadBottom": "84px",
+  "errors": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ],
+  "failed": [
+   "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;9",
+   "https://api.kayad.space/socket.io/socket.io.js",
+   "401 http://127.0.0.1:4181/api/v1/auth/me",
+   "401 http://127.0.0.1:4181/api/v1/auth/refresh"
+  ]
+ },
+ {
+  "w": 1280,
+  "scrollW": 1280,
+  "clientW": 1280,
+  "header": {
+   "top": 36,
+   "h": 73,
+   "w": 1280
+  },
+  "bottomNav": {
+   "top": 0,
+   "h": 0,
+   "w": 0
+  },
+  "overflowers": [
+   "flex min-w-max h-full animate-marquee whitespace-n",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "text-white/25",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "h-1.5 w-1.5 rounded-full bg-[#13B8A6]"
+  ],
+  "status": [
+   "KAYAD MARKETPLACE · VERIFIED INVENTORY",
+   "3 vehicles"
+  ],
+  "h1": "Drive Your DreamToday",
+  "bodyPadBottom": "0px",
+  "errors": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "failed": [
+   "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;9",
+   "401 http://127.0.0.1:4181/api/v1/auth/me",
+   "401 http://127.0.0.1:4181/api/v1/auth/refresh",
+   "https://api.kayad.space/socket.io/socket.io.js"
+  ]
+ },
+ {
+  "w": 1440,
+  "scrollW": 1440,
+  "clientW": 1440,
+  "header": {
+   "top": 36,
+   "h": 73,
+   "w": 1440
+  },
+  "bottomNav": {
+   "top": 0,
+   "h": 0,
+   "w": 0
+  },
+  "overflowers": [
+   "flex min-w-max h-full animate-marquee whitespace-n",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "text-white/25",
+   "flex items-center gap-6 px-8 py-2 text-[11px] sm:t",
+   "h-1.5 w-1.5 rounded-full bg-[#13B8A6]"
+  ],
+  "status": [
+   "KAYAD MARKETPLACE · VERIFIED INVENTORY",
+   "3 vehicles"
+  ],
+  "h1": "Drive Your DreamToday",
+  "bodyPadBottom": "0px",
+  "errors": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "failed": [
+   "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800;9",
+   "401 http://127.0.0.1:4181/api/v1/auth/me",
+   "401 http://127.0.0.1:4181/api/v1/auth/refresh",
+   "https://api.kayad.space/socket.io/socket.io.js"
+  ]
+ }
+]

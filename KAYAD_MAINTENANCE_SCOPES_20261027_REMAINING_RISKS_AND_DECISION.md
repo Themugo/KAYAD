@@ -1,26 +1,29 @@
-# Remaining risks, blockers and final decision
+# Remaining risks and final decision
 
-## Final decision: **B — PARTIAL; EXPLICIT BLOCKERS REMAIN**
+## Decision: **A — Local verification complete; deployment approval required**
 
-The owner lane, scoped maintenance, central policy, atomic control plane and UI are implemented and verified locally with no owner-lockout or privilege-bypass defect found. The decision is B, not A, for one stated requirement gap and one unverifiable hosted dependency:
+Scope of that statement: the owner recovery lane, scoped/global maintenance, the central server-side policy, the atomic control plane and the Panic Room are implemented and verified **locally** against a real backend, real PostgreSQL/PostgREST and a real browser on the final build. The full review found two defects (safe logout; fail-open after a store outage) which are fixed and tested; **no owner-lockout or privilege-bypass defect remains known**. This is **not** hosted verification: hosted login, hosted recovery and production readiness are **not** claimed. The hosted flag was read (read-only) and is **still enabled**.
 
-### Blockers
-1. **No MFA for technical-recovery staff (requirement gap).** The task requires "MFA and step-up" for high-risk recovery. The repository has an MFA store only for System Owners (`owner_mfa_*`); there is no second-factor store for other staff, and building one is a new identity feature outside this task. Technical recovery is therefore gated by: an explicit per-account `platform_recovery` grant made only by a System Owner, password re-entry on every recover, a mandatory reason, rate limits, CRITICAL audit, and being restore-only (cannot activate, cannot reach admin/financial APIs). It is **not** MFA. **Mitigation that closes the gap today:** the grant is off by default and in no role default; do not grant it to anyone until staff MFA exists, and the owner path (fully MFA-enforced) is unaffected. Owner decision needed: accept this mitigation, or commission staff MFA first.
-2. **Hosted owner recognition is unverified.** Whether the hosted backend recognises `jimmythemugo@gmail.com` as owner (legacy `WEBHOIST_EMAIL`, or owner tables) cannot be read from here (the owner's row has legacy role `dealer`, status `pending`, no owner tables). If recognition is missing, no code can give the owner a recovery lane; Operation B's precondition #3 covers this. Operation A (SQL) is independent of it.
+This changes the previous round's **B** to **A**. The reason is stated openly: the earlier blocker "no MFA for technical-recovery staff" is a limitation of the design that does not block this decision *only because* it can be fully neutralised by configuration — see condition 1. If you do not accept condition 1, the correct decision is B.
 
-Neither blocker is a local code defect, and neither stops you from approving Operation A. Operation B can be approved once you accept blocker 1's mitigation and confirm blocker 2.
+## Conditions that gate Operation B (deployment)
+1. **Technical-recovery staff have no MFA.** Only System Owners have a second-factor store in this repository. Technical recovery is gated by an explicit owner-made per-account grant (`platform_recovery`), password re-entry on every recover, a mandatory reason, rate limits (per user), CRITICAL audit, and by being restore-only (cannot activate; verified to gain **no** admin, finance, auction or escrow access — test T1–T8). That is not MFA. **Do not grant `platform_recovery` to anyone until staff MFA exists**; with zero grants the owner lane (MFA enforced) is the only recovery path and the gap is not exercised. Needs your explicit acceptance, or a separate staff-MFA piece of work.
+2. **Hosted owner recognition is unverified.** The hosted owner row has legacy role `dealer`, status `pending`, no owner tables. The deployed backend must recognise `jimmythemugo@gmail.com` as owner via `WEBHOIST_EMAIL` (first address) or the owner-governance migrations. If it does not, no code can give the owner a recovery lane (Operation A's SQL is independent of this and still works). Confirm before approving B.
+3. **Hosted PostgREST** must accept the JSON-path conditional update used for compare-and-swap (verified on local PostgREST only). Post-deploy test 4 in the deployment plan proves it.
+
+## Failure-policy recommendation (item 6)
+Implemented and recommended: **fail-static for a known state, fail-open only with no prior knowledge, never report a recovery that was not read back**; sign-in and recovery need the identity/settings store and honestly return 5xx without it. Full trade-off table: policy matrix section 7. Residual risk: a freshly started instance with the store down has no last-known state and serves ordinary traffic (database-backed routes fail on their own); a future hardening step is to persist the last-known state in Redis.
 
 ## Other known limitations (accurate, not hidden)
-- **Sockets:** already-open realtime (WebSocket) connections are not forcibly closed or re-evaluated when maintenance starts; HTTP access is cut immediately.
-- **Cache lag:** each backend instance caches the maintenance flag ~10 s (dealer-team lookup also 10 s). Changes can lag up to ~10 s on other instances; the control plane always reads the database directly.
-- **Registration pause is coarse:** under `buyers_sellers`, `ordinary_users` and `global`, all anonymous `POST /auth/register` is paused (the backend cannot know the registrant's intended audience).
-- **Password-reset/verification flows are not paused** (they are not signed-in functions and are needed to recover accounts).
-- **Settings-read failure fails open for ordinary traffic** (pre-existing choice to keep the marketplace up); the control `status` reports the store failure honestly.
-- **Authenticator interoperability:** MFA was exercised with KAYAD's own RFC 6238 implementation, not a physical authenticator app.
-- **Hosted PostgREST:** the compare-and-swap uses a JSON-path filter verified on local PostgREST; confirm with post-deploy test #4.
-- **Node version:** local runs used Node 22.23.4 vs the pinned 22.22.2.
+- **Sockets:** already-open realtime connections are not closed or re-evaluated when maintenance starts; HTTP access is cut immediately (every request is re-checked, including with old tokens).
+- **Cache lag:** each backend instance caches the flag ~10 s (dealer-team lookup also ~10 s); changes made on another instance can lag up to that. The control plane always reads the database directly.
+- **Registration pause is coarse:** under `buyers_sellers`, `ordinary_users` and `global`, all anonymous `POST /auth/register` is paused (the backend cannot know the intended audience).
+- **Password-reset / email-verification flows are not paused** (not signed-in functions; needed to recover accounts).
+- **Feature switches** (auctions, payments, ghost check) are separate from maintenance and stay `superadmin`-gated by the pre-existing legacy router; they are not a maintenance bypass (legacy `full_maintenance` / `maintenance` are refused).
+- **Authenticator interoperability:** MFA was exercised with KAYAD's own RFC 6238 implementation, not a physical app.
+- **Node version:** local runs used 22.23.4 vs the pinned 22.22.2.
 - **Two validators** fail only for missing credentials (`validate:communications:providers`, `validate:live-runtime`).
-- **Older incident documents** (`KAYAD_INCIDENT_20261027_*`) describe the superseded owner-only lane; this package's plan replaces their "Op 2".
+- **Older incident documents** (`KAYAD_INCIDENT_20261027_*`) describe the superseded owner-only lane; this package's deployment plan replaces their "Op 2".
 
 ## What is NOT claimed
-Hosted login, hosted recovery or deployment success is not claimed. Nothing hosted was changed.
+Hosted login, hosted recovery, deployment success or production readiness. Nothing hosted was changed; no commit, push or deploy was made.

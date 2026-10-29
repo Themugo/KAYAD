@@ -1,5 +1,5 @@
 // enforceMaintenance (identity-aware gate), checkSystemStatus (pre-auth gate), and wiring contracts for protect/login/refresh/routes.
-import { jest, describe, test, expect, beforeEach } from "@jest/globals";
+import { jest, describe, test, expect, beforeEach, afterEach } from "@jest/globals";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -139,5 +139,63 @@ describe("wiring contracts", () => {
     const roles = await import("../../config/roles.js");
     expect(roles.ASSIGNABLE_PERMISSIONS).toContain("platform_recovery");
     for (const [role, perms] of Object.entries(roles.ROLE_PERMISSIONS).filter(([r]) => r !== "superadmin")) expect({ role, has: perms.includes("platform_recovery") }).toEqual({ role, has: false });
+  });
+});
+
+describe("safe logout (never blocked)", () => {
+  test("every identity can POST /auth/logout under every scope, so a restricted user can always end (and revoke) their own session", async () => {
+    const tech = U("technical_support", { grantedPermissions: ["platform_recovery"] });
+    for (const scope of ["global", "ordinary_users", "buyers_sellers", "dealers"]) {
+      for (const [u, owner] of [[U("user"), false], [U("dealer"), false], [U("individual_seller"), false], [U("admin"), false], [U("superadmin"), false], [tech, false], [U("user"), true]]) {
+        const r = await run("POST", "/auth/logout", scope, u, owner);
+        expect({ scope, role: u.role, sent: r.sent }).toEqual({ scope, role: u.role, sent: false });
+      }
+    }
+  });
+  test("logout is the ONLY signed-in route that stays open for a restricted user", async () => {
+    expect((await run("POST", "/auth/logout", "global", U("user"))).sent).toBe(false);
+    expect((await run("GET", "/auth/me", "global", U("user"))).res.code).toBe(503);
+    expect((await run("POST", "/auth/refresh", "dealers", U("dealer"))).res.code).toBe(503);
+    expect((await run("DELETE", "/auth/logout", "global", U("user"))).res.code).toBe(503); // only the exact POST route is special
+  });
+});
+
+describe("settings store unavailable: fail-static policy", () => {
+  const go = async (method, url) => { const req = { method, path: url }, res = mkRes(); let nexted = false; await checkSystemStatus(req, res, () => { nexted = true; }); return { req, res, nexted }; };
+  let now; let spy;
+  beforeEach(() => { now = 1_000_000; spy = jest.spyOn(Date, "now").mockImplementation(() => now); });
+  afterEach(() => { spy.mockRestore(); });
+
+  test("an ACTIVE shutdown keeps being enforced when the store becomes unreadable after the cache expires", async () => {
+    settingsRow = { isMaintenanceMode: true, maintenanceScope: "global", emergencyMessage: "Down" };
+    expect((await go("GET", "/cars")).res.code).toBe(503);
+    settingsError = { code: "57P01", message: "terminated" }; now += 60_000;
+    const r = await go("GET", "/cars"); expect(r.nexted).toBe(false); expect(r.res.code).toBe(503); expect(r.res.body).toMatchObject({ code: "SYSTEM_MAINTENANCE", scope: "global" });
+  });
+  test("an INACTIVE platform stays open when the store becomes unreadable (no invented maintenance)", async () => {
+    settingsRow = { isMaintenanceMode: false };
+    expect((await go("GET", "/cars")).nexted).toBe(true);
+    settingsError = { code: "57P01", message: "terminated" }; now += 60_000;
+    expect((await go("GET", "/cars")).nexted).toBe(true);
+  });
+  test("with no prior knowledge at all (cold start) it fails open, as before", async () => {
+    settingsError = { code: "57P01", message: "terminated" };
+    expect((await go("GET", "/cars")).nexted).toBe(true);
+  });
+  test("the store is not hammered: after an error it retries only after a short back-off", async () => {
+    settingsRow = { isMaintenanceMode: true, maintenanceScope: "dealers" };
+    await go("GET", "/cars");
+    settingsError = { code: "57P01", message: "terminated" }; now += 60_000; await go("GET", "/cars");
+    settingsError = null; settingsRow = { isMaintenanceMode: false }; now += 500; // within the back-off: still the last known state
+    expect((await go("POST", "/auth/register")).nexted).toBe(true); // dealers scope never paused registration; just proves no throw
+    now += 5_000; // back-off over: fresh read sees the recovery
+    const r = await go("GET", "/cars"); expect(r.req.maintenance).toBeUndefined();
+  });
+  test("a locally-applied change drops the stale last-known state (recovery is not undone by a later read failure)", async () => {
+    settingsRow = { isMaintenanceMode: true, maintenanceScope: "global" };
+    expect((await go("GET", "/cars")).res.code).toBe(503);
+    invalidateSystemStatusCache(); // what every successful write does
+    settingsError = { code: "57P01", message: "terminated" };
+    expect((await go("GET", "/cars")).nexted).toBe(true);
   });
 });

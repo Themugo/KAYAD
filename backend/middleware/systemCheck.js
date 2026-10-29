@@ -7,7 +7,9 @@ export { MAINTENANCE_CODE, maintenanceResponse };
 
 let cachedSettings = null;
 let cachedAt = 0;
+let lastKnownGood = null; // most recent successfully-read state; used only when the store cannot be read (fail-static)
 const SETTINGS_TTL_MS = 10_000;
+const RETRY_AFTER_ERROR_MS = 2_000; // do not hammer an unreachable store on every request
 
 const loadSystemStatus = async () => {
   const { data, error } = await getSupabase()
@@ -31,8 +33,18 @@ export const checkSystemStatus = async (req, res, next) => {
   try {
     const now = Date.now();
     if (!cachedSettings || now - cachedAt > SETTINGS_TTL_MS) {
-      cachedSettings = await loadSystemStatus();
-      cachedAt = now;
+      try {
+        cachedSettings = await loadSystemStatus();
+        cachedAt = now;
+        lastKnownGood = cachedSettings;
+      } catch (readErr) {
+        // FAIL-STATIC: if we have ever read the state, keep enforcing the last state we knew (an active shutdown stays active; an
+        // inactive platform stays open). Only with no prior knowledge at all do we fail open (see the catch below).
+        if (!lastKnownGood) throw readErr;
+        console.error("systemCheck: settings unreadable, enforcing last known state:", readErr.message);
+        cachedSettings = lastKnownGood;
+        cachedAt = now - SETTINGS_TTL_MS + RETRY_AFTER_ERROR_MS;
+      }
     }
 
     const settings = cachedSettings;
@@ -68,7 +80,17 @@ export const checkSystemStatus = async (req, res, next) => {
   }
 };
 
+// Called after every local write. It also drops the last-known-good state: that state is now known to be outdated, and enforcing an
+// outdated shutdown (e.g. right after a successful recovery) would be worse than reading afresh.
 export const invalidateSystemStatusCache = () => {
   cachedSettings = null;
   cachedAt = 0;
+  lastKnownGood = null;
+};
+
+/** Test hook: forget everything, including the last-known-good state. */
+export const __resetSystemStatusState = () => {
+  cachedSettings = null;
+  cachedAt = 0;
+  lastKnownGood = null;
 };

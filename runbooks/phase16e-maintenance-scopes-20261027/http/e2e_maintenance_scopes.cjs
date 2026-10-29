@@ -1,4 +1,4 @@
-/* global process, console, setTimeout */
+/* global process, console, setTimeout, fetch */
 // Scoped maintenance + owner/technical recovery. Real HTTP -> backend -> PostgREST -> disposable PostgreSQL (legacy owner mode:
 // backend started with WEBHOIST_EMAIL=owner148@example.test). Ground truth is read from the database. Never run against hosted.
 const { execSync } = require('child_process');
@@ -170,7 +170,7 @@ const REASON = 'Planned failover rehearsal for incident INC-7';
   const honest = (r) => r.status >= 500 && !/maintenance/i.test(JSON.stringify(r.body)) && r.status !== 200;
   check('E1 DATABASE DOWN: control status and sign-in answer an honest 5xx error (not 200, not a false "maintenance")', honest(down) && honest(downLogin), `${down.status} ${JSON.stringify(down.body).slice(0, 80)} | ${downLogin.status} ${JSON.stringify(downLogin.body).slice(0, 80)}`);
   execSync(`cd /home/claude/pgrest && (nohup ./postgrest /home/claude/inc/pgrst_t.conf > /home/claude/m_inf/pgrst.log 2>&1 &) ; sleep 3`, { shell: '/bin/bash', stdio: 'ignore' });
-  for (let i = 0; i < 20; i += 1) { try { if ((await call('GET', '/api/admin/system/maintenance/status', A(o2))).status === 200) break; } catch (e) { /* retry */ } await wait(1000); }
+  for (let i = 0; i < 20; i += 1) { try { if ((await call('GET', '/api/admin/system/maintenance/status', A(o2))).status === 200) break; } catch { /* retry */ } await wait(1000); }
   check('E2 database back: owner reads the (unchanged, inactive) state again', (await status(o2)).body?.state?.active === false);
 
   console.log('RESULT', L.results.filter((r) => r.ok).length, 'pass', L.results.filter((r) => !r.ok).length, 'fail');

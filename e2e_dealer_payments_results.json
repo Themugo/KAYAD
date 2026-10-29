@@ -58,7 +58,7 @@
   {
    "name": "E4 with the correct password the phone changes and verification is reset (14.6 protection preserved)",
    "ok": true,
-   "detail": "200{\"success\":true,\"data\":{\"id\":\"e782abc2-9f46-4d98-80e5-4f9cd368240e\",\"businessName\":\"Biz dealer_1\",\"l"
+   "detail": "200{\"success\":true,\"data\":{\"id\":\"966d6a2d-4489-447e-8c1d-5fa9720a0b0a\",\"businessName\":\"Biz dealer_1\",\"l"
   },
   {
    "name": "E4 an unchanged phone or non-phone edit needs no password",
@@ -98,7 +98,7 @@
   {
    "name": "F1 the owner can save an auction setup for an available listing",
    "ok": true,
-   "detail": "200{\"success\":true,\"setup\":{\"id\":\"861d5679-5bfe-46d3-bd39-f1fda2cdb754\",\"car_id\":\"8cf82f35-6c78-49bc-97"
+   "detail": "200{\"success\":true,\"setup\":{\"id\":\"bd328b68-2afe-491a-aea8-dda3e76f6db2\",\"car_id\":\"7108b56c-50ad-4809-bc"
   },
   {
    "name": "F1 another dealer cannot read-modify the setup (403) and the saved config is unchanged",

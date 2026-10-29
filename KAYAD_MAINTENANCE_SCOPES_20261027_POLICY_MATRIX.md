@@ -20,13 +20,14 @@ Targeting uses only what the backend can enforce reliably: the caller's server-s
 | Class | Routes | Purpose |
 |---|---|---|
 | `session` | `GET /auth/me`, `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`, `GET /auth/csrf`, `GET /auth/profile` | authentication, MFA, session verification, safe logout |
+| `session` + `logout` | `POST /auth/logout` (exact route) | **never blocked, for any identity and any scope**: it only revokes the caller's own refresh tokens/sessions (added in the final verification round: previously a restricted user could not end or revoke their own session during maintenance) |
 | `control` | `GET /admin/system/maintenance/status`, `POST /admin/system/maintenance/recover`, `POST /admin/system/maintenance/activate` | the maintenance control plane |
 | `registration` | `POST /auth/register` | creating an ordinary account |
 | `other` | everything else (marketplace, dealer, finance, admin...) | |
 
 ## 3. Decision table (`decide`)
 
-Legend: ✔ allowed · ✖ 503 `SYSTEM_MAINTENANCE` · 403 = `MAINTENANCE_CONTROL_FORBIDDEN`.
+Legend: ✔ allowed · ✖ 503 `SYSTEM_MAINTENANCE` · 403 = `MAINTENANCE_CONTROL_FORBIDDEN`. Exception to every ✖ in the `session` column: `POST /auth/logout` is always allowed (see section 2).
 
 ### Scope `global`
 
@@ -76,11 +77,15 @@ Legacy endpoints: `POST /api/admin/system/kill-switch {full_maintenance}` and `P
 
 Every write is a compare-and-swap on `maintenanceVersion` (PostgREST conditional update; insert with 23505 retry; max 8 attempts, then 503 `MAINTENANCE_STATE_CONTENDED`). A caller-supplied `expectedVersion` mismatch returns 409 `MAINTENANCE_STATE_CONFLICT` with the current state. Re-asking for the existing state returns `changed:false` and writes no audit row. The response always carries the state read back from the database.
 
-## 7. Failure behaviour (honest errors)
+## 7. Failure policy (settings store / identity store unavailable)
 
-| Failure | Result |
-|---|---|
-| settings store unreadable on an ordinary request | marketplace stays up (pre-existing fail-open); control `status` returns 503 `MAINTENANCE_STORE_UNAVAILABLE` |
-| settings store unreadable during activate/recover | 503, nothing changed, UI keeps showing server-confirmed state |
-| dealer-team lookup fails for a role-`user` caller while scoped maintenance is active | fail closed: 503 `MAINTENANCE_POLICY_UNAVAILABLE` |
-| auth/identity store down at login | existing login 5xx path; no fake success |
+| Situation | Behaviour | Trade-off |
+|---|---|---|
+| Store becomes unreadable **after** a state was read (cache expired) | **Fail-static**: keep enforcing the last known state. An active shutdown stays active; an inactive platform stays open. Retries the store every ~2 s | A shutdown can persist while the store is down, but recovery needs the store anyway, and fail-open would silently re-open a platform the owner deliberately closed. After any local write the last-known state is discarded (never re-enforce an outdated shutdown after a recovery) |
+| Store unreadable and **nothing was ever read** (cold start) | Fail open for ordinary traffic (unchanged) | Availability of the marketplace is preferred over inventing a state; the control `status` reports the store failure honestly |
+| Control `status` / `activate` / `recover` with the store down | 503 `MAINTENANCE_STORE_UNAVAILABLE` (or an upstream 5xx), never `success`, never `changed:true` | A recovery is only reported when the row was read back after the write |
+| Sign-in / identity lookup with the database down | 5xx, no cookies, no session | Cannot be authenticated without the identity store; no cached bypass |
+| Dealer-team lookup fails while a scope needing it is active | Fail closed: 503 `MAINTENANCE_POLICY_UNAVAILABLE` (retryable) | Refuses (briefly) rather than guess an audience |
+| Admin/finance routes while shutdown is active and the store is down | Stay 503 (the pre-auth decision uses the last known state) | |
+
+**Recommended policy (implemented): fail-static for a known state; fail-open only with no prior knowledge; never report a recovery that was not read back.** Residual risk: a freshly started instance with the store down has no prior knowledge and serves ordinary traffic (but the database-backed routes themselves fail). Mitigation for a future hardening step: persist the last known state in Redis so a restarted instance inherits it.

@@ -28,7 +28,7 @@ beforeEach(() => {
   api.cars.mockResolvedValue({ cars: [{ id: 'c1', title: 'Pending Car', status: 'pending', price: 1000 }] });
   api.getAuditLog.mockResolvedValue({ entries: [] });
 });
-afterEach(() => cleanup());
+afterEach(() => { cleanup(); window.sessionStorage.clear(); });
 // AdminView renders inside the app's router in production (main.tsx); the department matrix uses <Link>.
 const mount = () => render(<MemoryRouter><AdminView vehicles={[]} /></MemoryRouter>);
 // KPI cards on the Super Admin dashboard are links whose <small> carries the label.
@@ -324,5 +324,41 @@ describe('Command centre — hero identity', () => {
     mount();
     await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
     expect(document.querySelector('.kayad-command-identity small')!.textContent).toBe('Authorized Administrator');
+  });
+});
+
+describe('Command centre — unavailable causes and retry', () => {
+  const err = (status?: number, data?: any, code?: string) => Object.assign(new Error('x'), { code, response: status ? { status, data } : undefined });
+
+  it('names maintenance as the cause when admin data routes answer 503 MAINTENANCE', async () => {
+    api.stats.mockRejectedValue(err(503, { code: 'MAINTENANCE_MODE', message: 'System under scheduled maintenance.' }));
+    api.users.mockRejectedValue(err(503, { code: 'MAINTENANCE_MODE' }));
+    mount();
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toMatch(/platform is in maintenance/));
+    expect(screen.getByRole('alert').textContent).not.toMatch(/browser could not reach/);
+  });
+
+  it('distinguishes a network failure and a missing route from maintenance', async () => {
+    api.stats.mockRejectedValue(err());
+    api.cars.mockRejectedValue(err(404));
+    mount();
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toMatch(/could not reach the API/));
+    expect(screen.getByRole('alert').textContent).toMatch(/not found \(HTTP 404\)/);
+  });
+
+  it('Retry reloads and clears the warning once the sources recover', async () => {
+    api.getAuditLog.mockRejectedValueOnce(err(500));
+    mount();
+    await waitFor(() => expect(screen.getByRole('alert')).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: 'Retry loading unavailable data' }));
+    await waitFor(() => expect(screen.queryByRole('alert')).toBeNull());
+  });
+
+  it('a failed source reads "unavailable" in its own panel while a healthy empty queue still reads as empty', async () => {
+    api.cars.mockRejectedValue(err(500));
+    api.users.mockResolvedValue({ users: [] });
+    mount();
+    await waitFor(() => expect(screen.getAllByText(/unavailable/i).length).toBeGreaterThan(0));
+    expect(screen.getByText(/No pending dealers returned/)).toBeTruthy();
   });
 });

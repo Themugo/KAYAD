@@ -1,9 +1,9 @@
 {
  "ctx": {
-  "seedPending": "db49b104-a2cb-49ce-88d3-d4f323956eb8",
-  "carId2": "68d5ff05-a39e-4e70-af14-525c8e1810bd",
-  "d1": "22194030-2b85-4dd9-aa09-05714dca6be8",
-  "d1email": "dealer_1793043724485_1@example.test"
+  "seedPending": "3d3ee919-4d7c-46a0-a517-6dc50205e22f",
+  "carId2": "f5f1a512-5cc0-4658-b894-6e5409e21499",
+  "d1": "5aa0b6a2-b2b0-4235-a52e-3e956c749a62",
+  "d1email": "dealer_1793105732925_1@example.test"
  },
  "results": [
   {
@@ -39,7 +39,7 @@
   {
    "name": "3 concurrent duplicate registrations create exactly one account",
    "ok": true,
-   "detail": "409,201,409,409,409,409,409,409"
+   "detail": "409,409,409,409,409,409,201,409"
   },
   {
    "name": "3 database holds exactly one user and one user_auth row for the race email",
@@ -119,7 +119,7 @@
   {
    "name": "8 onboarding completes and submits verification (pending)",
    "ok": true,
-   "detail": "200{\"success\":true,\"message\":\"Dealer onboarding completed and verification submitted.\",\"dealer\":{\"id\":\"d4d1fd8c-80e6-41a4-a"
+   "detail": "200{\"success\":true,\"message\":\"Dealer onboarding completed and verification submitted.\",\"dealer\":{\"id\":\"4ebf24c4-c468-4d30-b"
   },
   {
    "name": "8 dealers row has business details, onboarding flags and payment details",
@@ -159,7 +159,7 @@
   {
    "name": "9 admin approves the dealer",
    "ok": true,
-   "detail": "200{\"success\":true,\"message\":\"Verification approved successfully\",\"verification\":{\"id\":\"af5bef43-b773-46da-889c-0f2740fb99c"
+   "detail": "200{\"success\":true,\"message\":\"Verification approved successfully\",\"verification\":{\"id\":\"532de977-7ce0-4dfe-bfe9-c31482d0f85"
   },
   {
    "name": "9 APPROVAL DOES NOT PUBLISH INVENTORY: pending listing still pending after approval",
@@ -214,7 +214,7 @@
   {
    "name": "11 admin suspends an approved dealer",
    "ok": true,
-   "detail": "200{\"success\":true,\"message\":\"Dealer suspended successfully\",\"verification\":{\"id\":\"af5bef43-b773-46da-8"
+   "detail": "200{\"success\":true,\"message\":\"Dealer suspended successfully\",\"verification\":{\"id\":\"532de977-7ce0-4dfe-b"
   },
   {
    "name": "11 suspended dealer cannot create listings (403 DEALER_ACCOUNT_SUSPENDED)",

@@ -84,6 +84,7 @@ export const normalizeRoutePath = (path) => String(path || "").split("?")[0].rep
 export const classifyRoute = (method, path) => {
   const key = `${String(method || "").toUpperCase()} ${normalizeRoutePath(path)}`;
   if (CONTROL_ROUTES[key]) return { kind: "control", control: CONTROL_ROUTES[key] };
+  if (key === "POST /auth/logout") return { kind: "session", logout: true };
   if (SESSION_ROUTES.has(key)) return { kind: "session" };
   if (REGISTRATION_ROUTES.has(key)) return { kind: "registration" };
   return { kind: "other" };
@@ -143,6 +144,9 @@ export const decide = ({ scope, route, identity = null }) => {
     if (!identity) return { allow: true, reason: "AUTHENTICATES_ITSELF" };
     return CONTROL_ALLOWED[route.control](identity) ? { allow: true, reason: "CONTROL_PERMITTED" } : { allow: false, reason: "CONTROL_NOT_PERMITTED" };
   }
+  // Safe logout is never blocked: it only revokes the caller's own refresh tokens and sessions, so a restricted user must still be able to end
+  // their session (and an operator must be able to revoke a stolen one) while maintenance is active.
+  if (route.logout) return { allow: true, reason: "SAFE_LOGOUT" };
   if (scope === "global") {
     if (route.kind === "session") {
       if (!identity) return { allow: true, reason: "SESSION_PRE_AUTH" };

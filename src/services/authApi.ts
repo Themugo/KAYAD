@@ -67,10 +67,15 @@ export type AuthErrorKind = 'invalid_credentials' | 'email_verification_required
 export class AuthApiError extends Error {
   kind: AuthErrorKind;
   status?: number;
-  constructor(message: string, kind: AuthErrorKind, status?: number) {
+  /** Machine code from the backend's JSON body, when the API itself answered.
+   * Its presence proves the request reached KAYAD's application (not a proxy,
+   * gateway or dropped connection), so the outcome is known. */
+  code?: string;
+  constructor(message: string, kind: AuthErrorKind, status?: number, code?: string) {
     super(message);
     this.kind = kind;
     this.status = status;
+    this.code = code;
   }
 }
 
@@ -104,7 +109,7 @@ async function authFetch(path: string, options: RequestInit & { timeout?: number
                   : error.status
                     ? 'server'
                     : 'network';
-    throw new AuthApiError(error.message, kind, error.status);
+    throw new AuthApiError(error.message, kind, error.status, typeof responseCode === 'string' ? responseCode : undefined);
   }
 }
 

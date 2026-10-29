@@ -47,8 +47,8 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
 
   const handleLogout = async () => {
     if (confirm('Are you sure you want to sign out?')) {
-      await logout();
-      navigate('/');
+      const result = await logout();
+      if (result.ok) navigate('/');
     }
   };
 

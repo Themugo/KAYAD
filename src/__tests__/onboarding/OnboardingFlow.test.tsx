@@ -6,7 +6,7 @@ const m = vi.hoisted(() => ({ register: vi.fn(), apply: vi.fn(), resend: vi.fn()
 vi.mock('../../context/AuthContext', () => ({ useAuth: () => ({ register: m.register }) }));
 vi.mock('../../api/api', () => ({ inspectorAPI: { apply: m.apply } }));
 vi.mock('../../services/authApi', () => ({
-  AuthApiError: class AuthApiError extends Error { kind: string; status?: number; constructor(message: string, kind = 'unknown', status?: number) { super(message); this.kind = kind; this.status = status; } },
+  AuthApiError: class AuthApiError extends Error { kind: string; status?: number; code?: string; constructor(message: string, kind = 'unknown', status?: number, code?: string) { super(message); this.kind = kind; this.status = status; this.code = code; } },
   resendVerification: m.resend,
 }));
 
@@ -82,6 +82,75 @@ describe('OnboardingFlow', () => {
     await waitFor(() => expect(m.register).toHaveBeenCalledTimes(1));
     await screen.findByText(/couldn’t confirm that went through/i);
     expect(m.register).toHaveBeenCalledTimes(1);
+  });
+
+  const fillBuyer = () => {
+    type('Full name', 'Jane W'); type(/^Email/, 'j@example.com'); type('Password', STRONG);
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+  };
+
+  it('a 503 carrying a backend code is a KNOWN refusal (nothing created), not a lost connection', async () => {
+    m.register.mockRejectedValue(new AuthApiError('unavailable', 'server', 503, 'DATABASE_MIGRATION_REQUIRED'));
+    mount('/register?intent=buyer');
+    fillBuyer();
+    expect(await screen.findByText(/couldn’t create your account right now/i)).toBeInTheDocument();
+    expect(screen.queryByText(/couldn’t confirm that went through/i)).toBeNull();
+    expect(screen.getByText(/Nothing was created/i)).toBeInTheDocument();
+  });
+
+  it('a bare gateway 503/502/504 (no backend code) stays an UNKNOWN outcome', async () => {
+    for (const status of [502, 503, 504]) {
+      cleanup(); vi.clearAllMocks();
+      m.register.mockRejectedValue(new AuthApiError('gateway', 'server', status));
+      mount('/register?intent=buyer');
+      fillBuyer();
+      expect(await screen.findByText(/couldn’t confirm that went through/i)).toBeInTheDocument();
+    }
+  });
+
+  it('"Go back and try again" restores the form with details kept and sends nothing by itself', async () => {
+    m.register.mockRejectedValue(new AuthApiError('offline', 'network'));
+    mount('/register?intent=buyer');
+    fillBuyer();
+    await screen.findByText(/couldn’t confirm that went through/i);
+    fireEvent.click(screen.getByRole('button', { name: /go back and try again/i }));
+    expect((screen.getByLabelText(/^Email/) as HTMLInputElement).value).toBe('j@example.com');
+    expect((screen.getByLabelText('Password') as HTMLInputElement).value).toBe(STRONG);
+    expect(screen.getByRole('button', { name: /create account/i })).toBeEnabled();
+    expect(m.register).toHaveBeenCalledTimes(1);
+  });
+
+  it('"I may already have an account" goes to /login with the email and the role intent carried over', async () => {
+    m.register.mockRejectedValue(new AuthApiError('offline', 'network'));
+    mount('/register?intent=seller');
+    type('Full name', 'Sam Seller'); type(/^Email/, 's@example.com'); type(/^Phone/, '0712345678'); type('Password', STRONG);
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await screen.findByText(/couldn’t confirm that went through/i);
+    expect(m.register.mock.calls[0][0]).toMatchObject({ role: 'individual_seller', email: 's@example.com' });
+    const link = screen.getByRole('link', { name: /i may already have an account/i });
+    expect(link.getAttribute('href')).toMatch(/^\/login/);
+    expect(link.getAttribute('href')).toMatch(/intent=seller/);
+  });
+
+  it('lost response, then retry: the 409 is explained as the first attempt having succeeded', async () => {
+    m.register.mockRejectedValueOnce(new AuthApiError('offline', 'network'));
+    m.register.mockRejectedValueOnce(new AuthApiError('exists', 'conflict', 409));
+    mount('/register?intent=buyer');
+    fillBuyer();
+    await screen.findByText(/couldn’t confirm that went through/i);
+    fireEvent.click(screen.getByRole('button', { name: /go back and try again/i }));
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    expect(await screen.findByText(/Your earlier attempt went through/i)).toBeInTheDocument();
+    expect(m.register).toHaveBeenCalledTimes(2);
+    expect(screen.getByRole('button', { name: /resend verification email/i })).toBeInTheDocument();
+  });
+
+  it('a plain 409 with no earlier uncertainty keeps the ordinary existing-account wording', async () => {
+    m.register.mockRejectedValue(new AuthApiError('exists', 'conflict', 409));
+    mount('/register?intent=buyer');
+    fillBuyer();
+    expect(await screen.findByText(/This email already has an account/i)).toBeInTheDocument();
+    expect(screen.queryByText(/earlier attempt/i)).toBeNull();
   });
 
   it('double-submit sends one request', async () => {

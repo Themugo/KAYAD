@@ -190,3 +190,24 @@
 .kayad-command-health-list,.kayad-command-activity-list{display:grid;gap:8px;margin:6px 0 10px;padding:0;list-style:none}.kayad-command-health-list li{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:8px;align-items:center;font-size:11px;color:var(--admin-ink)}.kayad-command-health-list li>span:last-child{font-size:10px;color:var(--admin-muted-content);text-align:right}.kayad-command-health-dot{width:8px;height:8px;border-radius:50%;background:var(--admin-status-neutral)}.kayad-command-health-list [data-status=healthy] .kayad-command-health-dot{background:var(--admin-status-success)}.kayad-command-health-list [data-status=degraded] .kayad-command-health-dot{background:var(--admin-status-warning)}.kayad-command-health-list [data-status=down] .kayad-command-health-dot{background:var(--admin-status-danger)}.kayad-command-activity-list li{display:grid;gap:2px;padding-top:8px;border-top:1px solid var(--admin-divider)}.kayad-command-activity-list li:first-child{padding-top:0;border-top:0}.kayad-command-activity-list strong{font-size:11px;text-transform:capitalize;color:var(--admin-ink)}.kayad-command-activity-list small{font-size:10px;color:var(--admin-muted-content);overflow-wrap:anywhere}
 .kayad-command-kpi.is-restricted{cursor:default}.kayad-command-kpi.is-restricted:hover{border-color:var(--admin-border)}
 .kayad-command-kpi strong.is-link-label{font-size:14px;font-weight:700;color:var(--admin-brand);margin-top:6px}
+
+/* ---- Dashboard polish (refinement only: existing tokens, no new palette) ---- */
+/* Hero: readable text over the skyline, tighter vertical rhythm, legible panel caption */
+.kayad-command-hero{padding-top:22px;padding-bottom:22px}
+.kayad-command-hero h1,.kayad-command-hero .kayad-command-intro,.kayad-command-eyebrow{text-shadow:0 1px 3px rgba(0,20,28,.5)}
+.kayad-command-hero .kayad-command-intro{max-width:64ch;color:var(--admin-text,#E8F3F5);text-wrap:pretty}
+.kayad-command-actions-heading>span{font-size:11px;color:var(--admin-muted,#A9C0C6)}
+.kayad-command-actions{align-self:center}
+@media(max-width:850px){.kayad-command-hero{padding-top:18px;padding-bottom:18px}}
+/* KPI cards: one height, one value row, and no overflow for long states */
+.kayad-command-kpis{align-items:stretch}
+.kayad-command-kpi{min-height:92px;min-width:0;box-sizing:border-box}
+.kayad-command-kpi>div:last-child{min-width:0;flex:1}
+.kayad-command-kpi small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.kayad-command-kpi strong{min-height:26px;display:flex;align-items:center;margin-top:4px;overflow-wrap:anywhere}
+.kayad-command-kpi strong.is-link-label,.kayad-command-kpi strong.is-state{font-size:14px;font-weight:700;margin-top:4px}
+.kayad-command-kpi strong.is-state{color:var(--admin-muted-content)}
+/* Warning banner: proportionate, wraps cleanly with its Retry action */
+[data-testid="admin-command-centre"] [role="alert"]{line-height:1.5}
+[data-testid="admin-command-centre"] [role="alert"]{font-size:13px}
+@media(max-width:520px){[data-testid="admin-command-centre"] [role="alert"]{flex-wrap:wrap;padding:12px;font-size:12.5px}[data-testid="admin-command-centre"] [role="alert"] button{margin-left:auto}}

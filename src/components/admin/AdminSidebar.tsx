@@ -194,8 +194,7 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
                     <GroupIcon size={15} aria-hidden="true" />
                   </div>
                 )}
-                {(!collapsed && isExpanded || collapsed) && (
-                  <div className="admin-sidebar__links" id={`admin-nav-group-${group.id}`}>
+                <div className="admin-sidebar__links" id={`admin-nav-group-${group.id}`} hidden={!collapsed && !isExpanded}>
                     {group.links.map(link => {
                       const LinkIcon = link.icon;
                       return (
@@ -213,8 +212,7 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
                         </NavLink>
                       );
                     })}
-                  </div>
-                )}
+                </div>
               </section>
             );
           })}

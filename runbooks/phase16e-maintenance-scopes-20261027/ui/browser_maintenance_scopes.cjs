@@ -10,7 +10,7 @@ const SPA = 'http://127.0.0.1:4173', OWNER = 'owner148@example.test';
 const dbState = () => JSON.parse(sql(`select value::text from system_settings where key='system_status'`));
 (async () => {
   const mk = async (role, email) => { const u = await L.register('user', {}); await L.verifyEmailViaToken(u.email); const id = sql(`select id from users where email='${u.email}'`); sql(`update users set role='${role}', status='approved', email_verified=true${email ? `, email='${email}'` : ''} where id='${id}'`); return { id, email: email || u.email }; };
-  const owner = await mk('user', OWNER); const dealer = await mk('dealer'); const buyer = await mk('user'); const tech = await mk('technical_support'); const plainStaff = await mk('technical_support');
+  await mk('user', OWNER); const dealer = await mk('dealer'); const buyer = await mk('user'); const tech = await mk('technical_support'); const plainStaff = await mk('technical_support');
   const ownerLogin = await L.login(OWNER);
   const grant = await call('PUT', `/api/admin/staff/${tech.id}/permissions`, { jar: ownerLogin.jar, body: { grantedPermissions: ['platform_recovery'] } });
   check('U0 fixtures: owner granted platform_recovery to one technical account through the real endpoint', grant.status === 200, grant.status);

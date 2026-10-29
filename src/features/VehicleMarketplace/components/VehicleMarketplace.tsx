@@ -9,6 +9,7 @@ import FloatingAdRail from '../../../components/FloatingAdRail';
 import { getVisibleHeroSlides, HeroSlide } from '../../../services/heroApi';
 import { adminAPI } from '../../../api/api';
 import { getCars, mapBackendCarToVehicle, VehicleApiError, type GetCarsParams } from '../../../services/vehicleApi';
+import { classifyInventoryFailure, type InventoryFailure } from '../utils/inventoryAvailability';
 import { getSearchFacets, type SearchFacetsResponse } from '../../../services/searchApi';
 import { getVisibleAdSlots, recordAdEvent, AdSlot } from '../../../services/adApi';
 import { useHomePageConfig, ACCENT_THEME_CLASSES } from '../hooks/useHomePageConfig';
@@ -212,10 +213,19 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [serverTotalPages, setServerTotalPages] = useState<number>(1);
   const [serverLoading, setServerLoading] = useState<boolean>(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  /** Classified cause of the last failed inventory request (maintenance, timeout, offline, ...). */
+  const [serverFailure, setServerFailure] = useState<InventoryFailure | null>(null);
   const [serverRetryKey, setServerRetryKey] = useState(0);
   const [canonicalFacets, setCanonicalFacets] = useState<SearchFacetsResponse | null>(null);
   const [canonicalModelFacets, setCanonicalModelFacets] = useState<SearchFacetsResponse['models']>([]);
   const isLoading = isLoadingReal || serverLoading;
+  const inventoryFailure: InventoryFailure | null = serverError
+    ? (serverFailure ?? classifyInventoryFailure(serverError))
+    : loadError ? classifyInventoryFailure(loadError) : null;
+  const inventoryStatusText = inventoryFailure
+    ? (savedOnly ? 'Saved vehicles unavailable' : inventoryFailure.pill)
+    : null;
+  const retryInventory = () => { onRetryLoad?.(); setServerRetryKey((key) => key + 1); };
 
   // Search dropdowns use canonical full-inventory facets from the backend,
   // not a hard-coded list or only the currently loaded page of vehicles.
@@ -290,6 +300,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     let cancelled = false;
     setServerLoading(true);
     setServerError(null);
+    setServerFailure(null);
 
     getCars(serverQuery)
       .then((res) => {
@@ -302,6 +313,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       .catch((err) => {
         if (cancelled) return;
         setServerError(err instanceof VehicleApiError ? err.message : 'Unable to load marketplace results.');
+        setServerFailure(classifyInventoryFailure(err));
         setServerVehicles([]);
         setServerTotal(0);
         setServerTotalPages(1);
@@ -573,6 +585,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return selectedRealVehicles;
   }, [heroPresentation.vehicleSource, heroPresentation.showcaseFallbackEnabled, heroVehicles, heroFeaturedIds, heroShowcaseVehicles]);
   const [heroPairIndex, setHeroPairIndex] = useState(0);
+  /** Hero images that failed to load; the card keeps its truthful label over a neutral placeholder instead of a broken-image icon. */
+  const [brokenHeroImages, setBrokenHeroImages] = useState<Record<string, boolean>>({});
   const [heroPreviousPairIndex, setHeroPreviousPairIndex] = useState(0);
   const [heroTransitioning, setHeroTransitioning] = useState(false);
   const [heroIncomingVisible, setHeroIncomingVisible] = useState(true);
@@ -908,10 +922,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           layer changed, not the data or behavior. */}
 
       {/* Marketplace discovery shell: compact by design. The marketplace opens directly into the automotive experience rather than a second dashboard-like layer. */}
-      <div id="market-journey" className="mx-auto flex w-full max-w-[1480px] items-center justify-between gap-3 px-4 pb-2 pt-4 sm:px-6 lg:px-8">
-        <span className="text-[9px] font-black uppercase tracking-[0.22em] text-navy-600 sm:text-[10px]">KAYAD MARKETPLACE · VERIFIED INVENTORY</span>
-        <div role="group" aria-label="Marketplace at a glance" className="flex flex-wrap items-center justify-end gap-1.5 text-[9px] font-bold text-[#64748B] sm:gap-2 sm:text-[10px]">
-          <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{serverError ? (savedOnly ? 'Saved vehicles unavailable' : 'Inventory unavailable') : savedOnly ? `${serverTotal.toLocaleString()} saved` : `${serverTotal.toLocaleString()} vehicles`}</span>
+      <div id="market-journey" className="mx-auto flex w-full max-w-[1480px] items-center justify-between gap-x-3 gap-y-1.5 px-4 pb-2 pt-3 sm:px-6 sm:pt-4 lg:px-8">
+        <span className="min-w-0 flex-1 text-[9px] font-black uppercase leading-snug tracking-[0.14em] text-navy-600 sm:text-[10px] sm:tracking-[0.22em]">KAYAD MARKETPLACE · VERIFIED INVENTORY</span>
+        <div role="group" aria-label="Marketplace at a glance" className="flex shrink-0 flex-wrap items-center justify-end gap-1.5 text-[9px] font-bold text-[#64748B] sm:gap-2 sm:text-[10px]">
+          {inventoryStatusText ? (
+            <button type="button" onClick={retryInventory} aria-label={`Retry loading vehicles. Status: ${inventoryStatusText}`} data-inventory-state={inventoryFailure?.kind} className="inline-flex min-h-[28px] items-center gap-1 whitespace-nowrap rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1 text-navy-700 hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]">{inventoryStatusText}<RotateCcw className="h-3 w-3" aria-hidden="true" /></button>
+          ) : (
+            <span data-inventory-state={isLoading && !savedOnly ? 'loading' : 'loaded'} className="whitespace-nowrap rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{isLoading && !savedOnly ? 'Loading inventory' : savedOnly ? `${serverTotal.toLocaleString()} saved` : `${serverTotal.toLocaleString()} vehicle${serverTotal === 1 ? '' : 's'}`}</span>
+          )}
           {savedVehicles.length > 0 && <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{savedVehicles.length} saved</span>}
           {comparedVehicles.length > 0 && <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{comparedVehicles.length} compare</span>}
         </div>
@@ -1063,33 +1081,37 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
               <div className="relative px-3 pb-4 pt-3 lg:hidden" aria-label="KAYAD mobile hero">
                 <div className="mx-auto w-full max-w-[460px] rounded-[24px] border border-white/75 bg-white/95 px-3.5 py-4 text-center shadow-[0_20px_48px_rgba(3,19,27,.22)] backdrop-blur-xl min-[390px]:px-4 min-[390px]:py-4">
-                  <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-2.5 py-1.5 text-[9px] font-bold uppercase tracking-[.12em] text-navy-600 min-[390px]:text-[10px]"><span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--kayad-cyan)]" /><span className="truncate">{heroEyebrowDisplay}</span></span>
-                  <h1 className="mt-3 font-display text-[clamp(1.75rem,7.2vw,2.25rem)] font-black leading-[1.01] tracking-[-.045em] text-navy-900">{heroHeadlineNode}</h1>
+                  <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-2.5 py-1.5 text-[9px] font-bold uppercase leading-tight tracking-[.06em] text-navy-600 min-[430px]:text-[10px] min-[430px]:tracking-[.1em]"><span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--kayad-cyan)]" /><span className="min-w-0 text-balance">{heroEyebrowDisplay}</span></span>
+                  <h1 className="mt-3 text-balance font-display text-[clamp(1.75rem,7.2vw,2.25rem)] font-black leading-[1.05] tracking-[-.045em] text-navy-900">{heroHeadlineNode}</h1>
                   <p className="mx-auto mt-2 max-w-[330px] text-[12px] font-medium leading-[1.45rem] text-[#58717B] min-[390px]:text-[13px]">{heroSupportCopy}</p>
                   <div className="mt-3 flex flex-col items-stretch justify-center gap-2 min-[390px]:flex-row min-[390px]:items-center">
-                    <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} className="inline-flex min-h-[42px] items-center justify-center rounded-full px-4 text-[11px] font-black text-[#07313D] shadow-[0_8px_18px_rgba(19,184,166,.22)]">{heroPrimaryLabel} <ChevronRight className="ml-1 h-3.5 w-3.5 shrink-0" /></button>
-                    <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} className="inline-flex min-h-[42px] items-center justify-center rounded-full border bg-white px-4 text-[11px] font-black text-navy-900 shadow-sm">{heroSecondaryLabel} <span className="ml-1.5 text-xs">▶</span></button>
+                    <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} className="inline-flex min-h-[44px] items-center justify-center rounded-full px-4 text-[11px] font-black text-[#07313D] shadow-[0_8px_18px_rgba(19,184,166,.22)]">{heroPrimaryLabel} <ChevronRight className="ml-1 h-3.5 w-3.5 shrink-0" /></button>
+                    <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} className="inline-flex min-h-[44px] items-center justify-center rounded-full border bg-white px-4 text-[11px] font-black text-navy-900 shadow-sm">{heroSecondaryLabel} <span className="ml-1.5 text-xs">▶</span></button>
                   </div>
                 </div>
 
                 {/* Approved mobile composition: the center card sits above a dedicated two-car stage.
                     Both transparent vehicle assets remain fully contained and independently visible. */}
                 {(heroLeftVehicle || heroRightVehicle) && <div className="mx-auto mt-2.5 w-full max-w-[460px]">
-                  <div className="grid grid-cols-2 items-end gap-1 min-[390px]:gap-2" aria-label="Featured vehicle pair">
+                  <div className="grid grid-cols-2 items-stretch gap-1 min-[390px]:gap-2" aria-label="Featured vehicle pair">
                     {[heroLeftVehicle, heroRightVehicle].map((vehicle, index) => vehicle && heroImageForVehicle(vehicle) ? (
-                      <button key={`${vehicle.id}-${index}`} type="button" onClick={() => handleHeroVehicleSelect(vehicle)} className="group min-w-0 rounded-2xl border border-white/20 bg-[#082D39]/22 px-1.5 pt-1.5 text-center transition-colors hover:bg-[#082D39]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]" aria-label={isShowcaseHeroVehicle(vehicle) ? `Browse vehicles; visual showcase ${vehicle.make} ${vehicle.model}` : `View ${vehicle.make} ${vehicle.model}`}>
+                      <button key={`${vehicle.id}-${index}`} type="button" onClick={() => handleHeroVehicleSelect(vehicle)} className="group flex h-full min-w-0 flex-col justify-end rounded-2xl border border-white/20 bg-[#082D39]/22 px-1.5 pt-1.5 text-center transition-colors hover:bg-[#082D39]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]" aria-label={isShowcaseHeroVehicle(vehicle) ? `Browse vehicles; visual showcase ${vehicle.make} ${vehicle.model}` : `View ${vehicle.make} ${vehicle.model}`}>
                         <div className="flex items-end justify-center overflow-visible" style={{ height: `clamp(${Math.min(140, heroPresentation.mobileStageMinPx)}px, 40vw, ${Math.min(180, heroPresentation.mobileStageMaxPx)}px)` }} data-testid="hero-pair-image-stage">
+                          {brokenHeroImages[vehicle.id] ? (
+                            <div className="grid h-full w-full place-items-center text-white/70" role="img" aria-label={`Photo of ${vehicle.make} ${vehicle.model} is unavailable`}><ImageIcon className="h-8 w-8" aria-hidden="true" /></div>
+                          ) : (
                           <picture className="flex h-full w-full items-end justify-center">
                             {heroMobileImageForVehicle(vehicle) && <source media="(max-width: 1023.98px)" srcSet={heroMobileImageForVehicle(vehicle)} type={heroMobileImageForVehicle(vehicle).toLowerCase().endsWith('.webp') ? 'image/webp' : undefined} />}
-                            <img src={heroImageForVehicle(vehicle)} alt={isShowcaseHeroVehicle(vehicle) ? `KAYAD visual showcase: ${vehicle.make} ${vehicle.model}` : `${vehicle.year} ${vehicle.make} ${vehicle.model}`} width={1021} height={634} className="max-h-full max-w-full object-contain object-bottom drop-shadow-[0_12px_18px_rgba(3,19,27,.42)] transition-transform duration-300 group-hover:-translate-y-1" loading="eager" decoding="async" />
+                            <img src={heroImageForVehicle(vehicle)} alt={isShowcaseHeroVehicle(vehicle) ? `KAYAD visual showcase: ${vehicle.make} ${vehicle.model}` : `${vehicle.year} ${vehicle.make} ${vehicle.model}`} width={1021} height={634} className="max-h-full max-w-full object-contain object-bottom drop-shadow-[0_12px_18px_rgba(3,19,27,.42)] transition-transform duration-300 group-hover:-translate-y-1" loading="eager" decoding="async" onError={() => setBrokenHeroImages((prev) => (prev[vehicle.id] ? prev : { ...prev, [vehicle.id]: true }))} />
                           </picture>
+                          )}
                         </div>
-                        <div className="min-w-0 rounded-xl border border-white/15 bg-[#071F2A]/90 px-2 py-2 text-left backdrop-blur-md">
-                          <div className="truncate text-[8px] font-black uppercase tracking-[.09em] text-[#49D5C6]">{isShowcaseHeroVehicle(vehicle) ? 'KAYAD SELECT · SHOWCASE' : vehicle.isAuction ? 'AUCTION VEHICLE' : vehicle.badge || 'FEATURED VEHICLE'}</div>
-                          <div className="mt-0.5 truncate text-[10px] font-black leading-tight text-white min-[390px]:text-[11px]">{vehicle.make} {vehicle.model}</div>
+                        <div className="mt-auto min-w-0 rounded-xl border border-white/15 bg-[#071F2A]/90 px-2 py-2 text-left backdrop-blur-md">
+                          <div className="text-[8px] font-black uppercase leading-tight tracking-[.06em] text-[#49D5C6]">{isShowcaseHeroVehicle(vehicle) ? 'KAYAD SELECT · SHOWCASE' : vehicle.isAuction ? 'AUCTION VEHICLE' : vehicle.badge || 'FEATURED VEHICLE'}</div>
+                          <div className="mt-0.5 line-clamp-2 break-words text-[10px] font-black leading-tight text-white min-[390px]:text-[11px]">{vehicle.make} {vehicle.model}</div>
                           {isShowcaseHeroVehicle(vehicle)
-                            ? <div className="mt-0.5 truncate text-[9px] text-white/70">Visual showcase · not a listing</div>
-                            : <div className="mt-0.5 truncate text-[9px] font-semibold text-white/80">{vehicle.price > 0 ? formatPriceM(vehicle.price) : heroCaption(vehicle)}</div>}
+                            ? <div className="mt-0.5 text-[9px] leading-tight text-white/75">Visual showcase · not a listing</div>
+                            : <div className="mt-0.5 text-[9px] font-semibold leading-tight text-white/85">{vehicle.price > 0 ? formatPriceM(vehicle.price) : heroCaption(vehicle)}</div>}
                         </div>
                       </button>
                     ) : <div key={`hero-empty-${index}`} className="min-h-[120px]" />)}
@@ -1150,7 +1172,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       <div className="kayad-search-bridge relative z-10 -mt-10 w-full px-3 sm:-mt-12 sm:px-5 lg:px-8">
         <div className="w-full rounded-2xl border border-[#D7E7E4] bg-white p-3.5 shadow-[0_18px_45px_rgba(11,29,58,.10)] sm:p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
           <div className="lg:col-span-1 flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-[#94A3B8]">Search</label>
+            <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Search</label>
             <div className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 flex items-center gap-2 bg-[#F6FAF9]">
               <Search className="w-3.5 h-3.5 text-[#94A3B8] shrink-0" />
               <input
@@ -1163,7 +1185,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
             {/* The label follows its select: when the select is hidden by the sidebar the label stays in the grid cell (layout unchanged) but is invisible, so no orphaned "MAKE" caption remains. */}
-            <label className={`text-[10px] font-bold uppercase tracking-wide text-[#94A3B8] ${showDesktopSidebar ? 'lg:invisible' : ''}`}>Make</label>
+            <label className={`text-[10px] font-bold uppercase tracking-wide text-[#64748B] ${showDesktopSidebar ? 'lg:invisible' : ''}`}>Make</label>
             {/* Fixed: this select was always visible regardless of the
                 sidebar, but the sidebar has its own Make selector too -
                 showing both at once above the lg: breakpoint is
@@ -1182,7 +1204,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </select>
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-[#94A3B8]">Price up to</label>
+            <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Price up to</label>
             <select
               value={maxPrice}
               onChange={(e) => setMaxPrice(Number(e.target.value))}
@@ -1196,7 +1218,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </select>
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-[#94A3B8]">Year</label>
+            <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Year</label>
             <select
               value={minYear}
               onChange={(e) => setMinYear(Number(e.target.value))}
@@ -1209,7 +1231,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </select>
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-[#94A3B8]">Body Style</label>
+            <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Body Style</label>
             <select
               value={selectedBodyStyle}
               onChange={(e) => setSelectedBodyStyle(e.target.value)}
@@ -1292,14 +1314,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#DDF4F0] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-navy-700">
                   <LayoutGrid className="h-3.5 w-3.5" /> {savedOnly ? 'Saved vehicles' : 'Marketplace inventory'}
                 </span>
-                <span className="text-[11px] font-semibold text-[#94A3B8]">{selectedCounty}</span>
+                <span className="text-[11px] font-semibold text-[#64748B]">{selectedCounty}</span>
               </div>
               <h2 className="mt-2 flex flex-wrap items-center gap-2 font-display text-xl sm:text-2xl font-bold tracking-[-0.02em] text-navy-900">
                 {/* The Saved destination reuses this grid but must identify itself as the buyer's saved list, not the full inventory. */}
                 {savedOnly ? 'Saved Vehicles' : 'Vehicle Inventory'}
                 {!isLoading && (
                   <span className="inline-flex items-center rounded-full bg-[#DDF4F0] px-2.5 py-1 text-[11px] font-bold tracking-[0.02em] text-navy-700">
-                    {serverError || loadError ? (savedOnly ? 'Saved vehicles unavailable' : 'Inventory unavailable') : `${serverTotal.toLocaleString()} vehicle${serverTotal === 1 ? '' : 's'}`}
+                    {inventoryStatusText ?? `${serverTotal.toLocaleString()} vehicle${serverTotal === 1 ? '' : 's'}`}
                   </span>
                 )}
               </h2>
@@ -1310,7 +1332,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
             <div className="flex flex-wrap items-center gap-2">
               <div className="kayad-toolbar-control flex h-10 items-center gap-1 rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-1" aria-label="Results per page">
-                <span className="px-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#94A3B8]">Show</span>
+                <span className="px-2 text-[10px] font-black uppercase tracking-[0.12em] text-[#64748B]">Show</span>
                 {[12, 24, 48].map((n) => (
                   <button
                     key={n}
@@ -1324,7 +1346,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </div>
 
               <label className="kayad-toolbar-control flex h-10 items-center gap-2 rounded-xl border border-[#D7E7E4] bg-white px-3 focus-within:border-navy-600">
-                <span className="text-[10px] font-bold uppercase tracking-wide text-[#94A3B8]">Sort</span>
+                <span className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Sort</span>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
@@ -1358,7 +1380,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 </div>
               )}
 
-              <div className="kayad-toolbar-control flex h-10 items-center rounded-xl border border-[#D7E7E4] bg-white p-1" aria-label="Inventory view">
+              <div className="kayad-toolbar-control flex h-10 items-center rounded-xl border border-[#D7E7E4] bg-white p-1" role="group" aria-label="Inventory view">
                 <button
                   onClick={() => setViewMode('grid')}
                   aria-pressed={viewMode === 'grid'}
@@ -1413,27 +1435,27 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <div className="flex items-center justify-between mb-3.5">
               <div>
                 <h3 className="text-sm font-extrabold text-navy-900">Refine inventory</h3>
-                <p className="text-[10px] text-[#94A3B8] mt-0.5">Narrow the marketplace without leaving the page.</p>
+                <p className="text-[10px] text-[#64748B] mt-0.5">Narrow the marketplace without leaving the page.</p>
               </div>
               <button onClick={resetFilters} className="text-[11px] font-bold text-navy-600 hover:underline">Reset all</button>
             </div>
 
             <div className="border-b border-[#D7E7E4] py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Make</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Make</label>
               <select aria-label="Sidebar make filter" value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-[#D7E7E4] rounded-lg px-2.5 py-2 text-xs bg-[#F6FAF9]">
                 {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
               </select>
             </div>
 
             <div className="border-b border-[#D7E7E4] py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Model</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Model</label>
               <select aria-label="Sidebar model filter" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-[#D7E7E4] rounded-lg px-2.5 py-2 text-xs bg-[#F6FAF9]">
                 {models.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Models' : m}</option>)}
               </select>
             </div>
 
             <div className="border-b border-[#D7E7E4] py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Price Range · {formatPriceM(maxPrice)}</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Price Range · {formatPriceM(maxPrice)}</label>
               <div className="flex gap-2 mb-2">
                 <input
                   type="number"
@@ -1464,7 +1486,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </div>
 
             <div className="border-b border-[#D7E7E4] py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Year Range</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Year Range</label>
               <div className="flex gap-2">
                 <input
                   type="number"
@@ -1484,28 +1506,28 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </div>
 
             <div className="border-b border-[#D7E7E4] py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Body Style</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Body Style</label>
               <select aria-label="Sidebar body style filter" value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-[#D7E7E4] rounded-lg px-2.5 py-2 text-xs bg-[#F6FAF9]">
                 {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
               </select>
             </div>
 
             <div className="border-b border-[#D7E7E4] py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Fuel Type</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Fuel Type</label>
               <select aria-label="Sidebar fuel filter" value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-[#D7E7E4] rounded-lg px-2.5 py-2 text-xs bg-[#F6FAF9]">
                 {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
               </select>
             </div>
 
             <div className="border-b border-[#D7E7E4] py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Transmission</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Transmission</label>
               <select aria-label="Sidebar transmission filter" value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-[#D7E7E4] rounded-lg px-2.5 py-2 text-xs bg-[#F6FAF9]">
                 {transmissionOptions.map((t) => <option key={t} value={t}>{t === 'All' ? 'All Transmissions' : t}</option>)}
               </select>
             </div>
 
             <div className="border-b border-[#D7E7E4] py-3.5">
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Seller Type</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Seller Type</label>
               <select aria-label="Sidebar seller type filter" value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-[#D7E7E4] rounded-lg px-2.5 py-2 text-xs bg-[#F6FAF9]">
                 {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
               </select>
@@ -1542,26 +1564,33 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             ) : (loadError || serverError) ? (
               <div role="status" className="rounded-2xl border border-[#D7E7E4] bg-white px-6 py-14 text-center shadow-sm">
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF5F3] text-navy-600"><AlertTriangle className="h-5 w-5" aria-hidden="true" /></div>
-                <h3 className="font-display text-base font-bold text-navy-900">Inventory is temporarily unavailable</h3>
+                <h3 className="font-display text-base font-bold text-navy-900">{inventoryFailure?.title ?? 'Inventory is temporarily unavailable'}</h3>
                 <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-[#64748B]">
-                  We couldn&apos;t load vehicles just now. This is usually brief. Your filters and saved vehicles are kept, so you can pick up right where you left off.
+                  {inventoryFailure?.body}
                 </p>
-                {(() => {
-                  const code = /\b(4\d\d|5\d\d)\b/.exec(String(loadError || serverError || ''))?.[1];
-                  return code ? <p className="mt-2 text-xs text-[#94A3B8]">Reference: HTTP {code}</p> : null;
-                })()}
-                <button onClick={() => { onRetryLoad?.(); setServerRetryKey((key) => key + 1); }} className="mt-5 inline-flex h-10 items-center rounded-xl bg-navy-900 px-5 text-sm font-bold text-white transition hover:bg-navy-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--kayad-cyan)]">
+                {inventoryFailure?.status ? <p className="mt-2 text-xs text-[#64748B]">Reference: HTTP {inventoryFailure.status}</p> : null}
+                <button type="button" onClick={retryInventory} className="mt-5 inline-flex h-10 items-center rounded-xl bg-navy-900 px-5 text-sm font-bold text-white transition hover:bg-navy-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--kayad-cyan)]">
                   Retry inventory
                 </button>
               </div>
             ) : filteredVehicles.length === 0 ? (
               <div className="text-center py-16 bg-white border border-dashed border-[#D7E7E4] rounded-2xl">
                 <Search className="w-8 h-8 text-[#BDE5DE] mx-auto mb-3" />
-                <h4 className="text-sm font-bold text-navy-900 mb-1">No vehicles match your filters</h4>
-                <p className="text-xs text-[#64748B] mb-4">Try widening your price range or clearing a filter to see more results.</p>
-                <button onClick={resetFilters} className="bg-navy-900 text-white text-xs font-bold rounded-lg px-4 py-2">
-                  Reset Filters
-                </button>
+                {!savedOnly && serverTotal === 0 && !Object.entries(serverQuery).some(([key, value]) => !['page', 'limit', 'sort'].includes(key) && !(key === 'minPrice' && value === 50000)) ? (
+                  <>
+                    {/* Successful response, no filters applied, zero records: the marketplace is genuinely empty (not an outage). */}
+                    <h3 className="text-sm font-bold text-navy-900 mb-1">No vehicles are listed right now</h3>
+                    <p className="mx-auto mb-4 max-w-sm text-xs text-[#64748B]">New listings appear here as soon as they are approved. Please check back soon.</p>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-sm font-bold text-navy-900 mb-1">No vehicles match your filters</h3>
+                    <p className="text-xs text-[#64748B] mb-4">Try widening your price range or clearing a filter to see more results.</p>
+                    <button onClick={resetFilters} className="bg-navy-900 text-white text-xs font-bold rounded-lg px-4 py-2">
+                      Reset Filters
+                    </button>
+                  </>
+                )}
               </div>
             ) : (
               <div
@@ -1660,7 +1689,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                               </span>
                             )}
                             {showInspected && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm bg-emerald-600">
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm bg-emerald-700">
                                 <ShieldCheck className="w-2.5 h-2.5" />Inspected
                               </span>
                             )}
@@ -1690,9 +1719,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="text-[10px] font-black uppercase tracking-[0.12em] text-navy-600 mb-1">{showLiveAuction ? 'Live auction' : showUpcomingAuction ? 'Upcoming auction' : showEndedAuction ? 'Auction ended' : v.verified ? 'Verified listing' : 'Marketplace listing'}</p>
-                            <h4 className={`${inventoryDensity.title} font-extrabold leading-snug tracking-[-0.01em] text-navy-900 line-clamp-2`}>
+                            <h3 className={`${inventoryDensity.title} font-extrabold leading-snug tracking-[-0.01em] text-navy-900 line-clamp-2`}>
                               {v.year} {v.make} {v.model}
-                            </h4>
+                            </h3>
                           </div>
                           {v.verified && <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" aria-label="Verified listing" />}
                         </div>
@@ -1792,8 +1821,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </button>
           </div>
           <div className="bg-[#F4F8FC] p-8 sm:p-9 flex flex-col justify-center">
-            <h4 className="text-lg font-bold text-navy-900 mb-2 max-w-xs">Ready to sell your vehicle?</h4>
-            <p className="text-xs text-[#64748B] mb-4 max-w-xs">Reach interested buyers through the KAYAD marketplace and manage your listing through the existing Seller Studio.</p>
+            <h3 className="text-lg font-bold text-navy-900 mb-2 max-w-xs">Ready to sell your vehicle?</h3>
+            <p className="text-xs text-[#58717B] mb-4 max-w-xs">Reach interested buyers through the KAYAD marketplace and manage your listing through the existing Seller Studio.</p>
             <button onClick={() => onNavigate('seller-platform')} className="self-start bg-navy-900 hover:bg-navy-700 text-white text-sm font-bold px-5 py-2.5 rounded-full">
               Sell Your Vehicle →
             </button>
@@ -1816,66 +1845,66 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       {showMobileFilterDrawer && (
         <div className="fixed inset-0 bg-white z-50 overflow-y-auto lg:hidden" role="dialog" aria-modal="true" aria-labelledby="kayad-mobile-filter-title">
           <div className="sticky top-0 bg-white border-b border-[#D7E7E4] px-4 py-3 flex items-center justify-between">
-            <div><h3 id="kayad-mobile-filter-title" className="text-sm font-extrabold text-navy-900">Refine inventory</h3><p className="text-[10px] text-[#94A3B8] mt-0.5">Adjust any filter, then return to the results.</p></div>
+            <div><h3 id="kayad-mobile-filter-title" className="text-sm font-extrabold text-navy-900">Refine inventory</h3><p className="text-[10px] text-[#64748B] mt-0.5">Adjust any filter, then return to the results.</p></div>
             <button onClick={() => setShowMobileFilterDrawer(false)} className="p-1.5" aria-label="Close filters">
               <X className="w-5 h-5 text-[#64748B]" aria-hidden="true" />
             </button>
           </div>
           <div className="p-4 space-y-4 pb-8">
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Make</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Make</label>
               <select aria-label="Mobile make filter" value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
                 {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
               </select>
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Model</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Model</label>
               <select aria-label="Mobile model filter" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
                 {models.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Models' : m}</option>)}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Min price</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Min price</label>
                 <input type="number" value={minPrice || ''} onChange={(e) => setMinPrice(Number(e.target.value) || 0)} placeholder="Ksh 50K" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Max price</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Max price</label>
                 <input type="number" value={maxPrice === 20000000 ? '' : maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value) || 20000000)} placeholder="Ksh 20M" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">From year</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">From year</label>
                 <input type="number" value={minYear === 2005 ? '' : minYear} onChange={(e) => setMinYear(Number(e.target.value) || 2005)} placeholder="2005" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">To year</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">To year</label>
                 <input type="number" value={maxYear === 2026 ? '' : maxYear} onChange={(e) => setMaxYear(Number(e.target.value) || 2026)} placeholder="2026" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Body style</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Body style</label>
               <select aria-label="Mobile body style filter" value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
                 {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
               </select>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Fuel type</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Fuel type</label>
                 <select aria-label="Mobile fuel filter" value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
                   {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Transmission</label>
+                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Transmission</label>
                 <select aria-label="Mobile transmission filter" value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
                   {transmissionOptions.map((t) => <option key={t} value={t}>{t === 'All' ? 'All Transmissions' : t}</option>)}
                 </select>
               </div>
             </div>
             <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#94A3B8] mb-2">Seller type</label>
+              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Seller type</label>
               <select aria-label="Mobile seller type filter" value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
                 {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
               </select>

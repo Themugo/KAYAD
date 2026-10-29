@@ -142,14 +142,38 @@ export interface SingleCarResponse {
 
 export type VehicleApiErrorKind = 'network' | 'not_found' | 'server' | 'unknown';
 
+/** Structured, non-sensitive facts from the response body (e.g. the backend's maintenance 503
+ * `{ code, maintenance, scope }`), so callers can tell a maintenance pause from a real outage. */
+export interface VehicleApiErrorDetails {
+  code?: string;
+  maintenance?: boolean;
+  scope?: string;
+}
+
 export class VehicleApiError extends Error {
   kind: VehicleApiErrorKind;
   status?: number;
-  constructor(message: string, kind: VehicleApiErrorKind, status?: number) {
+  code?: string;
+  maintenance?: boolean;
+  scope?: string;
+  constructor(message: string, kind: VehicleApiErrorKind, status?: number, details?: VehicleApiErrorDetails) {
     super(message);
     this.kind = kind;
     this.status = status;
+    this.code = details?.code;
+    this.maintenance = details?.maintenance;
+    this.scope = details?.scope;
   }
+}
+
+function errorDetailsFrom(body: unknown): VehicleApiErrorDetails | undefined {
+  if (!body || typeof body !== 'object') return undefined;
+  const b = body as Record<string, unknown>;
+  const details: VehicleApiErrorDetails = {};
+  if (typeof b.code === 'string') details.code = b.code;
+  if (typeof b.maintenance === 'boolean') details.maintenance = b.maintenance;
+  if (typeof b.scope === 'string') details.scope = b.scope;
+  return Object.keys(details).length ? details : undefined;
 }
 
 async function vehicleFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -158,7 +182,7 @@ async function vehicleFetch<T>(path: string, options: RequestInit = {}): Promise
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
     const kind: VehicleApiErrorKind = error.status === 404 ? 'not_found' : error.status ? 'server' : 'network';
-    throw new VehicleApiError(error.message, kind, error.status);
+    throw new VehicleApiError(error.message, kind, error.status, errorDetailsFrom(error.responseData));
   }
 }
 

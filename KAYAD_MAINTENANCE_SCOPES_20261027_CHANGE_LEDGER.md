@@ -44,3 +44,28 @@ Base: `KAYAD-INCIDENT-20261027-OWNER-MAINTENANCE-LANE-FIX.zip` (original archive
 
 ## Not changed
 Public marketplace routes, design/pages, rate limiters, CSRF, MFA services, owner rank protection, owner tables/migrations, hosted data, env vars. No database migration is required.
+
+---
+# Addendum — final security verification round (2026-10-27, later)
+
+Foundation: `KAYAD-MAINTENANCE-SCOPES-20261027-OWNER-RECOVERY.zip` (sha256 `49f10132efe87fc4a1ba313fd95e5e2f28b7360c8a50838c288e2dda23b5526f`, re-verified: sidecar OK, `unzip -t` OK, 11,126-entry manifest 0 mismatches). The previous archive is preserved untouched. Full review of the implementation and tests (policy, enforcement, control service/routes, `systemCheck`, `protect`, login/refresh/logout, legacy endpoints, limiters) found two defects, both fixed here; no owner-lockout or privilege-bypass defect was found.
+
+| # | Finding | Severity | Fix |
+|---|---|---|---|
+| F1 | **A restricted user could not call `POST /auth/logout` during maintenance** (it was blocked like any signed-in route), so they could not end or revoke their own session/refresh tokens while maintenance was active | Medium (session hygiene; the task asks to preserve "safe logout") | `classifyRoute` marks the exact `POST /auth/logout` route `logout:true`; `decide` always allows it (reason `SAFE_LOGOUT`) for every identity and scope. It only revokes the caller's own tokens. Verified: matrix E2E logs out all nine identities in every scope and the token is 401 afterwards |
+| F2 | **Fail-open on settings-store read errors silently re-opened a platform the owner had deliberately shut down** once the 10 s cache expired during a store outage | Medium (policy) | `systemCheck` keeps the last known good state and keeps enforcing it when the store cannot be read (fail-static), retrying every ~2 s; with no prior knowledge it still fails open (unchanged). Every successful local write discards the last-known state so a recovery can never be undone by a later read failure. Verified in unit tests (5) and E2E F1–F7 against a really stopped PostgREST |
+
+## Files changed in this round
+| File | Change |
+|---|---|
+| `backend/config/maintenancePolicy.js` | `logout` route flag + `SAFE_LOGOUT` decision |
+| `backend/middleware/systemCheck.js` | last-known-good (fail-static) state, back-off, `__resetSystemStatusState` test hook, cache invalidation also drops last-known state |
+| `backend/tests/regression/maintenanceEnforcementPolicy.test.js` | +7 tests (safe logout for every identity/scope; fail-static ×5) |
+| `runbooks/phase16e-maintenance-scopes-20261027/http/e2e_maintenance_scope_matrix.cjs` (new) | 4 scopes × 9 identities × (anonymous, login, existing token, `/auth/me`, direct API, bearer-only, control plane, refresh token, logout, recovery) against a hand-written oracle, plus audit counts |
+| `.../http/e2e_maintenance_security_controls.cjs` (new) | technical-staff privilege differential vs an ungranted twin (16 admin/finance/auction/escrow routes, writes, during and outside shutdown), CSRF, legacy endpoints, feature switches, store-outage policy |
+| `.../http/e2e_maintenance_rate_limits.cjs` (new) | step-up and admin limiters on the control plane |
+| `.../ui/browser_owner_mfa_recovery.cjs` (new) | primary owner with an enrolled authenticator: MFA login during a global shutdown, session verification, Panic Room, wrong code refused, recovery |
+| `.../http/e2e_maintenance_scopes.cjs`, `.../http/*`, `.../ui/browser_maintenance_scopes.cjs` | lint-only edits (globals, unused bindings) |
+| `KAYAD_MAINTENANCE_SCOPES_20261027_POLICY_MATRIX.md` | logout rule; failure-policy section (fail-static) |
+
+No application source other than the two files above changed; no schema, env var, dependency or hosted change.

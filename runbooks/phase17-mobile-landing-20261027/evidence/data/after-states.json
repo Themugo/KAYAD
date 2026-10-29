@@ -1,0 +1,101 @@
+[
+ {
+  "name": "1-healthy",
+  "apiStatuses": [
+   200,
+   200,
+   200
+  ],
+  "pill": "3 vehicles",
+  "pillState": "loaded",
+  "panel": null,
+  "empty": null,
+  "ref": null,
+  "ovf": 0
+ },
+ {
+  "name": "2-maintenance-real",
+  "apiStatuses": [
+   503,
+   503,
+   503
+  ],
+  "pill": "Inventory paused",
+  "pillState": "maintenance",
+  "panel": "Inventory is paused for maintenance",
+  "empty": null,
+  "ref": "Reference: HTTP 503",
+  "ovf": 0
+ },
+ {
+  "name": "2b-retry-after-recovery",
+  "pillWasButton": 1,
+  "pillAfterRetry": "3 vehicles"
+ },
+ {
+  "name": "3-empty-real",
+  "apiStatuses": [
+   200,
+   200,
+   200
+  ],
+  "pill": "0 vehicles",
+  "pillState": "loaded",
+  "panel": null,
+  "empty": "No vehicles are listed right now",
+  "ref": null,
+  "ovf": 0
+ },
+ {
+  "name": "4-db-down-real",
+  "apiStatuses": [
+   500,
+   502,
+   408
+  ],
+  "pill": "Inventory unavailable",
+  "pillState": "unavailable",
+  "panel": "Inventory is temporarily unavailable",
+  "empty": null,
+  "ref": "Reference: HTTP 500",
+  "ovf": 0
+ },
+ {
+  "name": "5-network-MOCK",
+  "apiStatuses": [],
+  "pill": "Can’t reach inventory",
+  "pillState": "network",
+  "panel": "We can’t reach KAYAD right now",
+  "empty": null,
+  "ref": null,
+  "ovf": 0
+ },
+ {
+  "name": "6-403-MOCK",
+  "apiStatuses": [
+   403,
+   403,
+   403
+  ],
+  "pill": "Inventory restricted",
+  "pillState": "restricted",
+  "panel": "Inventory could not be shown for this session",
+  "empty": null,
+  "ref": "Reference: HTTP 403",
+  "ovf": 0
+ },
+ {
+  "name": "7-504-MOCK",
+  "apiStatuses": [
+   504,
+   504,
+   504
+  ],
+  "pill": "Inventory timed out",
+  "pillState": "timeout",
+  "panel": "Inventory took too long to respond",
+  "empty": null,
+  "ref": "Reference: HTTP 504",
+  "ovf": 0
+ }
+]

@@ -531,7 +531,7 @@ function AppInner() {
         onOpenAuth={handleOpenAuth}
         onOpenAlerts={() => setShowAlertsModal(true)}
         onOpenCompare={() => setShowCompareModal(true)}
-        onLogout={() => { authLogout(); }}
+        onLogout={() => { void authLogout(); }}
       />
 
       {/* 2. Main Container (Inventory Priority & Clear Hierarchy) */}

@@ -32,7 +32,7 @@ Rollback of A: `update system_settings set value=jsonb_set(value,'{isMaintenance
 ---
 ## Operation B — deploy the verified code
 
-**Exact version:** the project ZIP `KAYAD-MAINTENANCE-SCOPES-20261027-OWNER-RECOVERY.zip`; its SHA-256 is in the sidecar `...zip.sha256` and in the delivery message. Deploy only from a tree whose re-extracted hash matches. Changed files are listed in `KAYAD_MAINTENANCE_SCOPES_20261027_CHANGE_LEDGER.md`. Backend and frontend (build) both deploy; backend and frontend must go out together (the Panic Room calls the new endpoints).
+**Exact version:** the project ZIP `KAYAD-MAINTENANCE-SCOPES-20261027-FINAL-VERIFIED.zip` (this verification round; supersedes `...-OWNER-RECOVERY.zip`, which lacks the safe-logout and fail-static fixes); its SHA-256 is in the sidecar `...zip.sha256`, the integrity log and the delivery message. Deploy only from a tree whose re-extracted hash matches. Changed files are listed in `KAYAD_MAINTENANCE_SCOPES_20261027_CHANGE_LEDGER.md`. Backend and frontend (build) both deploy; backend and frontend must go out together (the Panic Room calls the new endpoints).
 
 **Dependencies to migrate / configure**
 | Item | Needed? |
@@ -41,6 +41,7 @@ Rollback of A: `update system_settings set value=jsonb_set(value,'{isMaintenance
 | Environment variables | **None new.** Existing owner configuration must already be correct: legacy mode needs `WEBHOIST_EMAIL` to start with the owner's address (`jimmythemugo@gmail.com`) **or** the owner-governance migrations applied. **Unverified on hosted** — I cannot read hosted env. Confirm before B; if it is wrong, owner recognition (and therefore the recovery lane) will not work |
 | `OWNER_MFA_ENCRYPTION_KEY` | Only if the owner has/enrols an authenticator. If the hosted owner has MFA enrolled, the key must be the one used at enrolment |
 | `platform_recovery` grant | Optional, after deploy: the System Owner grants it to named engineers via Staff Permissions. No grant = no technical recovery (owner only) |
+| Last-known-state memory | Fail-static state is held in process memory only; a freshly started instance with the store down fails open until its first successful read (documented residual risk) |
 | PostgREST | The CAS update uses a JSON-path filter (`value->>maintenanceVersion`). Verified against local PostgREST only; run the post-deploy test #4 below on hosted |
 
 **Preconditions (all must hold before approving B)**
@@ -51,6 +52,8 @@ Rollback of A: `update system_settings set value=jsonb_set(value,'{isMaintenance
 
 **Deploy steps:** build/deploy backend and frontend from the verified tree → wait for health green.
 
+**Pre-deploy read-only check (repeat just before B):** `select value from system_settings where key='system_status'` — record whether the flag is on. If Operation A has not been run, the owner's first sign-in after deploy happens under the legacy (global) row and goes through the recovery lane.
+
 **Health checks:** `GET /api/health` 200 with `database: ok`; `GET /api/cars` (public) 200; response headers/bundle show the new build id.
 
 **Post-deployment login tests (owner must run, with their own password)**
@@ -59,6 +62,8 @@ Rollback of A: `update system_settings set value=jsonb_set(value,'{isMaintenance
 3. Panic Room shows "Maintenance not active" and four scopes (state from the server).
 4. Rehearsal that proves the lane on hosted without disturbing buyers: activate scope **Dealers** (reason "post-deploy rehearsal") → status shows server-confirmed active; a dealer test account is refused, a buyer is not; then **Recover** (password step-up) → inactive. Skip the dealer-account check if no test dealer exists; do NOT rehearse the global scope on production.
 5. Public marketplace pages load for an anonymous visitor throughout.
+6. Log out as the owner (must succeed), sign in again; confirm a second test account can also log out during the rehearsal.
+7. Do NOT grant `platform_recovery` to anyone until the staff-MFA decision in the risks document is made.
 
 **Rollback of B**
 1. **First make sure maintenance is inactive** (Panic Room recover, or the Operation A SQL). Reason: the previous build only understands `isMaintenanceMode` and would treat a still-active *scoped* state as a GLOBAL shutdown (restoring the original incident).
@@ -66,3 +71,10 @@ Rollback of A: `update system_settings set value=jsonb_set(value,'{isMaintenance
 3. Re-run the login test #1. If sign-in is blocked, apply Operation A's SQL.
 
 **Independent safety net:** the Operation A SQL works on both old and new code and is the break-glass path if the app is unreachable.
+
+---
+## Approval request (separate decisions; NOTHING has been executed)
+
+**Operation A — approve?** One-row SQL above (hosted flag `isMaintenanceMode` true → false, plus one audit row). Current hosted state verified read-only this round: still `true`. Reply `approve Operation A` to authorise exactly that SQL.
+
+**Operation B — approve?** Deploy the verified ZIP above (backend + frontend, no migration, no env change) with the preconditions, health checks, login tests and rollback in this document. Reply `approve Operation B` to authorise exactly that deployment. Approving A does not approve B, and approving B does not approve A.

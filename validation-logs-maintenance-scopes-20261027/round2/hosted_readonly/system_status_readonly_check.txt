@@ -1,0 +1,6 @@
+READ-ONLY verification of the hosted maintenance flag (Supabase project KAYAD EA ubvgixwhfybbyjuvxboj), performed 2026-10-27 during the final verification round.
+Statement executed (SELECT only, nothing changed):  select value::text as value, updated_at from system_settings where key='system_status';
+Result:
+  value      = {"isAuctionActive": true, "emergencyMessage": "System under scheduled maintenance.", "isPaymentsActive": true, "isMaintenanceMode": true, "isGhostCheckActive": true}
+  updated_at = 2026-10-27 06:17:02.938545+00
+Conclusion: the hosted maintenance flag is STILL ENABLED (isMaintenanceMode:true), unchanged since 06:17:02 UTC. It is a legacy-shaped row (no maintenanceScope / maintenanceVersion). No hosted setting, account, env var or deployment was modified.

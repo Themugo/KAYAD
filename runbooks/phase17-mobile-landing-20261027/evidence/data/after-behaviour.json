@@ -1,0 +1,115 @@
+{
+ "label": "after",
+ "widths": {
+  "360": {
+   "headerTopAfterScroll": 0,
+   "endClearance": {
+    "footerBottom": 716,
+    "navTop": 736,
+    "footerClear": true
+   },
+   "lastContentVisibleAboveNav": "footer fully above nav",
+   "smallTargets": [
+    {
+     "n": "Toggle navigation menu",
+     "w": 42,
+     "h": 44
+    }
+   ],
+   "axe": [],
+   "activeInitial": "Home",
+   "urlAfterAuction": "/?nav=discovery",
+   "activeAfterAuction": "Auction",
+   "urlAfterBack": "about:blank",
+   "activeAfterBack": null,
+   "urlAfterForward": "/?nav=discovery",
+   "activeAfterForward": "Auction",
+   "directSaved": {
+    "url": "/login?next=%2F%3Fnav%3Dsaved",
+    "active": null
+   }
+  },
+  "390": {
+   "headerTopAfterScroll": 0,
+   "endClearance": {
+    "footerBottom": 716,
+    "navTop": 730,
+    "footerClear": true
+   },
+   "lastContentVisibleAboveNav": "footer fully above nav",
+   "smallTargets": [],
+   "axe": [],
+   "activeInitial": "Home",
+   "urlAfterAuction": "/?nav=discovery",
+   "activeAfterAuction": "Auction",
+   "urlAfterBack": "about:blank",
+   "activeAfterBack": null,
+   "urlAfterForward": "/?nav=discovery",
+   "activeAfterForward": "Auction",
+   "directSaved": {
+    "url": "/login?next=%2F%3Fnav%3Dsaved",
+    "active": null
+   }
+  },
+  "430": {
+   "headerTopAfterScroll": 0,
+   "endClearance": {
+    "footerBottom": 716,
+    "navTop": 730,
+    "footerClear": true
+   },
+   "lastContentVisibleAboveNav": "footer fully above nav",
+   "smallTargets": [],
+   "axe": [],
+   "activeInitial": "Home",
+   "urlAfterAuction": "/?nav=discovery",
+   "activeAfterAuction": "Auction",
+   "urlAfterBack": "about:blank",
+   "activeAfterBack": null,
+   "urlAfterForward": "/?nav=discovery",
+   "activeAfterForward": "Auction",
+   "directSaved": {
+    "url": "/login?next=%2F%3Fnav%3Dsaved",
+    "active": null
+   }
+  },
+  "768": {
+   "headerTopAfterScroll": 0,
+   "endClearance": {
+    "footerBottom": 716,
+    "navTop": 726,
+    "footerClear": true
+   },
+   "lastContentVisibleAboveNav": "footer fully above nav",
+   "smallTargets": [
+    {
+     "n": "Messages",
+     "w": 40,
+     "h": 40
+    },
+    {
+     "n": "Sell Vehicle",
+     "w": 118,
+     "h": 40
+    },
+    {
+     "n": "Sign In / Sign Up",
+     "w": 141,
+     "h": 40
+    }
+   ],
+   "axe": [],
+   "activeInitial": "Home",
+   "urlAfterAuction": "/?nav=discovery",
+   "activeAfterAuction": "Auction",
+   "urlAfterBack": "about:blank",
+   "activeAfterBack": null,
+   "urlAfterForward": "/?nav=discovery",
+   "activeAfterForward": "Auction",
+   "directSaved": {
+    "url": "/login?next=%2F%3Fnav%3Dsaved",
+    "active": null
+   }
+  }
+ }
+}
