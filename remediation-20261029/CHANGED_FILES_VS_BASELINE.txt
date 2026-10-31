@@ -1,0 +1,18 @@
+Files baseline/KAYAD/backend/routes/adminRoutes.js and w2/KAYAD/backend/routes/adminRoutes.js differ
+Only in w2/KAYAD/backend/tests/regression: adminRoutesImport.test.js
+Files baseline/KAYAD/backend/tests/regression/stage5f5RoleRouteMatrix.test.js and w2/KAYAD/backend/tests/regression/stage5f5RoleRouteMatrix.test.js differ
+Files baseline/KAYAD/backend/tests/regression/stage5f5StaffGovernance.test.js and w2/KAYAD/backend/tests/regression/stage5f5StaffGovernance.test.js differ
+Only in w2/KAYAD/backend: uploads
+Only in w2/KAYAD: logs
+Files baseline/KAYAD/src/__tests__/features/adManagerControl.test.tsx and w2/KAYAD/src/__tests__/features/adManagerControl.test.tsx differ
+Files baseline/KAYAD/src/__tests__/features/adminCommandCentre.test.tsx and w2/KAYAD/src/__tests__/features/adminCommandCentre.test.tsx differ
+Files baseline/KAYAD/src/__tests__/features/auctionsViewLoadFailure.test.tsx and w2/KAYAD/src/__tests__/features/auctionsViewLoadFailure.test.tsx differ
+Files baseline/KAYAD/src/__tests__/features/automotive/serviceFinder.test.tsx and w2/KAYAD/src/__tests__/features/automotive/serviceFinder.test.tsx differ
+Files baseline/KAYAD/src/__tests__/pages/admin/AdminMarketData.test.jsx and w2/KAYAD/src/__tests__/pages/admin/AdminMarketData.test.jsx differ
+Files baseline/KAYAD/src/__tests__/pages/admin/adminLightSurfaces.test.jsx and w2/KAYAD/src/__tests__/pages/admin/adminLightSurfaces.test.jsx differ
+Files baseline/KAYAD/src/__tests__/pages/admin/adminNoRequestStorm.test.jsx and w2/KAYAD/src/__tests__/pages/admin/adminNoRequestStorm.test.jsx differ
+Files baseline/KAYAD/src/__tests__/pages/admin/adminTables.test.jsx and w2/KAYAD/src/__tests__/pages/admin/adminTables.test.jsx differ
+Files baseline/KAYAD/src/__tests__/pages/admin/adminTruthfulness.test.jsx and w2/KAYAD/src/__tests__/pages/admin/adminTruthfulness.test.jsx differ
+Files baseline/KAYAD/src/__tests__/phase15/superAdminOperationalIntegrity.test.jsx and w2/KAYAD/src/__tests__/phase15/superAdminOperationalIntegrity.test.jsx differ
+Files baseline/KAYAD/src/features/AdminView.tsx and w2/KAYAD/src/features/AdminView.tsx differ
+Files baseline/KAYAD/src/pages/admin/WebhoistOverview.jsx and w2/KAYAD/src/pages/admin/WebhoistOverview.jsx differ
