@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminVerificationAPI } from '../../api/api';
+import AdminLoadNotice from '../../components/admin/AdminLoadNotice';
 import { ShieldCheck, Search, CheckCircle, XCircle, Eye, FileText, X, AlertTriangle } from 'lucide-react';
 
 const STATUS_COLORS = {
@@ -36,7 +37,9 @@ function Modal({ title, children, onClose }) {
 export default function AdminDealerVerifications() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState('');
+  const [loadError, setLoadError] = useState(null);
+  const [lastSuccessAt, setLastSuccessAt] = useState(null);
+  const loadedKeyRef = useRef(null);
   const [actionError, setActionError] = useState('');
   const [filter, setFilter] = useState('');
   const [search, setSearch] = useState('');
@@ -45,13 +48,14 @@ export default function AdminDealerVerifications() {
   const [actionNotes, setActionNotes] = useState('');
   const [processing, setProcessing] = useState(false);
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, pages: 0 });
-  const [summary, setSummary] = useState({ pending: 0, approved: 0, rejected: 0, suspended: 0, total: 0 });
+  const [summary, setSummary] = useState(null); // null = not confirmed by the server; never an initial block of zeros
   const requestSequence = useRef(0);
 
   const load = useCallback(async () => {
     const sequence = ++requestSequence.current;
     setLoading(true);
-    setLoadError('');
+    setLoadError(null);
+    const queryKey = JSON.stringify([pagination.page, filter]);
     try {
       const params = { page: pagination.page, limit: pagination.limit, ...(filter ? { status: filter } : {}) };
       const data = await adminVerificationAPI.list(params);
@@ -59,9 +63,15 @@ export default function AdminDealerVerifications() {
       if (sequence !== requestSequence.current) return;
       setItems(data.verifications);
       if (data.pagination) setPagination(current => ({ ...current, ...data.pagination }));
-      if (data.summary) setSummary(current => ({ ...current, ...data.summary }));
+      setSummary(data.summary && typeof data.summary === 'object' ? (current => ({ ...(current || {}), ...data.summary })) : null);
+      setLastSuccessAt(new Date());
+      loadedKeyRef.current = queryKey;
     } catch (err) {
-      if (sequence === requestSequence.current) setLoadError(err?.response?.data?.message || 'Dealer verification records could not be loaded. Check access or connectivity and retry.');
+      if (sequence === requestSequence.current) {
+        setLoadError(err || new Error('Dealer verification records could not be loaded.'));
+        // Rows of another status/page are never kept under this query.
+        if (loadedKeyRef.current !== queryKey) { setItems([]); setSummary(null); setLastSuccessAt(null); }
+      }
     } finally { if (sequence === requestSequence.current) setLoading(false); }
   }, [filter, pagination.page, pagination.limit]);
 
@@ -108,7 +118,7 @@ export default function AdminDealerVerifications() {
     } finally { setProcessing(false); }
   };
 
-  const countByStatus = (status) => Number(summary[status] || 0);
+  const countByStatus = (status) => (summary && Number.isFinite(Number(summary[status])) ? Number(summary[status]) : '—');
 
   return (
     <div style={{ padding: '32px 32px' }}>
@@ -122,14 +132,10 @@ export default function AdminDealerVerifications() {
             Review and manage dealer verification applications
           </p>
         </div>
+        <button type="button" className="btn btn-sm btn-outline" onClick={load} disabled={loading} aria-label="Refresh dealer verifications">{loading ? 'Refreshing…' : '↻ Refresh'}</button>
       </div>
 
-      {loadError && (
-        <div role="alert" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 18, padding: 14, borderRadius: 10, border: '1px solid rgba(239,68,68,.35)', background: 'rgba(239,68,68,.08)', color: 'var(--admin-status-danger)' }}>
-          <span>{loadError}</span>
-          <button onClick={load} style={{ padding: '7px 12px', borderRadius: 7, border: '1px solid var(--admin-border)', color: 'var(--admin-ink)' }}>Retry</button>
-        </div>
-      )}
+      <AdminLoadNotice error={loadError} subject="Dealer verification records" hasData={items.length > 0} lastSuccessAt={lastSuccessAt} onRetry={load} retrying={loading} />
 
       {/* Stats */}
       <div style={{ display: 'flex', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
@@ -137,7 +143,7 @@ export default function AdminDealerVerifications() {
           { label: 'Pending', count: countByStatus('pending'), color: '#176b87' },
                     { label: 'Approved', count: countByStatus('approved'), color: 'var(--admin-status-success)' },
           { label: 'Rejected', count: countByStatus('rejected'), color: 'var(--admin-status-danger)' },
-          { label: 'Total', count: Number(summary.total || pagination.total || 0), color: 'var(--admin-ink)' },
+          { label: 'Total', count: summary && Number.isFinite(Number(summary.total ?? pagination.total)) && lastSuccessAt ? Number(summary.total ?? pagination.total) : '—', color: 'var(--admin-ink)' },
         ].map(stat => (
           <div key={stat.label} style={{
             background: 'var(--card)', border: '1px solid var(--border)',
@@ -189,7 +195,7 @@ export default function AdminDealerVerifications() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {loading && items.length === 0 ? (
                 <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40 }}><div className="spinner" /></td></tr>
               ) : filtered.length === 0 ? (
                 <tr><td colSpan={6} style={{ textAlign: 'center', padding: 40, color: 'var(--admin-muted-content)' }}>{loadError ? 'Records unavailable until the request succeeds.' : 'No verification requests match this filter.'}</td></tr>
@@ -249,7 +255,7 @@ export default function AdminDealerVerifications() {
         </div>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', padding: '12px 2px', color: 'var(--admin-muted-content)', fontSize: 12 }}>
-        <span>Showing {items.length ? ((pagination.page - 1) * pagination.limit + 1) : 0}–{Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} verification records</span>
+        <span>{lastSuccessAt ? `Showing ${items.length ? ((pagination.page - 1) * pagination.limit + 1) : 0}–${Math.min(pagination.page * pagination.limit, pagination.total)} of ${pagination.total} verification records` : 'Record count unavailable until the list loads successfully'}</span>
         <div style={{ display: 'flex', gap: 8 }}>
           <button type="button" disabled={loading || pagination.page <= 1} onClick={() => setPagination(p => ({ ...p, page: p.page - 1 }))} style={{ padding: '7px 12px', border: '1px solid var(--admin-border)', borderRadius: 7, background: 'var(--card)', color: 'var(--admin-ink)', cursor: pagination.page <= 1 ? 'not-allowed' : 'pointer' }}>Previous</button>
           <span style={{ alignSelf: 'center' }}>Page {pagination.page} of {Math.max(1, pagination.pages)}</span>

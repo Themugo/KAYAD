@@ -19,7 +19,7 @@ const checks = [
   ['inspector approval rejects non-pending or self-review', inspectorController.includes('application.status !== "pending"') && inspectorController.includes('Cannot approve your own application')],
   ['dealer decisions use decision-authority guard and atomic RPC', adminRoutes.includes('requireDecisionAuthority("dealer")') && adminRoutes.includes('kayad_apply_dealer_verification_atomic')],
   ['vehicle listing decisions use decision-authority guard', adminRoutes.includes('requireDecisionAuthority("listing")') && adminRoutes.includes('LISTING_MODERATION_BLOCKED')],
-  ['inspector page has visible error and retry state', inspectorUi.includes('role="alert"') && inspectorUi.includes('Retry loading applications')],
+  ['inspector page has visible error and retry state', (inspectorUi.includes('role="alert"') || (inspectorUi.includes('<AdminLoadNotice') && fs.readFileSync(new URL('../src/components/admin/AdminLoadNotice.jsx', import.meta.url), 'utf8').includes('role="alert"'))) && inspectorUi.includes('Retry loading applications')],
   ['inspector refresh protects against stale response races', inspectorUi.includes('requestSequence.current') && inspectorUi.includes('requestId !== requestSequence.current')],
   ['tests assert canonical workflow route destinations', tests.includes('Command centre — canonical approval workbench') && tests.includes("'/admin/inspector-applications'")],
   ['no new approval API endpoints added by this phase', !admin.includes('/api/v4/') && !admin.includes('fetch("/api/approval-workbench')],

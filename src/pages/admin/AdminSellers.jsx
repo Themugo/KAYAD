@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
+import AdminLoadNotice from '../../components/admin/AdminLoadNotice';
 
 import { X, Search } from 'lucide-react';
 export default function AdminSellers() {
@@ -11,18 +12,29 @@ export default function AdminSellers() {
   const [filter, setFilter] = useState('all');
   const [selected, setSelected] = useState(null);
   const [editing, setEditing] = useState(null);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(null);
+  const [lastSuccessAt, setLastSuccessAt] = useState(null);
+  const loadedKeyRef = useRef(null);
   const [saving, setSaving] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(null);
 
   const fetchSellers = useCallback(async () => {
     setLoading(true);
-    setError('');
+    setError(null);
+    const queryKey = JSON.stringify([page, search.trim(), filter]);
     try {
       // Seller Management is the dealer/commercial-account workspace; never fetch every platform user here.
-      const roleParam = 'dealer';
-      const data = await adminAPI.users({ role: roleParam, search: search || undefined });
-      const users = data.users || data.data || [];
+      // Status tabs are answered by the server so a dealer beyond the first page can never make a queue look empty.
+      const params = { role: 'dealer', page, limit: 20, search: search.trim() || undefined };
+      if (filter === 'pending') params.status = 'pending';
+      else if (filter === 'approved') params.status = 'approved';
+      else if (filter === 'suspended') params.banned = true;
+      const data = await adminAPI.users(params);
+      const users = data?.users ?? data?.data;
+      if (!Array.isArray(users)) throw new Error('The server returned an unexpected seller-list response.');
+      const reportedTotal = Number(data?.pagination?.total ?? data?.total);
       const mapped = users.map(u => ({
         id: u._id,
         businessName: u.businessName || u.name,
@@ -33,22 +45,23 @@ export default function AdminSellers() {
         commission: u.commission ?? null,
         waiver: u.waiver ?? null,
         discount: u.discount ?? null,
-        totalSales: u.totalSales || 0,
-        listingCount: u.listingCount || 0,
-        rating: u.dealerRating || 0,
+        totalSales: u.totalSales ?? null,
+        listingCount: u.listingCount ?? null,
+        rating: u.dealerRating ?? null,
         createdAt: u.createdAt,
       }));
-      const filtered = filter === 'pending' ? mapped.filter(s => s.status === 'pending')
-        : filter === 'suspended' ? mapped.filter(s => s.status === 'suspended')
-        : filter === 'approved' ? mapped.filter(s => s.status === 'approved')
-        : mapped;
-      setSellers(filtered);
+      setSellers(mapped);
+      setTotal(Number.isFinite(reportedTotal) ? reportedTotal : mapped.length);
+      setLastSuccessAt(new Date());
+      loadedKeyRef.current = queryKey;
     } catch (err) {
-      setError(err?.response?.data?.message || 'Seller records could not be loaded. This does not mean there are no sellers. Check your connection and try again.');
+      setError(err || new Error('Seller records could not be loaded.'));
+      // Rows are kept (and labelled stale) only when they answer the same search/status/page; another query's rows are never relabelled.
+      if (loadedKeyRef.current !== queryKey) { setSellers([]); setTotal(null); }
     } finally {
       setLoading(false);
     }
-  }, [filter, search]);
+  }, [filter, search, page]);
 
   useEffect(() => { fetchSellers(); }, [fetchSellers]);
 
@@ -117,8 +130,8 @@ export default function AdminSellers() {
           </div>
           <div style={{ border: '1px solid var(--border)', background: 'var(--surface)', borderRadius: 12, padding: '10px 14px', minWidth: 140 }}>
             <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '.07em' }}>Current results</div>
-            <div style={{ fontSize: 23, fontWeight: 700, marginTop: 3 }}>{loading ? '—' : sellers.length}</div>
-            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Loaded records only</div>
+            <div style={{ fontSize: 23, fontWeight: 700, marginTop: 3 }}>{total === null || (loading && sellers.length === 0) ? '—' : total.toLocaleString()}</div>
+            <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{total === null ? 'Count unavailable' : 'Matching sellers (server count)'}</div>
           </div>
         </div>
 
@@ -126,11 +139,12 @@ export default function AdminSellers() {
           <label style={{ position: 'relative', flex: '1 1 280px', maxWidth: 440 }}>
             <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', display: 'flex' }}><Search size={16} aria-hidden="true" /></span>
             <input className="input" aria-label="Search sellers" placeholder="Search seller, business or email..." value={search}
-              onChange={e => setSearch(e.target.value)} style={{ width: '100%', paddingLeft: 36 }} />
+              onChange={e => { setSearch(e.target.value); setPage(1); }} style={{ width: '100%', paddingLeft: 36 }} />
           </label>
+          <button type="button" className="btn btn-sm btn-outline" onClick={fetchSellers} disabled={loading} aria-label="Refresh sellers">{loading ? 'Refreshing…' : '↻ Refresh'}</button>
           <div role="group" aria-label="Filter sellers by status" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {['all', 'approved', 'pending', 'suspended'].map(f => (
-              <button key={f} type="button" onClick={() => setFilter(f)} aria-pressed={filter === f}
+              <button key={f} type="button" onClick={() => { setFilter(f); setPage(1); }} aria-pressed={filter === f}
                 className={`btn btn-sm ${filter === f ? 'btn-gold' : 'btn-outline'}`}>
                 {f === 'all' ? 'All sellers' : f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
@@ -138,15 +152,7 @@ export default function AdminSellers() {
           </div>
         </div>
 
-        {error && (
-          <div role="alert" className="card" style={{ borderColor: 'var(--danger, #b45309)', padding: 16, marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <div>
-              <div style={{ fontWeight: 700, marginBottom: 4 }}>Seller records unavailable</div>
-              <div style={{ color: 'var(--text-muted)', fontSize: 13 }}>{error}</div>
-            </div>
-            <button type="button" className="btn btn-outline btn-sm" onClick={fetchSellers} disabled={loading}>Retry</button>
-          </div>
-        )}
+        <AdminLoadNotice error={error} subject="Seller records" hasData={sellers.length > 0} lastSuccessAt={lastSuccessAt} onRetry={fetchSellers} retrying={loading} />
 
         <div className="card" style={{ padding: 0 }}>
           <div className="table-wrap">
@@ -158,9 +164,9 @@ export default function AdminSellers() {
                 </tr>
               </thead>
               <tbody>
-                {loading ? (
+                {loading && sellers.length === 0 ? (
                   <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Loading sellers...</td></tr>
-                ) : error ? (
+                ) : error && sellers.length === 0 ? (
                   <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>Seller records are unavailable. Retry to load the authoritative list.</td></tr>
                 ) : sellers.length === 0 ? (
                   <tr><td colSpan={8} style={{ textAlign: 'center', padding: 44, color: 'var(--text-muted)' }}>
@@ -173,7 +179,7 @@ export default function AdminSellers() {
                   <tr key={s.id} style={{ cursor: 'pointer' }} onClick={() => setSelected(selected?.id === s.id ? null : s)}>
                     <td>
                       <div style={{ fontWeight: 600, fontSize: 13 }}>{s.businessName}</div>
-                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.name} · Rating {s.rating}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{s.name} · Rating {s.rating ?? 'not reported'}</div>
                     </td>
                     <td style={{ fontSize: 13 }}>
                       <div>{s.email}</div>
@@ -209,7 +215,7 @@ export default function AdminSellers() {
                         <span>{s.discount > 0 ? `${s.discount}%` : s.discount == null ? 'Not set' : '—'}</span>
                       )}
                     </td>
-                    <td style={{ fontWeight: 600, color: 'var(--brand-light)' }}>{formatKES(s.totalSales)}</td>
+                    <td style={{ fontWeight: 600, color: 'var(--brand-light)' }}>{s.totalSales === null ? 'Not reported' : formatKES(s.totalSales)}</td>
                     <td>
                       <span className={`badge ${s.status === 'approved' ? 'badge-green' : s.status === 'pending' ? 'badge-orange' : 'badge-muted'}`}>
                         {s.status}
@@ -233,6 +239,14 @@ export default function AdminSellers() {
               </tbody>
             </table>
           </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, padding: '12px 16px', borderTop: '1px solid var(--border)', fontSize: 12, color: 'var(--text-muted)' }}>
+            <span>{total === null ? 'Total unavailable' : `${total.toLocaleString()} matching sellers`}</span>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <button type="button" className="btn btn-sm btn-outline" disabled={page <= 1 || loading} onClick={() => setPage(p => p - 1)}>← Previous</button>
+              <span aria-current="page">Page {page}</span>
+              <button type="button" className="btn btn-sm btn-outline" disabled={loading || total === null || page * 20 >= total} onClick={() => setPage(p => p + 1)}>Next →</button>
+            </div>
+          </div>
         </div>
 
         {selected && (
@@ -249,9 +263,9 @@ export default function AdminSellers() {
                 { label: 'Commission Rate', val: `${selected.commission}%` },
                 { label: 'Fee Waiver', val: selected.waiver > 0 ? formatKES(selected.waiver) : 'None' },
                 { label: 'Discount', val: selected.discount > 0 ? `${selected.discount}%` : 'None' },
-                { label: 'Total Sales', val: formatKES(selected.totalSales) },
-                { label: 'Listings', val: selected.listingCount },
-                { label: 'Rating', val: `${selected.rating}/5` },
+                { label: 'Total Sales', val: selected.totalSales === null ? 'Not reported' : formatKES(selected.totalSales) },
+                { label: 'Listings', val: selected.listingCount ?? 'Not reported' },
+                { label: 'Rating', val: selected.rating === null ? 'Not reported' : `${selected.rating}/5` },
                 { label: 'Status', val: selected.status },
                 { label: 'Since', val: new Date(selected.createdAt).toLocaleDateString('en-KE') },
               ].map(r => (

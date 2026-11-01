@@ -78,7 +78,9 @@ export const carSearchQuerySchema = z.object({
 export const userListQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(100).default(20),
-  role: z.enum(["user", "dealer", "admin", "inspector"]).optional(),
+  // Must cover every role the Super Admin Users / Sellers filters offer (private sellers and Super Admins were rejected with 400,
+  // which the UI then reported as a failed load).
+  role: z.enum(["user", "dealer", "individual_seller", "admin", "superadmin", "inspector"]).optional(),
   isEmailVerified: z.coerce.boolean().optional(),
   isVerified: z.coerce.boolean().optional(),
   sortBy: z.enum(["createdAt", "name", "email"]).default("createdAt"),

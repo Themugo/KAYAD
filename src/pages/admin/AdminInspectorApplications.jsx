@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
+import AdminLoadNotice from '../../components/admin/AdminLoadNotice';
+import { classifyAdminFailure } from '../../utils/adminLoadFailure';
 
 const PAGE_SIZE = 20;
 const STATUS_META = {
@@ -8,7 +10,7 @@ const STATUS_META = {
   approved: { label: 'Approved', color: 'var(--green)', background: 'rgba(34, 197, 94, 0.10)' },
   rejected: { label: 'Rejected', color: 'var(--red)', background: 'rgba(239, 68, 68, 0.10)' },
 };
-const EMPTY_COUNTS = { pending: 0, approved: 0, rejected: 0, total: 0 };
+const EMPTY_COUNTS = null; // null = not confirmed by the server
 
 function safeDate(value) {
   if (!value) return '—';
@@ -41,13 +43,16 @@ export default function AdminInspectorApplications() {
   const [expanded, setExpanded] = useState(null);
   const [reviewNotes, setReviewNotes] = useState({});
   const [actionLoading, setActionLoading] = useState(null);
-  const [loadError, setLoadError] = useState('');
+  const [loadError, setLoadError] = useState(null);
+  const [lastSuccessAt, setLastSuccessAt] = useState(null);
+  const loadedKeyRef = useRef(null);
   const requestSequence = useRef(0);
 
   const fetchApps = useCallback(async ({ quiet = false } = {}) => {
     const requestId = ++requestSequence.current;
     if (!quiet) setLoading(true);
-    setLoadError('');
+    setLoadError(null);
+    const queryKey = JSON.stringify([page, statusFilter]);
     try {
       const params = { page, limit: PAGE_SIZE };
       if (statusFilter) params.status = statusFilter;
@@ -57,12 +62,12 @@ export default function AdminInspectorApplications() {
         throw new Error('The server returned an invalid inspector application response. No records were changed.');
       }
       setApps(response.applications);
-      setCounts({
-        pending: Number(response.statusCounts?.pending ?? 0),
-        approved: Number(response.statusCounts?.approved ?? 0),
-        rejected: Number(response.statusCounts?.rejected ?? 0),
-        total: Number(response.statusCounts?.total ?? response.pagination?.total ?? response.applications.length),
-      });
+      const sc = response.statusCounts;
+      const known = (v) => (v !== undefined && v !== null && Number.isFinite(Number(v)) ? Number(v) : null);
+      // A count the server did not report stays unconfirmed (null), it is never turned into 0.
+      setCounts(sc && typeof sc === 'object'
+        ? { pending: known(sc.pending), approved: known(sc.approved), rejected: known(sc.rejected), total: known(sc.total ?? response.pagination?.total) }
+        : null);
       const nextPagination = response.pagination || {};
       setPagination({
         page: Number(nextPagination.page || page),
@@ -70,13 +75,16 @@ export default function AdminInspectorApplications() {
         total: Number(nextPagination.total ?? response.applications.length),
         pages: Number(nextPagination.pages ?? (response.applications.length ? 1 : 0)),
       });
+      setLastSuccessAt(new Date());
+      loadedKeyRef.current = queryKey;
       return true;
     } catch (error) {
       if (requestId !== requestSequence.current) return false;
-      const data = error?.response?.data || error?.responseData || {};
-      const message = data.message || error?.message || 'Failed to load inspector applications.';
-      setLoadError(message);
-      toast(message, 'error');
+      const failure = classifyAdminFailure(error);
+      setLoadError(!error?.response && failure.kind === 'invalid' && error?.message ? error.message : failure.reason);
+      // Another status/page's rows are never kept under this query.
+      if (loadedKeyRef.current !== queryKey) { setApps([]); setCounts(null); setPagination(p => ({ ...p, total: 0, pages: 0 })); setLastSuccessAt(null); }
+      toast('Inspector applications could not be loaded.', 'error');
       return false;
     } finally {
       if (requestId === requestSequence.current && !quiet) setLoading(false);
@@ -130,10 +138,10 @@ export default function AdminInspectorApplications() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: 12, marginBottom: 20 }}>
-          {[['Pending', counts.pending, 'pending'], ['Approved', counts.approved, 'approved'], ['Rejected', counts.rejected, 'rejected'], ['Total', counts.total, 'total']].map(([label, value, key]) => (
+          {[['Pending', counts?.pending ?? null, 'pending'], ['Approved', counts?.approved ?? null, 'approved'], ['Rejected', counts?.rejected ?? null, 'rejected'], ['Total', counts?.total ?? null, 'total']].map(([label, value, key]) => (
             <div key={key} className="card" style={{ padding: 16, minWidth: 0 }}>
               <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>{label}</div>
-              <div style={{ fontSize: 26, lineHeight: 1.2, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{value.toLocaleString()}</div>
+              <div style={{ fontSize: 26, lineHeight: 1.2, fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{value === null || value === undefined ? '—' : value.toLocaleString()}</div>
             </div>
           ))}
         </div>
@@ -144,19 +152,12 @@ export default function AdminInspectorApplications() {
               <button key={value || 'all'} type="button" className={`btn btn-sm ${statusFilter === value ? 'btn-primary' : 'btn-outline'}`} aria-pressed={statusFilter === value} onClick={() => updateFilter(value)}>{label}</button>
             ))}
           </div>
-          <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{pagination.total ? `Showing ${firstRecord}–${lastRecord} of ${pagination.total}` : '0 applications'}</span>
+          <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>{!lastSuccessAt ? 'Application count unavailable' : pagination.total ? `Showing ${firstRecord}–${lastRecord} of ${pagination.total}` : '0 applications'}</span>
         </div>
 
-        {loadError && (
-          <div role="alert" className="card" style={{ padding: 16, marginBottom: 16, border: '1px solid var(--red)' }}>
-            <p style={{ margin: 0, fontWeight: 600 }}>Applications could not be loaded.</p>
-            <p style={{ margin: '6px 0 0', fontSize: 13, color: 'var(--text-muted)' }}>{loadError}</p>
-            <p style={{ margin: '6px 0 0', fontSize: 12, color: 'var(--text-muted)' }}>The queue is not being treated as empty, and no application decision has been changed by this failed read.</p>
-            <button type="button" className="btn btn-sm btn-outline" onClick={() => void fetchApps()} disabled={loading} style={{ marginTop: 12 }}>Retry loading applications</button>
-          </div>
-        )}
+        <AdminLoadNotice error={loadError} subject="Inspector applications" hasData={apps.length > 0} lastSuccessAt={lastSuccessAt} onRetry={() => void fetchApps()} retrying={loading} retryLabel="Retry loading applications" />
 
-        {loading ? (
+        {loading && apps.length === 0 ? (
           <div className="loading-center" role="status"><div className="spinner" /><span>Loading inspector applications…</span></div>
         ) : (loadError && apps.length === 0) ? null : apps.length === 0 ? (
           <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>

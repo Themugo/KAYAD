@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
+import { classifyAdminFailure } from '../../utils/adminLoadFailure';
 import { timeAgo } from '../../utils/helpers';
 
 const STATUS_BADGE = {
@@ -16,20 +17,7 @@ export const normalizeListingStatus = (car) => {
   return typeof value === 'string' && value.trim() ? value.trim().toLowerCase() : 'unknown';
 };
 
-export const getLoadErrorMessage = (error) => {
-  const status = error?.response?.status;
-  const body = error?.response?.data || {};
-  const code = String(body.code || '').toUpperCase();
-
-  if (code === 'SYSTEM_MAINTENANCE' || body.maintenance === true) {
-    return 'The system is under confirmed maintenance. Try again when service is restored.';
-  }
-  if (status === 401) return 'Your session may have expired. Sign in again to review listings.';
-  if (status === 403) return 'You do not have permission to view listing management.';
-  if (!error?.response) return 'Could not connect to the listing service. Check your connection and retry.';
-  if (status >= 500) return 'The listing service is temporarily unavailable. Your records have not been cleared.';
-  return 'The listing request could not be completed. Please retry or contact support if the problem continues.';
-};
+export const getLoadErrorMessage = (error) => `Listings could not be loaded. ${classifyAdminFailure(error).reason} Your records have not been cleared.`;
 
 export const isListingArray = (value) => Array.isArray(value) && value.every((item) =>
   item && typeof item === 'object' && !Array.isArray(item) &&
@@ -75,11 +63,14 @@ export default function AdminCars() {
   const [actionId, setActionId] = useState(null);
   const [selected, setSelected] = useState(null);
   const requestSequence = useRef(0);
+  const loadedKeyRef = useRef(null);
+  const [lastSuccessAt, setLastSuccessAt] = useState(null);
 
   const load = useCallback(async () => {
     const requestId = ++requestSequence.current;
     setLoading(true);
     setLoadError('');
+    const queryKey = JSON.stringify([page, search.trim(), statusFilter]);
     try {
       const params = { page, limit: 20 };
       if (search.trim()) params.search = search.trim();
@@ -103,8 +94,12 @@ export default function AdminCars() {
       setCars(listingData);
       setTotal(parsedTotal);
       setHasLoaded(true);
+      setLastSuccessAt(new Date());
+      loadedKeyRef.current = queryKey;
     } catch (error) {
       if (requestId !== requestSequence.current) return;
+      // Rows are retained (as stale) only for the SAME page/search/status; a different query's rows are never shown under new filters.
+      if (loadedKeyRef.current !== queryKey) { setCars([]); setTotal(0); setHasLoaded(false); }
       const message = error?.code === 'INVALID_LISTING_RESPONSE'
         ? 'The listing service returned an unexpected response. No records have been marked as empty.'
         : getLoadErrorMessage(error);
@@ -175,7 +170,7 @@ export default function AdminCars() {
             <div style={{ fontWeight: 700, marginBottom: 4 }}>{hasLoaded ? 'Could not refresh listings' : 'Could not load listings'}</div>
             <div style={{ color: 'var(--text-muted)', marginBottom: 12 }}>{loadError}</div>
             <button type="button" className="btn btn-sm btn-outline" onClick={refresh} disabled={loading}>{loading ? 'Retrying…' : 'Try again'}</button>
-            {hasLoaded && <p style={{ margin: '10px 0 0', fontSize: 12, color: 'var(--text-muted)' }}>Previously loaded records are retained and may be stale.</p>}
+            {hasLoaded && <p style={{ margin: '10px 0 0', fontSize: 12, color: 'var(--text-muted)' }}>Previously loaded records are retained and are <strong>stale</strong>{lastSuccessAt ? ` (last successful refresh ${lastSuccessAt.toLocaleTimeString()})` : ''}.</p>}
           </div>
         )}
 

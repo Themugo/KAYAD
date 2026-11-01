@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
+import AdminLoadNotice from '../../components/admin/AdminLoadNotice';
 import { formatDate, initials } from '../../utils/helpers';
 
 const ROLE_BADGE = { user: 'badge-blue', dealer: 'badge-gold', admin: 'badge-red', superadmin: 'badge-red', webhoist: 'badge-red', individual_seller: 'badge-blue' };
@@ -49,7 +50,9 @@ export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [hasLoaded, setHasLoaded] = useState(false);
-  const [loadError, setLoadError] = useState('');
+  const [loadError, setLoadError] = useState(null);
+  const [lastSuccessAt, setLastSuccessAt] = useState(null);
+  const loadedKeyRef = useRef(null);
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -60,7 +63,8 @@ export default function AdminUsers() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    setLoadError('');
+    setLoadError(null);
+    const queryKey = JSON.stringify([page, search.trim(), roleFilter, statusFilter]);
     try {
       const params = { page, limit: 20 };
       if (search.trim()) params.search = search.trim();
@@ -74,11 +78,12 @@ export default function AdminUsers() {
       setTotal(Number.isFinite(Number(data?.pagination?.total ?? data?.total)) ? Number(data?.pagination?.total ?? data?.total) : rows.length);
       setSummary(data?.summary && typeof data.summary === 'object' ? data.summary : null);
       setHasLoaded(true);
+      setLastSuccessAt(new Date());
+      loadedKeyRef.current = queryKey;
     } catch (err) {
-      const message = err?.response?.data?.message || err?.message || 'User records could not be loaded. Please retry.';
-      setLoadError(message);
-      setSummary(null);
-      setTotal(null);
+      setLoadError(err || new Error('User records could not be loaded.'));
+      // Keep the previous summary/rows (labelled stale) only when they answer the SAME query; never relabel another filter's rows.
+      if (loadedKeyRef.current !== queryKey) { setUsers([]); setTotal(null); setSummary(null); }
       toast('Could not load users. Existing records have not been changed.', 'error');
     } finally {
       setLoading(false);
@@ -159,12 +164,8 @@ export default function AdminUsers() {
         ))}
       </div>
 
-      {loadError && (
-        <div className="kayad-users-error" role="alert">
-          <div><strong>User records could not be refreshed.</strong><p>{loadError}</p><span>Summary values are not replaced with zero when the server is unavailable.</span></div>
-          <button type="button" className="btn btn-outline" onClick={load} disabled={loading}>{loading ? 'Retrying…' : 'Retry'}</button>
-        </div>
-      )}
+      <AdminLoadNotice error={loadError} subject="User records" hasData={users.length > 0} lastSuccessAt={lastSuccessAt} onRetry={load} retrying={loading}
+        unverifiedNote="Summary values are not replaced with zero when the server is unavailable." />
 
       <section className="kayad-users-workspace" aria-label="User records">
         <div className="kayad-users-workspace-heading">
@@ -182,9 +183,9 @@ export default function AdminUsers() {
             <thead><tr><th aria-label="Avatar" className="kayad-users-avatar-col"></th><th>Name</th><th>Email</th><th>Role</th><th>Phone</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
               {loading && hasLoaded && <tr><td colSpan={8} className="kayad-users-table-message">Refreshing account records…</td></tr>}
-              {!loading && !loadError && users.map(u => <UserRow key={u._id} user={u} onBan={handleBan} onApprove={handleApprove} actionId={actionId} />)}
+              {!loading && users.map(u => <UserRow key={u._id} user={u} onBan={handleBan} onApprove={handleApprove} actionId={actionId} />)}
               {!loading && !loadError && users.length === 0 && <tr><td colSpan={8} className="kayad-users-empty"><span className="kayad-users-empty-icon" aria-hidden="true">⌕</span><strong>{search || roleFilter !== 'all' || statusFilter !== 'all' ? 'No matching accounts' : 'No user records returned'}</strong><span>{search || roleFilter !== 'all' || statusFilter !== 'all' ? 'Try changing the search or filters.' : 'The request succeeded, but the server returned an empty user list.'}</span></td></tr>}
-              {loadError && <tr><td colSpan={8} className="kayad-users-table-message">The table is unavailable until user records can be retrieved.</td></tr>}
+              {loadError && users.length === 0 && <tr><td colSpan={8} className="kayad-users-table-message">The table is unavailable until user records can be retrieved.</td></tr>}
             </tbody>
           </table>
         </div>

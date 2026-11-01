@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { inspectionAPI, formatKES } from '../../api/api';
+import { classifyAdminFailure } from '../../utils/adminLoadFailure';
 import { UserCheck, ClipboardCheck, RefreshCw, AlertCircle, MapPin, CalendarClock } from 'lucide-react';
 
 const STATUS_META = {
@@ -42,11 +43,13 @@ export default function AdminInspections() {
   const [actionMessage, setActionMessage] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
   const requestSequence = useRef(0);
+  const loadedFilterRef = useRef(null);
 
   const load = useCallback(async ({ quiet = false } = {}) => {
     const sequence = ++requestSequence.current;
     if (quiet) setRefreshing(true); else setLoading(true);
     setError('');
+    let rejectedReason = null;
     try {
       const params = statusFilter ? { status: statusFilter } : {};
       const [data, inspectorResult] = await Promise.allSettled([
@@ -56,10 +59,12 @@ export default function AdminInspections() {
       if (sequence !== requestSequence.current) return;
       if (data.status !== 'fulfilled' || !data.value || data.value.success === false || !Array.isArray(data.value.orders)) {
         const reason = data.status === 'rejected' ? data.reason : null;
+        rejectedReason = reason;
         throw new Error(reason?.message || data.value?.message || 'The inspections service returned an unexpected response.');
       }
       setOrders(data.value.orders);
       setLastUpdated(new Date());
+      loadedFilterRef.current = statusFilter;
       if (inspectorResult.status === 'fulfilled' && inspectorResult.value?.success !== false && Array.isArray(inspectorResult.value?.inspectors)) {
         setInspectors(inspectorResult.value.inspectors);
       } else {
@@ -68,7 +73,10 @@ export default function AdminInspections() {
       }
     } catch (err) {
       if (sequence !== requestSequence.current) return;
-      setError(err?.message || 'Inspection orders could not be loaded. Try again.');
+      const reason = classifyAdminFailure(rejectedReason || err);
+      setError(reason.kind === 'invalid' && err?.message ? err.message : reason.reason);
+      // Orders of another status filter are never kept under this filter.
+      if (loadedFilterRef.current !== statusFilter) { setOrders([]); setLastUpdated(null); }
     } finally {
       if (sequence === requestSequence.current) {
         setLoading(false);
@@ -133,17 +141,17 @@ export default function AdminInspections() {
             { label: 'Completed', value: countFor('completed') },
           ].map((item) => <div key={item.label} style={{ background: '#fff', border: '1px solid rgba(10,51,64,0.08)', borderRadius: 10, padding: '13px 15px' }}>
             <div style={{ color: 'var(--admin-muted-content)', fontSize: 11, fontWeight: 650 }}>{item.label}</div>
-            <div style={{ color: '#0a3340', fontSize: 23, fontWeight: 800, marginTop: 3 }}>{loading ? '—' : item.value}</div>
+            <div style={{ color: '#0a3340', fontSize: 23, fontWeight: 800, marginTop: 3 }}>{!lastUpdated ? '—' : item.value}</div>
           </div>)}
         </div>
 
         {error && <div role="alert" style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.20)', borderRadius: 10, padding: 14, marginBottom: 16, color: '#991b1b', fontSize: 13 }}>
           <AlertCircle size={17} style={{ flexShrink: 0, marginTop: 1 }} />
-          <div style={{ flex: 1 }}><strong>Inspection data could not be refreshed.</strong><div style={{ marginTop: 4 }}>{error}</div><button type="button" onClick={() => load()} style={{ marginTop: 9, border: '1px solid rgba(153,27,27,0.3)', background: '#fff', color: '#991b1b', borderRadius: 7, padding: '6px 10px', cursor: 'pointer', fontWeight: 700 }}>Try again</button></div>
+          <div style={{ flex: 1 }}><strong>Inspection data could not be refreshed.</strong><div style={{ marginTop: 4 }}>{error}</div><div style={{ marginTop: 4 }}>{orders.length > 0 && lastUpdated ? `Showing previously loaded orders — they are stale (last successful refresh ${lastUpdated.toLocaleTimeString()}).` : 'No orders are shown and no count is confirmed; this is not an empty result.'}</div><button type="button" onClick={() => load()} style={{ marginTop: 9, border: '1px solid rgba(153,27,27,0.3)', background: '#fff', color: '#991b1b', borderRadius: 7, padding: '6px 10px', cursor: 'pointer', fontWeight: 700 }}>Try again</button></div>
         </div>}
         {actionMessage && <div role="status" style={{ background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.2)', color: '#166534', borderRadius: 9, padding: 11, marginBottom: 14, fontSize: 12 }}>{actionMessage}</div>}
 
-        {loading ? <div className="loading-center" aria-label="Loading inspection orders"><div className="spinner" /></div> : orders.length === 0 && !error ? (
+        {loading && orders.length === 0 ? <div className="loading-center" aria-label="Loading inspection orders"><div className="spinner" /></div> : orders.length === 0 && !error ? (
           <div className="empty-state" style={{ padding: '44px 24px', background: '#fff', border: '1px solid rgba(10,51,64,0.08)', borderRadius: 12 }}>
             <ClipboardCheck size={38} style={{ opacity: 0.35 }} />
             <h3 style={{ marginTop: 12 }}>{statusFilter ? `No ${STATUS_META[statusFilter]?.label.toLowerCase() || 'matching'} inspection orders` : 'No inspection orders yet'}</h3>

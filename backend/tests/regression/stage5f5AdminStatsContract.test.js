@@ -101,3 +101,27 @@ describe("D-9 pending dealer queue link", () => {
     expect(userFilters.every((f) => f.role !== "superadmin" || f.status !== "pending")).toBe(true);
   });
 });
+
+describe("Seller Management server-side status tabs and role filters", () => {
+  test("status=pending / approved are answered by the database filter", async () => {
+    for (const status of ["pending", "approved"]) {
+      const r = await get(`/api/admin/users?role=dealer&status=${status}`);
+      expect(r.status).toBe(200);
+      expect(userFilters.at(-1)).toMatchObject({ role: "dealer", status });
+    }
+  });
+  test("an unknown status value is ignored, never injected into the query", async () => {
+    const r = await get("/api/admin/users?role=dealer&status=%7B%22%24ne%22%3Anull%7D");
+    expect(r.status).toBe(200);
+    expect(userFilters.at(-1).status).toBeUndefined();
+  });
+  test("banned=true narrows to suspended accounts", async () => {
+    await get("/api/admin/users?role=dealer&banned=true");
+    expect(userFilters.at(-1)).toMatchObject({ role: "dealer", isBanned: true });
+  });
+  test.each(["individual_seller", "superadmin"])("the Users screen role filter %s is accepted (it was rejected with 400)", async (role) => {
+    const r = await get(`/api/admin/users?role=${role}`);
+    expect(r.status).toBe(200);
+    expect(userFilters.at(-1).role).toBe(role);
+  });
+});
