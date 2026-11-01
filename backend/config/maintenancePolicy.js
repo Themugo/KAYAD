@@ -167,6 +167,8 @@ export const DEFAULT_SYSTEM_STATUS = Object.freeze({
   isAuctionActive: true,
   isPaymentsActive: true,
   isGhostCheckActive: true,
+  isRegistrationsActive: true,
+  isMessagingActive: true,
   isMaintenanceMode: false,
   emergencyMessage: "System under scheduled maintenance.",
 });

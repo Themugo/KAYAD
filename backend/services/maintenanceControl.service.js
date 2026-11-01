@@ -6,6 +6,7 @@
 //   - Activation / scope change / recovery are idempotent: asking for the state that already exists changes nothing and is reported as such.
 //   - The response always carries the state read back from the database; callers (and the UI) never assume a write succeeded.
 //   - Every effective change writes an audit record with actor, reason, incident reference, scope transition and version.
+import { FEATURE_FREEZES, FREEZE_KEYS, UNAVAILABLE_FREEZES, featureSwitchView } from "../config/featureFreezePolicy.js";
 import { getSupabase } from "../utils/supabase.js";
 import { auditAfterCommit } from "../utils/auditAfterCommit.js";
 import { invalidateSystemStatusCache } from "../middleware/systemCheck.js";
@@ -99,7 +100,8 @@ export const publicState = (s) => {
     updatedAt: meta.updatedAt || null,
     lastRecovery: meta.lastRecovery || null,
     version: s.maintenanceVersion,
-    featureSwitches: { auctions: s.isAuctionActive !== false, payments: s.isPaymentsActive !== false, ghostCheck: s.isGhostCheckActive !== false },
+    featureSwitches: { ...featureSwitchView(s), ghostCheck: s.isGhostCheckActive !== false },
+    unavailableControls: Object.entries(UNAVAILABLE_FREEZES).map(([id, d]) => ({ id, label: d.label, reason: d.reason })),
   };
 };
 
@@ -188,7 +190,30 @@ export async function setFeatureSwitch(key, enabled) {
   return { changed: out.changed, state: out.state };
 }
 export async function recoverAllFeatureSwitches() {
-  const out = await mutateSystemStatus((cur) => (cur.isAuctionActive && cur.isPaymentsActive && cur.isGhostCheckActive ? { noop: true } : { next: { isAuctionActive: true, isPaymentsActive: true, isGhostCheckActive: true } }));
+  const fields = [...FREEZE_KEYS.map((k) => FEATURE_FREEZES[k].field), "isGhostCheckActive"];
+  const out = await mutateSystemStatus((cur) => (fields.every((f) => cur[f] !== false) ? { noop: true } : { next: Object.fromEntries(fields.map((f) => [f, true])) }));
   return { changed: out.changed, state: out.state };
 }
 
+
+const cleanFreezeReason = (v) => {
+  const t = typeof v === "string" ? [...v].map((ch) => (ch.charCodeAt(0) < 32 || ch.charCodeAt(0) === 127 ? " " : ch)).join("").trim().slice(0, 300) : "";
+  return t.length >= 8 ? t : "";
+};
+
+/**
+ * Explicit, persisted, audited, idempotent feature freeze / re-enable. `type` is a FEATURE_FREEZES key, or "all" when re-enabling.
+ * Controls without an enforcement path are refused (409) rather than recorded as if they worked. The audit entry is written only for an
+ * effective change; a repeat request is a no-op that still reports the persisted state.
+ */
+export async function applyFeatureFreeze({ type, enabled, reason, actor, ip }) {
+  if (UNAVAILABLE_FREEZES[type]) throw new MaintenanceError("FREEZE_UNAVAILABLE", `${UNAVAILABLE_FREEZES[type].label} is not connected to an enforceable freeze: ${UNAVAILABLE_FREEZES[type].reason}`, 409);
+  if (!(type === "all" && enabled) && !FEATURE_FREEZES[type]) throw new MaintenanceError("FREEZE_INVALID_TYPE", "Unknown freeze control.", 400);
+  const why = cleanFreezeReason(reason);
+  if (!why) throw new MaintenanceError("FREEZE_REASON_REQUIRED", `State the reason for this ${enabled ? "re-enable" : "freeze"} (at least 8 characters).`, 400);
+  const out = type === "all" ? await recoverAllFeatureSwitches() : await setFeatureSwitch(FEATURE_FREEZES[type].field, enabled);
+  if (out.changed) {
+    await auditAfterCommit({ action: enabled ? `System recovered: ${type}` : `Kill-switch activated: ${type}`, admin: actor.name || actor.email, adminId: actor.id, actorRole: actor.role || null, ipAddress: ip, details: { type, enabled, reason: why, version: out.state.maintenanceVersion } });
+  }
+  return { changed: out.changed, state: publicState(out.state) };
+}

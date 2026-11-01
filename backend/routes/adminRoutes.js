@@ -1142,24 +1142,19 @@ router.post(
   "/system/kill-switch",
   authorize("superadmin"),
   asyncHandler(async (req, res) => {
-    const { type } = req.body;
-    const SWITCHES = { auctions: "isAuctionActive", payments: "isPaymentsActive" };
-
+    const { type } = req.body || {};
     if (type === "full_maintenance") {
       // Platform-wide / scoped maintenance has its own audited control plane (scope, reason, step-up, owner-only):
       // /api/admin/system/maintenance. It cannot be started through this legacy endpoint.
       return res.status(400).json({ success: false, code: "MAINTENANCE_USE_SCOPED_CONTROL", message: "Maintenance is now started from the Panic Room maintenance control (scope, reason and confirmation required): POST /api/admin/system/maintenance/activate." });
     }
-    if (!SWITCHES[type]) return res.status(400).json({ success: false, message: "Invalid kill-switch type" });
-
-    const out = await maintenanceControl.setFeatureSwitch(SWITCHES[type], false);
-    await auditAfterCommit({
-      action: `Kill-switch activated: ${type}`,
-      admin: req.user.name || req.user.email,
-      adminId: req.user.id,
-    });
-
-    res.json({ success: true, changed: out.changed, message: `${type} disabled globally` });
+    try {
+      const out = await maintenanceControl.applyFeatureFreeze({ type, enabled: false, reason: req.body?.reason, actor: req.user, ip: req.ip });
+      res.json({ success: true, changed: out.changed, type, enabled: false, featureSwitches: out.state.featureSwitches, message: `${type} disabled globally` });
+    } catch (e) {
+      if (e?.status && e?.code) return res.status(e.status).json({ success: false, code: e.code, message: e.message });
+      throw e;
+    }
   }),
 );
 
@@ -1170,24 +1165,17 @@ router.post(
   "/system/recover",
   authorize("superadmin"),
   asyncHandler(async (req, res) => {
-    const { type } = req.body;
-    const SWITCHES = { auctions: "isAuctionActive", payments: "isPaymentsActive" };
-
+    const { type } = req.body || {};
     if (type === "maintenance") {
       return res.status(400).json({ success: false, code: "MAINTENANCE_USE_SCOPED_CONTROL", message: "End maintenance with POST /api/admin/system/maintenance/recover (owner or authorised technical recovery, with step-up)." });
     }
-    let out;
-    if (type === "all") out = await maintenanceControl.recoverAllFeatureSwitches(); // feature switches only; an active maintenance is left to its own control
-    else if (SWITCHES[type]) out = await maintenanceControl.setFeatureSwitch(SWITCHES[type], true);
-    else return res.status(400).json({ success: false, message: "Invalid recovery type" });
-
-    await auditAfterCommit({
-      action: `System recovered: ${type}`,
-      admin: req.user.name || req.user.email,
-      adminId: req.user.id,
-    });
-
-    res.json({ success: true, changed: out.changed, maintenanceActive: out.state.isMaintenanceMode, message: `${type} re-enabled globally` });
+    try {
+      const out = await maintenanceControl.applyFeatureFreeze({ type, enabled: true, reason: req.body?.reason, actor: req.user, ip: req.ip });
+      res.json({ success: true, changed: out.changed, type, enabled: true, maintenanceActive: out.state.active, featureSwitches: out.state.featureSwitches, message: `${type} re-enabled globally` });
+    } catch (e) {
+      if (e?.status && e?.code) return res.status(e.status).json({ success: false, code: e.code, message: e.message });
+      throw e;
+    }
   }),
 );
 

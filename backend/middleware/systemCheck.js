@@ -2,6 +2,7 @@ import { getSupabase, isSupabaseConnected } from "../utils/supabase.js";
 import {
   MAINTENANCE_CODE, MAINTENANCE_SCOPES, normalizeSystemStatus, classifyRoute, decide, maintenanceResponse,
 } from "../config/maintenancePolicy.js";
+import { frozenFor, frozenResponse } from "../config/featureFreezePolicy.js";
 
 export { MAINTENANCE_CODE, maintenanceResponse };
 
@@ -60,15 +61,15 @@ export const checkSystemStatus = async (req, res, next) => {
         res.setHeader("Retry-After", "60");
         return res.status(503).json(maintenanceResponse(message, scope));
       }
-      return next();
     }
 
-    if (req.path?.includes("/bid") && !settings.isAuctionActive) {
-      return res.status(403).json({ success: false, message: "Auctions are temporarily paused." });
-    }
-
-    if (req.path?.includes("/payment") && !settings.isPaymentsActive) {
-      return res.status(403).json({ success: false, message: "Payments are temporarily paused." });
+    // Feature freezes are independent of maintenance and apply under EVERY scope (a request that maintenance lets through can still be
+    // frozen). Method- and route-exact: only the documented new operations are stopped (config/featureFreezePolicy.js).
+    const frozen = frozenFor(settings, req.method, req.path);
+    if (frozen) {
+      // A provider-initiated call (inbound SMS) gets 200 so the provider does not retry-storm; the operation itself is not performed.
+      res.setHeader("Retry-After", "60");
+      return res.status(frozen.providerCall ? 200 : 503).json(frozenResponse(frozen.feature));
     }
 
     next();

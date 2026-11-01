@@ -4,41 +4,42 @@ import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
 import { Shield, ShieldOff, Activity, DollarSign, AlertTriangle, Wifi, WifiOff } from 'lucide-react';
 import MaintenanceControl from '../../components/admin/MaintenanceControl';
+import { classifyAdminFailure } from '../../utils/adminLoadFailure';
 
 const KILL_SWITCHES = [
   {
     id: 'auctions', apiType: 'auctions', stateKey: 'auctions', supported: true, label: 'Auction Bid Gate', icon: Activity,
-    desc: 'Blocks bid API requests while disabled. Existing auction countdowns are not paused by this switch.',
+    desc: 'Blocks placing a NEW bid (app, web and inbound SMS). Existing bids, countdowns, auction closing and settlement are not paused.',
     killColor: '#b91c1c', killBg: 'rgba(185,28,28,0.05)', killBorder: 'rgba(185,28,28,0.3)',
     killLabel: 'BLOCK NEW BIDS', recoverLabel: 'Re-enable Bidding',
   },
   {
     id: 'payments', apiType: 'payments', stateKey: 'payments', supported: true, label: 'Financial Gateway', icon: DollarSign,
-    desc: 'Blocks API requests whose route contains /payment. Other payment and verification routes require separate enforcement verification.',
+    desc: 'Blocks starting a NEW customer payment (general, auction-winner, subscription and dealer-plan). Provider callbacks, status checks, refunds and escrow releases keep working.',
     killColor: '#12576d', killBg: 'rgba(23, 107, 135, 0.05)', killBorder: 'rgba(23, 107, 135, 0.3)',
     killLabel: 'FREEZE PAYMENTS', recoverLabel: 'Re-enable Payments',
   },
   {
-    id: 'registrations', supported: false, label: 'User Registrations', icon: Shield,
-    desc: 'Blocks new account creation. Existing users unaffected.',
+    id: 'registrations', apiType: 'registrations', stateKey: 'registrations', supported: true, label: 'User Registrations', icon: Shield,
+    desc: 'Blocks creating a NEW account. Existing users, sign-in and password recovery are unaffected.',
     killColor: '#0E7490', killBg: 'rgba(139,92,246,0.05)', killBorder: 'rgba(139,92,246,0.3)',
     killLabel: 'BLOCK REGISTRATIONS', recoverLabel: 'Open Registrations',
   },
   {
     id: 'inspection', supported: false, label: 'Pre-Inspection Detection', icon: ShieldOff,
-    desc: 'A persisted legacy flag exists, but no complete request-enforcement path was found for this switch.',
+    desc: 'A persisted legacy flag exists, but no request path consults it, so a freeze would do nothing.',
     killColor: '#176b87', killBg: 'rgba(19, 184, 166, 0.05)', killBorder: 'rgba(19, 184, 166, 0.3)',
     killLabel: 'DISABLE PRE-INSPECTION', recoverLabel: 'Enable Pre-Inspection',
   },
   {
     id: 'escrows', supported: false, label: 'Escrow Transactions', icon: Shield,
-    desc: 'Pauses all escrow creation and releases.',
+    desc: 'Not available: pausing releases or refunds could strand customer funds. This needs an owner decision before it is built.',
     killColor: '#0F766E', killBg: 'rgba(19,184,166,0.05)', killBorder: 'rgba(19,184,166,0.3)',
     killLabel: 'FREEZE ESCROWS', recoverLabel: 'Re-enable Escrows',
   },
   {
-    id: 'messaging', supported: false, label: 'Messaging System', icon: WifiOff,
-    desc: 'Disables chat and notification delivery.',
+    id: 'messaging', apiType: 'messaging', stateKey: 'messaging', supported: true, label: 'Messaging System', icon: WifiOff,
+    desc: 'Blocks starting a chat and sending chat messages. Existing messages stay readable. Notification delivery is not affected.',
     killColor: '#475569', killBg: 'rgba(71,85,105,0.05)', killBorder: 'rgba(71,85,105,0.3)',
     killLabel: 'DISABLE MESSAGING', recoverLabel: 'Enable Messaging',
   },
@@ -54,6 +55,8 @@ export default function PanicRoom() {
   const [switchState, setSwitchState] = useState(null);
   const [switchLoading, setSwitchLoading] = useState(true);
   const [switchError, setSwitchError] = useState('');
+  const [maint, setMaint] = useState(null); // { active, scope } as last read from the server; null = unknown
+  const [reason, setReason] = useState('');
 
   const refreshHealth = useCallback(async () => {
     setHealthLoading(true);
@@ -63,8 +66,11 @@ export default function PanicRoom() {
       if (!next || typeof next !== 'object' || typeof next.status !== 'string') throw new Error('Unexpected health response');
       setHealth(next);
       setHealthError('');
-    } catch {
-      setHealthError('System health could not be checked. The current service state is unknown.');
+    } catch (err) {
+      const f = classifyAdminFailure(err);
+      // Name the real cause. During maintenance the health endpoint is an admin route and is refused, which says nothing about health.
+      setHealthError(`System health could not be checked. The current service state is unknown. ${f.kind === 'maintenance' ? 'Platform maintenance is refusing admin requests (HTTP 503); this is not a health result.' : f.reason}`);
+      setHealth(null);
     } finally { setHealthLoading(false); }
   }, []);
 
@@ -73,13 +79,16 @@ export default function PanicRoom() {
     try {
       const d = await adminAPI.maintenanceStatus();
       const features = d?.state?.featureSwitches;
-      if (!features || typeof features !== 'object' || typeof features.auctions !== 'boolean' || typeof features.payments !== 'boolean' || typeof features.ghostCheck !== 'boolean') {
+      if (!features || typeof features !== 'object' || ['auctions', 'payments', 'registrations', 'messaging'].some((k) => typeof features[k] !== 'boolean') || typeof d?.state?.active !== 'boolean') {
         throw new Error('Unexpected feature-switch response');
       }
       setSwitchState(features);
+      setMaint({ active: d.state.active, scope: d.state.scope || null });
       setSwitchError('');
       return features;
     } catch (err) {
+      setSwitchState(null);
+      setMaint(null);
       setSwitchError(err?.response?.status === 403
         ? 'Feature-switch state is restricted to the System Owner control plane. No state is assumed.'
         : 'Feature-switch state could not be verified. No state is assumed.');
@@ -90,16 +99,21 @@ export default function PanicRoom() {
   const refreshAll = useCallback(async () => { await Promise.all([refreshHealth(), refreshSwitches()]); }, [refreshHealth, refreshSwitches]);
   useEffect(() => { refreshAll(); }, [refreshAll]);
 
+  // Freeze changes go through /api/admin/*, which a GLOBAL shutdown refuses for everyone (including the owner). Offering the buttons then
+  // would only produce a misleading failure, so they are disabled with the cause stated. Scoped maintenance does not block staff.
+  const blockedByMaintenance = maint?.active === true && maint.scope === 'global';
+  const reasonOk = reason.trim().length >= 8;
+
   // Only switches enforced by the existing backend are actionable here. Other cards stay visible as explicit gaps,
   // rather than presenting buttons that the server rejects or that do not stop the claimed operation.
   const handleKillSwitch = async (type) => {
     const sw = KILL_SWITCHES.find(s => s.id === type);
-    if (!sw?.supported || !sw.apiType || !switchState) return;
+    if (!sw?.supported || !sw.apiType || !switchState || blockedByMaintenance || !reasonOk) return;
     const label = sw.label;
     if (!window.confirm(`DANGER: This will immediately stop ${label}. Proceed?`)) return;
     setLoading(type);
     try {
-      await adminAPI.systemKillSwitch({ type: sw.apiType });
+      await adminAPI.systemKillSwitch({ type: sw.apiType, reason: reason.trim() });
       const fresh = await refreshSwitches();
       const key = sw.stateKey;
       // Do not report success unless the canonical server state was read back and confirms the change.
@@ -112,11 +126,11 @@ export default function PanicRoom() {
 
   const handleRecover = async (type) => {
     const sw = KILL_SWITCHES.find(s => s.id === type);
-    if (!sw?.supported || !sw.apiType || !switchState) return;
+    if (!sw?.supported || !sw.apiType || !switchState || blockedByMaintenance || !reasonOk) return;
     if (!window.confirm(`Reactivate ${sw.label}?`)) return;
     setLoading(`recover_${type}`);
     try {
-      await adminAPI.systemRecover({ type: sw.apiType });
+      await adminAPI.systemRecover({ type: sw.apiType, reason: reason.trim() });
       const fresh = await refreshSwitches();
       if (fresh?.[sw.stateKey] === true) toast(`${sw.label} re-enabled — confirmed by server state.`, 'success');
       else toast(`${sw.label}: request sent, but the active state could not be confirmed.`, 'error');
@@ -168,7 +182,14 @@ export default function PanicRoom() {
           );
         })()}
 
+        {blockedByMaintenance && <div role="status" style={{ marginBottom: 14, padding: 12, borderRadius: 10, background: 'rgba(185,28,28,0.06)', color: '#b91c1c', fontSize: 13 }}><strong>Global maintenance is active (HTTP 503 on admin data).</strong> Freeze and re-enable actions and the health check are refused by the server until maintenance is ended or narrowed below. The freeze states shown are the persisted values.</div>}
         {switchError && <div role="alert" style={{ marginBottom: 14, padding: 12, borderRadius: 10, background: 'rgba(185,28,28,0.06)', color: '#b91c1c', fontSize: 13 }}>{switchError} <button type="button" onClick={refreshSwitches} disabled={switchLoading} style={{ marginLeft: 8, textDecoration: 'underline' }}>{switchLoading ? 'Checking…' : 'Retry switch status'}</button></div>}
+
+        <div style={{ marginBottom: 14 }}>
+          <label htmlFor="freeze-reason" style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#0a3340', marginBottom: 4 }}>Reason for a freeze or re-enable (required, recorded in the audit log)</label>
+          <input id="freeze-reason" type="text" value={reason} maxLength={300} onChange={(e) => setReason(e.target.value)} placeholder="e.g. Suspected bid manipulation, INC-123" style={{ width: '100%', maxWidth: 560, padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(10,51,64,0.2)' }} />
+          {!reasonOk && <div style={{ fontSize: 11, color: '#64748b', marginTop: 4 }}>At least 8 characters. Freeze and re-enable buttons stay disabled until a reason is entered.</div>}
+        </div>
 
         {/* Kill Switch Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16, marginBottom: 32 }}>
@@ -181,21 +202,21 @@ export default function PanicRoom() {
               <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 20, lineHeight: 1.5 }}>{sw.desc}</p>
               {sw.supported ? (
                 <>
-                  <div role="status" style={{ fontSize: 11, marginBottom: 10, color: switchLoading ? '#64748b' : switchError ? '#b91c1c' : switchState?.[sw.stateKey] ? '#0f766e' : '#b91c1c', fontWeight: 700 }}>
-                    {switchLoading ? 'Checking server state…' : switchError ? 'STATE UNKNOWN' : switchState?.[sw.stateKey] ? 'ENABLED' : 'DISABLED'}
+                  <div role="status" style={{ fontSize: 11, marginBottom: 10, color: switchLoading ? '#64748b' : (switchError || !switchState) ? '#b91c1c' : switchState?.[sw.stateKey] ? '#0f766e' : '#b91c1c', fontWeight: 700 }}>
+                    {switchLoading ? 'Checking server state…' : (switchError || !switchState || typeof switchState[sw.stateKey] !== 'boolean') ? 'STATE UNKNOWN' : switchState[sw.stateKey] ? 'ENABLED' : 'DISABLED (FROZEN)'}
                   </div>
-                  <button onClick={() => handleKillSwitch(sw.id)} disabled={!!loading || switchLoading || !!switchError || !switchState || switchState[sw.stateKey] === false}
+                  <button onClick={() => handleKillSwitch(sw.id)} disabled={!!loading || switchLoading || !!switchError || !switchState || blockedByMaintenance || !reasonOk || switchState[sw.stateKey] === false}
                     style={{ width: '100%', padding: '12px 0', background: sw.killColor, color: '#FFFFFF', fontWeight: 900, fontSize: 12, borderRadius: 10, border: 'none', cursor: 'pointer', opacity: switchLoading || switchError || switchState?.[sw.stateKey] === false ? 0.55 : 1, boxShadow: `0 4px 16px ${sw.killColor}30` }}>
                     {loading === sw.id ? 'Applying…' : sw.killLabel}
                   </button>
-                  <button onClick={() => handleRecover(sw.id)} disabled={!!loading || switchLoading || !!switchError || !switchState || switchState[sw.stateKey] === true}
+                  <button onClick={() => handleRecover(sw.id)} disabled={!!loading || switchLoading || !!switchError || !switchState || blockedByMaintenance || !reasonOk || switchState[sw.stateKey] === true}
                     style={{ width: '100%', padding: '8px 0', marginTop: 8, background: 'transparent', color: 'var(--text-muted)', borderRadius: 8, border: '1px solid rgba(10, 51, 64, 0.1)', cursor: 'pointer', fontSize: 11, opacity: switchLoading || switchError || switchState?.[sw.stateKey] === true ? 0.55 : 1 }}>
                     {loading === `recover_${sw.id}` ? 'Recovering…' : `↩ ${sw.recoverLabel}`}
                   </button>
                 </>
               ) : (
                 <div style={{ padding: 12, borderRadius: 9, background: 'rgba(100,116,139,0.08)', border: '1px solid rgba(100,116,139,0.16)', color: '#475569', fontSize: 12 }}>
-                  <strong>Not connected to an enforceable kill switch.</strong><br />No action button is shown because the backend does not currently enforce this control end to end.
+                  <strong>UNAVAILABLE — not connected to an enforceable freeze.</strong><br />No action is offered because the backend has no safe enforcement path for this control, and its state is not reported.
                 </div>
               )}
             </div>
