@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminPaymentsAPI } from '../../api/api';
+import { classifyAdminFailure } from '../../utils/adminLoadFailure';
 import { timeAgo } from '../../utils/helpers';
 
 import { X, Wallet, BarChart3 } from 'lucide-react';
@@ -32,6 +33,7 @@ export default function AdminTransactions() {
   const [loadError, setLoadError] = useState('');
   const [lastUpdated, setLastUpdated] = useState(null);
   const requestSequence = useRef(0);
+  const loadedKeyRef = useRef(null);
 
   const load = useCallback(async () => {
     const requestId = ++requestSequence.current;
@@ -52,9 +54,13 @@ export default function AdminTransactions() {
       setTotal(Number.isFinite(Number(reportedTotal)) && reportedTotal !== null && reportedTotal !== ''
         ? Math.max(0, Number(reportedTotal)) : null);
       setLastUpdated(new Date());
+      loadedKeyRef.current = JSON.stringify([page, filter, typeFilter]);
     } catch (error) {
       if (requestId !== requestSequence.current) return;
-      setLoadError(error?.message || 'Transactions could not be loaded. Please retry.');
+      const failure = classifyAdminFailure(error);
+      setLoadError(error?.response || failure.kind !== 'invalid' ? failure.reason : (error?.message || failure.reason));
+      // A different page/status/type's rows are never kept under new filters.
+      if (loadedKeyRef.current !== JSON.stringify([page, filter, typeFilter])) { setPayments([]); setSummary(null); setTotal(null); setLastUpdated(null); }
       // Keep the last successful result visible; an outage must not look like an empty ledger.
     } finally {
       if (requestId === requestSequence.current) setLoading(false);
@@ -137,7 +143,7 @@ export default function AdminTransactions() {
                 </tr>
               </thead>
               <tbody>
-                {loading ? (
+                {loading && payments.length === 0 ? (
                   <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40 }}>Loading...</td></tr>
                 ) : payments.length === 0 ? (
                   <tr><td colSpan={7} style={{ textAlign: 'center', padding: 40, color: 'var(--text-muted)' }}>{loadError ? 'No recent results are available. Retry to confirm the transaction queue.' : 'No transactions match the selected filters.'}</td></tr>

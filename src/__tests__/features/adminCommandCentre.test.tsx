@@ -402,7 +402,7 @@ describe('Command centre — unavailable causes and retry', () => {
     api.stats.mockRejectedValue(err(503, { code: 'MAINTENANCE_MODE', message: 'System under scheduled maintenance.' }));
     api.users.mockRejectedValue(err(503, { code: 'MAINTENANCE_MODE' }));
     mount();
-    await waitFor(() => expect(screen.getByRole('alert').textContent).toMatch(/platform is in maintenance/));
+    await waitFor(() => expect(screen.getByRole('alert').textContent).toMatch(/platform maintenance is active/));
     expect(screen.getByRole('alert').textContent).not.toMatch(/browser could not reach/);
   });
 
@@ -419,7 +419,7 @@ describe('Command centre — unavailable causes and retry', () => {
     mount();
     await waitFor(() => expect(screen.getByRole('alert').textContent).toMatch(/unexpected format/));
     expect(screen.getByRole('alert').textContent).toMatch(/dashboard statistics returned an invalid response/);
-    expect(screen.getByRole('alert').textContent).not.toMatch(/platform is in maintenance/);
+    expect(screen.getByRole('alert').textContent).not.toMatch(/platform maintenance is active/);
   });
 
   it('Retry reloads and clears the warning once the sources recover', async () => {

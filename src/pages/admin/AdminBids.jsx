@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { formatKES } from '../../api/api';
 import { fetchAdminBids, fetchSuspiciousBids, setBidWinner } from '../../services/bidApi';
 import { useToast } from '../../context/ToastContext';
+import { classifyAdminFailure } from '../../utils/adminLoadFailure';
 import { timeAgo } from '../../utils/helpers';
 
 import { Trophy, Zap, CheckCircle2, Clock, AlertTriangle, X } from 'lucide-react';
@@ -20,6 +21,7 @@ export default function AdminBids() {
   const [loadError, setLoadError]   = useState('');
   const [suspiciousError, setSuspiciousError] = useState('');
   const [lastLoadedAt, setLastLoadedAt] = useState(null);
+  const loadedKeyRef = useRef(null);
   const requestSequence = useRef(0);
   const [tab, setTab]               = useState('all');
   const [page, setPage]             = useState(1);
@@ -57,9 +59,13 @@ export default function AdminBids() {
       setBids(rows);
       setTotal(reportedTotal);
       setLastLoadedAt(new Date());
+      loadedKeyRef.current = JSON.stringify([page, search.trim(), paidFilter]);
     } catch (err) {
       if (sequence !== requestSequence.current) return;
-      setLoadError(err?.message || 'Unable to load bids. Your existing results have been retained.');
+      const failure = classifyAdminFailure(err);
+      // Another query's rows are never kept under new filters/pages.
+      if (loadedKeyRef.current !== JSON.stringify([page, search.trim(), paidFilter])) { setBids([]); setTotal(0); setLastLoadedAt(null); }
+      setLoadError(err?.response ? failure.reason : (err?.message && failure.kind === 'invalid' ? err.message : failure.reason));
       toast('Failed to load bids', 'error');
     } finally {
       if (sequence === requestSequence.current) setLoading(false);
@@ -72,7 +78,7 @@ export default function AdminBids() {
       setSuspicious(rows);
     } catch (err) {
       if (sequence !== requestSequence.current) return;
-      setSuspiciousError(err?.message || 'Unable to load suspicious bids.');
+      setSuspiciousError(classifyAdminFailure(err).reason);
     }
   }, [page, search, paidFilter, toast]);
 
@@ -123,9 +129,9 @@ export default function AdminBids() {
         {/* Stats row */}
         <div className="grid-4" style={{ marginBottom: 24 }}>
           {[
-            { label: 'Total Bids',    val: total.toLocaleString(),   icon: Zap, color: 'var(--brand)' },
-            { label: 'Paid bid value · this page', val: formatKES(paidTotal), icon: CheckCircle2, color: 'var(--green)' },
-            { label: 'Unpaid · this page', val: unpaidCount, icon: Clock, color: 'var(--orange)' },
+            { label: 'Total Bids',    val: !lastLoadedAt ? '—' : total.toLocaleString(),   icon: Zap, color: 'var(--brand)' },
+            { label: 'Paid bid value · this page', val: !lastLoadedAt ? '—' : formatKES(paidTotal), icon: CheckCircle2, color: 'var(--green)' },
+            { label: 'Unpaid · this page', val: !lastLoadedAt ? '—' : unpaidCount, icon: Clock, color: 'var(--orange)' },
             { label: 'Suspicious', val: suspiciousError ? '—' : suspicious.length, icon: AlertTriangle, color: 'var(--red)' },
           ].map(s => (
             <div key={s.label} className="stat-box">

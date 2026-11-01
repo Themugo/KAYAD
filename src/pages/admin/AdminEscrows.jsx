@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { escrowAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
+import { classifyAdminFailure } from '../../utils/adminLoadFailure';
 import { useAuth } from '../../context/AuthContext';
 import { userHasPermission, PERM } from '../../utils/permissions';
 
@@ -50,6 +51,7 @@ export default function AdminEscrows() {
   const [lastLoadedAt, setLastLoadedAt] = useState(null);
   const [busy, setBusy] = useState('');
   const requestSequence = useRef(0);
+  const loadedFilterRef = useRef(null);
   const caseSequence = useRef(0);
 
   const load = useCallback(async ({ silent = false } = {}) => {
@@ -71,9 +73,13 @@ export default function AdminEscrows() {
       setDashboard(ops);
       setEscrows(rows);
       setLastLoadedAt(new Date());
+      loadedFilterRef.current = filter;
     } catch (err) {
       if (sequence !== requestSequence.current) return;
-      const message = err?.response?.data?.message || err?.message || 'Failed to load escrow operations. Existing results, if any, have been retained.';
+      const failure = classifyAdminFailure(err);
+      // The queue rows of another status filter are never kept under this filter; the dashboard totals are filter-independent and stay (stale).
+      if (loadedFilterRef.current !== filter) setEscrows([]);
+      const message = err?.response ? failure.reason : (failure.kind === 'invalid' && err?.message ? err.message : failure.reason);
       setLoadError(message);
       toast('Could not refresh escrow operations. Existing results, if any, have been retained.', 'error');
     } finally {
@@ -167,7 +173,7 @@ export default function AdminEscrows() {
           <span>{lastLoadedAt ? `Last successful refresh: ${lastLoadedAt.toLocaleString('en-KE')}` : 'Escrow data has not yet refreshed successfully.'}</span>
           <button className="btn btn-outline btn-sm" onClick={() => load()} disabled={loading || !!busy}>{loading ? 'Refreshing…' : 'Refresh data'}</button>
         </div>
-        {loadError && <div role="alert" className="card" style={{ padding: 14, marginBottom: 16, borderColor: 'var(--red)' }}><strong>Escrow data could not be verified</strong><p style={{ margin: '6px 0 10px', color: 'var(--text-muted)' }}>{loadError}. Empty queues and zero balances are not confirmed.</p><button className="btn btn-outline btn-sm" onClick={() => load()} disabled={loading || !!busy}>Retry loading</button></div>}
+        {loadError && <div role="alert" className="card" style={{ padding: 14, marginBottom: 16, borderColor: 'var(--red)' }}><strong>Escrow data could not be verified</strong><p style={{ margin: '6px 0 10px', color: 'var(--text-muted)' }}>{loadError} Empty queues and zero balances are not confirmed{dashboard && lastLoadedAt ? `; queue totals and amounts shown below are stale (last successful refresh ${lastLoadedAt.toLocaleString('en-KE')}) and unverified` : ''}.</p><button className="btn btn-outline btn-sm" onClick={() => load()} disabled={loading || !!busy}>Retry loading</button></div>}
 
         <div className="card" style={{ padding: 14, marginBottom: 18 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
@@ -195,7 +201,7 @@ export default function AdminEscrows() {
 
         <div style={{ display: 'grid', gridTemplateColumns: selected ? 'minmax(0,1fr) minmax(360px, 460px)' : '1fr', gap: 18, alignItems: 'start' }}>
           <div className="card">
-            <div style={{ padding: 18, borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between' }}><div><div className="section-eyebrow">Queue</div><strong>{filter === 'all' ? 'All Escrows' : `${STATUS[filter]?.[0] || filter} Cases`}</strong></div><span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{escrows.length} visible</span></div>
+            <div style={{ padding: 18, borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between' }}><div><div className="section-eyebrow">Queue</div><strong>{filter === 'all' ? 'All Escrows' : `${STATUS[filter]?.[0] || filter} Cases`}</strong></div><span style={{ fontSize: 12, color: 'var(--text-muted)' }}>{loadError && escrows.length === 0 ? 'unverified' : `${escrows.length} visible`}</span></div>
             {loading && escrows.length === 0 ? <div className="loading-center" style={{ minHeight: 180 }}><div className="spinner" /></div> : escrows.length === 0 && !loadError ? <div className="empty-state"><h3>Queue clear</h3><p>No cases currently match this queue.</p></div> : escrows.length === 0 ? <div className="empty-state"><h3>Queue unavailable</h3><p>The queue could not be verified. Retry the request before treating this as an empty queue.</p></div> : <>{loadError && <div role="status" style={{ padding: '10px 18px', color: 'var(--text-muted)', fontSize: 12 }}>Showing last successfully loaded records; refresh failed.</div>}<div className="table-wrap"><table className="data-table"><thead><tr><th>Case</th><th>Vehicle</th><th>Amount</th><th>Status</th><th>Age</th><th>Action</th></tr></thead><tbody>{escrows.map(e => { const meta = STATUS[e.status] || [e.status, 'badge-muted']; const id=e.id||e._id; return <tr key={id}><td><button className="btn btn-outline btn-sm" onClick={() => openCase(id)}>#{String(id).slice(-8)}</button></td><td><div style={{ fontWeight: 600 }}>{e.car?.title || 'Vehicle'}</div><div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{e.buyer?.name || 'Buyer'} → {e.seller?.name || 'Seller'}</div></td><td>{e.amount !== null && e.amount !== undefined && e.amount !== '' && Number.isFinite(Number(e.amount)) ? formatKES(Number(e.amount)) : 'Unavailable'}</td><td><span className={`badge ${meta[1]}`}>{meta[0]}</span></td><td style={{ fontSize: 11, color: 'var(--text-muted)' }}>{e.createdAt ? new Date(e.createdAt).toLocaleDateString('en-KE') : '—'}</td><td><button className="btn btn-sm" onClick={() => openCase(id)}>Open Case</button></td></tr>; })}</tbody></table></div></>}
           </div>
 

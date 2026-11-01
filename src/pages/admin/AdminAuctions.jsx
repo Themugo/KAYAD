@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { carsAPI, auctionAdminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
+import { classifyAdminFailure } from '../../utils/adminLoadFailure';
 import { CountdownDisplay } from '../../components/CountdownDisplay';
 
 import { X, Radio, Pause, Flag, Zap, Car, Crown, RefreshCw, AlertTriangle } from 'lucide-react';
@@ -49,7 +50,7 @@ export default function AdminAuctions() {
       setLastLoadedAt(new Date());
     } catch (error) {
       if (sequence !== requestSequence.current) return;
-      const message = error?.response?.data?.message || error?.message || 'Unable to load auction records.';
+      const message = `Auction records could not be loaded. ${classifyAdminFailure(error).reason}`;
       setLoadError(message);
       toast('Could not refresh auction records. Existing results, if any, have been retained.', 'error');
     } finally {
@@ -165,7 +166,7 @@ export default function AdminAuctions() {
             <div style={{ flex: 1, minWidth: 0 }}>
               <strong style={{ display: 'block', marginBottom: 4 }}>Auction records could not be verified</strong>
               <span style={{ color: 'var(--text-muted)', fontSize: 13 }}>{loadError}</span>
-              <p style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 6 }}>Displayed records may be from the previous successful refresh. An error is not an empty auction queue.</p>
+              <p style={{ color: 'var(--text-muted)', fontSize: 12, marginTop: 6 }}>{lastLoadedAt ? <>Displayed records are <strong>stale</strong> (last successful refresh {lastLoadedAt.toLocaleTimeString('en-KE')}).</> : 'No records have loaded successfully, so no counts are confirmed.'} An error is not an empty auction queue.</p>
             </div>
             <button className="btn btn-outline btn-sm" onClick={() => load()} disabled={loading}>Retry</button>
           </div>
@@ -174,9 +175,9 @@ export default function AdminAuctions() {
         {/* Stats bar */}
         <div className="grid-3" style={{ marginBottom: 28 }}>
           {[
-            { label: 'Live Auctions', val: liveCars.length,  color: 'var(--green)', icon: Radio },
-            { label: 'Ready to Launch', val: draftCars.length, color: 'var(--brand-light)', icon: Pause },
-            { label: 'Completed', val: endedCars.length,     color: 'var(--text-muted)', icon: Flag },
+            { label: 'Live Auctions', val: lastLoadedAt ? liveCars.length : '—',  color: 'var(--green)', icon: Radio },
+            { label: 'Ready to Launch', val: lastLoadedAt ? draftCars.length : '—', color: 'var(--brand-light)', icon: Pause },
+            { label: 'Completed', val: lastLoadedAt ? endedCars.length : '—',     color: 'var(--text-muted)', icon: Flag },
           ].map(s => (
             <div key={s.label} className="stat-box">
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -193,9 +194,9 @@ export default function AdminAuctions() {
         {/* Tabs */}
         <div className="tabs">
           {[
-            { key: 'live',  label: `Live (${liveCars.length})` },
-            { key: 'draft', label: `Draft (${draftCars.length})` },
-            { key: 'ended', label: `Ended (${endedCars.length})` },
+            { key: 'live',  label: `Live (${lastLoadedAt ? liveCars.length : '—'})` },
+            { key: 'draft', label: `Draft (${lastLoadedAt ? draftCars.length : '—'})` },
+            { key: 'ended', label: `Ended (${lastLoadedAt ? endedCars.length : '—'})` },
           ].map(t => (
             <button key={t.key} className={`tab-btn ${tab === t.key ? 'active' : ''}`} onClick={() => setTab(t.key)}>
               {t.label}

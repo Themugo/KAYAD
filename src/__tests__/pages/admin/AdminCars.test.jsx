@@ -4,16 +4,17 @@ import { getLoadErrorMessage, isListingArray, normalizeListingStatus } from '../
 describe('AdminCars listing response contracts', () => {
   it('recognizes only an explicit maintenance response as maintenance', () => {
     expect(getLoadErrorMessage({ response: { status: 503, data: { code: 'SYSTEM_MAINTENANCE', maintenance: true } } }))
-      .toMatch(/confirmed maintenance/i);
-    expect(getLoadErrorMessage({ response: { status: 503, data: { message: 'Service unavailable' } } }))
-      .toMatch(/listing service is temporarily unavailable/i);
+      .toMatch(/maintenance is active/i);
+    const generic503 = getLoadErrorMessage({ response: { status: 503, data: { message: 'Service unavailable' } } });
+    expect(generic503).toMatch(/server returned an error/i);
+    expect(generic503).not.toMatch(/maintenance is active/i);
   });
 
   it('distinguishes session, permission, network and server failures', () => {
-    expect(getLoadErrorMessage({ response: { status: 401, data: {} } })).toMatch(/session may have expired/i);
-    expect(getLoadErrorMessage({ response: { status: 403, data: {} } })).toMatch(/permission/i);
-    expect(getLoadErrorMessage(new Error('network'))).toMatch(/connect to the listing service/i);
-    expect(getLoadErrorMessage({ response: { status: 500, data: {} } })).toMatch(/temporarily unavailable/i);
+    expect(getLoadErrorMessage({ response: { status: 401, data: {} } })).toMatch(/sign in again/i);
+    expect(getLoadErrorMessage({ response: { status: 403, data: {} } })).toMatch(/not permitted/i);
+    expect(getLoadErrorMessage(new Error('network'))).toMatch(/could not reach the API/i);
+    expect(getLoadErrorMessage({ response: { status: 500, data: {} } })).toMatch(/server returned an error/i);
   });
 
   it('accepts valid listing arrays and rejects malformed success payloads', () => {

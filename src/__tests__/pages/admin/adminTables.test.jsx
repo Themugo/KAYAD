@@ -56,7 +56,9 @@ describe('admin tables render every declared column and keep their actions reach
       .mockResolvedValueOnce({ users: [], pagination: { total: 0 }, summary: { totalUsers: 0, admins: 0, dealers: 0, banned: 0, pendingApproval: 0 } });
     render(<AdminUsers />);
     expect(await screen.findByRole('alert')).toBeTruthy();
-    expect(screen.getByText('Service unavailable')).toBeTruthy();
+    // The shared classifier states the cause; raw server text is deliberately not echoed to the operator.
+    expect(screen.getByRole('alert').textContent).toMatch(/could not reach the API/i);
+    expect(screen.queryByText('Service unavailable')).toBeNull();
     expect(screen.queryByText('No user records returned')).toBeNull();
     expect(screen.getAllByText('—').length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));

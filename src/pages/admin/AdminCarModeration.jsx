@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { adminAPI, formatKES, bulkAdminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
+import { classifyAdminFailure } from '../../utils/adminLoadFailure';
 import { timeAgo } from '../../utils/helpers';
 import useIntersectionObserver from '../../hooks/useIntersectionObserver';
 import { CheckCircle, XCircle, Clock, Search, Eye, Loader, RefreshCw, AlertTriangle } from 'lucide-react';
@@ -46,6 +47,8 @@ export default function AdminCarModeration() {
   const searchRef = useRef('');
   const filterRef = useRef('pending');
   const requestSequence = useRef(0);
+  const loadedFilterKeyRef = useRef(null);
+  const [lastSuccessAt, setLastSuccessAt] = useState(null);
 
   const loadPage = useCallback(async (pageNum, append) => {
     const requestId = ++requestSequence.current;
@@ -78,17 +81,16 @@ export default function AdminCarModeration() {
       }
       setHasMore(pageNum * PAGE_SIZE < total);
       setHasLoaded(true);
+      setLastSuccessAt(new Date());
+      loadedFilterKeyRef.current = JSON.stringify([searchRef.current.trim(), filterRef.current]);
     } catch (error) {
       if (requestId !== requestSequence.current) return;
+      const failure = classifyAdminFailure(error);
       const message = error?.code === 'INVALID_LISTING_RESPONSE'
         ? 'The listing service returned an unexpected response. No moderation records were cleared.'
-        : error?.response?.status === 401
-          ? 'Your session may have expired. Sign in again to access moderation.'
-          : error?.response?.status === 403
-            ? 'You do not have permission to access listing moderation.'
-            : !error?.response
-              ? 'Could not connect to the listing service. Check your connection and retry.'
-              : 'The moderation queue could not be loaded. Existing records have been retained.';
+        : `The moderation queue could not be loaded. ${failure.reason}`;
+      // Rows from a different search/status are never kept under the new filter: that would present another queue as this one.
+      if (!append && loadedFilterKeyRef.current !== JSON.stringify([searchRef.current.trim(), filterRef.current])) { setCars([]); setSelectedIds([]); setHasLoaded(false); }
       setLoadError(message);
       if (append) pageRef.current = Math.max(1, pageNum - 1);
       toast(message, 'error');
@@ -212,7 +214,7 @@ export default function AdminCarModeration() {
               <button type="button" className="btn btn-sm btn-outline" disabled={loading} onClick={() => loadPage(1, false)}>
                 <RefreshCw size={13} style={{ marginRight: 6 }} /> {loading ? 'Retrying…' : 'Try again'}
               </button>
-              {hasLoaded && <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '10px 0 0' }}>Previously loaded records are retained and may be stale.</p>}
+              {hasLoaded && <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '10px 0 0' }}>Previously loaded records are retained and are <strong>stale</strong>{lastSuccessAt ? ` (last successful refresh ${lastSuccessAt.toLocaleTimeString()})` : ''}.</p>}
             </div>
           </div>
         )}

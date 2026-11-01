@@ -320,6 +320,8 @@ router.get(
     // 🔍 FILTERS
     if (req.query.banned === "true") filter.isBanned = true;
     if (req.query.role) filter.role = req.query.role;
+    // Server-side account-status filter (whitelisted) so status tabs are answered by the database, not by filtering one page client-side.
+    if (["pending", "approved", "rejected"].includes(req.query.status)) filter.status = req.query.status;
     if (req.query.seller === "true") {
       filter.role = { $in: ["dealer", "individual_seller"] };
     }

@@ -52,7 +52,7 @@ export function classifyFailure(reason: unknown): FailureCause {
   return 'server';
 }
 const CAUSE_TEXT: Record<FailureCause, string> = {
-  maintenance: 'the platform is in maintenance and refuses admin data requests (HTTP 503) — end or scope the maintenance in the Panic Room',
+  maintenance: 'platform maintenance is active and the server refuses admin data requests (HTTP 503); only a System Owner (or staff holding the recovery grant) can review or change it in the Panic Room',
   server: 'the server returned an error (HTTP 5xx) — check the backend and database logs',
   network: 'the browser could not reach the API — check connectivity and that the backend is running',
   timeout: 'the request timed out — retry; check backend latency if it persists',

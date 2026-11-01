@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ntsaAPI } from '../../api/api';
+import { classifyAdminFailure } from '../../utils/adminLoadFailure';
 import { ShieldCheck, Search, CheckCircle, XCircle, FileText, X, RefreshCw, AlertTriangle, Clock3 } from 'lucide-react';
 
 const STATUS_META = {
@@ -52,6 +53,7 @@ export default function AdminNtsaQueue() {
   const [actionError, setActionError] = useState('');
   const [notice, setNotice] = useState('');
   const requestSequence = useRef(0);
+  const loadedFilterRef = useRef(null);
   const actionInFlight = useRef(false);
 
   const load = useCallback(async ({ quiet = false } = {}) => {
@@ -67,10 +69,14 @@ export default function AdminNtsaQueue() {
       }
       setRequests(data.requests);
       setLastUpdated(new Date());
+      loadedFilterRef.current = statusFilter;
       setSelectedId((current) => current && data.requests.some((item) => item?._id === current) ? current : null);
     } catch (error) {
       if (sequence !== requestSequence.current) return;
-      setLoadError(getErrorMessage(error, 'NTSA verification requests could not be loaded. Retry to check the service.'));
+      const failure = classifyAdminFailure(error);
+      setLoadError(error?.response || failure.kind !== 'invalid' ? failure.reason : getErrorMessage(error, failure.reason));
+      // Rows of another status filter are never kept under this filter.
+      if (loadedFilterRef.current !== statusFilter) { setRequests([]); setLastUpdated(null); setSelectedId(null); }
     } finally {
       if (sequence === requestSequence.current) setLoading(false);
     }
@@ -183,8 +189,8 @@ export default function AdminNtsaQueue() {
           {Object.entries(STATUS_META).map(([key, meta]) => (
             <div key={key} style={{ background: '#fff', border: '1px solid rgba(10,51,64,.08)', borderRadius: 12, padding: '13px 15px' }}>
               <div style={{ color: 'var(--admin-muted-content)', fontSize: 11, marginBottom: 6 }}>{meta.label}</div>
-              <div style={{ color: '#0a3340', fontSize: 23, fontWeight: 800, lineHeight: 1.2 }}>{loading && requests.length === 0 ? '—' : counts[key]}</div>
-              <div style={{ fontSize: 10, color: 'var(--admin-muted-content)', marginTop: 4 }}>Loaded records</div>
+              <div style={{ color: '#0a3340', fontSize: 23, fontWeight: 800, lineHeight: 1.2 }}>{!lastUpdated || (statusFilter && key !== statusFilter) ? '—' : counts[key]}</div>
+              <div style={{ fontSize: 10, color: 'var(--admin-muted-content)', marginTop: 4 }}>{statusFilter && key !== statusFilter ? 'Not in this filter' : 'Loaded records'}</div>
             </div>
           ))}
         </div>
