@@ -143,7 +143,7 @@ export default function AdminSettings() {
           escrowReleaseDays: Number(config.escrowReleaseDays),
           maxListingImages: Number(config.maxListingImages),
           allowGuestBrowsing: config.allowGuestBrowsing,
-          requireDealerApproval: config.requireDealerApproval,
+          // requireDealerApproval is intentionally NOT sent: dealer approval is governed by the Onboarding tab.
         });
       }
       if (!section || section === 'payments') {
@@ -162,8 +162,12 @@ export default function AdminSettings() {
       }
       toast('Settings saved', 'success');
       await loadConfig();
-    } catch {
-      toast('Failed to save settings', 'error');
+    } catch (err) {
+      // Show the server's own reason (validation message / code) instead of a generic failure, and say nothing was saved.
+      const data = err?.response?.data;
+      const reason = data?.message || err?.message;
+      const code = data?.code ? ` [${data.code}]` : '';
+      toast(reason ? `Not saved: ${reason}${code}` : 'Failed to save settings. Nothing was changed.', 'error');
     } finally {
       setSaving(false);
     }
@@ -291,14 +295,15 @@ export default function AdminSettings() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 {[
                   { key: 'dealerCommission', label: 'Dealer Commission (%)', type: 'number', min: 0, max: 50 },
-                  { key: 'bidCommitmentPct', label: 'Bid Commitment (%)', type: 'number', min: 0, max: 100 },
-                  { key: 'escrowReleaseDays', label: 'Escrow Release (days)', type: 'number', min: 1, max: 30 },
-                  { key: 'maxListingImages', label: 'Max Listing Images', type: 'number', min: 1, max: 20 },
+                  { key: 'bidCommitmentPct', label: 'Bid Commitment (%)', type: 'number', min: 0, max: 100, recordedOnly: true },
+                  { key: 'escrowReleaseDays', label: 'Escrow Release (days)', type: 'number', min: 1, max: 30, recordedOnly: true },
+                  { key: 'maxListingImages', label: 'Max Listing Images', type: 'number', min: 1, max: 20, recordedOnly: true },
                 ].map(f => (
                   <div key={f.key} className="input-group">
                     <label className="input-label">{f.label}</label>
                     <input aria-label={f.label} className="input" type={f.type} min={f.min} max={f.max} value={config[f.key]}
                       onChange={e => setConfig(p => ({ ...p, [f.key]: f.type === 'number' ? (e.target.value === '' ? '' : Number(e.target.value)) : e.target.value }))} />
+                    {f.recordedOnly && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>Recorded only: this value is saved but the platform does not apply it yet.</div>}
                   </div>
                 ))}
               </div>
@@ -307,8 +312,7 @@ export default function AdminSettings() {
             <div className="card" style={{ padding: 24 }}>
               <h3 style={{ fontSize: '1rem', marginBottom: 20 }}>Toggle Options</h3>
               {[
-                { key: 'allowGuestBrowsing', label: 'Allow Guest Browsing' },
-                { key: 'requireDealerApproval', label: 'Require Dealer Approval' },
+                { key: 'allowGuestBrowsing', label: 'Allow Guest Browsing (recorded only, not applied yet)' },
               ].map(f => (
                 <label key={f.key} style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', padding: '8px 0' }}>
                   <input type="checkbox" checked={config[f.key]} onChange={e => setConfig(p => ({ ...p, [f.key]: e.target.checked }))}
@@ -316,6 +320,7 @@ export default function AdminSettings() {
                   <span style={{ fontSize: 14 }}>{f.label}</span>
                 </label>
               ))}
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>Dealer approval, dealer paperwork, seller registration and listing moderation are controlled in the <strong>Onboarding</strong> tab.</p>
               <div style={{ marginTop: 16 }}>
                 <button className="btn btn-gold" onClick={() => saveConfig('general')} disabled={saving || !configLoaded} style={{ width: '100%' }}>
                   {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : 'Save General Settings'}

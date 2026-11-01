@@ -1,4 +1,5 @@
 import { create, findOne, findById, update, updateMany, findAll, count } from "../db/index.js";
+import { PAPERWORK_ITEMS, PAPERWORK_KEYS } from "../config/dealerPaperwork.js";
 import { createOtpChallenge, verifyOtpChallenge } from "./otpService.js";
 
 export const VERIFICATION_STATUSES = Object.freeze(["pending", "approved", "rejected", "suspended"]);
@@ -7,7 +8,7 @@ const OTP_MAX_ATTEMPTS = 3;
 
 const progressFor = (verification) => {
   const documents = verification?.documents || {};
-  const checks = ["governmentId", "kraPin", "businessRegistration", "physicalAddress", "phoneVerification"];
+  const checks = PAPERWORK_KEYS; // the catalogue, not a hand-written list
   const completed = checks.filter((key) => documents[key]?.verified === true).length;
   return { completed, total: checks.length, percentage: Math.round((completed / checks.length) * 100) };
 };
@@ -24,7 +25,9 @@ export const submitDealerVerification = async (userId, documents = {}) => {
   }
 
   const nextDocuments = { ...(verification?.documents || {}) };
-  for (const key of ["governmentId", "kraPin", "businessRegistration", "physicalAddress"]) {
+  // Only catalogue entries are merged, and only when supplied: an omitted optional item never wipes what is already on file.
+  for (const [key, def] of Object.entries(PAPERWORK_ITEMS)) {
+    if (def.kind !== "entry") continue;
     if (documents[key]) nextDocuments[key] = { ...documents[key], verified: false };
   }
   if (documents.phoneVerification) {

@@ -31,6 +31,8 @@ jest.unstable_mockModule("../../utils/supabase.js", () => ({ getSupabase: () => 
 const { approveVerification, rejectVerification } = await import("../../controllers/verificationController.js");
 const { transitionDealerVerification } = await import("../../services/dealerVerificationService.js");
 const { __setOnboardingPolicyForTests } = await import("../../services/onboardingPolicy.service.js");
+const { __setDealerPaperworkForTests } = await import("../../services/dealerPaperwork.service.js");
+__setDealerPaperworkForTests({}); // submit now validates against the owner-saved paperwork configuration (defaults: nothing required)
 
 const mkRes = () => { const r = { code: 200, body: null }; r.status = (c) => { r.code = c; return r; }; r.json = (b) => { r.body = b; return r; }; return r; };
 const decide = async (fn, id = V) => { const r = mkRes(); await fn({ params: { id }, body: {}, user: { id: "admin-1" } }, r); return r; };

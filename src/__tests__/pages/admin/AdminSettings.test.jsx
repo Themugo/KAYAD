@@ -55,4 +55,32 @@ describe('AdminSettings safe loading and saving', () => {
     await waitFor(() => expect(updateConfig).toHaveBeenCalledTimes(1));
     expect(toast).toHaveBeenCalledWith('Settings saved', 'success');
   });
+
+  it('shows the server reason and code when a save is rejected, and says nothing was saved', async () => {
+    getConfig.mockResolvedValue({ success: true, config: { platformName: 'Saved KAYAD' } });
+    updateConfig.mockRejectedValueOnce({ response: { status: 400, data: { message: 'Enter a valid support email address.', code: 'X_INVALID' } } });
+    render(<AdminSettings />);
+    const save = await screen.findByRole('button', { name: /Save General Settings/i });
+    await waitFor(() => expect(save).toBeEnabled());
+    await userEvent.click(save);
+    await waitFor(() => expect(toast).toHaveBeenCalledWith('Not saved: Enter a valid support email address. [X_INVALID]', 'error'));
+  });
+
+  it('labels settings the platform only records, and no longer offers the superseded dealer-approval toggle', async () => {
+    getConfig.mockResolvedValue({ success: true, config: { platformName: 'Saved KAYAD' } });
+    render(<AdminSettings />);
+    await screen.findByRole('button', { name: /Save General Settings/i });
+    expect(screen.getAllByText(/Recorded only/i).length).toBeGreaterThanOrEqual(3);
+    expect(screen.queryByText('Require Dealer Approval')).toBeNull();
+  });
+
+  it('never sends requireDealerApproval when saving', async () => {
+    getConfig.mockResolvedValue({ success: true, config: { platformName: 'Saved KAYAD', requireDealerApproval: true } });
+    render(<AdminSettings />);
+    const save = await screen.findByRole('button', { name: /Save General Settings/i });
+    await waitFor(() => expect(save).toBeEnabled());
+    await userEvent.click(save);
+    await waitFor(() => expect(updateConfig).toHaveBeenCalledTimes(1));
+    expect(updateConfig.mock.calls[0][0]).not.toHaveProperty('requireDealerApproval');
+  });
 });

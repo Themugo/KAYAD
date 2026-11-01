@@ -32,6 +32,8 @@ export default function AdminSellers() {
       // Seller Management is the dealer/commercial-account workspace; never fetch every platform user here.
       // Status tabs are answered by the server so a dealer beyond the first page can never make a queue look empty.
       const params = { role: 'dealer', page, limit: 20, search: search.trim() || undefined };
+      // Buyers who applied to sell on their existing account (still role "user" until approved).
+      if (filter === 'applicants') { delete params.role; params.dealerApplicants = true; }
       if (filter === 'pending') params.status = 'pending';
       else if (filter === 'approved') params.status = 'approved';
       else if (filter === 'suspended') params.banned = true;
@@ -45,7 +47,7 @@ export default function AdminSellers() {
         name: u.name,
         email: u.email,
         phone: u.phone || '—',
-        status: u.isBanned ? 'suspended' : u.approved ? 'approved' : 'pending',
+        status: u.isBanned ? 'suspended' : u.dealerApplicant ? (u.application?.dealerApproved ? 'approved' : 'pending') : u.approved ? 'approved' : 'pending',
         commission: u.commission ?? null,
         waiver: u.waiver ?? null,
         discount: u.discount ?? null,
@@ -55,6 +57,7 @@ export default function AdminSellers() {
         createdAt: u.createdAt,
         application: u.application ?? null, // what the server says the application still lacks; null = could not be inspected
         role: u.role,
+        applicant: u.dealerApplicant === true,
       }));
       setSellers(mapped);
       setTotal(Number.isFinite(reportedTotal) ? reportedTotal : mapped.length);
@@ -165,10 +168,10 @@ export default function AdminSellers() {
           </label>
           <button type="button" className="btn btn-sm btn-outline" onClick={fetchSellers} disabled={loading} aria-label="Refresh sellers">{loading ? 'Refreshing…' : '↻ Refresh'}</button>
           <div role="group" aria-label="Filter sellers by status" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {['all', 'approved', 'pending', 'suspended'].map(f => (
+            {['all', 'approved', 'pending', 'applicants', 'suspended'].map(f => (
               <button key={f} type="button" onClick={() => { setFilter(f); setPage(1); }} aria-pressed={filter === f}
                 className={`btn btn-sm ${filter === f ? 'btn-gold' : 'btn-outline'}`}>
-                {f === 'all' ? 'All sellers' : f.charAt(0).toUpperCase() + f.slice(1)}
+                {f === 'all' ? 'All sellers' : f === 'applicants' ? 'Buyer applicants' : f.charAt(0).toUpperCase() + f.slice(1)}
               </button>
             ))}
           </div>
@@ -242,7 +245,7 @@ export default function AdminSellers() {
                       <span className={`badge ${s.status === 'approved' ? 'badge-green' : s.status === 'pending' ? 'badge-orange' : 'badge-muted'}`}>
                         {s.status}
                       </span>
-                      {s.status === 'pending' && s.role === 'dealer' && (() => {
+                      {s.status === 'pending' && (s.role === 'dealer' || s.applicant) && (() => {
                         const el = approvalEligibility(s.application);
                         if (el.state === 'blocked') return <div role="note" style={{ fontSize: 11, color: '#92400e', marginTop: 6, maxWidth: 260 }}>Cannot be approved yet: {el.reasons.join(' ')}</div>;
                         if (el.state === 'unknown') return <div role="note" style={{ fontSize: 11, color: '#64748b', marginTop: 6, maxWidth: 260 }}>Application completeness could not be checked; the server will validate on approval.</div>;
@@ -256,7 +259,7 @@ export default function AdminSellers() {
                         ) : (
                           <button className="btn btn-outline btn-sm" onClick={() => setEditing(s.id)}>Price</button>
                         )}
-                        <button disabled={updatingStatus === s.id || (s.status === 'pending' && s.role === 'dealer' && approvalEligibility(s.application).state === 'blocked')}
+                        <button disabled={updatingStatus === s.id || (s.status === 'pending' && (s.role === 'dealer' || s.applicant) && approvalEligibility(s.application).state === 'blocked')}
                           className={`btn btn-sm ${s.status === 'approved' ? 'btn-danger' : 'btn-gold'}`}
                           onClick={() => (s.status === 'pending' ? startApprove(s) : toggleStatus(s.id, s.status))}>
                           {updatingStatus === s.id ? 'Updating…' : s.status === 'approved' ? 'Suspend' : s.status === 'pending' ? 'Approve' : 'Reinstate'}
@@ -318,6 +321,15 @@ export default function AdminSellers() {
                 </div>
               ))}
             </div>
+            {selected.application?.paperwork && (
+              <div style={{ marginTop: 20 }} data-testid="paperwork-state">
+                <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Paperwork (against current requirements)</div>
+                <div style={{ fontSize: 13 }}>Supplied: {selected.application.paperwork.supplied?.length ? selected.application.paperwork.supplied.join(', ') : 'none'}</div>
+                <div style={{ fontSize: 13 }}>Required and missing: {selected.application.paperwork.requiredMissing?.length ? selected.application.paperwork.requiredMissing.join(', ') : 'none — nothing blocks approval'}</div>
+                <div style={{ fontSize: 13 }}>Optional, not supplied: {selected.application.paperwork.optionalMissing?.length ? selected.application.paperwork.optionalMissing.join(', ') : 'none'}</div>
+              </div>
+            )}
+            {selected.applicant && <div role="note" style={{ marginTop: 14, fontSize: 12, color: 'var(--text-muted)' }}>This person is an existing buyer applying on the same account. Approving makes them a dealer; their buyer history is kept.</div>}
           </div>
         )}
       </div>

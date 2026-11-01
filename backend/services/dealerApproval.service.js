@@ -10,8 +10,14 @@
 // This module does not widen anybody's authority and does not bypass the function: it validates the application against the product's
 // onboarding rules first (so an incomplete application is refused with a precise reason instead of being approved), calls the function
 // with the operator's reason and maps its refusals to stable codes.
+import { evaluateRequirements } from "./dealerPaperwork.service.js";
+import { PAPERWORK_ITEMS } from "../config/dealerPaperwork.js";
+
 export const REASON_MIN = 8;
-export const REQUIRED_DOCUMENTS = Object.freeze(["governmentId", "kraPin", "businessRegistration", "physicalAddress"]);
+
+// One account for buying and selling: a buyer (role "user") who has started a dealer application keeps that account; the role becomes
+// "dealer" only when the application is approved. Staff, private sellers (own capability workflow) and anyone else are not eligible here.
+export const APPLICANT_ROLES = Object.freeze(["dealer", "user"]);
 
 const text = (v) => (typeof v === "string" ? v.trim() : "");
 export const cleanReason = (v) => {
@@ -25,11 +31,14 @@ export class DealerDecisionError extends Error {
 
 const defaultDeps = async () => {
   const db = await import("../db/index.js");
+  const paperwork = await import("./dealerPaperwork.service.js");
   const { getSupabase } = await import("../utils/supabase.js");
   return {
     findDealer: (userId) => db.findOne("dealers", { user: userId }),
     findVerification: (userId) => db.findOne("dealer_verifications", { user: userId }),
     findUser: (userId) => db.findById("users", userId),
+    updateVerification: (id, patch) => db.update("dealer_verifications", id, patch),
+    getPolicy: () => paperwork.getDealerPaperworkPolicy(),
     rpc: (name, args) => getSupabase().rpc(name, args),
   };
 };
@@ -42,6 +51,7 @@ export async function assessDealerApplication(user, deps) {
   const d = deps || (await defaultDeps());
   const blockers = [];
   const warnings = [];
+  let requirements = null;
   const dealer = await d.findDealer(String(user.id ?? user._id));
   const verification = await d.findVerification(String(user.id ?? user._id));
   const alreadyApproved = user.status === "approved" && dealer?.approved === true;
@@ -57,23 +67,30 @@ export async function assessDealerApplication(user, deps) {
     if (dealer.isSuspended) blockers.push({ code: "DEALER_SUSPENDED", message: "The dealer is suspended. Lift the suspension through the verification workflow first." });
   }
   if (!verification) {
-    blockers.push({ code: "DEALER_VERIFICATION_NOT_SUBMITTED", message: "The dealer has not submitted verification documents." });
+    blockers.push({ code: "DEALER_VERIFICATION_NOT_SUBMITTED", message: "The dealer has not completed and submitted the dealer application yet." });
   } else {
     const status = verification.verificationStatus;
     if (status === "rejected") blockers.push({ code: "DEALER_VERIFICATION_REJECTED", message: "The application was rejected; the dealer must resubmit before it can be approved." });
     else if (status === "suspended") blockers.push({ code: "DEALER_VERIFICATION_SUSPENDED", message: "The dealer verification is suspended." });
-    if (!verification.submittedAt) blockers.push({ code: "DEALER_VERIFICATION_NOT_SUBMITTED", message: "The dealer has not submitted verification documents." });
-    const docs = verification.documents && typeof verification.documents === "object" ? verification.documents : {};
-    const missingDocs = REQUIRED_DOCUMENTS.filter((k) => !docs[k] || (typeof docs[k] === "object" && Object.keys(docs[k]).length === 0));
-    if (verification.submittedAt && missingDocs.length) {
-      blockers.push({ code: "DEALER_DOCUMENTS_INCOMPLETE", message: `Required documents are missing: ${missingDocs.join(", ")}.`, documents: missingDocs });
+    if (!verification.submittedAt) blockers.push({ code: "DEALER_VERIFICATION_NOT_SUBMITTED", message: "The dealer has not completed and submitted the dealer application yet." });
+    // Paperwork is whatever the owner configured. Only items that are ENABLED and REQUIRED can block; optional or disabled items never do.
+    const policy = d.getPolicy ? await d.getPolicy() : null;
+    if (!policy || !policy.items) {
+      blockers.push({ code: "PAPERWORK_POLICY_UNAVAILABLE", message: "The paperwork requirements could not be read, so completeness cannot be confirmed. Nothing was changed. Try again shortly." });
+    } else if (verification.submittedAt) {
+      requirements = evaluateRequirements(verification.documents, policy.items);
+      if (requirements.requiredMissing.length) {
+        const names = requirements.requiredMissing.map((k) => PAPERWORK_ITEMS[k].label);
+        blockers.push({ code: "DEALER_REQUIRED_DOCUMENTS_MISSING", message: `Required paperwork is missing: ${names.join(", ")}.`, documents: requirements.requiredMissing });
+      }
+      if (requirements.optionalMissing.length) warnings.push({ code: "OPTIONAL_DOCUMENTS_NOT_SUPPLIED", message: `Optional paperwork not supplied: ${requirements.optionalMissing.map((k) => PAPERWORK_ITEMS[k].label).join(", ")}. This does not block approval.` });
     }
   }
   // Not blocking: a reviewer may approve before the dealer clicks the e-mail link, but the dealer cannot sign in until it is verified.
   if (user.emailVerified !== true) warnings.push({ code: "EMAIL_NOT_VERIFIED", message: "The dealer has not verified their e-mail address and cannot sign in until they do." });
   // De-duplicate by code (a missing submission can be reported by two checks).
   const seen = new Set();
-  return { blockers: blockers.filter((b) => (seen.has(b.code) ? false : seen.add(b.code))), warnings, dealer, verification, alreadyApproved };
+  return { blockers: blockers.filter((b) => (seen.has(b.code) ? false : seen.add(b.code))), warnings, dealer, verification, alreadyApproved, requirements };
 }
 
 /** Map a refusal from the database function (or a missing function) to a stable, actionable error. Unknown errors are returned as null. */
@@ -114,14 +131,14 @@ export async function approveDealer({ user, actorId, reason }, deps) {
   const d = deps || (await defaultDeps());
   const why = cleanReason(reason);
   if (!why) throw new DealerDecisionError("REASON_REQUIRED", `State the reason for approving this dealer (at least ${REASON_MIN} characters).`, 400);
-  if (user.role !== "dealer") throw new DealerDecisionError("NOT_A_DEALER_ACCOUNT", "Only dealer accounts are approved through dealer verification.", 400);
+  if (!APPLICANT_ROLES.includes(user.role)) throw new DealerDecisionError("NOT_A_DEALER_ACCOUNT", "Only dealer accounts and buyer accounts with a dealer application are approved through dealer verification.", 400);
   const id = String(user.id ?? user._id);
 
   return serialise(id, async () => {
     // Re-read the account inside the lock: the row the caller holds may be stale (another admin or tab may have decided meanwhile).
     const fresh = (d.findUser ? await d.findUser(id) : null) || user;
     if (!fresh) throw new DealerDecisionError("USER_NOT_FOUND", "The user no longer exists.", 404);
-    if (fresh.role !== "dealer") throw new DealerDecisionError("NOT_A_DEALER_ACCOUNT", "Only dealer accounts are approved through dealer verification.", 400);
+    if (!APPLICANT_ROLES.includes(fresh.role)) throw new DealerDecisionError("NOT_A_DEALER_ACCOUNT", "Only dealer accounts and buyer accounts with a dealer application are approved through dealer verification.", 400);
     const assessed = await assessDealerApplication({ ...user, ...fresh, id }, d);
     if (assessed.alreadyApproved) return { changed: false, alreadyApproved: true, warnings: assessed.warnings };
     if (assessed.blockers.length) {
@@ -155,15 +172,35 @@ export async function applyDealerAction({ userId, action, actorId, reason }, dep
 
 /** Batch view for the Seller Management list: what each pending dealer still lacks. Fail-soft: an unreadable store returns null (unknown). */
 export async function summarizeApplications(users, deps) {
-  const dealers = users.filter((u) => u.role === "dealer");
+  const dealers = users.filter((u) => APPLICANT_ROLES.includes(u.role));
   if (!dealers.length) return new Map();
   const d = deps || (await defaultDeps());
   const out = new Map();
   for (const u of dealers) {
     try {
       const a = await assessDealerApplication(u, d);
-      out.set(String(u.id ?? u._id), { blockers: a.blockers.map((b) => ({ code: b.code, message: b.message })), warnings: a.warnings.map((w) => w.code), alreadyApproved: a.alreadyApproved });
+      out.set(String(u.id ?? u._id), { blockers: a.blockers.map((b) => ({ code: b.code, message: b.message })), warnings: a.warnings.map((w) => w.code), alreadyApproved: a.alreadyApproved, dealerApproved: a.dealer ? a.dealer.approved === true : null, paperwork: a.requirements ? { requiredMissing: a.requirements.requiredMissing, optionalMissing: a.requirements.optionalMissing, supplied: a.requirements.supplied } : null });
     } catch { out.set(String(u.id ?? u._id), null); }
   }
   return out;
+}
+
+/**
+ * Reject the dealer application of a BUYER account (role "user"). The database function would also set users.status = "rejected", which
+ * for a buyer would lock the person out of their buyer account, so this path touches ONLY the application (dealer_verifications /
+ * dealers) and leaves users untouched. Guarded: only a pending application can be rejected; repeats are no-ops.
+ */
+export async function rejectApplicant({ user, actorId, reason }, deps) {
+  const d = deps || (await defaultDeps());
+  const why = cleanReason(reason);
+  if (!why) throw new DealerDecisionError("REASON_REQUIRED", `State the reason for this decision (at least ${REASON_MIN} characters).`, 400);
+  const id = String(user.id ?? user._id);
+  return serialise(id, async () => {
+    const verification = await d.findVerification(id);
+    if (!verification) throw new DealerDecisionError("DEALER_VERIFICATION_NOT_SUBMITTED", "The dealer has not submitted an application to reject.", 409);
+    if (verification.verificationStatus === "rejected") return { changed: false, alreadyRejected: true };
+    if (verification.verificationStatus !== "pending") throw new DealerDecisionError("DEALER_APPLICATION_NOT_PENDING", `The application is ${verification.verificationStatus}; only a pending application can be rejected here.`, 409);
+    await d.updateVerification(verification.id, { verificationStatus: "rejected", rejectionReason: why, reviewedAt: new Date().toISOString(), reviewedBy: String(actorId) });
+    return { changed: true, reason: why, previousStatus: "pending", newStatus: "rejected" };
+  });
 }

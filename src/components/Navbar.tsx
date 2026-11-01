@@ -29,7 +29,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { useBranding } from '../context/BrandingContext';
+import { useBranding, onBrandLogoError } from '../context/BrandingContext';
 import { usePrefersReducedMotion } from '../hooks/useMediaQuery';
 import { applyNavigationConfig, visibleChildren, type NavPrimary } from './navigation/navConfig';
 import '../styles/kayad-navigation.css';
@@ -312,7 +312,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         >
           {branding.logoType === 'image' && branding.logoUrl ? (
             <img
-              src={branding.logoUrl}
+              src={branding.logoUrl} onError={onBrandLogoError}
               alt=""
               aria-hidden="true"
               className="kayad-brand__image"
@@ -659,6 +659,19 @@ export const Navbar: React.FC<NavbarProps> = ({
                         >
                           <BarChart3 className="w-4 h-4 text-[#0A3340]" />
                           <span>Dealer Analytics</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* ONE ACCOUNT: a buyer applies to sell on the same account. Dealer tools stay hidden until approval turns the role into dealer. */}
+                    {user.role === 'buyer' && (
+                      <div className="border-t border-[#D7E7E4] pt-1.5 mt-1.5 pb-1">
+                        <button
+                          onClick={() => { navigate('/dealer/onboarding'); setShowUserDropdown(false); }}
+                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
+                        >
+                          <Building2 className="w-4 h-4 text-[#0A3340]" />
+                          <span>Become a dealer</span>
                         </button>
                       </div>
                     )}

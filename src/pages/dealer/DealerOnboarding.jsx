@@ -33,7 +33,12 @@ export default function DealerOnboarding() {
     idNumber: '',
     kraPin: '',
     businessRegNumber: '',
+    address: '',
   });
+  // The paperwork the OWNER currently asks for, from the server (never hard-coded here). null = loading.
+  const [checklist, setChecklist] = useState(null);
+  const [checklistError, setChecklistError] = useState(false);
+  const [needsStart, setNeedsStart] = useState(false); // a buyer who has not started a dealer application yet
 
   useEffect(() => {
     if (!user) return;
@@ -54,15 +59,56 @@ export default function DealerOnboarding() {
         idNumber: '',
         kraPin: '',
         businessRegNumber: '',
+        address: '',
       });
-    }).catch(() => {
+    }).catch((err) => {
       if (cancelled) return;
+      if (err?.response?.data?.code === 'DEALER_APPLICATION_NOT_STARTED' || err?.code === 'DEALER_APPLICATION_NOT_STARTED') setNeedsStart(true);
       setForm((current) => ({ ...current, businessName: user.businessName || '', location: user.location || '', bio: user.bio || '' }));
     });
     return () => { cancelled = true; };
   }, [user]);
 
+  useEffect(() => {
+    if (!user || needsStart) return undefined;
+    let cancelled = false;
+    dealerAPI.paperworkRequirements()
+      .then((r) => { if (!cancelled) { setChecklist(r.checklist || []); setChecklistError(false); } })
+      .catch(() => { if (!cancelled) setChecklistError(true); });
+    return () => { cancelled = true; };
+  }, [user, needsStart]);
+
+  const startApplication = async () => {
+    setSaving(true);
+    try {
+      await dealerAPI.startApplication();
+      setNeedsStart(false);
+      setStep(0);
+    } catch (error) {
+      toast(error?.response?.data?.message || error?.message || 'Could not start the dealer application.', 'error');
+    } finally { setSaving(false); }
+  };
+
   const update = (key, val) => { setForm(p => ({ ...p, [key]: val })); setErrors(p => { const n = { ...p }; delete n[key]; return n; }); };
+
+  const KRA_RE = /^[A-Z]\d{9}[A-Z]$/;
+  const asked = (key) => (checklist || []).find((c) => c.key === key);
+  const isReq = (key) => asked(key)?.required === true;
+  // Required items must be filled and valid; optional items may be left empty, but if started they must be valid.
+  const documentErrors = () => {
+    const errs = {};
+    if (asked('governmentId')) {
+      if (!form.idNumber.trim()) { if (isReq('governmentId')) errs.idNumber = 'ID/Passport number required'; }
+      else if (form.idNumber.trim().length < 3) errs.idNumber = 'ID number is too short';
+    }
+    if (asked('kraPin')) {
+      if (!form.kraPin.trim()) { if (isReq('kraPin')) errs.kraPin = 'KRA PIN required'; }
+      else if (!KRA_RE.test(form.kraPin.trim().toUpperCase())) errs.kraPin = 'Enter valid KRA PIN (e.g. A123456789Z)';
+    }
+    if (asked('businessRegistration') && !form.businessRegNumber.trim() && isReq('businessRegistration')) errs.businessRegNumber = 'Business registration number required';
+    if (asked('physicalAddress') && !form.address.trim() && isReq('physicalAddress')) errs.address = 'Physical address required';
+    return errs;
+  };
 
   const validate = () => {
     const errs = {};
@@ -78,11 +124,7 @@ export default function DealerOnboarding() {
       if (!form.mpesaPhone.trim()) errs.mpesaPhone = 'M-Pesa phone required';
       else if (!/^(?:\+?254|0)?7\d{8}$/.test(form.mpesaPhone.replace(/[\s-]/g, ''))) errs.mpesaPhone = 'Enter valid Kenyan number (e.g. 0712345678)';
     }
-    if (step === 2) {
-      if (!form.idNumber.trim()) errs.idNumber = 'ID/Passport number required';
-      if (!form.kraPin.trim()) errs.kraPin = 'KRA PIN required';
-      else if (!/^[A-Z]\d{9}[A-Z]$/.test(form.kraPin.trim().toUpperCase())) errs.kraPin = 'Enter valid KRA PIN (e.g. A123456789Z)';
-    }
+    if (step === 2) Object.assign(errs, documentErrors());
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -92,13 +134,21 @@ export default function DealerOnboarding() {
     if (step === 1) {
       return form.bankName.trim() && form.accountName.trim() && form.accountNumber.trim().length >= 6 && /^(?:\+?254|0)?7\d{8}$/.test(form.mpesaPhone.replace(/[\s-]/g, ''));
     }
-    if (step === 2) {
-      return form.idNumber.trim() && /^[A-Z]\d{9}[A-Z]$/.test(form.kraPin.trim().toUpperCase());
-    }
+    if (step === 2) return checklist !== null && Object.keys(documentErrors()).length === 0;
     return true;
   };
 
   const handleNext = () => { if (validate()) setStep(s => Math.min(s + 1, 3)); };
+
+  // Only what the owner asks for AND the dealer filled in; empty optional items are simply not sent.
+  const buildDocuments = () => {
+    const docs = {};
+    if (asked('governmentId') && form.idNumber.trim()) docs.governmentId = { type: form.idType, documentNumber: form.idNumber.trim() };
+    if (asked('kraPin') && form.kraPin.trim()) docs.kraPin = { pinNumber: form.kraPin.toUpperCase().trim() };
+    if (asked('businessRegistration') && form.businessRegNumber.trim()) docs.businessRegistration = { registrationNumber: form.businessRegNumber.trim(), businessName: form.businessName.trim() };
+    if (asked('physicalAddress') && form.address.trim()) docs.physicalAddress = { address: form.address.trim() };
+    return docs;
+  };
 
   const handleSubmit = async () => {
     setSaving(true);
@@ -114,24 +164,13 @@ export default function DealerOnboarding() {
           paybillNumber: form.paybillNumber.trim() || undefined,
           mpesaPhone: form.mpesaPhone.trim(),
         },
-        documents: {
-          governmentId: {
-            type: form.idType,
-            documentNumber: form.idNumber.trim(),
-          },
-          kraPin: {
-            pinNumber: form.kraPin.toUpperCase().trim(),
-          },
-          businessRegistration: form.businessRegNumber.trim()
-            ? { registrationNumber: form.businessRegNumber.trim(), businessName: form.businessName.trim() }
-            : undefined,
-        },
+        documents: buildDocuments(),
       });
 
       toast('Submitted. Your dealer account is now under review.', 'success');
       navigate('/dealer/onboarding?complete=1', { replace: true });
     } catch (error) {
-      toast(error?.message || 'Failed to complete onboarding. Please try again.', 'error');
+      toast(error?.response?.data?.message || error?.message || 'Failed to complete onboarding. Please try again.', 'error');
     } finally {
       setSaving(false);
     }
@@ -173,6 +212,21 @@ export default function DealerOnboarding() {
           <button onClick={() => navigate(approved ? '/dealer' : '/')} className="btn btn-gold">
             {approved ? 'Go to dealer dashboard' : 'Browse KAYAD while you wait'}
           </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (needsStart) {
+    return (
+      <div className="page">
+        <div className="container" style={{ paddingTop: 60, paddingBottom: 60, maxWidth: 600, textAlign: 'center' }}>
+          <div className="section-eyebrow">Become a dealer</div>
+          <h2>Sell on KAYAD with your existing account</h2>
+          <p style={{ color: 'rgba(10, 51, 64, 0.72)', marginBottom: 24 }}>
+            You keep this account, your bids, saved cars and history. Applying does not change how you buy. Dealer features switch on only after KAYAD approves your application.
+          </p>
+          <button onClick={startApplication} disabled={saving} className="btn btn-gold">{saving ? 'Starting…' : 'Start dealer application'}</button>
         </div>
       </div>
     );
@@ -293,37 +347,70 @@ export default function DealerOnboarding() {
 
           {step === 2 && (
             <div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 24 }}>Verification Documents</h3>
-              <p style={{ fontSize: 12, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 24 }}>
-                Provide your identification details for dealer verification. These will be verified by our team.
-              </p>
-              <div className="input-group" style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>ID Type *</label>
-                <select className="input" value={form.idType} onChange={e => update('idType', e.target.value)}>
-                  <option value="national_id">National ID</option>
-                  <option value="passport">Passport</option>
-                  <option value="drivers_license">Driver's License</option>
-                </select>
-              </div>
-              <div className="input-group" style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>ID Number *</label>
-                <input className="input" placeholder="National ID or Passport number"
-                  value={form.idNumber} onChange={e => update('idNumber', e.target.value)}
-                  style={{ borderColor: errors.idNumber ? 'var(--red)' : undefined }} />
-                {errors.idNumber && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.idNumber}</span>}
-              </div>
-              <div className="input-group" style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>KRA PIN *</label>
-                <input className="input" placeholder="e.g. A123456789Z"
-                  value={form.kraPin} onChange={e => update('kraPin', e.target.value.toUpperCase())}
-                  style={{ borderColor: errors.kraPin ? 'var(--red)' : undefined }} />
-                {errors.kraPin && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.kraPin}</span>}
-              </div>
-              <div className="input-group">
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Business Registration Number</label>
-                <input className="input" placeholder="Optional — e.g. BN/2024/12345"
-                  value={form.businessRegNumber} onChange={e => update('businessRegNumber', e.target.value)} />
-              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>Verification Documents</h3>
+              {checklist === null && !checklistError && <div className="loading-center"><div className="spinner" /></div>}
+              {checklistError && (
+                <p role="alert" style={{ fontSize: 13, color: 'var(--red)' }}>We could not load the list of documents we need. Reload the page to try again; nothing has been submitted.</p>
+              )}
+              {checklist !== null && checklist.length === 0 && (
+                <p role="status" style={{ fontSize: 13, color: 'rgba(10, 51, 64, 0.72)' }}>No documents are needed for your application. Continue to review and submit.</p>
+              )}
+              {checklist !== null && checklist.length > 0 && (
+                <>
+                  <ul aria-label="Documents checklist" style={{ listStyle: 'none', padding: 0, margin: '0 0 20px', display: 'grid', gap: 6 }}>
+                    {checklist.map((c) => (
+                      <li key={c.key} style={{ fontSize: 12, display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <strong>{c.label}</strong>
+                        <span style={{ padding: '1px 8px', borderRadius: 9999, fontSize: 10, fontWeight: 700, background: c.required ? 'rgba(185, 28, 28, 0.08)' : 'rgba(10, 51, 64, 0.06)', color: c.required ? '#991B1B' : 'rgba(10, 51, 64, 0.72)' }}>{c.required ? 'Required' : 'Optional'}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p style={{ fontSize: 12, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 24 }}>These details are checked by our team. Optional items can be left blank and will not delay approval.</p>
+                </>
+              )}
+              {asked('governmentId') && (
+                <>
+                  <div className="input-group" style={{ marginBottom: 16 }}>
+                    <label style={{ display: 'block', fontSize: 11, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>ID Type{isReq('governmentId') ? ' *' : ' (optional)'}</label>
+                    <select className="input" value={form.idType} onChange={e => update('idType', e.target.value)}>
+                      <option value="national_id">National ID</option>
+                      <option value="passport">Passport</option>
+                      <option value="drivers_license">Driver's License</option>
+                    </select>
+                  </div>
+                  <div className="input-group" style={{ marginBottom: 16 }}>
+                    <label style={{ display: 'block', fontSize: 11, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>ID Number{isReq('governmentId') ? ' *' : ' (optional)'}</label>
+                    <input className="input" placeholder="National ID or Passport number" value={form.idNumber} onChange={e => update('idNumber', e.target.value)} style={{ borderColor: errors.idNumber ? 'var(--red)' : undefined }} />
+                    {errors.idNumber && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.idNumber}</span>}
+                  </div>
+                </>
+              )}
+              {asked('kraPin') && (
+                <div className="input-group" style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 11, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>KRA PIN{isReq('kraPin') ? ' *' : ' (optional)'}</label>
+                  <input className="input" placeholder="e.g. A123456789Z" value={form.kraPin} onChange={e => update('kraPin', e.target.value.toUpperCase())} style={{ borderColor: errors.kraPin ? 'var(--red)' : undefined }} />
+                  {errors.kraPin && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.kraPin}</span>}
+                </div>
+              )}
+              {asked('businessRegistration') && (
+                <div className="input-group" style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 11, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Business Registration Number{isReq('businessRegistration') ? ' *' : ' (optional)'}</label>
+                  <input className="input" placeholder="e.g. BN/2024/12345" value={form.businessRegNumber} onChange={e => update('businessRegNumber', e.target.value)} style={{ borderColor: errors.businessRegNumber ? 'var(--red)' : undefined }} />
+                  {errors.businessRegNumber && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.businessRegNumber}</span>}
+                </div>
+              )}
+              {asked('physicalAddress') && (
+                <div className="input-group" style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 11, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Physical Address{isReq('physicalAddress') ? ' *' : ' (optional)'}</label>
+                  <input className="input" placeholder="Where your dealership operates from" value={form.address} onChange={e => update('address', e.target.value)} style={{ borderColor: errors.address ? 'var(--red)' : undefined }} />
+                  {errors.address && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.address}</span>}
+                </div>
+              )}
+              {asked('phoneVerification') && (
+                <p style={{ fontSize: 12, color: 'rgba(10, 51, 64, 0.72)' }}>
+                  Phone verification ({asked('phoneVerification').required ? 'required' : 'optional'}): after you submit, confirm your phone number with a one-time code.
+                </p>
+              )}
             </div>
           )}
 
@@ -337,15 +424,18 @@ export default function DealerOnboarding() {
                   <div><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>Location</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.location}</div></div>
                   {form.bio && <div style={{ gridColumn: '1 / -1' }}><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>Bio</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.bio}</div></div>}
                 </div>
-                <div style={{ borderTop: '1px solid rgba(10, 51, 64, 0.06)', paddingTop: 16, marginBottom: 16 }}>
-                  <div style={{ fontSize: 12, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>Verification Documents</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                    <div><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>ID Type</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.idType.replace(/_/g, ' ')}</div></div>
-                    <div><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>ID Number</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.idNumber}</div></div>
-                    <div><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>KRA PIN</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.kraPin.toUpperCase()}</div></div>
-                    {form.businessRegNumber && <div><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>Business Reg.</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.businessRegNumber}</div></div>}
+                {(checklist || []).length > 0 && (
+                  <div style={{ borderTop: '1px solid rgba(10, 51, 64, 0.06)', paddingTop: 16, marginBottom: 16 }}>
+                    <div style={{ fontSize: 12, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>Verification Documents</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                      {asked('governmentId') && form.idNumber && <div><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>{form.idType.replace(/_/g, ' ')}</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.idNumber}</div></div>}
+                      {asked('kraPin') && form.kraPin && <div><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>KRA PIN</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.kraPin.toUpperCase()}</div></div>}
+                      {asked('businessRegistration') && form.businessRegNumber && <div><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>Business Reg.</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.businessRegNumber}</div></div>}
+                      {asked('physicalAddress') && form.address && <div><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>Address</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.address}</div></div>}
+                    </div>
+                    {Object.keys(buildDocuments()).length === 0 && <div style={{ fontSize: 12, color: 'rgba(10, 51, 64, 0.72)' }}>No optional documents provided.</div>}
                   </div>
-                </div>
+                )}
                 <div style={{ borderTop: '1px solid rgba(10, 51, 64, 0.06)', paddingTop: 16, marginBottom: 16 }}>
                   <div style={{ fontSize: 12, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>Payment Details</div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>

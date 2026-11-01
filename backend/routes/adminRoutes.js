@@ -20,7 +20,11 @@ import Car from "../models/Car.js";
 import PlatformConfig from "../models/PlatformConfig.js";
 import AuditLog from "../models/AuditLog.js";
 import { auditAfterCommit } from "../utils/auditAfterCommit.js";
+import { logWarn } from "../utils/logger.js";
+import { validateBranding, isAllowedLogoUrl } from "../utils/brandingValidation.js";
+import { findAll } from "../db/index.js";
 import * as dealerApproval from "../services/dealerApproval.service.js";
+import { getDealerPaperworkPolicy, updateDealerPaperworkPolicy, PaperworkPolicyError, adminViewFor } from "../services/dealerPaperwork.service.js";
 import { syncLegacyApproval } from "../services/privateSellerCapability.service.js"; // Phase 13E
 import Payment from "../models/Payment.js";
 import Bid from "../models/Bid.js";
@@ -340,6 +344,14 @@ router.get(
       filter.$or = [{ name: { $regex: search, $options: "i" } }, { email: { $regex: search, $options: "i" } }];
     }
 
+    // Buyers who have applied to become dealers on their existing account (role stays "user" until an administrator approves).
+    if (req.query.dealerApplicants === "true") {
+      const rows = await findAll("dealers", { filters: { approved: false }, select: "user" });
+      const ids = [...new Set((rows || []).map((r) => String(r.user)))];
+      filter.role = "user";
+      filter._id = { $in: ids.length ? ids : ["00000000-0000-0000-0000-000000000000"] };
+    }
+
     // H-2 FIX: Use field whitelist instead of select("-password") which leaks
     // internal fields like bankAccount, mpesaBusiness, paymentDetails, etc.
     const ADMIN_USER_FIELDS = "_id name email role phone avatar status isBanned location dealerRating bio businessName createdAt lastLoginAt emailVerified phoneVerified dealerPackage subscriptionStatus";
@@ -360,10 +372,20 @@ router.get(
     // Dealer rows also carry what the application still lacks (profile / documents), read from the authoritative dealers and
     // dealer_verifications tables, so the Approve action is only offered for an application that can actually be approved. A row whose
     // application could not be read is `null` (unknown), never "complete".
-    const applications = await dealerApproval.summarizeApplications(users.map((u) => ({ ...u, id: u._id ?? u.id })));
+    // A buyer (role "user") only carries an application when they have started one (a dealers row exists) - same account, no duplicate.
+    const buyerIds = users.filter((u) => u.role === "user").map((u) => String(u._id ?? u.id));
+    let applicantBuyerIds = new Set();
+    if (buyerIds.length) {
+      try {
+        const rows = await findAll("dealers", { filters: { user: { $in: buyerIds } }, select: "user" });
+        applicantBuyerIds = new Set((rows || []).map((r) => String(r.user)));
+      } catch { /* unknown -> no buyer is shown as an applicant; the list itself still loads */ }
+    }
+    const inScope = users.filter((u) => u.role === "dealer" || (u.role === "user" && applicantBuyerIds.has(String(u._id ?? u.id))));
+    const applications = await dealerApproval.summarizeApplications(inScope.map((u) => ({ ...u, id: u._id ?? u.id })));
     const decorated = users.map((u) => ({
       ...u,
-      ...(u.role === "dealer" ? { application: applications.get(String(u._id ?? u.id)) ?? null } : {}),
+      ...(inScope.includes(u) ? { application: applications.get(String(u._id ?? u.id)) ?? null, dealerApplicant: u.role === "user" } : {}),
       approved: u.status === "approved",
       verificationStatus: u.status === "approved" ? "verified" : u.status === "rejected" ? "rejected" : "pending",
       lastLogin: u.lastLoginAt ?? null,
@@ -480,14 +502,14 @@ router.post(
       });
     }
 
-    if (!["dealer", "individual_seller"].includes(user.role)) {
-      return res.status(400).json({ success: false, code: "NOT_A_SELLER_ACCOUNT", message: "Only dealer and seller accounts can be approved here." });
+    if (!["dealer", "individual_seller", "user"].includes(user.role)) {
+      return res.status(400).json({ success: false, code: "NOT_A_SELLER_ACCOUNT", message: "Only dealer, seller and dealer-applicant accounts can be approved here." });
     }
     // STAGE 5A: `users.approved` / `users.verification_status` do not exist (this handler failed with 500 on the real schema and
     // never approved anyone). Approval is: the atomic verification RPC for dealers (dealers.approved, dealer_verifications) plus
     // the account gate users.status = "approved" for dealers and private sellers alike.
     let dealerOutcome = null;
-    if (user.role === "dealer") {
+    if (user.role === "dealer" || user.role === "user") {
       try {
         dealerOutcome = await dealerApproval.approveDealer({ user, actorId: req.user.id, reason: req.body?.reason });
       } catch (e) {
@@ -810,6 +832,10 @@ router.post(
 // ⚙️ PLATFORM CONFIG
 // =============================
 
+// Settings that are stored and audited but are NOT read by any runtime code path today (verified by repository search). The UI labels
+// them accordingly instead of implying they change platform behaviour.
+const RECORDED_ONLY_SETTINGS = Object.freeze(["maxListingImages", "escrowReleaseDays", "bidCommitmentPct", "allowGuestBrowsing", "requireDealerApproval"]);
+
 // GET CONFIG
 router.get(
   "/config",
@@ -834,7 +860,7 @@ router.get(
       };
     }
     res.set("Cache-Control", "no-store");
-    res.json({ success: true, config: safeConfig });
+    res.json({ success: true, config: safeConfig, recordedOnly: RECORDED_ONLY_SETTINGS });
   }),
 );
 
@@ -902,6 +928,10 @@ router.put(
         return res.status(400).json({ success: false, message: `${key} must be between ${min} and ${max}.` });
       }
     }
+    if (body.branding !== undefined) {
+      const checked = validateBranding(body.branding);
+      if (!checked.ok) return res.status(400).json({ success: false, code: "BRANDING_INVALID", message: checked.message });
+    }
     if (body.bank !== undefined) {
       if (!body.bank || typeof body.bank !== "object" || Array.isArray(body.bank)) {
         return res.status(400).json({ success: false, message: "Invalid bank transfer settings." });
@@ -957,6 +987,7 @@ router.put(
       config.navigation = checked.value;
     }
 
+    const beforeSnapshot = structuredClone(config.toObject?.() || { ...config });
     for (const key of allowed) {
       if (body[key] !== undefined) {
         if (typeof body[key] === "object" && body[key] !== null && !Array.isArray(body[key])) {
@@ -969,10 +1000,31 @@ router.put(
 
     await config.save();
 
+    // Audit what actually changed. Secrets and bank details are recorded as "changed" only (never their values).
+    const SECRET_LEAF = new Set(["consumerKey", "consumerSecret", "passkey", "accountNumber", "accountName", "bankName", "paybill"]);
+    const SENSITIVE_GROUPS = new Set(["daraja", "bank"]);
+    const afterSnapshot = config.toObject?.() || { ...config };
+    const changes = {};
+    for (const key of allowed) {
+      if (body[key] === undefined) continue;
+      const b = beforeSnapshot[key]; const a = afterSnapshot[key];
+      if (a && typeof a === "object" && !Array.isArray(a)) {
+        const leafChanges = {};
+        for (const leaf of new Set([...Object.keys(b || {}), ...Object.keys(a)])) {
+          if (JSON.stringify(b?.[leaf]) === JSON.stringify(a[leaf])) continue;
+          leafChanges[leaf] = SENSITIVE_GROUPS.has(key) || SECRET_LEAF.has(leaf) ? "changed" : { from: b?.[leaf] ?? null, to: a[leaf] ?? null };
+        }
+        if (Object.keys(leafChanges).length) changes[key] = leafChanges;
+      } else if (JSON.stringify(b) !== JSON.stringify(a)) {
+        changes[key] = { from: b ?? null, to: a ?? null };
+      }
+    }
+
     await auditAfterCommit({
       action: "Platform config updated",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
+      details: { outcome: "success", changedKeys: Object.keys(changes), changes },
     });
 
     if (navigationAudit) {
@@ -1155,6 +1207,51 @@ router.put(
 );
 
 // =============================
+// 📄 DEALER PAPERWORK CONFIGURATION
+// =============================
+// Which documents a dealer is asked for, and which are mandatory, is an owner decision stored in system_settings (never in code).
+// Reading is open to admins (they must see what an applicant is measured against); writing is owner-only with revision CAS.
+// Disabling or relaxing an item never deletes anything already submitted.
+router.get(
+  "/settings/dealer-paperwork",
+  adminOrSuper,
+  asyncHandler(async (req, res) => {
+    const policy = await getDealerPaperworkPolicy();
+    res.set("Cache-Control", "no-store");
+    if (!policy.items) return res.status(503).json({ success: false, code: "DEALER_PAPERWORK_UNAVAILABLE", message: "Paperwork settings could not be loaded." });
+    res.json({
+      success: true,
+      items: adminViewFor(policy.items),
+      revision: policy.revision,
+      source: policy.source,
+      issues: policy.issues,
+      canChange: req.user?.effectiveRole === "webhoist" && req.user?.emailVerified === true,
+    });
+  }),
+);
+
+router.put(
+  "/settings/dealer-paperwork",
+  adminOrSuper,
+  ownerOnly,
+  asyncHandler(async (req, res) => {
+    const { expectedRevision, items } = req.body || {};
+    const actor = { admin: req.user.name || req.user.email, adminId: req.user.id };
+    try {
+      const { before, after } = await updateDealerPaperworkPolicy({ changes: { items }, expectedRevision, actorId: req.user.id });
+      await auditAfterCommit({ action: "Dealer paperwork requirements updated", ...actor, details: { outcome: "success", before: before.items, after: after.items } });
+      res.json({ success: true, message: "Paperwork requirements saved", items: adminViewFor(after.items), revision: after.revision });
+    } catch (err) {
+      if (err instanceof PaperworkPolicyError) {
+        await auditAfterCommit({ action: "Dealer paperwork update rejected", ...actor, details: { outcome: "failed", code: err.code, attempted: Object.keys(items && typeof items === "object" ? items : {}) } });
+        return res.status(err.status).json({ success: false, code: err.code, message: err.message, errors: err.errors });
+      }
+      throw err;
+    }
+  }),
+);
+
+// =============================
 // 🚨 SYSTEM KILL-SWITCH (superadmin only)
 // =============================
 router.post(
@@ -1249,6 +1346,16 @@ router.post(
         const out = await dealerApproval.approveDealer({ user, actorId: req.user.id, reason: req.body.reason });
         if (!out.changed) return res.json({ success: true, changed: false, alreadyApproved: true, message: "This dealer is already approved. Nothing was changed." });
         result = out.result;
+      } else if (user.role === "user") {
+        // A buyer's application is rejected on the application only. users.status / role are never touched, so the buyer account keeps working.
+        const out = await dealerApproval.rejectApplicant({ user, actorId: req.user.id, reason: req.body.reason });
+        await auditAfterCommit({
+          action: `Dealer application rejected for ${user.email}`,
+          admin: req.user.name || req.user.email,
+          adminId: req.user.id,
+          details: { outcome: out.changed ? "success" : "no_change", targetUserId: String(user._id), accountUntouched: true, ...(out.reason ? { reason: out.reason } : {}) },
+        });
+        return res.json({ success: true, changed: out.changed, message: out.changed ? "Dealer application rejected. The buyer account is unchanged." : "This application was already rejected. Nothing was changed." });
       } else {
         result = (await dealerApproval.applyDealerAction({ userId: req.params.id, action, actorId: req.user.id, reason: req.body.reason })).result;
       }
@@ -2008,31 +2115,36 @@ import { isReservedOwnerEmail } from "../config/owners.js"; // STAGE 5B closure
 router.post(
   "/upload-logo",
   protect,
-  adminOnly,
+  adminOrSuper, // branding is a platform-wide setting: same authority as PUT /config, not "any staff role"
   uploadMemory.single("logo"),
   handleUploadError,
   asyncHandler(async (req, res) => {
-    if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
+    if (!req.file) return res.status(400).json({ success: false, code: "LOGO_FILE_MISSING", message: "No image file was received. Choose a PNG, JPEG or WebP file and try again." });
     if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      return res.status(503).json({ success: false, code: "LOGO_STORAGE_NOT_CONFIGURED", message: "Logo storage is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET in the server environment." });
+      return res.status(503).json({ success: false, code: "LOGO_STORAGE_NOT_CONFIGURED", message: "Logo storage is not configured on the server. The current logo was not changed." });
     }
-    const result = await uploadImage(req.file, "kayad/branding", {
-      generateVariants: true,
-      preserveOriginal: true,
-    });
-    if (!result?.url || typeof result.url !== "string") {
-      return res.status(502).json({ success: false, code: "LOGO_UPLOAD_INVALID_RESPONSE", message: "The image storage provider did not return a usable logo URL." });
+    let result;
+    try {
+      result = await uploadImage(req.file, "kayad/branding", { generateVariants: true, preserveOriginal: true });
+    } catch (err) {
+      // Provider outage / interrupted upload: nothing is stored in settings, the current logo stays. Provider text is not echoed (may carry account details).
+      logWarn("Logo upload to storage failed", { code: "LOGO_UPLOAD_FAILED", error: err?.message });
+      return res.status(502).json({ success: false, code: "LOGO_UPLOAD_FAILED", message: "The image storage service did not accept the upload. The current logo was not changed. Try again." });
+    }
+    if (!result?.url || typeof result.url !== "string" || !isAllowedLogoUrl(result.url)) {
+      return res.status(502).json({ success: false, code: "LOGO_UPLOAD_INVALID_RESPONSE", message: "The image storage provider did not return a usable logo URL. The current logo was not changed." });
     }
     let config = await PlatformConfig.findOne();
     if (!config) config = new PlatformConfig();
     const existingBranding = config.branding?.toObject?.() || config.branding || {};
+    const previousLogoUrl = existingBranding.logoUrl || null;
     config.branding = { ...existingBranding, logoType: "image", logoUrl: result.url };
     await config.save();
     await auditAfterCommit({
       action: "Platform logo updated",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
-      details: { logoUrl: result.url },
+      details: { previousLogoUrl, logoUrl: result.url },
     });
     res.json({ success: true, url: result.url, thumb: result.thumb });
   }),

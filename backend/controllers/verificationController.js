@@ -12,13 +12,20 @@ import {
   deriveDealerOnboardingStage,
 } from "../services/dealerVerificationService.js";
 import { sendNotification } from "../services/notification.service.js";
+import { getDealerPaperworkPolicy, validateSubmission } from "../services/dealerPaperwork.service.js";
 import { logInfo, logError } from "../utils/logger.js";
 
 const maskPhone = (phone) => String(phone || "").replace(/(\d{3})\d{6}(\d{2})/, "$1******$2");
 
 export const submitVerification = async (req, res) => {
   try {
-    const result = await submitDealerVerification(req.user.id, req.body?.documents || {});
+    // Same rule as PUT /api/dealer/onboarding: documents are checked against the owner-saved configuration, fail closed.
+    const policy = await getDealerPaperworkPolicy();
+    if (!policy.items) return res.status(503).json({ success: false, code: "DEALER_PAPERWORK_UNAVAILABLE", message: "The paperwork requirements could not be loaded. Try again shortly." });
+    const existing = (await getDealerVerification(req.user.id))?.documents || {};
+    const checked = validateSubmission(req.body?.documents || {}, policy.items, { existing });
+    if (!checked.ok) return res.status(400).json({ success: false, code: "DEALER_PAPERWORK_INVALID", message: checked.errors.map((e) => e.message).join(" "), errors: checked.errors });
+    const result = await submitDealerVerification(req.user.id, checked.accepted);
     // STAGE 5: acknowledge the APPLICATION (received ≠ verified email ≠ approved). Best effort: a
     // notification failure never turns a saved application into an error.
     await sendNotification({

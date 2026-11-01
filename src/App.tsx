@@ -36,7 +36,7 @@ import SkipLink from './components/ui/SkipLink';
 
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
-import { AuthProvider, useAuth, RequireAuth, RequireDealer, RequireAdmin, SessionRecovery } from './context/AuthContext';
+import { AuthProvider, useAuth, RequireAuth, RequireDealer, RequireDealerApplicant, RequireAdmin, SessionRecovery } from './context/AuthContext';
 import { NotificationProvider, useNotifications } from './context/NotificationContext';
 import { SocketProvider } from './context/SocketContext';
 import { CompareProvider, useCompare } from './context/CompareContext';
@@ -895,7 +895,7 @@ function AuthRouteSurface() {
   if (path === '/dealer') return <RequireAuth><RequireDealer><Navigate to="/?nav=dealer-dashboard" replace /></RequireDealer></RequireAuth>;
   if (path === '/inspector/dashboard') return <RequireAuth><Navigate to="/?nav=inspections" replace /></RequireAuth>;
 
-  if (path === '/dealer/onboarding') return <RequireAuth><RequireDealer><DealerOnboarding /></RequireDealer></RequireAuth>;
+  if (path === '/dealer/onboarding') return <RequireAuth><RequireDealerApplicant><DealerOnboarding /></RequireDealerApplicant></RequireAuth>;
   if (path === '/dealer/auction-setup') return <RequireAuth><RequireDealer><DealerAuctionSetupWizard /></RequireDealer></RequireAuth>;
   if (path === '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerAuctionOperations /></RequireDealer></RequireAuth>;
   if (path.startsWith('/dealer/auction-operations/') && path !== '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerAuctionOperationCase /></RequireDealer></RequireAuth>;

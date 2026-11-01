@@ -789,3 +789,7 @@
     padding: 6px;
   }
 }
+
+/* Pinned footer (View marketplace + Settings): never scrolls away with the groups; Settings is the last item. */
+.kayad-admin-shell .admin-sidebar__pinned { display: grid; gap: 6px; }
+.kayad-admin-shell .admin-sidebar__pinned .admin-sidebar__settings.is-active { color: #ffffff; }

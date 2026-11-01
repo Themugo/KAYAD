@@ -94,6 +94,7 @@ jest.unstable_mockModule("../../utils/supabase.js", () => ({
 const adminRoutes = (await import("../../routes/adminRoutes.js")).default;
 const { __setOnboardingPolicyForTests } = await import("../../services/onboardingPolicy.service.js");
 const approval = await import("../../services/dealerApproval.service.js");
+const { __setDealerPaperworkForTests } = await import("../../services/dealerPaperwork.service.js");
 
 // ---------------- fixtures ----------------
 const token = (id) => jwt.sign({ id, tokenVersion: 0 }, SECRET, { expiresIn: "1h" });
@@ -127,8 +128,10 @@ beforeEach(() => {
   // The platform owner as it is in production: recognised by verified e-mail, but the database ROW is an ordinary account.
   staff("owner-1", "user", { email: "owner@example.test" });
   __setOnboardingPolicyForTests({ dealerDecisionAuthority: "admins" });
+  // Paperwork is owner-configured. These legacy scenarios model an owner who requires the government ID and KRA PIN.
+  __setDealerPaperworkForTests({ governmentId: { enabled: true, required: true }, kraPin: { enabled: true, required: true } });
 });
-afterAll(() => __setOnboardingPolicyForTests(null));
+afterAll(() => { __setOnboardingPolicyForTests(null); __setDealerPaperworkForTests(null); });
 
 const call = async (method, path, as, body) => {
   const r = await fetch(base + path, { method, headers: { "content-type": "application/json", ...(as ? { authorization: `Bearer ${token(as)}` } : {}) }, body: body === undefined ? undefined : JSON.stringify(body) });
@@ -266,7 +269,7 @@ describe("approval is refused for invalid, missing, already-approved or ineligib
   });
   test.each([
     ["no verification submitted", { onboarded: false }, "DEALER_VERIFICATION_NOT_SUBMITTED"],
-    ["required document missing", { docs: { ...DOCS, kraPin: undefined } }, "DEALER_DOCUMENTS_INCOMPLETE"],
+    ["required document missing", { docs: { ...DOCS, kraPin: undefined } }, "DEALER_REQUIRED_DOCUMENTS_MISSING"],
     ["business name missing", { profile: { businessName: "" } }, "DEALER_PROFILE_INCOMPLETE"],
     ["dealer suspended", { profile: { isSuspended: true } }, "DEALER_SUSPENDED"],
   ])("incomplete application (%s) is refused with the blocker and is NOT silently approved", async (_n, opts, code) => {

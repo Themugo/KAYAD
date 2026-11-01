@@ -69,6 +69,13 @@ api.interceptors.request.use(async (config) => {
     await ensureCsrfToken();
   }
   Object.assign(config.headers, getCsrfHeaders(method));
+  // ROOT CAUSE of the platform-logo upload failure: this instance's default Content-Type is application/json, and axios 1.x
+  // serialises FormData to JSON (a File becomes `{}`) whenever the effective Content-Type is JSON, so the server received
+  // `{"logo":{}}` and no file. A multipart body must never be sent with the JSON default. Naming multipart here lets axios
+  // (Node) / the browser (XHR) add the boundary; it applies to every FormData caller, not only the ones that remembered to ask.
+  if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
+    config.headers['Content-Type'] = 'multipart/form-data';
+  }
   return config;
 });
 

@@ -4,7 +4,7 @@ import userEvent from '@testing-library/user-event';
 
 const getOnboardingSettings = vi.fn();
 const updateOnboardingSettings = vi.fn();
-vi.mock('../../../api/api', () => ({ adminAPI: { getOnboardingSettings: (...a) => getOnboardingSettings(...a), updateOnboardingSettings: (...a) => updateOnboardingSettings(...a) } }));
+vi.mock('../../../api/api', () => ({ adminAPI: { getOnboardingSettings: (...a) => getOnboardingSettings(...a), updateOnboardingSettings: (...a) => updateOnboardingSettings(...a), getDealerPaperwork: () => Promise.resolve({ items: [], revision: 0, canChange: false }) } }));
 
 import AdminSettingsOnboarding from '../../../pages/admin/AdminSettingsOnboarding';
 

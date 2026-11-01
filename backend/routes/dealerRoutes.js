@@ -26,6 +26,8 @@ import { startAuction, extendAuction, closeAuction } from "../services/auctionLi
 import { disburseB2C } from "../services/mpesaB2C.service.js";
 import { dealerOnboardingSchema } from "../validation/dealerOnboarding.schema.js";
 import { submitDealerVerification } from "../services/dealerVerificationService.js";
+import { getDealerPaperworkPolicy, validateSubmission, checklistFor } from "../services/dealerPaperwork.service.js";
+import * as onboardingPolicy from "../services/onboardingPolicy.service.js"; // namespace import: only /application reads it
 import Car from "../models/Car.js"; // 14.8 guarded bulk delete
 import User from "../models/User.js";
 import { listingDeletionBlock, DELETE_BLOCK_CODES } from "../utils/carDeletionGuard.js";
@@ -39,15 +41,54 @@ const router = express.Router();
 // This route intentionally sits before the approved-dealer boundary. A newly
 // registered dealer is pending by design, but must still be able to complete
 // the existing onboarding + verification workflow that leads to approval.
-router.get("/onboarding", protect, allowRoles("dealer"), asyncHandler(async (req, res) => {
+// ONE ACCOUNT FOR BUYING AND SELLING. A dealer is registered as role "dealer" (pending). An existing buyer (role "user") starts the same
+// application on the SAME account via POST /application: no second user is created, users.role / users.status / bids / saved items
+// are untouched, and seller privileges stay off until an administrator approves (approval is what turns the role into "dealer").
+const APPLICANT_ROLES = ["dealer", "user"];
+const applicationState = async (userId) => {
+  const dealer = await findOne("dealers", { user: userId });
+  const verification = dealer ? await findOne("dealer_verifications", { user: userId }) : null;
+  return { dealer, verification, started: !!dealer, submitted: !!verification?.submittedAt, status: verification?.verificationStatus ?? (dealer ? "draft" : "none") };
+};
+
+// The checklist the dealer is currently asked for (required vs optional) - read from the saved configuration, never from code.
+router.get("/paperwork-requirements", protect, allowRoles(...APPLICANT_ROLES), asyncHandler(async (req, res) => {
+  const policy = await getDealerPaperworkPolicy();
+  res.set("Cache-Control", "no-store");
+  if (!policy.items) return res.status(503).json({ success: false, code: "DEALER_PAPERWORK_UNAVAILABLE", message: "The paperwork requirements could not be loaded. Try again shortly." });
+  const checklist = checklistFor(policy.items);
+  res.json({ success: true, checklist, anyRequired: checklist.some((c) => c.required), revision: policy.revision });
+}));
+
+router.post("/application", protect, allowRoles(...APPLICANT_ROLES), asyncHandler(async (req, res) => {
+  const u = req.user;
+  if (u.emailVerified !== true) return res.status(403).json({ success: false, code: "EMAIL_VERIFICATION_REQUIRED", message: "Verify your e-mail address before applying to sell as a dealer." });
+  if (u.isBanned) return res.status(403).json({ success: false, code: "ACCOUNT_RESTRICTED", message: "This account cannot start a dealer application." });
+  const existing = await applicationState(u.id);
+  if (existing.started) {
+    // Duplicate / retry: nothing is created or changed.
+    return res.status(200).json({ success: true, alreadyStarted: true, status: existing.status, dealer: existing.dealer });
+  }
+  if (u.role === "user" && u.status !== "approved") return res.status(403).json({ success: false, code: "ACCOUNT_NOT_ACTIVE", message: "Only an active account can start a dealer application." });
+  const mode = await onboardingPolicy.getOnboardingPolicy();
+  if (!onboardingPolicy.isPolicyTrusted(mode) || mode.policy.dealerOnboardingMode === "closed") {
+    return res.status(403).json({ success: false, code: "DEALER_APPLICATIONS_CLOSED", message: "Dealer applications are not being accepted right now." });
+  }
+  const dealer = await create("dealers", { user: u.id, approved: false, isSuspended: false });
+  await logActionFromReq(req, "dealer_application_started", { target: dealer.id, targetModel: "Dealer", details: { role: u.role } });
+  res.status(201).json({ success: true, alreadyStarted: false, status: "draft", dealer });
+}));
+
+router.get("/onboarding", protect, allowRoles(...APPLICANT_ROLES), asyncHandler(async (req, res) => {
   let dealer = await findOne("dealers", { user: req.user.id });
-  if (!dealer) {
+  if (!dealer && req.user.role === "dealer") {
     dealer = await create("dealers", { user: req.user.id, approved: false, isSuspended: false });
   }
+  if (!dealer) return res.status(409).json({ success: false, code: "DEALER_APPLICATION_NOT_STARTED", message: "Start a dealer application first." });
   res.json({ success: true, dealer });
 }));
 
-router.put("/onboarding", protect, allowRoles("dealer"), asyncHandler(async (req, res) => {
+router.put("/onboarding", protect, allowRoles(...APPLICANT_ROLES), asyncHandler(async (req, res) => {
   const parsed = dealerOnboardingSchema.safeParse(req.body);
   if (!parsed.success) {
     const message = Object.entries(parsed.error.flatten().fieldErrors)
@@ -58,9 +99,10 @@ router.put("/onboarding", protect, allowRoles("dealer"), asyncHandler(async (req
 
   const { businessName, location, bio, paymentDetails, documents } = parsed.data;
   let dealer = await findOne("dealers", { user: req.user.id });
-  if (!dealer) {
+  if (!dealer && req.user.role === "dealer") {
     dealer = await create("dealers", { user: req.user.id, approved: false, isSuspended: false });
   }
+  if (!dealer) return res.status(409).json({ success: false, code: "DEALER_APPLICATION_NOT_STARTED", message: "Start a dealer application first." });
 
   // 14.7: decide BEFORE writing. An approved or suspended dealer cannot resubmit onboarding; previously the profile
   // and payment details were written first and only restored by compensation after submitDealerVerification refused.
@@ -74,6 +116,15 @@ router.put("/onboarding", protect, allowRoles("dealer"), asyncHandler(async (req
     });
   }
 
+  // Paperwork: validated against the SAVED configuration. Optional/unrequested items never block; required ones must be present
+  // (in this submission or already on file). Fail closed if the configuration cannot be read.
+  const policy = await getDealerPaperworkPolicy();
+  if (!policy.items) return res.status(503).json({ success: false, code: "DEALER_PAPERWORK_UNAVAILABLE", message: "The paperwork requirements could not be loaded, so the application was not saved. Try again shortly." });
+  const checked = validateSubmission(documents, policy.items, { existing: existingVerification?.documents || {} });
+  if (!checked.ok) {
+    return res.status(400).json({ success: false, code: "DEALER_PAPERWORK_INVALID", message: checked.errors.map((e) => e.message).join(" "), errors: checked.errors });
+  }
+
   const previousDealer = dealer;
   dealer = await update("dealers", dealer.id, {
     businessName,
@@ -85,7 +136,7 @@ router.put("/onboarding", protect, allowRoles("dealer"), asyncHandler(async (req
   });
 
   try {
-    const verification = await submitDealerVerification(req.user.id, documents);
+    const verification = await submitDealerVerification(req.user.id, checked.accepted);
 
     await logActionFromReq(req, "dealer_onboarding_completed", {
       target: dealer.id,
@@ -99,6 +150,7 @@ router.put("/onboarding", protect, allowRoles("dealer"), asyncHandler(async (req
       dealer,
       verification: verification.verification,
       progress: verification.progress,
+      ignoredDocuments: checked.ignored,
     });
   } catch (error) {
     // Do not leave a dealer claiming onboarding completion when the required

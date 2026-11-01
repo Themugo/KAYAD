@@ -76,7 +76,7 @@ jest.unstable_mockModule("../../infrastructure/logging/index.js", () => ({ logIn
 jest.unstable_mockModule("../../utils/supabase.js", () => ({ isSupabaseConnected: () => true, getSupabase: () => sb }));
 jest.unstable_mockModule("../../utils/securityLogger.js", () => ({ logActionFromReq: jest.fn(async () => {}) }));
 jest.unstable_mockModule("../../db/index.js", () => ({
-  findAll: jest.fn(async () => []), findById: jest.fn(async () => null), findOne: jest.fn(async (t) => (t === "dealer_verifications" ? verif.current : { id: "dl1", user: D1, businessName: "Old" })),
+  findAll: jest.fn(async () => []), findById: jest.fn(async () => null), findOne: jest.fn(async (t, f) => (t === "dealer_verifications" ? verif.current : (t === "dealers" && f?.user === B1 ? null /* a buyer who has not started an application has no dealers row */ : { id: "dl1", user: D1, businessName: "Old" }))),
   create: jest.fn(async (t, d) => ({ id: "new", ...d })), update: dbUpdate, remove: jest.fn(async () => ({})),
   paginate: jest.fn(async () => ({ data: [], total: 0 })), count: jest.fn(async () => 0),
 }));
@@ -130,8 +130,16 @@ describe("14.7 PUT /api/dealer/onboarding decides before it writes", () => {
     expect(submit).toHaveBeenCalledTimes(1);
     expect(dbUpdate).toHaveBeenCalled();
   });
-  test("a non-dealer role is refused before any lookup", async () => {
+  // ONE ACCOUNT (2026-11-01): a buyer may now apply on the same account, but only after starting an application. Without one nothing is
+  // written; roles that can never be applicants (staff) are still refused before any lookup.
+  test("a buyer who has not started an application cannot write onboarding data", async () => {
     const r = await put(B1);
+    expect(r.status).toBe(409);
+    expect(r.body.code).toBe("DEALER_APPLICATION_NOT_STARTED");
+    expect(dbUpdate).not.toHaveBeenCalled();
+  });
+  test.each([["ADMIN", ADMIN], ["MARKETING", MARKETING]])("a staff role (%s) is refused before any lookup", async (_n, who) => {
+    const r = await put(who);
     expect([401, 403]).toContain(r.status);
     expect(dbUpdate).not.toHaveBeenCalled();
   });

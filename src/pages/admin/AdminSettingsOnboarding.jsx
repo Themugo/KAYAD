@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { adminAPI } from '../../api/api';
 import { Button } from '../../components/ui';
+import AdminSettingsDealerPaperwork from './AdminSettingsDealerPaperwork';
 
 // STAGE 5 — Owner-controlled onboarding policy.
 // The server is the authority: this page only displays what GET /admin/settings/onboarding returns
@@ -115,6 +116,7 @@ export default function AdminSettingsOnboarding() {
   };
 
   return (
+    <>
     <div className="card" style={{ padding: 24 }}>
       <h3 style={{ fontSize: '1rem', marginBottom: 6 }}>Onboarding &amp; moderation policy</h3>
       <p style={{ color: 'var(--text-muted)', fontSize: 13, marginBottom: 16 }}>
@@ -166,5 +168,7 @@ export default function AdminSettingsOnboarding() {
         </div>
       )}
     </div>
+    <AdminSettingsDealerPaperwork />
+    </>
   );
 }

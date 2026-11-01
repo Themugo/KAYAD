@@ -26,48 +26,66 @@ interface NavigationGroup {
   links: LinkItem[];
 }
 
+// Grouped by the work an administrator is doing, in the order a day usually runs: look at the platform, run the marketplace, onboard and
+// verify the people who sell on it, handle money, look after customers, grow the business, then administer the platform itself.
+// Every destination from the previous four-group layout is kept exactly once; only grouping and order changed. Settings is NOT in a
+// group: it is pinned to the bottom of the sidebar (see SETTINGS_LINK) so it is reachable whatever is expanded or collapsed.
 const NAVIGATION_GROUPS: NavigationGroup[] = [
   {
     id: 'command-centre', label: 'Command Centre', icon: LayoutDashboard,
     links: [{ to: '/admin', icon: LayoutDashboard, label: 'Dashboard' }],
   },
   {
-    id: 'business-operations', label: 'Business Operations', icon: BriefcaseBusiness,
+    id: 'marketplace', label: 'Marketplace', icon: Car,
     links: [
-      { to: '/admin/users', icon: Users, label: 'Users' },
-      { to: '/admin/sellers', icon: UserCheck, label: 'Sellers' },
-      { to: '/admin/private-seller-applications', icon: IdCard, label: 'Private Seller Applications' },
       { to: '/admin/cars', icon: Car, label: 'Listings' },
       { to: '/admin/moderation', icon: ShieldCheck, label: 'Moderation' },
       { to: '/admin/auctions', icon: Activity, label: 'Auctions' },
       { to: '/admin/bids', icon: Gavel, label: 'Bids' },
-      { to: '/admin/escrows', icon: Lock, label: 'Escrows' },
-      { to: '/admin/transactions', icon: DollarSign, label: 'Transactions' },
-      { to: '/admin/ntsa-queue', icon: ClipboardCheck, label: 'NTSA Queue' },
       { to: '/admin/inspections', icon: BarChart3, label: 'Inspections' },
+      { to: '/admin/ntsa-queue', icon: ClipboardCheck, label: 'NTSA Queue' },
+    ],
+  },
+  {
+    id: 'accounts-onboarding', label: 'Accounts & Onboarding', icon: UserCheck,
+    links: [
+      { to: '/admin/users', icon: Users, label: 'Users' },
+      { to: '/admin/sellers', icon: UserCheck, label: 'Sellers' },
       { to: '/admin/dealer-verifications', icon: BadgeCheck, label: 'Dealer Verifications' },
+      { to: '/admin/private-seller-applications', icon: IdCard, label: 'Private Seller Applications' },
       { to: '/admin/inspector-applications', icon: UserSearch, label: 'Inspector Apps' },
     ],
   },
   {
-    id: 'business-management', label: 'Business Management', icon: Building2,
+    id: 'finance', label: 'Finance', icon: DollarSign,
     links: [
-      { to: '/admin/reviews', icon: Star, label: 'Reviews' },
-      { to: '/admin/referrals', icon: Gift, label: 'Referrals' },
-      { to: '/admin/chats', icon: MessageSquare, label: 'Chats' },
-      { to: '/admin/reports', icon: Flag, label: 'Reports' },
-      { to: '/admin/support-tickets', icon: TicketCheck, label: 'Support Tickets' },
-      { to: '/admin/feedback', icon: MessageSquareText, label: 'Feedback' },
-      { to: '/admin/market-data', icon: TrendingUp, label: 'Market Data' },
-      { to: '/admin/ads', icon: Megaphone, label: 'Ad Manager' },
-      { to: '/admin/broadcast', icon: Radio, label: 'Broadcast' },
+      { to: '/admin/escrows', icon: Lock, label: 'Escrows' },
+      { to: '/admin/transactions', icon: DollarSign, label: 'Transactions' },
     ],
   },
   {
-    id: 'system-administration', label: 'System Administration', icon: Wrench,
+    id: 'customer-care', label: 'Customer Care', icon: Building2,
+    links: [
+      { to: '/admin/support-tickets', icon: TicketCheck, label: 'Support Tickets' },
+      { to: '/admin/reports', icon: Flag, label: 'Reports' },
+      { to: '/admin/chats', icon: MessageSquare, label: 'Chats' },
+      { to: '/admin/reviews', icon: Star, label: 'Reviews' },
+      { to: '/admin/feedback', icon: MessageSquareText, label: 'Feedback' },
+    ],
+  },
+  {
+    id: 'growth', label: 'Growth & Insight', icon: TrendingUp,
+    links: [
+      { to: '/admin/market-data', icon: TrendingUp, label: 'Market Data' },
+      { to: '/admin/ads', icon: Megaphone, label: 'Ad Manager' },
+      { to: '/admin/broadcast', icon: Radio, label: 'Broadcast' },
+      { to: '/admin/referrals', icon: Gift, label: 'Referrals' },
+    ],
+  },
+  {
+    id: 'platform-security', label: 'Platform & Security', icon: Wrench,
     links: [
       { to: '/admin/security-log', icon: Shield, label: 'Security Log' },
-      { to: '/admin/settings', icon: Settings, label: 'Settings' },
       { to: '/admin/control-room', icon: Gauge, label: 'Control Room' },
       { to: '/admin/staff', icon: Crown, label: 'Staff', superadmin: true },
       { to: '/admin/staff-permissions', icon: KeyRound, label: 'Staff Permissions', superadmin: true },
@@ -78,13 +96,17 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
   },
 ];
 
+// Standalone, never inside a collapsible group, rendered last in the sidebar. Same route and same permission rule as before.
+const SETTINGS_LINK: LinkItem = { to: '/admin/settings', icon: Settings, label: 'Settings' };
+
 const ELIGIBLE_ROLES = ['superadmin', 'admin', 'moderator', 'escrow_officer', 'marketing', 'ad_manager', 'accounts', 'technical_support', 'hr', 'ghost_checker'];
 
 const roleLinks = (user: { role?: string; permissions?: string[] }): LinkItem[] => {
   const role = user?.role;
-  if (role === 'superadmin') return NAVIGATION_GROUPS.flatMap(group => group.links);
+  const everyLink = [...NAVIGATION_GROUPS.flatMap(group => group.links), SETTINGS_LINK];
+  if (role === 'superadmin') return everyLink;
   const perms = getEffectivePermissions(user);
-  return NAVIGATION_GROUPS.flatMap(group => group.links).filter(link => {
+  return everyLink.filter(link => {
     if (link.danger || link.superadmin) return false;
     if (SUPERADMIN_ONLY.has(link.to)) return false;
     const required = PAGE_PERMISSIONS[link.to];
@@ -104,9 +126,12 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
   const [collapsed, setCollapsed] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     'command-centre': true,
-    'business-operations': true,
-    'business-management': true,
-    'system-administration': true,
+    'marketplace': true,
+    'accounts-onboarding': true,
+    'finance': true,
+    'customer-care': true,
+    'growth': true,
+    'platform-security': true,
   });
   const [alertCount, setAlertCount] = useState(0);
 
@@ -218,13 +243,6 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
           })}
         </nav>
 
-        <div className="admin-sidebar__footer">
-          <Link className="admin-sidebar__link" to="/" title={collapsed ? 'View marketplace' : undefined} aria-label={collapsed ? 'View marketplace' : undefined} onClick={() => { if (mobileOpen) onToggle(); }}>
-            <Store size={16} aria-hidden="true" />
-            {!collapsed && <span>View marketplace</span>}
-          </Link>
-        </div>
-
         {alertCount > 0 && (
           <div className="admin-sidebar__alerts" role="status" aria-live="polite" title={`${alertCount} unread alert${alertCount !== 1 ? 's' : ''}`}>
             <Bell size={15} aria-hidden="true" />
@@ -232,6 +250,26 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
             {collapsed && <span className="admin-sidebar__alert-dot" aria-hidden="true" />}
           </div>
         )}
+
+        {/* Pinned footer: outside every group, so it stays visible however the groups above are expanded or collapsed. Settings is the last item. */}
+        <div className="admin-sidebar__footer admin-sidebar__pinned">
+          <Link className="admin-sidebar__link" to="/" title={collapsed ? 'View marketplace' : undefined} aria-label={collapsed ? 'View marketplace' : undefined} onClick={() => { if (mobileOpen) onToggle(); }}>
+            <Store size={16} aria-hidden="true" />
+            {!collapsed && <span>View marketplace</span>}
+          </Link>
+          {permittedLinks.has(SETTINGS_LINK.to) && (
+            <NavLink
+              to={SETTINGS_LINK.to}
+              className={({ isActive }) => `admin-sidebar__link admin-sidebar__settings${isActive ? ' is-active' : ''}`}
+              title={collapsed ? SETTINGS_LINK.label : undefined}
+              aria-label={collapsed ? SETTINGS_LINK.label : undefined}
+              onClick={() => { if (mobileOpen) onToggle(); }}
+            >
+              <Settings size={16} aria-hidden="true" />
+              {!collapsed && <span>{SETTINGS_LINK.label}</span>}
+            </NavLink>
+          )}
+        </div>
       </aside>
     </>
   );

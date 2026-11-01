@@ -1,4 +1,4 @@
-import { useBranding } from '../context/BrandingContext';
+import { useBranding, onBrandLogoError } from '../context/BrandingContext';
 interface FooterProps {
   setPage?: (page: string) => void;
 }
@@ -18,7 +18,7 @@ export default function Footer({ setPage }: FooterProps) {
           <div className="md:col-span-1">
             <button onClick={() => nav('home')} className="flex items-center gap-2 mb-3 min-w-0" aria-label={`${branding.logoText || 'KAYAD'} home`}>
               {branding.logoType === 'image' && branding.logoUrl ? (
-                <img src={branding.logoUrl} alt={branding.logoText || 'KAYAD'} className="h-12 w-auto max-w-[190px] object-contain object-left" loading="lazy" />
+                <img src={branding.logoUrl} onError={onBrandLogoError} alt={branding.logoText || 'KAYAD'} className="h-12 w-auto max-w-[190px] object-contain object-left" loading="lazy" />
               ) : (
                 <span className="text-[#13B8A6] font-sans font-bold tracking-[0.15em] uppercase">{branding.logoText || 'KAYAD'}</span>
               )}

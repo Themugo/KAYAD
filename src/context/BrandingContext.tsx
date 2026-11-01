@@ -187,6 +187,15 @@ function normalizeBrandingConfig(config: Partial<Branding> | null | undefined): 
   return merged;
 }
 
+export const DEFAULT_LOGO_URL = '/branding/kayad-road-mark.svg';
+/** A stored logo can go missing (deleted asset, provider outage). Fall back ONCE to the bundled mark instead of showing a broken image. */
+export function onBrandLogoError(e: { currentTarget: HTMLImageElement }) {
+  const img = e.currentTarget;
+  if (img.dataset.logoFallback === '1') return;
+  img.dataset.logoFallback = '1';
+  img.src = DEFAULT_LOGO_URL;
+}
+
 const BrandingCtx = createContext<BrandingContextValue | null>(null);
 
 interface BrandingProviderProps {

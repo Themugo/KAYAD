@@ -385,6 +385,15 @@ export function RequireDealer({ children }: RequireAuthProps) {
   return children;
 }
 
+/** The dealer application page: dealers (pending or approved) AND buyers who are applying on the same account. Staff are not applicants. */
+export function RequireDealerApplicant({ children }: RequireAuthProps) {
+  const { user, isDealer, loading, isAuth, sessionStatus } = useAuth();
+  if (loading) return <div className="loading-center"><div className="spinner"/></div>;
+  if (!isAuth && sessionStatus === 'error') return <SessionRecovery />;
+  if (!isDealer && (user?.role as string) !== 'buyer') return <Navigate to="/" replace />;
+  return children;
+}
+
 export function RequireSeller({ children }: RequireAuthProps) {
   const { isSeller, user, loading, isAuth, sessionStatus } = useAuth();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;

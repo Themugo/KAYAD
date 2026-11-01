@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 let mockUser = { id: 'd1', role: 'dealer', status: 'pending' };
 vi.mock('../../context/AuthContext', () => ({ useAuth: () => ({ user: mockUser, setUser: () => {} }) }));
 vi.mock('../../context/ToastContext', () => ({ useToast: () => ({ toast: vi.fn() }) }));
-vi.mock('../../api/api', () => ({ dealerAPI: { getOnboarding: vi.fn().mockResolvedValue({ dealer: null }), completeOnboarding: vi.fn() } }));
+vi.mock('../../api/api', () => ({ dealerAPI: { getOnboarding: vi.fn().mockResolvedValue({ dealer: null }), completeOnboarding: vi.fn(), paperworkRequirements: vi.fn().mockResolvedValue({ checklist: [] }) } }));
 
 import DealerOnboarding from '../../pages/dealer/DealerOnboarding';
 

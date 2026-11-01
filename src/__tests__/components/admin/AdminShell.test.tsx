@@ -48,8 +48,8 @@ describe('Super Admin shell', () => {
 
   it('gives every destination its own icon', () => {
     mount('/admin');
-    const links = Array.from(document.querySelectorAll('.admin-sidebar__links a')).filter((a) => a.getAttribute('href') !== '/');
-    expect(links.length).toBeGreaterThanOrEqual(29);
+    const links = Array.from(document.querySelectorAll('.admin-sidebar__links a, .admin-sidebar__settings')).filter((a) => a.getAttribute('href') !== '/');
+    expect(links.length).toBeGreaterThanOrEqual(31);
     const icons = links.map((a) => Array.from(a.querySelector('svg')!.classList).find((c) => c.startsWith('lucide-') && c !== 'lucide')!);
     expect(new Set(icons).size).toBe(icons.length);
   });
