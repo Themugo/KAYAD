@@ -15,7 +15,9 @@ describe("real-schema pins (STAGE 5A)", () => {
   test("approve-dealer uses the atomic RPC and the real account gate, not users.approved", () => {
     const s = src("backend/routes/adminRoutes.js");
     const seg = s.slice(s.indexOf('"/users/:id/approve-dealer"'), s.indexOf('"/users/:id/seller-settings"'));
-    expect(seg).toMatch(/kayad_apply_dealer_verification_atomic/);
+    // The route delegates to the approval service, which is the only caller of the atomic RPC for this decision.
+    expect(seg).toMatch(/dealerApproval\.approveDealer/);
+    expect(src("backend/services/dealerApproval.service.js")).toMatch(/kayad_apply_dealer_verification_atomic/);
     expect(seg).toMatch(/status:\s*"approved"/);
     expect(seg).not.toMatch(/approved:\s*true/);
   });

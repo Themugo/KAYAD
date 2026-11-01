@@ -1,3 +1,4 @@
+import { describeDealerDecisionError, isReasonValid, DEALER_REASON_MIN } from '../../utils/dealerDecision';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
@@ -116,14 +117,17 @@ export default function AdminUsers() {
   }, [load, toast]);
 
   const handleApprove = useCallback(async (u) => {
+    // The server requires an auditable reason for every dealer decision; it is the operator's, never a canned value.
+    const reason = (window.prompt(`Reason for approving ${u.businessName || u.name} (at least ${DEALER_REASON_MIN} characters):`) || '').trim();
+    if (!isReasonValid(reason)) { if (reason) toast(`The reason must be at least ${DEALER_REASON_MIN} characters. Nothing was changed.`, 'error'); return; }
     setActionId(`${u._id}-app`);
     try {
-      await adminAPI.approveDealer(u._id);
+      await adminAPI.approveDealer(u._id, { reason });
       setUsers(prev => prev.map(x => x._id === u._id ? { ...x, approved: true, status: 'approved' } : x));
       setSummary(prev => prev ? { ...prev, pendingApproval: Math.max(0, Number(prev.pendingApproval || 0) - 1) } : prev);
       toast('Dealer approval saved', 'success');
     } catch (err) {
-      toast(err?.response?.data?.message || 'Dealer approval failed. No change was assumed.', 'error');
+      toast(describeDealerDecisionError(err, 'Dealer approval failed. No change was assumed.'), 'error');
     } finally {
       setActionId(null);
     }

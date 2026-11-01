@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import AdminLoadNotice from '../../components/admin/AdminLoadNotice';
+import { approvalEligibility, describeDealerDecisionError, isReasonValid, DEALER_REASON_MIN } from '../../utils/dealerDecision';
 
 import { X, Search } from 'lucide-react';
 export default function AdminSellers() {
@@ -19,6 +20,9 @@ export default function AdminSellers() {
   const loadedKeyRef = useRef(null);
   const [saving, setSaving] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState(null);
+  const [approving, setApproving] = useState(null); // { id, label } while the reason is being entered
+  const [approveReason, setApproveReason] = useState('');
+  const [decisionError, setDecisionError] = useState('');
 
   const fetchSellers = useCallback(async () => {
     setLoading(true);
@@ -49,6 +53,8 @@ export default function AdminSellers() {
         listingCount: u.listingCount ?? null,
         rating: u.dealerRating ?? null,
         createdAt: u.createdAt,
+        application: u.application ?? null, // what the server says the application still lacks; null = could not be inspected
+        role: u.role,
       }));
       setSellers(mapped);
       setTotal(Number.isFinite(reportedTotal) ? reportedTotal : mapped.length);
@@ -65,20 +71,36 @@ export default function AdminSellers() {
 
   useEffect(() => { fetchSellers(); }, [fetchSellers]);
 
+  const startApprove = (s) => { setDecisionError(''); setApproveReason(''); setApproving({ id: s.id, label: s.businessName || s.name }); };
+
+  // Approval is confirmed by the SERVER: the list is re-read afterwards and the row changes only if the server now reports it approved.
+  const confirmApprove = async () => {
+    if (!approving || updatingStatus) return;
+    if (!isReasonValid(approveReason)) { setDecisionError(`State the reason for approving this dealer (at least ${DEALER_REASON_MIN} characters).`); return; }
+    setUpdatingStatus(approving.id);
+    setDecisionError('');
+    try {
+      const out = await adminAPI.approveDealer(approving.id, { reason: approveReason.trim() });
+      toast(out?.changed === false ? 'Already approved — nothing was changed.' : 'Dealer approved — confirmed by the server.', 'success');
+      setApproving(null); setApproveReason('');
+    } catch (err) {
+      // The original state is untouched on a refusal; show exactly what the server said.
+      setDecisionError(describeDealerDecisionError(err, 'The server did not approve this dealer. Nothing was changed.'));
+    } finally {
+      setUpdatingStatus(null);
+      await fetchSellers();
+    }
+  };
+
   const toggleStatus = async (id, currentStatus) => {
     if (updatingStatus) return;
     setUpdatingStatus(id);
     try {
-      if (currentStatus === 'pending') {
-        await adminAPI.approveDealer(id);
-        toast('Dealer approved', 'success');
-      } else {
-        await adminAPI.toggleBan(id);
-        toast(currentStatus === 'approved' ? 'Seller suspended' : 'Seller reinstated', 'success');
-      }
+      await adminAPI.toggleBan(id);
+      toast(currentStatus === 'approved' ? 'Seller suspended' : 'Seller reinstated', 'success');
       fetchSellers();
-    } catch {
-      toast('Failed to update seller status. The server did not confirm the change.', 'error');
+    } catch (err) {
+      toast(describeDealerDecisionError(err, 'Failed to update seller status. The server did not confirm the change.'), 'error');
       await fetchSellers();
     } finally {
       setUpdatingStatus(null);
@@ -220,6 +242,12 @@ export default function AdminSellers() {
                       <span className={`badge ${s.status === 'approved' ? 'badge-green' : s.status === 'pending' ? 'badge-orange' : 'badge-muted'}`}>
                         {s.status}
                       </span>
+                      {s.status === 'pending' && s.role === 'dealer' && (() => {
+                        const el = approvalEligibility(s.application);
+                        if (el.state === 'blocked') return <div role="note" style={{ fontSize: 11, color: '#92400e', marginTop: 6, maxWidth: 260 }}>Cannot be approved yet: {el.reasons.join(' ')}</div>;
+                        if (el.state === 'unknown') return <div role="note" style={{ fontSize: 11, color: '#64748b', marginTop: 6, maxWidth: 260 }}>Application completeness could not be checked; the server will validate on approval.</div>;
+                        return null;
+                      })()}
                     </td>
                     <td onClick={e => e.stopPropagation()}>
                       <div style={{ display: 'flex', gap: 6 }}>
@@ -228,8 +256,9 @@ export default function AdminSellers() {
                         ) : (
                           <button className="btn btn-outline btn-sm" onClick={() => setEditing(s.id)}>Price</button>
                         )}
-                        <button disabled={updatingStatus === s.id} className={`btn btn-sm ${s.status === 'approved' ? 'btn-danger' : 'btn-gold'}`}
-                          onClick={() => toggleStatus(s.id, s.status)}>
+                        <button disabled={updatingStatus === s.id || (s.status === 'pending' && s.role === 'dealer' && approvalEligibility(s.application).state === 'blocked')}
+                          className={`btn btn-sm ${s.status === 'approved' ? 'btn-danger' : 'btn-gold'}`}
+                          onClick={() => (s.status === 'pending' ? startApprove(s) : toggleStatus(s.id, s.status))}>
                           {updatingStatus === s.id ? 'Updating…' : s.status === 'approved' ? 'Suspend' : s.status === 'pending' ? 'Approve' : 'Reinstate'}
                         </button>
                       </div>
@@ -248,6 +277,20 @@ export default function AdminSellers() {
             </div>
           </div>
         </div>
+
+        {approving && (
+          <div className="card" role="dialog" aria-label="Confirm dealer approval" style={{ padding: 20, marginTop: 20 }}>
+            <h3 style={{ marginBottom: 6 }}>Approve {approving.label}?</h3>
+            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 10 }}>The reason is recorded in the audit log. The dealer can list vehicles once the server confirms the approval.</p>
+            <label htmlFor="approve-reason" style={{ display: 'block', fontSize: 12, fontWeight: 700, marginBottom: 4 }}>Reason (required, at least {DEALER_REASON_MIN} characters)</label>
+            <input id="approve-reason" className="input" value={approveReason} maxLength={300} onChange={(e) => setApproveReason(e.target.value)} style={{ width: '100%', maxWidth: 560 }} />
+            {decisionError && <div role="alert" style={{ marginTop: 10, padding: 10, borderRadius: 8, background: 'rgba(185,28,28,0.06)', color: '#b91c1c', fontSize: 13 }}>{decisionError}</div>}
+            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+              <button type="button" className="btn btn-gold btn-sm" disabled={!!updatingStatus || !isReasonValid(approveReason)} onClick={confirmApprove}>{updatingStatus ? 'Approving…' : 'Confirm approval'}</button>
+              <button type="button" className="btn btn-outline btn-sm" disabled={!!updatingStatus} onClick={() => { setApproving(null); setDecisionError(''); }}>Cancel</button>
+            </div>
+          </div>
+        )}
 
         {selected && (
           <div className="card" style={{ padding: 24, marginTop: 20 }}>

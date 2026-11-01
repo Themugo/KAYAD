@@ -20,6 +20,7 @@ import Car from "../models/Car.js";
 import PlatformConfig from "../models/PlatformConfig.js";
 import AuditLog from "../models/AuditLog.js";
 import { auditAfterCommit } from "../utils/auditAfterCommit.js";
+import * as dealerApproval from "../services/dealerApproval.service.js";
 import { syncLegacyApproval } from "../services/privateSellerCapability.service.js"; // Phase 13E
 import Payment from "../models/Payment.js";
 import Bid from "../models/Bid.js";
@@ -356,8 +357,13 @@ router.get(
     // STAGE 5A: `approved` / `verificationStatus` / `businessType` / `lastLogin` are not columns of `users` (selecting them made this
     // endpoint fail with 500 on the real schema). The admin UI still reads `approved` and `verificationStatus`, so derive them
     // from the authoritative account gate, `status`.
+    // Dealer rows also carry what the application still lacks (profile / documents), read from the authoritative dealers and
+    // dealer_verifications tables, so the Approve action is only offered for an application that can actually be approved. A row whose
+    // application could not be read is `null` (unknown), never "complete".
+    const applications = await dealerApproval.summarizeApplications(users.map((u) => ({ ...u, id: u._id ?? u.id })));
     const decorated = users.map((u) => ({
       ...u,
+      ...(u.role === "dealer" ? { application: applications.get(String(u._id ?? u.id)) ?? null } : {}),
       approved: u.status === "approved",
       verificationStatus: u.status === "approved" ? "verified" : u.status === "rejected" ? "rejected" : "pending",
       lastLogin: u.lastLoginAt ?? null,
@@ -480,14 +486,25 @@ router.post(
     // STAGE 5A: `users.approved` / `users.verification_status` do not exist (this handler failed with 500 on the real schema and
     // never approved anyone). Approval is: the atomic verification RPC for dealers (dealers.approved, dealer_verifications) plus
     // the account gate users.status = "approved" for dealers and private sellers alike.
+    let dealerOutcome = null;
     if (user.role === "dealer") {
-      const { error: rpcError } = await getSupabase().rpc("kayad_apply_dealer_verification_atomic", {
-        p_user: String(req.params.id),
-        p_action: "approve",
-        p_admin: String(req.user.id),
-        p_reason: null,
-      });
-      if (rpcError) throw rpcError;
+      try {
+        dealerOutcome = await dealerApproval.approveDealer({ user, actorId: req.user.id, reason: req.body?.reason });
+      } catch (e) {
+        if (!(e instanceof dealerApproval.DealerDecisionError)) throw e;
+        // A refusal changes nothing (the database function runs in one transaction and the pre-checks write nothing).
+        await auditAfterCommit({
+          action: "Dealer decision: approve-dealer refused",
+          admin: req.user.name || req.user.email,
+          adminId: req.user.id,
+          details: { outcome: "refused", code: e.code, targetUserId: String(user._id), previousStatus: user.status },
+        });
+        return res.status(e.status).json({ success: false, code: e.code, message: e.message, ...e.extra });
+      }
+      if (!dealerOutcome.changed) {
+        // Repeat / stale click: already approved. No second RPC, audit row or notification.
+        return res.json({ success: true, changed: false, alreadyApproved: true, message: "This dealer is already approved. Nothing was changed.", warnings: dealerOutcome.warnings });
+      }
     }
     // 13F: sync the authoritative capability row FIRST so a database failure aborts before users.status changes and the
     // response can state the real capability outcome (a suspended/revoked seller is not reinstated by this legacy endpoint).
@@ -516,7 +533,7 @@ router.post(
       action: "Dealer decision: approve-dealer",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
-      details: { outcome: "success", targetUserId: String(user._id) },
+      details: { outcome: "success", targetUserId: String(user._id), previousStatus: user.status, newStatus: "approved", ...(dealerOutcome?.reason ? { reason: dealerOutcome.reason } : {}) },
     });
 
     emitCommunication({
@@ -537,7 +554,9 @@ router.post(
 
 res.json({
       success: true,
+      changed: true,
       message: "Seller approved",
+      ...(dealerOutcome?.warnings?.length ? { warnings: dealerOutcome.warnings } : {}),
       ...(legacySync ? { sellerCapabilityStatus: legacySync.status } : {}),
     });
   }),
@@ -1223,13 +1242,20 @@ router.post(
       return res.status(400).json({ success: false, message: "Action must be 'approve' or 'reject'" });
     }
 
-    const { data: result, error } = await getSupabase().rpc('kayad_apply_dealer_verification_atomic', {
-      p_user: String(req.params.id),
-      p_action: action,
-      p_admin: String(req.user.id),
-      p_reason: req.body.reason || null,
-    });
-    if (error) throw error;
+    let result;
+    try {
+      // approve is validated against the onboarding rules exactly like approve-dealer; reject needs only the reason.
+      if (action === "approve") {
+        const out = await dealerApproval.approveDealer({ user, actorId: req.user.id, reason: req.body.reason });
+        if (!out.changed) return res.json({ success: true, changed: false, alreadyApproved: true, message: "This dealer is already approved. Nothing was changed." });
+        result = out.result;
+      } else {
+        result = (await dealerApproval.applyDealerAction({ userId: req.params.id, action, actorId: req.user.id, reason: req.body.reason })).result;
+      }
+    } catch (e) {
+      if (!(e instanceof dealerApproval.DealerDecisionError)) throw e;
+      return res.status(e.status).json({ success: false, code: e.code, message: e.message, ...e.extra });
+    }
     // STAGE 5: the RPC updates users.role/dealers/dealer_verifications but not the account gate, which left an
     // "approved" dealer's listings pending forever. Keep users.status consistent with the decision.
     await User.findByIdAndUpdate(req.params.id, { status: action === "approve" ? "approved" : "rejected" });

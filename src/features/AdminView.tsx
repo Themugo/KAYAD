@@ -1,3 +1,4 @@
+import { describeDealerDecisionError, isReasonValid, DEALER_REASON_MIN } from '../utils/dealerDecision';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { Vehicle } from '../types';
@@ -328,14 +329,17 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
   // STAGE 5A (Gate F): the dealer/seller decision and listing moderation controls existed only on pages that are not mounted
   // anywhere reachable. The server remains the authority (owner_only / admins policy); these buttons only call it and show its answer.
   const decideSeller = async (user: AdminUser, action: 'approve' | 'reject') => {
+    // Both decisions are audited with the operator's own reason (the server refuses an empty one).
+    const reason = (window.prompt(`Reason for ${action === 'approve' ? 'approving' : 'rejecting'} ${(user as { businessName?: string }).businessName || user.name} (at least ${DEALER_REASON_MIN} characters):`) || '').trim();
+    if (!isReasonValid(reason)) { if (reason) setActionError(`The reason must be at least ${DEALER_REASON_MIN} characters. Nothing was changed.`); return; }
     setBusyId(user._id);
     setActionError(null);
     try {
-      if (action === 'approve') await adminAPI.approveDealer(user._id);
-      else await adminAPI.verifyDealer(user._id, { action: 'reject', reason: 'Application not approved' });
+      if (action === 'approve') await adminAPI.approveDealer(user._id, { reason });
+      else await adminAPI.verifyDealer(user._id, { action: 'reject', reason });
       await load();
     } catch (err: any) {
-      setActionError(err?.response?.data?.message || err?.message || 'The server rejected this application decision.');
+      setActionError(describeDealerDecisionError(err, 'The server rejected this application decision.'));
     } finally {
       setBusyId(null);
     }
