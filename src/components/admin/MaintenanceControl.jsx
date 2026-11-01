@@ -14,12 +14,21 @@ const input = { width: '100%', background: '#f6faf9', border: '1px solid rgba(10
 const label = { display: 'block', fontSize: 11, fontWeight: 700, color: '#0a3340', marginBottom: 4, letterSpacing: '0.04em', textTransform: 'uppercase' };
 const fmt = (iso) => { try { return iso ? new Date(iso).toLocaleString() : '—'; } catch { return '—'; } };
 
+// The HTTP status and server code are appended so a refusal can be identified exactly (permission, confirmation, CSRF, conflict, outage).
 const errorText = (err) => {
   const d = err?.response?.data;
-  if (d?.code === 'MAINTENANCE_STATE_CONFLICT') return 'The maintenance state changed since this page loaded. The current state is shown below; review it and try again.';
-  if (d?.message) return d.message;
-  if (err?.response?.status === 503) return 'The service or its database is unavailable right now. Nothing was changed by this request.';
-  return 'The request could not be completed. Nothing is assumed to have changed; check the state shown.';
+  const st = err?.response?.status;
+  const tag = st ? ` [HTTP ${st}${typeof d?.code === 'string' ? ` · ${d.code}` : ''}]` : '';
+  if (d?.code === 'MAINTENANCE_STATE_CONFLICT') return `The maintenance state changed since this page loaded. The current state is shown below; review it and try again.${tag}`;
+  if (d?.message) return `${d.message}${tag}`;
+  if (st === 503) return `The service or its database is unavailable right now. Nothing was changed by this request.${tag}`;
+  return `The request could not be completed. Nothing is assumed to have changed; check the state shown.${tag}`;
+};
+const AUTH_HINT = {
+  required: 'An authenticator or recovery code is required.',
+  not_required: 'No authenticator code is required (none is enrolled); your password confirms the change.',
+  enrollment_required: 'Server policy requires an enrolled authenticator for owner changes, and none is enrolled. The change will be refused until one is enrolled.',
+  unknown: 'The server could not determine whether an authenticator code is required.',
 };
 
 export default function MaintenanceControl({ mode = 'owner' }) {
@@ -216,6 +225,7 @@ export default function MaintenanceControl({ mode = 'owner' }) {
             </div>
             {mode === 'owner' && (
               <div>
+                {AUTH_HINT[data?.confirmation?.authenticator] && <div role="note" style={{ fontSize: 11, color: '#475569', marginBottom: 6 }}>{AUTH_HINT[data.confirmation.authenticator]}</div>}
                 <label style={label} htmlFor="maint-mfa">Authenticator or recovery code (if enabled)</label>
                 <input id="maint-mfa" inputMode="text" autoComplete="one-time-code" style={input} value={mfaCode} onChange={(e) => setMfaCode(e.target.value)} />
               </div>

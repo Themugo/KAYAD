@@ -26,8 +26,10 @@ export async function resolveMaintenanceIdentity(user, isOwner, { needTeam = tru
 
 const refuse = (req, res, scope, message, reason) => {
   res.setHeader("Retry-After", "60");
-  // Control endpoints under a scoped (non-global) maintenance are ordinary authorization failures, not "maintenance".
-  if (reason === "CONTROL_NOT_PERMITTED" && scope !== "global") {
+  // An authenticated caller who is not permitted to use the maintenance controls has an AUTHORISATION problem, in every scope - including
+  // global. Answering 503 "maintenance" would disguise it (a technical-recovery user who tries to activate, or any non-owner, would be told
+  // the platform is down instead of "you may not do this").
+  if (reason === "CONTROL_NOT_PERMITTED") {
     res.status(403).json({ success: false, code: MAINTENANCE_FORBIDDEN_CODE, message: "You are not authorised to use the maintenance controls." });
     return true;
   }

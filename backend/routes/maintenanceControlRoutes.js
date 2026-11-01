@@ -10,6 +10,7 @@ import { isOwnerUser } from "../config/owners.js";
 import { buildIdentity, decide, MAINTENANCE_FORBIDDEN_CODE, MAINTENANCE_SCOPES } from "../config/maintenancePolicy.js";
 import * as svc from "../services/maintenanceControl.service.js";
 import * as gov from "../services/ownerGovernance.service.js";
+import * as ownerMfa from "../services/ownerMfa.service.js";
 import { logError } from "../infrastructure/logging/index.js";
 
 const router = express.Router();
@@ -53,6 +54,18 @@ const send = (res, err) => {
 };
 const wrap = (fn) => (req, res) => Promise.resolve(fn(req, res)).catch((e) => send(res, e));
 
+/** What the server will ask for to confirm a change, so the operator is told up front (read-only; never decides anything). */
+const confirmationFor = async (actor) => {
+  if (!actor.isOwner) return { password: true, authenticator: "not_applicable" };
+  const policy = ownerMfa.mfaPolicy();
+  if (policy === "off") return { password: true, authenticator: "not_required" };
+  try {
+    const enforced = await ownerMfa.isEnforcedFor(actor.id);
+    if (enforced) return { password: true, authenticator: "required" };
+    return { password: true, authenticator: policy === "required" ? "enrollment_required" : "not_required" };
+  } catch { return { password: true, authenticator: "unknown" }; }
+};
+
 router.get("/status", protect, authorizeControl("status"), wrap(async (req, res) => {
   noStore(res);
   const state = await svc.readState(); // 503 MAINTENANCE_STORE_UNAVAILABLE when the store cannot be read - never a made-up "operational"
@@ -62,6 +75,7 @@ router.get("/status", protect, authorizeControl("status"), wrap(async (req, res)
     scopes: svc.scopeCatalog(),
     capabilities: { canActivate: req.maintenanceActor.isOwner, canRecover: true, role: req.maintenanceActor.isOwner ? "system_owner" : "technical_recovery", globalConfirmation: GLOBAL_CONFIRM },
     operator: { name: req.user.name || req.user.email, at: new Date().toISOString() },
+    confirmation: await confirmationFor(req.maintenanceActor),
   });
 }));
 

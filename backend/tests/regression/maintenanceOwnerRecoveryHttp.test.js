@@ -28,8 +28,9 @@ jest.unstable_mockModule("../../middleware/rateLimiter.js", () => ({ adminLimite
 // Session stand-in: the x-test-user header carries the already-verified principal; no header = 401.
 jest.unstable_mockModule("../../middleware/auth.js", () => ({ protect: (req, res, next) => { try { req.user = JSON.parse(req.headers["x-test-user"]); next(); } catch { res.status(401).json({ success: false, message: "Not authenticated" }); } } }));
 jest.unstable_mockModule("../../config/owners.js", () => ({ isOwnerUser: (u) => u?.__verifiedOwner === true }));
-const stepUpImpl = async (u, password, mfa) => { stepUps.push({ id: u.id, mfa: mfa || null }); if (password !== "correct-password") throw new OwnerError("OWNER_STEP_UP_FAILED", "Password confirmation failed.", 401); };
+const stepUpImpl = async (u, password, mfa) => { stepUps.push({ id: u.id, mfa: mfa || null }); if (password !== "correct-password") throw new OwnerError("STEP_UP_FAILED", "Your password is incorrect.", 403); };
 jest.unstable_mockModule("../../services/ownerGovernance.service.js", () => ({ OwnerError, requireStepUp: stepUpImpl, passwordStepUp: stepUpImpl }));
+jest.unstable_mockModule("../../services/ownerMfa.service.js", () => ({ mfaPolicy: () => "off", isEnforcedFor: async () => false }));
 const control = (await import("../../routes/maintenanceControlRoutes.js")).default;
 const { checkSystemStatus, __resetSystemStatusState } = await import("../../middleware/systemCheck.js");
 
@@ -93,10 +94,10 @@ describe("unauthorised attempts are refused by the server", () => {
 describe("confirmation is enforced", () => {
   test("wrong password: 401, nothing written, nothing audited, still in maintenance", async () => {
     const r = await recover(OWNER, { password: "wrong" });
-    expect(r.code).toBe(401); expect(r.body.code).toBe("OWNER_STEP_UP_FAILED");
+    expect(r.code).toBe(403); expect(r.body.code).toBe("STEP_UP_FAILED");
     expect(store[0].value.isMaintenanceMode).toBe(true); expect(audits).toHaveLength(0);
   });
-  test("missing password: refused", async () => { const r = await recover(OWNER, { password: "" }); expect(r.code).toBe(401); expect(store[0].value.isMaintenanceMode).toBe(true); });
+  test("missing password: refused", async () => { const r = await recover(OWNER, { password: "" }); expect(r.code).toBe(403); expect(store[0].value.isMaintenanceMode).toBe(true); });
   test("missing/short reason: 400; missing expectedVersion: 428 - checked BEFORE any password is evaluated", async () => {
     expect((await recover(OWNER, { reason: "x" })).code).toBe(400);
     expect((await recover(OWNER, { expectedVersion: undefined })).code).toBe(428);

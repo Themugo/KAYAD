@@ -191,3 +191,37 @@ describe('integration contracts', () => {
     expect(read('pages/admin/PlatformRecovery.jsx')).toContain('mode="recovery"');
   });
 });
+
+describe('refusals are identifiable and the confirmation requirement is stated up front', () => {
+  test('a refused END MAINTENANCE shows the server message with its HTTP status and code, keeps the real state, and never claims success', async () => {
+    h.status.mockResolvedValue(payload(active('global', 0)));
+    h.recover.mockRejectedValue(httpErr(403, { code: 'STEP_UP_FAILED', message: 'Your password is incorrect. Re-enter your password to confirm this change.' }));
+    render(<MaintenanceControl mode="owner" />);
+    await screen.findByText(/MAINTENANCE ACTIVE — Global shutdown/);
+    type('Reason (required)', 'Incident resolved and services verified'); type('Your password', 'wrong');
+    fireEvent.click(screen.getByText('END MAINTENANCE'));
+    expect((await screen.findByText(/Your password is incorrect/)).textContent).toMatch(/\[HTTP 403 · STEP_UP_FAILED\]/);
+    expect(screen.getByText(/MAINTENANCE ACTIVE — Global shutdown/)).toBeTruthy();
+    expect(h.toast).not.toHaveBeenCalledWith(expect.stringMatching(/ended/), 'success');
+  });
+  test('an outage without a body is still labelled with its status', async () => {
+    h.status.mockResolvedValue(payload(active('global', 0)));
+    h.recover.mockRejectedValue(httpErr(503, undefined));
+    render(<MaintenanceControl mode="owner" />);
+    await screen.findByText(/MAINTENANCE ACTIVE — Global shutdown/);
+    type('Reason (required)', 'Incident resolved and services verified'); type('Your password', 'pw');
+    fireEvent.click(screen.getByText('END MAINTENANCE'));
+    expect((await screen.findByText(/Nothing was changed by this request/)).textContent).toMatch(/\[HTTP 503\]/);
+  });
+  test('the server-stated confirmation requirement is shown next to the code field', async () => {
+    h.status.mockResolvedValue({ ...payload(active('global', 0)), confirmation: { password: true, authenticator: 'not_required' } });
+    render(<MaintenanceControl mode="owner" />);
+    expect(await screen.findByText(/No authenticator code is required \(none is enrolled\)/)).toBeTruthy();
+  });
+  test('an enrolment-required policy is explained before any request is made', async () => {
+    h.status.mockResolvedValue({ ...payload(active('global', 0)), confirmation: { password: true, authenticator: 'enrollment_required' } });
+    render(<MaintenanceControl mode="owner" />);
+    expect(await screen.findByText(/requires an enrolled authenticator for owner changes/)).toBeTruthy();
+    expect(h.recover).not.toHaveBeenCalled();
+  });
+});

@@ -38,12 +38,18 @@ describe("enforceMaintenance (authenticated gate)", () => {
     expect((await run("GET", "/admin/system/maintenance/status", "global", tech)).sent).toBe(false);
     expect((await run("GET", "/admin/users", "global", U("user"), true)).res.code).toBe(503);
     expect((await run("GET", "/payments/history", "global", tech)).res.code).toBe(503);
-    expect((await run("POST", "/admin/system/maintenance/activate", "global", tech)).res.code).toBe(503);
+    // Technical recovery may END maintenance but never start it: that is an authorisation failure (403), not "the platform is down" (503).
+    const act = await run("POST", "/admin/system/maintenance/activate", "global", tech);
+    expect(act.res.code).toBe(403); expect(act.res.body.code).toBe("MAINTENANCE_CONTROL_FORBIDDEN");
   });
   test("global: ordinary staff and a non-owner 'superadmin' role label cannot use the control plane or any route", async () => {
     for (const u of [U("technical_support"), U("admin"), U("superadmin")]) {
-      expect((await run("GET", "/admin/system/maintenance/status", "global", u)).res.code).toBe(503);
+      // Authenticated but not permitted to use the controls: 403 (authorisation), never disguised as a 503 maintenance outage. Everything
+      // else, including session refresh, remains refused by the global shutdown.
+      const st = await run("GET", "/admin/system/maintenance/status", "global", u);
+      expect(st.res.code).toBe(403); expect(st.res.body.code).toBe("MAINTENANCE_CONTROL_FORBIDDEN");
       expect((await run("POST", "/auth/refresh", "global", u)).res.code).toBe(503);
+      expect((await run("GET", "/admin/users", "global", u)).res.code).toBe(503);
     }
   });
   test("dealers scope: a dealer and an ACTIVE dealer-team member are refused; buyers and staff are not", async () => {
