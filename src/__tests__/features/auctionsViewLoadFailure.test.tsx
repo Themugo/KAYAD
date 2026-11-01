@@ -87,7 +87,9 @@ describe('AuctionsView load failure handling', () => {
     await screen.findByText(/Live auction data could not be loaded/);
     expect(screen.getByRole('tab', { name: /Live now/ }).textContent).toContain('—');
     expect(screen.queryByText('The auction floor is quiet right now.')).toBeNull();
-    expect(screen.getAllByText('Nissan X-Trail').length).toBeGreaterThan(0);
+    // The live failure must not blank the completed list: switch tab and confirm its real record is still present.
+    fireEvent.click(screen.getByRole('tab', { name: /Completed/ }));
+    expect((await screen.findAllByText('Nissan X-Trail')).length).toBeGreaterThan(0);
   });
 
   it('does not present a failed saved-auction request as a verified empty watchlist', async () => {

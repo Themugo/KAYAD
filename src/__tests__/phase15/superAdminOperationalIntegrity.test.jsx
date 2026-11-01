@@ -38,9 +38,9 @@ describe('AdminTransactions honesty', () => {
   it('shows an alert, not an empty-state, when the list fails to load', async () => {
     impl = () => Promise.reject(new Error('boom'));
     render(<AdminTransactions />);
-    await waitFor(() => expect(document.body.textContent).toMatch(/could not be loaded/i));
+    await waitFor(() => expect(document.body.textContent).toMatch(/could not be refreshed/i));
     const alert = screen.getByRole('alert');
-    expect(alert.textContent).toMatch(/could not be loaded/i);
+    expect(alert.textContent).toMatch(/could not be refreshed/i);
     expect(screen.queryByText('No transactions found')).toBeNull();
   });
 });

@@ -1544,7 +1544,7 @@ router.put(
       action: "Staff governance: permissions changed",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
-      details: { targetUserId: String(user.id ?? req.params.id), targetRole: user.role, before: beforePerms, after: { granted: grantedPermissions, revoked: revokedPermissions }, reason: typeof req.body.reason === "string" ? req.body.reason.trim().slice(0, 500) : undefined },
+      details: { targetUserId: String(user.id ?? req.params.id), targetRole: user.role, before: beforePerms, after: { granted: grantedPermissions, revoked: revokedPermissions }, reason: typeof req.body?.reason === "string" ? req.body.reason.trim().slice(0, 500) : undefined },
     });
 
     res.json({
@@ -1602,7 +1602,7 @@ router.post(
       action: "Staff governance: account created",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
-      details: { targetUserId: String(user.id), role, reason: typeof req.body.reason === "string" ? req.body.reason.trim().slice(0, 500) : undefined },
+      details: { targetUserId: String(user.id), role, reason: typeof req.body?.reason === "string" ? req.body.reason.trim().slice(0, 500) : undefined },
     });
     res.json({
       success: true,
@@ -1664,7 +1664,7 @@ router.put(
       action: "Staff governance: staff record updated",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
-      details: { targetUserId: String(user.id ?? req.params.id), before: beforeState, after: { role: user.role, isBanned: user.isBanned === true }, reason: typeof req.body.reason === "string" ? req.body.reason.trim().slice(0, 500) : undefined },
+      details: { targetUserId: String(user.id ?? req.params.id), before: beforeState, after: { role: user.role, isBanned: user.isBanned === true }, reason: typeof req.body?.reason === "string" ? req.body.reason.trim().slice(0, 500) : undefined },
     });
     res.json({
       success: true,
@@ -1698,7 +1698,7 @@ router.delete(
       action: "Staff governance: account deleted",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
-      details: { targetUserId: String(req.params.id), role: user.role, reason: typeof req.body.reason === "string" ? req.body.reason.trim().slice(0, 500) : undefined },
+      details: { targetUserId: String(req.params.id), role: user.role, reason: typeof req.body?.reason === "string" ? req.body.reason.trim().slice(0, 500) : undefined },
     });
     res.json({ success: true, message: "Staff account deleted" });
   }),
@@ -2331,7 +2331,7 @@ router.get(
 router.get(
   "/chats/:chatId/messages",
   adminOrSuper,
-  validateObjectId("chatId"),
+  validateObjectId,
   validateQuery(messageListQuerySchema),
   asyncHandler(async (req, res) => {
     const chat = await Chat.findById(req.params.chatId)
@@ -2356,7 +2356,7 @@ router.get(
 router.delete(
   "/chats/:chatId/messages/:messageId",
   adminOrSuper,
-  validateObjectId("chatId"),
+  validateObjectId,
   (req, res, next) => {
     const messageId = String(req.params.messageId || "");
     if (!/^(?:[0-9a-f]{24}|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i.test(messageId)) {
@@ -2389,7 +2389,7 @@ router.delete(
 router.post(
   "/chats/:chatId/block",
   adminOrSuper,
-  validateObjectId("chatId"),
+  validateObjectId,
   asyncHandler(async (req, res) => {
     const chat = await Chat.findByIdAndUpdate(req.params.chatId, { isBlocked: true }, { new: true });
     if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });
@@ -2407,7 +2407,7 @@ router.post(
 router.post(
   "/chats/:chatId/unblock",
   adminOrSuper,
-  validateObjectId("chatId"),
+  validateObjectId,
   asyncHandler(async (req, res) => {
     const chat = await Chat.findByIdAndUpdate(req.params.chatId, { isBlocked: false }, { new: true });
     if (!chat) return res.status(404).json({ success: false, message: "Chat not found" });

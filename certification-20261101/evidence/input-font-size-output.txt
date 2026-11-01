@@ -1,0 +1,5 @@
+/login 390 [{"t":"email","fs":"16px","h":54,"cls":"kayad-auth-input"},{"t":"password","fs":"16px","h":54,"cls":"kayad-auth-input"}]
+/forgot-password 390 [{"t":"email","fs":"16px","h":54,"cls":"kayad-auth-input"}]
+/reset-password 390 [{"t":"password","fs":"16px","h":54,"cls":"kayad-auth-input"},{"t":"password","fs":"16px","h":54,"cls":"kayad-auth-input"}]
+/verify-email 390 [{"t":"email","fs":"16px","h":54,"cls":"kayad-auth-input"}]
+/login 1440 [{"t":"email","fs":"13px","h":54,"cls":"kayad-auth-input"},{"t":"password","fs":"13px","h":54,"cls":"kayad-auth-input"}]

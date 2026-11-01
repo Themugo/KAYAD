@@ -55,8 +55,17 @@ describe('Webhoist overview', () => {
 });
 
 describe('Panic Room health banner', () => {
-  test('a response without a status is "unknown" and invents no counts or alert claims', async () => {
+  test('a response without a status is an invalid response with retry, and invents no counts or alert claims', async () => {
     h.health.mockResolvedValue({ success: true });
+    render(<PanicRoom />);
+    const alert = await screen.findByText(/System health could not be checked/);
+    expect(alert.textContent).toMatch(/current service state is unknown/);
+    expect(screen.getAllByRole('button', { name: /retry/i }).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/no critical alerts/)).toBeNull();
+    expect(screen.queryByText('System Healthy')).toBeNull();
+  });
+  test('an unrecognised status string is "unknown", never healthy, with counts marked unavailable', async () => {
+    h.health.mockResolvedValue({ health: { status: 'maintenance' } });
     render(<PanicRoom />);
     expect(await screen.findByText('System status unknown')).toBeTruthy();
     expect(screen.getByText(/critical alerts unavailable/)).toBeTruthy();

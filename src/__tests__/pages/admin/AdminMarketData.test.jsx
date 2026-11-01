@@ -10,7 +10,9 @@ vi.mock('../../../api/api', () => ({
   },
   formatKES: (value) => `KES ${value}`,
 }));
-vi.mock('../../../context/ToastContext', () => ({ useToast: () => ({ toast: vi.fn() }) }));
+// Production useToast().toast is a stable (memoised) function; the mock must be stable too, or load() is re-created every render.
+const { stableToast } = vi.hoisted(() => ({ stableToast: { toast: vi.fn() } }));
+vi.mock('../../../context/ToastContext', () => ({ useToast: () => stableToast }));
 
 describe('AdminMarketData', () => {
   beforeEach(() => { vi.clearAllMocks(); });

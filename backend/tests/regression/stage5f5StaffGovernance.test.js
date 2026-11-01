@@ -213,7 +213,10 @@ describe("owner operations", () => {
     expect(softDelete).not.toHaveBeenCalled();
   });
   test("superadmin accounts cannot be deleted; regular staff can (soft delete)", async () => {
-    expect((await call("DELETE", `/api/admin/staff/${ID(11)}`, { as: "owner" })).status).toBe(400);
+    // Policy hardening: removing a superadmin/owner/self is a forbidden identity (403 PROTECTED_STAFF_IDENTITY), no longer a generic 400.
+    const protectedDelete = await call("DELETE", `/api/admin/staff/${ID(11)}`, { as: "owner" });
+    expect(protectedDelete.status).toBe(403);
+    expect(protectedDelete.body.code).toBe("PROTECTED_STAFF_IDENTITY");
     expect(softDelete).not.toHaveBeenCalled();
     expect((await call("DELETE", `/api/admin/staff/${TARGET}`, { as: "owner" })).status).toBe(200);
     expect(softDelete).toHaveBeenCalledWith(TARGET, CALLERS.owner);

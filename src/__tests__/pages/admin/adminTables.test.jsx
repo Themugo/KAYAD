@@ -4,7 +4,9 @@ import { MemoryRouter } from 'react-router-dom';
 
 const api = vi.hoisted(() => ({ users: vi.fn(), toggleBan: vi.fn(), approveDealer: vi.fn(), cars: vi.fn(), deleteCar: vi.fn() }));
 vi.mock('../../../api/api', async (orig) => ({ ...(await orig()), adminAPI: api }));
-vi.mock('../../../context/ToastContext', () => ({ useToast: () => ({ toast: vi.fn() }) }));
+// Production useToast().toast is a stable (memoised) function; the mock must be stable too, or load() is re-created every render.
+const { stableToast } = vi.hoisted(() => ({ stableToast: { toast: vi.fn() } }));
+vi.mock('../../../context/ToastContext', () => ({ useToast: () => stableToast }));
 
 import AdminUsers from '../../../pages/admin/AdminUsers';
 import AdminCars from '../../../pages/admin/AdminCars';
@@ -26,14 +28,14 @@ describe('admin tables render every declared column and keep their actions reach
     render(<AdminUsers />);
     const dealerRow = (await screen.findByText('Dealer One')).closest('tr');
     expect(dealerRow.querySelectorAll('td')).toHaveLength(8);
-    expect(within(dealerRow).getByText('pending')).toBeTruthy();
+    expect(within(dealerRow).getByText('Pending approval')).toBeTruthy();
     fireEvent.click(within(dealerRow).getByRole('button', { name: 'Approve' }));
     await waitFor(() => expect(api.approveDealer).toHaveBeenCalledWith('d1'));
     const buyerRow = screen.getByText('Buyer One').closest('tr');
-    expect(within(buyerRow).getByText('banned')).toBeTruthy();
+    expect(within(buyerRow).getByText('Banned')).toBeTruthy();
     fireEvent.click(within(buyerRow).getByRole('button', { name: 'Unban' }));
     await waitFor(() => expect(api.toggleBan).toHaveBeenCalledWith('u1', false)); // Phase 15: explicit target state, idempotent on the server
-    await waitFor(() => expect(within(screen.getByText('Buyer One').closest('tr')).queryByText('banned')).toBeNull()); // UI adopts the server-confirmed state
+    await waitFor(() => expect(within(screen.getByText('Buyer One').closest('tr')).queryByText('Banned')).toBeNull()); // UI adopts the server-confirmed state
   });
 
   test('Users: renders authoritative global summary and distinguishes unavailable counts from zero', async () => {
@@ -68,7 +70,11 @@ describe('admin tables render every declared column and keep their actions reach
     const row = (await screen.findByText('2019 Prado')).closest('tr');
     expect(row.querySelectorAll('td')).toHaveLength(7);
     expect(within(row).getByText('Unavailable')).toBeTruthy();
-    fireEvent.click(within(row).getByRole('button', { name: 'Delete' }));
+    // The page asks for confirmation before removing a listing and names the button after it.
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    fireEvent.click(within(row).getByRole('button', { name: 'Remove listing 2019 Prado' }));
+    expect(confirmSpy).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(api.deleteCar).toHaveBeenCalledWith('c1'));
+    confirmSpy.mockRestore();
   });
 });

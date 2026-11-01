@@ -106,7 +106,7 @@ export default function WebhoistOverview() {
         </button>
       </div>
 
-      {(statsFailed || logsFailed) && (
+      {(statsFailed || logsFailed || unavailableMetrics.length > 0) && (
         <p role="alert" style={{ margin: '0 0 16px', padding: '10px 14px', borderRadius: 10, border: '1px solid var(--admin-status-warning-border)', background: 'var(--admin-status-warning-bg)', color: 'var(--admin-status-warning)', fontSize: 13 }}>
           {statsFailed && 'Platform statistics could not be loaded, so those figures are shown as Unavailable. '}{!statsFailed && unavailableMetrics.length > 0 && `Some statistics are unavailable: ${unavailableMetrics.join(', ')}. `}{logsFailed && 'Admin activity could not be loaded.'}
         </p>

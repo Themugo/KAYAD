@@ -1,0 +1,2066 @@
+[
+ {
+  "route": "/",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/",
+    "overflow": false,
+    "h1": "Drive Your DreamToday",
+    "len": 2054,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/",
+    "overflow": false,
+    "h1": "Drive Your DreamToday",
+    "len": 2559,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/?nav=marketplace",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/",
+    "overflow": false,
+    "h1": "Drive Your DreamToday",
+    "len": 2054,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/",
+    "overflow": false,
+    "h1": "Drive Your DreamToday",
+    "len": 2559,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/?nav=discovery",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/?nav=discovery",
+    "overflow": false,
+    "h1": "Live auctions are temporarily unavailable",
+    "len": 954,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/?nav=discovery",
+    "overflow": false,
+    "h1": "Live auctions are temporarily unavailable",
+    "len": 966,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/?nav=escrow",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/?nav=escrow",
+    "overflow": false,
+    "h1": "Escrow",
+    "len": 3329,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/?nav=escrow",
+    "overflow": false,
+    "h1": "Escrow",
+    "len": 3341,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/?nav=support",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/?nav=support",
+    "overflow": false,
+    "h1": "One case number, the whole transaction.",
+    "len": 4197,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/?nav=support",
+    "overflow": false,
+    "h1": "One case number, the whole transaction.",
+    "len": 4237,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/?nav=inspections",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/?nav=inspections",
+    "overflow": false,
+    "h1": "Find the right independent expert for your car",
+    "len": 2794,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/?nav=inspections",
+    "overflow": false,
+    "h1": "Find the right independent expert for your car",
+    "len": 2806,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/?nav=financing",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/?nav=financing",
+    "overflow": false,
+    "h1": "Vehicle Financing",
+    "len": 1633,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/?nav=financing",
+    "overflow": false,
+    "h1": "Vehicle Financing",
+    "len": 1645,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/?nav=seller-platform",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/?nav=seller-platform",
+    "overflow": false,
+    "h1": "Your next sale should feel simpler.",
+    "len": 1072,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/?nav=seller-platform",
+    "overflow": false,
+    "h1": "Your next sale should feel simpler.",
+    "len": 1121,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/login",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/login",
+    "overflow": false,
+    "h1": "Welcome back.",
+    "len": 363,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/login",
+    "overflow": false,
+    "h1": "Welcome back.",
+    "len": 394,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/register",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/register",
+    "overflow": false,
+    "h1": "How will you use KAYAD?",
+    "len": 1192,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/register",
+    "overflow": false,
+    "h1": "How will you use KAYAD?",
+    "len": 1234,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/forgot-password",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/forgot-password",
+    "overflow": false,
+    "h1": "Reset your password",
+    "len": 235,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/forgot-password",
+    "overflow": false,
+    "h1": "Reset your password",
+    "len": 266,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/reset-password",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/reset-password",
+    "overflow": false,
+    "h1": "Choose a new password",
+    "len": 472,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/reset-password",
+    "overflow": false,
+    "h1": "Choose a new password",
+    "len": 503,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/verify-email",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/verify-email",
+    "overflow": false,
+    "h1": "Verification link problem",
+    "len": 250,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/verify-email",
+    "overflow": false,
+    "h1": "Verification link problem",
+    "len": 281,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/owner-invite",
+  "role": "public (invite token)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/owner-invite",
+    "overflow": false,
+    "h1": "KAYAD owner invitation",
+    "len": 97,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/owner-invite",
+    "overflow": false,
+    "h1": "KAYAD owner invitation",
+    "len": 97,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/login",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/login",
+    "overflow": false,
+    "h1": "Welcome back.",
+    "len": 363,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/login",
+    "overflow": false,
+    "h1": "Welcome back.",
+    "len": 394,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/auction/00000000-0000-4000-8000-000000000001",
+  "role": "public",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/auction/00000000-0000-4000-8000-000000000001",
+    "overflow": false,
+    "h1": "We could not load this auction",
+    "len": 207,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/auction/00000000-0000-4000-8000-000000000001",
+    "overflow": false,
+    "h1": "We could not load this auction",
+    "len": 207,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/marketplace",
+  "role": "public (redirect)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/",
+    "overflow": false,
+    "h1": "Drive Your DreamToday",
+    "len": 2054,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/",
+    "overflow": false,
+    "h1": "Drive Your DreamToday",
+    "len": 2559,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/auctions",
+  "role": "public (redirect)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/?nav=discovery",
+    "overflow": false,
+    "h1": "Live auctions are temporarily unavailable",
+    "len": 954,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/?nav=discovery",
+    "overflow": false,
+    "h1": "Live auctions are temporarily unavailable",
+    "len": 966,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/escrow",
+  "role": "public (redirect)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/?nav=escrow",
+    "overflow": false,
+    "h1": "Escrow",
+    "len": 3329,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/?nav=escrow",
+    "overflow": false,
+    "h1": "Escrow",
+    "len": 3341,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/support",
+  "role": "public (redirect)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/?nav=support",
+    "overflow": false,
+    "h1": "One case number, the whole transaction.",
+    "len": 4197,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/?nav=support",
+    "overflow": false,
+    "h1": "One case number, the whole transaction.",
+    "len": 4237,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/inspections",
+  "role": "public (redirect)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/?nav=inspections",
+    "overflow": false,
+    "h1": "Find the right independent expert for your car",
+    "len": 2794,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/?nav=inspections",
+    "overflow": false,
+    "h1": "Find the right independent expert for your car",
+    "len": 2806,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/financing",
+  "role": "public (redirect)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/?nav=financing",
+    "overflow": false,
+    "h1": "Vehicle Financing",
+    "len": 1633,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/?nav=financing",
+    "overflow": false,
+    "h1": "Vehicle Financing",
+    "len": 1645,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/sell-vehicle",
+  "role": "public (redirect)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/?nav=seller-platform",
+    "overflow": false,
+    "h1": "Your next sale should feel simpler.",
+    "len": 1072,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/?nav=seller-platform",
+    "overflow": false,
+    "h1": "Your next sale should feel simpler.",
+    "len": 1121,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/notifications",
+  "role": "authenticated",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/notifications",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/notifications",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/saved",
+  "role": "authenticated",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/saved",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/saved",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/profile",
+  "role": "authenticated",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/profile",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/profile",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/payments",
+  "role": "authenticated",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/payments",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/payments",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/chat",
+  "role": "authenticated",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/chat",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/chat",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/dashboard",
+  "role": "authenticated",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/dashboard",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/dashboard",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/buyer-platform",
+  "role": "authenticated",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/buyer-platform",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/buyer-platform",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/force-password-change",
+  "role": "authenticated",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/force-password-change",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/force-password-change",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/inspector/dashboard",
+  "role": "authenticated",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/inspector/dashboard",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/inspector/dashboard",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/dealer",
+  "role": "dealer",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/dealer",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/dealer",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/dealer/onboarding",
+  "role": "dealer",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/dealer/onboarding",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/dealer/onboarding",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/dealer/auction-setup",
+  "role": "dealer",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/dealer/auction-setup",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/dealer/auction-setup",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/dealer/auction-operations",
+  "role": "dealer",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/dealer/auction-operations",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/dealer/auction-operations",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/users",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/users",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/users",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/sellers",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/sellers",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/sellers",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/private-seller-applications",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/private-seller-applications",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/private-seller-applications",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/cars",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/cars",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/cars",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/moderation",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/moderation",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/moderation",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/auctions",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/auctions",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/auctions",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/bids",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/bids",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/bids",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/escrows",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/escrows",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/escrows",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/reviews",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/reviews",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/reviews",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/referrals",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/referrals",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/referrals",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/chats",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/chats",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/chats",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/reports",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/reports",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/reports",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/support-tickets",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/support-tickets",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/support-tickets",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/feedback",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/feedback",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/feedback",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/market-data",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/market-data",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/market-data",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/transactions",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/transactions",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/transactions",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/ntsa-queue",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/ntsa-queue",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/ntsa-queue",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/inspections",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/inspections",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/inspections",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/dealer-verifications",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/dealer-verifications",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/dealer-verifications",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/inspector-applications",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/inspector-applications",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/inspector-applications",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/security-log",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/security-log",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/security-log",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/ads",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/ads",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/ads",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/broadcast",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/broadcast",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/broadcast",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/settings",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/settings",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/settings",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/control-room",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/control-room",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/control-room",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/staff",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/staff",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/staff",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/staff-permissions",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/staff-permissions",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/staff-permissions",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/panic-room",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/panic-room",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/panic-room",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/platform-recovery",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/platform-recovery",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/platform-recovery",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/webhoist",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/webhoist",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/webhoist",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/cms",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/cms",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/cms",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/automation",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/automation",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/automation",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/config",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/config",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/config",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/lowcode",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/lowcode",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/lowcode",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/vxp",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/vxp",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/vxp",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/xos",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/xos",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/xos",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/ai",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/ai",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/ai",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/digital-twin",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/digital-twin",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/digital-twin",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/control-center",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/control-center",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/control-center",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/integration",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/integration",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/integration",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/governance",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/governance",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/governance",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/intelligence",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/intelligence",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/intelligence",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/command-center",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/command-center",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/command-center",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/improvement",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/improvement",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/improvement",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/platform-factory",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/platform-factory",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/platform-factory",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/owners",
+  "role": "superadmin",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/owners",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/owners",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/communications",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/communications",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/communications",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/provider-governance",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/provider-governance",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/provider-governance",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ },
+ {
+  "route": "/admin/support",
+  "role": "staff/admin (permission-gated)",
+  "vp": {
+   "390": {
+    "http": 200,
+    "finalUrl": "/admin/support",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   },
+   "1440": {
+    "http": 200,
+    "finalUrl": "/admin/support",
+    "overflow": false,
+    "h1": "",
+    "len": 0,
+    "pageErrors": [],
+    "err": null
+   }
+  }
+ }
+]

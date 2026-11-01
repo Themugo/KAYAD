@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, cleanup, fireEvent, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 const api = vi.hoisted(() => ({
@@ -85,7 +85,8 @@ describe('Command centre — business lifecycle hand-offs', () => {
       ['Transactions', '/admin/transactions'],
     ];
     for (const [label, href] of expected) {
-      const link = screen.getByRole('link', { name: new RegExp(label) });
+      // Scoped to the flow map: KPI cards and approval links elsewhere on the page also mention Escrow etc.
+      const link = within(flow).getByRole('link', { name: new RegExp(label) });
       expect(link.getAttribute('href')).toBe(href);
       expect(flow.contains(link)).toBe(true);
     }

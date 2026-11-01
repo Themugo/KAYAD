@@ -3,11 +3,12 @@ import { render, screen, waitFor } from '@testing-library/react';
 import AdminReports from '../../../pages/admin/AdminReports';
 import { reportAPI } from '../../../api/api';
 
+const { stableToast } = vi.hoisted(() => ({ stableToast: { toast: vi.fn() } }));
 vi.mock('../../../api/api', () => ({
   reportAPI: { adminAll: vi.fn(), adminUpdate: vi.fn() },
 }));
 vi.mock('../../../context/ToastContext', () => ({
-  useToast: () => ({ toast: vi.fn() }),
+  useToast: () => stableToast, // stable identity, as in production
 }));
 vi.mock('../../../utils/helpers', () => ({ timeAgo: () => 'recently' }));
 

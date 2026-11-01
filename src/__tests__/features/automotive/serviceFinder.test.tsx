@@ -208,7 +208,7 @@ describe('Service finder (inspection marketplace route)', () => {
     search.mockRejectedValueOnce(new Error('boom')).mockResolvedValue({ items: [prov()], total: 1 });
     vi.spyOn(console, 'error').mockImplementation(() => undefined);
     render(<InspectionMarketplacePage />);
-    expect((await screen.findByRole('alert')).textContent).toMatch(/could not be loaded/);
+    expect((await screen.findByRole('alert')).textContent).toMatch(/could not refresh the business directory/);
     expect(screen.queryByText(/No matching businesses/)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Try again' }));
     expect(await screen.findByText('Acme Garage')).toBeTruthy();

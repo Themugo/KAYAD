@@ -9,7 +9,7 @@ const h = vi.hoisted(() => ({
   deleteAdSlot: vi.fn(),
 }));
 
-vi.mock('../../../services/adApi', () => ({
+vi.mock('../../services/adApi', () => ({
   getAllAdSlots: (...args) => h.getAllAdSlots(...args),
   getAdStats: (...args) => h.getAdStats(...args),
   createAdSlot: (...args) => h.createAdSlot(...args),
@@ -18,7 +18,7 @@ vi.mock('../../../services/adApi', () => ({
   AdApiError: class AdApiError extends Error {},
 }));
 
-import AdManager from '../../../pages/admin/AdManager';
+import AdManager from '../../pages/admin/AdManager';
 
 beforeEach(() => {
   cleanup();
@@ -69,5 +69,8 @@ describe('Ad Manager end-to-end control surface', () => {
     expect(await screen.findByDisplayValue('Real campaign')).toBeTruthy();
     expect(await screen.findByRole('status')).toHaveTextContent(/statistics are unavailable/i);
     expect(screen.getByRole('button', { name: /save configuration/i })).toBeTruthy();
+    // Truthfulness: unavailable metrics are a dash, never an invented 0.
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(3);
+    expect(screen.queryByText('0.00%')).toBeNull();
   });
 });

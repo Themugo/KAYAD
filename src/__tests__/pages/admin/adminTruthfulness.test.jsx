@@ -56,20 +56,6 @@ describe('no fabricated data on admin studios', () => {
   });
 });
 
-import AdManager from '../../../pages/admin/AdManager';
-
-describe('Ad manager', () => {
-  test('a failed load is reported as a failure, not as an empty campaign list', async () => {
-    h.ads.list.mockRejectedValue(new Error('500'));
-    render(<AdManager />);
-    expect((await screen.findByRole('alert')).textContent).toMatch(/could not be loaded/);
-    expect(screen.queryByText('No ad campaigns yet')).toBeNull();
-  });
-  test('campaigns without counters show a dash, not 0', async () => {
-    h.ads.list.mockResolvedValue({ ads: [{ _id: 'a1', clientName: 'Acme Motors', placement: 'bid_modal', isActive: true }, { _id: 'a2', clientName: 'Zero Co', placement: 'bid_modal', isActive: false, viewCount: 0, clickCount: 0 }] });
-    render(<AdManager />);
-    expect(await screen.findByText('Acme Motors')).toBeTruthy();
-    expect(screen.getAllByText('—').length).toBe(2);
-    expect(screen.getAllByText('0').length).toBe(2);
-  });
-});
+// The legacy /admin/ads Ad Manager tests were retired with that screen. The canonical AdManagerPanel
+// (services/adApi) is covered by src/__tests__/features/adManagerControl.test.tsx, including failed-load and
+// metrics-unavailable ('—', never 0) truthfulness.

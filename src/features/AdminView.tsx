@@ -216,7 +216,9 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
 
     if (statsResult.status === 'fulfilled') {
       const payload = unwrap<any>(statsResult.value);
-      const nextStats = payload?.stats ?? payload;
+      // An explicit `stats` key is authoritative: `{ stats: null }` is a malformed envelope, not a stats object.
+      // Only a payload with no `stats` key is treated as the bare stats object.
+      const nextStats = payload && typeof payload === 'object' && 'stats' in payload ? payload.stats : payload;
       if (nextStats && typeof nextStats === 'object' && !Array.isArray(nextStats)) {
         setStats(nextStats);
         setStatsStatus('ready');

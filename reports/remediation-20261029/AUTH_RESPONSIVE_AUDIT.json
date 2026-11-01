@@ -1,0 +1,1216 @@
+[
+ {
+  "page": "login",
+  "width": 320,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 320,
+  "vw": 320,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   56
+  ],
+  "toggleInsideInput": true,
+  "h1": "Welcome back.",
+  "errors": []
+ },
+ {
+  "page": "register-chooser",
+  "width": 320,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 320,
+  "vw": 320,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [
+   "path.[object",
+   "path.[object"
+  ],
+  "inputH": [],
+  "btnH": [
+   127,
+   96,
+   127,
+   163,
+   124,
+   44
+  ],
+  "toggleInsideInput": null,
+  "h1": "How will you use KAYAD?",
+  "errors": []
+ },
+ {
+  "page": "register-buyer",
+  "width": 320,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 320,
+  "vw": 320,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [
+   "path.[object",
+   "path.[object"
+  ],
+  "inputH": [
+   54,
+   54,
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   44,
+   44
+  ],
+  "toggleInsideInput": true,
+  "h1": "Create your account.",
+  "errors": []
+ },
+ {
+  "page": "forgot-password",
+  "width": 320,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 320,
+  "vw": 320,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54
+  ],
+  "btnH": [
+   56
+  ],
+  "toggleInsideInput": null,
+  "h1": "Reset your password",
+  "errors": []
+ },
+ {
+  "page": "reset-password",
+  "width": 320,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 320,
+  "vw": 320,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   44,
+   56
+  ],
+  "toggleInsideInput": true,
+  "h1": "Choose a new password",
+  "errors": []
+ },
+ {
+  "page": "verify-email",
+  "width": 320,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 320,
+  "vw": 320,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54
+  ],
+  "btnH": [
+   56
+  ],
+  "toggleInsideInput": null,
+  "h1": "Verification link problem",
+  "errors": []
+ },
+ {
+  "page": "login-error-state",
+  "width": 320,
+  "alert": "Invalid email or password.",
+  "hOverflow": false
+ },
+ {
+  "page": "login",
+  "width": 360,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 360,
+  "vw": 360,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   56
+  ],
+  "toggleInsideInput": true,
+  "h1": "Welcome back.",
+  "errors": []
+ },
+ {
+  "page": "register-chooser",
+  "width": 360,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 360,
+  "vw": 360,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [],
+  "btnH": [
+   96,
+   96,
+   127,
+   127,
+   124,
+   44
+  ],
+  "toggleInsideInput": null,
+  "h1": "How will you use KAYAD?",
+  "errors": []
+ },
+ {
+  "page": "register-buyer",
+  "width": 360,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 360,
+  "vw": 360,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54,
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   44,
+   44
+  ],
+  "toggleInsideInput": true,
+  "h1": "Create your account.",
+  "errors": []
+ },
+ {
+  "page": "forgot-password",
+  "width": 360,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 360,
+  "vw": 360,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54
+  ],
+  "btnH": [
+   56
+  ],
+  "toggleInsideInput": null,
+  "h1": "Reset your password",
+  "errors": []
+ },
+ {
+  "page": "reset-password",
+  "width": 360,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 360,
+  "vw": 360,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   44,
+   56
+  ],
+  "toggleInsideInput": true,
+  "h1": "Choose a new password",
+  "errors": []
+ },
+ {
+  "page": "verify-email",
+  "width": 360,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 360,
+  "vw": 360,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54
+  ],
+  "btnH": [
+   56
+  ],
+  "toggleInsideInput": null,
+  "h1": "Verification link problem",
+  "errors": []
+ },
+ {
+  "page": "login-error-state",
+  "width": 360,
+  "alert": "Invalid email or password.",
+  "hOverflow": false
+ },
+ {
+  "page": "login",
+  "width": 390,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 390,
+  "vw": 390,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   56
+  ],
+  "toggleInsideInput": true,
+  "h1": "Welcome back.",
+  "errors": []
+ },
+ {
+  "page": "register-chooser",
+  "width": 390,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 390,
+  "vw": 390,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [],
+  "btnH": [
+   96,
+   96,
+   109,
+   127,
+   124,
+   44
+  ],
+  "toggleInsideInput": null,
+  "h1": "How will you use KAYAD?",
+  "errors": []
+ },
+ {
+  "page": "register-buyer",
+  "width": 390,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 390,
+  "vw": 390,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54,
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   44,
+   44
+  ],
+  "toggleInsideInput": true,
+  "h1": "Create your account.",
+  "errors": []
+ },
+ {
+  "page": "forgot-password",
+  "width": 390,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 390,
+  "vw": 390,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54
+  ],
+  "btnH": [
+   56
+  ],
+  "toggleInsideInput": null,
+  "h1": "Reset your password",
+  "errors": []
+ },
+ {
+  "page": "reset-password",
+  "width": 390,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 390,
+  "vw": 390,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   44,
+   56
+  ],
+  "toggleInsideInput": true,
+  "h1": "Choose a new password",
+  "errors": []
+ },
+ {
+  "page": "verify-email",
+  "width": 390,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 390,
+  "vw": 390,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54
+  ],
+  "btnH": [
+   56
+  ],
+  "toggleInsideInput": null,
+  "h1": "Verification link problem",
+  "errors": []
+ },
+ {
+  "page": "login-error-state",
+  "width": 390,
+  "alert": "Invalid email or password.",
+  "hOverflow": false
+ },
+ {
+  "page": "login",
+  "width": 412,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 412,
+  "vw": 412,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   56
+  ],
+  "toggleInsideInput": true,
+  "h1": "Welcome back.",
+  "errors": []
+ },
+ {
+  "page": "register-chooser",
+  "width": 412,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 412,
+  "vw": 412,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [],
+  "btnH": [
+   96,
+   96,
+   96,
+   127,
+   124,
+   44
+  ],
+  "toggleInsideInput": null,
+  "h1": "How will you use KAYAD?",
+  "errors": []
+ },
+ {
+  "page": "register-buyer",
+  "width": 412,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 412,
+  "vw": 412,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54,
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   44,
+   44
+  ],
+  "toggleInsideInput": true,
+  "h1": "Create your account.",
+  "errors": []
+ },
+ {
+  "page": "forgot-password",
+  "width": 412,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 412,
+  "vw": 412,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54
+  ],
+  "btnH": [
+   56
+  ],
+  "toggleInsideInput": null,
+  "h1": "Reset your password",
+  "errors": []
+ },
+ {
+  "page": "reset-password",
+  "width": 412,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 412,
+  "vw": 412,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   44,
+   56
+  ],
+  "toggleInsideInput": true,
+  "h1": "Choose a new password",
+  "errors": []
+ },
+ {
+  "page": "verify-email",
+  "width": 412,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 412,
+  "vw": 412,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54
+  ],
+  "btnH": [
+   56
+  ],
+  "toggleInsideInput": null,
+  "h1": "Verification link problem",
+  "errors": []
+ },
+ {
+  "page": "login-error-state",
+  "width": 412,
+  "alert": "Invalid email or password.",
+  "hOverflow": false
+ },
+ {
+  "page": "login",
+  "width": 430,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 430,
+  "vw": 430,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   56
+  ],
+  "toggleInsideInput": true,
+  "h1": "Welcome back.",
+  "errors": []
+ },
+ {
+  "page": "register-chooser",
+  "width": 430,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 430,
+  "vw": 430,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [],
+  "btnH": [
+   96,
+   96,
+   96,
+   127,
+   124,
+   44
+  ],
+  "toggleInsideInput": null,
+  "h1": "How will you use KAYAD?",
+  "errors": []
+ },
+ {
+  "page": "register-buyer",
+  "width": 430,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 430,
+  "vw": 430,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54,
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   44,
+   44
+  ],
+  "toggleInsideInput": true,
+  "h1": "Create your account.",
+  "errors": []
+ },
+ {
+  "page": "forgot-password",
+  "width": 430,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 430,
+  "vw": 430,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54
+  ],
+  "btnH": [
+   56
+  ],
+  "toggleInsideInput": null,
+  "h1": "Reset your password",
+  "errors": []
+ },
+ {
+  "page": "reset-password",
+  "width": 430,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 430,
+  "vw": 430,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   44,
+   56
+  ],
+  "toggleInsideInput": true,
+  "h1": "Choose a new password",
+  "errors": []
+ },
+ {
+  "page": "verify-email",
+  "width": 430,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 430,
+  "vw": 430,
+  "brand": [
+   38,
+   38
+  ],
+  "clipped": [],
+  "inputH": [
+   54
+  ],
+  "btnH": [
+   56
+  ],
+  "toggleInsideInput": null,
+  "h1": "Verification link problem",
+  "errors": []
+ },
+ {
+  "page": "login-error-state",
+  "width": 430,
+  "alert": "Invalid email or password.",
+  "hOverflow": false
+ },
+ {
+  "page": "login",
+  "width": 768,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 768,
+  "vw": 768,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   56,
+   56
+  ],
+  "btnH": [
+   44,
+   58
+  ],
+  "toggleInsideInput": true,
+  "h1": "Welcome back.",
+  "errors": []
+ },
+ {
+  "page": "register-chooser",
+  "width": 768,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 768,
+  "vw": 768,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [],
+  "btnH": [
+   96,
+   96,
+   96,
+   96,
+   109,
+   44
+  ],
+  "toggleInsideInput": null,
+  "h1": "How will you use KAYAD?",
+  "errors": []
+ },
+ {
+  "page": "register-buyer",
+  "width": 768,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 768,
+  "vw": 768,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54,
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   44,
+   44
+  ],
+  "toggleInsideInput": true,
+  "h1": "Create your account.",
+  "errors": []
+ },
+ {
+  "page": "forgot-password",
+  "width": 768,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 768,
+  "vw": 768,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   56
+  ],
+  "btnH": [
+   58
+  ],
+  "toggleInsideInput": null,
+  "h1": "Reset your password",
+  "errors": []
+ },
+ {
+  "page": "reset-password",
+  "width": 768,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 768,
+  "vw": 768,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   56,
+   56
+  ],
+  "btnH": [
+   44,
+   44,
+   58
+  ],
+  "toggleInsideInput": true,
+  "h1": "Choose a new password",
+  "errors": []
+ },
+ {
+  "page": "verify-email",
+  "width": 768,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 768,
+  "vw": 768,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   56
+  ],
+  "btnH": [
+   58
+  ],
+  "toggleInsideInput": null,
+  "h1": "Verification link problem",
+  "errors": []
+ },
+ {
+  "page": "login-error-state",
+  "width": 768,
+  "alert": "Invalid email or password.",
+  "hOverflow": false
+ },
+ {
+  "page": "login",
+  "width": 1024,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 1024,
+  "vw": 1024,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   56,
+   56
+  ],
+  "btnH": [
+   44,
+   58
+  ],
+  "toggleInsideInput": true,
+  "h1": "Welcome back.",
+  "errors": []
+ },
+ {
+  "page": "register-chooser",
+  "width": 1024,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 1024,
+  "vw": 1024,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [],
+  "btnH": [
+   96,
+   96,
+   96,
+   96,
+   109,
+   44
+  ],
+  "toggleInsideInput": null,
+  "h1": "How will you use KAYAD?",
+  "errors": []
+ },
+ {
+  "page": "register-buyer",
+  "width": 1024,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 1024,
+  "vw": 1024,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54,
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   44,
+   44
+  ],
+  "toggleInsideInput": true,
+  "h1": "Create your account.",
+  "errors": []
+ },
+ {
+  "page": "forgot-password",
+  "width": 1024,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 1024,
+  "vw": 1024,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   56
+  ],
+  "btnH": [
+   58
+  ],
+  "toggleInsideInput": null,
+  "h1": "Reset your password",
+  "errors": []
+ },
+ {
+  "page": "reset-password",
+  "width": 1024,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 1024,
+  "vw": 1024,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   56,
+   56
+  ],
+  "btnH": [
+   44,
+   44,
+   58
+  ],
+  "toggleInsideInput": true,
+  "h1": "Choose a new password",
+  "errors": []
+ },
+ {
+  "page": "verify-email",
+  "width": 1024,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 1024,
+  "vw": 1024,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   56
+  ],
+  "btnH": [
+   58
+  ],
+  "toggleInsideInput": null,
+  "h1": "Verification link problem",
+  "errors": []
+ },
+ {
+  "page": "login-error-state",
+  "width": 1024,
+  "alert": "Invalid email or password.",
+  "hOverflow": false
+ },
+ {
+  "page": "login",
+  "width": 1440,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 1440,
+  "vw": 1440,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   56,
+   56
+  ],
+  "btnH": [
+   44,
+   58
+  ],
+  "toggleInsideInput": true,
+  "h1": "Welcome back.",
+  "errors": []
+ },
+ {
+  "page": "register-chooser",
+  "width": 1440,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 1440,
+  "vw": 1440,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [],
+  "btnH": [
+   96,
+   96,
+   96,
+   96,
+   109,
+   44
+  ],
+  "toggleInsideInput": null,
+  "h1": "How will you use KAYAD?",
+  "errors": []
+ },
+ {
+  "page": "register-buyer",
+  "width": 1440,
+  "mode": "register",
+  "hOverflow": false,
+  "scrollW": 1440,
+  "vw": 1440,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   54,
+   54,
+   54,
+   54
+  ],
+  "btnH": [
+   44,
+   44,
+   44
+  ],
+  "toggleInsideInput": true,
+  "h1": "Create your account.",
+  "errors": []
+ },
+ {
+  "page": "forgot-password",
+  "width": 1440,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 1440,
+  "vw": 1440,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   56
+  ],
+  "btnH": [
+   58
+  ],
+  "toggleInsideInput": null,
+  "h1": "Reset your password",
+  "errors": []
+ },
+ {
+  "page": "reset-password",
+  "width": 1440,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 1440,
+  "vw": 1440,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   56,
+   56
+  ],
+  "btnH": [
+   44,
+   44,
+   58
+  ],
+  "toggleInsideInput": true,
+  "h1": "Choose a new password",
+  "errors": []
+ },
+ {
+  "page": "verify-email",
+  "width": 1440,
+  "mode": "signin",
+  "hOverflow": false,
+  "scrollW": 1440,
+  "vw": 1440,
+  "brand": [
+   42,
+   42
+  ],
+  "clipped": [],
+  "inputH": [
+   56
+  ],
+  "btnH": [
+   58
+  ],
+  "toggleInsideInput": null,
+  "h1": "Verification link problem",
+  "errors": []
+ },
+ {
+  "page": "login-error-state",
+  "width": 1440,
+  "alert": "Invalid email or password.",
+  "hOverflow": false
+ }
+]
