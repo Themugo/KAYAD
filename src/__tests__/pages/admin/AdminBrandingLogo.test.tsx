@@ -109,3 +109,15 @@ describe('Branding tab - logo upload', () => {
     expect(await detectImageType(file([1, 2, 3]))).toBeNull();
   });
 });
+
+describe('Branding tab - save control beside the logo', () => {
+  it('has a Save logo & identity button that is disabled until something changes, then saves', async () => {
+    m.updateConfig.mockResolvedValue({ success: true, config: { branding: {} } });
+    await openBranding();
+    const save = screen.getByRole('button', { name: 'Save logo & identity' });
+    expect(save).toBeDisabled();
+    await userEvent.type(screen.getByLabelText('Brand Tagline'), ' x');
+    expect(screen.getByRole('button', { name: 'Save logo & identity' })).toBeEnabled();
+    expect(screen.getByText('You have unsaved changes.')).toBeInTheDocument();
+  });
+});

@@ -18,15 +18,12 @@ import DealerOnboarding from '../../../pages/dealer/DealerOnboarding';
 const c = (key, label, required) => ({ key, label, required, kind: 'entry' });
 const mount = () => { window.history.pushState({}, '', '/dealer/onboarding'); return render(<MemoryRouter><DealerOnboarding /></MemoryRouter>); };
 
-const fillBusinessAndPayment = async (user) => {
+const fillBusiness = async (user) => {
   await waitFor(() => expect(m.dealerAPI.getOnboarding).toHaveBeenCalled());
   await new Promise((r) => setTimeout(r, 20)); // let the saved-profile load settle so it cannot overwrite typing
   await user.type(await screen.findByPlaceholderText(/dealership or trading name/i), 'Acme Motors');
   await user.type(screen.getByPlaceholderText(/City/i), 'Nairobi');
-  await user.click(screen.getByRole('button', { name: /next/i }));
-  await user.type(screen.getByPlaceholderText(/KCB/i), 'KCB');
-  await user.type(screen.getByPlaceholderText(/Name on the bank account/i), 'Acme');
-  await user.type(screen.getByPlaceholderText(/Bank account number/i), '1234567890');
+  await waitFor(() => expect(m.dealerAPI.paperworkRequirements).toHaveBeenCalled());
   await user.click(screen.getByRole('button', { name: /next/i }));
 };
 
@@ -51,13 +48,20 @@ describe('buyer starting a dealer application on the same account', () => {
 });
 
 describe('documents step is driven by the owner configuration', () => {
-  test('no paperwork configured: the step says nothing is needed and the dealer can continue', async () => {
+  test('no paperwork configured: there is no Documents step and no banking, Business goes straight to Review', async () => {
     const user = userEvent.setup();
     m.dealerAPI.paperworkRequirements.mockResolvedValue({ checklist: [] });
+    m.dealerAPI.completeOnboarding.mockResolvedValue({ dealer: {} });
     mount();
-    await fillBusinessAndPayment(user);
-    expect(await screen.findByText(/No documents are needed/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /next/i })).toBeEnabled();
+    await fillBusiness(user);
+    expect(screen.queryByText(/Documents/i)).toBeNull();
+    expect(screen.queryByText(/Payments/i)).toBeNull();
+    expect(screen.queryByPlaceholderText(/Bank account number/i)).toBeNull();
+    await user.click(await screen.findByRole('button', { name: /complete setup/i }));
+    await waitFor(() => expect(m.dealerAPI.completeOnboarding).toHaveBeenCalled());
+    const sent = m.dealerAPI.completeOnboarding.mock.calls[0][0];
+    expect(sent.paymentDetails).toBeUndefined();
+    expect(sent.businessName).toBe('Acme Motors');
   });
 
   test('required vs optional are labelled; optional can be left blank; only filled items are sent', async () => {
@@ -65,7 +69,7 @@ describe('documents step is driven by the owner configuration', () => {
     m.dealerAPI.paperworkRequirements.mockResolvedValue({ checklist: [c('kraPin', 'KRA PIN', true), c('governmentId', 'Government ID', false)] });
     m.dealerAPI.completeOnboarding.mockResolvedValue({ dealer: {} });
     mount();
-    await fillBusinessAndPayment(user);
+    await fillBusiness(user);
     const list = await screen.findByRole('list', { name: /documents checklist/i });
     expect(list).toHaveTextContent(/KRA PIN\s*Required/);
     expect(list).toHaveTextContent(/Government ID\s*Optional/);
@@ -81,7 +85,7 @@ describe('documents step is driven by the owner configuration', () => {
     const user = userEvent.setup();
     m.dealerAPI.paperworkRequirements.mockResolvedValue({ checklist: [c('kraPin', 'KRA PIN', false)] });
     mount();
-    await fillBusinessAndPayment(user);
+    await fillBusiness(user);
     expect(screen.queryByPlaceholderText(/National ID or Passport/i)).toBeNull();
     await user.type(await screen.findByPlaceholderText(/A123456789Z/), 'nope');
     expect(screen.getByRole('button', { name: /next/i })).toBeDisabled();
@@ -91,7 +95,7 @@ describe('documents step is driven by the owner configuration', () => {
     const user = userEvent.setup();
     m.dealerAPI.paperworkRequirements.mockRejectedValue(new Error('down'));
     mount();
-    await fillBusinessAndPayment(user);
+    await fillBusiness(user);
     expect(await screen.findByRole('alert')).toHaveTextContent(/could not load the list of documents/i);
     expect(screen.getByRole('button', { name: /next/i })).toBeDisabled();
   });

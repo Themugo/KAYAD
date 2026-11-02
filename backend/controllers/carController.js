@@ -23,6 +23,7 @@ import { STAFF_ROLES, SELLER_ROLES, canManageAnyListing } from "../config/roles.
 import { detectDuplicates, flagDuplicate } from "../services/duplicateVehicleService.js";
 import { logVehicleCreated, logVehicleEdited, logVehicleDeleted } from "../services/auditService.js";
 import { getDealerEntitlement, assertDealerCanCreateListing } from "../services/dealerSubscription.service.js";
+import { isPetrolFuel } from "../utils/vehicleOptions.js";
 import { atomicCreateDealerListing } from "../utils/atomicTransactions.js";
 import { evaluateEligibilityBatch } from "../services/privateSellerAuctionEligibility.service.js";
 import { randomUUID } from "node:crypto";
@@ -150,7 +151,8 @@ export const getCars = async (req, res) => {
       $options: "i",
     });
     if (body) query.bodyType = exactText(body);
-    if (fuel) query.fuel = exactText(fuel);
+    // "Petrol" and the older "Gasoline" are one fuel: a Petrol search must still find listings stored as Gasoline, and the reverse.
+    if (fuel) query.fuel = isPetrolFuel(fuel) ? { $regex: "^(petrol|gasoline|gas)$", $options: "i" } : exactText(fuel);
     if (transmission) query.transmission = exactText(transmission);
     if (color) query.color = exactText(color);
     if (condition) query.condition = exactText(condition);
@@ -1032,6 +1034,50 @@ export const deleteCarImage = async (req, res) => {
   } catch (err) {
     logError("DELETE IMAGE ERROR", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to delete image" });
+  }
+};
+
+// =============================
+// ⭐ CHOOSE THE POSTER (COVER) IMAGE
+// =============================
+// The chosen photo is moved to position 0 and coverImage is set to 0, so every consumer that shows `images[0]` (cards, search, detail,
+// SEO) and every consumer that honours `coverImage` agree on the poster without each page having to be taught about the index.
+export const setCoverImage = async (req, res) => {
+  try {
+    const car = await Car.findById(req.params.id);
+    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+    const isStaff = canManageAnyListing(req.user);
+    const isOwner = car.dealer?.toString() === req.user.id;
+    if (!isOwner && !isStaff) {
+      return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
+    }
+    if ((car.deletedAt || car.deleted_at) && !isStaff) return res.status(404).json({ success: false, message: "Car not found" });
+
+    const images = [...(car.images || [])];
+    const index = Number(req.body?.index);
+    if (!Number.isInteger(index) || index < 0 || index >= images.length) {
+      return res.status(400).json({ success: false, message: "Invalid image index" });
+    }
+
+    if (index !== 0 || car.coverImage !== 0) {
+      const [chosen] = images.splice(index, 1);
+      images.unshift(chosen);
+      car.images = images;
+      car.coverImage = 0;
+      await car.save();
+      await invalidatePublicListingCaches();
+      await logActionFromReq(req, "set_car_cover_image", {
+        target: car._id,
+        targetModel: "Car",
+        details: { fromIndex: index },
+      });
+    }
+
+    res.json({ success: true, data: { images: car.images, coverImage: car.coverImage } });
+  } catch (err) {
+    logError("SET COVER IMAGE ERROR", { error: err.message });
+    res.status(500).json({ success: false, message: "Failed to set the poster image" });
   }
 };
 

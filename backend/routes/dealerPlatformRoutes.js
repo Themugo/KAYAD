@@ -36,6 +36,11 @@ import {
   // Team
   getTeamMembers,
   inviteTeamMember,
+  resendTeamInvite,
+  getTeamRoles,
+  createTeamRole,
+  updateTeamRole,
+  deleteTeamRole,
   updateTeamMember,
   removeTeamMember,
   acceptTeamInvite,
@@ -95,6 +100,11 @@ router.get("/analytics/recommendations", protect, dealerBusinessOnly, asyncHandl
 // Phase 14.7: the roster exposes member names/emails, so listing needs the same permission as managing the team.
 router.get("/team", protect, dealerOrgAccess("canManageTeam"), asyncHandler(getTeamMembers));
 router.post("/team/invite", protect, dealerOrgAccess("canManageTeam"), asyncHandler(inviteTeamMember));
+router.post("/team/:memberId/resend", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(resendTeamInvite));
+router.get("/team/roles", protect, dealerOrgAccess("canManageTeam"), asyncHandler(getTeamRoles));
+router.post("/team/roles", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(createTeamRole));
+router.put("/team/roles/:roleKey", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(updateTeamRole));
+router.delete("/team/roles/:roleKey", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(deleteTeamRole));
 router.put("/team/:memberId", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(updateTeamMember));
 router.delete("/team/:memberId", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(removeTeamMember));
 router.post("/team/accept", protect, asyncHandler(acceptTeamInvite));

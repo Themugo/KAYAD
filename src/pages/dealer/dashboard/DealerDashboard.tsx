@@ -7,11 +7,13 @@ import {
   PieChart, Activity, Bell,
   Settings, FileText, Send, RefreshCw, ArrowUpRight, ArrowDownRight,
   UserPlus, Shield, Award, CreditCard, CalendarCheck, ClipboardCheck,
-  Gavel, X, Loader2, UserCog, ExternalLink, Megaphone, ChevronLeft, Plus,
+  Gavel, X, Loader2, UserCog, ExternalLink, Megaphone, ChevronLeft, Plus, Landmark,
 } from 'lucide-react';
 import * as dealerApi from '../../../services/dealerPlatformApi';
 import DealerListingForm from './DealerListingForm';
 import DealerSettingsPanel from './DealerSettingsPanel';
+import DealerBankingPanel from './DealerBankingPanel';
+import DealerAccountStatus from './DealerAccountStatus';
 import DealerTeamPanel from './DealerTeamPanel';
 import { getMyListings, deleteCar } from '../../../services/vehicleApi';
 import type { BackendCar } from '../../../services/vehicleApi';
@@ -214,7 +216,9 @@ const DEALER_NAV_GROUPS: NavGroup[] = [
   ] },
   { id: 'system', label: 'System Management', items: [
     { id: 'team', label: 'Team', icon: UserCog, title: 'Team', description: 'People who work with your dealership account.' },
-    { id: 'settings', label: 'Settings', icon: Settings, title: 'Settings', description: 'Dealership settings.' },
+    { id: 'settings', label: 'Settings', icon: Settings, title: 'Settings', description: 'Profile, notifications, plan, team and banking for your dealership.' },
+    // Banking sits at the bottom of the list: payout details are no longer asked for during onboarding.
+    { id: 'banking', label: 'Banking', icon: Landmark, title: 'Banking', description: 'Where your payouts are sent: bank account and M-Pesa.' },
   ] },
 ];
 
@@ -237,6 +241,7 @@ const writeDealerSectionToUrl = (section: string) => {
     if (section === 'overview') url.searchParams.delete('section');
     else url.searchParams.set('section', section);
     if (section !== 'escrow') url.searchParams.delete('escrowId');
+    if (section !== 'settings') url.searchParams.delete('tab');
     if (section !== 'inventory') { url.searchParams.delete('mode'); url.searchParams.delete('id'); }
     if (url.search === window.location.search) return;
     window.history.pushState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
@@ -372,6 +377,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const [leadsError, setLeadsError] = useState(null);
   const [leadsLoaded, setLeadsLoaded] = useState(false);
   const [leadUpdating, setLeadUpdating] = useState(null);
+  const [leadActionError, setLeadActionError] = useState<string | null>(null);
 
   const loadLeads = () => {
     setLeadsLoading(true);
@@ -390,12 +396,13 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
 
   const advanceLeadStage = async (leadId, nextStage) => {
     setLeadUpdating(leadId);
+    setLeadActionError(null);
     try {
       const body = await dealerApi.updateLead(leadId, { stage: nextStage });
       if (!body?.data) throw new Error('Lead update returned no record');
       setLeads((prev) => prev.map((l) => l.id === leadId ? body.data : l));
     } catch {
-      setLeadsError('Could not update this lead. Please try again.');
+      setLeadActionError('Could not update this lead. Please try again.');
     } finally {
       setLeadUpdating(null);
     }
@@ -569,19 +576,6 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     );
   }
 
-  if (loadError) {
-    return (
-      <div className="min-h-screen bg-[#F6FAF9] flex items-center justify-center">
-        <div className="text-center max-w-sm">
-          <p className="text-sm text-[#64748B] mb-4">{loadError}</p>
-          <button onClick={loadDashboard} className="bg-[#0A3340] text-white text-xs font-bold rounded-lg px-5 py-2.5">
-            Try Again
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   const currentGroup = DEALER_NAV_GROUPS.find((g) => g.items.some((i) => i.id === activeSection)) || DEALER_NAV_GROUPS[0];
   const currentItem = currentGroup.items.find((i) => i.id === activeSection) || currentGroup.items[0];
   const leadBadge = dashboard?.overview?.leads?.new;
@@ -627,14 +621,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           ))}
         </nav>
 
-        <div className="hidden lg:block p-4 border-t border-[#D7E7E4]">
-          <div className="p-4 bg-gradient-to-r from-[#DDF4F0] to-[#F3FAF9] rounded-xl">
-            <div className="flex items-center gap-3 mb-2">
-              <Shield className="w-5 h-5 text-[#176B87]" />
-              <span className="font-semibold text-[#0E4655]">Account status</span>
-            </div>
-            <p className="text-xs text-[#176B87]">Plan and verification details appear here when supplied by the account service.</p>
-          </div>
+        <div className="p-4 border-t border-[#D7E7E4]">
+          <DealerAccountStatus approved={user?.status === 'approved' || user?.approved === true} />
         </div>
       </aside>
 
@@ -674,6 +662,14 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
               )}
             </div>
           </div>
+
+          {loadError && activeSection === 'overview' && (
+            <div role="alert" className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-[#FDA29B] bg-[#FEF3F2] p-4 text-sm text-[#7A271A]">
+              <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <span className="flex-1"><span>{loadError}</span> The other sections of your Dealer Hub still work.</span>
+              <button type="button" onClick={loadDashboard} className="bg-[#0A3340] text-white text-xs font-bold rounded-lg px-4 py-2">Try Again</button>
+            </div>
+          )}
 
           {activeSection === 'overview' && (
             <>
@@ -843,10 +839,14 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
                     <div className="p-3 bg-emerald-50 rounded-xl text-center">
                       <p className="text-2xl font-bold text-emerald-700">{myListings.filter((l) => l.status === 'available' || l.status === 'active').length}</p>
                       <p className="text-xs text-emerald-800">Published</p>
+                    </div>
+                    <div className="p-3 bg-amber-50 rounded-xl text-center">
+                      <p className="text-2xl font-bold text-amber-700">{myListings.filter((l) => l.status === 'pending').length}</p>
+                      <p className="text-xs text-amber-800">Pending review</p>
                     </div>
                     <div className="p-3 bg-[#F3FAF9] rounded-xl text-center">
                       <p className="text-2xl font-bold text-[#176B87]">{myListings.filter((l) => l.status === 'draft').length}</p>
@@ -863,7 +863,10 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   </div>
                   <div className="space-y-3">
                     {myListings.length === 0 ? (
-                      <p className="text-sm text-[#64748B] text-center py-8">You haven't listed any vehicles yet.</p>
+                      <div className="text-center py-10">
+                        <p className="text-sm text-[#64748B] mb-3">You haven't listed any vehicles yet.</p>
+                        <button type="button" onClick={() => openListingForm({ mode: 'create' })} className="px-4 py-2 bg-[#176B87] text-white text-sm font-medium rounded-xl hover:bg-[#12576D]">Add your first vehicle</button>
+                      </div>
                     ) : myListings.map((car) => {
                       const image = car.images?.[0]?.thumb || car.images?.[0]?.url;
                       const carId = String(car.id || car._id);
@@ -939,7 +942,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   timestamp) are all genuinely real now. The dead
                   "Filter"/"Export" buttons (no onClick handler on
                   either) were removed rather than left non-functional. */}
-              {leadsLoading ? (
+              {leadsLoading || (!leadsLoaded && !leadsError) ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="w-6 h-6 text-[#176B87] animate-spin" />
                 </div>
@@ -995,6 +998,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           {activeSection === 'pipeline' && (
             <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
               <h3 className="text-xl font-bold text-[#0A3340] mb-6">Sales Pipeline</h3>
+              {leadActionError && <p role="alert" className="mb-4 p-3 rounded-lg bg-[#FEF3F2] border border-[#FDA29B] text-sm text-[#7A271A]">{leadActionError}</p>}
               {/* Fixed: this section had a real nav entry (Pipeline)
                   but zero content behind it at all - clicking it
                   showed nothing. Real, working kanban-style view now,
@@ -1003,7 +1007,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   real backend's own updateLead previously just echoed
                   back whatever was sent without writing to the
                   database at all - fixed as part of this same pass). */}
-              {leadsLoading ? (
+              {leadsLoading || (!leadsLoaded && !leadsError) ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="w-6 h-6 text-[#176B87] animate-spin" />
                 </div>
@@ -1077,7 +1081,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   released escrow deals (there is no separate real
                   "customer" entity anywhere in this project's
                   schema). */}
-              {customersLoading ? (
+              {customersLoading || (!customersLoaded && !customersError) ? (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="w-6 h-6 text-[#176B87] animate-spin" />
                 </div>
@@ -1118,6 +1122,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   value={newCampaignName}
                   onChange={(e) => setNewCampaignName(e.target.value)}
                   placeholder="New campaign name"
+                  aria-label="New campaign name"
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void handleCreateCampaign(); } }}
                   className="flex-1 border border-[#D7E7E4] rounded-xl px-3 py-2 text-sm"
                 />
                 <button
@@ -1161,7 +1167,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
             </div>
           )}
 
-          {['auctions', 'finance', 'inspections', 'settings'].includes(activeSection) && (
+          {['auctions', 'finance', 'inspections', 'settings', 'banking'].includes(activeSection) && (
             <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
               <h3 className="sr-only">{currentItem.label}</h3>
               {/* Phase 12 fix: "finance" used to be grouped with "team"/"settings"
@@ -1173,8 +1179,10 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   "settings" has no backend contract found in this audit, so it
                   honestly keeps the disclosed-gap placeholder. */}
               {activeSection === 'settings' ? (
-                <DealerSettingsPanel userId={String(user?.id || user?._id || '')} />
-              ) : operationsLoading ? (
+                <DealerSettingsPanel userId={String(user?.id || user?._id || '')} onOpenSection={setActiveSection} />
+              ) : activeSection === 'banking' ? (
+                <DealerBankingPanel />
+              ) : operationsLoading || (!operations[activeSection] && !operationsError) ? (
                 <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#176B87] animate-spin" /></div>
               ) : operationsError ? (
                 <div className="py-12 text-center"><p className="text-sm text-[#64748B] mb-3">{operationsError}</p><button onClick={() => setOperations((prev) => ({ ...prev, [activeSection]: undefined }))} className="text-xs font-bold text-[#176B87]">Try Again</button></div>
@@ -1271,7 +1279,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
 
           {activeSection === 'analytics' && (
             <div className="space-y-6">
-              {operationsLoading ? <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#176B87] animate-spin" /></div> : operationsError ? <div className="py-12 text-center"><p className="text-sm text-[#64748B] mb-3">{operationsError}</p><button onClick={() => setOperations((prev) => ({ ...prev, analytics: undefined }))} className="text-xs font-bold text-[#176B87]">Try Again</button></div> : <>
+              {operationsLoading || (!operations.analytics && !operationsError) ? <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#176B87] animate-spin" /></div> : operationsError ? <div className="py-12 text-center"><p className="text-sm text-[#64748B] mb-3">{operationsError}</p><button onClick={() => setOperations((prev) => ({ ...prev, analytics: undefined }))} className="text-xs font-bold text-[#176B87]">Try Again</button></div> : <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                   <StatCard title="Total Revenue" value={operations.analytics?.overview?.totalRevenue == null ? '—' : `Ksh ${Number(operations.analytics.overview.totalRevenue).toLocaleString('en-KE')}`} icon={DollarSign} color={colors.emerald} />
                   <StatCard title="Total Sales" value={operations.analytics?.overview?.totalSales ?? '—'} icon={ShoppingCart} color={colors.navy} />

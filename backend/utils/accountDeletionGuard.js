@@ -23,6 +23,7 @@ export const ACCOUNT_DELETE_DEPENDENCIES = [
   ["DEALER_ORGANIZATION", "dealer_verifications", ["user", "reviewed_by"]],
   ["LINKED_RECORDS", "referrals", ["referrer", "referee"]],
   ["DEALER_TEAM", "dealer_teams", ["dealer", "invited_by", "member"]],
+  ["DEALER_TEAM", "dealer_team_roles", ["dealer"]],
   ["DEALER_ORGANIZATION", "dealer_subscriptions", ["dealer"]],
   ["FINANCIAL_RECORDS", "loan_applications", ["dealer", "reviewed_by", "applicant"]],
   ["FINANCIAL_RECORDS", "dealer_payouts", ["dealer"]],

@@ -19,3 +19,10 @@ Ban was not changed.
 ## Evidence
 Evidence (./logs): tsc exit 0; vite build exit 0; frontend vitest 155 files / 1327 passed / 1 skipped; backend jest 3758 passed, 1 failed (stage5f5RoleRouteMatrix, D-11, fails identically in the untouched baseline); backend vitest exit 0; node --test pass 1 / fail 0; validators 27 failing vs 28 before, none newly failing.
 Tests changed because the prompt was replaced by a dialog (same assertions kept): AdminUsersIndependentApproval, adminTables. The hosted patch lives in runbooks/ (not supabase/migrations) because stage4IdentityLifecycle forbids a second definition of the registration function in the chain. NOT verified: any run against the hosted DB, a real browser, real e-mail/SMS delivery, the patch executing (reviewed, not run).
+
+## Live outcome (2026-11-02, hosted DB, read-only verification by me; SQL run by the owner)
+- Owner ran the hosted patch: registration function, onboarding column, dealer trigger, 2 dealer profiles, 'suspended' status all verified present.
+- First approval was refused (ADMIN_ACCOUNT_REQUIRED): the hosted DB had NO admin/superadmin row; the owner e-mail passes in the app but the approval function authorises against the DB row. Owner promoted their account with a single UPDATE on users (the matching profiles update fails on a pre-existing profiles trigger that references a missing updated_at column; skipped).
+- Approval then succeeded: user approved, dealers.approved, verification approved with reviewer/timestamp, audit rows 'admin_dealers_manage_approve' and 'Dealer decision: approve-dealer' (outcome success). Earlier refusals are also in the audit log.
+- Added readiness check 'An active administrator account'. Jest after this change: 3760 passed, 1 failed (stage5f5RoleRouteMatrix, D-11, baseline).
+- Open: Brevo delivery feedback webhook not wired (no email has ever been recorded as delivered); verification mail arrived late; sender-domain authentication not verified by me.

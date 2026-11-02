@@ -17,6 +17,7 @@ async function defaultDeps() {
     rpc: (name, args) => sb.rpc(name, args),
     selectDealerColumns: () => sb.from("dealers").select("bio,payment_details,onboarding_complete,onboarding_completed_at").limit(1),
     selectVerifications: () => sb.from("dealer_verifications").select("id,documents,submitted_at,verification_status").limit(1),
+    selectAdmins: () => sb.from("users").select("id").in("role", ["admin", "superadmin"]).eq("status", "approved").eq("is_banned", false).limit(1),
   };
 }
 
@@ -44,6 +45,13 @@ export async function checkDealerOnboardingReadiness(deps) {
       (err) => /Invalid verification action/i.test(String(err?.message || ""))),
     run("verification_table", "Dealer application records", () => d.selectVerifications(), (err) => !err),
   ]);
+  // The approval function authorises the acting account against the DATABASE row (role admin|superadmin, status approved). The app lets
+  // the configured owner e-mail into the admin screens regardless, so without a real admin row every approval is refused.
+  if (d.selectAdmins) {
+    const adminCheck = await run("admin_account", "An active administrator account", () => d.selectAdmins().then((r) => (r?.error ? r : { error: r?.data?.length ? null : { code: "NO_ADMIN", message: "no administrator" } })), (err) => !err);
+    if (adminCheck.ok === null && /no administrator/.test(adminCheck.detail || "")) { adminCheck.ok = false; adminCheck.reason = "missing"; delete adminCheck.detail; }
+    checks.push(adminCheck);
+  }
   const missing = checks.filter((c) => c.ok === false);
   const unknown = checks.filter((c) => c.ok === null);
   return {
@@ -51,7 +59,7 @@ export async function checkDealerOnboardingReadiness(deps) {
     checks,
     migration: REQUIRED_MIGRATION,
     message: missing.length
-      ? `The database is missing: ${missing.map((c) => c.label.toLowerCase()).join(", ")}. Apply ${REQUIRED_MIGRATION} before onboarding dealers.`
+      ? `The database is missing: ${missing.map((c) => c.label.toLowerCase()).join(", ")}.${missing.some((c) => c.id !== "admin_account") ? ` Run ${REQUIRED_MIGRATION} before onboarding dealers.` : ""}${missing.some((c) => c.id === "admin_account") ? " Dealer approvals are refused until an administrator account exists in the database (role admin or superadmin, status approved)." : ""}`
       : unknown.length ? "Some checks could not be completed; dealer onboarding may still work." : "Dealer onboarding is ready.",
   };
 }

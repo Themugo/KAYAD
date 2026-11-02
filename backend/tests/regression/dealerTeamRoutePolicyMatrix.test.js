@@ -26,13 +26,15 @@ beforeEach(() => { rows = []; dbError = null; });
 describe("dealer team route -> policy matrix (source)", () => {
   const src = fs.readFileSync(new URL("../../routes/dealerPlatformRoutes.js", import.meta.url), "utf8");
   const teamLines = src.split("\n").filter((l) => /router\.(get|post|put|delete)\("\/team/.test(l));
-  test("exactly five team routes, each with protect and the documented policy", () => {
-    expect(teamLines).toHaveLength(5);
+  test("exactly ten team routes (members, resend, roles), each with protect and the documented policy", () => {
+    expect(teamLines).toHaveLength(10);
     const policy = Object.fromEntries(teamLines.map((l) => [l.match(/router\.(\w+)\("([^"]+)"/).slice(1, 3).join(" "), l]));
     expect(policy["get /team"]).toMatch(/protect, dealerOrgAccess\("canManageTeam"\)/); // Phase 14.7: roster exposes member names/emails -> same permission as managing
     expect(policy["post /team/invite"]).toMatch(/dealerOrgAccess\("canManageTeam"\)/);
     expect(policy["put /team/:memberId"]).toMatch(/dealerOrgAccess\("canManageTeam"\)/);
     expect(policy["delete /team/:memberId"]).toMatch(/dealerOrgAccess\("canManageTeam"\)/);
+    // team roles + resend (added with custom roles): same permission as managing the team; owner-only editing is enforced in the controller
+    for (const k of ["post /team/:memberId/resend", "get /team/roles", "post /team/roles", "put /team/roles/:roleKey", "delete /team/roles/:roleKey"]) expect(policy[k]).toMatch(/protect, dealerOrgAccess\("canManageTeam"\)/);
     expect(policy["post /team/accept"]).toMatch(/protect, asyncHandler\(acceptTeamInvite\)/); // invitee is not yet a member: identity-only by design
     for (const l of teamLines) expect(l).toMatch(/protect/);
   });

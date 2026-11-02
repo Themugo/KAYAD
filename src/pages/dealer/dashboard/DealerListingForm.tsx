@@ -3,6 +3,9 @@ import { Loader2, ArrowLeft, AlertCircle } from 'lucide-react';
 import { createCar, updateCar, VehicleApiError } from '../../../services/vehicleApi';
 import type { BackendCar, CreateCarPayload } from '../../../services/vehicleApi';
 import DealerListingPhotos from './DealerListingPhotos';
+import DealerListingPhotoPicker from './DealerListingPhotoPicker';
+import { FUEL_TYPES, CONDITIONS } from '../../../constants/vehicleOptions';
+import { formatThousands, parseFormattedNumber, handleFormattedInput } from '../../../utils/numberFormat';
 
 /**
  * Phase 14.4 dealer listing create/edit form.
@@ -16,9 +19,10 @@ import DealerListingPhotos from './DealerListingPhotos';
  * listing are managed by DealerListingPhotos (separate image routes).
  */
 
-export const LISTING_FUELS = ['Gasoline', 'Diesel', 'Hybrid', 'Plug-in Hybrid', 'Electric'];
+export const LISTING_FUELS: string[] = [...FUEL_TYPES];
 export const LISTING_TRANSMISSIONS = ['Automatic', 'Manual', 'CVT', 'Dual-Clutch'];
-export const LISTING_CONDITIONS = ['New', 'Like New', 'Excellent', 'Good', 'Fair'];
+// Kenyan market terms. A listing saved earlier with an old value still shows it (see withCurrent below).
+export const LISTING_CONDITIONS: string[] = [...CONDITIONS];
 const MAX_IMAGES = 10;
 
 interface FormState {
@@ -47,8 +51,8 @@ function fromCar(car: BackendCar): FormState {
   const str = (v: unknown) => (v === null || v === undefined ? '' : String(v));
   return {
     title: str(car.title), brand: str(car.brand), model: str(car.model),
-    year: str(car.year), price: str(car.price), mileage: str(car.mileage),
-    fuel: str(car.fuel), transmission: str(car.transmission), color: str(car.color),
+    year: str(car.year), price: formatThousands(car.price), mileage: formatThousands(car.mileage),
+    fuel: str(car.fuel).toLowerCase() === 'gasoline' ? 'Petrol' : str(car.fuel), transmission: str(car.transmission), color: str(car.color),
     condition: str(car.condition), city: str(car.city ?? car.location_city),
     description: str(car.description),
   };
@@ -65,13 +69,13 @@ export function validateListing(form: FormState, mode: 'create' | 'edit', imageC
     if (!Number.isInteger(y) || y < 1900 || y > 2030) errors.year = 'Enter a whole-number year between 1900 and 2030.';
   }
   if (form.price.trim() !== '') {
-    const p = Number(form.price);
-    if (!Number.isFinite(p) || p <= 0) errors.price = 'Price must be greater than zero.';
+    const p = parseFormattedNumber(form.price);
+    if (p === undefined || !Number.isFinite(p) || p <= 0) errors.price = 'Price must be greater than zero.';
     else if (p > 100_000_000) errors.price = 'Price must not exceed 100,000,000.';
   }
   if (form.mileage.trim() !== '') {
-    const m = Number(form.mileage);
-    if (!Number.isFinite(m) || m < 0) errors.mileage = 'Mileage cannot be negative.';
+    const m = parseFormattedNumber(form.mileage);
+    if (m === undefined || !Number.isFinite(m) || m < 0) errors.mileage = 'Mileage cannot be negative.';
   }
   if (form.description.length > 5000) errors.description = 'Description must be 5000 characters or fewer.';
   if (mode === 'create') {
@@ -88,8 +92,8 @@ function toPayload(form: FormState): CreateCarPayload {
     brand: form.brand.trim(),
     model: form.model.trim() || undefined,
     year: num(form.year),
-    price: num(form.price),
-    mileage: num(form.mileage),
+    price: parseFormattedNumber(form.price),
+    mileage: parseFormattedNumber(form.mileage),
     fuel: form.fuel || undefined,
     transmission: form.transmission || undefined,
     color: form.color.trim() || undefined,
@@ -102,6 +106,8 @@ function toPayload(form: FormState): CreateCarPayload {
 function describeError(err: unknown): string {
   if (err instanceof VehicleApiError) {
     if (err.status === 401) return 'Your session has expired. Please sign in again.';
+    if (err.code === 'SUBSCRIPTION_REQUIRED') return 'Your dealer account is approved, but it needs an active listing plan before you can publish vehicles. Contact KAYAD support to have a plan activated.';
+    if (err.code === 'SUBSCRIPTION_EXPIRED' || err.code === 'LISTING_LIMIT_REACHED') return err.message;
     if (err.status === 403) return err.message || 'You do not have permission to do this.';
     if (err.kind === 'not_found') return 'This listing no longer exists.';
     if (err.kind === 'network') return 'Unable to reach KAYAD. Check your connection and try again.';
@@ -234,10 +240,10 @@ const DealerListingForm: React.FC<DealerListingFormProps> = ({ mode, car, onSave
           <input id="listing-year" inputMode="numeric" className={inputCls} value={form.year} onChange={set('year')} disabled={submitting} {...aria('year')} />
         </Field>
         <Field id="listing-price" label="Price (Ksh)" error={err('price')}>
-          <input id="listing-price" inputMode="decimal" className={inputCls} value={form.price} onChange={set('price')} disabled={submitting} {...aria('price')} />
+          <input id="listing-price" inputMode="numeric" autoComplete="off" placeholder="e.g. 1,850,000" className={inputCls} value={form.price} onChange={(e) => handleFormattedInput(e, (v) => { setForm((f) => ({ ...f, price: v })); setDirty(true); })} disabled={submitting} {...aria('price')} />
         </Field>
         <Field id="listing-mileage" label="Mileage (km)" error={err('mileage')}>
-          <input id="listing-mileage" inputMode="numeric" className={inputCls} value={form.mileage} onChange={set('mileage')} disabled={submitting} {...aria('mileage')} />
+          <input id="listing-mileage" inputMode="numeric" autoComplete="off" placeholder="e.g. 85,000" className={inputCls} value={form.mileage} onChange={(e) => handleFormattedInput(e, (v) => { setForm((f) => ({ ...f, mileage: v })); setDirty(true); })} disabled={submitting} {...aria('mileage')} />
         </Field>
         <Field id="listing-color" label="Colour">
           <input id="listing-color" className={inputCls} value={form.color} onChange={set('color')} disabled={submitting} />
@@ -270,13 +276,9 @@ const DealerListingForm: React.FC<DealerListingFormProps> = ({ mode, car, onSave
         </div>
         {mode === 'create' ? (
           <div className="sm:col-span-2">
-            <Field id="listing-images" label="Photos" required error={err('images')} hint={`Add 1–${MAX_IMAGES} photos. ${images.length} selected.`}>
-              <input
-                id="listing-images" type="file" accept="image/jpeg,image/png,image/webp" multiple
-                className={inputCls} disabled={submitting}
-                onChange={(e) => { setImages(Array.from(e.target.files || [])); setDirty(true); }}
-                {...aria('images', true)}
-              />
+            <Field id="listing-images" label="Photos" required error={err('images')}>
+              <DealerListingPhotoPicker files={images} max={MAX_IMAGES} disabled={submitting} error={err('images')}
+                onChange={(next) => { setImages(next); setDirty(true); }} />
             </Field>
           </div>
         ) : (

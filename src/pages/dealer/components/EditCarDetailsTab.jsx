@@ -5,7 +5,7 @@ const FUELS  = ['Petrol','Diesel','Hybrid','Electric','Plug-in Hybrid','Mild Hyb
 const TRANSMISSIONS = ['Automatic','Manual','CVT','AMT'];
 const BODIES = ['SUV','Sedan','Hatchback','Station Wagon','Pickup','Minivan','Coupe','Convertible','Crossover'];
 const COLORS = ['Black','White','Silver','Gray','Blue','Red','Green','Brown','Beige','Gold','Burgundy','Orange','Purple','Yellow','Maroon','Pearl','Navy'];
-const CONDITIONS = ['Foreign Used','Local Used','Brand New'];
+const CONDITIONS = ['Ex-Japan','Locally Used','New Import','Locally Assembled'];
 
 function FieldGroup({ label, children }) {
   return (

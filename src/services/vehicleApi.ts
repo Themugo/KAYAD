@@ -528,6 +528,13 @@ export async function deleteCarImage(id: string, index: number): Promise<Listing
   } catch (err) { throw toVehicleError(err); }
 }
 
+/** Choose the poster: the server moves the photo to the front and returns the new order. */
+export async function setCoverImage(id: string, index: number): Promise<ListingImagesResponse> {
+  try {
+    return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images/cover`, { method: 'PATCH', body: { index } });
+  } catch (err) { throw toVehicleError(err); }
+}
+
 export async function deleteCar(id: string): Promise<{ success: boolean; message?: string }> {
   try {
     return await request<{ success: boolean; message?: string }>(`/api/cars/${encodeURIComponent(id)}`, { method: 'DELETE' });

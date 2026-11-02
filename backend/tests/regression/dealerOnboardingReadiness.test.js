@@ -9,6 +9,7 @@ const healthy = () => ({
     : { data: null, error: { code: "P0001", message: "Invalid verification action" } }),
   selectDealerColumns: jest.fn(async () => ({ data: [], error: null })),
   selectVerifications: jest.fn(async () => ({ data: [], error: null })),
+  selectAdmins: jest.fn(async () => ({ data: [{ id: "a1" }], error: null })),
 });
 // What the hosted database answers today: no registration function, no onboarding columns.
 const hostedLike = () => ({
@@ -31,6 +32,21 @@ describe("dealer onboarding readiness", () => {
     expect(r.checks.filter((c) => c.ok === false).map((c) => c.id).sort()).toEqual(["dealer_columns", "register_function"]);
     expect(r.checks.find((c) => c.id === "approval_function").ok).toBe(true);
     expect(r.message).toContain(REQUIRED_MIGRATION);
+  });
+  test("no active administrator row in the database is reported (approvals would all be refused)", async () => {
+    const d = healthy();
+    d.selectAdmins = jest.fn(async () => ({ data: [], error: null }));
+    const r = await checkDealerOnboardingReadiness(d);
+    expect(r.ready).toBe(false);
+    expect(r.checks.find((c) => c.id === "admin_account").ok).toBe(false);
+    expect(r.message).toMatch(/administrator account/);
+    expect(r.message).not.toContain(REQUIRED_MIGRATION); // the SQL patch is not the fix for this one
+  });
+  test("an administrator-lookup error is 'unknown', not 'missing'", async () => {
+    const d = healthy();
+    d.selectAdmins = jest.fn(async () => ({ data: null, error: { code: "XX000", message: "boom" } }));
+    const r = await checkDealerOnboardingReadiness(d);
+    expect(r.checks.find((c) => c.id === "admin_account").ok).toBeNull();
   });
   test("an unexpected error is 'unknown', never reported as missing or as ready", async () => {
     const d = healthy();

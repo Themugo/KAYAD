@@ -36,13 +36,13 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
     const names = (id: string) => within(within(n).getByRole('group', { name: id })).getAllByRole('button').map((b) => b.querySelector('span.font-medium')?.textContent);
     expect(names('Business')).toEqual(['Inventory', 'Leads', 'Pipeline', 'Customers', 'Finance', 'Analytics', 'Reputation']);
     expect(names('Operations')).toEqual(['Auctions', 'Inspections', 'Escrow', 'Marketing']);
-    expect(names('System Management')).toEqual(['Team', 'Settings']);
+    expect(names('System Management')).toEqual(['Team', 'Settings', 'Banking']);
   });
 
-  it('keeps all 14 original sections reachable (none removed)', async () => {
+  it('keeps all 14 original sections reachable plus the new Banking item (none removed)', async () => {
     renderIt();
     const n = await nav();
-    expect(within(n).getAllByRole('button')).toHaveLength(14);
+    expect(within(n).getAllByRole('button')).toHaveLength(15);
   });
 
   it('marks exactly one item as the current page and shows the real new-lead badge', async () => {

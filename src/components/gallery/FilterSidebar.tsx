@@ -41,7 +41,7 @@ export const FilterSidebar: FC = () => {
   const cities = ['Nairobi', 'Mombasa', 'Nakuru', 'Eldoret', 'Kisumu'];
 
   const fuelTypes: { id: FuelType; label: string }[] = [
-    { id: 'Gasoline', label: 'Petrol' },
+    { id: 'Petrol', label: 'Petrol' },
     { id: 'Diesel', label: 'Diesel' },
     { id: 'Hybrid', label: 'Hybrid' },
     { id: 'Electric', label: 'EV Electric' },

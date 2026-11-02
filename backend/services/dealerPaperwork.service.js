@@ -30,7 +30,8 @@ export class PaperworkPolicyError extends Error {
 }
 const isPlainObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 
-export const DEFAULT_ITEMS = Object.freeze(Object.fromEntries(PAPERWORK_KEYS.map((k) => [k, Object.freeze({ enabled: true, required: false })])));
+// No paperwork is asked for until the owner turns an item on (Admin > Settings > Onboarding). Dealers are vetted by the administrator.
+export const DEFAULT_ITEMS = Object.freeze(Object.fromEntries(PAPERWORK_KEYS.map((k) => [k, Object.freeze({ enabled: false, required: false })])));
 
 /** Pure. A stored value -> { items, issues }. A corrupt record is reported and treated as unavailable by callers (never as "nothing required"). */
 export function normalizeItems(raw) {

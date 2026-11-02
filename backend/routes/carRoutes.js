@@ -25,6 +25,7 @@ import {
   updateCar,
   deleteCar,
   deleteCarImage,
+  setCoverImage,
   addCarImages,
 } from "../controllers/carController.js";
 
@@ -307,6 +308,16 @@ router.delete(
   validateObjectId,
   invalidateCache("cache:*"),
   asyncHandler(deleteCarImage),
+);
+
+// ⭐ CHOOSE POSTER IMAGE (moves the chosen photo to the front)
+router.patch(
+  "/:id/images/cover",
+  protect,
+  sellerListingAccess({ write: true }),
+  validateObjectId,
+  invalidateCache("cache:*"),
+  asyncHandler(setCoverImage),
 );
 
 // 📤 ADD IMAGES TO CAR

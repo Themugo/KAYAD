@@ -3,14 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useToast } from '../../context/ToastContext';
 import { dealerAPI } from '../../api/api';
-import { Check, ChevronRight, ChevronLeft, Building2, Banknote, FileText, CheckCircle } from 'lucide-react';
+import { Check, ChevronRight, ChevronLeft, Building2, FileText, CheckCircle } from 'lucide-react';
 
-const STEPS = [
-  { label: 'Business', icon: Building2 },
-  { label: 'Payments', icon: Banknote },
-  { label: 'Documents', icon: FileText },
-  { label: 'Review', icon: CheckCircle },
-];
+// Business -> Review. A Documents step appears ONLY if the owner has switched paperwork on (Admin > Settings > Onboarding); by default no
+// paperwork is asked for. Banking is not collected here at all: dealers add it later under Banking in the Dealer Hub.
+const STEP_DEFS = {
+  business: { key: 'business', label: 'Business', icon: Building2 },
+  documents: { key: 'documents', label: 'Documents', icon: FileText },
+  review: { key: 'review', label: 'Review', icon: CheckCircle },
+};
 
 export default function DealerOnboarding() {
   const { user, setUser } = useAuth();
@@ -24,11 +25,6 @@ export default function DealerOnboarding() {
     businessName: '',
     location: '',
     bio: '',
-    bankName: '',
-    accountName: '',
-    accountNumber: '',
-    paybillNumber: '',
-    mpesaPhone: '',
     idType: 'national_id',
     idNumber: '',
     kraPin: '',
@@ -45,16 +41,10 @@ export default function DealerOnboarding() {
     let cancelled = false;
     dealerAPI.getOnboarding().then(({ dealer }) => {
       if (cancelled) return;
-      const payment = dealer?.paymentDetails || {};
       setForm({
         businessName: dealer?.businessName || user.businessName || '',
         location: dealer?.location || user.location || '',
         bio: dealer?.bio || user.bio || '',
-        bankName: payment.bankName || '',
-        accountName: payment.accountName || '',
-        accountNumber: payment.accountNumber || '',
-        paybillNumber: payment.paybillNumber || '',
-        mpesaPhone: payment.mpesaPhone || user.phone || '',
         idType: 'national_id',
         idNumber: '',
         kraPin: '',
@@ -110,35 +100,30 @@ export default function DealerOnboarding() {
     return errs;
   };
 
+  // Hidden only when the owner's list is CONFIRMED empty; while loading or if it failed to load (null) the step stays so the dealer is never waved through on a guess.
+  const needsDocuments = checklist === null || checklist.length > 0;
+  const steps = [STEP_DEFS.business, ...(needsDocuments ? [STEP_DEFS.documents] : []), STEP_DEFS.review];
+  const lastStep = steps.length - 1;
+  const stepKey = steps[Math.min(step, lastStep)].key;
+
   const validate = () => {
     const errs = {};
-    if (step === 0) {
+    if (stepKey === 'business') {
       if (!form.businessName.trim()) errs.businessName = 'Business name required';
       if (!form.location.trim()) errs.location = 'Location required';
     }
-    if (step === 1) {
-      if (!form.bankName.trim()) errs.bankName = 'Bank name required';
-      if (!form.accountName.trim()) errs.accountName = 'Account name required';
-      if (!form.accountNumber.trim()) errs.accountNumber = 'Account number required';
-      else if (form.accountNumber.trim().length < 6) errs.accountNumber = 'Account number too short';
-      if (!form.mpesaPhone.trim()) errs.mpesaPhone = 'M-Pesa phone required';
-      else if (!/^(?:\+?254|0)?7\d{8}$/.test(form.mpesaPhone.replace(/[\s-]/g, ''))) errs.mpesaPhone = 'Enter valid Kenyan number (e.g. 0712345678)';
-    }
-    if (step === 2) Object.assign(errs, documentErrors());
+    if (stepKey === 'documents') Object.assign(errs, documentErrors());
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
 
   const canNext = () => {
-    if (step === 0) return form.businessName.trim() && form.location.trim();
-    if (step === 1) {
-      return form.bankName.trim() && form.accountName.trim() && form.accountNumber.trim().length >= 6 && /^(?:\+?254|0)?7\d{8}$/.test(form.mpesaPhone.replace(/[\s-]/g, ''));
-    }
-    if (step === 2) return checklist !== null && Object.keys(documentErrors()).length === 0;
+    if (stepKey === 'business') return form.businessName.trim() && form.location.trim();
+    if (stepKey === 'documents') return checklist !== null && Object.keys(documentErrors()).length === 0;
     return true;
   };
 
-  const handleNext = () => { if (validate()) setStep(s => Math.min(s + 1, 3)); };
+  const handleNext = () => { if (validate()) setStep(s => Math.min(s + 1, lastStep)); };
 
   // Only what the owner asks for AND the dealer filled in; empty optional items are simply not sent.
   const buildDocuments = () => {
@@ -157,13 +142,6 @@ export default function DealerOnboarding() {
         businessName: form.businessName.trim(),
         location: form.location.trim(),
         bio: form.bio.trim(),
-        paymentDetails: {
-          bankName: form.bankName.trim(),
-          accountName: form.accountName.trim(),
-          accountNumber: form.accountNumber.trim(),
-          paybillNumber: form.paybillNumber.trim() || undefined,
-          mpesaPhone: form.mpesaPhone.trim(),
-        },
         documents: buildDocuments(),
       });
 
@@ -240,13 +218,13 @@ export default function DealerOnboarding() {
           <div className="section-eyebrow">Seller Onboarding</div>
           <h2>Set Up Your Shop</h2>
           <p style={{ color: 'rgba(10, 51, 64, 0.72)', fontSize: 13, marginTop: 4 }}>
-            Complete these steps to start listing vehicles
+            Tell us about your dealership. You can add your banking details later from your Dealer Hub.
           </p>
         </div>
 
         {/* Steps indicator */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', rowGap: 8, gap: 0, marginBottom: 40 }}>
-          {STEPS.map((s, i) => (
+          {steps.map((s, i) => (
             <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
               <div style={{
                 display: 'flex', alignItems: 'center', gap: 8,
@@ -261,7 +239,7 @@ export default function DealerOnboarding() {
                 }}>{s.label}</span>
                 {i < step && <Check size={11} style={{ color: 'var(--brand)' }} />}
               </div>
-              {i < STEPS.length - 1 && (
+              {i < steps.length - 1 && (
                 <div style={{
                   width: 32, height: 1,
                   background: i < step ? 'var(--brand)' : 'rgba(10, 51, 64, 0.08)',
@@ -275,7 +253,7 @@ export default function DealerOnboarding() {
           background: '#FFFFFF', border: '1px solid rgba(10, 51, 64, 0.06)',
           borderRadius: 16, padding: 36,
         }}>
-          {step === 0 && (
+          {stepKey === 'business' && (
             <div>
               <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 24 }}>Business Profile</h3>
               <div className="input-group" style={{ marginBottom: 20 }}>
@@ -301,51 +279,7 @@ export default function DealerOnboarding() {
             </div>
           )}
 
-          {step === 1 && (
-            <div>
-              <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 24 }}>Payment Setup</h3>
-              <p style={{ fontSize: 12, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 24 }}>
-                Enter your preferred payout methods. Buyers will send payments here.
-              </p>
-              <h4 style={{ fontSize: 13, fontWeight: 700, color: 'var(--brand)', marginBottom: 16 }}>Bank Transfer</h4>
-              <div className="input-group" style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Bank Name *</label>
-                <input className="input" placeholder="e.g. KCB, Equity, Co-op"
-                  value={form.bankName} onChange={e => update('bankName', e.target.value)}
-                  style={{ borderColor: errors.bankName ? 'var(--red)' : undefined }} />
-                {errors.bankName && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.bankName}</span>}
-              </div>
-              <div className="input-group" style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Account Name *</label>
-                <input className="input" placeholder="Name on the bank account"
-                  value={form.accountName} onChange={e => update('accountName', e.target.value)}
-                  style={{ borderColor: errors.accountName ? 'var(--red)' : undefined }} />
-                {errors.accountName && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.accountName}</span>}
-              </div>
-              <div className="input-group" style={{ marginBottom: 24 }}>
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Account Number *</label>
-                <input className="input" placeholder="Bank account number"
-                  value={form.accountNumber} onChange={e => update('accountNumber', e.target.value)}
-                  style={{ borderColor: errors.accountNumber ? 'var(--red)' : undefined }} />
-                {errors.accountNumber && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.accountNumber}</span>}
-              </div>
-              <h4 style={{ fontSize: 13, fontWeight: 700, color: 'var(--brand)', marginBottom: 16 }}>M-Pesa</h4>
-              <div className="input-group" style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>Paybill Number</label>
-                <input className="input" placeholder="Optional — M-Pesa paybill"
-                  value={form.paybillNumber} onChange={e => update('paybillNumber', e.target.value)} />
-              </div>
-              <div className="input-group">
-                <label style={{ display: 'block', fontSize: 11, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, marginBottom: 6, letterSpacing: '0.05em' }}>M-Pesa Phone *</label>
-                <input className="input" placeholder="Phone for bid deposits and payouts"
-                  value={form.mpesaPhone} onChange={e => update('mpesaPhone', e.target.value)}
-                  style={{ borderColor: errors.mpesaPhone ? 'var(--red)' : undefined }} />
-                {errors.mpesaPhone && <span style={{ fontSize: 10, color: 'var(--red)', marginTop: 4 }}>{errors.mpesaPhone}</span>}
-              </div>
-            </div>
-          )}
-
-          {step === 2 && (
+          {stepKey === 'documents' && (
             <div>
               <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 12 }}>Verification Documents</h3>
               {checklist === null && !checklistError && <div className="loading-center"><div className="spinner" /></div>}
@@ -414,7 +348,7 @@ export default function DealerOnboarding() {
             </div>
           )}
 
-          {step === 3 && (
+          {stepKey === 'review' && (
             <div>
               <h3 style={{ fontSize: 18, fontWeight: 700, marginBottom: 24 }}>Review & Complete</h3>
               <div style={{ background: 'rgba(10, 51, 64, 0.03)', borderRadius: 12, padding: 20, marginBottom: 24 }}>
@@ -436,16 +370,6 @@ export default function DealerOnboarding() {
                     {Object.keys(buildDocuments()).length === 0 && <div style={{ fontSize: 12, color: 'rgba(10, 51, 64, 0.72)' }}>No optional documents provided.</div>}
                   </div>
                 )}
-                <div style={{ borderTop: '1px solid rgba(10, 51, 64, 0.06)', paddingTop: 16, marginBottom: 16 }}>
-                  <div style={{ fontSize: 12, color: 'rgba(10, 51, 64, 0.72)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 16 }}>Payment Details</div>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                    {form.bankName && <div><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>Bank</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.bankName}</div></div>}
-                    {form.accountName && <div><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>Account Name</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.accountName}</div></div>}
-                    {form.accountNumber && <div><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>Account No.</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.accountNumber}</div></div>}
-                    {form.paybillNumber && <div><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>Paybill</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.paybillNumber}</div></div>}
-                    {form.mpesaPhone && <div><div style={{ fontSize: 10, color: 'rgba(10, 51, 64, 0.72)', marginBottom: 2 }}>M-Pesa</div><div style={{ fontSize: 13, fontWeight: 600 }}>{form.mpesaPhone}</div></div>}
-                  </div>
-                </div>
               </div>
               <div style={{ background: 'rgba(23, 107, 135, 0.06)', border: '1px solid rgba(23, 107, 135, 0.12)', borderRadius: 8, padding: 14, marginBottom: 20 }}>
                 <div style={{ fontSize: 12, color: 'var(--brand-light)' }}>
@@ -457,7 +381,7 @@ export default function DealerOnboarding() {
 
           {/* Navigation */}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32, paddingTop: 24, borderTop: '1px solid rgba(10, 51, 64, 0.05)' }}>
-            <button onClick={() => setStep(s => s - 1)} disabled={step === 0} style={{
+            <button onClick={() => setStep(s => Math.max(0, s - 1))} disabled={step === 0} style={{
               padding: '10px 20px', borderRadius: 10,
               background: 'rgba(10, 51, 64, 0.04)', border: '1px solid rgba(10, 51, 64, 0.08)',
               color: step === 0 ? 'rgba(10, 51, 64, 0.15)' : 'rgba(10, 51, 64, 0.6)',
@@ -466,7 +390,7 @@ export default function DealerOnboarding() {
             }}>
               <ChevronLeft size={14} /> Back
             </button>
-            {step < STEPS.length - 1 ? (
+            {step < lastStep ? (
               <button onClick={handleNext} disabled={!canNext()} style={{
                 padding: '10px 24px', borderRadius: 10,
                 background: canNext() ? 'var(--brand)' : 'rgba(10, 51, 64, 0.08)',

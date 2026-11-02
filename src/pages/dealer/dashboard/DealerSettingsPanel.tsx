@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import * as dealerApi from '../../../services/dealerPlatformApi';
+import { communicationsAPI, dealerAPI } from '../../../api/api';
+import { Bell, Building2, Landmark, Users, CreditCard } from 'lucide-react';
 
 /**
  * Phase 14.4 dealer settings: organisation profile (existing
@@ -26,7 +28,7 @@ const STAGE_LABELS: Record<string, string> = {
 
 const inputCls = 'w-full px-3 py-2 border border-[#B9D3CF] rounded-lg text-sm text-[#0A3340] bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#0A3340]';
 
-export default function DealerSettingsPanel({ userId }: { userId: string }) {
+function ProfileSection({ userId }: { userId: string }) {
   const [form, setForm] = useState<ProfileForm>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -188,6 +190,204 @@ export default function DealerSettingsPanel({ userId }: { userId: string }) {
           </form>
         )}
       </section>
+    </div>
+  );
+}
+
+
+// ---------------------------------------------------------------------------------------------------------------------------------
+// Settings centre: one place for everything that configures the dealership. Each tab uses an existing, real contract.
+// ---------------------------------------------------------------------------------------------------------------------------------
+type Tab = 'profile' | 'notifications' | 'plan' | 'team' | 'banking';
+const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
+  { id: 'profile', label: 'Profile', icon: Building2 },
+  { id: 'notifications', label: 'Notifications', icon: Bell },
+  { id: 'plan', label: 'Plan & limits', icon: CreditCard },
+  { id: 'team', label: 'Team & roles', icon: Users },
+  { id: 'banking', label: 'Banking', icon: Landmark },
+];
+const readTab = (): Tab => {
+  try { const v = new URLSearchParams(window.location.search).get('tab'); return TABS.some((t) => t.id === v) ? (v as Tab) : 'profile'; } catch { return 'profile'; }
+};
+const writeTab = (tab: Tab) => {
+  try {
+    const url = new URL(window.location.href);
+    if (tab === 'profile') url.searchParams.delete('tab'); else url.searchParams.set('tab', tab);
+    if (url.search !== window.location.search) window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+  } catch { /* history unavailable */ }
+};
+
+interface Prefs { emailTransactional?: boolean; smsTransactional?: boolean; whatsappTransactional?: boolean; emailMarketing?: boolean; smsMarketing?: boolean; whatsappMarketing?: boolean; quietHoursStart?: string | null; quietHoursEnd?: string | null; timezone?: string }
+const hhmm = (v?: string | null) => (v ? String(v).slice(0, 5) : '');
+
+function NotificationsSection() {
+  const [prefs, setPrefs] = useState<Prefs | null>(null);
+  const [draft, setDraft] = useState<Prefs>({});
+  const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [retry, setRetry] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    setState('loading');
+    communicationsAPI.preferences()
+      .then((r: any) => { if (!live) return; const d = r?.data || r; if (!d || typeof d !== 'object') { setState('error'); return; } setPrefs(d); setDraft({}); setState('ready'); })
+      .catch(() => { if (live) setState('error'); });
+    return () => { live = false; };
+  }, [retry]);
+
+  const val = <K extends keyof Prefs>(k: K): Prefs[K] => (k in draft ? draft[k] : prefs?.[k]);
+  const toggle = (k: keyof Prefs) => (e: React.ChangeEvent<HTMLInputElement>) => { setDraft((d) => ({ ...d, [k]: e.target.checked })); setSaved(false); };
+  const dirty = Object.keys(draft).length > 0;
+
+  const save = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (saving || !dirty) return;
+    const qs = val('quietHoursStart'); const qe = val('quietHoursEnd');
+    if ((qs && !qe) || (!qs && qe)) { setSaveError('Set both a start and an end time for quiet hours, or clear both.'); return; }
+    setSaving(true); setSaveError(null); setSaved(false);
+    try {
+      const r: any = await communicationsAPI.updatePreferences(draft);
+      const d = r?.data || r;
+      if (r?.success === false) throw new Error(r.message);
+      setPrefs((p) => ({ ...(p || {}), ...(d && typeof d === 'object' ? d : draft) }));
+      setDraft({}); setSaved(true);
+    } catch (err: any) {
+      setSaveError(err?.response?.data?.message || 'Could not save your notification settings. Please try again.');
+    } finally { setSaving(false); }
+  };
+
+  if (state === 'loading') return <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#176B87] animate-spin" aria-label="Loading notification settings" /></div>;
+  if (state === 'error') return <div className="py-8 text-center"><p role="alert" className="text-sm text-[#475569] mb-3">Could not load your notification settings.</p><button type="button" onClick={() => setRetry((n) => n + 1)} className="text-xs font-bold text-[#176B87]">Try Again</button></div>;
+
+  const row = (label: string, hint: string, tKey: keyof Prefs, mKey: keyof Prefs) => (
+    <tr className="border-t border-[#D7E7E4]">
+      <th scope="row" className="py-3 pr-4 text-left align-top"><span className="block text-sm font-medium text-[#0A3340]">{label}</span><span className="block text-xs text-[#475569]">{hint}</span></th>
+      <td className="py-3 px-3 text-center"><input type="checkbox" aria-label={`${label}: account and deal updates`} checked={val(tKey) !== false} onChange={toggle(tKey)} disabled={saving} /></td>
+      <td className="py-3 px-3 text-center"><input type="checkbox" aria-label={`${label}: offers and marketing`} checked={val(mKey) !== false} onChange={toggle(mKey)} disabled={saving} /></td>
+    </tr>
+  );
+
+  return (
+    <form onSubmit={save} noValidate aria-label="Notification settings" className="space-y-5 max-w-2xl">
+      <p className="text-sm text-[#475569]">Choose how KAYAD reaches you. Security codes and essential account notices are always sent.</p>
+      {saveError && <div role="alert" className="flex items-start gap-2 p-3 rounded-lg bg-[#FEF3F2] border border-[#FDA29B] text-sm text-[#7A271A]"><AlertCircle className="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true" />{saveError}</div>}
+      {saved && <p role="status" className="flex items-center gap-2 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-900"><CheckCircle2 className="w-4 h-4" aria-hidden="true" />Notification settings saved.</p>}
+      <table className="w-full">
+        <thead><tr><th className="text-left text-xs uppercase tracking-wide text-[#64748B] pb-2">Channel</th><th className="text-xs uppercase tracking-wide text-[#64748B] pb-2">Account &amp; deals</th><th className="text-xs uppercase tracking-wide text-[#64748B] pb-2">Offers &amp; marketing</th></tr></thead>
+        <tbody>
+          {row('Email', 'Sent to your account email address', 'emailTransactional', 'emailMarketing')}
+          {row('SMS', 'Sent to your account phone number', 'smsTransactional', 'smsMarketing')}
+          {row('WhatsApp', 'Sent to your account phone number', 'whatsappTransactional', 'whatsappMarketing')}
+        </tbody>
+      </table>
+      <fieldset className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <legend className="text-sm font-medium text-[#0A3340] mb-1">Quiet hours (non-urgent messages wait until they end)</legend>
+        <div>
+          <label htmlFor="quiet-start" className="block text-xs font-medium text-[#0A3340] mb-1">From</label>
+          <input id="quiet-start" type="time" className={inputCls} value={hhmm(val('quietHoursStart'))} onChange={(e) => { setDraft((d) => ({ ...d, quietHoursStart: e.target.value || null })); setSaved(false); }} disabled={saving} />
+        </div>
+        <div>
+          <label htmlFor="quiet-end" className="block text-xs font-medium text-[#0A3340] mb-1">Until</label>
+          <input id="quiet-end" type="time" className={inputCls} value={hhmm(val('quietHoursEnd'))} onChange={(e) => { setDraft((d) => ({ ...d, quietHoursEnd: e.target.value || null })); setSaved(false); }} disabled={saving} />
+        </div>
+        <div>
+          <label htmlFor="quiet-tz" className="block text-xs font-medium text-[#0A3340] mb-1">Time zone</label>
+          <select id="quiet-tz" className={inputCls} value={String(val('timezone') || 'Africa/Nairobi')} onChange={(e) => { setDraft((d) => ({ ...d, timezone: e.target.value })); setSaved(false); }} disabled={saving}>
+            {Array.from(new Set(['Africa/Nairobi', 'Africa/Kampala', 'Africa/Dar_es_Salaam', 'UTC', String(val('timezone') || 'Africa/Nairobi')])).map((z) => <option key={z} value={z}>{z}</option>)}
+          </select>
+        </div>
+      </fieldset>
+      <button type="submit" disabled={saving || !dirty} className="px-4 py-2 rounded-xl bg-[#176B87] text-white font-medium hover:bg-[#12576D] disabled:opacity-60 flex items-center gap-2">
+        {saving && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}{saving ? 'Saving…' : 'Save notification settings'}
+      </button>
+    </form>
+  );
+}
+
+function PlanSection() {
+  const [ent, setEnt] = useState<any>(null);
+  const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [retry, setRetry] = useState(0);
+  useEffect(() => {
+    let live = true;
+    setState('loading');
+    dealerAPI.getSubscription()
+      .then((r: any) => { if (!live) return; setEnt(r?.entitlement || null); setState(r?.entitlement ? 'ready' : 'error'); })
+      .catch(() => { if (live) setState('error'); });
+    return () => { live = false; };
+  }, [retry]);
+  if (state === 'loading') return <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#176B87] animate-spin" aria-label="Loading plan" /></div>;
+  if (state === 'error') return <div className="py-8 text-center"><p role="alert" className="text-sm text-[#475569] mb-3">Could not load your plan details.</p><button type="button" onClick={() => setRetry((n) => n + 1)} className="text-xs font-bold text-[#176B87]">Try Again</button></div>;
+  const has = ent.status === 'active' || ent.status === 'cancelled';
+  const used = Number(ent.listingsUsed || 0); const max = Number(ent.listingMax || 0);
+  const pct = ent.unlimitedListings || !max ? 0 : Math.min(100, Math.round((used / max) * 100));
+  const date = (iso?: string) => { const d = iso ? new Date(iso) : null; return d && !Number.isNaN(d.getTime()) ? d.toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'; };
+  return (
+    <div className="space-y-4 max-w-xl">
+      {has ? (
+        <>
+          <div className="p-4 rounded-xl bg-[#F3FAF9] border border-[#D7E7E4]">
+            <p className="text-xs uppercase tracking-wide text-[#64748B]">Current plan</p>
+            <p className="text-xl font-bold text-[#0A3340]">{ent.planName || 'Active plan'}</p>
+            <p className="text-sm text-[#475569]">{ent.status === 'cancelled' ? 'Will not renew; active until' : 'Active until'} {date(ent.expiresAt)}</p>
+          </div>
+          <div>
+            <p className="text-sm font-medium text-[#0A3340] mb-1">Listings used: {used}{ent.unlimitedListings ? ' (unlimited)' : ` of ${max}`}</p>
+            {!ent.unlimitedListings && max > 0 && <div className="h-2 rounded-full bg-[#EEF7F5] overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={max} aria-valuenow={used} aria-label="Listings used"><div className="h-full bg-[#176B87]" style={{ width: `${pct}%` }} /></div>}
+            {ent.locked && <p role="alert" className="mt-2 text-sm text-[#7A271A]">New listings are currently locked on your account. Contact KAYAD support.</p>}
+          </div>
+        </>
+      ) : (
+        <div role="alert" className="p-4 rounded-xl bg-[#FEF3F2] border border-[#FDA29B]">
+          <p className="font-semibold text-[#7A271A]">No active listing plan</p>
+          <p className="text-sm text-[#7A271A]">You cannot publish vehicles until a plan is active. Contact KAYAD support to have a plan activated.</p>
+        </div>
+      )}
+      <p className="text-xs text-[#475569]">Plans are managed by KAYAD. This page is read-only.</p>
+    </div>
+  );
+}
+
+export default function DealerSettingsPanel({ userId, onOpenSection }: { userId: string; onOpenSection?: (section: string) => void }) {
+  const [tab, setTabState] = useState<Tab>(readTab);
+  const setTab = (t: Tab) => { setTabState(t); writeTab(t); };
+  useEffect(() => {
+    const onPop = () => setTabState(readTab());
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
+  const link = (target: string, title: string, body: string, cta: string) => (
+    <div className="p-4 rounded-xl bg-[#F3FAF9] border border-[#D7E7E4] max-w-xl">
+      <h3 className="text-base font-bold text-[#0A3340] mb-1">{title}</h3>
+      <p className="text-sm text-[#475569] mb-3">{body}</p>
+      <button type="button" onClick={() => onOpenSection?.(target)} disabled={!onOpenSection} className="px-4 py-2 rounded-xl bg-[#176B87] text-white text-sm font-medium hover:bg-[#12576D] disabled:opacity-60">{cta}</button>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <div role="tablist" aria-label="Settings sections" className="flex flex-wrap gap-2 border-b border-[#D7E7E4] pb-3">
+        {TABS.map((t) => {
+          const Icon = t.icon;
+          return (
+            <button key={t.id} type="button" role="tab" id={`settings-tab-${t.id}`} aria-selected={tab === t.id} aria-controls="settings-tabpanel" onClick={() => setTab(t.id)}
+              className={`inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340] ${tab === t.id ? 'bg-[#176B87] text-white' : 'text-[#176B87] border border-[#B9D3CF] hover:bg-[#F3FAF9]'}`}>
+              <Icon className="w-4 h-4" aria-hidden="true" />{t.label}
+            </button>
+          );
+        })}
+      </div>
+      <div id="settings-tabpanel" role="tabpanel" aria-labelledby={`settings-tab-${tab}`}>
+        {tab === 'profile' && <ProfileSection userId={userId} />}
+        {tab === 'notifications' && <NotificationsSection />}
+        {tab === 'plan' && <PlanSection />}
+        {tab === 'team' && link('team', 'Team & roles', 'Invite people by email, choose what each role can do, and suspend or remove members.', 'Open Team')}
+        {tab === 'banking' && link('banking', 'Banking & payouts', 'Where your payouts are sent: bank account and M-Pesa details.', 'Open Banking')}
+      </div>
     </div>
   );
 }

@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { normalizeFuel, stripNumberFormatting } from "../utils/vehicleOptions.js";
 
 const numberField = (schema) =>
   z.preprocess(
-    (value) => (value === "" || value === null || value === undefined ? undefined : value),
+    (value) => (value === "" || value === null || value === undefined ? undefined : stripNumberFormatting(value)),
     schema.optional(),
   );
 
@@ -24,7 +25,7 @@ export const createCarSchema = z.object({
   model: z.string().optional(),
   year: numberField(z.coerce.number().int().min(1900).max(2030)),
   price: numberField(z.coerce.number().positive("Price must be positive").max(100_000_000)),
-  fuel: z.string().optional(),
+  fuel: z.string().optional().transform(normalizeFuel),
   transmission: z.string().optional(),
   mileage: numberField(z.coerce.number().nonnegative()),
   bodyType: z.string().optional(),

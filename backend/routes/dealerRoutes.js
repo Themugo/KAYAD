@@ -130,7 +130,8 @@ router.put("/onboarding", protect, allowRoles(...APPLICANT_ROLES), asyncHandler(
     businessName,
     location,
     bio: bio || null,
-    paymentDetails,
+    // Banking is not part of onboarding: only write payment details when a caller explicitly sends them, never blank an existing record.
+    ...(paymentDetails !== undefined ? { paymentDetails } : {}),
     onboardingComplete: true,
     onboardingCompletedAt: new Date().toISOString(),
   });

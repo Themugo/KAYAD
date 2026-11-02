@@ -263,6 +263,15 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
               onChange={e => setBranding(p => ({...p, footerCopyright: e.target.value}))}
               placeholder="KAYAD Motors Kenya Ltd. All rights reserved." style={{ height: 44 }} />
           </div>
+          {/* A save control right where the logo and identity text are edited, so nobody has to scroll to the bottom bar. */}
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+            <button type="button" className="btn btn-primary" onClick={() => saveConfig('branding')} disabled={saving || !canSave || !dirty}>
+              {saving ? 'Saving…' : 'Save logo & identity'}
+            </button>
+            <small style={{ color: 'var(--text-muted)' }}>
+              {saving ? 'Saving…' : !canSave ? 'Saving is disabled until the saved settings load.' : dirty ? 'You have unsaved changes.' : 'Nothing to save. A logo you upload goes live as soon as it finishes uploading.'}
+            </small>
+          </div>
         </div>
       </SectionCard>
 

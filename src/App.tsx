@@ -17,6 +17,7 @@ import ResetPasswordPage from './pages/ResetPasswordPage';
 import ForcePasswordChange from './pages/ForcePasswordChange';
 import NotificationsPage from './pages/NotificationsPage';
 import DealerOnboarding from './pages/dealer/DealerOnboarding';
+import DealerTeamInvite from './pages/dealer/DealerTeamInvite';
 import DealerAuctionSetupWizard from './pages/dealer/DealerAuctionSetupWizard';
 import DealerAuctionOperations from './pages/dealer/DealerAuctionOperations';
 import DealerAuctionOperationCase from './pages/dealer/DealerAuctionOperationCase';
@@ -897,6 +898,7 @@ function AuthRouteSurface() {
   if (path === '/dealer') return <RequireAuth><RequireDealer><Navigate to="/?nav=dealer-dashboard" replace /></RequireDealer></RequireAuth>;
   if (path === '/inspector/dashboard') return <RequireAuth><Navigate to="/?nav=inspections" replace /></RequireAuth>;
 
+  if (path === '/dealer/setup') return <RequireAuth><DealerTeamInvite /></RequireAuth>;
   if (path === '/dealer/onboarding') return <RequireAuth><RequireDealerApplicant><DealerOnboarding /></RequireDealerApplicant></RequireAuth>;
   if (path === '/dealer/auction-setup') return <RequireAuth><RequireDealer><DealerAuctionSetupWizard /></RequireDealer></RequireAuth>;
   if (path === '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerAuctionOperations /></RequireDealer></RequireAuth>;

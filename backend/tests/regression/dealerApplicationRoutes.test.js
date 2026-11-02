@@ -214,6 +214,8 @@ describe("B. a buyer starts a dealer application on the SAME account", () => {
   });
 });
 
+// Paperwork is OFF by default now (owner switches items on in Admin > Settings > Onboarding). Tests that exercise an item turn it on explicitly.
+const optionalOn = (keys, extra = {}) => ({ ...Object.fromEntries(keys.map((k) => [k, { enabled: true, required: false }])), ...extra });
 describe("D. onboarding follows the saved paperwork configuration", () => {
   test("required item missing ⇒ 400 DEALER_PAPERWORK_INVALID and nothing saved", async () => {
     __setDealerPaperworkForTests({ kraPin: { enabled: true, required: true } });
@@ -239,7 +241,7 @@ describe("D. onboarding follows the saved paperwork configuration", () => {
     expect(world.verifications.d3.documents).toEqual({});
   });
   test("a disabled item that is sent is ignored (reported), not stored and not an error", async () => {
-    __setDealerPaperworkForTests({ kraPin: { enabled: false, required: false } });
+    __setDealerPaperworkForTests(optionalOn(["governmentId"], { kraPin: { enabled: false, required: false } }));
     mk("d4", "dealer", { status: "pending" });
     const r = await call("PUT", "/api/dealer/onboarding", "d4", profile({ kraPin: KRA, governmentId: ID }));
     expect(r.status).toBe(200);
@@ -248,6 +250,7 @@ describe("D. onboarding follows the saved paperwork configuration", () => {
     expect(world.verifications.d4.documents.governmentId).toBeTruthy();
   });
   test("an optional item that is present but malformed is rejected", async () => {
+    __setDealerPaperworkForTests(optionalOn(["kraPin"]));
     mk("d5", "dealer", { status: "pending" });
     const r = await call("PUT", "/api/dealer/onboarding", "d5", profile({ kraPin: { pinNumber: "nope" } }));
     expect(r.status).toBe(400);
@@ -261,6 +264,7 @@ describe("D. onboarding follows the saved paperwork configuration", () => {
     expect(world.verifications.d6).toBeUndefined();
   });
   test("resubmitting keeps documents already on file (an omitted optional item never wipes them)", async () => {
+    __setDealerPaperworkForTests(optionalOn(["governmentId", "kraPin"]));
     mk("d7", "dealer", { status: "pending" });
     await call("PUT", "/api/dealer/onboarding", "d7", profile({ governmentId: ID }));
     await call("PUT", "/api/dealer/onboarding", "d7", profile({ kraPin: KRA }));
@@ -274,7 +278,7 @@ describe("D. onboarding follows the saved paperwork configuration", () => {
     expect(r.status).toBe(409);
   });
   test("the checklist endpoint reflects the configuration (required vs optional, disabled omitted)", async () => {
-    __setDealerPaperworkForTests({ kraPin: { enabled: true, required: true }, businessRegistration: { enabled: false, required: false } });
+    __setDealerPaperworkForTests(optionalOn(["governmentId"], { kraPin: { enabled: true, required: true }, businessRegistration: { enabled: false, required: false } }));
     mk("d9", "dealer", { status: "pending" });
     const r = await call("GET", "/api/dealer/paperwork-requirements", "d9");
     expect(r.status).toBe(200);

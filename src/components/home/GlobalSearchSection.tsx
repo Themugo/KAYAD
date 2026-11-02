@@ -211,7 +211,7 @@ export const GlobalSearchSection: FC = () => {
                 className="w-full px-3 py-2 bg-[#12576D] dark:bg-[#0A3340] text-white rounded-xl text-xs font-mono font-bold border border-white/15 focus:outline-none"
               >
                 <option value="all">Any Fuel</option>
-                <option value="Gasoline">Petrol / Gasoline</option>
+                <option value="Petrol">Petrol</option>
                 <option value="Diesel">Diesel</option>
                 <option value="Hybrid">Hybrid</option>
                 <option value="Electric">Electric</option>
@@ -228,10 +228,10 @@ export const GlobalSearchSection: FC = () => {
                 className="w-full px-3 py-2 bg-[#12576D] dark:bg-[#0A3340] text-white rounded-xl text-xs font-mono font-bold border border-white/15 focus:outline-none"
               >
                 <option value="all">Any Condition</option>
-                <option value="New">Brand New</option>
-                <option value="Like New">Like New</option>
-                <option value="Excellent">Excellent</option>
-                <option value="Good">Good</option>
+                <option value="Ex-Japan">Ex-Japan</option>
+                <option value="Locally Used">Locally Used</option>
+                <option value="New Import">New Import</option>
+                <option value="Locally Assembled">Locally Assembled</option>
               </select>
             </div>
 

@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { sameFuel } from '../../constants/vehicleOptions';
 import {
   LayoutGrid,
   List,
@@ -75,7 +76,7 @@ export const GalleryPage: FC = () => {
 
       // Fuel Type Filter
       if (filters.fuelType && filters.fuelType.length > 0) {
-        if (!filters.fuelType.includes(vehicle.fuelType)) {
+        if (!filters.fuelType.some((f) => sameFuel(f, vehicle.fuelType))) {
           return false;
         }
       }

@@ -1,10 +1,11 @@
 import React, { useRef, useState } from 'react';
-import { Loader2, Trash2, Upload, AlertCircle } from 'lucide-react';
+import { Loader2, Trash2, Upload, AlertCircle, Star, X } from 'lucide-react';
 import {
-  addCarImages, deleteCarImage, VehicleApiError,
+  addCarImages, deleteCarImage, setCoverImage, VehicleApiError,
   LISTING_IMAGE_TYPES, LISTING_IMAGE_MAX_BYTES, LISTING_IMAGE_MAX_PER_REQUEST, LISTING_IMAGE_MAX_PER_LISTING,
 } from '../../../services/vehicleApi';
 import type { ListingImage } from '../../../services/vehicleApi';
+import { usePreviewUrls, photoKey } from './DealerListingPhotoPicker';
 
 /**
  * Existing-listing photo management. Uses only the existing owner-enforced routes
@@ -93,6 +94,21 @@ const DealerListingPhotos: React.FC<DealerListingPhotosProps> = ({ carId, initia
     } finally { busyRef.current = false; setBusy(null); }
   };
 
+  const poster = async (index: number) => {
+    if (busyRef.current || index === 0) return;
+    busyRef.current = true; setBusy(index); setError(null); setNotice(null); setRetry(null);
+    try {
+      const res = await setCoverImage(carId, index);
+      if (res.success === false) throw new VehicleApiError(res.message || 'The poster could not be changed.', 'server');
+      apply(res.data?.images);
+      setNotice('Poster updated. Buyers now see this photo first.');
+    } catch (err) {
+      setError(describe(err, 'The poster could not be changed. Try again.'));
+      setRetry(() => () => { void poster(index); });
+    } finally { busyRef.current = false; setBusy(null); }
+  };
+
+  const previews = usePreviewUrls(picked);
   const working = busy !== null;
   const onlyOne = images.length <= 1;
 
@@ -105,7 +121,10 @@ const DealerListingPhotos: React.FC<DealerListingPhotosProps> = ({ carId, initia
         <ul className="grid grid-cols-2 sm:grid-cols-4 gap-3" aria-label="Current photos">
           {images.map((img, i) => (
             <li key={img.public_id || img.url} className="min-w-0 rounded-lg border border-[#D7E7E4] p-2 bg-[#F6FAF9]">
-              <img src={img.thumb || img.url} alt={`Photo ${i + 1}${i === 0 ? ' (cover)' : ''}`} className="w-full h-24 object-cover rounded-md" />
+              <div className="relative">
+                <img src={img.thumb || img.url} alt={`Photo ${i + 1}${i === 0 ? ' (poster)' : ''}`} className="w-full h-24 object-cover rounded-md" />
+                {i === 0 && <span className="absolute left-1 top-1 inline-flex items-center gap-1 rounded bg-[#176B87] px-1.5 py-0.5 text-[10px] font-bold text-white"><Star className="w-3 h-3" aria-hidden="true" />Poster</span>}
+              </div>
               {confirmIndex === i ? (
                 <div className="mt-2 space-y-1" role="group" aria-label={`Confirm removing photo ${i + 1}`}>
                   <p className="text-xs text-[#7A271A]">Remove this photo?</p>
@@ -117,14 +136,21 @@ const DealerListingPhotos: React.FC<DealerListingPhotosProps> = ({ carId, initia
                   </div>
                 </div>
               ) : (
+                <div className="mt-2 flex flex-wrap gap-1">
+                {i !== 0 && (
+                  <button type="button" disabled={working} onClick={() => poster(i)} aria-label={`Make photo ${i + 1} the poster`} className={`${btn} bg-[#176B87] text-white flex items-center gap-1`}>
+                    {busy === i && <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />} Make poster
+                  </button>
+                )}
                 <button
                   type="button" disabled={working || onlyOne} onClick={() => setConfirmIndex(i)}
                   title={onlyOne ? 'A listing needs at least one photo' : undefined}
-                  className={`${btn} mt-2 border border-[#B9D3CF] text-[#B42318] flex items-center gap-1`}
+                  className={`${btn} border border-[#B9D3CF] text-[#B42318] flex items-center gap-1`}
                   aria-label={`Remove photo ${i + 1}`}
                 >
                   <Trash2 className="w-3 h-3" aria-hidden="true" /> Remove
                 </button>
+                </div>
               )}
             </li>
           ))}
@@ -146,6 +172,17 @@ const DealerListingPhotos: React.FC<DealerListingPhotosProps> = ({ carId, initia
           {busy === 'upload' ? 'Uploading…' : `Upload${picked.length ? ` ${picked.length}` : ''}`}
         </button>
       </div>
+      {picked.length > 0 && (
+        <ul className="grid grid-cols-3 sm:grid-cols-6 gap-2 mt-3" aria-label="Photos ready to upload">
+          {picked.map((f, i) => (
+            <li key={photoKey(f)} className="relative min-w-0">
+              <img src={previews[i]} alt={`Ready to upload: ${f.name}`} className="w-full h-16 object-cover rounded-md border border-[#D7E7E4]" />
+              <button type="button" disabled={working} onClick={() => setPicked((p) => p.filter((_, k) => k !== i))} aria-label={`Do not upload ${f.name}`}
+                className="absolute -right-1 -top-1 rounded-full bg-white border border-[#B9D3CF] p-0.5 text-[#B42318]"><X className="w-3 h-3" aria-hidden="true" /></button>
+            </li>
+          ))}
+        </ul>
+      )}
       <p id="listing-add-photos-hint" className="mt-1 text-xs text-[#475569]">JPG, PNG or WEBP, up to 5 MB each, {LISTING_IMAGE_MAX_PER_REQUEST} at a time. Existing photos are kept when you save the details.</p>
 
       {error && (

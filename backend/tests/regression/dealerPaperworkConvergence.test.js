@@ -153,11 +153,17 @@ const snap = () => JSON.stringify({ u: world.users, d: world.dealers, v: world.v
 const ID = { type: "national_id", documentNumber: "12345678" };
 
 describe("D. paperwork is admin-configured; the default is onboarding-friendly", () => {
-  test("default configuration: every item offered, none required", async () => {
+  test("default configuration: no paperwork is asked for and none is required (the owner can switch items on)", async () => {
     const p = await getDealerPaperworkPolicy();
     expect(p.source).toBe("default");
-    expect(Object.values(p.items).every((i) => i.enabled && !i.required)).toBe(true);
-    expect(checklistFor(p.items).every((c) => c.required === false)).toBe(true);
+    expect(Object.values(p.items).every((i) => !i.enabled && !i.required)).toBe(true);
+    expect(checklistFor(p.items)).toEqual([]);
+  });
+  test("DEFAULT: a dealer with no documents is approvable with no paperwork warning at all", async () => {
+    register(UID(5), { docs: {} });
+    const r = await approve(UID(5));
+    expect(r.status).toBe(200);
+    expect((r.body.warnings || []).map((w) => w.code)).not.toContain("OPTIONAL_DOCUMENTS_NOT_SUPPLIED");
   });
   test("NO PAPERWORK AT ALL: a dealer with no documents and nothing required is approvable", async () => {
     __setDealerPaperworkForTests(Object.fromEntries(["governmentId", "kraPin", "businessRegistration", "physicalAddress", "phoneVerification"].map((k) => [k, { enabled: false, required: false }])));
@@ -167,6 +173,7 @@ describe("D. paperwork is admin-configured; the default is onboarding-friendly",
     expect(world.users[UID(1)]).toMatchObject({ role: "dealer", status: "approved" });
   });
   test("ALL OPTIONAL: approval proceeds with a non-blocking warning naming what was not supplied", async () => {
+    __setDealerPaperworkForTests(Object.fromEntries(["governmentId", "kraPin", "businessRegistration", "physicalAddress", "phoneVerification"].map((k) => [k, { enabled: true, required: false }])));
     register(UID(2), { docs: {} });
     const r = await approve(UID(2));
     expect(r.status).toBe(200);

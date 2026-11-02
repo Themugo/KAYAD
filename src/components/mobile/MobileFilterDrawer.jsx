@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 const FUELS = ['All', 'Petrol', 'Diesel', 'Hybrid', 'Electric'];
 const TRANSMISSIONS = ['All', 'Automatic', 'Manual', 'CVT'];
 const BODY_TYPES = ['All', 'SUV', 'Sedan', 'Pickup', 'Truck', 'Hatchback', 'Coupe', 'Wagon'];
-const CONDITIONS = ['All', 'Brand New', 'Foreign Used', 'Locally Used'];
+const CONDITIONS = ['All', 'Ex-Japan', 'Locally Used', 'New Import', 'Locally Assembled'];
 const YEARS = Array.from({ length: 25 }, (_, i) => 2024 - i);
 
 const PRICE_PRESETS = [

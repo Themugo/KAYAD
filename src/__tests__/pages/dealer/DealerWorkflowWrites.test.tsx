@@ -52,7 +52,7 @@ describe('Dealer listing create/edit (Phase 14.4, mocked)', () => {
     expect(screen.getByText('Brand is required.')).toBeTruthy();
     expect(screen.getByText('Add at least one photo.')).toBeTruthy();
     expect(veh.createCar).not.toHaveBeenCalled();
-    fill(/^Title/, 'Prado'); fill(/^Brand/, 'Toyota'); fill(/^Price/, '-5'); fill(/^Year/, '1800');
+    fill(/^Title/, 'Prado'); fill(/^Brand/, 'Toyota'); fill(/^Price/, '0'); fill(/^Year/, '1800');  // price input is digits-only (commas), so a negative cannot be typed; zero still must be refused
     fireEvent.click(screen.getByRole('button', { name: 'Publish vehicle' }));
     expect(await screen.findByText('Price must be greater than zero.')).toBeTruthy();
     expect(screen.getByText(/between 1900 and 2030/)).toBeTruthy();

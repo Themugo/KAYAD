@@ -36,7 +36,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
   // 1. Calculate Market Price Comparison Tag (Concise Labels)
   const getMarketPriceTag = () => {
     if (!vehicle.marketPriceAvg) {
-      if (vehicle.condition === 'Brand New' || vehicle.condition === 'Foreign Used') {
+      if (['Brand New', 'Foreign Used', 'New Import', 'Ex-Japan', 'Locally Assembled', 'Locally Used'].includes(String(vehicle.condition))) {
         return { label: vehicle.condition, variant: 'neutral' as const };
       }
       return null;

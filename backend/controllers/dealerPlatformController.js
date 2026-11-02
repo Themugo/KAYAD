@@ -22,6 +22,7 @@ import { logAuditEvent } from "../services/auditService.js";
 import crypto from "crypto";
 import { sellerMayPublishDirectly, PUBLICATION_REVIEW_REQUIRED } from "../services/onboardingPolicy.service.js"; // STAGE 5
 import { sendTeamInviteEmail } from "../services/email.service.js";
+import { listRoles, resolveRole, createCustomRole, updateCustomRole, deleteCustomRole, RoleError, newInviteToken } from "../services/dealerTeamRoles.service.js";
 import { formatPhone } from "../utils/format.js";
 import { DEALER_TEAM_PERMISSIONS } from "../middleware/dealerOrgAccess.js";
 
@@ -589,7 +590,6 @@ function teamActorMayManage(req, target) {
   return null;
 }
 
-const TEAM_ROLES = Object.freeze(["manager", "sales_agent", "lot_agent", "finance_officer", "viewer"]);
 // Server-enforced lifecycle: from -> allowed targets. "invited" is never a client-selectable target and a
 // pending invitation can only become active through POST /team/accept (invitee proves the token + email).
 const TEAM_TRANSITIONS = Object.freeze({
@@ -608,22 +608,103 @@ export async function getTeamMembers(req, res) {
   return res.json({ success: true, data: { items: rows.map(r => ({ ...publicTeamRow(r), memberProfile: r.member ? { id: r.member, name: byId.get(r.member)?.name || null, email: byId.get(r.member)?.email || r.inviteEmail } : null })), stats: { total: rows.length, active: rows.filter(r => r.status === "active").length, invited: rows.filter(r => r.status === "invited").length, suspended: rows.filter(r => r.status === "suspended").length } } });
 }
 
+const roleError = (res, err) => (err instanceof RoleError ? res.status(err.status).json({ success: false, code: err.code, message: err.message }) : null);
+// A non-owner may only hand out a role whose permissions they hold themselves (no privilege expansion through role templates).
+const roleOverreach = (req, role) => (isUnrestrictedTeamActor(req) ? [] : grantedKeys(role.permissions).filter((k) => !req.dealerOrg?.permissions?.[k]));
+const INVITE_TTL_MS = 7 * 86400000;
+
+// Sends the invitation e-mail and reports what really happened (the provider returns {success:false} rather than throwing).
+async function deliverInvite(email, inviterName, roleLabel, token) {
+  try {
+    const r = await sendTeamInviteEmail(email, inviterName || "KAYAD Dealer", roleLabel, token);
+    if (r && r.success === true) return { sent: true };
+    return { sent: false, reason: r?.disabled ? "Email sending is not configured on the server." : "The email provider did not accept the message." };
+  } catch (err) {
+    return { sent: false, reason: "The email could not be sent." };
+  }
+}
+
 export async function inviteTeamMember(req, res) {
   const email = String(req.body?.email || "").trim().toLowerCase();
-  const role = String(req.body?.role || "sales_agent");
+  const roleKey = String(req.body?.role || "sales_agent");
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ success: false, message: "Valid email is required" });
-  if (!TEAM_ROLES.includes(role)) return res.status(400).json({ success: false, message: "Invalid team role" });
-  if (role === "manager" && !isUnrestrictedTeamActor(req)) return TEAM_PROTECTED(res, "TEAM_ROLE_OWNER_ONLY", "Only the dealership owner can invite a manager.");
   const dealerId = req.dealerId || req.user.id;
+  const role = await resolveRole(dealerId, roleKey);
+  if (!role) return res.status(400).json({ success: false, message: "Invalid team role" });
+  if (role.key === "manager" && !isUnrestrictedTeamActor(req)) return TEAM_PROTECTED(res, "TEAM_ROLE_OWNER_ONLY", "Only the dealership owner can invite a manager.");
+  const over = roleOverreach(req, role);
+  if (over.length) return res.status(403).json({ success: false, code: "PERMISSION_GRANT_FORBIDDEN", message: "You cannot invite someone into a role that holds permissions you do not hold.", fields: over });
   if (email === String(req.user.email || "").trim().toLowerCase()) return res.status(400).json({ success: false, message: "You cannot invite your own account" });
   const existing = await findOne("dealer_teams", { dealer: dealerId, inviteEmail: email });
   if (existing && existing.status !== "removed") return res.status(409).json({ success: false, message: "An active or pending invitation already exists for this email" });
-  const token = crypto.randomBytes(32).toString("hex");
+  const token = newInviteToken();
   const hash = crypto.createHash("sha256").update(token).digest("hex");
-  const row = existing ? await update("dealer_teams", existing.id, { member: null, role, permissions: {}, status: "invited", inviteEmail: email, inviteTokenHash: hash, inviteExpiresAt: new Date(Date.now() + 7 * 86400000).toISOString(), invitedBy: req.user.id }) : await create("dealer_teams", { dealer: dealerId, role, permissions: {}, status: "invited", inviteEmail: email, inviteTokenHash: hash, inviteExpiresAt: new Date(Date.now() + 7 * 86400000).toISOString(), invitedBy: req.user.id });
-  await sendTeamInviteEmail(email, req.user.name || "KAYAD Dealer", role, token).catch(() => {});
-  await logAuditEvent({ action: "dealer_team_invitation_created", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", details: { email, role }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
-  return res.status(201).json({ success: true, data: publicTeamRow(row) });
+  const fields = { member: null, role: role.key, permissions: { ...role.permissions }, status: "invited", inviteEmail: email, inviteTokenHash: hash, inviteExpiresAt: new Date(Date.now() + INVITE_TTL_MS).toISOString(), invitedBy: req.user.id };
+  const row = existing ? await update("dealer_teams", existing.id, fields) : await create("dealer_teams", { dealer: dealerId, ...fields });
+  const email_ = await deliverInvite(email, req.user.name, role.label, token);
+  await logAuditEvent({ action: "dealer_team_invitation_created", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", newValue: { ...publicTeamRow(row), emailSent: email_.sent }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
+  return res.status(201).json({ success: true, data: publicTeamRow(row), email: email_ });
+}
+
+// Re-issue the link (new token, new 7 days) for a pending invitation and send it again.
+export async function resendTeamInvite(req, res) {
+  const dealerId = req.dealerId || req.user.id;
+  const existing = await findOne("dealer_teams", { id: req.params.memberId, dealer: dealerId });
+  if (!existing) return res.status(404).json({ success: false, message: "Team member not found" });
+  if (existing.status !== "invited") return res.status(409).json({ success: false, code: "INVALID_TEAM_TRANSITION", message: "Only a pending invitation can be re-sent." });
+  const protectedTarget = teamActorMayManage(req, existing);
+  if (protectedTarget) return TEAM_PROTECTED(res, protectedTarget.code, protectedTarget.message);
+  const role = (await resolveRole(dealerId, existing.role)) || { label: String(existing.role || "member") };
+  const token = newInviteToken();
+  const row = await update("dealer_teams", existing.id, { inviteTokenHash: crypto.createHash("sha256").update(token).digest("hex"), inviteExpiresAt: new Date(Date.now() + INVITE_TTL_MS).toISOString() });
+  const email_ = await deliverInvite(existing.inviteEmail, req.user.name, role.label, token);
+  await logAuditEvent({ action: "dealer_team_invitation_resent", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", newValue: { emailSent: email_.sent }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
+  return res.json({ success: true, data: publicTeamRow(row), email: email_ });
+}
+
+// ---- Roles (named permission sets) ----
+export async function getTeamRoles(req, res) {
+  return res.json({ success: true, data: await listRoles(req.dealerId || req.user.id) });
+}
+const ownerOnlyRoles = (req, res) => {
+  if (isUnrestrictedTeamActor(req)) return false;
+  TEAM_PROTECTED(res, "TEAM_ROLE_OWNER_ONLY", "Only the dealership owner can create, edit or delete roles.");
+  return true;
+};
+export async function createTeamRole(req, res) {
+  if (ownerOnlyRoles(req, res)) return;
+  try {
+    const role = await createCustomRole(req.dealerId || req.user.id, req.body || {});
+    await logAuditEvent({ action: "dealer_team_role_created", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: role.id, targetModel: "DealerTeamRole", newValue: role, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
+    return res.status(201).json({ success: true, data: role });
+  } catch (err) { if (roleError(res, err)) return; throw err; }
+}
+export async function updateTeamRole(req, res) {
+  if (ownerOnlyRoles(req, res)) return;
+  try {
+    const dealerId = req.dealerId || req.user.id;
+    const role = await updateCustomRole(dealerId, req.params.roleKey, req.body || {});
+    // Members already in this role pick up the new permission set, so editing a role really changes what they can do.
+    let updatedMembers = 0;
+    if (req.body?.permissions !== undefined) {
+      const members = await findAll("dealer_teams", { filters: { dealer: dealerId, role: role.key }, limit: 500 });
+      for (const m of members) { if (m.status !== "removed") { await update("dealer_teams", m.id, { permissions: { ...role.permissions } }); updatedMembers += 1; } }
+    }
+    await logAuditEvent({ action: "dealer_team_role_updated", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: role.id, targetModel: "DealerTeamRole", oldValue: role.previousPermissions, newValue: { ...role, updatedMembers }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
+    const { previousPermissions, ...publicRole } = role; // eslint-disable-line no-unused-vars
+    return res.json({ success: true, data: publicRole, updatedMembers });
+  } catch (err) { if (roleError(res, err)) return; throw err; }
+}
+export async function deleteTeamRole(req, res) {
+  if (ownerOnlyRoles(req, res)) return;
+  try {
+    const dealerId = req.dealerId || req.user.id;
+    const members = await findAll("dealer_teams", { filters: { dealer: dealerId, role: req.params.roleKey }, limit: 500 });
+    const inUseCount = members.filter((m) => m.status !== "removed").length;
+    const out = await deleteCustomRole(dealerId, req.params.roleKey, { inUseCount });
+    await logAuditEvent({ action: "dealer_team_role_deleted", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: dealerId, targetModel: "DealerTeamRole", oldValue: out, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
+    return res.json({ success: true, data: out });
+  } catch (err) { if (roleError(res, err)) return; throw err; }
 }
 
 export async function updateTeamMember(req, res) {
@@ -639,7 +720,15 @@ export async function updateTeamMember(req, res) {
   const updates = {};
   if (body.role === "manager" && existing.role !== "manager" && !isUnrestrictedTeamActor(req)) return TEAM_PROTECTED(res, "TEAM_ROLE_OWNER_ONLY", "Only the dealership owner can promote a member to manager.");
   if (existing.status === "removed") return res.status(409).json({ success: false, code: "INVALID_TEAM_TRANSITION", message: "This team member has been removed" });
-  if (body.role !== undefined) { if (!TEAM_ROLES.includes(body.role)) return res.status(400).json({ success: false, message: "Invalid team role" }); updates.role = body.role; }
+  if (body.role !== undefined) {
+    const nextRole = await resolveRole(dealerId, body.role);
+    if (!nextRole) return res.status(400).json({ success: false, message: "Invalid team role" });
+    const over = roleOverreach(req, nextRole);
+    if (over.length) return res.status(403).json({ success: false, code: "PERMISSION_GRANT_FORBIDDEN", message: "You cannot move someone into a role that holds permissions you do not hold.", fields: over });
+    updates.role = nextRole.key;
+    // Moving to a role gives that role's permission set (an explicit `permissions` in the same request still wins below).
+    if (nextRole.key !== existing.role) updates.permissions = { ...nextRole.permissions };
+  }
   if (body.status !== undefined) {
     if (!["invited","active","suspended","removed"].includes(body.status)) return res.status(400).json({ success: false, message: "Invalid team status" });
     if (body.status !== existing.status) {

@@ -262,9 +262,9 @@ export interface UserProfile {
   reviewsCount?: number;
 }
 
-export type VehicleCondition = 'New' | 'Like New' | 'Excellent' | 'Good' | 'Fair' | 'Brand New';
+export type VehicleCondition = 'Ex-Japan' | 'Locally Used' | 'New Import' | 'Locally Assembled' | 'New' | 'Like New' | 'Excellent' | 'Good' | 'Fair' | 'Brand New';
 export type TransmissionType = 'Automatic' | 'Manual' | 'Dual-Clutch' | 'CVT' | 'Direct Drive' | '10-Speed Automatic' | '8-Speed Automatic';
-export type FuelType = 'Gasoline' | 'Diesel' | 'Hybrid' | 'Plug-in Hybrid' | 'Electric';
+export type FuelType = 'Petrol' | 'Gasoline' | 'Diesel' | 'Hybrid' | 'Plug-in Hybrid' | 'Electric';
 export type BodyStyle = 'Sedan' | 'SUV' | 'Coupe' | 'Truck' | 'Convertible' | 'Hatchback' | 'Wagon';
 export type ListingType = 'fixed' | 'auction' | 'both';
 

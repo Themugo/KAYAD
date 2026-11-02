@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import { CONDITIONS } from '../../../constants/vehicleOptions';
 import { Vehicle, UserProfile } from '../../../types';
 import VehicleCard from '../../../components/VehicleCard';
 import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon, Gauge, Fuel, MapPin, PlayCircle } from 'lucide-react';
@@ -391,7 +392,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }, [filterSourceVehicles, canonicalFacets]);
 
   const transmissionOptions = ['All', 'Automatic', 'Manual', 'CVT', 'Semi-Automatic'];
-  const conditionOptions = ['All', 'Foreign Used', 'Locally Used', 'Brand New'];
+  const conditionOptions = ['All', ...CONDITIONS];
   const sellerTypeOptions = ['All', 'Verified Dealer', 'Private Seller'];
 
   const locations = useMemo(() => {
@@ -570,8 +571,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       title: `${item.make || 'KAYAD'} ${item.model || 'Showcase'}`.trim(),
       make: item.make || 'KAYAD', model: item.model || 'Showcase', year: Number(item.year) || 0,
       vin: '', price: 0, mileage: 0, location: '', bodyStyle: 'SUV' as const,
-      transmission: 'Automatic' as const, fuelType: 'Gasoline' as const, engine: '', horsepower: 0,
-      exteriorColor: '', interiorColor: '', condition: 'Excellent' as const, listingType: 'fixed' as const,
+      transmission: 'Automatic' as const, fuelType: 'Petrol' as const, engine: '', horsepower: 0,
+      exteriorColor: '', interiorColor: '', condition: 'Locally Used' as const, listingType: 'fixed' as const,
       images: [item.image], image: item.image, heroMobileImage: item.mobileImage || item.image,
       description: item.tagline || 'KAYAD visual showcase · not a live listing', features: [],
       sellerId: '', sellerName: 'KAYAD Visual Showcase', sellerRating: 0, isDealerCertified: false,

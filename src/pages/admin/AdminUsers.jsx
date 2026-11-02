@@ -4,6 +4,7 @@ import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import AdminLoadNotice from '../../components/admin/AdminLoadNotice';
 import DealerApprovalDialog from '../../components/admin/DealerApprovalDialog';
+import DealerPlanDialog from '../../components/admin/DealerPlanDialog';
 import { formatDate, initials } from '../../utils/helpers';
 
 const ROLE_BADGE = { user: 'badge-blue', dealer: 'badge-gold', admin: 'badge-red', superadmin: 'badge-red', webhoist: 'badge-red', individual_seller: 'badge-blue' };
@@ -15,7 +16,7 @@ const getStatus = (u) => {
   return { label: 'Active', className: 'badge-green' };
 };
 
-function UserRow({ user: u, onBan, onApprove, actionId }) {
+function UserRow({ user: u, onBan, onApprove, onPlan, actionId }) {
   const banned = isBanned(u);
   const needsApproval = u.role === 'dealer' && (u.status === 'pending' || u.approved === false);
   const status = getStatus(u);
@@ -40,6 +41,9 @@ function UserRow({ user: u, onBan, onApprove, actionId }) {
             <button type="button" className="btn btn-sm btn-primary" disabled={actionId === `${u._id}-app`} onClick={() => onApprove(u)}>
               {actionId === `${u._id}-app` ? 'Approving…' : 'Approve'}
             </button>
+          )}
+          {u.role === 'dealer' && !needsApproval && (
+            <button type="button" className="btn btn-sm btn-outline" onClick={() => onPlan(u)}>Plan</button>
           )}
           <button type="button" className="btn btn-sm btn-outline" disabled={actionId === `${u._id}-ban`} onClick={() => onBan(u)}>
             {actionId === `${u._id}-ban` ? 'Saving…' : banned ? 'Unban' : 'Ban'}
@@ -129,6 +133,7 @@ export default function AdminUsers() {
   }, []);
   const [approving, setApproving] = useState(null); // the dealer row whose approval dialog is open
   const [approveError, setApproveError] = useState(null);
+  const [planFor, setPlanFor] = useState(null); // approved dealer whose listing-plan dialog is open
   const handleApprove = useCallback((u) => { setApproveError(null); setApproving(u); }, []);
   const closeApprove = useCallback(() => { setApproving(null); setApproveError(null); }, []);
 
@@ -217,7 +222,7 @@ export default function AdminUsers() {
             <thead><tr><th aria-label="Avatar" className="kayad-users-avatar-col"></th><th>Name</th><th>Email</th><th>Role</th><th>Phone</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
             <tbody>
               {loading && hasLoaded && <tr><td colSpan={8} className="kayad-users-table-message">Refreshing account records…</td></tr>}
-              {!loading && users.map(u => <UserRow key={u._id} user={u} onBan={handleBan} onApprove={handleApprove} actionId={actionId} />)}
+              {!loading && users.map(u => <UserRow key={u._id} user={u} onBan={handleBan} onApprove={handleApprove} onPlan={setPlanFor} actionId={actionId} />)}
               {!loading && !loadError && users.length === 0 && <tr><td colSpan={8} className="kayad-users-empty"><span className="kayad-users-empty-icon" aria-hidden="true">⌕</span><strong>{search || roleFilter !== 'all' || statusFilter !== 'all' ? 'No matching accounts' : 'No user records returned'}</strong><span>{search || roleFilter !== 'all' || statusFilter !== 'all' ? 'Try changing the search or filters.' : 'The request succeeded, but the server returned an empty user list.'}</span></td></tr>}
               {loadError && users.length === 0 && <tr><td colSpan={8} className="kayad-users-table-message">The table is unavailable until user records can be retrieved.</td></tr>}
             </tbody>
@@ -233,6 +238,10 @@ export default function AdminUsers() {
           </div>
         </div>
       </section>
+      {planFor && (
+        <DealerPlanDialog dealer={planFor} onClose={() => setPlanFor(null)}
+          onGranted={(pkg) => { toast(pkg === 'none' ? 'Plan removed' : 'Plan granted. The dealer can now list vehicles.', 'success'); setPlanFor(null); }} />
+      )}
       {approving && (
         <DealerApprovalDialog dealer={approving} busy={actionId === `${approving._id}-app`} error={approveError} onConfirm={confirmApprove} onCancel={closeApprove} />
       )}

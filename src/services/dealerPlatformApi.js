@@ -24,4 +24,9 @@ export const createLeadTask = (leadId, body) => api.post(`/dealer-platform/leads
 export const inviteTeamMember = (body) => api.post('/dealer-platform/team/invite', body).then(r => r.data);
 export const updateTeamMember = (memberId, body) => api.put(`/dealer-platform/team/${memberId}`, body).then(r => r.data);
 export const removeTeamMember = (memberId) => api.delete(`/dealer-platform/team/${memberId}`).then(r => r.data);
+export const resendTeamInvite = (memberId) => api.post(`/dealer-platform/team/${memberId}/resend`).then(r => r.data);
+export const getTeamRoles = () => api.get('/dealer-platform/team/roles').then(r => r.data);
+export const createTeamRole = (body) => api.post('/dealer-platform/team/roles', body).then(r => r.data);
+export const updateTeamRole = (key, body) => api.put(`/dealer-platform/team/roles/${encodeURIComponent(key)}`, body).then(r => r.data);
+export const deleteTeamRole = (key) => api.delete(`/dealer-platform/team/roles/${encodeURIComponent(key)}`).then(r => r.data);
 export const acceptTeamInvite = (token) => api.post('/dealer-platform/team/accept', { token }).then(r => r.data);
