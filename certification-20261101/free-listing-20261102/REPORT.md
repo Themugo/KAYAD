@@ -13,8 +13,16 @@
 - Unreadable settings store fails OPEN to free listing (logged).
 
 ## Evidence (logs/)
-tsc 0; build 0; frontend vitest 1379 passed/1 skipped (165 files); backend jest 3815 passed + 1 failed (known baseline `stage5f5RoleRouteMatrix`, D-11); backend vitest 36; node:test pass. New: jest dealerListingPolicy (15), vitest AdminSettingsListing (3), DealerAccountStatus (6).
+tsc 0; build 0; frontend vitest 1384 passed/1 skipped (166 files); backend jest 3834 passed + 1 failed (known baseline `stage5f5RoleRouteMatrix`, D-11); backend vitest 36; node:test pass. New: jest dealerListingPolicy (15), vitest AdminSettingsListing (3), DealerAccountStatus (6).
 Validators: 14 non-zero, all in the baseline failing set or live/production aggregates needing real environments (certify:*, verify:*, validate:live-runtime, validate:release).
 
 ## NOT verified
 Real browser run; real hosted DB (no writes by me); Cloudinary upload; Brevo delivery. OpenAPI doc does not list the 2 new admin routes (wave3 route-doc validator already failing in baseline). Invited team members still have no Dealer Hub workspace.
+
+## Follow-up (same day): "Failed to create car" (D-79)
+Root cause: the dealer listing is created by the DB function `kayad_create_dealer_listing_atomic`, which enforces a subscription itself and raised a plain error that the controller returned as a generic 500. Free mode now bypasses that function (normal create path); required mode still uses it, and its errors map to a clear 402.
+
+## Super Admin immutability, employment levels, company e-mail (D-76..D-78)
+- Owner and superadmin-role accounts cannot be suspended, banned, deactivated, deleted, re-roled or re-emailed through any admin route, by anyone including other owners (403 IMMUTABLE_ACCOUNT). API-level only; a direct database edit is not blocked.
+- Owner-only Employment levels (Admin > Staff): name + supported base role + exact permission set; never admin/owner authority.
+- Company e-mail domain with optional enforcement. Creates the login address only: no mailbox, no invitation e-mail.

@@ -8,6 +8,7 @@ import AdminStaffList from './components/AdminStaffList';
 import AdminStaffPermMatrix from './components/AdminStaffPermMatrix';
 import AdminStaffCreateModal from './components/AdminStaffCreateModal';
 import AdminStaffEditModal from './components/AdminStaffEditModal';
+import AdminStaffLevels from './components/AdminStaffLevels';
 
 const STAFF_ROLES = ['admin', 'marketing', 'technical_support', 'hr', 'accounts', 'escrow_officer', 'ad_manager', 'moderator', 'ghost_checker'];
 // Keep account creation aligned with POST /api/admin/staff. ghost_checker remains
@@ -21,6 +22,7 @@ export default function AdminStaff() {
   const [staff, setStaff] = useState([]);
   const [roleCatalog, setRoleCatalog] = useState([]);
   const [permissionCatalog, setPermissionCatalog] = useState([]);
+  const [levelsData, setLevelsData] = useState({ levels: [], companyEmailDomain: '', requireCompanyEmail: false });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [tab, setTab] = useState('directory');
@@ -52,9 +54,17 @@ export default function AdminStaff() {
     }
   }, [toast]);
 
+  const loadLevels = useCallback(async () => {
+    try {
+      const d = await adminAPI.getStaffLevels();
+      setLevelsData({ levels: d.levels || [], baseRoles: d.baseRoles || [], permissions: d.permissions || [], companyEmailDomain: d.companyEmailDomain || '', requireCompanyEmail: d.requireCompanyEmail === true });
+    } catch (err) { toast(err?.response?.data?.message || 'Employment levels could not be loaded.', 'error'); }
+  }, [toast]);
+
   useEffect(() => {
     if (isSystemOwner) {
       loadStaff();
+      loadLevels();
       adminAPI.getStaffRoleCatalog().then(result => { if (Array.isArray(result.roles)) setRoleCatalog(result.roles); }).catch(err => { toast(err?.response?.data?.message || 'Canonical role catalog unavailable; role changes must be verified by the backend.', 'error'); });
       adminAPI.getPermCatalog().then(result => { if (Array.isArray(result.catalog)) setPermissionCatalog(result.catalog); }).catch(err => { toast(err?.response?.data?.message || 'Canonical permission catalog unavailable; the permission matrix cannot be certified.', 'error'); });
     } else setLoading(false);
@@ -74,36 +84,44 @@ export default function AdminStaff() {
   const handleCreate = async (e) => {
     e.preventDefault();
     const name = form.name.trim();
-    const email = form.email.trim().toLowerCase();
+    const typed = form.email.trim().toLowerCase();
+    const domain = levelsData.companyEmailDomain;
+    const email = domain && typed && !typed.includes('@') ? `${typed}@${domain}` : typed;
+    const levelKey = String(form.role).startsWith('level:') ? String(form.role).slice(6) : null;
     if (!roleCatalog.length) { toast('The canonical staff role catalog is unavailable. Reload it before creating or changing staff roles.', 'error'); return; }
     if (!name || !email || !form.password || !form.role) { toast('Complete all required fields.', 'error'); return; }
     if (name.length > 120 || form.password.length < 12 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       toast('Use a valid email, a name up to 120 characters, and an initial password of at least 12 characters.', 'error'); return;
     }
-    if (!CREATABLE_STAFF_ROLES.includes(form.role)) { toast('Select a staff role supported by the account-creation endpoint.', 'error'); return; }
+    if (levelKey ? !levelsData.levels.some(l => l.key === levelKey) : !CREATABLE_STAFF_ROLES.includes(form.role)) { toast('Select a staff role supported by the account-creation endpoint.', 'error'); return; }
     const reason = window.prompt('Reason for creating this staff account (recorded in the audit trail):');
     if (!reason?.trim()) { toast('A reason is required; no staff account was created.', 'info'); return; }
-    if (!window.confirm(`Create a ${form.role.replaceAll('_', ' ')} account for ${email}? This uses the existing initial-password endpoint, not an email invitation.`)) return;
+    if (!window.confirm(`Create a ${levelKey ? (levelsData.levels.find(l => l.key === levelKey)?.label || levelKey) : form.role.replaceAll('_', ' ')} account for ${email}? This uses the existing initial-password endpoint, not an email invitation.`)) return;
     setSaving(true);
     try {
-      await adminAPI.createStaff({ name, email, password: form.password, role: form.role, reason: reason.trim().slice(0, 500) });
+      await adminAPI.createStaff({ name, email, password: form.password, ...(levelKey ? { level: levelKey } : { role: form.role }), reason: reason.trim().slice(0, 500) });
       setForm({ name: '', email: '', password: '', role: 'admin' });
       setShowAdd(false);
       toast('Staff account created. The initial password was not displayed or logged.', 'success');
       await loadStaff({ quiet: true });
+      loadLevels();
     } catch (err) {
       toast(err?.response?.data?.message || 'Staff account could not be created.', 'error');
     } finally { setSaving(false); }
   };
 
-  const handleUpdate = async (id, updates) => {
+  const handleUpdate = async (id, rawUpdates) => {
+    let updates = rawUpdates;
     const current = staff.find(s => s._id === id);
     if (!current) return;
+    const levelChoice = typeof updates.role === 'string' && updates.role.startsWith('level:') ? updates.role.slice(6) : null;
+    if (levelChoice) updates = { ...updates, level: levelChoice, role: undefined };
     const nextRole = updates.role ?? current.role;
     const nextBanned = updates.isBanned ?? current.isBanned === true;
     const changes = [];
     if (updates.name && updates.name !== current.name) changes.push(`name: ${current.name} → ${updates.name}`);
     if (nextRole !== current.role) changes.push(`role: ${current.role} → ${nextRole}`);
+    if (levelChoice && levelChoice !== current.level) changes.push(`level: ${current.levelLabel || current.level || 'none'} → ${levelsData.levels.find(l => l.key === levelChoice)?.label || levelChoice}`);
     if (nextBanned !== (current.isBanned === true)) changes.push(`access: ${nextBanned ? 'suspend' : 'restore'}`);
     if (!changes.length) { setEditMember(null); return; }
     if (current.role === 'superadmin' || current.isOwner === true) { toast('System Owner / Super Admin identity cannot be changed through staff editing.', 'error'); return; }
@@ -112,7 +130,7 @@ export default function AdminStaff() {
     if (!window.confirm(`Confirm staff access change for ${current.email}?\n\n${changes.join('\n')}\n\nThis action will be sent to the server and audited.`)) return;
     setSaving(true);
     try {
-      await adminAPI.updateStaff(id, { ...(updates.name !== undefined ? { name: updates.name } : {}), ...(updates.role !== undefined ? { role: updates.role } : {}), ...(updates.isBanned !== undefined ? { isBanned: updates.isBanned } : {}), reason: reason.trim().slice(0, 500) });
+      await adminAPI.updateStaff(id, { ...(updates.name !== undefined ? { name: updates.name } : {}), ...(updates.role !== undefined && updates.role !== current.role ? { role: updates.role } : {}), ...(updates.level ? { level: updates.level } : {}), ...(updates.isBanned !== undefined ? { isBanned: updates.isBanned } : {}), reason: reason.trim().slice(0, 500) });
       setEditMember(null);
       toast('Staff record updated.', 'success');
       await loadStaff({ quiet: true });
@@ -148,7 +166,7 @@ export default function AdminStaff() {
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><button type="button" onClick={() => loadStaff()} disabled={loading} style={buttonStyle('secondary')}><RefreshCw size={15} /> Refresh</button><button type="button" onClick={() => setShowAdd(true)} disabled={!roleCatalog.length || saving} title={!roleCatalog.length ? 'Canonical role catalog unavailable' : 'Create staff account'} style={{ ...buttonStyle('primary'), opacity: !roleCatalog.length || saving ? 0.55 : 1, cursor: !roleCatalog.length || saving ? 'not-allowed' : 'pointer' }}><Plus size={16} /> Create staff account</button></div>
       </header>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
-        {[['directory', 'Staff directory'], ['hierarchy', 'Role overview'], ['permissions', 'Permission matrix']].map(([key, label]) => <button type="button" key={key} onClick={() => setTab(key)} aria-pressed={tab === key} style={{ ...buttonStyle(tab === key ? 'primary' : 'secondary'), background: tab === key ? '#0a3340' : '#fff', color: tab === key ? '#fff' : '#0a3340' }}>{label}</button>)}
+        {[['directory', 'Staff directory'], ['levels', 'Employment levels'], ['hierarchy', 'Role overview'], ['permissions', 'Permission matrix']].map(([key, label]) => <button type="button" key={key} onClick={() => setTab(key)} aria-pressed={tab === key} style={{ ...buttonStyle(tab === key ? 'primary' : 'secondary'), background: tab === key ? '#0a3340' : '#fff', color: tab === key ? '#fff' : '#0a3340' }}>{label}</button>)}
       </div>
       {error && <div role="alert" style={{ padding: 12, marginBottom: 16, borderRadius: 10, border: '1px solid #fecaca', background: '#fff1f2', color: '#9f1239' }}><ShieldAlert size={16} style={{ display: 'inline', marginRight: 8 }} />{error}</div>}
       {tab === 'directory' && <>
@@ -166,12 +184,13 @@ export default function AdminStaff() {
             <button type="button" onClick={() => loadStaff()} disabled={loading} style={buttonStyle('secondary')}>Retry loading staff</button>
           </div>
         ) : <AdminStaffList staff={filteredStaff} loading={false} isSuperAdmin onEdit={setEditMember} onToggleBan={(id, banned) => handleUpdate(id, { isBanned: !banned })} onDelete={handleDeleteStaff} onShowAdd={() => setShowAdd(true)} />}
-        <p style={{ color: '#64748b', fontSize: 12, marginTop: 12 }}>Department assignment and email invitations are not currently represented by verified backend contracts. This directory does not fabricate either capability. “Suspended” maps to the existing `isBanned` field.</p>
+        <p style={{ color: '#64748b', fontSize: 12, marginTop: 12 }}>“Suspended” maps to the existing `isBanned` field. Creating an account sets the login e-mail and initial password only: it does not create a mailbox or send an invitation e-mail.</p>
       </>}
+      {tab === 'levels' && <AdminStaffLevels data={levelsData} onChanged={loadLevels} />}
       {tab === 'hierarchy' && <AdminStaffOrgChart staff={staff} isSuperAdmin onAddStaff={(role) => { if (!roleCatalog.length) { toast('The canonical staff role catalog is unavailable. Refresh before creating a staff account.', 'error'); return; } setForm(p => ({ ...p, role })); setShowAdd(true); }} />}
       {tab === 'permissions' && <AdminStaffPermMatrix roles={roleCatalog} catalog={permissionCatalog} />}
-      {showAdd && <AdminStaffCreateModal form={form} set={set} roles={roleCatalog} saving={saving} onSubmit={handleCreate} onClose={() => !saving && setShowAdd(false)} />}
-      {editMember && <AdminStaffEditModal member={editMember} setMember={setEditMember} roles={roleCatalog} saving={saving} onSave={() => handleUpdate(editMember._id, { name: editMember.name, role: editMember.role })} onClose={() => !saving && setEditMember(null)} />}
+      {showAdd && <AdminStaffCreateModal form={form} set={set} roles={roleCatalog} levels={levelsData.levels} emailDomain={levelsData.companyEmailDomain} requireCompanyEmail={levelsData.requireCompanyEmail} saving={saving} onSubmit={handleCreate} onClose={() => !saving && setShowAdd(false)} />}
+      {editMember && <AdminStaffEditModal member={editMember} setMember={setEditMember} roles={roleCatalog} levels={levelsData.levels} saving={saving} onSave={() => handleUpdate(editMember._id, { name: editMember.name, role: editMember.role })} onClose={() => !saving && setEditMember(null)} />}
     </div>
   );
 }

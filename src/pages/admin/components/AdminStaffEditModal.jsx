@@ -11,7 +11,7 @@ function Field({ label, children }) {
   );
 }
 
-export default function AdminStaffEditModal({ member, setMember, roles = [], onSave, onClose, saving = false }) {
+export default function AdminStaffEditModal({ member, setMember, roles = [], levels = [], onSave, onClose, saving = false }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10, 51, 64, 0.8)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose} role="presentation">
       <div style={{ background: '#0a3340', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 18, padding: 32, width: '100%', maxWidth: 420 }} onClick={e => e.stopPropagation()} role="presentation">
@@ -21,13 +21,16 @@ export default function AdminStaffEditModal({ member, setMember, roles = [], onS
         </div>
         <Field label="Full Name"><input value={member.name || ''} maxLength={120} onChange={e => setMember(p => ({ ...p, name: e.target.value }))} style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: 9, border: '1px solid rgba(10,51,64,.15)', background: '#fff', color: '#0a3340', fontSize: 13 }} /></Field>
         <Field label="Change Role">
-          <select defaultValue={member.role} disabled={!roles.length}
+          <select defaultValue={member.level ? `level:${member.level}` : member.role} disabled={!roles.length}
             onChange={e => setMember(p => ({ ...p, role: e.target.value }))}
             style={{ width: '100%', padding: '10px 12px', borderRadius: 9, border: '1px solid rgba(255,255,255,0.09)', background: '#0a3340', color: '#fff', fontSize: 13, outline: 'none' }}>
             {roles.filter(({ role }) => role !== 'superadmin' && role !== 'webhoist' && role !== 'owner').map(({ role: r }) => {
               const org = ORG.find(o => o.role === r);
               return <option key={r} value={r} style={{ background: '#0a3340' }}>{org?.icon} {org?.title || r}</option>;
             })}
+            {levels.length > 0 && <optgroup label="Employment levels">
+              {levels.map(l => <option key={l.key} value={`level:${l.key}`} style={{ background: '#0a3340' }}>{l.label}</option>)}
+            </optgroup>}
           </select>
         </Field>
         <button onClick={onSave} disabled={saving || !member.name?.trim()} style={{ width: '100%', padding: '12px', background: 'var(--brand)', border: 'none', borderRadius: 10, color: '#0a3340', fontSize: 13, fontWeight: 900, cursor: saving ? 'wait' : 'pointer', opacity: saving ? 0.65 : 1, textTransform: 'uppercase', letterSpacing: '0.06em' }}>

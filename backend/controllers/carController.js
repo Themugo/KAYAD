@@ -372,11 +372,16 @@ export const createCar = async (req, res) => {
 
     // Determine if user is allowed to create a listing (without incrementing yet)
     let shouldIncrementListingCount = false;
+    let freeDealerListing = false;
 
     if (isDealer) {
       // Dealer monetisation never bypasses the entitlement contract, even
       // while the public/private-seller market switch is in free mode.
-      await assertDealerCanCreateListing(req.user.id);
+      const gate = await assertDealerCanCreateListing(req.user.id);
+      // Free listing (admin has not required a subscription): the database function kayad_create_dealer_listing_atomic enforces
+      // a subscription on its own, so it is used only when a subscription IS required. Otherwise the listing is created like any
+      // other (no plan, no cap), which is what lets approved dealers populate the marketplace.
+      freeDealerListing = gate?.subscriptionRequired === false;
       shouldIncrementListingCount = true;
     } else if (monetisationOff) {
       // Free-market mode is intentionally limited to individual sellers.
@@ -496,7 +501,7 @@ export const createCar = async (req, res) => {
     // transaction. The legacy read-count-then-insert sequence was raceable
     // under concurrent requests and could over-consume a plan.
     let car;
-    if (isDealer) {
+    if (isDealer && !freeDealerListing) {
       const listingPayload = {
         ...body,
         slug: body.slug || undefined,
@@ -624,6 +629,13 @@ export const createCar = async (req, res) => {
     logError("CREATE ERROR", { error: err.message });
     cleanupFiles(req.files);
     const isDev = process.env.NODE_ENV === "development";
+    // The atomic listing function raises plain-text entitlement errors; surface them as a clear 402/403 instead of an opaque 500.
+    if (!res.headersSent && /active dealer subscription is required/i.test(err?.message || "")) {
+      return res.status(402).json({ success: false, code: "SUBSCRIPTION_REQUIRED", message: "An active dealer subscription is required to list vehicles." });
+    }
+    if (!res.headersSent && /Dealer listing entitlement exhausted/i.test(err?.message || "")) {
+      return res.status(402).json({ success: false, code: "LISTING_LIMIT_REACHED", message: "You've reached your plan's listing limit. Upgrade to list more." });
+    }
     // Entitlement errors (assertDealerCanCreateListing) carry a deliberate
     // 402/403 status and a user-facing message. Surface them instead of
     // collapsing them into an opaque 500 so a dealer learns they need a plan.

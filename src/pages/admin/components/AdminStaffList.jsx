@@ -31,7 +31,7 @@ export default function AdminStaffList({ staff, loading, isSuperAdmin, onEdit, o
               <div style={{ fontSize: 12, color: 'var(--admin-muted-content)' }}>{m.email}</div>
             </div>
             <div style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: orgRole.color, padding: '4px 10px', background: orgRole.bg, borderRadius: 6 }}>
-              {orgRole.title}
+              {m.levelLabel || orgRole.title}
             </div>
             <div style={{ fontSize: 11, color: 'var(--admin-muted-content)' }}>
               {m.lastLogin ? new Date(m.lastLogin).toLocaleDateString('en-KE') : 'Never logged in'}

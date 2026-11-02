@@ -43,6 +43,7 @@ jest.unstable_mockModule("../../services/mediaRecovery.service.js", () => ({ reg
 const { requireDealerVerification, isListingCreationRequest } = await import("../../middleware/dealerVerification.js");
 const { approveApplication } = await import("../../controllers/inspectorApplicationController.js");
 const { createCar } = await import("../../controllers/carController.js");
+const atomicMock = await import("../../utils/atomicTransactions.js");
 const { __setOnboardingPolicyForTests } = await import("../../services/onboardingPolicy.service.js");
 beforeEach(() => __setOnboardingPolicyForTests({})); // STAGE 5 default: approval_required
 
@@ -128,6 +129,47 @@ describe("createCar surfaces entitlement errors instead of a 500", () => {
     await createCar({ user: { id: U, role: "dealer" }, body: {}, files: [] }, r);
     expect(r.code).toBe(500);
     expect(r.body.message).toBe("Failed to create car");
+  });
+});
+
+describe("createCar for a dealer: free listing vs required subscription", () => {
+  const { atomicCreateDealerListing } = atomicMock;
+  const file = { path: "/tmp/kayad-test-a.jpg", originalname: "a.jpg", mimetype: "image/jpeg" };
+  const req = () => ({ user: { id: U, role: "dealer" }, body: { title: "Toyota Axio", brand: "Toyota" }, files: [file], get: () => undefined });
+  beforeEach(() => {
+    process.env.CLOUDINARY_CLOUD_NAME = "x"; process.env.CLOUDINARY_API_KEY = "x"; process.env.CLOUDINARY_API_SECRET = "x";
+    userModel.findById.mockReturnValue({ select: async () => ({ id: U, role: "dealer", status: "approved" }) });
+    userModel.findByIdAndUpdate = jest.fn(async () => ({}));
+    carModel.countDocuments.mockResolvedValue(0);
+    carModel.create.mockResolvedValue({ _id: "car-1", title: "Toyota Axio", price: 1 });
+  });
+  test("subscription NOT required: created through the normal path (no plan, no atomic subscription function)", async () => {
+    entitlement.mockResolvedValue({ status: "none", subscriptionRequired: false });
+    const r = res();
+    await createCar(req(), r);
+    expect(r.code).toBe(201);
+    expect(carModel.create).toHaveBeenCalledTimes(1);
+    expect(carModel.create.mock.calls[0][0]).toMatchObject({ dealer: U, title: "Toyota Axio" });
+    expect(atomicCreateDealerListing).not.toHaveBeenCalled();
+    expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith(U, { $inc: { listingCount: 1 } });
+  });
+  test("subscription required (and held): the atomic entitlement function is used", async () => {
+    entitlement.mockResolvedValue({ status: "active", subscriptionRequired: true });
+    atomicCreateDealerListing.mockResolvedValue({ listing: { id: "car-2" } });
+    carModel.findById = jest.fn(async () => ({ _id: "car-2", title: "T", price: 1 }));
+    const r = res();
+    await createCar(req(), r);
+    expect(r.code).toBe(201);
+    expect(atomicCreateDealerListing).toHaveBeenCalledTimes(1);
+    expect(carModel.create).not.toHaveBeenCalled();
+  });
+  test("the database function's plain-text subscription error becomes a clear 402, not an opaque 500", async () => {
+    entitlement.mockResolvedValue({ status: "active", subscriptionRequired: true });
+    atomicCreateDealerListing.mockRejectedValue(new Error("An active dealer subscription is required to list vehicles"));
+    const r = res();
+    await createCar(req(), r);
+    expect(r.code).toBe(402);
+    expect(r.body.code).toBe("SUBSCRIPTION_REQUIRED");
   });
 });
 

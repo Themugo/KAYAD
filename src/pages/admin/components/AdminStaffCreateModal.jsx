@@ -30,7 +30,8 @@ function SI({ value, onChange, placeholder, type = 'text' }) {
 import { Eye, EyeOff, X } from 'lucide-react';
 
 
-export default function AdminStaffCreateModal({ form, set, roles = [], saving, onSubmit, onClose }) {
+export default function AdminStaffCreateModal({ form, set, roles = [], levels = [], emailDomain = '', requireCompanyEmail = false, saving, onSubmit, onClose }) {
+  const level = String(form.role || '').startsWith('level:') ? levels.find(l => `level:${l.key}` === form.role) : null;
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10, 51, 64, 0.8)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose} role="presentation">
       <div style={{ background: '#0a3340', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 18, padding: 32, width: '100%', maxWidth: 480 }} onClick={e => e.stopPropagation()} role="presentation">
@@ -40,7 +41,10 @@ export default function AdminStaffCreateModal({ form, set, roles = [], saving, o
         </div>
         <form onSubmit={onSubmit}>
           <Field label="Full Name"><SI value={form.name} onChange={e => set('name', e.target.value)} placeholder="Jane Wanjiku" /></Field>
-          <Field label="Email Address"><SI type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="jane@kayad.space" /></Field>
+          <Field label={emailDomain ? `Company email (type the name, or a full address)` : 'Email Address'}>
+            <SI type={emailDomain ? 'text' : 'email'} value={form.email} onChange={e => set('email', e.target.value)} placeholder={emailDomain ? `jane` : 'jane@kayad.space'} />
+            {emailDomain && <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 6 }}>{form.email && !form.email.includes('@') ? `Will be created as ${form.email.trim().toLowerCase()}@${emailDomain}` : `Company domain: @${emailDomain}${requireCompanyEmail ? ' (required)' : ''}`}</div>}
+          </Field>
           <Field label="Initial Password (12+ characters)"><SI type="password" value={form.password} onChange={e => set('password', e.target.value)} placeholder="At least 12 characters" /></Field>
           <Field label="Role">
             <select value={form.role} onChange={e => set('role', e.target.value)}
@@ -49,11 +53,14 @@ export default function AdminStaffCreateModal({ form, set, roles = [], saving, o
                 const org = ORG.find(o => o.role === r);
                 return <option key={r} value={r} style={{ background: '#0a3340' }}>{org?.icon} {org?.title || r}</option>;
               })}
+              {levels.length > 0 && <optgroup label="Employment levels">
+                {levels.map(l => <option key={l.key} value={`level:${l.key}`} style={{ background: '#0a3340' }}>{l.label}</option>)}
+              </optgroup>}
             </select>
           </Field>
           {form.role && (
             <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 8, padding: '10px 14px', marginBottom: 20, fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>
-              {ORG.find(o => o.role === form.role)?.desc}
+              {level ? (level.description || `${level.label}: ${level.permissions.length} permission(s) on the ${level.baseRole.replaceAll('_', ' ')} base role.`) : ORG.find(o => o.role === form.role)?.desc}
             </div>
           )}
           <button type="submit" disabled={saving} style={{ width: '100%', padding: '13px', background: 'var(--brand)', border: 'none', borderRadius: 10, color: '#0a3340', fontSize: 13, fontWeight: 900, cursor: saving ? 'wait' : 'pointer', textTransform: 'uppercase', letterSpacing: '0.06em' }}>

@@ -1,3 +1,7 @@
+import {
+  getStaffConfig, createLevel, updateLevel, deleteLevel, updateEmailPolicy, assignLevel, clearAssignment, levelByKey, memberCounts,
+  permissionDeltaFor, resolveStaffEmail, StaffLevelError, LEVEL_BASE_ROLES, LEVEL_PERMISSIONS,
+} from "../services/staffLevels.service.js";
 import { getDealerListingPolicy, updateDealerListingPolicy } from "../services/dealerListingPolicy.service.js";
 import { parseBonusAmount } from "../utils/referralGuards.js"; // STAGE 4A (G9)
 import express from "express";
@@ -1643,8 +1647,11 @@ router.get(
       .sort({ createdAt: -1 })
       .lean();
     // Attach computed effective permissions for the UI
+    const levelConfig = await getStaffConfig().catch(() => null);
     const enriched = staff.map((s) => ({
       ...s,
+      level: levelConfig?.assignments?.[String(s.id ?? s._id)] || null,
+      levelLabel: levelByKey(levelConfig || { levels: [] }, levelConfig?.assignments?.[String(s.id ?? s._id)])?.label || null,
       isOwner: isOwnerUser(s), // safe boolean for the UI; never infer owner authority from a role label
       lastLogin: s.lastLoginAt ?? null, // UI field name (AdminStaffList) kept stable
       effectivePermissions: getEffectivePermissions(s),
@@ -1768,21 +1775,123 @@ router.put(
   }),
 );
 
+// =============================
+// 🏷️ EMPLOYMENT LEVELS + COMPANY E-MAIL POLICY (System Owner only)
+// =============================
+// A level (e.g. "Sales") is an owner-defined permission set on top of a supported staff role. It never carries admin/owner authority.
+const levelError = (res, err) => {
+  if (err instanceof StaffLevelError) return res.status(err.status).json({ success: false, code: err.code, message: err.message, errors: err.errors });
+  throw err;
+};
+
+router.get(
+  "/staff/levels",
+  authorize("superadmin"),
+  systemOwnerOnly,
+  asyncHandler(async (_req, res) => {
+    try {
+      const config = await getStaffConfig();
+      const counts = memberCounts(config);
+      res.set("Cache-Control", "no-store");
+      res.json({
+        success: true,
+        levels: config.levels.map((l) => ({ ...l, members: counts[l.key] || 0 })),
+        baseRoles: LEVEL_BASE_ROLES,
+        permissions: LEVEL_PERMISSIONS.map((p) => ({ key: p, label: PERM_LABELS[p]?.label || p, desc: PERM_LABELS[p]?.desc || "", group: PERM_LABELS[p]?.group || "Other" })),
+        companyEmailDomain: config.companyEmailDomain,
+        requireCompanyEmail: config.requireCompanyEmail,
+      });
+    } catch (err) { levelError(res, err); }
+  }),
+);
+
+router.post(
+  "/staff/levels",
+  authorize("superadmin"),
+  systemOwnerOnly,
+  asyncHandler(async (req, res) => {
+    try {
+      const config = await createLevel(req.body || {}, req.user.id);
+      await auditAfterCommit({ action: "Staff governance: employment level created", admin: req.user.name || req.user.email, adminId: req.user.id, details: { outcome: "success", level: String(req.body?.key || "").toLowerCase() } });
+      res.status(201).json({ success: true, message: "Employment level created", level: levelByKey(config, String(req.body.key).trim().toLowerCase()) });
+    } catch (err) { levelError(res, err); }
+  }),
+);
+
+router.put(
+  "/staff/levels/:key",
+  authorize("superadmin"),
+  systemOwnerOnly,
+  asyncHandler(async (req, res) => {
+    try {
+      const { level, memberIds } = await updateLevel(req.params.key, req.body || {}, req.user.id);
+      // Re-apply the new permission set to everyone who holds the level (the user row carries the grants/revokes).
+      const delta = permissionDeltaFor(level);
+      let failed = 0;
+      for (const uid of memberIds) {
+        try { await User.findByIdAndUpdate(uid, { role: level.baseRole, ...delta }); invalidateUserCache(uid); } catch { failed += 1; }
+      }
+      await auditAfterCommit({ action: "Staff governance: employment level updated", admin: req.user.name || req.user.email, adminId: req.user.id, details: { outcome: failed ? "partial" : "success", level: level.key, members: memberIds.length, failed } });
+      res.json({ success: true, message: failed ? `Level saved, but ${failed} member(s) could not be updated.` : "Employment level updated", level, membersUpdated: memberIds.length - failed, membersFailed: failed });
+    } catch (err) { levelError(res, err); }
+  }),
+);
+
+router.delete(
+  "/staff/levels/:key",
+  authorize("superadmin"),
+  systemOwnerOnly,
+  asyncHandler(async (req, res) => {
+    try {
+      await deleteLevel(req.params.key, req.user.id);
+      await auditAfterCommit({ action: "Staff governance: employment level deleted", admin: req.user.name || req.user.email, adminId: req.user.id, details: { outcome: "success", level: req.params.key } });
+      res.json({ success: true, message: "Employment level deleted" });
+    } catch (err) { levelError(res, err); }
+  }),
+);
+
+router.put(
+  "/staff/email-policy",
+  authorize("superadmin"),
+  systemOwnerOnly,
+  asyncHandler(async (req, res) => {
+    try {
+      const config = await updateEmailPolicy(req.body || {}, req.user.id);
+      await auditAfterCommit({ action: "Staff governance: company e-mail policy updated", admin: req.user.name || req.user.email, adminId: req.user.id, details: { outcome: "success", domain: config.companyEmailDomain, required: config.requireCompanyEmail } });
+      res.json({ success: true, message: "Company e-mail policy saved", companyEmailDomain: config.companyEmailDomain, requireCompanyEmail: config.requireCompanyEmail });
+    } catch (err) { levelError(res, err); }
+  }),
+);
+
 // CREATE STAFF ACCOUNT
 router.post(
   "/staff",
   authorize("superadmin"),
   systemOwnerOnly,
   asyncHandler(async (req, res) => {
-    const { name, password, role } = req.body;
-    const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
+    const { name, password } = req.body;
+    let role = req.body.role;
+    // Employment level (owner-defined) or built-in role. A level resolves to its supported base role + exact permission set.
+    const levelKey = typeof req.body.level === "string" && req.body.level ? req.body.level : null;
+    let level = null;
+    let policy = null;
+    if (levelKey || req.body.emailLocalPart) {
+      try { policy = await getStaffConfig(); } catch (err) { return levelError(res, err); }
+    } else {
+      policy = await getStaffConfig().catch(() => null); // e-mail policy is advisory when the settings store is unreadable and no level is used
+    }
+    if (levelKey) {
+      level = levelByKey(policy, levelKey);
+      if (!level) return res.status(400).json({ success: false, code: "STAFF_LEVEL_NOT_FOUND", message: "That employment level does not exist." });
+      role = level.baseRole;
+    }
     const staffRoles = CREATABLE_STAFF_ROLES;
-    if (typeof name !== "string" || !name.trim() || name.trim().length > 120 || !email || typeof password !== "string" || password.length < 12 || !role) {
+    if (typeof name !== "string" || !name.trim() || name.trim().length > 120 || typeof password !== "string" || password.length < 12 || !role || (!req.body.email && !req.body.emailLocalPart)) {
       return res.status(400).json({ success: false, message: "A valid name (1–120 characters), email, password (at least 12 characters), and role are required." });
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ success: false, message: "A valid email address is required." });
-    }
+    const resolved = resolveStaffEmail({ email: req.body.email, emailLocalPart: req.body.emailLocalPart }, policy || { companyEmailDomain: "", requireCompanyEmail: false });
+    if (!resolved.ok) return res.status(400).json({ success: false, message: resolved.message });
+    const email = resolved.email;
     if (!staffRoles.includes(role)) {
       return res
         .status(400)
@@ -1807,16 +1916,26 @@ router.post(
       });
       throw error;
     }
+    if (level) {
+      try {
+        await User.findByIdAndUpdate(user.id, permissionDeltaFor(level));
+        await assignLevel(user.id, level.key, req.user.id);
+        invalidateUserCache(user.id);
+      } catch (error) {
+        await User.softDelete(user.id, req.user.id).catch(() => {});
+        return levelError(res, error);
+      }
+    }
     await auditAfterCommit({
       action: "Staff governance: account created",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
-      details: { targetUserId: String(user.id), role, reason: typeof req.body?.reason === "string" ? req.body.reason.trim().slice(0, 500) : undefined },
+      details: { targetUserId: String(user.id), role, level: level?.key, reason: typeof req.body?.reason === "string" ? req.body.reason.trim().slice(0, 500) : undefined },
     });
     res.json({
       success: true,
       message: `Staff account created: ${email}`,
-      user: { name: user.name, email: user.email, role: user.role },
+      user: { name: user.name, email: user.email, role: user.role, level: level?.key || null },
     });
   }),
 );
@@ -1838,7 +1957,22 @@ router.put(
       return res.status(409).json({ success: false, code: "STAFF_ACCOUNT_REQUIRED", message: "Only an existing staff account can be edited here." });
     }
     const beforeState = { role: user.role, isBanned: user.isBanned === true };
-    if (req.body.role) {
+    const uid = String(user.id ?? user._id ?? req.params.id);
+    let appliedLevel = null;
+    let clearLevel = false;
+    if (typeof req.body.level === "string" && req.body.level) {
+      let cfg;
+      try { cfg = await getStaffConfig(); } catch (err) { return levelError(res, err); }
+      appliedLevel = levelByKey(cfg, req.body.level);
+      if (!appliedLevel) return res.status(400).json({ success: false, code: "STAFF_LEVEL_NOT_FOUND", message: "That employment level does not exist." });
+      user.role = appliedLevel.baseRole;
+      Object.assign(user, permissionDeltaFor(appliedLevel));
+    } else if (req.body.role) {
+      // Moving to a built-in role drops any level (and the level's grants/revokes) so permissions are exactly the role's.
+      const cfg = await getStaffConfig().catch(() => null);
+      if (cfg?.assignments?.[uid]) clearLevel = true;
+    }
+    if (req.body.role && !appliedLevel) {
       // Only known staff roles may be assigned — never "superadmin" itself
       // (superadmin elevation goes through the webhoist owner flow only).
       const staffRoles = [
@@ -1858,6 +1992,7 @@ router.put(
           .json({ success: false, message: `Invalid staff role. Must be one of: ${staffRoles.join(", ")}` });
       }
       user.role = req.body.role;
+      if (clearLevel) { user.grantedPermissions = []; user.revokedPermissions = []; }
     }
     // STAGE 5F.5 (D-4): isBanned must be a real boolean — a string such as "false" is truthy and would suspend the account.
     if (req.body.isBanned !== undefined && typeof req.body.isBanned !== "boolean") {
@@ -1869,6 +2004,9 @@ router.put(
     if (req.body.name) user.name = req.body.name.trim();
     if (req.body.isBanned !== undefined) user.isBanned = req.body.isBanned;
     await user.save();
+    invalidateUserCache(uid);
+    if (appliedLevel) await assignLevel(uid, appliedLevel.key, req.user.id).catch((e) => console.error("Level assignment failed", e?.message));
+    else if (clearLevel) await clearAssignment(uid, req.user.id).catch((e) => console.error("Level clear failed", e?.message));
     await auditAfterCommit({
       action: "Staff governance: staff record updated",
       admin: req.user.name || req.user.email,
