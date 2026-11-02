@@ -29,14 +29,17 @@ describe('admin tables render every declared column and keep their actions reach
     const dealerRow = (await screen.findByText('Dealer One')).closest('tr');
     expect(dealerRow.querySelectorAll('td')).toHaveLength(8);
     expect(within(dealerRow).getByText('Pending approval')).toBeTruthy();
-    // The server requires an auditable reason: a cancelled prompt sends nothing, a given reason is sent as the operator wrote it.
-    const prompt = vi.spyOn(window, 'prompt').mockReturnValueOnce(null).mockReturnValueOnce('Documents verified against registry');
+    // The server requires an auditable reason: cancelling the dialog sends nothing, a given reason is sent as the operator wrote it.
     fireEvent.click(within(dealerRow).getByRole('button', { name: 'Approve' }));
+    fireEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
     expect(api.approveDealer).not.toHaveBeenCalled();
     fireEvent.click(within(dealerRow).getByRole('button', { name: 'Approve' }));
+    const dlg = await screen.findByRole('dialog');
+    fireEvent.change(within(dlg).getByLabelText(/Reason for approval/), { target: { value: 'Documents verified against registry' } });
+    fireEvent.click(within(dlg).getByRole('button', { name: 'Approve dealer' }));
     await waitFor(() => expect(api.approveDealer).toHaveBeenCalledWith('d1', { reason: 'Documents verified against registry' }));
     expect(api.approveDealer).toHaveBeenCalledTimes(1);
-    prompt.mockRestore();
     const buyerRow = screen.getByText('Buyer One').closest('tr');
     expect(within(buyerRow).getByText('Banned')).toBeTruthy();
     fireEvent.click(within(buyerRow).getByRole('button', { name: 'Unban' }));

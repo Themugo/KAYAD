@@ -210,6 +210,7 @@ export const adminAPI = {
   users:         (params: any)    => api.get('/admin/users', { params }).then(unwrap).then(withRowIds),
   toggleBan:     (userId: string, banned?: boolean) => api.post(`/admin/users/${userId}/toggle-ban`, typeof banned === 'boolean' ? { banned } : undefined).then(unwrap),
   approveDealer: (userId: string, body?: { reason?: string }) => api.post(`/admin/users/${userId}/approve-dealer`, body).then(unwrap),
+  dealerOnboardingReadiness: () => api.get('/admin/dealer-onboarding/readiness').then(unwrap),
   cars:          (params: any)    => api.get('/admin/cars', { params }).then(unwrap),
   deleteCar:     (carId: string)     => api.delete(`/admin/cars/${carId}`).then(unwrap),
   updateSellerSettings: (userId: string, body: any) => api.put(`/admin/users/${userId}/seller-settings`, body).then(unwrap),

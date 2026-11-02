@@ -512,6 +512,17 @@ router.post(
   }),
 );
 
+// Read-only: can the database onboard a dealer end to end? (see services/dealerOnboardingReadiness.service.js)
+router.get(
+  "/dealer-onboarding/readiness",
+  adminOrSuper,
+  asyncHandler(async (_req, res) => {
+    const { checkDealerOnboardingReadiness } = await import("../services/dealerOnboardingReadiness.service.js");
+    res.set("Cache-Control", "no-store");
+    res.json({ success: true, ...(await checkDealerOnboardingReadiness()) });
+  }),
+);
+
 // =============================
 // 🧑‍💼 APPROVE DEALER
 // =============================

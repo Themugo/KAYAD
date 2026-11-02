@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminAPI } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import AdminLoadNotice from '../../components/admin/AdminLoadNotice';
+import DealerApprovalDialog from '../../components/admin/DealerApprovalDialog';
 import { formatDate, initials } from '../../utils/helpers';
 
 const ROLE_BADGE = { user: 'badge-blue', dealer: 'badge-gold', admin: 'badge-red', superadmin: 'badge-red', webhoist: 'badge-red', individual_seller: 'badge-blue' };
@@ -32,6 +33,9 @@ function UserRow({ user: u, onBan, onApprove, actionId }) {
       <td><span className={`badge ${status.className}`}>{status.label}</span></td>
       <td>
         <div className="kayad-user-row-actions">
+          {needsApproval && u.application?.blockers?.length > 0 && (
+            <span className="kayad-user-subtle" title={u.application.blockers.map((b) => b.message).join(' ')} style={{ alignSelf: 'center' }}>Application incomplete</span>
+          )}
           {needsApproval && (
             <button type="button" className="btn btn-sm btn-primary" disabled={actionId === `${u._id}-app`} onClick={() => onApprove(u)}>
               {actionId === `${u._id}-app` ? 'Approving…' : 'Approve'}
@@ -116,26 +120,39 @@ export default function AdminUsers() {
     }
   }, [load, toast]);
 
-  const handleApprove = useCallback(async (u) => {
+  const [readiness, setReadiness] = useState(null);
+  useEffect(() => {
+    let live = true;
+    // Advisory only: a failed check shows nothing rather than a false alarm.
+    adminAPI.dealerOnboardingReadiness?.().then((r) => { if (live) setReadiness(r); }).catch(() => {});
+    return () => { live = false; };
+  }, []);
+  const [approving, setApproving] = useState(null); // the dealer row whose approval dialog is open
+  const [approveError, setApproveError] = useState(null);
+  const handleApprove = useCallback((u) => { setApproveError(null); setApproving(u); }, []);
+  const closeApprove = useCallback(() => { setApproving(null); setApproveError(null); }, []);
+
+  const confirmApprove = useCallback(async (reason) => {
     // The server requires an auditable reason for every dealer decision; it is the operator's, never a canned value.
-    const reason = (window.prompt(`Reason for approving ${u.businessName || u.name} (at least ${DEALER_REASON_MIN} characters):`) || '').trim();
-    if (!isReasonValid(reason)) { if (reason) toast(`The reason must be at least ${DEALER_REASON_MIN} characters. Nothing was changed.`, 'error'); return; }
-    const targetId = u?._id;
-    if (!targetId) { toast('This row has no account id, so it cannot be approved. Nothing was changed.', 'error'); return; }
+    const targetId = approving?._id;
+    if (!targetId) { setApproveError('This row has no account id, so it cannot be approved. Nothing was changed.'); return; }
+    setApproveError(null);
     setActionId(`${targetId}-app`);
     try {
       const res = await adminAPI.approveDealer(targetId, { reason });
       // Only the approved account's row changes - matched by its exact id, never by a value that could be shared or missing.
       setUsers(prev => prev.map(x => (x._id && x._id === targetId) ? { ...x, approved: true, status: 'approved' } : x));
       if (res?.changed !== false) setSummary(prev => prev ? { ...prev, pendingApproval: Math.max(0, Number(prev.pendingApproval || 0) - 1) } : prev);
-      toast(res?.changed === false ? 'This dealer was already approved.' : 'Dealer approval saved', 'success');
+      toast(res?.changed === false ? 'This dealer was already approved.' : 'Dealer approved', 'success');
+      setApproving(null);
       await load(); // reconcile every row and count from the server
     } catch (err) {
-      toast(describeDealerDecisionError(err, 'Dealer approval failed. No change was assumed.'), 'error');
+      // Stay open with the server's own reason so the operator can act on it; a failed approval is never shown as done.
+      setApproveError(describeDealerDecisionError(err, 'Dealer approval failed. No change was assumed.'));
     } finally {
       setActionId(null);
     }
-  }, [toast, load]);
+  }, [approving, toast, load]);
 
   const stats = [
     { label: 'Total users', value: summary?.totalUsers, note: 'All accounts', tone: 'brand', mark: 'U' },
@@ -151,6 +168,15 @@ export default function AdminUsers() {
 
   return (
     <div className="page kayad-users-page">
+      {readiness && readiness.ready === false && !readiness.unknown && readiness.checks?.some((c) => c.ok === false) && (
+        <div role="alert" className="card" style={{ padding: 16, marginBottom: 16, border: '1px solid var(--warning, #d97706)' }}>
+          <strong>Dealer onboarding is not fully set up in the database.</strong>
+          <div style={{ fontSize: 13, marginTop: 4 }}>{readiness.message}</div>
+          <ul style={{ fontSize: 13, margin: '8px 0 0 18px' }}>
+            {readiness.checks.filter((c) => c.ok === false).map((c) => <li key={c.id}>{c.label}: missing</li>)}
+          </ul>
+        </div>
+      )}
       <div className="kayad-users-heading">
         <div>
           <div className="section-eyebrow">Business operations</div>
@@ -207,6 +233,9 @@ export default function AdminUsers() {
           </div>
         </div>
       </section>
+      {approving && (
+        <DealerApprovalDialog dealer={approving} busy={actionId === `${approving._id}-app`} error={approveError} onConfirm={confirmApprove} onCancel={closeApprove} />
+      )}
     </div>
   );
 }
