@@ -14,7 +14,7 @@ const checks = [
   ['shared navbar uses admin-managed logo URL', /branding\.logoType === 'image' && branding\.logoUrl/.test(read('src/components/Navbar.tsx'))],
   ['legacy EA badge is removed from navbar wordmark', !/kayad-brand__ea/.test(read('src/components/Navbar.tsx'))],
   ['primary footer uses same admin-managed logo URL', /branding\.logoType === 'image' && branding\.logoUrl/.test(read('src/components/layout/Footer.tsx'))],
-  ['admin can upload logo image', /adminAPI\.uploadLogo\(form\)/.test(read('src/pages/admin/AdminSettingsBranding.jsx'))],
+  ['admin can upload logo image', /adminAPI\.uploadLogo\(form\)/.test(read('src/components/admin/LogoUploader.jsx')) && /LogoUploader/.test(read('src/pages/admin/AdminSettingsBranding.jsx'))],
   ['admin can edit footer description', /value=\{branding\.footerDescription \|\| ''\}/.test(read('src/pages/admin/AdminSettingsBranding.jsx'))],
   ['admin can edit footer copyright', /value=\{branding\.footerCopyright \|\| ''\}/.test(read('src/pages/admin/AdminSettingsBranding.jsx'))],
   ['footer consumes admin-managed description', /branding\.footerDescription \|\|/.test(read('src/components/layout/Footer.tsx'))],

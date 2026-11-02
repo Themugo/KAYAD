@@ -5,9 +5,7 @@ import { protect } from "../middleware/auth.js";
 import { authorize } from "../middleware/role.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { uploadMemory, handleUploadError } from "../middleware/upload.js";
-import { uploadImage } from "../config/cloudinary.js";
-import { isAllowedLogoUrl } from "../utils/brandingValidation.js";
-import { logWarn } from "../utils/logger.js";
+import { keepLogoFile, LogoStorageError } from "../services/brandingAssets.service.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import * as svc from "../services/siteDesign.service.js";
 import { FONT_CHOICES, TRANSITIONS, DIRECTIONS, COLOR_KEYS, STARTERS } from "../utils/siteDesign.js";
@@ -34,12 +32,13 @@ router.get("/history", handle(async (req, res) => { res.set("Cache-Control", "no
 router.post("/assets/logo", uploadMemory.single("logo"), handleUploadError, handle(async (req, res) => {
   // Stores the image and returns its URL ONLY. The live logo is untouched until a design containing this URL is published.
   if (!req.file) return res.status(400).json({ success: false, code: "LOGO_FILE_MISSING", message: "No image file was received. Choose a PNG, JPEG or WebP file and try again." });
-  if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) return res.status(503).json({ success: false, code: "LOGO_STORAGE_NOT_CONFIGURED", message: "Image storage is not configured on the server. Nothing was uploaded." });
   let result;
-  try { result = await uploadImage(req.file, "kayad/branding", { generateVariants: true, preserveOriginal: true }); }
-  catch (err) { logWarn("Design asset upload failed", { error: err?.message }); return res.status(502).json({ success: false, code: "LOGO_UPLOAD_FAILED", message: "The image storage service did not accept the upload. Nothing was changed." }); }
-  if (!result?.url || !isAllowedLogoUrl(result.url)) return res.status(502).json({ success: false, code: "LOGO_UPLOAD_INVALID_RESPONSE", message: "The image storage provider did not return a usable URL. Nothing was changed." });
-  res.status(201).json({ success: true, url: result.url, thumb: result.thumb });
+  try { result = await keepLogoFile(req.file, uid(req)); }
+  catch (err) {
+    if (err instanceof LogoStorageError) return res.status(err.status).json({ success: false, code: err.code, message: `${err.message} Nothing was changed.` });
+    throw err;
+  }
+  res.status(201).json({ success: true, url: result.url, thumb: result.thumb, storage: result.storage });
 }));
 
 router.post("/rollback/:publicationId", handle(async (req, res) => {

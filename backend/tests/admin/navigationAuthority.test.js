@@ -186,8 +186,9 @@ describe("GET /api/admin/public/config — public read path", () => {
     const body = await res.json();
     expect(body.config.navigation.items.map((i) => i.id)).toEqual(["auction"]);
     expect(body.config.navigation).not.toHaveProperty("secret");
-    expect(lastSelect.split(/\s+/)).toContain("navigation");
-    for (const s of ["daraja", "bank", "reconciliation", "supportEmail", "dealerCommission", "listingFee"]) expect(lastSelect.split(/\s+/)).not.toContain(s);
+    // The public projection is applied in code (tolerant of missing columns), so assert on what is served.
+    expect(Object.keys(body.config)).toContain("navigation");
+    for (const s of ["daraja", "bank", "reconciliation", "supportEmail", "dealerCommission", "listingFee"]) expect(Object.keys(body.config)).not.toContain(s);
   });
   test("a null / malformed stored value is served as the safe empty state", async () => {
     for (const v of [null, undefined, "x", 5, [], { items: "nope" }]) {

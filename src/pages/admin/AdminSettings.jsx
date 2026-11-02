@@ -41,6 +41,18 @@ const DEFAULT_BRANDING = {
   infoColor: '#176B87',
 };
 
+// Module level on purpose: declared inside AdminSettings it was a NEW component type on every keystroke, so React remounted the input
+// and focus was lost after each character (Payments / Reconciliation fields accepted one character at a time).
+const Field = ({ label, hint, children }) => (
+  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+    <label style={{ fontSize: 13, fontWeight: 600, flex: 1 }}>
+      {label}
+      {hint && <div style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>{hint}</div>}
+    </label>
+    {Children.map(children, child => (isValidElement(child) && child.props['aria-label'] === undefined ? cloneElement(child, { 'aria-label': label }) : child))}
+  </div>
+);
+
 export default function AdminSettings() {
   const { user, isSuperAdmin } = useAuth();
   const { toast } = useToast();
@@ -56,6 +68,7 @@ export default function AdminSettings() {
 
   // Branding state
   const [branding, setBranding] = useState(DEFAULT_BRANDING);
+  const [savedBranding, setSavedBranding] = useState(DEFAULT_BRANDING); // what the server last confirmed: drives the unsaved-changes indicator
 
   // Test payment state
   const [testPhone, setTestPhone] = useState('254708374149');
@@ -100,6 +113,10 @@ export default function AdminSettings() {
       // Load branding config
       if (c.branding && typeof c.branding === 'object' && !Array.isArray(c.branding)) {
         setBranding({ ...DEFAULT_BRANDING, ...c.branding });
+        setSavedBranding({ ...DEFAULT_BRANDING, ...c.branding });
+      } else {
+        setBranding(DEFAULT_BRANDING);
+        setSavedBranding(DEFAULT_BRANDING);
       }
       setConfigLoaded(true);
     } catch {
@@ -195,16 +212,6 @@ export default function AdminSettings() {
 
 
 
-  const Field = ({ label, hint, children }) => (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
-      <label style={{ fontSize: 13, fontWeight: 600, flex: 1 }}>
-        {label}
-        {hint && <div style={{ fontSize: 11, fontWeight: 400, color: 'var(--text-muted)' }}>{hint}</div>}
-      </label>
-      {Children.map(children, child => (isValidElement(child) && child.props['aria-label'] === undefined ? cloneElement(child, { 'aria-label': label }) : child))}
-    </div>
-  );
-
   const tabs = useMemo(() => {
     const all = [
       { id: 'general', label: 'General' },
@@ -267,6 +274,10 @@ export default function AdminSettings() {
             saveConfig={saveConfig}
             saving={saving}
             canSave={configLoaded && !configLoadError}
+            dirty={JSON.stringify(branding) !== JSON.stringify(savedBranding)}
+            loadError={configLoadError}
+            onRetry={loadConfig}
+            markLogoSaved={(url) => setSavedBranding(p => ({ ...p, logoType: 'image', logoUrl: url }))}
           />
         )}
 

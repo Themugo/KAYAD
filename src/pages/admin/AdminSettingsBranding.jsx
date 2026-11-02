@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { adminAPI } from '../../api/api';
-import { useToast } from '../../context/ToastContext';
 
+import LogoUploader, { DEFAULT_LOGO_URL } from '../../components/admin/LogoUploader';
 import { Palette, Leaf, Layers, PenLine, BarChart3 } from 'lucide-react';
 // Color field component with color picker and hex input
 const ColorField = ({ label, value, onChange, description }) => {
@@ -44,6 +44,8 @@ const SectionCard = ({ title, icon, children }) => (
 // Logo type selector with visual feedback
 const LogoTypeButton = ({ id, label, isSelected, onClick }) => (
   <button
+    type="button"
+    aria-pressed={isSelected}
     onClick={() => onClick(id)}
     style={{
       padding: '10px 20px',
@@ -85,20 +87,16 @@ const BrandingPreview = ({ branding }) => (
       marginBottom: 12,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <div style={{
-          width: 36,
-          height: 36,
-          borderRadius: 8,
-          background: branding.primaryColor,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#fff',
-          fontWeight: 700,
-          fontSize: 14,
-        }}>
-          {branding.logoText?.charAt(0) || 'K'}
-        </div>
+        {branding.logoType === 'text' ? null : branding.logoType === 'image' && branding.logoUrl ? (
+          <img src={branding.logoUrl} alt="" style={{ height: 36, width: 'auto', maxWidth: 80, objectFit: 'contain' }} />
+        ) : (
+          <div style={{
+            width: 36, height: 36, borderRadius: 8, background: branding.primaryColor, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontWeight: 700, fontSize: 14,
+          }}>
+            {branding.logoText?.charAt(0) || 'K'}
+          </div>
+        )}
         <span style={{ color: '#FDFAF5', fontWeight: 600, fontSize: 15 }}>{branding.logoText || 'KAYAD'}</span>
       </div>
       <div style={{ display: 'flex', gap: 8 }}>
@@ -162,9 +160,7 @@ const BrandingPreview = ({ branding }) => (
   </div>
 );
 
-export default function AdminSettingsBranding({ branding, setBranding, config, setConfig, saveConfig, saving, canSave = true }) {
-  const { toast } = useToast();
-  const [uploadingLogo, setUploadingLogo] = useState(false);
+export default function AdminSettingsBranding({ branding, setBranding, config, setConfig, saveConfig, saving, canSave = true, dirty = false, loadError = null, onRetry, markLogoSaved }) {
 
   // Handle color change with validation
   const handleColorChange = (key, value) => {
@@ -192,6 +188,12 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
 
   return (
     <div style={{ display: 'grid', gap: 20 }}>
+      {(!canSave || loadError) && (
+        <div role="alert" className="card" style={{ padding: 16, borderLeft: '4px solid var(--admin-status-danger, #b91c1c)', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+          <span style={{ flex: 1, minWidth: 220, fontSize: 13 }}>{loadError || 'The saved settings have not loaded, so saving is disabled to protect what is stored.'}</span>
+          {onRetry && <button type="button" className="btn btn-outline" onClick={onRetry}>Retry loading</button>}
+        </div>
+      )}
       {/* Logo & Identity Section */}
       <SectionCard title="Logo & Identity" icon={Palette}>
         <div style={{ display: 'grid', gap: 16, maxWidth: 600 }}>
@@ -223,39 +225,13 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
           {/* Logo Preview/Upload */}
           {branding.logoType === 'image' ? (
             <div>
-              <label className="input-label">Logo Image</label>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 8 }}>
-                <div style={{ width: 280, maxWidth: '100%', height: 96, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 12, borderRadius: 12, background: 'var(--surface)', border: '1px solid var(--border)', overflow: 'hidden' }}>
-                  {branding.logoUrl ? (
-                    <img src={branding.logoUrl} alt={`${branding.logoText || 'KAYAD'} logo preview`} decoding="async"
-                      style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center' }} />
-                  ) : <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>Logo preview · transparent PNG or SVG recommended</span>}
-                </div>
-                <div style={{ display: 'grid', gap: 6, minWidth: 220, flex: 1 }}>
-                  <input type="file" accept="image/png,image/jpeg,image/webp" aria-label="Upload KAYAD logo" disabled={uploadingLogo} onChange={async (e) => {
-                    const file = e.target.files?.[0];
-                    if (!file) return;
-                    const allowed = ['image/png', 'image/jpeg', 'image/webp'];
-                    if (!allowed.includes(file.type)) { toast('Choose a PNG, JPEG or WebP logo. SVG uploads are not supported by the current secure upload service.', 'error'); e.currentTarget.value = ''; return; }
-                    if (file.size > 5 * 1024 * 1024) { toast('Logo must be 5 MB or smaller.', 'error'); e.currentTarget.value = ''; return; }
-                    const form = new FormData();
-                    form.append('logo', file);
-                    const input = e.currentTarget;
-                    setUploadingLogo(true);
-                    try {
-                      const res = await adminAPI.uploadLogo(form);
-                      if (res?.success === false || !res?.url || typeof res.url !== 'string') throw new Error(res?.message || 'Upload response did not include a logo URL');
-                      setBranding(p => ({...p, logoType: 'image', logoUrl: res.url}));
-                      toast('Logo uploaded. Save Branding Settings to confirm the complete branding configuration.', 'success');
-                    } catch (error) {
-                      const message = error?.response?.data?.message || error?.message || 'Check the upload service configuration and try again.';
-                      toast(`Logo upload failed: ${message}`, 'error');
-                    } finally { setUploadingLogo(false); input.value = ''; }
-                  }} style={{ fontSize: 13, color: 'var(--text-muted)' }} />
-                  <small style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>Upload the symbol/emblem only (without KAYAD lettering or tagline); the site renders the editable KAYAD wordmark and descriptor beside it. Use a transparent PNG or WebP with no built-in text for the cleanest responsive fit. Maximum upload size: 5 MB. Supported formats: PNG, JPEG and WebP.</small>
-                  {uploadingLogo && <small role="status" style={{ color: 'var(--brand)' }}>Uploading logo…</small>}
-                </div>
-              </div>
+              <label className="input-label" style={{ marginBottom: 8, display: 'block' }}>Logo Image</label>
+              <LogoUploader
+                value={branding.logoUrl}
+                disabled={saving}
+                onUploaded={(url) => { setBranding(p => ({ ...p, logoType: 'image', logoUrl: url })); markLogoSaved?.(url); /* the server already applied it */ }}
+                onReset={() => setBranding(p => ({ ...p, logoType: 'image', logoUrl: DEFAULT_LOGO_URL }))}
+              />
             </div>
           ) : (
             <div className="input-group">
@@ -429,38 +405,25 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
       {/* Live Preview */}
       <BrandingPreview branding={branding} />
 
-      {/* Save Button */}
-      <button
-        className="btn"
-        onClick={() => saveConfig('branding')}
-        disabled={saving || !canSave}
-        style={{
-          width: '100%',
-          padding: '14px 24px',
-          background: `linear-gradient(135deg, ${branding.primaryColor}, ${branding.primaryDark})`,
-          color: '#fff',
-          fontWeight: 700,
-          fontSize: 14,
-          border: 'none',
-          borderRadius: 12,
-          cursor: saving || !canSave ? 'not-allowed' : 'pointer',
-          opacity: saving || !canSave ? 0.7 : 1,
-          transition: 'all 0.2s ease',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 8,
-        }}
-      >
-        {saving ? (
-          <>
-            <div className="spinner" style={{ width: 16, height: 16, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%' }} />
-            Saving...
-          </>
-        ) : (
-          <>Save Branding Settings</>
-        )}
-      </button>
+      {/* Save bar: always reachable while editing a long page */}
+      <div style={{ position: 'sticky', bottom: 0, zIndex: 5, display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', padding: '12px 16px', borderRadius: 14, background: 'var(--card, #fff)', border: '1px solid var(--border)', boxShadow: '0 -4px 18px rgba(10,51,64,0.08)' }}>
+        <span role="status" style={{ fontSize: 13, color: dirty ? 'var(--admin-status-warning, #b45309)' : 'var(--text-muted)' }}>
+          {saving ? 'Saving…' : dirty ? 'You have unsaved branding changes.' : 'All branding changes are saved.'}
+        </span>
+        <button
+          type="button"
+          className="btn"
+          onClick={() => saveConfig('branding')}
+          disabled={saving || !canSave || !dirty}
+          style={{
+            padding: '12px 24px', background: `linear-gradient(135deg, ${branding.primaryColor}, ${branding.primaryDark})`, color: '#fff', fontWeight: 700, fontSize: 14,
+            border: 'none', borderRadius: 12, cursor: saving || !canSave || !dirty ? 'not-allowed' : 'pointer', opacity: saving || !canSave || !dirty ? 0.6 : 1,
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}
+        >
+          {saving ? 'Saving…' : 'Save Branding Settings'}
+        </button>
+      </div>
     </div>
   );
 }

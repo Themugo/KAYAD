@@ -22,6 +22,7 @@ import AuditLog from "../models/AuditLog.js";
 import { auditAfterCommit } from "../utils/auditAfterCommit.js";
 import { logWarn } from "../utils/logger.js";
 import { validateBranding, isAllowedLogoUrl } from "../utils/brandingValidation.js";
+import { keepLogoFile, readLogo, LogoStorageError } from "../services/brandingAssets.service.js";
 import { findAll } from "../db/index.js";
 import * as dealerApproval from "../services/dealerApproval.service.js";
 import { getDealerPaperworkPolicy, updateDealerPaperworkPolicy, PaperworkPolicyError, adminViewFor } from "../services/dealerPaperwork.service.js";
@@ -119,11 +120,16 @@ router.use((req, res, next) => {
 router.get(
   "/public/config",
   asyncHandler(async (req, res) => {
-    let config = await PlatformConfig.findOne()
-      .select(
-        "platformName galleryTitle gallerySubtitle fontDisplay fontBody fontSizePct baseFontSize lineHeight branding allowGuestBrowsing heroCarIds heroFeaturedMode heroPresentation heroCardContent navigation",
-      )
-      .lean();
+    // ROOT CAUSE of "branding never reaches the site" on a database that has not run the later migrations: this used to ask PostgREST for
+    // the hero_* / navigation columns by name. When those columns do not exist the whole request failed, so EVERY visitor got the built-in
+    // defaults and saved branding was invisible. Read the row as stored and pick the public fields in code: a missing column is simply an
+    // absent value (the client then uses its defaults for that one field) and can never take the whole response down.
+    const PUBLIC_CONFIG_FIELDS = [
+      "platformName", "galleryTitle", "gallerySubtitle", "fontDisplay", "fontBody", "fontSizePct", "baseFontSize", "lineHeight",
+      "branding", "allowGuestBrowsing", "heroCarIds", "heroFeaturedMode", "heroPresentation", "heroCardContent", "navigation",
+    ];
+    let config = await PlatformConfig.findOne().lean();
+    if (config) config = Object.fromEntries(PUBLIC_CONFIG_FIELDS.filter((k) => config[k] !== undefined).map((k) => [k, config[k]]));
 
     if (!config) {
       // This is a public GET used by the unauthenticated application shell.
@@ -137,6 +143,24 @@ router.get(
     config = { ...config, navigation: normalizeNavigation(config.navigation) };
 
     res.json({ success: true, config });
+  }),
+);
+
+// Built-in logo files (see services/brandingAssets.service.js). Public by design: it is the site logo. Content-addressed, so cacheable forever.
+router.get(
+  "/public/logo/:file",
+  asyncHandler(async (req, res) => {
+    const logo = await readLogo(req.params.file);
+    if (!logo) return res.status(404).json({ success: false, message: "Logo not found" });
+    res.set({
+      "Content-Type": logo.mime,
+      "Content-Length": String(logo.buffer.length),
+      "Cache-Control": "public, max-age=31536000, immutable",
+      "X-Content-Type-Options": "nosniff",
+      "Content-Security-Policy": "default-src 'none'; img-src 'self'",
+      "Cross-Origin-Resource-Policy": "cross-origin",
+    });
+    res.send(logo.buffer);
   }),
 );
 
@@ -1002,7 +1026,19 @@ router.put(
       }
     }
 
-    await config.save();
+    try {
+      await config.save();
+    } catch (err) {
+      // A column the code writes does not exist yet (migrations not applied): say exactly that instead of an opaque 500, and nothing was saved.
+      if (["PGRST204", "42703"].includes(String(err?.code)) || /column .* (does not exist|of relation)|could not find the .* column/i.test(String(err?.message || ""))) {
+        return res.status(503).json({
+          success: false,
+          code: "DATABASE_MIGRATION_REQUIRED",
+          message: "Nothing was saved: the database is missing a column this setting needs. Apply the pending database migrations (see the admin report), then save again.",
+        });
+      }
+      throw err;
+    }
 
     // Audit what actually changed. Secrets and bank details are recorded as "changed" only (never their values).
     const SECRET_LEAF = new Set(["consumerKey", "consumerSecret", "passkey", "accountNumber", "accountName", "bankName", "paybill"]);
@@ -2124,20 +2160,15 @@ router.post(
   handleUploadError,
   asyncHandler(async (req, res) => {
     if (!req.file) return res.status(400).json({ success: false, code: "LOGO_FILE_MISSING", message: "No image file was received. Choose a PNG, JPEG or WebP file and try again." });
-    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
-      return res.status(503).json({ success: false, code: "LOGO_STORAGE_NOT_CONFIGURED", message: "Logo storage is not configured on the server. The current logo was not changed." });
-    }
+    // Storage: the external image host when configured and accepting, otherwise the built-in store (works without image-host credentials).
     let result;
     try {
-      result = await uploadImage(req.file, "kayad/branding", { generateVariants: true, preserveOriginal: true });
+      result = await keepLogoFile(req.file, req.user.id);
     } catch (err) {
-      // Provider outage / interrupted upload: nothing is stored in settings, the current logo stays. Provider text is not echoed (may carry account details).
-      logWarn("Logo upload to storage failed", { code: "LOGO_UPLOAD_FAILED", error: err?.message });
-      return res.status(502).json({ success: false, code: "LOGO_UPLOAD_FAILED", message: "The image storage service did not accept the upload. The current logo was not changed. Try again." });
+      if (err instanceof LogoStorageError) return res.status(err.status).json({ success: false, code: err.code, message: `${err.message} The current logo was not changed.` });
+      throw err;
     }
-    if (!result?.url || typeof result.url !== "string" || !isAllowedLogoUrl(result.url)) {
-      return res.status(502).json({ success: false, code: "LOGO_UPLOAD_INVALID_RESPONSE", message: "The image storage provider did not return a usable logo URL. The current logo was not changed." });
-    }
+    const storage = result.storage;
     let config = await PlatformConfig.findOne();
     if (!config) config = new PlatformConfig();
     const existingBranding = config.branding?.toObject?.() || config.branding || {};
@@ -2150,7 +2181,7 @@ router.post(
       adminId: req.user.id,
       details: { previousLogoUrl, logoUrl: result.url },
     });
-    res.json({ success: true, url: result.url, thumb: result.thumb });
+    res.json({ success: true, url: result.url, thumb: result.thumb, storage });
   }),
 );
 

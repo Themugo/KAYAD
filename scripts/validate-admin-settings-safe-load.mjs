@@ -13,7 +13,7 @@ const checks = [
   ['failed settings load leaves saves disabled and displays retry', /Saving is disabled until the saved configuration loads successfully/.test(page) && /Retry loading settings/.test(page)],
   ['save handler has a second defensive loaded-state guard', /if \(!configLoaded \|\| configLoadError\)/.test(page)],
   ['general, payment and reconciliation save controls are disabled until loaded', (page.match(/disabled=\{saving \|\| !configLoaded\}/g) || []).length >= 3],
-  ['branding save respects the loaded-state gate', /canSave = true/.test(branding) && /disabled=\{saving \|\| !canSave\}/.test(branding)],
+  ['branding save respects the loaded-state gate', /canSave = true/.test(branding) && /disabled=\{saving \|\| !canSave( \|\| !dirty)?\}/.test(branding)],
   ['audit log retrieval failure is distinct from an empty audit log', /auditLogLoadError/.test(page) && /Invalid audit-log response/.test(page)],
   ['regression tests cover failed and malformed loads', /network unavailable/.test(tests) && /malformed configuration response/.test(tests)],
 ];

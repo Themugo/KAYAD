@@ -116,9 +116,14 @@ const rpc = jest.fn(async (name, args) => {
   world.dbAudit.push({ actor: p_admin, target: p_user, action: p_action, reason: p_reason });
   return { data: { userId: p_user, action: p_action, status }, error: null };
 });
+const kvStore = {}; let kvFail = false;
+const kvTable = {
+  select: () => ({ eq: (_c, key) => ({ maybeSingle: async () => ({ data: kvStore[key] ? { value: kvStore[key] } : null, error: null }) }) }),
+  upsert: async (row) => { if (kvFail) return { error: { message: "db down" } }; kvStore[row.key] = row.value; return { error: null }; },
+};
 jest.unstable_mockModule("../../utils/supabase.js", () => ({
   initSupabase: jest.fn(), checkSupabaseReadiness: async () => ({ ok: true }), isSupabaseConnected: () => true, default: null,
-  getSupabase: () => fakeDb,
+  getSupabase: () => ({ ...fakeDb, rpc: fakeDb.rpc?.bind(fakeDb), from: (t) => (t === "system_settings" ? kvTable : fakeDb.from(t)) }),
 }));
 
 
@@ -324,13 +329,22 @@ describe("logo asset upload for a design", () => {
     expect((await upload("admin-1", form("logo.png", "image/png", Buffer.from("this is not a png")))).status).toBeGreaterThanOrEqual(400);
     expect(uploadImage).not.toHaveBeenCalled();
   });
-  test("storage failure keeps everything unchanged and reports it", async () => {
+  test("image host failing falls back to the built-in store; the live logo is still untouched", async () => {
     uploadImage.mockRejectedValueOnce(new Error("provider down"));
     store.doc = { branding: { logoUrl: "/branding/kayad-road-mark.svg" } };
-    const r = await upload("admin-1", form("logo.png", "image/png", PNG)); expect(r.status).toBe(502); expect(r.body.code).toBe("LOGO_UPLOAD_FAILED"); expect(store.doc.branding.logoUrl).toBe("/branding/kayad-road-mark.svg");
+    const r = await upload("admin-1", form("logo.png", "image/png", PNG));
+    expect(r.status).toBe(201); expect(r.body.storage).toBe("database"); expect(r.body.url).toMatch(/^\/api\/admin\/public\/logo\/[0-9a-f]{16}\.png$/);
+    expect(store.doc.branding.logoUrl).toBe("/branding/kayad-road-mark.svg");
+    const d = await mk(); const saved = await call("PUT", `/${d.id}`, "admin-1", { expectedRevision: d.revision, config: tweak(d, (c) => { c.brand.logoUrl = r.body.url; }) });
+    expect(saved.status).toBe(200); // the built-in URL is accepted by design validation
   });
-  test("storage not configured is a truthful 503", async () => {
+  test("image host not configured uses the built-in store; if that fails too the error is truthful and nothing changes", async () => {
     const keep = process.env.CLOUDINARY_API_SECRET; delete process.env.CLOUDINARY_API_SECRET;
-    try { expect((await upload("admin-1", form("logo.png", "image/png", PNG))).status).toBe(503); } finally { process.env.CLOUDINARY_API_SECRET = keep; }
+    try {
+      const ok = await upload("admin-1", form("logo.png", "image/png", PNG)); expect(ok.status).toBe(201); expect(ok.body.storage).toBe("database");
+      kvFail = true; store.doc = { branding: { logoUrl: "/branding/kayad-road-mark.svg" } };
+      const bad = await upload("admin-1", form("logo2.png", "image/png", Buffer.concat([PNG, Buffer.from([1])])));
+      expect(bad.status).toBe(503); expect(bad.body.code).toBe("LOGO_STORAGE_UNAVAILABLE"); expect(store.doc.branding.logoUrl).toBe("/branding/kayad-road-mark.svg");
+    } finally { kvFail = false; process.env.CLOUDINARY_API_SECRET = keep; }
   });
 });

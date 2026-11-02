@@ -1,6 +1,6 @@
 // Server-side validation of the platform branding object (PUT /api/admin/config -> branding, and the logo upload route).
 // The browser validates for convenience; this is the authority. A logo URL is rendered into <img src> on every public page, so it
-// must be a bundled path or an https URL on the configured image host, never an arbitrary string.
+// must be a bundled path, a built-in logo URL or an https URL on the configured image host, never an arbitrary string.
 const LOGO_TYPES = ["icon", "text", "image"];
 const COLOR = /^(#[0-9A-Fa-f]{6}|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(\s*,\s*(0|1|0?\.\d+))?\s*\))$/;
 const COLOR_FIELDS = ["primaryColor", "primaryLight", "primaryDark", "primaryGlow", "accentColor", "backgroundColor", "surfaceColor", "cardColor", "textColor", "textMutedColor", "textDimColor", "borderColor", "successColor", "dangerColor", "warningColor", "infoColor"];
@@ -10,6 +10,7 @@ export const isAllowedLogoUrl = (value, env = process.env) => {
   if (value === "" || value == null) return true;
   if (typeof value !== "string" || value.length > 500) return false;
   if (/^\/branding\/[A-Za-z0-9._\-/]+$/.test(value) && !value.includes("..")) return true;
+  if (/^\/api\/admin\/public\/logo\/[0-9a-f]{16}\.(png|jpg|webp)$/.test(value)) return true; // built-in logo store (services/brandingAssets.service.js)
   try {
     const u = new URL(value);
     if (u.protocol !== "https:" || u.username || u.password) return false;

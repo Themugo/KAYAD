@@ -18,7 +18,7 @@ const checks = [
   ['onboarding optimistic concurrency retained', onboarding.includes('expectedRevision')],
   ['branding color picker is only rendered for valid six-digit hex', branding.includes("const isHex = /^#[0-9A-Fa-f]{6}$/")],
   ['branding supports valid rgba glow values', branding.includes('rgba?\\(')],
-  ['logo upload accepts only formats supported by backend', branding.includes("['image/png', 'image/jpeg', 'image/webp']")],
+  ['logo upload accepts only formats supported by backend', read('src/components/admin/LogoUploader.jsx').includes("['image/png', 'image/jpeg', 'image/webp']")],
   ['logo upload avoids manually setting multipart content type', api.includes("api.post('/admin/upload-logo', formData).then(unwrap)")],
   ['logo persistence safely initializes nested branding', routes.includes('const existingBranding = config.branding?.toObject?.() || config.branding || {}')],
   ['logo update writes an audit event', routes.includes('action: "Platform logo updated"')],

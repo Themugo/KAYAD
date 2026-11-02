@@ -30,9 +30,14 @@ const auditCreate = jest.fn(async (d) => ({ ...d }));
 jest.unstable_mockModule("../../models/AuditLog.js", () => ({ default: { create: auditCreate } }));
 jest.unstable_mockModule("../../middleware/auditLog.js", () => ({ auditLog: () => (req, res, next) => next() }));
 jest.unstable_mockModule("../../services/notification.service.js", () => ({ sendNotification: jest.fn(async () => {}) }));
+// system_settings as a tiny key/value store (the built-in logo store lives there); `failStore` simulates the database refusing the write.
+const kv = {}; let failStore = false;
 jest.unstable_mockModule("../../utils/supabase.js", () => ({
   initSupabase: jest.fn(), checkSupabaseReadiness: async () => ({ ok: true }), isSupabaseConnected: () => true, default: null,
-  getSupabase: () => ({ rpc: jest.fn(), from: () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }) }) }),
+  getSupabase: () => ({ rpc: jest.fn(), from: () => ({
+    select: () => ({ eq: (_c, key) => ({ maybeSingle: async () => ({ data: kv[key] ? { value: kv[key] } : null, error: null }) }) }),
+    upsert: async (row) => { if (failStore) return { error: { message: "db down" } }; kv[row.key] = row.value; return { error: null }; },
+  }) }),
 }));
 let uploadBehaviour = async () => ({ url: "https://res.cloudinary.com/kayadcloud/image/upload/v1/kayad/branding/new.png", thumb: "t" });
 const uploadImage = jest.fn((...a) => uploadBehaviour(...a));
@@ -62,7 +67,7 @@ afterAll(() => new Promise((r) => server.close(r)));
 beforeEach(() => {
   setStorageEnv();
   stored = { platformName: "KAYAD", branding: { logoType: "image", logoUrl: OLD, logoText: "KAYAD" } }; saves = 0;
-  uploadImage.mockClear(); auditCreate.mockClear();
+  uploadImage.mockClear(); auditCreate.mockClear(); for (const k of Object.keys(kv)) delete kv[k]; failStore = false;
   uploadBehaviour = async () => ({ url: "https://res.cloudinary.com/kayadcloud/image/upload/v1/kayad/branding/new.png", thumb: "t" });
 });
 
@@ -131,31 +136,89 @@ describe("validation: invalid files change nothing", () => {
   });
 });
 
-describe("failures leave the current logo in place", () => {
-  test("storage not configured ⇒ 503 LOGO_STORAGE_NOT_CONFIGURED, no secret in the response", async () => {
+const BUILTIN = /^\/api\/admin\/public\/logo\/[0-9a-f]{16}\.png$/;
+describe("built-in logo storage (works without image-host credentials)", () => {
+  test("image host not configured: the logo is stored, persisted, served as the same bytes, and shown by the public config", async () => {
     delete process.env.CLOUDINARY_API_SECRET;
     const r = await upload("u-admin");
-    expect(r.status).toBe(503);
-    expect(r.body.code).toBe("LOGO_STORAGE_NOT_CONFIGURED");
-    expect(r.body.message).not.toMatch(/CLOUDINARY_API_SECRET|SUPER-SECRET/);
-    expect(stored.branding.logoUrl).toBe(OLD);
-    expect(saves).toBe(0);
+    expect(r.status).toBe(200);
+    expect(r.body.storage).toBe("database");
+    expect(r.body.url).toMatch(BUILTIN);
+    expect(uploadImage).not.toHaveBeenCalled();
+    expect(stored.branding.logoUrl).toBe(r.body.url);
+    expect(saves).toBe(1);
+    expect((await publicBranding()).logoUrl).toBe(r.body.url);
+    const served = await fetch(base + r.body.url);
+    expect(served.status).toBe(200);
+    expect(served.headers.get("content-type")).toBe("image/png");
+    expect(served.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(served.headers.get("cache-control")).toMatch(/immutable/);
+    expect(Buffer.from(await served.arrayBuffer()).equals(PNG)).toBe(true);
+    expect(auditCreate.mock.calls.length + 0).toBeGreaterThanOrEqual(0);
   });
-  test("provider failure (interrupted upload) ⇒ 502, current logo kept, provider text and credentials not echoed", async () => {
+  test("image host failing: falls back to the built-in store, nothing about the provider is echoed", async () => {
     uploadBehaviour = async () => { throw new Error("connect ETIMEDOUT api_key=k SUPER-SECRET-VALUE"); };
     const r = await upload("u-admin");
-    expect(r.status).toBe(502);
-    expect(r.body.code).toBe("LOGO_UPLOAD_FAILED");
+    expect(r.status).toBe(200);
+    expect(r.body.storage).toBe("database");
     expect(JSON.stringify(r.body)).not.toMatch(/SUPER-SECRET|ETIMEDOUT|api_key/);
+    expect(stored.branding.logoUrl).toBe(r.body.url);
+  });
+  test.each([[undefined], ["http://evil.example/x.png"], ["https://res.cloudinary.com/othercloud/image/upload/x.png"], ["javascript:alert(1)"]])("image host returning an unusable URL (%s) is never stored; the built-in copy is used", async (url) => {
+    uploadBehaviour = async () => ({ url });
+    const r = await upload("u-admin");
+    expect(r.status).toBe(200);
+    expect(r.body.url).toMatch(BUILTIN);
+    expect(stored.branding.logoUrl).toBe(r.body.url);
+  });
+  test("image host working: the external URL is used", async () => {
+    const r = await upload("u-admin");
+    expect(r.body.storage).toBe("external");
+    expect(r.body.url).toMatch(/^https:\/\/res\.cloudinary\.com\/kayadcloud\//);
+  });
+  test("both stores unavailable: truthful error, the current logo is untouched, no secret leaks", async () => {
+    delete process.env.CLOUDINARY_API_SECRET; failStore = true;
+    const r = await upload("u-admin");
+    expect(r.status).toBe(503);
+    expect(r.body.code).toBe("LOGO_STORAGE_UNAVAILABLE");
+    expect(r.body.message).toMatch(/current logo was not changed/i);
+    expect(JSON.stringify(r.body)).not.toMatch(/CLOUDINARY_API_SECRET|SUPER-SECRET|db down/);
     expect(stored.branding.logoUrl).toBe(OLD);
     expect(saves).toBe(0);
   });
-  test.each([[undefined], ["http://evil.example/x.png"], ["https://res.cloudinary.com/othercloud/image/upload/x.png"], ["javascript:alert(1)"]])("provider returning an unusable URL (%s) is not stored", async (url) => {
-    uploadBehaviour = async () => ({ url });
-    const r = await upload("u-admin");
-    expect(r.status).toBe(502);
+  test("a file over 1 MB cannot use the built-in store: 413 with advice, logo unchanged", async () => {
+    delete process.env.CLOUDINARY_API_SECRET;
+    const big = Buffer.concat([PNG.subarray(0, 8), Buffer.alloc(1024 * 1024 + 10, 2)]);
+    const r = await upload("u-admin", { bytes: big });
+    expect(r.status).toBe(413);
+    expect(r.body.code).toBe("LOGO_TOO_LARGE_FOR_BUILTIN_STORAGE");
     expect(stored.branding.logoUrl).toBe(OLD);
     expect(saves).toBe(0);
+  });
+  test("replacing a logo keeps the earlier file reachable, and a second identical upload is not duplicated", async () => {
+    delete process.env.CLOUDINARY_API_SECRET;
+    const a = await upload("u-admin");
+    const PNG2 = Buffer.concat([PNG, Buffer.from([9, 9, 9])]);
+    const b = await upload("u-admin", { bytes: PNG2 });
+    expect(a.body.url).not.toBe(b.body.url);
+    expect((await fetch(base + a.body.url)).status).toBe(200);
+    expect((await fetch(base + b.body.url)).status).toBe(200);
+    await upload("u-admin");
+    expect(kv.branding_logo_assets.items.filter((i) => a.body.url.includes(i.hash))).toHaveLength(1);
+    expect(stored.branding.logoUrl).toBe(a.body.url);
+  });
+  test.each([["0000000000000000.png"], ["../../etc/passwd"], ["abcdefabcdefabcd.svg"], ["ABCDEFABCDEFABCD.png"], ["x"]])("serving %s -> 404, never a file", async (name) => {
+    expect((await fetch(`${base}/api/admin/public/logo/${encodeURIComponent(name)}`)).status).toBe(404);
+  });
+  test("the built-in URL passes branding validation; look-alikes do not", () => {
+    expect(isAllowedLogoUrl("/api/admin/public/logo/0123456789abcdef.png")).toBe(true);
+    for (const u of ["/api/admin/public/logo/0123456789abcdef.svg", "/api/admin/public/logo/short.png", "/api/admin/public/logo/0123456789abcdef.png/../x", "//evil/api/admin/public/logo/0123456789abcdef.png"]) expect(isAllowedLogoUrl(u)).toBe(false);
+  });
+  test("public config still answers when the database lacks the later columns (only the fields present are returned)", async () => {
+    const c = (await (await fetch(`${base}/api/admin/public/config`)).json());
+    expect(c.success).toBe(true);
+    expect(c.config.branding.logoUrl).toBe(OLD);
+    expect(c.config).not.toHaveProperty("heroCarIds");
   });
 });
 
