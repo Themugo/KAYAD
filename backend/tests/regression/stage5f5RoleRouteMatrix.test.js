@@ -82,7 +82,8 @@ const MATRIX = [
   ["POST", "/api/admin/audit-log", ["admin"]],
   ["PUT", "/api/admin/config", ["admin"]],
   // Any staff role (documented read-only aggregates / operational feeds — see report OD-5):
-  ["GET", "/api/admin/stats", STAFF],
+  // ghost_checker is a field-inspection role: /stats uses staffRole, which deliberately excludes it (revenue/platform totals). Fail-closed is the owner-safe policy (defect D-11); widening it is a product decision, not a CI fix.
+  ["GET", "/api/admin/stats", STAFF.filter((r) => r !== "ghost_checker")],
   ["GET", "/api/admin/alerts", STAFF],
   ["GET", "/api/admin/system/health", STAFF],
   // staffRole list excludes ghost_checker by design:

@@ -7,7 +7,7 @@ const pkg = JSON.parse(fs.readFileSync(path.join(root, 'package.json'), 'utf8'))
 const lock = JSON.parse(fs.readFileSync(path.join(root, 'package-lock.json'), 'utf8'));
 
 const floors = {
-  undici: '8.10.2',
+  undici: '8.12.3',
   esbuild: '0.28.1',
   'follow-redirects': '1.16.0',
   'js-yaml': '4.3.1',

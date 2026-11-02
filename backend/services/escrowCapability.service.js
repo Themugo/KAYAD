@@ -45,7 +45,16 @@ const CAPABILITY_ELIGIBLE_ROLES = Object.freeze(["individual_seller", "dealer"])
  */
 export async function getSellerEscrowCapabilityStatus(sellerId) {
   if (!sellerId) return "none";
-  const seller = await findById("users", sellerId, "role,escrowCapabilityStatus");
+  let seller;
+  try {
+    seller = await findById("users", sellerId, "role,escrowCapabilityStatus");
+  } catch (err) {
+    // A database that has not yet applied the escrow-capability migration has no users.escrow_capability_status column (Postgres 42703).
+    // That used to turn EVERY vehicle create/edit into an HTTP 500. No column means no capability has ever been granted, so the safe,
+    // fail-closed answer is "none" (escrow stays off for the vehicle); listing itself must not depend on escrow being installed.
+    if (err?.code === "42703" || /escrow_capability_status/i.test(String(err?.message || ""))) return "none";
+    throw err;
+  }
   if (!seller) return "none";
   return seller.escrowCapabilityStatus || "none";
 }
