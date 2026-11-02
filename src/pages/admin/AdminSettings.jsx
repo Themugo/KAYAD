@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { adminAPI } from '../../api/api';
 import AdminSettingsBranding from './AdminSettingsBranding';
 import AdminSettingsOnboarding from './AdminSettingsOnboarding';
+import AdminSettingsListing from './AdminSettingsListing';
 
 const DEFAULTS = {
   platformName: 'KAYAD',
@@ -216,6 +217,7 @@ export default function AdminSettings() {
     const all = [
       { id: 'general', label: 'General' },
       { id: 'onboarding', label: 'Onboarding' },
+      { id: 'listing', label: 'Listing & Plans' },
       { id: 'branding', label: 'Branding' },
       { id: 'payments', label: 'Payments' },
       { id: 'reconciliation', label: 'Reconciliation' },
@@ -263,6 +265,7 @@ export default function AdminSettings() {
 
         {/* ═══ ONBOARDING (Stage 5) ═══ */}
         {tab === 'onboarding' && <AdminSettingsOnboarding />}
+        {tab === 'listing' && <AdminSettingsListing />}
 
         {/* ═══ BRANDING ═══ */}
         {tab === 'branding' && (

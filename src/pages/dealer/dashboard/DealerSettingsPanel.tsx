@@ -340,6 +340,11 @@ function PlanSection() {
             {ent.locked && <p role="alert" className="mt-2 text-sm text-[#7A271A]">New listings are currently locked on your account. Contact KAYAD support.</p>}
           </div>
         </>
+      ) : ent.subscriptionRequired === false ? (
+        <div className="p-4 rounded-xl bg-[#ECFDF3] border border-[#ABEFC6]">
+          <p className="font-semibold text-[#067647]">Listing is free</p>
+          <p className="text-sm text-[#067647]">You can publish vehicles without a plan. KAYAD may offer optional plans later.</p>
+        </div>
       ) : (
         <div role="alert" className="p-4 rounded-xl bg-[#FEF3F2] border border-[#FDA29B]">
           <p className="font-semibold text-[#7A271A]">No active listing plan</p>

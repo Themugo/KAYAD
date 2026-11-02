@@ -622,7 +622,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
         </nav>
 
         <div className="p-4 border-t border-[#D7E7E4]">
-          <DealerAccountStatus approved={user?.status === 'approved' || user?.approved === true} />
+          <DealerAccountStatus />
         </div>
       </aside>
 

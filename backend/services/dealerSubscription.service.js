@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { getSupabase } from "../utils/supabase.js";
 import { findById } from "../db/index.js";
 import Car from "../models/Car.js";
+import { getDealerListingPolicy } from "./dealerListingPolicy.service.js";
 import { emitCommunication, COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
 
 const normalizePlan = (plan) => ({
@@ -71,6 +72,7 @@ export async function getDealerEntitlement(dealerId) {
     deletedAt: { $exists: false },
     status: { $in: ["available", "pending"] },
   });
+  const policy = await getDealerListingPolicy();
   const listingMax = usable ? Number(subscription.listing_max || 0) : 0;
   return {
     subscription,
@@ -85,6 +87,7 @@ export async function getDealerEntitlement(dealerId) {
     unlimitedListings: usable && listingMax === 0,
     features: usable && Array.isArray(subscription.features) ? subscription.features : [],
     locked: Boolean(user.listingsLocked),
+    subscriptionRequired: policy.subscriptionRequired,
   };
 }
 
@@ -172,7 +175,15 @@ export async function reactivateDealerSubscription(dealerId) {
  * the database entitlement remains the source of truth for plan state.
  */
 export async function assertDealerCanCreateListing(dealerId) {
-  const entitlement = await getDealerEntitlement(dealerId);
+  const [entitlement, policy] = await Promise.all([getDealerEntitlement(dealerId), getDealerListingPolicy()]);
+  if (entitlement.locked) {
+    const error = new Error("Dealer listings are currently locked. Contact platform support.");
+    error.code = "LISTINGS_LOCKED";
+    error.status = 403;
+    throw error;
+  }
+  // Free listing (default): no plan, limit or expiry applies, so a granted plan never leaves a dealer worse off than a free one.
+  if (!policy.subscriptionRequired) return entitlement;
   if (entitlement.status === "none") {
     const error = new Error("An active dealer subscription is required to list vehicles.");
     error.code = "SUBSCRIPTION_REQUIRED";

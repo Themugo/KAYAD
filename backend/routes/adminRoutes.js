@@ -1,3 +1,4 @@
+import { getDealerListingPolicy, updateDealerListingPolicy } from "../services/dealerListingPolicy.service.js";
 import { parseBonusAmount } from "../utils/referralGuards.js"; // STAGE 4A (G9)
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
@@ -1297,6 +1298,40 @@ router.put(
         await auditAfterCommit({ action: "Dealer paperwork update rejected", ...actor, details: { outcome: "failed", code: err.code, attempted: Object.keys(items && typeof items === "object" ? items : {}) } });
         return res.status(err.status).json({ success: false, code: err.code, message: err.message, errors: err.errors });
       }
+      throw err;
+    }
+  }),
+);
+
+// =============================
+// 🏷️ DEALER LISTING POLICY (is a subscription required to list?)
+// =============================
+// Default is FREE listing. Packages stay optional; an admin may require one later. Finance permission, like granting plans.
+router.get(
+  "/settings/dealer-listing-policy",
+  protect,
+  adminOnly,
+  requirePermission(PERMISSIONS.MANAGE_PAYMENTS),
+  asyncHandler(async (_req, res) => {
+    const policy = await getDealerListingPolicy();
+    res.set("Cache-Control", "no-store");
+    res.json({ success: true, ...policy });
+  }),
+);
+
+router.put(
+  "/settings/dealer-listing-policy",
+  protect,
+  adminOnly,
+  requirePermission(PERMISSIONS.MANAGE_PAYMENTS),
+  asyncHandler(async (req, res) => {
+    const actor = { admin: req.user.name || req.user.email, adminId: req.user.id };
+    try {
+      const { before, after } = await updateDealerListingPolicy({ subscriptionRequired: req.body?.subscriptionRequired, actorId: req.user.id });
+      await auditAfterCommit({ action: "Dealer listing policy updated", ...actor, details: { outcome: "success", before, after } });
+      res.json({ success: true, message: after.subscriptionRequired ? "A subscription is now required to list." : "Listing is now free for approved dealers.", ...after, source: "database" });
+    } catch (err) {
+      if (err?.status === 400) return res.status(400).json({ success: false, code: err.code, message: err.message });
       throw err;
     }
   }),
