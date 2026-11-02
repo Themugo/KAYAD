@@ -77,6 +77,8 @@ const InspectionMarketplacePage = React.lazy(() => import('./features/Inspection
 // App() is now a thin wrapper providing that, with the real logic in
 // AppInner().
 // Workspaces that require a verified session (backend authorization stays authoritative).
+// Buyer / private-seller workspaces a dealer account does not use (the dealer workspace has its own equivalents).
+const DEALER_REDIRECTED_NAVS = new Set(['dashboard', 'buyer-platform', 'seller-dashboard', 'seller-platform', 'seller', 'sell', 'payments', 'profile', 'saved']);
 const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard', 'escrow-operations']);
 // Of the workspaces above, these render their own "Sign in to ..." prompt
 // (with a button into the real auth flow) when `user` is null, instead of
@@ -160,6 +162,23 @@ function AppInner() {
   // expose a private workspace to the wrong account. Backend authorization
   // remains authoritative; this gate prevents accidental cross-surface
   // rendering and stale deep links from landing on the wrong workspace.
+  // Opens one section of the dealer workspace (?nav=dealer-dashboard&section=...). Used by the dealer menu and by the redirect below.
+  const openDealerSection = useCallback((section: string, mode?: string) => {
+    const params = new URLSearchParams({ nav: 'dealer-dashboard' });
+    if (section && section !== 'overview') params.set('section', section);
+    if (mode === 'new' && section === 'inventory') params.set('mode', 'new');
+    window.history.replaceState({}, '', `/?${params.toString()}`);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    setActiveNav('dealer-dashboard');
+  }, [setActiveNav]);
+
+  // A dealer account works only in the Dealer workspace. Buyer and private-seller pages are not offered to it in the menu, and a stale
+  // link or typed address to them lands in the dealer workspace instead of showing buyer or seller controls.
+  useEffect(() => {
+    if (authLoading || !isAuth || authUser?.role !== 'dealer') return;
+    if (DEALER_REDIRECTED_NAVS.has(activeNav)) openDealerSection(activeNav === 'profile' ? 'settings' : 'overview');
+  }, [activeNav, authLoading, isAuth, authUser?.role, openDealerSection]);
+
   useEffect(() => {
     if (authLoading) return;
     if (!protectedNavs.has(activeNav)) return;
@@ -468,6 +487,12 @@ function AppInner() {
     // `scope:value` ids from global navigation select existing sections of a
     // destination. Auction filters remain in-page; escrow sublinks resolve to
     // the public information page because private deals belong in user portals.
+    // `dealer:<section>[:new]` opens a section of the dealer workspace (inventory, leads, analytics, settings...).
+    if (nav.startsWith('dealer:')) {
+      const [, section = 'overview', mode] = nav.split(':');
+      openDealerSection(section, mode);
+      return;
+    }
     if (nav.startsWith('auctions:')) {
       const tab = nav.slice('auctions:'.length);
       const params = new URLSearchParams({ nav: 'auctions' });
@@ -494,7 +519,7 @@ function AppInner() {
       return;
     }
     setActiveNav(nav);
-  }, [launchInspections]);
+  }, [launchInspections, openDealerSection]);
 
   const isMarketplaceSurface = activeNav === 'marketplace' || activeNav === 'saved';
   const privateWorkspaceNavs = new Set([

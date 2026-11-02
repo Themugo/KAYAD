@@ -269,6 +269,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   const signedIn = Boolean(user);
+  // A dealer works only in the Dealer workspace: the buyer / private-seller pages are not part of a dealer account's menu.
+  const isDealerUser = user?.role === 'dealer';
   const isSectionActive = (item: NavPrimary) => item.match.includes(activeNav);
 
   const openGroup = useCallback((id: string) => {
@@ -431,7 +433,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           {/* Saved vehicles are per-user: shown only once signed in. */}
-          {user && (
+          {user && !isDealerUser && (
             <button
               type="button"
               onClick={() => handleNavSelect('saved')}
@@ -453,14 +455,14 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             type="button"
-            onClick={() => handleNavSelect('seller-platform')}
+            onClick={() => handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'seller-platform')}
             className="kayad-cta"
             id="cta-sell-car"
-            aria-label="Sell Vehicle"
+            aria-label={isDealerUser ? 'Add Vehicle' : 'Sell Vehicle'}
           >
             <PlusCircle className="w-4 h-4 stroke-[2]" aria-hidden="true" />
-            <span className="max-[359px]:hidden">Sell Vehicle</span>
-            <span className="min-[360px]:hidden" aria-hidden="true">Sell</span>
+            <span className="max-[359px]:hidden">{isDealerUser ? 'Add Vehicle' : 'Sell Vehicle'}</span>
+            <span className="min-[360px]:hidden" aria-hidden="true">{isDealerUser ? 'Add' : 'Sell'}</span>
           </button>
 
             {/* STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE FIX: while the
@@ -519,8 +521,53 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </div>
                     </div>
 
+                    {/* DEALER WORKSPACE: a dealer's whole menu lives here; buyer and private-seller pages are not offered. */}
+                    {isDealerUser && (
+                      <div className="py-1 bg-[#DDF4F0]/50">
+                        <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-[#64748B]">
+                          Dealer Management
+                        </div>
+                        <button
+                          onClick={() => handleNavSelect('dealer:overview')}
+                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
+                        >
+                          <Building2 className="w-4 h-4 text-[#0A3340]" />
+                          <span>Dealer Dashboard</span>
+                        </button>
+                        <button
+                          onClick={() => handleNavSelect('dealer:inventory')}
+                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
+                        >
+                          <Layers className="w-4 h-4 text-[#0A3340]" />
+                          <span>Inventory</span>
+                        </button>
+                        <button
+                          onClick={() => handleNavSelect('dealer:inventory:new')}
+                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
+                        >
+                          <PlusCircle className="w-4 h-4 text-[#0A3340]" />
+                          <span>Add Vehicle</span>
+                        </button>
+                        <button
+                          onClick={() => handleNavSelect('dealer:leads')}
+                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
+                        >
+                          <MessageSquare className="w-4 h-4 text-[#0A3340]" />
+                          <span>Leads</span>
+                        </button>
+                        <button
+                          onClick={() => handleNavSelect('dealer:analytics')}
+                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
+                        >
+                          <BarChart3 className="w-4 h-4 text-[#0A3340]" />
+                          <span>Analytics</span>
+                        </button>
+                      </div>
+                    )}
+
                     {/* Standard Links */}
                     <div className="py-1">
+{!isDealerUser && (
                       <button
                         onClick={() => isStaffRole(user.role) ? handleAdminRoute('/admin') : handleNavSelect('dashboard')}
                         className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
@@ -528,8 +575,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <LayoutDashboard className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
                         <span>{isStaffRole(user.role) ? 'Operations Dashboard' : 'Buyer Command Center'}</span>
                       </button>
+)}
 
-                      {!isStaffRole(user.role) && (
+                      {!isStaffRole(user.role) && !isDealerUser && (
                       <button
                         onClick={() => handleNavSelect('seller-dashboard')}
                         className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
@@ -567,7 +615,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         )}
                       </button>
 
-                      {!isStaffRole(user.role) && (
+                      {!isStaffRole(user.role) && !isDealerUser && (
                         <>
                       <button
                         onClick={() => handleNavSelect('seller-platform')}
@@ -625,43 +673,13 @@ export const Navbar: React.FC<NavbarProps> = ({
                       )}
 
                       <button
-                        onClick={() => handleNavSelect('profile')}
+                        onClick={() => handleNavSelect(isDealerUser ? 'dealer:settings' : 'profile')}
                         className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
                       >
                         <Settings className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
-                        <span>Account Settings</span>
+                        <span>{isDealerUser ? 'Dealer Settings' : 'Account Settings'}</span>
                       </button>
                     </div>
-
-                    {/* ROLE-SPECIFIC OPTIONS */}
-                    {user.role === 'dealer' && (
-                      <div className="border-t border-[#D7E7E4] pt-1.5 mt-1.5 bg-[#DDF4F0]/50 pb-1">
-                        <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-[#64748B]">
-                          Dealer Management
-                        </div>
-                        <button
-                          onClick={() => handleNavSelect('dealer-dashboard')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
-                        >
-                          <Building2 className="w-4 h-4 text-[#0A3340]" />
-                          <span>Dealer Dashboard</span>
-                        </button>
-                        <button
-                          onClick={() => handleNavSelect('dealer-dashboard')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
-                        >
-                          <Layers className="w-4 h-4 text-[#0A3340]" />
-                          <span>Dealer Inventory</span>
-                        </button>
-                        <button
-                          onClick={() => handleNavSelect('dealer-dashboard')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
-                        >
-                          <BarChart3 className="w-4 h-4 text-[#0A3340]" />
-                          <span>Dealer Analytics</span>
-                        </button>
-                      </div>
-                    )}
 
                     {/* ONE ACCOUNT: a buyer applies to sell on the same account. Dealer tools stay hidden until approval turns the role into dealer. */}
                     {user.role === 'buyer' && (
@@ -834,22 +852,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <span className="block px-2 pb-1 pt-1 text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">Your KAYAD</span>
                   <div className="grid grid-cols-2 gap-1.5">
                     {user && <>
-                      <button type="button" onClick={() => handleNavSelect('dashboard')} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><LayoutDashboard className="h-4 w-4 text-[#79D8CF]" />Dashboard</button>
+                      <button type="button" onClick={() => handleNavSelect(isDealerUser ? 'dealer:overview' : 'dashboard')} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><LayoutDashboard className="h-4 w-4 text-[#79D8CF]" />Dashboard</button>
                       <button type="button" onClick={() => handleNavSelect('chat')} className="flex min-h-11 items-center justify-between gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><span className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-[#79D8CF]" />Messages</span>{effectiveUnread > 0 && <span className="rounded-full bg-[#13B8A6] px-1.5 text-[9px] font-black text-[#062E3A]">{effectiveUnread}</span>}</button>
                       <button type="button" onClick={() => { navigate('/notifications'); setMobileMenuOpen(false); }} className="flex min-h-11 items-center justify-between gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><span className="flex items-center gap-2"><Bell className="h-4 w-4 text-[#79D8CF]" />Notifications</span>{notificationUnreadCount > 0 && <span className="rounded-full bg-rose-500 px-1.5 text-[9px] font-black text-white">{notificationUnreadCount}</span>}</button>
-                      <button type="button" onClick={() => handleNavSelect('payments')} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><CreditCard className="h-4 w-4 text-[#79D8CF]" />Payment History</button>
-                      <button type="button" onClick={() => handleNavSelect('saved')} className="flex min-h-11 items-center justify-between gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><span className="flex items-center gap-2"><Heart className="h-4 w-4 text-[#79D8CF]" />Saved Vehicles</span>{savedCount > 0 && <span className="rounded-full bg-[#176B87] px-1.5 text-[9px] font-black text-white">{savedCount}</span>}</button>
+                      {!isDealerUser && <button type="button" onClick={() => handleNavSelect('payments')} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><CreditCard className="h-4 w-4 text-[#79D8CF]" />Payment History</button>}
+                      {!isDealerUser && <button type="button" onClick={() => handleNavSelect('saved')} className="flex min-h-11 items-center justify-between gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><span className="flex items-center gap-2"><Heart className="h-4 w-4 text-[#79D8CF]" />Saved Vehicles</span>{savedCount > 0 && <span className="rounded-full bg-[#176B87] px-1.5 text-[9px] font-black text-white">{savedCount}</span>}</button>}
                       {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><Sliders className="h-4 w-4 text-[#79D8CF]" />Compare</button>}
                     </>}
                     <button type="button" onClick={() => { onOpenAlerts(); setMobileMenuOpen(false); }} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><Bell className="h-4 w-4 text-[#79D8CF]" />Price Alerts</button>
                   </div>
                 </section>
 
-                {user?.role === 'dealer' && <section className="mb-4 rounded-[20px] border border-white/[0.07] bg-white/[0.035] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">Dealer Tools</span><div className="grid grid-cols-2 gap-1.5"><button type="button" onClick={() => handleNavSelect('dealer-dashboard')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Building2 className="mb-1 h-4 w-4 text-[#79D8CF]" />Dashboard</button><button type="button" onClick={() => handleNavSelect('dealer-dashboard')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Layers className="mb-1 h-4 w-4 text-[#79D8CF]" />Inventory</button></div></section>}
+                {isDealerUser && <section className="mb-4 rounded-[20px] border border-white/[0.07] bg-white/[0.035] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">Dealer Tools</span><div className="grid grid-cols-2 gap-1.5"><button type="button" onClick={() => handleNavSelect('dealer:overview')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Building2 className="mb-1 h-4 w-4 text-[#79D8CF]" />Dashboard</button><button type="button" onClick={() => handleNavSelect('dealer:inventory')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Layers className="mb-1 h-4 w-4 text-[#79D8CF]" />Inventory</button><button type="button" onClick={() => handleNavSelect('dealer:inventory:new')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><PlusCircle className="mb-1 h-4 w-4 text-[#79D8CF]" />Add Vehicle</button><button type="button" onClick={() => handleNavSelect('dealer:leads')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><MessageSquare className="mb-1 h-4 w-4 text-[#79D8CF]" />Leads</button><button type="button" onClick={() => handleNavSelect('dealer:analytics')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><BarChart3 className="mb-1 h-4 w-4 text-[#79D8CF]" />Analytics</button><button type="button" onClick={() => handleNavSelect('dealer:settings')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Settings className="mb-1 h-4 w-4 text-[#79D8CF]" />Settings</button></div></section>}
                 {user?.role === 'mechanic' && <section className="mb-4 rounded-[20px] border border-emerald-300/10 bg-emerald-400/[0.05] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-emerald-300">Inspection Tools</span><button type="button" onClick={() => handleNavSelect('inspections')} className="flex w-full items-center gap-2 rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-emerald-100"><ShieldCheck className="h-4 w-4" />Inspection Portal</button></section>}
                 {(user?.role === 'admin' || isStaffRole(user?.role)) && <section className="mb-4 rounded-[20px] border border-white/[0.07] bg-white/[0.035] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-[#A8B8BC]">Administration</span><button type="button" onClick={() => handleNavSelect('admin')} className="flex w-full items-center gap-2 rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Settings className="h-4 w-4" />Admin Console</button></section>}
 
-                <button type="button" onClick={() => handleNavSelect('seller-platform')} id="mobile-cta-sell-car" className="mb-4 flex min-h-14 w-full items-center justify-between rounded-[20px] border border-[#43D0C2]/40 bg-gradient-to-r from-[#0D7187] to-[#176B87] px-4 text-left text-white shadow-[0_16px_35px_rgba(7,57,68,.22)] active:scale-[.99]"><span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/10"><PlusCircle className="h-5 w-5" /></span><span><strong className="block text-sm font-black">Sell Vehicle</strong><small className="text-[10px] text-white/60">List your vehicle with KAYAD</small></span></span><ChevronDown className="h-5 w-5 -rotate-90 text-[#8DE4DB]" /></button>
+                <button type="button" onClick={() => handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'seller-platform')} id="mobile-cta-sell-car" className="mb-4 flex min-h-14 w-full items-center justify-between rounded-[20px] border border-[#43D0C2]/40 bg-gradient-to-r from-[#0D7187] to-[#176B87] px-4 text-left text-white shadow-[0_16px_35px_rgba(7,57,68,.22)] active:scale-[.99]"><span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/10"><PlusCircle className="h-5 w-5" /></span><span><strong className="block text-sm font-black">{isDealerUser ? 'Add Vehicle' : 'Sell Vehicle'}</strong><small className="text-[10px] text-white/60">{isDealerUser ? 'Add stock to your inventory' : 'List your vehicle with KAYAD'}</small><small hidden></small></span></span><ChevronDown className="h-5 w-5 -rotate-90 text-[#8DE4DB]" /></button>
                 <div className="flex items-center justify-between border-t border-white/[0.08] px-1 pt-4 text-[10px] text-white/50"><span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-[#79D8CF]" />{selectedCounty}</span><button type="button" onClick={() => { onOpenAlerts(); setMobileMenuOpen(false); }} className="inline-flex min-h-11 items-center px-2 font-black text-white/65">Price alerts</button></div>
               </div>
             </div>

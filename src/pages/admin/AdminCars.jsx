@@ -6,16 +6,29 @@ import { classifyAdminFailure } from '../../utils/adminLoadFailure';
 import { timeAgo } from '../../utils/helpers';
 
 const STATUS_BADGE = {
+  available: 'badge-green',
+  pending: 'badge-gold',
+  hidden: 'badge-muted',
   live: 'badge-green',
   draft: 'badge-muted',
   ended: 'badge-muted',
   sold: 'badge-gold',
 };
 
+const cleanStatus = (value) => (typeof value === 'string' && value.trim() ? value.trim().toLowerCase() : null);
+
+/**
+ * The status an admin needs to see. An auction state is shown only when the listing really is in an auction; a plain listing's
+ * auction field is 'none', which used to hide the real marketplace status (pending / available / hidden) behind the word "none".
+ */
 export const normalizeListingStatus = (car) => {
-  const value = car?.auctionStatus ?? car?.auction_status ?? car?.status;
-  return typeof value === 'string' && value.trim() ? value.trim().toLowerCase() : 'unknown';
+  const auction = cleanStatus(car?.auctionStatus ?? car?.auction_status);
+  if (auction && auction !== 'none') return auction;
+  return cleanStatus(car?.status) || 'unknown';
 };
+
+// Marketplace statuses are filtered on the listing status; auction states on the auction status.
+const LISTING_STATUS_FILTERS = new Set(['pending', 'available', 'hidden']);
 
 export const getLoadErrorMessage = (error) => `Listings could not be loaded. ${classifyAdminFailure(error).reason} Your records have not been cleared.`;
 
@@ -24,7 +37,7 @@ export const isListingArray = (value) => Array.isArray(value) && value.every((it
   (typeof item._id === 'string' || typeof item.id === 'string')
 );
 
-function CarRow({ car: c, onDelete, onSelect, actionId }) {
+function CarRow({ car: c, onDelete, onSelect, onDecide, canDecide, actionId }) {
   const priceValue = c.price ?? c.startingPrice;
   const price = priceValue === null || priceValue === undefined || priceValue === '' ? NaN : Number(priceValue);
   const vehicle = [c.year, Number.isFinite(Number(c.mileage)) && c.mileage !== null && c.mileage !== undefined && c.mileage !== '' ? `${Number(c.mileage).toLocaleString()} km` : null].filter(Boolean).join(' · ');
@@ -41,12 +54,64 @@ function CarRow({ car: c, onDelete, onSelect, actionId }) {
       <td>{vehicle || '—'}</td>
       <td><span className={`badge ${STATUS_BADGE[status] || 'badge-muted'}`}>{status.replace(/_/g, ' ')}</span></td>
       <td>{(c.createdAt || c.created_at) ? timeAgo(c.createdAt || c.created_at) : '—'}</td>
-      <td>
+      <td style={{ whiteSpace: 'nowrap' }}>
+        {canDecide && (status === 'pending' || status === 'hidden') && (
+          <button type="button" className="btn btn-sm btn-primary" style={{ marginRight: 6 }} aria-label={`Approve listing ${title}`} disabled={actionId === `${id}-mod`} onClick={(e) => { e.stopPropagation(); onDecide(c, 'approve'); }}>
+            {actionId === `${id}-mod` ? 'Working…' : 'Approve'}
+          </button>
+        )}
+        {canDecide && status === 'available' && (
+          <button type="button" className="btn btn-sm btn-outline" style={{ marginRight: 6 }} aria-label={`Hide listing ${title}`} disabled={actionId === `${id}-mod`} onClick={(e) => { e.stopPropagation(); onDecide(c, 'hide'); }}>
+            {actionId === `${id}-mod` ? 'Working…' : 'Hide'}
+          </button>
+        )}
         <button type="button" className="btn btn-sm btn-danger" aria-label={`Remove listing ${title}`} disabled={actionId === `${id}-del`} onClick={(e) => { e.stopPropagation(); onDelete(c); }}>
           {actionId === `${id}-del` ? 'Removing…' : 'Remove'}
         </button>
       </td>
     </tr>
+  );
+}
+
+/** Owner switch for how new listings go live. Reads/writes the same onboarding policy as Settings > Onboarding. */
+function ListingPublishPolicy() {
+  const { toast } = useToast();
+  const [state, setState] = useState({ status: 'loading' });
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    Promise.resolve().then(() => adminAPI.getOnboardingSettings()).then((res) => {
+      if (alive) setState({ status: 'ready', policy: res.policy, canChange: res.canChange === true });
+    }).catch(() => { if (alive) setState({ status: 'error' }); });
+    return () => { alive = false; };
+  }, []);
+  if (state.status !== 'ready') return null;
+  const auto = state.policy.listingModeration === 'auto_publish';
+  const change = async (value) => {
+    setSaving(true);
+    try {
+      const res = await adminAPI.updateOnboardingSettings({ listingModeration: value, expectedRevision: state.policy.revision });
+      setState((p) => ({ ...p, policy: res.policy }));
+      toast(value === 'auto_publish' ? 'New listings from approved sellers now publish automatically' : 'New listings are now held for your approval', 'success');
+    } catch (error) {
+      toast(error?.response?.data?.message ? `Not saved: ${error.response.data.message}` : 'The setting was not saved.', 'error');
+    } finally { setSaving(false); }
+  };
+  return (
+    <div className="card" style={{ padding: 16, marginBottom: 20, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+      <div style={{ flex: 1, minWidth: 240 }}>
+        <div style={{ fontWeight: 700, fontSize: 14 }}>How new listings go live</div>
+        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+          {auto ? 'Auto-publish: listings from approved sellers and dealers appear on the marketplace immediately.' : 'Held for review: every new listing waits here until you approve it.'}
+        </div>
+      </div>
+      {state.canChange ? (
+        <select className="input" aria-label="Listing moderation" style={{ width: 'auto' }} value={state.policy.listingModeration} disabled={saving} onChange={(e) => change(e.target.value)}>
+          <option value="hold_for_review">Hold every new listing for review</option>
+          <option value="auto_publish">Auto-publish for approved sellers</option>
+        </select>
+      ) : <span className="badge badge-muted">Only the platform owner can change this</span>}
+    </div>
   );
 }
 
@@ -74,7 +139,7 @@ export default function AdminCars() {
     try {
       const params = { page, limit: 20 };
       if (search.trim()) params.search = search.trim();
-      if (statusFilter !== 'all') params.auctionStatus = statusFilter;
+      if (statusFilter !== 'all') { if (LISTING_STATUS_FILTERS.has(statusFilter)) params.status = statusFilter; else params.auctionStatus = statusFilter; }
       const data = await adminAPI.cars(params);
 
       if (!data || typeof data !== 'object' || Array.isArray(data)) {
@@ -139,10 +204,29 @@ export default function AdminCars() {
     }
   }, [selected, toast, load]);
 
+  const handleDecide = useCallback(async (car, action) => {
+    const id = car?._id || car?.id;
+    if (!id) { toast('This listing has no valid identifier.', 'error'); return; }
+    setActionId(`${id}-mod`);
+    try {
+      await adminAPI.moderateCar(id, { action });
+      const next = action === 'approve' ? 'available' : 'hidden';
+      toast(action === 'approve' ? 'Listing approved and now live on the marketplace' : 'Listing hidden from the marketplace', 'success');
+      setCars((prev) => prev.map((item) => ((item._id || item.id) === id ? { ...item, status: next } : item)));
+    } catch (error) {
+      const data = error?.response?.data;
+      toast(data?.message ? `Not changed: ${data.message}` : 'The decision was not saved. The server did not confirm the change.', 'error');
+      await load();
+    } finally {
+      setActionId(null);
+    }
+  }, [toast, load]);
+
   const pageStats = useMemo(() => {
     const statuses = cars.map(normalizeListingStatus);
     return {
       live: statuses.filter((status) => status === 'live').length,
+      published: statuses.filter((status) => status === 'available').length,
       sold: statuses.filter((status) => status === 'sold').length,
       pending: statuses.filter((status) => status === 'draft' || status === 'pending' || status === 'awaiting_review').length,
     };
@@ -165,6 +249,8 @@ export default function AdminCars() {
           </button>
         </div>
 
+        <ListingPublishPolicy />
+
         {loadError && (
           <div role="alert" aria-live="polite" style={{ border: '1px solid var(--border, #d8dce2)', borderRadius: 10, padding: 16, marginBottom: 20 }}>
             <div style={{ fontWeight: 700, marginBottom: 4 }}>{hasLoaded ? 'Could not refresh listings' : 'Could not load listings'}</div>
@@ -177,6 +263,7 @@ export default function AdminCars() {
         <div className="stat-grid" style={{ marginBottom: 24 }}>
           {[
             { label: 'Total Listings', value: hasLoaded ? total : '—', note: 'Across all pages', color: 'var(--brand)' },
+            { label: 'Published', value: hasLoaded ? pageStats.published : '—', note: 'On this page', color: 'var(--green-400)' },
             { label: 'Live Auctions', value: hasLoaded ? pageStats.live : '—', note: 'On this page', color: 'var(--green-400)' },
             { label: 'Sold', value: hasLoaded ? pageStats.sold : '—', note: 'On this page', color: 'var(--brand)' },
             { label: 'Pending', value: hasLoaded ? pageStats.pending : '—', note: 'On this page', color: 'var(--orange-400)' },
@@ -196,6 +283,9 @@ export default function AdminCars() {
           <select className="input" value={statusFilter} onChange={(event) => { setStatusFilter(event.target.value); setPage(1); }}
             style={{ width: 'auto' }} aria-label="Filter by auction status">
             <option value="all">All Status</option>
+            <option value="pending">Pending approval</option>
+            <option value="available">Published</option>
+            <option value="hidden">Hidden</option>
             <option value="live">Live</option>
             <option value="ended">Ended</option>
             <option value="sold">Sold</option>
@@ -213,12 +303,12 @@ export default function AdminCars() {
                 <th>Vehicle</th>
                 <th>Status</th>
                 <th>Listed</th>
-                <th style={{ width: 110 }}>Actions</th>
+                <th style={{ width: 190 }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {cars.map((car) => (
-                <CarRow key={car._id || car.id} car={car} onDelete={handleDelete} onSelect={setSelected} actionId={actionId} />
+                <CarRow key={car._id || car.id} car={car} onDelete={handleDelete} onSelect={setSelected} onDecide={handleDecide} canDecide actionId={actionId} />
               ))}
               {!loading && !loadError && hasLoaded && cars.length === 0 && (
                 <tr><td colSpan={7} style={{ textAlign: 'center', padding: 28, color: 'var(--text-muted)' }}>

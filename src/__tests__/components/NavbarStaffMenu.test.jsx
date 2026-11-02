@@ -39,11 +39,33 @@ describe('account dropdown by role', () => {
   it('superadmin is labelled Super Admin', () => {
     expect(open('superadmin').textContent).toContain('Super Admin');
   });
-  it.each(['buyer', 'user', 'individual_seller', 'dealer'])('%s keeps the buyer/seller menu and gets no admin section', (role) => {
+  it.each(['buyer', 'user', 'individual_seller'])('%s keeps the buyer/seller menu and gets no admin section', (role) => {
     const text = open(role).textContent;
     expect(text).toContain('Buyer Command Center');
     expect(text).toContain('Sell Vehicle');
     expect(text).not.toContain('System Administration');
+  });
+  // A dealer account lives in the Dealer workspace only: buyer and private-seller pages are not offered.
+  it('dealer gets a dealer-only menu: no buyer / private-seller / garage / financing links, no admin section', () => {
+    const panel = open('dealer');
+    const text = panel.textContent;
+    for (const dealerItem of ['Dealer Management', 'Dealer Dashboard', 'Inventory', 'Add Vehicle', 'Leads', 'Analytics', 'Dealer Settings', 'Notifications', 'Messages', 'Log Out']) {
+      expect(text).toContain(dealerItem);
+    }
+    for (const leaked of ['Buyer Command Center', 'Private Seller Dashboard', 'Sell Vehicle', 'Saved Cars', 'My Garage', 'Payment History', 'Vehicle Financing', 'KAYAD Live', 'Account Settings', 'System Administration']) {
+      expect(text).not.toContain(leaked);
+    }
+  });
+  it('dealer menu items open the matching dealer workspace section', () => {
+    props.onNavClick.mockClear();
+    const expected = { 'Dealer Dashboard': 'dealer:overview', Inventory: 'dealer:inventory', 'Add Vehicle': 'dealer:inventory:new', Leads: 'dealer:leads', Analytics: 'dealer:analytics', 'Dealer Settings': 'dealer:settings' };
+    for (const [label, id] of Object.entries(expected)) {
+      cleanup();
+      props.onNavClick.mockClear();
+      const panel = open('dealer'); // the menu closes after each choice, so open it afresh
+      fireEvent.click([...panel.querySelectorAll('button')].find((b) => b.textContent.trim() === label));
+      expect(props.onNavClick).toHaveBeenCalledWith(id);
+    }
   });
 });
 
