@@ -1,5 +1,6 @@
 // src/api/api.exports.ts
 // All the per-route API objects.
+import { applyPreviewToPublicConfig } from '../services/designPreview';
 import { api, unwrap } from "./httpClient";
 import { getTeamMembers, inviteTeamMember, updateTeamMember, removeTeamMember } from '../services/dealerPlatformApi';
 
@@ -202,12 +203,25 @@ export const adminAPI = {
   deleteCar:     (carId: string)     => api.delete(`/admin/cars/${carId}`).then(unwrap),
   updateSellerSettings: (userId: string, body: any) => api.put(`/admin/users/${userId}/seller-settings`, body).then(unwrap),
   getConfig:      ()          => api.get('/admin/config').then(unwrap),
-  getPublicConfig: ()         => api.get('/admin/public/config').then(unwrap),
+  getPublicConfig: ()         => api.get('/admin/public/config').then(unwrap).then(applyPreviewToPublicConfig),
   updateConfig:   (body: any)      => api.put('/admin/config', body).then(unwrap),
   getOnboardingSettings:    ()            => api.get('/admin/settings/onboarding').then(unwrap),
   updateOnboardingSettings: (body: any)   => api.put('/admin/settings/onboarding', body).then(unwrap),
   getDealerPaperwork:       ()            => api.get('/admin/settings/dealer-paperwork').then(unwrap),
   updateDealerPaperwork:    (body: any)   => api.put('/admin/settings/dealer-paperwork', body).then(unwrap),
+  siteDesigns:              ()            => api.get('/admin/site-designs').then(unwrap),
+  siteDesign:               (id: string)  => api.get(`/admin/site-designs/${id}`).then(unwrap),
+  siteDesignCreate:         (body: any)   => api.post('/admin/site-designs', body).then(unwrap),
+  siteDesignSave:           (id: string, body: any) => api.put(`/admin/site-designs/${id}`, body).then(unwrap),
+  siteDesignDuplicate:      (id: string, body?: any) => api.post(`/admin/site-designs/${id}/duplicate`, body || {}).then(unwrap),
+  siteDesignDelete:         (id: string)  => api.delete(`/admin/site-designs/${id}`, { data: { confirm: true } }).then(unwrap),
+  siteDesignPublish:        (id: string, expectedRevision?: number) => api.post(`/admin/site-designs/${id}/publish`, { confirm: true, expectedRevision }).then(unwrap),
+  siteDesignHistory:        ()            => api.get('/admin/site-designs/history').then(unwrap),
+  siteDesignRollback:       (publicationId: string) => api.post(`/admin/site-designs/rollback/${publicationId}`, { confirm: true }).then(unwrap),
+  siteDesignUploadLogo:     (formData: FormData) => api.post('/admin/site-designs/assets/logo', formData).then(unwrap),
+  trafficSummary:           (params: any) => api.get('/admin/analytics/summary', { params }).then(unwrap),
+  trafficLive:              ()            => api.get('/admin/analytics/live').then(unwrap),
+  trafficExport:            (params: any) => api.get('/admin/analytics/export', { params, responseType: 'blob' }).then((r: any) => r.data),
   getPublicOnboardingPolicy: ()           => api.get('/admin/public/onboarding-policy').then(unwrap),
   getSecurityLogs: (params: any) => api.get('/security-logs', { params }).then(unwrap),
   getSecurityLogSummary: (params?: any) => api.get('/security-logs/summary', { params }).then(unwrap),

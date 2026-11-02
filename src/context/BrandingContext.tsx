@@ -187,6 +187,15 @@ function normalizeBrandingConfig(config: Partial<Branding> | null | undefined): 
   return merged;
 }
 
+/** Fonts the site actually loads (index.html) or that are system fonts. Anything else in saved config is ignored rather than silently falling back. */
+export const SUPPORTED_FONTS: Record<string, string> = {
+  'Plus Jakarta Sans': "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
+  'Outfit': "'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif",
+  'Georgia': "Georgia, 'Times New Roman', serif",
+  'system-ui': "system-ui, -apple-system, 'Segoe UI', sans-serif",
+  'Arial': "Arial, Helvetica, sans-serif",
+};
+
 export const DEFAULT_LOGO_URL = '/branding/kayad-road-mark.svg';
 /** A stored logo can go missing (deleted asset, provider outage). Fall back ONCE to the bundled mark instead of showing a broken image. */
 export function onBrandLogoError(e: { currentTarget: HTMLImageElement }) {
@@ -207,6 +216,7 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
   const [loading, setLoading] = useState(true);
   const [hydrated, setHydrated] = useState(false);
   const [navigation, setNavigation] = useState<unknown>(null);
+  const [fonts, setFonts] = useState<{ display?: string; body?: string }>({});
 
   // Hydration guard - prevent flash on SSR/client mismatch
   useEffect(() => {
@@ -225,6 +235,14 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
     });
   }, [branding]);
 
+  // Typography from the published design: only supported fonts are applied; absent/unsupported values leave the stylesheet defaults alone.
+  useEffect(() => {
+    const root = document.documentElement;
+    const d = fonts.display && SUPPORTED_FONTS[fonts.display]; const b = fonts.body && SUPPORTED_FONTS[fonts.body];
+    if (d) root.style.setProperty('--font-display', d); else root.style.removeProperty('--font-display');
+    if (b) root.style.setProperty('--font-sans', b); else root.style.removeProperty('--font-sans');
+  }, [fonts]);
+
   useEffect(() => {
     if (!hydrated) return;
 
@@ -233,6 +251,7 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
         const configBranding = cfg.config?.branding || cfg.branding;
         setBranding(normalizeBrandingConfig(configBranding));
         setNavigation(cfg.config?.navigation ?? cfg.navigation ?? null);
+        setFonts({ display: cfg.config?.fontDisplay ?? cfg.fontDisplay, body: cfg.config?.fontBody ?? cfg.fontBody });
         setLoading(false);
       })
       .catch(() => {

@@ -1,6 +1,17 @@
 import Car from "../models/Car.js";
 import User from "../models/User.js";
 import PlatformConfig from "../models/PlatformConfig.js";
+
+export const MAX_LISTING_IMAGES_CEILING = 20;
+export async function effectiveMaxListingImages() {
+  try {
+    const cfg = await PlatformConfig.findOne().lean();
+    const n = Number(cfg?.maxListingImages);
+    return Number.isInteger(n) && n >= 1 && n <= MAX_LISTING_IMAGES_CEILING ? n : MAX_LISTING_IMAGES_CEILING;
+  } catch {
+    return MAX_LISTING_IMAGES_CEILING;
+  }
+}
 import { invalidatePublicListingCaches } from "../utils/publicListingCache.js";
 import { uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
@@ -1049,7 +1060,9 @@ export const addCarImages = async (req, res) => {
       return res.status(400).json({ success: false, message: "No images provided" });
     }
 
-    const maxImages = 20;
+    // Admin setting `maxListingImages` (Settings > Marketplace) is the per-listing photo cap; the hard ceiling stays 20. An unset or
+    // invalid value (or an unreadable config) falls back to the ceiling rather than blocking uploads.
+    const maxImages = await effectiveMaxListingImages();
     const currentCount = (car.images || []).length;
     if (currentCount + req.files.length > maxImages) {
       cleanupFiles(req.files);

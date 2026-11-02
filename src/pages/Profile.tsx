@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Phone, MapPin, Shield, Bell, Lock, LogOut, Star, Clock, ChevronRight, Camera, Loader2 } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Shield, Bell, Lock, LogOut, Star, Clock, ChevronRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { formatKES } from '../utils/helpers';
 import { AuctionExperienceRail, BidderIdentityCard } from '../components/auction/AuctionExperienceRail';
+import ChangePasswordForm from '../components/account/ChangePasswordForm';
+import NotificationPreferences from '../components/account/NotificationPreferences';
+import { PhoneVerification } from '../components/PhoneVerification';
 import { AuctionPremiumHeader, AuctionPremiumStats } from '../components/auction/AuctionPremiumSurface';
 
 interface ProfileProps {
@@ -60,6 +63,8 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
   const needsStepUp = editingField === 'phone' && (user.role === 'dealer' || user.role === 'individual_seller') && editValue.trim() !== (user.phone || '');
   const handleSaveEdit = async () => {
     if (!editingField) return;
+    if (loading) return;
+    if (editingField === 'name' && (editValue.trim().length < 1 || editValue.trim().length > 100)) { toast('Name must be 1-100 characters', 'error'); return; }
     if (needsStepUp && !stepUpPassword) { toast('Enter your current password to change your phone number', 'error'); return; }
     setLoading(true);
     try {
@@ -70,7 +75,7 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
     } catch (err: any) {
       const status = err?.response?.status;
       const msg = err?.response?.data?.message;
-      toast(status === 429 ? 'Too many attempts. Please wait a few minutes and try again.' : (status === 403 && msg) ? msg : 'Failed to update profile', 'error');
+      toast(status === 429 ? 'Too many attempts. Please wait a few minutes and try again.' : ((status === 403 || status === 400) && msg) ? msg : 'Failed to update profile', 'error');
     } finally {
       setLoading(false);
     }
@@ -96,9 +101,6 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                   </span>
                 )}
               </div>
-              <button className="absolute bottom-0 right-0 w-8 h-8 bg-[#13B8A6] rounded-full flex items-center justify-center text-[#0A3340] hover:bg-[#176B87] transition-colors">
-                <Camera size={14} />
-              </button>
             </div>
 
             {/* Info */}
@@ -208,6 +210,7 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                         Email Address
                       </label>
                       <p className="font-sans text-sm text-[#0A3340]">{user.email}</p>
+                      <p className="font-sans text-xs text-warm-400 mt-1">{user.emailVerified ? 'Verified. ' : ''}Changing your sign-in email is not available yet - contact support if it needs to change.</p>
                     </div>
                   </div>
 
@@ -271,6 +274,7 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                       <button onClick={() => handleEdit('location', user.location || '')} className="text-[#176B87] text-sm font-semibold hover:text-[#12576D]">Edit</button>
                     )}
                   </div>
+                  <PhoneVerification />
                 </div>
               </div>
             )}
@@ -278,27 +282,7 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
             {activeTab === 'notifications' && (
               <div className="bg-white rounded-2xl border border-[#D7E7E4] p-6">
                 <h2 className="font-serif text-xl text-[#0A3340] font-bold mb-6">Notification Preferences</h2>
-
-                <div className="space-y-4">
-                  {[
-                    { label: 'New bids on my listings', desc: 'Get notified when someone places a bid', key: 'new_bids', enabled: user.notifications?.newBids ?? true },
-                    { label: 'Escrow updates', desc: 'Payment and delivery notifications', key: 'escrow', enabled: user.notifications?.escrow ?? true },
-                    { label: 'Messages', desc: 'New messages from buyers or sellers', key: 'messages', enabled: user.notifications?.messages ?? true },
-                    { label: 'Price alerts', desc: 'Vehicles you saved dropped in price', key: 'price_alerts', enabled: user.notifications?.priceAlerts ?? false },
-                    { label: 'Newsletter', desc: 'Weekly market updates and new listings', key: 'newsletter', enabled: user.notifications?.newsletter ?? false },
-                  ].map(({ label, desc, key, enabled }) => (
-                    <div key={key} className="flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl">
-                      <div>
-                        <p className="font-sans text-sm font-semibold text-[#0A3340]">{label}</p>
-                        <p className="font-sans text-xs text-warm-400 mt-0.5">{desc}</p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" defaultChecked={enabled} className="sr-only peer" />
-                        <div className="w-11 h-6 bg-[#BDE5DE] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[#5AAFA4]/30 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#13B8A6]"></div>
-                      </label>
-                    </div>
-                  ))}
-                </div>
+                <NotificationPreferences />
               </div>
             )}
 
@@ -307,21 +291,14 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                 <h2 className="font-serif text-xl text-[#0A3340] font-bold mb-6">Security</h2>
 
                 <div className="space-y-4">
-                  <button className="w-full flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl hover:bg-[#EEF7F5] transition-colors">
-                    <div className="flex items-center gap-3">
-                      <Lock size={18} className="text-[#176B87]" />
-                      <span className="font-sans text-sm font-semibold text-[#0A3340]">Change Password</span>
-                    </div>
-                    <ChevronRight size={16} className="text-warm-400" />
-                  </button>
-
-                  <button className="w-full flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl hover:bg-[#EEF7F5] transition-colors">
+                  <ChangePasswordForm />
+                  <div className="flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl">
                     <div className="flex items-center gap-3">
                       <Shield size={18} className="text-[#176B87]" />
-                      <span className="font-sans text-sm font-semibold text-[#0A3340]">Two-Factor Authentication</span>
+                      <span className="font-sans text-sm font-semibold text-[#0A3340]">Two-factor authentication</span>
                     </div>
-                    <span className="text-xs text-warm-400">{user.twoFactorEnabled ? 'Enabled' : 'Disabled'}</span>
-                  </button>
+                    <span className="text-xs text-warm-400">Not available yet</span>
+                  </div>
                 </div>
               </div>
             )}

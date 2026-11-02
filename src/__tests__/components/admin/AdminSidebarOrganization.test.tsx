@@ -13,7 +13,7 @@ vi.mock('../../../api/api', () => ({ adminAPI: { alerts: vi.fn().mockResolvedVal
 import AdminSidebar from '../../../components/admin/AdminSidebar';
 import { getEffectivePermissions, PAGE_PERMISSIONS, SUPERADMIN_ONLY } from '../../../utils/permissions';
 
-// The complete inventory from the product brief (31 destinations).
+// The complete inventory from the product brief (31 original destinations + Traffic Analytics, added with the visitor analytics requirement).
 const INVENTORY: Record<string, string> = {
   '/admin': 'Dashboard', '/admin/users': 'Users', '/admin/sellers': 'Sellers', '/admin/private-seller-applications': 'Private Seller Applications',
   '/admin/cars': 'Listings', '/admin/moderation': 'Moderation', '/admin/auctions': 'Auctions', '/admin/bids': 'Bids', '/admin/escrows': 'Escrows',
@@ -21,7 +21,7 @@ const INVENTORY: Record<string, string> = {
   '/admin/inspector-applications': 'Inspector Apps', '/admin/reviews': 'Reviews', '/admin/referrals': 'Referrals', '/admin/chats': 'Chats', '/admin/reports': 'Reports',
   '/admin/support-tickets': 'Support Tickets', '/admin/feedback': 'Feedback', '/admin/market-data': 'Market Data', '/admin/ads': 'Ad Manager', '/admin/broadcast': 'Broadcast',
   '/admin/security-log': 'Security Log', '/admin/settings': 'Settings', '/admin/control-room': 'Control Room', '/admin/staff': 'Staff', '/admin/staff-permissions': 'Staff Permissions',
-  '/admin/panic-room': 'Panic Room', '/admin/platform-recovery': 'Platform Recovery', '/admin/webhoist': 'System Overview',
+  '/admin/traffic-analytics': 'Traffic Analytics', '/admin/site-designs': 'Site Designs', '/admin/panic-room': 'Panic Room', '/admin/platform-recovery': 'Platform Recovery', '/admin/webhoist': 'System Overview',
 };
 const mount = (route = '/admin', props: Partial<{ mobileOpen: boolean }> = {}) =>
   render(<MemoryRouter initialEntries={[route]}><AdminSidebar mobileOpen={!!props.mobileOpen} onToggle={() => {}} /></MemoryRouter>);
@@ -29,7 +29,7 @@ afterEach(() => cleanup());
 const superadmin = () => { authUser = { id: 's', role: 'superadmin', permissions: [] }; };
 
 describe('destinations', () => {
-  it('every one of the 31 destinations appears exactly once with its label and route (no duplicates, none dropped)', () => {
+  it('every one of the 33 destinations appears exactly once with its label and route (no duplicates, none dropped)', () => {
     superadmin(); mount();
     const hrefs = Array.from(document.querySelectorAll('aside a')).map((a) => a.getAttribute('href')).filter((h) => h !== '/');
     expect(hrefs.sort()).toEqual(Object.keys(INVENTORY).sort());

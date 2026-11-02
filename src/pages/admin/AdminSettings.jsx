@@ -12,7 +12,7 @@ const DEFAULTS = {
   dealerCommission: 5,
   bidCommitmentPct: 5,
   escrowReleaseDays: 3,
-  maxListingImages: 8,
+  maxListingImages: 20,
   allowGuestBrowsing: true,
   requireDealerApproval: true,
 };
@@ -297,12 +297,13 @@ export default function AdminSettings() {
                   { key: 'dealerCommission', label: 'Dealer Commission (%)', type: 'number', min: 0, max: 50 },
                   { key: 'bidCommitmentPct', label: 'Bid Commitment (%)', type: 'number', min: 0, max: 100, recordedOnly: true },
                   { key: 'escrowReleaseDays', label: 'Escrow Release (days)', type: 'number', min: 1, max: 30, recordedOnly: true },
-                  { key: 'maxListingImages', label: 'Max Listing Images', type: 'number', min: 1, max: 20, recordedOnly: true },
+                  { key: 'maxListingImages', label: 'Max Listing Images', type: 'number', min: 1, max: 20, note: 'Applied: the most photos one listing can hold (platform ceiling 20). Existing listings above the cap keep their photos; new uploads are refused past it.' },
                 ].map(f => (
                   <div key={f.key} className="input-group">
                     <label className="input-label">{f.label}</label>
                     <input aria-label={f.label} className="input" type={f.type} min={f.min} max={f.max} value={config[f.key]}
                       onChange={e => setConfig(p => ({ ...p, [f.key]: f.type === 'number' ? (e.target.value === '' ? '' : Number(e.target.value)) : e.target.value }))} />
+                    {f.note && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>{f.note}</div>}
                     {f.recordedOnly && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>Recorded only: this value is saved but the platform does not apply it yet.</div>}
                   </div>
                 ))}
@@ -312,7 +313,7 @@ export default function AdminSettings() {
             <div className="card" style={{ padding: 24 }}>
               <h3 style={{ fontSize: '1rem', marginBottom: 20 }}>Toggle Options</h3>
               {[
-                { key: 'allowGuestBrowsing', label: 'Allow Guest Browsing (recorded only, not applied yet)' },
+                { key: 'allowGuestBrowsing', label: 'Allow Guest Browsing (recorded only; no effect: the public catalogue is always open without an account)' },
               ].map(f => (
                 <label key={f.key} style={{ display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', padding: '8px 0' }}>
                   <input type="checkbox" checked={config[f.key]} onChange={e => setConfig(p => ({ ...p, [f.key]: e.target.checked }))}

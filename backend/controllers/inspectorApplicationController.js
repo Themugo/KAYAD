@@ -29,11 +29,15 @@ export const submitApplication = async (req, res) => {
     }
 
     const {
-      fullName, email, phone, idNumber, location, yearsOfExperience,
+      fullName, phone, idNumber, location, yearsOfExperience,
       specialties, certifications, toolsAvailable, preferredRegions, cvUrl, certificationDocs,
     } = parsed.data;
+    // ONE ACCOUNT: a signed-in applicant applies as THAT account. The application is bound to the session's identity and its contact e-mail
+    // is the account's own e-mail (a different address typed into the form can never attach the application to, or later create, another
+    // identity). Guests may still apply by e-mail; approval then never auto-creates a second account for an address that already has one.
+    const email = String(req.user?.email || parsed.data.email).toLowerCase().trim();
 
-    const existing = await InspectorApplication.findOne({ email: email.toLowerCase().trim(), status: "pending" });
+    const existing = await InspectorApplication.findOne(req.user?.id ? { user: req.user.id, status: "pending" } : { email: email.toLowerCase().trim(), status: "pending" });
     if (existing) {
       return res.status(400).json({ success: false, message: "You already have a pending application" });
     }
@@ -153,7 +157,10 @@ export const approveApplication = async (req, res) => {
     // represented by the canonical inspection_providers domain, not by
     // ad-hoc users.isInspector/inspectionSpecialty/locationCity fields (those
     // columns do not exist in the current users table).
-    let user = await User.findOne({ email: application.email });
+    // ONE ACCOUNT: an application submitted while signed in is approved onto THAT user (never a second identity); only a guest
+    // application falls back to the e-mail lookup.
+    let user = application.user ? await User.findById(application.user) : null;
+    if (!user) user = await User.findOne({ email: application.email });
     // The apply endpoint is public and takes any email address, so approval must
     // never rewrite the role of an existing dealer, private seller or staff
     // account that merely shares that email. Only buyers (and existing

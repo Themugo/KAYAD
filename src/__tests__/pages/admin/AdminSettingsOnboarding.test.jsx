@@ -32,7 +32,7 @@ describe('AdminSettingsOnboarding', () => {
     const select = await screen.findByLabelText(/Dealer onboarding/i);
     expect(select).toBeDisabled();
     expect(screen.queryByRole('button', { name: /save/i })).toBeNull();
-    expect(screen.getByText(/Only the platform owner can change them/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Only the platform owner can change them/i).length).toBeGreaterThan(0); // the onboarding panel and the dealer-paperwork panel each state it
   });
 
   test('saves only the changed fields with the loaded revision and shows the server-confirmed result', async () => {

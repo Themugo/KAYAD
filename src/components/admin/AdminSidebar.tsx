@@ -5,7 +5,7 @@ import {
   Activity, Megaphone, Settings, AlertTriangle, ClipboardCheck, BarChart3,
   Gift, MessageSquare, TrendingUp, Bell, X, type LucideIcon, Flag, TicketCheck,
   Radio, ChevronDown, BriefcaseBusiness, Building2, Wrench,
-  BadgeCheck, UserSearch, IdCard, Gauge, Server, KeyRound, MessageSquareText, Store,
+  BadgeCheck, UserSearch, IdCard, Gauge, Server, KeyRound, MessageSquareText, Store, Globe, Palette,
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../../api/api';
@@ -33,7 +33,10 @@ interface NavigationGroup {
 const NAVIGATION_GROUPS: NavigationGroup[] = [
   {
     id: 'command-centre', label: 'Command Centre', icon: LayoutDashboard,
-    links: [{ to: '/admin', icon: LayoutDashboard, label: 'Dashboard' }],
+    links: [
+      { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
+      { to: '/admin/traffic-analytics', icon: Globe, label: 'Traffic Analytics', superadmin: true },
+    ],
   },
   {
     id: 'marketplace', label: 'Marketplace', icon: Car,
@@ -90,6 +93,7 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
       { to: '/admin/staff', icon: Crown, label: 'Staff', superadmin: true },
       { to: '/admin/staff-permissions', icon: KeyRound, label: 'Staff Permissions', superadmin: true },
       { to: '/admin/panic-room', icon: AlertTriangle, label: 'Panic Room', danger: true },
+      { to: '/admin/site-designs', icon: Palette, label: 'Site Designs' },
       { to: '/admin/platform-recovery', icon: LifeBuoy, label: 'Platform Recovery' },
       { to: '/admin/webhoist', icon: Server, label: 'System Overview', superadmin: true },
     ],

@@ -834,7 +834,7 @@ router.post(
 
 // Settings that are stored and audited but are NOT read by any runtime code path today (verified by repository search). The UI labels
 // them accordingly instead of implying they change platform behaviour.
-const RECORDED_ONLY_SETTINGS = Object.freeze(["maxListingImages", "escrowReleaseDays", "bidCommitmentPct", "allowGuestBrowsing", "requireDealerApproval"]);
+const RECORDED_ONLY_SETTINGS = Object.freeze(["escrowReleaseDays", "bidCommitmentPct", "allowGuestBrowsing", "requireDealerApproval"]);
 
 // GET CONFIG
 router.get(

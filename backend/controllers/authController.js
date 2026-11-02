@@ -750,6 +750,27 @@ export const updateProfile = async (req, res) => {
       avatar,
     } = req.body;
 
+    // Server-side validation (the client mirrors it, but the server is the authority): nothing is trimmed into emptiness or stored unbounded.
+    const bad = [];
+    const textOk = (v, min, max) => typeof v === "string" && v.trim().length >= min && v.trim().length <= max;
+    if (name !== undefined && !textOk(name, 1, 100)) bad.push("name");
+    if (location !== undefined && !(typeof location === "string" && location.trim().length <= 120)) bad.push("location");
+    if (businessName !== undefined && !(typeof businessName === "string" && businessName.trim().length <= 120)) bad.push("businessName");
+    if (bio !== undefined && !(typeof bio === "string" && bio.trim().length <= 1000)) bad.push("bio");
+    if (avatar !== undefined && avatar !== "" && avatar !== null) {
+      let okAvatar = typeof avatar === "string" && avatar.length <= 2048;
+      if (okAvatar) { try { okAvatar = new URL(avatar).protocol === "https:"; } catch { okAvatar = false; } }
+      if (!okAvatar) bad.push("avatar");
+    }
+    if (bad.length) {
+      return res.status(400).json({
+        success: false,
+        code: "VALIDATION_FAILED",
+        message: bad.includes("name") ? "Name must be 1-100 characters." : `Invalid value for: ${bad.join(", ")}.`,
+        fields: bad,
+      });
+    }
+
     const updates = {};
     if (name !== undefined) updates.name = String(name).trim();
     let normalizedPhone;
@@ -769,7 +790,7 @@ export const updateProfile = async (req, res) => {
     if (location !== undefined) updates.location = String(location).trim();
     if (businessName !== undefined) updates.businessName = String(businessName).trim();
     if (bio !== undefined) updates.bio = String(bio).trim();
-    if (avatar !== undefined) updates.avatar = String(avatar);
+    if (avatar !== undefined) updates.avatar = avatar ? String(avatar) : "";
 
     // STAGE 5C: bank / M-Pesa / payment / onboarding / visibility / notifications fields are NOT columns of `users` (they never existed in any migration, so sending
     // them produced a 500 "column not found"). Dealer payout details are stored on the dealer record via PUT /dealer/settlement and

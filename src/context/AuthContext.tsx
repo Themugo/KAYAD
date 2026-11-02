@@ -1,4 +1,5 @@
 // src/context/AuthContext.tsx
+import { trackRegistration } from '../services/analyticsTracker';
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import {
@@ -243,6 +244,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     // when required and then explicitly sign in. Keep the current auth state
     // untouched so registration cannot silently replace an existing session.
     const user = await authRegister(body);
+    trackRegistration(); // anonymous conversion marker for traffic analytics (no personal data)
     return { success: true, user };
   }, []);
 
@@ -435,6 +437,7 @@ const ADMIN_PAGE_ROLES: Record<string, string[]> = {
   '/admin/webhoist':       ['superadmin'],
   '/admin/staff':          ['superadmin', 'admin', 'hr'],
   '/admin/settings':       ['superadmin', 'admin'],
+  '/admin/site-designs':   ['superadmin', 'admin'],
   '/admin/security-log':   ['superadmin', 'admin'],
   '/admin/users':          ['superadmin', 'admin', 'technical_support', 'hr', 'moderator'],
   '/admin/private-seller-applications': ['superadmin', 'admin', 'technical_support', 'hr'],

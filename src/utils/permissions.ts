@@ -162,6 +162,7 @@ export const PAGE_PERMISSIONS: Record<string, Permission> = {
   "/admin/security-log":  PERM.VIEW_LOGS,
   "/admin/ads":           PERM.MANAGE_ADS,
   "/admin/settings":      PERM.MANAGE_PLATFORM,
+  "/admin/site-designs":  PERM.MANAGE_PLATFORM,
   "/admin/platform-recovery": PERM.PLATFORM_RECOVERY,
 };
 
@@ -172,4 +173,5 @@ export const SUPERADMIN_ONLY = new Set([
   "/admin/control-room",
   "/admin/panic-room",
   "/admin/webhoist",
+  "/admin/traffic-analytics",
 ]);

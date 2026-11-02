@@ -25,11 +25,14 @@ const expectedPaths = [
   // Maintenance-scope work: permission-only destination. It is visible solely to staff holding the explicit platform_recovery grant
   // (ADMIN_PAGE_ROLES gives no role access), so the 30 established destinations are unchanged for everyone else. Match stays exact.
   '/admin/platform-recovery',
+  // Visitor analytics requirement (2026-11-01): superadmin-only Traffic Analytics under Command Centre. Match stays exact.
+  '/admin/traffic-analytics',
+  '/admin/site-designs',
 ];
 const actualPaths = [...sidebar.matchAll(/\{ to: '(\/admin[^']*)'/g)].map(match => match[1]);
 const routeSurface = read('src/components/admin/AdminRouteSurface.tsx');
 const registeredPaths = new Set([...routeSurface.matchAll(/'((?:\/admin)[^']*)': \{ component:/g)].map(match => match[1]));
-add('All 31 established sidebar destinations (29 original + approved private-seller review + permission-only platform recovery) remain present exactly once', actualPaths.length === expectedPaths.length && new Set(actualPaths).size === expectedPaths.length && expectedPaths.every(path => actualPaths.includes(path)));
+add('All 33 established sidebar destinations (29 original + approved private-seller review + permission-only platform recovery + superadmin Traffic Analytics + admin Site Designs) remain present exactly once', actualPaths.length === expectedPaths.length && new Set(actualPaths).size === expectedPaths.length && expectedPaths.every(path => actualPaths.includes(path)));
 add('Every sidebar destination remains registered or resolves to the canonical command centre', actualPaths.every(path => path === '/admin' || registeredPaths.has(path)));
 add('Seven workflow groups are present (Command Centre, Marketplace, Accounts & Onboarding, Finance, Customer Care, Growth & Insight, Platform & Security)', ['Command Centre', 'Marketplace', 'Accounts & Onboarding', 'Finance', 'Customer Care', 'Growth & Insight', 'Platform & Security'].every(label => sidebar.includes(`label: '${label}'`)));
 add('Settings is a standalone pinned item outside every group and is the last element of the sidebar', sidebar.includes('const SETTINGS_LINK') && !/links: \[[^\]]*\/admin\/settings/.test(sidebar) && sidebar.indexOf('admin-sidebar__settings') > sidebar.indexOf('View marketplace') && sidebar.indexOf('admin-sidebar__pinned') > sidebar.indexOf('</nav>'));

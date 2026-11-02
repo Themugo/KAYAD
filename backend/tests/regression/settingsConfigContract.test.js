@@ -151,7 +151,8 @@ describe("GET /config", () => {
   });
   test("tells the UI which settings are recorded only", async () => {
     const r = await call("GET", "/api/admin/config", "admin-1");
-    expect(r.body.recordedOnly).toEqual(expect.arrayContaining(["maxListingImages", "escrowReleaseDays", "bidCommitmentPct", "allowGuestBrowsing"]));
+    expect(r.body.recordedOnly).toEqual(expect.arrayContaining(["escrowReleaseDays", "bidCommitmentPct", "allowGuestBrowsing"]));
+    expect(r.body.recordedOnly).not.toContain("maxListingImages"); // now enforced by carController.addCarImages (see maxListingImagesEffect.test.js)
   });
   test.each([["buyer-1"], [null]])("%s is refused", async (who) => {
     const r = await call("GET", "/api/admin/config", who);

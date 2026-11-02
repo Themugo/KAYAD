@@ -42,6 +42,14 @@ export const updatePreferences = async (userId, patch) => {
   ];
   const updates = {};
   for (const key of allowed) if (patch?.[key] !== undefined) updates[key] = patch[key];
+  // Validate before persisting: a toggle must be a real boolean, quiet hours HH:MM (or null to clear), timezone a plain IANA-looking string.
+  const bad = [];
+  for (const [k, v] of Object.entries(updates)) {
+    if (/Transactional$|Marketing$/.test(k)) { if (typeof v !== "boolean") bad.push(k); }
+    else if (k === "quietHoursStart" || k === "quietHoursEnd") { if (v !== null && !(typeof v === "string" && /^([01]\d|2[0-3]):[0-5]\d(:00)?$/.test(v))) bad.push(k); }
+    else if (k === "timezone") { if (!(typeof v === "string" && /^[A-Za-z_]+(\/[A-Za-z_+\-0-9]+){0,2}$/.test(v) && v.length <= 64)) bad.push(k); }
+  }
+  if (bad.length) throw AppError.badRequest(`Invalid preference value for: ${bad.join(", ")}`);
   return Object.keys(updates).length ? update("communication_preferences", current.id, updates) : current;
 };
 

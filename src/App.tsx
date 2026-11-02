@@ -36,6 +36,8 @@ import SkipLink from './components/ui/SkipLink';
 
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
+import AnalyticsBeacon from './components/AnalyticsBeacon';
+import DesignPreviewBanner from './components/DesignPreviewBanner';
 import { AuthProvider, useAuth, RequireAuth, RequireDealer, RequireDealerApplicant, RequireAdmin, SessionRecovery } from './context/AuthContext';
 import { NotificationProvider, useNotifications } from './context/NotificationContext';
 import { SocketProvider } from './context/SocketContext';
@@ -908,6 +910,8 @@ export function App() {
   if (location.pathname === '/owner-invite') return <OwnerInviteAccept />;
   return (
     <AuthProvider>
+      <AnalyticsBeacon />
+      <DesignPreviewBanner />
       <SocketProvider>
         <NotificationProvider>
           <CompareProvider>
