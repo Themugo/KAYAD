@@ -64,11 +64,15 @@ export function validateListing(form: FormState, mode: 'create' | 'edit', imageC
   if (title.length < 2) errors.title = 'Title must be at least 2 characters.';
   else if (title.length > 200) errors.title = 'Title must be 200 characters or fewer.';
   if (!form.brand.trim()) errors.brand = 'Brand is required.';
-  if (form.year.trim() !== '') {
+  // Model, year and price are required by the database; a blank one used to pass this form and fail on the server.
+  if (!form.model.trim()) errors.model = 'Model is required.';
+  if (form.year.trim() === '') errors.year = 'Year is required.';
+  else {
     const y = Number(form.year);
     if (!Number.isInteger(y) || y < 1900 || y > 2030) errors.year = 'Enter a whole-number year between 1900 and 2030.';
   }
-  if (form.price.trim() !== '') {
+  if (form.price.trim() === '') errors.price = 'Price is required.';
+  else {
     const p = parseFormattedNumber(form.price);
     if (p === undefined || !Number.isFinite(p) || p <= 0) errors.price = 'Price must be greater than zero.';
     else if (p > 100_000_000) errors.price = 'Price must not exceed 100,000,000.';
@@ -76,6 +80,7 @@ export function validateListing(form: FormState, mode: 'create' | 'edit', imageC
   if (form.mileage.trim() !== '') {
     const m = parseFormattedNumber(form.mileage);
     if (m === undefined || !Number.isFinite(m) || m < 0) errors.mileage = 'Mileage cannot be negative.';
+    else if (m > 2_000_000) errors.mileage = 'Mileage must not exceed 2,000,000 km.';
   }
   if (form.description.length > 5000) errors.description = 'Description must be 5000 characters or fewer.';
   if (mode === 'create') {
@@ -108,6 +113,8 @@ function describeError(err: unknown): string {
     if (err.status === 401) return 'Your session has expired. Please sign in again.';
     if (err.code === 'SUBSCRIPTION_REQUIRED') return 'Your dealer account is approved, but it needs an active listing plan before you can publish vehicles. Contact KAYAD support to have a plan activated.';
     if (err.code === 'SUBSCRIPTION_EXPIRED' || err.code === 'LISTING_LIMIT_REACHED') return err.message;
+    if (err.status && err.status >= 400 && err.status < 500 && err.message) return err.message; // validation / duplicate VIN / required field: the server's text is actionable
+    if (err.status && err.status >= 500) return 'KAYAD could not save this listing because of a server problem. Your entries are kept, please try again in a moment. If it keeps happening, contact support.';
     if (err.status === 403) return err.message || 'You do not have permission to do this.';
     if (err.kind === 'not_found') return 'This listing no longer exists.';
     if (err.kind === 'network') return 'Unable to reach KAYAD. Check your connection and try again.';
@@ -233,13 +240,13 @@ const DealerListingForm: React.FC<DealerListingFormProps> = ({ mode, car, onSave
         <Field id="listing-brand" label="Brand" required error={err('brand')}>
           <input id="listing-brand" className={inputCls} value={form.brand} onChange={set('brand')} disabled={submitting} {...aria('brand')} />
         </Field>
-        <Field id="listing-model" label="Model">
-          <input id="listing-model" className={inputCls} value={form.model} onChange={set('model')} disabled={submitting} />
+        <Field id="listing-model" label="Model" required error={err('model')}>
+          <input id="listing-model" className={inputCls} value={form.model} onChange={set('model')} disabled={submitting} {...aria('model')} />
         </Field>
-        <Field id="listing-year" label="Year" error={err('year')}>
+        <Field id="listing-year" label="Year" required error={err('year')}>
           <input id="listing-year" inputMode="numeric" className={inputCls} value={form.year} onChange={set('year')} disabled={submitting} {...aria('year')} />
         </Field>
-        <Field id="listing-price" label="Price (Ksh)" error={err('price')}>
+        <Field id="listing-price" label="Price (Ksh)" required error={err('price')}>
           <input id="listing-price" inputMode="numeric" autoComplete="off" placeholder="e.g. 1,850,000" className={inputCls} value={form.price} onChange={(e) => handleFormattedInput(e, (v) => { setForm((f) => ({ ...f, price: v })); setDirty(true); })} disabled={submitting} {...aria('price')} />
         </Field>
         <Field id="listing-mileage" label="Mileage (km)" error={err('mileage')}>

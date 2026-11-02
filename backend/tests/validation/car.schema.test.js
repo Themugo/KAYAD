@@ -16,7 +16,7 @@ describe("createCarSchema", () => {
       color: "Black",
       condition: "Excellent",
     };
-    const result = createCarSchema.safeParse(validData);
+    const result = createCarSchema.safeParse({ model: "Corolla", year: 2020, price: 100000, ...validData });
     expect(result.success).toBe(true);
   });
 
@@ -24,9 +24,11 @@ describe("createCarSchema", () => {
     const validData = {
       title: "My Car",
       brand: "Toyota",
+      model: "Corolla",
+      year: 2020,
       price: 100000,
     };
-    const result = createCarSchema.safeParse(validData);
+    const result = createCarSchema.safeParse({ model: "Corolla", year: 2020, price: 100000, ...validData });
     expect(result.success).toBe(true);
   });
 
@@ -34,10 +36,11 @@ describe("createCarSchema", () => {
     const validData = {
       title: "My Car",
       brand: "Toyota",
+      model: "Corolla",
       price: 100000,
       year: "2021",
     };
-    const result = createCarSchema.safeParse(validData);
+    const result = createCarSchema.safeParse({ model: "Corolla", year: 2020, price: 100000, ...validData });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.year).toBe(2021);
@@ -48,6 +51,8 @@ describe("createCarSchema", () => {
     const invalidData = {
       title: "A",
       brand: "Toyota",
+      model: "Corolla",
+      year: 2020,
       price: 100000,
     };
     const result = createCarSchema.safeParse(invalidData);
@@ -87,9 +92,11 @@ describe("createCarSchema", () => {
     const validData = {
       title: "Expensive Car",
       brand: "Toyota",
+      model: "Land Cruiser",
+      year: 2020,
       price: 100_000_000,
     };
-    const result = createCarSchema.safeParse(validData);
+    const result = createCarSchema.safeParse({ model: "Corolla", year: 2020, price: 100000, ...validData });
     expect(result.success).toBe(true);
   });
 
@@ -122,7 +129,7 @@ describe("createCarSchema", () => {
       price: 100000,
       year: 2030,
     };
-    const result = createCarSchema.safeParse(validData);
+    const result = createCarSchema.safeParse({ model: "Corolla", year: 2020, price: 100000, ...validData });
     expect(result.success).toBe(true);
   });
 
@@ -144,7 +151,7 @@ describe("createCarSchema", () => {
       price: 100000,
       mileage: 0,
     };
-    const result = createCarSchema.safeParse(validData);
+    const result = createCarSchema.safeParse({ model: "Corolla", year: 2020, price: 100000, ...validData });
     expect(result.success).toBe(true);
   });
 
@@ -156,7 +163,7 @@ describe("createCarSchema", () => {
       allowBuy: "true",
       allowBid: "false",
     };
-    const result = createCarSchema.safeParse(validData);
+    const result = createCarSchema.safeParse({ model: "Corolla", year: 2020, price: 100000, ...validData });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.allowBuy).toBe(true);
@@ -171,7 +178,7 @@ describe("createCarSchema", () => {
       price: 100000,
       features: ["Leather seats", "Sunroof", "GPS"],
     };
-    const result = createCarSchema.safeParse(validData);
+    const result = createCarSchema.safeParse({ model: "Corolla", year: 2020, price: 100000, ...validData });
     expect(result.success).toBe(true);
   });
 
@@ -182,7 +189,7 @@ describe("createCarSchema", () => {
       price: 100000,
       features: "Leather seats",
     };
-    const result = createCarSchema.safeParse(validData);
+    const result = createCarSchema.safeParse({ model: "Corolla", year: 2020, price: 100000, ...validData });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(Array.isArray(result.data.features)).toBe(true);
@@ -208,7 +215,7 @@ describe("createCarSchema", () => {
       price: 100000,
       vin: "1HGBH41JXMN109186",
     };
-    const result = createCarSchema.safeParse(validData);
+    const result = createCarSchema.safeParse({ model: "Corolla", year: 2020, price: 100000, ...validData });
     expect(result.success).toBe(true);
   });
 
@@ -231,7 +238,7 @@ describe("createCarSchema", () => {
       auctionStatus: "live",
       auctionEnd: "2024-12-31T23:59:59Z",
     };
-    const result = createCarSchema.safeParse(validData);
+    const result = createCarSchema.safeParse({ model: "Corolla", year: 2020, price: 100000, ...validData });
     expect(result.success).toBe(true);
   });
 
@@ -242,7 +249,7 @@ describe("createCarSchema", () => {
       price: 100000,
       coverImage: "0",
     };
-    const result = createCarSchema.safeParse(validData);
+    const result = createCarSchema.safeParse({ model: "Corolla", year: 2020, price: 100000, ...validData });
     expect(result.success).toBe(true);
     if (result.success) {
       expect(result.data.coverImage).toBe(0);

@@ -270,3 +270,21 @@ describe('vehicleApi photo management and delete (Phase 14.6)', () => {
     await expect(addCarImages('c1', [])).rejects.toMatchObject({ kind: 'network' });
   });
 });
+
+describe('vehicleApi.createCar / updateCar - what the server said reaches the caller (listing audit)', () => {
+  afterEach(() => { requestMock.mockReset(); });
+  const reject = (status: number, data: unknown) => requestMock.mockRejectedValueOnce(new HttpRequestError(String((data as any)?.message ?? 'x'), status, data));
+
+  it('createCar carries the server error CODE (so SUBSCRIPTION_REQUIRED / DUPLICATE_VIN can be recognised)', async () => {
+    reject(409, { success: false, code: 'DUPLICATE_VIN', message: 'A vehicle with this VIN is already listed.' });
+    await expect(createCar({ title: 'Prado', brand: 'Toyota' })).rejects.toMatchObject({ code: 'DUPLICATE_VIN', status: 409, message: 'A vehicle with this VIN is already listed.' });
+  });
+  it('createCar shows the field-level validation text instead of the generic "Validation failed"', async () => {
+    reject(400, { success: false, message: 'Validation failed', errors: 'year: Year is required; price: Price is required' });
+    await expect(createCar({ title: 'Prado', brand: 'Toyota' })).rejects.toMatchObject({ status: 400, message: 'year: Year is required; price: Price is required' });
+  });
+  it('updateCar behaves the same', async () => {
+    reject(400, { success: false, message: 'Validation failed', errors: 'mileage: Mileage must not exceed 2,000,000 km' });
+    await expect(updateCar('c1', { mileage: 1 })).rejects.toMatchObject({ message: expect.stringContaining('Mileage must not exceed') });
+  });
+});

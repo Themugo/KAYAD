@@ -5,7 +5,7 @@ import { dealerOnboardingSchema } from "../../validation/dealerOnboarding.schema
 import { FUEL_TYPES, CONDITIONS, normalizeFuel, isPetrolFuel, stripNumberFormatting } from "../../utils/vehicleOptions.js";
 import { DEFAULT_ITEMS } from "../../services/dealerPaperwork.service.js";
 
-const base = { title: "Toyota Land Cruiser V8", brand: "Toyota" };
+const base = { title: "Toyota Land Cruiser V8", brand: "Toyota", model: "Land Cruiser", year: 2018, price: 1000000 };
 
 describe("vocabulary", () => {
   test("Kenyan conditions and Petrol (not Gasoline)", () => {
@@ -49,7 +49,9 @@ describe("figures typed with commas", () => {
     expect(createCarSchema.safeParse({ ...base, mileage: "-5" }).success).toBe(false);
   });
   test("blank stays 'not provided'", () => {
-    expect(createCarSchema.parse({ ...base, price: "", mileage: "" }).price).toBeUndefined();
+    // Mileage is optional, so blank stays "not provided". Price is now required (a blank price used to reach the DB NOT NULL and 500).
+    expect(createCarSchema.parse({ ...base, mileage: "" }).mileage).toBeUndefined();
+    expect(createCarSchema.safeParse({ ...base, price: "" }).success).toBe(false);
   });
   test("stripNumberFormatting leaves non-strings alone", () => {
     expect(stripNumberFormatting(5)).toBe(5);

@@ -50,6 +50,10 @@ describe('Dealer listing create/edit (Phase 14.4, mocked)', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Publish vehicle' }));
     expect(await screen.findByText('Title must be at least 2 characters.')).toBeTruthy();
     expect(screen.getByText('Brand is required.')).toBeTruthy();
+    // The database requires model, year and price: a blank one used to pass this form and fail on the server as an opaque 500.
+    expect(screen.getByText('Model is required.')).toBeTruthy();
+    expect(screen.getByText('Year is required.')).toBeTruthy();
+    expect(screen.getByText('Price is required.')).toBeTruthy();
     expect(screen.getByText('Add at least one photo.')).toBeTruthy();
     expect(veh.createCar).not.toHaveBeenCalled();
     fill(/^Title/, 'Prado'); fill(/^Brand/, 'Toyota'); fill(/^Price/, '0'); fill(/^Year/, '1800');  // price input is digits-only (commas), so a negative cannot be typed; zero still must be refused
@@ -62,14 +66,14 @@ describe('Dealer listing create/edit (Phase 14.4, mocked)', () => {
     let resolve: (v: unknown) => void = () => {};
     veh.createCar.mockReturnValue(new Promise((r) => { resolve = r; }));
     await open('section=inventory&mode=new');
-    fill(/^Title/, 'Prado TX'); fill(/^Brand/, 'Toyota');
+    fill(/^Title/, 'Prado TX'); fill(/^Brand/, 'Toyota'); fill(/^Model/, 'Prado'); fill(/^Year/, '2018'); fill(/^Price/, '4800000');
     fireEvent.change(screen.getByLabelText(/Photos/), { target: { files: [file()] } });
     const submit = screen.getByRole('button', { name: 'Publish vehicle' });
     fireEvent.click(submit);
     fireEvent.click(screen.getByRole('button', { name: /Saving/ }));
     fireEvent.submit(screen.getByRole('form', { name: 'Add vehicle' }));
     expect(veh.createCar).toHaveBeenCalledTimes(1);
-    expect(veh.createCar.mock.calls[0][0]).toMatchObject({ title: 'Prado TX', brand: 'Toyota' });
+    expect(veh.createCar.mock.calls[0][0]).toMatchObject({ title: 'Prado TX', brand: 'Toyota', model: 'Prado', year: 2018, price: 4800000 });
     veh.getMyListings.mockResolvedValue([{ id: 'c2', title: 'Prado TX', brand: 'Toyota', status: 'draft' }]);
     resolve({ success: true, data: { id: 'c2' } });
     expect(await screen.findByText(/Vehicle submitted/)).toBeTruthy();
@@ -80,7 +84,7 @@ describe('Dealer listing create/edit (Phase 14.4, mocked)', () => {
   it('server rejection (403 unverified/unauthorized) is shown, entries are kept, and retry works', async () => {
     veh.createCar.mockRejectedValueOnce(new veh.VehicleApiError('Dealer verification required', 'server', 403)).mockResolvedValueOnce({ success: true, data: { id: 'c3' } });
     await open('section=inventory&mode=new');
-    fill(/^Title/, 'Prado TX'); fill(/^Brand/, 'Toyota');
+    fill(/^Title/, 'Prado TX'); fill(/^Brand/, 'Toyota'); fill(/^Model/, 'Prado'); fill(/^Year/, '2018'); fill(/^Price/, '4800000');
     fireEvent.change(screen.getByLabelText(/Photos/), { target: { files: [file()] } });
     fireEvent.click(screen.getByRole('button', { name: 'Publish vehicle' }));
     expect((await screen.findByRole('alert')).textContent).toContain('Dealer verification required');

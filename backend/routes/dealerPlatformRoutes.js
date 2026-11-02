@@ -1,3 +1,4 @@
+import { validateCar } from "../middleware/validate.js";
 import express from "express";
 import { protect, optionalAuth } from "../middleware/auth.js";
 import { dealerBusinessOnly } from "../middleware/dealerIsolation.js"; // PHASE 13D (DI-2)
@@ -72,8 +73,8 @@ router.put("/profile/:dealerId", protect, createLimiter, stepUpLimiter, asyncHan
 
 // Inventory
 router.get("/inventory", protect, dealerBusinessOnly, asyncHandler(getInventory));
-router.post("/inventory", protect, dealerBusinessOnly, requireDealerVerification, uploadLimiter, cleanupUploadsOnError, upload.array("images", 10), handleUploadError, createLimiter, asyncHandler(createListing));
-router.put("/inventory/:listingId", protect, dealerBusinessOnly, createLimiter, asyncHandler(updateListing));
+router.post("/inventory", protect, dealerBusinessOnly, requireDealerVerification, uploadLimiter, cleanupUploadsOnError, upload.array("images", 10), handleUploadError, validateCar, createLimiter, asyncHandler(createListing));
+router.put("/inventory/:listingId", protect, dealerBusinessOnly, validateCar, createLimiter, asyncHandler(updateListing));
 router.delete("/inventory/:listingId", protect, dealerBusinessOnly, createLimiter, asyncHandler(deleteListing));
 router.post("/inventory/bulk", protect, dealerBusinessOnly, createLimiter, asyncHandler(bulkUpdateListings));
 

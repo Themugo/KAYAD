@@ -346,6 +346,26 @@ export const getMyListings = async (req, res) => {
   }
 };
 
+// Translate a database/PostgREST error from a listing write into a user-facing 4xx, or null when it is not a known input problem.
+const FIELD_LABELS = { model: "Model", year: "Year", price: "Price", title: "Title", brand: "Brand", mileage: "Mileage" };
+export function describeListingDbError(err) {
+  const code = String(err?.code || "");
+  const text = String(err?.message || "");
+  if (code === "23502" || /violates not-null constraint/i.test(text)) {
+    const col = /column "?([a-z_]+)"?/i.exec(text)?.[1];
+    const label = FIELD_LABELS[col] || (col ? col.replace(/_/g, " ") : "A required field");
+    return { status: 400, code: "LISTING_FIELD_REQUIRED", message: `${label} is required.` };
+  }
+  if (code === "23505" || /duplicate key value|already exists/i.test(text)) {
+    if (/vin/i.test(text)) return { status: 409, code: "DUPLICATE_VIN", message: "A vehicle with this VIN is already listed." };
+    if (/chassis|registration|identity/i.test(text)) return { status: 409, code: "DUPLICATE_VEHICLE", message: "This vehicle (chassis or registration number) is already listed." };
+    return { status: 409, code: "DUPLICATE_LISTING", message: "This listing already exists." };
+  }
+  if (code === "22003" || /out of range/i.test(text)) return { status: 400, code: "LISTING_NUMBER_OUT_OF_RANGE", message: "A number in the listing (price, mileage or year) is too large." };
+  if (code === "22P02" || /invalid input syntax/i.test(text)) return { status: 400, code: "LISTING_VALUE_INVALID", message: "A value in the listing is not in the expected format." };
+  return null;
+}
+
 // =============================
 // ➕ CREATE CAR
 // =============================
@@ -626,7 +646,7 @@ export const createCar = async (req, res) => {
       });
     }
   } catch (err) {
-    logError("CREATE ERROR", { error: err.message });
+    logError("CREATE ERROR", { error: err.message, code: err.code, details: err.details, hint: err.hint });
     cleanupFiles(req.files);
     const isDev = process.env.NODE_ENV === "development";
     // The atomic listing function raises plain-text entitlement errors; surface them as a clear 402/403 instead of an opaque 500.
@@ -642,9 +662,13 @@ export const createCar = async (req, res) => {
     if (!res.headersSent && Number.isInteger(err?.status) && err.status >= 400 && err.status < 500 && err.code) {
       return res.status(err.status).json({ success: false, message: err.message, code: err.code });
     }
+    // Known database rejections become a clear 4xx the dealer can act on (never an opaque 500).
+    const db = describeListingDbError(err);
+    if (!res.headersSent && db) return res.status(db.status).json({ success: false, message: db.message, code: db.code });
     if (!res.headersSent) {
       res.status(500).json({
         success: false,
+        code: "LISTING_SAVE_FAILED",
         message: "Failed to create car",
         ...(isDev && { error: err.message }),
       });
@@ -849,6 +873,9 @@ export const updateCar = async (req, res) => {
       const cityPart = req.body.city ?? existingCity;
       const addressPart = req.body.address ?? "";
       req.body.city = [cityPart, addressPart].filter(Boolean).join(", ");
+      // The folded value used to be computed and then skipped by the loop below, so a city edit returned 200 and changed nothing
+      // (found by the real-schema rehearsal, tests/rehearsal/listingRealSchema.test.js).
+      car.city = req.body.city;
     }
     for (const key of Object.keys(req.body)) {
       if (key === "city" || key === "address") continue; // folded into location above

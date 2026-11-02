@@ -166,6 +166,12 @@ export class VehicleApiError extends Error {
   }
 }
 
+/** The most useful message the server gave: field-level validation text ("year: Year is required") beats the generic "Validation failed". */
+function serverMessageFrom(body: unknown, fallback: string): string {
+  const errors = body && typeof body === 'object' ? (body as Record<string, unknown>).errors : undefined;
+  return typeof errors === 'string' && errors.trim() ? errors : fallback;
+}
+
 function errorDetailsFrom(body: unknown): VehicleApiErrorDetails | undefined {
   if (!body || typeof body !== 'object') return undefined;
   const b = body as Record<string, unknown>;
@@ -470,7 +476,7 @@ export async function createCar(payload: CreateCarPayload): Promise<CreateCarRes
     });
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
-    throw new VehicleApiError(error.message, error.status === 404 ? 'not_found' : 'server', error.status);
+    throw new VehicleApiError(serverMessageFrom(error.responseData, error.message), error.status === 404 ? 'not_found' : 'server', error.status, errorDetailsFrom(error.responseData));
   }
 }
 
@@ -489,7 +495,7 @@ export async function updateCar(id: string, payload: UpdateCarPayload): Promise<
     return await request<CreateCarResponse>(`/api/cars/${encodeURIComponent(id)}`, { method: 'PUT', body });
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
-    throw new VehicleApiError(error.message, error.status === 404 ? 'not_found' : error.status ? 'server' : 'network', error.status);
+    throw new VehicleApiError(serverMessageFrom(error.responseData, error.message), error.status === 404 ? 'not_found' : error.status ? 'server' : 'network', error.status, errorDetailsFrom(error.responseData));
   }
 }
 

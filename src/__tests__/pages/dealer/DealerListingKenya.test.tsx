@@ -9,7 +9,7 @@ vi.mock('../../../pages/dealer/dashboard/DealerListingPhotos', () => ({ default:
 import DealerListingForm from '../../../pages/dealer/dashboard/DealerListingForm';
 import { VehicleApiError } from '../../../services/vehicleApi';
 
-const car: any = { id: 'c1', title: 'Toyota Harrier', brand: 'Toyota', price: 2450000, mileage: 85000, fuel: 'Gasoline', condition: 'Foreign Used', images: [] };
+const car: any = { id: 'c1', title: 'Toyota Harrier', brand: 'Toyota', model: 'Harrier', year: 2018, price: 2450000, mileage: 85000, fuel: 'Gasoline', condition: 'Foreign Used', images: [] };
 const opts = (label: RegExp) => within(screen.getByLabelText(label)).getAllByRole('option').map((o) => (o as HTMLOptionElement).value);
 const mount = (c: any = car) => render(<DealerListingForm mode="edit" car={c} onSaved={vi.fn()} onCancel={vi.fn()} />);
 
@@ -58,5 +58,47 @@ describe('Kenyan listing form', () => {
     expect(alert).toHaveTextContent(/needs an active listing plan/i);
     expect(alert).toHaveTextContent(/entries have been kept/i);
     expect(screen.getByLabelText(/Price/)).toHaveValue('2,450,000');
+  });
+});
+
+describe('Listing form: required fields and server answers (listing audit)', () => {
+  const create = () => render(<DealerListingForm mode="create" car={null} onSaved={vi.fn()} onCancel={vi.fn()} />);
+
+  it('Model, Year and Price are required, shown as such, and block the request', async () => {
+    const user = userEvent.setup();
+    create();
+    await user.type(screen.getByLabelText(/^Title/), 'Toyota Axio');
+    await user.type(screen.getByLabelText(/^Brand/), 'Toyota');
+    await user.click(screen.getByRole('button', { name: /publish/i }));
+    expect(await screen.findByText('Model is required.')).toBeInTheDocument();
+    expect(screen.getByText('Year is required.')).toBeInTheDocument();
+    expect(screen.getByText('Price is required.')).toBeInTheDocument();
+    expect(m.createCar).not.toHaveBeenCalled();
+  });
+  it('mileage above 2,000,000 km is refused before it reaches the server', async () => {
+    const user = userEvent.setup();
+    mount();
+    const mileage = screen.getByLabelText(/Mileage/);
+    await user.clear(mileage);
+    await user.type(mileage, '3000000');
+    await user.click(screen.getByRole('button', { name: /save|update|submit/i }));
+    expect(await screen.findByText(/Mileage must not exceed 2,000,000 km/)).toBeInTheDocument();
+    expect(m.updateCar).not.toHaveBeenCalled();
+  });
+  it('a server validation / duplicate-VIN answer is shown as the server worded it, entries kept', async () => {
+    const user = userEvent.setup();
+    m.updateCar.mockRejectedValue(new VehicleApiError('A vehicle with this VIN is already listed.', 'server', 409, { code: 'DUPLICATE_VIN' } as any));
+    mount();
+    await user.click(screen.getByRole('button', { name: /save|update|submit/i }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('A vehicle with this VIN is already listed.');
+    expect(screen.getByLabelText(/^Title/)).toHaveValue('Toyota Harrier');
+  });
+  it('a server fault (5xx) is explained in plain words and the entries are kept', async () => {
+    const user = userEvent.setup();
+    m.updateCar.mockRejectedValue(new VehicleApiError('Failed to create car', 'server', 500));
+    mount();
+    await user.click(screen.getByRole('button', { name: /save|update|submit/i }));
+    expect(await screen.findByRole('alert')).toHaveTextContent(/server problem/i);
+    expect(screen.getByLabelText(/^Title/)).toHaveValue('Toyota Harrier');
   });
 });

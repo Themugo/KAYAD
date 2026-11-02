@@ -26,3 +26,7 @@ Root cause: the dealer listing is created by the DB function `kayad_create_deale
 - Owner and superadmin-role accounts cannot be suspended, banned, deactivated, deleted, re-roled or re-emailed through any admin route, by anyone including other owners (403 IMMUTABLE_ACCOUNT). API-level only; a direct database edit is not blocked.
 - Owner-only Employment levels (Admin > Staff): name + supported base role + exact permission set; never admin/owner authority.
 - Company e-mail domain with optional enforcement. Creates the login address only: no mailbox, no invitation e-mail.
+
+## Listing audit against the REAL schema (D-80..D-86)
+Method: `scripts/rehearse-listing-local.sh` builds a throwaway local PostgreSQL from all 191 migrations (Supabase stubs only) and runs the real validateCar -> createCar/updateCar -> Car model -> db layer and the real `kayad_create_dealer_listing_atomic` against it (21 cases). It never touches a hosted database. The persisted-listing, edit, duplicate-VIN, blank-field, overflow and subscription-required paths were exercised; photo upload to Cloudinary, email and the browser were not.
+New listings are created `pending` by default (Admin > Settings > Onboarding > listing moderation = hold for review). Switch to auto-publish there if approved dealers should appear publicly immediately.
