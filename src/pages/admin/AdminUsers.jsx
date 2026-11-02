@@ -106,7 +106,7 @@ export default function AdminUsers() {
         toast('Ban request returned no confirmed status. The list has been refreshed.', 'error');
         return;
       }
-      setUsers(prev => prev.map(x => x._id === u._id ? { ...x, isBanned: confirmed, is_banned: confirmed } : x));
+      setUsers(prev => prev.map(x => (x._id && x._id === u._id) ? { ...x, isBanned: confirmed, is_banned: confirmed } : x));
       setSummary(prev => prev ? { ...prev, banned: Math.max(0, Number(prev.banned || 0) + (confirmed === currentBanned ? 0 : confirmed ? 1 : -1)) } : prev);
       toast(confirmed ? 'User banned' : 'User unbanned', 'success');
     } catch (err) {
@@ -120,18 +120,22 @@ export default function AdminUsers() {
     // The server requires an auditable reason for every dealer decision; it is the operator's, never a canned value.
     const reason = (window.prompt(`Reason for approving ${u.businessName || u.name} (at least ${DEALER_REASON_MIN} characters):`) || '').trim();
     if (!isReasonValid(reason)) { if (reason) toast(`The reason must be at least ${DEALER_REASON_MIN} characters. Nothing was changed.`, 'error'); return; }
-    setActionId(`${u._id}-app`);
+    const targetId = u?._id;
+    if (!targetId) { toast('This row has no account id, so it cannot be approved. Nothing was changed.', 'error'); return; }
+    setActionId(`${targetId}-app`);
     try {
-      await adminAPI.approveDealer(u._id, { reason });
-      setUsers(prev => prev.map(x => x._id === u._id ? { ...x, approved: true, status: 'approved' } : x));
-      setSummary(prev => prev ? { ...prev, pendingApproval: Math.max(0, Number(prev.pendingApproval || 0) - 1) } : prev);
-      toast('Dealer approval saved', 'success');
+      const res = await adminAPI.approveDealer(targetId, { reason });
+      // Only the approved account's row changes - matched by its exact id, never by a value that could be shared or missing.
+      setUsers(prev => prev.map(x => (x._id && x._id === targetId) ? { ...x, approved: true, status: 'approved' } : x));
+      if (res?.changed !== false) setSummary(prev => prev ? { ...prev, pendingApproval: Math.max(0, Number(prev.pendingApproval || 0) - 1) } : prev);
+      toast(res?.changed === false ? 'This dealer was already approved.' : 'Dealer approval saved', 'success');
+      await load(); // reconcile every row and count from the server
     } catch (err) {
       toast(describeDealerDecisionError(err, 'Dealer approval failed. No change was assumed.'), 'error');
     } finally {
       setActionId(null);
     }
-  }, [toast]);
+  }, [toast, load]);
 
   const stats = [
     { label: 'Total users', value: summary?.totalUsers, note: 'All accounts', tone: 'brand', mark: 'U' },

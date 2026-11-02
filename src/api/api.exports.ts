@@ -194,9 +194,20 @@ export const communicationsAPI = {
 };
 
 // ── ADMIN ─────────────────────────────────────────────
+/** Every account row is addressed by its own id. Make `_id` and `id` agree; a row with neither is left without one (it cannot be acted on). */
+export const withRowIds = (payload: any) => {
+  const fix = (rows: any) => Array.isArray(rows) ? rows.map((r: any) => {
+    const id = r?._id ?? r?.id;
+    return id == null ? r : { ...r, _id: String(id), id: String(id) };
+  }) : rows;
+  if (payload && Array.isArray(payload.users)) return { ...payload, users: fix(payload.users) };
+  if (payload && Array.isArray(payload.data)) return { ...payload, data: fix(payload.data) };
+  return payload;
+};
+
 export const adminAPI = {
   stats:         ()          => api.get('/admin/stats').then(unwrap),
-  users:         (params: any)    => api.get('/admin/users', { params }).then(unwrap),
+  users:         (params: any)    => api.get('/admin/users', { params }).then(unwrap).then(withRowIds),
   toggleBan:     (userId: string, banned?: boolean) => api.post(`/admin/users/${userId}/toggle-ban`, typeof banned === 'boolean' ? { banned } : undefined).then(unwrap),
   approveDealer: (userId: string, body?: { reason?: string }) => api.post(`/admin/users/${userId}/approve-dealer`, body).then(unwrap),
   cars:          (params: any)    => api.get('/admin/cars', { params }).then(unwrap),

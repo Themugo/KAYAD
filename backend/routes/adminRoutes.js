@@ -383,8 +383,12 @@ router.get(
     }
     const inScope = users.filter((u) => u.role === "dealer" || (u.role === "user" && applicantBuyerIds.has(String(u._id ?? u.id))));
     const applications = await dealerApproval.summarizeApplications(inScope.map((u) => ({ ...u, id: u._id ?? u.id })));
+    // `.lean()` rows carry the database column `id` only. The admin screens address every row by `_id`; without it `row._id` was
+    // undefined for EVERY row, so "the row whose _id equals the clicked one" matched all rows at once. Always emit both, from the
+    // same authoritative id (rows without an id cannot be acted on and are never given a made-up one).
     const decorated = users.map((u) => ({
       ...u,
+      ...((u._id ?? u.id) != null ? { id: String(u._id ?? u.id), _id: String(u._id ?? u.id) } : {}),
       ...(inScope.includes(u) ? { application: applications.get(String(u._id ?? u.id)) ?? null, dealerApplicant: u.role === "user" } : {}),
       approved: u.status === "approved",
       verificationStatus: u.status === "approved" ? "verified" : u.status === "rejected" ? "rejected" : "pending",

@@ -202,6 +202,12 @@ export const update = async (table, id, data) => {
 };
 
 export const updateMany = async (table, filters, data) => {
+  // applyFilters() skips undefined values, so `{ id: undefined }` used to become an UNFILTERED update of every row. A bulk write must
+  // never be widened by a missing identifier: refuse it instead.
+  const undefinedKeys = Object.entries(filters || {}).filter(([, v]) => v === undefined).map(([k]) => k);
+  if (undefinedKeys.length) {
+    throw new Error(`updateMany(${table}) refused: filter value for ${undefinedKeys.join(", ")} is undefined, which would widen the update to every row`);
+  }
   const sb = getSupabase();
   let query = sb.from(table).update(mapPayloadOut(table, data));
   query = applyFilters(query, filters, table);
