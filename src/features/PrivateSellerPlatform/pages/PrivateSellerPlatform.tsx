@@ -3,6 +3,7 @@
 // Sections 1-17: Step-by-step seller journey
 // ============================================================
 
+import BrandMark from '../../../components/BrandMark';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { buildAuthPath } from '../../../utils/authIntent';
@@ -450,11 +451,10 @@ function SidebarContent({
     <div className="flex flex-col h-full">
       <div className="p-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-[#13B8A6] flex items-center justify-center flex-shrink-0">
-            <Car size={24} color="white" />
+          <div className="text-white">
+            <BrandMark size={36} nameClassName="text-white font-bold text-lg" />
           </div>
           <div>
-            <h1 className="text-white font-bold text-lg">KAYAD</h1>
             <p className="text-white/60 text-xs">Private Seller</p>
           </div>
         </div>

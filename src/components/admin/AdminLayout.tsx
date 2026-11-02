@@ -1,3 +1,4 @@
+import BrandMark from '../BrandMark';
 import { useState, useEffect, type ReactNode, useRef } from 'react';
 import { loginPathFor } from '../../utils/authIntent';
 import AdminAccountMenu from './AdminAccountMenu';
@@ -112,7 +113,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             >
               <Menu size={19} aria-hidden="true" />
             </button>
-            <span className="kayad-admin-header__brand">KAYAD</span>
+            <span className="kayad-admin-header__brand"><BrandMark size={22} nameClassName="kayad-admin-header__brand-name" /></span>
             {segments.map((segment, index) => (
               <span className="kayad-admin-header__crumb" key={`${segment}-${index}`}>
                 <ChevronRight size={13} aria-hidden="true" />

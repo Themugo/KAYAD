@@ -1,3 +1,4 @@
+import BrandMark from '../BrandMark';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import {
@@ -174,7 +175,7 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
         <div className="admin-sidebar__brand">
           {!collapsed && (
             <div className="admin-sidebar__brand-copy">
-              <span className="admin-sidebar__eyebrow">KAYAD</span>
+              <span className="admin-sidebar__eyebrow"><BrandMark size={26} nameClassName="admin-sidebar__brand-name" /></span>
               <span className="admin-sidebar__brand-title">Admin Console</span>
             </div>
           )}

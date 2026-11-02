@@ -3,7 +3,7 @@
    existing Navbar (#0A3340 deep navy, #12576D, #13B8A6 teal accent,
    #D7E7E4 line). Presentation only. */
 
-.kayad-header{--kn-ink:#0A3340;--kn-deep:#062E3A;--kn-mid:#0E4B5A;--kn-teal:#13B8A6;--kn-line:#D7E7E4;--kn-soft:#E7F5F2;position:sticky;top:0;z-index:50;background:rgba(255,255,255,.96);backdrop-filter:blur(18px);border-bottom:1px solid var(--kn-line);box-shadow:0 6px 22px rgba(10,51,64,.06);color:#1e293b}
+.kayad-header{--kn-ink:#0A3340;--kn-deep:#062E3A;--kn-mid:#0E4B5A;--kn-teal:#13B8A6;--kn-line:#D7E7E4;--kn-soft:#E7F5F2;position:sticky;top:0;z-index:50;background:var(--navbar-bg,rgba(255,255,255,.96));backdrop-filter:blur(18px);border-bottom:1px solid var(--kn-line);box-shadow:0 6px 22px rgba(10,51,64,.06);color:#1e293b}
 .kayad-header__bar{display:flex;align-items:center;gap:12px;width:100%;max-width:1440px;margin:0 auto;min-height:60px;padding:0 12px}
 @media(min-width:640px){.kayad-header__bar{padding:0 20px;gap:14px}}
 @media(min-width:1024px){.kayad-header__bar{min-height:72px;padding:0 28px;gap:18px}}
@@ -14,7 +14,7 @@
 .kayad-brand__mark{display:grid;place-items:center;width:40px;height:40px;flex-shrink:0;border-radius:13px;background:linear-gradient(135deg,var(--kn-ink),var(--kn-mid));color:#fff;box-shadow:0 6px 16px rgba(10,51,64,.22),inset 0 1px 0 rgba(255,255,255,.14);transition:transform .2s ease}
 .kayad-brand:hover .kayad-brand__mark{transform:translateY(-1px)}
 .kayad-brand__text{display:flex;flex-direction:column;min-width:0;text-align:left;line-height:1}
-.kayad-brand__word{display:flex;align-items:center;gap:6px;font-family:var(--font-display);font-weight:900;font-size:clamp(1.25rem,2vw,1.6rem);letter-spacing:-.035em;color:var(--kn-ink)}
+.kayad-brand__word{display:flex;align-items:center;gap:6px;font-family:var(--font-display);font-weight:900;font-size:clamp(1.25rem,2vw,1.6rem);letter-spacing:-.035em;color:var(--navbar-text,var(--kn-ink))}
 .kayad-brand__ea{font-family:var(--font-sans);font-size:9px;font-weight:800;letter-spacing:.04em;padding:2px 6px;border-radius:6px;background:#DDF4F0;color:#12576D;border:1px solid #BDE5DE}
 .kayad-brand__tag{margin-top:5px;font-size:8.5px;font-weight:700;letter-spacing:.10em;text-transform:uppercase;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}.kayad-brand__tag--reserved{display:block!important;max-width:190px;line-height:1.25}
 @media(max-width:1279px){.kayad-brand__tag:not(.kayad-brand__tag--reserved){display:none}}
@@ -22,7 +22,7 @@
 @media(max-width:379px){.kayad-brand__mark{width:36px;height:36px;border-radius:11px}.kayad-brand__tag--reserved{max-width:112px;font-size:7px;letter-spacing:.04em;white-space:normal}}
 
 /* Navigation field — a distinct deep-teal capsule. */
-.kayad-navfield{display:none;flex:1 1 auto;min-width:0;align-items:center;height:50px;padding:0 6px;border-radius:16px;background:linear-gradient(135deg,var(--kn-deep) 0%,var(--kn-ink) 55%,var(--kn-mid) 100%);box-shadow:0 10px 26px rgba(6,46,58,.18),inset 0 1px 0 rgba(255,255,255,.08)}
+.kayad-navfield{display:none;flex:1 1 auto;min-width:0;align-items:center;height:50px;padding:0 6px;border-radius:16px;background:var(--navbar-nav-bg,linear-gradient(135deg,var(--kn-deep) 0%,var(--kn-ink) 55%,var(--kn-mid) 100%));box-shadow:0 10px 26px rgba(6,46,58,.18),inset 0 1px 0 rgba(255,255,255,.08)}
 @media(min-width:1024px){.kayad-navfield{display:flex}}
 .kayad-navfield>ul{display:flex;align-items:center;gap:2px;margin:0;padding:0;list-style:none;min-width:0}
 .kayad-nav__group{position:relative;display:flex;align-items:center}

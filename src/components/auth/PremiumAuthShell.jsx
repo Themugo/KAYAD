@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowUpRight, CarFront } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
+import BrandMark from '../BrandMark';
 import { buildAuthPath, readAuthContext } from '../../utils/authIntent';
 
 /**
@@ -22,9 +23,8 @@ export default function PremiumAuthShell({ mode = 'signin', eyebrow, title, desc
   return (
     <main className="kayad-auth-page" id="main-content">
       <header className="kayad-auth-header">
-        <Link to="/" className="kayad-auth-brand" aria-label="KAYAD home">
-          <span className="kayad-auth-brand-mark"><CarFront size={19} strokeWidth={2.4} aria-hidden="true" /></span>
-          <span className="kayad-auth-brand-copy"><strong>KAYAD</strong><small>Kenya’s trusted vehicle marketplace</small></span>
+        <Link to="/" className="kayad-auth-brand" aria-label="Home">
+          <BrandMark size={38} showTagline nameClassName="kayad-auth-brand-name" />
         </Link>
         <div className="kayad-auth-header-action">
           <span>{switchPrompt}</span>

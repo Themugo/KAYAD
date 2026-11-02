@@ -11,7 +11,7 @@ export default function Footer({ setPage }: FooterProps) {
   };
 
   return (
-    <footer className="bg-[#0A3340] text-white/60 border-t-2 border-[#12576D]/50">
+    <footer className="bg-[var(--footer-bg,#0A3340)] text-[var(--footer-text,rgba(255,255,255,0.6))] border-t-2 border-[#12576D]/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 pb-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
           {/* Brand */}
@@ -20,17 +20,17 @@ export default function Footer({ setPage }: FooterProps) {
               {branding.logoType === 'image' && branding.logoUrl ? (
                 <img src={branding.logoUrl} onError={onBrandLogoError} alt={branding.logoText || 'KAYAD'} className="h-12 w-auto max-w-[190px] object-contain object-left" loading="lazy" />
               ) : (
-                <span className="text-[#13B8A6] font-sans font-bold tracking-[0.15em] uppercase">{branding.logoText || 'KAYAD'}</span>
+                <span className="text-[var(--footer-accent,#13B8A6)] font-sans font-bold tracking-[0.15em] uppercase">{branding.logoText || 'KAYAD'}</span>
               )}
             </button>
-            <p className="font-sans text-sm text-white/40 leading-relaxed">
+            <p className="font-sans text-sm text-[var(--footer-text,rgba(255,255,255,0.4))] leading-relaxed">
               {branding.footerDescription || "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services."}
             </p>
           </div>
 
           {/* Marketplace */}
           <div>
-            <h4 className="text-[#13B8A6] font-sans font-semibold text-sm mb-4 tracking-wide">Marketplace</h4>
+            <h4 className="text-[var(--footer-accent,#13B8A6)] font-sans font-semibold text-sm mb-4 tracking-wide">Marketplace</h4>
             <ul className="space-y-2.5">
               {[
                 { label: 'Browse Cars', page: 'gallery' },
@@ -39,7 +39,7 @@ export default function Footer({ setPage }: FooterProps) {
                 { label: 'Escrow Services', page: 'escrow' },
               ].map(({ label, page }) => (
                 <li key={label}>
-                  <button onClick={() => nav(page)} className="font-sans text-sm text-white/40 hover:text-[#13B8A6] transition-colors duration-200">
+                  <button onClick={() => nav(page)} className="font-sans text-sm text-[var(--footer-text,rgba(255,255,255,0.4))] hover:text-[var(--footer-accent,#13B8A6)] transition-colors duration-200">
                     {label}
                   </button>
                 </li>
@@ -49,7 +49,7 @@ export default function Footer({ setPage }: FooterProps) {
 
           {/* Services */}
           <div>
-            <h4 className="text-[#13B8A6] font-sans font-semibold text-sm mb-4 tracking-wide">Services</h4>
+            <h4 className="text-[var(--footer-accent,#13B8A6)] font-sans font-semibold text-sm mb-4 tracking-wide">Services</h4>
             <ul className="space-y-2.5">
               {[
                 { label: 'Pre-Inspection', page: 'pre-inspection' },
@@ -58,7 +58,7 @@ export default function Footer({ setPage }: FooterProps) {
                 { label: 'Become a Dealer', page: 'support' },
               ].map(({ label, page }) => (
                 <li key={label}>
-                  <button onClick={() => nav(page)} className="font-sans text-sm text-white/40 hover:text-[#13B8A6] transition-colors duration-200">
+                  <button onClick={() => nav(page)} className="font-sans text-sm text-[var(--footer-text,rgba(255,255,255,0.4))] hover:text-[var(--footer-accent,#13B8A6)] transition-colors duration-200">
                     {label}
                   </button>
                 </li>
@@ -68,7 +68,7 @@ export default function Footer({ setPage }: FooterProps) {
 
           {/* Company */}
           <div>
-            <h4 className="text-[#13B8A6] font-sans font-semibold text-sm mb-4 tracking-wide">Company</h4>
+            <h4 className="text-[var(--footer-accent,#13B8A6)] font-sans font-semibold text-sm mb-4 tracking-wide">Company</h4>
             <ul className="space-y-2.5">
               {[
                 { label: 'About KAYAD', page: 'home' },
@@ -77,7 +77,7 @@ export default function Footer({ setPage }: FooterProps) {
                 { label: 'Contact', page: 'support' },
               ].map(({ label, page }) => (
                 <li key={label}>
-                  <button onClick={() => nav(page)} className="font-sans text-sm text-white/40 hover:text-[#13B8A6] transition-colors duration-200">
+                  <button onClick={() => nav(page)} className="font-sans text-sm text-[var(--footer-text,rgba(255,255,255,0.4))] hover:text-[var(--footer-accent,#13B8A6)] transition-colors duration-200">
                     {label}
                   </button>
                 </li>
@@ -93,7 +93,7 @@ export default function Footer({ setPage }: FooterProps) {
           </p>
           <div className="flex gap-5">
             {['Privacy Policy', 'Terms of Service', 'Support'].map(item => (
-              <button key={item} className="font-sans text-xs text-white/30 hover:text-[#13B8A6] transition-colors duration-200">
+              <button key={item} className="font-sans text-xs text-white/30 hover:text-[var(--footer-accent,#13B8A6)] transition-colors duration-200">
                 {item}
               </button>
             ))}

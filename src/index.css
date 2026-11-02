@@ -1120,3 +1120,5 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
     transition: none !important;
   }
 }
+.kayad-auth-brand-name { font-size: 1.35rem; letter-spacing: -.055em; color: var(--auth-ink); }
+.kayad-auth-brand [data-testid="brand-mark"] small { color: #7b8f96; opacity: 1; font-size: 7px !important; }

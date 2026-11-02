@@ -1,3 +1,4 @@
+import { announceBrandingUpdated } from '../../context/BrandingContext';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { adminAPI } from '../../api/api';
 import { Button } from '../../components/ui';
@@ -143,11 +144,11 @@ export default function AdminSiteDesigns() {
   };
   const doPublish = async () => {
     const r = await run(() => adminAPI.siteDesignPublish(design.id, design.revision), `"${design.name}" is now live on the public site.`);
-    setDialog(null); if (r) { await refresh(); await open(design.id, { keepNotice: true }); }
+    setDialog(null); if (r) { announceBrandingUpdated(); await refresh(); await open(design.id, { keepNotice: true }); }
   };
   const doRollback = async () => {
     const pub = dialog.pub; const r = await run(() => adminAPI.siteDesignRollback(pub.id), `Restored "${pub.designName}" from ${fmt(pub.publishedAt)}. It is now live.`);
-    setDialog(null); if (r) { await refresh(); if (design) await open(design.id, { keepNotice: true }); }
+    setDialog(null); if (r) { announceBrandingUpdated(); await refresh(); if (design) await open(design.id, { keepNotice: true }); }
   };
   const previewOnSite = () => { startPreview({ designId: design.id, name: meta.name || design.name, config: draft }); window.open('/', '_blank', 'noopener'); };
 

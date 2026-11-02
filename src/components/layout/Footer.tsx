@@ -21,7 +21,14 @@ export default function Footer({ setPage }: FooterProps) {
   const navigate = useNavigate();
   const { theme } = useDesignTheme();
   const { branding } = useBranding();
-  const { colors, layouts } = theme;
+  const { layouts } = theme;
+  // Server-saved branding (Admin > Settings > Branding) wins over the per-browser Theme Studio value, so every visitor sees the same footer.
+  const colors = {
+    ...theme.colors,
+    ...(branding.footerBg ? { footerBg: branding.footerBg } : {}),
+    ...(branding.footerText ? { footerText: branding.footerText } : {}),
+    ...(branding.footerAccent ? { footerAccent: branding.footerAccent } : {}),
+  };
   const layout = layouts.footer;
 
   const nav = (page: string) => {

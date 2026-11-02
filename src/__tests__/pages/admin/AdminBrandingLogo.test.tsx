@@ -82,17 +82,30 @@ describe('Branding tab - logo upload', () => {
     done({ success: true, url: '/api/admin/public/logo/0123456789abcdef.png' });
     await screen.findByText(/applied to the site/);
   });
-  it('Use default logo is a draft change that Save then persists; Save is off until something changed', async () => {
+  it('Use default logo is a draft change that Save then persists; Save stays usable and the bar tells you what is unsaved', async () => {
     m.getConfig.mockResolvedValue(cfg({ logoType: 'image', logoUrl: '/api/admin/public/logo/0123456789abcdef.png' }));
     m.updateConfig.mockResolvedValue({ success: true, config: {} });
     await openBranding();
     const save = screen.getByRole('button', { name: 'Save Branding Settings' });
-    expect(save).toBeDisabled();
+    expect(save).toBeEnabled();
+    expect(screen.getByText(/All branding changes are saved/i)).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Use default logo' }));
     expect(screen.getByText(/unsaved branding changes/i)).toBeInTheDocument();
     await userEvent.click(save);
     await waitFor(() => expect(m.updateConfig).toHaveBeenCalledTimes(1));
     expect(m.updateConfig.mock.calls[0][0].branding.logoUrl).toBe('/branding/kayad-road-mark.svg');
+  });
+  it('navbar and footer colours are editable, sent on save, and can be reset to the default', async () => {
+    m.getConfig.mockResolvedValue(cfg({ logoType: 'image', logoUrl: '/branding/kayad-road-mark.svg' }));
+    m.updateConfig.mockResolvedValue({ success: true, config: {} });
+    await openBranding();
+    const input = screen.getByLabelText('Footer background value');
+    await userEvent.clear(input);
+    await userEvent.type(input, '#112233');
+    await userEvent.click(screen.getByRole('button', { name: 'Save Branding Settings' }));
+    await waitFor(() => expect(m.updateConfig).toHaveBeenCalledTimes(1));
+    expect(m.updateConfig.mock.calls[0][0].branding.footerBg).toBe('#112233');
+    expect(m.updateConfig.mock.calls[0][0].branding.navbarBg).toBe('');
   });
   it('when settings could not be loaded, saving is disabled and the reason with a retry is shown', async () => {
     m.getConfig.mockRejectedValue(new Error('down'));
@@ -111,13 +124,16 @@ describe('Branding tab - logo upload', () => {
 });
 
 describe('Branding tab - save control beside the logo', () => {
-  it('has a Save logo & identity button that is disabled until something changes, then saves', async () => {
+  it('has a Save logo & identity button that is always usable once settings load, and saves what is on screen', async () => {
     m.updateConfig.mockResolvedValue({ success: true, config: { branding: {} } });
     await openBranding();
-    const save = screen.getByRole('button', { name: 'Save logo & identity' });
-    expect(save).toBeDisabled();
-    await userEvent.type(screen.getByLabelText('Brand Tagline'), ' x');
+    // Nothing edited yet: the button is still clickable (a visitor-facing re-publish), not a dead grey control.
     expect(screen.getByRole('button', { name: 'Save logo & identity' })).toBeEnabled();
-    expect(screen.getByText('You have unsaved changes.')).toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText('Brand Tagline'), ' x');
+    expect(screen.getByText(/You have unsaved changes\./)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Save logo & identity' }));
+    await waitFor(() => expect(m.updateConfig).toHaveBeenCalledTimes(1));
+    const body = m.updateConfig.mock.calls[0][0];
+    expect(body.branding.brandTagline).toMatch(/ x$/);
   });
 });

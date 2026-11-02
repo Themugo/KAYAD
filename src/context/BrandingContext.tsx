@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useMemo, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback, ReactNode } from 'react';
 import { adminAPI } from '../api/api';
 
 // Enhanced branding interface with comprehensive color customization
@@ -36,6 +36,26 @@ interface Branding {
   dangerColor: string;      // Danger state
   warningColor: string;     // Warning state
   infoColor: string;        // Info state
+
+  // Optional surface colours (empty = built-in look). Saved on the server, so every visitor sees them.
+  navbarBg?: string;        // Top header bar
+  navbarText?: string;      // Brand name / header text
+  navbarNavBg?: string;     // Main navigation capsule
+  footerBg?: string;
+  footerText?: string;
+  footerAccent?: string;
+}
+
+export const SURFACE_COLOR_FIELDS = ['navbarBg', 'navbarText', 'navbarNavBg', 'footerBg', 'footerText', 'footerAccent'] as const;
+const SURFACE_CSS_VARS: Record<(typeof SURFACE_COLOR_FIELDS)[number], string> = {
+  navbarBg: '--navbar-bg', navbarText: '--navbar-text', navbarNavBg: '--navbar-nav-bg',
+  footerBg: '--footer-bg', footerText: '--footer-text', footerAccent: '--footer-accent',
+};
+const BRANDING_CACHE_KEY = 'kayad_branding_cache_v1';
+export const BRANDING_UPDATED_EVENT = 'kayad:branding-updated';
+/** Tell the running site that branding was saved so it re-reads it now (no reload needed). */
+export function announceBrandingUpdated() {
+  try { window.dispatchEvent(new Event(BRANDING_UPDATED_EVENT)); } catch { /* non-browser */ }
 }
 
 interface BrandingContextValue {
@@ -81,6 +101,7 @@ const DEFAULT_BRANDING: Branding = {
   dangerColor: '#EF4444',
   warningColor: '#176B87',
   infoColor: '#176B87',
+  navbarBg: '', navbarText: '', navbarNavBg: '', footerBg: '', footerText: '', footerAccent: '',
 };
 
 // Normalize legacy amber/gold and true-black values coming from older saved admin themes.
@@ -212,7 +233,11 @@ interface BrandingProviderProps {
 }
 
 export function BrandingProvider({ children }: BrandingProviderProps) {
-  const [branding, setBranding] = useState<Branding | null>(null);
+  const [branding, setBranding] = useState<Branding | null>(() => {
+    // Last known branding from this browser: avoids a flash of the default logo/colours on the login pages while the server answers.
+    try { const raw = localStorage.getItem(BRANDING_CACHE_KEY); if (raw) return normalizeBrandingConfig(JSON.parse(raw)); } catch { /* ignore */ }
+    return null;
+  });
   const [loading, setLoading] = useState(true);
   const [hydrated, setHydrated] = useState(false);
   const [navigation, setNavigation] = useState<unknown>(null);
@@ -231,7 +256,7 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
     const cssVars = getCSSVariables(branding);
 
     Object.entries(cssVars).forEach(([key, value]) => {
-      root.style.setProperty(key, value);
+      if (value === '') root.style.removeProperty(key); else root.style.setProperty(key, value);
     });
   }, [branding]);
 
@@ -243,23 +268,31 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
     if (b) root.style.setProperty('--font-sans', b); else root.style.removeProperty('--font-sans');
   }, [fonts]);
 
-  useEffect(() => {
-    if (!hydrated) return;
-
-    adminAPI.getPublicConfig()
+  const loadBranding = useCallback(() => {
+    return adminAPI.getPublicConfig()
       .then(cfg => {
         const configBranding = cfg.config?.branding || cfg.branding;
-        setBranding(normalizeBrandingConfig(configBranding));
+        const next = normalizeBrandingConfig(configBranding);
+        setBranding(next);
+        try { localStorage.setItem(BRANDING_CACHE_KEY, JSON.stringify(next)); } catch { /* storage unavailable */ }
         setNavigation(cfg.config?.navigation ?? cfg.navigation ?? null);
         setFonts({ display: cfg.config?.fontDisplay ?? cfg.fontDisplay, body: cfg.config?.fontBody ?? cfg.fontBody });
         setLoading(false);
       })
       .catch(() => {
-        // Fallback to defaults on error
-        setBranding(DEFAULT_BRANDING);
+        // Keep whatever is already showing (cached or default) rather than resetting to defaults on a failed refresh.
+        setBranding(prev => prev || DEFAULT_BRANDING);
         setLoading(false);
       });
-  }, [hydrated]);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    void loadBranding();
+    const onUpdated = () => { void loadBranding(); };
+    window.addEventListener(BRANDING_UPDATED_EVENT, onUpdated);
+    return () => window.removeEventListener(BRANDING_UPDATED_EVENT, onUpdated);
+  }, [hydrated, loadBranding]);
 
   // Helper function to generate CSS variables from branding
   function getCSSVariables(brandingData: Branding): Record<string, string> {
@@ -307,6 +340,7 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
       '--gold-700': '#12576D',
       '--gold-800': '#0E4655',
       '--gold-900': '#0A3340',
+      ...Object.fromEntries(SURFACE_COLOR_FIELDS.map((f) => [SURFACE_CSS_VARS[f], String(brandingData[f] || '').trim()])),
     };
   }
 
@@ -326,6 +360,9 @@ export function BrandingProvider({ children }: BrandingProviderProps) {
     </BrandingCtx.Provider>
   );
 }
+
+/** Like useBranding but never throws: outside the provider (tests, isolated renders) the built-in branding is returned. */
+export const useBrandingSafe = (): Branding => useContext(BrandingCtx)?.branding ?? DEFAULT_BRANDING;
 
 export const useBranding = (): BrandingContextValue => {
   const ctx = useContext(BrandingCtx);

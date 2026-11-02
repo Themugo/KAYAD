@@ -1,3 +1,4 @@
+import BrandMark from '../BrandMark';
 import { useState, useMemo, memo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -307,8 +308,7 @@ export default function DealerHub({ children, user }) {
         <div className="dealer-hub__header-inner">
           <div className="dealer-hub__logo">
             <Link to="/dealer" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none' }}>
-              <div className="dealer-hub__logo-icon">🚗</div>
-              <span className="dealer-hub__logo-text">KAYAD</span>
+              <BrandMark size={34} nameClassName="dealer-hub__logo-text" />
               <span className="dealer-hub__logo-badge">Dealer Hub</span>
             </Link>
           </div>

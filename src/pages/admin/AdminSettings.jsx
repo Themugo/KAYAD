@@ -1,3 +1,4 @@
+import { announceBrandingUpdated } from '../../context/BrandingContext';
 import { useState, useEffect, useMemo, Children, cloneElement, isValidElement } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { useAuth } from '../../context/AuthContext';
@@ -24,6 +25,7 @@ const DEFAULT_BRANDING = {
   logoText: 'KAYAD',
   logoUrl: '/branding/kayad-road-mark.svg',
   brandTagline: "Kenya's Trusted Vehicle Marketplace",
+  navbarBg: '', navbarText: '', navbarNavBg: '', footerBg: '', footerText: '', footerAccent: '',
   primaryColor: '#176B87',
   primaryLight: '#13B8A6',
   primaryDark: '#0A3340',
@@ -178,8 +180,9 @@ export default function AdminSettings() {
       if (!savedResponse || savedResponse.success === false || !savedResponse.config) {
         throw new Error('The server did not confirm the saved configuration.');
       }
-      toast('Settings saved', 'success');
+      toast(section === 'branding' ? 'Branding saved and applied across the site' : 'Settings saved', 'success');
       await loadConfig();
+      if (!section || section === 'branding') announceBrandingUpdated();
     } catch (err) {
       // Show the server's own reason (validation message / code) instead of a generic failure, and say nothing was saved.
       const data = err?.response?.data;
@@ -280,7 +283,7 @@ export default function AdminSettings() {
             dirty={JSON.stringify(branding) !== JSON.stringify(savedBranding)}
             loadError={configLoadError}
             onRetry={loadConfig}
-            markLogoSaved={(url) => setSavedBranding(p => ({ ...p, logoType: 'image', logoUrl: url }))}
+            markLogoSaved={(url) => { setSavedBranding(p => ({ ...p, logoType: 'image', logoUrl: url })); announceBrandingUpdated(); }}
           />
         )}
 

@@ -30,6 +30,15 @@ const ColorField = ({ label, value, onChange, description }) => {
   );
 };
 
+const SURFACE_FIELDS = [
+  ['navbarBg', 'Navbar background', 'Top header bar', '#FFFFFF'],
+  ['navbarText', 'Navbar brand text', 'Brand name in the header', '#0A3340'],
+  ['navbarNavBg', 'Navigation bar', 'Main menu strip', '#0A3340'],
+  ['footerBg', 'Footer background', 'Whole footer', '#0A3340'],
+  ['footerText', 'Footer text', 'Footer body text', '#94A3B8'],
+  ['footerAccent', 'Footer accent', 'Footer headings and links', '#13B8A6'],
+];
+
 // Section card wrapper
 const SectionCard = ({ title, icon, children }) => (
   <div className="card" style={{ padding: 24 }}>
@@ -78,7 +87,7 @@ const BrandingPreview = ({ branding }) => (
 
     {/* Navbar preview */}
     <div style={{
-      background: '#0a3340',
+      background: branding.navbarNavBg || '#0a3340',
       borderRadius: 8,
       padding: '12px 16px',
       display: 'flex',
@@ -265,11 +274,11 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
           </div>
           {/* A save control right where the logo and identity text are edited, so nobody has to scroll to the bottom bar. */}
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-            <button type="button" className="btn btn-primary" onClick={() => saveConfig('branding')} disabled={saving || !canSave || !dirty}>
+            <button type="button" className="btn btn-primary" onClick={() => saveConfig('branding')} disabled={saving || !canSave}>
               {saving ? 'Saving…' : 'Save logo & identity'}
             </button>
             <small style={{ color: 'var(--text-muted)' }}>
-              {saving ? 'Saving…' : !canSave ? 'Saving is disabled until the saved settings load.' : dirty ? 'You have unsaved changes.' : 'Nothing to save. A logo you upload goes live as soon as it finishes uploading.'}
+              {saving ? 'Saving…' : !canSave ? 'Saving is disabled until the saved settings load.' : dirty ? 'You have unsaved changes. Click Save to publish them to the whole site.' : 'Saved. A logo you upload goes live as soon as it finishes uploading; you can still press Save to re-publish.'}
             </small>
           </div>
         </div>
@@ -381,6 +390,23 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
         </div>
       </SectionCard>
 
+      {/* Navbar & Footer surfaces: saved on the server, so every visitor sees them */}
+      <SectionCard title="Navbar & Footer Colors" icon={Layers}>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', margin: '0 0 14px', maxWidth: 600 }}>
+          These apply to every visitor after you save. Leave a field empty to keep the built-in look.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, maxWidth: 600 }}>
+          {SURFACE_FIELDS.map(([key, label, description, fallback]) => (
+            <div key={key}>
+              <ColorField label={label} value={branding[key] || fallback} onChange={(val) => setBranding(p => ({ ...p, [key]: val }))} description={description} />
+              {branding[key] ? (
+                <button type="button" className="btn btn-outline" style={{ marginTop: 6, fontSize: 11, padding: '4px 10px' }} onClick={() => setBranding(p => ({ ...p, [key]: '' }))}>Use default</button>
+              ) : <small style={{ color: 'var(--text-muted)' }}>Using built-in default</small>}
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
       {/* Status Colors Section */}
       <SectionCard title="Status & Semantic Colors" icon={BarChart3}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 16, maxWidth: 600 }}>
@@ -423,10 +449,10 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
           type="button"
           className="btn"
           onClick={() => saveConfig('branding')}
-          disabled={saving || !canSave || !dirty}
+          disabled={saving || !canSave}
           style={{
             padding: '12px 24px', background: `linear-gradient(135deg, ${branding.primaryColor}, ${branding.primaryDark})`, color: '#fff', fontWeight: 700, fontSize: 14,
-            border: 'none', borderRadius: 12, cursor: saving || !canSave || !dirty ? 'not-allowed' : 'pointer', opacity: saving || !canSave || !dirty ? 0.6 : 1,
+            border: 'none', borderRadius: 12, cursor: saving || !canSave ? 'not-allowed' : 'pointer', opacity: saving || !canSave ? 0.6 : 1,
             display: 'flex', alignItems: 'center', gap: 8,
           }}
         >

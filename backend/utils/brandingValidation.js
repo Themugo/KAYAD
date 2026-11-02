@@ -4,6 +4,8 @@
 const LOGO_TYPES = ["icon", "text", "image"];
 const COLOR = /^(#[0-9A-Fa-f]{6}|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(\s*,\s*(0|1|0?\.\d+))?\s*\))$/;
 const COLOR_FIELDS = ["primaryColor", "primaryLight", "primaryDark", "primaryGlow", "accentColor", "backgroundColor", "surfaceColor", "cardColor", "textColor", "textMutedColor", "textDimColor", "borderColor", "successColor", "dangerColor", "warningColor", "infoColor"];
+// Optional surface colours: empty string means "use the built-in look".
+const OPTIONAL_COLOR_FIELDS = ["navbarBg", "navbarText", "navbarNavBg", "footerBg", "footerText", "footerAccent"];
 const TEXT_LIMITS = { logoText: 40, brandTagline: 80 };
 
 export const isAllowedLogoUrl = (value, env = process.env) => {
@@ -31,6 +33,10 @@ export function validateBranding(branding, env = process.env) {
   }
   for (const k of COLOR_FIELDS) {
     if (branding[k] !== undefined && (typeof branding[k] !== "string" || !COLOR.test(branding[k].trim()))) return { ok: false, message: `${k} must be a hex colour (#RRGGBB) or rgb()/rgba() value.` };
+  }
+  for (const k of OPTIONAL_COLOR_FIELDS) {
+    const v = branding[k];
+    if (v !== undefined && v !== "" && (typeof v !== "string" || !COLOR.test(v.trim()))) return { ok: false, message: `${k} must be empty (default) or a hex colour (#RRGGBB) or rgb()/rgba() value.` };
   }
   return { ok: true };
 }
