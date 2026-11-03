@@ -1,3 +1,4 @@
+import { markDealerListingSold } from "../services/dealerListingSale.service.js";
 import express from "express";
 import { protect, dealerOnly, requireApproved, allowRoles } from "../middleware/auth.js";
 import { dealerBusinessOnly } from "../middleware/dealerIsolation.js"; // PHASE 13D
@@ -986,23 +987,15 @@ router.patch(
   "/cars/:id/mark-sold",
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
-    const { buyerName, buyerEmail, salePrice, saleNotes } = req.body;
-    const existing = await findOne("cars", { id: req.params.id, dealer: req.user.id });
-    if (!existing) return res.status(404).json({ success: false, message: "Car not found" });
-
-    const car = await update("cars", req.params.id, {
-      sold: true,
-      status: "sold",
-      saleDetails: { buyerName, buyerEmail, salePrice: salePrice || existing.price, saleNotes, soldAt: new Date().toISOString() },
-    });
-
-    await logActionFromReq(req, "mark_sold", {
-      target: req.params.id,
-      targetModel: "Car",
-      details: { buyerName, salePrice },
-    });
-
-    res.json({ success: true, car });
+    let result;
+    try {
+      result = await markDealerListingSold(req.user.id, req.params.id, req.body || {});
+    } catch (err) {
+      if (err?.expose) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
+      throw err;
+    }
+    await logActionFromReq(req, "mark_sold", { target: req.params.id, targetModel: "Car", details: result.audit });
+    res.json({ success: true, car: result.car });
   }),
 );
 

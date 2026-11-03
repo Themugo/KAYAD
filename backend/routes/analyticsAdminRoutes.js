@@ -4,7 +4,7 @@ import { protect } from "../middleware/auth.js";
 import { authorize } from "../middleware/role.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { buildReport, liveActivity, exportCsv, EXPORT_KINDS, RANGES, METRIC_DEFINITIONS } from "../services/analyticsReport.service.js";
-import { getAnalyticsSettings, purgeExpired } from "../services/analytics.service.js";
+import { getAnalyticsSettings, purgeExpired, isAnalyticsStoreMissing, ANALYTICS_NOT_SET_UP } from "../services/analytics.service.js";
 import { findAll, count } from "../db/index.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 
@@ -24,24 +24,32 @@ async function withListingTitles(report) {
   return report;
 }
 
+// A database without the analytics tables is a setup state, not a server fault: say so plainly (503 + code) instead of a generic 500.
+const guarded = (handler) => asyncHandler(async (req, res, next) => {
+  try { return await handler(req, res, next); } catch (err) {
+    if (isAnalyticsStoreMissing(err)) return res.status(503).json({ success: false, ...ANALYTICS_NOT_SET_UP });
+    throw err;
+  }
+});
+
 const params = (q) => ({ range: q.range || "7d", from: q.from, to: q.to });
 const bad = (res, r) => res.status(400).json({ success: false, code: r.code, message: r.message });
 
-router.get("/summary", asyncHandler(async (req, res) => {
+router.get("/summary", guarded(async (req, res) => {
   const r = await buildReport(params(req.query), { newAccountsCounter: newAccounts });
   if (!r.ok) return bad(res, r);
   res.set("Cache-Control", "no-store");
   res.json({ success: true, ranges: RANGES, settings: await getAnalyticsSettings(), ...(await withListingTitles(r)) });
 }));
 
-router.get("/live", asyncHandler(async (req, res) => {
+router.get("/live", guarded(async (req, res) => {
   res.set("Cache-Control", "no-store");
   res.json({ success: true, ...(await liveActivity()) });
 }));
 
 router.get("/definitions", (req, res) => res.json({ success: true, definitions: METRIC_DEFINITIONS }));
 
-router.get("/export", asyncHandler(async (req, res) => {
+router.get("/export", guarded(async (req, res) => {
   const kind = String(req.query.kind || "summary");
   if (!EXPORT_KINDS.includes(kind)) return res.status(400).json({ success: false, code: "ANALYTICS_EXPORT_KIND_INVALID", message: `kind must be one of: ${EXPORT_KINDS.join(", ")}` });
   const r = await buildReport(params(req.query), { newAccountsCounter: newAccounts });
@@ -54,7 +62,7 @@ router.get("/export", asyncHandler(async (req, res) => {
 }));
 
 // Retention: superadmin only; deletes data older than the configured window and records the action.
-router.post("/purge", authorize("superadmin"), asyncHandler(async (req, res) => {
+router.post("/purge", authorize("superadmin"), guarded(async (req, res) => {
   const out = await purgeExpired();
   await logActionFromReq(req, "analytics_retention_purge", { target: "analytics", targetModel: "Analytics", details: out });
   res.json({ success: true, ...out });

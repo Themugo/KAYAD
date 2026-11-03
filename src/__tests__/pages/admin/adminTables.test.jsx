@@ -74,12 +74,12 @@ describe('admin tables render every declared column and keep their actions reach
     expect(await screen.findByText('No user records returned')).toBeTruthy();
   });
 
-  test('Listings: seven cells per row, a missing price is Unavailable, Delete passes the listing', async () => {
+  test('Listings: seven data cells plus a row number per row, a missing price is Unavailable, Delete passes the listing', async () => {
     api.cars.mockResolvedValue({ cars: [{ _id: 'c1', title: '2019 Prado', status: 'live', year: 2019 }], total: 1 });
     api.deleteCar.mockResolvedValue({});
     render(<MemoryRouter><AdminCars /></MemoryRouter>);
     const row = (await screen.findByText('2019 Prado')).closest('tr');
-    expect(row.querySelectorAll('td')).toHaveLength(7);
+    expect(row.querySelectorAll('td')).toHaveLength(8); // 7 data cells + the new row-number cell
     expect(within(row).getByText('Unavailable')).toBeTruthy();
     // The page asks for confirmation before removing a listing and names the button after it.
     const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);

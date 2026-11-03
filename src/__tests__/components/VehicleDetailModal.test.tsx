@@ -361,3 +361,89 @@ describe('VehicleDetailModal inspection entry point on every vehicle type', () =
     }
   });
 });
+
+describe('VehicleDetailModal shows only what the seller entered', () => {
+  const bare: any = { id: 'x1', title: '2016 LANDCRUISER V8', make: 'Toyota', model: 'Land Cruiser', year: 2016, price: 3500000, mileage: 165000, location: 'Nairobi', fuelType: 'Petrol', transmission: 'Automatic', description: '', features: [], image: 'https://x.test/a.jpg', additionalImages: [], sellerName: 'MAKENA DEALERS' };
+  const mount = (v: any) => render(
+    <VehicleDetailModal vehicle={v} notFoundId={null} allVehicles={[]} onClose={() => {}} onStartEscrow={() => {}} onContactSeller={() => {}} isSaved={false} onToggleSave={() => {}} />
+  );
+
+  it('invents no description, history, condition ratings, features, engine or drive', () => {
+    mount(bare);
+    const text = document.body.textContent || '';
+    for (const fake of ['Pristine', 'Maintenance History', 'Ownership History', 'Why This Vehicle Stands Out', 'Excellent (100%)', 'Grade A Clean', 'EyeSight', 'Lane Keep', 'Heated Front Seats', 'Apple CarPlay', '2500 cc', 'AWD / 4WD', 'Foreign Used']) {
+      expect(text).not.toContain(fake);
+    }
+    expect(screen.queryByTestId('vehicle-features')).toBeNull();
+    expect(screen.getByTestId('no-description')).toBeTruthy();
+  });
+
+  it('shows the seller description, real features and real engine/drive when provided', () => {
+    mount({ ...bare, description: 'Clean unit, one owner.', features: ['Sunroof', 'Reverse camera'], engineSize: '4500 cc', driveType: '4WD', condition: 'Locally Used' });
+    const text = document.body.textContent || '';
+    expect(text).toContain('Clean unit, one owner.');
+    expect(text).toContain('Sunroof');
+    expect(text).toContain('4500 cc');
+    expect(text).toContain('4WD');
+    expect(text).toContain('Locally Used');
+  });
+});
+
+describe('VehicleDetailModal navigation and role tools', () => {
+  const list: any[] = INITIAL_VEHICLES.slice(0, 3);
+  const mount = (extra: Record<string, unknown> = {}, v: any = list[1]) => render(
+    <VehicleDetailModal vehicle={v} notFoundId={null} allVehicles={list} onClose={() => {}} onStartEscrow={() => {}} onContactSeller={() => {}} isSaved={false} onToggleSave={() => {}} onSelectVehicle={() => {}} {...(extra as object)} />
+  );
+
+  it('everyone gets Back to results and previous/next through the list they came from', () => {
+    const onSelectVehicle = vi.fn(); const onClose = vi.fn();
+    mount({ onSelectVehicle, onClose });
+    expect(screen.getByText('2 of 3')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Previous vehicle' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Next vehicle' }));
+    expect(onSelectVehicle).toHaveBeenNthCalledWith(1, list[0]);
+    expect(onSelectVehicle).toHaveBeenNthCalledWith(2, list[2]);
+    fireEvent.click(screen.getByRole('button', { name: /Back to results/ }));
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('visitors and customers see no admin or owner tools', () => {
+    mount({ viewer: null });
+    expect(screen.queryByTestId('role-tools')).toBeNull();
+    mount({ viewer: { id: 'someone-else', role: 'buyer' }, onManageListing: vi.fn(), onEditListing: vi.fn() });
+    expect(screen.queryByTestId('role-tools')).toBeNull();
+  });
+
+  it('an admin or owner can open the listing in Listing Management', () => {
+    const onManageListing = vi.fn();
+    mount({ viewer: { id: 'a1', role: 'admin', isStaff: true }, onManageListing });
+    fireEvent.click(screen.getByRole('button', { name: /Manage in Listing Management/ }));
+    expect(onManageListing).toHaveBeenCalledWith(list[1]);
+  });
+
+  it("the listing's own dealer can edit it; another dealer cannot", () => {
+    const onEditListing = vi.fn();
+    mount({ viewer: { id: list[1].sellerId, role: 'dealer' }, onEditListing });
+    fireEvent.click(screen.getByRole('button', { name: 'Edit listing' }));
+    expect(onEditListing).toHaveBeenCalledWith(list[1]);
+  });
+
+  it('shows a phone action bar with the price and the primary action', () => {
+    mount();
+    expect(screen.getByTestId('mobile-action-bar').textContent).toContain('Ksh');
+  });
+});
+
+describe('VehicleDetailModal gallery and status honesty', () => {
+  const base: any = { ...INITIAL_VEHICLES[0], image: 'a.jpg', additionalImages: undefined, images: ['a.jpg', 'b.jpg', 'c.jpg'], county: '' };
+  it('shows every photo delivered in images (not only the first)', () => {
+    render(<VehicleDetailModal vehicle={base} notFoundId={null} allVehicles={[]} onClose={() => {}} onStartEscrow={() => {}} onContactSeller={() => {}} isSaved={false} onToggleSave={() => {}} />);
+    expect(document.body.textContent).toContain('1 / 3');
+  });
+  it('makes no "Available Today / Ready for Viewing" claim and no dangling comma in the location', () => {
+    render(<VehicleDetailModal vehicle={{ ...base, isAuction: false, sellerType: 'Verified Dealer' }} notFoundId={null} allVehicles={[]} onClose={() => {}} onStartEscrow={() => {}} onContactSeller={() => {}} isSaved={false} onToggleSave={() => {}} />);
+    const text = document.body.textContent || '';
+    expect(text).not.toContain('Ready for Viewing');
+    expect(text).not.toMatch(/,\s*$/m);
+  });
+});

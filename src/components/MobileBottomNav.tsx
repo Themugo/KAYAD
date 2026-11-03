@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { House, CarFront, Gavel, Heart } from 'lucide-react';
+import { House, CarFront, Gavel, Heart, LayoutDashboard, PlusCircle, Users, BarChart3 } from 'lucide-react';
 import { usePrefersReducedMotion } from '../hooks/useMediaQuery';
 
 /** Event the Navbar listens for to open its existing mobile menu (single menu implementation). */
 export const OPEN_MOBILE_MENU_EVENT = 'kayad:open-mobile-menu';
 
 interface MobileBottomNavProps {
-  authUser?: { id?: string; _id?: string } | null;
+  authUser?: { id?: string; _id?: string; role?: string } | null;
   activeNav: string;
   onNavigate: (nav: string) => void;
   /** Kept for call-site compatibility; Compare/Saved/Account remain in the existing menu. */
@@ -33,7 +33,8 @@ function MechanicRepairIcon({ size = 24, strokeWidth = 1.8 }: { size?: number; s
   );
 }
 
-export default function MobileBottomNav({ activeNav, onNavigate }: MobileBottomNavProps) {
+export default function MobileBottomNav({ activeNav, onNavigate, authUser }: MobileBottomNavProps) {
+  if (authUser?.role === 'dealer') return <DealerBottomNav activeNav={activeNav} onNavigate={onNavigate} />;
   const prefersReducedMotion = usePrefersReducedMotion();
   const [selectedTab, setSelectedTab] = useState('home');
 
@@ -114,6 +115,39 @@ export default function MobileBottomNav({ activeNav, onNavigate }: MobileBottomN
             <span className="kayad-mobile-bottom-nav__icon" aria-hidden="true">
               <Icon size={23} strokeWidth={active ? 2.5 : 2} />
             </span>
+            <span>{label}</span>
+          </button>
+        );
+      })}
+    </nav>
+  );
+}
+
+
+/** Dealers get a dealer-only dock: no buyer Home/Showroom/Saved shortcuts. The menu stays in the header (no duplicate opener). */
+function DealerBottomNav({ activeNav, onNavigate }: { activeNav: string; onNavigate: (nav: string) => void }) {
+  const section = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('section') || 'overview' : 'overview';
+  const onDealer = activeNav === 'dealer-dashboard';
+  const items = [
+    { key: 'overview', label: 'Dashboard', icon: LayoutDashboard, nav: 'dealer:overview' },
+    { key: 'inventory', label: 'Inventory', icon: CarFront, nav: 'dealer:inventory' },
+    { key: 'add', label: 'Add', icon: PlusCircle, nav: 'dealer:inventory:new' },
+    { key: 'leads', label: 'Leads', icon: Users, nav: 'dealer:leads' },
+    { key: 'analytics', label: 'Analytics', icon: BarChart3, nav: 'dealer:analytics' },
+  ];
+  return (
+    <nav className="kayad-mobile-bottom-nav lg:hidden" aria-label="Dealer mobile navigation">
+      {items.map(({ key, label, icon: Icon, nav }) => {
+        const active = onDealer && key !== 'add' && section === key;
+        return (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onNavigate(nav)}
+            className={`kayad-mobile-bottom-nav__item kayad-mobile-bottom-nav__item--${key === 'add' ? 'home' : 'showroom'} ${active ? 'is-active' : ''}`}
+            aria-current={active ? 'page' : undefined}
+          >
+            <span className="kayad-mobile-bottom-nav__icon" aria-hidden="true"><Icon size={22} strokeWidth={active ? 2.5 : 2} /></span>
             <span>{label}</span>
           </button>
         );

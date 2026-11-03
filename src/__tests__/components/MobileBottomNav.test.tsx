@@ -50,3 +50,15 @@ describe('MobileBottomNav Showroom flow', () => {
     document.getElementById = originalGetElementById;
   });
 });
+
+describe('MobileBottomNav for dealers', () => {
+  it('shows a dealer-only dock (no buyer Home/Showroom/Saved) and routes to dealer sections', () => {
+    const onNavigate = vi.fn();
+    render(<MobileBottomNav activeNav="marketplace" onNavigate={onNavigate} authUser={{ id: 'd1', role: 'dealer' }} />);
+    expect(screen.getAllByRole('button').map((b) => b.textContent?.trim())).toEqual(['Dashboard', 'Inventory', 'Add', 'Leads', 'Analytics']);
+    fireEvent.click(screen.getByRole('button', { name: /Inventory/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Add/ }));
+    expect(onNavigate).toHaveBeenNthCalledWith(1, 'dealer:inventory');
+    expect(onNavigate).toHaveBeenNthCalledWith(2, 'dealer:inventory:new');
+  });
+});

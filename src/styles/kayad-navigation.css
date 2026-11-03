@@ -365,3 +365,152 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
 @media (prefers-reduced-motion: reduce) {
   .kayad-mobile-menu, .kayad-mobile-drawer-primary .kayad-drawer-group { animation: none !important; transition: none !important; }
 }
+
+/* ── Premium mobile menu refinement ─────────────────────────────────────────
+   Fixes the unreadable active chip (dark text on a dark tile, e.g. "Browse vehicles"),
+   lifts tiny 9-10px text to a readable size, and gives the drawer a clear hierarchy:
+   account card → destinations → personal shortcuts → primary action. */
+.kayad-mobile-menu__surface {
+  background:
+    radial-gradient(120% 60% at 100% 0%, rgba(19,184,166,.10), transparent 55%),
+    linear-gradient(180deg, #08333F 0%, #062A35 100%) !important;
+}
+.kayad-mobile-menu__surface > div:first-child span { width: 44px; height: 4px; }
+
+/* Account card */
+.kayad-mobile-menu__surface section:first-child {
+  border-radius: 22px;
+  border: 1px solid rgba(141,228,219,.22);
+  background: linear-gradient(150deg, rgba(19,184,166,.14), rgba(255,255,255,.04));
+  box-shadow: 0 10px 28px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.kayad-mobile-menu__surface section:first-child p { color: #fff; }
+.kayad-mobile-menu__surface section:first-child p + p { color: rgba(255,255,255,.72); font-size: 12px; line-height: 1.5; }
+.kayad-mobile-menu__surface section:first-child > div + button,
+.kayad-mobile-menu__surface section:first-child > button {
+  min-height: 48px; font-size: 14px; letter-spacing: .01em;
+  box-shadow: 0 12px 26px rgba(19,184,166,.28);
+}
+
+/* Section labels */
+.kayad-mobile-menu__surface #kayad-drawer-explore { font-size: 11px; letter-spacing: .16em; color: #9FE3DA; }
+.kayad-mobile-menu__surface #kayad-drawer-explore + span { font-size: 11px; color: rgba(255,255,255,.6); }
+
+/* Destination cards */
+.kayad-mobile-drawer-primary .kayad-drawer-group {
+  border-radius: 18px;
+  border-color: rgba(189,229,222,.16);
+  background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.025));
+  box-shadow: 0 6px 18px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.kayad-mobile-drawer-primary .kayad-drawer-group__head {
+  min-height: 60px; font-size: 14px; font-weight: 800; letter-spacing: .005em; color: #fff;
+}
+.kayad-mobile-drawer-primary .kayad-drawer-group__head.is-active {
+  background: linear-gradient(135deg, rgba(19,184,166,.30), rgba(23,107,135,.55));
+  box-shadow: inset 3px 0 0 #43D0C2;
+}
+.kayad-mobile-drawer-primary .kayad-drawer-group__head.is-active .kayad-drawer-group__icon { background: #DDF4F0; color: #0A3340; }
+.kayad-mobile-drawer-primary .kayad-drawer-group__head > svg:last-child { color: #8DE4DB; opacity: .9; }
+
+/* Child links: legible at rest, clearly filled when current */
+.kayad-mobile-drawer-primary .kayad-drawer-chip {
+  min-height: 44px; font-size: 13px; font-weight: 700; color: rgba(255,255,255,.92);
+  background: rgba(3,30,39,.42); border: 1px solid rgba(255,255,255,.10);
+}
+.kayad-mobile-drawer-primary .kayad-drawer-chip:hover,
+.kayad-mobile-drawer-primary .kayad-drawer-chip:active { background: rgba(255,255,255,.12); }
+.kayad-mobile-drawer-primary .kayad-drawer-chip[aria-current="page"] {
+  background: #8EE7DA; border-color: #8EE7DA; color: #05343F; font-weight: 800;
+  box-shadow: 0 4px 14px rgba(19,184,166,.28);
+}
+.kayad-mobile-drawer-primary .kayad-drawer-chip[aria-current="page"] .kayad-drawer-chip__icon { color: #05343F; }
+@media (max-width: 359px) { .kayad-mobile-drawer-primary .kayad-drawer-chip { font-size: 12px; } }
+
+/* Personal shortcuts */
+.kayad-drawer-panel { padding: 10px !important; background: rgba(255,255,255,.04) !important; border-color: rgba(255,255,255,.09) !important; }
+.kayad-drawer-panel > span:first-child { font-size: 11px !important; letter-spacing: .16em !important; color: #9FE3DA !important; padding: 2px 6px 8px !important; }
+.kayad-drawer-tile {
+  display: flex; align-items: center; justify-content: flex-start; gap: 10px;
+  min-height: 48px; padding: 0 12px; border-radius: 14px; text-align: left;
+  background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.07);
+  color: rgba(255,255,255,.92); font-size: 13px; font-weight: 700;
+  transition: background .16s ease, transform .16s ease;
+}
+.kayad-drawer-tile:hover, .kayad-drawer-tile:active { background: rgba(255,255,255,.11); }
+.kayad-drawer-tile:active { transform: scale(.985); }
+.kayad-drawer-tile:focus-visible { outline: 2px solid #8EE7DA; outline-offset: 2px; }
+.kayad-drawer-tile svg { width: 18px; height: 18px; color: #7DE0D5; flex: 0 0 auto; }
+.kayad-drawer-tile > span:first-child { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
+.kayad-drawer-tile > span:last-child:not(:first-child) { margin-left: auto; }
+
+/* Primary action */
+#mobile-cta-sell-car { min-height: 60px; border-radius: 20px; box-shadow: 0 16px 34px rgba(19,184,166,.22); }
+#mobile-cta-sell-car strong { font-size: 15px; }
+#mobile-cta-sell-car small { font-size: 12px; color: rgba(255,255,255,.75); }
+@media (prefers-reduced-motion: reduce) { .kayad-drawer-tile { transition: none; } }
+
+/* ===== Premium mobile menu (final layer) =====
+   One authoritative pass over the drawer: calmer surface, compact welcome card, destination
+   groups with wrapping pills (about half the height of the previous stacked tiles), a clearly
+   readable active state, consistent 44px+ tap targets and tidy section labels. */
+.kayad-mobile-menu__surface {
+  background: radial-gradient(120% 60% at 50% 0%, #0B4252 0%, #062E3A 38%, #04212B 100%) !important;
+  border-top-color: rgba(141,228,219,.28) !important;
+}
+.kayad-mobile-menu__surface > div:first-child { background: transparent !important; padding-top: 8px; }
+.kayad-mobile-menu__surface > div:first-child span { width: 40px !important; height: 4px !important; background: rgba(189,229,222,.38) !important; }
+.kayad-mobile-menu__surface > div:nth-child(2) { padding: 10px 16px max(1.5rem, env(safe-area-inset-bottom)) !important; }
+
+/* Welcome / account card */
+.kayad-mobile-menu__surface section.mb-4:first-child {
+  margin-bottom: 14px !important; padding: 14px !important; border-radius: 20px !important;
+  border: 1px solid rgba(141,228,219,.22) !important;
+  background: linear-gradient(145deg, rgba(19,184,166,.16), rgba(255,255,255,.04)) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.08);
+}
+.kayad-mobile-menu__surface section.mb-4:first-child p.text-sm { font-size: 15px; letter-spacing: -.01em; }
+.kayad-mobile-menu__surface section.mb-4:first-child p.mt-0\.5 { font-size: 12px; line-height: 1.4; color: rgba(255,255,255,.68); }
+.kayad-mobile-menu__surface section.mb-4:first-child > button { min-height: 46px !important; margin-top: 12px !important; border-radius: 14px !important; font-size: 14px; }
+
+/* Section labels with a hairline */
+.kayad-mobile-menu__surface section[aria-labelledby="kayad-drawer-explore"] > div:first-child { display: flex !important; align-items: center; gap: 10px; margin-bottom: 10px !important; }
+.kayad-mobile-menu__surface #kayad-drawer-explore { font-size: 11px; font-weight: 800; letter-spacing: .18em; color: #8EE7DA; white-space: nowrap; }
+.kayad-mobile-menu__surface #kayad-drawer-explore + span { display: none; }
+.kayad-mobile-menu__surface section[aria-labelledby="kayad-drawer-explore"] > div:first-child::after { content: ""; flex: 1; height: 1px; background: linear-gradient(90deg, rgba(141,228,219,.35), transparent); }
+
+/* Destination groups */
+.kayad-mobile-menu__surface .kayad-mobile-drawer-primary { grid-template-columns: minmax(0,1fr) !important; gap: 10px !important; }
+.kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group {
+  border-radius: 18px; border: 1px solid rgba(189,229,222,.14);
+  background: linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
+  box-shadow: 0 6px 18px rgba(0,0,0,.14);
+}
+.kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group:has(.kayad-drawer-group__head[href*="support"]) { grid-column: auto; }
+.kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__head { min-height: 56px; padding: 8px 12px; gap: 12px; font-size: 14px; font-weight: 800; letter-spacing: -.005em; }
+.kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__icon { width: 38px; height: 38px; border-radius: 12px; box-shadow: inset 0 1px 0 rgba(255,255,255,.12); }
+.kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__head > svg:last-child { width: 16px; height: 16px; opacity: .7; }
+.kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__head.is-active { background: linear-gradient(135deg, rgba(23,107,135,.85), rgba(15,89,104,.85)); box-shadow: inset 3px 0 0 #13B8A6; }
+.kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__links { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px; padding: 2px 12px 12px; }
+.kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-chip {
+  width: auto; min-height: 46px; padding: 6px 11px; gap: 8px; border-radius: 14px;
+  font-size: 12.5px; font-weight: 700; line-height: 1.2; color: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+}
+.kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-chip:active { background: rgba(255,255,255,.16); }
+.kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-chip[aria-current="page"] {
+  background: #8EE7DA !important; border-color: #8EE7DA !important; color: #04343F !important; font-weight: 800;
+}
+.kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-chip[aria-current="page"] .kayad-drawer-chip__icon { color: #04343F !important; }
+
+/* Your KAYAD shortcuts */
+.kayad-mobile-menu__surface .kayad-drawer-panel { padding: 12px !important; border-radius: 20px !important; background: rgba(255,255,255,.04) !important; border: 1px solid rgba(255,255,255,.09) !important; }
+.kayad-mobile-menu__surface .kayad-drawer-panel > span:first-child { font-size: 11px !important; font-weight: 800; letter-spacing: .18em !important; color: #8EE7DA !important; padding: 0 2px 10px !important; }
+.kayad-mobile-menu__surface .kayad-drawer-tile { min-height: 46px; border-radius: 13px; font-size: 13px; font-weight: 700; }
+
+/* Primary call to action */
+.kayad-mobile-menu__surface #mobile-cta-sell-car { min-height: 56px; border-radius: 18px; background: linear-gradient(135deg, #13B8A6, #0D7187) !important; border-color: rgba(255,255,255,.18) !important; }
+.kayad-mobile-menu__surface #mobile-cta-sell-car strong { font-size: 15px; }
+.kayad-mobile-menu__surface #mobile-cta-sell-car small { color: rgba(255,255,255,.78) !important; font-size: 11px; }
+.kayad-mobile-menu__surface #mobile-cta-sell-car svg:last-child { color: #fff; }
+@media (max-width: 340px) { .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__links { grid-template-columns: minmax(0, 1fr) !important; } }

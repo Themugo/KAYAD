@@ -25,7 +25,7 @@ pass('Registration is reachable: combined header entry -> /login -> /register CT
 // change, not a regression (the "KAYAD mobile hero" aria-label section and
 // its card inside both still render correctly; see VehicleMarketplace.test.tsx).
 // Updated the literal match to the current className rather than reverting it.
-pass('Hero keeps stable mobile/desktop footprint', hero.includes('lg:h-[var(--hero-stage-h)]') && hero.includes('relative px-3 pb-4 pt-3 lg:hidden'));
+pass('Hero keeps stable mobile/desktop footprint', hero.includes('lg:h-[var(--hero-stage-h)]') && hero.includes('relative px-3 pb-3 pt-2 lg:hidden'));
 pass('Hero keeps real vehicle source', hero.includes('heroSourceVehicles') && hero.includes('heroImageForVehicle'));
 pass('Hero retains existing actions', hero.includes('Explore Vehicles') && hero.includes('How It Works'));
 pass('Hero retains carousel controls', hero.includes('Previous featured vehicles') && hero.includes('Next featured vehicles') && hero.includes('Show featured pair'));

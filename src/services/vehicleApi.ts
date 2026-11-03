@@ -354,6 +354,8 @@ export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
     transmission: transmissionValue,
     fuelType: fuelTypeValue,
     engine: car.engine || '',
+    engineSize: car.engine || undefined,
+    driveType: ((car.driveType ?? car.drive_type) || undefined) as Vehicle['driveType'],
     horsepower: 0,
     exteriorColor: car.color || '',
     interiorColor: '',
@@ -538,6 +540,13 @@ export async function deleteCarImage(id: string, index: number): Promise<Listing
 export async function setCoverImage(id: string, index: number): Promise<ListingImagesResponse> {
   try {
     return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images/cover`, { method: 'PATCH', body: { index } });
+  } catch (err) { throw toVehicleError(err); }
+}
+
+/** Dealer marks one of their own listings as sold. Sale details are optional and kept in the audit log. */
+export async function markCarSold(id: string, body: { buyerName?: string; salePrice?: number; notes?: string } = {}): Promise<{ success: boolean; message?: string; code?: string }> {
+  try {
+    return await request<{ success: boolean; message?: string }>(`/api/dealer/cars/${encodeURIComponent(id)}/mark-sold`, { method: 'PATCH', body });
   } catch (err) { throw toVehicleError(err); }
 }
 

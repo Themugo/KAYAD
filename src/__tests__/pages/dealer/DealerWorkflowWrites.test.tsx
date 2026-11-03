@@ -329,12 +329,19 @@ describe('Dealer photo management and listing removal (Phase 14.6, mocked)', () 
     expect(screen.queryByText('Listing removed from your inventory.')).toBeNull();
   });
 
-  it('sold listings offer no Remove button and explain why (14.7)', async () => {
-    veh.getMyListings.mockResolvedValue([{ id: 's1', title: 'Sold Corolla', status: 'sold', images: imgs }]);
+  it('sold listings leave the active list, sit in the collapsed Sold section, and offer no Remove button (14.7)', async () => {
+    veh.getMyListings.mockResolvedValue([{ id: 's1', title: 'Sold Corolla', status: 'sold', images: imgs }, { id: 'a1', title: 'Live Prado', status: 'available', images: imgs }]);
     await open('section=inventory');
-    expect(await screen.findByText('Sold Corolla')).toBeTruthy();
+    expect(await screen.findByText('Live Prado')).toBeTruthy();
+    // not in the active, numbered list
+    expect(screen.queryByText('Sold Corolla')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: /Sold vehicles \(1\)/ }));
+    expect(screen.getByText('Sold Corolla')).toBeTruthy();
     expect(screen.queryByRole('button', { name: /Remove Sold Corolla/ })).toBeNull();
-    expect(screen.getByText(/Sold listings cannot be removed/)).toBeTruthy();
+    // the Sold filter shows it in the main list, still without Remove, with the explanation
+    fireEvent.change(screen.getByLabelText('Filter by status'), { target: { value: 'sold' } });
+    expect(await screen.findByText(/Sold listings cannot be removed/)).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Remove Sold Corolla/ })).toBeNull();
   });
 
   it('a server-side delete block (409) keeps the listing and shows the reason (14.7)', async () => {

@@ -533,7 +533,7 @@ function AppInner() {
     'seller-dashboard',
     'escrow-operations',
   ]);
-  const showPublicMobileDock = !privateWorkspaceNavs.has(activeNav) && !['auctions', 'payments', 'profile'].includes(activeNav);
+  const showPublicMobileDock = !privateWorkspaceNavs.has(activeNav) && !['auctions', 'payments', 'profile'].includes(activeNav) && !quickViewVehicle && !invalidVehicleId; // the vehicle sheet has its own sticky action bar
   const publicShellClass = privateWorkspaceNavs.has(activeNav) ? '' : 'kayad-public-shell ';
 
   return (
@@ -797,7 +797,7 @@ function AppInner() {
         <MobileBottomNav
           authUser={authUser}
           activeNav={activeNav}
-          onNavigate={(nav) => setActiveNav(nav)}
+          onNavigate={(nav) => handleNavClick(nav)}
           onOpenCompare={() => setShowCompareModal(true)}
           onOpenAuth={handleOpenAuth}
         />
@@ -837,6 +837,18 @@ function AppInner() {
         isSaved={quickViewVehicle ? savedVehicles.includes(quickViewVehicle.id) : false}
         onToggleSave={handleToggleSave}
         onSelectVehicle={handleOpenVehicleDetails}
+        viewer={authUser ? { id: authUser.id ? String(authUser.id) : undefined, role: authUser.role, isStaff: Boolean(isAdmin) || isEscrowStaffRole(authUser.role) } : null}
+        onManageListing={() => { handleCloseVehicleDetails(); navigate('/admin/cars'); }}
+        onEditListing={(v) => {
+          handleCloseVehicleDetails();
+          if (authUser?.role === 'dealer') {
+            window.history.replaceState({}, '', `/?nav=dealer-dashboard&section=inventory&mode=edit&id=${encodeURIComponent(v.id)}`);
+            window.dispatchEvent(new PopStateEvent('popstate'));
+            setActiveNav('dealer-dashboard');
+          } else {
+            setActiveNav('seller-platform');
+          }
+        }}
       />
 
       {showCompareModal && (

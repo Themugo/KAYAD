@@ -57,4 +57,11 @@ describe('Listing Management shows the real status and lets an admin publish', (
     expect(await screen.findByText(/Only the platform owner can change this/)).toBeTruthy();
     expect(screen.queryByLabelText('Listing moderation')).toBeNull();
   });
+
+  test('rows are numbered', async () => {
+    api.cars.mockResolvedValue({ cars: [pendingCar, { ...pendingCar, id: 'c2', title: 'MAZDA' }], pagination: { total: 2 } });
+    render(<MemoryRouter><AdminCars /></MemoryRouter>);
+    await screen.findByText('MAZDA');
+    expect(screen.getAllByTestId('admin-car-number').map((n) => n.textContent)).toEqual(['1', '2']);
+  });
 });

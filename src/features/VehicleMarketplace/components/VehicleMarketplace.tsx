@@ -216,7 +216,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [serverVehicles, setServerVehicles] = useState<Vehicle[]>(vehicles);
   const [serverTotal, setServerTotal] = useState<number>(vehicles.length);
   const [serverTotalPages, setServerTotalPages] = useState<number>(1);
-  const [serverLoading, setServerLoading] = useState<boolean>(false);
+  const [serverLoading, setServerLoading] = useState<boolean>(!savedOnly);
   const [serverError, setServerError] = useState<string | null>(null);
   /** Classified cause of the last failed inventory request (maintenance, timeout, offline, ...). */
   const [serverFailure, setServerFailure] = useState<InventoryFailure | null>(null);
@@ -1084,12 +1084,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/35 bg-white/85 p-3 text-navy-900 shadow-xl backdrop-blur-md" aria-label="Next featured vehicles"><ChevronRight className="h-5 w-5" /></button>}
               </div>
 
-              <div className="relative px-3 pb-4 pt-3 lg:hidden" aria-label="KAYAD mobile hero">
+              <div className="relative px-3 pb-3 pt-2 lg:hidden" aria-label="KAYAD mobile hero">
                 <div className="kayad-public-hero__mobile-card mx-auto w-full max-w-[460px] rounded-[24px] border border-white/75 bg-white/95 px-3.5 py-4 text-center shadow-[0_20px_48px_rgba(3,19,27,.22)] backdrop-blur-xl min-[390px]:px-4 min-[390px]:py-4">
                   <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-2.5 py-1.5 text-[9px] font-bold uppercase leading-tight tracking-[.06em] text-navy-600 min-[430px]:text-[10px] min-[430px]:tracking-[.1em]"><span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--kayad-cyan)]" /><span className="min-w-0 text-balance">{heroEyebrowDisplay}</span></span>
                   <h1 className="mt-3 text-balance font-display text-[clamp(1.75rem,7.2vw,2.25rem)] font-black leading-[1.05] tracking-[-.045em] text-navy-900">{heroHeadlineNode}</h1>
                   <p className="mx-auto mt-2 max-w-[330px] text-[12px] font-medium leading-[1.45rem] text-[#58717B] min-[390px]:text-[13px]">{heroSupportCopy}</p>
-                  <div className="mt-3 flex flex-col items-stretch justify-center gap-2 min-[390px]:flex-row min-[390px]:items-center">
+                  <div className="mt-2.5 flex flex-row items-center justify-center gap-2">
                     <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} type="button" aria-label={`${heroPrimaryLabel} — browse KAYAD inventory`} className="kayad-public-hero__primary-cta inline-flex min-h-[46px] items-center justify-center rounded-full px-4 text-[11px] font-black text-[#07313D] shadow-[0_8px_18px_rgba(19,184,166,.22)]">{heroPrimaryLabel} <ChevronRight className="ml-1 h-3.5 w-3.5 shrink-0" /></button>
                     <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} type="button" aria-label={`${heroSecondaryLabel} — learn about KAYAD`} className="kayad-public-hero__secondary-cta inline-flex min-h-[46px] items-center justify-center rounded-full border bg-white px-4 text-[11px] font-black text-navy-900 shadow-sm">{heroSecondaryLabel} <PlayCircle className="ml-1.5 h-4 w-4" aria-hidden="true" /></button>
                   </div>
@@ -1097,7 +1097,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
                 {/* Approved mobile composition: the center card sits above a dedicated two-car stage.
                     Both transparent vehicle assets remain fully contained and independently visible. */}
-                {(heroLeftVehicle || heroRightVehicle) && <div className="mx-auto mt-2.5 w-full max-w-[460px]">
+                {(heroLeftVehicle || heroRightVehicle) && <div className="mx-auto mt-2 w-full max-w-[460px]">
                   <div className="grid grid-cols-2 items-stretch gap-1 min-[390px]:gap-2" aria-label="Featured vehicle pair">
                     {[heroLeftVehicle, heroRightVehicle].map((vehicle, index) => vehicle && heroImageForVehicle(vehicle) ? (
                       <button key={`${vehicle.id}-${index}`} type="button" onClick={() => handleHeroVehicleSelect(vehicle)} className="kayad-public-hero__vehicle-card group flex h-full min-w-0 flex-col justify-end rounded-2xl border border-white/20 bg-[#082D39]/22 px-1.5 pt-1.5 text-center transition-colors hover:bg-[#082D39]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]" aria-label={isShowcaseHeroVehicle(vehicle) ? `Browse vehicles; visual showcase ${vehicle.make} ${vehicle.model}` : `View ${vehicle.make} ${vehicle.model}`}>

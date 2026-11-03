@@ -4,7 +4,7 @@ import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 import { z } from "zod";
 import { optionalAuth } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
-import { recordEvent, EVENT_TYPES } from "../services/analytics.service.js";
+import { recordEvent, EVENT_TYPES, isAnalyticsStoreMissing } from "../services/analytics.service.js";
 
 const router = express.Router();
 const uuid = z.string().uuid();
@@ -39,6 +39,8 @@ router.post("/collect", optionalAuth, limiter, asyncHandler(async (req, res) => 
     return res.status(202).json({ success: true, counted: out.counted });
   } catch (err) {
     if (err?.code === "ANALYTICS_NOT_CONFIGURED") return res.status(202).json({ success: true, counted: false });
+    // Tables not created yet: collection is a silent no-op for the visitor instead of a server error on every page view.
+    if (isAnalyticsStoreMissing(err)) return res.status(202).json({ success: true, counted: false });
     throw err;
   }
 }));

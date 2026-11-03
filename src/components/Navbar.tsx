@@ -1,3 +1,4 @@
+import { hasSessionHint } from '../utils/sessionHint';
 import { isStaffRole, staffRoleLabel } from '../utils/staffRoles';
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -271,6 +272,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const signedIn = Boolean(user);
   // A dealer works only in the Dealer workspace: the buyer / private-seller pages are not part of a dealer account's menu.
   const isDealerUser = user?.role === 'dealer';
+  // A returning member sees a neutral placeholder while the session check runs; everyone else gets a working Sign In at once.
+  const sessionHinted = React.useMemo(() => hasSessionHint(), []);
   const isSectionActive = (item: NavPrimary) => item.match.includes(activeNav);
 
   const openGroup = useCallback((id: string) => {
@@ -473,7 +476,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 getMe() resolved. Render a neutral, same-sized placeholder
                 instead during that window - it never claims either auth
                 state, unlike both branches it replaces. */}
-            {authLoading ? (
+            {authLoading && sessionHinted ? (
               <div className="hidden sm:flex items-center gap-2" aria-hidden="true">
                 <div className="w-28 h-10 rounded-xl bg-[#EEF7F5] animate-pulse" />
               </div>
@@ -848,18 +851,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </nav>
                 </section>
 
-                <section className="mb-4 rounded-[22px] border border-white/[0.07] bg-white/[0.035] p-2">
+                <section className="kayad-drawer-panel mb-4 rounded-[22px] border border-white/[0.07] bg-white/[0.035] p-2">
                   <span className="block px-2 pb-1 pt-1 text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">Your KAYAD</span>
                   <div className="grid grid-cols-2 gap-1.5">
                     {user && <>
-                      <button type="button" onClick={() => handleNavSelect(isDealerUser ? 'dealer:overview' : 'dashboard')} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><LayoutDashboard className="h-4 w-4 text-[#79D8CF]" />Dashboard</button>
-                      <button type="button" onClick={() => handleNavSelect('chat')} className="flex min-h-11 items-center justify-between gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><span className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-[#79D8CF]" />Messages</span>{effectiveUnread > 0 && <span className="rounded-full bg-[#13B8A6] px-1.5 text-[9px] font-black text-[#062E3A]">{effectiveUnread}</span>}</button>
-                      <button type="button" onClick={() => { navigate('/notifications'); setMobileMenuOpen(false); }} className="flex min-h-11 items-center justify-between gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><span className="flex items-center gap-2"><Bell className="h-4 w-4 text-[#79D8CF]" />Notifications</span>{notificationUnreadCount > 0 && <span className="rounded-full bg-rose-500 px-1.5 text-[9px] font-black text-white">{notificationUnreadCount}</span>}</button>
-                      {!isDealerUser && <button type="button" onClick={() => handleNavSelect('payments')} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><CreditCard className="h-4 w-4 text-[#79D8CF]" />Payment History</button>}
-                      {!isDealerUser && <button type="button" onClick={() => handleNavSelect('saved')} className="flex min-h-11 items-center justify-between gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><span className="flex items-center gap-2"><Heart className="h-4 w-4 text-[#79D8CF]" />Saved Vehicles</span>{savedCount > 0 && <span className="rounded-full bg-[#176B87] px-1.5 text-[9px] font-black text-white">{savedCount}</span>}</button>}
-                      {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><Sliders className="h-4 w-4 text-[#79D8CF]" />Compare</button>}
+                      <button type="button" onClick={() => handleNavSelect(isDealerUser ? 'dealer:overview' : 'dashboard')} className="kayad-drawer-tile"><LayoutDashboard className="h-4 w-4 text-[#79D8CF]" />Dashboard</button>
+                      <button type="button" onClick={() => handleNavSelect('chat')} className="kayad-drawer-tile"><span className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-[#79D8CF]" />Messages</span>{effectiveUnread > 0 && <span className="rounded-full bg-[#13B8A6] px-1.5 text-[9px] font-black text-[#062E3A]">{effectiveUnread}</span>}</button>
+                      <button type="button" onClick={() => { navigate('/notifications'); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><span className="flex items-center gap-2"><Bell className="h-4 w-4 text-[#79D8CF]" />Notifications</span>{notificationUnreadCount > 0 && <span className="rounded-full bg-rose-500 px-1.5 text-[9px] font-black text-white">{notificationUnreadCount}</span>}</button>
+                      {!isDealerUser && <button type="button" onClick={() => handleNavSelect('payments')} className="kayad-drawer-tile"><CreditCard className="h-4 w-4 text-[#79D8CF]" />Payment History</button>}
+                      {!isDealerUser && <button type="button" onClick={() => handleNavSelect('saved')} className="kayad-drawer-tile"><span className="flex items-center gap-2"><Heart className="h-4 w-4 text-[#79D8CF]" />Saved Vehicles</span>{savedCount > 0 && <span className="rounded-full bg-[#176B87] px-1.5 text-[9px] font-black text-white">{savedCount}</span>}</button>}
+                      {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Sliders className="h-4 w-4 text-[#79D8CF]" />Compare</button>}
                     </>}
-                    <button type="button" onClick={() => { onOpenAlerts(); setMobileMenuOpen(false); }} className="flex min-h-11 items-center gap-2 rounded-xl px-2.5 text-left text-[10px] font-bold text-white/75 hover:bg-white/[0.06]"><Bell className="h-4 w-4 text-[#79D8CF]" />Price Alerts</button>
+                    <button type="button" onClick={() => { onOpenAlerts(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Bell className="h-4 w-4 text-[#79D8CF]" />Price Alerts</button>
                   </div>
                 </section>
 
@@ -868,7 +871,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {(user?.role === 'admin' || isStaffRole(user?.role)) && <section className="mb-4 rounded-[20px] border border-white/[0.07] bg-white/[0.035] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-[#A8B8BC]">Administration</span><button type="button" onClick={() => handleNavSelect('admin')} className="flex w-full items-center gap-2 rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Settings className="h-4 w-4" />Admin Console</button></section>}
 
                 <button type="button" onClick={() => handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'seller-platform')} id="mobile-cta-sell-car" className="mb-4 flex min-h-14 w-full items-center justify-between rounded-[20px] border border-[#43D0C2]/40 bg-gradient-to-r from-[#0D7187] to-[#176B87] px-4 text-left text-white shadow-[0_16px_35px_rgba(7,57,68,.22)] active:scale-[.99]"><span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/10"><PlusCircle className="h-5 w-5" /></span><span><strong className="block text-sm font-black">{isDealerUser ? 'Add Vehicle' : 'Sell Vehicle'}</strong><small className="text-[10px] text-white/60">{isDealerUser ? 'Add stock to your inventory' : 'List your vehicle with KAYAD'}</small><small hidden></small></span></span><ChevronDown className="h-5 w-5 -rotate-90 text-[#8DE4DB]" /></button>
-                <div className="flex items-center justify-between border-t border-white/[0.08] px-1 pt-4 text-[10px] text-white/50"><span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-[#79D8CF]" />{selectedCounty}</span><button type="button" onClick={() => { onOpenAlerts(); setMobileMenuOpen(false); }} className="inline-flex min-h-11 items-center px-2 font-black text-white/65">Price alerts</button></div>
+                <div className="flex items-center justify-between border-t border-white/[0.08] px-1 pt-4 text-[10px] text-white/50"><span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-[#79D8CF]" />{selectedCounty}</span></div>
               </div>
             </div>
           </aside>

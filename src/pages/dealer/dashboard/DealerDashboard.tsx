@@ -15,7 +15,7 @@ import DealerSettingsPanel from './DealerSettingsPanel';
 import DealerBankingPanel from './DealerBankingPanel';
 import DealerAccountStatus from './DealerAccountStatus';
 import DealerTeamPanel from './DealerTeamPanel';
-import { getMyListings, deleteCar } from '../../../services/vehicleApi';
+import { getMyListings, deleteCar, markCarSold } from '../../../services/vehicleApi';
 import type { BackendCar } from '../../../services/vehicleApi';
 import { ParticipantEscrowDesk } from '../../../features/escrow/ParticipantEscrowDesk';
 
@@ -329,8 +329,49 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const [listingsRetry, setListingsRetry] = useState(0);
   const photosChangedRef = React.useRef(false);
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [invQuery, setInvQuery] = useState('');
+  const [invStatus, setInvStatus] = useState('all');
+  const [invSort, setInvSort] = useState<'newest' | 'price_desc' | 'price_asc' | 'views'>('newest');
+  const visibleListings = React.useMemo(() => {
+    const q = invQuery.trim().toLowerCase();
+    const matchStatus = (st: unknown) => invStatus === 'sold' ? st === 'sold' : st !== 'sold' && (invStatus === 'all' || (invStatus === 'published' ? st === 'available' || st === 'active' : st === invStatus));
+    const list = (myListings as any[]).filter((l) => matchStatus(l.status) && (!q || `${l.title || ''} ${l.brand || ''} ${l.model || ''} ${l.year || ''} ${l.city || l.location_city || ''}`.toLowerCase().includes(q)));
+    const time = (l: any) => Date.parse(String(l.createdAt || l.created_at || l.updatedAt || l.updated_at || '')) || 0;
+    const price = (l: any) => (l.price == null ? 0 : Number(l.price) || 0);
+    const views = (l: any) => Number(l.views) || 0;
+    const sorted = [...list];
+    if (invSort === 'price_desc') sorted.sort((a, b) => price(b) - price(a));
+    else if (invSort === 'price_asc') sorted.sort((a, b) => price(a) - price(b));
+    else if (invSort === 'views') sorted.sort((a, b) => views(b) - views(a));
+    else sorted.sort((a, b) => time(b) - time(a));
+    return sorted;
+  }, [myListings, invQuery, invStatus, invSort]);
+  const activeListings = (myListings as any[]).filter((l) => l.status !== 'sold');
+  const soldListings = (myListings as any[]).filter((l) => l.status === 'sold');
+  const [soldTargetId, setSoldTargetId] = useState<string | null>(null);
+  const [soldBuyer, setSoldBuyer] = useState('');
+  const [soldPrice, setSoldPrice] = useState('');
+  const [soldBusy, setSoldBusy] = useState(false);
+  const [soldError, setSoldError] = useState<string | null>(null);
+  const [showSold, setShowSold] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+
+  const confirmMarkSold = async (car: BackendCar) => {
+    const id = String(car.id || car._id);
+    if (soldBusy) return;
+    setSoldBusy(true); setSoldError(null);
+    try {
+      const price = Number(soldPrice.replace(/[^0-9.]/g, ''));
+      const res = await markCarSold(id, { buyerName: soldBuyer.trim() || undefined, salePrice: price > 0 ? price : undefined });
+      if (res && res.success === false) throw new Error(res.message || 'Could not mark this vehicle as sold.');
+      setMyListings((prev) => prev.map((c) => (String(c.id || c._id) === id ? { ...c, status: 'sold', sold: true } : c)));
+      setSoldTargetId(null); setSoldBuyer(''); setSoldPrice('');
+      setListingNotice('Marked as sold. It moved to your Sold list and the active inventory renumbered.');
+    } catch (err) {
+      setSoldError((err as Error)?.message || 'Could not mark this vehicle as sold. Nothing was changed — please try again.');
+    } finally { setSoldBusy(false); }
+  };
 
   const confirmDeleteListing = async (car: BackendCar) => {
     const id = String(car.id || car._id);
@@ -861,13 +902,35 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                       <p className="text-xs text-[#475569]">Sold</p>
                     </div>
                   </div>
+                  {myListings.length > 0 && (
+                    <div className="flex flex-wrap items-center gap-2 mb-4" data-testid="inventory-controls">
+                      <input type="search" value={invQuery} onChange={(e) => setInvQuery(e.target.value)} placeholder="Search make, model, title…" aria-label="Search your inventory" className="flex-1 min-w-[180px] px-3 py-2 text-sm border border-[#B9D3CF] rounded-lg" />
+                      <select value={invStatus} onChange={(e) => setInvStatus(e.target.value)} aria-label="Filter by status" className="px-3 py-2 text-sm border border-[#B9D3CF] rounded-lg bg-white">
+                        <option value="all">All statuses</option>
+                        <option value="published">Published</option>
+                        <option value="pending">Pending review</option>
+                        <option value="draft">Draft</option>
+                        <option value="reserved">Reserved</option>
+                        <option value="sold">Sold</option>
+                      </select>
+                      <select value={invSort} onChange={(e) => setInvSort(e.target.value as typeof invSort)} aria-label="Sort inventory" className="px-3 py-2 text-sm border border-[#B9D3CF] rounded-lg bg-white">
+                        <option value="newest">Newest first</option>
+                        <option value="price_desc">Price: high to low</option>
+                        <option value="price_asc">Price: low to high</option>
+                        <option value="views">Most viewed</option>
+                      </select>
+                      <p className="text-xs text-[#475569] ml-auto" data-testid="inventory-count">Showing {visibleListings.length} of {invStatus === 'sold' ? soldListings.length : activeListings.length} {invStatus === 'sold' ? 'sold' : 'active'}</p>
+                    </div>
+                  )}
                   <div className="space-y-3">
                     {myListings.length === 0 ? (
                       <div className="text-center py-10">
                         <p className="text-sm text-[#64748B] mb-3">You haven't listed any vehicles yet.</p>
                         <button type="button" onClick={() => openListingForm({ mode: 'create' })} className="px-4 py-2 bg-[#176B87] text-white text-sm font-medium rounded-xl hover:bg-[#12576D]">Add your first vehicle</button>
                       </div>
-                    ) : myListings.map((car) => {
+                    ) : visibleListings.length === 0 ? (
+                      <p className="text-sm text-[#64748B] text-center py-8" data-testid="inventory-no-match">{activeListings.length === 0 && invStatus !== 'sold' ? 'No active vehicles. Add a vehicle or open the Sold list below.' : 'No vehicles match your search or filter.'}</p>
+                    ) : visibleListings.map((car, rowIdx) => {
                       const image = car.images?.[0]?.thumb || car.images?.[0]?.url;
                       const carId = String(car.id || car._id);
                       const label = car.title || `${car.year} ${car.brand} ${car.model}`;
@@ -879,15 +942,25 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                       const isSoldListing = car.status === 'sold';
                       const statusText = car.status ? String(car.status).replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()) : 'Status unavailable';
                       const confirming = deleteTargetId === carId;
+                      const photoCount = Array.isArray(car.images) ? car.images.length : 0;
+                      const mileageNum = Number(car.mileage);
+                      const detailLine = [
+                        car.year ? String(car.year) : '',
+                        Number.isFinite(mileageNum) && mileageNum > 0 ? `${mileageNum.toLocaleString('en-KE')} km` : '',
+                        car.city || car.location_city || '',
+                      ].filter(Boolean).join(' · ');
                       return (
                         <div key={car.id} className="p-4 bg-[#F6FAF9] rounded-xl">
                           <div className="flex flex-wrap sm:flex-nowrap items-center gap-4">
-                            <div className="w-20 h-14 bg-[#DDF4F0] rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-                              {image ? <img src={image} alt={label} className="w-full h-full object-cover" /> : <Car className="w-6 h-6 text-[#64748B]" aria-hidden="true" />}
+                            <span className="w-7 text-center text-sm font-bold text-[#475569] shrink-0" aria-label={`Listing number ${rowIdx + 1}`} data-testid="inventory-row-number">{rowIdx + 1}</span>
+                            <div className="relative w-32 h-24 bg-[#DDF4F0] rounded-lg flex items-center justify-center overflow-hidden shrink-0">
+                              {image ? <img src={image} alt={label} loading="lazy" className="w-full h-full object-cover" /> : <Car className="w-8 h-8 text-[#64748B]" aria-hidden="true" />}
+                              {photoCount > 0 && <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/60 text-white text-[10px] font-semibold">{photoCount} {photoCount === 1 ? 'photo' : 'photos'}</span>}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-[#0A3340] truncate">{label}</p>
                               <p className="text-sm text-[#475569]">{car.price == null ? 'Price unavailable' : `Ksh ${Number(car.price).toLocaleString('en-KE')}`} • {car.views == null ? 'Views unavailable' : `${Number(car.views).toLocaleString('en-KE')} views`}</p>
+                              {detailLine && <p className="text-xs text-[#475569]" data-testid="inventory-details">{detailLine}</p>}
                               {updated && <p className="text-xs text-[#475569]">Updated {updated}</p>}
                             </div>
                             <span className={`px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap ${
@@ -898,6 +971,9 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                               {statusText}
                             </span>
                             <div className="flex gap-2">
+                              {!isSoldListing && !(aStatus === 'live') && (
+                                <button type="button" onClick={() => { setSoldError(null); setSoldBuyer(''); setSoldPrice(''); setSoldTargetId(carId); }} className="px-3 py-1 text-xs font-bold text-emerald-800 border border-emerald-300 rounded-lg hover:bg-emerald-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Mark ${car.title || 'vehicle'} as sold`}>Mark sold</button>
+                              )}
                               <button type="button" onClick={() => openListingForm({ mode: 'edit', id: carId })} className="px-3 py-1 text-xs font-bold text-[#176B87] border border-[#B9D3CF] rounded-lg hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Edit ${car.title || 'vehicle'}`}>Edit</button>
                               {!isAuctionListing && !isSoldListing && (
                                 <button type="button" disabled={Boolean(deletingId)} onClick={() => { setDeleteError(null); setDeleteTargetId(carId); }} className="px-3 py-1 text-xs font-bold text-[#B42318] border border-[#B9D3CF] rounded-lg hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Remove ${car.title || 'vehicle'}`}>Remove</button>
@@ -906,6 +982,23 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                           </div>
                           {isAuctionListing && <p className="mt-2 text-xs text-[#475569]">Listings with an auction cannot be removed from this screen.</p>}
                           {isSoldListing && !isAuctionListing && <p className="mt-2 text-xs text-[#475569]">Sold listings cannot be removed; completed sales are handled through escrow.</p>}
+                          {soldTargetId === carId && (
+                            <div role="alertdialog" aria-label={`Confirm marking ${label} as sold`} className="mt-3 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-950">
+                              <p className="font-semibold">Mark “{label}” as sold?</p>
+                              <p className="text-xs mt-1">It will leave your active inventory (the list renumbers) and stop appearing to buyers. You can add the buyer and final price for your records.</p>
+                              <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                <input value={soldBuyer} onChange={(e) => setSoldBuyer(e.target.value)} maxLength={200} placeholder="Buyer name (optional)" aria-label="Buyer name" className="px-3 py-2 text-sm border border-emerald-300 rounded-lg bg-white" />
+                                <input value={soldPrice} onChange={(e) => setSoldPrice(e.target.value)} inputMode="numeric" placeholder="Final price Ksh (optional)" aria-label="Final sale price" className="px-3 py-2 text-sm border border-emerald-300 rounded-lg bg-white" />
+                              </div>
+                              {soldError && <p role="alert" className="mt-2 font-medium text-[#7A271A]">{soldError}</p>}
+                              <div className="mt-2 flex gap-2">
+                                <button type="button" disabled={soldBusy} onClick={() => confirmMarkSold(car)} aria-busy={soldBusy} className="px-3 py-1 text-xs font-bold rounded-lg bg-emerald-700 text-white disabled:opacity-60 flex items-center gap-1">
+                                  {soldBusy && <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />}{soldBusy ? 'Saving…' : soldError ? 'Try again' : 'Yes, mark as sold'}
+                                </button>
+                                <button type="button" disabled={soldBusy} onClick={() => { setSoldTargetId(null); setSoldError(null); }} className="px-3 py-1 text-xs font-bold rounded-lg border border-emerald-300 text-emerald-900">Cancel</button>
+                              </div>
+                            </div>
+                          )}
                           {confirming && (
                             <div role="alertdialog" aria-label={`Confirm removing ${label}`} className="mt-3 p-3 rounded-lg bg-[#FEF3F2] border border-[#FDA29B] text-sm text-[#7A271A]">
                               <p>Remove “{label}” from your inventory? It will no longer appear to buyers.</p>
@@ -922,6 +1015,29 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                       );
                     })}
                   </div>
+                  {soldListings.length > 0 && invStatus !== 'sold' && (
+                    <div className="mt-6 border-t border-[#D7E7E4] pt-4" data-testid="sold-section">
+                      <button type="button" onClick={() => setShowSold((v) => !v)} aria-expanded={showSold} className="w-full flex items-center justify-between text-left text-sm font-bold text-[#0A3340] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340] rounded-lg">
+                        <span>Sold vehicles ({soldListings.length})</span>
+                        <ChevronDown className={`w-4 h-4 transition-transform ${showSold ? 'rotate-180' : ''}`} aria-hidden="true" />
+                      </button>
+                      {showSold && (
+                        <ul className="mt-3 space-y-2" aria-label="Sold vehicles">
+                          {soldListings.map((car) => {
+                            const img = car.images?.[0]?.thumb || car.images?.[0]?.url;
+                            const name = car.title || `${car.year} ${car.brand} ${car.model}`;
+                            return (
+                              <li key={String(car.id || car._id)} className="flex items-center gap-3 p-2 rounded-lg bg-[#EEF7F5]">
+                                <div className="w-14 h-10 rounded-md bg-[#DDF4F0] overflow-hidden shrink-0 flex items-center justify-center">{img ? <img src={img} alt="" loading="lazy" className="w-full h-full object-cover grayscale" /> : <Car className="w-5 h-5 text-[#64748B]" aria-hidden="true" />}</div>
+                                <div className="min-w-0 flex-1"><p className="text-sm font-medium text-[#0A3340] truncate">{name}</p><p className="text-xs text-[#475569]">{car.price == null ? '' : `Listed at Ksh ${Number(car.price).toLocaleString('en-KE')}`}</p></div>
+                                <span className="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-[#DDE7E5] text-[#475569]">Sold</span>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      )}
+                    </div>
+                  )}
                 </>
               )}
             </div>

@@ -114,15 +114,37 @@ describe('Navbar', () => {
   // customer saw the signed-out "Sign In / Sign Up" button flash on every
   // reload. With `authLoading` true, neither the signed-in nor the
   // signed-out control should render.
-  it('renders neither the signed-in menu nor the sign-in button while the session check is still in flight', () => {
+  it('a returning member sees neither the signed-in menu nor the sign-in button while the session check is still in flight', () => {
+    window.localStorage.setItem('kayad_session_hint', '1');
+    try {
+      render(<MemoryRouter><Navbar {...guestProps} authLoading={true} /></MemoryRouter>);
+      expect(screen.queryByRole('button', { name: /sign in/i })).toBeNull();
+      expect(screen.queryByRole('button', { name: /create account/i })).toBeNull();
+      expect(screen.queryByText(/sign in \/ sign up/i)).toBeNull();
+    } finally { window.localStorage.removeItem('kayad_session_hint'); }
+  });
+
+  it('a first-time or signed-out visitor gets a working Sign In immediately, without waiting for the session check', () => {
+    window.localStorage.removeItem('kayad_session_hint');
     render(<MemoryRouter><Navbar {...guestProps} authLoading={true} /></MemoryRouter>);
-    expect(screen.queryByRole('button', { name: /sign in/i })).toBeNull();
-    expect(screen.queryByRole('button', { name: /create account/i })).toBeNull();
-    expect(screen.queryByText(/sign in \/ sign up/i)).toBeNull();
+    expect(screen.getByText(/sign in \/ sign up/i)).toBeTruthy();
   });
 
   it('renders the signed-out sign-in control once the session check resolves to unauthenticated', () => {
     render(<MemoryRouter><Navbar {...guestProps} authLoading={false} /></MemoryRouter>);
     expect(screen.getByText(/sign in \/ sign up/i)).toBeTruthy();
+  });
+
+  it('mobile drawer: Price Alerts appears once, shortcut tiles use the readable tile style and the current child link is flagged', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <Navbar {...guestProps} />
+      </MemoryRouter>
+    );
+    fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+    const drawer = screen.getByRole('dialog');
+    const alerts = Array.from(drawer.querySelectorAll('button')).filter((b) => /^price alerts$/i.test((b.textContent || '').trim()));
+    expect(alerts).toHaveLength(1);
+    expect(alerts[0].className).toContain('kayad-drawer-tile');
   });
 });

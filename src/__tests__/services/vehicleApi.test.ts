@@ -288,3 +288,17 @@ describe('vehicleApi.createCar / updateCar - what the server said reaches the ca
     await expect(updateCar('c1', { mileage: 1 })).rejects.toMatchObject({ message: expect.stringContaining('Mileage must not exceed') });
   });
 });
+
+describe('mapBackendCar engine and drive', () => {
+  it('passes the seller-entered engine and drive type through to the vehicle', async () => {
+    const mod: any = await import('../../services/vehicleApi');
+    const fn = mod.mapBackendCarToVehicle;
+    expect(typeof fn).toBe('function');
+    const v = fn({ id: '1', title: 't', brand: 'Toyota', model: 'LC', year: 2016, price: 1, engine: '4500 cc', driveType: '4WD' });
+    expect(v.engineSize).toBe('4500 cc');
+    expect(v.driveType).toBe('4WD');
+    const none = fn({ id: '2', title: 't', brand: 'Toyota', model: 'LC', year: 2016, price: 1 });
+    expect(none.engineSize).toBeUndefined();
+    expect(none.driveType).toBeUndefined();
+  });
+});

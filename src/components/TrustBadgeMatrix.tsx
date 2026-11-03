@@ -231,8 +231,8 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
           <p className="text-[10px] text-[#BDE5DE] uppercase font-bold flex items-center gap-1">
             <Zap className="w-3 h-3 text-[#13B8A6]" /> Response Time
           </p>
-          <p className="font-bold text-[#5AAFA4] text-xs">{vehicle.responseTime || '< 15 mins'}</p>
-          <p className="text-[10px] text-[#BDE5DE]">{vehicle.condition || 'Foreign Used'}</p>
+          <p className="font-bold text-[#5AAFA4] text-xs">{vehicle.responseTime || 'Not stated'}</p>
+          <p className="text-[10px] text-[#BDE5DE]">{vehicle.condition || ''}</p>
         </div>
       </div>
     </div>

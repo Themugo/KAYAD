@@ -23,7 +23,26 @@ export interface HttpRequestOptions {
 /** Fetch-shaped adapter over KAYAD's single Axios transport. Service modules
  * use this only to preserve their existing request/response contracts while
  * inheriting the canonical credentials, timeout, CSRF and auth-expiry rules. */
+// Identical GETs that are in flight at the same moment (the header, the page and a context all asking for
+// the same config/ads/session on startup) share ONE network request. Only while pending: nothing is cached,
+// so every later call still goes to the server. Each caller receives its own copy of the data.
+const inflightGets = new Map<string, Promise<unknown>>();
+const copyOf = <T,>(data: T): T => {
+  try { return typeof structuredClone === 'function' ? structuredClone(data) : data; } catch { return data; }
+};
+
 export async function request<T>(path: string, options: HttpRequestOptions = {}): Promise<T> {
+  const isGet = String(options.method || 'GET').toUpperCase() === 'GET' && options.body === undefined;
+  if (!isGet) return performRequest<T>(path, options);
+  const key = `${path}|${JSON.stringify(options.params ?? null)}|${JSON.stringify(options.headers ?? null)}|${options.timeout ?? ''}`;
+  const existing = inflightGets.get(key) as Promise<T> | undefined;
+  if (existing) return existing.then(copyOf);
+  const pending = performRequest<T>(path, options).finally(() => { inflightGets.delete(key); });
+  inflightGets.set(key, pending);
+  return pending.then(copyOf);
+}
+
+async function performRequest<T>(path: string, options: HttpRequestOptions = {}): Promise<T> {
   const { method = 'GET', body, headers, params, timeout } = options;
   // httpClient always carries the canonical /api prefix in baseURL.
   // Strip an optional /api prefix from service paths so legacy /api/v1/...

@@ -37,7 +37,7 @@ export const isListingArray = (value) => Array.isArray(value) && value.every((it
   (typeof item._id === 'string' || typeof item.id === 'string')
 );
 
-function CarRow({ car: c, onDelete, onSelect, onDecide, canDecide, actionId }) {
+function CarRow({ car: c, index, onDelete, onSelect, onDecide, canDecide, actionId }) {
   const priceValue = c.price ?? c.startingPrice;
   const price = priceValue === null || priceValue === undefined || priceValue === '' ? NaN : Number(priceValue);
   const vehicle = [c.year, Number.isFinite(Number(c.mileage)) && c.mileage !== null && c.mileage !== undefined && c.mileage !== '' ? `${Number(c.mileage).toLocaleString()} km` : null].filter(Boolean).join(' · ');
@@ -48,7 +48,8 @@ function CarRow({ car: c, onDelete, onSelect, onDecide, canDecide, actionId }) {
 
   return (
     <tr onClick={() => onSelect?.(c)}>
-      <td>{image ? <img src={image} alt="" loading="lazy" decoding="async" style={{ width: 48, height: 48, objectFit: 'cover', borderRadius: 8 }} onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }} /> : <span aria-hidden="true">—</span>}</td>
+      <td data-testid="admin-car-number" style={{ textAlign: 'center', fontWeight: 600 }}>{index}</td>
+      <td>{image ? <img src={image} alt="" loading="lazy" decoding="async" style={{ width: 88, height: 64, objectFit: 'cover', borderRadius: 8 }} onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }} /> : <span aria-hidden="true">—</span>}</td>
       <td style={{ fontWeight: 600, minWidth: 180 }}><Link to={`/cars/${id}`} style={{ color: 'var(--admin-brand-dark)' }} onClick={(e) => e.stopPropagation()}>{title}</Link></td>
       <td>{Number.isFinite(price) ? formatKES(price) : 'Unavailable'}</td>
       <td>{vehicle || '—'}</td>
@@ -297,7 +298,8 @@ export default function AdminCars() {
           <table>
             <thead>
               <tr>
-                <th style={{ width: 64 }}>Image</th>
+                <th style={{ width: 40 }}>#</th>
+                <th style={{ width: 104 }}>Image</th>
                 <th>Title</th>
                 <th>Price</th>
                 <th>Vehicle</th>
@@ -307,8 +309,8 @@ export default function AdminCars() {
               </tr>
             </thead>
             <tbody>
-              {cars.map((car) => (
-                <CarRow key={car._id || car.id} car={car} onDelete={handleDelete} onSelect={setSelected} onDecide={handleDecide} canDecide actionId={actionId} />
+              {cars.map((car, i) => (
+                <CarRow key={car._id || car.id} index={i + 1} car={car} onDelete={handleDelete} onSelect={setSelected} onDecide={handleDecide} canDecide actionId={actionId} />
               ))}
               {!loading && !loadError && hasLoaded && cars.length === 0 && (
                 <tr><td colSpan={7} style={{ textAlign: 'center', padding: 28, color: 'var(--text-muted)' }}>

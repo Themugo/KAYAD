@@ -1,4 +1,5 @@
 // src/context/AuthContext.tsx
+import { hasSessionHint, setSessionHint, clearSessionHint } from '../utils/sessionHint';
 import { trackRegistration } from '../services/analyticsTracker';
 import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
@@ -152,12 +153,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const setUser = (u: User | null) => {
     setUserState(u);
-    if (u) { setPostHogUser(u); setSessionStatus('authenticated'); setSessionError(null); }
-    else   clearPostHogUser();
+    if (u) { setPostHogUser(u); setSessionStatus('authenticated'); setSessionError(null); setSessionHint(); }
+    else   { clearPostHogUser(); clearSessionHint(); }
   };
 
   /** Settle the session as confirmed-signed-out (never used for transient failures). */
-  const settleUnauthenticated = () => { setUserState(null); clearPostHogUser(); setSessionStatus('unauthenticated'); setSessionError(null); };
+  const settleUnauthenticated = () => { setUserState(null); clearPostHogUser(); clearSessionHint(); setSessionStatus('unauthenticated'); setSessionError(null); };
 
   // Session bootstrap: ask the server (cookie-based, HttpOnly token) who is signed in.
   // Transient failures are retried a bounded number of times and then settle in

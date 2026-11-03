@@ -26,6 +26,22 @@ export const hashId = (kind, value) => {
   return crypto.createHmac("sha256", key).update(`${kind}:${value}`).digest("hex").slice(0, 32);
 };
 
+/**
+ * True when a database error means the analytics tables have not been created on this database (migration 20261101120000 not applied).
+ * Postgres says 42P01 (undefined_table); PostgREST says PGRST205 / "Could not find the table ... in the schema cache".
+ */
+export function isAnalyticsStoreMissing(err) {
+  if (!err) return false;
+  const code = String(err.code || "");
+  const msg = String(err.message || "");
+  if (code !== "42P01" && code !== "PGRST205" && !/does not exist|schema cache/i.test(msg)) return false;
+  return code === "42P01" || code === "PGRST205" || /analytics_(visitors|sessions|events)/i.test(msg);
+}
+export const ANALYTICS_NOT_SET_UP = Object.freeze({
+  code: "ANALYTICS_NOT_SET_UP",
+  message: "Traffic analytics is not set up on this database yet: its tables (analytics_visitors, analytics_sessions, analytics_events) are missing. Run the analytics setup SQL once (runbooks/traffic-analytics-setup-20261102), then reload this page.",
+});
+
 export async function getAnalyticsSettings() {
   if (testSettings) return { ...DEFAULT_SETTINGS, ...testSettings };
   if (settingsCache && Date.now() - settingsCache.at < SETTINGS_TTL_MS) return settingsCache.value;

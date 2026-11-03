@@ -16,11 +16,11 @@ describe('VehicleCard - size reduction (scale/density pass)', () => {
     onStartEscrow: vi.fn(),
   };
 
-  it('renders the image container at the reduced height, not the old h-48/h-52', () => {
+  it('renders a larger photo area on phones (h-44, compact sm:h-36), not the old h-48/h-52', () => {
     const { container: c } = render(<VehicleCard {...baseProps} />);
-    const imageWrapper = c.querySelector('.relative.h-32.overflow-hidden');
+    const imageWrapper = c.querySelector('.relative.h-44.overflow-hidden');
     expect(imageWrapper).toBeTruthy();
-    expect(imageWrapper?.className).toMatch(/h-32/);
+    expect(imageWrapper?.className).toMatch(/h-44/);
     expect(imageWrapper?.className).not.toMatch(/h-48/);
     expect(imageWrapper?.className).not.toMatch(/h-52/);
   });
@@ -215,5 +215,14 @@ describe('VehicleCard - price consistency with the real, live auction session (P
     const nonAuction = INITIAL_VEHICLES.find((v) => !v.isAuction)!;
     render(<VehicleCard {...baseProps} vehicle={nonAuction} />);
     expect(screen.getByText(`Ksh ${nonAuction.price.toLocaleString()}`)).toBeTruthy();
+  });
+});
+
+describe('VehicleCard presentation honesty', () => {
+  it('does not present an unrecorded mileage (0) as a fact and shows the photo count', () => {
+    const v: any = { ...INITIAL_VEHICLES[0], mileage: 0, images: ['a.jpg', 'b.jpg', 'c.jpg'] };
+    const { container } = render(<VehicleCard vehicle={v} isSaved={false} isCompared={false} onToggleSave={vi.fn()} onToggleCompare={vi.fn()} onQuickView={vi.fn()} onStartEscrow={vi.fn()} />);
+    expect(container.textContent).not.toMatch(/\b0 km/);
+    expect(screen.getByTestId('card-photo-count').textContent).toBe('3 photos');
   });
 });

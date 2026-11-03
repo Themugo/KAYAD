@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Vehicle } from '../types';
 import { isEscrowApplicable, getEscrowBadgeLabel, isEscrowLive } from '../utils/escrow';
 import {
@@ -64,6 +64,12 @@ interface VehicleDetailModalProps {
   isSaved: boolean;
   onToggleSave: (id: string) => void;
   onSelectVehicle?: (vehicle: Vehicle) => void;
+  /** Who is looking: shapes the navigation strip (visitor/customer, owning dealer or seller, admin/owner). */
+  viewer?: { id?: string; role?: string; isStaff?: boolean } | null;
+  /** Admin / owner: open this listing in Listing Management. */
+  onManageListing?: (vehicle: Vehicle) => void;
+  /** The listing's own dealer or seller: open the editor / their inventory. */
+  onEditListing?: (vehicle: Vehicle) => void;
 }
 
 export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
@@ -79,7 +85,10 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   onViewShowroom,
   isSaved,
   onToggleSave,
-  onSelectVehicle
+  onSelectVehicle,
+  viewer,
+  onManageListing,
+  onEditListing
 }) => {
   // Related / Similar vehicles (matching make or bodyStyle)
   const relatedVehicles = useMemo(() => {
@@ -89,10 +98,21 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
       .slice(0, 3);
   }, [allVehicles, vehicle]);
 
+  // Previous / next vehicle in the list the visitor came from.
+  const siblingNav = useMemo(() => {
+    if (!vehicle || allVehicles.length < 2) return null;
+    const idx = allVehicles.findIndex((v) => v.id === vehicle.id);
+    if (idx < 0) return null;
+    return { index: idx, total: allVehicles.length, prev: idx > 0 ? allVehicles[idx - 1] : null, next: idx < allVehicles.length - 1 ? allVehicles[idx + 1] : null };
+  }, [allVehicles, vehicle]);
+  const isOwnListing = Boolean(vehicle && viewer?.id && vehicle.sellerId && String(vehicle.sellerId) === String(viewer.id));
+  const touchStartX = useRef<number | null>(null);
+
   // Gallery State
   const allImages = useMemo(() => {
     if (!vehicle) return [];
-    const set = new Set([vehicle.image, ...(vehicle.additionalImages || [])]);
+    // The API delivers every photo in `images`; older shapes use additionalImages.
+    const set = new Set([vehicle.image, ...(vehicle.additionalImages || []), ...(Array.isArray(vehicle.images) ? vehicle.images : [])].filter(Boolean) as string[]);
     return Array.from(set);
   }, [vehicle]);
 
@@ -160,12 +180,8 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
       }
     });
 
-    return {
-      safety: safety.length ? safety : ['EyeSight Driver Assist', 'Lane Keep Assist', 'Anti-Lock Brakes (ABS)', 'Front & Side Airbags'],
-      comfort: comfort.length ? comfort : ['Heated Front Seats', 'Dual-Zone Automatic Climate Control', 'Leather Upholstery'],
-      technology: technology.length ? technology : ['Apple CarPlay & Android Auto', 'Bluetooth Audio & Hands-Free', 'Multi-View Reverse Camera'],
-      utility: utility.length ? utility : ['Roof Rails & Crossbars', 'Power Tailgate', 'Retractable Cargo Cover']
-    };
+    // Only what the seller actually entered. No invented fallback equipment.
+    return { safety, comfort, technology, utility };
   }, [vehicle]);
 
   if (!vehicle && !notFoundId) return null;
@@ -253,9 +269,11 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   // Status Chip Generation
   const getStatusChip = () => {
     if (isAuction) return { label: vehicle.auctionEndsAt ? 'Auction Listing' : 'Auction', variant: 'live' as const };
-    if (isPrivateSeller) return { label: 'Private Sale • Direct Transfer', variant: 'neutral' as const };
-    if (vehicle.condition === 'Brand New') return { label: 'Ready for Immediate Transfer', variant: 'success' as const };
-    return { label: 'Available Today • Ready for Viewing', variant: 'verified' as const };
+    const rawStatus = String((vehicle as { status?: string }).status || '');
+    if (rawStatus === 'sold') return { label: 'Sold', variant: 'neutral' as const };
+    if (rawStatus === 'reserved') return { label: 'Reserved', variant: 'neutral' as const };
+    if (isPrivateSeller) return { label: 'Private sale', variant: 'neutral' as const };
+    return { label: 'Available', variant: 'verified' as const };
   };
   const statusChip = getStatusChip();
 
@@ -278,25 +296,25 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
 
   // Header Title Component
   const modalTitle = (
-    <div className="flex items-center justify-between w-full pr-8">
-      <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center justify-between gap-2 w-full pr-8 min-w-0">
+      <div className="flex items-center gap-x-2 flex-wrap min-w-0">
         <span className="text-[#176B87] font-black text-lg font-display tracking-tight">
           {vehicle.year} {vehicle.make} {vehicle.model}
         </span>
-        <span className="text-[#94A3B8] font-medium text-xs">| Ref #{vehicle.id}</span>
+        <span className="text-[#94A3B8] font-medium text-xs" title={`Reference ${vehicle.id}`}>Ref {String(vehicle.id).slice(0, 8)}</span>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={handleShare}
-          className="p-2 rounded-full border border-[#D7E7E4] text-[#64748B] hover:text-[#0A3340] hover:bg-[#EEF7F5] transition-colors cursor-pointer"
+          className="shrink-0 grid place-items-center w-10 h-10 rounded-full border border-[#D7E7E4] text-[#64748B] hover:text-[#0A3340] hover:bg-[#EEF7F5] transition-colors cursor-pointer"
           title="Share Listing"
         >
           {shareSuccess ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4" />}
         </button>
         <button
           onClick={() => onToggleSave(vehicle.id)}
-          className={`p-2 rounded-full border transition-all cursor-pointer ${
+          className={`shrink-0 grid place-items-center w-10 h-10 rounded-full border transition-all cursor-pointer ${
             isSaved ? 'bg-rose-50 text-rose-600 border-rose-200' : 'text-[#64748B] border-[#D7E7E4] hover:bg-[#EEF7F5]'
           }`}
           title={isSaved ? 'Saved in Watchlist' : 'Save to Watchlist'}
@@ -310,7 +328,32 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   return (
     <>
       <Modal isOpen={!!vehicle} onClose={onClose} title={modalTitle} maxWidth="5xl">
-        <div className="space-y-10 pb-28 lg:pb-8 relative bg-white">
+        <div className="space-y-8 sm:space-y-10 pb-28 lg:pb-8 relative bg-white">
+
+          {/* ==========================================
+              0. NAVIGATION STRIP (everyone) + ROLE TOOLS (owner dealer / admin / owner)
+              ========================================== */}
+          <nav aria-label="Vehicle navigation" className="flex flex-wrap items-center justify-between gap-2" data-testid="vehicle-nav">
+            <button type="button" onClick={onClose} className="inline-flex items-center gap-1.5 min-h-[40px] px-3 rounded-xl border border-[#D7E7E4] text-xs font-bold text-[#12576D] hover:bg-[#EEF7F5]">
+              <ChevronLeft className="w-4 h-4" aria-hidden="true" /> Back to results
+            </button>
+            {siblingNav && (
+              <div className="flex items-center gap-1.5 text-xs font-bold text-[#64748B]">
+                <button type="button" disabled={!siblingNav.prev} onClick={() => siblingNav.prev && onSelectVehicle?.(siblingNav.prev)} aria-label="Previous vehicle" className="grid place-items-center w-10 h-10 rounded-xl border border-[#D7E7E4] text-[#12576D] disabled:opacity-35 hover:bg-[#EEF7F5]"><ChevronLeft className="w-4 h-4" /></button>
+                <span aria-live="polite">{siblingNav.index + 1} of {siblingNav.total}</span>
+                <button type="button" disabled={!siblingNav.next} onClick={() => siblingNav.next && onSelectVehicle?.(siblingNav.next)} aria-label="Next vehicle" className="grid place-items-center w-10 h-10 rounded-xl border border-[#D7E7E4] text-[#12576D] disabled:opacity-35 hover:bg-[#EEF7F5]"><ChevronRight className="w-4 h-4" /></button>
+              </div>
+            )}
+          </nav>
+          {(viewer?.isStaff && onManageListing) || (isOwnListing && onEditListing) ? (
+            <div role="region" aria-label="Listing tools" className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-[#BDE5DE] bg-[#F3FAF9] px-4 py-3" data-testid="role-tools">
+              <p className="text-xs font-bold text-[#12576D]">{viewer?.isStaff ? 'Administrator view' : 'This is your listing'}{vehicle.status ? ` · ${String(vehicle.status).replace(/_/g, ' ')}` : ''}</p>
+              <div className="flex gap-2">
+                {viewer?.isStaff && onManageListing && <Button variant="secondary" size="sm" onClick={() => onManageListing(vehicle)}>Manage in Listing Management</Button>}
+                {isOwnListing && onEditListing && <Button variant="secondary" size="sm" onClick={() => onEditListing(vehicle)}>Edit listing</Button>}
+              </div>
+            </div>
+          ) : null}
 
           {/* ==========================================
               1. HERO AREA (Near-Full First Screen Showroom)
@@ -322,7 +365,15 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               {/* Primary Large Image Viewer */}
               <div
                 onClick={() => setIsLightboxOpen(true)}
-                className="h-80 sm:h-[420px] rounded-3xl overflow-hidden bg-[#0A3340] border border-[#D7E7E4] relative group shadow-lg cursor-zoom-in"
+                onTouchStart={(e) => { touchStartX.current = e.touches[0]?.clientX ?? null; }}
+                onTouchEnd={(e) => {
+                  const start = touchStartX.current; touchStartX.current = null;
+                  const end = e.changedTouches[0]?.clientX;
+                  if (start == null || end == null || allImages.length < 2 || Math.abs(end - start) < 45) return;
+                  const i = allImages.indexOf(activeImage);
+                  setActiveImage(allImages[(i + (end < start ? 1 : -1) + allImages.length) % allImages.length]);
+                }}
+                className="h-72 sm:h-[420px] rounded-2xl sm:rounded-3xl overflow-hidden bg-[#0A3340] border border-[#D7E7E4] relative group shadow-lg cursor-zoom-in"
               >
                 <LazyImage
                   src={activeImage}
@@ -333,17 +384,19 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
 
                 {/* Overlays: Condition & Interactive Media Chips */}
                 <div className="absolute top-4 left-4 flex items-center gap-2 flex-wrap z-10">
+                  {vehicle.condition ? (
                   <Badge variant="verified" size="sm" className="shadow-xs">
                     <ShieldCheck className="w-3.5 h-3.5 text-[#13B8A6]" />
-                    {vehicle.condition || 'Foreign Used'}
+                    {vehicle.condition}
                   </Badge>
+                  ) : null}
 
                 </div>
 
                 {/* Floating Location Overlay */}
                 <div className="absolute bottom-4 left-4 bg-[#176B87]/90 text-white text-xs font-extrabold px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 backdrop-blur-md shadow-md z-10">
                   <MapPin className="w-3.5 h-3.5 text-[#13B8A6] shrink-0" />
-                  <span>{vehicle.location}, {vehicle.county}</span>
+                  <span>{[vehicle.location, vehicle.county].filter(Boolean).join(', ')}</span>
                 </div>
 
                 {/* Counter & Fullscreen Controls */}
@@ -366,7 +419,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
 
                 {/* Touch Previous / Next Controls */}
                 {allImages.length > 1 && (
-                  <div className="absolute inset-x-3 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                  <div className="absolute inset-x-3 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity z-10">
                     <button
                       type="button"
                       onClick={(e) => {
@@ -414,7 +467,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
             </div>
 
             {/* Right Side: Title, Price Block, Dealer Preview & Primary Actions (5 Cols) */}
-            <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
+            <div className="lg:col-span-5 flex flex-col justify-between space-y-6 lg:sticky lg:top-2">
 
               <div className="space-y-4">
 
@@ -484,7 +537,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                           <ShieldCheck className="w-4 h-4 text-[#176B87]" />
                         </div>
                         <p className="text-[11px] text-[#64748B] font-medium">
-                          {vehicle.sellerRating ? `★ ${vehicle.sellerRating} Rating` : 'Rating not available'} • {vehicle.sellerType || 'Seller'}{vehicle.responseTime ? ` • Response: ${vehicle.responseTime}` : ''}
+                          {vehicle.sellerRating ? `★ ${vehicle.sellerRating} Rating • ` : ''}{vehicle.sellerType || 'Seller'}{vehicle.responseTime ? ` • Response: ${vehicle.responseTime}` : ''}
                         </p>
                       </div>
                     </div>
@@ -579,14 +632,14 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5 text-xs">
               {[
                 { label: 'Year', val: vehicle.year, icon: <Calendar className="w-4 h-4 text-[#176B87]" /> },
-                { label: 'Mileage', val: `${vehicle.mileage.toLocaleString()} km`, icon: <Gauge className="w-4 h-4 text-[#176B87]" /> },
+                { label: 'Mileage', val: Number.isFinite(Number(vehicle.mileage)) && Number(vehicle.mileage) > 0 ? `${Number(vehicle.mileage).toLocaleString()} km` : '', icon: <Gauge className="w-4 h-4 text-[#176B87]" /> },
                 { label: 'Fuel', val: vehicle.fuelType, icon: <Fuel className="w-4 h-4 text-[#176B87]" /> },
-                { label: 'Trans', val: vehicle.transmission.replace('Automatic', 'Auto'), icon: <Sliders className="w-4 h-4 text-[#176B87]" /> },
-                { label: 'Drive', val: vehicle.driveType || 'AWD / 4WD', icon: <Car className="w-4 h-4 text-[#176B87]" /> },
-                { label: 'Engine', val: vehicle.engineSize || '2500 cc', icon: <Zap className="w-4 h-4 text-[#176B87]" /> },
-                { label: 'Condition', val: vehicle.condition || 'Foreign Used', icon: <Award className="w-4 h-4 text-[#176B87]" /> },
-                { label: 'Verification', val: vehicle.verified ? 'Verified' : 'Pending verification', icon: <ShieldCheck className="w-4 h-4 text-emerald-600" /> }
-              ].map((chip, idx) => (
+                { label: 'Trans', val: (vehicle.transmission || '').replace('Automatic', 'Auto'), icon: <Sliders className="w-4 h-4 text-[#176B87]" /> },
+                { label: 'Drive', val: vehicle.driveType, icon: <Car className="w-4 h-4 text-[#176B87]" /> },
+                { label: 'Engine', val: vehicle.engineSize, icon: <Zap className="w-4 h-4 text-[#176B87]" /> },
+                { label: 'Condition', val: vehicle.condition, icon: <Award className="w-4 h-4 text-[#176B87]" /> },
+                { label: 'Verification', val: vehicle.verified ? 'Verified' : 'Pending', icon: <ShieldCheck className="w-4 h-4 text-emerald-600" /> }
+              ].filter((chip) => chip.val !== undefined && chip.val !== null && String(chip.val).trim() !== '').map((chip, idx) => (
                 <div key={idx} className="p-3.5 bg-[#F6FAF9] hover:bg-[#EEF7F5]/80 rounded-2xl border border-[#D7E7E4]/80 text-center space-y-1 transition-colors">
                   <div className="flex justify-center">{chip.icon}</div>
                   <p className="text-[10px] text-[#94A3B8] font-bold uppercase tracking-wider">{chip.label}</p>
@@ -604,7 +657,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               <span className="text-sm font-black text-[#13B8A6] uppercase tracking-wider font-display flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-[#13B8A6]" /> KAYAD Transaction Safeguards
               </span>
-              <span className="text-xs text-[#BDE5DE] font-semibold">Max 6 Verified Safeguards</span>
+              <span className="text-xs text-[#BDE5DE] font-semibold">Only recorded safeguards are shown</span>
             </div>
 
             {/* Exactly 6 Concise Trust Chips */}
@@ -616,8 +669,8 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 { enabled: Boolean(vehicle.financeAvailable), title: '✓ Finance Available', desc: 'Financing is offered for this listing' },
                 { enabled: Boolean(vehicle.escrowEligible || isEscrowActive), title: `✓ ${getEscrowBadgeLabel(vehicle)}`, desc: 'Escrow workflow is available for this listing' },
                 ...(vehicle.vin ? [{ enabled: true, title: '✓ Vehicle Identity', desc: 'VIN is recorded on the listing' }] : []) // Phase 13K: the public API no longer carries the VIN, so the badge is shown only when the VIN is actually available (owner/staff)
-              ].map((item, idx) => (
-                <div key={idx} className={`p-3 rounded-2xl backdrop-blur-md border space-y-0.5 ${item.enabled ? 'bg-white/10 border-white/15' : 'bg-white/5 border-white/10 opacity-60'}`}>
+              ].filter((item) => item.enabled).map((item, idx) => (
+                <div key={idx} className="p-3 rounded-2xl backdrop-blur-md border space-y-0.5 bg-white/10 border-white/15">
                   <p className="font-extrabold text-white text-xs">{item.title}</p>
                   <p className="text-[10px] text-[#BDE5DE] font-medium">{item.desc}</p>
                 </div>
@@ -634,75 +687,34 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               The Vehicle Story & Detailed Assessment
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
-
-              <Card className="p-5 space-y-2 bg-white border-[#D7E7E4]">
-                <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
-                  <Car className="w-4 h-4 text-[#176B87]" />
-                  <span>Vehicle Overview</span>
-                </div>
-                <p className="text-[#64748B] leading-relaxed text-xs">
-                  {vehicle.description || `Pristine ${vehicle.year} ${vehicle.make} ${vehicle.model} presented in immaculate mechanical state in ${vehicle.location}. Review available inspection records and seller details before purchase in Kenya.`}
-                </p>
-              </Card>
-
-              <Card className="p-5 space-y-2 bg-white border-[#D7E7E4]">
-                <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
-                  <Wrench className="w-4 h-4 text-emerald-600" />
-                  <span>Maintenance History</span>
-                </div>
-                <p className="text-[#64748B] leading-relaxed text-xs">
-                  Full service log recorded with authorized brand workshops. Fluid replacements, brake system overhaul, and brand new set of heavy-duty all-terrain tires recently fitted.
-                </p>
-              </Card>
-
-              <Card className="p-5 space-y-2 bg-white border-[#D7E7E4]">
-                <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
-                  <ShieldCheck className="w-4 h-4 text-[#176B87]" />
-                  <span>Ownership History</span>
-                </div>
-                <p className="text-[#64748B] leading-relaxed text-xs">
-                  Single non-smoking owner since import. Complete NTSA TIMS logbook documentation available with zero bank encumbrances or outstanding traffic penalties.
-                </p>
-              </Card>
-
-              <Card className="p-5 space-y-2 bg-white border-[#D7E7E4]">
-                <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
-                  <Sparkles className="w-4 h-4 text-[#176B87]" />
-                  <span>Why This Vehicle Stands Out</span>
-                </div>
-                <p className="text-[#64748B] leading-relaxed text-xs">
-                  Rare trim package featuring advanced driver safety assist systems, exceptional fuel efficiency, high ground clearance, and strong resale value retention in the regional market.
-                </p>
-              </Card>
-
-              <Card className="p-5 space-y-2 bg-white border-[#D7E7E4] md:col-span-2 lg:col-span-2">
-                <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
-                  <CheckSquare className="w-4 h-4 text-emerald-600" />
-                  <span>Condition Summary</span>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[#12576D] font-semibold">
-                  <div className="bg-[#F6FAF9] p-2 rounded-xl text-center">Engine: Excellent (100%)</div>
-                  <div className="bg-[#F6FAF9] p-2 rounded-xl text-center">Transmission: Smooth</div>
-                  <div className="bg-[#F6FAF9] p-2 rounded-xl text-center">Bodywork: Factory Paint</div>
-                  <div className="bg-[#F6FAF9] p-2 rounded-xl text-center">Interior: Grade A Clean</div>
-                </div>
-              </Card>
-
+            <div className="grid grid-cols-1 gap-4 text-xs">
+              {vehicle.description && vehicle.description.trim() ? (
+                <Card className="p-5 space-y-2 bg-white border-[#D7E7E4]">
+                  <div className="flex items-center gap-2 text-[#176B87] font-black text-sm font-display">
+                    <Car className="w-4 h-4 text-[#176B87]" />
+                    <span>Seller's Description</span>
+                  </div>
+                  <p className="text-[#64748B] leading-relaxed text-xs whitespace-pre-line">{vehicle.description}</p>
+                </Card>
+              ) : (
+                <p className="text-xs text-[#64748B]" data-testid="no-description">The seller has not added a description yet. Ask the seller for details or arrange an inspection.</p>
+              )}
             </div>
           </div>
 
           {/* ==========================================
               7. CATEGORIZED FEATURE GROUPS (Collapsible)
               ========================================== */}
-          <div className="space-y-4">
+          {(featureGroups.safety.length + featureGroups.comfort.length + featureGroups.technology.length + featureGroups.utility.length) > 0 && (
+          <div className="space-y-4" data-testid="vehicle-features">
             <h3 className="text-sm font-black text-[#176B87] uppercase tracking-wider font-display">
-              Categorized Factory Features & Equipment
+              Features & Equipment
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
 
               {/* Safety Category */}
+              {featureGroups.safety.length > 0 && (
               <div className="border border-[#D7E7E4] rounded-2xl overflow-hidden bg-white shadow-xs">
                 <button
                   onClick={() => toggleFeatureCategory('safety')}
@@ -724,8 +736,10 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   </div>
                 )}
               </div>
+              )}
 
               {/* Comfort Category */}
+              {featureGroups.comfort.length > 0 && (
               <div className="border border-[#D7E7E4] rounded-2xl overflow-hidden bg-white shadow-xs">
                 <button
                   onClick={() => toggleFeatureCategory('comfort')}
@@ -747,8 +761,10 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   </div>
                 )}
               </div>
+              )}
 
               {/* Technology Category */}
+              {featureGroups.technology.length > 0 && (
               <div className="border border-[#D7E7E4] rounded-2xl overflow-hidden bg-white shadow-xs">
                 <button
                   onClick={() => toggleFeatureCategory('technology')}
@@ -770,8 +786,10 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   </div>
                 )}
               </div>
+              )}
 
               {/* Utility Category */}
+              {featureGroups.utility.length > 0 && (
               <div className="border border-[#D7E7E4] rounded-2xl overflow-hidden bg-white shadow-xs">
                 <button
                   onClick={() => toggleFeatureCategory('utility')}
@@ -793,9 +811,11 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   </div>
                 )}
               </div>
+              )}
 
             </div>
           </div>
+          )}
 
           {/* ==========================================
               8. PRE-PURCHASE INSPECTION
@@ -839,7 +859,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 </div>
               </div>
               <Badge variant="success" size="md">
-                Pre-Approval Ready
+                Estimate only
               </Badge>
             </div>
 
@@ -924,7 +944,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 <div className="p-4 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs border-t border-[#D7E7E4]">
                   <div>
                     <p className="text-[#94A3B8] font-bold uppercase text-[10px]">Engine Capacity</p>
-                    <p className="font-extrabold text-[#0A3340] mt-0.5">{vehicle.engineSize || '2500 cc'}</p>
+                    <p className="font-extrabold text-[#0A3340] mt-0.5">{vehicle.engineSize || 'Not specified'}</p>
                   </div>
                   <div>
                     <p className="text-[#94A3B8] font-bold uppercase text-[10px]">Transmission</p>
@@ -932,7 +952,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   </div>
                   <div>
                     <p className="text-[#94A3B8] font-bold uppercase text-[10px]">Drive System</p>
-                    <p className="font-extrabold text-[#0A3340] mt-0.5">{vehicle.driveType || 'All-Wheel Drive'}</p>
+                    <p className="font-extrabold text-[#0A3340] mt-0.5">{vehicle.driveType || 'Not specified'}</p>
                   </div>
                   <div>
                     <p className="text-[#94A3B8] font-bold uppercase text-[10px]">Fuel Type</p>
@@ -970,6 +990,27 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               </div>
             </div>
           )}
+
+          {/* Phone-only sticky action bar: price + the primary action stay reachable while scrolling. */}
+          <div className="lg:hidden sticky bottom-0 -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 bg-white/95 backdrop-blur border-t border-[#D7E7E4] flex items-center gap-3 z-20" data-testid="mobile-action-bar">
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">{isAuction ? 'Current bid' : 'Price'}</p>
+              <p className="text-lg font-black text-[#176B87] font-display leading-tight truncate">Ksh {displayPrice.toLocaleString()}</p>
+            </div>
+            <Button
+              variant="primary"
+              size="md"
+              className="ml-auto font-black text-sm shrink-0"
+              onClick={() => (
+                isAuction ? (onViewAuctionLot ? onViewAuctionLot(vehicle) : onContactSeller(vehicle))
+                : isPrivateSeller || isEscrowActive ? onStartEscrow(vehicle)
+                : onContactSeller(vehicle)
+              )}
+            >
+              {isAuction ? <Gavel className="w-4 h-4" /> : isPrivateSeller || isEscrowActive ? <Lock className="w-4 h-4" /> : <MessageSquare className="w-4 h-4" />}
+              <span>{isAuction ? 'Place bid' : isPrivateSeller || isEscrowActive ? 'Buy securely' : 'Contact seller'}</span>
+            </Button>
+          </div>
 
         </div>
       </Modal>

@@ -91,9 +91,12 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
   const sellerDisplayName = vehicle.dealerName || vehicle.sellerName || (vehicle.sellerType === 'Private Seller' ? 'Private Seller' : 'Seller information unavailable');
 
   // Formatted mileage
+  // Mileage 0 means "not recorded" (the API maps a blank to 0), so it is not shown as a fact.
   const formattedMileage = vehicle.mileage >= 1000
     ? `${Math.round(vehicle.mileage / 1000)}k km`
-    : `${vehicle.mileage} km`;
+    : vehicle.mileage > 0 ? `${vehicle.mileage} km` : '';
+  const specLine = [vehicle.year ? String(vehicle.year) : '', formattedMileage, vehicle.fuelType, vehicle.transmission].filter(Boolean).join(' • ');
+  const photoCount = Array.isArray(vehicle.images) ? vehicle.images.length : 0;
 
   return (
     <div
@@ -110,7 +113,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
       className="bg-white rounded-2xl overflow-hidden border border-[#D7E7E4]/80 shadow-xs hover:shadow-md hover:border-navy-600/30 transition-all duration-200 flex flex-col group relative cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy-600 focus:ring-offset-2"
     >
       {/* 1. VEHICLE IMAGE CONTAINER */}
-      <div className="relative h-32 overflow-hidden bg-[#EEF7F5]">
+      <div className="relative h-44 sm:h-36 overflow-hidden bg-[#EEF7F5]">
         {vehicle.image ? (
           <LazyImage
             src={vehicle.image}
@@ -171,6 +174,10 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
             </Badge>
           )}
         </div>
+
+        {photoCount > 1 && (
+          <span className="absolute bottom-2 left-2 z-10 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white" data-testid="card-photo-count">{photoCount} photos</span>
+        )}
 
         {/* Action Controls (Save & Compare) */}
         <div className="absolute top-2.5 right-2.5 flex flex-col gap-1.5 z-10" onClick={(e) => e.stopPropagation()}>
@@ -243,7 +250,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
         <div className="space-y-1 pt-1 border-t border-[#D7E7E4] text-xs">
           {/* Row 1: Single compact metadata line */}
           <p className="font-bold text-[#0A3340] text-[12px] truncate">
-            {vehicle.year} • {formattedMileage} • {vehicle.fuelType || 'Fuel type unavailable'} • {vehicle.transmission || 'Transmission unavailable'}
+            {specLine || 'Specifications not provided'}
           </p>
 
           {/* Row 2: Location */}

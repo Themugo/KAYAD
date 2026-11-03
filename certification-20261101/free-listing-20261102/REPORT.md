@@ -33,3 +33,24 @@ New listings are created `pending` by default (Admin > Settings > Onboarding > l
 
 ## Branding end to end (D-87..D-91)
 Settings > Branding writes platform_config.branding (PUT /api/admin/config, validated server side). The site reads it from /api/admin/public/config. New: logo/name/tagline appear on login, register, admin, Dealer Hub and Private Seller portal via BrandMark; navbar bar/text/menu strip and footer bg/text/accent are saved server-side and applied as CSS variables; saves refresh the running site. Not verified: a real browser render, the hosted database, a live logo upload. Theme Studio (browser-only colours) is not routed in the app and was left untouched.
+
+## Traffic analytics (D-97)
+Hosted DB lacks the analytics tables. Collection is now a quiet no-op and the admin report answers 503 "not set up" until `runbooks/traffic-analytics-setup-20261102/APPLY_traffic_analytics.sql` is run by the owner. Data accrues only after the tables exist.
+
+## Vehicle page honesty and listing lists (D-98, D-99)
+The public vehicle page now shows only what the seller entered. Removed: invented description, Maintenance/Ownership/"Why it stands out", Condition Summary, default features, default engine/drive/condition. Engine and drive type are now passed from the listing. Dealer Inventory: numbering, larger thumbnails with photo count, details line, search, status filter, sort. Admin Listing Management: numbering and larger thumbnails. Not verified in a real browser.
+
+## Mobile navigation, hero and vehicle presentation (D-100)
+Phone hero reduced from ~530px to ~420px (search now on the first screen); vehicle cards get a taller photo area on phones, a photo count and no unrecorded "0 km"; the bottom dock is slimmer and dealers see a dealer-only dock; header Sell/Add button compacted. Validators that pinned the old hero padding string were updated to the new one (intent unchanged: stable hero footprint); dock deliberately has no Menu key (the header owns the menu). Not verified on a real phone.
+
+## Mobile menu polish (D-101)
+CSS-only redesign of the mobile drawer (kayad-navigation.css, final layer). Before/after screenshots in logs-menu-polish. Signed-in, dealer and admin variants not screenshotted.
+
+## Sold flow, vehicle details and navigation (D-102, D-103)
+Dealers: Mark sold (confirm, optional buyer/price); sold vehicles collapse into a 'Sold vehicles (n)' section and the numbered active list renumbers. Backend fix: the old mark-sold route wrote a non-existent column. Details page: all photos, honest status, back/prev/next navigation for everyone, admin/owner 'Manage in Listing Management', dealer 'Edit listing', phone sticky action bar. Not verified on a real device or hosted DB. One backend analytics test timed out once under full-suite load and passed on rerun.
+
+## Speed, sign-in and phone listing (D-104)
+- Database check (read-only): the Land Cruiser V8 (05752bf6…) is status available, not deleted, price and photos present; /api/cars returns it unfiltered. No data or filter cause found for it missing on phone.
+- Changes: session hint for the Sign In button, GET de-duplication, non-blocking fonts, marketplace loading state from first render.
+- Validation: logs-speed/ (tsc, build, vitest, jest, node-test pass; validators identical to baseline).
+- NOT verified: deployed site, real phone, actual load times, why the vehicle did not show on the user's phone (likely slow or failed API call; unconfirmed).
