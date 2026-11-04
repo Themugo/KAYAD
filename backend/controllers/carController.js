@@ -96,6 +96,7 @@ export const getCars = async (req, res) => {
       featured,
       auctionStatus,
       dealerType,
+      dealer,
       vin,
       engine,
       drivetrain,
@@ -172,7 +173,11 @@ export const getCars = async (req, res) => {
       query.engine = { $regex: `^${safeEngine}$`, $options: "i" };
     }
     if (drivetrain) query.drivetrain = exactText(drivetrain);
-    if (dealerType === "dealer") {
+    // A dealer's own showroom: only that seller's vehicles (still status "available" and not deleted).
+    // The value must be a UUID, so it can never be used to inject anything into the query.
+    if (typeof dealer === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dealer)) {
+      query.dealer = { $in: [dealer] };
+    } else if (dealerType === "dealer") {
       const dealerIds = await User.find({ role: "dealer" }).distinct("_id").lean();
       query.dealer = { $in: dealerIds };
     } else if (dealerType === "private") {

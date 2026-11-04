@@ -5,6 +5,7 @@ import { useToast } from '../../context/ToastContext';
 import { classifyAdminFailure } from '../../utils/adminLoadFailure';
 import { CountdownDisplay } from '../../components/CountdownDisplay';
 
+import AdminAuctionAudiencePanel from './AdminAuctionAudiencePanel';
 import { X, Radio, Pause, Flag, Zap, Car, Crown, RefreshCw, AlertTriangle } from 'lucide-react';
 export default function AdminAuctions() {
   const { toast } = useToast();
@@ -417,6 +418,7 @@ export default function AdminAuctions() {
           </div>
         </div>
       )}
+      <AdminAuctionAudiencePanel />
     </div>
   );
 }

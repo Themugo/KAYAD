@@ -347,8 +347,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
   return (
     <div className="auction-premium-page space-y-7">
       <AuctionExperienceRail current={tab === 'ended' ? 'history' : 'detail'} />
-      {user && <AuctionSwipeHint>Swipe the room • save anything you want to return to</AuctionSwipeHint>}
-      {user && <BidderIdentityCard user={user} savedCount={favorites.size} onPayments={() => navigate('/?nav=payments')} onProfile={() => navigate('/?nav=profile')} />}
+      {user && <div className="hidden md:block"><BidderIdentityCard user={user} savedCount={favorites.size} onPayments={() => navigate('/?nav=payments')} onProfile={() => navigate('/?nav=profile')} /></div>}
 
       {/* Compact, data-led market header — real counts drive the headline;
           there is no marketing copy independent of what the backend returns. */}

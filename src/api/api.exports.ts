@@ -98,6 +98,30 @@ export const auctionRegistrationAPI = {
   authorize: (auctionId: string) => api.get(`/auctions/${auctionId}/registration/authorization`).then(unwrap),
 };
 
+export const auctionEngagementAPI = {
+  get: (id: string) => api.get(`/auctions/${id}/engagement`).then(unwrap),
+  visit: (id: string) => api.post(`/auctions/${id}/visit`).then(unwrap),
+  follow: (id: string, on: boolean) => (on ? api.post(`/auctions/${id}/follow`) : api.delete(`/auctions/${id}/follow`)).then(unwrap),
+  like: (id: string, on: boolean) => (on ? api.post(`/auctions/${id}/like`) : api.delete(`/auctions/${id}/like`)).then(unwrap),
+  comments: (id: string, before?: string) => api.get(`/auctions/${id}/comments`, { params: before ? { before } : {} }).then(unwrap),
+  comment: (id: string, body: string) => api.post(`/auctions/${id}/comments`, { body }).then(unwrap),
+  removeComment: (id: string, commentId: string) => api.delete(`/auctions/${id}/comments/${commentId}`).then(unwrap),
+  insights: (id: string) => api.get(`/auctions/${id}/insights`).then(unwrap),
+  report: (id: string, commentId: string, reason?: string) => api.post(`/auctions/${id}/comments/${commentId}/report`, { reason }).then(unwrap),
+  reported: () => api.get('/auctions/admin/reported-comments').then(unwrap),
+  handover: (id: string) => api.get(`/auctions/${id}/handover`).then(unwrap),
+};
+
+export const walletAPI = {
+  get: () => api.get('/wallet').then(unwrap),
+  refund: (holdId: string, destination: 'wallet' | 'mpesa') => api.post(`/wallet/refunds/${holdId}`, { destination }).then(unwrap),
+  withdraw: (amount: number, idempotencyKey: string) => api.post('/wallet/withdraw', { amount, idempotencyKey }).then(unwrap),
+  dealerAccount: () => api.get('/wallet/dealer-account').then(unwrap),
+  adminAccounts: (status = 'pending') => api.get('/wallet/dealer-accounts', { params: { status } }).then(unwrap),
+  reviewAccount: (id: string, decision: 'verified' | 'disabled') => api.post(`/wallet/dealer-account/${id}/review`, { decision }).then(unwrap),
+  saveDealerAccount: (body: any) => api.put('/wallet/dealer-account', body).then(unwrap),
+};
+
 export const bidsAPI = {
   place:           (carId: string, body: any) => api.post(`/bids/${carId}/bid`, body).then(unwrap),
   getForCar:       (carId: string)       => api.get(`/bids/${carId}/bids`).then(unwrap),

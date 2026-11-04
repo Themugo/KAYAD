@@ -45,6 +45,9 @@ import bidRoutes from "./routes/bidRoutes.js";
 import dealerRoutes from "./routes/dealerRoutes.js";
 import auctionSetupRoutes from "./routes/auctionSetupRoutes.js";
 import auctionRegistrationRoutes from "./routes/auctionRegistrationRoutes.js";
+import walletRoutes from "./routes/walletRoutes.js";
+import auctionEngagementRoutes from "./routes/auctionEngagementRoutes.js";
+import { broadcastWatchers } from "./services/auctionEngagement.service.js";
 import privateSellerAuctionRoutes from "./routes/privateSellerAuctionRoutes.js";
 import privateSellerCapabilityRoutes from "./routes/privateSellerCapabilityRoutes.js"; // Phase 13E
 import accountCapabilitiesRoutes from "./routes/accountCapabilitiesRoutes.js"; // one account, many capabilities (read-only)
@@ -723,6 +726,7 @@ io.on("connection", (socket) => {
         auctionEnd: car.auction_end,
         auctionStatus: car.auction_status,
       });
+      broadcastWatchers(String(carId)).catch(() => {});
     } catch (error) {
       // Never grant room access when the authorization lookup fails.
       logWarn("Socket auction room authorization failed", { carId, error: error?.message });
@@ -730,7 +734,12 @@ io.on("connection", (socket) => {
   });
 
   socket.on("leaveAuction", (carId) => {
-    if (!isRateLimited("leaveAuction") && isValidId(carId)) socket.leave(`car_${carId}`);
+    if (!isRateLimited("leaveAuction") && isValidId(carId)) { socket.leave(`car_${carId}`); broadcastWatchers(String(carId)).catch(() => {}); }
+  });
+
+  // Rooms are already empty of this socket by the time "disconnect" fires, so read them while disconnecting.
+  socket.on("disconnecting", () => {
+    for (const room of socket.rooms) if (typeof room === "string" && room.startsWith("car_")) setTimeout(() => broadcastWatchers(room.slice(4)).catch(() => {}), 50);
   });
 
   socket.on("joinChat", async (chatId) => {
@@ -838,6 +847,8 @@ app.use("/api/dealer", auctionSetupRoutes);
 app.use("/api/dealer", dealerRoutes);
 app.use("/api/auctions", auctionRoutes);
 app.use("/api/auctions", auctionRegistrationRoutes);
+app.use("/api/auctions", auctionEngagementRoutes);
+app.use("/api/wallet", walletRoutes);
 app.use("/api/private-seller-capability", privateSellerCapabilityRoutes); // Phase 13E: personal-account seller application / review
 app.use("/api/account", accountCapabilitiesRoutes);
 app.use("/api/private-seller-auctions", privateSellerAuctionRoutes); // Stage 5F.10: proposal / verification / custody lifecycle

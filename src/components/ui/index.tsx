@@ -293,6 +293,35 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   maxWidth = 'md'
 }) => {
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const titleId = React.useId();
+
+  // Dialog behaviour: Escape closes, the page behind stops scrolling, focus moves into the
+  // dialog on open and returns to whatever opened it on close.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+    const previouslyFocused = typeof document !== 'undefined' ? (document.activeElement as HTMLElement | null) : null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    panelRef.current?.focus({ preventScroll: true });
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.stopPropagation();
+        onCloseRef.current();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      document.body.style.overflow = previousOverflow;
+      if (previouslyFocused && typeof previouslyFocused.focus === 'function' && document.contains(previouslyFocused)) {
+        previouslyFocused.focus({ preventScroll: true });
+      }
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const widthStyles = {
@@ -307,20 +336,32 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-[#0A3340]/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className={`bg-white rounded-2xl w-full ${widthStyles[maxWidth]} max-h-[90vh] overflow-y-auto shadow-2xl border border-[#D7E7E4] relative animate-fade-in`}>
+    <div
+      className="fixed inset-0 z-50 bg-[#0A3340]/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
+      onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
+    >
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={title ? titleId : undefined}
+        tabIndex={-1}
+        className={`bg-white rounded-2xl w-full ${widthStyles[maxWidth]} max-h-[92vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl border border-[#D7E7E4] relative animate-fade-in outline-none`}
+      >
         {title && (
-          <div className="sticky top-0 z-10 bg-white border-b border-[#D7E7E4] px-6 py-4 flex items-center justify-between">
-            <div className="font-bold text-[#176B87] font-display text-base">{title}</div>
+          <div className="sticky top-0 z-10 bg-white border-b border-[#D7E7E4] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">
+            <div id={titleId} className="min-w-0 flex-1 font-bold text-[#176B87] font-display text-base">{title}</div>
             <button
+              type="button"
               onClick={onClose}
-              className="p-1.5 text-[#94A3B8] hover:text-[#12576D] rounded-full hover:bg-[#EEF7F5] transition-colors"
+              aria-label="Close"
+              className="shrink-0 grid h-10 w-10 place-items-center text-[#94A3B8] hover:text-[#12576D] rounded-full hover:bg-[#EEF7F5] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
         )}
-        <div className="p-6">{children}</div>
+        <div className="p-4 sm:p-6">{children}</div>
       </div>
     </div>
   );
@@ -351,7 +392,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
           <div className="flex items-center gap-2 text-xs font-bold text-[#13B8A6] uppercase tracking-wider mb-1">
             {badgeIcon} {badgeText}
           </div>
-          <h2 className="text-2xl font-extrabold font-display">{title}</h2>
+          <h1 className="text-2xl font-extrabold font-display">{title}</h1>
           <p className="text-[#BDE5DE] text-xs mt-1 max-w-2xl leading-relaxed">{description}</p>
         </div>
         {rightElement && <div className="shrink-0">{rightElement}</div>}
@@ -365,7 +406,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         <div className="flex items-center gap-2 text-xs font-bold text-[#176B87] uppercase tracking-wider mb-1">
           {badgeIcon} {badgeText}
         </div>
-        <h2 className="text-2xl font-extrabold text-[#176B87] font-display">{title}</h2>
+        <h1 className="text-2xl font-extrabold text-[#176B87] font-display">{title}</h1>
         <p className="text-[#64748B] text-xs mt-1 max-w-xl">{description}</p>
       </div>
       {rightElement && <div className="shrink-0">{rightElement}</div>}

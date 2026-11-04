@@ -59,6 +59,11 @@ export async function fetchAuctionOutcome(id: string) {
   return auctionRequest<{ success?: boolean; outcome: Record<string, unknown> }>(`/api/auctions/${encodeURIComponent(id)}/outcome`);
 }
 
+export async function fetchAuctionCertificate(id: string) {
+  if (!id) throw new HttpRequestError('Auction ID is required.');
+  return auctionRequest<{ success?: boolean; certificate: Record<string, any> }>(`/api/auctions/${encodeURIComponent(id)}/certificate`);
+}
+
 export async function initiateAuctionWinnerPayment(id: string, phone: string) {
   if (!id) throw new HttpRequestError('Auction ID is required.');
   if (!phone) throw new HttpRequestError('Verified phone number is required.');
@@ -97,4 +102,4 @@ export async function setAuctionWinner(bidId: string) {
   });
 }
 
-export default { fetchList, fetchAuction, fetchActiveAuctions, fetchAuctionOutcome, initiateAuctionWinnerPayment, fetchMyAuctions, fetchAuctionBids, startDealerAuction, setAuctionWinner };
+export default { fetchList, fetchAuction, fetchActiveAuctions, fetchAuctionOutcome, fetchAuctionCertificate, initiateAuctionWinnerPayment, fetchMyAuctions, fetchAuctionBids, startDealerAuction, setAuctionWinner };

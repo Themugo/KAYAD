@@ -14,6 +14,8 @@ import { evaluateEligibilityBatch } from "./privateSellerAuctionEligibility.serv
 import { emitCommunication, COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
 
 const ENABLED = process.env.AUCTION_REMINDER_ENABLED !== "false";
+// The sweep runs every 5 minutes, so each reminder window must be 5 minutes wide or most auctions fall between two sweeps.
+const SWEEP_INTERVAL_MS = 5 * 60 * 1000;
 
 const notify = async (userId, title, message, type = "auction", metadata = {}) => {
   return emitCommunication({
@@ -38,7 +40,7 @@ const runReminders = async () => {
 
   for (const threshold of thresholds) {
     const windowStart = new Date(now.getTime() + threshold.ms);
-    const windowEnd = new Date(now.getTime() + threshold.ms + 60 * 1000);
+    const windowEnd = new Date(now.getTime() + threshold.ms + SWEEP_INTERVAL_MS);
 
     const endingAuctions = await findAll("cars", { filters: {
       auctionStatus: "live",
@@ -58,24 +60,37 @@ const runReminders = async () => {
       try {
         const activeBidders = await findAll("bids", { filters: { carId: car.id, status: { $in: ["active", "paid"] } }, select: "user" });
         const bidderIds = [...new Set(activeBidders.map(b => b.user).filter(Boolean))];
+        const minutesLeft = Math.max(1, Math.round((new Date(car.auctionEnd).getTime() - Date.now()) / 60000));
+        const amount = `KES ${Number(car.currentBid || car.price).toLocaleString("en-KE")}`;
 
-        if (bidderIds.length === 0) continue;
+        // Cleared-to-bid registrants and followers also want to know; they get the quieter in-app notice only.
+        let audienceIds = [];
+        try {
+          const regs = await findAll("auction_registrations", { filters: { auctionId: car.id, status: "active" }, select: "bidderId" });
+          const follows = await findAll("auction_follows", { filters: { auction_id: car.id }, select: "user_id", limit: 2000 });
+          audienceIds = [...new Set([...regs.map((r) => r.bidderId || r.bidder_id), ...(follows || []).map((f) => f.userId || f.user_id)].filter(Boolean))].filter((id) => !bidderIds.includes(id));
+        } catch { /* audience reminders are best effort */ }
+
+        if (bidderIds.length === 0 && audienceIds.length === 0) continue;
 
         for (const userId of bidderIds) {
           await notify(
             userId,
-            `Auction ending in ${threshold.minutes} min`,
-            `The auction for ${car.title || "a vehicle"} ends in ${threshold.minutes} minutes. Current bid: KES ${Number(car.currentBid || car.price).toLocaleString("en-KE")}.`,
+            `Auction ending in ${minutesLeft} min`,
+            `The auction for ${car.title || "a vehicle"} ends in about ${minutesLeft} minutes. Current bid: ${amount}.`,
             "auction",
             { carId: car.id, auctionEnd: car.auctionEnd, thresholdMinutes: threshold.minutes },
           );
+        }
+        for (const userId of audienceIds) {
+          await emitCommunication({ userId, eventType: COMMUNICATION_EVENTS.AUCTION_ENDING_SOON || "auction.ending_soon", category: "transactional", title: `Auction ending in ${minutesLeft} min`, message: `${car.title || "A vehicle you are following"} ends in about ${minutesLeft} minutes. Current bid: ${amount}.`, channels: ["in_app"], metadata: { type: "auction", carId: car.id, thresholdMinutes: threshold.minutes } }).catch(() => {});
         }
 
         await update("cars", car.id, {
           [`reminderSent_${threshold.label}min`]: true,
         });
 
-        logInfo(`Reminder sent (${threshold.minutes}min) for car ${car.id} (${bidderIds.length} bidders)`);
+        logInfo(`Reminder sent (${threshold.minutes}min) for car ${car.id} (${bidderIds.length} bidders, ${audienceIds.length} audience)`);
       } catch (err) {
         console.error(`  ❌ Reminder failed for ${car.id}:`, err.message);
       }
@@ -97,7 +112,7 @@ export const startAuctionReminderCron = () => {
     return;
   }
 
-  const INTERVAL_MS = 5 * 60 * 1000;
+  const INTERVAL_MS = SWEEP_INTERVAL_MS;
 
   const run = async () => {
     try {

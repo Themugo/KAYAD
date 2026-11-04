@@ -290,6 +290,10 @@ export const b2cCallback = async (req, res) => {
     const sb = getSupabase();
     const conversationId = result.conversationID;
     if (conversationId) {
+      const { handleWalletB2CResult } = await import("../services/auctionWallet.service.js");
+      if (await handleWalletB2CResult({ conversationId, success: result.success, transactionId: result.transactionId, amount: result.amount, resultDesc: result.resultDesc })) {
+        return res.json({ ResultCode: 0, ResultDesc: "Accepted" });
+      }
       const { data: payout } = await sb.from("dealer_payouts").select("id,status").eq("conversation_id", conversationId).maybeSingle();
       if (payout) {
         const { data: payoutForVerification, error: payoutReadError } = await sb

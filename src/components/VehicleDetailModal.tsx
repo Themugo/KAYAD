@@ -60,7 +60,7 @@ interface VehicleDetailModalProps {
   onRequestInspection?: (vehicle: Vehicle) => void;
   onViewAuctionLot?: (vehicle: Vehicle) => void;
   onNavigateToFinancing?: (vehicle: Vehicle) => void;
-  onViewShowroom?: (sellerName: string) => void;
+  onViewShowroom?: (sellerName: string, vehicle?: Vehicle) => void;
   isSaved: boolean;
   onToggleSave: (id: string) => void;
   onSelectVehicle?: (vehicle: Vehicle) => void;
@@ -119,6 +119,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   const [activeImage, setActiveImage] = useState<string>(vehicle?.image || '');
   const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
   const [shareSuccess, setShareSuccess] = useState<boolean>(false);
+  const [shareState, setShareState] = useState<'idle' | 'copied' | 'failed'>('idle');
   const [testDriveBooked, setTestDriveBooked] = useState<boolean>(false);
 
   // Categorized Collapsible Features State
@@ -277,12 +278,43 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   };
   const statusChip = getStatusChip();
 
-  // Share handler
-  const handleShare = () => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href);
-      setShareSuccess(true);
-      setTimeout(() => setShareSuccess(false), 3000);
+  // Share handler: native share sheet where the device has one (phones), otherwise copy the link.
+  // Every path is guarded: a blocked clipboard or a dismissed share sheet must never throw.
+  const handleShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const flash = (state: 'copied' | 'failed') => {
+      setShareState(state);
+      setShareSuccess(state === 'copied');
+      setTimeout(() => { setShareState('idle'); setShareSuccess(false); }, 3000);
+    };
+    try {
+      if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+        await navigator.share({ title: vehicle.title, text: `${vehicle.title} on KAYAD`, url });
+        return;
+      }
+    } catch (err) {
+      if ((err as { name?: string })?.name === 'AbortError') return; // the person closed the share sheet
+    }
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(url);
+        flash('copied');
+        return;
+      }
+    } catch { /* fall through to the legacy copy */ }
+    try {
+      const area = document.createElement('textarea');
+      area.value = url;
+      area.setAttribute('readonly', '');
+      area.style.position = 'fixed';
+      area.style.opacity = '0';
+      document.body.appendChild(area);
+      area.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(area);
+      flash(ok ? 'copied' : 'failed');
+    } catch {
+      flash('failed');
     }
   };
 
@@ -297,11 +329,11 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   // Header Title Component
   const modalTitle = (
     <div className="flex items-center justify-between gap-2 w-full pr-8 min-w-0">
-      <div className="flex items-center gap-x-2 flex-wrap min-w-0">
-        <span className="text-[#176B87] font-black text-lg font-display tracking-tight">
+      <div className="flex min-w-0 flex-col sm:flex-row sm:items-baseline sm:gap-x-2">
+        <span className="min-w-0 truncate text-[#176B87] font-black text-base sm:text-lg font-display tracking-tight">
           {vehicle.year} {vehicle.make} {vehicle.model}
         </span>
-        <span className="text-[#94A3B8] font-medium text-xs" title={`Reference ${vehicle.id}`}>Ref {String(vehicle.id).slice(0, 8)}</span>
+        <span className="text-[#94A3B8] font-medium text-[11px] sm:text-xs" title={`Reference ${vehicle.id}`}>Ref {String(vehicle.id).slice(0, 8)}</span>
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
@@ -309,8 +341,10 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           onClick={handleShare}
           className="shrink-0 grid place-items-center w-10 h-10 rounded-full border border-[#D7E7E4] text-[#64748B] hover:text-[#0A3340] hover:bg-[#EEF7F5] transition-colors cursor-pointer"
           title="Share Listing"
+          aria-label={shareState === 'copied' ? 'Link copied' : shareState === 'failed' ? 'Could not copy the link' : 'Share listing'}
         >
           {shareSuccess ? <Check className="w-4 h-4 text-emerald-600" /> : <Share2 className="w-4 h-4" />}
+          <span role="status" className="sr-only">{shareState === 'copied' ? 'Link copied' : shareState === 'failed' ? 'Could not copy the link' : ''}</span>
         </button>
         <button
           onClick={() => onToggleSave(vehicle.id)}
@@ -318,6 +352,8 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
             isSaved ? 'bg-rose-50 text-rose-600 border-rose-200' : 'text-[#64748B] border-[#D7E7E4] hover:bg-[#EEF7F5]'
           }`}
           title={isSaved ? 'Saved in Watchlist' : 'Save to Watchlist'}
+          aria-label={isSaved ? 'Remove from watchlist' : 'Save to watchlist'}
+          aria-pressed={isSaved}
         >
           <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
         </button>
@@ -475,7 +511,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <Badge variant={statusChip.variant} size="sm">
-                      <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                      {statusChip.label === 'Available' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
                       {statusChip.label}
                     </Badge>
                   </div>
@@ -548,7 +584,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     <Button
                       variant="primary"
                       size="sm"
-                      onClick={() => (onViewShowroom ? onViewShowroom(vehicle.sellerName) : onContactSeller(vehicle))}
+                      onClick={() => (onViewShowroom && vehicle.sellerName ? onViewShowroom(vehicle.sellerName, vehicle) : onContactSeller(vehicle))}
                     >
                       <Building2 className="w-3.5 h-3.5 text-[#13B8A6]" />
                       <span>View Showroom</span>
@@ -634,13 +670,13 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 { label: 'Year', val: vehicle.year, icon: <Calendar className="w-4 h-4 text-[#176B87]" /> },
                 { label: 'Mileage', val: Number.isFinite(Number(vehicle.mileage)) && Number(vehicle.mileage) > 0 ? `${Number(vehicle.mileage).toLocaleString()} km` : '', icon: <Gauge className="w-4 h-4 text-[#176B87]" /> },
                 { label: 'Fuel', val: vehicle.fuelType, icon: <Fuel className="w-4 h-4 text-[#176B87]" /> },
-                { label: 'Trans', val: (vehicle.transmission || '').replace('Automatic', 'Auto'), icon: <Sliders className="w-4 h-4 text-[#176B87]" /> },
+                { label: 'Transmission', val: (vehicle.transmission || ''), icon: <Sliders className="w-4 h-4 text-[#176B87]" /> },
                 { label: 'Drive', val: vehicle.driveType, icon: <Car className="w-4 h-4 text-[#176B87]" /> },
                 { label: 'Engine', val: vehicle.engineSize, icon: <Zap className="w-4 h-4 text-[#176B87]" /> },
                 { label: 'Condition', val: vehicle.condition, icon: <Award className="w-4 h-4 text-[#176B87]" /> },
                 { label: 'Verification', val: vehicle.verified ? 'Verified' : 'Pending', icon: <ShieldCheck className="w-4 h-4 text-emerald-600" /> }
               ].filter((chip) => chip.val !== undefined && chip.val !== null && String(chip.val).trim() !== '').map((chip, idx) => (
-                <div key={idx} className="p-3.5 bg-[#F6FAF9] hover:bg-[#EEF7F5]/80 rounded-2xl border border-[#D7E7E4]/80 text-center space-y-1 transition-colors">
+                <div key={idx} className="p-3 sm:p-3.5 bg-[#F6FAF9] hover:bg-[#EEF7F5]/80 rounded-2xl border border-[#D7E7E4]/80 text-center space-y-1 transition-colors min-w-0">
                   <div className="flex justify-center">{chip.icon}</div>
                   <p className="text-[10px] text-[#94A3B8] font-bold uppercase tracking-wider">{chip.label}</p>
                   <p className="font-black text-[#0A3340] text-xs truncate">{chip.val}</p>
@@ -652,31 +688,42 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           {/* ==========================================
               5. BUYER ASSURANCE (KAYAD Transaction Safeguards)
               ========================================== */}
-          <div className="p-6 bg-gradient-to-r from-[#0A3340] via-[#176B87] to-[#0A3340] text-white rounded-3xl shadow-md space-y-4 border border-[#91CEC5]/20">
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <span className="text-sm font-black text-[#13B8A6] uppercase tracking-wider font-display flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-[#13B8A6]" /> KAYAD Transaction Safeguards
-              </span>
-              <span className="text-xs text-[#BDE5DE] font-semibold">Only recorded safeguards are shown</span>
-            </div>
-
-            {/* Exactly 6 Concise Trust Chips */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
-              {[
-                { enabled: Boolean(vehicle.verified), title: '✓ Listing Verified', desc: 'KAYAD verification is recorded' },
-                { enabled: Boolean(vehicle.isDealerCertified), title: '✓ Dealer Certified', desc: 'Seller has a dealer certification record' },
-                { enabled: Boolean(vehicle.inspectionPassed || vehicle.inspection), title: '✓ Inspection Report', desc: 'Inspection data is available' },
-                { enabled: Boolean(vehicle.financeAvailable), title: '✓ Finance Available', desc: 'Financing is offered for this listing' },
-                { enabled: Boolean(vehicle.escrowEligible || isEscrowActive), title: `✓ ${getEscrowBadgeLabel(vehicle)}`, desc: 'Escrow workflow is available for this listing' },
-                ...(vehicle.vin ? [{ enabled: true, title: '✓ Vehicle Identity', desc: 'VIN is recorded on the listing' }] : []) // Phase 13K: the public API no longer carries the VIN, so the badge is shown only when the VIN is actually available (owner/staff)
-              ].filter((item) => item.enabled).map((item, idx) => (
-                <div key={idx} className="p-3 rounded-2xl backdrop-blur-md border space-y-0.5 bg-white/10 border-white/15">
-                  <p className="font-extrabold text-white text-xs">{item.title}</p>
-                  <p className="text-[10px] text-[#BDE5DE] font-medium">{item.desc}</p>
+          {(() => {
+            const safeguardItems = [
+              { enabled: Boolean(vehicle.verified), title: '✓ Listing Verified', desc: 'KAYAD verification is recorded' },
+              { enabled: Boolean(vehicle.isDealerCertified), title: '✓ Dealer Certified', desc: 'Seller has a dealer certification record' },
+              { enabled: Boolean(vehicle.inspectionPassed || vehicle.inspection), title: '✓ Inspection Report', desc: 'Inspection data is available' },
+              { enabled: Boolean(vehicle.financeAvailable), title: '✓ Finance Available', desc: 'Financing is offered for this listing' },
+              { enabled: Boolean(vehicle.escrowEligible || isEscrowActive), title: `✓ ${getEscrowBadgeLabel(vehicle)}`, desc: 'Escrow workflow is available for this listing' },
+              ...(vehicle.vin ? [{ enabled: true, title: '✓ Vehicle Identity', desc: 'VIN is recorded on the listing' }] : []),
+            ].filter((item) => item.enabled);
+            if (safeguardItems.length === 0) {
+              return (
+                <div data-testid="safeguards-empty" className="flex items-start gap-3 rounded-2xl border border-[#D7E7E4] bg-[#F6FAF9] px-4 py-3 text-xs text-[#64748B]">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#176B87]" aria-hidden="true" />
+                  <p><span className="font-extrabold text-[#0A3340]">KAYAD transaction safeguards:</span> none recorded for this listing yet. Request an inspection before you pay.</p>
                 </div>
-              ))}
-            </div>
-          </div>
+              );
+            }
+            return (
+              <div className="p-5 sm:p-6 bg-gradient-to-r from-[#0A3340] via-[#176B87] to-[#0A3340] text-white rounded-3xl shadow-md space-y-4 border border-[#91CEC5]/20">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="text-sm font-black text-[#13B8A6] uppercase tracking-wider font-display flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-[#13B8A6]" /> KAYAD Transaction Safeguards
+                  </span>
+                  <span className="text-xs text-[#BDE5DE] font-semibold">Only recorded safeguards are shown</span>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-xs">
+                  {safeguardItems.map((item, idx) => (
+                    <div key={idx} className="p-3 rounded-2xl backdrop-blur-md border space-y-0.5 bg-white/10 border-white/15">
+                      <p className="font-extrabold text-white text-xs">{item.title}</p>
+                      <p className="text-[10px] text-[#BDE5DE] font-medium">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* ==========================================
               6. VEHICLE STORY (Cards instead of raw paragraphs)

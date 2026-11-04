@@ -1,4 +1,6 @@
 import { stkPush } from "./mpesaService.js";
+import { resolveDealerCollection } from "./dealerPaymentAccount.service.js";
+import { evaluatePrivateSellerAuctionEligibility } from "./privateSellerAuctionEligibility.service.js";
 import { sendNotification } from "./notification.service.js";
 import { findById, findOne, create, update } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
@@ -17,20 +19,27 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount, re
   const setupConfig = setup.config || {};
   if (setupConfig.startsAt && Date.parse(setupConfig.startsAt) <= Date.now()) return { success: false, message: "Auction registration commitment window has closed" };
 
-  const securityAmount = amount || auction.bidSecurityAmount || 50000;
+  // No silent default: the amount is the registration/policy amount or the payment is refused.
+  const securityAmount = Number(amount || auction.bidSecurityAmount);
+  if (!Number.isFinite(securityAmount) || securityAmount <= 0) return { success: false, message: "Commitment amount is not configured for this auction" };
 
-  const recipient = setupConfig.commitment?.recipient || "organizer";
-  const destination = setupConfig.commitment?.recipientAccount || process.env.KAYAD_AUCTION_COMMITMENT_PAYBILL;
-
-  // Trigger STK Push
-  if (!destination) {
-    return { success: false, message: "Payment recipient is not configured" };
-  }
+  // Private sellers never control where commitment money goes (anti-scam): KAYAD collects and holds it,
+  // and any seller-supplied recipient account is ignored. Only dealers' configured recipient is recorded.
+  // Safe default if the seller type cannot be verified: treat as private (KAYAD-held).
+  let privateSeller = true;
+  try { privateSeller = (await evaluatePrivateSellerAuctionEligibility(auction)).scope !== "not_private_seller"; } catch (_) { privateSeller = true; }
+  const recipient = privateSeller ? "platform" : (setupConfig.commitment?.recipient || "organizer");
+  const destination = privateSeller ? null : (setupConfig.commitment?.recipientAccount || null);
+  // Dealer-direct: only a non-private seller whose own paybill/till was verified by an admin. Anything else is collected by KAYAD.
+  const dealerCollection = !privateSeller && recipient === "organizer" ? await resolveDealerCollection(setup.organizerId).catch(() => null) : null;
+  const custody = dealerCollection ? "dealer" : "kayad";
+  // Every car gets its own M-Pesa account reference (Daraja allows 12 chars) so each payment is traceable to one auction.
+  const accountReference = `AUC-${String(auction.id).replace(/-/g, "").slice(0, 8).toUpperCase()}`;
 
   let checkoutID;
   const mode = "mpesa";
   try {
-    const stkRes = await stkPush(phone, securityAmount, destination);
+    const stkRes = await stkPush(phone, securityAmount, { ...(dealerCollection?.overrides || {}), accountReference, transactionDesc: "Bid commitment" });
     checkoutID = stkRes?.CheckoutRequestID;
     if (!checkoutID) throw new Error("M-Pesa did not return a checkout request ID");
   } catch (err) {
@@ -52,8 +61,9 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount, re
     checkoutRequestId: checkoutID,
     metadata: {
       description: recipient === "platform"
-        ? `Bid commitment for auction ${auctionId} — KAYAD platform recipient`
-        : `Bid commitment for auction ${auctionId} — organizer recipient`,
+        ? `Bid commitment for auction ${auctionId} — held by KAYAD`
+        : custody === "dealer" ? `Bid commitment for auction ${auctionId} — paid directly to the organizer's verified account` : `Bid commitment for auction ${auctionId} — collected by KAYAD (organizer account ${destination || "n/a"} recorded)`,
+      accountReference, custody, collectedBy: custody === "dealer" ? `dealer_${dealerCollection.kind}_${dealerCollection.shortcode}` : "kayad_shortcode",
       reference: `SEC-${auctionId}-${Date.now()}`,
       auctionRegistrationId: registrationId || null, auctionId, recipient, auctionSecurityHoldId: holdId || null, auctionSecurityHoldType: holdType,
     },
@@ -63,11 +73,12 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount, re
     await update("auction_security_holds", holdId, {
       checkout_request_id: checkoutID,
       payment_transaction_id: transaction.id,
+      ...(custody === "dealer" ? { custody } : {}), // column exists only after the wallet/custody migration; dealer-direct needs that migration anyway
       status: "pending",
     });
   }
 
-  return { success: true, transaction, checkoutID, mode, destination, holdId, holdType };
+  return { success: true, transaction, checkoutID, mode, destination, accountReference, recipient, custody, holdId, holdType };
 }
 
 export async function handleBidSecurityCallback({ checkoutRequestID, resultCode, mpesaReceipt, providerAmount = null }) {

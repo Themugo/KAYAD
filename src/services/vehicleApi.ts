@@ -213,6 +213,8 @@ export interface GetCarsParams {
   category?: 'auction' | 'fixed';
   featured?: boolean;
   dealerType?: 'dealer' | 'private';
+  /** One seller's showroom: that seller's id (UUID). */
+  dealer?: string;
   vin?: string;
   engine?: string;
   drivetrain?: string;

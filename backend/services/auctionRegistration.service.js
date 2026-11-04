@@ -1,3 +1,4 @@
+import { bidderNumber } from "../utils/bidderIdentity.js";
 import crypto from "crypto";
 import { findById, findOne, create, update } from "../db/index.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
@@ -9,9 +10,6 @@ const ACTIVE = "active";
 const REGISTRATION_STATES = ["not_registered","registration_started","pending_verification","pending_eligibility","pending_commitment","active","suspended","withdrawn","disqualified","expired"];
 
 function normalizeTerms(v) { return String(v || "").trim(); }
-function bidderNumber(userId, auctionId) {
-  return `K-${crypto.createHash("sha256").update(`${auctionId}:${userId}:kayad`).digest("hex").slice(0, 8).toUpperCase()}`;
-}
 
 async function getContext(auctionId, userId) {
   const [car, setup, user] = await Promise.all([

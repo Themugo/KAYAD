@@ -19,6 +19,11 @@ vi.mock('../../api/api', () => ({
     register: vi.fn().mockResolvedValue({ registration: { status: 'active' } }),
     initiateCommitment: vi.fn().mockResolvedValue({ registration: { status: 'pending' } }),
   },
+  auctionEngagementAPI: {
+    get: vi.fn().mockResolvedValue({ engagement: { watchers: 0, visits: 0, follows: 0, likes: 0, comments: 0, enabled: false, viewer: {} } }),
+    visit: vi.fn().mockResolvedValue({}),
+    comments: vi.fn().mockResolvedValue({ comments: [], enabled: false }),
+  },
   formatKES: vi.fn(v => `KES ${(v / 1000).toFixed(0)}K`),
 }));
 vi.mock('../../services/auctionService', () => ({
@@ -58,7 +63,7 @@ vi.mock('../../context/AuthContext', () => ({
   useAuth: () => ({ user: null, isAuth: authState.isAuth }),
 }));
 vi.mock('../../context/SocketContext', () => ({
-  useSocket: () => ({ joinAuction: vi.fn(), leaveChannel: vi.fn(), connected: false }),
+  useSocket: () => ({ joinAuction: vi.fn(), leaveChannel: vi.fn(), connected: false, on: () => () => {} }),
 }));
 vi.mock('../../context/ToastContext', () => ({
   useToast: () => ({ toast: toastSpy }),
@@ -168,5 +173,38 @@ describe('AuctionLivePage registration-status error surfacing', () => {
     await screen.findAllByText('Test Car');
 
     expect(toastSpy).not.toHaveBeenCalled();
+  });
+});
+
+// Bidding identity: bids show the anonymous K-ID (never a real name/phone), the viewer's own entries are marked,
+// and the viewer sees whether they are leading or outbid.
+describe('AuctionLivePage bidder identity and standing', () => {
+  afterEach(() => { cleanup(); authState.isAuth = false; });
+
+  const liveWith = (bids) => {
+    fetchAuction.mockResolvedValueOnce({
+      auction: { id: 'mock1', carId: 'mock1', status: 'active', startingBid: 2000000, bidIncrement: 1000,
+        car: { _id: 'mock1', id: 'mock1', title: 'Test Car', brand: 'Toyota', model: 'Hilux', year: 2021, images: [], auctionStatus: 'live', auctionEnd: new Date(Date.now() + 3600000).toISOString(), currentBid: 2100000, bidsCount: bids.length, dealer: {} } },
+      bids,
+    });
+    auctionRegistrationAPI.get.mockResolvedValueOnce({ registration: { status: 'active', bidder_number: 'K-AAAA1111' }, setup: null });
+  };
+
+  it('marks own bid as YOU and shows leading', async () => {
+    authState.isAuth = true;
+    liveWith([{ id: 'b2', amount: 2100000, bidderTag: 'K-AAAA1111', createdAt: new Date().toISOString() }, { id: 'b1', amount: 2050000, bidderTag: 'K-BBBB2222', createdAt: new Date().toISOString() }]);
+    renderAuctionPage();
+    const standing = await screen.findByTestId('my-standing');
+    expect(standing.textContent).toMatch(/K-AAAA1111/);
+    expect(standing.textContent).toMatch(/leading/i);
+    expect(screen.getByText('K-BBBB2222')).toBeInTheDocument();
+    expect(screen.getAllByText('YOU').length).toBe(1);
+  });
+
+  it('shows outbid when another bidder leads', async () => {
+    authState.isAuth = true;
+    liveWith([{ id: 'b2', amount: 2100000, bidderTag: 'K-BBBB2222', createdAt: new Date().toISOString() }, { id: 'b1', amount: 2050000, bidderTag: 'K-AAAA1111', createdAt: new Date().toISOString() }]);
+    renderAuctionPage();
+    expect((await screen.findByTestId('my-standing')).textContent).toMatch(/outbid/i);
   });
 });
