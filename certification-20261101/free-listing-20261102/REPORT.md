@@ -54,3 +54,49 @@ Dealers: Mark sold (confirm, optional buyer/price); sold vehicles collapse into 
 - Changes: session hint for the Sign In button, GET de-duplication, non-blocking fonts, marketplace loading state from first render.
 - Validation: logs-speed/ (tsc, build, vitest, jest, node-test pass; validators identical to baseline).
 - NOT verified: deployed site, real phone, actual load times, why the vehicle did not show on the user's phone (likely slow or failed API call; unconfirmed).
+
+## Inventory scaling and car details (D-105, D-106)
+- Phone: one-row toolbar (Sort/view/Filters), compact photo-left cards, whole card opens the vehicle, blank specs omitted. Desktop toolbar controls on their own row at 1024-1439 px.
+- Details: honest empty safeguards note, full transmission text, compact header, status icon only for Available.
+- Validation: logs-inventory-phone/. tsc, build, frontend 1434, backend vitest, node-test pass; validators identical to baseline. Jest 3871 pass, 1 fail: tests/regression/visitorAnalytics "yesterday excludes today" fails when run shortly after local midnight (00:10 EAT) and passed in earlier runs; backend code was not changed in this round. Test left as is.
+- NOT verified: real phone, deployed site, real photos.
+
+## Click-through audit: details, actions, navigation (D-107 to D-110)
+- Fixed: shared Modal dialog behaviour, stale URL after Contact/Escrow, Share robustness, View Showroom (dealer filter + chip), Place Bid to auction lot.
+- Backend: GET /api/cars?dealer=<uuid> added (needs deploy; until deployed the showroom view will show the unfiltered list).
+- Validation: logs-click-through/. tsc, build, frontend 1443, jest 3875, backend vitest, node-test pass; validators identical to baseline.
+- NOT verified: real phone/browser, deployed backend, signed-in admin/owner/dealer links (unit-tested only), real photos.
+
+## Public pages sweep (D-111, D-112)
+- Audited 16 public routes at 390 and 1366 px (errors, overflow, tap targets, headings, titles) and clicked all 18 mobile menu items: every one lands correctly.
+- Fixed: per-screen page titles, main headings, phone tap targets.
+- Observed but not changed: Auctions and Services pages showed their error states because my test API returned empty replies (not evidence of a real fault); auction journey strip scrolls sideways by design.
+- Validation: logs-public-sweep/. tsc, build, frontend 1449, jest 3875, backend vitest, node-test pass; validators identical to baseline.
+- NOT verified: real phone, deployed site, signed-in flows.
+
+## Auction page and business-flow audit (2026-11-04)
+Code-read audit against the 10 stated steps; nothing run against real M-Pesa, Supabase prod or a phone.
+Fixed: D-113 STK push ignored dealer account and used a constant reference (now per-car AccountReference AUC-xxxxxxxx; string misuse removed). D-114 private-seller commitments not forced to KAYAD-held (now forced; seller account ignored; unverifiable type fails safe to KAYAD-held). D-115 silent 50000 default amount removed (fails closed). D-116 two different bidder identities (K-ID at registration vs "Bidder #x" on bids) unified; D-117 room ignored bidderTag and showed no own standing (now shows K-ID, YOU marker, leading/outbid line).
+Open, owner decision: D-118 losers' holds stop at refund_pending: no wallet and no payout code (needs wallet/B2C design + SQL). D-119 dealer-direct collection to a dealer paybill/till needs that dealer's own Daraja credentials; today all STK money lands on KAYAD's shortcode. D-120 certificate/winner notification and winner-to-dealer handover read in code only, not exercised.
+
+## Auction wallet, loser refunds and dealer-direct collection (2026-11-04)
+Closes D-118 and D-119. New: wallet + loser refund (keep in wallet or send to own M-Pesa) + withdrawals with automatic reversal on failure; verified dealer paybill/till collection with AES-256-GCM credentials and admin verification; dealer-custody holds skip KAYAD ledger postings; screens (WalletPanel on the auction page after close and under Payments; dealer Banking > Auction commitment account).
+Verified: SQL migration loaded and re-run on a scratch local Postgres 16 with scenario checks (refund, double refund, wrong user, dealer custody refusal, overdraw, withdraw replay, failure reversal, paid ledger, replay no double credit). 32 new/updated backend tests, 5 frontend tests. Full run final17: one failure (route-inventory guard flagged the new refund route) fixed by classifying it as an exempt "refund of held funds" like the escrow refunds; that file re-run alone passes (89/89); the rest of final17 was green. A complete re-run after that one-line test change was not done.
+NOT verified: migration on the hosted database (owner-run), real M-Pesa STK to a dealer till, real B2C payout and callback, the screens on a phone, a verified-dealer flow end to end in sandbox.
+
+## Master audit round (2026-11-04)
+Gaps found and closed: D-121 winner certificate screen existed but was never shown and had no backend (now winner-only GET /api/auctions/:id/certificate, View winner certificate button, accessible dialog, print/save as PDF with print CSS, shows bidder ID, commitment credited, balance due, pay-by). D-122 win/loss notifications gave no next step (win: certificate + payment deadline; loss: refund to wallet/M-Pesa). D-123 phone auction list: bidder-profile card and a floating "swipe the room" bubble pushed live auctions down and covered text (profile card desktop-only, bubble removed). D-124 room bid history amount wrapped under the name on phones; mixed emoji icons replaced with consistent icons (Crown, Check, Lock, Zap).
+Verified: headless Chromium at 390 and 1366 widths with mocked API (screenshots in logs-master-audit); full run final18 green (tsc, build, 176 frontend files, 3897 backend tests, same 14 baseline validators).
+NOT verified: real device, real data, winner flow with a real outcome, handover after payment (read only), admin screen for verifying dealer accounts does not exist (API only).
+
+## Auction audience engagement (2026-11-04)
+New: live watching count, views and unique visitors, follow (live/ended notices), like, public comments (anonymous IDs, anti-scam screening, owner/staff moderation), owner Audience insights (totals, peak watchers, funnel visitors>followers>registered>bidders, 14-day trend).
+Verified: migration on scratch Postgres 16 incl. re-run and counter/peak/unique checks; 15 backend + 9 frontend tests; full run final19 green (177 frontend files, 3912 backend tests, same 14 baseline validators); headless render at 390 and 1366 widths with mocked API.
+NOT verified: migration on the hosted DB (owner-run); real Socket.IO presence with multiple users/instances (count is unit-tested against a mocked room; with several server instances it needs the Socket.IO adapter to be cluster-wide); real follower notification delivery; real phone.
+Known design limits: two tabs count as two watchers; comments sit above the bid panel on phones (the sticky Place bid bar remains); no admin UI for comment moderation beyond owner/staff hide; no report-comment button yet.
+
+## Deeper audit round (2026-11-04)
+Fixed: D-129 reminder sweep could skip auctions (window widened, minutes from end time); D-130 followers and registered people now get in-app reminders; D-131 winner handover panel (dealer contact only after payment, never private sellers); D-132 comment reporting (3 distinct reports auto-hide) and admin reported list; D-133 admin Audience panel and dealer collection accounts list; D-134 comments moved below the bid grid; D-135 stale "Payment destination" removed from the setup wizard and contract (money goes to the verified dealer account, otherwise KAYAD holds it). Intentional behaviour change: validateConfig no longer errors on a missing destination; reported here, no test weakened (new test auctionSetupCommitment).
+Migration 20261104150000_auction_engagement.sql now also creates auction_comment_reports (owner-run; re-run safe).
+Verified: targeted tests plus full run final20 (see logs-deep-audit).
+NOT verified: migrations on hosted DB, real M-Pesa/B2C, real Socket.IO multi-user, notification delivery, real phone/printer, winner flow with a real outcome. Open business decision: "direct" settlement still routes the winner's balance through KAYAD, while the stated model says KAYAD is not involved after the win. Not covered: auction cards in the list show no audience counts.

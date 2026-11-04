@@ -76,7 +76,7 @@ export function validateConfig(config) {
     if (config.commitment.type === 'fixed' && !(config.commitment.amount > 0)) errors.push('Commitment amount is required');
     if (config.commitment.type === 'percent' && !(config.commitment.percent > 0 && config.commitment.percent <= 100)) errors.push('Commitment percentage must be between 0 and 100');
     if (!config.commitment.recipient) errors.push('Commitment recipient is required');
-    if (!String(config.commitment.recipientAccount || '').trim()) errors.push('Commitment payment destination is required');
+    // The destination is no longer typed per auction: it is the dealer's admin-verified collection account (Banking), or KAYAD-held when none is verified.
   }
   if (!(config.paymentDeadlineHours > 0 && config.paymentDeadlineHours <= 168)) errors.push('Winner payment deadline must be between 1 and 168 hours');
   if (!config.termsVersion || !config.termsAccepted) errors.push('Auction terms version must be accepted');

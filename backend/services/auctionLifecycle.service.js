@@ -23,6 +23,7 @@ export const startAuction = async ({ carId, durationMs, scheduledEndAt = null, s
   });
 
   const car = await Car.findById(carId).select("title dealer").lean();
+  import("./auctionEngagement.service.js").then((m) => m.notifyAuctionFollowers({ auctionId: carId, eventType: COMMUNICATION_EVENTS.AUCTION_STARTED, title: "Auction you follow is live", message: `${car?.title || "A vehicle you follow"} is now open for bidding.`, excludeUserIds: [car?.dealer] })).catch(() => {});
   if (car?.dealer) await emitCommunication({ userId: car.dealer, eventType: COMMUNICATION_EVENTS.AUCTION_STARTED, title: "Auction started", message: `${car.title || "Your vehicle"} is now live for auction.`, channels: ["in_app", "email", "sms", "whatsapp"], metadata: { carId, auctionEnd: result.auction_end } }).catch(() => {});
   return result;
 };

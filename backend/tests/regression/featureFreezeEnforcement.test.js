@@ -187,6 +187,7 @@ describe("route inventory guard: every money / bid / registration / message POST
     "escrowRoutes.js POST /:id/refund": "refund of held funds; must stay available",
     "escrowRoutes.js POST /:id/refund/:refundId/complete": "refund of held funds; must stay available",
     "escrowRoutes.js POST /:id/verify-funding": "confirms funds already sent; must stay available",
+    "walletRoutes.js POST /refunds/:holdId": "refund of held bidder commitment to the bidder's own wallet/M-Pesa; must stay available during a freeze",
     "automationRoutes.js POST /approvals/initiate": "internal approval workflow, no customer payment",
     "eventRoutes.js POST /bid": "analytics event only; places no bid",
     "queueRoutes.js POST /dlq/retry/:jobId": "operator queue retry",

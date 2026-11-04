@@ -181,14 +181,14 @@ export const stkPush = async (phone, amount, configOverrides = {}) => {
       BusinessShortCode: cfg.shortCode,
       Password: password,
       Timestamp: timestamp,
-      TransactionType: "CustomerPayBillOnline",
+      TransactionType: cfg.transactionType === "CustomerBuyGoodsOnline" ? "CustomerBuyGoodsOnline" : "CustomerPayBillOnline",
       Amount: amount,
       PartyA: formatPhone(phone),
-      PartyB: cfg.shortCode,
+      PartyB: cfg.partyB || cfg.shortCode,
       PhoneNumber: formatPhone(phone),
       CallBackURL: cfg.callbackUrl,
-      AccountReference: "KAYAD",
-      TransactionDesc: "Car payment",
+      AccountReference: String(configOverrides?.accountReference || "KAYAD").slice(0, 12),
+      TransactionDesc: String(configOverrides?.transactionDesc || "Car payment").slice(0, 13),
     };
 
     logInfo("M-Pesa STK push initiated", { phone, amount, environment: cfg.environment });

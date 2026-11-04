@@ -13,6 +13,8 @@ import * as dealerApi from '../../../services/dealerPlatformApi';
 import DealerListingForm from './DealerListingForm';
 import DealerSettingsPanel from './DealerSettingsPanel';
 import DealerBankingPanel from './DealerBankingPanel';
+import DealerCollectionAccountPanel from './DealerCollectionAccountPanel';
+import AuctionInsightsPanel from './AuctionInsightsPanel';
 import DealerAccountStatus from './DealerAccountStatus';
 import DealerTeamPanel from './DealerTeamPanel';
 import { getMyListings, deleteCar, markCarSold } from '../../../services/vehicleApi';
@@ -287,6 +289,7 @@ const writeListingFormToUrl = (state: ListingFormState) => {
 // ============================================================
 
 export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
+  const [insightsFor, setInsightsFor] = useState<string | null>(null);
   const [activeSection, setActiveSectionState] = useState<string>(readDealerSectionFromUrl);
   const [listingForm, setListingFormState] = useState<ListingFormState>(readListingFormFromUrl);
   const [listingNotice, setListingNotice] = useState<string | null>(null);
@@ -1297,7 +1300,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
               {activeSection === 'settings' ? (
                 <DealerSettingsPanel userId={String(user?.id || user?._id || '')} onOpenSection={setActiveSection} />
               ) : activeSection === 'banking' ? (
-                <DealerBankingPanel />
+                <><DealerBankingPanel /><DealerCollectionAccountPanel /></>
               ) : operationsLoading || (!operations[activeSection] && !operationsError) ? (
                 <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#176B87] animate-spin" /></div>
               ) : operationsError ? (
@@ -1309,9 +1312,12 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                     <a href="/dealer/auction-setup" className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#D7E7E4] bg-white px-4 text-sm font-medium text-[#12576D] hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]">Set up an auction<ExternalLink className="w-4 h-4" aria-hidden="true" /></a>
                   </div>
                   {(operations.auctions?.items || []).length === 0 ? <p className="py-10 text-center text-sm text-[#64748B]">No auctions found for this dealership.</p> : (operations.auctions.items || []).map((auction) => (
-                    <div key={auction.id} className="flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl">
+                    <div key={auction.id} className="space-y-2">
+                    <div className="flex items-center justify-between gap-3 p-4 bg-[#F6FAF9] rounded-xl">
                       <div><p className="font-medium text-[#0A3340]">{auction.title}</p><p className="text-xs text-[#64748B]">{auction.bidsCount} bids • {auction.views} views</p></div>
-                      <div className="text-right"><p className="font-bold text-[#0A3340]">Ksh {Number(auction.currentBid || auction.startingBid || 0).toLocaleString()}</p><span className="text-xs capitalize text-[#64748B]">{auction.status}</span></div>
+                      <div className="text-right"><p className="font-bold text-[#0A3340]">Ksh {Number(auction.currentBid || auction.startingBid || 0).toLocaleString()}</p><span className="text-xs capitalize text-[#64748B]">{auction.status}</span><button type="button" aria-expanded={insightsFor === String(auction.id)} onClick={() => setInsightsFor((cur) => (cur === String(auction.id) ? null : String(auction.id)))} className="mt-1 block min-h-11 rounded-lg border border-[#D7E7E4] bg-white px-3 text-xs font-semibold text-[#12576D]">{insightsFor === String(auction.id) ? 'Hide insights' : 'Audience insights'}</button></div>
+                    </div>
+                    {insightsFor === String(auction.id) && <AuctionInsightsPanel auctionId={String(auction.id)} />}
                     </div>
                   ))}
                 </div>

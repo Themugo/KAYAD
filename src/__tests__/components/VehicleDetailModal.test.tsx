@@ -281,7 +281,7 @@ describe('VehicleDetailModal', () => {
       />
     );
     fireEvent.click(screen.getByText('View Showroom'));
-    expect(onViewShowroom).toHaveBeenCalledWith(anyVehicle.sellerName);
+    expect(onViewShowroom).toHaveBeenCalledWith(anyVehicle.sellerName, anyVehicle); // intentional: the vehicle is now passed too so the dealer id can scope the marketplace
     expect(onContactSeller).not.toHaveBeenCalled();
   });
 });
@@ -445,5 +445,61 @@ describe('VehicleDetailModal gallery and status honesty', () => {
     const text = document.body.textContent || '';
     expect(text).not.toContain('Ready for Viewing');
     expect(text).not.toMatch(/,\s*$/m);
+  });
+});
+
+describe('VehicleDetailModal polish', () => {
+  const mk = (over: any = {}): any => ({ ...INITIAL_VEHICLES[0], image: 'a.jpg', images: ['a.jpg'], county: '', verified: false, isDealerCertified: false, inspectionPassed: false, inspection: undefined, financeAvailable: false, escrowEligible: false, vin: undefined, ...over });
+  const show = (v: any) => render(<VehicleDetailModal vehicle={v} notFoundId={null} allVehicles={[]} onClose={() => {}} onStartEscrow={() => {}} onContactSeller={() => {}} isSaved={false} onToggleSave={() => {}} />);
+  it('shows a slim honest note instead of an empty safeguards banner', () => {
+    show(mk({ isAuction: false }));
+    expect(screen.getByTestId('safeguards-empty')).toBeTruthy();
+    expect(document.body.textContent).not.toContain('Only recorded safeguards are shown');
+  });
+  it('shows the full safeguards banner when a safeguard is recorded', () => {
+    show(mk({ verified: true }));
+    expect(screen.queryByTestId('safeguards-empty')).toBeNull();
+    expect(document.body.textContent).toContain('Listing Verified');
+  });
+  it('writes transmission in full', () => {
+    show(mk({ transmission: 'Automatic' }));
+    expect(document.body.textContent).toContain('Automatic');
+    expect(document.body.textContent).not.toMatch(/\bAuto\b(?!matic)/);
+  });
+});
+
+describe('VehicleDetailModal actions', () => {
+  const mk = (over: any = {}): any => ({ ...INITIAL_VEHICLES[0], image: 'a.jpg', images: ['a.jpg'], sellerType: 'Verified Dealer', sellerName: 'MAKENA DEALERS', sellerId: 'd-1', isAuction: false, ...over });
+  const props = (over: any = {}) => ({ notFoundId: null, allVehicles: [], onClose: () => {}, onStartEscrow: () => {}, onContactSeller: vi.fn(), isSaved: false, onToggleSave: () => {}, ...over });
+  it('View Showroom hands the dealer name and vehicle to the page (it does not open a chat)', () => {
+    const onViewShowroom = vi.fn(); const onContactSeller = vi.fn();
+    render(<VehicleDetailModal vehicle={mk()} {...props({ onViewShowroom, onContactSeller })} />);
+    fireEvent.click(screen.getByRole('button', { name: /View Showroom/i }));
+    expect(onViewShowroom).toHaveBeenCalledWith('MAKENA DEALERS', expect.objectContaining({ sellerId: 'd-1' }));
+    expect(onContactSeller).not.toHaveBeenCalled();
+  });
+  it('View Showroom falls back to contacting the seller when the seller has no name', () => {
+    const onViewShowroom = vi.fn(); const onContactSeller = vi.fn();
+    render(<VehicleDetailModal vehicle={mk({ sellerName: '' })} {...props({ onViewShowroom, onContactSeller })} />);
+    fireEvent.click(screen.getByRole('button', { name: /View Showroom/i }));
+    expect(onViewShowroom).not.toHaveBeenCalled();
+    expect(onContactSeller).toHaveBeenCalled();
+  });
+  it('Share never throws when the clipboard is blocked and reports it', async () => {
+    const writeText = vi.fn().mockRejectedValue(new Error('denied'));
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    Object.defineProperty(navigator, 'share', { value: undefined, configurable: true });
+    (document as any).execCommand = vi.fn().mockReturnValue(false);
+    render(<VehicleDetailModal vehicle={mk()} {...props()} />);
+    fireEvent.click(screen.getByRole('button', { name: /share listing/i }));
+    expect(await screen.findByRole('button', { name: /could not copy the link/i })).toBeTruthy();
+  });
+  it('Share uses the native share sheet when the device has one', async () => {
+    const share = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'share', { value: share, configurable: true });
+    render(<VehicleDetailModal vehicle={mk()} {...props()} />);
+    fireEvent.click(screen.getByRole('button', { name: /share listing/i }));
+    await Promise.resolve();
+    expect(share).toHaveBeenCalledWith(expect.objectContaining({ title: expect.any(String), url: expect.any(String) }));
   });
 });

@@ -105,6 +105,29 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
   });
 
 
+  it('phone inventory scaling: every card carries the compact-layout hooks and omits blank specs', async () => {
+    vehicleApiMocks.getCars.mockResolvedValue({
+      success: true,
+      data: [{ id: 'c1', title: 'Blanky', brand: 'Toyota', model: 'V8', year: 2016, price: 3500000, mileage: 0, fuel: '', transmission: '', location_city: 'Nairobi', images: [] }],
+      pagination: { page: 1, limit: 24, total: 1, pages: 1 },
+    });
+    await renderMarketplace({ ...baseProps, vehicles: [] });
+    await waitFor(() => expect(document.querySelectorAll('.kayad-vehicle-card').length).toBe(1));
+    const card = document.querySelector('.kayad-vehicle-card') as HTMLElement;
+    ['kayad-vc-media', 'kayad-vc-body', 'kayad-vc-price', 'kayad-vc-specs', 'kayad-vc-cta'].forEach((c) => expect(card.querySelector('.' + c)).toBeTruthy());
+    expect(card.textContent).not.toMatch(/\b0 km\b/);
+    expect(card.querySelector('.kayad-vc-specs')?.textContent).toContain('Nairobi');
+    expect(document.querySelector('.kayad-toolbar-blurb')).toBeInTheDocument();
+  });
+
+  it('a dealer showroom queries that dealer only and shows a clearable Dealer chip', async () => {
+    const onClearDealerScope = vi.fn();
+    await renderMarketplace({ ...baseProps, dealerScope: { id: 'd-1', name: 'MAKENA DEALERS' }, onClearDealerScope } as any);
+    await waitFor(() => expect(vehicleApiMocks.getCars).toHaveBeenCalledWith(expect.objectContaining({ dealer: 'd-1' })));
+    const chip = await screen.findByText('Dealer: MAKENA DEALERS');
+    expect(chip).toBeInTheDocument();
+  });
+
   it('renders without throwing against the real mock dataset', async () => {
     await renderMarketplace({ ...baseProps  });
     expect(screen.getByText(/Vehicle Inventory/i)).toBeTruthy();

@@ -1171,3 +1171,74 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
 @media (max-width: 639px) {
   .kayad-header .kayad-cta { min-height: 38px; padding: 0 11px; font-size: 12px; border-radius: 11px; gap: 5px; }
 }
+
+/* Phone inventory scaling (2026-11-03): one compact toolbar row and compact
+   photo-left vehicle cards, so a phone shows several vehicles per screen
+   instead of one card per screen. Presentation only - same data, same handlers. */
+@media (max-width: 639px) {
+  .kayad-homepage .kayad-market-toolbar { margin-bottom: .75rem; border-radius: 18px; }
+  .kayad-homepage .kayad-market-toolbar > div:first-child { gap: .625rem; padding: .75rem; }
+  .kayad-homepage .kayad-market-toolbar .kayad-toolbar-blurb,
+  .kayad-homepage .kayad-market-toolbar [aria-label="Results per page"] { display: none !important; }
+  .kayad-homepage .kayad-market-toolbar h2 { margin-top: .25rem; font-size: 1.125rem; }
+  .kayad-homepage .kayad-market-toolbar .kayad-market-toolbar-controls { display: flex !important; flex-wrap: nowrap; gap: .5rem; width: 100%; }
+  .kayad-homepage .kayad-market-toolbar .kayad-market-toolbar-controls > * { width: auto; }
+  .kayad-homepage .kayad-market-toolbar .kayad-market-toolbar-controls > label.kayad-toolbar-control {
+    flex: 1 1 0; min-width: 0; width: auto; height: 42px; min-height: 42px; padding: 0 .625rem; gap: .5rem; justify-content: flex-start;
+  }
+  .kayad-homepage .kayad-market-toolbar label.kayad-toolbar-control > span { width: auto; flex: 0 0 auto; }
+  .kayad-homepage .kayad-market-toolbar label.kayad-toolbar-control > select {
+    width: auto; flex: 1 1 0; min-width: 0; min-height: 0; height: 100%; text-align: left; color: #0A3340; font-size: 12px; text-overflow: ellipsis;
+  }
+  .kayad-homepage .kayad-market-toolbar .kayad-market-toolbar-controls > [aria-label="Inventory view"] { flex: 0 0 auto; width: auto; height: 42px; min-height: 42px; }
+  .kayad-homepage .kayad-market-toolbar [aria-label="Inventory view"] button { min-height: 0; height: 34px; width: 38px; padding: 0; justify-content: center; }
+  .kayad-homepage .kayad-market-toolbar [aria-label="Inventory view"] button span { display: none; }
+  .kayad-homepage .kayad-market-toolbar [aria-label="Open inventory filters"] { flex: 0 0 auto; width: auto; height: 42px; min-height: 42px; padding: 0 .75rem; }
+
+  .kayad-homepage .kayad-inventory-grid,
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] { gap: .625rem; }
+  .kayad-homepage .kayad-vehicle-card {
+    position: relative; display: grid !important; grid-template-columns: 8.5rem minmax(0, 1fr); border-radius: 16px; min-height: 8.5rem;
+    box-shadow: 0 4px 14px rgba(11, 29, 58, .06);
+  }
+  .kayad-homepage .kayad-vehicle-card:hover { transform: none; }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-media { height: 100% !important; min-height: 8.5rem; width: 100% !important; }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-media > div:first-of-type { padding: .375rem; }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-media > div:first-of-type > div { max-width: 100%; }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-media button { position: relative; z-index: 2; width: 30px; height: 30px; min-height: 0; }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-body { padding: .625rem .75rem .625rem .75rem; justify-content: center; }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-kicker { margin-bottom: .125rem; font-size: 9px; letter-spacing: .1em; }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-body h3 { font-size: 14px; line-height: 1.25; }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-price { margin-top: .25rem; font-size: 1.0625rem; }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-specs { margin-top: .375rem; gap: .125rem .5rem; font-size: 11px; }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-inspection { display: none; }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-cta {
+    margin-top: .5rem; width: auto; align-self: flex-start; min-height: 0; height: 30px; padding: 0 .75rem; font-size: 11px; border-radius: 10px;
+  }
+  /* The whole card opens the vehicle: stretch the details button over it (the save heart stays on top). */
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-cta::after { content: ""; position: absolute; inset: 0; z-index: 1; }
+}
+
+/* Desktop toolbar: headline on one row, controls on their own row, so Show / Sort / Columns / View never wrap raggedly. */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .kayad-homepage .kayad-market-toolbar > div:first-child { flex-direction: column; align-items: stretch; gap: .875rem; }
+  .kayad-homepage .kayad-market-toolbar .kayad-market-toolbar-controls { justify-content: flex-start; }
+}
+
+/* Touch targets (2026-11-04): text links and chips that were 15-35px tall on phones now meet a ~40-44px tap size
+   without changing how they look on desktop. */
+@media (max-width: 639px) {
+  footer a, footer button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding-inline: .5rem; }
+  .kayad-homepage .kayad-search-bridge button { min-height: 40px; }
+  a[href="/forgot-password"], a[href="/login"], a[href="/register"] { display: inline-flex; align-items: center; min-height: 40px; }
+  .btn.btn-sm { min-height: 40px; }
+}
+
+/* Winner certificate: print only the certificate card. */
+@media print {
+  body * { visibility: hidden !important; }
+  .kayad-certificate, .kayad-certificate * { visibility: visible !important; }
+  .kayad-certificate-overlay { position: static !important; background: #fff !important; backdrop-filter: none !important; }
+  .kayad-certificate { position: absolute; left: 0; top: 0; width: 100%; max-width: none !important; box-shadow: none !important; }
+  .kayad-no-print { display: none !important; }
+}

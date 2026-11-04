@@ -1,10 +1,15 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, lazy, Suspense } from 'react';
+import { Crown, Check, Lock, Zap } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getIdFromPathPrefix } from '../utils/navigation';
 import { auctionRegistrationAPI, formatKES } from '../api/api';
-import { fetchAuction, fetchAuctionOutcome, initiateAuctionWinnerPayment } from '../services/auctionService';
+import { AuctionEngagementBar, AuctionComments, useAuctionEngagement } from '../components/auction/AuctionEngagement';
+import WinnerHandoverPanel from '../components/auction/WinnerHandoverPanel';
+import WinnerModal from '../components/features/auction/WinnerModal';
+import { fetchAuction, fetchAuctionOutcome, fetchAuctionCertificate, initiateAuctionWinnerPayment } from '../services/auctionService';
 import { placeBid, BidApiError } from '../services/bidApi';
 import { useAuth } from '../context/AuthContext';
+const WalletPanel = lazy(() => import('../components/WalletPanel'));
 import { loginPathFor } from '../utils/authIntent';
 import { useSocket } from '../context/SocketContext';
 import { useToast } from '../context/ToastContext';
@@ -40,6 +45,7 @@ export default function AuctionLivePage() {
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [settling, setSettling] = useState(false);
   const [outcome, setOutcome] = useState(null);
+  const [certificate, setCertificate] = useState(null);
   const [placing, setPlacing]     = useState(false);
   const [registration, setRegistration] = useState(null);
   const [registrationSetup, setRegistrationSetup] = useState(null);
@@ -284,6 +290,9 @@ export default function AuctionLivePage() {
   const minBid = currentBid + bidIncrement;
   const isOwner = Boolean(user?.id && car?.dealer && (String(user.id) === String(car.dealer.id || car.dealer._id || car.dealer)));
   const scheduled = !auctionLive && !ended && car?.auctionStatus === 'draft';
+  const [engagement, setEngagement] = useAuctionEngagement(id, isAuth);
+  const myTag = registration?.bidder_number || registration?.bidderNumber || '';
+  const myBestBid = myTag ? bids.filter(b => b.bidderTag === myTag).reduce((m, b) => Math.max(m, Number(b.amount || 0)), 0) : 0;
   const topBid = bids.reduce((best, bid) => Number(bid.amount || 0) > Number(best?.amount || 0) ? bid : best, null);
   const userWon = ended && Boolean(user?.id && outcome?.winner_user_id && String(user.id) === String(outcome.winner_user_id));
 
@@ -321,7 +330,12 @@ export default function AuctionLivePage() {
         <DomainPremiumStats domain="auction" items={[{ label: scheduled ? 'Starting bid' : 'Current bid', value: currentBid > 0 ? formatKES(currentBid) : '—', detail: scheduled ? 'Published opening value' : 'Authoritative live value' }, { label: 'Bids', value: bidCount, detail: 'Live bid count' }, { label: 'Room', value: auctionLive ? 'Open' : ended ? 'Closed' : 'Registration', detail: 'Canonical auction state' }, { label: 'Connection', value: connected ? 'Live' : 'Reconnecting', detail: 'Auction market stream' }]} />
         <DomainJourneyRail domain="auction" steps={[{ label: 'Register', state: ended ? 'complete' : registration ? 'complete' : 'current' }, { label: 'Bid', state: ended ? 'complete' : auctionLive ? 'current' : 'pending' }, { label: 'Outcome', state: ended ? 'current' : 'pending' }, { label: 'Settlement', state: 'pending' }, { label: 'Fulfilment', state: 'pending' }]} />
         <DomainTrustStrip domain="auction" items={[{ label: scheduled ? 'Published auction data' : 'Authoritative bid stream' }, { label: 'Bidding lock enforced' }, { label: 'Dealer settlement policy' }, { label: 'Escrow only when selected' }]} />
+        {id && <div style={{ margin: '12px 0' }}><AuctionEngagementBar auctionId={id} state={engagement} setState={setEngagement} isAuth={isAuth} onNeedLogin={() => navigate(loginPathFor(location))} onMessage={(m) => toast(m, 'info')} /></div>}
+        {ended && isAuth && registration && !userWon && <div style={{ margin: '12px 0' }}><Suspense fallback={null}><WalletPanel auctionId={String(car.id || id)} /></Suspense></div>}
         {ended && userWon && <AuctionWinningCelebration title={car.title} amount={Number(outcome?.winning_amount || topBid?.amount || currentBid || 0)} onSettle={settling ? undefined : handleWinnerSettlement} onHistory={() => navigate('/?nav=discovery')} />}
+        {ended && userWon && <div style={{ margin: '12px 0' }}><button type="button" className="btn btn-outline" style={{ minHeight: 44 }} onClick={() => fetchAuctionCertificate(id).then((d) => setCertificate(d.certificate)).catch(() => toast('Your certificate is not available yet. Please try again shortly.', 'error'))}>View winner certificate</button></div>}
+        {ended && userWon && <WinnerHandoverPanel auctionId={id} refreshKey={outcome?.status} />}
+        <WinnerModal certificate={certificate} onClose={() => setCertificate(null)} onPayBalance={settling ? undefined : () => { setCertificate(null); handleWinnerSettlement(); }} />
         {/* STAGE 12 PHASE B: symmetric with AuctionWinningCelebration above --
             this is the one-time, genuinely meaningful "auction just ended"
             transition for everyone who isn't the winner (including a losing
@@ -362,14 +376,19 @@ export default function AuctionLivePage() {
                 <h3 style={{ fontSize: '1rem' }}>Bid History</h3>
                 <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{bidCount} bids</span>
               </div>
+              {myTag && auctionLive && (
+                <div data-testid="my-standing" style={{ padding: '10px 20px', fontSize: 13, borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
+                  Your bidder ID: <strong>{myTag}</strong> · {!myBestBid ? 'You have not bid yet' : topBid && topBid.bidderTag === myTag ? `You are leading at ${formatKES(myBestBid)}` : `Outbid — your best ${formatKES(myBestBid)}, current ${formatKES(currentBid)}`}
+                </div>
+              )}
               <div ref={bidListRef} style={{ maxHeight: 340, overflowY: 'auto', padding: '8px 0' }}>
                 {bids.length === 0 ? (
                   <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-muted)', fontSize: 14 }}>
                     No bids yet — be the first!
                   </div>
                 ) : bids.map((bid, i) => (
-                  <div key={bid._id || i} className="bid-row" style={{ padding: '12px 20px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <div key={bid._id || i} className="bid-row" style={{ padding: '12px 20px', display: 'flex', flexWrap: 'nowrap', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
                       <div style={{
                         width: 32, height: 32, borderRadius: '50%',
                         background: i === 0 ? 'var(--brand)' : 'var(--surface)',
@@ -378,11 +397,11 @@ export default function AuctionLivePage() {
                         fontSize: 12, fontWeight: 700,
                         color: i === 0 ? 'var(--color-navy-900)' : 'var(--text-muted)',
                       }}>
-                        {i === 0 ? '👑' : `#${bidCount - i}`}
+                        {i === 0 ? <Crown size={16} aria-label="Highest bid" /> : `#${bidCount - i}`}
                       </div>
                       <div>
                         <div style={{ fontSize: 13, fontWeight: 600 }}>
-                          {bid.user?.name || bid.phone?.slice(-4).replace(/./g, '*').slice(0, -3) + bid.phone?.slice(-3) || 'Bidder'}
+                          {bid.bidderTag || 'Bidder'}{myTag && bid.bidderTag === myTag && <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 700, color: 'var(--brand-light)' }}>YOU</span>}
                         </div>
                         <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{formatTime(bid.createdAt)}</div>
                       </div>
@@ -392,7 +411,7 @@ export default function AuctionLivePage() {
                         {formatKES(bid.amount)}
                       </div>
                       {bid.mpesaPaid && (
-                        <span style={{ fontSize: 10, color: 'var(--green)' }}>✓ M-Pesa confirmed</span>
+                        <span style={{ fontSize: 10, color: 'var(--green)', display: 'inline-flex', alignItems: 'center', gap: 3 }}><Check size={11} aria-hidden="true" /> M-Pesa confirmed</span>
                       )}
                     </div>
                   </div>
@@ -496,7 +515,7 @@ export default function AuctionLivePage() {
                     onClick={handlePlaceBid}
                     disabled={placing || !bidAmount || Number(bidAmount) < minBid}
                   >
-                    {placing ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Placing...</> : '⚡ Place Bid'}
+                    {placing ? <><div className="spinner" style={{ width: 18, height: 18 }} /> Placing...</> : <><Zap size={16} aria-hidden="true" /> Place Bid</>}
                   </button>
                 ) : isOwner ? (
                   <div style={{ textAlign: 'center', padding: 12, color: 'var(--text-muted)', fontSize: 13 }}>
@@ -517,7 +536,7 @@ export default function AuctionLivePage() {
                     {!isAuth ? (
                       <button className="btn btn-gold btn-full" onClick={() => navigate(loginPathFor(location))}>Sign in to register</button>
                     ) : registration?.status === 'active' ? (
-                      <div style={{ color: 'var(--green)', fontSize: 12 }}>✓ You are registered and cleared to bid when the auction opens.</div>
+                      <div style={{ color: 'var(--green)', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}><Check size={13} aria-hidden="true" /> You are registered and cleared to bid when the auction opens.</div>
                     ) : !roomState?.registrationOpen ? (
                       <div style={{ color: 'var(--red)', fontSize: 12 }}>Registration is closed. You may watch when the auction goes live.</div>
                     ) : !registration ? (
@@ -545,7 +564,7 @@ export default function AuctionLivePage() {
               {/* Escrow info */}
               <div className="card" style={{ padding: 16 }}>
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7 }}>
-                  <strong style={{ color: 'var(--text)', display: 'block', marginBottom: 6 }}>🔒 How Bidding Works</strong>
+                  <strong style={{ color: 'var(--text)', display: 'block', marginBottom: 6 }}><Lock size={13} aria-hidden="true" style={{ marginRight: 6, verticalAlign: '-2px' }} />How Bidding Works</strong>
                   <p>1. Register before the room opens and satisfy any required bidder commitment.</p>
                   <p>2. Place bids using your verified profile. Bid confirmation is completed through KAYAD's M-Pesa flow.</p>
                   <p>3. If you win, settlement follows the auction's published <strong>{String(registrationSetup?.config?.settlement?.mode || outcome?.settlement_mode || 'direct') === 'escrow' ? 'escrow' : 'direct settlement'}</strong> rule.</p>
@@ -575,6 +594,7 @@ export default function AuctionLivePage() {
             </div>
           </div>
         </div>
+        {id && <div style={{ marginTop: 16 }}><AuctionComments auctionId={id} isAuth={isAuth} myTag={myTag} canModerate={Boolean(user?.id && car?.dealer && String(car.dealer?._id || car.dealer?.id || car.dealer) === String(user.id))} onNeedLogin={() => navigate(loginPathFor(location))} /></div>}
       </div>
       <AuctionBidConfirmation amount={Number(bidAmount || 0)} open={bidConfirmation} onClose={() => setBidConfirmation(false)} />
       <AuctionMobileActionBar

@@ -73,7 +73,7 @@ export async function emitAuctionOutcome({ carId, winnerUserId, winnerAmount, ca
     userId: winnerUserId,
     eventType: COMMUNICATION_EVENTS.AUCTION_WON,
     title: "Auction won",
-    message: `Congratulations. You won ${carTitle || "the vehicle"} with a bid of KES ${Number(winnerAmount || 0).toLocaleString("en-KE")}.`,
+    message: `Congratulations. You won ${carTitle || "the vehicle"} with a bid of KES ${Number(winnerAmount || 0).toLocaleString("en-KE")}. Open the auction page to view your winner certificate and complete payment before the deadline shown there.`,
     channels: ["in_app", "email", "sms", "whatsapp"],
     metadata: { carId, winnerAmount },
   }));
@@ -81,9 +81,11 @@ export async function emitAuctionOutcome({ carId, winnerUserId, winnerAmount, ca
     userId,
     eventType: COMMUNICATION_EVENTS.AUCTION_LOST,
     title: "Auction ended",
-    message: `${carTitle || "The vehicle"} auction has ended. Your bid was not the winning bid.`,
+    message: `${carTitle || "The vehicle"} auction has ended. Your bid was not the winning bid. If you paid a bid commitment, open the auction page to refund it to your KAYAD wallet or your M-Pesa.`,
     channels: ["in_app", "email", "sms"],
     metadata: { carId },
   }));
+  const { notifyAuctionFollowers } = await import("./auctionEngagement.service.js");
+  jobs.push(notifyAuctionFollowers({ auctionId: carId, eventType: COMMUNICATION_EVENTS.AUCTION_LOST, title: "Auction you follow has ended", message: `${carTitle || "The vehicle"} has closed${winnerAmount ? ` at KES ${Number(winnerAmount).toLocaleString("en-KE")}` : ""}.`, excludeUserIds: [winnerUserId, ...loserIds] }));
   return Promise.all(jobs);
 }

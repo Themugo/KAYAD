@@ -19,16 +19,13 @@ import { logAuctionBidPlaced } from "../services/auditService.js";
 import { assertBidderAuthorized } from "../services/auctionRegistration.service.js";
 import { findOne } from "../db/index.js";
 import { getAuctionFinancialPolicy, getAuctionSecurityHold } from "../services/auctionFinancialIntegrity.service.js";
+import { bidderNumber } from "../utils/bidderIdentity.js";
 import { assertPrivateSellerAuctionEligible } from "../services/privateSellerAuctionEligibility.service.js";
 
 // =============================
 // 🆔 PSEUDONYM GENERATOR
 // =============================
-const generatePseudonym = (userId, carId) => {
-  const hash = crypto.createHash("sha256").update(`${userId}-${carId}-kayad`).digest("hex");
-  const shortId = parseInt(hash.substring(0, 4), 16).toString(36).toUpperCase();
-  return `Bidder #${shortId}`;
-};
+const generatePseudonym = (userId, carId) => bidderNumber(userId, carId);
 
 // =============================
 // 🎯 CREATE LEAD FROM BID

@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import AdminRouteSurface from './components/admin/AdminRouteSurface';
 import VehicleMarketplace from './features/VehicleMarketplace';
 import TopNoticeStrip from './components/TopNoticeStrip';
+import { titleForRoute } from './utils/pageTitle';
 import VehicleDetailModal from './components/VehicleDetailModal';
 import CompareModal from './components/CompareModal';
 import PriceAlertsModal from './components/PriceAlertsModal';
@@ -62,6 +63,7 @@ const ChatView = React.lazy(() => import('./features/ChatView'));
 const AdminView = React.lazy(() => import('./features/AdminView'));
 const SupportView = React.lazy(() => import('./features/SupportView'));
 const PaymentHistoryView = React.lazy(() => import('./features/PaymentHistoryView'));
+const WalletPanel = React.lazy(() => import('./components/WalletPanel'));
 const AuctionLivePage = React.lazy(() => import('./pages/AuctionLivePage'));
 const KAYADLive = React.lazy(() => import('./pages/KAYADLive'));
 const BuyerPlatform = React.lazy(() => import('./features/OwnershipPlatform').then((m) => ({ default: m.BuyerPlatform })));
@@ -293,6 +295,12 @@ function AppInner() {
   const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
   const [showAlertsModal, setShowAlertsModal] = useState<boolean>(false);
   const [selectedChatVehicle, setSelectedChatVehicle] = useState<Vehicle | null>(null);
+  /** A dealer's showroom view of the marketplace (set from the vehicle page's View Showroom button). */
+  const [dealerScope, setDealerScope] = useState<{ id: string; name: string } | null>(null);
+  // Browser-tab title follows the screen (and the open vehicle) so tabs and history are distinguishable.
+  useEffect(() => {
+    document.title = titleForRoute(location.pathname, activeNav && activeNav !== 'marketplace' ? `?nav=${encodeURIComponent(activeNav)}` : '', quickViewVehicle?.title);
+  }, [location.pathname, activeNav, quickViewVehicle?.title]);
 
   // Central Navigation Handler: Opens Vehicle Details & Updates URL
   const handleOpenVehicleDetails = useCallback((vehicleOrId: Vehicle | string) => {
@@ -450,10 +458,10 @@ function AppInner() {
 
   // Escrow CTA Handler
   const handleStartEscrow = useCallback((vehicle: Vehicle) => {
-    setQuickViewVehicle(null);
+    handleCloseVehicleDetails();
     setSelectedChatVehicle(vehicle);
     setActiveNav('escrow');
-  }, []);
+  }, [handleCloseVehicleDetails]);
 
   // Inspection launch: keep the vehicle the customer was looking at (it used to be discarded).
   const launchInspections = useCallback((next: { vehicle?: Vehicle | null; tab?: 'service' | 'mine' | 'reports'; action?: 'request' | 'apply-provider' | 'manage-business' | null }) => {
@@ -472,10 +480,10 @@ function AppInner() {
 
   // Contact Seller Handler
   const handleContactSeller = useCallback((vehicle: Vehicle) => {
-    setQuickViewVehicle(null);
+    handleCloseVehicleDetails();
     setSelectedChatVehicle(vehicle);
     setActiveNav('chat');
-  }, []);
+  }, [handleCloseVehicleDetails]);
 
   // Select Dealer Vehicles Shortcut
   const handleSelectDealerVehicles = useCallback((dealerName: string) => {
@@ -608,6 +616,8 @@ function AppInner() {
               isLoadingReal={vehiclesLoading}
               loadError={vehiclesError}
               onRetryLoad={fetchVehicles}
+              dealerScope={dealerScope}
+              onClearDealerScope={() => setDealerScope(null)}
             />
           )}
 
@@ -621,7 +631,7 @@ function AppInner() {
             />
           )}
 
-          {activeNav === 'payments' && user && <PaymentHistoryView />}
+          {activeNav === 'payments' && user && (<><div className="mx-auto max-w-5xl p-4 md:px-6"><WalletPanel /></div><PaymentHistoryView /></>)}
 
           {activeNav === 'profile' && user && (
             <Profile setPage={(page) => setActiveNav(page)} authUser={authUser} />
@@ -838,6 +848,8 @@ function AppInner() {
         onToggleSave={handleToggleSave}
         onSelectVehicle={handleOpenVehicleDetails}
         viewer={authUser ? { id: authUser.id ? String(authUser.id) : undefined, role: authUser.role, isStaff: Boolean(isAdmin) || isEscrowStaffRole(authUser.role) } : null}
+        onViewAuctionLot={(v) => { handleCloseVehicleDetails(); navigate(`/auction/${encodeURIComponent(v.id)}`); }}
+        onViewShowroom={(dealerName, v) => { handleCloseVehicleDetails(); if (v?.sellerId) { setDealerScope({ id: v.sellerId, name: dealerName }); setActiveNav('marketplace'); } else { handleSelectDealerVehicles(dealerName); } }}
         onManageListing={() => { handleCloseVehicleDetails(); navigate('/admin/cars'); }}
         onEditListing={(v) => {
           handleCloseVehicleDetails();
@@ -872,6 +884,7 @@ function AppInner() {
 function AuthRouteSurface() {
   const location = useLocation();
   const path = location.pathname;
+  useEffect(() => { document.title = titleForRoute(location.pathname, location.search); }, [location.pathname, location.search]);
   if (path === '/login' || path === '/admin/login') return <LoginPage />;
   if (path === '/register') return <OnboardingFlow onClose={() => { window.location.href = '/'; }} />;
   if (path === '/forgot-password') return <ForgotPasswordPage />;

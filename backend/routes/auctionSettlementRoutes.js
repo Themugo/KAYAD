@@ -7,6 +7,8 @@ import { findById, findOne } from "../db/index.js";
 import { initiatePayment } from "../services/paymentService.js";
 import { getAuctionOutcome, createOptionalEscrowForOutcome, defaultAuctionWinner } from "../services/auctionSettlement.service.js";
 import { getDealerAuctionCapabilities, getAuctionPlatformPolicy, setAuctionPlatformPolicy } from "../services/auctionPlatformPolicy.service.js";
+import { getWinnerHandover } from "../services/auctionHandover.service.js";
+import { buildWinnerCertificate } from "../services/auctionCertificate.service.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 
 const router = express.Router();
@@ -18,6 +20,14 @@ router.get("/:id/outcome", protect, validateObjectId, asyncHandler(async (req, r
   const isParticipant = String(outcome.winnerUserId) === String(req.user.id) || String(outcome.organizerId) === String(req.user.id);
   if (!isAdmin && !isParticipant) return res.status(403).json({ success: false, message: "Not authorized to view this auction outcome" });
   res.json({ success: true, outcome });
+}));
+
+router.get("/:id/certificate", protect, validateObjectId, asyncHandler(async (req, res) => {
+  res.json({ success: true, certificate: await buildWinnerCertificate({ auctionId: req.params.id, userId: req.user.id }) });
+}));
+
+router.get("/:id/handover", protect, validateObjectId, asyncHandler(async (req, res) => {
+  res.json({ success: true, handover: await getWinnerHandover({ auctionId: req.params.id, userId: req.user.id }) });
 }));
 
 router.get("/:id/settlement-capabilities", protect, requireDealerVerification, asyncHandler(async (req, res) => {

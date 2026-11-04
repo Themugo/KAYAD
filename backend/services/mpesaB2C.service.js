@@ -193,3 +193,31 @@ export const handleB2CCallback = async (callbackData) => {
     completedAt: params.TransactionCompletedDateTime || null,
   };
 };
+
+// ── GENERIC B2C SEND (wallet withdrawals) ────────────────────
+// Same Daraja B2C rail as seller payouts, but without a dealer_payouts row. The caller owns idempotency and state.
+export const sendB2CPayment = async ({ phone, amount, remarks = "Kayad wallet withdrawal", occasion = "Wallet withdrawal" }) => {
+  if (!B2C_INITIATOR || !process.env.MPESA_B2C_INITIATOR_PW || !B2C_SHORTCODE) {
+    const err = new Error("M-Pesa B2C payout is not configured");
+    err.code = "MPESA_B2C_NOT_CONFIGURED";
+    throw err;
+  }
+  const token = await getOAuthToken();
+  const res = await axios.post(`${MPESA_BASE}/mpesa/b2c/v1/paymentrequest`, {
+    InitiatorName: B2C_INITIATOR,
+    SecurityCredential: process.env.MPESA_B2C_INITIATOR_PW,
+    CommandID: "BusinessPayment",
+    Amount: Math.round(amount),
+    PartyA: B2C_SHORTCODE,
+    PartyB: String(phone).replace(/^\+/, "").replace(/^0/, "254"),
+    Remarks: remarks.slice(0, 100),
+    QueueTimeOutURL: B2C_TIMEOUT,
+    ResultURL: B2C_CALLBACK,
+    Occasion: occasion.slice(0, 100),
+  }, { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, timeout: 30000, httpsAgent: new https.Agent({ rejectUnauthorized: true }) });
+  const data = res.data || {};
+  if (data.ErrorCode || String(data.ResponseCode) !== "0" || !data.ConversationID) {
+    throw new Error(`M-Pesa B2C Error: ${data.ErrorMessage || data.ResponseDescription || "rejected"} (${data.ErrorCode || data.ResponseCode || "no code"})`);
+  }
+  return { conversationID: data.ConversationID, originatorConversationID: data.OriginatorConversationID };
+};
