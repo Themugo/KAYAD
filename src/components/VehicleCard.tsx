@@ -229,7 +229,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
           )}
 
           {/* Title: Year Make Model Variant */}
-          <h3 className="text-base font-black text-navy-600 font-display line-clamp-1 group-hover:text-[#176B87] transition-colors pt-0.5">
+          <h3 className="text-base font-black text-navy-600 font-display line-clamp-2 break-words leading-snug group-hover:text-[#176B87] transition-colors pt-0.5">
             {vehicle.title}
           </h3>
 

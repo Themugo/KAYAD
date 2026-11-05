@@ -2,7 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { CONDITIONS } from '../../../constants/vehicleOptions';
 import { Vehicle, UserProfile } from '../../../types';
 import VehicleCard from '../../../components/VehicleCard';
-import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon, Gauge, Fuel, MapPin, PlayCircle } from 'lucide-react';
+import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon, Gauge, Fuel, MapPin, PlayCircle, Heart, CarFront } from 'lucide-react';
 import { usePrefersReducedMotion } from '../../../hooks/useMediaQuery';
 import { Select, Button, Card, SkeletonGrid } from '../../../components/ui';
 import { isEscrowApplicable } from '../../../utils/escrow';
@@ -1685,45 +1685,47 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                             loading="lazy"
                           />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-[#94A3B8]">
-                            <LayoutGrid className="w-8 h-8" />
+                          <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-[#64748B]">
+                            <CarFront className="w-8 h-8 text-[#176B87]/60" aria-hidden="true" />
+                            <span className="text-xs font-semibold">Photo not available</span>
                           </div>
                         )}
                         <div className="absolute inset-x-0 top-0 flex items-start justify-between p-2.5">
                           <div className="flex flex-wrap gap-1 max-w-[78%]">
                             {showLiveAuction && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm bg-rose-600">
-                                <Gavel className="w-2.5 h-2.5" />Live Auction
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full text-white shadow-sm bg-rose-600">
+                                <Gavel className="w-3 h-3" />Live Auction
                               </span>
                             )}
                             {showUpcomingAuction && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm bg-navy-600">
-                                <Gavel className="w-2.5 h-2.5" />Upcoming Auction
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full text-white shadow-sm bg-navy-600">
+                                <Gavel className="w-3 h-3" />Upcoming Auction
                               </span>
                             )}
                             {showEndedAuction && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm bg-[#5AAFA4]">
-                                <Gavel className="w-2.5 h-2.5" />Auction Ended
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full text-white shadow-sm bg-[#5AAFA4]">
+                                <Gavel className="w-3 h-3" />Auction Ended
                               </span>
                             )}
                             {showEscrow && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm bg-navy-900">
-                                <Lock className="w-2.5 h-2.5" />Escrow
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full text-white shadow-sm bg-navy-900">
+                                <Lock className="w-3 h-3" />Escrow
                               </span>
                             )}
                             {showInspected && (
-                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide px-2 py-1 rounded-full text-white shadow-sm bg-emerald-700">
-                                <ShieldCheck className="w-2.5 h-2.5" />Inspected
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full text-white shadow-sm bg-emerald-700">
+                                <ShieldCheck className="w-3 h-3" />Inspected
                               </span>
                             )}
                           </div>
                           <button
                             onClick={() => onToggleSave(v.id)}
-                            className="w-8 h-8 rounded-full bg-navy-900/75 hover:bg-navy-900 text-white flex items-center justify-center backdrop-blur-sm transition-colors"
+                            aria-pressed={isSaved}
+                            className={`w-9 h-9 rounded-full shadow-sm flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:ring-white ${isSaved ? 'bg-rose-500 text-white' : 'bg-white/95 text-[#12576D] hover:text-rose-500'}`}
                             title={isSaved ? 'Remove from saved' : 'Save vehicle'}
                             aria-label={isSaved ? `Remove ${v.title} from saved vehicles` : `Save ${v.title}`}
                           >
-                            <span className="text-base leading-none">{isSaved ? '♥' : '♡'}</span>
+                            <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} aria-hidden="true" />
                           </button>
                         </div>
                         {/* STAGE 10 FIX: gated on auctionLifecycle === 'live', not
@@ -1741,7 +1743,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                       <div className={`kayad-vc-body ${inventoryDensity.body} flex-1 flex flex-col min-w-0`}>
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="kayad-vc-kicker text-[10px] font-black uppercase tracking-[0.12em] text-navy-600 mb-1">{showLiveAuction ? 'Live auction' : showUpcomingAuction ? 'Upcoming auction' : showEndedAuction ? 'Auction ended' : v.verified ? 'Verified listing' : 'Marketplace listing'}</p>
+                            <p className="kayad-vc-kicker text-[11px] font-bold text-[#176B87] mb-1">{showLiveAuction ? 'Live auction' : showUpcomingAuction ? 'Upcoming auction' : showEndedAuction ? 'Auction ended' : v.verified ? 'Verified listing' : 'Marketplace listing'}</p>
                             <h3 className={`${inventoryDensity.title} font-extrabold leading-snug tracking-[-0.01em] text-navy-900 line-clamp-2`}>
                               {v.year} {v.make} {v.model}
                             </h3>

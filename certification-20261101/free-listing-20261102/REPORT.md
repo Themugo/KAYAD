@@ -100,3 +100,12 @@ Fixed: D-129 reminder sweep could skip auctions (window widened, minutes from en
 Migration 20261104150000_auction_engagement.sql now also creates auction_comment_reports (owner-run; re-run safe).
 Verified: targeted tests plus full run final20 (see logs-deep-audit).
 NOT verified: migrations on hosted DB, real M-Pesa/B2C, real Socket.IO multi-user, notification delivery, real phone/printer, winner flow with a real outcome. Open business decision: "direct" settlement still routes the winner's balance through KAYAD, while the stated model says KAYAD is not involved after the win. Not covered: auction cards in the list show no audience counts.
+
+## Listing, vehicle details and logo polish (2026-11-04)
+Components improved: gallery VehicleCard (Gallery, home, dashboard, dealer profile), marketplace inventory card (VehicleMarketplace + index.css mobile rules), VehicleCard.tsx title wrap, VehicleDetailModal gallery, status chip and mobile price/contact bar. No routes, APIs, data models, navbar or bottom navigation were changed.
+Honesty fixes (D-136 to D-138): removed the "150-PT AUDITED" claim, made-up mileage/transmission/location defaults and the stock-photo fallback; verified badge only when the record says verified; auction badge follows the real lifecycle.
+Details page (D-139, D-140): duplicate fixed bottom bar removed (one sticky bar stays); gallery uses a stable aspect ratio, labelled controls, arrow-key navigation and clear selected-thumbnail state.
+Logo (D-142): refined symbol-only mark (no letters, flat colours) at public/branding/kayad-road-mark.svg, favicon.svg and icons/icon-192/512/badge-72 (svg and png). Wordmark text in the navbar is unchanged.
+Price format: gallery cards now say "Ksh" like the other cards (was "KES"). Prices themselves are untouched.
+Verified: tsc and production build; 12 new tests (ListingPolish); headless Chromium at 320, 390, 768 and 1366 px: no horizontal overflow, one mobile action bar; screenshots in logs-listing-polish. Full run: see logs-listing-polish/final22.
+NOT verified: real phone/tablet, real vehicle photos and data, touch swipe on the gallery, the reference's hero artwork (not part of this scope), iOS home-screen icon rendering, existing admin-uploaded custom logos. Not changed: Sort label clips at 320px in the inventory toolbar.
