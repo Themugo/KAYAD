@@ -1207,7 +1207,7 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
   .kayad-homepage .kayad-vehicle-card .kayad-vc-media > div:first-of-type > div { max-width: 100%; }
   .kayad-homepage .kayad-vehicle-card .kayad-vc-media button { position: relative; z-index: 2; width: 30px; height: 30px; min-height: 0; }
   .kayad-homepage .kayad-vehicle-card .kayad-vc-body { padding: .625rem .75rem .625rem .75rem; justify-content: center; }
-  .kayad-homepage .kayad-vehicle-card .kayad-vc-kicker { margin-bottom: .125rem; font-size: 9px; letter-spacing: .1em; }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-kicker { margin-bottom: .125rem; font-size: 11px; letter-spacing: 0; }
   .kayad-homepage .kayad-vehicle-card .kayad-vc-body h3 { font-size: 14px; line-height: 1.25; }
   .kayad-homepage .kayad-vehicle-card .kayad-vc-price { margin-top: .25rem; font-size: 1.0625rem; }
   .kayad-homepage .kayad-vehicle-card .kayad-vc-specs { margin-top: .375rem; gap: .125rem .5rem; font-size: 11px; }
@@ -1218,6 +1218,15 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
   /* The whole card opens the vehicle: stretch the details button over it (the save heart stays on top). */
   .kayad-homepage .kayad-vehicle-card .kayad-vc-cta::after { content: ""; position: absolute; inset: 0; z-index: 1; }
 }
+
+/* Very narrow phones (320px): a slimmer photo and wrapping spec chips so km, fuel and gearbox never clip. */
+@media (max-width: 359px) {
+  .kayad-homepage .kayad-vehicle-card { grid-template-columns: 6.75rem minmax(0, 1fr); }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-specs { display: flex; flex-wrap: wrap; gap: .125rem .625rem; }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-specs > span { white-space: nowrap; }
+  .kayad-homepage .kayad-vehicle-card .kayad-vc-body { padding-inline: .625rem; }
+}
+
 
 /* Desktop toolbar: headline on one row, controls on their own row, so Show / Sort / Columns / View never wrap raggedly. */
 @media (min-width: 1024px) and (max-width: 1439px) {

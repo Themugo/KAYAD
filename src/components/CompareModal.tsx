@@ -154,7 +154,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                 <TableCell className="font-bold text-[#64748B] bg-[#F6FAF9]/50">Engine / Drive</TableCell>
                 {vehicles.map((v) => (
                   <TableCell key={v.id} className="font-medium text-[#12576D]">
-                    {v.engineSize || 'N/A'} • {v.driveType || '2WD'}
+                    {[v.engineSize, v.driveType].filter(Boolean).join(' • ') || 'Not stated'}
                   </TableCell>
                 ))}
               </TableRow>
@@ -164,7 +164,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                 <TableCell className="font-bold text-[#64748B] bg-[#F6FAF9]/50">Body & Condition</TableCell>
                 {vehicles.map((v) => (
                   <TableCell key={v.id} className="font-medium text-[#12576D]">
-                    {v.bodyStyle || 'N/A'} ({v.condition || 'Used'})
+                    {[v.bodyStyle, v.condition].filter(Boolean).join(' • ') || 'Not stated'}
                   </TableCell>
                 ))}
               </TableRow>
@@ -176,7 +176,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                   <TableCell key={v.id} className="font-semibold text-[#0A3340]">
                     <p>{v.sellerName}</p>
                     <p className="text-[#176B87] font-bold text-[11px] flex items-center gap-1 mt-0.5">
-                      ★ {v.sellerRating} <span className="text-[#94A3B8] font-normal">({v.sellerType})</span>
+                      {v.sellerRating > 0 ? `★ ${v.sellerRating}` : 'No rating yet'}{v.sellerType ? <span className="text-[#94A3B8] font-normal"> ({v.sellerType})</span> : null}
                     </p>
                   </TableCell>
                 ))}
@@ -188,7 +188,7 @@ export const CompareModal: React.FC<CompareModalProps> = ({
                 {vehicles.map((v) => (
                   <TableCell key={v.id}>
                     <Badge variant={v.inspectionPassed ? 'success' : 'neutral'}>
-                      {v.inspectionPassed ? '✓ Certified Passed' : 'Pending'}
+                      {v.inspectionPassed ? '✓ Inspection passed' : 'No inspection report'}
                     </Badge>
                   </TableCell>
                 ))}

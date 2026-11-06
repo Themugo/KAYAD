@@ -92,8 +92,9 @@ export default function AdminSiteDesigns() {
   const refresh = useCallback(async () => {
     try {
       const [o, h] = await Promise.all([adminAPI.siteDesigns(), adminAPI.siteDesignHistory()]);
-      setOverview(o); setHistory(h.history || []); setState({ status: 'ready' });
-      return o;
+      const safe = { ...(o || {}), designs: Array.isArray(o?.designs) ? o.designs : [] };
+      setOverview(safe); setHistory(Array.isArray(h?.history) ? h.history : []); setState({ status: 'ready' });
+      return safe;
     } catch (e) { setState({ status: 'error', message: apiMessage(e, 'Designs could not be loaded.') }); return null; }
   }, []);
   useEffect(() => { refresh(); }, [refresh]);

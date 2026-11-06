@@ -640,7 +640,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           </div>
         </div>
 
-        <nav aria-label="Dealer workspace" className="flex-1 p-3 lg:p-4 flex lg:flex-col gap-2 lg:gap-0 overflow-x-auto lg:overflow-x-visible">
+        <nav aria-label="Dealer workspace" className="relative flex-1 p-3 lg:p-4 flex lg:flex-col gap-2 lg:gap-0 overflow-x-auto lg:overflow-x-visible">
           {DEALER_NAV_GROUPS.map((group, index) => (
             <div
               key={group.id}

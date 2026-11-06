@@ -2,6 +2,8 @@
  * Browser-tab / history title for the current screen, so a person with several tabs open (or a
  * long back-button history) can tell the pages apart. Pure: the caller decides when to apply it.
  */
+import { isKnownPath } from './knownRoutes';
+
 const BRAND = 'KAYAD';
 export const DEFAULT_TITLE = "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault";
 
@@ -40,6 +42,14 @@ const PATH_TITLES: Array<[RegExp, string]> = [
   [/^\/reset-password\/?$/, 'Choose a new password'],
   [/^\/auction\/[^/]+\/?$/, 'Live auction'],
   [/^\/notifications\/?$/, 'Notifications'],
+  [/^\/dealer\/auction-setup\/?$/, 'Set up an auction'],
+  [/^\/dealer\/auction-operations(\/|$)/, 'Auction operations'],
+  [/^\/dealer\/onboarding\/?$/, 'Dealer application'],
+  [/^\/dealer\/setup\/?$/, 'Join a dealer team'],
+  [/^\/force-password-change\/?$/, 'Change your password'],
+  [/^\/verify-email\/?$/, 'Verify your email'],
+  [/^\/terms\/?$/, 'Terms of Service'],
+  [/^\/privacy\/?$/, 'Privacy Policy'],
   [/^\/admin(\/|$)/, 'Admin'],
 ];
 
@@ -52,5 +62,6 @@ export function titleForRoute(pathname: string, search: string, vehicleTitle?: s
     const nav = new URLSearchParams(search).get('nav');
     if (nav && NAV_TITLES[nav]) return `${NAV_TITLES[nav]} | ${BRAND}`;
   }
+  if (pathname && pathname !== '/' && !isKnownPath(pathname)) return `Page not found | ${BRAND}`;
   return DEFAULT_TITLE;
 }

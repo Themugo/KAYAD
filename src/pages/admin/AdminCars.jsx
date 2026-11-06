@@ -82,7 +82,9 @@ function ListingPublishPolicy() {
   useEffect(() => {
     let alive = true;
     Promise.resolve().then(() => adminAPI.getOnboardingSettings()).then((res) => {
-      if (alive) setState({ status: 'ready', policy: res.policy, canChange: res.canChange === true });
+      if (!alive) return;
+      if (!res || !res.policy || typeof res.policy !== 'object') { setState({ status: 'error' }); return; }
+      setState({ status: 'ready', policy: res.policy, canChange: res.canChange === true });
     }).catch(() => { if (alive) setState({ status: 'error' }); });
     return () => { alive = false; };
   }, []);

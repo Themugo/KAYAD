@@ -5,6 +5,9 @@ import AdminRouteSurface from './components/admin/AdminRouteSurface';
 import VehicleMarketplace from './features/VehicleMarketplace';
 import TopNoticeStrip from './components/TopNoticeStrip';
 import { titleForRoute } from './utils/pageTitle';
+import { isKnownPath } from './utils/knownRoutes';
+import NotFoundPage from './pages/NotFoundPage';
+import LegalPage from './pages/LegalPage';
 import VehicleDetailModal from './components/VehicleDetailModal';
 import CompareModal from './components/CompareModal';
 import PriceAlertsModal from './components/PriceAlertsModal';
@@ -48,7 +51,8 @@ import { Vehicle, UserProfile } from './types';
 import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
 import { navLocationFor } from './utils/navLocation';
 import { isStaffRole as isEscrowStaffRole } from './features/escrow/escrowModel';
-import { Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useBranding } from './context/BrandingContext';
 
 // Views
 // Heavy authenticated/admin surfaces are loaded on demand. This keeps the
@@ -817,9 +821,7 @@ function AppInner() {
       <footer className="bg-[#0A3340] text-[#BDE5DE] text-xs py-8 border-t border-navy-600/40 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#13B8A6] text-[#0A3340] font-black flex items-center justify-center">
-              K
-            </div>
+            <FooterLogo />
             <div>
               <p className="font-bold text-white">KAYAD KE Automotive Marketplace</p>
               <p className="text-[11px] text-[#94A3B8]">Verified Automotive & Escrow Platform · Kenya</p>
@@ -832,6 +834,14 @@ function AppInner() {
             <button onClick={() => setActiveNav('financing')} className="hover:text-[#5AAFA4]">Financing</button>
             <button onClick={() => setActiveNav('support')} className="hover:text-[#5AAFA4]">Support & Disputes</button>
           </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 pt-5 border-t border-[#12576D]/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#94A3B8]">
+          <p className="m-0">&copy; {new Date().getFullYear()} KAYAD KE. All rights reserved.</p>
+          <nav aria-label="Legal" className="flex items-center gap-5">
+            <Link to="/terms" className="hover:text-[#5AAFA4]">Terms of Service</Link>
+            <Link to="/privacy" className="hover:text-[#5AAFA4]">Privacy Policy</Link>
+            <button type="button" onClick={() => setActiveNav('support')} className="hover:text-[#5AAFA4]">Contact support</button>
+          </nav>
         </div>
       </footer>
 
@@ -879,6 +889,13 @@ function AppInner() {
       />
     </div>
   );
+}
+
+/** Footer logo: the admin-managed logo when one is set, otherwise the built-in KAYAD vehicle mark (symbol only). */
+function FooterLogo() {
+  const { branding } = useBranding();
+  const custom = branding?.logoType === 'image' && branding?.logoUrl;
+  return <img src={custom ? branding.logoUrl : '/branding/kayad-road-mark-light.svg'} alt="" aria-hidden="true" width={44} height={32} className="h-8 w-auto max-w-[96px] object-contain shrink-0" decoding="async" />;
 }
 
 function AuthRouteSurface() {
@@ -953,6 +970,9 @@ function AuthRouteSurface() {
   if (path === '/dealer/auction-setup') return <RequireAuth><RequireDealer><DealerAuctionSetupWizard /></RequireDealer></RequireAuth>;
   if (path === '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerAuctionOperations /></RequireDealer></RequireAuth>;
   if (path.startsWith('/dealer/auction-operations/') && path !== '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerAuctionOperationCase /></RequireDealer></RequireAuth>;
+  if (path === '/terms') return <LegalPage kind="terms" />;
+  if (path === '/privacy') return <LegalPage kind="privacy" />;
+  if (!isKnownPath(path)) return <NotFoundPage />;
   return <AppInner />;
 }
 

@@ -172,12 +172,16 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
           {/* Background Cover Image with Sophisticated Navy Gradient */}
           <div className="h-44 sm:h-56 w-full relative">
-            <LazyImage
-              src={dealer.coverBanner || 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=1200'}
-              alt={dealer.name}
-              wrapperClassName="w-full h-full"
-              className="w-full h-full object-cover"
-            />
+            {dealer.coverBanner ? (
+              <LazyImage
+                src={dealer.coverBanner}
+                alt={`${dealer.name} cover`}
+                wrapperClassName="w-full h-full"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-[#0A3340] via-[#12576D] to-[#176B87]" aria-hidden="true" />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-[#176B87] via-[#176B87]/85 to-transparent" />
           </div>
 
@@ -964,11 +968,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {(dealer.galleryImages || [
-                'https://images.unsplash.com/photo-1563720223185-11003d516935?auto=format&fit=crop&q=80&w=800',
-                'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&q=80&w=800',
-                'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=800'
-              ]).map((img, idx) => (
+              {(Array.isArray(dealer.galleryImages) ? dealer.galleryImages : []).map((img, idx) => (
                 <div
                   key={idx}
                   onClick={() => setActiveGalleryImage(img)}
@@ -981,6 +981,9 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                 </div>
               ))}
             </div>
+            {!(Array.isArray(dealer.galleryImages) && dealer.galleryImages.length) && (
+              <p className="rounded-2xl border border-dashed border-[#BDE5DE] bg-[#F6FAF9] p-6 text-center text-sm text-[#64748B]" data-testid="dealer-gallery-empty">This dealer has not added showroom photos yet.</p>
+            )}
           </div>
         )}
 
@@ -1009,12 +1012,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
               {/* Styled Visual Map Card */}
               <div className="h-64 rounded-2xl bg-[#0A3340] overflow-hidden relative border border-[#D7E7E4] flex items-center justify-center">
-                <LazyImage
-                  src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=1000"
-                  alt="Map Location"
-                  wrapperClassName="w-full h-full opacity-60"
-                  className="w-full h-full object-cover"
-                />
+                <div className="w-full h-full bg-gradient-to-br from-[#0A3340] via-[#12576D] to-[#176B87] opacity-80" aria-hidden="true" />
 
                 <div className="absolute z-10 bg-[#176B87] text-white p-4 rounded-2xl shadow-2xl border border-[#91CEC5]/50 text-center space-y-2 max-w-xs">
                   <MapPin className="w-8 h-8 text-[#13B8A6] mx-auto animate-bounce" />

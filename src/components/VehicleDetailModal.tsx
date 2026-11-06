@@ -46,7 +46,8 @@ import {
   RotateCw,
   Compass,
   CheckSquare,
-  Sparkle
+  Sparkle,
+  Camera
 } from 'lucide-react';
 import { Modal, Badge, Button, Card, LazyImage } from './ui';
 
@@ -409,13 +410,25 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   const i = allImages.indexOf(activeImage);
                   setActiveImage(allImages[(i + (end < start ? 1 : -1) + allImages.length) % allImages.length]);
                 }}
-                className="h-72 sm:h-[420px] rounded-2xl sm:rounded-3xl overflow-hidden bg-[#0A3340] border border-[#D7E7E4] relative group shadow-lg cursor-zoom-in"
+                role="group"
+                aria-roledescription="carousel"
+                aria-label={`${vehicle.title} photos`}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (allImages.length < 2) return;
+                  const i = allImages.indexOf(activeImage);
+                  if (e.key === 'ArrowRight') { e.preventDefault(); setActiveImage(allImages[(i + 1) % allImages.length]); }
+                  if (e.key === 'ArrowLeft') { e.preventDefault(); setActiveImage(allImages[(i - 1 + allImages.length) % allImages.length]); }
+                  if (e.key === 'Enter' && e.target === e.currentTarget) setIsLightboxOpen(true);
+                }}
+                data-testid="vehicle-gallery-main"
+                className="aspect-[4/3] sm:aspect-[16/10] lg:max-h-[460px] w-full rounded-2xl overflow-hidden bg-[#0A3340] border border-[#D7E7E4] relative group shadow-md cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-[#176B87] focus-visible:ring-offset-2"
               >
                 <LazyImage
                   src={activeImage}
-                  alt={vehicle.title}
+                  alt={`${vehicle.title}, photo ${allImages.indexOf(activeImage) + 1} of ${allImages.length}`}
                   wrapperClassName="w-full h-full"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                  className="w-full h-full object-cover motion-safe:group-hover:scale-[1.02] motion-safe:transition-transform motion-safe:duration-700 ease-out"
                 />
 
                 {/* Overlays: Condition & Interactive Media Chips */}
@@ -438,7 +451,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 {/* Counter & Fullscreen Controls */}
                 <div className="absolute bottom-4 right-4 flex items-center gap-2 z-10">
                   <span className="bg-[#0A3340]/75 text-white text-[11px] font-extrabold px-3 py-1.5 rounded-xl backdrop-blur-md border border-white/10">
-                    📷 {allImages.indexOf(activeImage) + 1} / {allImages.length}
+                    <Camera className="inline w-3.5 h-3.5 -mt-0.5 mr-1" aria-hidden="true" />{allImages.indexOf(activeImage) + 1} / {allImages.length}
                   </span>
                   <button
                     type="button"
@@ -447,15 +460,16 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                       setIsLightboxOpen(true);
                     }}
                     className="p-2 bg-[#0A3340]/75 hover:bg-[#0A3340] text-white rounded-xl backdrop-blur-md transition-colors border border-white/10 cursor-pointer"
-                    title="Fullscreen Lightbox"
+                    title="View fullscreen"
+                    aria-label="View photos fullscreen"
                   >
-                    <Maximize2 className="w-4 h-4" />
+                    <Maximize2 className="w-4 h-4" aria-hidden="true" />
                   </button>
                 </div>
 
                 {/* Touch Previous / Next Controls */}
                 {allImages.length > 1 && (
-                  <div className="absolute inset-x-3 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity z-10">
+                  <div className="absolute inset-x-3 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 transition-opacity z-10">
                     <button
                       type="button"
                       onClick={(e) => {
@@ -464,9 +478,10 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                         const prevIdx = (currentIdx - 1 + allImages.length) % allImages.length;
                         setActiveImage(allImages[prevIdx]);
                       }}
-                      className="pointer-events-auto w-10 h-10 rounded-full bg-[#0A3340]/60 hover:bg-[#0A3340]/90 text-white flex items-center justify-center backdrop-blur-md transition-all cursor-pointer"
+                      aria-label="Previous photo"
+                      className="pointer-events-auto w-11 h-11 rounded-full bg-[#0A3340]/60 hover:bg-[#0A3340]/90 text-white flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-white"
                     >
-                      <ChevronLeft className="w-5 h-5" />
+                      <ChevronLeft className="w-5 h-5" aria-hidden="true" />
                     </button>
                     <button
                       type="button"
@@ -476,9 +491,10 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                         const nextIdx = (currentIdx + 1) % allImages.length;
                         setActiveImage(allImages[nextIdx]);
                       }}
-                      className="pointer-events-auto w-10 h-10 rounded-full bg-[#0A3340]/60 hover:bg-[#0A3340]/90 text-white flex items-center justify-center backdrop-blur-md transition-all cursor-pointer"
+                      aria-label="Next photo"
+                      className="pointer-events-auto w-11 h-11 rounded-full bg-[#0A3340]/60 hover:bg-[#0A3340]/90 text-white flex items-center justify-center backdrop-blur-md transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-white"
                     >
-                      <ChevronRight className="w-5 h-5" />
+                      <ChevronRight className="w-5 h-5" aria-hidden="true" />
                     </button>
                   </div>
                 )}
@@ -490,12 +506,15 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   {allImages.map((img, idx) => (
                     <button
                       key={idx}
+                      type="button"
                       onClick={() => setActiveImage(img)}
-                      className={`h-20 w-28 shrink-0 rounded-2xl overflow-hidden border-2 transition-all cursor-pointer ${
-                        activeImage === img ? 'border-[#176B87] ring-2 ring-[#176B87]/20 scale-95 shadow-xs' : 'border-[#D7E7E4] opacity-70 hover:opacity-100'
+                      aria-label={`Show photo ${idx + 1} of ${allImages.length}`}
+                      aria-pressed={activeImage === img}
+                      className={`h-16 w-24 sm:h-20 sm:w-28 shrink-0 rounded-xl overflow-hidden border-2 transition-[opacity,border-color,box-shadow] cursor-pointer focus-visible:ring-2 focus-visible:ring-[#176B87] ${
+                        activeImage === img ? 'border-[#176B87] ring-2 ring-[#176B87]/25 shadow-xs' : 'border-transparent opacity-70 hover:opacity-100'
                       }`}
                     >
-                      <LazyImage src={img} alt={`Thumb ${idx + 1}`} wrapperClassName="w-full h-full" className="w-full h-full object-cover" />
+                      <LazyImage src={img} alt="" wrapperClassName="w-full h-full" className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
@@ -511,7 +530,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1">
                     <Badge variant={statusChip.variant} size="sm">
-                      {statusChip.label === 'Available' && <CheckCircle2 className="w-3 h-3 text-emerald-600" />}
+                      {statusChip.label === 'Available' && <CheckCircle2 className="w-3 h-3" aria-hidden="true" />}
                       {statusChip.label}
                     </Badge>
                   </div>
@@ -1044,10 +1063,15 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               <p className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">{isAuction ? 'Current bid' : 'Price'}</p>
               <p className="text-lg font-black text-[#176B87] font-display leading-tight truncate">Ksh {displayPrice.toLocaleString()}</p>
             </div>
+            {(isAuction || isPrivateSeller || isEscrowActive) && (
+              <Button variant="secondary" size="md" className="ml-auto shrink-0" aria-label="Message seller" onClick={() => onContactSeller(vehicle)}>
+                <MessageSquare className="w-4 h-4" aria-hidden="true" />
+              </Button>
+            )}
             <Button
               variant="primary"
               size="md"
-              className="ml-auto font-black text-sm shrink-0"
+              className={`${isAuction || isPrivateSeller || isEscrowActive ? '' : 'ml-auto '}font-black text-sm shrink-0 min-h-11`}
               onClick={() => (
                 isAuction ? (onViewAuctionLot ? onViewAuctionLot(vehicle) : onContactSeller(vehicle))
                 : isPrivateSeller || isEscrowActive ? onStartEscrow(vehicle)
@@ -1061,48 +1085,6 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
 
         </div>
       </Modal>
-
-      {/* ==========================================
-          MOBILE STICKY BOTTOM PURCHASE BAR
-          ========================================== */}
-      <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-[#D7E7E4] p-3 lg:hidden shadow-lg flex items-center justify-between gap-3">
-        <div>
-          <p className="text-[10px] font-bold text-[#94A3B8] uppercase">{isAuction ? 'Current Highest Bid' : 'Listed Price'}</p>
-          <p className="text-base font-black text-[#176B87] font-display">
-            Ksh {displayPrice.toLocaleString()}
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => onContactSeller(vehicle)}
-          >
-            <MessageSquare className="w-3.5 h-3.5 text-[#176B87]" />
-            <span>Chat</span>
-          </Button>
-
-          {isEscrowActive ? (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => onStartEscrow(vehicle)}
-            >
-              <Lock className="w-3.5 h-3.5 text-[#13B8A6]" />
-              <span>{isEscrowLive() ? 'Start Escrow' : 'Review Escrow'}</span>
-            </Button>
-          ) : (
-            <Button
-              variant="primary"
-              size="sm"
-              onClick={() => onContactSeller(vehicle)}
-            >
-              <span>Contact Dealer</span>
-            </Button>
-          )}
-        </div>
-      </div>
 
       {/* ==========================================
           FULLSCREEN LIGHTBOX MODAL

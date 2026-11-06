@@ -363,6 +363,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
             <PasswordField ref={(el) => { refs.current.password = el; }} label="Password" value={form.password} onChange={set('password')} autoComplete="new-password" showRules error={errors.password} disabled={submitting} />
           )}
 
+          <p className="m-0 text-[11px] text-[#64748B]" data-testid="onboarding-consent">By continuing you agree to the <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#12576D] underline">Terms of Service</a> and the <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#12576D] underline">Privacy Policy</a>.</p>
           <button type="submit" className="kayad-auth-submit" disabled={submitting}>{submitting ? <><span className="kayad-auth-spinner" aria-hidden="true" /> Working…</> : submitLabel}</button>
           <p className="m-0 text-[11px] text-[#64748B]"><Mail className="mr-1 inline h-3 w-3" aria-hidden="true" />{independent ? 'We will only use these details to review your application.' : 'We will email you a link to confirm your address.'}</p>
         </form>

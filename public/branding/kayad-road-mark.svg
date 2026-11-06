@@ -1,34 +1,13 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 112 80" role="img" aria-labelledby="title desc">
-  <title id="title">KAYAD road and vehicle mark</title>
-  <desc id="desc">A bold geometric K built from a dark tarmacked road, bright teal road edges, white lane markings and a modern vehicle.</desc>
-  <defs>
-    <linearGradient id="kTeal" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#13C7B7"/>
-      <stop offset=".48" stop-color="#087F98"/>
-      <stop offset="1" stop-color="#0A3340"/>
-    </linearGradient>
-    <linearGradient id="road" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#172D39"/>
-      <stop offset="1" stop-color="#061923"/>
-    </linearGradient>
-    <linearGradient id="carBody" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FFFFFF"/>
-      <stop offset="1" stop-color="#B9DCE0"/>
-    </linearGradient>
-  </defs>
-  <!-- Strong, angular K silhouette in the established navy/teal palette. -->
-  <path d="M7 72 29 7h19L31 39 77 7h25L59 39l43 33H76L45 49 39 72Z" fill="url(#kTeal)"/>
-  <!-- Tarmacked road sweeps through the K; white dashed centreline stays legible at small sizes. -->
-  <path d="M9 72c17-8 27-18 38-31 12-14 26-23 48-27L77 31C62 35 53 44 44 55 34 66 25 71 9 72Z" fill="url(#road)" stroke="#071E28" stroke-width="1.5" stroke-linejoin="round"/>
-  <path d="M10 72c18-8 28-19 39-32 12-13 26-22 45-26" fill="none" stroke="#13B8A6" stroke-width="2.7" stroke-linecap="round"/>
-  <path d="M20 67c11-6 19-15 27-24 10-11 22-19 37-24" fill="none" stroke="#FFFFFF" stroke-width="2.1" stroke-linecap="round" stroke-dasharray="5 5"/>
-  <!-- Compact vehicle silhouette with bright windows and teal lamps. -->
-  <g transform="translate(43 31)">
-    <path d="M2 16 6 8c1-2 3-3 6-3h19c3 0 5 1 7 4l5 7 5 2c2 1 3 3 3 5v5H0v-6c0-3 1-5 2-6Z" fill="#0A3340" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"/>
-    <path d="m10 8-4 8h13V7h-7c-1 0-2 0-2 1Zm12-1v9h16l-4-6c-1-2-2-3-4-3Z" fill="url(#carBody)"/>
-    <path d="M3 19h4m34 0h4" stroke="#13C7B7" stroke-width="2.2" stroke-linecap="round"/>
-    <circle cx="11" cy="28" r="4.3" fill="#061923" stroke="#FFFFFF" stroke-width="1.5"/>
-    <circle cx="39" cy="28" r="4.3" fill="#061923" stroke="#FFFFFF" stroke-width="1.5"/>
-    <circle cx="11" cy="28" r="1.6" fill="#13C7B7"/><circle cx="39" cy="28" r="1.6" fill="#13C7B7"/>
-  </g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 82" role="img"><title>KAYAD vehicle mark</title><g transform="translate(0 0) scale(1.0)">
+  <path d="M10 36C38 4 86 2 112 32C84 13 44 14 10 36Z" fill="#176B87"/>
+  <path d="M5 62v-6c0-4 3-7 8-8l23-5 13-14c3-3 7-5 12-5h20c7 0 12 3 16 8l8 10 8 2c4 1 6 4 6 8v10Z" fill="#0A3340"/>
+  <path d="M46 35l9-8c1-1 3-2 5-2h11v13H46Z" fill="#DDF4F0"/>
+  <path d="M77 25h4c4 0 7 2 10 5l5 8H77Z" fill="#DDF4F0"/>
+  <circle cx="33" cy="63" r="10" fill="#0A3340" stroke="#DDF4F0" stroke-width="0"/>
+  <circle cx="33" cy="63" r="7" fill="#0A3340" stroke="#13B8A6" stroke-width="3.2"/>
+  <circle cx="33" cy="63" r="2.2" fill="#13B8A6"/>
+  <circle cx="89" cy="63" r="10" fill="#0A3340"/>
+  <circle cx="89" cy="63" r="7" fill="#0A3340" stroke="#13B8A6" stroke-width="3.2"/>
+  <circle cx="89" cy="63" r="2.2" fill="#13B8A6"/>
+  <path d="M10 78h100" stroke="#13B8A6" stroke-width="3.4" stroke-linecap="round"/>
+</g></svg>

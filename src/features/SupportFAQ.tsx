@@ -108,7 +108,7 @@ export const FAQ_DATA: FAQItem[] = [
     categoryLabel: 'Auctions',
     categoryIcon: <Gavel className={iconClass} />,
     question: 'What happens after I win a KAYAD auction?',
-    answer: 'A winning auction outcome moves into the transaction and settlement workflow available to the winning buyer. Follow the purchase instructions attached to the transaction rather than treating the auction screen itself as proof of payment or ownership transfer.',
+    answer: 'The winner is notified and can open a winner certificate from the auction page. The winner then arranges payment and handover with the dealer or seller within the payment period shown on the auction, using the contact details released once the commitment is paid. The auction screen and certificate are not proof of payment or ownership transfer, so follow the payment instructions on the auction and keep your own record.',
     nextStep: 'Open Auction',
     popular: true,
   },
@@ -120,6 +120,25 @@ export const FAQ_DATA: FAQItem[] = [
     question: 'I have a problem with a bid or auction result. What should I do?',
     answer: 'Keep the auction or vehicle reference and open a Support case. Describe what you saw, when it happened, and what outcome you expected. This gives the resolution team a traceable case instead of an untracked message.',
     nextStep: 'Open a support case',
+  },
+  {
+    id: 'faq-auctions-3',
+    category: 'auctions',
+    categoryLabel: 'Auctions',
+    categoryIcon: <Gavel className={iconClass} />,
+    question: 'How does the bid commitment work, and who gets the money?',
+    answer: 'To bid you register and pay the commitment shown on that auction through the M-Pesa prompt or payment details inside KAYAD. For dealer auctions it goes to the dealer\u2019s verified collection account when one is set up; otherwise, and always for private-seller auctions, KAYAD collects and holds it. Never pay a commitment to someone who contacts you directly. After payment you get access to the bidding room and an anonymous bidder ID, so other bidders never see your real name.',
+    nextStep: 'Open Auction',
+    popular: true,
+  },
+  {
+    id: 'faq-auctions-4',
+    category: 'auctions',
+    categoryLabel: 'Auctions',
+    categoryIcon: <Gavel className={iconClass} />,
+    question: 'I did not win. How do I get my commitment back?',
+    answer: 'When an auction closes without you as the winner, your commitment is released for refund. Open Payments to keep it in your KAYAD wallet for future auctions or to withdraw it to the M-Pesa number on your profile. If a withdrawal fails it returns to your wallet. Commitments paid straight to a dealer\u2019s account are returned by that dealer under the auction\u2019s stated rules.',
+    nextStep: 'Open Payments',
   },
   {
     id: 'faq-ins-1',
@@ -297,6 +316,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
       : faq.nextStep === 'Open Inspection' ? 'inspections'
       : faq.nextStep === 'Open Escrow' ? 'escrow'
       : faq.nextStep === 'Open Financing' ? 'financing'
+      : faq.nextStep === 'Open Payments' ? 'payments'
       : CATEGORY_META[faq.category]?.nav;
     onNavigate(nav || 'support');
   };

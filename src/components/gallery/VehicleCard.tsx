@@ -1,31 +1,32 @@
 import { useState } from 'react';
-import type { FC } from 'react';
+import type { FC, KeyboardEvent, MouseEvent, ReactNode } from 'react';
 import {
   Heart,
-  ShieldCheck,
-  Tag,
   ChevronLeft,
   ChevronRight,
-  Calendar,
   Gauge,
   Fuel,
-  Sparkles,
-  ArrowRight,
-  CheckCircle2,
-  Lock,
+  Settings2,
   MapPin,
-  Eye
+  CheckCircle2,
+  Gavel,
+  ChevronRight as ArrowRight,
+  CarFront,
 } from 'lucide-react';
 import { Vehicle } from '../../types';
 import { useMarketplace } from '../../context/MarketplaceContext';
 import { Skeleton } from '../ui/Skeleton';
-import type React from 'react';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
   viewMode?: 'grid' | 'list';
 }
 
+/**
+ * The shared gallery/home/dashboard/dealer-profile listing card. Everything it shows comes from the vehicle record:
+ * a missing mileage, fuel, transmission or location is left out (never replaced by a made-up default), a verified
+ * badge needs `vehicle.verified`, and a missing photo shows a neutral placeholder rather than unrelated stock imagery.
+ */
 export const VehicleCard: FC<VehicleCardProps> = ({ vehicle, viewMode = 'grid' }) => {
   const { savedVehicleIds, toggleSaveVehicle, navigateTo } = useMarketplace();
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
@@ -33,190 +34,158 @@ export const VehicleCard: FC<VehicleCardProps> = ({ vehicle, viewMode = 'grid' }
   const [imgFailed, setImgFailed] = useState(false);
 
   const isSaved = savedVehicleIds.includes(vehicle.id);
+  const images = (Array.isArray(vehicle.images) && vehicle.images.length > 0 ? vehicle.images : vehicle.image ? [vehicle.image] : []).filter(Boolean);
+  const activeImage = images[currentImgIndex] || images[0];
 
-  const nextImg = (e: React.MouseEvent) => {
+  const step = (delta: number) => (e: MouseEvent) => {
     e.stopPropagation();
-    if (!vehicle.images || vehicle.images.length === 0) return;
+    if (images.length < 2) return;
     setIsImgLoading(true);
     setImgFailed(false);
-    setCurrentImgIndex(prev => (prev + 1) % vehicle.images.length);
+    setCurrentImgIndex((prev) => (prev + delta + images.length) % images.length);
   };
 
-  const prevImg = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!vehicle.images || vehicle.images.length === 0) return;
-    setIsImgLoading(true);
-    setImgFailed(false);
-    setCurrentImgIndex(prev => (prev - 1 + vehicle.images.length) % vehicle.images.length);
-  };
-
-  // Format price in KES (Kenyan Shillings)
-  const priceVal = vehicle.currentBid || vehicle.price;
-  const formattedKESPrice = `KES ${priceVal.toLocaleString()}`;
-
-  const isAuction = vehicle.listingType === 'auction' || vehicle.listingType === 'both';
+  const lifecycle = vehicle.auctionLifecycle;
+  const isAuction = vehicle.listingType === 'auction' || vehicle.listingType === 'both' || vehicle.isAuction === true || (!!lifecycle && lifecycle !== 'none');
+  const showBid = isAuction && lifecycle === 'live' && typeof vehicle.currentBid === 'number' && vehicle.currentBid > 0;
+  const priceVal = showBid ? (vehicle.currentBid as number) : vehicle.price;
+  const priceText = Number.isFinite(priceVal) && priceVal > 0 ? `Ksh ${Number(priceVal).toLocaleString()}` : 'Price on request';
+  const priceLabel = showBid ? 'Current bid' : isAuction ? 'Starting price' : 'Asking price';
 
   const fullTitle = vehicle.title
     ? (vehicle.title.startsWith(String(vehicle.year)) ? vehicle.title : `${vehicle.year} ${vehicle.title}`)
     : `${vehicle.year} ${vehicle.make} ${vehicle.model}`;
 
+  const availability = vehicle.status === 'sold' ? { text: 'Sold', tone: 'sold' } : vehicle.status === 'pending' ? { text: 'Pending', tone: 'pending' } : vehicle.status === 'active' ? { text: 'Available', tone: 'ok' } : null;
+  const auctionBadge = lifecycle === 'live' ? 'Live auction' : lifecycle === 'draft' ? 'Upcoming auction' : lifecycle === 'ended' ? 'Auction ended' : isAuction ? 'Auction' : null;
+
+  const mileageText = vehicle.mileage > 0 ? `${vehicle.mileage.toLocaleString()} km` : '';
+  const location = vehicle.location ? vehicle.location.split(',')[0].trim() : '';
+  const specs = [
+    mileageText && { key: 'mileage', icon: <Gauge className="w-3.5 h-3.5" aria-hidden="true" />, text: mileageText },
+    vehicle.fuelType && { key: 'fuel', icon: <Fuel className="w-3.5 h-3.5" aria-hidden="true" />, text: String(vehicle.fuelType) },
+    vehicle.transmission && { key: 'trans', icon: <Settings2 className="w-3.5 h-3.5" aria-hidden="true" />, text: String(vehicle.transmission) },
+    location && { key: 'loc', icon: <MapPin className="w-3.5 h-3.5" aria-hidden="true" />, text: location },
+  ].filter(Boolean) as { key: string; icon: ReactNode; text: string }[];
+
+  const open = () => navigateTo('vehicle_detail', vehicle.id);
+  const onKey = (e: KeyboardEvent<HTMLElement>) => {
+    if (e.target !== e.currentTarget) return;
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+  };
+  const list = viewMode === 'list';
+
   return (
-    <div
-      onClick={() => navigateTo('vehicle_detail', vehicle.id)}
-      className={`group bg-white border border-[#D7E7E4] rounded-3xl p-3 sm:p-3.5 shadow-xs hover:border-[#176B87] hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col justify-between h-full ${
-        viewMode === 'list' ? 'md:flex-row md:items-center md:gap-6' : 'space-y-3'
+    <article
+      onClick={open}
+      onKeyDown={onKey}
+      tabIndex={0}
+      role="link"
+      aria-label={`${fullTitle}, ${priceText}${availability ? `, ${availability.text}` : ''}. View vehicle details`}
+      data-testid="gallery-vehicle-card"
+      className={`group bg-white border border-[#D7E7E4] rounded-2xl p-2.5 sm:p-3 shadow-xs hover:border-[#176B87]/50 hover:shadow-md transition-[box-shadow,border-color] duration-200 cursor-pointer flex flex-col h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[#176B87] focus-visible:ring-offset-2 ${
+        list ? 'sm:flex-row sm:items-stretch sm:gap-4' : 'gap-3'
       }`}
     >
-      {/* Image Container with Badges */}
-      <div className={`relative rounded-2xl overflow-hidden bg-[#176B87] border border-[#D7E7E4] group shrink-0 ${
-        viewMode === 'list' ? 'md:w-72 h-48' : 'w-full aspect-[16/11] sm:aspect-[16/11]'
-      }`}>
-        {isImgLoading && !imgFailed && (
-          <Skeleton className="absolute inset-0 w-full h-full bg-[#176B87]" />
-        )}
-
-        {imgFailed ? (
-          <div className="w-full h-full bg-gradient-to-br from-[#176B87] via-[#0A3340] to-[#0A3340] flex flex-col items-center justify-center p-4 text-center space-y-2">
-            <div className="w-10 h-10 rounded-full bg-[#13B8A6]/15 border border-[#13B8A6]/30 flex items-center justify-center">
-              <ShieldCheck className="w-5 h-5 text-[#13B8A6]" />
-            </div>
-            <span className="text-[10px] font-mono font-black uppercase tracking-widest text-[#13B8A6]">
-              KAYAD VERIFIED ASSET
-            </span>
-            <span className="text-[11px] font-serif font-bold text-[#DDF4F0] line-clamp-1">
-              {fullTitle}
-            </span>
-          </div>
+      {/* Photo: fixed aspect ratio so nothing shifts while it loads */}
+      <div className={`relative rounded-xl overflow-hidden bg-[#EEF7F5] shrink-0 ${list ? 'sm:w-64 lg:w-72 aspect-[4/3] sm:aspect-auto sm:min-h-[11rem]' : 'w-full aspect-[4/3]'}`}>
+        {activeImage && !imgFailed ? (
+          <>
+            {isImgLoading && <Skeleton className="absolute inset-0 w-full h-full" />}
+            <img
+              src={activeImage}
+              alt={`${fullTitle}${images.length > 1 ? `, photo ${currentImgIndex + 1} of ${images.length}` : ''}`}
+              width={400}
+              height={300}
+              loading="lazy"
+              decoding="async"
+              onLoad={() => setIsImgLoading(false)}
+              onError={() => { setImgFailed(true); setIsImgLoading(false); }}
+              className={`absolute inset-0 w-full h-full object-cover motion-safe:group-hover:scale-[1.03] motion-safe:transition-transform motion-safe:duration-500 ${isImgLoading ? 'opacity-0' : 'opacity-100'}`}
+            />
+          </>
         ) : (
-          <img
-            src={vehicle.images?.[currentImgIndex] || 'https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=800&q=80'}
-            alt={fullTitle}
-            width={400}
-            height={300}
-            loading="lazy"
-            decoding="async"
-            onLoad={() => setIsImgLoading(false)}
-            onError={() => {
-              setImgFailed(true);
-              setIsImgLoading(false);
-            }}
-            className={`w-full h-full object-cover group-hover:scale-105 transition-all duration-500 ${
-              isImgLoading ? 'opacity-0' : 'opacity-100'
-            }`}
-          />
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 text-[#64748B]" data-testid="gallery-card-no-photo">
+            <CarFront className="w-8 h-8 text-[#176B87]/60" aria-hidden="true" />
+            <span className="text-xs font-semibold">Photo not available</span>
+          </div>
         )}
 
-        {/* Carousel Arrow Controls */}
-        {!imgFailed && vehicle.images && vehicle.images.length > 1 && (
-          <div className="absolute inset-x-2 top-1/2 -translate-y-1/2 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity z-10">
-            <button
-              onClick={prevImg}
-              className="p-1.5 rounded-full bg-[#176B87]/90 text-[#13B8A6] hover:bg-[#13B8A6] hover:text-[#176B87] transition-colors shadow-md cursor-pointer"
-            >
-              <ChevronLeft className="w-4 h-4" />
+        {/* Arrows: always reachable on touch and by keyboard, revealed on hover for mouse users */}
+        {activeImage && !imgFailed && images.length > 1 && (
+          <div className="absolute inset-x-1.5 top-1/2 -translate-y-1/2 flex items-center justify-between md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity z-10 pointer-events-none">
+            <button type="button" onClick={step(-1)} aria-label="Previous photo" className="pointer-events-auto w-8 h-8 grid place-items-center rounded-full bg-white/90 text-[#0A3340] shadow-sm hover:bg-white focus-visible:ring-2 focus-visible:ring-[#176B87]">
+              <ChevronLeft className="w-4 h-4" aria-hidden="true" />
             </button>
-            <button
-              onClick={nextImg}
-              className="p-1.5 rounded-full bg-[#176B87]/90 text-[#13B8A6] hover:bg-[#13B8A6] hover:text-[#176B87] transition-colors shadow-md cursor-pointer"
-            >
-              <ChevronRight className="w-4 h-4" />
+            <button type="button" onClick={step(1)} aria-label="Next photo" className="pointer-events-auto w-8 h-8 grid place-items-center rounded-full bg-white/90 text-[#0A3340] shadow-sm hover:bg-white focus-visible:ring-2 focus-visible:ring-[#176B87]">
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
             </button>
           </div>
         )}
 
-        {/* Top Left Badges */}
-        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1.5">
-          {isAuction ? (
-            <span className="px-2.5 py-1 rounded-xl bg-[#176B87]/95 backdrop-blur-md text-[#13B8A6] font-mono font-black text-[10px] uppercase shadow-md border border-[#13B8A6]/40 flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-[#13B8A6]" />
-              LIVE AUCTION LOT
+        <div className="absolute top-2 left-2 z-10 flex flex-col items-start gap-1.5 max-w-[75%]">
+          {auctionBadge && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-[#0A3340]/90 px-2.5 py-1 text-[11px] font-bold text-white">
+              <Gavel className="w-3 h-3" aria-hidden="true" />{auctionBadge}
             </span>
-          ) : (
-            <span className="px-2.5 py-1 rounded-xl bg-[#176B87]/95 backdrop-blur-md text-[#13B8A6] font-mono font-black text-[10px] uppercase shadow-md border border-[#13B8A6]/40 flex items-center gap-1">
-              <ShieldCheck className="w-3 h-3 text-[#13B8A6]" />
-              150-PT AUDITED
+          )}
+          {vehicle.verified && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/95 px-2.5 py-1 text-[11px] font-bold text-emerald-700 shadow-xs">
+              <CheckCircle2 className="w-3 h-3" aria-hidden="true" />Verified listing
             </span>
           )}
         </div>
 
-        {/* Top Right Year Badge */}
-        <div className="absolute top-2.5 right-2.5 z-10">
-          <span className="px-2.5 py-1 rounded-xl bg-[#176B87]/90 backdrop-blur-md text-white font-mono font-black text-xs shadow-md border border-white/20">
-            {vehicle.year}
-          </span>
-        </div>
-
-        {/* Favorite Heart Button */}
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleSaveVehicle(vehicle.id);
-          }}
-          className={`absolute bottom-2.5 right-2.5 p-2 rounded-full backdrop-blur-md transition-all z-10 cursor-pointer ${
-            isSaved
-              ? 'bg-rose-600 text-white shadow-lg'
-              : 'bg-[#176B87]/80 text-[#13B8A6] hover:bg-rose-600 hover:text-white border border-[#13B8A6]/30'
-          }`}
-          title={isSaved ? 'Remove from Saved' : 'Save Vehicle'}
+          type="button"
+          onClick={(e) => { e.stopPropagation(); toggleSaveVehicle(vehicle.id); }}
+          aria-pressed={isSaved}
+          aria-label={isSaved ? `Remove ${fullTitle} from saved` : `Save ${fullTitle}`}
+          title={isSaved ? 'Remove from saved' : 'Save vehicle'}
+          className={`absolute top-2 right-2 z-10 w-9 h-9 grid place-items-center rounded-full shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-[#176B87] ${isSaved ? 'bg-rose-500 text-white' : 'bg-white/95 text-[#12576D] hover:text-rose-500'}`}
         >
-          <Heart className={`w-3.5 h-3.5 ${isSaved ? 'fill-current' : ''}`} />
+          <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} aria-hidden="true" />
         </button>
+
+        {images.length > 1 && (
+          <span className="absolute bottom-2 left-2 z-10 rounded-md bg-black/60 px-1.5 py-0.5 text-[11px] font-semibold text-white">{currentImgIndex + 1}/{images.length}</span>
+        )}
       </div>
 
-      {/* Card Details */}
-      <div className="flex-1 flex flex-col justify-between space-y-3 min-w-0">
-        <div className="space-y-1.5">
-          {/* Make / Brand & Location Header */}
-          <div className="flex items-center justify-between text-[11px] font-mono font-bold text-[#64748b] gap-2">
-            <span className="uppercase tracking-wider truncate">{vehicle.make}</span>
-            <span className="flex items-center gap-1 shrink-0">
-              <MapPin className="w-3 h-3 text-[#13B8A6] shrink-0" />
-              <span className="truncate">{vehicle.location ? vehicle.location.split(',')[0] : 'Nairobi'}</span>
-            </span>
-          </div>
-
-          {/* Model Title */}
-          <h3 className="text-base sm:text-lg font-serif font-black text-[#176B87] group-hover:text-[#13B8A6] transition-colors leading-snug line-clamp-2 min-h-[2.5rem]">
-            {fullTitle}
-          </h3>
-
-          {/* Specs Row */}
-          <div className="flex items-center justify-between text-[11px] font-mono font-bold text-[#64748b] pt-0.5 gap-2">
-            <span className="flex items-center gap-1 shrink-0">
-              <Gauge className="w-3.5 h-3.5 text-[#176B87] shrink-0" />
-              {vehicle.mileage ? vehicle.mileage.toLocaleString() : '18,000'} km
-            </span>
-            <span className="flex items-center gap-1 truncate min-w-0 justify-end">
-              <Fuel className="w-3.5 h-3.5 text-[#13B8A6] shrink-0" />
-              <span className="truncate">{vehicle.transmission || 'Automatic'}</span>
-            </span>
-          </div>
-
-          {/* Sleek Price Box */}
-          <div className="px-3 py-2 rounded-xl bg-[#EEF7F5] border border-[#D7E7E4]/80 flex items-center justify-between gap-2 overflow-hidden">
-            <span className="text-[#64748b] font-mono font-bold uppercase text-[10px] tracking-wider truncate min-w-0">
-              {isAuction ? 'Current High Bid' : 'Verified Price'}
-            </span>
-            <span className="text-base sm:text-lg font-serif font-black text-[#176B87] whitespace-nowrap shrink-0">
-              {formattedKESPrice}
-            </span>
-          </div>
+      {/* Details */}
+      <div className="flex-1 flex flex-col min-w-0 gap-2">
+        {availability && (
+          <span className={`self-start inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-bold ${availability.tone === 'ok' ? 'bg-emerald-50 text-emerald-700' : availability.tone === 'sold' ? 'bg-slate-200 text-slate-700' : 'bg-amber-50 text-amber-700'}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${availability.tone === 'ok' ? 'bg-emerald-500' : availability.tone === 'sold' ? 'bg-slate-500' : 'bg-amber-500'}`} aria-hidden="true" />
+            {availability.text}
+          </span>
+        )}
+        <h3 className="text-base sm:text-[1.05rem] font-bold text-[#0A3340] leading-snug line-clamp-2 break-words">{fullTitle}</h3>
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold text-[#64748B]">{priceLabel}</p>
+          <p className="text-xl font-extrabold text-[#12576D] tracking-tight break-words">{priceText}</p>
         </div>
-
-        {/* Action Button */}
-        <div className="pt-0.5">
+        {specs.length > 0 && (
+          <ul className="grid grid-cols-2 gap-x-3 gap-y-1.5 text-xs font-medium text-[#475569] list-none p-0 m-0">
+            {specs.map((s) => (
+              <li key={s.key} className="flex items-center gap-1.5 min-w-0">
+                <span className="text-[#176B87] shrink-0">{s.icon}</span>
+                <span className="truncate">{s.text}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="mt-auto pt-1">
           <button
-            onClick={() => navigateTo('vehicle_detail', vehicle.id)}
-            className="w-full py-2.5 px-3 rounded-xl bg-[#176B87] hover:bg-[#0A3340] text-white text-xs font-mono font-black uppercase tracking-wider transition-all text-center flex items-center justify-center gap-1.5 shadow-xs cursor-pointer"
+            type="button"
+            onClick={(e) => { e.stopPropagation(); open(); }}
+            className="w-full min-h-11 px-3 rounded-xl bg-[#176B87] hover:bg-[#0A3340] text-white text-sm font-bold transition-colors flex items-center justify-center gap-1 focus-visible:ring-2 focus-visible:ring-[#176B87] focus-visible:ring-offset-2"
           >
-            <span>{isAuction ? 'Place Bid / View Lot' : 'Inspect & Buy'}</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#13B8A6]" />
+            <span>{isAuction && lifecycle === 'live' ? 'View auction' : 'View vehicle details'}</span>
+            <ArrowRight className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       </div>
-    </div>
+    </article>
   );
 };
-
-
-

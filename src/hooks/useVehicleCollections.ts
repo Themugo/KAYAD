@@ -32,6 +32,21 @@ import { getCarById, mapBackendCarToVehicle } from '../services/vehicleApi';
  * comparison into CompareContext, the app's existing persisted client-state
  * boundary, so favorites and comparison no longer have competing sources.
  */
+const GUEST_SAVED_KEY = 'kayad.guestSavedVehicles';
+function readGuestSaved(): string[] {
+  try {
+    const raw = window.localStorage.getItem(GUEST_SAVED_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string').slice(0, 100) : [];
+  } catch { return []; }
+}
+function writeGuestSaved(ids: string[]) {
+  try {
+    if (ids.length) window.localStorage.setItem(GUEST_SAVED_KEY, JSON.stringify(ids.slice(0, 100)));
+    else window.localStorage.removeItem(GUEST_SAVED_KEY);
+  } catch { /* private mode: guest saves stay in memory only */ }
+}
+
 export function useVehicleCollections(vehicles: Vehicle[], userId?: string | null) {
   const [savedVehicles, setSavedVehicles] = useState<string[]>([]);
   const [isFetchingFavorites, setIsFetchingFavorites] = useState<boolean>(false);
@@ -55,7 +70,8 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
     if (!userId) {
       // A logout is a hard session boundary. Never leak the previous
       // authenticated user's saved vehicles into another session.
-      setSavedVehicles([]);
+      // Only the visitor's own browser-held picks (never an account's list) are shown while signed out.
+      setSavedVehicles(readGuestSaved());
       setResolvedSavedVehicles({});
       setFavoritesError(null);
       setIsFetchingFavorites(false);
@@ -71,6 +87,12 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
           const ids = res.favorites
             .map((f) => f.id || f._id)
             .filter((id): id is string => Boolean(id));
+          // Vehicles saved while signed out join the account's list, then the browser copy is cleared.
+          const guestIds = readGuestSaved().filter((id) => !ids.includes(id));
+          for (const gid of guestIds) {
+            try { const r = await toggleFavorite(gid); if (r.favorited) ids.push(gid); } catch { /* keep going; the rest still merge */ }
+          }
+          writeGuestSaved([]);
           setSavedVehicles(ids);
 
           // The saved-vehicle tab must not depend on the current marketplace
@@ -129,9 +151,11 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
       // Not authenticated - same local-only behavior as before Phase 2,
       // since there is no backend concept to connect to for an
       // anonymous visitor.
-      setSavedVehicles((prev) =>
-        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-      );
+      setSavedVehicles((prev) => {
+        const next = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
+        writeGuestSaved(next);
+        return next;
+      });
       return;
     }
 
