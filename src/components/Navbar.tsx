@@ -1,3 +1,4 @@
+import CountryBadge from './CountryBadge';
 import { hasSessionHint } from '../utils/sessionHint';
 import { isStaffRole, staffRoleLabel } from '../utils/staffRoles';
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -330,6 +331,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <span className="kayad-brand__word">{branding.logoText || 'KAYAD'}</span>
             <span className="kayad-brand__tag kayad-brand__tag--reserved">{branding.brandTagline || 'Automotive Marketplace'}</span>
           </span>
+          <CountryBadge show={branding.countryBadgeShow} text={branding.countryBadgeText} />
         </a>
 
         {/* NAVIGATION FIELD — primary destinations; dropdowns expose existing

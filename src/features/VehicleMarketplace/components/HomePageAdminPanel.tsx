@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Settings, RotateCcw, Eye, EyeOff, ShieldAlert, History, LayoutGrid, List, PanelLeftOpen, CarFront } from 'lucide-react';
-import { HomePageConfig, ACCENT_THEME_OPTIONS } from '../hooks/useHomePageConfig';
+import { HomePageConfig, ACCENT_THEME_OPTIONS, sanitizePriceSteps, sanitizeYearFrom } from '../hooks/useHomePageConfig';
 import {
   EscrowRulesConfig,
   SellerEscrowRequirement,
@@ -433,6 +433,39 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                   <option value="standard">Standard · balanced</option>
                   <option value="comfortable">Comfortable · larger cards</option>
                 </select>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-[#D7E7E4] p-3 space-y-2.5">
+              <div>
+                <h4 className="text-[10px] font-bold uppercase tracking-wide text-[#12576D]">Search filter choices</h4>
+                <p className="mt-1 text-[10.5px] leading-relaxed text-[#64748B]">Set the price steps and the earliest year shoppers can pick in the homepage search bar and filter panel. Presentation only; no listing or price is changed.</p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[10px] font-bold text-[#64748B] mb-1" htmlFor="kayad-price-steps">Price steps (Ksh, comma separated)</label>
+                  <input
+                    id="kayad-price-steps"
+                    key={config.filterOptions.priceSteps.join(',')}
+                    defaultValue={config.filterOptions.priceSteps.join(', ')}
+                    onBlur={(e) => onUpdate((prev) => ({ ...prev, filterOptions: { ...prev.filterOptions, priceSteps: sanitizePriceSteps(e.target.value) } }))}
+                    inputMode="numeric"
+                    className="w-full px-2.5 py-2 border border-[#D7E7E4] rounded-lg font-semibold text-[#12576D] tabular-nums focus:outline-none focus:ring-1 focus:ring-[#176B87]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-[#64748B] mb-1" htmlFor="kayad-year-from">Earliest year offered</label>
+                  <input
+                    id="kayad-year-from"
+                    key={config.filterOptions.yearFrom}
+                    type="number"
+                    min={1950}
+                    max={new Date().getFullYear()}
+                    defaultValue={config.filterOptions.yearFrom}
+                    onBlur={(e) => onUpdate((prev) => ({ ...prev, filterOptions: { ...prev.filterOptions, yearFrom: sanitizeYearFrom(e.target.value) } }))}
+                    className="w-full px-2.5 py-2 border border-[#D7E7E4] rounded-lg font-semibold text-[#12576D] tabular-nums focus:outline-none focus:ring-1 focus:ring-[#176B87]"
+                  />
+                </div>
               </div>
             </div>
 

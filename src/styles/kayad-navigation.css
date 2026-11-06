@@ -514,3 +514,14 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
 .kayad-mobile-menu__surface #mobile-cta-sell-car small { color: rgba(255,255,255,.78) !important; font-size: 11px; }
 .kayad-mobile-menu__surface #mobile-cta-sell-car svg:last-child { color: #fff; }
 @media (max-width: 340px) { .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__links { grid-template-columns: minmax(0, 1fr) !important; } }
+
+/* Country badge: a small flag window beside the wordmark with the country label (default KE) sitting on top of it. */
+.kayad-country-badge{display:inline-flex;flex-direction:column;align-items:center;gap:2px;flex:none;margin-left:2px;line-height:1;align-self:center}
+.kayad-country-badge__label{font-size:10px;font-weight:900;letter-spacing:.16em;padding-left:.16em;color:var(--navbar-text,var(--kn-ink,#0A3340))}
+.kayad-country-badge__window{display:block;width:36px;height:24px;border-radius:6px;padding:2px;background:#fff;border:1px solid rgba(10,51,64,.16);box-shadow:0 3px 8px rgba(10,51,64,.18),inset 0 0 0 1px rgba(255,255,255,.8);overflow:hidden}
+.kayad-country-badge__flag{display:block;width:100%;height:100%;border-radius:3px}
+@media (max-width:639px){
+  .kayad-country-badge__label{font-size:9px}
+  .kayad-country-badge__window{width:30px;height:20px;border-radius:5px}
+}
+@media (max-width:359px){ .kayad-country-badge{display:none} }

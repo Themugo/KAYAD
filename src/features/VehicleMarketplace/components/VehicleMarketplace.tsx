@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 import { CONDITIONS } from '../../../constants/vehicleOptions';
 import { Vehicle, UserProfile } from '../../../types';
 import InventoryCardMedia from './InventoryCardMedia';
+import ContactSellerSheet from './ContactSellerSheet';
 import VehicleCard from '../../../components/VehicleCard';
 import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon, Gauge, Fuel, MapPin, PlayCircle, Heart, CarFront, Phone } from 'lucide-react';
 import { usePrefersReducedMotion } from '../../../hooks/useMediaQuery';
@@ -15,7 +16,7 @@ import { getCars, getCarById, getCurrentFeaturedCampaignCarIds, mapBackendCarToV
 import { classifyInventoryFailure, type InventoryFailure } from '../utils/inventoryAvailability';
 import { getSearchFacets, type SearchFacetsResponse } from '../../../services/searchApi';
 import { getVisibleAdSlots, recordAdEvent, AdSlot } from '../../../services/adApi';
-import { useHomePageConfig, ACCENT_THEME_CLASSES } from '../hooks/useHomePageConfig';
+import { useHomePageConfig, ACCENT_THEME_CLASSES, DEFAULT_HOME_PAGE_CONFIG } from '../hooks/useHomePageConfig';
 import HomePageAdminPanel from './HomePageAdminPanel';
 import AdManagerPanel from '../../AdManager/AdManagerPanel';
 import HeroEditorPanel from '../../HeroEditor/HeroEditorPanel';
@@ -151,7 +152,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [selectedSellerType, setSelectedSellerType] = useState<string>('All');
   const [minPrice, setMinPrice] = useState<number>(50000);
   const [maxPrice, setMaxPrice] = useState<number>(20000000);
-  const [minYear, setMinYear] = useState<number>(2005);
+  // 0 means "no minimum year"; the earliest year offered is the Super Admin setting filterOptions.yearFrom.
+  const [minYear, setMinYear] = useState<number>(0);
   const [maxYear, setMaxYear] = useState<number>(2026);
   const [maxMileage, setMaxMileage] = useState<number>(250000);
 
@@ -198,6 +200,22 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       gap: 'gap-5', image: 'h-44 sm:h-48', body: 'p-5', title: 'text-base', price: 'text-xl', meta: 'text-[13px]', detail: 'py-3.5',
     },
   }[homeConfig.inventoryLayout.cardDensity];
+
+  // Super Admin configurable search choices (Home page settings): price steps and the earliest year offered.
+  const filterOptions = homeConfig.filterOptions ?? DEFAULT_HOME_PAGE_CONFIG.filterOptions;
+  const priceSteps = filterOptions.priceSteps;
+  const currentYear = Math.max(new Date().getFullYear(), 2026);
+  const yearChoices = useMemo(() => {
+    const first = Math.min(filterOptions.yearFrom, currentYear);
+    const years = Array.from({ length: currentYear - first + 1 }, (_, i) => first + i);
+    return minYear === 0 || years.includes(minYear) ? years : [...years, minYear].sort((a, b) => a - b);
+  }, [filterOptions.yearFrom, currentYear, minYear]);
+  const shortAmount = (v: number) => (v >= 1000000 ? `${Number((v / 1000000).toFixed(2))}M` : `${Math.round(v / 1000)}K`);
+  const [contactVehicle, setContactVehicle] = useState<{ id: string; title: string } | null>(null);
+  const activeSidebarFilters = [
+    selectedMake !== 'All', selectedModel !== 'All', selectedBodyStyle !== 'All', selectedFuel !== 'All',
+    selectedTransmission !== 'All', selectedSellerType !== 'All', maxPrice !== 20000000, minYear !== 0, maxYear !== 2026,
+  ].filter(Boolean).length;
 
   // The selected desktop column count is rendered through a dedicated CSS
   // contract instead of dynamically assembled Tailwind grid classes. This
@@ -277,7 +295,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     if (selectedCounty !== 'All Kenya') query.city = selectedCounty;
     if (minPrice > 0) query.minPrice = minPrice;
     if (maxPrice < 20000000) query.maxPrice = maxPrice;
-    if (minYear > 2005) query.yearMin = minYear;
+    if (minYear > 0) query.yearMin = minYear;
     if (maxYear < 2026) query.yearMax = maxYear;
     if (selectedBodyStyle !== 'All') query.body = selectedBodyStyle;
     if (selectedFuel !== 'All') query.fuel = selectedFuel;
@@ -445,7 +463,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     setSelectedSellerType('All');
     setMinPrice(50000);
     setMaxPrice(20000000);
-    setMinYear(2005);
+    setMinYear(0);
     setMaxYear(2026);
     setMaxMileage(250000);
     setOnlyAuction(false);
@@ -467,7 +485,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     if (selectedSellerType !== 'All') list.push({ id: 'seller', label: `Seller: ${selectedSellerType}`, onClear: () => setSelectedSellerType('All') });
     if (selectedCondition !== 'All') list.push({ id: 'cond', label: `Condition: ${selectedCondition}`, onClear: () => setSelectedCondition('All') });
     if (maxPrice < 20000000) list.push({ id: 'price', label: `Under Ksh ${(maxPrice / 1000000).toFixed(1)}M`, onClear: () => setMaxPrice(20000000) });
-    if (minYear > 2005) list.push({ id: 'minyear', label: `From ${minYear}`, onClear: () => setMinYear(2005) });
+    if (minYear > 0) list.push({ id: 'minyear', label: `From ${minYear}`, onClear: () => setMinYear(0) });
     if (maxYear < 2026) list.push({ id: 'maxyear', label: `Up to ${maxYear}`, onClear: () => setMaxYear(2026) });
     if (onlyAuction) list.push({ id: 'auction', label: 'Live Auction', onClear: () => setOnlyAuction(false) });
     if (dealerScope?.id) list.push({ id: 'dealer', label: `Dealer: ${dealerScope.name}`, onClear: () => onClearDealerScope?.() });
@@ -1027,9 +1045,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     aria-label={`View ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}
                   >
                     <div className="relative flex h-[380px] flex-col justify-end overflow-visible px-1" data-testid="hero-desktop-vehicle">
-                      <div className="flex min-h-0 flex-1 items-end justify-center"><img src={heroImageForVehicle(heroLeftVehicle)} alt={isShowcaseHeroVehicle(heroLeftVehicle) ? `KAYAD visual showcase: ${heroLeftVehicle.make} ${heroLeftVehicle.model}` : `${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`} className="max-h-full max-w-full object-contain object-center select-none drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" /></div>
+                      <div className="relative flex min-h-0 flex-1 items-end justify-center"><span aria-hidden="true" data-testid="hero-ground-shadow" className="pointer-events-none absolute inset-x-[4%] bottom-[-3px] h-[11%] rounded-[50%] bg-black/70 blur-[8px]" /><span aria-hidden="true" className="pointer-events-none absolute inset-x-[-6%] bottom-[-10px] h-6 rounded-[50%] bg-gradient-to-t from-black/30 to-transparent blur-md" /><img src={heroImageForVehicle(heroLeftVehicle)} alt={isShowcaseHeroVehicle(heroLeftVehicle) ? `KAYAD visual showcase: ${heroLeftVehicle.make} ${heroLeftVehicle.model}` : `${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`} className="max-h-full max-w-full object-contain object-center select-none drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" /></div>
                       {heroPresentation.showVehicleInfoCards && (
-                        <div className="mt-2 w-full rounded-2xl border border-white/20 bg-[#071F2A]/88 px-3.5 py-2.5 text-left backdrop-blur-md">
+                        <div className="mt-1.5 w-full rounded-2xl border border-white/20 bg-[#071F2A]/88 px-3.5 py-2.5 text-left backdrop-blur-md">
                           <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{isShowcaseHeroVehicle(heroLeftVehicle) ? 'KAYAD SELECT · VISUAL SHOWCASE' : heroCardContent[heroLeftVehicle.id]?.eyebrow || (heroLeftVehicle.auctionLifecycle === 'live' ? 'Live auction' : heroLeftVehicle.auctionLifecycle === 'draft' ? 'Upcoming auction' : heroLeftVehicle.auctionLifecycle === 'ended' ? 'Auction ended' : 'KAYAD SELECT')}</div>
                           <div className="mt-1 truncate text-sm font-black text-white">{heroLeftVehicle.make} {heroLeftVehicle.model}{heroLeftVehicle.year ? ` · ${heroLeftVehicle.year}` : ''}</div>
                           <div className="mt-0.5 text-[9px] text-white/65">{heroLeftVehicle.isAuction ? heroAuctionMeta(heroLeftVehicle) : heroCardContent[heroLeftVehicle.id]?.detail || heroLeftVehicle.description || 'Premium vehicle showcase'}</div>
@@ -1052,9 +1070,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     aria-label={`View ${heroRightVehicle.make} ${heroRightVehicle.model}`}
                   >
                     <div className="relative flex h-[380px] flex-col justify-end overflow-visible px-1" data-testid="hero-desktop-vehicle">
-                      <div className="flex min-h-0 flex-1 items-end justify-center"><img src={heroImageForVehicle(heroRightVehicle)} alt={isShowcaseHeroVehicle(heroRightVehicle) ? `KAYAD visual showcase: ${heroRightVehicle.make} ${heroRightVehicle.model}` : `${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`} className="max-h-full max-w-full object-contain object-center select-none drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" /></div>
+                      <div className="relative flex min-h-0 flex-1 items-end justify-center"><span aria-hidden="true" data-testid="hero-ground-shadow" className="pointer-events-none absolute inset-x-[4%] bottom-[-3px] h-[11%] rounded-[50%] bg-black/70 blur-[8px]" /><span aria-hidden="true" className="pointer-events-none absolute inset-x-[-6%] bottom-[-10px] h-6 rounded-[50%] bg-gradient-to-t from-black/30 to-transparent blur-md" /><img src={heroImageForVehicle(heroRightVehicle)} alt={isShowcaseHeroVehicle(heroRightVehicle) ? `KAYAD visual showcase: ${heroRightVehicle.make} ${heroRightVehicle.model}` : `${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`} className="max-h-full max-w-full object-contain object-center select-none drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" /></div>
                       {heroPresentation.showVehicleInfoCards && (
-                        <div className="mt-2 w-full rounded-2xl border border-white/20 bg-[#071F2A]/88 px-3.5 py-2.5 text-left backdrop-blur-md">
+                        <div className="mt-1.5 w-full rounded-2xl border border-white/20 bg-[#071F2A]/88 px-3.5 py-2.5 text-left backdrop-blur-md">
                           <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{isShowcaseHeroVehicle(heroRightVehicle) ? 'KAYAD SELECT · VISUAL SHOWCASE' : heroCardContent[heroRightVehicle.id]?.eyebrow || (heroRightVehicle.auctionLifecycle === 'live' ? 'Live auction' : heroRightVehicle.auctionLifecycle === 'draft' ? 'Upcoming auction' : heroRightVehicle.auctionLifecycle === 'ended' ? 'Auction ended' : 'KAYAD SELECT')}</div>
                           <div className="mt-1 truncate text-sm font-black text-white">{heroRightVehicle.make} {heroRightVehicle.model}{heroRightVehicle.year ? ` · ${heroRightVehicle.year}` : ''}</div>
                           <div className="mt-0.5 text-[9px] text-white/65">{heroRightVehicle.isAuction ? heroAuctionMeta(heroRightVehicle) : heroCardContent[heroRightVehicle.id]?.detail || heroRightVehicle.description || 'Premium vehicle showcase'}</div>
@@ -1129,7 +1147,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   <div className="grid grid-cols-2 items-stretch gap-1 min-[390px]:gap-2" aria-label="Featured vehicle pair">
                     {[heroLeftVehicle, heroRightVehicle].map((vehicle, index) => vehicle && heroImageForVehicle(vehicle) ? (
                       <button key={`${vehicle.id}-${index}`} type="button" onClick={() => handleHeroVehicleSelect(vehicle)} className="kayad-public-hero__vehicle-card group flex h-full min-w-0 flex-col justify-end rounded-2xl border border-white/20 bg-[#082D39]/22 px-1.5 pt-1.5 text-center transition-colors hover:bg-[#082D39]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]" aria-label={isShowcaseHeroVehicle(vehicle) ? `Browse vehicles; visual showcase ${vehicle.make} ${vehicle.model}` : `View ${vehicle.make} ${vehicle.model}`}>
-                        <div className="flex items-end justify-center overflow-visible" style={{ height: `clamp(${Math.min(140, heroPresentation.mobileStageMinPx)}px, 40vw, ${Math.min(180, heroPresentation.mobileStageMaxPx)}px)` }} data-testid="hero-pair-image-stage">
+                        <div className="relative flex items-end justify-center overflow-visible" style={{ height: `clamp(${Math.min(140, heroPresentation.mobileStageMinPx)}px, 40vw, ${Math.min(180, heroPresentation.mobileStageMaxPx)}px)` }} data-testid="hero-pair-image-stage">
+                          <span aria-hidden="true" className="pointer-events-none absolute inset-x-[6%] bottom-0 h-[10%] rounded-[50%] bg-black/55 blur-[5px]" />
                           {brokenHeroImages[vehicle.id] ? (
                             <div className="grid h-full w-full place-items-center text-white/70" role="img" aria-label={`Photo of ${vehicle.make} ${vehicle.model} is unavailable`}><ImageIcon className="h-8 w-8" aria-hidden="true" /></div>
                           ) : (
@@ -1246,22 +1265,19 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-xs bg-[#F6FAF9] outline-none"
             >
               <option value={20000000}>All</option>
-              <option value={2500000}>Ksh 2.5M</option>
-              <option value={4000000}>Ksh 4M</option>
-              <option value={7000000}>Ksh 7M</option>
+              {priceSteps.map((step) => <option key={step} value={step}>Ksh {shortAmount(step)}</option>)}
+              {maxPrice !== 20000000 && !priceSteps.includes(maxPrice) && <option value={maxPrice}>Ksh {shortAmount(maxPrice)}</option>}
             </select>
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
             <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Year</label>
             <select
-              value={minYear}
-              onChange={(e) => setMinYear(Number(e.target.value))}
+              value={minYear || yearChoices[0]}
+              onChange={(e) => { const y = Number(e.target.value); setMinYear(y <= filterOptions.yearFrom ? 0 : y); }}
               aria-label="Hero year filter"
               className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-xs bg-[#F6FAF9] outline-none"
             >
-              <option value={2005}>2005 – 2026</option>
-              <option value={2020}>2020 – 2026</option>
-              <option value={2023}>2023 – 2026</option>
+              {yearChoices.map((y) => <option key={y} value={y}>{y} – {currentYear}</option>)}
             </select>
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
@@ -1474,53 +1490,63 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         <div className={`grid ${showDesktopSidebar ? 'lg:grid-cols-[236px_minmax(0,1fr)]' : 'lg:grid-cols-1'} gap-6 items-start`}>
           {/* SIDEBAR */}
           {showDesktopSidebar && (
-          <aside className="hidden lg:block bg-white border border-[#D7E7E4] rounded-2xl p-5 sticky top-20">
-            <div className="flex items-center justify-between mb-3.5">
-              <div>
-                <h3 className="text-sm font-extrabold text-navy-900">Refine inventory</h3>
-                <p className="text-[11.5px] text-[#64748B] mt-0.5">Narrow the marketplace without leaving the page.</p>
+          <aside className="kayad-filter-panel hidden lg:block sticky top-20 overflow-hidden rounded-2xl border border-[#CFE3E0] bg-white shadow-[0_14px_40px_rgba(10,51,64,.10)]">
+            <div className="relative overflow-hidden bg-gradient-to-br from-[#0A3340] via-[#12576D] to-[#176B87] px-4 py-4 text-white">
+              <div aria-hidden="true" className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-[#13B8A6]/25 blur-2xl" />
+              <div className="relative flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25"><SlidersHorizontal className="h-5 w-5 text-[#7EE8DB]" aria-hidden="true" /></span>
+                  <div className="min-w-0">
+                    <h3 className="text-[15px] font-extrabold leading-tight">Refine inventory</h3>
+                    <p className="mt-0.5 text-[11.5px] leading-snug text-white/75">Narrow the marketplace without leaving the page.</p>
+                  </div>
+                </div>
               </div>
-              <button onClick={resetFilters} className="text-[12.5px] font-bold text-navy-600 hover:underline">Reset all</button>
+              <div className="relative mt-3 flex items-center justify-between">
+                <span data-testid="sidebar-active-count" className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold ${activeSidebarFilters > 0 ? 'bg-[#13B8A6] text-[#06303A]' : 'bg-white/15 text-white/85'}`}>{activeSidebarFilters > 0 ? `${activeSidebarFilters} filter${activeSidebarFilters === 1 ? '' : 's'} active` : 'No filters active'}</span>
+                <button onClick={resetFilters} className="rounded-lg px-2 py-1 text-[12.5px] font-bold text-white underline-offset-2 hover:bg-white/10 hover:underline">Reset all</button>
+              </div>
             </div>
-
+            <div className="px-4 pb-4 pt-1">
             <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="block text-[12px] font-bold uppercase tracking-[.06em] text-[#475569] mb-2">Make</label>
-              <select aria-label="Sidebar make filter" value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-white tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
+              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Make</label>
+              <select aria-label="Sidebar make filter" value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
                 {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
               </select>
             </div>
 
             <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="block text-[12px] font-bold uppercase tracking-[.06em] text-[#475569] mb-2">Model</label>
-              <select aria-label="Sidebar model filter" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-white tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
+              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Model</label>
+              <select aria-label="Sidebar model filter" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
                 {models.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Models' : m}</option>)}
               </select>
             </div>
 
             <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="block text-[12px] font-bold uppercase tracking-[.06em] text-[#475569] mb-2">Price Range · {formatPriceM(maxPrice)}</label>
+              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Price Range · {formatPriceM(maxPrice)}</label>
               <div className="flex gap-2 mb-2">
                 <input
                   type="number"
                   placeholder="Min"
                   value={minPrice || ''}
                   onChange={(e) => setMinPrice(Number(e.target.value) || 0)}
-                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-white tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
+                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
                 />
                 <input
                   type="number"
                   placeholder="Max"
                   value={maxPrice === 20000000 ? '' : maxPrice}
                   onChange={(e) => setMaxPrice(Number(e.target.value) || 20000000)}
-                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-white tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
+                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
                 />
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {[{ label: '< 2.5M', v: 2500000 }, { label: '< 4M', v: 4000000 }, { label: '< 7M', v: 7000000 }, { label: 'All', v: 20000000 }].map((c) => (
+                {[...priceSteps.map((v) => ({ label: `< ${shortAmount(v)}`, v })), { label: 'All', v: 20000000 }].map((c) => (
                   <button
                     key={c.label}
                     onClick={() => setMaxPrice(c.v)}
-                    className={`border rounded-full px-2.5 py-1 text-[10.5px] font-medium ${maxPrice === c.v ? 'border-navy-600 bg-[#DDF4F0] text-navy-600' : 'border-[#D7E7E4] text-[#64748B]'}`}
+                    aria-pressed={maxPrice === c.v}
+                    className={`border rounded-full px-3 py-1.5 text-[12px] font-bold transition-colors ${maxPrice === c.v ? 'border-[#176B87] bg-[#176B87] text-white shadow-sm' : 'border-[#CBDAD7] bg-white text-[#475569] hover:border-[#176B87] hover:text-[#176B87]'}`}
                   >
                     {c.label}
                   </button>
@@ -1529,54 +1555,54 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             </div>
 
             <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="block text-[12px] font-bold uppercase tracking-[.06em] text-[#475569] mb-2">Year Range</label>
+              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Year Range</label>
               <div className="flex gap-2">
                 <input
                   type="number"
-                  placeholder={`Min (2005)`}
-                  value={minYear === 2005 ? '' : minYear}
-                  onChange={(e) => setMinYear(Number(e.target.value) || 2005)}
-                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-white tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
+                  placeholder="From year" aria-label="Minimum year"
+                  value={minYear || ''}
+                  onChange={(e) => setMinYear(Number(e.target.value) || 0)}
+                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
                 />
                 <input
                   type="number"
-                  placeholder={`Max (2026)`}
+                  placeholder="To year" aria-label="Maximum year"
                   value={maxYear === 2026 ? '' : maxYear}
                   onChange={(e) => setMaxYear(Number(e.target.value) || 2026)}
-                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-white tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
+                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
                 />
               </div>
             </div>
 
             <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="block text-[12px] font-bold uppercase tracking-[.06em] text-[#475569] mb-2">Body Style</label>
-              <select aria-label="Sidebar body style filter" value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-white tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
+              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Body Style</label>
+              <select aria-label="Sidebar body style filter" value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
                 {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
               </select>
             </div>
 
             <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="block text-[12px] font-bold uppercase tracking-[.06em] text-[#475569] mb-2">Fuel Type</label>
-              <select aria-label="Sidebar fuel filter" value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-white tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
+              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Fuel Type</label>
+              <select aria-label="Sidebar fuel filter" value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
                 {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
               </select>
             </div>
 
             <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="block text-[12px] font-bold uppercase tracking-[.06em] text-[#475569] mb-2">Transmission</label>
-              <select aria-label="Sidebar transmission filter" value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-white tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
+              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Transmission</label>
+              <select aria-label="Sidebar transmission filter" value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
                 {transmissionOptions.map((t) => <option key={t} value={t}>{t === 'All' ? 'All Transmissions' : t}</option>)}
               </select>
             </div>
 
             <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="block text-[12px] font-bold uppercase tracking-[.06em] text-[#475569] mb-2">Seller Type</label>
-              <select aria-label="Sidebar seller type filter" value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-white tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
+              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Seller Type</label>
+              <select aria-label="Sidebar seller type filter" value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
                 {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
               </select>
             </div>
 
-            <button onClick={resetFilters} className="w-full bg-navy-900 hover:bg-navy-700 text-white font-bold text-xs rounded-xl py-2.5 mt-3">
+            <button onClick={resetFilters} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0A3340] to-[#176B87] py-3 text-[13px] font-extrabold text-white shadow-md transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]">
               Reset all filters
             </button>
 
@@ -1597,6 +1623,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 ))}
               </div>
             )}
+            </div>
           </aside>
           )}
 
@@ -1694,13 +1721,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   return (
                     <article
                       key={v.id}
-                      className={`kayad-vehicle-card group bg-white border border-[#D7E7E4] rounded-2xl overflow-hidden flex shadow-[0_6px_22px_rgba(11,29,58,0.055)] hover:shadow-[0_14px_34px_rgba(11,29,58,0.12)] hover:-translate-y-0.5 transition-all duration-200 ${viewMode === 'list' ? 'flex-col sm:flex-row' : 'flex-col'}`}
+                      className={`kayad-vehicle-card group bg-white border border-[#D7E7E4] rounded-2xl overflow-hidden flex shadow-[0_6px_22px_rgba(11,29,58,0.055)] hover:shadow-[0_14px_34px_rgba(11,29,58,0.12)] hover:-translate-y-0.5 hover:border-[#176B87]/45 transition-all duration-200 ${viewMode === 'list' ? 'flex-col sm:flex-row' : 'flex-col'}`}
                     >
                       <InventoryCardMedia
                         title={v.title}
                         images={v.images}
                         onOpen={() => handleVehicleSelect(v)}
-                        className={viewMode === 'list' ? 'h-44 w-full sm:h-auto sm:w-64' : inventoryDensity.image}
+                        className={viewMode === 'list' ? 'aspect-[16/10] w-full sm:aspect-auto sm:min-h-[230px] sm:w-[300px]' : 'aspect-[4/3] w-full'}
                         top={<>
                           <div className="flex flex-wrap gap-1 max-w-[78%]">
                             {v.verified && (
@@ -1768,7 +1795,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="kayad-vc-kicker text-[11px] font-bold text-[#176B87] mb-1">{showLiveAuction ? 'Live auction' : showUpcomingAuction ? 'Upcoming auction' : showEndedAuction ? 'Auction ended' : v.verified ? 'Verified listing' : 'Marketplace listing'}</p>
-                            <h3 className={`${inventoryDensity.title} font-extrabold leading-snug tracking-[-0.01em] text-navy-900 line-clamp-2 max-sm:text-[18px] max-sm:uppercase`}>
+                            <h3 className={`${inventoryDensity.title} font-extrabold leading-snug tracking-[-0.01em] text-navy-900 line-clamp-2 max-sm:text-[18px] max-sm:uppercase ${viewMode === 'grid' ? 'sm:min-h-[2.6em]' : ''}`}>
                               {v.year} {v.make} {v.model}
                             </h3>
                           </div>
@@ -1777,7 +1804,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
                         <div className={`kayad-vc-price mt-2 ${inventoryDensity.price} font-black tracking-tight text-navy-900 max-sm:text-[30px] max-sm:leading-none max-sm:!text-[#176B87]`}>{formatPriceM(v.price)}</div>
 
-                        <div className={`kayad-vc-specs mt-2.5 grid grid-cols-2 gap-x-2 gap-y-1.5 ${inventoryDensity.meta} font-medium text-[#64748B] max-sm:grid-cols-1 max-sm:col-start-2 max-sm:row-start-1 max-sm:row-span-2 max-sm:mt-0 max-sm:border-l max-sm:border-[#D7E7E4] max-sm:pl-3 max-sm:gap-y-2.5 max-sm:text-[13px] max-sm:text-[#334155]`}>
+                        <div className={`kayad-vc-specs mt-2.5 grid grid-cols-2 ${viewMode === 'list' ? 'sm:grid-cols-4' : ''} gap-x-2 gap-y-1.5 ${inventoryDensity.meta} font-medium text-[#64748B] max-sm:grid-cols-1 max-sm:col-start-2 max-sm:row-start-1 max-sm:row-span-2 max-sm:mt-0 max-sm:border-l max-sm:border-[#D7E7E4] max-sm:pl-3 max-sm:gap-y-2.5 max-sm:text-[13px] max-sm:text-[#334155]`}>
                           {v.mileage > 0 && <span className="inline-flex items-center gap-1.5 min-w-0"><Gauge className="w-3 h-3 text-navy-600 shrink-0" />{v.mileage.toLocaleString()} km</span>}
                           {v.fuelType && <span className="inline-flex items-center gap-1.5 min-w-0"><Fuel className="w-3 h-3 text-[var(--kayad-cyan)] shrink-0" />{v.fuelType}</span>}
                           {v.transmission && <span className="inline-flex items-center gap-1.5 min-w-0"><ArrowRightLeft className="w-3 h-3 text-[#94A3B8] shrink-0" />{v.transmission}</span>}
@@ -1800,16 +1827,16 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                           )}
                         </div>
 
-                        <div className="kayad-vc-actions mt-3 flex flex-col gap-2 max-sm:mt-4 max-sm:grid max-sm:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+                        <div className={`kayad-vc-actions mt-auto pt-3 flex flex-col gap-2 ${viewMode === 'list' ? 'sm:flex-row sm:justify-end' : ''} max-sm:mt-4 max-sm:grid max-sm:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]`}>
                           <button
                             onClick={() => handleVehicleSelect(v)}
-                            className="kayad-vc-cta w-full max-sm:capitalize max-sm:min-h-12 max-sm:text-[14px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#B8D9D6] bg-white hover:bg-[#DDF4F0] hover:border-navy-600/40 py-2.5 text-xs font-extrabold text-navy-700 transition-colors"
+                            className={`kayad-vc-cta w-full max-sm:capitalize max-sm:min-h-12 max-sm:text-[14px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#B8D9D6] bg-white hover:bg-[#DDF4F0] hover:border-navy-600/40 py-2.5 text-xs font-extrabold text-navy-700 transition-colors ${viewMode === 'list' ? 'sm:w-auto sm:px-6' : ''}`}
                           >
                             View vehicle details <ChevronRight className="w-3.5 h-3.5" />
                           </button>
                           <button
                             type="button"
-                            onClick={() => handleVehicleSelect(v)}
+                            onClick={() => setContactVehicle({ id: v.id, title: v.title })}
                             aria-label={`Contact seller about ${v.title}`}
                             className="kayad-vc-contact hidden min-h-12 items-center justify-center gap-2 rounded-xl bg-[#176B87] px-3 text-[14px] font-extrabold text-white hover:bg-[#12576D] max-sm:inline-flex focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]"
                           >
@@ -1902,6 +1929,15 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         </div>
       )}
 
+      {contactVehicle && (
+        <ContactSellerSheet
+          vehicleId={contactVehicle.id}
+          title={contactVehicle.title}
+          onClose={() => setContactVehicle(null)}
+          onOpenListing={() => { const v = [...filteredVehicles, ...vehicles].find((x) => x.id === contactVehicle.id); setContactVehicle(null); if (v) handleVehicleSelect(v); }}
+        />
+      )}
+
       {/* MOBILE FULL-SCREEN FILTER DRAWER */}
       {showMobileFilterDrawer && (
         <div className="fixed inset-0 bg-white z-50 overflow-y-auto lg:hidden" role="dialog" aria-modal="true" aria-labelledby="kayad-mobile-filter-title">
@@ -1937,7 +1973,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">From year</label>
-                <input type="number" value={minYear === 2005 ? '' : minYear} onChange={(e) => setMinYear(Number(e.target.value) || 2005)} placeholder="2005" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
+                <input type="number" value={minYear || ''} onChange={(e) => setMinYear(Number(e.target.value) || 0)} placeholder={String(filterOptions.yearFrom)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
               </div>
               <div>
                 <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">To year</label>

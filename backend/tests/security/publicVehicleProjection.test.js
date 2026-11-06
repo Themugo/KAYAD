@@ -17,10 +17,12 @@ describe("public vehicle projection", () => {
     expect(out.title).toBe("T"); expect(out.currentBid).toBe(5); expect(out.dealer.name).toBe("N"); expect(out.dealer.id).toBe("d-1");
     const text = JSON.stringify(out);
     for (const k of Object.keys(SENSITIVE)) expect(Object.prototype.hasOwnProperty.call(out, k)).toBe(false);
-    for (const v of ["9876543", "+254799000111", "CHS-1", "REG-1", "VIN-1", "u-1", "+254711000222", "d@x.example", "bio"]) expect(text.includes(v)).toBe(false);
+    for (const v of ["9876543", "+254799000111", "CHS-1", "REG-1", "VIN-1", "u-1", "d@x.example", "bio"]) expect(text.includes(v)).toBe(false);
+    // Intentional change 2026-11-06: contacting a seller needs no account, so the single-listing detail carries the seller phone (never the listing contact phone).
+    expect(out.dealer.phone).toBe("+254711000222");
   });
   it("seller phone and VIN are emitted only when the recorded owner policy says so", () => {
-    expect(PUBLIC_VEHICLE_POLICY).toEqual({ exposeVin: false, exposeSellerPhone: false });
+    expect(PUBLIC_VEHICLE_POLICY).toEqual({ exposeVin: false, exposeSellerPhone: false, exposeSellerPhoneOnDetail: true });
     const open = toPublicVehicleDetail(car, { exposeVin: true, exposeSellerPhone: true });
     expect(open.vin).toBe("VIN-1"); expect(open.dealer.phone).toBe("+254711000222"); expect(open.dealer.email).toBeUndefined(); expect(open.chassisNumber).toBeUndefined();
   });

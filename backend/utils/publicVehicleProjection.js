@@ -7,6 +7,8 @@ export const PUBLIC_VEHICLE_POLICY = Object.freeze({
   exposeVin: false,
   /** Seller account phone feeds the public "Call Seller" action; owner decision 13K. */
   exposeSellerPhone: false,
+  /** Owner decision 2026-11-06: contacting a seller must not need an account, so the single-listing detail response (never lists or search) carries the seller's phone unless the seller hides it. */
+  exposeSellerPhoneOnDetail: true,
 });
 
 const DETAIL_FIELDS = new Set(("id _id slug title brand model year price mileage fuel transmission bodyType body_type color engine driveType drive_type drivetrain condition description features images coverImage cover_image city location_city status views inspectionStatus inspection_status dutyStatus duty_status isVerifiedDealer is_verified_dealer isPromoted is_promoted dealRating deal_rating auctionStatus auction_status auctionEnd auction_end auctionStartTime auction_start_time startingBid starting_bid currentBid current_bid bidsCount bids_count allowBid allow_bid allowBuy allow_buy hasAuction has_auction isAuction createdAt created_at updatedAt updated_at escrowEnabled escrow_enabled sold dealer").split(" "));
@@ -23,7 +25,7 @@ export const toPublicDealer = (dealer, policy = PUBLIC_VEHICLE_POLICY) => {
 export const toPublicVehicleDetail = (car, policy = PUBLIC_VEHICLE_POLICY) => {
   const out = filterKeys(car, DETAIL_FIELDS);
   if (policy.exposeVin && car?.vin) out.vin = car.vin;
-  if (car?.dealer !== undefined) out.dealer = toPublicDealer(car.dealer, policy);
+  if (car?.dealer !== undefined) out.dealer = toPublicDealer(car.dealer, { ...policy, exposeSellerPhone: Boolean(policy.exposeSellerPhone || policy.exposeSellerPhoneOnDetail) });
   return out;
 };
 export const toPublicVehicleSummary = (car, policy = PUBLIC_VEHICLE_POLICY) => {

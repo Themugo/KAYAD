@@ -31,6 +31,8 @@ export function validateBranding(branding, env = process.env) {
   for (const [k, max] of Object.entries(TEXT_LIMITS)) {
     if (branding[k] !== undefined && (typeof branding[k] !== "string" || branding[k].length > max)) return { ok: false, message: `${k} must be text of at most ${max} characters.` };
   }
+  if (branding.countryBadgeShow !== undefined && typeof branding.countryBadgeShow !== "boolean") return { ok: false, message: "countryBadgeShow must be true or false." };
+  if (branding.countryBadgeText !== undefined && (typeof branding.countryBadgeText !== "string" || !/^[A-Za-z0-9]{1,4}$/.test(branding.countryBadgeText))) return { ok: false, message: "The country badge label must be 1 to 4 letters or digits." };
   for (const k of COLOR_FIELDS) {
     if (branding[k] !== undefined && (typeof branding[k] !== "string" || !COLOR.test(branding[k].trim()))) return { ok: false, message: `${k} must be a hex colour (#RRGGBB) or rgb()/rgba() value.` };
   }

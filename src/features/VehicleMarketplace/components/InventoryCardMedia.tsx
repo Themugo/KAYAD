@@ -28,12 +28,12 @@ const InventoryCardMedia: React.FC<Props> = ({ title, images = [], className, on
 
   return (
     <>
-      <div className={`kayad-vc-media relative bg-[#EEF4F3] shrink-0 overflow-hidden ${className}`}>
+      <div className={`kayad-vc-media relative bg-gradient-to-b from-[#F3F8F7] to-[#E1EDEB] shrink-0 overflow-hidden ${className}`}>
         {total > 0 ? (
           <img
             src={images[current]}
             alt={title}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.035] max-sm:object-contain max-sm:group-hover:scale-100"
+            className="h-full w-full object-contain p-1 transition-transform duration-500 group-hover:scale-[1.03]"
             loading="lazy"
           />
         ) : (

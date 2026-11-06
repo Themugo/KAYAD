@@ -8,6 +8,9 @@ interface Branding {
   logoText: string;
   logoUrl: string;
   brandTagline: string;
+  /** Country badge beside the logo: a small Kenyan-flag window with a short label (default KE) sitting on top of it. */
+  countryBadgeShow?: boolean;
+  countryBadgeText?: string;
   footerDescription: string;
   footerCopyright: string;
 
@@ -74,6 +77,8 @@ const DEFAULT_BRANDING: Branding = {
   logoText: 'KAYAD',
   logoUrl: '/branding/kayad-road-mark.svg',
   brandTagline: "Kenya's Trusted Vehicle Marketplace",
+  countryBadgeShow: true,
+  countryBadgeText: 'KE',
   footerDescription: "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services.",
   footerCopyright: 'KAYAD Motors Kenya Ltd. All rights reserved.',
 
@@ -194,6 +199,12 @@ function normalizeLegacyBrandColor(value: string, field: keyof Branding): string
   return trimmed;
 }
 
+/** Short label shown above the flag: letters and digits only, upper case, at most 4 characters; empty falls back to KE. */
+export function sanitizeCountryBadgeText(value: unknown): string {
+  const t = typeof value === 'string' ? value.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 4) : '';
+  return t || 'KE';
+}
+
 function normalizeBrandingConfig(config: Partial<Branding> | null | undefined): Branding {
   const merged = { ...DEFAULT_BRANDING, ...(config && typeof config === 'object' ? config : {}) } as Branding;
   const colorFields: Array<keyof Branding> = [
@@ -205,6 +216,8 @@ function normalizeBrandingConfig(config: Partial<Branding> | null | undefined): 
     const value = merged[field];
     if (typeof value === 'string') merged[field] = normalizeLegacyBrandColor(value, field) as never;
   }
+  merged.countryBadgeShow = merged.countryBadgeShow !== false;
+  merged.countryBadgeText = sanitizeCountryBadgeText(merged.countryBadgeText);
   return merged;
 }
 

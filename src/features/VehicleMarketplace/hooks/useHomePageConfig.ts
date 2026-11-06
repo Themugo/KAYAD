@@ -59,7 +59,27 @@ export interface HomePageConfig {
     showSidebar: boolean;
     cardDensity: 'compact' | 'standard' | 'comfortable';
   };
+  /** Super Admin configurable choices offered by the homepage search bar and price chips. */
+  filterOptions: {
+    /** "Price up to" choices in Ksh, ascending. */
+    priceSteps: number[];
+    /** Earliest model year offered by the "Year" choice (every year from here to the current year is listed). */
+    yearFrom: number;
+  };
 }
+
+export const DEFAULT_PRICE_STEPS = [2500000, 4000000, 7000000, 10000000];
+export const DEFAULT_YEAR_FROM = 2005;
+export const sanitizePriceSteps = (raw: unknown): number[] => {
+  const list = Array.isArray(raw) ? raw : typeof raw === 'string' ? raw.split(/[\s,;]+/) : [];
+  const nums = Array.from(new Set(list.map((n) => Math.round(Number(n))).filter((n) => Number.isFinite(n) && n >= 10000 && n <= 500000000))).sort((a, b) => a - b).slice(0, 8);
+  return nums.length > 0 ? nums : DEFAULT_PRICE_STEPS;
+};
+export const sanitizeYearFrom = (raw: unknown): number => {
+  const n = Math.round(Number(raw));
+  const max = new Date().getFullYear();
+  return Number.isFinite(n) && n >= 1950 && n <= max ? n : DEFAULT_YEAR_FROM;
+};
 
 export const ACCENT_THEME_OPTIONS: { id: HomePageConfig['accentTheme']; label: string; swatch: string }[] = [
   { id: 'blue', label: 'Electric Blue', swatch: '#176B87' },
@@ -108,6 +128,7 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
     showSidebar: true,
     cardDensity: 'compact',
   },
+  filterOptions: { priceSteps: DEFAULT_PRICE_STEPS, yearFrom: DEFAULT_YEAR_FROM },
 };
 
 const STORAGE_KEY = 'kayad_home_page_config_v1';
@@ -149,6 +170,10 @@ function loadConfig(): HomePageConfig {
         cardDensity: ['compact', 'standard', 'comfortable'].includes(parsed.inventoryLayout?.cardDensity)
           ? parsed.inventoryLayout.cardDensity
           : DEFAULT_HOME_PAGE_CONFIG.inventoryLayout.cardDensity,
+      },
+      filterOptions: {
+        priceSteps: sanitizePriceSteps(parsed.filterOptions?.priceSteps),
+        yearFrom: sanitizeYearFrom(parsed.filterOptions?.yearFrom),
       },
     };
   } catch {

@@ -25,6 +25,8 @@ const DEFAULT_BRANDING = {
   logoText: 'KAYAD',
   logoUrl: '/branding/kayad-road-mark.svg',
   brandTagline: "Kenya's Trusted Vehicle Marketplace",
+  countryBadgeShow: true,
+  countryBadgeText: 'KE',
   navbarBg: '', navbarText: '', navbarNavBg: '', footerBg: '', footerText: '', footerAccent: '',
   primaryColor: '#176B87',
   primaryLight: '#13B8A6',

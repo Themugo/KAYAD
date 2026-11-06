@@ -258,6 +258,19 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
               placeholder="Kenya’s Trusted Vehicle Marketplace" style={{ height: 44 }} />
           </div>
 
+          <div className="input-group" data-testid="country-badge-editor">
+            <label className="input-label">Country badge (flag beside the logo)</label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, marginBottom: 8 }}>
+              <input aria-label="Show country badge" type="checkbox" checked={branding.countryBadgeShow !== false}
+                onChange={e => setBranding(p => ({...p, countryBadgeShow: e.target.checked}))} />
+              Show the Kenyan flag window next to the logo
+            </label>
+            <input aria-label="Country badge label" className="input" type="text" maxLength={4} value={branding.countryBadgeText ?? 'KE'}
+              onChange={e => setBranding(p => ({...p, countryBadgeText: e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 4)}))}
+              placeholder="KE" style={{ height: 44, maxWidth: 140 }} />
+            <small style={{ display: 'block', marginTop: 6, opacity: .7 }}>Up to 4 letters or digits, shown above the flag. Saved with the other branding settings.</small>
+          </div>
+
           <div className="input-group">
             <label className="input-label">Footer Description</label>
             <textarea aria-label="Footer Description" className="input" value={branding.footerDescription || ''} rows={3}

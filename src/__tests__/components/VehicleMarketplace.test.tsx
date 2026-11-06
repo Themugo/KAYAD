@@ -240,10 +240,35 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     expect(stages.length).toBeGreaterThanOrEqual(1);
     for (const stage of stages) {
       const caption = Array.from(stage.children).find((c) => /rounded-2xl/.test(c.className));
-      if (caption) { expect(caption.className).not.toMatch(/\babsolute\b/); expect(caption.className).toMatch(/\bmt-2\b/); }
+      if (caption) { expect(caption.className).not.toMatch(/\babsolute\b/); expect(caption.className).toMatch(/\bmt-\d/); }
       const img = stage.querySelector('img');
       expect(img?.className).toMatch(/object-contain/);
     }
+  });
+
+  it('year and price choices come from the Super Admin search settings, not fixed values', async () => {
+    window.localStorage.setItem('kayad_home_page_config_v1', JSON.stringify({ filterOptions: { priceSteps: [1500000, 3000000, 12000000], yearFrom: 2012 } }));
+    try {
+      await renderMarketplace({ ...baseProps });
+      const years = Array.from((screen.getByLabelText('Hero year filter') as HTMLSelectElement).options).map((o) => o.value);
+      expect(years[0]).toBe('2012');
+      expect(years).toContain('2018');
+      expect(years).toContain('2026');
+      expect(years).not.toContain('2005');
+      const prices = Array.from((screen.getByLabelText('Hero maximum price filter') as HTMLSelectElement).options).map((o) => o.textContent);
+      expect(prices).toEqual(['All', 'Ksh 1.5M', 'Ksh 3M', 'Ksh 12M']);
+    } finally {
+      window.localStorage.removeItem('kayad_home_page_config_v1');
+    }
+  });
+
+  it('without settings the search keeps the standard 2005 start and default price steps', async () => {
+    await renderMarketplace({ ...baseProps });
+    const years = Array.from((screen.getByLabelText('Hero year filter') as HTMLSelectElement).options).map((o) => o.value);
+    expect(years[0]).toBe('2005');
+    expect(years).toContain('2021');
+    const prices = Array.from((screen.getByLabelText('Hero maximum price filter') as HTMLSelectElement).options).map((o) => o.textContent);
+    expect(prices).toEqual(['All', 'Ksh 2.5M', 'Ksh 4M', 'Ksh 7M', 'Ksh 10M']);
   });
 
   it('a featured card whose image fails keeps its label over a neutral placeholder (no broken-image icon)', async () => {

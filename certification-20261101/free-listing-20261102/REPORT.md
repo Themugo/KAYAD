@@ -132,3 +132,9 @@ NOT verified: signed-in screens only with mocked data, merge against a real acco
 
 ### Phone inventory card from the supplied mockup (D-159)
 Photo stage with Verified chip (only when the record says verified), heart, photo counter and expand; thumbnail strip with "+N More"; location line; title and price beside the spec list; View Vehicle Details and Contact Seller. Desktop cards keep their layout. Rendered headlessly at 390 and 320 px with placeholder photos. Not verified: real devices, real photos, Contact Seller as a distinct action.
+
+### Polish round (D-160 to D-164)
+Grounded hero cars, styled filter panel, refined grid and list cards, no-login Contact Seller (intentional change to the public vehicle projection test: detail now carries seller phone), and Super Admin configurable year and price choices. Not verified: real photos and devices, hosted settings persistence, real calls/WhatsApp.
+
+### KE flag window (D-165)
+Editable from Admin > Settings > Branding (switch and label). Backend validation added. Not verified: saving through the live settings route, real devices.
