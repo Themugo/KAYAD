@@ -52,6 +52,7 @@ import privateSellerAuctionRoutes from "./routes/privateSellerAuctionRoutes.js";
 import privateSellerCapabilityRoutes from "./routes/privateSellerCapabilityRoutes.js"; // Phase 13E
 import accountCapabilitiesRoutes from "./routes/accountCapabilitiesRoutes.js"; // one account, many capabilities (read-only)
 import siteDesignRoutes from "./routes/siteDesignRoutes.js"; // no-code public-site design editor
+import featuredCampaignRoutes, { publicRouter as featuredCampaignPublicRoutes } from "./routes/featuredCampaignRoutes.js"; // homepage featured-vehicle campaigns
 import analyticsRoutes from "./routes/analyticsRoutes.js"; // visitor analytics: public collection
 import analyticsAdminRoutes from "./routes/analyticsAdminRoutes.js"; // visitor analytics: Super Admin aggregate reports
 import auctionRoutes from "./routes/auctionRoutes.js";
@@ -857,6 +858,8 @@ app.use("/api/auctions", auctionFulfilmentRoutes);
 app.use("/api/admin/system/maintenance", maintenanceControlRoutes); // maintenance control plane (owner / authorised technical recovery); must precede /api/admin
 app.use("/api/admin/analytics", adminLimiter, analyticsAdminRoutes); // must precede /api/admin
 app.use("/api/admin/site-designs", adminLimiter, siteDesignRoutes); // must precede /api/admin
+app.use("/api/admin/featured-campaigns", adminLimiter, featuredCampaignRoutes); // must precede /api/admin
+app.use("/api/featured-campaigns", featuredCampaignPublicRoutes); // public: current campaign vehicle ids
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/admin", adminLimiter, adminRoutes);
 app.use("/api/owner-access", authLimiter, ownerAccessRouter); // STAGE 5B: public, token-gated invitation preview/accept

@@ -122,3 +122,13 @@ NOT verified: real servers (the 404 is client-side; the host must serve the app 
 Fixed: D-148 dealer dashboard no longer scrolls sideways on phones; D-149 Admin Cars and Site Designs no longer crash when the API returns no policy/designs; D-150 page titles for dealer auction setup/operations/onboarding/team setup, password change and email verification; D-151 Support FAQ now explains bid commitments, refunds and what happens after you win; D-152 vehicles saved while signed out now persist in the browser and merge into the account on sign-in.
 Verified: tsc, new tests (Sweep1105b 4, guestSavedVehicles 3), admin and features folders, full run final25 (see logs-end-to-end-1105b).
 NOT verified: signed-in screens only with mocked data, merge against a real account, real phone, FAQ wording (owner review), migrations on hosted DB, real M-Pesa/B2C, real Socket.IO presence, winner flow with a real outcome.
+
+## Design implementation 1106 (approved design package)
+
+- Hero captions moved beneath each vehicle (D-153); filter typography refined, structure unchanged (D-154).
+- Super Admin Featured Vehicles: migration `supabase/migrations/20261106120000_featured_campaigns.sql` (owner-run), backend service/routes, admin page, hero consumption of running campaigns (D-155, D-156).
+- Intentional test change: sidebar destination count 33 to 34 (D-157).
+- Not verified: migration on hosted DB, real photography, real browsers/phones, campaign flow against live data, screenshots of the implemented pages.
+
+### Phone inventory card from the supplied mockup (D-159)
+Photo stage with Verified chip (only when the record says verified), heart, photo counter and expand; thumbnail strip with "+N More"; location line; title and price beside the spec list; View Vehicle Details and Contact Seller. Desktop cards keep their layout. Rendered headlessly at 390 and 320 px with placeholder photos. Not verified: real devices, real photos, Contact Seller as a distinct action.

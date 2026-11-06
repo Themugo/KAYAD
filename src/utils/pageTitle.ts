@@ -50,6 +50,7 @@ const PATH_TITLES: Array<[RegExp, string]> = [
   [/^\/verify-email\/?$/, 'Verify your email'],
   [/^\/terms\/?$/, 'Terms of Service'],
   [/^\/privacy\/?$/, 'Privacy Policy'],
+  [/^\/admin\/featured-vehicles\/?$/, 'Featured vehicles'],
   [/^\/admin(\/|$)/, 'Admin'],
 ];
 

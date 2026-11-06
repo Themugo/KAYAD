@@ -5,10 +5,10 @@ import { readEscrowRulesConfig } from '../../features/Admin/hooks/escrowRulesCon
 import { VehicleMarketplace } from '../../features/VehicleMarketplace/components/VehicleMarketplace';
 import { INITIAL_VEHICLES } from '../fixtures/mockVehicles';
 
-const vehicleApiMocks = vi.hoisted(() => ({ getCars: vi.fn() }));
+const vehicleApiMocks = vi.hoisted(() => ({ getCars: vi.fn(), campaignIds: vi.fn(), getCarById: vi.fn() }));
 vi.mock('../../services/vehicleApi', async () => {
   const actual = await vi.importActual('../../services/vehicleApi');
-  return { ...actual, getCars: vehicleApiMocks.getCars };
+  return { ...actual, getCars: vehicleApiMocks.getCars, getCurrentFeaturedCampaignCarIds: vehicleApiMocks.campaignIds, getCarById: vehicleApiMocks.getCarById };
 });
 
 // Fixed: mid-grid sponsor cards previously came from MOCK_SPONSOR_CARDS
@@ -59,6 +59,7 @@ const renderMarketplace = async (props: MarketplaceProps) => {
 
 describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
   beforeEach(() => {
+    vehicleApiMocks.campaignIds.mockReset(); vehicleApiMocks.campaignIds.mockResolvedValue([]); vehicleApiMocks.getCarById.mockReset();
     vehicleApiMocks.getCars.mockReset();
     vehicleApiMocks.getCars.mockResolvedValue({
       success: true,
@@ -214,6 +215,35 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     await waitFor(() => expect(screen.getByText(/No vehicles are listed right now/i)).toBeTruthy(), { timeout: 3000 });
     expect(screen.queryByText(/temporarily unavailable/i)).toBeNull();
     expect(screen.queryByText(/No vehicles match your filters/i)).toBeNull();
+  });
+
+  it('a running Super Admin campaign takes over the hero, in the scheduled order', async () => {
+    const car = (id: string, brand: string, model: string) => ({ id, title: `${brand} ${model}`, brand, model, year: 2022, price: 5000000, status: 'available', images: [{ url: `/img/${id}.png` }], location_city: 'Nairobi' });
+    vehicleApiMocks.campaignIds.mockResolvedValue(['camp-a', 'camp-b']);
+    vehicleApiMocks.getCarById.mockImplementation(async (id: string) => (id === 'camp-a' ? car('camp-a', 'Campaign', 'Alpha') : car('camp-b', 'Campaign', 'Bravo')));
+    await renderMarketplace({ ...baseProps });
+    const view = within(screen.getByLabelText('KAYAD mobile hero'));
+    await waitFor(() => expect(view.getByText('Campaign Alpha')).toBeTruthy());
+    expect(view.getByText('Campaign Bravo')).toBeTruthy();
+    expect(view.queryByText(`${INITIAL_VEHICLES[0].make} ${INITIAL_VEHICLES[0].model}`)).toBeNull();
+  });
+
+  it('with no running campaign the hero keeps its normal featured selection', async () => {
+    await renderMarketplace({ ...baseProps });
+    const view = within(screen.getByLabelText('KAYAD mobile hero'));
+    expect(view.getByText(`${INITIAL_VEHICLES[0].make} ${INITIAL_VEHICLES[0].model}`)).toBeTruthy();
+  });
+
+  it('desktop hero captions sit beneath each vehicle, never positioned over it', async () => {
+    await renderMarketplace({ ...baseProps });
+    const stages = screen.getAllByTestId('hero-desktop-vehicle');
+    expect(stages.length).toBeGreaterThanOrEqual(1);
+    for (const stage of stages) {
+      const caption = Array.from(stage.children).find((c) => /rounded-2xl/.test(c.className));
+      if (caption) { expect(caption.className).not.toMatch(/\babsolute\b/); expect(caption.className).toMatch(/\bmt-2\b/); }
+      const img = stage.querySelector('img');
+      expect(img?.className).toMatch(/object-contain/);
+    }
   });
 
   it('a featured card whose image fails keeps its label over a neutral placeholder (no broken-image icon)', async () => {

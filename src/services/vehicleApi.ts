@@ -257,6 +257,17 @@ export async function getCarById(id: string): Promise<BackendCar | null> {
   }
 }
 
+/** GET /api/featured-campaigns/current - vehicle ids the Super Admin is featuring right now, in display order.
+ * Never throws: when campaigns are unavailable the homepage keeps using its normal featured selection. */
+export async function getCurrentFeaturedCampaignCarIds(): Promise<string[]> {
+  try {
+    const res = await vehicleFetch<{ carIds?: unknown }>('/api/featured-campaigns/current', { method: 'GET' });
+    return Array.isArray(res?.carIds) ? res.carIds.filter((id): id is string => typeof id === 'string') : [];
+  } catch {
+    return [];
+  }
+}
+
 /** GET /api/cars/my-listings - the real, signed-in seller's own
  * listings, every status (not just "available"). */
 export async function getMyListings(): Promise<BackendCar[]> {

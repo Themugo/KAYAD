@@ -35,6 +35,7 @@ const AdminStaff = lazy(() => import('../../pages/admin/AdminStaff'));
 const AdminStaffPermissions = lazy(() => import('../../pages/admin/AdminStaffPermissions'));
 const AdminTrafficAnalytics = lazy(() => import('../../pages/admin/AdminTrafficAnalytics'));
 const AdminSiteDesigns = lazy(() => import('../../pages/admin/AdminSiteDesigns'));
+const AdminFeaturedVehicles = lazy(() => import('../../pages/admin/AdminFeaturedVehicles'));
 const PanicRoom = lazy(() => import('../../pages/admin/PanicRoom'));
 const PlatformRecovery = lazy(() => import('../../pages/admin/PlatformRecovery'));
 const WebhoistOverview = lazy(() => import('../../pages/admin/WebhoistOverview'));
@@ -98,6 +99,7 @@ export const ADMIN_ROUTE_COMPONENTS: Record<string, AdminRouteDefinition> = {
   '/admin/staff-permissions': { component: AdminStaffPermissions, superadminOnly: true },
   '/admin/traffic-analytics': { component: AdminTrafficAnalytics, superadminOnly: true },
   '/admin/site-designs': { component: AdminSiteDesigns },
+  '/admin/featured-vehicles': { component: AdminFeaturedVehicles },
   '/admin/panic-room': { component: PanicRoom, superadminOnly: true },
   '/admin/platform-recovery': { component: PlatformRecovery }, // permission-gated (platform_recovery); never role-gated
   '/admin/webhoist': { component: WebhoistOverview, superadminOnly: true },
