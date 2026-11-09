@@ -15,7 +15,7 @@ const EMPTY_DRAFT: HeroSlideInput = {
   ctaSecondaryText: '',
   ctaSecondaryLink: '',
   backgroundType: 'image',
-  backgroundValue: '/hero/kayad-kenyan-highlands-road.svg',
+  backgroundValue: '/hero/kayad-thika-expressway-no-signs.svg',
   overlayColor: '#176B87',
   overlayOpacity: 40,
   displayMode: 'boxed',

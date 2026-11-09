@@ -23,7 +23,7 @@ export const DEFAULT_DESIGN = Object.freeze({
     footerDescription: "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services.", footerCopyright: "KAYAD Motors Kenya Ltd. All rights reserved." },
   colors: { primaryColor: "#176B87", primaryLight: "#13B8A6", primaryDark: "#0A3340", primaryGlow: "rgba(23, 107, 135, 0.22)", accentColor: "#13B8A6", backgroundColor: "#F6FAF9", surfaceColor: "#EEF7F5", cardColor: "#FFFFFF", textColor: "#0A3340", textMutedColor: "#64748B", textDimColor: "#94A3B8", borderColor: "#D7E7E4", successColor: "#10B981", dangerColor: "#EF4444", warningColor: "#176B87", infoColor: "#176B87" },
   typography: { fontDisplay: "Outfit", fontBody: "Plus Jakarta Sans" },
-  hero: { backgroundUrl: "/hero/kayad-kenyan-highlands-road.svg", overlayColor: "#EEF7F5", overlayOpacityPct: 18, showVehicleInfoCards: true, rotationSeconds: 6.5 },
+  hero: { backgroundUrl: "/hero/kayad-thika-expressway-no-signs.svg", overlayColor: "#EEF7F5", overlayOpacityPct: 18, showVehicleInfoCards: true, rotationSeconds: 6.5 },
   announcement: { enabled: true, text: "KAYAD · Verified vehicles across Kenya · Live auctions · Transparent bidding · Clear transaction workflows", backgroundColor: "#0A3340", textColor: "#FFFFFF", heightPx: 36, scrollSeconds: 34, direction: "left", transition: "scroll" },
 });
 

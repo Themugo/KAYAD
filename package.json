@@ -179,7 +179,8 @@
     "validate:admin-mobile-shell-scroll": "node scripts/validate-admin-mobile-shell-scroll.mjs",
     "validate:admin-navigation-page-coverage": "node scripts/validate-admin-navigation-page-coverage.mjs",
     "validate:kayad-navbar-branding": "node scripts/validate-kayad-navbar-branding.mjs",
-    "validate:kayad-distinctive-brand-hero": "node scripts/validate-kayad-distinctive-brand-hero.mjs"
+    "validate:kayad-distinctive-brand-hero": "node scripts/validate-kayad-distinctive-brand-hero.mjs",
+    "validate:kayad-thika-expressway-hero": "node scripts/validate-kayad-thika-expressway-hero.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

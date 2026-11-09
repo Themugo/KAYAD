@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1000" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1">
+      <stop stop-color="#62B9F1"/><stop offset=".55" stop-color="#B9DDF0"/><stop offset="1" stop-color="#EAF1E9"/>
+    </linearGradient>
+    <linearGradient id="asphalt" x2="0" y2="1">
+      <stop stop-color="#65747A"/><stop offset=".45" stop-color="#3B4B54"/><stop offset="1" stop-color="#172A35"/>
+    </linearGradient>
+    <linearGradient id="bridge" x2="0" y2="1">
+      <stop stop-color="#D9E0E2"/><stop offset=".45" stop-color="#8D9CA1"/><stop offset="1" stop-color="#53666E"/>
+    </linearGradient>
+    <linearGradient id="verge" x2="0" y2="1">
+      <stop stop-color="#79A96C"/><stop offset="1" stop-color="#285C49"/>
+    </linearGradient>
+    <linearGradient id="glass" x2="1" y2="1">
+      <stop stop-color="#A8D7E9" stop-opacity=".75"/><stop offset="1" stop-color="#356A80" stop-opacity=".3"/>
+    </linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="18"/></filter>
+    <filter id="shadow"><feGaussianBlur stdDeviation="8"/></filter>
+    <pattern id="roadgrain" width="46" height="38" patternUnits="userSpaceOnUse">
+      <circle cx="5" cy="8" r="1.1" fill="#D9E2E3" opacity=".13"/>
+      <circle cx="28" cy="23" r=".8" fill="#D9E2E3" opacity=".1"/>
+      <path d="M14 34l5-1" stroke="#D9E2E3" stroke-width=".7" opacity=".08"/>
+    </pattern>
+  </defs>
+
+  <!-- Bright, everyday Nairobi expressway atmosphere -->
+  <rect width="1920" height="1000" fill="url(#sky)"/>
+  <g fill="#FFF" opacity=".42" filter="url(#soft)">
+    <ellipse cx="330" cy="160" rx="180" ry="34"/><ellipse cx="880" cy="105" rx="220" ry="38"/>
+    <ellipse cx="1510" cy="180" rx="190" ry="35"/>
+  </g>
+
+  <!-- Distant Nairobi-style commercial buildings, intentionally generic -->
+  <g opacity=".95">
+    <path d="M0 450V250h72v200z" fill="#547A89"/>
+    <path d="M12 270h48v180H12z" fill="url(#glass)"/>
+    <path d="M90 450V305h105v145z" fill="#D5D8D3"/>
+    <path d="M105 322h75v128h-75z" fill="#7DA5B4"/>
+    <path d="M215 450V220h92v230z" fill="#B9C6C9"/>
+    <path d="M230 238h62v212h-62z" fill="url(#glass)"/>
+    <path d="M330 450V330h78v120z" fill="#C8C9C1"/>
+    <path d="M346 346h47v104h-47z" fill="#7C9EAC"/>
+    <path d="M1540 450V310h86v140z" fill="#AAB8BA"/>
+    <path d="M1554 326h58v124h-58z" fill="url(#glass)"/>
+    <path d="M1650 450V245h112v205z" fill="#D5D7D1"/>
+    <path d="M1666 260h80v190h-80z" fill="#7097A8"/>
+    <path d="M1780 450V330h140v120z" fill="#AAB9BB"/>
+    <path d="M1796 344h108v106h-108z" fill="url(#glass)"/>
+    <g stroke="#EAF1F2" stroke-width="5" opacity=".8">
+      <path d="M20 300h32M20 335h32M20 370h32M20 405h32"/>
+      <path d="M112 350h60M112 380h60M112 410h60"/>
+      <path d="M236 275h50M236 310h50M236 345h50M236 380h50"/>
+      <path d="M1670 300h72M1670 338h72M1670 376h72M1670 414h72"/>
+    </g>
+  </g>
+
+  <!-- Tree-lined green verges, landscaped like an urban Kenyan highway -->
+  <path d="M0 470Q250 400 470 455T920 450T1430 445T1920 470V760H0Z" fill="#6C9A69"/>
+  <path d="M0 520Q240 455 470 500T920 490T1450 495T1920 510V760H0Z" fill="#3F7958"/>
+  <g fill="#245D43">
+    <path d="M70 520h18v-150H70zM78 390q-72-8-80-48 53-32 91 8 42-44 100-16-15 54-111 56Z"/>
+    <path d="M300 520h14V405h-14zM307 430q-56-7-66-36 42-28 72 5 32-31 78-10-12 42-84 41Z"/>
+    <path d="M1660 525h18V380h-18zM1669 408q-72-8-82-42 54-32 92 8 40-44 98-16-15 54-108 50Z"/>
+    <path d="M1850 520h14V410h-14zM1857 435q-50-6-60-34 38-25 67 4 30-28 70-9-10 40-77 39Z"/>
+  </g>
+  <g fill="#6F9F67" opacity=".95">
+    <circle cx="170" cy="445" r="52"/><circle cx="220" cy="456" r="43"/><circle cx="430" cy="458" r="38"/>
+    <circle cx="1490" cy="452" r="44"/><circle cx="1750" cy="450" r="55"/>
+  </g>
+  <g fill="#D7E8B6" opacity=".75">
+    <path d="M0 575q150-50 280 0t260-5v30H0z"/><path d="M1380 570q160-50 280 0t260-5v30h-540z"/>
+  </g>
+
+  <!-- Elevated expressway flyover in the middle distance -->
+  <g>
+    <path d="M0 365H1920V412H0Z" fill="url(#bridge)"/>
+    <path d="M0 365H1920" stroke="#F0F4F3" stroke-width="9"/>
+    <path d="M0 412H1920" stroke="#334D58" stroke-width="8"/>
+    <path d="M100 412v190h34V412M520 412v190h34V412M930 412v190h34V412M1350 412v190h34V412M1770 412v190h34V412" fill="#71848A"/>
+    <path d="M0 378H1920" stroke="#7E9095" stroke-width="3" opacity=".7"/>
+    <path d="M0 350H1920" stroke="#E7ECEA" stroke-width="4"/>
+    <g stroke="#526A73" stroke-width="4" opacity=".9">
+      <path d="M0 344v22M80 344v22M160 344v22M240 344v22M320 344v22M400 344v22M480 344v22M560 344v22M640 344v22M720 344v22M800 344v22M880 344v22M960 344v22M1040 344v22M1120 344v22M1200 344v22M1280 344v22M1360 344v22M1440 344v22M1520 344v22M1600 344v22M1680 344v22M1760 344v22M1840 344v22"/>
+    </g>
+  </g>
+
+  <!-- Tall, restrained street lighting -->
+  <g fill="none" stroke="#425B65" stroke-width="7" stroke-linecap="round">
+    <path d="M470 390V145q0-26 26-26h50"/>
+    <path d="M710 390V195q0-23 24-23h50"/>
+    <path d="M1210 390V172q0-25 25-25h45"/>
+    <path d="M1450 390V135q0-24 25-24h52"/>
+  </g>
+  <g fill="#F8F3D8" opacity=".85">
+    <ellipse cx="546" cy="119" rx="27" ry="6"/><ellipse cx="784" cy="172" rx="24" ry="5"/>
+    <ellipse cx="1280" cy="148" rx="25" ry="5"/><ellipse cx="1527" cy="111" rx="27" ry="6"/>
+  </g>
+
+  <!-- Broad asphalt carriageway with perspective and lane markings -->
+  <path d="M-100 1000 245 615Q490 520 960 515Q1430 520 1675 615L2020 1000Z" fill="url(#asphalt)"/>
+  <path d="M-100 1000 245 615Q490 520 960 515Q1430 520 1675 615L2020 1000Z" fill="url(#roadgrain)"/>
+  <path d="M-100 1000 245 615Q490 520 960 515Q1430 520 1675 615L2020 1000" fill="none" stroke="#B8C3C5" stroke-width="15" opacity=".8"/>
+  <path d="M-100 1000 245 615Q490 520 960 515Q1430 520 1675 615L2020 1000" fill="none" stroke="#F7F5E9" stroke-width="5" opacity=".95"/>
+  <path d="M960 535 960 1000" stroke="#F7F5E9" stroke-width="7" stroke-dasharray="42 38" opacity=".9"/>
+  <path d="M565 555 300 1000M1355 555 1620 1000" stroke="#F7F5E9" stroke-width="7" stroke-dasharray="40 40" opacity=".8"/>
+  <path d="M0 850Q260 720 510 660" fill="none" stroke="#9CAEB2" stroke-width="4" opacity=".24"/>
+  <path d="M1920 850Q1660 720 1410 660" fill="none" stroke="#9CAEB2" stroke-width="4" opacity=".24"/>
+
+  <!-- Safety barriers and edge reflectors -->
+  <path d="M0 610Q220 540 440 535" fill="none" stroke="#D6DFDC" stroke-width="18"/>
+  <path d="M1480 535Q1700 540 1920 610" fill="none" stroke="#D6DFDC" stroke-width="18"/>
+  <path d="M0 620Q220 550 440 545" fill="none" stroke="#7E9298" stroke-width="7"/>
+  <path d="M1480 545Q1700 550 1920 620" fill="none" stroke="#7E9298" stroke-width="7"/>
+  <g fill="#F6E7A8">
+    <circle cx="105" cy="585" r="5"/><circle cx="205" cy="563" r="5"/><circle cx="310" cy="548" r="5"/>
+    <circle cx="1610" cy="548" r="5"/><circle cx="1715" cy="563" r="5"/><circle cx="1815" cy="585" r="5"/>
+  </g>
+
+  <!-- Gentle tonal wash keeps the real hero copy and vehicle cutouts readable -->
+  <rect width="1920" height="1000" fill="#0B3440" opacity=".055"/>
+</svg>

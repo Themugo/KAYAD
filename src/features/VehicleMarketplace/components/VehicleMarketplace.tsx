@@ -25,7 +25,7 @@ import type { HeroPresentationConfig, HeroShowcaseVehicle } from '../types/heroP
 import { HERO_EXTRAS_DEFAULTS, normalizeHeroExtras } from '../types/heroPresentation';
 
 const kenyaOnlyCopy = (value: string) => value.replace(/East Africa/gi, 'Kenya');
-const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-kenyan-highlands-road.svg';
+const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-thika-expressway-no-signs.svg';
 
 interface VehicleMarketplaceProps {
   vehicles: Vehicle[];
@@ -121,7 +121,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const DEFAULT_HERO_PRESENTATION: HeroPresentationConfig = {
     stageHeightPct: 100, stageMaxWidthPct: 100, cardScalePct: 80, cardWidthPct: 42, cardOffsetXPct: 0, cardOffsetYPct: 0,
     cardBgOpacityPct: 95, cardBlurPx: 18, cardBorderColor: '#FFFFFF', cardTextColor: 'var(--color-navy-900)',
-    backgroundUrl: '/hero/kayad-kenyan-highlands-road.svg', backgroundPositionX: 50, backgroundPositionY: 50, backgroundScalePct: 100,
+    backgroundUrl: '/hero/kayad-thika-expressway-no-signs.svg', backgroundPositionX: 50, backgroundPositionY: 50, backgroundScalePct: 100,
     overlayColor: '#EEF7F5', overlayOpacityPct: 18, secondaryOverlayColor: '#FFFFFF', secondaryOverlayOpacityPct: 10,
     leftOffsetPct: 0, rightOffsetPct: 0, leftVehicleNudgePct: 28, rightVehicleNudgePct: 28, vehicleScalePct: 100, vehicleTopPct: 50, vehicleWidthPct: 43,
     showVehicleInfoCards: true, showVehicleLabels: true, primaryButtonColor: 'var(--kayad-cyan)', secondaryButtonBorderColor: '#C7DAD8',
@@ -569,7 +569,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           ...presentation,
           // Migrate only the known built-in skyline defaults; preserve any
           // custom background URL deliberately saved by the administrator.
-          backgroundUrl: ['/hero/kayad-nairobi-kicc.jpg', 'https://commons.wikimedia.org/wiki/Special:FilePath/Nairobi%20skyline%20from%20Uhuru%20Park.jpg?width=2400'].includes(String(presentation.backgroundUrl || ''))
+          backgroundUrl: ['/hero/kayad-nairobi-kicc.jpg', 'https://commons.wikimedia.org/wiki/Special:FilePath/Nairobi%20skyline%20from%20Uhuru%20Park.jpg?width=2400', '/hero/kayad-kenyan-highlands-road.svg'].includes(String(presentation.backgroundUrl || ''))
             ? KENYA_ROAD_HERO_BACKGROUND
             : (presentation.backgroundUrl || KENYA_ROAD_HERO_BACKGROUND),
           stageHeightPct: Math.max(70, Math.min(120, Number(presentation.stageHeightPct) || DEFAULT_HERO_PRESENTATION.stageHeightPct)),
