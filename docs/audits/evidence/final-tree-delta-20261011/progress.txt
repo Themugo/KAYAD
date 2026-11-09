@@ -1,4 +1,0 @@
-chain k6_main exit=0
-chain k6_plain exit=0
-jest done
-ALL DONE 15:26:39

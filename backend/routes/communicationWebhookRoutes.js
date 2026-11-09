@@ -1,4 +1,5 @@
 import express from "express";
+import { validateWritePayload } from "../middleware/validateWritePayload.js";
 import crypto from "crypto";
 import twilio from "twilio";
 import asyncHandler from "../middleware/asyncHandler.js";
@@ -27,7 +28,7 @@ const requireWebhookSecret = (req, res, next) => {
   next();
 };
 
-router.post("/brevo/events", asyncHandler(async (req, res) => {
+router.post("/brevo/events", validateWritePayload, asyncHandler(async (req, res) => {
   if (!verifyBrevoWebhook(req)) return res.status(401).json({ success: false, message: "Unauthorized Brevo webhook" });
 
   const event = req.body || {};
@@ -61,13 +62,13 @@ router.post("/brevo/events", asyncHandler(async (req, res) => {
   return res.json({ success: true, matched: Boolean(result) });
 }));
 
-router.post("/status", requireWebhookSecret, asyncHandler(async (req, res) => {
+router.post("/status", requireWebhookSecret, validateWritePayload, asyncHandler(async (req, res) => {
   const { provider = "unknown", providerMessageId, status, error, providerEventId, metadata = {} } = req.body || {};
   const result = await handleProviderStatus({ provider, providerMessageId, status, error, providerEventId, metadata });
   return res.json({ success: true, matched: Boolean(result) });
 }));
 
-router.post("/twilio/status", asyncHandler(async (req, res) => {
+router.post("/twilio/status", validateWritePayload, asyncHandler(async (req, res) => {
   const authToken = process.env.TWILIO_AUTH_TOKEN;
   const signature = req.get("x-twilio-signature");
   const proto = req.get("x-forwarded-proto") || req.protocol;
@@ -81,7 +82,7 @@ router.post("/twilio/status", asyncHandler(async (req, res) => {
   res.type("text/plain").send(result ? "OK" : "IGNORED");
 }));
 
-router.post("/africastalking/status", requireWebhookSecret, asyncHandler(async (req, res) => {
+router.post("/africastalking/status", requireWebhookSecret, validateWritePayload, asyncHandler(async (req, res) => {
   const result = await handleProviderStatus({
     provider: "africastalking",
     providerMessageId: req.body?.id || req.body?.messageId,

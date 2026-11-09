@@ -1,0 +1,501 @@
+{
+  "browser": "Chromium 144.0.7559.96",
+  "testType": "HTML/CSS shell fixture using actual project navigation stylesheet and new SVG mark; not authenticated React runtime",
+  "results": [
+    {
+      "width": 320,
+      "documentWidth": 320,
+      "headerHeight": 72,
+      "brand": {
+        "x": 9,
+        "width": 209,
+        "right": 218,
+        "height": 37,
+        "display": "flex"
+      },
+      "logo": {
+        "x": 9,
+        "width": 37,
+        "right": 46,
+        "height": 37,
+        "display": "block"
+      },
+      "descriptor": {
+        "x": 52,
+        "width": 120,
+        "right": 172,
+        "height": 16,
+        "display": "block"
+      },
+      "country": {
+        "x": 0,
+        "width": 0,
+        "right": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "cta": {
+        "x": 224,
+        "width": 42,
+        "right": 266,
+        "height": 42,
+        "display": "flex"
+      },
+      "menu": {
+        "x": 271,
+        "width": 40,
+        "right": 311,
+        "height": 40,
+        "display": "grid"
+      },
+      "nav": {
+        "x": 0,
+        "width": 0,
+        "right": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "width": 360,
+      "documentWidth": 360,
+      "headerHeight": 72,
+      "brand": {
+        "x": 9,
+        "width": 199,
+        "right": 208,
+        "height": 37,
+        "display": "flex"
+      },
+      "logo": {
+        "x": 9,
+        "width": 37,
+        "right": 46,
+        "height": 37,
+        "display": "block"
+      },
+      "descriptor": {
+        "x": 52,
+        "width": 120,
+        "right": 172,
+        "height": 16,
+        "display": "block"
+      },
+      "country": {
+        "x": 0,
+        "width": 0,
+        "right": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "cta": {
+        "x": 214,
+        "width": 92,
+        "right": 306,
+        "height": 42,
+        "display": "flex"
+      },
+      "menu": {
+        "x": 311,
+        "width": 40,
+        "right": 351,
+        "height": 40,
+        "display": "grid"
+      },
+      "nav": {
+        "x": 0,
+        "width": 0,
+        "right": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "width": 375,
+      "documentWidth": 375,
+      "headerHeight": 72,
+      "brand": {
+        "x": 9,
+        "width": 214,
+        "right": 223,
+        "height": 37,
+        "display": "flex"
+      },
+      "logo": {
+        "x": 9,
+        "width": 37,
+        "right": 46,
+        "height": 37,
+        "display": "block"
+      },
+      "descriptor": {
+        "x": 52,
+        "width": 120,
+        "right": 172,
+        "height": 16,
+        "display": "block"
+      },
+      "country": {
+        "x": 0,
+        "width": 0,
+        "right": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "cta": {
+        "x": 229,
+        "width": 92,
+        "right": 321,
+        "height": 42,
+        "display": "flex"
+      },
+      "menu": {
+        "x": 326,
+        "width": 40,
+        "right": 366,
+        "height": 40,
+        "display": "grid"
+      },
+      "nav": {
+        "x": 0,
+        "width": 0,
+        "right": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "width": 390,
+      "documentWidth": 390,
+      "headerHeight": 78,
+      "brand": {
+        "x": 12,
+        "width": 205,
+        "right": 217,
+        "height": 42,
+        "display": "flex"
+      },
+      "logo": {
+        "x": 12,
+        "width": 42,
+        "right": 54,
+        "height": 42,
+        "display": "block"
+      },
+      "descriptor": {
+        "x": 62,
+        "width": 155,
+        "right": 217,
+        "height": 8,
+        "display": "block"
+      },
+      "country": {
+        "x": 0,
+        "width": 0,
+        "right": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "cta": {
+        "x": 225,
+        "width": 104,
+        "right": 329,
+        "height": 44,
+        "display": "flex"
+      },
+      "menu": {
+        "x": 336,
+        "width": 42,
+        "right": 378,
+        "height": 42,
+        "display": "grid"
+      },
+      "nav": {
+        "x": 0,
+        "width": 0,
+        "right": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "width": 430,
+      "documentWidth": 430,
+      "headerHeight": 78,
+      "brand": {
+        "x": 12,
+        "width": 245,
+        "right": 257,
+        "height": 42,
+        "display": "flex"
+      },
+      "logo": {
+        "x": 12,
+        "width": 42,
+        "right": 54,
+        "height": 42,
+        "display": "block"
+      },
+      "descriptor": {
+        "x": 62,
+        "width": 160,
+        "right": 222,
+        "height": 8,
+        "display": "block"
+      },
+      "country": {
+        "x": 0,
+        "width": 0,
+        "right": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "cta": {
+        "x": 265,
+        "width": 104,
+        "right": 369,
+        "height": 44,
+        "display": "flex"
+      },
+      "menu": {
+        "x": 376,
+        "width": 42,
+        "right": 418,
+        "height": 42,
+        "display": "grid"
+      },
+      "nav": {
+        "x": 0,
+        "width": 0,
+        "right": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "width": 768,
+      "documentWidth": 768,
+      "headerHeight": 82,
+      "brand": {
+        "x": 18,
+        "width": 360,
+        "right": 378,
+        "height": 54,
+        "display": "flex"
+      },
+      "logo": {
+        "x": 18,
+        "width": 48,
+        "right": 66,
+        "height": 48,
+        "display": "block"
+      },
+      "descriptor": {
+        "x": 77,
+        "width": 220,
+        "right": 297,
+        "height": 10,
+        "display": "block"
+      },
+      "country": {
+        "x": 352,
+        "width": 19,
+        "right": 370,
+        "height": 10,
+        "display": "flex"
+      },
+      "cta": {
+        "x": 576,
+        "width": 121,
+        "right": 698,
+        "height": 46,
+        "display": "flex"
+      },
+      "menu": {
+        "x": 706,
+        "width": 44,
+        "right": 750,
+        "height": 44,
+        "display": "grid"
+      },
+      "nav": {
+        "x": 0,
+        "width": 0,
+        "right": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1024,
+      "documentWidth": 1024,
+      "headerHeight": 84,
+      "brand": {
+        "x": 25,
+        "width": 265,
+        "right": 290,
+        "height": 56,
+        "display": "flex"
+      },
+      "logo": {
+        "x": 25,
+        "width": 50,
+        "right": 75,
+        "height": 50,
+        "display": "block"
+      },
+      "descriptor": {
+        "x": 86,
+        "width": 165,
+        "right": 251,
+        "height": 20,
+        "display": "block"
+      },
+      "country": {
+        "x": 263,
+        "width": 19,
+        "right": 282,
+        "height": 10,
+        "display": "flex"
+      },
+      "cta": {
+        "x": 878,
+        "width": 121,
+        "right": 999,
+        "height": 46,
+        "display": "flex"
+      },
+      "menu": {
+        "x": 0,
+        "width": 0,
+        "right": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "nav": {
+        "x": 306,
+        "width": 556,
+        "right": 862,
+        "height": 48,
+        "display": "flex"
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1366,
+      "documentWidth": 1366,
+      "headerHeight": 84,
+      "brand": {
+        "x": 30,
+        "width": 300,
+        "right": 330,
+        "height": 60,
+        "display": "flex"
+      },
+      "logo": {
+        "x": 30,
+        "width": 54,
+        "right": 84,
+        "height": 54,
+        "display": "block"
+      },
+      "descriptor": {
+        "x": 95,
+        "width": 196,
+        "right": 291,
+        "height": 11,
+        "display": "block"
+      },
+      "country": {
+        "x": 303,
+        "width": 19,
+        "right": 322,
+        "height": 10,
+        "display": "flex"
+      },
+      "cta": {
+        "x": 1215,
+        "width": 121,
+        "right": 1336,
+        "height": 46,
+        "display": "flex"
+      },
+      "menu": {
+        "x": 0,
+        "width": 0,
+        "right": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "nav": {
+        "x": 350,
+        "width": 845,
+        "right": 1195,
+        "height": 48,
+        "display": "flex"
+      },
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1440,
+      "documentWidth": 1440,
+      "headerHeight": 84,
+      "brand": {
+        "x": 30,
+        "width": 300,
+        "right": 330,
+        "height": 60,
+        "display": "flex"
+      },
+      "logo": {
+        "x": 30,
+        "width": 54,
+        "right": 84,
+        "height": 54,
+        "display": "block"
+      },
+      "descriptor": {
+        "x": 95,
+        "width": 196,
+        "right": 291,
+        "height": 11,
+        "display": "block"
+      },
+      "country": {
+        "x": 303,
+        "width": 19,
+        "right": 322,
+        "height": 10,
+        "display": "flex"
+      },
+      "cta": {
+        "x": 1289,
+        "width": 121,
+        "right": 1410,
+        "height": 46,
+        "display": "flex"
+      },
+      "menu": {
+        "x": 0,
+        "width": 0,
+        "right": 0,
+        "height": 0,
+        "display": "none"
+      },
+      "nav": {
+        "x": 350,
+        "width": 919,
+        "right": 1269,
+        "height": 48,
+        "display": "flex"
+      },
+      "horizontalOverflow": false
+    }
+  ]
+}

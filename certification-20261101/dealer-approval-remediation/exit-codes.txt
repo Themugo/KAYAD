@@ -1,9 +1,0 @@
-01-lint exit=0 :: npm run lint
-02-vitest-frontend exit=0 :: npx vitest run
-03-build exit=0 :: npm run build
-04-validate-panic-room exit=0 :: node scripts/validate-panic-room-end-to-end.mjs
-05-validate-bcc-phase04 exit=0 :: node scripts/validate-business-command-centre-phase04.mjs
-06-backend-jest exit=1 :: node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit
-07-backend-vitest exit=0 :: npx vitest run --config vitest.config.js
-08-backend-nodetest exit=0 :: node --test tests/response-lifecycle.test.js
-DONE

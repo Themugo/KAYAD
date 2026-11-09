@@ -1,2 +1,0 @@
-✓ built in 1.35s
-exit 0

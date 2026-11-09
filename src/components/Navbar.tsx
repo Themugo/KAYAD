@@ -1,4 +1,4 @@
-import CountryBadge from './CountryBadge';
+import { KenyaFlag } from './CountryBadge';
 import { hasSessionHint } from '../utils/sessionHint';
 import { isStaffRole, staffRoleLabel } from '../utils/staffRoles';
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -308,30 +308,41 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* The broadcast notice board is rendered by TopNoticeStrip above this navigation. */}
       <div className="kayad-header__bar">
 
-        {/* BRAND FIELD — the admin-managed master logo is shared across header and footer. */}
+        {/* BRAND FIELD — the mark, wordmark, descriptor and country badge are
+            independent elements. The mark itself contains no lettering or tagline. */}
         <a
           href="/?nav=marketplace"
           onClick={(e) => { if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); handleNavSelect('marketplace'); }}
           className="kayad-brand group"
           id="brand-logo"
-          aria-label={`${branding.logoText || 'KAYAD'} marketplace`}
+          aria-label="KAYAD-KE marketplace home"
         >
           {branding.logoType === 'image' && branding.logoUrl ? (
             <img
-              src={branding.logoUrl} onError={onBrandLogoError}
+              src={branding.logoUrl}
+              onError={onBrandLogoError}
               alt=""
               aria-hidden="true"
               className="kayad-brand__image"
+              width="52"
+              height="52"
               decoding="async"
             />
           ) : (
             <span className="kayad-brand__mark" aria-hidden="true"><Car className="w-5 h-5 stroke-[2]" /></span>
           )}
           <span className="kayad-brand__text">
-            <span className="kayad-brand__word">{branding.logoText || 'KAYAD'}</span>
-            <span className="kayad-brand__tag kayad-brand__tag--reserved">{branding.brandTagline || 'Automotive Marketplace'}</span>
+            <span className="kayad-brand__word">
+              {(branding.logoText || 'KAYAD').replace(/\s*[-–]?\s*KE$/i, '')}
+              <span className="kayad-brand__word-ke">
+                <span>-KE</span>
+                <KenyaFlag className="kayad-brand__kenya-flag" />
+              </span>
+            </span>
+            <span className="kayad-brand__tag kayad-brand__tag--reserved">
+              {branding.brandTagline || 'Premium Automotive Marketplace'}
+            </span>
           </span>
-          <CountryBadge show={branding.countryBadgeShow} text={branding.countryBadgeText} />
         </a>
 
         {/* NAVIGATION FIELD — primary destinations; dropdowns expose existing

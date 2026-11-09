@@ -1,2 +1,0 @@
-GET /api/admin/public/config -> 200 [adminRoutes.js]
-GET /api/countries -> 200 [regionalConfigurationRoutes.js]

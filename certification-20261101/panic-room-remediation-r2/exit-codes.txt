@@ -1,9 +1,0 @@
-lint exit=0 cmd=npm run lint
-frontend-tests exit=0 cmd=npx vitest run
-build exit=0 cmd=npm run build
-validate-panic-room exit=0 cmd=node scripts/validate-panic-room-end-to-end.mjs
-validate-phase04 exit=0 cmd=node scripts/validate-business-command-centre-phase04.mjs
-backend-jest exit=1 cmd=node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit --passWithNoTests
-backend-vitest exit=0 cmd=npx vitest run --config vitest.config.js
-backend-node-test exit=0 cmd=node --test --test-force-exit tests/response-lifecycle.test.js
-FINISHED

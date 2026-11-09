@@ -1,0 +1,72 @@
+
+/* KAYAD home page: premium automotive hierarchy, preserving existing data and route contracts. */
+.kayad-public-hero { isolation: isolate; }
+.kayad-public-hero__mobile-card {
+  border-color: rgba(255,255,255,.88) !important;
+  box-shadow: 0 16px 42px rgba(3, 30, 42, .20) !important;
+}
+.kayad-public-hero__mobile-card h1 { color: #062E3A; }
+.kayad-public-hero__vehicle-card { min-width: 0; }
+.kayad-home-quick-actions {
+  position: relative;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0,1fr));
+  width: min(100% - 28px, 1120px);
+  margin: -1px auto 0;
+  padding: 10px 8px;
+  border: 1px solid #E0ECE9;
+  border-radius: 22px;
+  background: rgba(255,255,255,.97);
+  box-shadow: 0 12px 30px rgba(6,46,58,.10);
+}
+.kayad-home-quick-action {
+  display: flex;
+  min-width: 0;
+  min-height: 92px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 7px 3px;
+  border: 0;
+  border-right: 1px solid #E3EEEB;
+  background: transparent;
+  color: #082F3C;
+  text-align: center;
+  cursor: pointer;
+}
+.kayad-home-quick-action:last-child { border-right: 0; }
+.kayad-home-quick-action__icon {
+  display: grid;
+  width: 38px;
+  height: 36px;
+  place-items: center;
+  color: #087E79;
+}
+.kayad-home-quick-action__title { font-size: 12px; font-weight: 850; line-height: 1.15; }
+.kayad-home-quick-action__desc { color: #647985; font-size: 9px; font-weight: 550; line-height: 1.2; }
+.kayad-home-quick-action:focus-visible { outline: 2px solid #13B8A6; outline-offset: -2px; border-radius: 12px; }
+.kayad-home-quick-action:active { background: #EFFAF7; }
+.kayad-home-category-strip > div { scrollbar-width: none; }
+.kayad-home-category-strip > div::-webkit-scrollbar { display: none; }
+@media (max-width: 359px) {
+  .kayad-home-quick-actions { width: calc(100% - 20px); padding: 7px 4px; border-radius: 18px; }
+  .kayad-home-quick-action { min-height: 82px; }
+  .kayad-home-quick-action__title { font-size: 10px; }
+  .kayad-home-quick-action__desc { font-size: 8px; }
+  .kayad-public-hero__mobile-card { padding: 13px 10px !important; }
+  .kayad-public-hero__primary-cta, .kayad-public-hero__secondary-cta { padding-left: 10px !important; padding-right: 10px !important; font-size: 10px !important; }
+}
+@media (min-width: 640px) {
+  .kayad-home-quick-actions { margin-top: 16px; padding: 12px 14px; }
+  .kayad-home-quick-action { min-height: 108px; }
+  .kayad-home-quick-action__title { font-size: 14px; }
+  .kayad-home-quick-action__desc { font-size: 11px; }
+}
+@media (min-width: 1024px) {
+  .kayad-home-quick-actions { margin-top: 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kayad-home-quick-action { transition: none; }
+}

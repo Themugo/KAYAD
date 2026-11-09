@@ -436,6 +436,7 @@ export interface CreateCarPayload {
   mileage?: number;
   fuel?: string;
   transmission?: string;
+  bodyType?: string;
   color?: string;
   condition?: string;
   vin?: string;

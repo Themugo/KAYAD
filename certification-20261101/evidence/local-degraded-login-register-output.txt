@@ -1,2 +1,0 @@
-login status 500 {"success":false,"message":"Login failed"}
-register(empty body) status 400 {"success":false,"message":"Validation failed","errors":"name: Invalid input: expected string, received undefined; email: Invalid input: expected string, received undefined; password: Invalid input: expected string, received undefined"}

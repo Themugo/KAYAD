@@ -81,7 +81,7 @@ export default function AdminProviderGovernance() {
               <li key={r.id}>
                 <button type="button" onClick={() => void open(r.id)} aria-current={openId === r.id} className={`w-full text-left rounded-xl border p-3 min-h-[44px] ${openId === r.id ? 'border-[#13B8A6] bg-[#E7F7F4]' : 'border-[#D7E7E4] bg-white'}`}>
                   <span className="block font-semibold">{r.trading_name || r.company_name}</span>
-                  <span className="block text-xs text-[#64748B]">{[r.town, r.county].filter(Boolean).join(', ') || 'No location'} · {String(r.lifecycle_stage).replace(/_/g, ' ').toLowerCase()}{r.verification_route ? ` · ${r.verification_route} route` : ''}</span>
+                  <span className="block text-xs text-[#64748B]">{String(r.business_type || 'provider').replace(/_/g, ' ')} · {[r.town, r.county].filter(Boolean).join(', ') || 'No location'} · {String(r.lifecycle_stage).replace(/_/g, ' ').toLowerCase()}{r.verification_route ? ` · ${r.verification_route} route` : ''}</span>
                 </button>
               </li>
             ))}
@@ -96,6 +96,7 @@ export default function AdminProviderGovernance() {
               <div>
                 <h4 className="font-bold">{p.trading_name || p.company_name}</h4>
                 <dl className="text-sm grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 mt-2">
+                  <dt className="text-[#64748B]">Organization / profile type</dt><dd>{String(p.business_type || 'not specified').replace(/_/g, ' ')}</dd>
                   <dt className="text-[#64748B]">Stage</dt><dd>{p.lifecycle_stage}</dd>
                   <dt className="text-[#64748B]">Contact</dt><dd>{[p.email, p.phone].filter(Boolean).join(' · ') || '—'}</dd>
                   <dt className="text-[#64748B]">Registration</dt><dd>{p.registration_number || p.tax_id || 'none supplied'}</dd>

@@ -1239,3 +1239,74 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
   .kayad-certificate { position: absolute; left: 0; top: 0; width: 100%; max-width: none !important; box-shadow: none !important; }
   .kayad-no-print { display: none !important; }
 }
+
+
+/* KAYAD private-seller workspace: one shell, one navigation system, responsive containment. */
+.kayad-portal--seller {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+  box-sizing: border-box;
+}
+.kayad-portal--seller *,
+.kayad-portal--seller *::before,
+.kayad-portal--seller *::after {
+  box-sizing: border-box;
+}
+.kayad-portal--seller > aside {
+  flex: 0 0 16rem;
+  min-width: 16rem;
+  max-width: 16rem;
+  z-index: 20;
+}
+.kayad-portal--seller > main {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+.kayad-portal--seller [data-testid="private-seller-listing-wizard"] {
+  width: 100%;
+  min-width: 0;
+  max-width: 64rem;
+  margin-inline: auto;
+}
+.kayad-portal--seller [data-testid="private-seller-listing-wizard"] > section,
+.kayad-portal--seller [data-testid="private-seller-listing-wizard"] label,
+.kayad-portal--seller [data-testid="private-seller-listing-wizard"] input,
+.kayad-portal--seller [data-testid="private-seller-listing-wizard"] textarea,
+.kayad-portal--seller [data-testid="private-seller-listing-wizard"] select {
+  min-width: 0;
+  max-width: 100%;
+}
+@media (max-width: 1023px) {
+  .kayad-portal--seller {
+    display: block;
+    padding-top: 4rem;
+  }
+  .kayad-portal--seller > main {
+    min-height: calc(100dvh - 4rem);
+    padding-top: 0;
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+  .kayad-portal--seller [data-testid="private-seller-listing-wizard"] {
+    padding-inline: 0;
+  }
+  .kayad-portal--seller [data-testid="private-seller-listing-wizard"] > section {
+    border-radius: 1rem;
+  }
+  .kayad-portal--seller [data-testid="private-seller-listing-wizard"] input,
+  .kayad-portal--seller [data-testid="private-seller-listing-wizard"] textarea,
+  .kayad-portal--seller [data-testid="private-seller-listing-wizard"] select {
+    font-size: 16px;
+  }
+}
+@media (max-width: 420px) {
+  .kayad-portal--seller > main > div {
+    padding-inline: .75rem;
+  }
+  .kayad-portal--seller [data-testid="private-seller-listing-wizard"] > section {
+    padding: .875rem;
+  }
+}

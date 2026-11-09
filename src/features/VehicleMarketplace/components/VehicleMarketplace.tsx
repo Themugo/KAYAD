@@ -1,3 +1,4 @@
+import './homepage-redesign.css';
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { CONDITIONS } from '../../../constants/vehicleOptions';
 import { Vehicle, UserProfile } from '../../../types';
@@ -24,6 +25,7 @@ import type { HeroPresentationConfig, HeroShowcaseVehicle } from '../types/heroP
 import { HERO_EXTRAS_DEFAULTS, normalizeHeroExtras } from '../types/heroPresentation';
 
 const kenyaOnlyCopy = (value: string) => value.replace(/East Africa/gi, 'Kenya');
+const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-kenyan-highlands-road.svg';
 
 interface VehicleMarketplaceProps {
   vehicles: Vehicle[];
@@ -119,7 +121,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const DEFAULT_HERO_PRESENTATION: HeroPresentationConfig = {
     stageHeightPct: 100, stageMaxWidthPct: 100, cardScalePct: 80, cardWidthPct: 42, cardOffsetXPct: 0, cardOffsetYPct: 0,
     cardBgOpacityPct: 95, cardBlurPx: 18, cardBorderColor: '#FFFFFF', cardTextColor: 'var(--color-navy-900)',
-    backgroundUrl: '/hero/kayad-nairobi-kicc.jpg', backgroundPositionX: 50, backgroundPositionY: 50, backgroundScalePct: 100,
+    backgroundUrl: '/hero/kayad-kenyan-highlands-road.svg', backgroundPositionX: 50, backgroundPositionY: 50, backgroundScalePct: 100,
     overlayColor: '#EEF7F5', overlayOpacityPct: 18, secondaryOverlayColor: '#FFFFFF', secondaryOverlayOpacityPct: 10,
     leftOffsetPct: 0, rightOffsetPct: 0, leftVehicleNudgePct: 28, rightVehicleNudgePct: 28, vehicleScalePct: 100, vehicleTopPct: 50, vehicleWidthPct: 43,
     showVehicleInfoCards: true, showVehicleLabels: true, primaryButtonColor: 'var(--kayad-cyan)', secondaryButtonBorderColor: '#C7DAD8',
@@ -565,6 +567,11 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         setHeroPresentation({
           ...DEFAULT_HERO_PRESENTATION,
           ...presentation,
+          // Migrate only the known built-in skyline defaults; preserve any
+          // custom background URL deliberately saved by the administrator.
+          backgroundUrl: ['/hero/kayad-nairobi-kicc.jpg', 'https://commons.wikimedia.org/wiki/Special:FilePath/Nairobi%20skyline%20from%20Uhuru%20Park.jpg?width=2400'].includes(String(presentation.backgroundUrl || ''))
+            ? KENYA_ROAD_HERO_BACKGROUND
+            : (presentation.backgroundUrl || KENYA_ROAD_HERO_BACKGROUND),
           stageHeightPct: Math.max(70, Math.min(120, Number(presentation.stageHeightPct) || DEFAULT_HERO_PRESENTATION.stageHeightPct)),
           stageMaxWidthPct: Math.max(90, Math.min(100, Number(presentation.stageMaxWidthPct) || DEFAULT_HERO_PRESENTATION.stageMaxWidthPct)),
           cardScalePct: Math.max(70, Math.min(100, Number(presentation.cardScalePct) || DEFAULT_HERO_PRESENTATION.cardScalePct)),
@@ -734,7 +741,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // Only the canonical default headline gets the designed line break; any admin-authored headline renders exactly as written.
   const heroHeadlineNode: React.ReactNode = heroHeadline === 'Drive Your Dream Today' ? <>Drive Your Dream<br />Today</> : heroHeadline;
   const heroSubheadline = kenyaOnlyCopy(activeHeroSlide?.subheadline?.trim() || 'Discover quality vehicles across Kenya. Find the right car, make your move, and drive with confidence.');
-  const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-nairobi-kicc.jpg';
   const heroAdminBackgroundUrl = heroPresentation.backgroundUrl || KENYA_ROAD_HERO_BACKGROUND;
   const heroBackgroundStyle: React.CSSProperties = {
     backgroundImage: `url("${heroAdminBackgroundUrl}")`,
@@ -1047,7 +1053,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     <div className="relative flex h-[380px] flex-col justify-end overflow-visible px-1" data-testid="hero-desktop-vehicle">
                       <div className="relative flex min-h-0 flex-1 items-end justify-center"><span aria-hidden="true" data-testid="hero-ground-shadow" className="pointer-events-none absolute inset-x-[4%] bottom-[-3px] h-[11%] rounded-[50%] bg-black/70 blur-[8px]" /><span aria-hidden="true" className="pointer-events-none absolute inset-x-[-6%] bottom-[-10px] h-6 rounded-[50%] bg-gradient-to-t from-black/30 to-transparent blur-md" /><img src={heroImageForVehicle(heroLeftVehicle)} alt={isShowcaseHeroVehicle(heroLeftVehicle) ? `KAYAD visual showcase: ${heroLeftVehicle.make} ${heroLeftVehicle.model}` : `${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`} className="max-h-full max-w-full object-contain object-center select-none drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" /></div>
                       {heroPresentation.showVehicleInfoCards && (
-                        <div className="mt-1.5 w-full rounded-2xl border border-white/20 bg-[#071F2A]/88 px-3.5 py-2.5 text-left backdrop-blur-md">
+                        <div className="mx-auto mt-1.5 w-full max-w-[calc(100%-2rem)] rounded-2xl border border-white/20 bg-[#071F2A]/88 px-3.5 py-2.5 text-left backdrop-blur-md">
                           <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{isShowcaseHeroVehicle(heroLeftVehicle) ? 'KAYAD SELECT · VISUAL SHOWCASE' : heroCardContent[heroLeftVehicle.id]?.eyebrow || (heroLeftVehicle.auctionLifecycle === 'live' ? 'Live auction' : heroLeftVehicle.auctionLifecycle === 'draft' ? 'Upcoming auction' : heroLeftVehicle.auctionLifecycle === 'ended' ? 'Auction ended' : 'KAYAD SELECT')}</div>
                           <div className="mt-1 truncate text-sm font-black text-white">{heroLeftVehicle.make} {heroLeftVehicle.model}{heroLeftVehicle.year ? ` · ${heroLeftVehicle.year}` : ''}</div>
                           <div className="mt-0.5 text-[9px] text-white/65">{heroLeftVehicle.isAuction ? heroAuctionMeta(heroLeftVehicle) : heroCardContent[heroLeftVehicle.id]?.detail || heroLeftVehicle.description || 'Premium vehicle showcase'}</div>
@@ -1072,7 +1078,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     <div className="relative flex h-[380px] flex-col justify-end overflow-visible px-1" data-testid="hero-desktop-vehicle">
                       <div className="relative flex min-h-0 flex-1 items-end justify-center"><span aria-hidden="true" data-testid="hero-ground-shadow" className="pointer-events-none absolute inset-x-[4%] bottom-[-3px] h-[11%] rounded-[50%] bg-black/70 blur-[8px]" /><span aria-hidden="true" className="pointer-events-none absolute inset-x-[-6%] bottom-[-10px] h-6 rounded-[50%] bg-gradient-to-t from-black/30 to-transparent blur-md" /><img src={heroImageForVehicle(heroRightVehicle)} alt={isShowcaseHeroVehicle(heroRightVehicle) ? `KAYAD visual showcase: ${heroRightVehicle.make} ${heroRightVehicle.model}` : `${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`} className="max-h-full max-w-full object-contain object-center select-none drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" /></div>
                       {heroPresentation.showVehicleInfoCards && (
-                        <div className="mt-1.5 w-full rounded-2xl border border-white/20 bg-[#071F2A]/88 px-3.5 py-2.5 text-left backdrop-blur-md">
+                        <div className="mx-auto mt-1.5 w-full max-w-[calc(100%-2rem)] rounded-2xl border border-white/20 bg-[#071F2A]/88 px-3.5 py-2.5 text-left backdrop-blur-md">
                           <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{isShowcaseHeroVehicle(heroRightVehicle) ? 'KAYAD SELECT · VISUAL SHOWCASE' : heroCardContent[heroRightVehicle.id]?.eyebrow || (heroRightVehicle.auctionLifecycle === 'live' ? 'Live auction' : heroRightVehicle.auctionLifecycle === 'draft' ? 'Upcoming auction' : heroRightVehicle.auctionLifecycle === 'ended' ? 'Auction ended' : 'KAYAD SELECT')}</div>
                           <div className="mt-1 truncate text-sm font-black text-white">{heroRightVehicle.make} {heroRightVehicle.model}{heroRightVehicle.year ? ` · ${heroRightVehicle.year}` : ''}</div>
                           <div className="mt-0.5 text-[9px] text-white/65">{heroRightVehicle.isAuction ? heroAuctionMeta(heroRightVehicle) : heroCardContent[heroRightVehicle.id]?.detail || heroRightVehicle.description || 'Premium vehicle showcase'}</div>
@@ -1186,8 +1192,31 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         </section>
       )}
 
+      {!savedOnly && <section className="kayad-home-quick-actions" aria-label="Quick marketplace actions">
+        <button type="button" onClick={() => onNavigate('marketplace')} className="kayad-home-quick-action">
+          <span className="kayad-home-quick-action__icon"><Search size={23} /></span>
+          <span className="kayad-home-quick-action__title">Find a Car</span>
+          <span className="kayad-home-quick-action__desc">Browse listings</span>
+        </button>
+        <button type="button" onClick={() => onNavigate('seller-platform')} className="kayad-home-quick-action">
+          <span className="kayad-home-quick-action__icon"><CarFront size={24} /></span>
+          <span className="kayad-home-quick-action__title">Sell a Car</span>
+          <span className="kayad-home-quick-action__desc">List in minutes</span>
+        </button>
+        <button type="button" onClick={() => onNavigate('discovery')} className="kayad-home-quick-action">
+          <span className="kayad-home-quick-action__icon"><Gavel size={23} /></span>
+          <span className="kayad-home-quick-action__title">Auctions</span>
+          <span className="kayad-home-quick-action__desc">Bid &amp; win</span>
+        </button>
+        <button type="button" onClick={() => onNavigate('inspections')} className="kayad-home-quick-action">
+          <span className="kayad-home-quick-action__icon"><ShieldCheck size={23} /></span>
+          <span className="kayad-home-quick-action__title">Verified</span>
+          <span className="kayad-home-quick-action__desc">Trusted vehicles</span>
+        </button>
+      </section>}
+
       {/* Marketplace categories: the visual bridge from hero to inventory, matching the original discovery concept without adding a second dashboard. */}
-      {!savedOnly && <section className="border-y border-[#D7E7E4] bg-white" aria-label="Vehicle categories">
+      {!savedOnly && <section className="kayad-home-category-strip border-y border-[#D7E7E4] bg-white" aria-label="Vehicle categories">
         <div className="mx-auto flex max-w-[1480px] items-center gap-2 overflow-x-auto px-4 py-3 sm:px-6 lg:px-8">
           {[
             ['All', () => { setSelectedBodyStyle('All'); setSelectedFuel('All'); }],

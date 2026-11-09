@@ -22,7 +22,7 @@ const securityWorkflow = read(".github/workflows/security.yml");
 
 check("R25 declares proxy-addr as a direct backend dependency", Boolean(backendPackage.dependencies?.["proxy-addr"]));
 check("R25 uses an explicit trusted-proxy CIDR setting", mpesa.includes("MPESA_TRUSTED_PROXY_CIDRS"));
-check("R25 checks the immediate socket peer before using req.ip", /if \(!isTrustedProxyPeer\(remoteAddress\)\) return remoteAddress/.test(mpesa));
+check("R25 checks the immediate socket peer before using req.ip", /if \(!isTrustedProxyPeer\(remoteAddress\)\) return normalizeIp\(remoteAddress\)/.test(mpesa));
 check("R25 does not parse the raw X-Forwarded-For header as client identity", !/x-forwarded-for["'\]]*\s*\|\|\s*["']{2}\s*\)\.split\(/i.test(mpesa));
 check("R25 fails closed when proxy CIDRs are missing or invalid", /if \(!cidrs\.length \|\| !remoteAddress\) return false/.test(mpesa) && /catch \{\s*\/\/ Invalid operator configuration/.test(mpesa));
 check("Production Kubernetes config explicitly sets MPESA_ENV=production", /MPESA_ENV:\s*["']production["']/.test(configMap));

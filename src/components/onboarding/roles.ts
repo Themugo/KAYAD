@@ -9,7 +9,7 @@ import type { AuthIntent } from '../../utils/authIntent';
  * here is a request - the backend (schema, RPC and approval workflow) decides
  * what they actually become.
  */
-export type PublicRoleId = 'buyer' | 'seller' | 'dealer' | 'service_business' | 'professional';
+export type PublicRoleId = 'buyer' | 'dealer' | 'garage_business' | 'inspection_company' | 'professional';
 
 /** How the person enters the system. */
 export type RegistrationRoute =
@@ -26,7 +26,7 @@ export interface PublicRole {
   outcome: string;
   intent: AuthIntent;
   /** Role string sent to /auth/register; null when the route is not an account registration. */
-  backendRole: 'user' | 'individual_seller' | 'dealer' | null;
+  backendRole: 'user' | 'dealer' | null;
   route: RegistrationRoute;
   /** Where a person should land after verifying and signing in, when it is not their default home. */
   afterSignIn: string | null;
@@ -34,25 +34,17 @@ export interface PublicRole {
 }
 
 export const PROVIDER_APPLICATION_PATH = '/?nav=inspections&action=apply-provider';
+export const providerApplicationPath = (providerType: string) => `${PROVIDER_APPLICATION_PATH}&providerType=${encodeURIComponent(providerType)}`;
 export const AFFILIATION_PATH = '/?nav=inspections&action=manage-business';
 
 export const PUBLIC_ROLES: PublicRole[] = [
   {
-    id: 'buyer', title: 'Buyer', summary: 'Browse, save, compare, bid and buy.',
+    id: 'buyer', title: 'Personal account', summary: 'Buy, save and compare vehicles, and sell your own vehicle from the same account.',
     outcome: 'Ready once you verify your email', intent: 'buyer', backendRole: 'user', route: 'account', afterSignIn: null,
     steps: [
       { title: 'Create your account', body: 'Name, email and a password. No documents needed.' },
       { title: 'Verify your email', body: 'We email you a link. You cannot sign in until it is confirmed.' },
       { title: 'Sign in and start', body: 'Browse vehicles, save favourites, join auctions.' },
-    ],
-  },
-  {
-    id: 'seller', title: 'Private seller', summary: 'Sell your own vehicle.',
-    outcome: 'Listing needs KAYAD approval', intent: 'seller', backendRole: 'individual_seller', route: 'account', afterSignIn: null,
-    steps: [
-      { title: 'Create your seller account', body: 'Your account is created in a pending state.' },
-      { title: 'Verify your email', body: 'Required before you can sign in.' },
-      { title: 'KAYAD approval', body: 'You can sign in while pending, but you cannot list a vehicle until KAYAD approves your seller account.' },
     ],
   },
   {
@@ -65,21 +57,31 @@ export const PUBLIC_ROLES: PublicRole[] = [
     ],
   },
   {
-    id: 'service_business', title: 'Garage or inspection business', summary: 'List your workshop, inspection company or specialist services.',
-    outcome: 'Application reviewed by KAYAD; services verified separately', intent: 'provider', backendRole: 'user', route: 'account_then_provider', afterSignIn: PROVIDER_APPLICATION_PATH,
+    id: 'garage_business', title: 'Garage / workshop', summary: 'Offer vehicle servicing, repairs, diagnostics and workshop services.',
+    outcome: 'Business and each service reviewed separately', intent: 'provider', backendRole: 'user', route: 'account_then_provider', afterSignIn: providerApplicationPath('garage_business'),
     steps: [
-      { title: 'Create an account for the business owner', body: 'This is a normal KAYAD account in your name.' },
+      { title: 'Create your personal account', body: 'The owner signs up with their own name and email; the business is registered separately.' },
       { title: 'Verify your email', body: 'Required before you can sign in.' },
-      { title: 'Apply as a provider', body: 'After signing in you go straight to the provider application: business details and the services you offer. Declared services are shown as “declared”, not “verified”.' },
-      { title: 'KAYAD review', body: 'KAYAD verifies the business and each service from evidence. You become publicly bookable only for what is verified.' },
+      { title: 'Register your garage', body: 'Add the business identity, branches, service coverage and services offered.' },
+      { title: 'KAYAD review', body: 'Business approval and service verification are separate. Only verified services become bookable.' },
     ],
   },
   {
-    id: 'professional', title: 'Inspector or mechanic', summary: 'Work as an individual professional.',
-    outcome: 'Independent: KAYAD reviews your application. Employed: your business confirms you.', intent: 'professional', backendRole: null, route: 'application', afterSignIn: null,
+    id: 'inspection_company', title: 'Inspection company', summary: 'Register an organization offering vehicle inspections and condition reports.',
+    outcome: 'Company and inspection services reviewed separately', intent: 'provider', backendRole: 'user', route: 'account_then_provider', afterSignIn: providerApplicationPath('inspection_company'),
+    steps: [
+      { title: 'Create your personal account', body: 'The company owner signs up with their own name and email.' },
+      { title: 'Verify your email', body: 'Required before you can sign in.' },
+      { title: 'Register your inspection company', body: 'Add company details, inspection coverage, branches and professional staff.' },
+      { title: 'KAYAD review', body: 'Company verification, inspector credentials and inspection services are reviewed separately.' },
+    ],
+  },
+  {
+    id: 'professional', title: 'Inspector or mechanic', summary: 'Apply as an individual professional or join an approved business.',
+    outcome: 'Your personal account is verified first; professional access requires approval.', intent: 'professional', backendRole: 'user', route: 'account_then_provider', afterSignIn: providerApplicationPath('individual_inspector'),
     steps: [
       { title: 'Choose how you work', body: 'On your own, or as staff of a garage or inspection company already on KAYAD.' },
-      { title: 'Independent', body: 'You send an application with your ID and experience. It is not an account yet; if KAYAD approves it you get an email with a link to set your password.' },
+      { title: 'Independent', body: 'Create your personal account first, then submit professional credentials for KAYAD review. Approval adds professional access to that same account.' },
       { title: 'Employed by a business', body: 'You create an account, then ask the business to confirm you. The business must accept, and KAYAD verifies qualifications separately.' },
     ],
   },
@@ -90,9 +92,9 @@ export const roleById = (id: PublicRoleId): PublicRole => PUBLIC_ROLES.find((r) 
 export const roleForIntent = (intent: AuthIntent | null | undefined): PublicRoleId | null => {
   switch (intent) {
     case 'buyer': return 'buyer';
-    case 'seller': return 'seller';
+    case 'seller': return 'buyer';
     case 'dealer': return 'dealer';
-    case 'provider': return 'service_business';
+    case 'provider': return 'garage_business';
     case 'professional': return 'professional';
     default: return null;
   }

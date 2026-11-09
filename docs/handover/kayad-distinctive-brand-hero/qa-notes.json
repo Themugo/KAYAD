@@ -1,0 +1,22 @@
+{
+  "previewType": "Hand-authored browser layout fixture using the actual new logo SVG and hero SVG assets; not a live React application screenshot",
+  "browser": "Chromium 144.0.7559.96",
+  "viewports": [
+    {
+      "width": 390,
+      "documentWidth": 390,
+      "horizontalOverflow": false
+    },
+    {
+      "width": 1366,
+      "documentWidth": 1366,
+      "horizontalOverflow": false
+    }
+  ],
+  "checks": [
+    "logo SVG loads",
+    "hero SVG loads",
+    "KE flag appears below suffix",
+    "header remains within viewport"
+  ]
+}

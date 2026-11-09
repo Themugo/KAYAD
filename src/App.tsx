@@ -558,7 +558,7 @@ function AppInner() {
       {/* 1. Header Navigation */}
       <SkipLink />
 
-      <Navbar
+      {!privateWorkspaceNavs.has(activeNav) && <Navbar
         user={user}
         unreadCount={visibleUnreadMessageCount}
         notificationUnreadCount={unreadNotificationCount}
@@ -572,7 +572,7 @@ function AppInner() {
         onOpenAlerts={() => setShowAlertsModal(true)}
         onOpenCompare={() => setShowCompareModal(true)}
         onLogout={() => { void authLogout(); }}
-      />
+      />}
 
       {/* 2. Main Container (Inventory Priority & Clear Hierarchy) */}
       <main
@@ -795,6 +795,7 @@ function AppInner() {
                 user={user}
                 onOpenAuth={(intent = 'seller') => handleOpenRegister(intent, '/?nav=seller-platform')}
                 onNavigate={(nav) => setActiveNav(nav)}
+                onLogout={() => { void authLogout(); }}
               />
             )
           )}
@@ -817,8 +818,8 @@ function AppInner() {
         />
       )}
 
-      {/* 3. Footer */}
-      <footer className="bg-[#0A3340] text-[#BDE5DE] text-xs py-8 border-t border-navy-600/40 mt-12">
+      {/* 3. Public-site footer is intentionally excluded from account workspaces. */}
+      {!privateWorkspaceNavs.has(activeNav) && <footer className="bg-[#0A3340] text-[#BDE5DE] text-xs py-8 border-t border-navy-600/40 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-3">
             <FooterLogo />
@@ -843,7 +844,7 @@ function AppInner() {
             <button type="button" onClick={() => setActiveNav('support')} className="hover:text-[#5AAFA4]">Contact support</button>
           </nav>
         </div>
-      </footer>
+      </footer>}
 
       {/* 4. Modals */}
       <VehicleDetailModal

@@ -75,8 +75,8 @@ interface BrandingContextValue {
 const DEFAULT_BRANDING: Branding = {
   logoType: 'image',
   logoText: 'KAYAD',
-  logoUrl: '/branding/kayad-road-mark.svg',
-  brandTagline: "Kenya's Trusted Vehicle Marketplace",
+  logoUrl: '/branding/kayad-symbol.svg',
+  brandTagline: "Premium Automotive Marketplace",
   countryBadgeShow: true,
   countryBadgeText: 'KE',
   footerDescription: "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services.",
@@ -216,7 +216,8 @@ function normalizeBrandingConfig(config: Partial<Branding> | null | undefined): 
     const value = merged[field];
     if (typeof value === 'string') merged[field] = normalizeLegacyBrandColor(value, field) as never;
   }
-  merged.countryBadgeShow = merged.countryBadgeShow !== false;
+  // Migrate only the built-in legacy mark; explicitly uploaded admin logos remain untouched.\n  if (merged.logoUrl === '/branding/kayad-road-mark.svg') merged.logoUrl = '/branding/kayad-symbol.svg';
+  if (merged.brandTagline?.trim().toLowerCase() === "kenya's trusted vehicle marketplace") merged.brandTagline = 'Premium Automotive Marketplace';\n  merged.countryBadgeShow = merged.countryBadgeShow !== false;
   merged.countryBadgeText = sanitizeCountryBadgeText(merged.countryBadgeText);
   return merged;
 }

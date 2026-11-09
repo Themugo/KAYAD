@@ -1,7 +1,0 @@
-PASS GET /api/v1/auth/csrf returns 200 with a token — status=200 tokenPresent=true canonicalHeader=present
-PASS CSRF cookie issued with SameSite set — cookies=[{"name":"XSRF-TOKEN","httpOnly":false,"sameSite":"Strict","secure":false,"path":"/"}]
-PASS POST login with NO csrf token/cookie is rejected 403 — status=403
-PASS POST login with MISMATCHED csrf token is rejected 403 — status=403
-PASS POST login with VALID csrf token passes the CSRF gate (not 403-CSRF) — status=500 (non-CSRF outcome expected; no database in this run)
-
-LOCAL CSRF PROBE: 5/5 passed

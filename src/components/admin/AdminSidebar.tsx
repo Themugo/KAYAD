@@ -163,6 +163,33 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
     if (activeGroup) setExpandedGroups(current => ({ ...current, [activeGroup.id]: true }));
   }, [activeGroup?.id, location.pathname]);
 
+  // On mobile, open only the group containing the current page. This keeps the
+  // first drawer view short and prevents later groups from appearing trapped
+  // beneath the pinned footer; every other group remains one tap away.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    setExpandedGroups(Object.fromEntries(
+      NAVIGATION_GROUPS.map(group => [group.id, group.id === activeGroup?.id]),
+    ));
+  }, [mobileOpen, activeGroup?.id]);
+
+  // When the drawer opens, bring the current destination into view inside the
+  // scrollable navigation region without scrolling the page behind the drawer.
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const frame = window.requestAnimationFrame(() => {
+      const navigation = document.querySelector<HTMLElement>('.admin-sidebar__navigation');
+      const activeLink = navigation?.querySelector<HTMLElement>('.admin-sidebar__link.is-active');
+      if (!navigation || !activeLink) return;
+      const navRect = navigation.getBoundingClientRect();
+      const linkRect = activeLink.getBoundingClientRect();
+      if (linkRect.top < navRect.top || linkRect.bottom > navRect.bottom) {
+        navigation.scrollTop += linkRect.top - navRect.top - Math.max(12, (navRect.height - linkRect.height) / 2);
+      }
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [mobileOpen, activeGroup?.id, location.pathname, expandedGroups]);
+
   if (!user || !ELIGIBLE_ROLES.includes(user.role || '')) return null;
 
   return (
@@ -172,12 +199,17 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
         id="admin-sidebar-navigation"
         className={`admin-sidebar${mobileOpen ? ' open' : ''}${collapsed ? ' is-collapsed' : ''}`}
         aria-label="Administration navigation"
+        role={mobileOpen ? 'dialog' : undefined}
+        aria-modal={mobileOpen ? true : undefined}
+        aria-describedby={mobileOpen ? 'admin-sidebar-navigation-help' : undefined}
+        aria-labelledby={mobileOpen ? 'admin-sidebar-title' : undefined}
+        tabIndex={mobileOpen ? -1 : undefined}
       >
         <div className="admin-sidebar__brand">
           {!collapsed && (
             <div className="admin-sidebar__brand-copy">
               <span className="admin-sidebar__eyebrow"><BrandMark size={26} nameClassName="admin-sidebar__brand-name" /></span>
-              <span className="admin-sidebar__brand-title">Admin Console</span>
+              <span className="admin-sidebar__brand-title" id="admin-sidebar-title">Admin Console</span>
             </div>
           )}
           <div className="admin-sidebar__controls">
@@ -199,7 +231,7 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
           </div>
         </div>
 
-        <nav className="admin-sidebar__navigation" aria-label="Admin sections">
+        <nav className="admin-sidebar__navigation" aria-label="Admin sections" id="admin-sidebar-navigation-help">
           {visibleGroups.map(group => {
             const GroupIcon = group.icon;
             const isExpanded = expandedGroups[group.id] ?? true;
@@ -212,6 +244,7 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
                   <button
                     type="button"
                     className="admin-sidebar__group-toggle"
+                    aria-label={`${group.label} navigation`}
                     aria-expanded={isExpanded}
                     aria-controls={`admin-nav-group-${group.id}`}
                     onClick={() => setExpandedGroups(current => ({ ...current, [group.id]: !(current[group.id] ?? true) }))}

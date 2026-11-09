@@ -15,7 +15,7 @@ const EMPTY_DRAFT: HeroSlideInput = {
   ctaSecondaryText: '',
   ctaSecondaryLink: '',
   backgroundType: 'image',
-  backgroundValue: 'https://commons.wikimedia.org/wiki/Special:FilePath/Nairobi%20skyline%20from%20Uhuru%20Park.jpg?width=2400',
+  backgroundValue: '/hero/kayad-kenyan-highlands-road.svg',
   overlayColor: '#176B87',
   overlayOpacity: 40,
   displayMode: 'boxed',

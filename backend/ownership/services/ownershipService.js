@@ -229,7 +229,7 @@ class OwnershipService {
       service_title: serviceData.serviceTitle,
       service_description: serviceData.description,
       workshop_name: serviceData.workshopName,
-      workshop_verified: serviceData.workshopVerified || false,
+      workshop_verified: false, // verification is staff-controlled, never accepted from a client payload
       mileage_at_service: serviceData.mileageAtService || vehicle.current_mileage,
       service_cost: serviceData.serviceCost,
       invoice_number: serviceData.invoiceNumber,
@@ -309,6 +309,20 @@ class OwnershipService {
       throw new AppError('Reminder not found', 404);
     }
     await this.requireOwnedVehicle(userId, reminder.owner_vehicle_id);
+
+    // A caller may only attach a service record belonging to the same
+    // vehicle/owner. Without this check a valid owner could cross-link a
+    // service record from another vehicle (or another account) to this
+    // reminder, corrupting the ownership history.
+    if (serviceRecordId) {
+      const serviceRecord = await db.findOne('ownership_service_records', {
+        id: serviceRecordId,
+        owner_vehicle_id: reminder.owner_vehicle_id,
+      });
+      if (!serviceRecord) {
+        throw new AppError('Service record not found for this vehicle', 404);
+      }
+    }
 
     const updates = {
       status: 'completed',

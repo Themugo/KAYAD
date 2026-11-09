@@ -1,4 +1,5 @@
 import express from "express";
+import { validateWritePayload } from "../middleware/validateWritePayload.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import {
@@ -47,15 +48,15 @@ router.get("/export", protect, adminOnly, asyncHandler(exportTranslations));
 // =============================
 
 // Create translation
-router.post("/", protect, adminOnly, asyncHandler(createTranslation));
+router.post("/", protect, adminOnly, validateWritePayload, asyncHandler(createTranslation));
 
 // Update translation
-router.patch("/:translationId", protect, adminOnly, asyncHandler(updateTranslation));
+router.patch("/:translationId", protect, adminOnly, validateWritePayload, asyncHandler(updateTranslation));
 
 // Delete translation
-router.delete("/:translationId", protect, adminOnly, asyncHandler(deleteTranslation));
+router.delete("/:translationId", protect, adminOnly, validateWritePayload, asyncHandler(deleteTranslation));
 
 // Import translations (bulk)
-router.post("/import", protect, adminOnly, asyncHandler(importTranslations));
+router.post("/import", protect, adminOnly, validateWritePayload, asyncHandler(importTranslations));
 
 export default router;

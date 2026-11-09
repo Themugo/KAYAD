@@ -1,4 +1,5 @@
 import express from "express";
+import { validateWritePayload } from "../middleware/validateWritePayload.js";
 import { protect, adminOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import {
@@ -25,31 +26,31 @@ const router = express.Router();
 router.get("/", protect, asyncHandler(getUserPreferences));
 
 // Update user preferences
-router.patch("/", protect, asyncHandler(updateUserPreferences));
+router.patch("/", protect, validateWritePayload, asyncHandler(updateUserPreferences));
 
 // Set theme (light/dark/system)
-router.post("/theme", protect, asyncHandler(setTheme));
+router.post("/theme", protect, validateWritePayload, asyncHandler(setTheme));
 
 // Toggle dark mode
-router.post("/theme/toggle", protect, asyncHandler(toggleDarkMode));
+router.post("/theme/toggle", protect, validateWritePayload, asyncHandler(toggleDarkMode));
 
 // Set language
-router.post("/language", protect, asyncHandler(setLanguage));
+router.post("/language", protect, validateWritePayload, asyncHandler(setLanguage));
 
 // Update notification settings
-router.post("/notifications", protect, asyncHandler(updateNotificationSettings));
+router.post("/notifications", protect, validateWritePayload, asyncHandler(updateNotificationSettings));
 
 // Add recent search
-router.post("/search/recent", protect, asyncHandler(addRecentSearch));
+router.post("/search/recent", protect, validateWritePayload, asyncHandler(addRecentSearch));
 
 // Clear recent searches
-router.delete("/search/recent", protect, asyncHandler(clearRecentSearches));
+router.delete("/search/recent", protect, validateWritePayload, asyncHandler(clearRecentSearches));
 
 // Update accessibility settings
-router.post("/accessibility", protect, asyncHandler(updateAccessibility));
+router.post("/accessibility", protect, validateWritePayload, asyncHandler(updateAccessibility));
 
 // Update last seen
-router.post("/last-seen", protect, asyncHandler(updateLastSeen));
+router.post("/last-seen", protect, validateWritePayload, asyncHandler(updateLastSeen));
 
 // =============================
 // ADMIN ROUTES

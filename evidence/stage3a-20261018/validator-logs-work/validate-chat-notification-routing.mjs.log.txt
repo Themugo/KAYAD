@@ -1,3 +1,0 @@
-Chat / notification / navbar route convergence: PASS
-Auth guards and owner-scoped backend route mounting: PASS
-Message send/socket/notification ID contract: PASS

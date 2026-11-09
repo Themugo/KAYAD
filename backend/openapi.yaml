@@ -3312,6 +3312,32 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+  /api/cars/{id}/images/cover:
+    patch:
+      tags:
+      - Api
+      summary: Set the cover image for a vehicle listing
+      description: Set the primary image for an owned listing using the canonical vehicle image endpoint.
+      operationId: patchApiCarsIdImagesCover
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Cover image updated
+        '400':
+          description: Invalid image selection
+        '401':
+          description: Unauthorized
+        '403':
+          description: Listing ownership or permission denied
+        '404':
+          description: Listing or image not found
+        '500':
+          description: Internal server error
   /api/cars/{id}/insights:
     get:
       tags:
@@ -7137,6 +7163,164 @@ paths:
           description: Bad request
         '401':
           description: Unauthorized
+        '500':
+          description: Internal server error
+  /api/dealer/paperwork-requirements:
+    get:
+      tags:
+      - Dealer
+      summary: Get dealer verification paperwork requirements
+      description: Return the currently configured required and optional dealer verification documents for a pending applicant.
+      operationId: getDealerPaperworkRequirements
+      responses:
+        '200':
+          description: Configured paperwork checklist
+        '401':
+          description: Unauthorized
+        '403':
+          description: Account is not eligible to apply
+        '503':
+          description: Paperwork policy unavailable
+  /api/dealer/application:
+    post:
+      tags:
+      - Dealer
+      summary: Start a dealer application
+      description: Start the dealer application on the existing personal account; does not create a second identity.
+      operationId: postDealerApplication
+      responses:
+        '201':
+          description: Dealer application started
+        '200':
+          description: Existing application returned without duplication
+        '401':
+          description: Unauthorized
+        '403':
+          description: Account verification, status or application policy prevents submission
+        '500':
+          description: Internal server error
+  /api/dealer-platform/team/{memberId}/resend:
+    post:
+      tags:
+      - Dealer Platform
+      summary: Resend a dealer team invitation
+      description: Resend an invitation for an existing team member; requires the dealer organisation team-management capability.
+      operationId: postApiDealerPlatformTeamMemberResend
+      parameters:
+      - name: memberId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Invitation resend accepted
+        '400':
+          description: Invalid invitation state
+        '401':
+          description: Unauthorized
+        '403':
+          description: Team-management permission required
+        '404':
+          description: Team member not found
+        '500':
+          description: Internal server error
+  /api/dealer-platform/team/roles:
+    get:
+      tags:
+      - Dealer Platform
+      summary: List dealer team roles
+      description: Return the organisation's available team roles to an authorised team manager.
+      operationId: getApiDealerPlatformTeamRoles
+      responses:
+        '200':
+          description: Team roles
+        '401':
+          description: Unauthorized
+        '403':
+          description: Team-management permission required
+        '500':
+          description: Internal server error
+    post:
+      tags:
+      - Dealer Platform
+      summary: Create a dealer team role
+      description: Create a custom team role within the current dealer organisation.
+      operationId: postApiDealerPlatformTeamRoles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, permissions]
+              properties:
+                name:
+                  type: string
+                permissions:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Team role created
+        '400':
+          description: Invalid role definition
+        '401':
+          description: Unauthorized
+        '403':
+          description: Team-management permission required
+        '500':
+          description: Internal server error
+  /api/dealer-platform/team/roles/{roleKey}:
+    put:
+      tags:
+      - Dealer Platform
+      summary: Update a dealer team role
+      description: Update a custom role within the current dealer organisation.
+      operationId: putApiDealerPlatformTeamRolesRoleKey
+      parameters:
+      - name: roleKey
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Team role updated
+        '400':
+          description: Invalid role definition
+        '401':
+          description: Unauthorized
+        '403':
+          description: Team-management permission required
+        '404':
+          description: Team role not found
+        '500':
+          description: Internal server error
+    delete:
+      tags:
+      - Dealer Platform
+      summary: Delete a dealer team role
+      description: Delete a custom role that is no longer assigned to team members.
+      operationId: deleteApiDealerPlatformTeamRolesRoleKey
+      parameters:
+      - name: roleKey
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Team role deleted
+        '400':
+          description: Role is still assigned or cannot be deleted
+        '401':
+          description: Unauthorized
+        '403':
+          description: Team-management permission required
+        '404':
+          description: Team role not found
         '500':
           description: Internal server error
   /api/dealer/onboarding:

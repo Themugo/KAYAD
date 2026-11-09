@@ -8,12 +8,12 @@ const routes = fs.readFileSync(path.join(root, 'backend/routes/ownershipRoutes.j
 
 const checks = [
   ['full passport receives authenticated access context', controller.includes('getFullPassport(req.params.passportId, { userId: req.user.id, role: req.user.role, effectiveRole: req.user.effectiveRole })')],
-  ['full passport route requires protect middleware', /router\.get\('\/passports\/:passportId',\s*protect,\s*getPassport\)/.test(routes)],
+  ['full passport route requires protect middleware', /router\.get\('\/passports\/:passportId',\s*protect,\s*validateParams\(passportIdParamsSchema\),\s*getPassport\)/.test(routes)],
   ['staff access uses canonical STAFF_ROLES', service.includes("STAFF_ROLES.includes(role)")],
   ['owner access is constrained by passport_id and owner_id', service.includes("passport_id: passportId") && service.includes("owner_id: userId")],
   ['inactive owner vehicle does not authorize access', service.includes("status: 'active'")],
   ['unauthorized passport does not reveal existence', service.includes("throw new AppError('Passport not found', 404)")],
-  ['public passport endpoint remains separate', routes.includes("router.get('/passports/:passportId/public', getPublicPassport)")],
+  ['public passport endpoint remains separate', routes.includes("router.get('/passports/:passportId/public', validateParams(passportIdParamsSchema), getPublicPassport)")],
 ];
 
 let failed = 0;

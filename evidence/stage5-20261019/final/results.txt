@@ -1,7 +1,0 @@
-tsc exit=0
-build exit=0
-front_vitest exit=0
-back_jest exit=0
-back_vitest exit=0
-back_node exit=0
-DONE

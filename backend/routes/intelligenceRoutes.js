@@ -1,4 +1,5 @@
 import express from "express";
+import { validateWritePayload } from "../middleware/validateWritePayload.js";
 import { protect, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import {
@@ -64,17 +65,17 @@ router.get("/benchmarks", asyncHandler(getBenchmarks));
 
 // Reports
 router.get("/reports", asyncHandler(getReports));
-router.post("/reports/generate", asyncHandler(generateReport));
+router.post("/reports/generate", validateWritePayload, asyncHandler(generateReport));
 router.get("/reports/download/:reportId", asyncHandler(downloadReport));
 
 // Self-Service Analytics
-router.post("/query", asyncHandler(queryIntelligence));
+router.post("/query", validateWritePayload, asyncHandler(queryIntelligence));
 
 // Exports
-router.post("/exports", asyncHandler(exportData));
+router.post("/exports", validateWritePayload, asyncHandler(exportData));
 
 // Scheduled Reports
 router.get("/scheduled", asyncHandler(getScheduledReports));
-router.post("/scheduled", allowRoles("admin", "superadmin", "executive"), asyncHandler(createScheduledReport));
+router.post("/scheduled", allowRoles("admin", "superadmin", "executive"), validateWritePayload, asyncHandler(createScheduledReport));
 
 export default router;

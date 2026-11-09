@@ -1,0 +1,105 @@
+{
+  "browser": "Chromium 144.0.7559.96",
+  "fixture": "Representative long admin drawer and dashboard using current candidate CSS; not authenticated React runtime",
+  "results": [
+    {
+      "viewport": "320x640",
+      "navClientHeight": 401,
+      "navScrollHeight": 824,
+      "navCanScroll": true,
+      "navEnd": true,
+      "footerVisible": true,
+      "docAtEnd": true,
+      "horizontalOverflow": false,
+      "contentOverflow": "visible"
+    },
+    {
+      "viewport": "360x740",
+      "navClientHeight": 501,
+      "navScrollHeight": 824,
+      "navCanScroll": true,
+      "navEnd": true,
+      "footerVisible": true,
+      "docAtEnd": true,
+      "horizontalOverflow": false,
+      "contentOverflow": "visible"
+    },
+    {
+      "viewport": "375x812",
+      "navClientHeight": 573,
+      "navScrollHeight": 824,
+      "navCanScroll": true,
+      "navEnd": true,
+      "footerVisible": true,
+      "docAtEnd": true,
+      "horizontalOverflow": false,
+      "contentOverflow": "visible"
+    },
+    {
+      "viewport": "390x844",
+      "navClientHeight": 605,
+      "navScrollHeight": 824,
+      "navCanScroll": true,
+      "navEnd": true,
+      "footerVisible": true,
+      "docAtEnd": true,
+      "horizontalOverflow": false,
+      "contentOverflow": "visible"
+    },
+    {
+      "viewport": "430x900",
+      "navClientHeight": 661,
+      "navScrollHeight": 824,
+      "navCanScroll": true,
+      "navEnd": true,
+      "footerVisible": true,
+      "docAtEnd": true,
+      "horizontalOverflow": false,
+      "contentOverflow": "visible"
+    },
+    {
+      "viewport": "768x900",
+      "navClientHeight": 640,
+      "navScrollHeight": 3284,
+      "navCanScroll": true,
+      "navEnd": true,
+      "footerVisible": true,
+      "docAtEnd": true,
+      "horizontalOverflow": false,
+      "contentOverflow": "visible"
+    },
+    {
+      "viewport": "1024x900",
+      "navClientHeight": 640,
+      "navScrollHeight": 3284,
+      "navCanScroll": true,
+      "navEnd": true,
+      "footerVisible": true,
+      "docAtEnd": true,
+      "horizontalOverflow": false,
+      "contentOverflow": "visible"
+    },
+    {
+      "viewport": "1366x900",
+      "navClientHeight": 640,
+      "navScrollHeight": 3284,
+      "navCanScroll": true,
+      "navEnd": true,
+      "footerVisible": true,
+      "docAtEnd": true,
+      "horizontalOverflow": false,
+      "contentOverflow": "visible"
+    },
+    {
+      "viewport": "1440x900",
+      "navClientHeight": 640,
+      "navScrollHeight": 3284,
+      "navCanScroll": true,
+      "navEnd": true,
+      "footerVisible": true,
+      "docAtEnd": true,
+      "horizontalOverflow": false,
+      "contentOverflow": "visible"
+    }
+  ]
+}

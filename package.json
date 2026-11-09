@@ -169,7 +169,17 @@
     "validate:phase13e-listing-visibility": "node scripts/validate-phase13e-listing-visibility.mjs",
     "validate:phase13f": "npm run validate:phase13e-listing-visibility && npm run validate:migration-hygiene && cd backend && npm run test:jest -- tests/regression/phase13fCapabilityHardening tests/regression/phaseC1PublicListingCacheInvalidation",
     "validate:repository-naming": "node scripts/validate-repository-naming-and-paths.mjs",
-    "validate:admin-dashboard-mobile-premium": "node scripts/validate-admin-dashboard-mobile-premium.mjs"
+    "validate:admin-dashboard-mobile-premium": "node scripts/validate-admin-dashboard-mobile-premium.mjs",
+    "validate:private-seller-listing-workflow": "node scripts/validate-private-seller-listing-workflow.mjs",
+    "validate:system-handover-core": "node scripts/validate-system-handover-core.mjs",
+    "validate:security-finance-release": "node scripts/validate-security-finance-release-gate.mjs",
+    "validate:write-route-coverage": "node scripts/validate-write-route-coverage.mjs",
+    "validate:homepage-design": "node scripts/validate-kayad-homepage-redesign.mjs",
+    "validate:unified-onboarding": "node scripts/validate-kayad-unified-onboarding.mjs",
+    "validate:admin-mobile-shell-scroll": "node scripts/validate-admin-mobile-shell-scroll.mjs",
+    "validate:admin-navigation-page-coverage": "node scripts/validate-admin-navigation-page-coverage.mjs",
+    "validate:kayad-navbar-branding": "node scripts/validate-kayad-navbar-branding.mjs",
+    "validate:kayad-distinctive-brand-hero": "node scripts/validate-kayad-distinctive-brand-hero.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

@@ -1,4 +1,5 @@
 import express from "express";
+import { validateWritePayload } from "../middleware/validateWritePayload.js";
 import { protect, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import {
@@ -71,23 +72,23 @@ router.get("/ai", asyncHandler(getAIOperations));
 
 // Action Center
 router.get("/actions", asyncHandler(getPendingActions));
-router.post("/actions/execute", allowRoles("admin", "superadmin", "manager"), asyncHandler(executeAction));
+router.post("/actions/execute", allowRoles("admin", "superadmin", "manager"), validateWritePayload, asyncHandler(executeAction));
 
 // Notifications
 router.get("/notifications", asyncHandler(getNotifications));
-router.put("/notifications/:notificationId/read", asyncHandler(markNotificationRead));
+router.put("/notifications/:notificationId/read", validateWritePayload, asyncHandler(markNotificationRead));
 
 // Decision Center
 router.get("/decisions", asyncHandler(getDecisions));
 
 // Command Palette
 router.get("/commands", asyncHandler(getCommands));
-router.post("/commands/execute", allowRoles("admin", "superadmin", "executive", "engineer", "manager"), asyncHandler(executeCommand));
+router.post("/commands/execute", allowRoles("admin", "superadmin", "executive", "engineer", "manager"), validateWritePayload, asyncHandler(executeCommand));
 
 // War Room
 router.get("/war-room", asyncHandler(getWarRoom));
-router.post("/war-room/activate", allowRoles("admin", "superadmin", "executive"), asyncHandler(activateWarRoom));
-router.post("/war-room/deactivate", allowRoles("admin", "superadmin", "executive"), asyncHandler(deactivateWarRoom));
+router.post("/war-room/activate", allowRoles("admin", "superadmin", "executive"), validateWritePayload, asyncHandler(activateWarRoom));
+router.post("/war-room/deactivate", allowRoles("admin", "superadmin", "executive"), validateWritePayload, asyncHandler(deactivateWarRoom));
 
 // Timeline
 router.get("/timeline", asyncHandler(getExecutiveTimeline));
@@ -100,7 +101,7 @@ router.get("/search", asyncHandler(enterpriseSearch));
 
 // Widgets
 router.get("/widgets", asyncHandler(getWidgets));
-router.post("/widgets/layout", allowRoles("admin", "superadmin"), asyncHandler(saveWidgetLayout));
+router.post("/widgets/layout", allowRoles("admin", "superadmin"), validateWritePayload, asyncHandler(saveWidgetLayout));
 
 // Regional Map
 router.get("/map", asyncHandler(getRegionalMap));

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title">
+<title id="title">KAYAD forward-motion automotive mark</title>
+<defs>
+ <linearGradient id="body" x1="24" y1="35" x2="104" y2="104"><stop stop-color="#176B87"/><stop offset=".48" stop-color="#0A3340"/><stop offset="1" stop-color="#061F2C"/></linearGradient>
+ <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#DDF7F4"/><stop offset="1" stop-color="#7FB7C1"/></linearGradient>
+ <linearGradient id="teal" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#13B8A6"/><stop offset="1" stop-color="#087C82"/></linearGradient>
+</defs>
+<path d="M8 45Q33 13 73 13" fill="none" stroke="url(#teal)" stroke-width="5" stroke-linecap="round"/>
+<path d="M8 56Q32 31 61 29" fill="none" stroke="#176B87" stroke-width="2.5" stroke-linecap="round" opacity=".65"/>
+<path d="M10 78 30 69M8 87 26 81" stroke="#13B8A6" stroke-width="3" stroke-linecap="round"/>
+<!-- perspective road / forward motion -->
+<path d="M18 105 48 88 78 88 112 111 64 119Z" fill="#0A3340"/>
+<path d="m62 96-3 11h7l2-11" fill="#DDF4F0"/>
+<!-- frontal three-quarter body; front fascia and windscreen face the viewer -->
+<path d="M27 77 36 54Q40 43 54 39L78 34Q91 32 100 43L112 64 117 80Q119 88 111 93L99 98 29 94Q20 91 22 84Z" fill="url(#body)" stroke="#DDF4F0" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M43 54Q47 44 57 43l20-4q10-2 16 6l9 15-66 5Z" fill="url(#glass)" stroke="#DDF4F0" stroke-width="2"/>
+<path d="m48 58 9-11 19-4q9-1 13 5l6 10Z" fill="#082F3B" opacity=".92"/>
+<path d="m27 75 17-7 58-3 12 11-2 10-15 7-65-4-8-7Z" fill="#0A3340"/>
+<path d="M27 75 44 70l-4 10-14 3Z" fill="#EAF8F5"/>
+<path d="m105 70 10 8 1 6-13-4Z" fill="#EAF8F5"/>
+<path d="M45 82q31-9 61-1" fill="none" stroke="#13B8A6" stroke-width="3"/>
+<path d="M54 87h39" stroke="#DDF4F0" stroke-width="2" opacity=".8"/>
+<path d="M35 94 30 105M100 97l7 11" stroke="#061F2C" stroke-width="6" stroke-linecap="round"/>
+<circle cx="38" cy="96" r="8" fill="#061F2C" stroke="#A9D9D6" stroke-width="2.5"/>
+<circle cx="38" cy="96" r="3" fill="#13B8A6"/>
+<circle cx="101" cy="98" r="8" fill="#061F2C" stroke="#A9D9D6" stroke-width="2.5"/>
+<circle cx="101" cy="98" r="3" fill="#13B8A6"/>
+</svg>

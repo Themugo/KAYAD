@@ -1,1 +1,0 @@
-PASS messaging persistence confirmation contract

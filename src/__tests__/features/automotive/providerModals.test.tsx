@@ -34,6 +34,14 @@ const TAX = {
 beforeEach(() => { [register, getTax, declare, getMy, listCaps, listStaff, myAff, accept, confirm, invite, myMem, myWork, acceptInv, leaveMem].forEach((m) => m.mockReset()); getTax.mockResolvedValue(TAX); myMem.mockResolvedValue({ memberships: [] }); myWork.mockResolvedValue({ items: [], memberships: 0 }); });
 
 describe('Provider application', () => {
+  it('preselects the provider subtype carried through the registration return URL', async () => {
+    const previous = window.location.href;
+    window.history.pushState({}, '', '/?nav=inspections&action=apply-provider&providerType=inspection_company');
+    render(<ProviderApplicationModal isOpen signedIn onClose={vi.fn()} />);
+    expect(await screen.findByRole('radio', { name: /Inspection company/ })).toBeChecked();
+    window.history.pushState({}, '', previous);
+  });
+
   it('offers services from the canonical taxonomy (no free-text list) and records them as declared after the application', async () => {
     register.mockResolvedValue('prov-123'); declare.mockResolvedValue({});
     render(<ProviderApplicationModal isOpen signedIn onClose={vi.fn()} />);
@@ -47,6 +55,17 @@ describe('Provider application', () => {
     expect(register.mock.calls[0][0]).not.toHaveProperty('serviceTypes');
     expect((await screen.findByRole('status')).textContent).toMatch(/submitted to KAYAD for review/);
     expect(document.body.textContent).toMatch(/recorded as declared, not verified/);
+  });
+
+
+  it('offers distinct garage and inspection-company organization types and sends the selected type', async () => {
+    register.mockResolvedValue('prov-company');
+    render(<ProviderApplicationModal isOpen signedIn onClose={vi.fn()} />);
+    fireEvent.click(await screen.findByRole('radio', { name: /Inspection company/ }));
+    fireEvent.change(screen.getByLabelText(/Registered business \/ trading name/), { target: { value: 'Kenya Vehicle Inspections Ltd' } });
+    fireEvent.change(screen.getByLabelText('Contact phone'), { target: { value: '0712345678' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Submit application' }));
+    await waitFor(() => expect(register).toHaveBeenCalledWith(expect.objectContaining({ businessType: 'inspection_company', companyName: 'Kenya Vehicle Inspections Ltd' })));
   });
 
   it('tells a business without premises that an evidence-based route exists, and does not promise approval', async () => {

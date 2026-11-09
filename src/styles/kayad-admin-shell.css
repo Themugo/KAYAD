@@ -793,3 +793,178 @@
 /* Pinned footer (View marketplace + Settings): never scrolls away with the groups; Settings is the last item. */
 .kayad-admin-shell .admin-sidebar__pinned { display: grid; gap: 6px; }
 .kayad-admin-shell .admin-sidebar__pinned .admin-sidebar__settings.is-active { color: #ffffff; }
+
+
+/* Mobile navigation and document-scroll convergence.
+   The document owns vertical page scrolling; only the fixed drawer's link region scrolls independently. */
+.kayad-admin-shell__main {
+  min-width: 0;
+  overflow-x: clip;
+}
+.kayad-admin-shell__content {
+  min-width: 0;
+  overflow: visible;
+  overscroll-behavior: auto;
+}
+.kayad-admin-shell .admin-sidebar {
+  min-height: 0;
+}
+.kayad-admin-shell .admin-sidebar__brand,
+.kayad-admin-shell .admin-sidebar__alerts,
+.kayad-admin-shell .admin-sidebar__footer {
+  flex: 0 0 auto;
+}
+.kayad-admin-shell .admin-sidebar__navigation {
+  flex: 1 1 0%;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scrollbar-gutter: stable;
+}
+.kayad-admin-shell .admin-sidebar__footer {
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+@media (max-width: 767px) {
+  .kayad-admin-shell {
+    display: flex;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: auto;
+    align-items: stretch;
+  }
+  .kayad-admin-shell__main {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+  .kayad-admin-shell__content {
+    flex: 0 0 auto;
+    min-height: 0;
+    overflow: visible;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+  .kayad-admin-shell .admin-sidebar {
+    inset-block: 0;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    min-height: 0;
+    overscroll-behavior: contain;
+  }
+  .kayad-admin-shell .admin-sidebar__navigation {
+    min-height: 0;
+    max-height: none;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .kayad-admin-shell .admin-sidebar__footer .admin-sidebar__link {
+    min-height: 44px;
+  }
+  .kayad-admin-shell .admin-sidebar__mobile-close {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .admin-sidebar-backdrop {
+    height: 100vh;
+    height: 100dvh;
+    touch-action: manipulation;
+  }
+}
+@media (min-width: 768px) {
+  .kayad-admin-shell {
+    align-items: stretch;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  .kayad-admin-shell .admin-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    align-self: flex-start;
+  }
+  .kayad-admin-shell__main {
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+  .kayad-admin-header {
+    position: sticky;
+    top: 0;
+  }
+}
+
+
+/* Drawer information architecture: compact mobile entry state and a genuinely
+   bounded navigation viewport above the always-visible utility footer. */
+.kayad-admin-shell .admin-sidebar__navigation {
+  flex: 1 1 0%;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+.kayad-admin-shell .admin-sidebar__group {
+  scroll-margin-block: 12px;
+}
+.kayad-admin-shell .admin-sidebar__group-toggle {
+  min-height: 42px;
+  padding: 8px 10px;
+}
+.kayad-admin-shell .admin-sidebar__link {
+  min-height: 42px;
+  padding-block: 10px;
+}
+.kayad-admin-shell .admin-sidebar__pinned {
+  gap: 5px;
+  padding: 8px 10px max(10px, env(safe-area-inset-bottom));
+  background: var(--admin-sidebar-bg);
+}
+.kayad-admin-shell .admin-sidebar__pinned .admin-sidebar__link {
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid rgba(156, 207, 216, .12);
+  border-radius: 11px;
+  background: rgba(221, 246, 248, .045);
+}
+.kayad-admin-shell .admin-sidebar__pinned .admin-sidebar__link:hover,
+.kayad-admin-shell .admin-sidebar__pinned .admin-sidebar__link:focus-visible {
+  border-color: var(--admin-accent-border);
+  background: rgba(19, 184, 166, .12);
+}
+@media (max-width: 767px) {
+  .kayad-admin-shell .admin-sidebar {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .kayad-admin-shell .admin-sidebar__brand {
+    flex: 0 0 auto;
+  }
+  .kayad-admin-shell .admin-sidebar__navigation {
+    flex: 1 1 0%;
+    min-height: 0;
+    max-height: none;
+    padding-bottom: 16px;
+  }
+  .kayad-admin-shell .admin-sidebar__alerts {
+    flex: 0 0 auto;
+  }
+  .kayad-admin-shell .admin-sidebar__footer {
+    flex: 0 0 auto;
+    max-height: 124px;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .kayad-admin-shell .admin-sidebar__pinned .admin-sidebar__link {
+    min-height: 48px;
+  }
+}

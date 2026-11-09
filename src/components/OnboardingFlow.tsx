@@ -4,12 +4,11 @@ import { CheckCircle2, Clock3, Mail } from 'lucide-react';
 import PremiumAuthShell from './auth/PremiumAuthShell';
 import { PasswordField, TextField } from './onboarding/fields';
 import {
-  AFFILIATION_PATH, PUBLIC_ROLES, roleById, roleForIntent, type PublicRoleId,
+  AFFILIATION_PATH, PUBLIC_ROLES, roleById, roleForIntent, providerApplicationPath, type PublicRoleId,
 } from './onboarding/roles';
-import { parseList, validateAccount, validateProfessional, type FieldErrors } from './onboarding/validation';
+import { validateAccount, type FieldErrors } from './onboarding/validation';
 import { AuthApiError, resendVerification } from '../services/authApi';
 import { useAuth } from '../context/AuthContext';
-import { inspectorAPI } from '../api/api';
 import { buildAuthPath, readAuthContext, rememberAuthIntent } from '../utils/authIntent';
 
 type Props = {
@@ -75,7 +74,6 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
   const refs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const role = roleId ? roleById(roleId) : null;
-  const independent = role?.id === 'professional' && mode === 'independent';
   const needsMode = role?.id === 'professional' && mode === null;
   const set = (key: keyof typeof emptyForm) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((p) => ({ ...p, [key]: e.target.value }));
@@ -85,7 +83,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
   useEffect(() => { headingRef.current?.focus(); }, [roleId, mode, outcome]);
 
   // Where to send the person once they have verified and signed in.
-  const destination = role?.id === 'professional' && mode === 'employed' ? AFFILIATION_PATH : (role?.afterSignIn || ctx.next);
+  const destination = role?.id === 'professional' && mode === 'employed' ? AFFILIATION_PATH : (role?.id === 'professional' && mode === 'independent' ? providerApplicationPath('individual_inspector') : (role?.afterSignIn || ctx.next));
 
   const choose = (id: PublicRoleId) => { setRoleId(id); setMode(null); setErrors({}); setServerError(''); };
 
@@ -98,25 +96,13 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
     e.preventDefault();
     if (inFlight.current || !role) return;
     setServerError('');
-    const found = independent
-      ? validateProfessional(form)
-      : validateAccount(form, role.backendRole || 'user');
+    const found = validateAccount(form, role.backendRole || 'user');
     setErrors(found);
     if (Object.keys(found).length) { focusFirstError(found); return; }
 
     inFlight.current = true;
     setSubmitting(true);
     try {
-      if (independent) {
-        await inspectorAPI.apply({
-          fullName: form.name.trim(), email: form.email.trim(), phone: form.phone.trim(), idNumber: form.idNumber.trim(),
-          location: form.location.trim(), yearsOfExperience: Number(form.yearsOfExperience),
-          specialties: parseList(form.specialties), preferredRegions: parseList(form.preferredRegions),
-          toolsAvailable: form.toolsAvailable.trim() || undefined,
-        });
-        setOutcome({ kind: 'application' });
-        return;
-      }
       const backendRole = role.backendRole || 'user';
       const body = {
         name: form.name.trim(), email: form.email.trim(), password: form.password, role: backendRole,
@@ -134,9 +120,8 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
       onComplete?.(result?.user);
     } catch (err) {
       const status = statusOf(err);
-      if (status === 409 && !independent) setOutcome({ kind: 'exists', recovered: earlierUncertain.current });
-      else if (status === 503 && !independent && err instanceof AuthApiError && err.code) setOutcome({ kind: 'unavailable' });
-      else if (independent && status === 400 && /pending application/i.test(messageOf(err))) setOutcome({ kind: 'pending-application' });
+      if (status === 409) setOutcome({ kind: 'exists', recovered: earlierUncertain.current });
+      else if (status === 503 && err instanceof AuthApiError && err.code) setOutcome({ kind: 'unavailable' });
       else if (outcomeUnknown(err)) { earlierUncertain.current = true; setOutcome({ kind: 'unknown' }); }
       else if (status === 429) setServerError('Too many attempts. Please wait a few minutes and try again.');
       else setServerError(messageOf(err));
@@ -160,13 +145,11 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
     if (outcome.kind === 'account') {
       const nextStep = role?.id === 'dealer'
         ? 'After you sign in you will be taken to business verification. Dealer tools stay locked until KAYAD approves it.'
-        : role?.id === 'seller'
-          ? 'You can sign in once verified, but you cannot list a vehicle until KAYAD approves your seller account.'
-          : role?.id === 'service_business'
+        : (role?.id === 'garage_business' || role?.id === 'inspection_company')
             ? 'After you sign in you will go straight to the provider application. KAYAD reviews it; nothing is published until it is approved.'
             : role?.id === 'professional'
-              ? 'After you sign in you can ask your garage or inspection company to confirm you as staff. They must accept, and KAYAD verifies qualifications separately.'
-              : 'After you sign in you can start browsing, saving and bidding.';
+              ? mode === 'independent' ? 'After you sign in, submit your inspector or mechanic credentials from the professional application. KAYAD reviews them and adds approved access to this same account.' : 'After you sign in, ask your garage or inspection company to confirm you as staff. They must accept, and KAYAD verifies qualifications separately.'
+              : 'After verification you can browse, save and bid. You can also request private-selling access from the same account; listing remains subject to KAYAD approval.';
       return (
         <PremiumAuthShell {...common} eyebrow="Account created" title="Check your email." description={`We sent a verification link to ${outcome.email}. You must verify before you can sign in.`}>
           <div className="space-y-5" role="status">
@@ -259,15 +242,15 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
     title: 'How KAYAD accounts work',
     steps: [
       { title: 'Everyone starts with an email', body: 'Every account must verify its email before it can sign in.' },
-      { title: 'Selling and services need approval', body: 'Sellers, dealers and service businesses are reviewed by KAYAD before they can list or be booked.' },
-      { title: 'You can add roles later', body: 'A buyer account can become a seller or apply as a provider without a new account.' },
+      { title: 'Additional access needs approval', body: 'Private selling, dealership operations and professional services are reviewed by KAYAD before they are enabled.' },
+      { title: 'One identity, more capabilities', body: 'Request private-selling or professional access, or join an approved business, without creating another personal account.' },
     ],
     note: 'Staff and administrator accounts are provisioned by KAYAD and cannot be created here.',
   };
 
   if (!role) {
     return (
-      <PremiumAuthShell mode="register" eyebrow="Create your account" title="How will you use KAYAD?" description="Pick the one that fits. It sets what we ask for and what happens next." rail={rail}>
+      <PremiumAuthShell mode="register" eyebrow="Create your account" title="Choose your KAYAD account" description="One personal account lets you buy and sell vehicles. Dealerships, garages, inspection companies and professionals apply for additional verified access." rail={rail}>
         <div role="radiogroup" aria-label="How you will use KAYAD" className="grid gap-3">
           {PUBLIC_ROLES.map((r, i) => (
             <button
@@ -294,12 +277,11 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
 
   /* ---------- step 2: details ---------- */
   const isDealer = role.backendRole === 'dealer';
-  const isSeller = role.backendRole === 'individual_seller';
-  const submitLabel = independent ? 'Send application' : role.id === 'service_business' ? 'Create account and continue' : 'Create account';
+    const submitLabel = (role.id === 'garage_business' || role.id === 'inspection_company') ? 'Create account and continue' : 'Create account';
   const errorKeys = Object.keys(errors);
 
   return (
-    <PremiumAuthShell mode="register" eyebrow={role.title} title={independent ? 'Apply as an independent inspector.' : 'Create your account.'} description={independent ? 'KAYAD reviews every application. You will not get an account until it is approved.' : role.summary} rail={rail}>
+    <PremiumAuthShell mode="register" eyebrow={role.title} title='Create your account.' description={role.summary} rail={rail}>
       <h2 ref={headingRef} tabIndex={-1} className="sr-only">{role.title} details</h2>
       <div className="mb-5 flex items-center justify-between gap-3 rounded-xl bg-[#F6FAF9] px-4 py-3 text-xs text-[#64748B]">
         <span><strong className="text-[#0A3340]">{role.title}</strong> · {role.outcome}</span>
@@ -310,7 +292,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
         <fieldset className="mb-5 grid gap-3">
           <legend className="mb-2 text-sm font-black text-[#0A3340]">How do you work?</legend>
           {([
-            ['independent', 'On my own', 'Apply to be reviewed as an independent inspector. You send ID and experience; KAYAD decides.'],
+            ['independent', 'On my own', 'Create your personal account first, then submit inspector or mechanic credentials for KAYAD review.'],
             ['employed', 'For a garage or inspection company', 'Create an account, then ask the business to confirm you as staff. No separate KAYAD application.'],
           ] as const).map(([value, title, body]) => (
             <label key={value} className="kayad-role-card cursor-pointer" aria-checked={mode === value}>
@@ -333,7 +315,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
 
           <TextField ref={(el) => { refs.current.name = el; }} label="Full name" value={form.name} onChange={set('name')} autoComplete="name" error={errors.name} disabled={submitting} />
           <TextField ref={(el) => { refs.current.email = el; }} label="Email" type="email" inputMode="email" value={form.email} onChange={set('email')} autoComplete="email" error={errors.email} disabled={submitting} />
-          <TextField ref={(el) => { refs.current.phone = el; }} label="Phone" type="tel" inputMode="tel" value={form.phone} onChange={set('phone')} autoComplete="tel" optional={!isDealer && !isSeller && !independent} hint={isDealer || isSeller ? 'KAYAD uses this to reach you about your approval.' : undefined} error={errors.phone} disabled={submitting} />
+          <TextField ref={(el) => { refs.current.phone = el; }} label="Phone" type="tel" inputMode="tel" value={form.phone} onChange={set('phone')} autoComplete="tel" optional={!isDealer} hint={isDealer ? 'KAYAD uses this to reach you about your approval.' : undefined} error={errors.phone} disabled={submitting} />
 
           {isDealer && (
             <>
@@ -341,31 +323,15 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
               <TextField ref={(el) => { refs.current.location = el; }} label="City or location" value={form.location} onChange={set('location')} autoComplete="address-level2" error={errors.location} disabled={submitting} />
             </>
           )}
-          {isSeller && (
-            <>
-              <TextField label="Trading name" optional value={form.businessName} onChange={set('businessName')} autoComplete="organization" disabled={submitting} />
-              <TextField label="City or location" optional value={form.location} onChange={set('location')} autoComplete="address-level2" disabled={submitting} />
-            </>
-          )}
 
-          {independent && (
-            <>
-              <TextField ref={(el) => { refs.current.idNumber = el; }} label="National ID or passport number" value={form.idNumber} onChange={set('idNumber')} autoComplete="off" hint="Used by KAYAD to verify you. It is sent securely and is not stored in your browser." error={errors.idNumber} disabled={submitting} />
-              <TextField ref={(el) => { refs.current.location = el; }} label="City or town" value={form.location} onChange={set('location')} autoComplete="address-level2" error={errors.location} disabled={submitting} />
-              <TextField ref={(el) => { refs.current.yearsOfExperience = el; }} label="Years of experience" type="number" inputMode="numeric" min={0} max={80} value={form.yearsOfExperience} onChange={set('yearsOfExperience')} error={errors.yearsOfExperience} disabled={submitting} />
-              <TextField ref={(el) => { refs.current.specialties = el; }} label="Specialties" value={form.specialties} onChange={set('specialties')} placeholder="e.g. engine diagnostics, pre-purchase inspection" hint="Separate with commas. These are your claims; KAYAD verifies them." error={errors.specialties} disabled={submitting} />
-              <TextField label="Regions you cover" optional value={form.preferredRegions} onChange={set('preferredRegions')} placeholder="e.g. Nairobi, Kiambu" disabled={submitting} />
-              <TextField label="Tools or equipment" optional value={form.toolsAvailable} onChange={set('toolsAvailable')} disabled={submitting} />
-            </>
-          )}
 
-          {!independent && (
+          {(
             <PasswordField ref={(el) => { refs.current.password = el; }} label="Password" value={form.password} onChange={set('password')} autoComplete="new-password" showRules error={errors.password} disabled={submitting} />
           )}
 
           <p className="m-0 text-[11px] text-[#64748B]" data-testid="onboarding-consent">By continuing you agree to the <a href="/terms" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#12576D] underline">Terms of Service</a> and the <a href="/privacy" target="_blank" rel="noopener noreferrer" className="font-semibold text-[#12576D] underline">Privacy Policy</a>.</p>
           <button type="submit" className="kayad-auth-submit" disabled={submitting}>{submitting ? <><span className="kayad-auth-spinner" aria-hidden="true" /> Working…</> : submitLabel}</button>
-          <p className="m-0 text-[11px] text-[#64748B]"><Mail className="mr-1 inline h-3 w-3" aria-hidden="true" />{independent ? 'We will only use these details to review your application.' : 'We will email you a link to confirm your address.'}</p>
+          <p className="m-0 text-[11px] text-[#64748B]"><Mail className="mr-1 inline h-3 w-3" aria-hidden="true" />We will email you a link to confirm your address.</p>
         </form>
       )}
     </PremiumAuthShell>

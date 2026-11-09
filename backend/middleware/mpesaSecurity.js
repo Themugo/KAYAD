@@ -39,13 +39,23 @@ const SAFARICOM_SANDBOX_IPS = [
   "127.0.0.1",
 ];
 
-// CIDR helper — checks if IP is in range
-const ipInCidr = (ip, cidr) => {
-  if (!cidr.includes("/")) return ip === cidr;
-  const [range, bits] = cidr.split("/");
-  const mask = ~(2 ** (32 - parseInt(bits)) - 1);
-  const toInt = (s) => s.split(".").reduce((acc, b) => (acc << 8) + parseInt(b), 0);
-  return (toInt(ip) & mask) === (toInt(range) & mask);
+// CIDR helper — delegate parsing and address-family handling to proxy-addr.
+// The previous hand-rolled IPv4 mask parser treated a malformed prefix such
+// as `203.0.113.0/not-a-number` as a zero mask (bitwise NaN becomes 0), which
+// matched EVERY IPv4 address. Invalid operator configuration must never widen
+// the M-Pesa callback allowlist.
+const normalizeIp = (value) => String(value || "").trim().replace(/^::ffff:/i, "");
+
+export const ipInCidr = (ip, cidr) => {
+  const address = normalizeIp(ip);
+  const range = String(cidr || "").trim();
+  if (!address || !range) return false;
+  try {
+    const matcher = proxyaddr.compile([range]);
+    return matcher(address, 0);
+  } catch {
+    return false;
+  }
 };
 
 // R25 hardening (Phase 39): req.ip is only trustworthy when the immediate
@@ -89,10 +99,10 @@ const isTrustedProxyPeer = (remoteAddress) => {
 
 const getClientIp = (req) => {
   const remoteAddress = req.socket?.remoteAddress || "";
-  if (!isTrustedProxyPeer(remoteAddress)) return remoteAddress;
+  if (!isTrustedProxyPeer(remoteAddress)) return normalizeIp(remoteAddress);
   // Only honor Express's resolved client IP after verifying the immediate
   // peer belongs to the explicitly configured trusted-proxy CIDRs.
-  return req.ip || "";
+  return normalizeIp(req.ip || "");
 };
 
 export const mpesaIpWhitelist = (req, res, next) => {
@@ -106,7 +116,7 @@ export const mpesaIpWhitelist = (req, res, next) => {
   const allowedIps = process.env.MPESA_ENV === "production" ? SAFARICOM_PRODUCTION_IPS : SAFARICOM_SANDBOX_IPS;
 
   // Add any custom IPs from env (comma-separated)
-  const extraIps = (process.env.MPESA_EXTRA_IPS || "").split(",").filter(Boolean);
+  const extraIps = (process.env.MPESA_EXTRA_IPS || "").split(",").map((value) => value.trim()).filter(Boolean);
   const allAllowed = [...allowedIps, ...extraIps];
 
   const clientIp = getClientIp(req);

@@ -1,3 +1,0 @@
-
-added 24 packages in 521ms
-exit=0

@@ -459,3 +459,54 @@
   .kayad-admin-shell__content .kayad-users-stat-grid { grid-template-columns:1fr 1fr; }
   .kayad-admin-shell__content .kayad-users-stat-top { align-items:flex-start; }
 }
+
+
+/* Admin specialist-page consistency pass: safe responsive behaviour shared by
+   every canonical route, without changing page data, actions or permissions. */
+.kayad-admin-shell__content {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.kayad-admin-shell__content :where(img, video, canvas) {
+  max-width: 100%;
+}
+.kayad-admin-shell__content :where(input, select, textarea) {
+  min-width: 0;
+  max-width: 100%;
+}
+.kayad-admin-shell__content :where(.data-table, .table-wrap) {
+  max-width: 100%;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+.kayad-admin-shell__content :where(.data-table, .table-wrap) table {
+  font-variant-numeric: tabular-nums;
+}
+.kayad-admin-shell__content :where(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid var(--admin-focus-ring);
+  outline-offset: 2px;
+}
+@media (max-width: 767px) {
+  .kayad-admin-shell__content :where(.data-table-controls) {
+    align-items: stretch;
+    gap: 8px;
+  }
+  .kayad-admin-shell__content :where(.tabs) {
+    flex-wrap: nowrap;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    padding-bottom: 5px;
+  }
+  .kayad-admin-shell__content :where(.tabs .tab-btn) {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+  .kayad-admin-shell__content :where(.data-table, .table-wrap) {
+    max-width: calc(100vw - 24px);
+  }
+}

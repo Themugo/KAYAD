@@ -525,3 +525,476 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
   .kayad-country-badge__window{width:30px;height:20px;border-radius:5px}
 }
 @media (max-width:359px){ .kayad-country-badge{display:none} }
+
+/* KAYAD mobile menu — clean editorial navigation pass (Frameworks reference).
+   Keep the canonical nav config, role-aware destinations, handlers and focus model;
+   this layer changes presentation only. */
+@media (max-width: 1023px) {
+  .kayad-mobile-menu { z-index: 140 !important; }
+  .kayad-mobile-menu__surface {
+    background: #061126 !important;
+    border: 1px solid rgba(148, 163, 184, .14) !important;
+    border-top: 1px solid rgba(148, 163, 184, .18) !important;
+    border-radius: 0 0 24px 24px !important;
+    box-shadow: 0 28px 70px rgba(0, 8, 24, .42) !important;
+  }
+  .kayad-mobile-menu__surface > div:first-child { display: none !important; }
+  .kayad-mobile-menu__surface > div:nth-child(2) {
+    padding: 12px 20px max(22px, env(safe-area-inset-bottom)) !important;
+  }
+  .kayad-mobile-menu__surface section.mb-4:first-child {
+    margin: 0 0 12px !important;
+    padding: 12px 0 16px !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(148,163,184,.16) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  .kayad-mobile-menu__surface section.mb-4:first-child > div { align-items: center; }
+  .kayad-mobile-menu__surface section.mb-4:first-child > button {
+    min-height: 44px !important;
+    border-radius: 12px !important;
+    background: #13B8A6 !important;
+    color: #052D38 !important;
+    box-shadow: none !important;
+  }
+  .kayad-mobile-menu__surface section[aria-labelledby="kayad-drawer-explore"] { margin-bottom: 16px !important; }
+  .kayad-mobile-menu__surface section[aria-labelledby="kayad-drawer-explore"] > div:first-child {
+    margin: 0 0 4px !important;
+    padding: 0 !important;
+  }
+  .kayad-mobile-menu__surface #kayad-drawer-explore {
+    color: #7DDDD2 !important;
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    letter-spacing: .17em !important;
+  }
+  .kayad-mobile-menu__surface #kayad-drawer-explore + span { display: none !important; }
+  .kayad-mobile-menu__surface section[aria-labelledby="kayad-drawer-explore"] > div:first-child::after { display: none !important; }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group {
+    margin: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(148,163,184,.14) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__head {
+    min-height: 60px !important;
+    padding: 8px 2px !important;
+    gap: 12px !important;
+    color: #E8EEF8 !important;
+    background: transparent !important;
+    font-size: 17px !important;
+    font-weight: 650 !important;
+    letter-spacing: -.025em !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__icon {
+    display: none !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__head > svg:last-child {
+    width: 17px !important;
+    height: 17px !important;
+    margin-left: auto !important;
+    color: #78D9D0 !important;
+    opacity: .85 !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__head.is-active {
+    color: #8DE4DB !important;
+    box-shadow: none !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__links {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0,1fr)) !important;
+    gap: 2px 18px !important;
+    padding: 0 0 12px 2px !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-chip {
+    min-height: 38px !important;
+    padding: 5px 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: rgba(226,235,247,.72) !important;
+    font-size: 13px !important;
+    font-weight: 550 !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-chip__icon { display: none !important; }
+  .kayad-mobile-menu__surface .kayad-drawer-panel,
+  .kayad-mobile-menu__surface > div:nth-child(2) > section:not([aria-labelledby]) {
+    margin: 14px 0 !important;
+    padding: 12px 0 !important;
+    border: 0 !important;
+    border-top: 1px solid rgba(148,163,184,.14) !important;
+    border-bottom: 1px solid rgba(148,163,184,.14) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+  .kayad-mobile-menu__surface .kayad-drawer-panel > span:first-child {
+    padding: 0 0 8px !important;
+    color: #7DDDD2 !important;
+    font-size: 10px !important;
+    letter-spacing: .17em !important;
+  }
+  .kayad-mobile-menu__surface .kayad-drawer-panel > div { grid-template-columns: 1fr !important; gap: 0 !important; }
+  .kayad-mobile-menu__surface .kayad-drawer-tile {
+    min-height: 46px !important;
+    padding: 8px 2px !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(148,163,184,.10) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #DCE6F4 !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+  }
+  .kayad-mobile-menu__surface #mobile-cta-sell-car {
+    min-height: 58px !important;
+    margin: 18px 0 10px !important;
+    padding: 0 18px !important;
+    border: 0 !important;
+    border-radius: 14px !important;
+    background: linear-gradient(105deg, #1768E8 0%, #079CB4 100%) !important;
+    box-shadow: 0 12px 28px rgba(0,130,180,.20) !important;
+  }
+  .kayad-mobile-menu__surface #mobile-cta-sell-car strong { font-size: 16px !important; }
+  .kayad-mobile-menu__surface #mobile-cta-sell-car small { color: rgba(255,255,255,.78) !important; }
+  .kayad-mobile-menu__surface > div:nth-child(2) > div:last-child {
+    padding-top: 12px !important;
+    color: rgba(226,235,247,.48) !important;
+  }
+}
+@media (max-width: 380px) {
+  .kayad-mobile-menu__surface > div:nth-child(2) { padding-inline: 16px !important; }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__head { min-height: 56px !important; font-size: 16px !important; }
+}
+
+
+/* KAYAD premium public-home refinement — single shared navigation, no duplicate shell. */
+@media (max-width: 639px) {
+  .kayad-header { box-shadow: 0 4px 18px rgba(6, 46, 58, .07); }
+  .kayad-header__bar { min-height: 76px; padding: 8px 14px; gap: 8px; }
+  .kayad-brand { gap: 9px; max-width: min(58vw, 310px); }
+  .kayad-brand__image, .kayad-brand__mark { width: 48px; height: 48px; border-radius: 13px; }
+  .kayad-brand__text { min-width: 0; }
+  .kayad-brand__word { font-size: clamp(17px, 4.8vw, 21px); letter-spacing: -.045em; white-space: nowrap; }
+  .kayad-brand__tag { display: block; max-width: 180px; font-size: 8px; line-height: 1.2; letter-spacing: .08em; white-space: normal; }
+  .kayad-utilities { gap: 7px; }
+  .kayad-cta { min-height: 44px; padding: 0 12px; border-radius: 14px; font-size: 11px; white-space: nowrap; }
+  .kayad-hamburger { width: 42px; height: 44px; border-radius: 13px; }
+}
+@media (min-width: 640px) and (max-width: 1023px) {
+  .kayad-header__bar { min-height: 82px; padding: 10px 20px; }
+  .kayad-brand__image, .kayad-brand__mark { width: 54px; height: 54px; }
+}
+.kayad-mobile-bottom-nav {
+  position: fixed;
+  left: max(12px, env(safe-area-inset-left));
+  right: max(12px, env(safe-area-inset-right));
+  bottom: max(10px, env(safe-area-inset-bottom));
+  z-index: 80;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: center;
+  min-height: 76px;
+  padding: 7px;
+  border: 1px solid rgba(255,255,255,.16);
+  border-radius: 27px;
+  background: linear-gradient(115deg, #061F32 0%, #082D3D 52%, #073443 100%);
+  box-shadow: 0 14px 38px rgba(4, 32, 47, .25), 0 2px 8px rgba(4,32,47,.12);
+  backdrop-filter: blur(18px);
+}
+.kayad-mobile-bottom-nav__item {
+  display: flex;
+  min-width: 0;
+  min-height: 62px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: 0;
+  border-radius: 19px;
+  background: transparent;
+  color: rgba(255,255,255,.82);
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: -.01em;
+  line-height: 1.1;
+  transition: background .18s ease, color .18s ease, transform .18s ease;
+}
+.kayad-mobile-bottom-nav__icon { display: grid; place-items: center; width: 31px; height: 29px; color: currentColor; }
+.kayad-mobile-bottom-nav__item.is-active {
+  color: #063B43;
+  background: linear-gradient(145deg, #BFF5EB, #75DFD0);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 5px 14px rgba(19,184,166,.18);
+}
+.kayad-mobile-bottom-nav__item:focus-visible { outline: 2px solid #5DE0D0; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .kayad-mobile-bottom-nav__item { transition: none; }
+}
+
+
+/* KAYAD-KE header refinement — compact mark, separate wordmark and descriptor,
+   balanced primary action, and a single clear mobile menu control. */
+.kayad-header {
+  --kn-ink: #0A3340;
+  --kn-deep: #062E3A;
+  --kn-mid: #176B87;
+  --kn-teal: #13B8A6;
+  --kn-line: #D7E7E4;
+  background: rgba(255,255,255,.97);
+  border-bottom: 1px solid rgba(10,51,64,.10);
+  box-shadow: 0 5px 20px rgba(10,51,64,.055);
+}
+.kayad-header__bar {
+  min-height: 82px;
+  gap: 16px;
+  padding: 10px clamp(14px, 2.4vw, 30px);
+}
+.kayad-brand {
+  flex: 0 1 310px;
+  width: auto;
+  max-width: min(34vw, 360px);
+  min-width: 0;
+  gap: 11px;
+  padding: 3px 8px 3px 0;
+  align-items: center;
+}
+.kayad-brand__image {
+  display: block;
+  width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
+  object-fit: contain;
+  filter: none;
+}
+.kayad-brand__text {
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-direction: column;
+  gap: 5px;
+}
+.kayad-brand__word {
+  display: flex;
+  align-items: baseline;
+  gap: 0;
+  color: #0A3340;
+  font-size: clamp(1.35rem, 1.8vw, 1.72rem);
+  font-weight: 950;
+  letter-spacing: -.065em;
+  line-height: .98;
+  white-space: nowrap;
+}
+.kayad-brand__word-ke { color: #128B83; }
+.kayad-brand__tag--reserved {
+  display: block !important;
+  max-width: 220px;
+  margin: 0;
+  color: #55727C;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .105em;
+  line-height: 1.25;
+  white-space: normal;
+  text-wrap: balance;
+}
+.kayad-brand__country {
+  flex: 0 0 auto;
+  margin-left: 1px;
+}
+.kayad-navfield {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 48px;
+  border-radius: 15px;
+  box-shadow: 0 6px 18px rgba(6,46,58,.13), inset 0 1px 0 rgba(255,255,255,.08);
+}
+.kayad-utilities {
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+.kayad-cta {
+  min-height: 46px;
+  padding-inline: 16px;
+  border-radius: 13px;
+  background: #176B87;
+  font-size: 13px;
+  box-shadow: 0 7px 16px rgba(23,107,135,.17);
+}
+.kayad-hamburger {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #D7E7E4;
+  border-radius: 13px;
+  background: #F7FBFA;
+  color: #0A3340;
+}
+.kayad-hamburger:hover {
+  background: #E8F6F3;
+  color: #0A3340;
+}
+@media (min-width: 1024px) {
+  .kayad-header__bar { min-height: 84px; gap: 16px; }
+  .kayad-brand { flex-basis: 265px; max-width: 265px; }
+  .kayad-brand__image { width: 50px; height: 50px; flex-basis: 50px; }
+  .kayad-brand__word { font-size: 1.52rem; }
+  .kayad-brand__tag--reserved { font-size: 8px; letter-spacing: .08em; }
+}
+@media (min-width: 1280px) {
+  .kayad-header__bar { gap: 20px; }
+  .kayad-brand { flex-basis: 300px; max-width: 300px; }
+  .kayad-brand__image { width: 54px; height: 54px; flex-basis: 54px; }
+  .kayad-brand__word { font-size: 1.68rem; }
+  .kayad-brand__tag--reserved { font-size: 8.5px; }
+}
+@media (max-width: 1023px) {
+  .kayad-brand { flex: 1 1 auto; max-width: none; }
+  .kayad-navfield { display: none; }
+  .kayad-utilities { margin-left: auto; }
+}
+@media (max-width: 639px) {
+  .kayad-header__bar {
+    min-height: 78px;
+    gap: 8px;
+    padding: 9px 12px;
+  }
+  .kayad-brand {
+    flex: 1 1 0;
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    gap: 8px;
+    padding: 0;
+  }
+  .kayad-brand__image {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+  .kayad-brand__text { gap: 4px; }
+  .kayad-brand__word {
+    font-size: clamp(1.08rem, 4.9vw, 1.38rem);
+    letter-spacing: -.06em;
+  }
+  .kayad-brand__tag--reserved {
+    max-width: 160px;
+    font-size: 7px;
+    letter-spacing: .075em;
+    line-height: 1.2;
+  }
+  .kayad-brand__country { display: none; }
+  .kayad-utilities { gap: 7px; }
+  .kayad-cta {
+    min-height: 44px;
+    padding-inline: 11px;
+    border-radius: 12px;
+    gap: 6px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .kayad-hamburger {
+    width: 42px;
+    height: 42px;
+    flex: 0 0 42px;
+    border-radius: 12px;
+  }
+}
+@media (max-width: 380px) {
+  .kayad-header__bar { min-height: 72px; gap: 6px; padding-inline: 9px; }
+  .kayad-brand { gap: 6px; }
+  .kayad-brand__image { width: 37px; height: 37px; flex-basis: 37px; }
+  .kayad-brand__word { font-size: 1.05rem; }
+  .kayad-brand__tag--reserved { max-width: 120px; font-size: 6.5px; letter-spacing: .045em; }
+  .kayad-utilities { gap: 5px; }
+  .kayad-cta { min-height: 42px; padding-inline: 8px; font-size: 11px; }
+  .kayad-hamburger { width: 40px; height: 40px; flex-basis: 40px; }
+}
+@media (max-width: 359px) {
+  .kayad-cta { width: 42px; min-width: 42px; padding: 0; justify-content: center; }
+  .kayad-cta > span { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kayad-brand__image, .kayad-cta, .kayad-hamburger { transition: none !important; }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .kayad-brand { flex: 0 1 360px; max-width: min(48vw, 360px); }
+  .kayad-brand__image { width: 48px; height: 48px; flex-basis: 48px; }
+  .kayad-brand__word { font-size: 1.45rem; }
+  .kayad-brand__tag--reserved { font-size: 8px; }
+}
+
+
+/* KAYAD-KE national identity lockup: the flag sits directly beneath the KE suffix. */
+.kayad-brand__word { align-items: center; }
+.kayad-brand__word-ke {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  line-height: .9;
+  white-space: nowrap;
+}
+.kayad-brand__kenya-flag {
+  display: block;
+  width: 23px;
+  height: 14px;
+  border: 1px solid rgba(10,51,64,.2);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(10,51,64,.14);
+}
+@media (max-width: 639px) {
+  .kayad-brand__kenya-flag { width: 20px; height: 12px; }
+}
+@media (max-width: 359px) {
+  .kayad-brand__kenya-flag { width: 17px; height: 10px; }
+}
+
+
+/* Final mobile lockup balance: keep mark, KAYAD-KE + flag, descriptor,
+   Sell Vehicle and menu distinct without overlap at narrow widths. */
+.kayad-brand__text { flex: 1 1 auto; min-width: 0; }
+.kayad-brand__tag--reserved {
+  max-width: 220px;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+@media (max-width: 767px) {
+  .kayad-header__bar { gap: 8px; padding-inline: 10px; }
+  .kayad-brand { flex: 1 1 0%; width: auto; max-width: none; min-width: 0; gap: 7px; }
+  .kayad-brand__image,
+  .kayad-brand__mark { width: 44px; height: 44px; flex: 0 0 44px; }
+  .kayad-brand__text { flex: 1 1 auto; min-width: 0; }
+  .kayad-brand__word { gap: 3px; font-size: clamp(17px, 4.8vw, 22px); }
+  .kayad-brand__word-ke { font-size: .94em; }
+  .kayad-brand__kenya-flag { width: 19px; height: 12px; }
+  .kayad-brand__tag--reserved {
+    display: block !important;
+    max-width: 148px;
+    margin-top: 4px;
+    font-size: 7px;
+    letter-spacing: .055em;
+    line-height: 1.15;
+  }
+  .kayad-utilities { flex: 0 0 auto; gap: 6px; margin-left: 0; }
+  .kayad-cta { min-height: 42px; padding-inline: 10px; font-size: 11px; white-space: nowrap; }
+  .kayad-hamburger { width: 40px; height: 40px; flex: 0 0 40px; }
+}
+@media (max-width: 379px) {
+  .kayad-brand__image,
+  .kayad-brand__mark { width: 38px; height: 38px; flex-basis: 38px; }
+  .kayad-brand__word { font-size: 17px; }
+  .kayad-brand__tag--reserved { max-width: 124px; font-size: 6.5px; }
+  .kayad-cta { width: 40px; min-width: 40px; padding: 0; font-size: 0; }
+  .kayad-cta svg { width: 19px; height: 19px; }
+}

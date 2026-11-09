@@ -1,4 +1,5 @@
 import express from "express";
+import { validateWritePayload } from "../middleware/validateWritePayload.js";
 import Car from "../models/Car.js";
 import User from "../models/User.js";
 import { logInfo, logError } from "../utils/logger.js";
@@ -35,7 +36,7 @@ export const safeEqual = (a, b) => {
   return ba.length === bb.length && crypto.timingSafeEqual(ba, bb);
 };
 
-router.post("/inventory", async (req, res) => {
+router.post("/inventory", validateWritePayload, async (req, res) => {
   try {
     const apiKey = req.headers["x-api-key"];
     const { listings } = req.body;

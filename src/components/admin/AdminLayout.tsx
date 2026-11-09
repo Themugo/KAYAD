@@ -23,30 +23,79 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebarToggleRef = useRef<HTMLButtonElement>(null);
-  const contentRef = useRef<HTMLElement>(null);
+  const mainRef = useRef<HTMLDivElement>(null);
   const navigationType = useNavigationType();
   // Scroll positions per history entry (location.key), so Back/Forward return to where the user was.
-  const scrollPositions = useRef(new Map<string, { win: number; box: number }>());
+  const scrollPositions = useRef(new Map<string, number>());
   const activeKey = useRef(location.key);
-  const closeSidebar = () => {
-    setSidebarOpen(false);
-    sidebarToggleRef.current?.focus();
-  };
+  const closeSidebar = () => setSidebarOpen(false);
 
-  useEffect(() => {
-    document.body.style.overflow = sidebarOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
-  }, [sidebarOpen]);
-
+  // The document is the single vertical scroll owner at every breakpoint.
+  // While the mobile drawer is open, lock the body without losing a pre-existing inline value.
   useEffect(() => {
     if (!sidebarOpen) return;
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+    };
+  }, [sidebarOpen]);
+
+  // Keep background content out of the tab order while the modal drawer is open.
+  useEffect(() => {
+    const main = mainRef.current;
+    if (!main) return;
+    const wasInert = main.hasAttribute('inert');
+    if (sidebarOpen) main.setAttribute('inert', '');
+    else if (!wasInert) main.removeAttribute('inert');
+    return () => {
+      if (!wasInert) main.removeAttribute('inert');
+    };
+  }, [sidebarOpen]);
+
+  const wasSidebarOpen = useRef(false);
+  useEffect(() => {
+    if (wasSidebarOpen.current && !sidebarOpen) {
+      sidebarToggleRef.current?.focus({ preventScroll: true });
+    }
+    wasSidebarOpen.current = sidebarOpen;
+  }, [sidebarOpen]);
+
+  // Accessible modal-drawer behaviour: initial focus, Escape, and a contained Tab sequence.
+  useEffect(() => {
+    if (!sidebarOpen) return;
+    const drawer = document.getElementById('admin-sidebar-navigation');
+    if (!drawer) return;
+    const focusableSelector = 'a[href]:not([tabindex="-1"]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const getFocusable = () => Array.from(drawer.querySelectorAll<HTMLElement>(focusableSelector))
+      .filter(element => element.getClientRects().length > 0 && !element.closest('[hidden]'));
+    const closeButton = drawer.querySelector<HTMLElement>('.admin-sidebar__mobile-close');
+    (closeButton ?? getFocusable()[0] ?? drawer).focus({ preventScroll: true });
+
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      closeSidebar();
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeSidebar();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = getFocusable();
+      if (!focusable.length) {
+        event.preventDefault();
+        drawer.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !drawer.contains(document.activeElement))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (document.activeElement === last || !drawer.contains(document.activeElement))) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener('keydown', onKeyDown);
-    const firstLink = document.querySelector<HTMLElement>('.admin-sidebar a[href]');
-    firstLink?.focus();
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [sidebarOpen]);
 
@@ -55,31 +104,21 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   }, [location.pathname]);
 
   useEffect(() => {
-    const save = () => {
-      scrollPositions.current.set(activeKey.current, { win: window.scrollY, box: contentRef.current?.scrollTop ?? 0 });
-    };
-    const box = contentRef.current;
+    const save = () => scrollPositions.current.set(activeKey.current, window.scrollY);
     window.addEventListener('scroll', save, { passive: true });
-    box?.addEventListener('scroll', save, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', save);
-      box?.removeEventListener('scroll', save);
-    };
-  }, [loading, isAuth]);
+    return () => window.removeEventListener('scroll', save);
+  }, []);
 
   useEffect(() => {
     activeKey.current = location.key;
-    const saved = navigationType === 'POP' ? scrollPositions.current.get(location.key) : undefined;
-    const target = saved ?? { win: 0, box: 0 };
+    const target = navigationType === 'POP' ? (scrollPositions.current.get(location.key) ?? 0) : 0;
     let tries = 0;
     let timer = 0;
-    // Pages load data asynchronously, so keep trying briefly until the page is tall enough to reach the saved offset.
+    // Async specialist pages may grow after navigation; restore only the document scroll position.
     const apply = () => {
-      window.scrollTo(0, target.win);
-      if (contentRef.current) contentRef.current.scrollTop = target.box;
-      const reachedWin = Math.abs(window.scrollY - target.win) < 2;
-      const reachedBox = !contentRef.current || Math.abs(contentRef.current.scrollTop - target.box) < 2;
-      if ((!reachedWin || !reachedBox) && tries++ < 20) timer = window.setTimeout(apply, 100);
+      window.scrollTo({ top: target, left: 0, behavior: 'auto' });
+      const reached = Math.abs(window.scrollY - target) < 2;
+      if (!reached && tries++ < 20) timer = window.setTimeout(apply, 100);
     };
     apply();
     return () => window.clearTimeout(timer);
@@ -99,7 +138,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="kayad-admin-shell">
       <AdminSidebar mobileOpen={sidebarOpen} onToggle={closeSidebar} />
-      <div className="kayad-admin-shell__main">
+      <div ref={mainRef} className="kayad-admin-shell__main">
         <header className="kayad-admin-header">
           <nav className="kayad-admin-header__breadcrumb" aria-label="Breadcrumb">
             <button
@@ -127,7 +166,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <AdminAccountMenu displayName={displayName} roleLabel={roleLabel} initials={initials} />
           </div>
         </header>
-        <main ref={contentRef} className="kayad-admin-shell__content">
+        <main className="kayad-admin-shell__content">
           {children}
         </main>
       </div>

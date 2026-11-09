@@ -56,8 +56,10 @@ Do not use legacy `vercel --prod` shortcuts or manually mix preview and producti
 
 
 
-## Documentation index
+## Documentation and handover
 
-The current engineering baseline, defect register and validation evidence are in [`KAYAD_FOUNDATION_RECONCILIATION_REPORT_20261018.md`](docs/history/legacy-root-evidence/runtime-and-operations/KAYAD_FOUNDATION_RECONCILIATION_REPORT_20261018.md).
-
-Start with [`docs/README.md`](docs/README.md), the [technical team handover](docs/runbooks/TECHNICAL_TEAM_HANDOVER.md), the [system boundaries map](docs/architecture/SYSTEM_AND_MODULE_BOUNDARIES.md), and the [dependency/duplication audit](docs/architecture/DEPENDENCY_AND_DUPLICATION_AUDIT_20261010.md).
+Start with [`docs/README.md`](docs/README.md) for the documentation map and
+[`docs/handover/HANDOVER_GUIDE.md`](docs/handover/HANDOVER_GUIDE.md) for the
+project handover entry point. Historical phase reports and their original
+checksum manifests are retained under `docs/archive/phase-records/`; they are
+audit history, not the live system architecture.

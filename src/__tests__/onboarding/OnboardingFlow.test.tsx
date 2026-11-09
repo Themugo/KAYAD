@@ -31,7 +31,7 @@ describe('OnboardingFlow', () => {
   it('buyer: registers role "user", creates NO session and tells them to verify email', async () => {
     m.register.mockResolvedValue({ user: { id: 'u' } });
     mount();
-    pick(/buyer/i);
+    pick(/personal account/i);
     type('Full name', 'Jane Wanjiru'); type(/^Email/, 'jane@example.com'); type('Password', STRONG);
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
     await waitFor(() => expect(m.register).toHaveBeenCalledTimes(1));
@@ -59,7 +59,7 @@ describe('OnboardingFlow', () => {
     m.register.mockResolvedValue({});
     mount('/register?intent=admin&role=admin');
     expect(screen.getAllByRole('radio').length).toBe(5); // unknown intent is ignored: picker shown
-    pick(/buyer/i);
+    pick(/personal account/i);
     type('Full name', 'Jane W'); type(/^Email/, 'j@example.com'); type('Password', STRONG);
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
     await waitFor(() => expect(m.register).toHaveBeenCalled());
@@ -126,7 +126,7 @@ describe('OnboardingFlow', () => {
     type('Full name', 'Sam Seller'); type(/^Email/, 's@example.com'); type(/^Phone/, '0712345678'); type('Password', STRONG);
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
     await screen.findByText(/couldn’t confirm that went through/i);
-    expect(m.register.mock.calls[0][0]).toMatchObject({ role: 'individual_seller', email: 's@example.com' });
+    expect(m.register.mock.calls[0][0]).toMatchObject({ role: 'user', email: 's@example.com' });
     const link = screen.getByRole('link', { name: /i may already have an account/i });
     expect(link.getAttribute('href')).toMatch(/^\/login/);
     expect(link.getAttribute('href')).toMatch(/intent=seller/);
@@ -164,17 +164,16 @@ describe('OnboardingFlow', () => {
     release({});
   });
 
-  it('independent inspector uses the application endpoint and is told it is not an account yet', async () => {
-    m.apply.mockResolvedValue({});
+  it('independent professionals create one personal account before applying for credentials', async () => {
+    m.register.mockResolvedValue({ user: { id: 'professional-user' } });
     mount('/register?intent=professional');
     fireEvent.click(screen.getByLabelText(/on your own|independent/i));
-    type('Full name', 'Ian Inspector'); type(/^Email/, 'i@example.com'); type(/^Phone/, '0712345678');
-    type(/National ID/, '12345678'); type(/City or town/, 'Nairobi'); type(/Years of experience/, '5'); type(/^Specialties/, 'engine diagnostics');
-    fireEvent.click(screen.getByRole('button', { name: /send application/i }));
-    await waitFor(() => expect(m.apply).toHaveBeenCalledTimes(1));
-    expect(m.register).not.toHaveBeenCalled();
-    expect(m.apply.mock.calls[0][0]).toMatchObject({ fullName: 'Ian Inspector', idNumber: '12345678' });
-    expect(await screen.findByText(/review/i)).toBeInTheDocument();
+    type('Full name', 'Ian Inspector'); type(/^Email/, 'i@example.com'); type('Password', STRONG);
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await waitFor(() => expect(m.register).toHaveBeenCalledTimes(1));
+    expect(m.register.mock.calls[0][0]).toMatchObject({ role: 'user', email: 'i@example.com' });
+    expect(m.apply).not.toHaveBeenCalled();
+    expect(await screen.findByText(/professional application/i)).toBeInTheDocument();
   });
 
   it('keeps passwords and ID numbers out of browser storage', async () => {

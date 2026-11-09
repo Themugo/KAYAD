@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const vm = fs.readFileSync('src/features/VehicleMarketplace/components/VehicleMarketplace.tsx', 'utf8');
+const dock = fs.readFileSync('src/components/MobileBottomNav.tsx', 'utf8');
+const css = fs.readFileSync('src/features/VehicleMarketplace/components/homepage-redesign.css', 'utf8');
+const navCss = fs.readFileSync('src/styles/kayad-navigation.css', 'utf8');
+for (const label of ['Find a Car', 'Sell a Car', 'Auctions', 'Verified']) assert.ok(vm.includes(label), `missing quick action ${label}`);
+for (const nav of ["onNavigate('marketplace')", "onNavigate('seller-platform')", "onNavigate('discovery')", "onNavigate('inspections')"]) assert.ok(vm.includes(nav), `missing navigation ${nav}`);
+for (const label of ['Home', 'Showroom', 'Auction', 'Services', 'Saved']) assert.ok(dock.includes(`label: '${label}'`), `missing dock destination ${label}`);
+for (const width of ['359px', '640px', '1024px']) assert.ok(css.includes(width), `missing responsive breakpoint ${width}`);
+assert.ok(css.includes('focus-visible'));
+assert.ok(css.includes('prefers-reduced-motion'));
+assert.ok(navCss.includes('env(safe-area-inset-bottom)'));
+assert.ok(navCss.includes('.kayad-mobile-bottom-nav.is-active') || navCss.includes('.kayad-mobile-bottom-nav__item.is-active'));
+console.log('PASS: KAYAD homepage redesign source contract (quick actions, routes, five-tab dock, responsive/accessibility styling)');

@@ -1,4 +1,5 @@
 import express from "express";
+import { validateWritePayload } from "../middleware/validateWritePayload.js";
 import { protect, adminOnly, allowRoles } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import {
@@ -59,14 +60,14 @@ router.get("/templates", asyncHandler(getTemplates));
 router.get("/templates/:templateId", asyncHandler(getTemplateDetails));
 
 // Generator
-router.post("/generate", allowRoles("admin", "superadmin"), asyncHandler(generateProduct));
+router.post("/generate", allowRoles("admin", "superadmin"), validateWritePayload, asyncHandler(generateProduct));
 router.get("/generate/:productId/status", asyncHandler(getGenerationStatus));
 
 // Products
 router.get("/products", asyncHandler(getProducts));
 router.get("/products/:productId", asyncHandler(getProductDetails));
-router.put("/products/:productId", allowRoles("admin", "superadmin"), asyncHandler(updateProduct));
-router.delete("/products/:productId", allowRoles("superadmin"), asyncHandler(deleteProduct));
+router.put("/products/:productId", allowRoles("admin", "superadmin"), validateWritePayload, asyncHandler(updateProduct));
+router.delete("/products/:productId", allowRoles("superadmin"), validateWritePayload, asyncHandler(deleteProduct));
 
 // Components
 router.get("/components", asyncHandler(getComponents));
@@ -80,24 +81,24 @@ router.get("/services", asyncHandler(getSharedServices));
 // White Label
 router.get("/brands", asyncHandler(getBrands));
 router.get("/brands/:brandId", asyncHandler(getBrandDetails));
-router.put("/brands/:brandId", allowRoles("admin", "superadmin"), asyncHandler(updateBrand));
+router.put("/brands/:brandId", allowRoles("admin", "superadmin"), validateWritePayload, asyncHandler(updateBrand));
 
 // Deployment
 router.get("/deployments", asyncHandler(getDeployments));
-router.post("/deploy", allowRoles("admin", "superadmin"), asyncHandler(deployProduct));
-router.post("/deployments/:deploymentId/rollback", allowRoles("admin", "superadmin"), asyncHandler(rollbackDeployment));
+router.post("/deploy", allowRoles("admin", "superadmin"), validateWritePayload, asyncHandler(deployProduct));
+router.post("/deployments/:deploymentId/rollback", allowRoles("admin", "superadmin"), validateWritePayload, asyncHandler(rollbackDeployment));
 
 // App Store
 router.get("/store", asyncHandler(getAppStore));
-router.post("/store/install", allowRoles("admin", "superadmin"), asyncHandler(installApp));
+router.post("/store/install", allowRoles("admin", "superadmin"), validateWritePayload, asyncHandler(installApp));
 
 // AI Designer
-router.post("/design", asyncHandler(designProduct));
+router.post("/design", validateWritePayload, asyncHandler(designProduct));
 router.get("/design/:designId/status", asyncHandler(getDesignStatus));
 
 // Monetization
 router.get("/monetization", asyncHandler(getMonetizationOptions));
-router.post("/monetization/configure", allowRoles("admin", "superadmin"), asyncHandler(configureMonetization));
+router.post("/monetization/configure", allowRoles("admin", "superadmin"), validateWritePayload, asyncHandler(configureMonetization));
 
 // Platform Health
 router.get("/health", asyncHandler(getPlatformHealth));

@@ -4,7 +4,7 @@
 // ============================================================
 
 import BrandMark from '../../../components/BrandMark';
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { buildAuthPath } from '../../../utils/authIntent';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -139,8 +139,9 @@ interface ListingDraft {
     year: number;
     registration: string;
     vin: string;
+    bodyType: string;
   };
-  photos: string[];
+  photos: File[];
   details: {
     mileage: number;
     fuelType: string;
@@ -148,12 +149,14 @@ interface ListingDraft {
     color: string;
     condition: string;
     description: string;
+    city: string;
   };
   ownership: {
     ownerName: string;
     ownerId: string;
     purchaseDate: string;
     logbookAvailable: boolean;
+    ownerConfirmed: boolean;
   };
   condition: {
     exterior: string;
@@ -214,22 +217,54 @@ type PlatformSection =
   | 'trust-center'
   | 'listing-quality'
   | 'escrow'
-  | 'help';
+  | 'help'
+  | 'settings';
 
 interface PrivateSellerPlatformProps {
   user?: UserProfile | null;
   onOpenAuth?: (intent?: 'seller' | 'dealer') => void;
   onNavigate?: (nav: string) => void;
+  onLogout?: () => void;
 }
 
-export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: PrivateSellerPlatformProps) {
+export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, onLogout }: PrivateSellerPlatformProps) {
   const [activeSection, setActiveSection] = useState<PlatformSection>('home');
   // Phase 13E: seller eligibility comes from the real capability state of the SAME personal account.
   const personalRole = ['user', 'buyer', 'individual_seller'].includes(String(user?.role || '').toLowerCase());
   const { capability, loading: capLoading, error: capError, reload: reloadCap } = usePrivateSellerCapability(Boolean(user) && personalRole);
   const [sellerAccountType, setSellerAccountType] = useState<'seller' | 'dealer'>('seller');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [listingDraft, setListingDraft] = useState<ListingDraft | null>(null);
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMobileMenuOpen(false);
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [mobileMenuOpen]);
+  const [listingDraft, setListingDraft] = useState<ListingDraft | null>(() => {
+    try {
+      const saved = window.localStorage.getItem('kayad.privateSeller.listingDraft.v1');
+      if (!saved) return null;
+      const parsed = JSON.parse(saved) as ListingDraft;
+      return { ...parsed, photos: [] }; // Browsers cannot restore File objects; photos are reselected after reload.
+    } catch { return null; }
+  });
+  useEffect(() => {
+    try {
+      if (listingDraft) {
+        const { photos: _photos, ...serializable } = listingDraft;
+        window.localStorage.setItem('kayad.privateSeller.listingDraft.v1', JSON.stringify(serializable));
+      } else {
+        window.localStorage.removeItem('kayad.privateSeller.listingDraft.v1');
+      }
+    } catch { /* Storage may be disabled; the in-session draft remains usable. */ }
+  }, [listingDraft]);
 
   // The dashboard uses only the signed-in seller's backend listings and
   // escrow records. Unsupported seller capabilities remain unavailable
@@ -342,17 +377,17 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: 
         <SidebarContent
           activeSection={activeSection}
           onSectionChange={handleSectionChange}
+          user={user}
+          onLogout={onLogout}
         />
       </aside>
 
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: KAYAD_THEME.navy }}>
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#13B8A6] flex items-center justify-center">
-              <Car size={18} style={{ color: 'white' }} />
-            </div>
-            <span className="text-white font-bold">Sell</span>
+        <div className="flex min-h-16 items-center justify-between gap-3 px-4 py-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <BrandMark size={36} nameClassName="text-white font-bold text-base" />
+            <span className="truncate text-white font-semibold text-sm">Private Seller Studio</span>
           </div>
           <button
             type="button"
@@ -375,25 +410,28 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="lg:hidden fixed inset-0 z-40 pt-16"
+            className="lg:hidden fixed inset-x-0 bottom-0 top-16 z-40"
             style={{ backgroundColor: 'rgba(10, 51, 64, 0.5)' }}
             onClick={() => setMobileMenuOpen(false)}
           >
             <motion.div
               id="seller-mobile-navigation"
               role="dialog"
+              aria-modal="true"
               aria-label="Seller navigation"
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25 }}
-              className="w-72 h-full p-4 overflow-y-auto"
-              style={{ backgroundColor: KAYAD_THEME.navy }}
+              className="h-full p-4 overflow-y-auto overscroll-contain"
+              style={{ backgroundColor: KAYAD_THEME.navy, width: 'min(86vw, 360px)', maxWidth: '100%' }}
               onClick={(e) => e.stopPropagation()}
             >
               <SidebarContent
                 activeSection={activeSection}
                 onSectionChange={handleSectionChange}
+                user={user}
+                onLogout={onLogout}
               />
             </motion.div>
           </motion.div>
@@ -401,8 +439,8 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: 
       </AnimatePresence>
 
       {/* Main Content */}
-      <main className="flex-1 min-h-screen pt-16 lg:pt-0">
-        <div className="p-4 lg:p-8 max-w-7xl mx-auto">
+      <main className="min-w-0 flex-1 min-h-screen pt-16 lg:pt-0 overflow-x-hidden">
+        <div className="min-w-0 w-full max-w-7xl mx-auto px-3 py-4 sm:p-5 lg:p-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={activeSection}
@@ -412,12 +450,13 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: 
               transition={{ duration: 0.2 }}
             >
               {activeSection === 'home' && <SellerHomeSection listings={myListings} escrows={myEscrows} loading={dataLoading} listingsError={listingsError} escrowsError={escrowsError} lastRefreshedAt={lastRefreshedAt} onRefresh={loadSellerData} userName={user?.name} onNavigate={handleSectionChange} />}
-              {activeSection === 'listing-wizard' && <ListingWizardSection draft={listingDraft} setDraft={setListingDraft} onNavigate={handleSectionChange} />}
+              {activeSection === 'listing-wizard' && <ListingWizardSection draft={listingDraft} setDraft={setListingDraft} onNavigate={handleSectionChange} onPublished={loadSellerData} />}
               {activeSection === 'auction-verification' && <AuctionVerificationSection listings={myListings} />}
               {activeSection === 'trust-center' && <TrustCenterSection />}
               {activeSection === 'listing-quality' && <ListingQualitySection listings={myListings} loading={dataLoading} />}
               {activeSection === 'escrow' && <EscrowCenterSection transactions={myEscrows} loading={dataLoading} />}
               {activeSection === 'help' && <HelpCenterSection />}
+              {activeSection === 'settings' && <SellerSettingsSection user={user} onLogout={onLogout} onNavigate={onNavigate} />}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -433,9 +472,13 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate }: 
 function SidebarContent({
   activeSection,
   onSectionChange,
+  user,
+  onLogout,
 }: {
   activeSection: PlatformSection;
   onSectionChange: (s: PlatformSection) => void;
+  user?: UserProfile | null;
+  onLogout?: () => void;
 }) {
   const navItems: { id: PlatformSection; label: string; icon: React.ReactNode; badge?: number }[] = [
     { id: 'home', label: 'Seller Home', icon: <Home size={20} /> },
@@ -445,6 +488,7 @@ function SidebarContent({
     { id: 'trust-center', label: 'Trust Center', icon: <BadgeCheck size={20} /> },
     { id: 'listing-quality', label: 'My Listings', icon: <Car size={20} /> },
     { id: 'help', label: 'Help', icon: <HelpCircle size={20} /> },
+    { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
   ];
 
   return (
@@ -486,6 +530,11 @@ function SidebarContent({
         </div>
       </nav>
 
+      <div className="px-3 pb-3">
+        <button type="button" onClick={() => onLogout?.()} disabled={!onLogout} className="w-full flex items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-semibold text-white/80 hover:bg-white/10 disabled:opacity-50" aria-label="Log out of KAYAD">
+          <LogOut size={17} /> Log out
+        </button>
+      </div>
       <div className="p-4 border-t" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
         <div className="rounded-xl p-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
           <div className="flex items-center gap-2 mb-2">
@@ -497,6 +546,49 @@ function SidebarContent({
         </div>
       </div>
     </div>
+  );
+}
+
+// ============================================================
+// SELLER ACCOUNT SETTINGS
+// ============================================================
+
+function SellerSettingsSection({ user, onLogout, onNavigate }: {
+  user?: UserProfile | null;
+  onLogout?: () => void;
+  onNavigate?: (nav: string) => void;
+}) {
+  return (
+    <section className="w-full min-w-0 space-y-6" aria-labelledby="seller-settings-title">
+      <header className="rounded-2xl bg-white border border-[#D7E7E4] p-5 sm:p-7">
+        <p className="text-xs font-bold tracking-widest text-[#176B87] uppercase">Account preferences</p>
+        <h1 id="seller-settings-title" className="mt-2 text-2xl sm:text-3xl font-extrabold text-[#0A3340]">Seller settings</h1>
+        <p className="mt-2 text-sm text-slate-600">Manage your personal KAYAD account and security preferences. Buying and selling remain available from this one account.</p>
+      </header>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <article className="min-w-0 rounded-2xl bg-white border border-[#D7E7E4] p-5">
+          <div className="flex items-center gap-3">
+            <div className="h-11 w-11 rounded-xl bg-[#DDF4F0] text-[#0A3340] grid place-items-center"><User size={21}/></div>
+            <div className="min-w-0"><h2 className="font-bold text-[#0A3340]">Personal account</h2><p className="text-xs text-slate-500">Your unified buyer and seller identity</p></div>
+          </div>
+          <dl className="mt-5 space-y-3 text-sm">
+            <div><dt className="text-xs text-slate-500">Name</dt><dd className="font-semibold text-[#0A3340] break-words">{user?.name || 'KAYAD account holder'}</dd></div>
+            <div><dt className="text-xs text-slate-500">Email</dt><dd className="font-semibold text-[#0A3340] break-all">{user?.email || 'Not available'}</dd></div>
+            <div><dt className="text-xs text-slate-500">Account type</dt><dd className="font-semibold text-[#0A3340]">Personal · Buyer and private seller</dd></div>
+          </dl>
+          <button type="button" onClick={() => onNavigate?.('profile')} className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#0A3340] px-4 text-sm font-bold text-white hover:bg-[#12576D]">Manage account details <ArrowRight size={16}/></button>
+        </article>
+        <article className="min-w-0 rounded-2xl bg-white border border-[#D7E7E4] p-5">
+          <div className="flex items-center gap-3"><div className="h-11 w-11 rounded-xl bg-[#DDF4F0] text-[#0A3340] grid place-items-center"><Shield size={21}/></div><div><h2 className="font-bold text-[#0A3340]">Sign-in and security</h2><p className="text-xs text-slate-500">Protect access to your account</p></div></div>
+          <p className="mt-4 text-sm leading-6 text-slate-600">Update your account credentials and security details from the central KAYAD account settings.</p>
+          <button type="button" onClick={() => onNavigate?.('profile')} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#D7E7E4] px-4 text-sm font-bold text-[#0A3340] hover:bg-[#F6FAF9]">Open account settings <ArrowRight size={16}/></button>
+        </article>
+      </div>
+      <div className="rounded-2xl border border-red-100 bg-white p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div><h2 className="font-bold text-[#0A3340]">Sign out</h2><p className="mt-1 text-sm text-slate-600">Sign out of this KAYAD account on this device.</p></div>
+        <button type="button" onClick={() => onLogout?.()} disabled={!onLogout} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-red-600 px-5 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-50"><LogOut size={16}/> Log out</button>
+      </div>
+    </section>
   );
 }
 
@@ -660,174 +752,109 @@ function ListingCard({ listing, delay }: { listing: BackendCar; delay: number })
 // SECTION 2: LISTING WIZARD (Simplified)
 // ============================================================
 
-function ListingWizardSection({ draft, setDraft, onNavigate }: {
+function ListingWizardSection({ draft, setDraft, onNavigate, onPublished }: {
   draft: ListingDraft | null;
   setDraft: (d: ListingDraft | null) => void;
   onNavigate: (s: PlatformSection) => void;
+  onPublished: () => void;
 }) {
-  const [currentStep, setCurrentStep] = useState(draft?.step || 1);
-  const totalSteps = 12;
-  // Added (Final Integration Phase 2): real publish state - the
-  // frontend must not claim publication until the real backend
-  // confirms it (this phase's own explicit instruction). No fake
-  // "success" is ever shown; the real HTTP response, success or
-  // failure, is what the UI reflects.
+  const emptyDraft = (): ListingDraft => ({
+    step: 1,
+    vehicleInfo: { make: '', model: '', year: new Date().getFullYear(), registration: '', vin: '', bodyType: '' },
+    photos: [],
+    details: { mileage: 0, fuelType: 'Petrol', transmission: 'Automatic', color: '', condition: 'Used', description: '', city: '' },
+    ownership: { ownerName: '', ownerId: '', purchaseDate: '', logbookAvailable: false, ownerConfirmed: false },
+    condition: { exterior: '', interior: '', engine: '', tyres: '', knownIssues: '', serviceHistory: '' },
+    pricing: { askingPrice: 0, negotiable: false, tradeIn: false },
+    delivery: { canDeliver: false, deliveryRadius: 0 },
+  });
+  const [currentStep, setCurrentStep] = useState(Math.min(12, Math.max(1, draft?.step || 1)));
+  const [form, setForm] = useState<ListingDraft>(() => draft || emptyDraft());
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
   const [publishedCarId, setPublishedCarId] = useState<string | null>(null);
-
-  const handlePublish = useCallback(async () => {
-    setIsPublishing(true);
-    setPublishError(null);
-    try {
-      // Maps the wizard's own, existing draft state to the real
-      // backend's real field names - does not invent any field the
-      // wizard doesn't already declare in its own ListingDraft type.
-      // title is constructed from year+make+model since the wizard
-      // never collects a separate title field of its own - a direct,
-      // literal combination of fields it does declare, not a new
-      // input being added.
-      const vehicleInfo = draft?.vehicleInfo;
-      const details = draft?.details;
-      const pricing = draft?.pricing;
-      const title = vehicleInfo
-        ? [vehicleInfo.year, vehicleInfo.make, vehicleInfo.model].filter(Boolean).join(' ').trim()
-        : '';
-
-      const result = await createCar({
-        title: title || undefined,
-        brand: vehicleInfo?.make,
-        model: vehicleInfo?.model,
-        year: vehicleInfo?.year,
-        vin: vehicleInfo?.vin,
-        registrationNumber: vehicleInfo?.registration,
-        mileage: details?.mileage,
-        fuel: details?.fuelType,
-        transmission: details?.transmission,
-        color: details?.color,
-        condition: details?.condition,
-        description: details?.description,
-        price: pricing?.askingPrice,
-      });
-
-      if (result.success && result.data) {
-        setPublishedCarId(result.data.id);
-        setDraft(null);
-      } else {
-        setPublishError(result.message || 'Failed to publish listing.');
-      }
-    } catch (err) {
-      setPublishError(err instanceof VehicleApiError ? err.message : 'Failed to publish listing. Please try again.');
-    } finally {
-      setIsPublishing(false);
-    }
-  }, [draft, setDraft]);
-
+  const [validationError, setValidationError] = useState<string | null>(null);
+  const totalSteps = 12;
   const steps = [
-    { id: 1, label: 'Start' },
-    { id: 2, label: 'Vehicle' },
-    { id: 3, label: 'Photos' },
-    { id: 4, label: 'Details' },
-    { id: 5, label: 'Ownership' },
-    { id: 6, label: 'Condition' },
-    { id: 7, label: 'Issues' },
-    { id: 8, label: 'Service' },
-    { id: 9, label: 'Inspection' },
-    { id: 10, label: 'Pricing' },
-    { id: 11, label: 'Preview' },
-    { id: 12, label: 'Publish' },
+    { id: 1, label: 'Start' }, { id: 2, label: 'Vehicle' }, { id: 3, label: 'Photos' },
+    { id: 4, label: 'Details' }, { id: 5, label: 'Ownership' }, { id: 6, label: 'Condition' },
+    { id: 7, label: 'Issues' }, { id: 8, label: 'Service' }, { id: 9, label: 'Inspection' },
+    { id: 10, label: 'Pricing' }, { id: 11, label: 'Preview' }, { id: 12, label: 'Publish' },
   ];
+  const update = <K extends keyof ListingDraft>(key: K, value: ListingDraft[K]) => {
+    const next = { ...form, [key]: value, step: currentStep };
+    setForm(next);
+    setDraft(next);
+    setValidationError(null);
+  };
+  const updateNested = (section: 'vehicleInfo' | 'details' | 'ownership' | 'condition' | 'pricing' | 'delivery', key: string, value: string | number | boolean) => {
+    const next = { ...form, [section]: { ...form[section], [key]: value }, step: currentStep } as ListingDraft;
+    setForm(next); setDraft(next); setValidationError(null);
+  };
+  const fieldClass = 'mt-1 w-full min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-3 text-base text-slate-800 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100';
+  const labelClass = 'block min-w-0 text-sm font-semibold text-slate-700';
+  const goNext = () => {
+    const v = form.vehicleInfo; const d = form.details;
+    if (currentStep === 2 && (!v.make.trim() || !v.model.trim() || !v.year || v.year < 1900 || v.year > new Date().getFullYear() + 1)) return setValidationError('Enter a valid make, model and year before continuing.');
+    if (currentStep === 3 && form.photos.length === 0) return setValidationError('Add at least one clear vehicle photo. At least one image is required to submit a listing.');
+    if (currentStep === 4 && (!d.city.trim() || !d.description.trim())) return setValidationError('Enter the vehicle location and a description.');
+    if (currentStep === 5 && !form.ownership.ownerConfirmed) return setValidationError('Confirm that you are the owner or are authorised to sell this vehicle.');
+    if (currentStep === 10 && (!form.pricing.askingPrice || form.pricing.askingPrice <= 0)) return setValidationError('Enter an asking price greater than zero.');
+    setValidationError(null); const nextStep = Math.min(totalSteps, currentStep + 1); setCurrentStep(nextStep); update('step', nextStep);
+  };
+  const handlePublish = async () => {
+    setIsPublishing(true); setPublishError(null); setValidationError(null);
+    try {
+      const v = form.vehicleInfo; const d = form.details; const c = form.condition;
+      const description = [d.description, c.exterior && `Exterior: ${c.exterior}`, c.interior && `Interior: ${c.interior}`, c.engine && `Engine: ${c.engine}`, c.tyres && `Tyres: ${c.tyres}`, c.knownIssues && `Known issues: ${c.knownIssues}`, c.serviceHistory && `Service history: ${c.serviceHistory}`].filter(Boolean).join('\n\n');
+      const result = await createCar({
+        title: `${v.year} ${v.make} ${v.model}`.trim(), brand: v.make.trim(), model: v.model.trim(), year: Number(v.year),
+        vin: v.vin.trim() || undefined, registrationNumber: v.registration.trim() || undefined,
+        bodyType: v.bodyType || undefined, mileage: Number(d.mileage) || 0, fuel: d.fuelType, transmission: d.transmission,
+        color: d.color || undefined, condition: d.condition, description, city: d.city.trim(), price: Number(form.pricing.askingPrice), images: form.photos,
+      });
+      if (!result.success || !result.data?.id) throw new Error(result.message || 'The server did not confirm listing creation.');
+      setPublishedCarId(result.data.id); setDraft(null); window.localStorage.removeItem('kayad.privateSeller.listingDraft.v1'); onPublished();
+    } catch (err) {
+      setPublishError(err instanceof VehicleApiError ? err.message : err instanceof Error ? err.message : 'Unable to submit your listing. Please try again.');
+    } finally { setIsPublishing(false); }
+  };
+  const photoPreviews = useMemo(() => form.photos.map((file) => ({ file, url: URL.createObjectURL(file) })), [form.photos]);
+  useEffect(() => () => photoPreviews.forEach(({ url }) => URL.revokeObjectURL(url)), [photoPreviews]);
+  const sectionTitle = steps[currentStep - 1]?.label || 'Create listing';
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold" style={{ color: KAYAD_THEME.navy }}>Create Listing</h1>
-        <button onClick={() => setDraft({ ...draft || { step: 1 } as ListingDraft, step: currentStep })} className="px-4 py-2 rounded-lg font-medium" style={{ backgroundColor: KAYAD_THEME.warmBeige, color: KAYAD_THEME.navy }}>
-          Save Draft
-        </button>
+    <div className="mx-auto w-full min-w-0 max-w-5xl space-y-4 overflow-x-hidden pb-8" data-testid="private-seller-listing-wizard">
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0"><p className="text-xs font-bold uppercase tracking-wider text-teal-700">Private seller workspace</p><h1 className="break-words text-2xl font-bold text-[#0A3340]">Create vehicle listing</h1></div>
+        <button type="button" onClick={() => { const saved = { ...form, step: currentStep }; setDraft(saved); try { const { photos: _photos, ...serializable } = saved; localStorage.setItem('kayad.privateSeller.listingDraft.v1', JSON.stringify(serializable)); } catch {} setValidationError('Draft saved on this device. Selected photos must be added again if you leave or reload this page.'); }} className="rounded-xl bg-[#DDF4F0] px-4 py-2.5 text-sm font-bold text-[#0A3340]">Save draft</button>
       </div>
-
-      <div className="rounded-xl p-4" style={{ backgroundColor: 'white' }}>
-        <div className="flex items-center justify-between mb-4">
-          <span className="text-sm font-medium" style={{ color: KAYAD_THEME.navy }}>
-            Step {currentStep} of {totalSteps}
-          </span>
-          <span className="text-sm" style={{ color: KAYAD_THEME.slate[500] }}>
-            {Math.round((currentStep / totalSteps) * 100)}% complete
-          </span>
-        </div>
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          {steps.map((step) => (
-            <div
-              key={step.id}
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                step.id === currentStep
-                  ? 'bg-[#13B8A6] text-white'
-                  : step.id < currentStep
-                    ? 'bg-emerald-100 text-emerald-700'
-                    : 'bg-[#EEF7F5] text-[#64748B]'
-              }`}
-            >
-              {step.id < currentStep ? <CheckCircle size={14} /> : null}
-              {step.label}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="rounded-xl p-6" style={{ backgroundColor: 'white' }}>
-        <div className="text-center py-8">
-          <div className="w-20 h-20 rounded-full mx-auto mb-6 flex items-center justify-center" style={{ backgroundColor: `${KAYAD_THEME.orange}15` }}>
-            <Sparkles size={40} style={{ color: KAYAD_THEME.orange }} />
-          </div>
-          {publishedCarId ? (
-            // Real success - only ever shown after the real backend
-            // returned a real, created car record. Never shown
-            // optimistically.
-            <>
-              <h2 className="text-2xl font-bold mb-4" style={{ color: KAYAD_THEME.navy }}>Listing Published</h2>
-              <p className="text-lg mb-8 max-w-2xl mx-auto" style={{ color: KAYAD_THEME.slate[500] }}>
-                Your listing has been saved to KAYAD. It is now searchable in the real marketplace.
-              </p>
-            </>
-          ) : (
-            <>
-              <h2 className="text-2xl font-bold mb-4" style={{ color: KAYAD_THEME.navy }}>Create Your Vehicle Listing</h2>
-              <p className="text-lg mb-8 max-w-2xl mx-auto" style={{ color: KAYAD_THEME.slate[500] }}>
-                We'll guide you step-by-step to create a professional listing. The process takes about 10-15 minutes.
-              </p>
-              {publishError && (
-                // Real failure, surfaced honestly - the real backend's
-                // own validation/authorization message, never
-                // swallowed or replaced with a fake success state.
-                <p className="text-sm mb-4 max-w-2xl mx-auto font-medium" style={{ color: '#DC2626' }}>
-                  {publishError}
-                </p>
-              )}
-              <button
-                onClick={() => {
-                  if (currentStep < totalSteps) {
-                    setCurrentStep(currentStep + 1);
-                  } else {
-                    handlePublish();
-                  }
-                }}
-                disabled={isPublishing}
-                className="px-8 py-3 rounded-xl font-bold text-white disabled:opacity-60"
-                style={{ backgroundColor: KAYAD_THEME.orange }}
-              >
-                {isPublishing
-                  ? 'Publishing…'
-                  : currentStep < totalSteps ? 'Start Creating Listing' : 'Publish Listing'} <ArrowRight size={20} className="inline ml-2" />
-              </button>
-            </>
-          )}
-        </div>
-      </div>
+      <section className="min-w-0 rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm sm:p-5">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><span className="font-semibold text-[#0A3340]">Step {currentStep} of {totalSteps}: {sectionTitle}</span><span className="text-sm text-slate-500">{Math.round(currentStep / totalSteps * 100)}%</span></div>
+        <div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#13B8A6] transition-all" style={{ width: `${currentStep / totalSteps * 100}%` }} /></div>
+        <div className="mt-4 flex min-w-0 gap-2 overflow-x-auto pb-2" aria-label="Listing steps">{steps.map(step => <button type="button" key={step.id} onClick={() => { if (step.id < currentStep) { setCurrentStep(step.id); update('step', step.id); } }} disabled={step.id >= currentStep} aria-current={step.id === currentStep ? 'step' : undefined} className={`shrink-0 rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap ${step.id === currentStep ? 'bg-[#13B8A6] text-white' : step.id < currentStep ? 'bg-teal-50 text-teal-800' : 'bg-slate-100 text-slate-500'}`}>{step.id < currentStep ? '✓ ' : ''}{step.label}</button>)}</div>
+      </section>
+      <section className="min-w-0 w-full overflow-hidden rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm sm:p-6">
+        {publishedCarId ? <div className="mx-auto max-w-xl py-8 text-center"><CheckCircle className="mx-auto mb-4 text-teal-600" size={48}/><h2 className="text-2xl font-bold text-[#0A3340]">Listing submitted</h2><p className="mt-2 text-slate-600">KAYAD received your vehicle listing. Its visibility follows the existing seller approval and moderation rules.</p><p className="mt-2 break-all text-xs text-slate-400">Reference: {publishedCarId}</p><button type="button" onClick={() => onNavigate('home')} className="mt-6 rounded-xl bg-[#0A3340] px-5 py-3 font-bold text-white">Return to seller dashboard</button></div> : <>
+          {currentStep === 1 && <div className="mx-auto max-w-2xl py-6 text-center"><Car className="mx-auto mb-4 text-teal-600" size={48}/><h2 className="text-2xl font-bold text-[#0A3340]">Let's get your vehicle listed</h2><p className="mt-3 text-slate-600">Provide accurate details and clear photographs. Your listing is submitted for the existing KAYAD review process; submission does not guarantee immediate publication.</p><div className="mt-5 rounded-xl bg-[#F6FAF9] p-4 text-left text-sm text-slate-600">Have your vehicle details, at least one photo, asking price and accurate ownership information ready.</div></div>}
+          {currentStep === 2 && <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2"><label className={labelClass}>Make *<input className={fieldClass} maxLength={80} value={form.vehicleInfo.make} onChange={e => updateNested('vehicleInfo','make',e.target.value)} placeholder="e.g. Toyota" /></label><label className={labelClass}>Model *<input className={fieldClass} maxLength={100} value={form.vehicleInfo.model} onChange={e => updateNested('vehicleInfo','model',e.target.value)} placeholder="e.g. Harrier" /></label><label className={labelClass}>Year *<input className={fieldClass} type="number" min="1900" max={new Date().getFullYear()+1} value={form.vehicleInfo.year || ''} onChange={e => updateNested('vehicleInfo','year',Number(e.target.value))}/></label><label className={labelClass}>Body type<select className={fieldClass} value={form.vehicleInfo.bodyType} onChange={e => updateNested('vehicleInfo','bodyType',e.target.value)}><option value="">Select body type</option>{['SUV','Sedan','Hatchback','Wagon','Coupe','Pickup','Van','Truck','Convertible','Other'].map(x=><option key={x}>{x}</option>)}</select></label><label className={labelClass}>Registration number<input className={fieldClass} value={form.vehicleInfo.registration} onChange={e => updateNested('vehicleInfo','registration',e.target.value)} placeholder="Optional" maxLength={50}/></label><label className={labelClass}>VIN / chassis number<input className={fieldClass} value={form.vehicleInfo.vin} onChange={e => updateNested('vehicleInfo','vin',e.target.value)} placeholder="Optional" maxLength={50}/></label></div>}
+          {currentStep === 3 && <div className="space-y-4"><div><h2 className="text-lg font-bold text-[#0A3340]">Add vehicle photographs *</h2><p className="mt-1 text-sm text-slate-500">JPEG, PNG or WebP; up to 10 photos in this submission, maximum 5 MB each. Show the full vehicle clearly.</p></div><label className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-teal-300 bg-teal-50/50 p-5 text-center"><Camera className="mb-2 text-teal-700" size={32}/><span className="font-bold text-[#0A3340]">Choose vehicle photos</span><span className="mt-1 text-xs text-slate-500">Select up to 10 images</span><input className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={e => { const files = Array.from(e.currentTarget.files || []) as File[]; const valid = files.filter(f => ['image/jpeg','image/png','image/webp'].includes(f.type) && f.size <= 5*1024*1024); const hadInvalid = valid.length !== files.length; update('photos', [...form.photos, ...valid].slice(0,10)); if (hadInvalid) setValidationError('Some files were skipped. Use JPG, PNG or WebP images no larger than 5 MB each.'); e.currentTarget.value=''; }}/></label><div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{photoPreviews.map(({file,url},i)=><div key={`${file.name}-${i}`} className="relative overflow-hidden rounded-xl border border-slate-200"><img src={url} alt={`Vehicle photo ${i+1}`} className="h-32 w-full object-contain bg-slate-50"/><button type="button" onClick={()=>update('photos',form.photos.filter((_,index)=>index!==i))} className="absolute right-2 top-2 rounded-full bg-white/95 px-2 py-1 text-xs font-bold text-rose-700">Remove</button></div>)}</div><p className="text-sm text-slate-600">{form.photos.length} of 10 photos selected</p></div>}
+          {currentStep === 4 && <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2"><label className={labelClass}>Mileage (km)<input className={fieldClass} type="number" min="0" max="2000000" value={form.details.mileage || ''} onChange={e=>updateNested('details','mileage',Number(e.target.value))}/></label><label className={labelClass}>Fuel type<select className={fieldClass} value={form.details.fuelType} onChange={e=>updateNested('details','fuelType',e.target.value)}>{['Petrol','Diesel','Hybrid','Plug-in Hybrid','Electric'].map(x=><option key={x}>{x}</option>)}</select></label><label className={labelClass}>Transmission<select className={fieldClass} value={form.details.transmission} onChange={e=>updateNested('details','transmission',e.target.value)}>{['Automatic','Manual','CVT','Dual-Clutch'].map(x=><option key={x}>{x}</option>)}</select></label><label className={labelClass}>Exterior colour<input className={fieldClass} value={form.details.color} onChange={e=>updateNested('details','color',e.target.value)} maxLength={60}/></label><label className={`${labelClass} sm:col-span-2`}>Vehicle location / town *<input className={fieldClass} value={form.details.city} onChange={e=>updateNested('details','city',e.target.value)} placeholder="e.g. Nairobi" maxLength={100}/></label><label className={`${labelClass} sm:col-span-2`}>Description *<textarea className={fieldClass} rows={5} maxLength={5000} value={form.details.description} onChange={e=>updateNested('details','description',e.target.value)} placeholder="Describe the vehicle, key features and anything a buyer should know."/><span className="mt-1 block text-xs font-normal text-slate-400">{form.details.description.length}/5000 characters</span></label><label className={labelClass}>Condition<select className={fieldClass} value={form.details.condition} onChange={e=>updateNested('details','condition',e.target.value)}>{['New','Like New','Excellent','Good','Fair','Used','Locally Used','Ex-Japan'].map(x=><option key={x}>{x}</option>)}</select></label></div>}
+          {currentStep === 5 && <div className="max-w-2xl space-y-4"><h2 className="text-lg font-bold text-[#0A3340]">Ownership declaration</h2><p className="text-sm text-slate-600">Only list a vehicle you own or are legally authorised to sell. KAYAD may request supporting documents during its verification process.</p><label className="flex items-start gap-3 rounded-xl bg-[#F6FAF9] p-4 text-sm text-slate-700"><input className="mt-1 h-4 w-4 accent-teal-600" type="checkbox" checked={form.ownership.ownerConfirmed} onChange={e=>updateNested('ownership','ownerConfirmed',e.target.checked)}/><span>I confirm that I am the vehicle owner or have authority from the owner to advertise and sell it. *</span></label><label className="flex items-start gap-3 rounded-xl border border-slate-200 p-4 text-sm text-slate-700"><input className="mt-1 h-4 w-4 accent-teal-600" type="checkbox" checked={form.ownership.logbookAvailable} onChange={e=>updateNested('ownership','logbookAvailable',e.target.checked)}/><span>I have access to the vehicle logbook / ownership documentation.</span></label><p className="text-xs text-amber-700">This declaration is part of the listing form. The current listing API does not store ownership documents or the logbook checkbox; verification remains subject to the Trust Center process.</p></div>}
+          {currentStep === 6 && <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">{(['exterior','interior','engine','tyres'] as const).map(key=><label key={key} className={labelClass}>{key[0].toUpperCase()+key.slice(1)} condition<textarea className={fieldClass} rows={3} maxLength={500} value={form.condition[key]} onChange={e=>updateNested('condition',key,e.target.value)} placeholder={`Describe ${key} condition`}/></label>)}</div>}
+          {currentStep === 7 && <label className={labelClass}>Known issues / repairs<textarea className={fieldClass} rows={6} maxLength={2000} value={form.condition.knownIssues} onChange={e=>updateNested('condition','knownIssues',e.target.value)} placeholder="Disclose known faults, accident repairs or issues. Enter 'None known' if applicable."/></label>}
+          {currentStep === 8 && <label className={labelClass}>Service history<textarea className={fieldClass} rows={6} maxLength={2000} value={form.condition.serviceHistory} onChange={e=>updateNested('condition','serviceHistory',e.target.value)} placeholder="Describe available service records, recent maintenance and major work."/></label>}
+          {currentStep === 9 && <div className="max-w-2xl space-y-3"><h2 className="text-lg font-bold text-[#0A3340]">Inspection and verification</h2><p className="text-sm text-slate-600">You can request or arrange an inspection through the available KAYAD inspection services. Do not describe a vehicle as inspected or verified unless KAYAD has confirmed it.</p><div className="rounded-xl bg-[#F6FAF9] p-4 text-sm text-slate-600">Your listing submission does not itself book an inspection or certify vehicle condition. Follow the dashboard and Trust Center for available next steps.</div></div>}
+          {currentStep === 10 && <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2"><label className={labelClass}>Asking price (KES) *<input className={fieldClass} type="number" min="1" max="100000000" step="1000" value={form.pricing.askingPrice || ''} onChange={e=>updateNested('pricing','askingPrice',Number(e.target.value))} placeholder="e.g. 1850000"/></label><div className="rounded-xl bg-[#F6FAF9] p-4 text-sm text-slate-600">Your asking price is submitted in Kenyan shillings. Any platform fees, moderation or seller eligibility checks are handled by KAYAD's existing backend rules.</div></div>}
+          {currentStep === 11 && <div className="space-y-4"><h2 className="text-lg font-bold text-[#0A3340]">Review your listing</h2><div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-[180px_1fr]">{photoPreviews[0] && <img src={photoPreviews[0].url} alt="Selected vehicle cover" className="h-36 w-full rounded-xl bg-slate-50 object-contain"/>}<div className="min-w-0"><h3 className="break-words text-xl font-bold text-[#0A3340]">{form.vehicleInfo.year} {form.vehicleInfo.make} {form.vehicleInfo.model}</h3><p className="mt-1 text-lg font-bold text-teal-700">KES {Number(form.pricing.askingPrice || 0).toLocaleString('en-KE')}</p><p className="mt-2 break-words text-sm text-slate-600">{form.details.city} · {form.details.mileage.toLocaleString()} km · {form.details.fuelType} · {form.details.transmission}</p><p className="mt-2 whitespace-pre-wrap break-words text-sm text-slate-600">{form.details.description}</p></div></div><div className="rounded-xl bg-[#F6FAF9] p-4 text-sm text-slate-600">{form.photos.length} photos · {form.details.condition} · Ownership declaration {form.ownership.ownerConfirmed ? 'confirmed' : 'not confirmed'}</div></div>}
+          {currentStep === 12 && <div className="max-w-2xl space-y-3"><h2 className="text-lg font-bold text-[#0A3340]">Submit your vehicle</h2><p className="text-sm text-slate-600">Your details and photos will be sent to KAYAD. The server decides the listing status based on your account capability and moderation policy. You will see confirmation only after the server creates the listing.</p><div className="rounded-xl bg-[#F6FAF9] p-4 text-sm text-slate-700">{form.vehicleInfo.year} {form.vehicleInfo.make} {form.vehicleInfo.model} · KES {Number(form.pricing.askingPrice || 0).toLocaleString('en-KE')} · {form.photos.length} photos</div></div>}
+          {(validationError || publishError) && <div role="alert" className="mt-5 break-words rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm font-medium text-rose-700">{validationError || publishError}</div>}
+          <div className="mt-7 flex min-w-0 flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-5"><button type="button" disabled={currentStep===1 || isPublishing} onClick={()=>{const prev=currentStep-1;setCurrentStep(prev);update('step',prev);}} className="rounded-xl border border-slate-200 px-4 py-3 font-semibold text-slate-700 disabled:opacity-40">Back</button>{currentStep < totalSteps ? <button type="button" onClick={goNext} className="rounded-xl bg-[#0A3340] px-6 py-3 font-bold text-white">Continue <ArrowRight className="ml-2 inline" size={17}/></button> : <button type="button" onClick={handlePublish} disabled={isPublishing} className="rounded-xl bg-[#13B8A6] px-6 py-3 font-bold text-[#07343B] disabled:opacity-60">{isPublishing ? 'Submitting…' : 'Submit listing'} <ArrowRight className="ml-2 inline" size={17}/></button>}</div>
+        </>}
+      </section>
     </div>
   );
 }
-
 
 // ============================================================
 // OTHER SECTIONS (Simplified for brevity)

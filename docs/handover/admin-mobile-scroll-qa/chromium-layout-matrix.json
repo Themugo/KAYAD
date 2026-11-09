@@ -1,0 +1,94 @@
+{
+  "testType": "synthetic CSS shell fixture; not authenticated React app",
+  "browser": "Chromium 144.0.7559.96",
+  "results": [
+    {
+      "viewport": "320x640",
+      "navClientHeight": 394,
+      "navScrollHeight": 2850,
+      "navAtEnd": true,
+      "footerVisible": true,
+      "docScrollable": true,
+      "pageAtEnd": true,
+      "contentOverflow": "visible",
+      "horizontalOverflow": false
+    },
+    {
+      "viewport": "360x740",
+      "navClientHeight": 494,
+      "navScrollHeight": 2850,
+      "navAtEnd": true,
+      "footerVisible": true,
+      "docScrollable": true,
+      "pageAtEnd": true,
+      "contentOverflow": "visible",
+      "horizontalOverflow": false
+    },
+    {
+      "viewport": "390x844",
+      "navClientHeight": 598,
+      "navScrollHeight": 2850,
+      "navAtEnd": true,
+      "footerVisible": true,
+      "docScrollable": true,
+      "pageAtEnd": true,
+      "contentOverflow": "visible",
+      "horizontalOverflow": false
+    },
+    {
+      "viewport": "430x900",
+      "navClientHeight": 654,
+      "navScrollHeight": 2850,
+      "navAtEnd": true,
+      "footerVisible": true,
+      "docScrollable": true,
+      "pageAtEnd": true,
+      "contentOverflow": "visible",
+      "horizontalOverflow": false
+    },
+    {
+      "viewport": "768x900",
+      "navClientHeight": 664,
+      "navScrollHeight": 2850,
+      "navAtEnd": true,
+      "footerVisible": true,
+      "docScrollable": true,
+      "pageAtEnd": true,
+      "contentOverflow": "visible",
+      "horizontalOverflow": false
+    },
+    {
+      "viewport": "1024x900",
+      "navClientHeight": 664,
+      "navScrollHeight": 2850,
+      "navAtEnd": true,
+      "footerVisible": true,
+      "docScrollable": true,
+      "pageAtEnd": true,
+      "contentOverflow": "visible",
+      "horizontalOverflow": false
+    },
+    {
+      "viewport": "1366x900",
+      "navClientHeight": 664,
+      "navScrollHeight": 2850,
+      "navAtEnd": true,
+      "footerVisible": true,
+      "docScrollable": true,
+      "pageAtEnd": true,
+      "contentOverflow": "visible",
+      "horizontalOverflow": false
+    },
+    {
+      "viewport": "1440x900",
+      "navClientHeight": 664,
+      "navScrollHeight": 2850,
+      "navAtEnd": true,
+      "footerVisible": true,
+      "docScrollable": true,
+      "pageAtEnd": true,
+      "contentOverflow": "visible",
+      "horizontalOverflow": false
+    }
+  ]
+}
