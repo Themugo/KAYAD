@@ -31,7 +31,7 @@ describe('OnboardingFlow', () => {
   it('buyer: registers role "user", creates NO session and tells them to verify email', async () => {
     m.register.mockResolvedValue({ user: { id: 'u' } });
     mount();
-    pick(/personal account/i);
+    pick(/^personal account/i);
     type('Full name', 'Jane Wanjiru'); type(/^Email/, 'jane@example.com'); type('Password', STRONG);
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
     await waitFor(() => expect(m.register).toHaveBeenCalledTimes(1));
@@ -59,7 +59,7 @@ describe('OnboardingFlow', () => {
     m.register.mockResolvedValue({});
     mount('/register?intent=admin&role=admin');
     expect(screen.getAllByRole('radio').length).toBe(5); // unknown intent is ignored: picker shown
-    pick(/personal account/i);
+    pick(/^personal account/i);
     type('Full name', 'Jane W'); type(/^Email/, 'j@example.com'); type('Password', STRONG);
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
     await waitFor(() => expect(m.register).toHaveBeenCalled());
@@ -129,7 +129,8 @@ describe('OnboardingFlow', () => {
     expect(m.register.mock.calls[0][0]).toMatchObject({ role: 'user', email: 's@example.com' });
     const link = screen.getByRole('link', { name: /i may already have an account/i });
     expect(link.getAttribute('href')).toMatch(/^\/login/);
-    expect(link.getAttribute('href')).toMatch(/intent=seller/);
+    // 'seller' resolves to the unified personal account, whose intent is 'buyer'.
+    expect(link.getAttribute('href')).toMatch(/intent=buyer/);
   });
 
   it('lost response, then retry: the 409 is explained as the first attempt having succeeded', async () => {
@@ -167,7 +168,7 @@ describe('OnboardingFlow', () => {
   it('independent professionals create one personal account before applying for credentials', async () => {
     m.register.mockResolvedValue({ user: { id: 'professional-user' } });
     mount('/register?intent=professional');
-    fireEvent.click(screen.getByLabelText(/on your own|independent/i));
+    fireEvent.click(screen.getByLabelText(/on my own/i));
     type('Full name', 'Ian Inspector'); type(/^Email/, 'i@example.com'); type('Password', STRONG);
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
     await waitFor(() => expect(m.register).toHaveBeenCalledTimes(1));

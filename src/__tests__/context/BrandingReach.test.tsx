@@ -23,9 +23,9 @@ describe('saved branding reaches the login / register shell', () => {
   });
 
   it('a save elsewhere in the app refreshes the logo without a reload', async () => {
-    getPublicConfig.mockResolvedValueOnce(cfg({ logoType: 'image', logoUrl: '/branding/kayad-road-mark.svg', logoText: 'KAYAD' }));
+    getPublicConfig.mockResolvedValueOnce(cfg({ logoType: 'image', logoUrl: '/api/admin/public/logo/aaaa111122223333.png', logoText: 'KAYAD' }));
     const { container } = render(<BrandingProvider><BrandMark /></BrandingProvider>);
-    await waitFor(() => expect(container.querySelector('img')?.getAttribute('src')).toBe('/branding/kayad-road-mark.svg'));
+    await waitFor(() => expect(container.querySelector('img')?.getAttribute('src')).toBe('/api/admin/public/logo/aaaa111122223333.png'));
     getPublicConfig.mockResolvedValueOnce(cfg({ logoType: 'image', logoUrl: '/api/admin/public/logo/fedcba9876543210.webp', logoText: 'KAYAD' }));
     act(() => { announceBrandingUpdated(); });
     await waitFor(() => expect(container.querySelector('img')?.getAttribute('src')).toBe('/api/admin/public/logo/fedcba9876543210.webp'));

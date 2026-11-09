@@ -5,7 +5,7 @@ import { AUTH_INTENTS } from '../../utils/authIntent';
 describe('public role matrix', () => {
   it('new registrations use one personal identity or a dealer business identity', () => {
     for (const r of PUBLIC_ROLES) expect(['user', 'dealer']).toContain(r.backendRole);
-    expect(PUBLIC_ROLES.some((r) => r.id === 'seller')).toBe(false);
+    expect(PUBLIC_ROLES.some((r) => (r.id as string) === 'seller')).toBe(false);
   });
   it('never offers staff or broker roles', () => {
     for (const r of PUBLIC_ROLES) {

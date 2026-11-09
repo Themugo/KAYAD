@@ -216,8 +216,10 @@ function normalizeBrandingConfig(config: Partial<Branding> | null | undefined): 
     const value = merged[field];
     if (typeof value === 'string') merged[field] = normalizeLegacyBrandColor(value, field) as never;
   }
-  // Migrate only the built-in legacy mark; explicitly uploaded admin logos remain untouched.\n  if (merged.logoUrl === '/branding/kayad-road-mark.svg') merged.logoUrl = '/branding/kayad-symbol.svg';
-  if (merged.brandTagline?.trim().toLowerCase() === "kenya's trusted vehicle marketplace") merged.brandTagline = 'Premium Automotive Marketplace';\n  merged.countryBadgeShow = merged.countryBadgeShow !== false;
+  // Migrate only the built-in legacy mark; explicitly uploaded admin logos remain untouched.
+  if (merged.logoUrl === '/branding/kayad-road-mark.svg') merged.logoUrl = '/branding/kayad-symbol.svg';
+  if (merged.brandTagline?.trim().toLowerCase() === "kenya's trusted vehicle marketplace") merged.brandTagline = 'Premium Automotive Marketplace';
+  merged.countryBadgeShow = merged.countryBadgeShow !== false;
   merged.countryBadgeText = sanitizeCountryBadgeText(merged.countryBadgeText);
   return merged;
 }

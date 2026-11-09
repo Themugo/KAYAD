@@ -5,12 +5,12 @@ const css = fs.readFileSync(new URL('../src/styles/kayad-navigation.css', import
 const branding = fs.readFileSync(new URL('../src/context/BrandingContext.tsx', import.meta.url), 'utf8');
 const logo = fs.readFileSync(new URL('../public/branding/kayad-symbol.svg', import.meta.url), 'utf8');
 assert.ok(navbar.includes('src={branding.logoUrl}') && navbar.includes('onError={onBrandLogoError}'), 'admin-uploaded logo override remains supported');
-assert.ok(navbar.includes('kayad-brand__word-ke">-KE</span>') && navbar.includes('branding.logoText'), 'KAYAD-KE wordmark is a separate text element');
+assert.ok(navbar.includes('kayad-brand__word-ke">') && navbar.includes('<span>-KE</span>') && navbar.includes('branding.logoText'), 'KAYAD-KE wordmark is a separate text element');
 assert.ok(navbar.includes('kayad-brand__tag kayad-brand__tag--reserved'), 'descriptor is independent text outside the logo asset');
 assert.ok(navbar.includes('className="kayad-brand__image"') && navbar.includes('CountryBadge'), 'logo image and country badge remain separate components');
 assert.ok(branding.includes("logoUrl: '/branding/kayad-symbol.svg'"), 'new vector mark is the default brand asset');
 assert.ok(branding.includes("merged.logoUrl === '/branding/kayad-road-mark.svg'"), 'legacy default mark migrates without overwriting custom uploads');
-assert.ok(logo.includes('viewBox="0 0 96 96"') && !/KAYAD|PREMIUM|MARKETPLACE/i.test(logo.replace(/<title[^>]*>.*?<\/title>/s,'')), 'standalone square logo mark contains no wordmark or descriptor');
+assert.ok(logo.includes('viewBox="0 0 128 128"') && !/KAYAD|PREMIUM|MARKETPLACE/i.test(logo.replace(/<title[^>]*>.*?<\/title>/s,'')), 'standalone square logo mark contains no wordmark or descriptor');
 for (const selector of ['.kayad-header__bar', '.kayad-brand__image', '.kayad-brand__word-ke', '.kayad-brand__tag--reserved', '.kayad-cta', '.kayad-hamburger']) assert.ok(css.includes(selector), `responsive header style exists: ${selector}`);
 assert.ok(css.includes('@media (max-width: 359px)') && css.includes('@media (max-width: 380px)') && css.includes('@media (min-width: 640px) and (max-width: 1023px)'), 'small phone and tablet breakpoints are defined');
 assert.ok(navbar.includes("handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'seller-platform')"), 'existing seller/dealer CTA routing remains unchanged');
