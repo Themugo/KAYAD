@@ -185,8 +185,13 @@ describe("Workstream A — legacy /api/dealer/* admits no private seller or buye
   test.each(LEGACY_SELLER_OWN_ROUTES)("approved private seller KEEPS caller-scoped %s %s (not a dealer-business route; unchanged by 13D)", async (m, p, b) => {
     expect(passedGuard(await call(m, p, S_APPROVED, b))).toBe(true);
   });
-  test("pending/suspended/rejected private sellers remain refused by the existing status gate", async () => {
-    for (const id of [S_PENDING, S_SUSPENDED, S_REJECTED]) expect((await call("GET", "/api/dealer/cars", id)).status).toBe(403);
+  test("suspended and rejected private sellers remain refused by the existing status gate", async () => {
+    for (const id of [S_SUSPENDED, S_REJECTED]) expect((await call("GET", "/api/dealer/cars", id)).status).toBe(403);
+  });
+  // Free private-selling policy: a legacy *pending* seller record is preserved but does not block caller-scoped own-listing
+  // management (it never reaches the dealer-business routes, which are asserted 403 above).
+  test("legacy pending private seller keeps caller-scoped own-listing access under the free policy", async () => {
+    expect(passedGuard(await call("GET", "/api/dealer/cars", S_PENDING))).toBe(true);
   });
   test("anonymous → 401", async () => { expect((await call("GET", "/api/dealer/team", null)).status).toBe(401); });
   test.each(rows3([["GET", "/api/dealer/team"], ["GET", "/api/dealer/trade-listings"], ["GET", "/api/dealer/earnings"]]))("dealer owner keeps %s %s", async (m, p) => {

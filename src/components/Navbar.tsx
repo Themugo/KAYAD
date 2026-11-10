@@ -348,10 +348,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           <span className="kayad-brand__text">
             <span className="kayad-brand__word">
               {(branding.logoText || 'KAYAD').replace(/\s*[-–]?\s*KE$/i, '')}
-              <span className="kayad-brand__word-ke">
-                <span>-KE</span>
-                <KenyaFlag className="kayad-brand__kenya-flag" />
-              </span>
+              <span className="kayad-brand__word-ke">KE</span>
+              <KenyaFlag className="kayad-brand__kenya-flag" />
             </span>
             <span className="kayad-brand__tag kayad-brand__tag--reserved">
               {branding.brandTagline || 'Premium Automotive Marketplace'}

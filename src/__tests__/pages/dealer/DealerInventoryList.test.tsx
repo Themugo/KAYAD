@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, within, fireEvent, waitFor } from '@testing-library/react';
 
+vi.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ signOut: vi.fn() }) }));
 vi.mock('../../../services/dealerPlatformApi', () => ({
   getDealerDashboard: vi.fn().mockResolvedValue({ success: true, data: { overview: {} } }),
   getLeads: vi.fn().mockResolvedValue({ success: true, data: { items: [] } }),

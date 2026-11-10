@@ -42,7 +42,7 @@ describe('legal pages', () => {
   it('terms describe the real commitment, refund and anonymity rules', () => {
     render(<MemoryRouter><LegalPage kind="terms" /></MemoryRouter>);
     const t = screen.getByTestId('legal-terms').textContent || '';
-    for (const x of ['anonymous bidder ID', 'Private sellers cannot choose where commitments are paid', 'M-Pesa number on your profile', 'Never pay a bid commitment']) expect(t).toContain(x);
+    for (const x of ['anonymous bidder ID', 'Private sellers cannot choose where commitments are paid', 'M-Pesa prompt to your phone', 'Do not pay a commitment to a person who contacts you separately']) expect(t).toContain(x);
     expect(screen.getAllByRole('heading', { level: 2 }).length).toBeGreaterThanOrEqual(8);
   });
   it('privacy names the Data Protection Act and the M-Pesa PIN promise', () => {

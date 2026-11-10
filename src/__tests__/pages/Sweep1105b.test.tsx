@@ -10,7 +10,7 @@ describe('1105b sweep', () => {
   });
   it('dealer mobile nav scrolls inside itself and is the positioning context', () => {
     const s = fs.readFileSync('src/pages/dealer/dashboard/DealerDashboard.tsx', 'utf8');
-    expect(s).toMatch(/<nav[^>]*relative flex-1[^>]*overflow-x-auto lg:overflow-x-visible/);
+    expect(s).toMatch(/<nav[^>]*relative flex-1[^>]*overflow-y-auto/);
   });
   it('FAQ answers cover commitments, refunds and winning', () => {
     const s = fs.readFileSync('src/features/SupportFAQ.tsx', 'utf8');

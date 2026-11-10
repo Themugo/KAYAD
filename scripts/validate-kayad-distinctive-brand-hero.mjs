@@ -10,10 +10,10 @@ const marketplace = read('../src/features/VehicleMarketplace/components/VehicleM
 const siteDesign = read('../backend/utils/siteDesign.js');
 assert.ok(logo.includes('forward-motion') && logo.includes('M27 77') && logo.includes('M45 82'), 'new logo has front-facing moving vehicle artwork');
 assert.ok(!/KAYAD|PREMIUM|MARKETPLACE/i.test(logo.replace(/<title[^>]*>.*?<\/title>/s,'')), 'symbol itself contains no brand wording');
-assert.ok(navbar.includes('<KenyaFlag className="kayad-brand__kenya-flag" />'), 'Kenyan flag is directly beneath KE');
-assert.ok(css.includes('.kayad-brand__word-ke') && css.includes('.kayad-brand__kenya-flag'), 'flag-under-KE responsive styling exists');
+assert.ok(/kayad-brand__word-ke">KE<\/span>\s*<KenyaFlag className="kayad-brand__kenya-flag" \/>/.test(navbar), 'Kenyan flag sits at the end of the wordmark, same line as KE');
+assert.ok(css.includes('.kayad-brand__word-ke') && css.includes('.kayad-brand__kenya-flag'), 'inline KE + flag lockup styling exists');
 assert.ok(hero.includes('Kenyan') === false && hero.includes('1920') && hero.includes('acacia') === false, 'custom vector landscape asset is present');
-assert.ok(!siteDesign.includes('kayad-nairobi-kicc.jpg') && marketplace.includes("'/hero/kayad-kenyan-highlands-road.svg'"), 'homepage defaults no longer use Nairobi skyline; legacy stored default is normalized');
-assert.ok(marketplace.includes('/hero/kayad-kenyan-highlands-road.svg') && siteDesign.includes('/hero/kayad-kenyan-highlands-road.svg'), 'homepage and site-design defaults point to custom Kenyan road art');
-assert.ok(branding.includes("logoUrl: '/branding/kayad-symbol.svg'"), 'new front-facing mark remains the default logo');
+assert.ok(!siteDesign.includes('kayad-nairobi-kicc.jpg') && marketplace.includes("'/hero/kayad-kenyan-highlands-road.svg'") /* legacy value still normalized */, 'homepage defaults no longer use Nairobi skyline; legacy stored default is normalized');
+assert.ok(marketplace.includes('/hero/kayad-thika-expressway-no-signs.svg') && siteDesign.includes('/hero/kayad-thika-expressway-no-signs.svg') && fs.existsSync(new URL('../public/hero/kayad-thika-expressway-no-signs.svg', import.meta.url)), 'homepage and site-design defaults point to the custom Kenyan road art asset');
+assert.ok(branding.includes("logoUrl: '/branding/kayad-mark.png'"), 'new front-facing mark remains the default logo');
 console.log('PASS: forward-facing automotive mark, flag-under-KE, original Kenyan highlands road art and default asset references.');

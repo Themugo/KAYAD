@@ -21,6 +21,7 @@ const veh = vi.hoisted(() => {
     LISTING_IMAGE_MAX_PER_REQUEST: 10, LISTING_IMAGE_MAX_PER_LISTING: 20,
   };
 });
+vi.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ signOut: vi.fn() }) }));
 vi.mock('../../../services/dealerPlatformApi', () => api);
 vi.mock('../../../services/vehicleApi', () => veh);
 vi.mock('../../../features/escrow/ParticipantEscrowDesk', () => ({ ParticipantEscrowDesk: () => <div>escrow desk</div> }));

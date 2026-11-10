@@ -29,7 +29,7 @@ vi.mock('../../api/api', () => ({
   notifAPI: { list: vi.fn().mockResolvedValue({ notifications: [] }) },
 }));
 vi.mock('../../utils/helpers', () => ({ initials: () => 'TU' }));
-vi.mock('../../utils/authRoutes', () => ({ isSellerRole: () => false }));
+vi.mock('../../utils/authRoutes', async (importOriginal) => ({ ...(await importOriginal()), isSellerRole: () => false }));
 vi.mock('../../components/features/common/NotificationCenter', () => ({ default: () => null }));
 vi.mock('framer-motion', () => ({
   motion: { div: ({ children, ...p }) => <div {...p}>{children}</div> },

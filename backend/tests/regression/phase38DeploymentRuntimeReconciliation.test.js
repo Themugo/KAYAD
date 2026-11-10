@@ -134,14 +134,14 @@ describe("R25 — M-Pesa IP whitelist uses Express's trust-proxy-aware req.ip, n
   });
 
   it("getClientIp uses req.ip only after the immediate peer passes the trusted-proxy gate", () => {
-    expect(src).toMatch(/return req\.ip \|\| ""/);
-    expect(src).toMatch(/if \(!isTrustedProxyPeer\(remoteAddress\)\) return remoteAddress/);
+    expect(src).toMatch(/return normalizeIp\(req\.ip \|\| ""\)/);
+    expect(src).toMatch(/if \(!isTrustedProxyPeer\(remoteAddress\)\) return normalizeIp\(remoteAddress\)/);
   });
 
   it("M-Pesa IP resolution requires an explicit trusted-proxy CIDR gate before using req.ip", () => {
     expect(src).toMatch(/MPESA_TRUSTED_PROXY_CIDRS/);
     expect(src).toMatch(/isTrustedProxyPeer\(remoteAddress\)/);
-    expect(src).toMatch(/if \(!isTrustedProxyPeer\(remoteAddress\)\) return remoteAddress/);
+    expect(src).toMatch(/if \(!isTrustedProxyPeer\(remoteAddress\)\) return normalizeIp\(remoteAddress\)/);
   });
 
   it("deployment config exposes the trusted-proxy CIDR setting with a fail-closed empty default", () => {
