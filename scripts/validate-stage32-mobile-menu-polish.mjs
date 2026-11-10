@@ -30,7 +30,7 @@ const checks = [
   ['existing header hamburger remains the menu opener', navbar.includes('Toggle navigation menu') && navbar.includes('openMobileMenu()')],
   ['existing single accessible drawer is retained', navbar.includes('id="kayad-mobile-drawer"') && navbar.includes('role="dialog" aria-modal="true"')],
   ['drawer destination cards no longer stretch vertically', css.includes('align-items: start;') && css.includes('align-self: start;') && css.includes('height: auto;')],
-  ['drawer maintains compact, responsive two-column layout', css.includes('grid-template-columns:repeat(2,minmax(0,1fr))') && css.includes('min-height: 58px')],
+  ['drawer now uses one continuous single-column menu flow', css.includes('flex-direction: column !important;') && css.includes('min-height: 58px')],
   ['menu still hides the dock while open', css.includes('body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav') && css.includes('visibility:hidden!important')],
   ['reduced-motion preference remains respected', css.includes('@media(prefers-reduced-motion:reduce)')],
 ];

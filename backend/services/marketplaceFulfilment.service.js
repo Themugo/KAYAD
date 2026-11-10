@@ -4,7 +4,6 @@ import { ownershipService } from "../ownership/services/ownershipService.js";
 import { openDispute as openEscrowDispute } from "./dispute.service.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { emitCommunication, COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
-import { logWarn } from "../utils/logger.js";
 
 const nowIso = () => new Date().toISOString();
 const err = (message, status=409) => Object.assign(new Error(message), { status });
@@ -52,7 +51,11 @@ export async function syncPurchaseOutcomeFromEscrow(escrowId, escrowStatus, meta
     // the exact field set the other two paths already use, so this
     // reuses the established "sold" convention rather than inventing a
     // new one.
-    await update("cars", outcome.car_id, { sold: true, status: "sold", isPaid: true, paymentStatus: "paid" }).catch((e) => logWarn("Failed to mark car sold after escrow release", { error: e.message, carId: outcome.car_id }));
+    // Fail closed: the public listing must be removed before the purchase
+    // outcome advances. Swallowing this write error left a released, paid car
+    // publicly available and eligible for a second buyer. A failed sync must
+    // surface so the operator can retry/reconcile the already-released escrow.
+    await update("cars", outcome.car_id, { sold: true, status: "sold", isPaid: true, paymentStatus: "paid" });
     return atomicTransitionPurchaseOutcome({outcomeId:outcome.id,nextStatus:outcome.collection_status==='collected'?(outcome.transfer_status==='completed'?'completed':'transfer_pending'):'ready_for_collection',collectionStatus:outcome.collection_status==='collected'?'collected':'ready',transferStatus:outcome.transfer_status});
   }
   if(["funded","vehicle_confirmed","delivered"].includes(String(escrowStatus)) && outcome.status === "payment_received") {

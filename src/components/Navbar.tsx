@@ -95,6 +95,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const navItems = useMemo(() => applyNavigationConfig(navigation), [navigation]);
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileExpandedGroups, setMobileExpandedGroups] = useState<Record<string, boolean>>({ marketplace: true });
   const [showCountyDropdown, setShowCountyDropdown] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const countyRef = useRef<HTMLDivElement>(null);
@@ -105,6 +106,16 @@ export const Navbar: React.FC<NavbarProps> = ({
   const hamburgerRef = useRef<HTMLButtonElement>(null);
   const [mobileDrawerTop, setMobileDrawerTop] = useState(0);
   const [mobileDrawerHeight, setMobileDrawerHeight] = useState(0);
+
+  // Expand the current section when the drawer opens; keep other sections
+  // collapsed until requested so the menu remains short and scannable.
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const currentSection = navItems.find((item) =>
+      item.match.includes(activeNav) || item.children?.some((child) => child.navId === activeNav),
+    );
+    setMobileExpandedGroups(currentSection ? { [currentSection.id]: true } : { marketplace: true });
+  }, [mobileMenuOpen, activeNav, navItems]);
 
   const openMobileMenu = useCallback(() => {
     const headerAnchor = headerRef.current?.querySelector('.kayad-header__bar') as HTMLElement | null;
@@ -273,6 +284,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   const signedIn = Boolean(user);
   // A dealer works only in the Dealer workspace: the buyer / private-seller pages are not part of a dealer account's menu.
   const isDealerUser = user?.role === 'dealer';
+  const isStaffAccount = isStaffRole(user?.role);
+  const isMechanicAccount = user?.role === 'mechanic';
+  const isRestrictedWorkspace = isDealerUser || isStaffAccount;
   // A returning member sees a neutral placeholder while the session check runs; everyone else gets a working Sign In at once.
   const sessionHinted = React.useMemo(() => hasSessionHint(), []);
   const isSectionActive = (item: NavPrimary) => item.match.includes(activeNav);
@@ -350,7 +364,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         <nav className="kayad-navfield" aria-label="Primary">
           <ul>
             {navItems.map((item) => {
-              const children = visibleChildren(item, signedIn);
+              const children = visibleChildren(item, signedIn, isRestrictedWorkspace);
               const hasChildren = children.length > 0;
               const isOpen = openMenu === item.id;
               const active = isSectionActive(item);
@@ -804,10 +818,13 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* MOBILE DRAWER NAVIGATION — one premium, scroll-safe surface. */}
       {mobileMenuOpen && (
         <>
-          <button type="button" aria-label="Close navigation menu" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-[55] bg-[#031E27]/55 backdrop-blur-[2px] lg:hidden" />
+          <button type="button" aria-label="Dismiss navigation backdrop" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-[55] bg-[#031E27]/55 backdrop-blur-[2px] lg:hidden" />
           <aside ref={drawerRef} id="kayad-mobile-drawer" tabIndex={-1} className="kayad-mobile-menu fixed inset-x-0 bottom-0 z-[60] lg:hidden focus:outline-none" style={{ top: `${mobileDrawerTop}px`, height: `${mobileDrawerHeight}px` }} role="dialog" aria-modal="true" aria-label="KAYAD mobile navigation">
             <div className="kayad-mobile-menu__surface mx-auto flex h-full w-full max-w-[760px] flex-col overflow-hidden rounded-t-[28px] border-x border-t border-[#2C6671] bg-[#062E3A] text-white shadow-[0_30px_90px_rgba(3,30,39,.38)]">
-              <div className="flex min-h-1.5 items-center justify-center bg-[#0A3340]"><span className="h-1 w-10 rounded-full bg-white/20" /></div>
+              <div className="kayad-mobile-menu__topbar flex min-h-[58px] shrink-0 items-center justify-between border-b border-white/10 bg-[#071B2E] px-5">
+                <div className="min-w-0"><p className="text-[13px] font-black tracking-[.08em] text-white">KAYAD MENU</p><p className="text-[10px] text-white/55">Explore, manage and get support</p></div>
+                <button type="button" onClick={() => { setMobileMenuOpen(false); hamburgerRef.current?.focus(); }} className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/15 bg-white/[0.06] text-white hover:bg-white/[0.12]" aria-label="Close navigation menu"><X className="h-5 w-5" aria-hidden="true" /></button>
+              </div>
               <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                 {user ? (
                   <section className="mb-4 rounded-[22px] border border-white/10 bg-white/[0.07] p-3.5">
@@ -832,21 +849,37 @@ export const Navbar: React.FC<NavbarProps> = ({
                     {navItems.map((item) => {
                       const Icon = item.icon;
                       const active = isSectionActive(item);
-                      const children = visibleChildren(item, signedIn);
+                      const children = visibleChildren(item, signedIn, isRestrictedWorkspace);
                       return (
                         <div key={item.id} className="kayad-drawer-group">
-                          <a
-                            href={item.href}
-                            onClick={(e) => handleLinkClick(e, item.navId)}
-                            className={`kayad-drawer-group__head ${active ? 'is-active' : ''}`}
-                            aria-current={active ? 'page' : undefined}
-                          >
-                            <span className={`kayad-drawer-group__icon kayad-drawer-group__icon--${item.id}`}><Icon className="h-[18px] w-[18px]" aria-hidden="true" /></span>
-                            <span className="flex-1">{item.id === 'support' ? 'Support & Disputes' : item.label}</span>
-                            <ChevronDown className="h-4 w-4 -rotate-90 text-[#8DE4DB]" aria-hidden="true" />
-                          </a>
+                          <div className={`kayad-drawer-group__row ${active ? 'is-active' : ''}`}>
+                            <a
+                              href={item.href}
+                              onClick={(e) => handleLinkClick(e, item.navId)}
+                              className={`kayad-drawer-group__head ${active ? 'is-active' : ''}`}
+                              aria-current={active ? 'page' : undefined}
+                            >
+                              <span className={`kayad-drawer-group__icon kayad-drawer-group__icon--${item.id}`}><Icon className="h-[18px] w-[18px]" aria-hidden="true" /></span>
+                              <span className="flex-1">{item.id === 'support' ? 'Support & Disputes' : item.label}</span>
+                            </a>
+                            {children.length > 0 && (
+                              <button
+                                type="button"
+                                className="kayad-drawer-group__expand"
+                                aria-label={`${mobileExpandedGroups[item.id] ? 'Collapse' : 'Expand'} ${item.label} links`}
+                                aria-expanded={!!mobileExpandedGroups[item.id]}
+                                aria-controls={`kayad-drawer-links-${item.id}`}
+                                onClick={() => setMobileExpandedGroups((current) => ({
+                                  ...current,
+                                  [item.id]: !current[item.id],
+                                }))}
+                              >
+                                <ChevronDown className={`h-4 w-4 transition-transform ${mobileExpandedGroups[item.id] ? 'rotate-180' : ''}`} aria-hidden="true" />
+                              </button>
+                            )}
+                          </div>
                           {children.length > 0 && (
-                            <div className="kayad-drawer-group__links">
+                            <div id={`kayad-drawer-links-${item.id}`} className="kayad-drawer-group__links" hidden={!mobileExpandedGroups[item.id]}>
                               {children.map((child) => {
                                 const ChildIcon = child.icon;
                                 return (
@@ -864,26 +897,51 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </nav>
                 </section>
 
-                <section className="kayad-drawer-panel mb-4 rounded-[22px] border border-white/[0.07] bg-white/[0.035] p-2">
-                  <span className="block px-2 pb-1 pt-1 text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">Your KAYAD</span>
-                  <div className="grid grid-cols-2 gap-1.5">
-                    {user && <>
-                      <button type="button" onClick={() => handleNavSelect(isDealerUser ? 'dealer:overview' : 'dashboard')} className="kayad-drawer-tile"><LayoutDashboard className="h-4 w-4 text-[#79D8CF]" />Dashboard</button>
-                      <button type="button" onClick={() => handleNavSelect('chat')} className="kayad-drawer-tile"><span className="flex items-center gap-2"><MessageSquare className="h-4 w-4 text-[#79D8CF]" />Messages</span>{effectiveUnread > 0 && <span className="rounded-full bg-[#13B8A6] px-1.5 text-[9px] font-black text-[#062E3A]">{effectiveUnread}</span>}</button>
-                      <button type="button" onClick={() => { navigate('/notifications'); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><span className="flex items-center gap-2"><Bell className="h-4 w-4 text-[#79D8CF]" />Notifications</span>{notificationUnreadCount > 0 && <span className="rounded-full bg-rose-500 px-1.5 text-[9px] font-black text-white">{notificationUnreadCount}</span>}</button>
-                      {!isDealerUser && <button type="button" onClick={() => handleNavSelect('payments')} className="kayad-drawer-tile"><CreditCard className="h-4 w-4 text-[#79D8CF]" />Payment History</button>}
-                      {!isDealerUser && <button type="button" onClick={() => handleNavSelect('saved')} className="kayad-drawer-tile"><span className="flex items-center gap-2"><Heart className="h-4 w-4 text-[#79D8CF]" />Saved Vehicles</span>{savedCount > 0 && <span className="rounded-full bg-[#176B87] px-1.5 text-[9px] font-black text-white">{savedCount}</span>}</button>}
-                      {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Sliders className="h-4 w-4 text-[#79D8CF]" />Compare</button>}
-                    </>}
-                    <button type="button" onClick={() => { onOpenAlerts(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Bell className="h-4 w-4 text-[#79D8CF]" />Price Alerts</button>
-                  </div>
-                </section>
+                <section className="kayad-drawer-panel mb-4 rounded-[22px] border border-white/[0.07] bg-white/[0.035] p-2" aria-labelledby="kayad-drawer-workspace">
+                    <span id="kayad-drawer-workspace" className="block px-2 pb-1 pt-1 text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">
+                      {isDealerUser ? 'Dealer workspace' : isStaffAccount ? 'Staff workspace' : isMechanicAccount ? 'Provider workspace' : user ? 'Your KAYAD' : 'Quick access'}
+                    </span>
+                    <div className="kayad-drawer-list">
+                      {user && isDealerUser && <>
+                        <button type="button" onClick={() => handleNavSelect('dealer:overview')} className="kayad-drawer-tile"><LayoutDashboard className="h-4 w-4" />Dashboard</button>
+                        <button type="button" onClick={() => handleNavSelect('dealer:inventory')} className="kayad-drawer-tile"><Layers className="h-4 w-4" />Inventory</button>
+                        <button type="button" onClick={() => handleNavSelect('dealer:leads')} className="kayad-drawer-tile"><MessageSquare className="h-4 w-4" />Leads</button>
+                        <button type="button" onClick={() => handleNavSelect('dealer:analytics')} className="kayad-drawer-tile"><BarChart3 className="h-4 w-4" />Analytics</button>
+                        <button type="button" onClick={() => handleNavSelect('dealer:settings')} className="kayad-drawer-tile"><Settings className="h-4 w-4" />Settings</button>
+                        <button type="button" onClick={() => handleNavSelect('chat')} className="kayad-drawer-tile"><MessageSquare className="h-4 w-4" />Messages {effectiveUnread > 0 && <span className="kayad-drawer-count">{effectiveUnread}</span>}</button>
+                        <button type="button" onClick={() => { navigate('/notifications'); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Bell className="h-4 w-4" />Notifications {notificationUnreadCount > 0 && <span className="kayad-drawer-count kayad-drawer-count--alert">{notificationUnreadCount}</span>}</button>
+                        {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Sliders className="h-4 w-4" />Compare Vehicles</button>}
+                      </>}
+                      {user && isStaffAccount && <>
+                        <button type="button" onClick={() => handleNavSelect('chat')} className="kayad-drawer-tile"><MessageSquare className="h-4 w-4" />Messages {effectiveUnread > 0 && <span className="kayad-drawer-count">{effectiveUnread}</span>}</button>
+                        <button type="button" onClick={() => { navigate('/notifications'); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Bell className="h-4 w-4" />Notifications {notificationUnreadCount > 0 && <span className="kayad-drawer-count kayad-drawer-count--alert">{notificationUnreadCount}</span>}</button>
+                        <button type="button" onClick={() => handleAdminRoute('/admin')} className="kayad-drawer-tile"><Settings className="h-4 w-4" />Admin Console</button>
+                        <button type="button" onClick={() => handleNavSelect('profile')} className="kayad-drawer-tile"><User className="h-4 w-4" />Account Settings</button>
+                        {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Sliders className="h-4 w-4" />Compare Vehicles</button>}
+                      </>}
+                      {user && isMechanicAccount && <>
+                        <button type="button" onClick={() => handleNavSelect('dashboard')} className="kayad-drawer-tile"><LayoutDashboard className="h-4 w-4" />Dashboard</button>
+                        <button type="button" onClick={() => handleNavSelect('inspections')} className="kayad-drawer-tile"><ShieldCheck className="h-4 w-4" />Inspection Portal</button>
+                        <button type="button" onClick={() => handleNavSelect('chat')} className="kayad-drawer-tile"><MessageSquare className="h-4 w-4" />Messages {effectiveUnread > 0 && <span className="kayad-drawer-count">{effectiveUnread}</span>}</button>
+                        <button type="button" onClick={() => { navigate('/notifications'); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Bell className="h-4 w-4" />Notifications</button>
+                        <button type="button" onClick={() => handleNavSelect('profile')} className="kayad-drawer-tile"><User className="h-4 w-4" />Account Settings</button>
+                        <button type="button" onClick={() => handleNavSelect('payments')} className="kayad-drawer-tile"><CreditCard className="h-4 w-4" />Payment History</button>
+                        {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Sliders className="h-4 w-4" />Compare Vehicles</button>}
+                      </>}
+                      {user && !isRestrictedWorkspace && !isMechanicAccount && <>
+                        <button type="button" onClick={() => handleNavSelect('dashboard')} className="kayad-drawer-tile"><LayoutDashboard className="h-4 w-4" />Dashboard</button>
+                        <button type="button" onClick={() => handleNavSelect('chat')} className="kayad-drawer-tile"><MessageSquare className="h-4 w-4" />Messages {effectiveUnread > 0 && <span className="kayad-drawer-count">{effectiveUnread}</span>}</button>
+                        <button type="button" onClick={() => { navigate('/notifications'); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Bell className="h-4 w-4" />Notifications {notificationUnreadCount > 0 && <span className="kayad-drawer-count kayad-drawer-count--alert">{notificationUnreadCount}</span>}</button>
+                        <button type="button" onClick={() => handleNavSelect('payments')} className="kayad-drawer-tile"><CreditCard className="h-4 w-4" />Payment History</button>
+                        {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Sliders className="h-4 w-4" />Compare Vehicles</button>}
+                      </>}
+                      <button type="button" onClick={() => { onOpenAlerts(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Bell className="h-4 w-4" />Price Alerts</button>
+                    </div>
+                  </section>
 
-                {isDealerUser && <section className="mb-4 rounded-[20px] border border-white/[0.07] bg-white/[0.035] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">Dealer Tools</span><div className="grid grid-cols-2 gap-1.5"><button type="button" onClick={() => handleNavSelect('dealer:overview')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Building2 className="mb-1 h-4 w-4 text-[#79D8CF]" />Dashboard</button><button type="button" onClick={() => handleNavSelect('dealer:inventory')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Layers className="mb-1 h-4 w-4 text-[#79D8CF]" />Inventory</button><button type="button" onClick={() => handleNavSelect('dealer:inventory:new')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><PlusCircle className="mb-1 h-4 w-4 text-[#79D8CF]" />Add Vehicle</button><button type="button" onClick={() => handleNavSelect('dealer:leads')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><MessageSquare className="mb-1 h-4 w-4 text-[#79D8CF]" />Leads</button><button type="button" onClick={() => handleNavSelect('dealer:analytics')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><BarChart3 className="mb-1 h-4 w-4 text-[#79D8CF]" />Analytics</button><button type="button" onClick={() => handleNavSelect('dealer:settings')} className="rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Settings className="mb-1 h-4 w-4 text-[#79D8CF]" />Settings</button></div></section>}
-                {user?.role === 'mechanic' && <section className="mb-4 rounded-[20px] border border-emerald-300/10 bg-emerald-400/[0.05] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-emerald-300">Inspection Tools</span><button type="button" onClick={() => handleNavSelect('inspections')} className="flex w-full items-center gap-2 rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-emerald-100"><ShieldCheck className="h-4 w-4" />Inspection Portal</button></section>}
-                {(user?.role === 'admin' || isStaffRole(user?.role)) && <section className="mb-4 rounded-[20px] border border-white/[0.07] bg-white/[0.035] p-3"><span className="block px-1 pb-2 text-[9px] font-black uppercase tracking-[.2em] text-[#A8B8BC]">Administration</span><button type="button" onClick={() => handleNavSelect('admin')} className="flex w-full items-center gap-2 rounded-xl bg-white/[0.05] px-3 py-3 text-left text-[10px] font-bold text-white/75"><Settings className="h-4 w-4" />Admin Console</button></section>}
-
-                <button type="button" onClick={() => handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'seller-platform')} id="mobile-cta-sell-car" className="mb-4 flex min-h-14 w-full items-center justify-between rounded-[20px] border border-[#43D0C2]/40 bg-gradient-to-r from-[#0D7187] to-[#176B87] px-4 text-left text-white shadow-[0_16px_35px_rgba(7,57,68,.22)] active:scale-[.99]"><span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/10"><PlusCircle className="h-5 w-5" /></span><span><strong className="block text-sm font-black">{isDealerUser ? 'Add Vehicle' : 'Sell Vehicle'}</strong><small className="text-[10px] text-white/60">{isDealerUser ? 'Add stock to your inventory' : 'List your vehicle with KAYAD'}</small><small hidden></small></span></span><ChevronDown className="h-5 w-5 -rotate-90 text-[#8DE4DB]" /></button>
+                {!isStaffAccount && (
+                  <button type="button" onClick={() => handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'seller-platform')} id="mobile-cta-sell-car" className="mb-4 flex min-h-14 w-full items-center justify-between rounded-[20px] border border-[#43D0C2]/40 bg-gradient-to-r from-[#0D7187] to-[#176B87] px-4 text-left text-white shadow-[0_16px_35px_rgba(7,57,68,.22)] active:scale-[.99]"><span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/10"><PlusCircle className="h-5 w-5" /></span><span><strong className="block text-sm font-black">{isDealerUser ? 'Add Vehicle' : 'Sell Vehicle'}</strong><small className="text-[10px] text-white/60">{isDealerUser ? 'Add stock to your inventory' : 'List your vehicle with KAYAD'}</small></span></span><ChevronDown className="h-5 w-5 -rotate-90 text-[#8DE4DB]" /></button>
+                )}
                 <div className="flex items-center justify-between border-t border-white/[0.08] px-1 pt-4 text-[10px] text-white/50"><span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-[#79D8CF]" />{selectedCounty}</span></div>
               </div>
             </div>

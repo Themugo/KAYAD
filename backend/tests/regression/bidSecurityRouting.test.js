@@ -24,7 +24,7 @@ jest.unstable_mockModule("../../services/dealerPaymentAccount.service.js", () =>
 const { initiateBidSecurity } = await import("../../services/bidSecurityService.js");
 const { bidderNumber } = await import("../../utils/bidderIdentity.js");
 
-beforeEach(() => { stk.mockClear(); });
+beforeEach(() => { stk.mockClear(); delete process.env.AUCTION_DEALER_DIRECT_COLLECTION_ENABLED; });
 
 describe("bid commitment routing", () => {
   it("private seller: platform recipient, seller account ignored, per-car reference", async () => {
@@ -57,7 +57,16 @@ describe("bid commitment routing", () => {
 
 describe("dealer-direct collection", () => {
   const overrides = { consumerKey: "k", consumerSecret: "s", passkey: "p", shortCode: "174379", transactionType: "CustomerBuyGoodsOnline", partyB: "522522" };
-  it("verified dealer account: STK uses the dealer's credentials, custody is dealer", async () => {
+  it("keeps dealer-direct collection disabled until the owner explicitly enables the migrated flow", async () => {
+    gate.mockResolvedValue({ eligible: true, scope: "not_private_seller" });
+    dealerCollection.mockResolvedValueOnce({ overrides, kind: "till", shortcode: "174379" });
+    const r = await initiateBidSecurity({ auctionId: CAR, userId: "u1", phone: "0712345678", amount: 5000, holdId: null });
+    expect(r.custody).toBe("kayad");
+    expect(dealerCollection).not.toHaveBeenCalled();
+    expect(stk).toHaveBeenCalledWith("0712345678", 5000, { accountReference: "AUC-05752BF6", transactionDesc: "Bid commitment" });
+  });
+  it("verified dealer account: STK uses dealer credentials only when owner enables the migrated flow", async () => {
+    process.env.AUCTION_DEALER_DIRECT_COLLECTION_ENABLED = "true";
     gate.mockResolvedValue({ eligible: true, scope: "not_private_seller" });
     dealerCollection.mockResolvedValueOnce({ overrides, kind: "till", shortcode: "174379" });
     const r = await initiateBidSecurity({ auctionId: CAR, userId: "u1", phone: "0712345678", amount: 5000, holdId: null });

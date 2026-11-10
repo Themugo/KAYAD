@@ -104,3 +104,33 @@ describe('canonical admin destinations', () => {
     expect(screen.getAllByText('JM').length).toBeGreaterThan(0);
   });
 });
+
+
+describe('role-aware mobile drawer navigation', () => {
+  const renderMobileMenu = (role) => {
+    render(<MemoryRouter initialEntries={['/']}>
+      <Navbar {...props} user={{ id: 'u1', name: 'James Mugo', email: 'owner@example.test', role }} />
+    </MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+    return screen.getByRole('dialog');
+  };
+
+  it('superadmin sees staff tools but not buyer-only saved, payment, escrow or personal request links', () => {
+    const drawer = renderMobileMenu('superadmin');
+    const text = drawer.textContent;
+    expect(text).toContain('Admin Console');
+    expect(text).toContain('Messages');
+    expect(text).toContain('Notifications');
+    for (const hidden of ['Saved vehicles', 'Saved for you', 'Payment History', 'My requests and reports', 'My escrow deals', 'Sell Vehicle']) {
+      expect(text).not.toContain(hidden);
+    }
+  });
+
+  it('dealer sees one dealer workspace list without buyer-only shortcuts', () => {
+    const drawer = renderMobileMenu('dealer');
+    const text = drawer.textContent;
+    for (const item of ['Dealer workspace', 'Dashboard', 'Inventory', 'Leads', 'Analytics', 'Settings', 'Add Vehicle']) expect(text).toContain(item);
+    for (const hidden of ['Saved vehicles', 'Saved for you', 'Payment History', 'My requests and reports', 'My escrow deals', 'Sell Vehicle']) expect(text).not.toContain(hidden);
+    expect((text.match(/Dashboard/g) || []).length).toBe(1);
+  });
+});

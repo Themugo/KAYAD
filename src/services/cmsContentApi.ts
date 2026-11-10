@@ -34,10 +34,6 @@ interface CMSContentResponse {
  * by real content type (e.g. 'news', 'guide'). */
 export async function getCMSContent(contentType: string, limit = 6): Promise<CMSContentItem[]> {
   const params = new URLSearchParams({ contentType, status: 'published', limit: String(limit) });
-  try {
-    const body = await request<CMSContentResponse>(`/api/cms/content?${params.toString()}`);
-    return body.data || [];
-  } catch {
-    return [];
-  }
+  const body = await request<CMSContentResponse>(`/api/cms/content?${params.toString()}`);
+  return body.data || [];
 }

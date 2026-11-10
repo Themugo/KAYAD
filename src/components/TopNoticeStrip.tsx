@@ -8,12 +8,34 @@ import { adminAPI } from '../api/api';
  */
 const kenyaOnlyTickerCopy = (value?: string | null) => (value || '').replace(/East Africa/gi, 'Kenya');
 
+/** Only allow same-site relative links and ordinary HTTP(S) destinations from CMS/admin content. */
+export function safeTickerHref(value?: string | null): string | null {
+  const candidate = String(value || '').trim();
+  if (!candidate || candidate.startsWith('//') || /[\u0000-\u001f\u007f]/.test(candidate)) return null;
+  if (candidate.startsWith('/') && !candidate.startsWith('\\')) return candidate;
+  try {
+    const parsed = new URL(candidate);
+    return parsed.protocol === 'https:' || parsed.protocol === 'http:' ? parsed.href : null;
+  } catch {
+    return null;
+  }
+}
+
 export const TopNoticeStrip: React.FC = () => {
   const [slots, setSlots] = useState<AdSlot[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [fadeIndex, setFadeIndex] = useState(0);
   const [fadeVisible, setFadeVisible] = useState(true);
-  const [heroTickerConfig, setHeroTickerConfig] = useState({ enabled: true, fallbackText: 'KAYAD · Verified vehicles across Kenya · Live auctions · Transparent bidding · Protected transactions', backgroundColor: '#0A3340', textColor: '#FFFFFF', heightPx: 36, scrollSeconds: 34, direction: 'left' as 'left' | 'right', transition: 'scroll' as 'scroll' | 'fade' | 'pop' | 'slide' });
+  const [paused, setPaused] = useState(() => typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches));
+  const [heroTickerConfig, setHeroTickerConfig] = useState({ enabled: true, fallbackText: 'KAYAD · Vehicle listings across Kenya · Live auctions · Transparent bidding · Eligible escrow services', backgroundColor: '#0A3340', textColor: '#FFFFFF', heightPx: 36, scrollSeconds: 34, direction: 'left' as 'left' | 'right', transition: 'scroll' as 'scroll' | 'fade' | 'pop' | 'slide' });
+
+  useEffect(() => {
+    const media = window.matchMedia?.('(prefers-reduced-motion: reduce)');
+    if (!media) return;
+    const syncMotionPreference = () => setPaused(media.matches);
+    media.addEventListener?.('change', syncMotionPreference);
+    return () => media.removeEventListener?.('change', syncMotionPreference);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -47,7 +69,7 @@ export const TopNoticeStrip: React.FC = () => {
   const scrollDuration = Math.max(10, slots[0]?.scrollDurationSeconds || 28);
 
   useEffect(() => {
-    if (mode !== 'fade' || slots.length < 2) return;
+    if (mode !== 'fade' || slots.length < 2 || paused) return;
     let swapTimer: number | undefined;
     const timer = window.setInterval(() => {
       setFadeVisible(false);
@@ -60,7 +82,7 @@ export const TopNoticeStrip: React.FC = () => {
       window.clearInterval(timer);
       if (swapTimer !== undefined) window.clearTimeout(swapTimer);
     };
-  }, [mode, activeFadeDuration, slots.length]);
+  }, [mode, activeFadeDuration, slots.length, paused]);
 
   useEffect(() => {
     if (fadeIndex >= slots.length) setFadeIndex(0);
@@ -68,12 +90,20 @@ export const TopNoticeStrip: React.FC = () => {
 
   if (!heroTickerConfig.enabled) return null;
 
+  const pauseControl = (
+    <button type="button" onClick={() => setPaused((value) => !value)} aria-pressed={paused} aria-label={paused ? 'Resume KAYAD notices' : 'Pause KAYAD notices'}
+      className="absolute right-1 top-1 z-10 rounded bg-black/30 px-2 py-1 text-[10px] font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+      {paused ? 'Resume notices' : 'Pause notices'}
+    </button>
+  );
+
   if (!loaded || slots.length === 0) {
     const fallback = heroTickerConfig.fallbackText.split(' · ').filter(Boolean);
     const items = [...fallback, ...fallback];
     return (
-      <div className="kayad-top-ticker w-full overflow-hidden border-b border-white/10" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }} role="region" aria-label="KAYAD notices">
-        <div className="flex min-w-max h-full animate-marquee whitespace-nowrap" style={{ animationDuration: `${heroTickerConfig.scrollSeconds}s`, animationDirection: heroTickerConfig.direction === 'right' ? 'reverse' : 'normal' }}>
+      <div className="kayad-top-ticker w-full overflow-hidden border-b border-white/10 relative" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }} role="region" aria-label="KAYAD notices">
+        {pauseControl}
+        <div className="flex min-w-max h-full animate-marquee whitespace-nowrap" style={{ animationDuration: `${heroTickerConfig.scrollSeconds}s`, animationDirection: heroTickerConfig.direction === 'right' ? 'reverse' : 'normal', animationPlayState: paused ? 'paused' : 'running' }}>
           {items.map((item, index) => (
             <span key={`${item}-${index}`} aria-hidden={index >= fallback.length ? true : undefined} className="flex items-center gap-6 px-8 py-2 text-[11px] sm:text-xs font-semibold tracking-[0.01em]" style={{ color: heroTickerConfig.textColor }}>
               <span className="h-1.5 w-1.5 rounded-full bg-[#13B8A6]" aria-hidden="true" />
@@ -96,8 +126,9 @@ export const TopNoticeStrip: React.FC = () => {
       </span>
     );
 
-    return slot.buttonUrl ? (
-      <a href={slot.buttonUrl} className="block" aria-label={kenyaOnlyTickerCopy(slot.title)}>{content}</a>
+    const safeHref = safeTickerHref(slot.buttonUrl);
+    return safeHref ? (
+      <a href={safeHref} className="block focus-visible:outline focus-visible:outline-2 focus-visible:outline-white" aria-label={kenyaOnlyTickerCopy(slot.title)}>{content}</a>
     ) : content;
   };
 
@@ -105,11 +136,12 @@ export const TopNoticeStrip: React.FC = () => {
     const slot = slots[fadeIndex];
     return (
       <div
-        className="kayad-top-ticker w-full overflow-hidden border-b border-white/10" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }}
+        className="kayad-top-ticker w-full overflow-hidden border-b border-white/10 relative" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }}
         role="region"
         aria-label="KAYAD notices"
-        aria-live="polite"
+        aria-live={paused ? 'off' : 'polite'}
       >
+        {pauseControl}
         <div
           className={`h-full flex items-center justify-center transition-all duration-700 ease-in-out ${heroTickerConfig.transition === 'pop' ? (fadeVisible ? 'scale-100' : 'scale-95') : ''} ${heroTickerConfig.transition === 'slide' ? (fadeVisible ? 'translate-y-0' : 'translate-y-2') : ''}`}
           key={slot.id}
@@ -128,13 +160,14 @@ export const TopNoticeStrip: React.FC = () => {
   const loopItems = [...slots, ...slots];
   return (
     <div
-      className="kayad-top-ticker w-full overflow-hidden border-b border-white/10" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }}
+      className="kayad-top-ticker w-full overflow-hidden border-b border-white/10 relative" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }}
       role="region"
       aria-label="KAYAD notices"
     >
+      {pauseControl}
       <div
-        className="flex min-w-max h-full animate-marquee hover:[animation-play-state:paused] whitespace-nowrap"
-        style={{ animationDuration: `${Math.max(10, heroTickerConfig.scrollSeconds || scrollDuration)}s`, animationDirection: heroTickerConfig.direction === 'right' ? 'reverse' : 'normal', transform: heroTickerConfig.transition === 'slide' ? 'translateZ(0)' : undefined }}
+        className="flex min-w-max h-full animate-marquee whitespace-nowrap"
+        style={{ animationDuration: `${Math.max(10, heroTickerConfig.scrollSeconds || scrollDuration)}s`, animationDirection: heroTickerConfig.direction === 'right' ? 'reverse' : 'normal', animationPlayState: paused ? 'paused' : 'running', transform: heroTickerConfig.transition === 'slide' ? 'translateZ(0)' : undefined }}
       >
         {loopItems.map((slot, index) => (
           <span

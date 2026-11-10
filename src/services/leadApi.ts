@@ -1,5 +1,28 @@
 import { request, HttpRequestOptions } from "../api/httpRequest";
 
+export interface MarketplaceOffer {
+  id: string;
+  lead_id: string;
+  parent_offer_id: string | null;
+  buyer_id: string;
+  seller_id: string;
+  sender_id: string;
+  recipient_id: string;
+  amount: number;
+  currency: "KES";
+  status: "pending" | "accepted" | "rejected" | "withdrawn" | "countered" | "expired";
+  message?: string | null;
+  expires_at?: string | null;
+  created_at: string;
+}
+
+export interface OfferActionInput {
+  action: "accept" | "reject" | "counter" | "withdraw";
+  amount?: number;
+  message?: string;
+  idempotencyKey: string;
+}
+
 export interface LeadListParams {
   stage?: string;
   source?: string;
@@ -48,6 +71,18 @@ export const leadApi = {
   },
   async addNote(leadId: string, note: string) {
     return apiRequest<{ lead: any }>(`/api/leads/${leadId}/notes`, { method: "POST", body: { note } });
+  },
+  async myNegotiations() {
+    return apiRequest<{ leads: Array<{ id: string; vehicle?: string | null; dealer?: string | null; stage?: string; created_at?: string }> }>("/api/leads/mine/offers", { method: "GET" });
+  },
+  async offers(leadId: string) {
+    return apiRequest<{ offers: MarketplaceOffer[]; events: any[] }>(`/api/leads/${leadId}/offers`, { method: "GET" });
+  },
+  async submitOffer(leadId: string, input: { amount: number; message?: string; idempotencyKey: string }) {
+    return apiRequest<{ offer: MarketplaceOffer; replayed: boolean }>(`/api/leads/${leadId}/offers`, { method: "POST", body: input });
+  },
+  async respondToOffer(leadId: string, offerId: string, input: OfferActionInput) {
+    return apiRequest<{ offer: MarketplaceOffer; replayed: boolean }>(`/api/leads/${leadId}/offers/${offerId}/actions`, { method: "POST", body: input });
   },
   async timeline(leadId: string) {
     return apiRequest<{ timeline: any[] }>(`/api/leads/${leadId}/timeline`, { method: "GET" });

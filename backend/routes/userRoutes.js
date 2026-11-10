@@ -5,12 +5,43 @@ import { STAFF_ROLES } from "../config/roles.js";
 import { validateObjectId, validateQuery, userListQuerySchema } from "../middleware/validate.js";
 import { getPagination } from "../middleware/apiPagination.js";
 import { cacheUserData, invalidateCache } from "../middleware/apiCache.js";
-import { cacheDealerSearch, invalidateDealerSearchCache } from "../middleware/searchCache.js";
+import { cacheDealerSearch } from "../middleware/searchCache.js";
 import { trackCarSearch } from "../middleware/searchTracking.js";
 import { trackDealerSearchLatency } from "../middleware/searchLatencyTracking.js";
 import User from "../models/User.js";
 
 const router = express.Router();
+
+// Public dealer directory: expose only approved, non-banned dealer identities.
+// Never return account email, phone, verification documents or internal fields.
+router.get(
+  "/dealers",
+  cacheDealerSearch,
+  trackDealerSearchLatency,
+  asyncHandler(async (_req, res) => {
+    const dealers = await User.find({
+      role: "dealer",
+      status: "approved",
+      dealerApprovedAt: { $ne: null },
+      isBanned: { $ne: true },
+    })
+      .select("_id name businessName avatar location bio dealerApprovedAt")
+      .sort({ businessName: 1, name: 1 })
+      .limit(200)
+      .lean();
+
+    res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=120");
+    res.json({ success: true, dealers: dealers.map((dealer) => ({
+      id: String(dealer._id || dealer.id),
+      name: dealer.businessName || dealer.name || "KAYAD dealer",
+      avatar: dealer.avatar || null,
+      location: dealer.location || null,
+      description: dealer.bio || null,
+      approvedAt: dealer.dealerApprovedAt || null,
+      verification: { dealerApproved: Boolean(dealer.dealerApprovedAt) },
+    })) });
+  }),
+);
 
 router.get(
   "/search",

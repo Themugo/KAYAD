@@ -8,7 +8,7 @@ const check = (label, ok, detail = '') => checks.push({ label, ok: Boolean(ok), 
 
 const app = read('src/App.tsx');
 const css = read('src/index.css');
-const dealers = read('src/features/DealersView.tsx');
+const dealers = read('src/features/DealersView/components/DealersView.tsx');
 const detail = read('src/components/detail/VehicleDetailPage.tsx');
 const marketplace = read('src/features/VehicleMarketplace/components/VehicleMarketplace.tsx');
 const escrowWorkflow = read('src/components/home/EscrowWorkflowSection.tsx');
@@ -40,12 +40,12 @@ check('public shell respects reduced-motion preferences', css.includes('@media (
 check('shared loading spinner uses KAYAD mint instead of legacy amber', read('src/components/ui/index.tsx').includes('border-t-[#13B8A6]') && !read('src/components/ui/index.tsx').includes('border-t-amber-500'));
 
 // Public navigation and directory entry.
-check('public dealer page defaults to directory, not management console', dealers.includes("useState<'platform' | 'directory'>('directory')"));
-check('dealer management switch is shown only to dealer/admin roles', dealers.includes("['dealer', 'admin'].includes(String(user?.role || '').toLowerCase())") && dealers.includes('{canAccessBusinessPlatform &&'));
-check('App passes the current authenticated role into dealer view', app.includes('dealers={[]}') && app.includes('user={authUser}'));
-check('public dealer copy does not promise universal verification', dealers.includes('Verification and escrow status are shown only where the relevant account or vehicle has an applicable status.') && !dealers.includes('100% Audited Sellers'));
-check('empty directory does not fabricate seller profiles', dealers.includes('No public seller profiles are available here yet') && !dealers.includes('const mockDealers'));
-check('dealer management remains in existing component, not a duplicate portal', dealers.includes('<DealerBusinessView') && app.includes("activeNav === 'dealer-dashboard'"));
+check('public dealer destination is a visitor-first backend-backed directory', dealers.includes("api.get('/users/dealers')") && dealers.includes('Explore KAYAD Dealer Showrooms'));
+check('public directory does not expose dealer management controls', !dealers.includes('DealerBusinessView') && !dealers.includes('MANAGEMENT CONSOLE'));
+check('App connects the directory showroom action to the dealer-scoped marketplace filter', app.includes('<DealersView') && app.includes('onSelectDealerVehicles={handleSelectDealerVehicles}') && app.includes('if (dealerId) setDealerScope({ id: dealerId, name: dealerName })'));
+check('public dealer copy limits approval claims to approved account status', dealers.includes('Approval confirms the dealer account status') && !dealers.includes('100% Audited Sellers'));
+check('empty directory does not fabricate seller profiles', dealers.includes('No approved dealer showrooms match your search') && !dealers.includes('const mockDealers'));
+check('dealer management remains in the existing protected dealer workspace', app.includes("activeNav === 'dealer-dashboard'"));
 
 // Vehicle detail purchase/escrow claims and state transitions.
 check('vehicle detail no longer creates client-only escrow records', !detail.includes('initiateEscrow,') && !detail.includes('initiateEscrow(vehicle'));

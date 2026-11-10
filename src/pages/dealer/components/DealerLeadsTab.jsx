@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import leadApi from '../../../services/leadApi';
 import { MessageSquare, Mail, Phone, Search, X, Archive } from 'lucide-react';
 import { timeAgo } from './DashboardWidgets';
+import MarketplaceOfferPanel from '../../../components/offers/MarketplaceOfferPanel';
 
 const STAGE_CONFIG = {
   new:             { label: 'New',           color: '#22c55e', bg: 'rgba(34,197,94,0.1)' },
@@ -22,6 +23,7 @@ export default function DealerLeadsTab({ toast }) {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
   const [search, setSearch] = useState('');
+  const [expandedNegotiation, setExpandedNegotiation] = useState('');
 
   const fetchLeads = useCallback(() => {
     setLoading(true);
@@ -172,6 +174,10 @@ export default function DealerLeadsTab({ toast }) {
                 </div>
 
                 <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start' }}>
+                  <button type="button" onClick={() => setExpandedNegotiation((current) => current === String(lead.id || lead._id) ? '' : String(lead.id || lead._id))}
+                    style={{ padding: '5px 8px', borderRadius: 6, background: expandedNegotiation === String(lead.id || lead._id) ? 'var(--brand)' : 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: expandedNegotiation === String(lead.id || lead._id) ? '#0a3340' : 'rgba(255,255,255,0.7)', fontSize: 10, cursor: 'pointer' }}>
+                    {expandedNegotiation === String(lead.id || lead._id) ? 'Close offers' : 'Offers'}
+                  </button>
                   <select value={lead.stage} onChange={e => handleStageChange(lead.id || lead._id, e.target.value)}
                     style={{ padding: '5px 8px', borderRadius: 6, background: 'var(--card)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)', fontSize: 10, outline: 'none', cursor: 'pointer' }}>
                     {STAGE_ORDER.map(s => (
@@ -183,6 +189,9 @@ export default function DealerLeadsTab({ toast }) {
                     <Archive size={12} />
                   </button>
                 </div>
+                {expandedNegotiation === String(lead.id || lead._id) && (
+                  <MarketplaceOfferPanel leadId={String(lead.id || lead._id)} compact />
+                )}
               </div>
             );
           })}

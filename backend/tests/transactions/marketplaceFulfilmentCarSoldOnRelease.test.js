@@ -57,6 +57,15 @@ describe("syncPurchaseOutcomeFromEscrow — marks the car sold on escrow release
     expect(updateMock).toHaveBeenCalledWith("cars", "car1", expect.objectContaining({ sold: true, status: "sold", isPaid: true, paymentStatus: "paid" }));
   });
 
+  test("a failed car status write blocks purchase-outcome advancement", async () => {
+    findOneMock.mockResolvedValue({ id: "outcome1", car_id: "car1", status: "payment_received", collection_status: "pending", transfer_status: "pending" });
+    updateMock.mockRejectedValueOnce(new Error("car status write failed"));
+
+    await expect(syncPurchaseOutcomeFromEscrow("escrow1", "released", { actorId: "admin1" }))
+      .rejects.toThrow("car status write failed");
+    expect(atomicTransitionPurchaseOutcomeMock).not.toHaveBeenCalled();
+  });
+
   test("a release on an already-completed outcome is a no-op (idempotent) and does not re-touch the car", async () => {
     findOneMock.mockResolvedValue({ id: "outcome1", car_id: "car1", status: "completed" });
 

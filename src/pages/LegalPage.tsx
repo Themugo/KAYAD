@@ -3,7 +3,7 @@ import { ArrowLeft } from 'lucide-react';
 import BrandMark from '../components/BrandMark';
 
 type Section = { heading: string; body: string[] };
-const UPDATED = '5 November 2026';
+const UPDATED = '10 November 2026';
 
 const TERMS: Section[] = [
   { heading: '1. About these terms', body: [
@@ -19,15 +19,14 @@ const TERMS: Section[] = [
     'KAYAD may remove listings or restrict accounts that are misleading, unlawful or reported as fraudulent.',
   ] },
   { heading: '4. Auctions and bid commitments', body: [
-    'To bid in an auction you register and pay the bid commitment shown on that auction. For dealer auctions the commitment is paid to the dealer’s verified collection account when one is set up; for private-seller auctions, and whenever a verified dealer account is not available, KAYAD collects and holds it. Private sellers cannot choose where commitments are paid.',
-    'Pay commitments only through KAYAD (an M-Pesa prompt to your phone or the payment details shown inside the app). Never pay a bid commitment to a person who contacts you directly.',
+    'To bid in an auction you register and pay the bid commitment shown on that auction. The payment screen and auction-specific rules must identify the collection recipient and applicable refund route before you confirm. Collection options may differ by auction and are available only where the relevant payment, custody and reconciliation capability has been enabled. Private sellers cannot choose where commitments are paid.',
+    'Pay commitments only through the payment flow presented inside KAYAD (for example, an M-Pesa prompt to your phone). Do not pay a commitment to a person who contacts you separately or to payment details that are not shown in the KAYAD flow. If the recipient or refund route is unclear, do not proceed and contact Support.',
     'Bids are shown under an anonymous bidder ID, not your real name. Bids are binding offers, and the auction closes at the time shown on it.',
     'When an auction closes the winner is notified and can view a winner certificate. The winner then arranges payment and handover with the dealer or seller within the payment period shown on the auction. KAYAD is not a party to that arrangement unless you use an escrow service.',
     'If the winner does not complete payment within that period (and any grace period shown), the seller may re-award the auction, and the winner’s commitment may be forfeited where the auction rules allow it.',
   ] },
   { heading: '5. Refunds of commitments', body: [
-    'If you do not win, your commitment is released as a refund. You choose whether to keep it in your KAYAD wallet for future auctions or withdraw it to the M-Pesa number on your profile. Withdrawals are sent only to your own profile number. If a withdrawal fails, the amount is returned to your wallet.',
-    'Commitments paid directly to a dealer’s account are returned by that dealer under the auction’s stated rules.',
+    'The refund destination and process depend on the collection route shown for the auction and the applicable auction rules. A KAYAD wallet credit or M-Pesa withdrawal is available only where that capability is enabled and shown in your account; do not assume every commitment can be withdrawn. Where a commitment is paid directly to a dealer under an enabled dealer-collection arrangement, the dealer is responsible for returning it under the auction rules. Keep your payment receipt and contact Support if a refund is overdue or disputed.',
   ] },
   { heading: '6. Comments and conduct', body: [
     'Comments on auctions appear under your anonymous bidder ID. Do not post links, phone numbers, email addresses or requests to pay or move a conversation off KAYAD. Abusive or fraudulent content can be hidden, and repeated reports hide a comment automatically while it is reviewed.',
@@ -59,18 +58,21 @@ const PRIVACY: Section[] = [
     'Your real name is not shown to other bidders. A seller or dealer sees your details only where needed for an enquiry or to complete a sale you won.',
   ] },
   { heading: '4. Sharing', body: [
-    'We share information with sellers and dealers you choose to deal with, with payment providers such as Safaricom M-Pesa to process payments, with service providers who help us run the platform, and with authorities where the law requires. We do not sell your personal information.',
+    'We share only information needed for the relevant purpose with sellers and dealers you choose to deal with, payment providers such as Safaricom M-Pesa, technical and operational service providers that support hosting, storage, communications, security and analytics, and public authorities where the law requires. These providers may process information on KAYAD’s instructions or under their own legal obligations. We do not sell your personal information. The specific provider list, processing locations and applicable cross-border transfer safeguards should be confirmed in the current provider register; this policy does not claim that all processing takes place in Kenya.',
   ] },
   { heading: '5. Keeping and protecting it', body: [
-    'We keep information for as long as needed to provide the service, meet legal and accounting duties and resolve disputes. We use access controls and encryption for sensitive items such as dealer payment credentials. No system is completely secure, so keep your password private.',
+    'We retain information for as long as it is reasonably needed for the purpose for which it was collected, to operate your account and transactions, prevent fraud, meet applicable legal and accounting duties, and establish or defend claims. We restrict access and use security controls for sensitive information. Information should be securely deleted or de-identified when it is no longer required, subject to lawful retention obligations. KAYAD does not publish fixed retention periods for each data category in this policy; those periods require confirmation against the operational retention schedule.',
   ] },
   { heading: '6. Your rights', body: [
-    'Under the Kenya Data Protection Act, 2019 you can ask to see, correct or delete the personal information we hold about you, object to certain uses and withdraw consent. Contact Support from the Support page and we will respond within the time the law allows.',
+    'Under the Kenya Data Protection Act, 2019 you may exercise applicable rights, including access, correction, deletion, objection and withdrawal of consent where processing is based on consent. To make a request, email support@kayad.space from your registered email address or use the Support page. State the right you wish to exercise and the account phone number or email used on KAYAD. We may ask for proportionate information to verify that you control the account; never send your password, M-Pesa PIN or one-time security code. We will acknowledge the request, route it for review, and respond within the period required by applicable law. If we cannot fulfil a request, we will explain the reason and any available review or complaint route.',
   ] },
   { heading: '7. Cookies and local storage', body: [
     'KAYAD uses cookies and browser storage to keep you signed in, remember preferences and secure the service.',
   ] },
-  { heading: '8. Changes', body: [
+  { heading: '8. Data controller and contact', body: [
+    'For privacy questions and data-rights requests, contact KAYAD at support@kayad.space or through the Support page. The KAYAD brand name and support email are the public contact details currently stated here; the legal name and registered address of the data controller, and any designated data protection officer contact, must be confirmed and published by the service operator.',
+  ] },
+  { heading: '9. Changes', body: [
     'We may update this policy; the date above shows the latest version.',
   ] },
 ];

@@ -126,7 +126,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     leftOffsetPct: 0, rightOffsetPct: 0, leftVehicleNudgePct: 28, rightVehicleNudgePct: 28, vehicleScalePct: 100, vehicleTopPct: 50, vehicleWidthPct: 43,
     showVehicleInfoCards: true, showVehicleLabels: true, primaryButtonColor: 'var(--kayad-cyan)', secondaryButtonBorderColor: '#C7DAD8',
     arrowEnabled: true, dotsEnabled: true, tickerEnabled: true,
-    tickerFallbackText: 'KAYAD · Verified vehicles across Kenya · Live auctions · Transparent bidding · Clear transaction workflows', tickerBackgroundColor: 'var(--color-navy-900)', tickerTextColor: '#FFFFFF', tickerHeightPx: 36, tickerScrollSeconds: 34, tickerDirection: 'left', tickerTransition: 'scroll',
+    tickerFallbackText: 'KAYAD · Vehicle listings across Kenya · Live auctions · Transparent bidding · Eligible escrow services', tickerBackgroundColor: 'var(--color-navy-900)', tickerTextColor: '#FFFFFF', tickerHeightPx: 36, tickerScrollSeconds: 34, tickerDirection: 'left', tickerTransition: 'scroll',
     // Real promoted/featured inventory is the canonical public hero source.
     // Legacy 'showcase' configs are normalized to this source below.
     vehicleSource: 'featured',
@@ -784,7 +784,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   };
 
   const activeHeroCard = heroLeftVehicle ? heroCardContent[heroLeftVehicle.id] : undefined;
-  const heroSupportCopy = kenyaOnlyCopy(activeHeroCard?.message || (heroSubheadline === 'Discover quality vehicles across Kenya. Find the right car, make your move, and drive with confidence.' ? 'Verified vehicles, transparent pricing and clear transaction workflows — from discovery to ownership.' : heroSubheadline));
+  const heroSupportCopy = kenyaOnlyCopy(activeHeroCard?.message || (heroSubheadline === 'Discover quality vehicles across Kenya. Find the right car, make your move, and drive with confidence.' ? 'Explore vehicle listings, compare seller information and review available transaction options.' : heroSubheadline));
   // CTA labels: vehicle card content first (existing behaviour), then the admin hero slide's own button text, then the default.
   const heroPrimaryLabel = kenyaOnlyCopy(activeHeroCard?.ctaLabel || activeHeroSlide?.ctaPrimaryText?.trim() || 'Explore Vehicles');
   const heroSecondaryLabel = kenyaOnlyCopy(activeHeroSlide?.ctaSecondaryText?.trim() || 'How It Works');
@@ -1114,7 +1114,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                         <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} type="button" aria-label={`${heroSecondaryLabel} — learn about KAYAD`} className="inline-flex min-h-[44px] items-center rounded-full border bg-white px-6 py-3 text-xs font-black text-navy-900 shadow-sm">{heroSecondaryLabel} <PlayCircle className="ml-2 h-4 w-4" aria-hidden="true" /></button>
                       </div>
                       <dl className="mt-6 grid grid-cols-4 border-t border-[#D7E7E4] pt-5">
-                        {[['VERIFIED','Listings'],['INSPECTED','Vehicles'],['PROTECTED','Transactions'],['KENYA','Marketplace']].map(([a,b]) => <div key={a}><dt className="text-[8px] font-black uppercase tracking-[.13em] text-navy-600">{a}</dt><dd className="mt-1 text-[9px] text-[#6D858D]">{b}</dd></div>)}
+                        {[['BROWSE','Listings'],['LIVE','Auctions'],['LOCAL','Sellers'],['KENYA','Marketplace']].map(([a,b]) => <div key={a}><dt className="text-[8px] font-black uppercase tracking-[.13em] text-navy-600">{a}</dt><dd className="mt-1 text-[9px] text-[#6D858D]">{b}</dd></div>)}
                       </dl>
                     </div>
                   </div>

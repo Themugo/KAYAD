@@ -97,7 +97,7 @@ const ALL_FILTER_KEYS = [
 export default function Showroom() {
   usePageMeta(
     'Browse Cars',
-    'Browse premium cars for sale in Kenya. Filter by make, model, price, body, fuel — every listing escrow-backed on Kayad.'
+    'Browse vehicle listings in Kenya. Filter by make, model, price, body type and fuel, and contact sellers about available vehicles.'
   );
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -408,7 +408,7 @@ export default function Showroom() {
             <div className="showroom-hero-overline">Kenya's Premium Automotive Gallery</div>
             <h1 className="showroom-hero-title">The Gallery</h1>
             <p className="showroom-hero-sub">
-              Curated listings, transparent pricing, escrow-backed transactions.
+              Vehicle listings, seller connections and eligible transaction services.
               Every vehicle independently verifiable.
             </p>
           </div>

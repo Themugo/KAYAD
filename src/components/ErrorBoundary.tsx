@@ -1,5 +1,5 @@
 import { Component, type ReactNode, type ErrorInfo } from 'react';
-import { AlertTriangle, RefreshCw, Home, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home, RotateCcw } from 'lucide-react';
 import { logError } from '@/lib/logger';
 
 interface Props {
@@ -13,6 +13,7 @@ interface State {
   error: Error | null;
   errorInfo: ErrorInfo | null;
   showDetails: boolean;
+  supportReference: string;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -21,6 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
     error: null,
     errorInfo: null,
     showDetails: false,
+    supportReference: `KAYAD-${Date.now().toString(36).toUpperCase()}`, 
   };
 
   static getDerivedStateFromError(error: Error): Partial<State> {
@@ -85,25 +87,10 @@ export class ErrorBoundary extends Component<Props, State> {
               </a>
             </div>
 
-            {this.state.error && (
-              <div className="pt-4 border-t border-border text-left">
-                <button
-                  type="button"
-                  onClick={() => this.setState((prev) => ({ showDetails: !prev.showDetails }))}
-                  className="inline-flex items-center justify-between w-full text-xs font-mono text-muted-foreground hover:text-foreground py-1"
-                >
-                  <span>Technical Diagnostic Info</span>
-                  {this.state.showDetails ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                </button>
-
-                {this.state.showDetails && (
-                  <div className="mt-2 p-3 bg-muted/60 rounded-lg text-xs font-mono space-y-2 overflow-x-auto max-h-48 border border-border">
-                    <p className="font-semibold text-destructive">{this.state.error.name}: {this.state.error.message}</p>
-                    {this.state.error.stack && (
-                      <pre className="text-[11px] text-muted-foreground whitespace-pre-wrap font-mono leading-relaxed">
-                        {this.state.error.stack}
-                      </pre>
-                    )}
+            <p className="text-xs text-muted-foreground" role="note">
+              Support reference: <strong className="font-mono">{this.state.supportReference}</strong>
+              <br />Share this reference with KAYAD Support if the problem continues.
+            </p>
                   </div>
                 )}
               </div>

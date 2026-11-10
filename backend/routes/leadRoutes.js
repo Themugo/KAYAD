@@ -22,6 +22,8 @@ import { protect, adminOnly, dealerOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validate, validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 import { createLeadSchema, leadNoteSchema } from "../validation/lead.schema.js";
+import { submitOfferSchema, respondOfferSchema } from "../validation/offerNegotiation.schema.js";
+import { getOffers, submitOffer, respondToOffer, getBuyerNegotiations } from "../controllers/offerNegotiationController.js";
 
 const router = express.Router();
 
@@ -31,6 +33,14 @@ const router = express.Router();
 
 // Get dealer's leads
 router.get("/", protect, validateQuery(analyticsQuerySchema), asyncHandler(getLeads));
+
+// Buyer inbox must precede the parameterized /:leadId/offers route.
+router.get("/mine/offers", protect, asyncHandler(getBuyerNegotiations));
+
+// Canonical buyer/seller offer negotiation, attached to the existing lead.
+router.get("/:leadId/offers", protect, asyncHandler(getOffers));
+router.post("/:leadId/offers", protect, validate(submitOfferSchema), asyncHandler(submitOffer));
+router.post("/:leadId/offers/:offerId/actions", protect, validate(respondOfferSchema), asyncHandler(respondToOffer));
 
 // Get lead details
 router.get("/:leadId", protect, validateObjectId, asyncHandler(getLead));

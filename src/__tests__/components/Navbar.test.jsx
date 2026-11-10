@@ -147,4 +147,42 @@ describe('Navbar', () => {
     expect(alerts).toHaveLength(1);
     expect(alerts[0].className).toContain('kayad-drawer-tile');
   });
+
+  it('mobile menu is a single readable list with an always-visible close control', () => {
+    render(<MemoryRouter><Navbar {...guestProps} /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+    const drawer = screen.getByRole('dialog');
+    expect(screen.getByRole('button', { name: /close navigation menu/i })).toBeTruthy();
+    expect(drawer.querySelector('.kayad-mobile-menu__topbar')).toBeTruthy();
+    expect(drawer.querySelector('.kayad-mobile-drawer-primary')).toBeTruthy();
+  });
+
+
+  it('mobile menu keeps categories compact with accessible expandable child lists', () => {
+    render(<MemoryRouter initialEntries={['/']}>
+      <Navbar {...guestProps} activeNav="marketplace" />
+    </MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+    const drawer = screen.getByRole('dialog');
+    const marketplaceToggle = screen.getByRole('button', { name: /collapse marketplace links/i });
+    expect(marketplaceToggle.getAttribute('aria-expanded')).toBe('true');
+    expect(drawer.querySelector('#kayad-drawer-links-marketplace')).toBeTruthy();
+
+    const auctionToggle = screen.getByRole('button', { name: /expand auction links/i });
+    expect(auctionToggle.getAttribute('aria-expanded')).toBe('false');
+    expect(drawer.querySelector('#kayad-drawer-links-auction')?.hasAttribute('hidden')).toBe(true);
+    fireEvent.click(auctionToggle);
+    expect(screen.getByRole('button', { name: /collapse auction links/i }).getAttribute('aria-expanded')).toBe('true');
+    expect(drawer.querySelector('#kayad-drawer-links-auction')?.hasAttribute('hidden')).toBe(false);
+  });
+
+  it('signed-in buyer sees Saved Vehicles only once in the unified menu list', () => {
+    const buyer = { ...guestProps, user: { id: 'buyer-1', name: 'Buyer', email: 'buyer@example.test', role: 'buyer' } };
+    render(<MemoryRouter><Navbar {...buyer} /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+    const drawer = screen.getByRole('dialog');
+    const savedLinks = Array.from(drawer.querySelectorAll('a')).filter((a) => (a.textContent || '').trim() === 'Saved vehicles');
+    expect(savedLinks).toHaveLength(1);
+  });
+
 });

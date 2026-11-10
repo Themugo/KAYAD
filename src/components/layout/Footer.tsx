@@ -142,7 +142,7 @@ export default function Footer({ setPage }: FooterProps) {
               </span>}
             </button>
             <p style={{ fontSize: 13, opacity: 0.5, maxWidth: 400, margin: '0 auto 24px', lineHeight: 1.6 }}>
-              {branding.footerDescription || "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services."}
+              {branding.footerDescription || "Browse vehicle listings, explore auctions, connect with sellers and discover vehicle services across Kenya."}
             </p>
             <div
               style={{
@@ -231,7 +231,7 @@ export default function Footer({ setPage }: FooterProps) {
                   </span>}
                 </button>
                 <p style={{ fontSize: 13, opacity: 0.4, lineHeight: 1.6 }}>
-                  {branding.footerDescription || "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services."}
+                  {branding.footerDescription || "Browse vehicle listings, explore auctions, connect with sellers and discover vehicle services across Kenya."}
                 </p>
               </div>
             )}
