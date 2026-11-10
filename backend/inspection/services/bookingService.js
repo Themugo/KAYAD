@@ -428,20 +428,27 @@ class BookingService {
       throw new AppError('Cannot cancel booking in current status', 400);
     }
 
-    // Check if within cancellation policy
-    const hoursUntil = (new Date(booking.scheduled_date) - new Date()) / (1000 * 60 * 60);
-    let refundPercentage = 100;
-
-    if (hoursUntil < 24) {
-      refundPercentage = 50;
+    // Customer self-service cancellation is deliberately limited to unpaid
+    // bookings. The inspection refund RPC currently performs ledger accounting
+    // and marks a refund completed; it does not call a payment-provider refund
+    // API or verify an external refund callback. Never cancel a paid booking
+    // while merely calculating and returning a notional refund amount.
+    if (booking.payment_status !== 'pending') {
+      throw new AppError(
+        'This booking has a payment record and cannot be cancelled through self-service. Contact KAYAD Support for a reviewed refund.',
+        409,
+        { paymentStatus: booking.payment_status || null, refundInitiated: false }
+      );
     }
-    if (hoursUntil < 2) {
-      refundPercentage = 0;
-    }
 
-    const refundAmount = (booking.total_price * refundPercentage) / 100;
-
-    await db.update('inspection_bookings', bookingId, {
+    // Conditional write prevents a stale cancellation from overwriting a payment
+    // that has already settled. The payment RPC also needs its own terminal-
+    // status guard (added in the companion migration) for the opposite ordering.
+    const cancelledRows = await db.updateMany('inspection_bookings', {
+      id: bookingId,
+      payment_status: 'pending',
+      status: { $nin: ['closed', 'cancelled', 'no_show'] },
+    }, {
       status: 'cancelled',
       cancellation_reason: reason,
       status_changed_at: new Date(),
@@ -449,12 +456,21 @@ class BookingService {
       updated_at: new Date(),
     });
 
-    await this.addStatusHistory(bookingId, booking.status, 'cancelled', userId, null, `Refund: ${refundPercentage}%`);
+    if (!cancelledRows.length) {
+      throw new AppError(
+        'The booking changed while cancellation was being processed. Refresh the booking and contact KAYAD Support if payment was made.',
+        409,
+        { refundInitiated: false }
+      );
+    }
+
+    await this.addStatusHistory(bookingId, booking.status, 'cancelled', userId, null, 'Unpaid booking cancelled; no refund was due');
 
     return {
       booking: await this.getBookingById(bookingId),
-      refundAmount,
-      refundPercentage,
+      refundAmount: 0,
+      refundPercentage: 0,
+      refundStatus: 'not_applicable_unpaid_booking',
     };
   }
 

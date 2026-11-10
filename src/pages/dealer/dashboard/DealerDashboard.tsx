@@ -7,9 +7,11 @@ import {
   PieChart, Activity, Bell,
   Settings, FileText, Send, RefreshCw, ArrowUpRight, ArrowDownRight,
   UserPlus, Shield, Award, CreditCard, CalendarCheck, ClipboardCheck,
-  Gavel, X, Loader2, UserCog, ExternalLink, Megaphone, ChevronLeft, Plus, Landmark,
+  Gavel, X, Loader2, UserCog, ExternalLink, Megaphone, ChevronLeft, Plus, Landmark, LogOut, Menu,
 } from 'lucide-react';
 import * as dealerApi from '../../../services/dealerPlatformApi';
+import { useAuth } from '../../../context/AuthContext';
+import { useBrandingSafe } from '../../../context/BrandingContext';
 import DealerListingForm from './DealerListingForm';
 import DealerSettingsPanel from './DealerSettingsPanel';
 import DealerBankingPanel from './DealerBankingPanel';
@@ -289,6 +291,18 @@ const writeListingFormToUrl = (state: ListingFormState) => {
 // ============================================================
 
 export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
+  const { signOut } = useAuth();
+  const branding = useBrandingSafe();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [logoutError, setLogoutError] = useState<string | null>(null);
+  const handleDealerLogout = async () => {
+    setLogoutError(null);
+    try {
+      const result = await signOut();
+      if (!result.ok) setLogoutError(result.message || "Could not sign out. Please try again.");
+      else window.location.assign("/");
+    } catch { setLogoutError("Could not sign out. Please try again."); }
+  };
   const [insightsFor, setInsightsFor] = useState<string | null>(null);
   const [activeSection, setActiveSectionState] = useState<string>(readDealerSectionFromUrl);
   const [listingForm, setListingFormState] = useState<ListingFormState>(readListingFormFromUrl);
@@ -306,6 +320,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     setListingFormState(null);
     setActiveSectionState(section);
     writeDealerSectionToUrl(section);
+    setMobileNavOpen(false);
     if (typeof window !== 'undefined') window.scrollTo?.({ top: 0 });
   };
 
@@ -627,20 +642,21 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   return (
     <div className="min-h-screen bg-[#F6FAF9] flex flex-col lg:flex-row">
       {/* Sidebar Navigation */}
-      <aside className="w-full lg:w-64 lg:min-w-64 bg-white border-b lg:border-b-0 lg:border-r border-[#D7E7E4] flex flex-col">
+      <div className="lg:hidden px-4 pt-3"><button type="button" aria-expanded={mobileNavOpen} aria-controls="dealer-workspace-sidebar" onClick={() => setMobileNavOpen(v => !v)} className="inline-flex items-center gap-2 rounded-lg border border-[#D7E7E4] bg-white px-4 py-2 font-semibold text-[#0A3340]"><Menu className="w-4 h-4" />{mobileNavOpen ? "Close dealer menu" : "Dealer menu"}</button></div>
+      <aside id="dealer-workspace-sidebar" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex w-full lg:w-64 lg:min-w-64 bg-white border-b lg:border-b-0 lg:border-r border-[#D7E7E4] flex-col lg:sticky lg:top-0 lg:h-screen`}>
         <div className="p-4 border-b border-[#D7E7E4]">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#176B87] to-[#13B8A6] flex items-center justify-center">
-              <Car className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-[#176B87] to-[#13B8A6] flex items-center justify-center overflow-hidden">
+              {branding.logoType === 'image' && branding.logoUrl ? <img src={branding.logoUrl} alt={branding.logoText || 'KAYAD'} className="w-full h-full object-contain bg-white" /> : branding.logoType === 'text' ? <span className="text-xs font-black text-white">{branding.logoText || 'KAYAD'}</span> : <img src={branding.logoUrl || '/branding/kayad-symbol.svg'} alt={branding.logoText || 'KAYAD'} className="w-full h-full object-contain" onError={(event) => { event.currentTarget.style.display = 'none'; }} />}
             </div>
-            <div>
-              <h1 className="font-bold text-[#0A3340]">Dealer Hub</h1>
-              <p className="text-xs text-[#64748B]">{user?.businessName || user?.name || "Dealer account"}</p>
+            <div className="min-w-0">
+              <h1 className="font-bold text-[#0A3340] truncate">{branding.logoText || 'KAYAD'}</h1>
+              <p className="text-xs text-[#64748B] truncate">{user?.businessName || user?.name || 'Dealer account'}</p>
             </div>
           </div>
         </div>
 
-        <nav aria-label="Dealer workspace" className="relative flex-1 p-3 lg:p-4 flex lg:flex-col gap-2 lg:gap-0 overflow-x-auto lg:overflow-x-visible">
+        <nav aria-label="Dealer workspace" className="relative flex-1 min-h-0 p-3 lg:p-4 flex flex-col gap-2 lg:gap-0 overflow-y-auto">
           {DEALER_NAV_GROUPS.map((group, index) => (
             <div
               key={group.id}
@@ -665,8 +681,10 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-[#D7E7E4]">
+        <div className="p-4 border-t border-[#D7E7E4] space-y-3">
           <DealerAccountStatus />
+          {logoutError && <p role="alert" className="text-sm text-red-700">{logoutError}</p>}
+          <button type="button" onClick={handleDealerLogout} className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-[#D7E7E4] px-4 py-2 text-sm font-semibold text-[#0A3340] hover:bg-[#EEF7F5]"><LogOut className="w-4 h-4" />Sign out</button>
         </div>
       </aside>
 
@@ -694,7 +712,11 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
               <h2 className="text-2xl font-bold text-[#0A3340]">{currentItem.title}</h2>
               <p className="text-[#64748B]">{activeSection === 'overview' ? `Welcome back, ${user?.name || 'dealer'}` : currentItem.description}</p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="inline-flex items-center rounded-xl border border-[#D7E7E4] bg-white p-1" aria-label="Page history">
+                <button type="button" aria-label="Go to previous page" title="Previous page" onClick={() => window.history.back()} className="rounded-lg p-2 text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><ChevronLeft className="h-4 w-4" /></button>
+                <button type="button" aria-label="Go to next page" title="Next page" onClick={() => window.history.forward()} className="rounded-lg p-2 text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><ChevronRight className="h-4 w-4" /></button>
+              </div>
               <button type="button" aria-label="Notifications" className="p-2 bg-white border border-[#D7E7E4] rounded-xl hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]" onClick={() => { window.location.assign('/notifications'); }}>
                 <Bell className="w-5 h-5 text-[#64748B]" aria-hidden="true" />
               </button>

@@ -162,7 +162,7 @@ router.get('/provider/:providerId/earnings-summary', requireAuth, requireProvide
 router.post('/bookings/:bookingId/payment/initiate', requireAuth, paymentLimiter, csrfProtection, idempotencyCheck, validate(inspectionPaymentInitiateSchema), controller.initiateInspectionPayment);
 router.post('/bookings/:bookingId/payment', requireRole(['admin']), validate(inspectionPaymentSchema), controller.processPayment);
 
-// Process refund (admin)
+// Process refund (admin; service fails closed until provider refund confirmation is integrated)
 router.post('/bookings/:bookingId/refund', requireRole(['admin']), controller.processRefund);
 
 /**

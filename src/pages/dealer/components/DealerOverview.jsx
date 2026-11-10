@@ -212,7 +212,7 @@ export default function DealerOverview({ summary = {}, cars = [], totalRevenue =
             const img = car.images?.[0]?.url || car.images?.[0] || car.image;
             return (
               <div key={car._id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 22px', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                {img ? <img src={img} alt={car.title} loading="lazy" decoding="async" style={{ width: 54, height: 40, objectFit: 'cover', borderRadius: 7, flexShrink: 0 }} />
+                {img ? <img src={img} alt={car.title} loading="lazy" decoding="async" style={{ width: 54, height: 40, objectFit: 'contain', background: '#eef7f5', borderRadius: 7, flexShrink: 0 }} />
                   : <div style={{ width: 54, height: 40, borderRadius: 7, background: 'rgba(255,255,255,0.04)', flexShrink: 0 }} />}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>

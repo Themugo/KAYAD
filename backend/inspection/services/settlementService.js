@@ -53,17 +53,22 @@ class SettlementService {
    * Process refund
    */
   async processRefund(bookingId, refundData, userId) {
-    const { data, error } = await getSupabase().rpc('kayad_process_inspection_refund_atomic', {
-      p_booking_id: bookingId,
-      p_amount: refundData.amount,
-      p_reason: refundData.reason || null,
-      p_user_id: userId,
+    // The current database RPC only posts internal ledger entries and marks
+    // inspection_refunds completed. No inspection-specific provider refund API,
+    // verified refund callback, or external refund receipt is wired in this
+    // project. Calling it here would incorrectly represent an accounting entry
+    // as a completed cash refund. Fail closed until that provider boundary and
+    // an idempotent confirmation workflow are implemented end to end.
+    logError('Inspection refund blocked: provider refund confirmation is not integrated', null, {
+      bookingId,
+      actorId: userId,
+      requestedAmount: refundData?.amount,
     });
-    if (error) {
-      logError('Inspection refund failed', error, { bookingId });
-      throw new AppError(error.message || 'Inspection refund failed', 409);
-    }
-    return data;
+    throw new AppError(
+      'Inspection refunds are temporarily unavailable: KAYAD cannot yet verify a completed payment-provider refund. Do not mark this refund as paid; contact Finance for the approved manual process.',
+      501,
+      { refundInitiated: false, providerRefundConfirmed: false }
+    );
   }
 
   /**
