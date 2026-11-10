@@ -330,7 +330,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
     return (
       <section className="kayad-sell-entry" aria-labelledby="kayad-sell-entry-title">
         <div className="kayad-sell-entry__hero">
-          <span className="kayad-sell-entry__eyebrow"><Car size={14} aria-hidden="true" /> KAYAD SELLER STUDIO</span>
+          <span className="kayad-sell-entry__eyebrow"><Car size={14} aria-hidden="true" /> SELL ON KAYAD</span>
           <h1 id="kayad-sell-entry-title">Your next sale should feel simpler.</h1>
           <p>Present your vehicle clearly and manage genuine buyer conversations from one dedicated workspace. Private seller access is free and does not require a seller application or package.</p>
           <div className="kayad-sell-entry__trust-row" aria-label="Seller workflow benefits">
@@ -378,6 +378,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
         <SidebarContent
           activeSection={activeSection}
           onSectionChange={handleSectionChange}
+          onAppNavigate={onNavigate}
           user={user}
           onLogout={onLogout}
         />
@@ -388,7 +389,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
         <div className="flex min-h-16 items-center justify-between gap-3 px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
             <BrandMark size={36} nameClassName="text-white font-bold text-base" />
-            <span className="truncate text-white font-semibold text-sm">Private Seller Studio</span>
+            <span className="truncate text-white font-semibold text-sm">My KAYAD Account</span>
           </div>
           <button
             type="button"
@@ -431,6 +432,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
               <SidebarContent
                 activeSection={activeSection}
                 onSectionChange={handleSectionChange}
+                onAppNavigate={onNavigate}
                 user={user}
                 onLogout={onLogout}
               />
@@ -450,7 +452,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.2 }}
             >
-              {activeSection === 'home' && <SellerHomeSection listings={myListings} escrows={myEscrows} loading={dataLoading} listingsError={listingsError} escrowsError={escrowsError} lastRefreshedAt={lastRefreshedAt} onRefresh={loadSellerData} userName={user?.name} onNavigate={handleSectionChange} />}
+              {activeSection === 'home' && <SellerHomeSection listings={myListings} escrows={myEscrows} loading={dataLoading} listingsError={listingsError} escrowsError={escrowsError} lastRefreshedAt={lastRefreshedAt} onRefresh={loadSellerData} userName={user?.name} onNavigate={handleSectionChange} policyOpen={capability?.source === 'policy_default'} />}
               {activeSection === 'listing-wizard' && <ListingWizardSection draft={listingDraft} setDraft={setListingDraft} onNavigate={handleSectionChange} onPublished={loadSellerData} />}
               {activeSection === 'auction-verification' && <AuctionVerificationSection listings={myListings} />}
               {activeSection === 'trust-center' && <TrustCenterSection />}
@@ -473,23 +475,39 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
 function SidebarContent({
   activeSection,
   onSectionChange,
+  onAppNavigate,
   user,
   onLogout,
 }: {
   activeSection: PlatformSection;
   onSectionChange: (s: PlatformSection) => void;
+  onAppNavigate?: (nav: string) => void;
   user?: UserProfile | null;
   onLogout?: () => void;
 }) {
-  const navItems: { id: PlatformSection; label: string; icon: React.ReactNode; badge?: number }[] = [
-    { id: 'home', label: 'Seller Home', icon: <Home size={20} /> },
-    { id: 'listing-wizard', label: 'Create Listing', icon: <PlusCircleIcon size={20} /> },
-    { id: 'escrow', label: 'Escrow & Deals', icon: <CreditCard size={20} /> },
-    { id: 'auction-verification', label: 'Auction verification', icon: <ShieldCheck size={20} /> },
-    { id: 'trust-center', label: 'Trust Center', icon: <BadgeCheck size={20} /> },
-    { id: 'listing-quality', label: 'My Listings', icon: <Car size={20} /> },
-    { id: 'help', label: 'Help', icon: <HelpCircle size={20} /> },
-    { id: 'settings', label: 'Settings', icon: <Settings size={20} /> },
+  type NavEntry = { key: string; label: string; icon: React.ReactNode; section?: PlatformSection; app?: string };
+  // One personal account: buying, selling, transactions and account tools, grouped. Every entry reuses an existing destination.
+  const navGroups: { heading: string; items: NavEntry[] }[] = [
+    { heading: 'Personal account', items: [
+      { key: 'overview', label: 'Overview', icon: <Home size={20} />, section: 'home' },
+      { key: 'browse', label: 'Browse marketplace', icon: <Search size={20} />, app: 'marketplace' },
+      { key: 'saved', label: 'Saved vehicles', icon: <Heart size={20} />, app: 'saved' },
+      { key: 'offers', label: 'Offers & enquiries', icon: <MessageSquare size={20} />, app: 'dashboard' },
+    ] },
+    { heading: 'Selling', items: [
+      { key: 'create', label: 'Create listing', icon: <PlusCircleIcon size={20} />, section: 'listing-wizard' },
+      { key: 'listings', label: 'My listings', icon: <Car size={20} />, section: 'listing-quality' },
+    ] },
+    { heading: 'Transactions', items: [
+      { key: 'escrow', label: 'Escrow & deals', icon: <CreditCard size={20} />, section: 'escrow' },
+    ] },
+    { heading: 'Account', items: [
+      { key: 'trust', label: 'Verification & trust', icon: <BadgeCheck size={20} />, section: 'trust-center' },
+      { key: 'auction', label: 'Auction verification', icon: <ShieldCheck size={20} />, section: 'auction-verification' },
+      { key: 'profile', label: 'My profile', icon: <User size={20} />, app: 'profile' },
+      { key: 'settings', label: 'Settings', icon: <Settings size={20} />, section: 'settings' },
+      { key: 'help', label: 'Help & support', icon: <HelpCircle size={20} />, section: 'help' },
+    ] },
   ];
 
   return (
@@ -500,33 +518,37 @@ function SidebarContent({
             <BrandMark size={36} nameClassName="text-white font-bold text-lg" />
           </div>
           <div>
-            <p className="text-white/60 text-xs">Private Seller</p>
+            <p className="text-white/60 text-xs">Personal account</p>
           </div>
         </div>
       </div>
 
       <nav className="flex-1 py-4 px-2 overflow-y-auto">
-        <div className="space-y-1">
-          {navItems.map(item => (
-            <button
-              key={item.id}
-              type="button"
-              aria-current={activeSection === item.id ? 'page' : undefined}
-              onClick={() => onSectionChange(item.id)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors relative ${
-                activeSection === item.id
-                  ? 'bg-[#13B8A6]/20 text-[#A7F0E6]'
-                  : 'text-white/70 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              {item.icon}
-              <span className="font-medium text-sm">{item.label}</span>
-              {item.badge && item.badge > 0 && (
-                <span className="absolute right-3 w-5 h-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-bold">
-                  {item.badge}
-                </span>
-              )}
-            </button>
+        <div className="space-y-4">
+          {navGroups.map(group => (
+            <div key={group.heading} role="group" aria-label={group.heading}>
+              <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-[.14em] text-white/40">{group.heading}</p>
+              <div className="space-y-0.5">
+                {group.items.map(item => {
+                  const isActive = Boolean(item.section) && activeSection === item.section;
+                  return (
+                    <button
+                      key={item.key}
+                      type="button"
+                      aria-current={isActive ? 'page' : undefined}
+                      onClick={() => { if (item.section) onSectionChange(item.section); else if (item.app) onAppNavigate?.(item.app); }}
+                      disabled={!item.section && !onAppNavigate}
+                      className={`w-full min-h-11 flex items-center gap-3 px-3 py-2 rounded-lg transition-colors relative focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#13B8A6] disabled:opacity-40 ${
+                        isActive ? 'bg-[#13B8A6]/20 text-[#A7F0E6]' : 'text-white/70 hover:bg-white/5 hover:text-white'
+                      }`}
+                    >
+                      {item.icon}
+                      <span className="font-medium text-sm text-left">{item.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
           ))}
         </div>
       </nav>
@@ -540,10 +562,10 @@ function SidebarContent({
         <div className="rounded-xl p-3" style={{ backgroundColor: 'rgba(255,255,255,0.06)' }}>
           <div className="flex items-center gap-2 mb-2">
             <ShieldCheckVerified size={16} style={{ color: KAYAD_THEME.emerald }} />
-            <span className="text-white/70 text-xs">Seller account status</span>
+            <span className="text-white/70 text-xs">Personal account status</span>
           </div>
-          <p className="text-white text-sm font-bold">Access &amp; verification</p>
-          <p className="mt-1 text-white/60 text-[11px] leading-4">Review your seller account settings and any verification steps in Trust Center.</p>
+          <p className="text-white text-sm font-bold">Account &amp; trust</p>
+          <p className="mt-1 text-white/60 text-[11px] leading-4">One KAYAD account for buying and selling. Review verification steps in Verification & trust.</p>
         </div>
       </div>
     </div>
@@ -597,7 +619,7 @@ function SellerSettingsSection({ user, onLogout, onNavigate }: {
 // SECTION 1: SELLER HOME
 // ============================================================
 
-function SellerHomeSection({ listings, escrows, loading, listingsError, escrowsError, lastRefreshedAt, onRefresh, userName, onNavigate }: {
+function SellerHomeSection({ listings, escrows, loading, listingsError, escrowsError, lastRefreshedAt, onRefresh, userName, onNavigate, policyOpen = false }: {
   listings: BackendCar[];
   escrows: BackendEscrow[];
   loading: boolean;
@@ -607,6 +629,7 @@ function SellerHomeSection({ listings, escrows, loading, listingsError, escrowsE
   onRefresh: () => void;
   userName?: string;
   onNavigate: (s: PlatformSection) => void;
+  policyOpen?: boolean;
 }) {
   const greeting = new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 18 ? 'Good afternoon' : 'Good evening';
   const activeListings = listings.filter((l) => l.status === 'available' || l.status === 'active').length;
@@ -628,10 +651,11 @@ function SellerHomeSection({ listings, escrows, loading, listingsError, escrowsE
       <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="overflow-hidden rounded-2xl p-5 sm:p-6 lg:p-8" style={{ background: `linear-gradient(125deg, ${KAYAD_THEME.navy} 0%, ${KAYAD_THEME.navyLight} 68%, #176B87 100%)` }} aria-labelledby="seller-dashboard-title">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
-            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-teal-100"><ShieldCheck size={14} aria-hidden="true" /> KAYAD SELLER STUDIO</div>
+            <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-teal-100"><ShieldCheck size={14} aria-hidden="true" /> KAYAD PERSONAL ACCOUNT</div>
             <h1 id="seller-dashboard-title" className="text-2xl font-bold text-white sm:text-3xl">{greeting}{userName ? `, ${userName.split(' ')[0]}` : ''}</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/75">Manage your listings, track listing moderation and keep up with buyer interest.</p>
-            <p className="mt-3 text-xs text-white/60" aria-live="polite">{loading ? 'Refreshing your seller data…' : refreshedLabel ? `Last updated ${refreshedLabel}` : 'Seller data has not been refreshed yet'}</p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/75">Your KAYAD marketplace account. Discover vehicles, manage your listings and follow your transactions in one place.</p>
+            {policyOpen && <p className="mt-2 inline-flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1.5 text-xs font-semibold text-teal-100">Free personal listing workspace · no seller approval or package required</p>}
+            <p className="mt-3 text-xs text-white/60" aria-live="polite">{loading ? 'Refreshing your account data…' : refreshedLabel ? `Last updated ${refreshedLabel}` : 'Account data has not been refreshed yet'}</p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
             <button type="button" onClick={onRefresh} disabled={loading} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-60" aria-label="Refresh seller dashboard data"><RefreshCw size={16} aria-hidden="true" className={loading ? 'animate-spin' : ''} /> Refresh</button>
@@ -658,10 +682,10 @@ function SellerHomeSection({ listings, escrows, loading, listingsError, escrowsE
         </section>
 
         <aside className="space-y-5">
-          <section className="rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm sm:p-5" aria-labelledby="seller-actions-heading"><h2 id="seller-actions-heading" className="text-lg font-bold" style={{ color: KAYAD_THEME.navy }}>Quick Actions</h2><p className="mt-1 text-sm text-slate-500">Common tasks for your seller account.</p><div className="mt-4 space-y-2">
+          <section className="rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm sm:p-5" aria-labelledby="seller-actions-heading"><h2 id="seller-actions-heading" className="text-lg font-bold" style={{ color: KAYAD_THEME.navy }}>Quick Actions</h2><p className="mt-1 text-sm text-slate-500">Common tasks for your KAYAD account.</p><div className="mt-4 space-y-2">
             <SellerAction icon={<PlusCircle size={17} />} title="Create a listing" description="Start a new vehicle submission" onClick={() => onNavigate('listing-wizard')} />
             <SellerAction icon={<ClipboardList size={17} />} title="Manage my listings" description="Review statuses and listing details" onClick={() => onNavigate('listing-quality')} />
-            <SellerAction icon={<ShieldCheck size={17} />} title="Trust & verification" description="Review your seller access and next steps" onClick={() => onNavigate('trust-center')} />
+            <SellerAction icon={<ShieldCheck size={17} />} title="Trust & verification" description="Review your account verification and next steps" onClick={() => onNavigate('trust-center')} />
             <SellerAction icon={<CreditCard size={17} />} title="Escrow & sale progress" description="Review deals associated with your account" onClick={() => onNavigate('escrow')} />
             <SellerAction icon={<HelpCircle size={17} />} title="Help & support" description="Find guidance for selling on KAYAD" onClick={() => onNavigate('help')} />
           </div></section>
@@ -702,6 +726,31 @@ function QuickStat({ icon, value, label, color }: { icon: React.ReactNode; value
   );
 }
 
+/** Whole vehicle visible (object-contain on a neutral ground). A failed load is shown explicitly as "Photo unavailable"
+ *  and reported to the console with the failing URL: storage/permission faults are surfaced, not hidden. */
+function VehicleImage({ urls, alt, className = '', compact = false }: { urls: (string | undefined)[]; alt: string; className?: string; compact?: boolean }) {
+  const candidates = urls.filter((u): u is string => Boolean(u));
+  const [index, setIndex] = React.useState(0);
+  const src = candidates[index];
+  if (!src) {
+    return (
+      <div role="img" aria-label={candidates.length ? `${alt}: photo unavailable` : `${alt}: no photo uploaded`} className={`flex h-full w-full flex-col items-center justify-center gap-1 bg-slate-100 text-center text-slate-500 ${className}`}>
+        <Car size={compact ? 22 : 40} aria-hidden="true" />
+        {!compact && <span className="px-2 text-[11px] font-semibold">{candidates.length ? 'Photo unavailable' : 'No photo yet'}</span>}
+      </div>
+    );
+  }
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      className={`h-full w-full bg-slate-100 object-contain ${className}`}
+      onError={() => { console.warn('[KAYAD] vehicle image failed to load:', src); setIndex((i) => i + 1); }}
+    />
+  );
+}
+
 function ListingCard({ listing, delay }: { listing: BackendCar; delay: number }) {
   const statusColors: Record<string, { bg: string; text: string }> = {
     available: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
@@ -723,11 +772,7 @@ function ListingCard({ listing, delay }: { listing: BackendCar; delay: number })
     >
       <div className="flex flex-col md:flex-row">
         <div className="w-full md:w-48 h-32 md:h-auto flex items-center justify-center" style={{ backgroundColor: KAYAD_THEME.slate[100] }}>
-          {image ? (
-            <img src={image} alt={`${listing.year} ${listing.brand} ${listing.model}`} className="w-full h-full object-cover" loading="lazy" />
-          ) : (
-            <Car size={48} style={{ color: KAYAD_THEME.slate[300] }} />
-          )}
+          <VehicleImage urls={[listing.images?.[0]?.thumb, listing.images?.[0]?.url]} alt={`${listing.year} ${listing.brand} ${listing.model}`} />
         </div>
         <div className="flex-1 p-4">
           <div className="flex items-start justify-between mb-2">
@@ -910,11 +955,7 @@ function ListingQualitySection({ listings, loading }: { listings: BackendCar[]; 
         return (
           <div key={l.id} className="rounded-xl p-4 bg-white flex items-center gap-4">
             <div className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden shrink-0" style={{ backgroundColor: KAYAD_THEME.slate[100] }}>
-              {l.images?.[0]?.thumb || l.images?.[0]?.url ? (
-                <img src={l.images[0].thumb || l.images[0].url} alt={l.title} className="w-full h-full object-cover" />
-              ) : (
-                <Car size={32} style={{ color: KAYAD_THEME.slate[400] }} />
-              )}
+              <VehicleImage compact urls={[l.images?.[0]?.thumb, l.images?.[0]?.url]} alt={l.title} />
             </div>
             <div className="flex-1">
               <h3 className="font-bold" style={{ color: KAYAD_THEME.navy }}>{l.year} {l.brand} {l.model}</h3>

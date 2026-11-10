@@ -10,7 +10,7 @@ import { resolveSellerState } from "../services/privateSellerCapability.service.
 import { getOnboardingPolicy } from "../services/onboardingPolicy.service.js";
 
 const deny = (res, status, code, message, sellerStatus) =>
-  res.status(403).json({ success: false, code, message, sellerStatus });
+  res.status(status).json({ success: false, code, message, sellerStatus });
 
 export const sellerListingAccess = ({ write = true } = {}) => async (req, res, next) => {
   if (req.user?.effectiveRole === "webhoist") return next();

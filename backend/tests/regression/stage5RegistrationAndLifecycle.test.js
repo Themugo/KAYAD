@@ -186,7 +186,8 @@ describe("wording: application received ≠ email verified ≠ approved", () => 
   });
   test("seller registration response mentions review before publication", async () => {
     const r = await reg({ role: "individual_seller" });
-    expect(r.body.message).toMatch(/reviewed before they are published/i);
+    expect(r.body.message).toMatch(/does not require a package or seller approval/i);
+    expect(r.body.message).toMatch(/listing moderation is separate/i);
   });
   test("buyer wording is unchanged", async () => {
     expect((await reg({})).body.message).toBe("Account created successfully. Please verify your email before signing in.");

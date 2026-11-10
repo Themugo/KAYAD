@@ -9,8 +9,12 @@
       "destination": "https://api.kayad.space/api/:path*"
     },
     {
-      "source": "/((?!api/|assets/).*)",
+      "source": "/((?!api/|assets/|uploads/).*)",
       "destination": "/index.html"
+    },
+    {
+      "source": "/uploads/:path*",
+      "destination": "https://api.kayad.space/uploads/:path*"
     }
   ],
   "headers": [

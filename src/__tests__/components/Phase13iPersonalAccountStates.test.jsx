@@ -42,8 +42,8 @@ afterEach(() => cleanup());
 describe('state-to-behaviour matrix: role user (personal account)', () => {
   const rows = [
     // status, application form?, workspace entry?, text
-    ['none', true, false, /apply with this same account/i],
-    ['pending', false, false, /application is pending review/i],
+    ['none', true, false, /want to sell a vehicle/i],
+    ['pending', false, false, /pending because administrator approval is currently enabled/i],
     ['approved', false, true, /private-seller access is approved/i],
     ['rejected', true, false, /not approved/i],
     ['suspended', false, false, /access is suspended/i],
@@ -91,7 +91,7 @@ describe('the UI never treats client-side claims as authorization', () => {
     expect(screen.queryByRole('button', { name: /open seller workspace/i })).toBeNull();
     expectBuyerIntact();
     release(serverState('pending'));
-    expect(await screen.findByText(/pending review/i)).toBeTruthy();
+    expect(await screen.findByText(/pending because administrator approval/i)).toBeTruthy();
   });
   it('a failed status load keeps every buyer section and offers retry', async () => {
     getMySellerCapability.mockRejectedValue(new Error('network'));

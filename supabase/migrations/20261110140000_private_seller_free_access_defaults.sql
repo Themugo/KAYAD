@@ -30,13 +30,11 @@ BEGIN
 END;
 $preflight$;
 
--- Existing pending individual_seller accounts were held by the old seller-approval
--- workflow. The new launch policy treats them as active personal accounts. Do not
--- touch suspended, banned, deactivated, dealer or staff identities.
-UPDATE public.users
-   SET status = 'approved'
- WHERE role = 'individual_seller'
-   AND status = 'pending';
+-- Legacy individual_seller rows with users.status = 'pending' are deliberately NOT rewritten.
+-- Historical status is preserved; effective access under the free policy is computed by the
+-- backend (requireApproved + resolveSellerState -> source 'policy_default'), and suspension,
+-- revocation and listing moderation remain independent. If an administrator later sets
+-- privateSellerApprovalMode = 'required', those pending records are still pending.
 
 -- New capability rows default to approved in the free launch mode. The backend still
 -- requires an explicit pending row when an administrator later enables approval.

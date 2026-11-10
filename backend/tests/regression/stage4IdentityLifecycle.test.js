@@ -241,8 +241,8 @@ describe("S4-D-04 registration function: source contract (static, final migratio
   const body = finalDef.slice(finalDef.search(/CREATE\s+(OR\s+REPLACE\s+)?FUNCTION\s+public\.kayad_register_identity_atomic/i));
   const fn = body.slice(0, body.indexOf("$$;", body.indexOf("AS $$")) + 3);
 
-  test("exactly one migration defines the function (no competing later redefinition)", () => {
-    expect(defs).toEqual(["20261001090000_registration_onboarding_integrity.sql"]);
+  test("the original definition plus the single forward-only free-seller-policy redefinition (final state is asserted below)", () => {
+    expect(defs).toEqual(["20261001090000_registration_onboarding_integrity.sql", "20261110140000_private_seller_free_access_defaults.sql"]);
   });
   test("SECURITY DEFINER with a pinned search_path and schema-qualified relations", () => {
     expect(fn).toMatch(/SECURITY DEFINER/);

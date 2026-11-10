@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, waitFor, within, fireEvent, act } from '@testing-library/react';
 
+vi.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ signOut: vi.fn() }) }));
 vi.mock('../../../services/dealerPlatformApi', () => ({
   getDealerDashboard: vi.fn().mockResolvedValue({ success: true, data: { overview: { totalListings: 4, totalViews: 1200, leads: { total: 6, new: 3 }, revenue: { total: 0 } } } }),
   getLeads: vi.fn().mockResolvedValue({ success: true, data: { items: [{ id: 'l1', buyer: { name: 'Wanjiru K', email: 'wk@example.test' }, vehicle: { title: 'Toyota Prado' }, stage: 'new', status: 'new' }] } }),

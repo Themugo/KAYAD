@@ -42,7 +42,7 @@ describe('buyer who has not applied', () => {
     fireEvent.click(screen.getByRole('checkbox'));
     fireEvent.click(screen.getByRole('button', { name: /apply to sell/i }));
     await waitFor(() => expect(applyForPrivateSelling).toHaveBeenCalledWith({ contactPhone: '+254712345678', intendedUse: undefined, acceptTerms: true }));
-    expect(await screen.findByText(/application is pending review/i)).toBeTruthy();
+    expect(await screen.findByText(/pending because administrator approval is currently enabled/i)).toBeTruthy();
     expect(screen.getByTestId('bidder-card')).toBeTruthy();
   });
   it('shows a server error on a failed or duplicate submission and keeps the form', async () => {
@@ -66,7 +66,7 @@ describe('seller states keep the buyer dashboard', () => {
   it('pending: buyer sections plus the real pending status, no workspace action', async () => {
     getMySellerCapability.mockResolvedValue(cap('pending'));
     mount('user');
-    expect(await screen.findByText(/application is pending review/i)).toBeTruthy();
+    expect(await screen.findByText(/pending because administrator approval is currently enabled/i)).toBeTruthy();
     expect(screen.getByTestId('bidder-card')).toBeTruthy();
     expect(screen.queryByText('Open seller workspace')).toBeNull();
   });

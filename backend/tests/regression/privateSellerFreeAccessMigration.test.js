@@ -11,9 +11,10 @@ describe("private seller free-access migration contract", () => {
     expect(sql).toContain("Preflight failed: expected kayad_register_identity_atomic signature is missing");
   });
 
-  test("activates legacy pending individual sellers without changing other roles", () => {
-    expect(sql).toMatch(/UPDATE public\.users[\s\S]*?WHERE role = 'individual_seller'[\s\S]*?AND status = 'pending'/);
-    expect(sql).toContain("SET status = 'approved'");
+  test("preserves legacy pending seller records: never rewrites existing users to approved", () => {
+    // Effective access is computed from policy by the backend; history must not be silently approved.
+    expect(sql).not.toMatch(/UPDATE\s+public\.users/i);
+    expect(sql).not.toMatch(/SET\s+status\s*=\s*'approved'/i);
   });
 
   test("new individual sellers are approved by default and pending only when approval mode is enabled", () => {

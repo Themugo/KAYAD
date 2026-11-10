@@ -92,7 +92,7 @@ export const TopNoticeStrip: React.FC = () => {
 
   const pauseControl = (
     <button type="button" onClick={() => setPaused((value) => !value)} aria-pressed={paused} aria-label={paused ? 'Resume KAYAD notices' : 'Pause KAYAD notices'}
-      className="absolute right-1 top-1 z-10 rounded bg-black/30 px-2 py-1 text-[10px] font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+      className="absolute right-1 top-1 z-10 rounded border border-white/15 bg-[#0A3340] px-2 py-1 text-[10px] font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
       {paused ? 'Resume notices' : 'Pause notices'}
     </button>
   );
