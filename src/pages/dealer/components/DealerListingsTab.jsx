@@ -23,7 +23,7 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
   const fetchListings = useCallback(async (p, ps, s, sf) => {
     setLoading(true);
     try {
-      const params = { page: p, limit: ps };
+      const params = { page: p, limit: ps, sortBy: sortField, sortOrder: sortDir };
       if (s) params.search = s;
       if (sf) params.status = sf;
       const res = await dealerAPI.cars(params);
@@ -36,7 +36,7 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, [toast, sortField, sortDir]);
 
   useEffect(() => {
     fetchListings(page, pageSize, search, statusFilter);
@@ -171,7 +171,7 @@ export default function DealerListingsTab({ cars: initialCars, totalCars: initia
             return (
               <div key={car._id} style={{ background: 'var(--card)', border: `1px solid ${isSelected ? 'rgba(23, 107, 135, 0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 14, padding: '12px 16px', display: 'grid', gridTemplateColumns: '20px 64px 1fr 120px 90px auto', alignItems: 'center', gap: 12, transition: 'border-color 0.15s' }}>
                 <input type="checkbox" checked={isSelected} onChange={() => setSelectedIds(p => p.includes(car._id) ? p.filter(id => id !== car._id) : [...p, car._id])} style={{ accentColor: 'var(--brand)', width: 16, height: 16, flexShrink: 0 }} />
-                {img ? <img src={img} alt={car.title} loading="lazy" decoding="async" style={{ width: 64, height: 48, objectFit: 'cover', borderRadius: 10, aspectRatio: '4/3', flexShrink: 0 }} />
+                {img ? <img src={img} alt={car.title} loading="lazy" decoding="async" style={{ width: 64, height: 48, objectFit: 'contain', background: '#eef7f5', borderRadius: 10, aspectRatio: '4/3', flexShrink: 0 }} />
                   : <div style={{ width: 64, height: 48, borderRadius: 10, background: 'rgba(255,255,255,0.03)', flexShrink: 0 }} />}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4, flexWrap: 'wrap' }}>

@@ -167,7 +167,7 @@ Complete booking flow:
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/inspection/bookings/:id/payment` | Process payment |
-| POST | `/api/inspection/bookings/:id/refund` | Process refund |
+| POST | `/api/inspection/bookings/:id/refund` | Disabled until a verified inspection payment-provider refund flow is integrated; currently fails closed with 501 |
 | GET | `/api/inspection/provider/:id/transactions` | Get transactions |
 | GET | `/api/inspection/provider/:id/settlements` | Get settlements |
 | POST | `/api/inspection/provider/:id/settlements` | Generate settlement |
