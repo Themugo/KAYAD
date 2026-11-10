@@ -11,6 +11,8 @@ const b2c = read('backend/controllers/paymentController.js');
 const migration = read('supabase/migrations/20261006240000_escrow_marketplace_reconciliation_hardening.sql');
 const purchase = read('supabase/migrations/20261002240000_marketplace_purchase_fulfilment_convergence.sql');
 const escrowService = read('backend/services/escrow.service.js');
+const escrowAtomic = read('supabase/migrations/20261002180000_escrow_live_operations_hardening.sql');
+const refundAtomic = read('supabase/migrations/20261002150000_escrow_business_integrity_sweep.sql');
 
 check('B2C callback has specific operation classification', /b2c\/callback.*b2c_callback|operationType === "b2c_callback"/.test(idem));
 check('B2C timeout has specific operation classification', /b2c\/timeout.*b2c_timeout|operationType === "b2c_timeout"/.test(idem));
@@ -24,6 +26,9 @@ check('partial/split dispute buyer settlement creates refund record', /v_buyer_a
 check('payment-less dispute refunds are supported', /NEW\.payment/.test(migration) && /escrow_id = NEW\.id/.test(migration));
 check('escrow status reconciles purchase outcome in database', /kayad_sync_purchase_outcome_from_escrow/.test(migration));
 check('purchase outcome reconciliation is trigger-bound', /trg_escrow_purchase_outcome_reconciliation/.test(migration) && /AFTER UPDATE OF status ON public\.escrows/.test(migration));
+check('escrow transition updates escrow, car and payment within atomic SQL function', /UPDATE public\.escrows SET status=p_next_status/.test(escrowAtomic) && /UPDATE public\.cars SET sold=true/.test(escrowAtomic) && /UPDATE public\.payments SET status='released'/.test(escrowAtomic));
+check('purchase outcome trigger updates canonical outcome in the same database transaction', /UPDATE public\.purchase_outcomes/.test(migration) && /AFTER UPDATE OF status ON public\.escrows/.test(migration));
+check('refund settlement posts ledger and completes refund atomically', /kayad_post_ledger_entry_atomic/.test(refundAtomic) && /UPDATE public\.refunds SET status='completed'/.test(refundAtomic));
 check('purchase outcome schema contains canonical escrow link', /escrow_id UUID REFERENCES public\.escrows/.test(purchase));
 check('emergency escrow close uses atomic transition', /nextStatus: STATES\.CLOSED/.test(escrowService) && /atomicTransitionEscrow/.test(escrowService) && !/update\(\"escrows\", escrow\.id/.test(escrowService));
 

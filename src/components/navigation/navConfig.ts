@@ -125,8 +125,10 @@ export const NAV_PRIMARY: NavPrimary[] = [
   },
 ];
 
-export const visibleChildren = (item: NavPrimary, signedIn: boolean): NavChild[] =>
-  (item.children || []).filter((child) => !child.requiresAuth || signedIn);
+export const visibleChildren = (item: NavPrimary, signedIn: boolean, hidePersonalDestinations = false): NavChild[] =>
+  (item.children || []).filter((child) =>
+    (!child.requiresAuth || signedIn) && !(hidePersonalDestinations && child.requiresAuth)
+  );
 
 /**
  * ── Admin navigation authority (Stage 14A) ───────────────────────────────

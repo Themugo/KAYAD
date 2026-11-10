@@ -30,8 +30,13 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount, re
   try { privateSeller = (await evaluatePrivateSellerAuctionEligibility(auction)).scope !== "not_private_seller"; } catch (_) { privateSeller = true; }
   const recipient = privateSeller ? "platform" : (setupConfig.commitment?.recipient || "organizer");
   const destination = privateSeller ? null : (setupConfig.commitment?.recipientAccount || null);
-  // Dealer-direct: only a non-private seller whose own paybill/till was verified by an admin. Anything else is collected by KAYAD.
-  const dealerCollection = !privateSeller && recipient === "organizer" ? await resolveDealerCollection(setup.organizerId).catch(() => null) : null;
+  // Dealer-direct collection is deployment-gated. Keep it disabled until the owner confirms
+  // the wallet/custody migration, callback/ledger semantics and sandbox reconciliation.
+  // This prevents routing funds to a dealer while production may lack the custody schema/RPCs.
+  const dealerDirectEnabled = process.env.AUCTION_DEALER_DIRECT_COLLECTION_ENABLED === "true";
+  const dealerCollection = dealerDirectEnabled && !privateSeller && recipient === "organizer"
+    ? await resolveDealerCollection(setup.organizerId).catch(() => null)
+    : null;
   const custody = dealerCollection ? "dealer" : "kayad";
   // Every car gets its own M-Pesa account reference (Daraja allows 12 chars) so each payment is traceable to one auction.
   const accountReference = `AUC-${String(auction.id).replace(/-/g, "").slice(0, 8).toUpperCase()}`;

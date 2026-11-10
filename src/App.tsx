@@ -490,8 +490,9 @@ function AppInner() {
   }, [handleCloseVehicleDetails]);
 
   // Select Dealer Vehicles Shortcut
-  const handleSelectDealerVehicles = useCallback((dealerName: string) => {
-    setSearchQuery(dealerName);
+  const handleSelectDealerVehicles = useCallback((dealerName: string, dealerId?: string) => {
+    if (dealerId) setDealerScope({ id: dealerId, name: dealerName });
+    else setSearchQuery(dealerName);
     setActiveNav('marketplace');
   }, []);
 
@@ -687,13 +688,7 @@ function AppInner() {
 
           {activeNav === 'dealers' && (
             <DealersView
-              dealers={[]}
-              vehicles={vehicles}
-              user={authUser}
               onSelectDealerVehicles={handleSelectDealerVehicles}
-              onQuickViewVehicle={handleOpenVehicleDetails}
-              onStartEscrow={handleStartEscrow}
-              onAddVehicle={handleAddVehicle}
             />
           )}
 
@@ -749,7 +744,7 @@ function AppInner() {
           )}
 
           {activeNav === 'kayadlive' && (
-            <KAYADLive onNavigate={(nav) => setActiveNav(nav)} />
+            <KAYADLive onNavigate={(nav) => setActiveNav(nav)} onOpenVehicleDetails={handleOpenVehicleDetails} />
           )}
 
           {activeNav === 'buyer-platform' && (
@@ -824,17 +819,22 @@ function AppInner() {
           <div className="flex items-center gap-3">
             <FooterLogo />
             <div>
-              <p className="font-bold text-white">KAYAD KE Automotive Marketplace</p>
-              <p className="text-[11px] text-[#94A3B8]">Verified Automotive & Escrow Platform · Kenya</p>
+              <p className="font-bold text-white">KAYAD KE</p>
+              <p className="text-[11px] text-[#94A3B8]">Vehicle marketplace · Kenya</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-6 text-[#BDE5DE]">
-            <button onClick={() => setActiveNav('marketplace')} className="hover:text-[#5AAFA4]">Marketplace</button>
-            <button onClick={() => setActiveNav('escrow')} className="hover:text-[#5AAFA4]">Escrow Services</button>
-            <button onClick={() => setActiveNav('financing')} className="hover:text-[#5AAFA4]">Financing</button>
-            <button onClick={() => setActiveNav('support')} className="hover:text-[#5AAFA4]">Support & Disputes</button>
-          </div>
+          <nav aria-label="Explore KAYAD" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-[#BDE5DE]">
+            <button type="button" onClick={() => setActiveNav('marketplace')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Browse vehicles</button>
+            <button type="button" onClick={() => setActiveNav('dealers')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Dealers & showrooms</button>
+            <button type="button" onClick={() => setActiveNav('auctions')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Auctions</button>
+            <button type="button" onClick={() => setActiveNav('inspection-marketplace')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Auto services</button>
+            <button type="button" onClick={() => setActiveNav('kayadlive')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">KAYAD Live</button>
+            <button type="button" onClick={() => setActiveNav('escrow')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Escrow Services</button>
+            <button type="button" onClick={() => setActiveNav('escrow')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Escrow Services</button>
+            <button type="button" onClick={() => setActiveNav('financing')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Financing</button>
+            <button type="button" onClick={() => setActiveNav('support')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Support & disputes</button>
+          </nav>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 pt-5 border-t border-[#12576D]/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#94A3B8]">
           <p className="m-0">&copy; {new Date().getFullYear()} KAYAD KE. All rights reserved.</p>

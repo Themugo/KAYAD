@@ -33,13 +33,21 @@ export default function usePageMeta(title, description, opts = {}) {
       return { el, prev, created };
     };
 
+    const canonicalUrl = url || (typeof window !== 'undefined' ? window.location.href.split('#')[0] : undefined);
+    let canonical = document.head.querySelector('link[rel="canonical"]');
+    const canonicalCreated = !canonical;
+    if (!canonical && canonicalUrl) { canonical = document.createElement('link'); canonical.setAttribute('rel', 'canonical'); document.head.appendChild(canonical); }
+    const previousCanonical = canonical?.getAttribute('href');
+    if (canonical && canonicalUrl) canonical.setAttribute('href', canonicalUrl);
+
     const tracked = [
       setMeta('meta[name="description"]', 'content', description),
       setMeta('meta[property="og:title"]', 'content', fullTitle),
       setMeta('meta[property="og:description"]', 'content', description),
       setMeta('meta[property="og:type"]', 'content', type),
       setMeta('meta[property="og:image"]', 'content', image),
-      setMeta('meta[property="og:url"]', 'content', url || (typeof window !== 'undefined' ? window.location.href : undefined)),
+      setMeta('meta[property="og:url"]', 'content', canonicalUrl),
+      setMeta('meta[name="twitter:card"]', 'content', image ? 'summary_large_image' : 'summary'),
       setMeta('meta[name="twitter:title"]', 'content', fullTitle),
       setMeta('meta[name="twitter:description"]', 'content', description),
       setMeta('meta[name="twitter:image"]', 'content', image),
@@ -47,6 +55,8 @@ export default function usePageMeta(title, description, opts = {}) {
 
     return () => {
       document.title = prevTitle;
+      if (canonicalCreated) canonical?.remove();
+      else if (canonical && previousCanonical != null) canonical.setAttribute('href', previousCanonical);
       tracked.forEach(({ el, prev, created }) => {
         if (created) el.remove();
         else if (prev != null) el.setAttribute('content', prev);

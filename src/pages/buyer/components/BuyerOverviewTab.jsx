@@ -2,6 +2,7 @@ import '../../../styles/dashboard.css';
 import { Link } from 'react-router-dom';
 import { StatCard, QuickLink, BidStatusBadge, TimeRemaining } from './BuyerWidgets';
 import { MiniBarChart, BreakdownBars } from '../../../components/features/admin/AdminWidgets';
+import BuyerNegotiationsPanel from './BuyerNegotiationsPanel';
 
 export default function BuyerOverviewTab({
   favorites, escrows, payments, myBids, chats, watchlist, trending, trendingLoading, onSetTab,
@@ -58,6 +59,8 @@ export default function BuyerOverviewTab({
         <StatCard icon="⭐" label="Watchlist" value={watchlist.length || '-'} sub={watchlist.length ? 'saved searches' : 'track vehicles'} accent="#176B87" to="/showroom" />
         <StatCard icon="✉" label="Messages" value={unreadMessages || (chats.length || '-')} sub={unreadMessages > 0 ? `${unreadMessages} unread` : chats.length ? 'all read' : 'no messages'} accent="var(--purple)" to="/chat" />
       </div>
+
+      <BuyerNegotiationsPanel />
 
       <div className="overview-cols">
         <div className="ov-card">

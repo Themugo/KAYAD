@@ -1310,3 +1310,19 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
     padding: .875rem;
   }
 }
+
+/* Public notice ticker: pause motion whenever a visitor points at it or
+   tabs into it, and suppress decorative motion for reduced-motion users. */
+.kayad-top-ticker:hover .animate-marquee,
+.kayad-top-ticker:focus-within .animate-marquee {
+  animation-play-state: paused !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kayad-top-ticker .animate-marquee {
+    animation: none !important;
+    transform: none !important;
+  }
+  .kayad-top-ticker .transition-all {
+    transition: none !important;
+  }
+}

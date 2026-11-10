@@ -15,6 +15,11 @@ afterEach(cleanup);
 describe('known routes and 404', () => {
   it.each(['/', '/login', '/register', '/terms', '/privacy', '/auction/abc', '/cars/1', '/admin/cars', '/dealer/auction-operations/9', '/support', '/saved/'])('%s is served', (p) => expect(isKnownPath(p)).toBe(true));
   it.each(['/about', '/contact', '/faq', '/does-not-exist', '/showroom', '/random/deep/path'])('%s is not found', (p) => expect(isKnownPath(p)).toBe(false));
+  it('does not advertise the unimplemented showroom path to crawlers', () => {
+    const robots = readFileSync('public/robots.txt', 'utf8');
+    expect(robots).not.toMatch(/^Allow:\s*\/showroom\/?\s*$/m);
+    expect(isKnownPath('/showroom')).toBe(false);
+  });
   it('titles the 404 and the legal pages', () => {
     expect(titleForRoute('/nope', '')).toBe('Page not found | KAYAD');
     expect(titleForRoute('/terms', '')).toBe('Terms of Service | KAYAD');

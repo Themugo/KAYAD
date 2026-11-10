@@ -180,7 +180,16 @@
     "validate:admin-navigation-page-coverage": "node scripts/validate-admin-navigation-page-coverage.mjs",
     "validate:kayad-navbar-branding": "node scripts/validate-kayad-navbar-branding.mjs",
     "validate:kayad-distinctive-brand-hero": "node scripts/validate-kayad-distinctive-brand-hero.mjs",
-    "validate:kayad-thika-expressway-hero": "node scripts/validate-kayad-thika-expressway-hero.mjs"
+    "validate:kayad-thika-expressway-hero": "node scripts/validate-kayad-thika-expressway-hero.mjs",
+    "validate:unified-mobile-menu": "node scripts/validate-unified-mobile-menu.mjs",
+    "validate:public-dealer-directory": "node scripts/validate-public-dealer-directory.mjs",
+    "validate:security-txt": "node scripts/validate-security-txt.mjs",
+    "validate:homepage-search-metadata": "node scripts/validate-homepage-search-metadata.mjs",
+    "validate:showroom-route-crawler-alignment": "node scripts/validate-showroom-route-crawler-alignment.mjs",
+    "validate:public-trust-accessibility-seo-batch": "node scripts/validate-public-trust-accessibility-seo-batch.mjs",
+    "validate:public-journeys-final": "node scripts/validate-public-journeys-final.mjs",
+    "validate:customer-transaction-lifecycle": "node scripts/validate-customer-transaction-lifecycle.mjs",
+    "validate:offer-negotiation-ui": "node scripts/validate-offer-negotiation-ui.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

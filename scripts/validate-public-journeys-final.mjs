@@ -1,0 +1,40 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const read = (file) => fs.readFileSync(file, 'utf8');
+const app = read('src/App.tsx');
+const live = read('src/pages/KAYADLive.tsx');
+const ticker = read('src/components/TopNoticeStrip.tsx');
+const css = read('src/index.css');
+const legal = read('src/pages/LegalPage.tsx');
+const showroom = read('src/pages/Showroom.tsx') + read('src/pages/Showroom.jsx');
+const marketplace = read('src/features/VehicleMarketplace/components/VehicleMarketplace.tsx');
+const footer = app.slice(app.indexOf('Public-site footer'), app.indexOf('{/* 4. Modals */}'));
+
+for (const label of ['Browse vehicles', 'Dealers & showrooms', 'Auctions', 'Auto services', 'KAYAD Live', 'Support & disputes']) {
+  assert.ok(footer.includes(label), `public footer missing ${label}`);
+}
+assert.match(footer, /aria-label="Explore KAYAD"/);
+assert.match(live, /setSearchParams/);
+assert.match(live, /searchParams\.get\('article'\)/);
+assert.match(live, /content\/s\//);
+assert.match(live, /RetryNotice/);
+assert.match(live, /onOpenVehicleDetails\(v\)/);
+assert.match(live, /usePageMeta/);
+assert.match(ticker, /function safeTickerHref/);
+assert.match(ticker, /parsed\.protocol === 'https:' \|\| parsed\.protocol === 'http:'/);
+assert.match(ticker, /prefers-reduced-motion: reduce/);
+assert.match(css, /\.kayad-top-ticker:hover \.animate-marquee/);
+assert.match(css, /\.kayad-top-ticker:focus-within \.animate-marquee/);
+assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+assert.match(legal, /support@kayad\.space/);
+assert.match(legal, /never send your password, M-Pesa PIN or one-time security code/);
+assert.match(legal, /does not publish fixed retention periods/);
+assert.match(legal, /legal name and registered address of the data controller/);
+assert.doesNotMatch(showroom, /every listing escrow-backed|Curated vehicles with escrow-backed transactions|escrow-backed transactions\./i);
+assert.doesNotMatch(marketplace, /Verified vehicles, transparent pricing and clear transaction workflows/i);
+assert.match(app, /Vehicle marketplace · Kenya/);
+console.log('PASS: public footer discoverability (6 destination groups)');
+console.log('PASS: KAYAD Live article deep-link, detail, retry and metadata contracts');
+console.log('PASS: ticker destination scheme validation and reduced-motion/focus accessibility contracts');
+console.log('PASS: privacy request, contact and retention transparency contracts');
+console.log('PASS: unsupported blanket escrow/verification marketing claims removed from audited surfaces');

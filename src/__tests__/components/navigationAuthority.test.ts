@@ -72,6 +72,17 @@ describe('applyNavigationConfig — controlled state', () => {
     expect(ids(visibleChildren(auction, false))).not.toContain('saved');
     expect(ids(visibleChildren(auction, true))).toContain('saved');
   });
+  it('restricted staff/dealer/provider workspaces do not show buyer-only child destinations', () => {
+    const marketplace = NAV_PRIMARY.find((i) => i.id === 'marketplace')!;
+    const auction = NAV_PRIMARY.find((i) => i.id === 'auction')!;
+    const services = NAV_PRIMARY.find((i) => i.id === 'inspection')!;
+    const escrow = NAV_PRIMARY.find((i) => i.id === 'escrow')!;
+    expect(ids(visibleChildren(marketplace, true, true))).not.toContain('saved');
+    expect(ids(visibleChildren(auction, true, true))).not.toContain('saved');
+    expect(ids(visibleChildren(services, true, true))).not.toContain('mine');
+    expect(ids(visibleChildren(escrow, true, true))).not.toContain('deals');
+    expect(ids(visibleChildren(marketplace, true, false))).toContain('saved');
+  });
   it('does not mutate the canonical NAV_PRIMARY', () => {
     const before = JSON.stringify(NAV_PRIMARY.map((n) => [n.id, (n.children || []).map((c) => c.id)]));
     applyNavigationConfig({ items: [{ id: 'auction', visible: false }, { id: 'escrow', dropdown: false }] });

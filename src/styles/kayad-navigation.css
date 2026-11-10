@@ -998,3 +998,220 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
   .kayad-cta { width: 40px; min-width: 40px; padding: 0; font-size: 0; }
   .kayad-cta svg { width: 19px; height: 19px; }
 }
+
+
+/* KAYAD unified mobile menu — one continuous page, one readable list.
+   This final layer supersedes legacy two-column drawer experiments while
+   retaining the canonical route data, role gates and action handlers. */
+@media (max-width: 1023px) {
+  .kayad-mobile-menu__surface { border-radius: 0 0 24px 24px !important; }
+  .kayad-mobile-menu__surface > .kayad-mobile-menu__topbar {
+    display: flex !important;
+    min-height: 60px !important;
+    position: relative;
+    z-index: 2;
+    border-bottom: 1px solid rgba(148,163,184,.18) !important;
+    background: #071B2E !important;
+  }
+  .kayad-mobile-menu__surface > div:nth-child(2) {
+    min-height: 0 !important;
+    flex: 1 1 auto !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    padding: 14px 18px max(24px, env(safe-area-inset-bottom)) !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: minmax(0,1fr) !important;
+    gap: 0 !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group {
+    width: 100% !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(148,163,184,.16) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__head {
+    display: flex !important;
+    width: 100% !important;
+    min-height: 58px !important;
+    height: auto !important;
+    padding: 8px 2px !important;
+    gap: 12px !important;
+    color: #E8EEF8 !important;
+    background: transparent !important;
+    font-size: 16px !important;
+    font-weight: 750 !important;
+    line-height: 1.25 !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__icon {
+    display: grid !important;
+    width: 36px !important;
+    height: 36px !important;
+    flex: 0 0 36px !important;
+    border-radius: 11px !important;
+    background: rgba(19,184,166,.12) !important;
+    color: #8DE4DB !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__head > svg:last-child {
+    width: 17px !important;
+    height: 17px !important;
+    margin-left: auto !important;
+    color: #8DE4DB !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__head.is-active {
+    color: #8DE4DB !important;
+    background: rgba(19,184,166,.07) !important;
+    box-shadow: inset 3px 0 0 #13B8A6 !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__links {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: minmax(0,1fr) !important;
+    gap: 0 !important;
+    padding: 0 0 10px 48px !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-chip {
+    display: flex !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 44px !important;
+    padding: 8px 10px !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(148,163,184,.09) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: rgba(226,235,247,.82) !important;
+    font-size: 14px !important;
+    font-weight: 550 !important;
+    line-height: 1.35 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    box-shadow: none !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-chip__icon {
+    display: block !important;
+    width: 16px !important;
+    height: 16px !important;
+    flex: 0 0 16px !important;
+    color: #79D8CF !important;
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-chip[aria-current="page"] {
+    color: #8DE4DB !important;
+    background: rgba(19,184,166,.10) !important;
+    border-radius: 10px !important;
+    font-weight: 800 !important;
+    box-shadow: inset 3px 0 0 #13B8A6 !important;
+  }
+  .kayad-mobile-menu__surface .kayad-drawer-panel {
+    margin: 18px 0 !important;
+    padding: 12px 0 !important;
+    border: 0 !important;
+    border-top: 1px solid rgba(148,163,184,.16) !important;
+    border-bottom: 1px solid rgba(148,163,184,.16) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+  .kayad-mobile-menu__surface .kayad-drawer-panel > div,
+  .kayad-mobile-menu__surface .kayad-drawer-list {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: minmax(0,1fr) !important;
+    gap: 0 !important;
+  }
+  .kayad-mobile-menu__surface .kayad-drawer-tile {
+    display: flex !important;
+    width: 100% !important;
+    min-height: 48px !important;
+    padding: 8px 2px !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(148,163,184,.10) !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    color: #E1EAF5 !important;
+    font-size: 14px !important;
+    font-weight: 650 !important;
+    text-align: left !important;
+  }
+  .kayad-mobile-menu__surface .kayad-drawer-tile svg { color: #79D8CF !important; }
+  .kayad-mobile-menu__surface .kayad-drawer-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 21px;
+    height: 21px;
+    margin-left: auto;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: #13B8A6;
+    color: #062E3A;
+    font-size: 10px;
+    font-weight: 900;
+  }
+  .kayad-mobile-menu__surface .kayad-drawer-count--alert { background: #E35B75; color: white; }
+  .kayad-mobile-menu__surface #mobile-cta-sell-car { margin-top: 16px !important; border-radius: 14px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kayad-mobile-menu__surface .kayad-drawer-group__head,
+  .kayad-mobile-menu__surface .kayad-drawer-chip,
+  .kayad-mobile-menu__surface .kayad-drawer-tile { transition: none !important; animation: none !important; }
+}
+
+
+/* Unified menu accordions: keep each category header navigable while its
+   dedicated disclosure button expands/collapses child destinations. */
+@media (max-width: 1023px) {
+  .kayad-mobile-menu__surface .kayad-drawer-group__row {
+    display: flex;
+    align-items: stretch;
+    width: 100%;
+    min-width: 0;
+    border-bottom: 1px solid rgba(148,163,184,.16);
+  }
+  .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group {
+    border-bottom: 0 !important;
+  }
+  .kayad-mobile-menu__surface .kayad-drawer-group__row .kayad-drawer-group__head {
+    flex: 1 1 auto;
+    min-width: 0;
+    border-bottom: 0 !important;
+  }
+  .kayad-mobile-menu__surface .kayad-drawer-group__expand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 44px;
+    width: 44px;
+    min-height: 54px;
+    margin: 0 0 0 4px;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: #8DE4DB;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .kayad-mobile-menu__surface .kayad-drawer-group__expand:hover,
+  .kayad-mobile-menu__surface .kayad-drawer-group__expand[aria-expanded="true"] {
+    background: rgba(19,184,166,.12);
+  }
+  .kayad-mobile-menu__surface .kayad-drawer-group__expand:focus-visible {
+    outline: 2px solid #8DE4DB;
+    outline-offset: -3px;
+  }
+  .kayad-mobile-menu__surface .kayad-drawer-group__links {
+    padding-top: 4px !important;
+    padding-bottom: 12px !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .kayad-mobile-menu__surface .kayad-drawer-group__links[hidden] { display: none !important; }
+}

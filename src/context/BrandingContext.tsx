@@ -79,7 +79,7 @@ const DEFAULT_BRANDING: Branding = {
   brandTagline: "Premium Automotive Marketplace",
   countryBadgeShow: true,
   countryBadgeText: 'KE',
-  footerDescription: "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services.",
+  footerDescription: "Browse vehicle listings, explore auctions, connect with sellers and discover vehicle services across Kenya.",
   footerCopyright: 'KAYAD Motors Kenya Ltd. All rights reserved.',
 
   // Primary KAYAD navy/blue palette

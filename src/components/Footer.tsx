@@ -24,7 +24,7 @@ export default function Footer({ setPage }: FooterProps) {
               )}
             </button>
             <p className="font-sans text-sm text-[var(--footer-text,rgba(255,255,255,0.4))] leading-relaxed">
-              {branding.footerDescription || "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services."}
+              {branding.footerDescription || "Browse vehicle listings, explore auctions, connect with sellers and discover vehicle services across Kenya."}
             </p>
           </div>
 

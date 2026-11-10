@@ -6,7 +6,7 @@
 
 import { findById, findOne, create } from "../db/index.js";
 import { STATES, validateTransition } from "../services/escrowStateMachine.js";
-import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { logInfo, logError } from "../utils/logger.js";
 import { atomicTransitionEscrow } from "../utils/atomicTransactions.js";
 import { recordEscrowDeposit } from "./ledgerService.js";
 import { syncPurchaseOutcomeFromEscrow } from "./marketplaceFulfilment.service.js";
@@ -103,7 +103,7 @@ export const releaseEscrow = async (escrowId, adminId, { idempotencyKey } = {}) 
   // The database transition is the sole financial authority for release.
   // It posts seller settlement + commission inside the same transaction as
   // the state change. Do not post a second application-side ledger event.
-  await syncPurchaseOutcomeFromEscrow(escrowId, "released", { actorId: adminId }).catch((e) => logWarn("Marketplace purchase outcome release sync failed", { error: e.message, escrowId }));
+  await syncPurchaseOutcomeFromEscrow(escrowId, "released", { actorId: adminId });
   logInfo("Escrow released atomically", { escrowId, sellerAmount: result?.sellerAmount, commission: result?.commission });
   return released || result;
 };
@@ -114,7 +114,7 @@ export const autoReleaseEscrow = async (escrowId) => {
     idempotencyKey: `auto-release:${escrowId}`,
   });
   const escrow = await findById("escrows", escrowId);
-  await syncPurchaseOutcomeFromEscrow(escrowId, "released", { actorId: null, auto: true }).catch((e) => logWarn("Marketplace purchase outcome auto-release sync failed", { error: e.message, escrowId }));
+  await syncPurchaseOutcomeFromEscrow(escrowId, "released", { actorId: null, auto: true });
   logInfo("Escrow auto-released atomically", { escrowId, sellerAmount: result?.sellerAmount, commission: result?.commission });
   return escrow || result;
 };
@@ -125,7 +125,7 @@ export const refundEscrow = async (escrowId, adminId, reason, { idempotencyKey }
     idempotencyKey, reason,
   });
   const escrow = await findById("escrows", escrowId);
-  await syncPurchaseOutcomeFromEscrow(escrowId, "refunded", { actorId: adminId, reason }).catch((e) => logWarn("Marketplace purchase outcome refund sync failed", { error: e.message, escrowId }));
+  await syncPurchaseOutcomeFromEscrow(escrowId, "refunded", { actorId: adminId, reason });
   logInfo("Escrow refunded atomically", { escrowId, reason });
   return escrow || result;
 };
@@ -135,7 +135,7 @@ export const disputeEscrow = async (escrowId, userId, role, reason) => {
     escrowId, nextStatus: STATES.DISPUTED, actorId: userId, role,
     reason,
   });
-  await syncPurchaseOutcomeFromEscrow(escrowId, "disputed", { actorId: userId, reason }).catch((e) => logWarn("Marketplace purchase outcome dispute sync failed", { error: e.message, escrowId }));
+  await syncPurchaseOutcomeFromEscrow(escrowId, "disputed", { actorId: userId, reason });
   return findById("escrows", escrowId);
 };
 

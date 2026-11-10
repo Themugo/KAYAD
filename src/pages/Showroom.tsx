@@ -42,7 +42,7 @@ export default function Showroom() {
         <div className="bg-gradient-to-r from-[#176B87] to-[#0E4655] text-white py-12">
           <div className="max-w-6xl mx-auto px-4">
             <h1 className="text-4xl font-bold mb-2">Kenya's Premium Automotive Gallery</h1>
-            <p className="text-[#DDF4F0]">Curated vehicles with escrow-backed transactions</p>
+            <p className="text-[#DDF4F0]">Browse vehicle listings and explore eligible transaction services</p>
           </div>
         </div>
 
