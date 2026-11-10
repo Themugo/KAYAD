@@ -1,8 +1,10 @@
+
 import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
 const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
+
 const flow = read('src/components/OnboardingFlow.tsx');
 const roles = read('src/components/onboarding/roles.ts');
 const validation = read('src/components/onboarding/validation.ts');
@@ -42,7 +44,12 @@ const checks = [
   ['registration uses atomic database identity function', /kayad_register_identity_atomic/.test(controller)],
   ['dealer registration provisions dealer domain record', /sync_dealer_profile_from_user/.test(read('supabase/migrations/20261001090000_registration_onboarding_integrity.sql'))],
   ['inspector application table exists in migration chain', /CREATE TABLE IF NOT EXISTS public\.inspector_applications/.test(read('supabase/migrations/20261001090000_registration_onboarding_integrity.sql'))],
-  ['registration does not issue an authenticated session', (() => { const a = controller.indexOf('export const register'); const b = controller.indexOf('// =============================\n// 🔑 LOGIN', a); const register = controller.slice(a, b); return !/sendAuthResponse\(res,/.test(register); })()],
+  ['registration does not issue an authenticated session', (() => {
+    const a = controller.indexOf('export const register');
+    const b = controller.indexOf('// =============================\n// 🔑 LOGIN', a);
+    const register = controller.slice(a, b);
+    return !/sendAuthResponse\(res,/.test(register);
+  })()],
   ['registration route uses canonical auth endpoint', /router\.post\("\/register"/.test(routes)],
   ['frontend uses canonical auth service', /authRegister\(body\)/.test(flow) && /authFetch\('\/api\/v1\/auth\/register'/.test(authApi)],
   ['state-changing requests bootstrap CSRF', /await ensureCsrfToken\(\)/.test(httpClient)],
@@ -53,9 +60,18 @@ const checks = [
 ];
 
 let passed = 0;
+
 for (const [name, ok] of checks) {
-  if (ok) { passed++; console.log(`PASS ${name}`); }
-  else console.error(`FAIL ${name}`);
+  if (ok) {
+    passed++;
+    console.log(`PASS ${name}`);
+  } else {
+    console.error(`FAIL ${name}`);
+  }
 }
+
 console.log(`\nRegistration role matrix: ${passed}/${checks.length} PASS`);
-if (passed !== checks.length) process.exit(1);
+
+if (passed !== checks.length) {
+  process.exit(1);
+}
