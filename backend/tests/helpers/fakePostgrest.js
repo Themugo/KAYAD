@@ -96,7 +96,7 @@ export const startFakePostgrest = async (options = {}) => {
           const row = {
             id: crypto.randomUUID(), name: args.p_name, email, role: args.p_role,
             phone: String(args.p_phone || "").trim() || null,
-            status: args.p_role === "user" ? "approved" : "pending", email_verified: false,
+            status: args.p_role === "dealer" ? "pending" : "approved", email_verified: false,
             business_name: sellerish ? args.p_business_name || null : null,
             location: sellerish ? args.p_location || null : null,
             referred_by: args.p_referred_by || null, created_at: new Date().toISOString(),

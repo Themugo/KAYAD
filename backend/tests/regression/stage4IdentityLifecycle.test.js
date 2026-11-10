@@ -54,7 +54,7 @@ const rpc = jest.fn(async (fn, args) => {
   if (!ALLOWED.has(args.p_role)) return { data: null, error: { code: "22023", message: "Invalid self-registration role" } };
   if (byEmail(args.p_email)) return { data: null, error: { code: "23505", message: "duplicate key value violates unique constraint" } };
   const id = `u-${store.users.size + 1}`;
-  const row = { id, name: args.p_name, email: norm(args.p_email), role: args.p_role, status: args.p_role === "user" ? "approved" : "pending", email_verified: false };
+  const row = { id, name: args.p_name, email: norm(args.p_email), role: args.p_role, status: args.p_role === "dealer" ? "pending" : "approved", email_verified: false };
   store.users.set(id, { ...row, _id: id, emailVerified: false });
   store.auth.set(id, { user: id, password: args.p_password_hash, tokenVersion: 0 });
   return { data: row, error: null };
@@ -116,12 +116,14 @@ describe("S4-D-01 registration: role escalation is impossible from the public en
       expect(res.body.user.role).toBe("user");
     },
   );
-  test("dealer and individual_seller are the only elevated self-registrations and start pending", async () => {
+  test("dealer starts pending for verification; individual_seller starts active in free mode", async () => {
     const d = await reg({ role: "dealer", businessName: "B", location: "Nairobi", email: "d@example.test" });
     const s = await reg({ role: "individual_seller", email: "s@example.test" });
     expect([d.code, s.code]).toEqual([201, 201]);
     expect(rpcCalls.map((c) => c.args.p_role)).toEqual(["dealer", "individual_seller"]);
     expect(d.body.user.status).toBe("pending");
+    expect(s.body.user.status).toBe("approved");
+    expect(s.body.user.emailVerified).toBe(false);
   });
   test("dealer without business name or location is refused before the database", async () => {
     expect((await reg({ role: "dealer", location: "x" })).code).toBe(400);

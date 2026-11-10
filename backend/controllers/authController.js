@@ -258,11 +258,16 @@ export const register = async (req, res) => {
     }
 
     // STAGE 5: owner-controlled registration policy, enforced server-side BEFORE any side effect.
-    // Untrusted policy (store unavailable/corrupt) never opens seller or dealer registration.
+    // Private-seller registration defaults to open/free; dealer onboarding remains separately controlled.
+    let privateSellerApprovalRequired = false;
     if (role === "individual_seller" || role === "dealer") {
       const onboarding = await getOnboardingPolicy();
       if (!isPolicyTrusted(onboarding)) {
         return res.status(503).json({ success: false, code: "ONBOARDING_POLICY_UNAVAILABLE", message: "Seller and dealer registration is temporarily unavailable. Please try again shortly." });
+      }
+      privateSellerApprovalRequired = role === "individual_seller" && onboarding.policy.privateSellerApprovalMode === "required";
+      if (role === "individual_seller" && onboarding.policy.privateSellerPackageMode !== "free") {
+        return res.status(503).json({ success: false, code: "SELLER_PACKAGE_CONFIGURATION_INCOMPLETE", message: "Paid seller packages are not available yet. Please try again later." });
       }
       if (role === "individual_seller" && onboarding.policy.privateSellerRegistration !== "enabled") {
         return res.status(403).json({ success: false, code: "SELLER_REGISTRATION_DISABLED", message: "Private seller registration is not open right now." });
@@ -341,7 +346,7 @@ export const register = async (req, res) => {
       logError("Verification email dispatch failed", e, { userId: user.id, event: "account.email_verification" });
     });
 
-    if (role === "dealer" || role === "individual_seller") {
+    if (role === "dealer" || (role === "individual_seller" && privateSellerApprovalRequired)) {
       void notifyAdminsOfPendingSeller(user).catch(() => {});
     }
 
@@ -378,11 +383,15 @@ export const register = async (req, res) => {
       recipient: user.email,
       ...(await buildEmail("buildWelcomeEmail", { name: user.name, role: user.role }, {
         subject: "Welcome to KAYAD",
-        text: (role === "dealer" || role === "individual_seller")
-          ? `Welcome to KAYAD, ${user.name || "there"}. Your account has been created; seller access depends on email verification and review.`
-          : `Welcome to KAYAD, ${user.name || "there"}. Your account is ready.`,
+        text: role === "dealer"
+          ? `Welcome to KAYAD, ${user.name || "there"}. Your dealer application is under review.`
+          : role === "individual_seller"
+            ? privateSellerApprovalRequired
+              ? `Welcome to KAYAD, ${user.name || "there"}. Verify your email. Your private-seller account is free; administrator approval is required before selling.`
+              : `Welcome to KAYAD, ${user.name || "there"}. Private selling is free and does not require a package or seller approval. Verify your email before using seller features.`
+            : `Welcome to KAYAD, ${user.name || "there"}. Your account is ready.`,
         html: (role === "dealer" || role === "individual_seller")
-          ? `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>Your account has been created. Seller access depends on email verification and review.</p>`
+          ? `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>${role === "dealer" ? "Your dealer application is under review. Please verify your email." : privateSellerApprovalRequired ? "Your private-seller account is free. Verify your email; administrator approval is required before selling." : "Your private-seller account is free. No seller package or administrator approval is required. Verify your email before using seller features. Vehicle listings may still go through separate listing moderation."}</p>`
           : `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>Your account is ready.</p>`,
       })),
       metadata: { welcome: true },
@@ -397,7 +406,9 @@ export const register = async (req, res) => {
       message: role === "dealer"
         ? "Dealer application received. Please verify your email. Your dealer account is not approved until our team reviews it, and we will notify you of the decision."
         : role === "individual_seller"
-          ? "Seller account created. Please verify your email before using seller features. New listings are reviewed before they are published."
+          ? privateSellerApprovalRequired
+            ? "Private-seller account created. Registration is free. Please verify your email; administrator approval is required before selling."
+            : "Private-seller account created. Selling is free and does not require a package or seller approval. Please verify your email before using seller features. Vehicle listing moderation is separate."
           : "Account created successfully. Please verify your email before signing in.",
     });
   } catch (err) {

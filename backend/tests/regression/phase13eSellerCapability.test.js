@@ -27,6 +27,11 @@ const chain = (v) => { const q = { select: () => q, lean: () => q, catch: () => 
 
 // in-memory private_seller_capabilities behind a PostgREST-shaped builder
 let table = new Map();
+let capabilityTableMissing = false;
+const missingCapabilityTableBuilder = () => {
+  const q = { select: () => q, eq: () => q, maybeSingle: async () => ({ data: null, error: { code: "PGRST205", message: "Could not find the table 'public.private_seller_capabilities' in the schema cache" } }) };
+  return q;
+};
 const builder = () => {
   const st = { op: "select", filters: [], inF: null, patch: null, row: null };
   const q = {
@@ -51,7 +56,7 @@ const builder = () => {
   return q;
 };
 const noop = () => { const q = new Proxy({}, { get: (_t, p) => (p === "then" ? (a, b) => Promise.resolve({ data: [], error: null }).then(a, b) : p === "single" || p === "maybeSingle" ? async () => ({ data: null, error: null }) : () => q) }); return q; };
-const sb = { from: jest.fn((t) => (t === "private_seller_capabilities" ? builder() : noop())), rpc: jest.fn(async () => ({ data: null, error: null })) };
+const sb = { from: jest.fn((t) => (t === "private_seller_capabilities" ? (capabilityTableMissing ? missingCapabilityTableBuilder() : builder()) : noop())), rpc: jest.fn(async () => ({ data: null, error: null })) };
 
 jest.unstable_mockModule("../../models/User.js", () => ({ default: { findById: jest.fn((id) => chain(users[id] || null)), findByIdAndUpdate: jest.fn(() => chain({})), findOne: jest.fn(() => chain(null)), find: jest.fn(() => chain([])), countDocuments: jest.fn(async () => 0) } }));
 jest.unstable_mockModule("../../models/UserAuth.js", () => ({ default: { findOne: jest.fn(() => chain({ tokenVersion: 0 })) } }));
@@ -63,7 +68,9 @@ const audit = jest.fn(async () => {});
 jest.unstable_mockModule("../../utils/securityLogger.js", () => ({ logActionFromReq: audit }));
 
 const svc = await import("../../services/privateSellerCapability.service.js");
+const onboardingPolicy = await import("../../services/onboardingPolicy.service.js");
 const { sellerListingAccess } = await import("../../middleware/sellerCapability.js");
+const { requireApproved } = await import("../../middleware/auth.js");
 const { dealerBusinessOnly } = await import("../../middleware/dealerIsolation.js");
 const { default: routes } = await import("../../routes/privateSellerCapabilityRoutes.js");
 
@@ -71,7 +78,13 @@ const token = (id) => jwt.sign({ id, tokenVersion: 0 }, process.env.JWT_SECRET, 
 let server, base;
 beforeAll(async () => { const app = express(); app.use(express.json()); app.use("/api/private-seller-capability", routes); await new Promise((r) => { server = app.listen(0, "127.0.0.1", r); }); base = `http://127.0.0.1:${server.address().port}`; });
 afterAll(() => new Promise((r) => { server.closeAllConnections?.(); server.close(() => r()); }));
-beforeEach(() => { table = new Map(); audit.mockClear(); });
+beforeEach(() => {
+  table = new Map();
+  capabilityTableMissing = false;
+  audit.mockClear();
+  // The lifecycle tests below exercise the optional future approval workflow explicitly.
+  onboardingPolicy.__setOnboardingPolicyForTests({ privateSellerApprovalMode: "required", privateSellerPackageMode: "free" });
+});
 const call = (method, path, who, body) => new Promise((resolve) => {
   const u = new URL(base + path); const payload = body ? JSON.stringify(body) : undefined;
   const headers = { "Content-Type": "application/json", ...(who ? { Authorization: `Bearer ${token(who)}` } : {}), ...(payload ? { "Content-Length": Buffer.byteLength(payload) } : {}) };
@@ -182,19 +195,21 @@ describe("Listing guard (sellerListingAccess): capability enforced at the backen
     expect(dealerGuard).toBe(403);
   });
   test("unverified email cannot sell even when approved", async () => { seed(UNVERIFIED, "approved"); expect((await run(users[UNVERIFIED], { write: true })).status).toBe(403); });
-  test("seller views (write:false) stay available for every application state, but not for plain buyers", async () => {
+  test("seller views (write:false) require approved capability; applications remain on their separate status endpoint", async () => {
     expect((await run(users[BUYER], { write: false })).status).toBe(403);
-    for (const st of ["pending", "rejected", "suspended", "revoked", "approved"]) { seed(BUYER, st); expect((await run(users[BUYER], { write: false })).passed).toBe(true); }
+    for (const st of ["pending", "rejected", "suspended", "revoked"]) { seed(BUYER, st); expect((await run(users[BUYER], { write: false })).status).toBe(403); }
+    seed(BUYER, "approved");
+    expect((await run(users[BUYER], { write: false })).passed).toBe(true);
   });
   test("suspension/revocation blocks seller writes only; buyer reads of the account are not this guard's concern", async () => {
     seed(BUYER, "suspended"); expect((await run(users[BUYER], { write: true })).status).toBe(403);
     seed(BUYER, "revoked"); expect((await run(users[BUYER], { write: true })).status).toBe(403);
   });
-  test("legacy individual_seller: approved and pending keep working; suspended/rejected/revoked are now blocked (DI-5)", async () => {
+  test("legacy individual_seller: approved works; pending is blocked when approval is required; suspended/revoked remain blocked", async () => {
     expect((await run(users[LEGACY_APPROVED], { write: true })).passed).toBe(true);
-    expect((await run(users[LEGACY_PENDING], { write: true })).passed).toBe(true);
+    expect((await run(users[LEGACY_PENDING], { write: true })).status).toBe(403);
     const s = await run(users[LEGACY_SUSP], { write: true }); expect(s.status).toBe(403); expect(s.body.code).toBe("SELLER_CAPABILITY_BLOCKED");
-    expect((await run(users[LEGACY_SUSP], { write: false })).passed).toBe(true);
+    expect((await run(users[LEGACY_SUSP], { write: false })).status).toBe(403);
     table.set(LEGACY_APPROVED, { user_id: LEGACY_APPROVED, status: "revoked", source: "legacy_backfill" });
     expect((await run(users[LEGACY_APPROVED], { write: true })).status).toBe(403); // the capability row is authoritative once present
   });
@@ -223,5 +238,89 @@ describe("Legacy compatibility", () => {
     table.set(LEGACY_SUSP, { user_id: LEGACY_SUSP, status: "suspended", source: "legacy_backfill" });
     await svc.syncLegacyApproval(LEGACY_PENDING); await svc.syncLegacyApproval(LEGACY_SUSP);
     expect(table.get(LEGACY_PENDING).status).toBe("approved"); expect(table.get(LEGACY_SUSP).status).toBe("suspended");
+  });
+});
+
+
+describe("free private-seller default policy", () => {
+  beforeEach(() => {
+    onboardingPolicy.__setOnboardingPolicyForTests({ privateSellerApprovalMode: "disabled", privateSellerPackageMode: "free" });
+  });
+
+  test("a missing capability table does not block free-mode personal selling", async () => {
+    capabilityTableMissing = true;
+    const state = await svc.getMySellerCapability({ id: BUYER, role: "user", status: "approved", emailVerified: true });
+    expect(state).toMatchObject({ status: "approved", source: "policy_default", canList: true, packageMode: "free" });
+  });
+
+  test("a personal buyer account gets seller access without an application row", async () => {
+    const state = await svc.getMySellerCapability({ id: BUYER, role: "user", status: "approved", emailVerified: true });
+    expect(state).toMatchObject({ status: "approved", source: "policy_default", canApply: false, canList: true, approvalRequired: false, packageMode: "free" });
+  });
+
+  test("legacy pending individual seller is treated as active without rewriting identity", async () => {
+    const state = await svc.getMySellerCapability({ id: LEGACY_PENDING, role: "individual_seller", status: "pending", emailVerified: true });
+    expect(state).toMatchObject({ status: "approved", source: "policy_default", canList: true });
+    expect(users[LEGACY_PENDING]).toMatchObject({ role: "individual_seller", status: "pending" });
+  });
+
+  test("old pending or rejected application records do not impose approval while the policy is disabled", async () => {
+    table.set(BUYER, { user_id: BUYER, status: "pending", source: "application" });
+    expect(await svc.resolveSellerState({ id: BUYER, role: "user", status: "approved" })).toMatchObject({ status: "approved", source: "policy_default" });
+    table.set(BUYER, { user_id: BUYER, status: "rejected", source: "application" });
+    expect(await svc.resolveSellerState({ id: BUYER, role: "user", status: "approved" })).toMatchObject({ status: "approved", source: "policy_default" });
+  });
+
+  test("legacy suspension and revocation remain enforceable even when approval is disabled", async () => {
+    expect(await svc.resolveSellerState(users[LEGACY_SUSP])).toMatchObject({ status: "suspended", source: "legacy_users_status" });
+    const revokedLegacy = { id: ID(10), role: "individual_seller", status: "revoked" };
+    expect(await svc.resolveSellerState(revokedLegacy)).toMatchObject({ status: "revoked", source: "legacy_users_status" });
+  });
+
+  test("capability suspension and revocation remain enforceable even when approval is disabled", async () => {
+    table.set(BUYER, { user_id: BUYER, status: "suspended", source: "application" });
+    expect(await svc.resolveSellerState({ id: BUYER, role: "user", status: "approved" })).toMatchObject({ status: "suspended" });
+    table.set(BUYER, { user_id: BUYER, status: "revoked", source: "application" });
+    expect(await svc.resolveSellerState({ id: BUYER, role: "user", status: "approved" })).toMatchObject({ status: "revoked" });
+  });
+
+  test("legacy pending individual_seller passes requireApproved only while approval mode is disabled", async () => {
+    const req = { user: { id: LEGACY_PENDING, role: "individual_seller", status: "pending" } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    const next = jest.fn();
+    await requireApproved(req, res, next);
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.status).not.toHaveBeenCalled();
+  });
+
+  test("approval-required mode blocks a legacy pending individual seller from writing", async () => {
+    onboardingPolicy.__setOnboardingPolicyForTests({ privateSellerApprovalMode: "required", privateSellerPackageMode: "free" });
+    const req = { user: { id: LEGACY_PENDING, role: "individual_seller", status: "pending", emailVerified: true } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    const next = jest.fn();
+    await sellerListingAccess({ write: true })(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: "SELLER_CAPABILITY_BLOCKED" }));
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  test("seller listing middleware admits verified personal accounts in free mode", async () => {
+    const req = { user: { id: BUYER, role: "user", status: "approved", emailVerified: true } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    const next = jest.fn();
+    await sellerListingAccess({ write: true })(req, res, next);
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.status).not.toHaveBeenCalled();
+  });
+
+  test("paid package mode remains blocked until package checkout is implemented", async () => {
+    onboardingPolicy.__setOnboardingPolicyForTests({ privateSellerApprovalMode: "disabled", privateSellerPackageMode: "required" });
+    const req = { user: { id: BUYER, role: "user", status: "approved", emailVerified: true } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    const next = jest.fn();
+    await sellerListingAccess({ write: true })(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(503);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: "SELLER_PACKAGE_CONFIGURATION_INCOMPLETE" }));
+    expect(next).not.toHaveBeenCalled();
   });
 });

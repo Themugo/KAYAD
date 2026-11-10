@@ -86,19 +86,13 @@ describe("registration safety: escalation, normalisation, concurrency", () => {
     }
   });
 
-  it("a private seller is created pending-approval (not approved) and not email-verified", async () => {
+  it("a private seller is created active in free mode and remains unverified until email verification", async () => {
     const res = await post({ name: "Priv Seller", email: "privseller@example.com", password: PASS, role: "individual_seller", phone: "0712345678" });
-    // Seller registration is owner-policy controlled: either it is open (201, pending) or it is refused with a stable code.
-    // It must never succeed as an already-approved / verified seller.
-    if (res.status === 201) {
-      const row = fake.db.users.find((u) => u.email === "privseller@example.com");
-      expect(row.role).toBe("individual_seller");
-      expect(row.status).toBe("pending");
-      expect(row.email_verified).toBe(false);
-    } else {
-      expect([403, 503]).toContain(res.status);
-      expect((fake.db.users || []).find((u) => u.email === "privseller@example.com")).toBeUndefined();
-    }
+    expect(res.status).toBe(201);
+    const row = fake.db.users.find((u) => u.email === "privseller@example.com");
+    expect(row.role).toBe("individual_seller");
+    expect(row.status).toBe("approved");
+    expect(row.email_verified).toBe(false);
   });
 
   it("treats case/whitespace variants of an existing email as the same identity (409, one row)", async () => {

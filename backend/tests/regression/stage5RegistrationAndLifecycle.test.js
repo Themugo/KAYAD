@@ -34,7 +34,7 @@ const UserAuth = {
 };
 const rpc = jest.fn(async (fn, args) => {
   rpcCalls.push({ fn, args });
-  return { data: { id: "u-new", name: args.p_name, email: args.p_email, role: args.p_role, status: args.p_role === "user" ? "approved" : "pending", email_verified: false }, error: null };
+  return { data: { id: "u-new", name: args.p_name, email: args.p_email, role: args.p_role, status: args.p_role === "dealer" ? "pending" : "approved", email_verified: false }, error: null };
 });
 jest.unstable_mockModule("../../models/User.js", () => ({ default: User }));
 jest.unstable_mockModule("../../models/UserAuth.js", () => ({ default: UserAuth }));
@@ -59,8 +59,11 @@ const reg = async (body) => { const res = mkRes(); await register({ body: { name
 beforeEach(() => { rpcCalls.length = 0; users.clear(); auths.clear(); jest.clearAllMocks(); __setOnboardingPolicyForTests({}); });
 
 describe("registration obeys the owner's policy BEFORE any side effect", () => {
-  test("private seller: enabled ⇒ 201 and starts pending; disabled ⇒ 403 with no database call", async () => {
-    expect((await reg({ role: "individual_seller" })).code).toBe(201);
+  test("private seller: enabled ⇒ 201 and starts active in free mode; disabled ⇒ 403 with no database call", async () => {
+    const created = await reg({ role: "individual_seller" });
+    expect(created.code).toBe(201);
+    expect(created.body.user.status).toBe("approved");
+    expect(created.body.user.emailVerified).toBe(false);
     expect(rpcCalls.at(-1).args.p_role).toBe("individual_seller");
     rpcCalls.length = 0;
     __setOnboardingPolicyForTests({ privateSellerRegistration: "disabled" });
@@ -140,7 +143,7 @@ describe("verification token lifecycle (GET /verify-email/:token)", () => {
     expect(r.code).toBe(200);
     expect(users.get("u1").emailVerified).toBe(true);
     expect(users.get("u1").role).toBe("individual_seller");
-    expect(users.get("u1").status).toBe("pending"); // verification ≠ approval
+    expect(users.get("u1").status).toBe("pending"); // verification does not rewrite the legacy status; free-mode policy resolves access
   });
   test("replay: the same token a second time is rejected (single use)", async () => {
     seed("t1");

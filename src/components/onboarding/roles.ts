@@ -40,11 +40,11 @@ export const AFFILIATION_PATH = '/?nav=inspections&action=manage-business';
 export const PUBLIC_ROLES: PublicRole[] = [
   {
     id: 'buyer', title: 'Personal account', summary: 'Buy, save and compare vehicles, and sell your own vehicle from the same account.',
-    outcome: 'Ready once you verify your email', intent: 'buyer', backendRole: 'user', route: 'account', afterSignIn: null,
+    outcome: 'Buy and sell privately for free after email verification', intent: 'buyer', backendRole: 'user', route: 'account', afterSignIn: null,
     steps: [
-      { title: 'Create your account', body: 'Name, email and a password. No documents needed.' },
-      { title: 'Verify your email', body: 'We email you a link. You cannot sign in until it is confirmed.' },
-      { title: 'Sign in and start', body: 'Browse vehicles, save favourites, join auctions.' },
+      { title: 'Create your personal account', body: 'Name, email and a password. No documents, package or payment needed.' },
+      { title: 'Verify your email', body: 'We email you a link. Email verification is required before sign-in.' },
+      { title: 'Buy and sell straight away', body: 'Browse, save, bid and list your own vehicle for free. No seller application or administrator approval is required.' },
     ],
   },
   {

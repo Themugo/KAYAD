@@ -9,6 +9,7 @@ import { OWNER_EMAILS, isOwnerEmail, isOwnerUser, isUnverifiedOwner, OWNER_IDENT
 import { enforceMaintenance } from "./maintenanceEnforcement.js";
 import { ensureFresh as ensureOwnerRegistryFresh } from "../services/ownerRegistry.service.js"; // STAGE 5B
 import { logError, logWarn } from "../utils/logger.js";
+import { getOnboardingPolicy } from "../services/onboardingPolicy.service.js";
 
 // OWNER_EMAILS / isOwnerEmail now come from config/owners.js, which supports a
 // comma-separated WEBHOIST_EMAIL list (multiple platform owners).
@@ -309,15 +310,25 @@ export const buyerOnly = (req, res, next) => {
 // =============================
 // ✅ REQUIRE APPROVED STATUS
 // =============================
-export const requireApproved = (req, res, next) => {
+export const requireApproved = async (req, res, next) => {
   if (req.user?.effectiveRole === "webhoist") return next();
-  if (!req.user || req.user.status !== "approved") {
-    return res.status(403).json({
-      success: false,
-      message: "Account must be approved to access this resource",
-    });
+  if (!req.user) {
+    return res.status(403).json({ success: false, message: "Account must be approved to access this resource" });
   }
-  next();
+  if (req.user.status === "approved") return next();
+
+  // Existing individual_seller rows used users.status='pending' as a seller-approval flag.
+  // Under the free default policy this legacy flag must not block the personal account.
+  // Dealers and other account states continue to use the normal approval gate.
+  if (req.user.role === "individual_seller" && req.user.status === "pending") {
+    const policy = await getOnboardingPolicy();
+    if (policy.policy.privateSellerApprovalMode !== "required") return next();
+  }
+
+  return res.status(403).json({
+    success: false,
+    message: "Account must be approved to access this resource",
+  });
 };
 
 export const optionalAuth = async (req, res, next) => {

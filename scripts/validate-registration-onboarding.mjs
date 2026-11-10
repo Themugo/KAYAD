@@ -1,11 +1,13 @@
+
 import fs from 'node:fs';
 import path from 'node:path';
 
 const root = process.cwd();
 const read = (p) => fs.readFileSync(path.join(root, p), 'utf8');
+
 const checks = [
   ['canonical registration schema contains dealer fields', /businessName: z\.string\(\)\.trim\(\)\.max\(200\)\.optional\(\)/.test(read('backend/validation/auth.schema.js')) && /location: z\.string\(\)\.trim\(\)\.max\(200\)\.optional\(\)/.test(read('backend/validation/auth.schema.js'))],
-  ['onboarding maps buyer to backend user role', /id: 'buyer'[\s\S]{0,200}backendRole: 'user'/.test(read('src/components/onboarding/roles.ts'))],
+  ['onboarding maps buyer to backend user role', /id: 'buyer'[\s\S]{0,500}backendRole: 'user'/.test(read('src/components/onboarding/roles.ts'))],
   ['dealer onboarding enforces business name', /backendRole === 'dealer'[\s\S]{0,80}!form\.businessName\.trim\(\)/.test(read('src/components/onboarding/validation.ts'))],
   ['dealer onboarding enforces location', /backendRole === 'dealer'[\s\S]{0,200}!form\.location\.trim\(\)/.test(read('src/components/onboarding/validation.ts'))],
   ['backend enforces dealer business name', /role === "dealer" && !businessName/.test(read('backend/controllers/authController.js'))],
@@ -14,7 +16,13 @@ const checks = [
   ['frontend verification page exists', fs.existsSync(path.join(root, 'src/pages/VerifyEmailPage.tsx'))],
   ['verification page calls backend token endpoint', /verifyEmail\(token\)/.test(read('src/pages/VerifyEmailPage.tsx')) && /\/verify-email\/\$\{encodeURIComponent\(token\)\}/.test(read('src/services/authApi.ts'))],
   ['login handles email verification gate', /verificationRequired/.test(read('src/pages/LoginPage.jsx')) && /resendVerification/.test(read('src/pages/LoginPage.jsx'))],
-  ['registration is account-creation only and does not issue a session', (() => { const source = read('backend/controllers/authController.js'); const start = source.indexOf('export const register'); const end = source.indexOf('// =============================\n// 🔑 LOGIN', start); const register = source.slice(start, end); return /return res\.status\(201\)\.json\(\{/.test(register) && !/sendAuthResponse\(\s*res/.test(register); })()],
+  ['registration is account-creation only and does not issue a session', (() => {
+    const source = read('backend/controllers/authController.js');
+    const start = source.indexOf('export const register');
+    const end = source.indexOf('// =============================\n// 🔑 LOGIN', start);
+    const register = source.slice(start, end);
+    return /return res\.status\(201\)\.json\(\{/.test(register) && !/sendAuthResponse\(\s*res/.test(register);
+  })()],
   ['registration duplicate email returns conflict', /An account with that email already exists/.test(read('backend/controllers/authController.js')) && /409/.test(read('backend/controllers/authController.js'))],
   ['verification delivery is non-blocking after atomic registration', (() => {
     const source = read('backend/controllers/authController.js');
@@ -40,8 +48,10 @@ const checks = [
   ['production verifier probes the canonical CSRF endpoint', /auth\/csrf/.test(read('scripts/verify-production-deployment.mjs'))],
   ['registration duplicate email returns 409', /An account with that email already exists/.test(read('backend/controllers/authController.js')) && /return R\.error\(res, "An account with that email already exists", 409\)/.test(read('backend/controllers/authController.js'))],
   ['registration referral side effect is non-blocking', /void \(async \(\) => \{/.test(read('backend/controllers/authController.js')) && /Referral credit failed/.test(read('backend/controllers/authController.js'))],
-  ['buyer onboarding uses canonical user role', /id: 'buyer'[\s\S]{0,200}backendRole: 'user'/.test(read('src/components/onboarding/roles.ts')) && /role: backendRole/.test(read('src/components/OnboardingFlow.tsx'))],
-  ['private seller access is an approved capability on the personal account', /case 'seller': return 'buyer'/.test(read('src/components/onboarding/roles.ts')) && /privateSeller:/.test(read('backend/services/accountCapabilities.service.js')) && /canApply: user\.role === \"user\"/.test(read('backend/services/privateSellerCapability.service.js'))],
+
+  ['buyer onboarding uses canonical user role', /id: 'buyer'[\s\S]{0,500}backendRole: 'user'/.test(read('src/components/onboarding/roles.ts')) && /role: backendRole/.test(read('src/components/OnboardingFlow.tsx'))],
+  ['private selling is free and approval-free for every personal account by default', /case 'seller': return 'buyer'/.test(read('src/components/onboarding/roles.ts')) && /privateSeller:/.test(read('backend/services/accountCapabilities.service.js')) && /privateSellerApprovalMode: "disabled"/.test(read('backend/services/onboardingPolicy.service.js')) && /privateSellerPackageMode: "free"/.test(read('backend/services/onboardingPolicy.service.js')) && /canList: state\.status === "approved" && policy\.policy\.privateSellerPackageMode === "free"/.test(read('backend/services/privateSellerCapability.service.js'))],
+
   ['dealer onboarding uses dealer role and required business fields', /backendRole: 'dealer'/.test(read('src/components/onboarding/roles.ts')) && /businessName/.test(read('src/components/onboarding/validation.ts')) && /location/.test(read('src/components/onboarding/validation.ts'))],
   ['professional registration creates a personal account before provider application', /id: 'professional'[\s\S]*backendRole: 'user'[\s\S]*route: 'account_then_provider'/.test(read('src/components/onboarding/roles.ts')) && /after you sign in, submit your inspector or mechanic credentials/i.test(read('src/components/OnboardingFlow.tsx'))],
   ['inspector application validates specialties before submit', /specialties\.length === 0/.test(read('src/components/onboarding/validation.ts'))],
@@ -57,10 +67,16 @@ const checks = [
   ['protected API enforces email verification when configured', /Please verify your email before accessing this resource/.test(read('backend/middleware/auth.js'))],
   ['dealer approval remains server-controlled', /Dealer approval must ONLY come from the admin verification/.test(read('backend/controllers/authController.js'))],
 ];
+
 let passed = 0;
 for (const [name, ok] of checks) {
-  if (ok) { passed++; console.log(`PASS ${name}`); }
-  else console.error(`FAIL ${name}`);
+  if (ok) {
+    passed++;
+    console.log(`PASS ${name}`);
+  } else {
+    console.error(`FAIL ${name}`);
+  }
 }
+
 console.log(`\nRegistration/onboarding source gate: ${passed}/${checks.length} PASS`);
 if (passed !== checks.length) process.exit(1);

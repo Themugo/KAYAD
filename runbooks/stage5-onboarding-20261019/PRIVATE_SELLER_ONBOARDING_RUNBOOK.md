@@ -8,11 +8,11 @@ Owner settings saved (private sellers `enabled`); email provider verified (live 
 ## Acceptance journey
 | Step | Seller does | Expected | If not |
 |---|---|---|---|
-| 1 | Registers as *Private seller* | Message: "Seller account created. Please verify your email… New listings are reviewed before they are published." Account `pending`, unverified | 403 `SELLER_REGISTRATION_DISABLED` = setting closed; 503 = settings unreadable (check DB); 409 = email exists |
+| 1 | Registers as *Private seller* | Message: "Seller account created. Please verify your email… New listings may be reviewed before publication." Account `approved`, unverified in free launch mode | 403 `SELLER_REGISTRATION_DISABLED` = owner closed registration; 503 = settings unavailable; 409 = email exists |
 | 2 | Opens the verification email and clicks the link | Success page; `email_verified=true`; role and status unchanged | Expired/used: *Resend*. No email: provider checklist |
 | 3 | Signs in | Signed in | Login blocked only if the generic gate is on and email unverified |
 | 4 | Tries a seller action **before** step 2 (for the supervised test) | 403 `EMAIL_VERIFICATION_REQUIRED` | — |
-| 5 | Creates the first listing | 201; listing `pending` under *hold_for_review* (or `pending` under *auto_publish* until the seller account itself is approved) | 403 with a clear code if a prerequisite is missing |
+| 5 | Creates the first listing | 201; listing `pending` under the unchanged *hold_for_review* default. Seller account approval is not required in free mode. | 403 with a clear code if a real prerequisite is missing |
 | 6 | Tries to publish the listing themselves (bulk status → available) | 403 `LISTING_PUBLICATION_REQUIRES_REVIEW` | — |
 | 7 | **Owner** reviews the listing (Admin → Cars moderation) and approves | Listing `available`, publicly visible | 403 `DECISION_AUTHORITY_REQUIRED` if a non-owner admin tried while *owner_only* |
 | 8 | Seller logs out; reuses the old session | Old session rejected (existing session revocation) | — |
@@ -21,7 +21,7 @@ Owner settings saved (private sellers `enabled`); email provider verified (live 
 `role`, `status`, `approved`, `emailVerified`, `isVerifiedDealer`, listing `status`, `ntsaVerified`, `logbookVerified`, `dutyStatus`, `isPromoted`, `escrowEnabled` — server overrides or rejects (tests: `stage5RegistrationAndLifecycle`, `onboardingFlow`, existing Stage 1 listing-boundary tests).
 
 ## Approving the seller account
-`users.status` starts `pending`. Under *auto_publish* the listing only publishes once the account is `approved`. Approve through **Admin → Dealer verifications / Sellers** (owner-only by default). All three approval endpoints now set `users.status` consistently.
+**Current policy correction (2026-11-10):** self-registration and private selling are free and approval-free by default. `individual_seller` identities are created `approved` while email verification remains false until the existing verification flow completes. The default listing moderation policy remains `hold_for_review`; this is separate from seller-account approval. Dealer accounts remain pending until their independent verification is completed. Administrators can enable private-seller approval later through **Admin → Settings → Onboarding**. Paid package modes are not operational until catalogue/pricing and provider-confirmed checkout are implemented.
 
 ## Rollback / recovery
 - Wrong listing published: hide it (Admin → Cars) — reversible. Sold listings cannot be moderated.

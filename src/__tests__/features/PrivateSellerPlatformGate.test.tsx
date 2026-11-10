@@ -27,6 +27,12 @@ describe('Seller Studio entry for personal accounts', () => {
     await screen.findByTestId('seller-capability-panel');
     expect(screen.queryByText('My Listings')).toBeNull();
   });
+  it('free policy default admits personal accounts without seller application or package', async () => {
+    getMySellerCapability.mockResolvedValue({ ...cap('approved'), source: 'policy_default', canApply: false, canList: true });
+    mount('user');
+    expect((await screen.findAllByText('My Listings')).length).toBeGreaterThan(0);
+    expect(screen.getByText(/free personal listing workspace · no seller approval or package required/i)).toBeTruthy();
+  });
   it('an approved personal account is admitted to the workspace', async () => {
     getMySellerCapability.mockResolvedValue(cap('approved'));
     mount('user');
@@ -39,6 +45,12 @@ describe('Seller Studio entry for personal accounts', () => {
   });
   it('a suspended individual_seller is moved out of the workspace', async () => {
     getMySellerCapability.mockResolvedValue(cap('suspended'));
+    mount('individual_seller');
+    await screen.findByTestId('seller-capability-panel');
+    expect(screen.queryByText('My Listings')).toBeNull();
+  });
+  it('a pending individual_seller is blocked when approval is explicitly required', async () => {
+    getMySellerCapability.mockResolvedValue({ ...cap('pending'), approvalRequired: true });
     mount('individual_seller');
     await screen.findByTestId('seller-capability-panel');
     expect(screen.queryByText('My Listings')).toBeNull();
