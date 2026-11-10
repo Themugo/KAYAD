@@ -1,11 +1,12 @@
 // ============================================================
-//  PHASE 13E — private-seller capability service (C1).
-//  Authoritative source: public.private_seller_capabilities (one row per users.id). Legacy role=individual_seller accounts with no
-//  row fall back to their users.status (the only approval source that existed before 13E); once a row exists it is authoritative.
+//  PRIVATE SELLER ACCESS — policy-controlled personal-account capability.
+//  Default launch policy is free/open with no seller application or approval. When the administrator enables approval,
+//  public.private_seller_capabilities becomes authoritative. Suspension/revocation remain enforceable in either mode.
 //  Never touches dealers / dealer_verifications / dealer_teams, never changes users.role or users.status, never creates users.
 // ============================================================
 import { getSupabase } from "../utils/supabase.js";
 import { STAFF_ROLES } from "../config/roles.js";
+import { getOnboardingPolicy } from "./onboardingPolicy.service.js";
 
 const TABLE = "private_seller_capabilities";
 const EVENTS_TABLE = "private_seller_listing_visibility_events";
@@ -26,8 +27,15 @@ const map = (r) => r && ({
   submittedAt: r.submitted_at, reviewedAt: r.reviewed_at ?? null, reviewReason: r.review_reason ?? null,
 });
 
+const isMissingCapabilityTable = (error) =>
+  ["42P01", "PGRST205", "PGRST204"].includes(String(error?.code || ""))
+  || /could not find the table .*private_seller_capabilities.*schema cache|relation .*private_seller_capabilities.* does not exist/i.test(String(error?.message || ""));
+
 export const getCapabilityRow = async (userId) => {
   const { data, error } = await getSupabase().from(TABLE).select("*").eq("user_id", userId).maybeSingle();
+  // The free/no-approval policy must not depend on the optional review table being deployed.
+  // Only a confirmed missing-table error is treated as absent; outages and other schema errors still fail closed.
+  if (error && isMissingCapabilityTable(error)) return null;
   if (error) throw error;
   return data || null;
 };
@@ -37,24 +45,53 @@ export const getCapabilityRow = async (userId) => {
 export const resolveSellerState = async (user) => {
   if (!user) return { status: "none", source: "none" };
   if (user.role === "dealer" || STAFF_ROLES.includes(user.role)) return { status: "not_applicable", source: "role" };
+
+  const policyResult = await getOnboardingPolicy();
+  const approvalRequired = policyResult.policy.privateSellerApprovalMode === "required";
   const row = await getCapabilityRow(user.id ?? user._id);
-  if (row) return { status: row.status, source: row.source === "legacy_backfill" ? "legacy_backfill" : "capability" };
-  if (user.role === "individual_seller") return { status: LEGACY_MAP[user.status] || "pending", source: "legacy_users_status" };
+
+  // Suspension/revocation remain enforceable safety controls even while routine seller approval is disabled.
+  if (row && ["suspended", "revoked"].includes(row.status)) {
+    return { status: row.status, source: "capability", application: map(row) };
+  }
+  if (user.role === "individual_seller" && ["suspended", "revoked"].includes(String(user.status || "").toLowerCase())) {
+    return { status: String(user.status).toLowerCase(), source: "legacy_users_status" };
+  }
+  if (!approvalRequired) {
+    return { status: "approved", source: "policy_default", application: map(row) };
+  }
+
+  if (row) return { status: row.status, source: row.source === "legacy_backfill" ? "legacy_backfill" : "capability", application: map(row) };
+  if (user.role === "individual_seller") {
+    const legacyStatus = String(user.status || "").toLowerCase();
+    if (["suspended", "revoked"].includes(legacyStatus)) return { status: legacyStatus, source: "legacy_users_status" };
+    return { status: LEGACY_MAP[user.status] || "pending", source: "legacy_users_status" };
+  }
   return { status: "none", source: "none" };
 };
 
 export const getMySellerCapability = async (user) => {
+  const policy = await getOnboardingPolicy();
   const state = await resolveSellerState(user);
   const row = ["none", "not_applicable"].includes(state.status) ? null : await getCapabilityRow(user.id ?? user._id);
   return {
-    status: state.status, source: state.source, application: map(row),
-    canApply: user.role === "user" && (state.status === "none" || state.status === "rejected"),
-    canList: state.status === "approved",
+    status: state.status, source: state.source, application: state.application || map(row),
+    canApply: policy.policy.privateSellerApprovalMode === "required" && user.role === "user" && (state.status === "none" || state.status === "rejected"),
+    canList: state.status === "approved" && policy.policy.privateSellerPackageMode === "free",
+    approvalRequired: policy.policy.privateSellerApprovalMode === "required",
+    packageMode: policy.policy.privateSellerPackageMode,
   };
 };
 
 const PHONE_RE = /^\+?[0-9]{9,15}$/;
 export const submitApplication = async ({ user, contactPhone, intendedUse }) => {
+  const onboarding = await getOnboardingPolicy();
+  if (onboarding.policy.privateSellerApprovalMode !== "required") {
+    throw err(409, "SELLER_APPROVAL_NOT_REQUIRED", "Private selling is open. No application or administrator approval is required.");
+  }
+  if (onboarding.policy.privateSellerPackageMode !== "free") {
+    throw err(503, "SELLER_PACKAGE_CONFIGURATION_INCOMPLETE", "Paid seller packages are not available until package checkout is configured.");
+  }
   if (user.role !== "user") throw err(403, "SELLER_APPLICATION_NOT_ALLOWED", "Only personal buyer accounts can apply for private-seller access.");
   if (user.emailVerified !== true) throw err(403, "EMAIL_VERIFICATION_REQUIRED", "Please verify your email address before applying to sell.");
   const phone = String(contactPhone || "").replace(/[\s-]/g, "");

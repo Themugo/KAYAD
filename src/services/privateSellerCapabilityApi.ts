@@ -8,6 +8,8 @@ export interface SellerCapability {
   application: { status: string; reviewReason: string | null; submittedAt: string; reviewedAt: string | null } | null;
   canApply: boolean;
   canList: boolean;
+  approvalRequired: boolean;
+  packageMode: 'free' | 'optional' | 'required';
 }
 
 interface Envelope<T> { success: boolean; data: T }

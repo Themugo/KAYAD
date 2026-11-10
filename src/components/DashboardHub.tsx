@@ -33,8 +33,12 @@ export default function DashboardHub({ user, vehicles = [], onNavigate }: Props)
   const sellerApproved = capability ? capability.status === 'approved' : role === 'individual_seller';
   const baseConfig = configs[role === 'individual_seller' ? 'user' : role];
   // Phase 13F: a legacy individual_seller whose real capability is suspended/revoked/rejected is not offered the seller workspace entry (the backend refuses their seller writes).
-  const sellerBlocked = !!capability && ['suspended', 'revoked', 'rejected'].includes(capability.status);
-  const personalConfig = role === 'individual_seller' ? { ...baseConfig, title: 'My Dashboard', subtitle: 'Buy and sell from one account: your saved vehicles, active transactions and private-seller tools.', actions: sellerBlocked ? baseConfig.actions : [...baseConfig.actions, {label:'Seller workspace',nav:'seller-platform',icon:LayoutDashboard}] } : (isPersonal && capability?.status === 'approved' ? { ...baseConfig, actions: [...baseConfig.actions, {label:'Seller workspace',nav:'seller-platform',icon:LayoutDashboard}] } : baseConfig);
+  const sellerBlocked = !!capability && (
+    ['suspended', 'revoked', 'rejected'].includes(capability.status)
+    || (capability.approvalRequired === true && capability.status !== 'approved')
+    || (capability.packageMode && capability.packageMode !== 'free')
+  );
+  const personalConfig = role === 'individual_seller' ? { ...baseConfig, title: 'My Dashboard', subtitle: 'Buy and sell from one account: your saved vehicles, active transactions and private-seller tools.', actions: sellerBlocked ? baseConfig.actions : [...baseConfig.actions, {label:'Seller workspace',nav:'seller-platform',icon:LayoutDashboard}] } : (isPersonal && capability?.status === 'approved' && (!capability.packageMode || capability.packageMode === 'free') ? { ...baseConfig, actions: [...baseConfig.actions, {label:'Seller workspace',nav:'seller-platform',icon:LayoutDashboard}] } : baseConfig);
   const config = (isPersonal ? personalConfig : undefined) || configs[role] || (['admin','superadmin','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','moderator'].includes(role) ? { title: 'Platform Operations Dashboard', subtitle: 'Role-scoped control, queues and platform health.', accent: '#5AAFA4', actions: staffActions } : configs.user);
   const [density, setDensity] = useState<'comfortable'|'compact'>('comfortable');
   const [hidden, setHidden] = useState<string[]>([]);

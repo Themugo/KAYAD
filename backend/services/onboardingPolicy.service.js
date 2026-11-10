@@ -9,6 +9,8 @@
 //
 // Policy fields (all server-validated enums; unknown keys are rejected):
 //   privateSellerRegistration  enabled | disabled
+//   privateSellerApprovalMode  disabled | required (defaults to disabled)
+//   privateSellerPackageMode   free (paid modes require a later package catalogue + verified checkout integration)
 //   dealerOnboardingMode       self_onboarding | approval_required | closed
 //   listingModeration          hold_for_review | auto_publish
 //   dealerDecisionAuthority    owner_only | admins     (who may approve/reject dealers & sellers)
@@ -37,11 +39,13 @@ const logError = (...a) => { try { loggerModule.logError?.(...a); } catch { /* l
 const logWarn = (...a) => { try { loggerModule.logWarn?.(...a); } catch { /* logging must not throw */ } };
 
 export const ONBOARDING_POLICY_KEY = "onboarding_policy";
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 const CACHE_TTL_MS = 5_000;
 
 export const POLICY_FIELDS = Object.freeze({
   privateSellerRegistration: Object.freeze(["enabled", "disabled"]),
+  privateSellerApprovalMode: Object.freeze(["disabled", "required"]),
+  privateSellerPackageMode: Object.freeze(["free", "optional", "required"]),
   dealerOnboardingMode: Object.freeze(["self_onboarding", "approval_required", "closed"]),
   listingModeration: Object.freeze(["hold_for_review", "auto_publish"]),
   dealerDecisionAuthority: Object.freeze(["owner_only", "admins"]),
@@ -51,6 +55,8 @@ export const POLICY_FIELDS = Object.freeze({
 /** Deliberate initial configuration when no row exists. Dealers are NOT opened by default. */
 export const INITIAL_DEFAULTS = Object.freeze({
   privateSellerRegistration: "enabled",
+  privateSellerApprovalMode: "disabled",
+  privateSellerPackageMode: "free",
   dealerOnboardingMode: "approval_required",
   listingModeration: "hold_for_review",
   dealerDecisionAuthority: "owner_only",
@@ -60,6 +66,8 @@ export const INITIAL_DEFAULTS = Object.freeze({
 /** Used whenever the real value cannot be trusted. Every value is the most restrictive one. */
 export const RESTRICTIVE = Object.freeze({
   privateSellerRegistration: "disabled",
+  privateSellerApprovalMode: "disabled",
+  privateSellerPackageMode: "free",
   dealerOnboardingMode: "closed",
   listingModeration: "hold_for_review",
   dealerDecisionAuthority: "owner_only",
@@ -188,6 +196,19 @@ export async function updateOnboardingPolicy({ changes: rawChanges, expectedRevi
   if (current.revision !== expectedRevision) {
     throw new OnboardingPolicyError("ONBOARDING_POLICY_CONFLICT", "Settings changed since you loaded them. Reload and review before saving.", 409, { current: publicView(current) });
   }
+  if (v.changes.privateSellerApprovalMode === "required" && current.policy.privateSellerApprovalMode !== "required") {
+    // Approval mode depends on the persisted capability table. Do not let an administrator
+    // enable a gate that the current database cannot enforce or review.
+    const capabilityCheck = await getSupabase().from("private_seller_capabilities").select("user_id").limit(1);
+    if (capabilityCheck.error) {
+      const missing = ["42P01", "PGRST205", "PGRST204"].includes(String(capabilityCheck.error.code || ""))
+        || /private_seller_capabilities.*(does not exist|schema cache)/i.test(String(capabilityCheck.error.message || ""));
+      if (missing) {
+        throw new OnboardingPolicyError("ONBOARDING_POLICY_PREREQUISITE_MISSING", "Private-seller approval cannot be enabled until the capability-table migration has been reconciled and applied.", 503);
+      }
+      throw new OnboardingPolicyError("ONBOARDING_POLICY_PREREQUISITE_UNAVAILABLE", "Could not verify the private-seller capability table. Settings were not changed.", 503);
+    }
+  }
   // A corrupt stored policy is repaired from the trusted merge (corrupt fields were already replaced by RESTRICTIVE).
   const nextRevision = current.revision + 1;
   const stamp = new Date().toISOString();
@@ -241,6 +262,8 @@ export function publicRegistrationView(result) {
   const trusted = isPolicyTrusted(result);
   return {
     privateSellerRegistration: result.policy.privateSellerRegistration,
+    privateSellerApprovalMode: result.policy.privateSellerApprovalMode,
+    privateSellerPackageMode: result.policy.privateSellerPackageMode,
     dealerOnboardingMode: result.policy.dealerOnboardingMode,
     available: trusted,
     emailVerificationRequiredForSellers: true,
@@ -289,7 +312,11 @@ export async function sellerMayPublishDirectly(user) {
   if (user.effectiveRole === "webhoist") return true;
   if (user.role === "admin" || user.role === "superadmin") return true;
   const result = await getOnboardingPolicy();
-  return isPolicyTrusted(result) && result.policy.listingModeration === "auto_publish" && user.status === "approved";
+  if (!isPolicyTrusted(result) || result.policy.listingModeration !== "auto_publish") return false;
+  const personalSeller = ["user", "individual_seller"].includes(String(user.role || ""));
+  const accountStatusOk = user.status === "approved"
+    || (personalSeller && result.policy.privateSellerApprovalMode !== "required" && !["suspended", "revoked", "deactivated", "banned"].includes(String(user.status || "").toLowerCase()));
+  return accountStatusOk && result.policy.privateSellerPackageMode === "free";
 }
 
 export const PUBLICATION_REVIEW_REQUIRED = Object.freeze({

@@ -15,6 +15,18 @@ const FIELDS = [
     options: { enabled: 'Open — sellers can register themselves', disabled: 'Closed — no new private-seller registrations' },
   },
   {
+    key: 'privateSellerApprovalMode',
+    label: 'Private seller approval',
+    help: 'Disabled means every eligible personal account can sell immediately without an approval queue. Suspensions and revocations remain enforceable. Enabling approval is blocked until the capability-table migration is deployed.',
+    options: { disabled: 'Disabled — free self-service selling for everyone', required: 'Required — administrator approval before selling' },
+  },
+  {
+    key: 'privateSellerPackageMode',
+    label: 'Private seller packages',
+    help: 'Free is the active launch mode. Paid package modes are reserved for rollout after package catalogue, pricing and provider-confirmed checkout are implemented; selecting them safely blocks selling rather than accepting unpaid listings.',
+    options: { free: 'Free — no package selection', optional: 'Paid packages optional (checkout integration required)', required: 'Paid package required (checkout integration required)' },
+  },
+  {
     key: 'dealerOnboardingMode',
     label: 'Dealer onboarding',
     help: 'Self-onboarding lets a dealer register and list a few vehicles (up to 3) while unverified. Approval-required keeps dealers unable to list until you approve them.',
@@ -32,7 +44,7 @@ const FIELDS = [
   },
   {
     key: 'dealerDecisionAuthority',
-    label: 'Who approves or rejects dealers and sellers',
+    label: 'Who approves or rejects dealer applications and optional seller reviews',
     help: 'Owner only is the safest launch setting.',
     options: { owner_only: 'Platform owner only', admins: 'Owner and administrators' },
   },
@@ -48,7 +60,7 @@ const SOURCE_NOTE = {
   default: 'No settings have been saved yet. These are the launch defaults.',
   database: 'Saved settings.',
   invalid: 'The stored settings are damaged. Restrictive values are in force until you save.',
-  unavailable: 'Settings could not be read. Restrictive values are in force: seller and dealer registration are closed and listings are held for review.',
+  unavailable: 'Settings could not be read. Restrictive values are in force for dealer onboarding; private selling remains free and approval-free.',
 };
 
 export default function AdminSettingsOnboarding() {

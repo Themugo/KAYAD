@@ -46,14 +46,19 @@ export default function SellerCapabilityPanel({ capability, loading, error, onRe
   const { status } = capability;
   const reason = capability.application?.reviewReason;
 
+  if (capability.packageMode && capability.packageMode !== 'free') {
+    return shell(<p className="mt-2 text-xs text-[#0A3340]" role="status">KAYAD has configured a paid seller-package mode, but package checkout is not available yet. Selling actions remain unavailable until the package catalogue and verified payment flow are launched.</p>, 'border-[#F2D6A2] bg-[#FFFAF0]');
+  }
+
   if (status === 'approved') {
+    const policyOpen = capability.source === 'policy_default';
     return shell(<div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <p className="flex items-center gap-2 text-xs text-[#0A3340]"><ShieldCheck size={16} aria-hidden="true" /> Your private-seller access is approved. You can list and manage your own vehicles from this same account.</p>
+      <p className="flex items-center gap-2 text-xs text-[#0A3340]"><ShieldCheck size={16} aria-hidden="true" /> {policyOpen ? 'Private selling is open to every registered personal account. No seller application, package selection or administrator approval is required.' : 'Your private-seller access is approved. You can list and manage your own vehicles from this same account.'}</p>
       <button type="button" onClick={onOpenWorkspace} className="inline-flex items-center gap-2 rounded-xl bg-[#0A3340] px-3 py-2 text-xs font-bold text-white"><LayoutDashboard size={14} aria-hidden="true" /> Open seller workspace</button>
     </div>);
   }
   if (status === 'pending') {
-    return shell(<p className="mt-2 flex items-center gap-2 text-xs text-[#0A3340]" role="status"><Clock size={16} aria-hidden="true" /> Your application is pending review. You can keep buying and bidding as normal; selling tools unlock after approval.</p>);
+    return shell(<p className="mt-2 flex items-center gap-2 text-xs text-[#0A3340]" role="status"><Clock size={16} aria-hidden="true" /> Your seller application is pending because administrator approval is currently enabled. Buying remains available.</p>);
   }
   if (status === 'suspended' || status === 'revoked') {
     return shell(<p className="mt-2 flex items-start gap-2 text-xs text-[#0A3340]" role="status"><ShieldAlert size={16} aria-hidden="true" className="mt-0.5 shrink-0" /> Your private-seller access is {status}. Selling actions are unavailable; your buyer account is not affected. Public listings that were live when this status changed are hidden until an authorized administrator restores approval; records and ownership are preserved.{reason ? ` Reason: ${reason}` : ''}</p>, 'border-[#F2D6A2] bg-[#FFFAF0]');
@@ -70,7 +75,7 @@ export default function SellerCapabilityPanel({ capability, loading, error, onRe
   // none | rejected -> application form
   return shell(<>
     {status === 'rejected' && <p className="mt-2 flex items-start gap-2 text-xs text-[#0A3340]" role="status"><ShieldAlert size={16} aria-hidden="true" className="mt-0.5 shrink-0" /> Your last application was not approved.{reason ? ` Reason: ${reason}` : ''} You can apply again; buying is unaffected.</p>}
-    <p className="mt-2 text-xs text-[#64748B]">Want to sell a vehicle? Apply with this same account – no second account needed.</p>
+    <p className="mt-2 text-xs text-[#64748B]">Want to sell a vehicle? Private selling is free when approval is disabled. If the administrator enables a review requirement in future, the application options will appear here.</p>
     <form onSubmit={submit} className="mt-3 grid gap-3 sm:grid-cols-2" noValidate>
       <label className="text-xs font-bold text-[#0A3340]">Contact phone
         <input value={phone} onChange={(e) => setPhone(e.target.value)} inputMode="tel" autoComplete="tel" required className="mt-1 w-full rounded-xl border border-[#D7E7E4] px-3 py-2 text-sm font-normal" placeholder="+254712345678" />

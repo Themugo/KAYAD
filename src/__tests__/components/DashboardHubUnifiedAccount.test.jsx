@@ -18,7 +18,7 @@ vi.mock('../../components/auction/AuctionExperienceRail', () => ({
   BidderIdentityCard: () => <div data-testid="bidder-card">Bidder profile</div>,
 }));
 
-const cap = (status, extra = {}) => ({ status, source: 'capability', application: status === 'none' ? null : { status, reviewReason: null, submittedAt: 'x', reviewedAt: null, ...extra }, canApply: status === 'none' || status === 'rejected', canList: status === 'approved' });
+const cap = (status, extra = {}) => ({ status, source: 'capability', approvalRequired: true, application: status === 'none' ? null : { status, reviewReason: null, submittedAt: 'x', reviewedAt: null, ...extra }, canApply: status === 'none' || status === 'rejected', canList: status === 'approved' });
 const mount = (role = 'user', onNavigate = () => {}) => render(<DashboardHub user={{ id: 'u1', name: 'James', role }} vehicles={[]} onNavigate={onNavigate} />);
 
 beforeEach(() => { getMySellerCapability.mockReset(); applyForPrivateSelling.mockReset(); });
@@ -81,6 +81,13 @@ describe('seller states keep the buyer dashboard', () => {
     fireEvent.click(open);
     expect(nav).toHaveBeenCalledWith('seller-platform');
   });
+  it('free policy default opens selling without an application or package', async () => {
+    getMySellerCapability.mockResolvedValue({ ...cap('approved'), source: 'policy_default', canApply: false, canList: true });
+    mount('user');
+    expect(await screen.findByText(/open to every registered personal account/i)).toBeTruthy();
+    expect(await screen.findByRole('button', { name: /open seller workspace/i })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /apply to sell/i })).toBeNull();
+  });
   it('rejected: shows the real state and reason, allows re-applying, buyer intact', async () => {
     getMySellerCapability.mockResolvedValue(cap('rejected', { reviewReason: 'documents unclear' }));
     mount('user');
@@ -132,10 +139,12 @@ describe('existing private sellers (role individual_seller)', () => {
     await waitFor(() => expect(screen.queryByText('Seller workspace')).toBeNull());
     expect(screen.getByTestId('bidder-card')).toBeTruthy();
   });
-  it('a pending legacy seller keeps the workspace entry (backend still admits pending legacy sellers)', async () => {
-    getMySellerCapability.mockResolvedValue({ ...cap('pending'), source: 'legacy_users_status' });
+  it('a pending legacy seller is blocked only when the administrator enables approval', async () => {
+    getMySellerCapability.mockResolvedValue({ ...cap('pending'), source: 'legacy_users_status', approvalRequired: true });
     mount('individual_seller');
-    expect((await screen.findAllByText('Seller workspace')).length).toBeGreaterThan(0);
+    await screen.findByTestId('seller-capability-panel');
+    expect(screen.queryByText('Seller workspace')).toBeNull();
+    expect(screen.getByTestId('bidder-card')).toBeTruthy();
   });
 });
 

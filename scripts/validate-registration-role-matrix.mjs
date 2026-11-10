@@ -13,6 +13,7 @@ const routes = read('backend/routes/authRoutes.js');
 const authApi = read('src/services/authApi.ts');
 const httpClient = read('src/api/httpClient.ts');
 const responseSchema = read('backend/validation/response.schema.js');
+const freeSellerMigration = read('supabase/migrations/20261110140000_private_seller_free_access_defaults.sql');
 
 const checks = [
   ['staff and broker roles are never offered on the public matrix', !/id: '(admin|superadmin|moderator|broker|ghost_checker)'/.test(roles) && /NON_SELF_REGISTRABLE/.test(roles)],
@@ -29,8 +30,9 @@ const checks = [
   ['dealer requires location server-side', /role === "dealer" && !location/.test(controller)],
   ['personal account does not require business fields for private selling', /const isDealer = role\.backendRole === 'dealer'/.test(flow) && /{isDealer && \(/.test(flow) && /backendRole !== 'user' && form\.businessName\.trim\(\)/.test(flow)],
   ['backend preserves seller role instead of silently converting it', /requestedRole === "dealer" \|\| requestedRole === "individual_seller" \? requestedRole : "user"/.test(controller)],
-  ['buyer registration creates approved user status', /CASE WHEN p_role = 'user' THEN 'approved' ELSE 'pending' END/.test(read('supabase/migrations/20261001090000_registration_onboarding_integrity.sql'))],
-  ['seller registration remains pending for platform verification', /CASE WHEN p_role = 'user' THEN 'approved' ELSE 'pending' END/.test(read('supabase/migrations/20261001090000_registration_onboarding_integrity.sql'))],
+  ['personal and private-seller registrations are active by default', /WHEN p_role = 'individual_seller' AND v_seller_approval_required THEN 'pending'[\s\S]*ELSE 'approved'/.test(freeSellerMigration)],
+  ['future seller approval remains configurable without changing the free default', /privateSellerApprovalMode/.test(freeSellerMigration) && /privateSellerApprovalMode: \"disabled\"/.test(read('backend/services/onboardingPolicy.service.js'))],
+  ['future package modes remain configurable while free is the default', /privateSellerPackageMode: \"free\"/.test(read('backend/services/onboardingPolicy.service.js')) && /privateSellerPackageMode/.test(read('backend/services/onboardingPolicy.service.js'))],
   ['registration creates user record', /INSERT INTO public\.users/.test(read('supabase/migrations/20261001090000_registration_onboarding_integrity.sql'))],
   ['registration creates credential record', /INSERT INTO public\.user_auth/.test(read('supabase/migrations/20261001090000_registration_onboarding_integrity.sql'))],
   ['registration identity writes are transactionally atomic', /RETURNS JSONB[\s\S]*INSERT INTO public\.users[\s\S]*INSERT INTO public\.user_auth/.test(read('supabase/migrations/20261001090000_registration_onboarding_integrity.sql'))],
@@ -46,7 +48,7 @@ const checks = [
   ['state-changing requests bootstrap CSRF', /await ensureCsrfToken\(\)/.test(httpClient)],
   ['CSRF endpoint remains canonical', /CSRF_BOOTSTRAP_PATH = '\/v1\/auth\/csrf'/.test(httpClient)],
   ['auth response contract accepts created user', /user: z\.object\(\{[\s\S]*_id: z\.string\(\)/.test(responseSchema)],
-  ['personal account explains separate private-seller approval', /request private-selling access from the same account/.test(flow) && /listing remains subject to KAYAD approval/.test(flow)],
+  ['personal account explains free immediate private selling', /sell your own vehicle for free/.test(flow) && /No package selection, seller application or administrator approval is required/.test(flow)],
   ['dealer completion messaging is distinct', /taken to business verification/.test(flow)],
 ];
 

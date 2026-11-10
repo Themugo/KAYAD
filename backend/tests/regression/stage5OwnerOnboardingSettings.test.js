@@ -41,7 +41,7 @@ const carUpdate = jest.fn(async () => ({}));
 jest.unstable_mockModule("../../models/Car.js", () => ({ default: { findById: jest.fn(() => ({ populate: async () => carFind() })), findByIdAndUpdate: carUpdate, find: jest.fn() } }));
 
 // ── in-memory system_settings with UNIQUE(key) and a hook to interleave concurrent requests ──
-let table; let failRead; let failWrite; let beforeWrite;
+let table; let failRead; let failWrite; let beforeWrite; let capabilityTableMissing;
 const sbModule = {
   initSupabase: jest.fn(),
   checkSupabaseReadiness: async () => ({ ok: true }),
@@ -50,6 +50,9 @@ const sbModule = {
   getSupabase: () => ({
     rpc: jest.fn(),
     from: (name) => {
+      if (name === "private_seller_capabilities") return { select: () => ({ limit: async () => capabilityTableMissing
+        ? ({ data: null, error: { code: "PGRST205", message: "Could not find the table 'public.private_seller_capabilities' in the schema cache" } })
+        : ({ data: [], error: null }) }) };
       if (name !== "system_settings") return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }) };
       const st = { op: "select", filters: [], payload: null, single: false };
       const api = {
@@ -120,7 +123,7 @@ const stored = () => table.find((r) => r.key === svc.ONBOARDING_POLICY_KEY);
 const actions = () => auditCreate.mock.calls.map((c) => c[0].action);
 
 beforeEach(() => {
-  table = []; failRead = false; failWrite = false; beforeWrite = null;
+  table = []; failRead = false; failWrite = false; beforeWrite = null; capabilityTableMissing = false;
   auditCreate.mockClear();
   svc.invalidateOnboardingPolicyCache();
   svc.__setOnboardingPolicyForTests(null);
@@ -130,8 +133,13 @@ beforeEach(() => {
 describe("pure policy functions", () => {
   test("launch defaults are deliberate: dealers are NOT silently opened", () => {
     expect(INITIAL_DEFAULTS).toEqual({
-      privateSellerRegistration: "enabled", dealerOnboardingMode: "approval_required", listingModeration: "hold_for_review",
-      dealerDecisionAuthority: "owner_only", listingDecisionAuthority: "owner_only",
+      privateSellerRegistration: "enabled",
+      privateSellerApprovalMode: "disabled",
+      privateSellerPackageMode: "free",
+      dealerOnboardingMode: "approval_required",
+      listingModeration: "hold_for_review",
+      dealerDecisionAuthority: "owner_only",
+      listingDecisionAuthority: "owner_only",
     });
   });
   test("restrictive fallback closes registration and holds listings", () => {
@@ -153,7 +161,12 @@ describe("pure policy functions", () => {
     expect(svc.validatePolicyChanges(input).ok).toBe(false);
   });
   test("validatePolicyChanges accepts exactly the allowed enums", () => {
-    expect(svc.validatePolicyChanges({ dealerOnboardingMode: "self_onboarding", listingModeration: "auto_publish" })).toMatchObject({ ok: true });
+    expect(svc.validatePolicyChanges({
+      dealerOnboardingMode: "self_onboarding",
+      listingModeration: "auto_publish",
+      privateSellerApprovalMode: "required",
+      privateSellerPackageMode: "optional",
+    })).toMatchObject({ ok: true });
   });
   test("mayDecide: owner_only admits the owner only; admins admits admin/superadmin; untrusted ⇒ owner only", () => {
     const owner = { role: "superadmin", effectiveRole: "webhoist", emailVerified: true };
@@ -273,6 +286,17 @@ describe("PUT /api/admin/settings/onboarding — who can change, validation, aud
     expect(r.status).toBe(400);
     expect(stored()).toBeUndefined();
   });
+  test("cannot enable seller approval until the capability table migration exists", async () => {
+    capabilityTableMissing = true;
+    const r = await call("PUT", "/api/admin/settings/onboarding", {
+      role: "owner",
+      body: { privateSellerApprovalMode: "required", expectedRevision: 0 },
+    });
+    expect(r.status).toBe(503);
+    expect(r.body.code).toBe("ONBOARDING_POLICY_PREREQUISITE_MISSING");
+    expect(stored()).toBeUndefined();
+  });
+
   test("owner change persists, bumps revision, and writes a no-secret audit entry with before/after/actor", async () => {
     const r = await call("PUT", "/api/admin/settings/onboarding", { role: "owner", body: { dealerOnboardingMode: "self_onboarding", listingModeration: "auto_publish", expectedRevision: 0 } });
     expect(r.status).toBe(200);
@@ -361,8 +385,8 @@ describe("public registration modes", () => {
   test("anonymous callers see only the two registration modes + a trust flag", async () => {
     const r = await call("GET", "/api/admin/public/onboarding-policy");
     expect(r.status).toBe(200);
-    expect(Object.keys(r.body.policy).sort()).toEqual(["available", "dealerOnboardingMode", "emailVerificationRequiredForSellers", "privateSellerRegistration"]);
-    expect(r.body.policy).toMatchObject({ privateSellerRegistration: "enabled", dealerOnboardingMode: "approval_required", available: true });
+    expect(Object.keys(r.body.policy).sort()).toEqual(["available", "dealerOnboardingMode", "emailVerificationRequiredForSellers", "privateSellerApprovalMode", "privateSellerPackageMode", "privateSellerRegistration"]);
+    expect(r.body.policy).toMatchObject({ privateSellerRegistration: "enabled", privateSellerApprovalMode: "disabled", privateSellerPackageMode: "free", dealerOnboardingMode: "approval_required", available: true });
   });
   test("when the store is unavailable the page learns 'unavailable' and the restrictive values", async () => {
     failRead = true;

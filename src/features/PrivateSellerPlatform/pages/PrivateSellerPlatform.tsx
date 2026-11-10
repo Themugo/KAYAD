@@ -317,10 +317,11 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
   }, []);
 
   const normalizedRole = String(user?.role || '').toLowerCase();
-  // approved capability -> workspace. Legacy individual_seller keeps the workspace unless the capability state says otherwise
-  // (suspended / revoked / rejected) or while the state is still loading / could not be loaded (no regression for existing sellers).
+  // Free policy returns an effective approved state for all eligible personal accounts.
+  // Once approval is enabled, only an approved capability enters the workspace.
+  // Existing individual_seller users retain the workspace during initial load to avoid a navigation flash.
   const sellerWorkspaceAllowed = capability
-    ? capability.status === 'approved' || (normalizedRole === 'individual_seller' && capability.status === 'pending')
+    ? capability.status === 'approved' && (!capability.packageMode || capability.packageMode === 'free')
     : normalizedRole === 'individual_seller';
 
   if (!user || !sellerWorkspaceAllowed) {
@@ -331,9 +332,9 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
         <div className="kayad-sell-entry__hero">
           <span className="kayad-sell-entry__eyebrow"><Car size={14} aria-hidden="true" /> KAYAD SELLER STUDIO</span>
           <h1 id="kayad-sell-entry-title">Your next sale should feel simpler.</h1>
-          <p>Present your vehicle clearly, manage genuine buyer conversations and follow the approval steps from one dedicated workspace.</p>
+          <p>Present your vehicle clearly and manage genuine buyer conversations from one dedicated workspace. Private seller access is free and does not require a seller application or package.</p>
           <div className="kayad-sell-entry__trust-row" aria-label="Seller workflow benefits">
-            <span><ShieldCheck size={16} aria-hidden="true" /> Approval-led listings</span>
+            <span><ShieldCheck size={16} aria-hidden="true" /> Free private selling · listing moderation remains separate</span>
             <span><MessageSquare size={16} aria-hidden="true" /> Buyer conversations</span>
             <span><FileCheck size={16} aria-hidden="true" /> Inspection options</span>
           </div>
@@ -348,7 +349,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
           <div className="kayad-sell-entry__choices">
             <button type="button" aria-pressed={!isDealer} onClick={() => setSellerAccountType('seller')} className={`kayad-sell-choice ${!isDealer ? 'is-selected' : ''}`}>
               <span className="kayad-sell-choice__icon"><User size={22} aria-hidden="true" /></span>
-              <span className="kayad-sell-choice__copy"><strong>Private seller</strong><small>For an individual selling their own vehicle.</small><em>Personal listing workspace · KAYAD approval required</em></span>
+              <span className="kayad-sell-choice__copy"><strong>Private seller</strong><small>For an individual selling their own vehicle.</small><em>Free personal listing workspace · no seller approval or package required</em></span>
               <span className="kayad-sell-choice__check" aria-hidden="true">{!isDealer ? '✓' : ''}</span>
             </button>
             <button type="button" aria-pressed={isDealer} onClick={() => setSellerAccountType('dealer')} className={`kayad-sell-choice kayad-sell-choice--dealer ${isDealer ? 'is-selected' : ''}`}>
@@ -542,7 +543,7 @@ function SidebarContent({
             <span className="text-white/70 text-xs">Seller account status</span>
           </div>
           <p className="text-white text-sm font-bold">Access &amp; verification</p>
-          <p className="mt-1 text-white/60 text-[11px] leading-4">Review your seller approval and any required next steps in Trust Center.</p>
+          <p className="mt-1 text-white/60 text-[11px] leading-4">Review your seller account settings and any verification steps in Trust Center.</p>
         </div>
       </div>
     </div>
@@ -629,7 +630,7 @@ function SellerHomeSection({ listings, escrows, loading, listingsError, escrowsE
           <div className="min-w-0">
             <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-semibold text-teal-100"><ShieldCheck size={14} aria-hidden="true" /> KAYAD SELLER STUDIO</div>
             <h1 id="seller-dashboard-title" className="text-2xl font-bold text-white sm:text-3xl">{greeting}{userName ? `, ${userName.split(' ')[0]}` : ''}</h1>
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/75">Manage your listings, follow approval progress and keep track of buyer interest.</p>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/75">Manage your listings, track listing moderation and keep up with buyer interest.</p>
             <p className="mt-3 text-xs text-white/60" aria-live="polite">{loading ? 'Refreshing your seller data…' : refreshedLabel ? `Last updated ${refreshedLabel}` : 'Seller data has not been refreshed yet'}</p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">
@@ -835,7 +836,7 @@ function ListingWizardSection({ draft, setDraft, onNavigate, onPublished }: {
         <div className="mt-4 flex min-w-0 gap-2 overflow-x-auto pb-2" aria-label="Listing steps">{steps.map(step => <button type="button" key={step.id} onClick={() => { if (step.id < currentStep) { setCurrentStep(step.id); update('step', step.id); } }} disabled={step.id >= currentStep} aria-current={step.id === currentStep ? 'step' : undefined} className={`shrink-0 rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap ${step.id === currentStep ? 'bg-[#13B8A6] text-white' : step.id < currentStep ? 'bg-teal-50 text-teal-800' : 'bg-slate-100 text-slate-500'}`}>{step.id < currentStep ? '✓ ' : ''}{step.label}</button>)}</div>
       </section>
       <section className="min-w-0 w-full overflow-hidden rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm sm:p-6">
-        {publishedCarId ? <div className="mx-auto max-w-xl py-8 text-center"><CheckCircle className="mx-auto mb-4 text-teal-600" size={48}/><h2 className="text-2xl font-bold text-[#0A3340]">Listing submitted</h2><p className="mt-2 text-slate-600">KAYAD received your vehicle listing. Its visibility follows the existing seller approval and moderation rules.</p><p className="mt-2 break-all text-xs text-slate-400">Reference: {publishedCarId}</p><button type="button" onClick={() => onNavigate('home')} className="mt-6 rounded-xl bg-[#0A3340] px-5 py-3 font-bold text-white">Return to seller dashboard</button></div> : <>
+        {publishedCarId ? <div className="mx-auto max-w-xl py-8 text-center"><CheckCircle className="mx-auto mb-4 text-teal-600" size={48}/><h2 className="text-2xl font-bold text-[#0A3340]">Listing submitted</h2><p className="mt-2 text-slate-600">KAYAD received your vehicle listing. Seller access is free and approval-free; listing visibility follows the separate moderation policy.</p><p className="mt-2 break-all text-xs text-slate-400">Reference: {publishedCarId}</p><button type="button" onClick={() => onNavigate('home')} className="mt-6 rounded-xl bg-[#0A3340] px-5 py-3 font-bold text-white">Return to seller dashboard</button></div> : <>
           {currentStep === 1 && <div className="mx-auto max-w-2xl py-6 text-center"><Car className="mx-auto mb-4 text-teal-600" size={48}/><h2 className="text-2xl font-bold text-[#0A3340]">Let's get your vehicle listed</h2><p className="mt-3 text-slate-600">Provide accurate details and clear photographs. Your listing is submitted for the existing KAYAD review process; submission does not guarantee immediate publication.</p><div className="mt-5 rounded-xl bg-[#F6FAF9] p-4 text-left text-sm text-slate-600">Have your vehicle details, at least one photo, asking price and accurate ownership information ready.</div></div>}
           {currentStep === 2 && <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2"><label className={labelClass}>Make *<input className={fieldClass} maxLength={80} value={form.vehicleInfo.make} onChange={e => updateNested('vehicleInfo','make',e.target.value)} placeholder="e.g. Toyota" /></label><label className={labelClass}>Model *<input className={fieldClass} maxLength={100} value={form.vehicleInfo.model} onChange={e => updateNested('vehicleInfo','model',e.target.value)} placeholder="e.g. Harrier" /></label><label className={labelClass}>Year *<input className={fieldClass} type="number" min="1900" max={new Date().getFullYear()+1} value={form.vehicleInfo.year || ''} onChange={e => updateNested('vehicleInfo','year',Number(e.target.value))}/></label><label className={labelClass}>Body type<select className={fieldClass} value={form.vehicleInfo.bodyType} onChange={e => updateNested('vehicleInfo','bodyType',e.target.value)}><option value="">Select body type</option>{['SUV','Sedan','Hatchback','Wagon','Coupe','Pickup','Van','Truck','Convertible','Other'].map(x=><option key={x}>{x}</option>)}</select></label><label className={labelClass}>Registration number<input className={fieldClass} value={form.vehicleInfo.registration} onChange={e => updateNested('vehicleInfo','registration',e.target.value)} placeholder="Optional" maxLength={50}/></label><label className={labelClass}>VIN / chassis number<input className={fieldClass} value={form.vehicleInfo.vin} onChange={e => updateNested('vehicleInfo','vin',e.target.value)} placeholder="Optional" maxLength={50}/></label></div>}
           {currentStep === 3 && <div className="space-y-4"><div><h2 className="text-lg font-bold text-[#0A3340]">Add vehicle photographs *</h2><p className="mt-1 text-sm text-slate-500">JPEG, PNG or WebP; up to 10 photos in this submission, maximum 5 MB each. Show the full vehicle clearly.</p></div><label className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-teal-300 bg-teal-50/50 p-5 text-center"><Camera className="mb-2 text-teal-700" size={32}/><span className="font-bold text-[#0A3340]">Choose vehicle photos</span><span className="mt-1 text-xs text-slate-500">Select up to 10 images</span><input className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={e => { const files = Array.from(e.currentTarget.files || []) as File[]; const valid = files.filter(f => ['image/jpeg','image/png','image/webp'].includes(f.type) && f.size <= 5*1024*1024); const hadInvalid = valid.length !== files.length; update('photos', [...form.photos, ...valid].slice(0,10)); if (hadInvalid) setValidationError('Some files were skipped. Use JPG, PNG or WebP images no larger than 5 MB each.'); e.currentTarget.value=''; }}/></label><div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{photoPreviews.map(({file,url},i)=><div key={`${file.name}-${i}`} className="relative overflow-hidden rounded-xl border border-slate-200"><img src={url} alt={`Vehicle photo ${i+1}`} className="h-32 w-full object-contain bg-slate-50"/><button type="button" onClick={()=>update('photos',form.photos.filter((_,index)=>index!==i))} className="absolute right-2 top-2 rounded-full bg-white/95 px-2 py-1 text-xs font-bold text-rose-700">Remove</button></div>)}</div><p className="text-sm text-slate-600">{form.photos.length} of 10 photos selected</p></div>}

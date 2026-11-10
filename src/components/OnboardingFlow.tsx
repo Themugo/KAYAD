@@ -149,7 +149,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
             ? 'After you sign in you will go straight to the provider application. KAYAD reviews it; nothing is published until it is approved.'
             : role?.id === 'professional'
               ? mode === 'independent' ? 'After you sign in, submit your inspector or mechanic credentials from the professional application. KAYAD reviews them and adds approved access to this same account.' : 'After you sign in, ask your garage or inspection company to confirm you as staff. They must accept, and KAYAD verifies qualifications separately.'
-              : 'After verification you can browse, save and bid. You can also request private-selling access from the same account; listing remains subject to KAYAD approval.';
+              : 'After email verification you can browse, save, bid and sell your own vehicle for free from this account. No package selection, seller application or administrator approval is required.';
       return (
         <PremiumAuthShell {...common} eyebrow="Account created" title="Check your email." description={`We sent a verification link to ${outcome.email}. You must verify before you can sign in.`}>
           <div className="space-y-5" role="status">
@@ -242,8 +242,8 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
     title: 'How KAYAD accounts work',
     steps: [
       { title: 'Everyone starts with an email', body: 'Every account must verify its email before it can sign in.' },
-      { title: 'Additional access needs approval', body: 'Private selling, dealership operations and professional services are reviewed by KAYAD before they are enabled.' },
-      { title: 'One identity, more capabilities', body: 'Request private-selling or professional access, or join an approved business, without creating another personal account.' },
+      { title: 'Private selling is free and immediate', body: 'Every verified personal account can list a private vehicle without a package, seller application or administrator approval.' },
+      { title: 'Business and professional access stays separate', body: 'Dealer verification, garage and inspection-company reviews, and professional qualifications retain their own approval processes.' },
     ],
     note: 'Staff and administrator accounts are provisioned by KAYAD and cannot be created here.',
   };

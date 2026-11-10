@@ -9,7 +9,8 @@ vi.mock('../../../api/api', () => ({ adminAPI: { getOnboardingSettings: (...a) =
 import AdminSettingsOnboarding from '../../../pages/admin/AdminSettingsOnboarding';
 
 const policy = (over = {}) => ({
-  privateSellerRegistration: 'enabled', dealerOnboardingMode: 'approval_required', listingModeration: 'hold_for_review',
+  privateSellerRegistration: 'enabled', privateSellerApprovalMode: 'disabled', privateSellerPackageMode: 'free',
+  dealerOnboardingMode: 'approval_required', listingModeration: 'hold_for_review',
   dealerDecisionAuthority: 'owner_only', listingDecisionAuthority: 'owner_only',
   revision: 0, source: 'default', updatedAt: null, emailVerificationRequiredForSellers: true, ...over,
 });
@@ -20,7 +21,9 @@ describe('AdminSettingsOnboarding', () => {
   test('shows the current server values and that email verification cannot be disabled', async () => {
     getOnboardingSettings.mockResolvedValue({ policy: policy(), canChange: true });
     render(<AdminSettingsOnboarding />);
-    expect(await screen.findByLabelText(/Dealer onboarding/i)).toHaveValue('approval_required');
+    expect(await screen.findByLabelText(/Private seller approval/i)).toHaveValue('disabled');
+    expect(screen.getByLabelText(/Private seller packages/i)).toHaveValue('free');
+    expect(screen.getByLabelText(/Dealer onboarding/i)).toHaveValue('approval_required');
     expect(screen.getByLabelText(/Listing moderation/i)).toHaveValue('hold_for_review');
     expect(screen.getByText(/cannot be switched off/i)).toBeInTheDocument();
     expect(screen.getByText(/launch defaults/i)).toBeInTheDocument();
@@ -45,6 +48,16 @@ describe('AdminSettingsOnboarding', () => {
     await waitFor(() => expect(updateOnboardingSettings).toHaveBeenCalledWith({ dealerOnboardingMode: 'self_onboarding', expectedRevision: 4 }));
     expect(await screen.findByText(/Saved\. The new settings apply/i)).toBeInTheDocument();
     expect(screen.getByText(/Revision 5/)).toBeInTheDocument();
+  });
+
+  test('owner can configure the future seller approval mode without changing package mode', async () => {
+    getOnboardingSettings.mockResolvedValue({ policy: policy({ revision: 4, source: 'database' }), canChange: true });
+    updateOnboardingSettings.mockResolvedValue({ policy: policy({ revision: 5, source: 'database', privateSellerApprovalMode: 'required' }) });
+    render(<AdminSettingsOnboarding />);
+    const user = userEvent.setup();
+    await user.selectOptions(await screen.findByLabelText(/Private seller approval/i), 'required');
+    await user.click(screen.getByRole('button', { name: /Save 1 change/i }));
+    await waitFor(() => expect(updateOnboardingSettings).toHaveBeenCalledWith({ privateSellerApprovalMode: 'required', expectedRevision: 4 }));
   });
 
   test('a failed save says nothing was changed and keeps the server values', async () => {

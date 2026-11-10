@@ -26,6 +26,7 @@ const serverState = (status, role = 'user', extra = {}) => ({
   application: status === 'none' ? null : { status, reviewReason: extra.reason ?? null, submittedAt: 'x', reviewedAt: null },
   canApply: role === 'user' && (status === 'none' || status === 'rejected'),
   canList: status === 'approved',
+  approvalRequired: true,
 });
 const mount = (role = 'user', user = {}) => render(<DashboardHub user={{ id: 'u1', name: 'James', role, ...user }} vehicles={[]} onNavigate={() => {}} />);
 const BUYER_ACTIONS = ['Browse vehicles', 'Saved vehicles', 'Auctions', 'Messages'];

@@ -6,7 +6,7 @@
 - Added responsive, width-constrained form layouts and a horizontally scrollable step rail so the form remains within narrow phone viewports.
 - Added required-field checks for vehicle make/model/year, at least one photo, location/description, seller ownership declaration and asking price.
 - Added image checks matching the existing upload contract: JPEG/PNG/WebP, maximum 5 MB per image and up to 10 files per submission.
-- Connected submission to the existing `createCar` API and `/api/cars` route; the existing server-side seller capability, dealer verification, schema validation, upload and moderation controls remain authoritative.
+- Connected submission to the existing `createCar` API and `/api/cars` route; the server remains authoritative for free private-seller access, dealer verification, schema validation, upload and listing moderation. Under the launch default, private selling requires no package or seller approval; explicit suspension/revocation and email verification remain enforced.
 - Added device-local draft persistence for text fields. Browsers cannot restore selected `File` objects after reload, so the seller must reselect photos when resuming a saved draft.
 - Refreshes the signed-in seller dashboard from `getMyListings()` after the server confirms a created listing. Confirmation is not shown optimistically.
 - Added `npm run validate:private-seller-listing-workflow` as a source-contract regression check.
@@ -23,4 +23,4 @@ The condition, issue and service-history notes are included in the listing descr
 
 - The source-contract validator can run without installing project dependencies.
 - Full TypeScript, Vite build, Vitest, backend integration tests and real browser/device journeys were not run in this environment because `node_modules` is absent and the available Node runtime is v22.16.0 while the project declares `>=22.22.2`.
-- Live listing submission additionally depends on the configured upload provider and authenticated account with approved private-seller capability; these cannot be certified from this offline source archive.
+- Live listing submission additionally depends on the configured upload provider, authenticated account and verified email. The free launch policy does not require an approved private-seller capability record; this cannot be certified against production until the missing capability migration and policy reconciliation are completed.
