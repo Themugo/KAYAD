@@ -302,12 +302,35 @@ describe("Workstream C — requireDealerVerification creates no dealership for p
     expect(r.passed).toBe(true);
     expect(r.req.dealer ?? null).toBeNull();
   });
-  test("an existing legacy Dealer row grants an individual_seller nothing extra and is not modified", async () => {
-    Dealer.findOne.mockResolvedValue({ id: "legacy", user: S_APPROVED, approved: true });
+  test("an existing legacy Dealer row does not become a private seller's dealership identity", async () => {
+    const legacyDealer = { id: "legacy", user: S_APPROVED, approved: true };
+    Dealer.findOne.mockResolvedValue(legacyDealer);
     const r = await run({ id: S_APPROVED, role: "individual_seller", status: "approved" });
     expect(r.passed).toBe(true);
+    expect(r.req.dealer).toBeNull();
+    expect(DealerVerification.findOne).not.toHaveBeenCalled();
     expect(Dealer.create).not.toHaveBeenCalled();
-    expect(Dealer.update).toBeUndefined(); // the middleware never mutates a pre-existing row
+    expect(Dealer.update).toBeUndefined(); // no mutation of the legacy row
+  });
+  test.each(["suspended", "rejected"])("legacy DealerVerification=%s cannot block a private seller", async (status) => {
+    Dealer.findOne.mockResolvedValue({ id: "legacy", user: S_APPROVED, approved: true });
+    DealerVerification.findOne.mockResolvedValue({ verificationStatus: status });
+    const r = await run({ id: S_APPROVED, role: "individual_seller", status: "approved" });
+    expect(r.passed).toBe(true);
+    expect(r.req.dealer).toBeNull();
+    expect(r.req.verification).toBeNull();
+    expect(DealerVerification.findOne).not.toHaveBeenCalled();
+  });
+  test("approved user with private-seller capability ignores a legacy dealership decision", async () => {
+    Dealer.findOne.mockResolvedValue({ id: "legacy", user: U_REVOKED, approved: true });
+    DealerVerification.findOne.mockResolvedValue({ verificationStatus: "suspended" });
+    const r = await run(
+      { id: U_REVOKED, role: "user", status: "approved" },
+      { sellerCapability: { status: "approved" } }
+    );
+    expect(r.passed).toBe(true);
+    expect(r.req.dealer).toBeNull();
+    expect(DealerVerification.findOne).not.toHaveBeenCalled();
   });
   test("ordinary buyer still gets 403 and no record", async () => {
     Dealer.findOne.mockResolvedValue(null);

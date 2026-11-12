@@ -116,11 +116,12 @@ describe("S4-D-01 registration: role escalation is impossible from the public en
       expect(res.body.user.role).toBe("user");
     },
   );
-  test("dealer starts pending for verification; individual_seller starts active in free mode", async () => {
-    const d = await reg({ role: "dealer", businessName: "B", location: "Nairobi", email: "d@example.test" });
+  test("dealer starts pending for verification; a retired individual_seller request becomes an active personal account", async () => {
+    const d = await reg({ role: "dealer", businessName: "Bravo Motors", location: "Nairobi", email: "d@example.test" });
     const s = await reg({ role: "individual_seller", email: "s@example.test" });
     expect([d.code, s.code]).toEqual([201, 201]);
-    expect(rpcCalls.map((c) => c.args.p_role)).toEqual(["dealer", "individual_seller"]);
+    // individual_seller is retired for new accounts: the request is mapped to the single personal identity.
+    expect(rpcCalls.map((c) => c.args.p_role)).toEqual(["dealer", "user"]);
     expect(d.body.user.status).toBe("pending");
     expect(s.body.user.status).toBe("approved");
     expect(s.body.user.emailVerified).toBe(false);

@@ -200,7 +200,8 @@ describe("route inventory guard: every money / bid / registration / message POST
   const FROZEN_FILES = new Set(["bidRoutes.js POST /:id/bid", "paymentRoutes.js POST /initiate", "auctionSettlementRoutes.js POST /:id/outcome/payment", "authRoutes.js POST /register", "chatRoutes.js POST /:chatId/message", "dealerRoutes.js POST /upgrade", "subscriptionRoutes.js POST /upgrade", "subscriptionRoutes.js POST /reactivate", "auctionRegistrationRoutes.js POST /:id/registration/commitment", "auctionRegistrationRoutes.js POST /:id/registration/high-value-deposit"]);
   test("no unclassified candidate route exists", async () => {
     const fs = await import("node:fs"); const path = await import("node:path");
-    const dir = path.resolve(new URL("../../routes", import.meta.url).pathname);
+    const { fileURLToPath } = await import("node:url");
+    const dir = fileURLToPath(new URL("../../routes", import.meta.url));
     const unclassified = [];
     for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".js"))) {
       const src = fs.readFileSync(path.join(dir, f), "utf8");

@@ -311,7 +311,10 @@ describe("collection", () => {
 // ---- seeded history for aggregation / ranges / comparison ----
 const seed = () => {
   const mk = (i, daysAgo, o = {}) => {
-    const t = new Date(Date.now() - daysAgo * 86400_000 - 3600_000).toISOString();
+    // Anchor to midday EAT of the target calendar day (never in the future) so the suite does not depend on
+    // the wall-clock hour it runs at; "now minus 1h" lands on yesterday between 00:00 and 01:00 EAT.
+    const eatMidnight = Math.floor((Date.now() + 3 * 3600_000) / 86400_000) * 86400_000 - 3 * 3600_000;
+    const t = new Date(Math.min(eatMidnight - daysAgo * 86400_000 + 12 * 3600_000, Date.now() - 60_000)).toISOString();
     const vh = `v${i}`; const sh = `s${i}-${daysAgo}`;
     T().analytics_sessions.push({ session_hash: sh, visitor_hash: vh, started_at: t, last_seen_at: t, authenticated: !!o.auth, user_hash: o.auth ? `u${i}` : null, device_class: o.device || "desktop", country_code: o.country === undefined ? "KE" : o.country, source_channel: o.channel || "direct", source_host: o.host || null, landing_path: "/", page_views: 1 });
     T().analytics_events.push({ event_id: uid(), occurred_at: t, session_hash: sh, visitor_hash: vh, event_type: o.type || "page_view", path: o.path || "/?nav=marketplace", listing_id: o.listing || null, authenticated: !!o.auth, dedupe_key: uid() });

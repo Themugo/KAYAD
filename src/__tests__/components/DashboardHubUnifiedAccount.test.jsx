@@ -10,7 +10,7 @@ vi.mock('../../services/privateSellerCapabilityApi', () => ({
   applyForPrivateSelling: (...a) => applyForPrivateSelling(...a),
 }));
 vi.mock('../../services/ownershipApi', () => ({ getOwnershipDashboard: vi.fn().mockResolvedValue({}) }));
-vi.mock('../../services/dealerPlatformApi', () => ({}));
+vi.mock('../../services/dealerPlatformApi', () => ({ getMyWorkspace: vi.fn().mockResolvedValue({ membership: null, ambiguous: false }) }));
 vi.mock('../../services/commandCenterApi', () => ({ getControlPlaneSnapshot: vi.fn().mockResolvedValue({ counts: {} }) }));
 vi.mock('../../api/api', () => ({ inspectionAPI: { myAssigned: vi.fn().mockResolvedValue({}) } }));
 vi.mock('../../components/auction/AuctionExperienceRail', () => ({
@@ -25,10 +25,10 @@ beforeEach(() => { getMySellerCapability.mockReset(); applyForPrivateSelling.moc
 afterEach(() => cleanup());
 
 describe('buyer who has not applied', () => {
-  it('keeps the buyer dashboard and offers the application, with no seller workspace action', async () => {
+  it('keeps the personal dashboard and offers the application, with no seller workspace action', async () => {
     getMySellerCapability.mockResolvedValue(cap('none'));
     mount('user');
-    expect(screen.getByText('Buyer Dashboard')).toBeTruthy();
+    expect(screen.getByText('My Dashboard')).toBeTruthy();
     expect(screen.getByTestId('bidder-card')).toBeTruthy();
     expect(await screen.findByRole('button', { name: /apply to sell/i })).toBeTruthy();
     expect(screen.queryByText('Seller workspace')).toBeNull();

@@ -31,11 +31,11 @@ import { logActionFromReq } from "../utils/securityLogger.js";
 
 export const ESCROW_CAPABILITY_STATUSES = Object.freeze(["none", "granted", "suspended", "revoked"]);
 
-// Only these two roles have ever been able to carry vehicle escrow
-// eligibility (see Stage 8's audit: "Vehicle escrow is a private-seller
-// custody product only"). A capability grant to any other role is
-// meaningless and is rejected rather than silently accepted.
-const CAPABILITY_ELIGIBLE_ROLES = Object.freeze(["individual_seller", "dealer"]);
+// Vehicle escrow is a private-seller custody product (Stage 8 audit). Under the unified personal account a private
+// seller is a plain `user`, so `user` is eligible; `individual_seller` is the retired legacy role and stays eligible for
+// existing rows. Eligibility alone grants nothing: escrow still needs an explicit staff-granted capability.
+// Any other role is rejected rather than silently accepted.
+const CAPABILITY_ELIGIBLE_ROLES = Object.freeze(["user", "individual_seller", "dealer"]);
 
 /**
  * Reads the seller's current escrow capability status directly from the
@@ -157,7 +157,7 @@ export async function setSellerEscrowCapability({ targetUserId, status, reason, 
   }
 
   if (!CAPABILITY_ELIGIBLE_ROLES.includes(target.role)) {
-    const err = new Error(`Escrow capability only applies to individual sellers and dealers, not role "${target.role}"`);
+    const err = new Error(`Escrow capability only applies to personal accounts (private sellers) and dealers, not role "${target.role}"`);
     err.statusCode = 400;
     throw err;
   }

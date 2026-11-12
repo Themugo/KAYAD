@@ -3,7 +3,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 import DashboardHub from '../../components/DashboardHub';
 
 vi.mock('../../services/ownershipApi', () => ({ getOwnershipDashboard: vi.fn().mockResolvedValue({}) }));
-vi.mock('../../services/dealerPlatformApi', () => ({}));
+vi.mock('../../services/dealerPlatformApi', () => ({ getMyWorkspace: vi.fn().mockResolvedValue({ membership: null, ambiguous: false }) }));
 vi.mock('../../services/commandCenterApi', () => ({ getControlPlaneSnapshot: vi.fn().mockResolvedValue({ counts: {} }) }));
 vi.mock('../../api/api', () => ({ inspectionAPI: { list: vi.fn().mockResolvedValue({}) } }));
 vi.mock('../../components/auction/AuctionExperienceRail', () => ({

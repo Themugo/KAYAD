@@ -26,6 +26,7 @@ import { listRoles, resolveRole, createCustomRole, updateCustomRole, deleteCusto
 import { formatPhone } from "../utils/format.js";
 import { DEALER_TEAM_PERMISSIONS } from "../middleware/dealerOrgAccess.js";
 
+import { validateCompanyName, dealerPublicName } from '../utils/companyName.js';
 // ============================================================
 // DEALER DASHBOARD
 // ============================================================
@@ -111,7 +112,7 @@ export async function getDealerProfile(req, res) {
       success: true,
       data: {
         id: dealerUser.id,
-        businessName: dealerRecord?.businessName || dealerUser.businessName || dealerUser.name,
+        businessName: dealerRecord?.businessName || dealerUser.businessName || null,
         name: dealerUser.name,
         bio: dealerUser.bio || null,
         location: dealerRecord?.location || dealerUser.location || null,
@@ -196,6 +197,10 @@ export async function updateDealerProfile(req, res) {
       return res.status(404).json({ success: false, message: "Dealer not found" });
     }
     const dealerRecord = await Dealer.findOne({ user: dealerId });
+    if (updates.businessName !== undefined) {
+      const company = validateCompanyName(updates.businessName, { personName: existingUser.name });
+      if (!company.ok) return res.status(400).json({ success: false, code: company.code, message: company.message });
+    }
 
     const userUpdates = { ...updates };
     if (normalizedPhone !== undefined && normalizedPhone !== existingUser.phone) {
@@ -787,6 +792,9 @@ export async function acceptTeamInvite(req, res) {
   if (!row) return res.status(404).json({ success: false, message: "Invitation not found or already used" });
   if (row.inviteExpiresAt && new Date(row.inviteExpiresAt) <= new Date()) return res.status(410).json({ success: false, message: "Invitation has expired" });
   if (String(req.user.email || "").trim().toLowerCase() !== String(row.inviteEmail || "").trim().toLowerCase()) return res.status(403).json({ success: false, message: "Invitation email does not match the authenticated account" });
+  // Team members are personal accounts. A dealer (business) or staff account never becomes a member, and a membership never changes the member's role.
+  if (req.user.role !== "user") return res.status(403).json({ success: false, code: "TEAM_MEMBER_MUST_BE_PERSONAL_ACCOUNT", message: "Dealership team members join with a personal account. A dealer owner who also has a personal account can invite it from that account's email." });
+  if (String(row.dealer) === String(req.user.id)) return res.status(403).json({ success: false, code: "TEAM_SELF_MEMBERSHIP", message: "A dealer account cannot be a member of its own team." });
   const activeMembership = await findOne("dealer_teams", { dealer: row.dealer, member: req.user.id, status: "active" });
   if (activeMembership) return res.status(409).json({ success: false, message: "You are already an active member of this dealer team" });
   const updated = await update("dealer_teams", row.id, { member: req.user.id, status: "active", inviteTokenHash: null, inviteExpiresAt: null });

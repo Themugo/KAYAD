@@ -73,6 +73,7 @@ const KAYADLive = React.lazy(() => import('./pages/KAYADLive'));
 const BuyerPlatform = React.lazy(() => import('./features/OwnershipPlatform').then((m) => ({ default: m.BuyerPlatform })));
 const PrivateSellerPlatform = React.lazy(() => import('./features/PrivateSellerPlatform').then((module) => ({ default: module.PrivateSellerPlatform })));
 const DealerDashboard = React.lazy(() => import('./pages/dealer/dashboard/DealerDashboard'));
+const DealershipWorkspace = React.lazy(() => import('./features/DealershipWorkspace/DealershipWorkspace'));
 const FinanceMarketplace = React.lazy(() => import('./features/FinancePlatform').then((m) => ({ default: m.FinanceMarketplace })));
 const InspectionMarketplacePage = React.lazy(() => import('./features/InspectionMarketplace/pages/InspectionMarketplacePage'));
 
@@ -85,7 +86,7 @@ const InspectionMarketplacePage = React.lazy(() => import('./features/Inspection
 // Workspaces that require a verified session (backend authorization stays authoritative).
 // Buyer / private-seller workspaces a dealer account does not use (the dealer workspace has its own equivalents).
 const DEALER_REDIRECTED_NAVS = new Set(['dashboard', 'buyer-platform', 'seller-dashboard', 'seller-platform', 'seller', 'sell', 'payments', 'profile', 'saved']);
-const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard', 'escrow-operations']);
+const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard', 'dealership-workspace', 'escrow-operations']);
 // Of the workspaces above, these render their own "Sign in to ..." prompt
 // (with a button into the real auth flow) when `user` is null, instead of
 // an empty screen - ChatView/UnifiedCommunicationHub, BuyerPlatform and
@@ -96,7 +97,7 @@ const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'sav
 // the Messages panel's own "Sign in to see your conversations" message.
 // Redirect only the navs with no such fallback, which would otherwise
 // render blank for a signed-out visitor.
-const navsWithOwnSignedOutPrompt = new Set(['chat', 'buyer-platform', 'dealer-dashboard']);
+const navsWithOwnSignedOutPrompt = new Set(['chat', 'buyer-platform', 'dealer-dashboard', 'dealership-workspace']);
 
 function AppInner() {
   const [activeNav, setActiveNavState] = useState<string>('marketplace');
@@ -539,6 +540,7 @@ function AppInner() {
     'admin',
     'dashboard',
     'dealer-dashboard',
+    'dealership-workspace',
     'buyer-platform',
     'seller-platform',
     'sell',
@@ -751,6 +753,10 @@ function AppInner() {
             <BuyerPlatform key={`${user?.id || 'guest'}-${buyerInspectionTab}`} user={user} onNavigate={(nav) => setActiveNav(nav)} onOpenAuth={handleOpenAuth} initialInspectionTab={buyerInspectionTab} />
           )}
 
+
+          {activeNav === 'dealership-workspace' && (
+            <DealershipWorkspace user={user} onOpenAuth={handleOpenAuth} onNavigate={(nav) => setActiveNav(nav)} />
+          )}
 
           {activeNav === 'dealer-dashboard' && (
             <DealerDashboard user={user} onOpenAuth={handleOpenAuth} onNavigate={(nav) => setActiveNav(nav)} />

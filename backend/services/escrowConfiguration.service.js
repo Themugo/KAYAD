@@ -70,7 +70,7 @@ export async function removeEscrowAccount(id) {
 }
 
 export async function validatePrivateSellerEscrow({ car, seller, amount }) {
-  if (!seller || seller.role !== "individual_seller") {
+  if (!seller || !["user", "individual_seller"].includes(seller.role)) {
     throw new Error("KAYAD vehicle escrow is available only for private-seller transactions");
   }
 

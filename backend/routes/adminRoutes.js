@@ -373,11 +373,12 @@ router.get(
       filter.$or = [{ name: { $regex: search, $options: "i" } }, { email: { $regex: search, $options: "i" } }];
     }
 
-    // Buyers who have applied to become dealers on their existing account (role stays "user" until an administrator approves).
+    // Dealer applicants = DEALER accounts whose application is not yet approved. A personal account is never an applicant: it cannot
+    // become a dealer (a dealer is a separate business account), so legacy drafts left on personal accounts are not listed here.
     if (req.query.dealerApplicants === "true") {
       const rows = await findAll("dealers", { filters: { approved: false }, select: "user" });
       const ids = [...new Set((rows || []).map((r) => String(r.user)))];
-      filter.role = "user";
+      filter.role = "dealer";
       filter._id = { $in: ids.length ? ids : ["00000000-0000-0000-0000-000000000000"] };
     }
 
@@ -401,16 +402,7 @@ router.get(
     // Dealer rows also carry what the application still lacks (profile / documents), read from the authoritative dealers and
     // dealer_verifications tables, so the Approve action is only offered for an application that can actually be approved. A row whose
     // application could not be read is `null` (unknown), never "complete".
-    // A buyer (role "user") only carries an application when they have started one (a dealers row exists) - same account, no duplicate.
-    const buyerIds = users.filter((u) => u.role === "user").map((u) => String(u._id ?? u.id));
-    let applicantBuyerIds = new Set();
-    if (buyerIds.length) {
-      try {
-        const rows = await findAll("dealers", { filters: { user: { $in: buyerIds } }, select: "user" });
-        applicantBuyerIds = new Set((rows || []).map((r) => String(r.user)));
-      } catch { /* unknown -> no buyer is shown as an applicant; the list itself still loads */ }
-    }
-    const inScope = users.filter((u) => u.role === "dealer" || (u.role === "user" && applicantBuyerIds.has(String(u._id ?? u.id))));
+    const inScope = users.filter((u) => u.role === "dealer");
     const applications = await dealerApproval.summarizeApplications(inScope.map((u) => ({ ...u, id: u._id ?? u.id })));
     // `.lean()` rows carry the database column `id` only. The admin screens address every row by `_id`; without it `row._id` was
     // undefined for EVERY row, so "the row whose _id equals the clicked one" matched all rows at once. Always emit both, from the
@@ -418,7 +410,7 @@ router.get(
     const decorated = users.map((u) => ({
       ...u,
       ...((u._id ?? u.id) != null ? { id: String(u._id ?? u.id), _id: String(u._id ?? u.id) } : {}),
-      ...(inScope.includes(u) ? { application: applications.get(String(u._id ?? u.id)) ?? null, dealerApplicant: u.role === "user" } : {}),
+      ...(inScope.includes(u) ? { application: applications.get(String(u._id ?? u.id)) ?? null, dealerApplicant: false } : {}),
       approved: u.status === "approved",
       verificationStatus: u.status === "approved" ? "verified" : u.status === "rejected" ? "rejected" : "pending",
       lastLogin: u.lastLoginAt ?? null,

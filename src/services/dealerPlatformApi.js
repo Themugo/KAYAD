@@ -30,3 +30,5 @@ export const createTeamRole = (body) => api.post('/dealer-platform/team/roles', 
 export const updateTeamRole = (key, body) => api.put(`/dealer-platform/team/roles/${encodeURIComponent(key)}`, body).then(r => r.data);
 export const deleteTeamRole = (key) => api.delete(`/dealer-platform/team/roles/${encodeURIComponent(key)}`).then(r => r.data);
 export const acceptTeamInvite = (token) => api.post('/dealer-platform/team/accept', { token }).then(r => r.data);
+export const getMyWorkspace = () => api.get('/dealer-platform/my-workspace').then(r => r.data?.data || { membership: null, ambiguous: false });
+export const getInventory = (params = {}) => api.get('/dealer-platform/inventory', { params }).then(r => r.data?.data || { items: [] });

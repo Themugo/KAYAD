@@ -35,6 +35,7 @@ import { enforceMaintenance } from '../middleware/maintenanceEnforcement.js'; //
 import { hasTechnicalRecovery } from '../config/maintenancePolicy.js';
 import { getOnboardingPolicy, isPolicyTrusted } from '../services/onboardingPolicy.service.js'; // STAGE 5
 import { parseReferralCode, referrerEligible } from '../utils/referralGuards.js'; // STAGE 4A (G9): string-only code; self/suspended referrer excluded
+import { validateCompanyName } from '../utils/companyName.js'; // a dealer is a business: company name, never a personal name
 const STAFF_ROLES = [
   "admin",
   "superadmin",
@@ -246,12 +247,25 @@ export const register = async (req, res) => {
     }
 
     const requestedRole = req.body.role;
-    const role = requestedRole === "dealer" || requestedRole === "individual_seller" ? requestedRole : "user";
+    // RETIRED ROLE (owner decision, 11 Nov 2026): `individual_seller` is no longer created by self-registration.
+    // KAYAD has ONE personal identity (`user`); private selling is a capability of that account, governed by the
+    // onboarding policy and enforced when a listing is created (sellerListingAccess), not by a second identity.
+    // Old API clients that still send it receive a personal account, a Deprecation signal and a compatibility note.
+    // Existing legacy `individual_seller` rows are untouched and continue to resolve through the compatibility
+    // logic in the capability services; they are neither converted nor approved here.
+    const legacySellerRole = requestedRole === "individual_seller";
+    const role = requestedRole === "dealer" ? "dealer" : "user";
+    if (legacySellerRole) {
+      logWarn("Retired individual_seller registration mapped to a personal account", { event: "account.legacy_individual_seller_registration", ip: req.ip, mappedTo: "user" });
+      // Best-effort signal only: it must never be able to fail a registration.
+      try { res.set?.("Deprecation", "true"); } catch { /* ignore */ }
+    }
     const businessName = String(req.body.businessName || "").trim();
     const location = String(req.body.location || "").trim();
 
-    if (role === "dealer" && !businessName) {
-      return R.error(res, "Business name is required for dealer registration", 400);
+    if (role === "dealer") {
+      const company = validateCompanyName(businessName, { personName: req.body.name });
+      if (!company.ok) return res.status(400).json({ success: false, code: company.code, message: company.message });
     }
     if (role === "dealer" && !location) {
       return R.error(res, "Location or city is required for dealer registration", 400);
@@ -259,20 +273,12 @@ export const register = async (req, res) => {
 
     // STAGE 5: owner-controlled registration policy, enforced server-side BEFORE any side effect.
     // Private-seller registration defaults to open/free; dealer onboarding remains separately controlled.
-    let privateSellerApprovalRequired = false;
-    if (role === "individual_seller" || role === "dealer") {
+    if (role === "dealer") {
       const onboarding = await getOnboardingPolicy();
       if (!isPolicyTrusted(onboarding)) {
         return res.status(503).json({ success: false, code: "ONBOARDING_POLICY_UNAVAILABLE", message: "Seller and dealer registration is temporarily unavailable. Please try again shortly." });
       }
-      privateSellerApprovalRequired = role === "individual_seller" && onboarding.policy.privateSellerApprovalMode === "required";
-      if (role === "individual_seller" && onboarding.policy.privateSellerPackageMode !== "free") {
-        return res.status(503).json({ success: false, code: "SELLER_PACKAGE_CONFIGURATION_INCOMPLETE", message: "Paid seller packages are not available yet. Please try again later." });
-      }
-      if (role === "individual_seller" && onboarding.policy.privateSellerRegistration !== "enabled") {
-        return res.status(403).json({ success: false, code: "SELLER_REGISTRATION_DISABLED", message: "Private seller registration is not open right now." });
-      }
-      if (role === "dealer" && onboarding.policy.dealerOnboardingMode === "closed") {
+      if (onboarding.policy.dealerOnboardingMode === "closed") {
         return res.status(403).json({ success: false, code: "DEALER_REGISTRATION_CLOSED", message: "Dealer registration is not open right now." });
       }
     }
@@ -346,7 +352,7 @@ export const register = async (req, res) => {
       logError("Verification email dispatch failed", e, { userId: user.id, event: "account.email_verification" });
     });
 
-    if (role === "dealer" || (role === "individual_seller" && privateSellerApprovalRequired)) {
+    if (role === "dealer") {
       void notifyAdminsOfPendingSeller(user).catch(() => {});
     }
 
@@ -385,14 +391,14 @@ export const register = async (req, res) => {
         subject: "Welcome to KAYAD",
         text: role === "dealer"
           ? `Welcome to KAYAD, ${user.name || "there"}. Your dealer application is under review.`
-          : role === "individual_seller"
-            ? privateSellerApprovalRequired
-              ? `Welcome to KAYAD, ${user.name || "there"}. Verify your email. Your private-seller account is free; administrator approval is required before selling.`
-              : `Welcome to KAYAD, ${user.name || "there"}. Private selling is free and does not require a package or seller approval. Verify your email before using seller features.`
+          : legacySellerRole
+            ? `Welcome to KAYAD, ${user.name || "there"}. Your personal account is ready. Private selling is part of your account; any requirements are shown in your dashboard. Please verify your email.`
             : `Welcome to KAYAD, ${user.name || "there"}. Your account is ready.`,
-        html: (role === "dealer" || role === "individual_seller")
-          ? `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>${role === "dealer" ? "Your dealer application is under review. Please verify your email." : privateSellerApprovalRequired ? "Your private-seller account is free. Verify your email; administrator approval is required before selling." : "Your private-seller account is free. No seller package or administrator approval is required. Verify your email before using seller features. Vehicle listings may still go through separate listing moderation."}</p>`
-          : `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>Your account is ready.</p>`,
+        html: role === "dealer"
+          ? `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>Your dealer application is under review. Please verify your email.</p>`
+          : legacySellerRole
+            ? `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>Your personal account is ready. Private selling is part of your account; any requirements are shown in your dashboard. Please verify your email.</p>`
+            : `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>Your account is ready.</p>`,
       })),
       metadata: { welcome: true },
       idempotencyKey: `registration-welcome:${user.id}`,
@@ -403,12 +409,11 @@ export const register = async (req, res) => {
     return res.status(201).json({
       success: true,
       user: serializeUser(user, userAuth),
+      ...(legacySellerRole ? { compatibility: { requestedRole: "individual_seller", createdRole: "user", deprecated: true } } : {}),
       message: role === "dealer"
         ? "Dealer application received. Please verify your email. Your dealer account is not approved until our team reviews it, and we will notify you of the decision."
-        : role === "individual_seller"
-          ? privateSellerApprovalRequired
-            ? "Private-seller account created. Registration is free. Please verify your email; administrator approval is required before selling."
-            : "Private-seller account created. Selling is free and does not require a package or seller approval. Please verify your email before using seller features. Vehicle listing moderation is separate."
+        : legacySellerRole
+          ? "Personal account created. KAYAD no longer has a separate private-seller account: selling is part of your personal account. Please verify your email before signing in."
           : "Account created successfully. Please verify your email before signing in.",
     });
   } catch (err) {
@@ -421,6 +426,9 @@ export const register = async (req, res) => {
       details: err?.details,
       hint: err?.hint,
     });
+    if ((String(err?.code) === "23505" || err?.code === 11000) && /dealers_business_name_unique|business_name/i.test(`${err?.message || ""} ${err?.details || ""}`)) {
+      return res.status(409).json({ success: false, code: "COMPANY_NAME_TAKEN", message: "A dealership with that company name already exists. Use your registered company name." });
+    }
     if (String(err?.code) === "23505" || err?.code === 11000) {
       return R.error(res, "An account with that email already exists", 409);
     }
@@ -829,6 +837,17 @@ export const updateProfile = async (req, res) => {
           if (refusal) return res.status(403).json(refusal);
         }
         updates.phoneVerified = false;
+      }
+    }
+
+    if (updates.businessName !== undefined || updates.name !== undefined) {
+      const current = await User.findById(req.user.id).select("name role businessName");
+      if (current?.role === "dealer") {
+        const company = validateCompanyName(updates.businessName ?? current.businessName, { personName: updates.name ?? current.name });
+        if (!company.ok) return res.status(400).json({ success: false, code: company.code, message: company.message });
+      } else if (updates.businessName !== undefined) {
+        // Personal accounts have no business identity; it is never stored on them.
+        delete updates.businessName;
       }
     }
 
