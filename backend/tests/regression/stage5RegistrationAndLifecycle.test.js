@@ -190,14 +190,9 @@ describe("wording: application received ≠ email verified ≠ approved", () => 
   });
   test("retired seller registration response explains there is no separate seller account", async () => {
     const r = await reg({ role: "individual_seller" });
-<<<<<<< HEAD
-    expect(r.body.message).toMatch(/does not require a package or seller approval/i);
-    expect(r.body.message).toMatch(/listing moderation is separate/i);
-=======
     expect(r.body.message).toMatch(/no longer has a separate private-seller account/i);
     expect(r.body.message).toMatch(/selling is part of your personal account/i);
     expect(r.body.compatibility).toEqual({ requestedRole: "individual_seller", createdRole: "user", deprecated: true });
->>>>>>> feat/unified-accounts-dealer-team-r9
   });
   test("buyer wording is unchanged", async () => {
     expect((await reg({})).body.message).toBe("Account created successfully. Please verify your email before signing in.");

@@ -31,7 +31,7 @@ const checks = [
   ["subscription routes exist", server.includes('app.use("/api/subscriptions", subscriptionRoutes)') && subscription.includes('router.get("/my-subscription", protect') && subscription.includes('router.get("/all", protect, adminOnly')],
   ["public auction catalogue route exists", server.includes('app.use("/api/auctions",') || v1.includes('router.use("/auctions", auctionRoutes)')],
   ["public subscription plans route exists", server.includes('app.use("/api/subscriptions", subscriptionRoutes)') && subscription.includes('router.get("/plans"')],
-  ["dealer certification routes exist", server.includes('app.use("/api/dealer-platform", dealerPlatformRoutes)') && /router\.get\("\/dashboard", protect, (dealerOnly|dealerBusinessOnly)\b/.test(dealer) && /router\.get\("\/finance", protect, (dealerOnly|dealerBusinessOnly)\b/.test(dealer)],
+  ["dealer certification routes exist", server.includes('app.use("/api/dealer-platform", dealerPlatformRoutes)') && /router\.get\("\/dashboard", protect, (dealerOnly\b|dealerBusinessOnly\b|dealerWorkspaceAccess\()/.test(dealer) && /router\.get\("\/finance", protect, (dealerOnly|dealerBusinessOnly)\b/.test(dealer)],
   ["admin escrow route exists", server.includes('app.use("/api/escrow",') && (escrow.includes('router.get("/", protect, adminOnly') || escrow.includes('router.get("/", protect, escrowViewOnly'))],
   ["admin disputes route exists", dispute.includes('router.get("/", protect, adminOnly')],
 ];
