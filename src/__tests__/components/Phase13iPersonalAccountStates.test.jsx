@@ -11,7 +11,7 @@ vi.mock('../../services/privateSellerCapabilityApi', () => ({
   applyForPrivateSelling: vi.fn(),
 }));
 vi.mock('../../services/ownershipApi', () => ({ getOwnershipDashboard: vi.fn().mockResolvedValue({}) }));
-vi.mock('../../services/dealerPlatformApi', () => ({ getDealerDashboard: vi.fn().mockResolvedValue({}) }));
+vi.mock('../../services/dealerPlatformApi', () => ({ getDealerDashboard: vi.fn().mockResolvedValue({}), getMyWorkspace: vi.fn().mockResolvedValue({ membership: null, ambiguous: false }) }));
 vi.mock('../../services/commandCenterApi', () => ({ getControlPlaneSnapshot: vi.fn().mockResolvedValue({ counts: {} }) }));
 vi.mock('../../api/api', () => ({ inspectionAPI: { myAssigned: vi.fn().mockResolvedValue({}) } }));
 vi.mock('../../components/auction/AuctionExperienceRail', () => ({
@@ -56,7 +56,7 @@ describe('state-to-behaviour matrix: role user (personal account)', () => {
     expect(Boolean(screen.queryByRole('button', { name: /apply to sell/i }))).toBe(form);
     expect(Boolean(screen.queryByRole('button', { name: /open seller workspace/i }))).toBe(workspace);
     expect(screen.queryAllByText('Seller workspace').length > 0).toBe(workspace);
-    expect(screen.getByText('Buyer Dashboard')).toBeTruthy();
+    expect(screen.getByText('My Dashboard')).toBeTruthy();
     expectBuyerIntact();
   });
   it('never exposes a dealer surface in any seller state', async () => {

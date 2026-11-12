@@ -1,5 +1,5 @@
 // ============================================================
-// DEALER APPLICATION ROUTES: buyer→dealer on ONE account + configured paperwork at onboarding (2026-11-01).
+// DEALER APPLICATION ROUTES: dealer-account-only applications (a personal account can never become a dealer) + configured paperwork at onboarding.
 // Real routes/adminRoutes.js, real protect / authorize / requireDecisionAuthority, real dealerApproval + dealerPaperwork services.
 // Only persistence is faked (users, dealers, dealer_verifications, system_settings with the same compare-and-swap rules).
 // EVIDENCE TIER: mocked local runtime.
@@ -145,72 +145,75 @@ const profile = (documents) => ({ businessName: "Acme Motors", location: "Nairob
 const ID = { type: "national_id", documentNumber: "12345678" };
 const KRA = { pinNumber: "A000000000Z" };
 
-describe("B. a buyer starts a dealer application on the SAME account", () => {
-  test("creates exactly one dealers row, leaves users untouched, grants no seller access", async () => {
-    mk("b1", "user");
-    const strip = () => JSON.stringify(world.users, (k, v) => (k === "lastActive" ? undefined : v));
-    const users = strip();
-    const r = await call("POST", "/api/dealer/application", "b1");
-    expect(r.status).toBe(201);
-    expect(Object.keys(world.dealers)).toEqual(["b1"]);
-    expect(world.dealers.b1.approved).toBe(false);
-    expect(strip()).toBe(users);
-    // seller-only API stays closed while pending
-    expect((await call("GET", "/api/dealer/dashboard", "b1")).status).toBeGreaterThanOrEqual(403);
+describe("B. a personal account can NEVER become a dealer; a dealer is a separate business account", () => {
+  const strip = () => JSON.stringify(world.users, (k, v) => (k === "lastActive" ? undefined : v));
+  test.each(["user", "individual_seller"])("a %s is refused on every dealer-application route, whatever the policy or account state, and nothing is created", async (role) => {
+    for (const mode of ["approval_required", "open", "closed"]) {
+      __setOnboardingPolicyForTests({ dealerOnboardingMode: mode });
+      world.users = {}; world.dealers = {}; world.verifications = {};
+      mk("p1", role);
+      const before = strip();
+      expect((await call("POST", "/api/dealer/application", "p1")).status).toBe(403);
+      expect((await call("GET", "/api/dealer/onboarding", "p1")).status).toBe(403);
+      expect((await call("PUT", "/api/dealer/onboarding", "p1", profile())).status).toBe(403);
+      expect((await call("GET", "/api/dealer/paperwork-requirements", "p1")).status).toBe(403);
+      expect(world.dealers.p1).toBeUndefined();
+      expect(world.verifications.p1).toBeUndefined();
+      expect(strip()).toBe(before);
+    }
   });
-  test("is idempotent: a second call creates nothing and changes nothing", async () => {
-    mk("b2", "user");
-    await call("POST", "/api/dealer/application", "b2");
+  test("an administrator cannot approve a personal account as a dealer: role never changes and no RPC runs", async () => {
+    mk("p2", "user");
+    world.dealers.p2 = { id: "d-p2", user: "p2", approved: false }; // e.g. a legacy draft left from the retired in-place flow
+    world.verifications.p2 = { id: "ver-p2", user: "p2", verificationStatus: "pending" };
+    const before = strip();
+    await expect(approval.approveDealer({ user: world.users.p2, actorId: "admin-1", reason: "Looks complete to me." })).rejects.toMatchObject({ code: "NOT_A_DEALER_ACCOUNT" });
+    expect(world.rpcCalls).toHaveLength(0);
+    expect(strip()).toBe(before);
+  });
+  test("a dealer account (registered as a dealer) can still open its own application, and its role never changes", async () => {
+    mk("d1", "dealer", { status: "pending" });
+    const r = await call("POST", "/api/dealer/application", "d1");
+    expect(r.status).toBe(201);
+    expect(world.dealers.d1.approved).toBe(false);
+    expect(world.users.d1.role).toBe("dealer");
+  });
+  test("is idempotent for a dealer: a second call creates nothing and changes nothing", async () => {
+    mk("d2", "dealer", { status: "pending" });
+    await call("POST", "/api/dealer/application", "d2");
     const snap = JSON.stringify(world.dealers);
-    const r = await call("POST", "/api/dealer/application", "b2");
+    const r = await call("POST", "/api/dealer/application", "d2");
     expect(r.status).toBe(200);
     expect(r.body.alreadyStarted).toBe(true);
     expect(JSON.stringify(world.dealers)).toBe(snap);
   });
-  test.each([
-    ["unverified e-mail", { emailVerified: false }, 403, "EMAIL_VERIFICATION_REQUIRED"],
-    ["banned", { isBanned: true }, 403, null],
-    ["not an active account", { status: "pending" }, 403, "ACCOUNT_NOT_ACTIVE"],
-  ])("refused for %s - nothing is created", async (_n, extra, status, code) => {
-    mk("b3", "user", extra);
-    const r = await call("POST", "/api/dealer/application", "b3");
-    expect(r.status).toBe(status);
-    if (code) expect(r.body.code).toBe(code);
-    expect(world.dealers.b3).toBeUndefined();
+  test("a dealer with an unverified e-mail is refused - nothing is created", async () => {
+    mk("d3", "dealer", { status: "pending", emailVerified: false });
+    const r = await call("POST", "/api/dealer/application", "d3");
+    expect(r.status).toBe(403);
+    expect(r.body.code).toBe("EMAIL_VERIFICATION_REQUIRED");
+    expect(world.dealers.d3).toBeUndefined();
   });
   test("refused while dealer applications are closed", async () => {
     __setOnboardingPolicyForTests({ dealerOnboardingMode: "closed" });
-    mk("b4", "user");
-    const r = await call("POST", "/api/dealer/application", "b4");
+    mk("d4", "dealer", { status: "pending" });
+    const r = await call("POST", "/api/dealer/application", "d4");
     expect(r.status).toBe(403);
     expect(r.body.code).toBe("DEALER_APPLICATIONS_CLOSED");
-    expect(world.dealers.b4).toBeUndefined();
+    expect(world.dealers.d4).toBeUndefined();
   });
   test("staff and unauthenticated callers cannot use it", async () => {
     mk("adm", "admin");
     expect((await call("POST", "/api/dealer/application", "adm")).status).toBe(403);
     expect((await call("POST", "/api/dealer/application", null)).status).toBe(401);
   });
-  test("GET /onboarding does not silently create a dealer row for a buyer", async () => {
-    mk("b5", "user");
-    const r = await call("GET", "/api/dealer/onboarding", "b5");
-    expect(r.status).toBe(409);
-    expect(r.body.code).toBe("DEALER_APPLICATION_NOT_STARTED");
-    expect(world.dealers.b5).toBeUndefined();
-  });
-  test("a buyer who has not started cannot submit onboarding", async () => {
-    mk("b6", "user");
-    const r = await call("PUT", "/api/dealer/onboarding", "b6", profile({}));
-    expect(r.status).toBe(409);
-    expect(world.verifications.b6).toBeUndefined();
-  });
-  test("the full buyer path: apply → onboard with no documents (none required) → pending verification, buyer role intact", async () => {
-    mk("b7", "user");
-    await call("POST", "/api/dealer/application", "b7");
-    const r = await call("PUT", "/api/dealer/onboarding", "b7", profile());
+  test("the full dealer path: apply → onboard with no documents (none required) → pending verification, role stays dealer", async () => {
+    mk("d5", "dealer", { status: "pending" });
+    await call("POST", "/api/dealer/application", "d5");
+    const r = await call("PUT", "/api/dealer/onboarding", "d5", profile());
     expect(r.status).toBe(200);
-    expect(world.verifications.b7.verificationStatus).toBe("pending");
-    expect(world.users.b7).toMatchObject({ role: "user", status: "approved" });
+    expect(world.verifications.d5.verificationStatus).toBe("pending");
+    expect(world.users.d5.role).toBe("dealer");
   });
 });
 

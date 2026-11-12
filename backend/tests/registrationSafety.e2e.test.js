@@ -86,11 +86,11 @@ describe("registration safety: escalation, normalisation, concurrency", () => {
     }
   });
 
-  it("a private seller is created active in free mode and remains unverified until email verification", async () => {
+  it("a retired individual_seller request creates an active personal account (role user), unverified until email verification", async () => {
     const res = await post({ name: "Priv Seller", email: "privseller@example.com", password: PASS, role: "individual_seller", phone: "0712345678" });
     expect(res.status).toBe(201);
     const row = fake.db.users.find((u) => u.email === "privseller@example.com");
-    expect(row.role).toBe("individual_seller");
+    expect(row.role).toBe("user");
     expect(row.status).toBe("approved");
     expect(row.email_verified).toBe(false);
   });

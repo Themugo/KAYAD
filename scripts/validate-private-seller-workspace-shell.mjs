@@ -11,7 +11,7 @@ const checks = [
   ['Public footer is suppressed in private workspaces', app.includes('{!privateWorkspaceNavs.has(activeNav) && <footer')],
   ['Seller logout uses the existing auth logout handler', app.includes('onLogout={() => { void authLogout(); }}')],
   ['Seller page receives logout callback', app.includes('<PrivateSellerPlatform') && app.slice(app.indexOf('<PrivateSellerPlatform'), app.indexOf('<PrivateSellerPlatform') + 700).includes('onLogout=')],
-  ['Seller Settings navigation exists', seller.includes("id: 'settings', label: 'Settings'")],
+  ['Seller Settings navigation exists', seller.includes("key: 'settings', label: 'Settings'")],
   ['Seller Logout action exists', seller.includes('aria-label="Log out of KAYAD"')],
   ['Settings page links to central profile settings', seller.includes("onNavigate?.('profile')")],
   ['Mobile header uses the KAYAD BrandMark', seller.includes('<BrandMark size={36} nameClassName="text-white font-bold text-base" />')],

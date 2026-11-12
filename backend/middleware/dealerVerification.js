@@ -54,6 +54,16 @@ export const requireDealerVerification = async (req, res, next) => {
       });
     }
 
+    // Personal selling is a separate capability, not a dealership identity. Once the
+    // upstream sellerListingAccess guard has admitted this personal seller, a legacy
+    // Dealer row or DealerVerification decision must not block or impersonate that access.
+    // Keep the legacy row untouched; genuine dealer accounts continue through verification.
+    if (isPrivateSeller) {
+      req.dealer = null;
+      req.verification = null;
+      return next();
+    }
+
     // A legacy approved flag must never override a current suspension or rejection.
     // Resolve the verification record before applying backward-compatible approval.
     const verification = await DealerVerification.findOne({ user: userId });

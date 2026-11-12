@@ -30,7 +30,7 @@ router.post('/vehicles/:vehicleId/trips', protect, validateParams(vehicleIdParam
 router.patch('/reminders/:reminderId/complete', protect, validateParams(reminderIdParamsSchema), validate(completeOwnershipReminderSchema), completeReminder);
 router.patch('/vehicles/:vehicleId/sold', protect, validateParams(vehicleIdParamsSchema), validate(ownershipSaleSchema), markSold);
 
-router.post('/passports', protect, allowRoles('admin', 'superadmin', 'dealer', 'individual_seller'), validate(vehiclePassportSchema), createPassport);
+router.post('/passports', protect, allowRoles('admin', 'superadmin', 'dealer', 'user', 'individual_seller'), validate(vehiclePassportSchema), createPassport);
 // Full passport is owner/staff-only; the service enforces ownership and returns 404 for unrelated callers.
 router.get('/passports/:passportId', protect, validateParams(passportIdParamsSchema), getPassport);
 router.get('/passports/:passportId/public', validateParams(passportIdParamsSchema), getPublicPassport);

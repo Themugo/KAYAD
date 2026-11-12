@@ -287,46 +287,44 @@ describe("D. configuration routes: owner-only writes, revisioned, audited", () =
   });
 });
 
-describe("B. one account: a buyer who applies as a dealer", () => {
-  test("a buyer with a started application appears in Seller Management as an applicant; plain buyers do not", async () => {
-    register(UID(10), { role: "user", status: "approved", docs: {} });
+describe("B. a dealer is a separate business account: no personal account is a dealer applicant", () => {
+  test("a personal account is never listed as a dealer applicant, even with a legacy draft; dealers carry their application", async () => {
+    register(UID(10), { role: "user", status: "approved", docs: {} }); // legacy draft left on a personal account
     staff(UID(11), "user");
+    register(UID(12), { role: "dealer", status: "pending", docs: {} });
     const r = await call("GET", "/api/admin/users", "admin-1");
     const rows = Object.fromEntries(r.body.users.map((u) => [u._id, u]));
-    expect(rows[UID(10)].dealerApplicant).toBe(true);
-    expect(rows[UID(10)].application).toBeTruthy();
+    expect(rows[UID(10)].dealerApplicant).toBeUndefined();
+    expect(rows[UID(10)].application).toBeUndefined();
     expect(rows[UID(11)].application).toBeUndefined();
+    expect(rows[UID(12)].application).toBeTruthy();
+    expect(rows[UID(12)].dealerApplicant).toBe(false);
   });
-  test("the Applicants filter lists only buyers with an open application (not plain buyers, not dealers)", async () => {
+  test("the Applicants filter lists only dealer accounts whose application is not approved (never personal accounts)", async () => {
     register(UID(20), { role: "user", status: "approved", docs: {} });
     staff(UID(21), "user");
     register(UID(22), { role: "dealer", status: "pending", docs: {} });
     const r = await call("GET", "/api/admin/users?dealerApplicants=true", "admin-1");
     expect(r.status).toBe(200);
-    expect(r.body.users.map((u) => u._id)).toEqual([UID(20)]);
-    expect(r.body.users[0].dealerApplicant).toBe(true);
+    expect(r.body.users.map((u) => u._id)).toEqual([UID(22)]);
   });
-  test("approval converts the SAME user (no new user), keeping id, e-mail and name; role becomes dealer only now", async () => {
-    register(UID(12), { role: "user", status: "approved", docs: {} });
-    const usersBefore = Object.keys(world.users).length;
-    const idBefore = world.users[UID(12)].id; const emailBefore = world.users[UID(12)].email;
-    expect(world.users[UID(12)].role).toBe("user"); // no seller privilege while pending
-    const r = await approve(UID(12));
-    expect(r.status).toBe(200);
-    expect(Object.keys(world.users)).toHaveLength(usersBefore);
-    expect(world.users[UID(12)]).toMatchObject({ id: idBefore, email: emailBefore, role: "dealer", status: "approved" });
-    expect(world.dealers[UID(12)].approved).toBe(true);
-  });
-  test("REJECTING a buyer's application leaves the buyer account fully usable (status stays approved, role stays user) and never calls the RPC", async () => {
+  test("a personal account with a started application can NOT be approved as a dealer: refused, role and data unchanged, no RPC", async () => {
     register(UID(13), { role: "user", status: "approved", docs: {} });
-    const r = await reject(UID(13));
+    const before = snap();
+    const r = await approve(UID(13));
+    expect(r.status).toBe(400);
+    expect(r.body.code).toBe("NOT_A_DEALER_ACCOUNT");
+    expect(world.users[UID(13)]).toMatchObject({ role: "user", status: "approved" });
+    expect(world.rpcCalls).toHaveLength(0);
+    expect(snap()).toBe(before);
+  });
+  test("REJECTING a legacy draft on a personal account (clean-up) leaves the account fully usable and never calls the RPC", async () => {
+    register(UID(18), { role: "user", status: "approved", docs: {} });
+    const r = await reject(UID(18));
     expect(r.status).toBe(200);
     expect(r.body.changed).toBe(true);
-    expect(world.users[UID(13)]).toMatchObject({ role: "user", status: "approved" });
-    expect(world.verifications[UID(13)].verificationStatus).toBe("rejected");
+    expect(world.users[UID(18)]).toMatchObject({ role: "user", status: "approved" });
     expect(world.rpcCalls).toHaveLength(0);
-    const again = await reject(UID(13));
-    expect(again.body.changed).toBe(false); // idempotent
     const entry = auditCreate.mock.calls.map(([e]) => e).find((e) => String(e.action).startsWith("Dealer application rejected"));
     expect(entry.details.accountUntouched).toBe(true);
   });
@@ -335,11 +333,11 @@ describe("B. one account: a buyer who applies as a dealer", () => {
     expect((await reject(UID(14))).status).toBe(200);
     expect(world.rpcCalls.map((c) => c.args.p_action)).toEqual(["reject"]);
   });
-  test("a buyer with NO application cannot be approved as a dealer (nothing to approve)", async () => {
+  test("a personal account with NO application cannot be approved as a dealer either", async () => {
     staff(UID(15), "user");
     const before = snap();
     const r = await approve(UID(15));
-    expect(r.status).toBe(409);
+    expect(r.status).toBe(400);
     expect(snap()).toBe(before);
   });
   test("other roles are not dealer applicants", async () => {

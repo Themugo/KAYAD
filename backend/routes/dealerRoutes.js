@@ -45,7 +45,8 @@ const router = express.Router();
 // ONE ACCOUNT FOR BUYING AND SELLING. A dealer is registered as role "dealer" (pending). An existing buyer (role "user") starts the same
 // application on the SAME account via POST /application: no second user is created, users.role / users.status / bids / saved items
 // are untouched, and seller privileges stay off until an administrator approves (approval is what turns the role into "dealer").
-const APPLICANT_ROLES = ["dealer", "user"];
+// Dealer accounts only: a personal account cannot start or complete a dealer application (a dealer is a separate business account).
+const APPLICANT_ROLES = ["dealer"];
 const applicationState = async (userId) => {
   const dealer = await findOne("dealers", { user: userId });
   const verification = dealer ? await findOne("dealer_verifications", { user: userId }) : null;
@@ -70,7 +71,6 @@ router.post("/application", protect, allowRoles(...APPLICANT_ROLES), asyncHandle
     // Duplicate / retry: nothing is created or changed.
     return res.status(200).json({ success: true, alreadyStarted: true, status: existing.status, dealer: existing.dealer });
   }
-  if (u.role === "user" && u.status !== "approved") return res.status(403).json({ success: false, code: "ACCOUNT_NOT_ACTIVE", message: "Only an active account can start a dealer application." });
   const mode = await onboardingPolicy.getOnboardingPolicy();
   if (!onboardingPolicy.isPolicyTrusted(mode) || mode.policy.dealerOnboardingMode === "closed") {
     return res.status(403).json({ success: false, code: "DEALER_APPLICATIONS_CLOSED", message: "Dealer applications are not being accepted right now." });
@@ -86,6 +86,10 @@ router.get("/onboarding", protect, allowRoles(...APPLICANT_ROLES), asyncHandler(
     dealer = await create("dealers", { user: req.user.id, approved: false, isSuspended: false });
   }
   if (!dealer) return res.status(409).json({ success: false, code: "DEALER_APPLICATION_NOT_STARTED", message: "Start a dealer application first." });
+  {
+    const company = validateCompanyName(businessName, { personName: req.user.name });
+    if (!company.ok) return res.status(400).json({ success: false, code: company.code, message: company.message });
+  }
   res.json({ success: true, dealer });
 }));
 
@@ -760,6 +764,7 @@ router.put(
 // ─────────────────────────────────────────────────────────────
 import crypto from "crypto";
 
+import { validateCompanyName } from '../utils/companyName.js';
 // GET  /api/dealer/team          — list all team members (PAGINATED + CACHED)
 router.get(
   "/team",

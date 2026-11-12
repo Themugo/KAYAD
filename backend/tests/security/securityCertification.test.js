@@ -330,7 +330,7 @@ describe("registration role assignment", () => {
     }
   });
 
-  test("dealer and individual_seller are sent as their own role (DB stores them pending)", async () => {
+  test("dealer is sent as its own role (pending); the retired individual_seller is mapped to a personal account", async () => {
     const dealerRes = mockRes();
     await register(registerReq("dealer", { businessName: "Jane Motors", location: "Nairobi" }), dealerRes);
     expect(rpcArgs()).toEqual(expect.objectContaining({ p_role: "dealer", p_business_name: "Jane Motors", p_location: "Nairobi" }));
@@ -339,9 +339,9 @@ describe("registration role assignment", () => {
 
     const sellerRes = mockRes();
     await register(registerReq("individual_seller"), sellerRes);
-    expect(rpcArgs().p_role).toBe("individual_seller");
+    expect(rpcArgs().p_role).toBe("user");
     expect(sellerRes.status).toHaveBeenCalledWith(201);
-    expect(sellerRes.json.mock.calls.at(-1)[0].user.status).toBe("pending");
+    expect(sellerRes.json.mock.calls.at(-1)[0].user.status).toBe("approved");
   });
 
   test("a buyer registers approved with no business fields", async () => {

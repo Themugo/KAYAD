@@ -172,11 +172,12 @@ describe("guest vs account-required", () => {
 });
 
 describe("one account, several capabilities", () => {
-  test("a fresh registered account is a buyer, may ask to sell privately, and may apply for dealer/inspector - none granted", async () => {
+  test("a fresh registered account is ONE personal account (buying + selling), may ask to sell privately, may apply as an inspector, and can NEVER apply to become a dealer", async () => {
     person("b1"); const { body } = await caps("b1"); const d = body.data;
-    expect(d.buyer.granted).toBe(true);
+    expect(d.personal).toMatchObject({ granted: true, buying: { granted: true } });
+    expect(d.buyer.granted).toBe(true); // deprecated alias
     expect(d.privateSeller).toMatchObject({ status: "none", granted: false, canApply: true });
-    expect(d.dealer).toMatchObject({ granted: false, status: "none", canApply: true });
+    expect(d.dealer).toMatchObject({ granted: false, status: "none", canApply: false });
     expect(d.inspector).toMatchObject({ granted: false, status: "none", canApply: true });
     expect(d.userId).toBe("b1");
   });

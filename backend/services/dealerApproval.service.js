@@ -17,7 +17,10 @@ export const REASON_MIN = 8;
 
 // One account for buying and selling: a buyer (role "user") who has started a dealer application keeps that account; the role becomes
 // "dealer" only when the application is approved. Staff, private sellers (own capability workflow) and anyone else are not eligible here.
-export const APPLICANT_ROLES = Object.freeze(["dealer", "user"]);
+// A dealer is a SEPARATE business account. A personal account (`user`, or the retired `individual_seller`) can never be converted or
+// approved into a dealer; dealers register as dealers (company name, own verification). The members of a dealership are managed through
+// the dealer team (dealer_teams), which never changes a member's own role.
+export const APPLICANT_ROLES = Object.freeze(["dealer"]);
 
 const text = (v) => (typeof v === "string" ? v.trim() : "");
 export const cleanReason = (v) => {
@@ -131,14 +134,14 @@ export async function approveDealer({ user, actorId, reason }, deps) {
   const d = deps || (await defaultDeps());
   const why = cleanReason(reason);
   if (!why) throw new DealerDecisionError("REASON_REQUIRED", `State the reason for approving this dealer (at least ${REASON_MIN} characters).`, 400);
-  if (!APPLICANT_ROLES.includes(user.role)) throw new DealerDecisionError("NOT_A_DEALER_ACCOUNT", "Only dealer accounts and buyer accounts with a dealer application are approved through dealer verification.", 400);
+  if (!APPLICANT_ROLES.includes(user.role)) throw new DealerDecisionError("NOT_A_DEALER_ACCOUNT", "Only dealer accounts are approved through dealer verification. A personal account cannot become a dealer: the business must register its own dealer account.", 400);
   const id = String(user.id ?? user._id);
 
   return serialise(id, async () => {
     // Re-read the account inside the lock: the row the caller holds may be stale (another admin or tab may have decided meanwhile).
     const fresh = (d.findUser ? await d.findUser(id) : null) || user;
     if (!fresh) throw new DealerDecisionError("USER_NOT_FOUND", "The user no longer exists.", 404);
-    if (!APPLICANT_ROLES.includes(fresh.role)) throw new DealerDecisionError("NOT_A_DEALER_ACCOUNT", "Only dealer accounts and buyer accounts with a dealer application are approved through dealer verification.", 400);
+    if (!APPLICANT_ROLES.includes(fresh.role)) throw new DealerDecisionError("NOT_A_DEALER_ACCOUNT", "Only dealer accounts are approved through dealer verification. A personal account cannot become a dealer: the business must register its own dealer account.", 400);
     const assessed = await assessDealerApplication({ ...user, ...fresh, id }, d);
     if (assessed.alreadyApproved) return { changed: false, alreadyApproved: true, warnings: assessed.warnings };
     if (assessed.blockers.length) {

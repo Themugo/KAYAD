@@ -23,7 +23,7 @@ const mk = (over: any = {}) => ({
   amount: 2500000, status: 'funded', viewerRole: 'buyer', availableActions: ['confirm_vehicle', 'open_dispute'], createdAt: now, updatedAt: now, fundedAt: now, ...over,
 });
 const summary = (over: any = {}) => ({ scope: 'participant', currency: 'KES', totalDeals: 1, heldAmount: 2500000, heldCount: 1, pendingFundingCount: 0, activeCount: 1, settledCount: 0, needsActionCount: 1, ...over });
-const buyer = { id: 'b', name: 'Bea', email: '', role: 'buyer' as const, avatar: '', phone: '' };
+const buyer = { id: 'b', name: 'Bea', email: '', role: 'user' as const, avatar: '', phone: '' };
 const staffUser = { ...buyer, id: 'a', role: 'admin' as const };
 const program = { enabled: true, fundingMethods: ['bank_transfer'], releaseDays: 3, minimumAmount: 0, maximumAmount: null, currency: 'KES' };
 

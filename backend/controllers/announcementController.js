@@ -5,7 +5,9 @@ import { logInfo, logError } from "../utils/logger.js";
 import AuditLog from "../models/AuditLog.js";
 import { auditAfterCommit } from "../utils/auditAfterCommit.js";
 
-const SELLER_ROLES = ["dealer", "individual_seller"];
+// "dealers" = business dealer accounts only. "buyers" = every personal account (buying AND private selling live on one account), plus legacy individual_seller rows (G-20).
+const DEALER_ROLES = ["dealer"];
+const PERSONAL_ROLES = ["user", "buyer", "individual_seller"];
 const BATCH_SIZE = 250;
 const VALID_AUDIENCES = new Set(["all", "dealers", "buyers", "specific_users"]);
 const MAX_TITLE_LENGTH = 120;
@@ -106,10 +108,10 @@ export const sendAnnouncement = async (req, res) => {
         query = {};
         break;
       case "dealers":
-        query = { role: { $in: SELLER_ROLES } };
+        query = { role: { $in: DEALER_ROLES } };
         break;
       case "buyers":
-        query = { role: "user" };
+        query = { role: { $in: PERSONAL_ROLES } };
         break;
       case "specific_users":
         query = { _id: { $in: announcement.targetUsers } };

@@ -59,10 +59,15 @@ check('Seller quick actions stay within existing implemented sections', () => {
 check('Icon controls have accessible labels and navigation state semantics', () => {
   assert.match(dashboard, /aria-label=\{mobileMenuOpen \? 'Close seller navigation' : 'Open seller navigation'\}/);
   assert.match(dashboard, /aria-expanded=\{mobileMenuOpen\}/);
-  assert.match(dashboard, /aria-current=\{activeSection === item\.id \? 'page' : undefined\}/);
+  // Navigation is now grouped (navGroups); the active entry is still exposed to assistive tech.
+  assert.match(dashboard, /aria-current=\{isActive \? 'page' : undefined\}/);
 });
 check('Listing imagery has descriptive alternative text and lazy loading', () => {
-  assert.match(dashboard, /alt=\{`\$\{listing\.year\} \$\{listing\.brand\} \$\{listing\.model\}`\} className="w-full h-full object-cover" loading="lazy"/);
+  // Imagery goes through VehicleImage: descriptive alt from the listing, lazy loading, and an explicit
+  // text alternative (role=img + aria-label) when the photo is unavailable.
+  assert.match(dashboard, /<VehicleImage urls=\{\[listing\.images\?\.\[0\]\?\.thumb, listing\.images\?\.\[0\]\?\.url\]\} alt=\{`\$\{listing\.year\} \$\{listing\.brand\} \$\{listing\.model\}`\} \/>/);
+  assert.match(dashboard, /alt=\{alt\}\s+loading="lazy"/);
+  assert.match(dashboard, /role="img" aria-label=\{candidates\.length \? `\$\{alt\}: photo unavailable` : `\$\{alt\}: no photo uploaded`\}/);
 });
 check('Refresh responses are guarded against stale user/request races', () => {
   assert.match(dashboard, /const requestGeneration = useRef\(0\)/);

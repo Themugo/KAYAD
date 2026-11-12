@@ -1,4 +1,5 @@
 import { KenyaFlag } from './CountryBadge';
+import { useMyDealership } from '../features/DealershipWorkspace/useMyDealership';
 import { hasSessionHint } from '../utils/sessionHint';
 import { isStaffRole, staffRoleLabel } from '../utils/staffRoles';
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
@@ -284,6 +285,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const signedIn = Boolean(user);
   // A dealer works only in the Dealer workspace: the buyer / private-seller pages are not part of a dealer account's menu.
   const isDealerUser = user?.role === 'dealer';
+  const { membership: dealershipMembership } = useMyDealership(user?.id, user?.role);
   const isStaffAccount = isStaffRole(user?.role);
   const isMechanicAccount = user?.role === 'mechanic';
   const isRestrictedWorkspace = isDealerUser || isStaffAccount;
@@ -544,7 +546,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <p className="font-bold text-[#0A3340] truncate">{user.name}</p>
                         <p className="text-[11px] text-[#64748B] truncate">{user.email}</p>
                         <span className="inline-block mt-1 px-2 py-0.5 bg-[#0A3340] text-white font-semibold text-[9px] rounded uppercase">
-                          {isStaffRole(user.role) ? staffRoleLabel(user.role) : user.role === 'dealer' ? 'Verified Dealer' : user.role === 'mechanic' ? 'NTSA Mechanic' : user.role === 'admin' ? 'Administrator' : 'Private Seller / Buyer'}
+                          {isStaffRole(user.role) ? staffRoleLabel(user.role) : user.role === 'dealer' ? 'Verified Dealer' : user.role === 'mechanic' ? 'NTSA Mechanic' : user.role === 'admin' ? 'Administrator' : 'Personal account'}
                         </span>
                       </div>
                     </div>
@@ -601,7 +603,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
                       >
                         <LayoutDashboard className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
-                        <span>{isStaffRole(user.role) ? 'Operations Dashboard' : 'Buyer Command Center'}</span>
+                        <span>{isStaffRole(user.role) ? 'Operations Dashboard' : 'My Account'}</span>
                       </button>
 )}
 
@@ -611,7 +613,17 @@ export const Navbar: React.FC<NavbarProps> = ({
                         className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
                       >
                         <Car className="w-4 h-4 text-[#176B87] stroke-[1.75]" />
-                        <span>Private Seller Dashboard</span>
+                        <span>Selling Workspace</span>
+                      </button>
+                      )}
+
+                      {dealershipMembership && (
+                      <button
+                        onClick={() => handleNavSelect('dealership-workspace')}
+                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
+                      >
+                        <Car className="w-4 h-4 text-[#176B87] stroke-[1.75]" />
+                        <span>Dealership Workspace</span>
                       </button>
                       )}
 
@@ -709,18 +721,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                       </button>
                     </div>
 
-                    {/* ONE ACCOUNT: a buyer applies to sell on the same account. Dealer tools stay hidden until approval turns the role into dealer. */}
-                    {user.role === 'buyer' && (
-                      <div className="border-t border-[#D7E7E4] pt-1.5 mt-1.5 pb-1">
-                        <button
-                          onClick={() => { navigate('/dealer/onboarding'); setShowUserDropdown(false); }}
-                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
-                        >
-                          <Building2 className="w-4 h-4 text-[#0A3340]" />
-                          <span>Become a dealer</span>
-                        </button>
-                      </div>
-                    )}
+                    {/* A dealer is a SEPARATE account (own registration and verification). The personal account menu offers no in-place dealer upgrade. */}
 
                     {user.role === 'mechanic' && (
                       <div className="border-t border-[#D7E7E4] pt-1.5 mt-1.5 bg-emerald-50/50 pb-1">

@@ -9,6 +9,7 @@ import { cacheDealerSearch } from "../middleware/searchCache.js";
 import { trackCarSearch } from "../middleware/searchTracking.js";
 import { trackDealerSearchLatency } from "../middleware/searchLatencyTracking.js";
 import User from "../models/User.js";
+import { dealerPublicName } from "../utils/companyName.js";
 
 const router = express.Router();
 
@@ -33,7 +34,7 @@ router.get(
     res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=120");
     res.json({ success: true, dealers: dealers.map((dealer) => ({
       id: String(dealer._id || dealer.id),
-      name: dealer.businessName || dealer.name || "KAYAD dealer",
+      name: dealerPublicName(dealer),
       avatar: dealer.avatar || null,
       location: dealer.location || null,
       description: dealer.bio || null,

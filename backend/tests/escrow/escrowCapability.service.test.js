@@ -144,10 +144,19 @@ describe("setSellerEscrowCapability — admin grant/revoke/suspend/restore", () 
       .rejects.toMatchObject({ statusCode: 404 });
   });
 
-  test("rejects a target role that can never carry escrow capability (e.g. plain 'user' or 'admin')", async () => {
+  test("rejects a target role that can never carry escrow capability (staff and other non-seller roles)", async () => {
+    for (const role of ["admin", "superadmin", "moderator"]) {
+      findByIdMock.mockResolvedValue({ id: "x-1", role, escrowCapabilityStatus: "none" });
+      await expect(setSellerEscrowCapability({ targetUserId: "x-1", status: "granted", adminUser, req: {} }))
+        .rejects.toMatchObject({ statusCode: 400 });
+    }
+  });
+
+  test("unified personal account: a plain 'user' (private seller) CAN be granted escrow capability by an authorised admin", async () => {
     findByIdMock.mockResolvedValue({ id: "user-1", role: "user", escrowCapabilityStatus: "none" });
-    await expect(setSellerEscrowCapability({ targetUserId: "user-1", status: "granted", adminUser, req: {} }))
-      .rejects.toMatchObject({ statusCode: 400 });
+    const result = await setSellerEscrowCapability({ targetUserId: "user-1", status: "granted", reason: "manual review passed", adminUser, req: { originalUrl: "/x" } });
+    expect(result).toMatchObject({ userId: "user-1", previousStatus: "none", status: "granted" });
+    expect(updateMock).toHaveBeenCalledWith("users", "user-1", expect.objectContaining({ escrowCapabilityStatus: "granted" }));
   });
 
   test("authorized grant succeeds: individual_seller -> writes 'granted', logs the change, does not cascade to cars", async () => {

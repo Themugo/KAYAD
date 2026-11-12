@@ -311,12 +311,61 @@ export async function sellerMayPublishDirectly(user) {
   if (!user) return false;
   if (user.effectiveRole === "webhoist") return true;
   if (user.role === "admin" || user.role === "superadmin") return true;
+
   const result = await getOnboardingPolicy();
   if (!isPolicyTrusted(result) || result.policy.listingModeration !== "auto_publish") return false;
-  const personalSeller = ["user", "individual_seller"].includes(String(user.role || ""));
-  const accountStatusOk = user.status === "approved"
-    || (personalSeller && result.policy.privateSellerApprovalMode !== "required" && !["suspended", "revoked", "deactivated", "banned"].includes(String(user.status || "").toLowerCase()));
-  return accountStatusOk && result.policy.privateSellerPackageMode === "free";
+  if (result.policy.privateSellerPackageMode !== "free") return false;
+
+  const role = String(user.role || "");
+  const personalSeller = role === "user" || role === "individual_seller";
+  const accountStatus = String(user.status || "").toLowerCase();
+  const blockedIdentityStatuses = ["suspended", "revoked", "deactivated", "banned"];
+  if (blockedIdentityStatuses.includes(accountStatus)) return false;
+
+  // Seller actions always require verified email. Keep this check here as well as
+  // in route middleware so direct callers cannot accidentally bypass the rule.
+  if (personalSeller && user.emailVerified !== true) return false;
+
+  // Preserve the existing dealer path: dealers are governed by their own role,
+  // verification and account-status middleware, not the private-seller capability.
+  if (!personalSeller) return accountStatus === "approved";
+
+  const approvalRequired = result.policy.privateSellerApprovalMode === "required";
+  let capability = null;
+  try {
+    const { data, error } = await getSupabase()
+      .from("private_seller_capabilities")
+      .select("status")
+      .eq("user_id", String(user.id ?? user._id))
+      .maybeSingle();
+
+    if (error) {
+      const missingTable = ["42P01", "PGRST205", "PGRST204"].includes(String(error.code || ""))
+        || /private_seller_capabilities.*(does not exist|schema cache)/i.test(String(error.message || ""));
+      // The table is optional in free/open mode, but approval mode must fail closed.
+      if (!missingTable || approvalRequired) return false;
+    } else {
+      capability = data || null;
+    }
+  } catch {
+    return false;
+  }
+
+  if (capability && ["suspended", "revoked"].includes(String(capability.status || "").toLowerCase())) {
+    return false;
+  }
+
+  if (!approvalRequired) {
+    // In free mode, old pending/rejected application states do not impose an approval
+    // gate. Explicit suspension and revocation above remain enforceable.
+    return true;
+  }
+
+  if (capability) return capability.status === "approved";
+
+  // Compatibility for a legacy individual_seller before capability backfill.
+  // A missing/unknown legacy state is pending, never implicitly approved.
+  return role === "individual_seller" && accountStatus === "approved";
 }
 
 export const PUBLICATION_REVIEW_REQUIRED = Object.freeze({

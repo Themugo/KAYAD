@@ -132,10 +132,9 @@ describe("14.7 PUT /api/dealer/onboarding decides before it writes", () => {
   });
   // ONE ACCOUNT (2026-11-01): a buyer may now apply on the same account, but only after starting an application. Without one nothing is
   // written; roles that can never be applicants (staff) are still refused before any lookup.
-  test("a buyer who has not started an application cannot write onboarding data", async () => {
+  test("a personal account can never write onboarding data (personal accounts cannot become dealers)", async () => {
     const r = await put(B1);
-    expect(r.status).toBe(409);
-    expect(r.body.code).toBe("DEALER_APPLICATION_NOT_STARTED");
+    expect(r.status).toBe(403);
     expect(dbUpdate).not.toHaveBeenCalled();
   });
   test.each([["ADMIN", ADMIN], ["MARKETING", MARKETING]])("a staff role (%s) is refused before any lookup", async (_n, who) => {

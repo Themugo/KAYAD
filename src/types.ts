@@ -622,7 +622,7 @@ export interface UserProfile {
   email: string;
   phone: string;
   // Staff roles come from the canonical STAFF_ROLES list; the session can carry any of them at runtime.
-  role: 'buyer' | 'dealer' | 'mechanic' | 'bank_officer' | StaffRole;
+  role: 'user' | 'dealer' | 'mechanic' | 'bank_officer' | StaffRole;
   avatar: string;
   isVerified?: boolean;
   unreadMessagesCount?: number;

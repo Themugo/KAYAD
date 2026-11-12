@@ -39,9 +39,10 @@ describe('account dropdown by role', () => {
   it('superadmin is labelled Super Admin', () => {
     expect(open('superadmin').textContent).toContain('Super Admin');
   });
-  it.each(['buyer', 'user', 'individual_seller'])('%s keeps the buyer/seller menu and gets no admin section', (role) => {
+  it.each(['user', 'individual_seller'])('%s keeps the one personal-account menu (buying and selling) and gets no admin section', (role) => {
     const text = open(role).textContent;
-    expect(text).toContain('Buyer Command Center');
+    expect(text).toContain('My Account');
+    expect(text).not.toMatch(/Buyer Command Center|Private Seller Dashboard/);
     expect(text).toContain('Sell Vehicle');
     expect(text).not.toContain('System Administration');
   });

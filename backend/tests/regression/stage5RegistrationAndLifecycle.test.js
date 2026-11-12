@@ -59,17 +59,21 @@ const reg = async (body) => { const res = mkRes(); await register({ body: { name
 beforeEach(() => { rpcCalls.length = 0; users.clear(); auths.clear(); jest.clearAllMocks(); __setOnboardingPolicyForTests({}); });
 
 describe("registration obeys the owner's policy BEFORE any side effect", () => {
-  test("private seller: enabled ⇒ 201 and starts active in free mode; disabled ⇒ 403 with no database call", async () => {
-    const created = await reg({ role: "individual_seller" });
-    expect(created.code).toBe(201);
-    expect(created.body.user.status).toBe("approved");
-    expect(created.body.user.emailVerified).toBe(false);
-    expect(rpcCalls.at(-1).args.p_role).toBe("individual_seller");
-    rpcCalls.length = 0;
-    __setOnboardingPolicyForTests({ privateSellerRegistration: "disabled" });
-    const r = await reg({ role: "individual_seller" });
-    expect([r.code, r.body.code]).toEqual([403, "SELLER_REGISTRATION_DISABLED"]);
-    expect(rpcCalls).toHaveLength(0);
+  test("retired individual_seller request: always a personal account (role user), whatever the seller policy says", async () => {
+    // Selling is gated when a listing is created (sellerListingAccess), never by creating a second identity.
+    for (const policy of [{}, { privateSellerRegistration: "disabled" }, { privateSellerApprovalMode: "required" }, { privateSellerPackageMode: "required" }]) {
+      __setOnboardingPolicyForTests(policy);
+      rpcCalls.length = 0;
+      const created = await reg({ role: "individual_seller" });
+      expect(created.code).toBe(201);
+      expect(created.body.user.status).toBe("approved");
+      expect(created.body.user.role).toBe("user");
+      expect(created.body.user.emailVerified).toBe(false);
+      expect(rpcCalls.at(-1).args.p_role).toBe("user");
+    }
+    // An unavailable onboarding policy cannot block a personal account either.
+    __setOnboardingPolicyForTests({}, "unavailable");
+    expect((await reg({ role: "individual_seller" })).code).toBe(201);
   });
   test.each(["approval_required", "self_onboarding"])("dealer mode %s ⇒ 201, stored pending/unverified, no elevated flags passed to the database", async (mode) => {
     __setOnboardingPolicyForTests({ dealerOnboardingMode: mode });
@@ -87,10 +91,10 @@ describe("registration obeys the owner's policy BEFORE any side effect", () => {
     expect([r.code, r.body.code]).toEqual([403, "DEALER_REGISTRATION_CLOSED"]);
     expect(rpcCalls).toHaveLength(0);
   });
-  test("policy unavailable/invalid ⇒ 503 for seller and dealer registration; never opens", async () => {
+  test("policy unavailable/invalid ⇒ 503 for dealer registration; never opens", async () => {
     for (const source of ["unavailable", "invalid"]) {
       __setOnboardingPolicyForTests({ privateSellerRegistration: "enabled", dealerOnboardingMode: "self_onboarding" }, source);
-      for (const body of [{ role: "individual_seller" }, { role: "dealer", businessName: "B", location: "L" }]) {
+      for (const body of [{ role: "dealer", businessName: "Bravo Motors", location: "L" }]) {
         const r = await reg(body);
         expect([r.code, r.body.code]).toEqual([503, "ONBOARDING_POLICY_UNAVAILABLE"]);
       }
@@ -104,9 +108,9 @@ describe("registration obeys the owner's policy BEFORE any side effect", () => {
   });
   test("the owner's settings change takes effect at runtime without a restart", async () => {
     __setOnboardingPolicyForTests({ dealerOnboardingMode: "closed" });
-    expect((await reg({ role: "dealer", businessName: "B", location: "L" })).code).toBe(403);
+    expect((await reg({ role: "dealer", businessName: "Bravo Motors", location: "L" })).code).toBe(403);
     __setOnboardingPolicyForTests({ dealerOnboardingMode: "self_onboarding" });
-    expect((await reg({ role: "dealer", businessName: "B", location: "L" })).code).toBe(201);
+    expect((await reg({ role: "dealer", businessName: "Bravo Motors", location: "L" })).code).toBe(201);
   });
 });
 
@@ -179,15 +183,16 @@ describe("verification token lifecycle (GET /verify-email/:token)", () => {
 describe("wording: application received ≠ email verified ≠ approved", () => {
   test("dealer registration response says the application is received and NOT approved", async () => {
     __setOnboardingPolicyForTests({ dealerOnboardingMode: "approval_required" });
-    const r = await reg({ role: "dealer", businessName: "B", location: "L" });
+    const r = await reg({ role: "dealer", businessName: "Bravo Motors Ltd", location: "L" });
     expect(r.body.message).toMatch(/application received/i);
     expect(r.body.message).toMatch(/not approved until/i);
     expect(r.body.message).not.toMatch(/ready/i);
   });
-  test("seller registration response mentions review before publication", async () => {
+  test("retired seller registration response explains there is no separate seller account", async () => {
     const r = await reg({ role: "individual_seller" });
-    expect(r.body.message).toMatch(/does not require a package or seller approval/i);
-    expect(r.body.message).toMatch(/listing moderation is separate/i);
+    expect(r.body.message).toMatch(/no longer has a separate private-seller account/i);
+    expect(r.body.message).toMatch(/selling is part of your personal account/i);
+    expect(r.body.compatibility).toEqual({ requestedRole: "individual_seller", createdRole: "user", deprecated: true });
   });
   test("buyer wording is unchanged", async () => {
     expect((await reg({})).body.message).toBe("Account created successfully. Please verify your email before signing in.");
@@ -201,5 +206,38 @@ describe("wording: application received ≠ email verified ≠ approved", () => 
     expect(mail.buildWelcomeEmail({ name: "Wanjiru", role: "dealer" }).text).toMatch(/not approved|before your dealer account is approved/i);
     expect(mail.buildWelcomeEmail({ name: "Wanjiru" }).text).toMatch(/Your account is ready/);
     expect(mail.buildWelcomeEmail({ name: "<script>x</script>", role: "dealer" }).html).not.toContain("<script>x</script>");
+  });
+});
+
+describe("retired individual_seller self-registration is mapped to a personal account", () => {
+  const regWithHeaders = async (body) => {
+    const headers = {};
+    const res = { code: 200, body: null, status(c) { this.code = c; return this; }, json(b) { this.body = b; return this; }, cookie() { return this; }, clearCookie() { return this; }, set(k, v) { headers[k] = v; return this; }, setHeader(k, v) { headers[k] = v; return this; } };
+    await register({ body: { name: "N", email: "legacy@example.test", password: "Str0ng!Passw0rd", ...body }, query: {}, headers: {} }, res);
+    return { res, headers };
+  };
+  test("individual_seller is retired: accepted from old clients, mapped to a personal account, flagged with a Deprecation header", async () => {
+    const { res, headers } = await regWithHeaders({ role: "individual_seller" });
+    expect(res.code).toBe(201);
+    expect(rpcCalls.at(-1).args.p_role).toBe("user");
+    expect(headers.Deprecation).toBe("true");
+  });
+  test("the personal-account path (role user / omitted) carries no deprecation marker", async () => {
+    for (const body of [{ role: "user" }, {}]) {
+      const { res, headers } = await regWithHeaders(body);
+      expect(res.code).toBe(201);
+      expect(rpcCalls.at(-1).args.p_role).toBe("user");
+      expect(headers.Deprecation).toBeUndefined();
+    }
+  });
+});
+
+describe("individual_seller retirement guard (source level)", () => {
+  test("self-registration can never create the retired role", async () => {
+    const { readFileSync } = await import("node:fs");
+    const src = readFileSync(new URL("../../controllers/authController.js", import.meta.url), "utf8");
+    expect(src).toMatch(/const role = requestedRole === "dealer" \? "dealer" : "user";/);
+    expect(src).not.toMatch(/requestedRole === "individual_seller" \? requestedRole/);
+    expect(src).not.toMatch(/p_role:\s*["']individual_seller["']/);
   });
 });
