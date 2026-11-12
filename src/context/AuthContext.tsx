@@ -82,8 +82,8 @@ const AuthCtx = createContext<AuthContextValue | null>(null);
 // Backend→frontend role mapping contract (locked by
 // src/__tests__/context/roleMapping.test.ts, docs/ROLE_MATRIX.md):
 // every real backend role keeps its identity; only the backend "user"
-// role maps to this frontend's pre-existing "buyer" term; anything
-// unrecognized fails closed to "buyer" (least privileged).
+// role is the ONE personal account (buying and private selling together); anything
+// unrecognized fails closed to "user" (least privileged). The old frontend-only "buyer" role no longer exists.
 const KNOWN_ROLES = [
   'dealer', 'admin', 'superadmin', 'broker', 'individual_seller',
   'ghost_checker', 'moderator', 'ad_manager', 'marketing',
@@ -91,9 +91,9 @@ const KNOWN_ROLES = [
 ];
 
 export function mapBackendRoleToFrontend(role: string): string {
-  if (role === 'user') return 'buyer';
+  if (role === 'user' || role === 'buyer') return 'user';
   if (KNOWN_ROLES.includes(role)) return role;
-  return 'buyer';
+  return 'user';
 }
 
 // Normalize user object to always have both _id and id fields
@@ -388,12 +388,12 @@ export function RequireDealer({ children }: RequireAuthProps) {
   return children;
 }
 
-/** The dealer application page: dealers (pending or approved) AND buyers who are applying on the same account. Staff are not applicants. */
+/** The dealer application page: dealer accounts only (pending or approved). A dealer is a separate account; personal accounts and staff are not applicants here. */
 export function RequireDealerApplicant({ children }: RequireAuthProps) {
   const { user, isDealer, loading, isAuth, sessionStatus } = useAuth();
   if (loading) return <div className="loading-center"><div className="spinner"/></div>;
   if (!isAuth && sessionStatus === 'error') return <SessionRecovery />;
-  if (!isDealer && (user?.role as string) !== 'buyer') return <Navigate to="/" replace />;
+  if (!isDealer) return <Navigate to="/" replace />;
   return children;
 }
 

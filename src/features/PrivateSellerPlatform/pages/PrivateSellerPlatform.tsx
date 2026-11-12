@@ -38,6 +38,8 @@ import {
 } from 'lucide-react';
 import { usePrivateSellerCapability } from '../../../hooks/usePrivateSellerCapability';
 import SellerCapabilityPanel from '../../../components/SellerCapabilityPanel';
+import { useBuyingActivity, metricLabel, summariseEscrows } from '../hooks/useBuyingActivity';
+import { countByLifecycle } from '../../../utils/listingLifecycle';
 
 // ============================================================
 // TYPES & INTERFACES
@@ -632,10 +634,16 @@ function SellerHomeSection({ listings, escrows, loading, listingsError, escrowsE
   policyOpen?: boolean;
 }) {
   const greeting = new Date().getHours() < 12 ? 'Good morning' : new Date().getHours() < 18 ? 'Good afternoon' : 'Good evening';
-  const activeListings = listings.filter((l) => l.status === 'available' || l.status === 'active').length;
-  const soldListings = listings.filter((l) => l.status === 'sold').length;
-  const draftListings = listings.filter((l) => l.status === 'draft').length;
-  const pendingListings = listings.filter((l) => l.status === 'pending' || l.status === 'under_review').length;
+  const lifecycle = countByLifecycle(listings);
+  const activeListings = lifecycle.active + lifecycle.reserved;
+  const soldListings = lifecycle.sold;
+  const draftListings = lifecycle.draft;
+  const pendingListings = lifecycle.under_review;
+  const hiddenListings = lifecycle.hidden;
+  const buying = useBuyingActivity(true);
+  const txn = summariseEscrows(escrows);
+  const txnUnavailable = escrowsError !== null && escrows.length === 0;
+  const txnMetric = (n: number) => (txnUnavailable ? 'Unavailable' : loading && escrows.length === 0 ? '—' : String(n));
   const viewCountsComplete = listings.every((listing) => typeof listing.views === 'number' && Number.isFinite(listing.views));
   const totalViews = listings.reduce((sum, listing) => sum + (typeof listing.views === 'number' && Number.isFinite(listing.views) ? listing.views : 0), 0);
   const openEscrows = escrows.filter((escrow) => !['closed', 'cancelled', 'refunded', 'released'].includes(escrow.status)).length;
@@ -674,10 +682,21 @@ function SellerHomeSection({ listings, escrows, loading, listingsError, escrowsE
         <SellerMetric icon={<ShieldCheck size={19} />} label="Open Deals" value={escrowMetric} hint="Account-linked escrow activity" color="#7C3AED" />
       </section>
 
+      <section aria-label="Buying and transactions" className="space-y-2">
+        <h2 className="px-1 text-sm font-bold uppercase tracking-wide text-[#12576D]">Buying &amp; transactions</h2>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
+          <SellerMetric icon={<Heart size={19} />} label="Saved Vehicles" value={metricLabel(buying.saved)} hint="Your favourites" color="#BE185D" />
+          <SellerMetric icon={<MessageSquare size={19} />} label="Negotiations" value={metricLabel(buying.negotiations)} hint="Offers and enquiries you started" color="#176B87" />
+          <SellerMetric icon={<Clock3 size={19} />} label="Awaiting Payment" value={txnMetric(txn.pendingFunding)} hint="Escrow pending funding" color="#B7791F" />
+          <SellerMetric icon={<CheckCircle2 size={19} />} label="Completed Deals" value={txnMetric(txn.completed)} hint="Released or closed escrow" color="#0D9488" />
+          <SellerMetric icon={<AlertTriangle size={19} />} label="Refunds & Cancellations" value={txnMetric(txn.refundedOrCancelled)} hint="Refunded or cancelled escrow" color="#7C3AED" />
+        </div>
+      </section>
+
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.65fr)_minmax(280px,0.85fr)]">
         <section className="min-w-0 rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm sm:p-5" aria-labelledby="seller-listings-heading">
           <div className="mb-4 flex items-center justify-between gap-3"><div><h2 id="seller-listings-heading" className="text-lg font-bold" style={{ color: KAYAD_THEME.navy }}>My Listings</h2><p className="mt-1 text-sm text-slate-500">Your latest vehicles and their current status.</p></div><button type="button" onClick={() => onNavigate('listing-quality')} className="inline-flex shrink-0 items-center gap-1 rounded-lg border border-[#D7E7E4] px-3 py-2 text-sm font-semibold hover:bg-[#F6FAF9]" style={{ color: KAYAD_THEME.navy }}>View all <ChevronRight size={15} aria-hidden="true" /></button></div>
-          <div className="mb-4 flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-[#E7F5F2] px-3 py-1.5 font-semibold text-[#0F766E]">Active {activeListings}</span><span className="rounded-full bg-warning/10 px-3 py-1.5 font-semibold text-warning">Under review {pendingListings}</span><span className="rounded-full bg-slate-100 px-3 py-1.5 font-semibold text-slate-700">Drafts {draftListings}</span><span className="rounded-full bg-[#F6FAF9] px-3 py-1.5 font-semibold text-[#12576D]">Sold {soldListings}</span></div>
+          <div className="mb-4 flex flex-wrap gap-2 text-xs"><span className="rounded-full bg-[#E7F5F2] px-3 py-1.5 font-semibold text-[#0F766E]">Active {activeListings}</span><span className="rounded-full bg-warning/10 px-3 py-1.5 font-semibold text-warning">Under review {pendingListings}</span><span className="rounded-full bg-slate-100 px-3 py-1.5 font-semibold text-slate-700">Drafts {draftListings}</span><span className="rounded-full bg-[#F6FAF9] px-3 py-1.5 font-semibold text-[#12576D]">Sold {soldListings}</span>{hiddenListings > 0 && <span className="rounded-full bg-rose-50 px-3 py-1.5 font-semibold text-rose-700" title="Hidden from the marketplace; contact support to find out what is needed to publish it">Not published {hiddenListings}</span>}</div>
           {loading && listings.length === 0 ? <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-5 text-sm text-slate-600"><RefreshCw size={17} className="animate-spin" aria-hidden="true" /> Loading your listings…</div> : listingsError && listings.length === 0 ? <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center"><AlertCircle size={24} className="mx-auto mb-2 text-rose-500" aria-hidden="true" /><p className="font-semibold text-slate-800">We couldn't retrieve your listings</p><p className="mt-1 text-sm text-slate-500">Try refreshing. We won't show a false empty state.</p></div> : listings.length === 0 ? <div className="rounded-xl border border-dashed border-[#D7E7E4] bg-[#F8FBFA] p-7 text-center"><div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-[#DDF4F0] text-[#12576D]"><Car size={24} aria-hidden="true" /></div><p className="font-semibold text-slate-800">Your first listing starts here</p><p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">Add your vehicle details and photos to begin the KAYAD review process.</p><button type="button" onClick={() => onNavigate('listing-wizard')} className="mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-bold text-white" style={{ backgroundColor: KAYAD_THEME.navy }}><Plus size={16} aria-hidden="true" /> Create your first listing</button></div> : <div className="space-y-3">{listings.slice(0, 5).map((listing, i) => <ListingCard key={listing.id} listing={listing} delay={i * 0.04} />)}</div>}
         </section>
 

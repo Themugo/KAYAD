@@ -91,10 +91,6 @@ export class ErrorBoundary extends Component<Props, State> {
               Support reference: <strong className="font-mono">{this.state.supportReference}</strong>
               <br />Share this reference with KAYAD Support if the problem continues.
             </p>
-                  </div>
-                )}
-              </div>
-            )}
           </div>
         </div>
       );

@@ -6,7 +6,9 @@
 // has to re-prove its password when the phone number actually changes. Unchanged phone numbers and non-payout roles are unaffected.
 import UserAuth from "../models/UserAuth.js";
 
-export const STEP_UP_ROLES = Object.freeze(["dealer", "individual_seller"]);
+// Unified personal account: a `user` can sell privately and receive payouts, so it is payout-capable too. `individual_seller` is
+// the retired legacy role and stays listed for existing rows.
+export const STEP_UP_ROLES = Object.freeze(["user", "dealer", "individual_seller"]);
 export const needsPhoneStepUp = (role) => STEP_UP_ROLES.includes(role);
 
 /** Resolves to null when the password is valid, otherwise the 403 body to send. Never reveals which part was wrong beyond required/failed. */

@@ -664,7 +664,7 @@ describe('VehicleMarketplace - admin home page customization', () => {
     avatar: 'https://example.com/avatar.jpg',
   };
 
-  const buyerUser = { ...adminUser, role: 'buyer' as const };
+  const buyerUser = { ...adminUser, role: 'user' as const };
 
   beforeEach(() => {
     // The config hook reads/writes localStorage - clear it between

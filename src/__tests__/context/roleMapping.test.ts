@@ -41,11 +41,12 @@ describe('mapBackendRoleToFrontend - role identity preservation (Phase 2 fix)', 
     expect(mapBackendRoleToFrontend('admin')).toBe('admin');
   });
 
-  it('maps the backend "user" role to this frontend\'s own pre-existing "buyer" term (not a collapse - no other role maps here)', () => {
-    expect(mapBackendRoleToFrontend('user')).toBe('buyer');
+  it('keeps the backend "user" role as "user": ONE personal account, no separate frontend "buyer" role (a legacy "buyer" string maps to it)', () => {
+    expect(mapBackendRoleToFrontend('user')).toBe('user');
+    expect(mapBackendRoleToFrontend('buyer')).toBe('user');
   });
 
-  it('fails closed to buyer (least-privileged) for a genuinely unrecognized role string, never granting elevated access', () => {
-    expect(mapBackendRoleToFrontend('some_future_unknown_role')).toBe('buyer');
+  it('fails closed to the personal account (least-privileged) for a genuinely unrecognized role string, never granting elevated access', () => {
+    expect(mapBackendRoleToFrontend('some_future_unknown_role')).toBe('user');
   });
 });

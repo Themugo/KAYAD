@@ -158,6 +158,20 @@ describe("invitation lifecycle: scoped, expiring, single-use, replay-safe", () =
     expect(store.teams.inv).toMatchObject({ status: "active", member: "uN", dealer: D1, inviteTokenHash: null });
     expect(JSON.stringify(r.body)).not.toMatch(/inviteTokenHash|SECRET/);
   });
+  test("a dealer (business) or staff account can never accept a membership; the invite stays pending", async () => {
+    for (const role of ["dealer", "admin"]) {
+      const r = await accept({ ...invitee, id: "uD", role });
+      expect(r.statusCode).toBe(403);
+      expect(r.body.code).toBe("TEAM_MEMBER_MUST_BE_PERSONAL_ACCOUNT");
+    }
+    expect(store.teams.inv.status).toBe("invited");
+  });
+  test("accepting a membership never changes the member's role (a personal account stays personal)", async () => {
+    const u = { ...invitee };
+    await accept(u);
+    expect(u.role).toBe("user");
+    expect(writes.some((w) => w[0] === "User.update")).toBe(false);
+  });
   test("replay of the same token fails (404), even by the same user", async () => {
     await accept(invitee);
     expect((await accept(invitee)).statusCode).toBe(404);

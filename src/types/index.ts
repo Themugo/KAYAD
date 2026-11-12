@@ -246,7 +246,7 @@ export interface PaymentRequest {
 // simpler `Car` type above used by CarCard and the main Home page)
 // ============================================================
 
-export type UserRole = 'buyer' | 'seller' | 'dealer' | 'admin';
+export type UserRole = 'user' | 'dealer' | 'admin';
 
 export interface UserProfile {
   id: string;

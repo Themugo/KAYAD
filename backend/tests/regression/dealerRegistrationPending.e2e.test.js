@@ -39,7 +39,7 @@ describe("dealer registration creates the expected pending records (scenarios 1,
   let h;
   beforeAll(async () => { h = await boot(); });
   afterAll(async () => { await h.close(); });
-  const body = (o = {}) => ({ name: "Makena Dealers", email: "makena@example.com", password: PASS, role: "dealer", businessName: "Makena Dealers", location: "Nairobi", phone: "0712345678", ...o });
+  const body = (o = {}) => ({ name: "Makena Otieno", email: "makena@example.com", password: PASS, role: "dealer", businessName: "Makena Dealers", location: "Nairobi", phone: "0712345678", ...o });
 
   it("valid registration: one pending user, one credential row, one dealer profile (not approved); no verification yet; no second seller record", async () => {
     const res = await h.post(body());

@@ -324,3 +324,77 @@ describe("free private-seller default policy", () => {
     expect(next).not.toHaveBeenCalled();
   });
 });
+
+
+describe("direct publication requires a trusted policy and an eligible personal seller capability", () => {
+  beforeEach(() => {
+    table = new Map();
+    capabilityTableMissing = false;
+    onboardingPolicy.__setOnboardingPolicyForTests({
+      privateSellerApprovalMode: "disabled",
+      privateSellerPackageMode: "free",
+      listingModeration: "auto_publish",
+    });
+  });
+
+  test("verified free-mode personal buyer can publish when policy allows auto-publish", async () => {
+    expect(await onboardingPolicy.sellerMayPublishDirectly(users[BUYER])).toBe(true);
+  });
+
+  test("unverified personal seller cannot publish directly", async () => {
+    expect(await onboardingPolicy.sellerMayPublishDirectly(users[UNVERIFIED])).toBe(false);
+  });
+
+  test.each(["suspended", "revoked"])("capability %s blocks direct publication even in free mode", async (status) => {
+    table.set(BUYER, { user_id: BUYER, status, source: "application" });
+    expect(await onboardingPolicy.sellerMayPublishDirectly(users[BUYER])).toBe(false);
+  });
+
+  test("legacy suspension and revocation block direct publication", async () => {
+    expect(await onboardingPolicy.sellerMayPublishDirectly(users[LEGACY_SUSP])).toBe(false);
+    expect(await onboardingPolicy.sellerMayPublishDirectly({ id: ID(10), role: "individual_seller", status: "revoked", emailVerified: true })).toBe(false);
+  });
+
+  test("missing capability table remains compatible with free mode, but not approval-required mode", async () => {
+    capabilityTableMissing = true;
+    expect(await onboardingPolicy.sellerMayPublishDirectly(users[BUYER])).toBe(true);
+    onboardingPolicy.__setOnboardingPolicyForTests({
+      privateSellerApprovalMode: "required",
+      privateSellerPackageMode: "free",
+      listingModeration: "auto_publish",
+    });
+    expect(await onboardingPolicy.sellerMayPublishDirectly(users[BUYER])).toBe(false);
+  });
+
+  test("approval-required mode needs an approved capability row", async () => {
+    onboardingPolicy.__setOnboardingPolicyForTests({
+      privateSellerApprovalMode: "required",
+      privateSellerPackageMode: "free",
+      listingModeration: "auto_publish",
+    });
+    table.set(BUYER, { user_id: BUYER, status: "pending", source: "application" });
+    expect(await onboardingPolicy.sellerMayPublishDirectly(users[BUYER])).toBe(false);
+    table.set(BUYER, { user_id: BUYER, status: "approved", source: "application" });
+    expect(await onboardingPolicy.sellerMayPublishDirectly(users[BUYER])).toBe(true);
+  });
+
+  test("hold-for-review and unavailable policy never permit direct publication", async () => {
+    onboardingPolicy.__setOnboardingPolicyForTests({
+      privateSellerApprovalMode: "disabled",
+      privateSellerPackageMode: "free",
+      listingModeration: "hold_for_review",
+    });
+    expect(await onboardingPolicy.sellerMayPublishDirectly(users[BUYER])).toBe(false);
+    onboardingPolicy.__setOnboardingPolicyForTests({
+      privateSellerApprovalMode: "disabled",
+      privateSellerPackageMode: "free",
+      listingModeration: "auto_publish",
+    }, "unavailable");
+    expect(await onboardingPolicy.sellerMayPublishDirectly(users[BUYER])).toBe(false);
+  });
+
+  test("dealer behaviour remains on its existing account-status path", async () => {
+    expect(await onboardingPolicy.sellerMayPublishDirectly(users[DEALER])).toBe(true);
+    expect(await onboardingPolicy.sellerMayPublishDirectly({ ...users[DEALER], status: "pending" })).toBe(false);
+  });
+});

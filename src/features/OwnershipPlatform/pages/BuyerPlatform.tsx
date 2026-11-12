@@ -159,7 +159,7 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth, initialIns
         <div aria-hidden="true" className="pointer-events-none absolute -right-2 -top-6 h-36 w-36 rounded-full border border-white/10" />
         <div className="relative flex flex-col justify-between gap-5 md:flex-row md:items-end">
           <div className="max-w-2xl">
-            <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-teal-100"><Activity className="h-3.5 w-3.5" aria-hidden="true" /> Buyer command centre</p>
+            <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-teal-100"><Activity className="h-3.5 w-3.5" aria-hidden="true" /> My account</p>
             <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Welcome{user.name ? `, ${user.name}` : ''}</h1>
             <p className="mt-2 max-w-xl text-sm leading-6 text-white/75">Follow your saved vehicles, auction bids, inspections and protected purchases from one place.</p>
           </div>
@@ -170,14 +170,14 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth, initialIns
         </div>
       </header>
 
-      <section aria-label="Buyer activity summary" className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+      <section aria-label="Buying activity summary" className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         <SummaryMetric icon={<Bookmark className="h-5 w-5" aria-hidden="true" />} label="Saved vehicles" value={isLoading ? '—' : String(visibleFavorites.length)} hint="Your shortlist" onClick={() => onNavigate?.('saved')} />
         <SummaryMetric icon={<Gavel className="h-5 w-5" aria-hidden="true" />} label="Active bids" value={isLoading || bidLoading || failedResources.includes('auction bids') ? '—' : String(activeBidCount)} hint={failedResources.includes('auction bids') ? 'Bid data unavailable' : 'Open auction activity'} onClick={() => onNavigate?.('discovery')} />
         <SummaryMetric icon={<CarFront className="h-5 w-5" aria-hidden="true" />} label="In your garage" value={isLoading ? '—' : String(visibleOwnedVehicles.length)} hint="Recorded ownership" onClick={() => document.getElementById('buyer-owned-vehicles')?.scrollIntoView({ behavior: 'auto', block: 'start' })} />
         <SummaryMetric icon={<ShieldCheck className="h-5 w-5" aria-hidden="true" />} label="Escrow & purchases" value="View details" hint="Participant-scoped records" onClick={() => document.getElementById('buyer-escrow-workspace')?.scrollIntoView({ behavior: 'auto', block: 'start' })} />
       </section>
 
-      <section aria-label="Buyer quick actions" className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <section aria-label="Quick actions" className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <BuyerAction icon={<Gavel className="h-5 w-5" aria-hidden="true" />} title="Watch auctions" detail="Live and upcoming" onClick={() => onNavigate?.('discovery')} />
         <BuyerAction icon={<ClipboardCheck className="h-5 w-5" aria-hidden="true" />} title="Request inspection" detail="Book and track requests" onClick={() => onNavigate?.('inspections')} />
         <BuyerAction icon={<WalletCards className="h-5 w-5" aria-hidden="true" />} title="Purchases & escrow" detail="Review deal milestones" onClick={() => document.getElementById('buyer-escrow-workspace')?.scrollIntoView({ behavior: 'auto', block: 'start' })} />
@@ -205,7 +205,7 @@ export default function BuyerPlatform({ user, onNavigate, onOpenAuth, initialIns
             {bidLoading ? (
               <div role="status" className="flex items-center gap-2 rounded-xl border border-[#D7E7E4] bg-[#F8FBFA] p-4 text-sm text-[#64748B]"><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Loading your bid history…</div>
             ) : failedResources.includes('auction bids') ? (
-              <div role="status" className="rounded-xl border border-warning/30 bg-warning/10 p-3 text-sm text-warning">Your bid history is temporarily unavailable. Other buyer workspace sections remain available.</div>
+              <div role="status" className="rounded-xl border border-warning/30 bg-warning/10 p-3 text-sm text-warning">Your bid history is temporarily unavailable. Other sections remain available.</div>
             ) : visibleBids.length === 0 ? (
               <div className="rounded-xl border border-dashed border-[#BDE5DE] bg-[#F8FBFA] p-5 text-center"><Clock3 className="mx-auto mb-2 h-5 w-5 text-[#176B87]" aria-hidden="true" /><p className="text-sm font-semibold text-[#0A3340]">No bids recorded yet</p><p className="mt-1 text-xs text-[#64748B]">Explore live and upcoming auctions to find your next vehicle.</p><button type="button" onClick={() => onNavigate?.('discovery')} className="mt-3 rounded-lg bg-[#0A3340] px-3 py-2 text-xs font-semibold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4]">Explore auctions</button></div>
             ) : (

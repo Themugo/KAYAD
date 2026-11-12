@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { EscrowView } from '../../features/EscrowView';
 import * as escrowApiMock from '../../services/escrowApi';
 
-const user = { id: 'user-1', name: 'Test Buyer', email: 'b@test.com', role: 'buyer' as const, avatar: '', phone: '' };
+const user = { id: 'user-1', name: 'Test Buyer', email: 'b@test.com', role: 'user' as const, avatar: '', phone: '' };
 const deal = (id: string, title: string) => ({
   id, buyer: { id: 'user-1', name: 'Test Buyer' }, seller: { id: 'user-2', name: 'Test Seller' }, car: { id: `v-${id}`, title },
   amount: 1000000, status: 'pending', viewerRole: 'buyer', availableActions: ['view_funding_instructions'],

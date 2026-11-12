@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useMyDealership } from '../features/DealershipWorkspace/useMyDealership';
 import { Activity, BarChart3, Bell, Car, CreditCard, ChevronRight, ClipboardCheck, LayoutDashboard, RefreshCw, Settings2, ShieldCheck, ShoppingBag, Users, Wrench } from 'lucide-react';
 import { getOwnershipDashboard } from '../services/ownershipApi';
 import * as dealerApi from '../services/dealerPlatformApi';
@@ -14,9 +15,7 @@ type Props = { user: any; vehicles?: any[]; onNavigate: (nav: string) => void };
 type RoleConfig = { title: string; subtitle: string; accent: string; actions: Array<{ label: string; nav: string; icon: React.ElementType }> };
 
 const configs: Record<string, RoleConfig> = {
-  user: { title: 'Buyer Dashboard', subtitle: 'Your saved vehicles, active transactions and next actions.', accent: '#176B87', actions: [{label:'Browse vehicles',nav:'marketplace',icon:Car},{label:'Saved vehicles',nav:'saved',icon:ShoppingBag},{label:'Vehicle financing',nav:'buyer-platform',icon:CreditCard},{label:'Auctions',nav:'auctions',icon:Activity},{label:'My escrow deals',nav:'buyer-platform',icon:ShieldCheck},{label:'Messages',nav:'chat',icon:Bell}] },
-  buyer: { title: 'Buyer Dashboard', subtitle: 'Your saved vehicles, active transactions and next actions.', accent: '#176B87', actions: [{label:'Browse vehicles',nav:'marketplace',icon:Car},{label:'Saved vehicles',nav:'saved',icon:ShoppingBag},{label:'Vehicle financing',nav:'buyer-platform',icon:CreditCard},{label:'Auctions',nav:'auctions',icon:Activity},{label:'My escrow deals',nav:'buyer-platform',icon:ShieldCheck},{label:'Messages',nav:'chat',icon:Bell}] },
-  individual_seller: { title: 'Private Seller Dashboard', subtitle: 'Manage your listings, buyer interest and verification status.', accent: '#13B8A6', actions: [{label:'Seller workspace',nav:'seller-platform',icon:LayoutDashboard},{label:'Add / manage cars',nav:'seller-platform',icon:Car},{label:'Inspections',nav:'inspections',icon:ClipboardCheck},{label:'Messages',nav:'chat',icon:Bell}] },
+  user: { title: 'My Dashboard', subtitle: 'Buy and sell from one account: your saved vehicles, active transactions and private-seller tools.', accent: '#176B87', actions: [{label:'Browse vehicles',nav:'marketplace',icon:Car},{label:'Saved vehicles',nav:'saved',icon:ShoppingBag},{label:'Vehicle financing',nav:'buyer-platform',icon:CreditCard},{label:'Auctions',nav:'auctions',icon:Activity},{label:'My escrow deals',nav:'buyer-platform',icon:ShieldCheck},{label:'Messages',nav:'chat',icon:Bell}] },
   broker: { title: 'Seller Dashboard', subtitle: 'Manage seller inventory and marketplace activity.', accent: '#12576d', actions: [{label:'Seller workspace',nav:'seller-platform',icon:LayoutDashboard},{label:'Marketplace',nav:'marketplace',icon:Car},{label:'Messages',nav:'chat',icon:Bell}] },
   dealer: { title: 'Dealer Dashboard', subtitle: 'Commercial inventory, leads, auctions, subscriptions and payouts.', accent: '#12576d', actions: [{label:'Dealer workspace',nav:'dealer-dashboard',icon:LayoutDashboard},{label:'Inventory',nav:'dealer-dashboard',icon:Car},{label:'Auctions',nav:'auctions',icon:Activity},{label:'Finance',nav:'finance',icon:BarChart3}] },
   ghost_checker: { title: 'Inspector Dashboard', subtitle: 'Assigned inspections, evidence and execution status.', accent: '#5AAFA4', actions: [{label:'Inspection work',nav:'inspections',icon:ClipboardCheck},{label:'Messages',nav:'chat',icon:Bell}] },
@@ -26,10 +25,11 @@ const staffActions = [{label:'Control plane',nav:'admin',icon:LayoutDashboard},{
 
 export default function DashboardHub({ user, vehicles = [], onNavigate }: Props) {
   const role = user?.role || 'user';
-  // Phase 13E: a private seller is still a buyer. individual_seller no longer gets a seller-only view; it gets the buyer dashboard
+  // Unified personal account: there is no separate buyer or seller dashboard. A legacy individual_seller row gets this same view
   // plus the seller workspace entry. The seller section itself is driven by the real capability state (SellerCapabilityPanel).
-  const isPersonal = role === 'user' || role === 'buyer' || role === 'individual_seller';
+  const isPersonal = role === 'user' || role === 'individual_seller';
   const { capability, loading: capLoading, error: capError, reload: reloadCap } = usePrivateSellerCapability(isPersonal);
+  const { membership: dealershipMembership } = useMyDealership(user?.id, role);
   const sellerApproved = capability ? capability.status === 'approved' : role === 'individual_seller';
   const baseConfig = configs[role === 'individual_seller' ? 'user' : role];
   // Phase 13F: a legacy individual_seller whose real capability is suspended/revoked/rejected is not offered the seller workspace entry (the backend refuses their seller writes).
@@ -38,8 +38,11 @@ export default function DashboardHub({ user, vehicles = [], onNavigate }: Props)
     || (capability.approvalRequired === true && capability.status !== 'approved')
     || (capability.packageMode && capability.packageMode !== 'free')
   );
-  const personalConfig = role === 'individual_seller' ? { ...baseConfig, title: 'My Dashboard', subtitle: 'Buy and sell from one account: your saved vehicles, active transactions and private-seller tools.', actions: sellerBlocked ? baseConfig.actions : [...baseConfig.actions, {label:'Seller workspace',nav:'seller-platform',icon:LayoutDashboard}] } : (isPersonal && capability?.status === 'approved' && (!capability.packageMode || capability.packageMode === 'free') ? { ...baseConfig, actions: [...baseConfig.actions, {label:'Seller workspace',nav:'seller-platform',icon:LayoutDashboard}] } : baseConfig);
-  const config = (isPersonal ? personalConfig : undefined) || configs[role] || (['admin','superadmin','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','moderator'].includes(role) ? { title: 'Platform Operations Dashboard', subtitle: 'Role-scoped control, queues and platform health.', accent: '#5AAFA4', actions: staffActions } : configs.user);
+  // ONE personal account: the same dashboard for every personal account (legacy individual_seller rows included). The seller
+  // workspace entry is driven by the REAL capability state; where the state is unknown the legacy row keeps its prior access.
+  const sellerWorkspaceOpen = capability ? (capability.status === 'approved' && (!capability.packageMode || capability.packageMode === 'free')) : role === 'individual_seller';
+  const personalConfig = isPersonal && baseConfig ? { ...baseConfig, actions: [...baseConfig.actions, ...(sellerWorkspaceOpen ? [{label:'Seller workspace',nav:'seller-platform',icon:LayoutDashboard}] : []), ...(dealershipMembership ? [{label:`Work for ${dealershipMembership.dealershipName}`,nav:'dealership-workspace',icon:LayoutDashboard}] : [])] } : undefined;
+  const config = personalConfig || configs[role] || (['admin','superadmin','marketing','technical_support','hr','accounts','escrow_officer','ad_manager','moderator'].includes(role) ? { title: 'Platform Operations Dashboard', subtitle: 'Role-scoped control, queues and platform health.', accent: '#5AAFA4', actions: staffActions } : configs.user);
   const [density, setDensity] = useState<'comfortable'|'compact'>('comfortable');
   const [hidden, setHidden] = useState<string[]>([]);
   const [snapshot, setSnapshot] = useState<any>(null);
@@ -62,7 +65,7 @@ export default function DashboardHub({ user, vehicles = [], onNavigate }: Props)
         const result = await getControlPlaneSnapshot(); setSnapshot(result?.data || result);
       } else if (role === 'dealer') {
         const result = await dealerApi.getDealerDashboard(); setSnapshot(result?.data || result);
-      } else if (role === 'user' || role === 'buyer' || role === 'individual_seller') {
+      } else if (role === 'user' || role === 'individual_seller') {
         const result = await getOwnershipDashboard(); setSnapshot(result);
       } else if (role === 'ghost_checker') {
         const result = await inspectionAPI.myAssigned(); setSnapshot(result?.data || result);

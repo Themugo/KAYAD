@@ -280,32 +280,11 @@ export const allowRoles = (...roles) => {
 };
 
 // =============================
-// 👤 PRIVATE SELLER ONLY
+// RETIRED: `privateSellerOnly` and `buyerOnly`.
+// KAYAD has ONE personal account (role `user`) that buys and sells; a role gate that admits only a "buyer" or only a "private
+// seller" cannot be correct. Selling is gated by `sellerListingAccess` (policy/capability), dealers by `dealerOnly` /
+// `dealerBusinessOnly`. A guard test (unifiedPersonalAccountParity) fails if these are reintroduced.
 // =============================
-export const privateSellerOnly = (req, res, next) => {
-  if (req.user?.effectiveRole === "webhoist") return next();
-  if (!req.user || req.user.role !== "individual_seller") {
-    return res.status(403).json({
-      success: false,
-      message: "Private seller access only",
-    });
-  }
-  next();
-};
-
-// =============================
-// 🛒 BUYER ONLY
-// =============================
-export const buyerOnly = (req, res, next) => {
-  if (req.user?.effectiveRole === "webhoist") return next();
-  if (!req.user || req.user.role !== "user") {
-    return res.status(403).json({
-      success: false,
-      message: "Buyer access only",
-    });
-  }
-  next();
-};
 
 // =============================
 // ✅ REQUIRE APPROVED STATUS

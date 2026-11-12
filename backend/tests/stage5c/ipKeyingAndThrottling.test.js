@@ -1,5 +1,5 @@
 // STAGE 5C — client-IP keying for the rate limiters / account lockout, and the burst limiters, exercised through a real HTTP stack.
-import { describe, test, expect, beforeAll, afterAll, jest } from "@jest/globals";
+import { describe, test, expect, beforeAll, afterAll, afterEach, jest } from "@jest/globals";
 import http from "node:http";
 import express from "express";
 
@@ -81,5 +81,49 @@ describe("authLimiter / otpLimiter through HTTP", () => {
     expect(u1).toEqual([200, 200, 200, 429]);
     // a different subscriber behind the SAME carrier address is not throttled by user-1's traffic
     expect((await hit(port, "POST", "/otp", same, { "x-user": "user-2" })).status).toBe(200);
+  });
+});
+
+// ── Stage 5C timer hygiene (focused regression for the lockout cleanup timers) ──
+describe("accountLockout cleanup timers", () => {
+  afterEach(() => { jest.useRealTimers(); lockout.clearAllAttempts(); });
+  const res = () => ({ code: 0, status(c) { this.code = c; return this; }, json() { return this; } });
+  const attempt = (ip) => { let passed = false; const r = res(); lockout.accountLockout({ ip }, r, () => { passed = true; }); return { passed, code: r.code }; };
+
+  test("lockout lasts 15 minutes from the LAST failure and then releases", () => {
+    jest.useFakeTimers(); const ip = "203.0.113.50";
+    for (let i = 0; i < 5; i++) lockout.recordFailedAttempt({ ip });
+    jest.advanceTimersByTime(14 * 60 * 1000);
+    expect(attempt(ip).code).toBe(429);
+    jest.advanceTimersByTime(60 * 1000 + 2000);
+    expect(attempt(ip).passed).toBe(true);
+  });
+  test("a later failure replaces the timer: the earlier timer cannot evict a refreshed entry", () => {
+    jest.useFakeTimers(); const ip = "203.0.113.51";
+    for (let i = 0; i < 4; i++) lockout.recordFailedAttempt({ ip });
+    jest.advanceTimersByTime(10 * 60 * 1000);
+    lockout.recordFailedAttempt({ ip }); // 5th failure refreshes the window
+    expect(jest.getTimerCount()).toBe(1); // exactly one live cleanup timer for this address
+    jest.advanceTimersByTime(6 * 60 * 1000); // past the FIRST timer's deadline, inside the refreshed window
+    expect(attempt(ip).code).toBe(429);
+  });
+  test("success and clearAllAttempts cancel pending timers (no leak)", () => {
+    jest.useFakeTimers();
+    lockout.recordFailedAttempt({ ip: "203.0.113.52" });
+    lockout.recordFailedAttempt({ ip: "203.0.113.53" });
+    expect(jest.getTimerCount()).toBe(2);
+    lockout.recordSuccessfulAttempt({ ip: "203.0.113.52" });
+    expect(jest.getTimerCount()).toBe(1);
+    lockout.clearAllAttempts();
+    expect(jest.getTimerCount()).toBe(0);
+    expect(lockout.getFailedAttemptsCount()).toBe(0);
+  });
+  test("four failures do not lock; the fifth does; other addresses stay isolated (threshold unchanged)", () => {
+    const ip = "203.0.113.54";
+    for (let i = 0; i < 4; i++) lockout.recordFailedAttempt({ ip });
+    expect(attempt(ip).passed).toBe(true);
+    lockout.recordFailedAttempt({ ip });
+    expect(attempt(ip).code).toBe(429);
+    expect(attempt("203.0.113.55").passed).toBe(true);
   });
 });

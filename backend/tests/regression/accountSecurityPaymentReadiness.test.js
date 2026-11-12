@@ -55,7 +55,9 @@ describe("password step-up", () => {
   test("only payout-capable roles need it", () => {
     expect(needsPhoneStepUp("dealer")).toBe(true);
     expect(needsPhoneStepUp("individual_seller")).toBe(true);
-    expect(needsPhoneStepUp("user")).toBe(false);
+    // Unified personal account: a `user` can sell and receive payouts, so it is step-up protected too.
+    expect(needsPhoneStepUp("user")).toBe(true);
+    expect(needsPhoneStepUp("admin")).toBe(false);
   });
   test("missing password -> STEP_UP_REQUIRED and no lookup", async () => {
     expect((await checkPasswordStepUp("u1", "")).code).toBe("STEP_UP_REQUIRED");

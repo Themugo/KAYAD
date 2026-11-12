@@ -60,7 +60,7 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
     setEditValue(currentValue || '');
   };
 
-  const needsStepUp = editingField === 'phone' && (user.role === 'dealer' || user.role === 'individual_seller') && editValue.trim() !== (user.phone || '');
+  const needsStepUp = editingField === 'phone' && (user.role === 'user' || user.role === 'dealer' || user.role === 'individual_seller') && editValue.trim() !== (user.phone || '');
   const handleSaveEdit = async () => {
     if (!editingField) return;
     if (loading) return;
