@@ -110,13 +110,19 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   // Expand the current section when the drawer opens; keep other sections
   // collapsed until requested so the menu remains short and scannable.
+  // Runs ONLY when the drawer opens. It must not depend on navItems/activeNav: those change identity whenever the navigation
+  // configuration or the signed-in account finishes loading, and re-running this would reset the groups the person has just
+  // expanded — the menu would "open and collapse immediately", most visibly for a personal account whose data loads after sign-in.
+  const latestNav = useRef({ navItems, activeNav });
+  latestNav.current = { navItems, activeNav };
   useEffect(() => {
     if (!mobileMenuOpen) return;
-    const currentSection = navItems.find((item) =>
-      item.match.includes(activeNav) || item.children?.some((child) => child.navId === activeNav),
+    const { navItems: items, activeNav: current } = latestNav.current;
+    const currentSection = items.find((item) =>
+      item.match.includes(current) || item.children?.some((child) => child.navId === current),
     );
     setMobileExpandedGroups(currentSection ? { [currentSection.id]: true } : { marketplace: true });
-  }, [mobileMenuOpen, activeNav, navItems]);
+  }, [mobileMenuOpen]);
 
   const openMobileMenu = useCallback(() => {
     const headerAnchor = headerRef.current?.querySelector('.kayad-header__bar') as HTMLElement | null;

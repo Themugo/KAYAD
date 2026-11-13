@@ -45,7 +45,7 @@ describe('Listing Management shows the real status and lets an admin publish', (
   test('the owner can switch auto-publish on from this page', async () => {
     api.updateOnboardingSettings.mockResolvedValue({ policy: { listingModeration: 'auto_publish', revision: 5 } });
     render(<MemoryRouter><AdminCars /></MemoryRouter>);
-    const select = await screen.findByLabelText('Listing moderation');
+    const select = await screen.findByLabelText('Listing approval');
     fireEvent.change(select, { target: { value: 'auto_publish' } });
     await waitFor(() => expect(api.updateOnboardingSettings).toHaveBeenCalledWith({ listingModeration: 'auto_publish', expectedRevision: 4 }));
     expect(await screen.findByText(/Auto-publish: listings from approved sellers/)).toBeTruthy();
@@ -55,7 +55,7 @@ describe('Listing Management shows the real status and lets an admin publish', (
     api.getOnboardingSettings.mockResolvedValue({ canChange: false, policy: { listingModeration: 'hold_for_review', revision: 4 } });
     render(<MemoryRouter><AdminCars /></MemoryRouter>);
     expect(await screen.findByText(/Only the platform owner can change this/)).toBeTruthy();
-    expect(screen.queryByLabelText('Listing moderation')).toBeNull();
+    expect(screen.queryByLabelText('Listing approval')).toBeNull();
   });
 
   test('rows are numbered', async () => {

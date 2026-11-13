@@ -198,6 +198,10 @@ export interface GetCarsParams {
   keyword?: string;
   brand?: string;
   model?: string;
+  /** Manual entry: typed text that is not a listed option; matched by "contains" on the server. */
+  brandLike?: string;
+  modelLike?: string;
+  colorLike?: string;
   city?: string;
   minPrice?: number;
   maxPrice?: number;

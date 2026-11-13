@@ -1,0 +1,46 @@
+KAYAD — targeted private-seller repairs
+=========================================
+
+Contents
+--------
+1. backend/services/accountCapabilities.service.js
+   Separates buyer access from the legacy individual_seller pending marker and seller capability status.
+
+2. backend/middleware/dealerVerification.js
+   Bypasses dealership verification for personal sellers already admitted by sellerListingAccess.
+   Legacy Dealer/DealerVerification rows are not changed. Genuine dealers retain existing checks.
+
+3. backend/services/onboardingPolicy.service.js
+   Makes sellerMayPublishDirectly enforce personal-seller email verification and capability suspension/revocation.
+   Uses a direct table read rather than importing privateSellerCapability.service.js, avoiding a circular module dependency.
+   Missing capability table is tolerated only in free/open mode; approval-required mode fails closed.
+
+4. backend/tests/regression/phase13dDealerIsolation.test.js
+   Adds regression coverage for legacy Dealer rows with suspended/rejected verification and personal seller separation.
+
+5. backend/tests/regression/phase13eSellerCapability.test.js
+   Adds direct-publication tests for email verification, capability suspension/revocation, approval-required mode,
+   free-mode compatibility, trusted policy and dealer behaviour.
+
+6. backend/tests/regression/phase13fAccountCapabilities.test.js
+   New focused test for buyer capability independence from private-seller suspension/revocation.
+
+Apply
+-----
+Copy the six files into the matching paths in your repository, reviewing the diff first.
+Run the focused Jest tests and then the broader backend suite.
+
+Suggested commands from repository root:
+  git diff --check
+  npm test -- --runInBand backend/tests/regression/phase13dDealerIsolation.test.js
+  npm test -- --runInBand backend/tests/regression/phase13eSellerCapability.test.js
+  npm test -- --runInBand backend/tests/regression/phase13fAccountCapabilities.test.js
+
+Important
+---------
+These files were prepared from the source bundle supplied in this conversation. They have not been run
+against your local repository or Supabase. The source bundle reported that
+backend/tests/accountCapabilities.test.js did not exist at the supplied path, so the new focused test
+is placed under backend/tests/regression instead.
+
+No migrations, database changes, commits, pushes or deployments are included.

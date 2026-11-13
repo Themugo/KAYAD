@@ -1,0 +1,1503 @@
+==================== ACCOUNT CAPABILITIES ====================
+// ONE ACCOUNT, MANY CAPABILITIES. A read-only view over the existing authorities - it never grants, changes or infers anything.
+//   buyer            : every active registered account.
+//   privateSeller    : policy-controlled. Default mode is free/open with no seller approval; suspension/revocation remain enforceable. When approval is enabled, capability status is authoritative.
+//   dealer           : users.role === "dealer" (set only by administrator approval); the dealers/dealer_verifications rows are the
+//                      application, separate from the identity.
+//   inspector        : users.role === "ghost_checker" (set only by administrator approval); InspectorApplication is the application.
+// A pending or rejected business application never reduces the buyer or private-seller entries.
+import { findOne } from "../db/index.js";
+import InspectorApplication from "../models/InspectorApplication.js";
+import { resolveSellerState } from "./privateSellerCapability.service.js";
+
+const BUSINESS_STATUS = (granted, application) => (granted ? "approved" : application || "none");
+
+export async function getAccountCapabilities(user) {
+  const userId = String(user.id ?? user._id);
+  const isStaff = !["user", "dealer", "ghost_checker", "individual_seller"].includes(user.role);
+  const seller = await resolveSellerState({ id: userId, role: user.role, status: user.status });
+  // Legacy individual_seller identities were marked pending solely by the old seller-approval workflow.
+  // Under the free default policy they remain active personal accounts; the forward migration also normalizes
+  // this persisted status so routes using requireApproved see the same result after rollout.
+  const active = (user.status || "approved") === "approved"
+    || (user.role === "individual_seller" && seller.source === "policy_default" && user.status === "pending");
+  const dealerRow = user.role === "dealer" ? null : await findOne("dealers", { user: userId });
+  const dealerVerification = dealerRow ? await findOne("dealer_verifications", { user: userId }) : null;
+  const inspectorApps = await InspectorApplication.find({ user: userId }).sort({ createdAt: -1 }).lean();
+  const inspectorApp = inspectorApps?.[0]?.status || null;
+
+  const dealerApplication = dealerRow ? (dealerVerification?.verificationStatus ?? "draft") : null;
+  return {
+    userId,
+    identity: { role: user.role, status: user.status || "approved", emailVerified: user.emailVerified === true },
+    buyer: { granted: !isStaff && active },
+    privateSeller: {
+      status: seller.status, // none | pending | approved | rejected | suspended | revoked | not_applicable
+      granted: seller.status === "approved",
+      canApply: user.role === "user" && ["none", "rejected"].includes(seller.status),
+    },
+    dealer: {
+      granted: user.role === "dealer",
+      status: BUSINESS_STATUS(user.role === "dealer" && !dealerApplication, dealerApplication),
+      canApply: user.role === "user" && !dealerRow,
+    },
+    inspector: {
+      granted: user.role === "ghost_checker",
+      status: BUSINESS_STATUS(user.role === "ghost_checker", inspectorApp),
+      canApply: user.role === "user" && inspectorApp !== "pending",
+    },
+  };
+}
+
+==================== DEALER VERIFICATION ====================
+// backend/middleware/dealerVerification.js - Production Hardened v2.0
+// ─────────────────────────────────────────────────────────────
+// Dealer verification middleware to enforce verification requirements
+// Protects listing creation, auction start, escrow initiation
+// ─────────────────────────────────────────────────────────────
+
+import Dealer from "../models/Dealer.js";
+import DealerVerification from "../models/DealerVerification.js";
+import User from "../models/User.js";
+import Car from "../models/Car.js";
+import Referral from "../models/Referral.js";
+import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { getOnboardingPolicy } from "../services/onboardingPolicy.service.js"; // STAGE 5
+
+// Inside a mounted Express router req.path is relative to the mount point
+// (POST /api/cars arrives as "/"), so comparing it to "/cars" never matched and
+// progressive access was unreachable. Use the full mounted path instead.
+export const isListingCreationRequest = (req) => {
+  if (req.method !== "POST") return false;
+  const full = String(`${req.baseUrl || ""}${req.path || ""}` || req.originalUrl || "")
+    .split("?")[0]
+    .replace(/\/+$/, "");
+  return /\/(cars|add-car|inventory)$/.test(full);
+};
+
+// =============================
+// 🔒 REQUIRE DEALER VERIFICATION
+// =============================
+// Checks if dealer is verified before allowing protected operations
+// Applied to: listing creation, auction start, escrow initiation
+export const requireDealerVerification = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    // Check if user is a dealer
+    let dealer = await Dealer.findOne({ user: userId });
+
+    // PHASE 13D (DI-4): a private seller (individual_seller) listing their own vehicle is NOT a dealership. This
+    // middleware used to INSERT an `approved: true` Dealer row for any individual_seller that reached it, whatever
+    // their users.status, which silently created (and auto-approved) a dealership identity from a personal listing.
+    // It no longer creates anything: a private seller with no Dealer row is let through to the listing handler (which
+    // keeps its own seller email-verification / publication-review rules) with `req.dealer = null`, exactly the
+    // authorization outcome the old auto-created row produced, minus the dealership record. Dealer rows that already
+    // exist are neither modified nor removed here. Legitimate dealer onboarding (role `dealer`, trigger-created row,
+    // verification workflow) is unchanged.
+    // 13E: a personal account (role user) with an APPROVED private-seller capability (set by sellerListingAccess) is also a private seller.
+    const isPrivateSeller = req.user.role === "individual_seller" || (req.user.role === "user" && req.sellerCapability?.status === "approved");
+
+    if (!dealer && !isPrivateSeller) {
+      return res.status(403).json({
+        success: false,
+        message: "Dealer profile not found",
+        requiresAction: "create_dealer_profile",
+      });
+    }
+
+    // A legacy approved flag must never override a current suspension or rejection.
+    // Resolve the verification record before applying backward-compatible approval.
+    const verification = await DealerVerification.findOne({ user: userId });
+
+    if (verification?.verificationStatus === "suspended") {
+      return res.status(403).json({
+        success: false,
+        code: "DEALER_ACCOUNT_SUSPENDED",
+        message: "Dealer account is suspended and requires an explicit admin reinstatement.",
+        verificationStatus: "suspended",
+        suspensionReason: verification.suspensionReason || dealer?.suspensionReason || null,
+        suspensionExpiresAt: verification.suspensionExpiresAt || null,
+      });
+    }
+
+    if (verification?.verificationStatus === "rejected") {
+      return res.status(403).json({
+        success: false,
+        code: "DEALER_VERIFICATION_REJECTED",
+        message: "Dealer verification was rejected. Update the application and resubmit it.",
+        verificationStatus: "rejected",
+        requiresAction: "resubmit_verification",
+        rejectionReason: verification.rejectionReason || null,
+      });
+    }
+
+    // PHASE 13D: private seller without a Dealer row -> no dealership identity, listing flow continues.
+    if (!dealer) {
+      req.dealer = null;
+      req.verification = verification || null;
+      return next();
+    }
+
+    // Backward compatibility applies only when there is no newer blocking decision.
+    if (dealer.approved === true && (!verification || verification.verificationStatus === "approved")) {
+      req.dealer = dealer;
+      req.verification = verification || null;
+      return next();
+    }
+
+    if (!verification) {
+      return res.status(403).json({
+        success: false,
+        message: "Dealer verification required",
+        verificationStatus: "none",
+        requiresAction: "submit_verification",
+        verificationUrl: "/api/verification/submit",
+      });
+    }
+
+    // Check verification status — progressive access for pending/under_review
+    if (verification.verificationStatus !== "approved") {
+      // STAGE 5: progressive (pre-approval) listing access exists ONLY in the owner's
+      // `self_onboarding` mode. In `approval_required`/`closed` — and whenever the policy
+      // cannot be trusted — an unapproved dealer cannot create listings at all.
+      let progressiveAllowed = false;
+      if (["pending", "under_review"].includes(verification.verificationStatus) && isListingCreationRequest(req)) {
+        const onboarding = await getOnboardingPolicy();
+        progressiveAllowed =
+          (onboarding.source === "default" || onboarding.source === "database") &&
+          onboarding.policy.dealerOnboardingMode === "self_onboarding";
+      }
+      // Progressive verification: allow listing creation if < 3 cars and not rejected
+      if (progressiveAllowed) {
+        const carCount = await Car.countDocuments({ dealer: userId });
+        if (carCount < 3) {
+          req.dealer = dealer;
+          req.verification = verification;
+          req.progressiveAccess = true;
+          return next();
+        }
+      }
+
+      return res.status(403).json({
+        success: false,
+        message: getVerificationMessage(verification.verificationStatus),
+        code: ["pending", "under_review"].includes(verification.verificationStatus) ? "DEALER_APPROVAL_PENDING" : undefined,
+        verificationStatus: verification.verificationStatus,
+        requiresAction: getRequiredAction(verification.verificationStatus),
+        verificationUrl: "/api/verification/status",
+        rejectionReason: verification.rejectionReason,
+        progressiveLimit: 3,
+        progressiveUsed: verification.verificationStatus === "pending" || verification.verificationStatus === "under_review",
+      });
+    }
+
+    // Verification passed
+    req.dealer = dealer;
+    req.verification = verification;
+    next();
+  } catch (err) {
+    logError("Dealer verification middleware error", err);
+    return res.status(500).json({
+      success: false,
+      message: "Verification check failed",
+    });
+  }
+};
+
+// =============================
+// 🔒 REQUIRE DEALER VERIFICATION (WARN ONLY)
+// =============================
+// Logs verification status but doesn't block requests
+// Used for gradual rollout and monitoring
+export const requireDealerVerificationWarn = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    const dealer = await Dealer.findOne({ user: userId });
+    if (!dealer) {
+      logWarn("Dealer profile not found", { userId });
+      req.dealer = dealer;
+      return next();
+    }
+
+    if (dealer.approved === true) {
+      req.dealer = dealer;
+      return next();
+    }
+
+    const verification = await DealerVerification.findOne({ user: userId });
+
+    if (!verification) {
+      logWarn("Dealer verification not submitted", { userId, dealerId: dealer._id });
+      req.dealer = dealer;
+      return next();
+    }
+
+    if (verification.verificationStatus !== "approved") {
+      logWarn("Dealer not verified", {
+        userId,
+        dealerId: dealer._id,
+        verificationStatus: verification.verificationStatus,
+        path: req.path,
+      });
+    }
+
+    req.dealer = dealer;
+    req.verification = verification;
+    next();
+  } catch (err) {
+    logError("Dealer verification warn middleware error", err);
+    req.dealer = null;
+    next();
+  }
+};
+
+// =============================
+// 📋 GET VERIFICATION MESSAGE
+// =============================
+const getVerificationMessage = (status) => {
+  const messages = {
+    pending: "Your verification is pending review",
+    under_review: "Your verification is under review",
+    approved: "Verification approved",
+    rejected: "Your verification was rejected",
+    suspended: "Your account has been suspended",
+  };
+  return messages[status] || "Verification status unknown";
+};
+
+// =============================
+// 📋 GET REQUIRED ACTION
+// =============================
+const getRequiredAction = (status) => {
+  const actions = {
+    none: "submit_verification",
+    pending: "wait_for_review",
+    under_review: "wait_for_review",
+    approved: "none",
+    rejected: "resubmit_verification",
+    suspended: "contact_support",
+  };
+  return actions[status] || "contact_support";
+};
+
+// =============================
+// 🔒 CHECK DEALER VERIFICATION STATUS
+// =============================
+// Helper function to check verification status without blocking
+export const checkDealerVerificationStatus = async (userId) => {
+  try {
+    const dealer = await Dealer.findOne({ user: userId });
+    if (!dealer) return { verified: false, reason: "no_dealer_profile" };
+
+    const verification = await DealerVerification.findOne({ user: userId });
+
+    if (verification?.verificationStatus === "suspended") {
+      return { verified: false, reason: "suspended", suspensionReason: verification.suspensionReason || dealer.suspensionReason || null };
+    }
+    if (verification?.verificationStatus === "rejected") {
+      return { verified: false, reason: "rejected", rejectionReason: verification.rejectionReason || null };
+    }
+
+    // Legacy approval is only a fallback when no newer blocking decision exists.
+    if (dealer.approved === true && (!verification || verification.verificationStatus === "approved")) {
+      return { verified: true, reason: verification ? "approved" : "legacy_approval" };
+    }
+
+    if (!verification) return { verified: false, reason: "no_verification" };
+
+    if (verification.verificationStatus === "approved") {
+      return { verified: true, reason: "approved" };
+    }
+
+    return {
+      verified: false,
+      reason: verification.verificationStatus,
+      verificationStatus: verification.verificationStatus,
+      rejectionReason: verification.rejectionReason,
+    };
+  } catch (err) {
+    logError("Check dealer verification status error", err, { userId });
+    return { verified: false, reason: "error" };
+  }
+};
+
+==================== ONBOARDING POLICY ====================
+// backend/services/onboardingPolicy.service.js
+// ─────────────────────────────────────────────────────────────────────────
+// Stage 5 (2026-10-19) — OWNER-CONTROLLED ONBOARDING POLICY.
+//
+// Storage: the established key/value control plane, public.system_settings
+// (key = 'onboarding_policy', value = jsonb). The same table already holds
+// 'system_status' (kill-switch). NO schema change is needed, so no migration is
+// required to launch; the row is created by the first authorized save.
+//
+// Policy fields (all server-validated enums; unknown keys are rejected):
+//   privateSellerRegistration  enabled | disabled
+//   privateSellerApprovalMode  disabled | required (defaults to disabled)
+//   privateSellerPackageMode   free (paid modes require a later package catalogue + verified checkout integration)
+//   dealerOnboardingMode       self_onboarding | approval_required | closed
+//   listingModeration          hold_for_review | auto_publish
+//   dealerDecisionAuthority    owner_only | admins     (who may approve/reject dealers & sellers)
+//   listingDecisionAuthority   owner_only | admins     (who may approve/reject listings)
+// Email verification for seller actions is NOT a setting: it is always required.
+//
+// Fail-safe contract (never "error ⇒ allowed"):
+//   row missing                → INITIAL_DEFAULTS (deliberate launch configuration), source "default"
+//   store unreachable / error  → RESTRICTIVE values, source "unavailable"
+//   row or a field is corrupt  → RESTRICTIVE value for the corrupt field(s), source "invalid"
+// Reads are cached for CACHE_TTL_MS (a change reaches every instance within that
+// time); the cache is dropped on every successful write by this instance.
+// Writes are compare-and-swap on the row's revision AND updated_at, so two
+// concurrent editors cannot silently overwrite each other.
+// ─────────────────────────────────────────────────────────────────────────
+import * as supabaseModule from "../utils/supabase.js";
+import * as loggerModule from "../infrastructure/logging/index.js";
+
+// Namespace imports + guarded calls: this service is imported by many modules, and some test doubles
+// replace utils/supabase.js or utils/logger.js with partial factories. A missing helper must degrade to
+// the safe behaviour (treat as connected / skip logging), never to an import-time failure.
+const getSupabase = () => supabaseModule.getSupabase();
+const isSupabaseConnected = () =>
+  typeof supabaseModule.isSupabaseConnected === "function" ? supabaseModule.isSupabaseConnected() : true;
+const logError = (...a) => { try { loggerModule.logError?.(...a); } catch { /* logging must not throw */ } };
+const logWarn = (...a) => { try { loggerModule.logWarn?.(...a); } catch { /* logging must not throw */ } };
+
+export const ONBOARDING_POLICY_KEY = "onboarding_policy";
+export const SCHEMA_VERSION = 2;
+const CACHE_TTL_MS = 5_000;
+
+export const POLICY_FIELDS = Object.freeze({
+  privateSellerRegistration: Object.freeze(["enabled", "disabled"]),
+  privateSellerApprovalMode: Object.freeze(["disabled", "required"]),
+  privateSellerPackageMode: Object.freeze(["free", "optional", "required"]),
+  dealerOnboardingMode: Object.freeze(["self_onboarding", "approval_required", "closed"]),
+  listingModeration: Object.freeze(["hold_for_review", "auto_publish"]),
+  dealerDecisionAuthority: Object.freeze(["owner_only", "admins"]),
+  listingDecisionAuthority: Object.freeze(["owner_only", "admins"]),
+});
+
+/** Deliberate initial configuration when no row exists. Dealers are NOT opened by default. */
+export const INITIAL_DEFAULTS = Object.freeze({
+  privateSellerRegistration: "enabled",
+  privateSellerApprovalMode: "disabled",
+  privateSellerPackageMode: "free",
+  dealerOnboardingMode: "approval_required",
+  listingModeration: "hold_for_review",
+  dealerDecisionAuthority: "owner_only",
+  listingDecisionAuthority: "owner_only",
+});
+
+/** Used whenever the real value cannot be trusted. Every value is the most restrictive one. */
+export const RESTRICTIVE = Object.freeze({
+  privateSellerRegistration: "disabled",
+  privateSellerApprovalMode: "disabled",
+  privateSellerPackageMode: "free",
+  dealerOnboardingMode: "closed",
+  listingModeration: "hold_for_review",
+  dealerDecisionAuthority: "owner_only",
+  listingDecisionAuthority: "owner_only",
+});
+
+export class OnboardingPolicyError extends Error {
+  constructor(code, message, status, extra = {}) {
+    super(message);
+    this.name = "OnboardingPolicyError";
+    this.code = code;
+    this.status = status;
+    Object.assign(this, extra);
+  }
+}
+
+const isPlainObject = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
+const meta = (raw) => ({
+  revision: Number.isInteger(raw?.revision) && raw.revision >= 0 ? raw.revision : 0,
+  updatedAt: typeof raw?.updatedAt === "string" ? raw.updatedAt : null,
+  updatedBy: typeof raw?.updatedBy === "string" ? raw.updatedBy : null,
+});
+
+/** Pure: turn a stored value into a policy. Corrupt fields become RESTRICTIVE and are reported. */
+export function normalizePolicyValue(raw) {
+  if (!isPlainObject(raw)) {
+    return { policy: { ...RESTRICTIVE }, issues: ["value is not an object"], meta: meta(null) };
+  }
+  const policy = {};
+  const issues = [];
+  for (const [field, allowed] of Object.entries(POLICY_FIELDS)) {
+    if (raw[field] === undefined) policy[field] = INITIAL_DEFAULTS[field]; // older revision without the field
+    else if (typeof raw[field] === "string" && allowed.includes(raw[field])) policy[field] = raw[field];
+    else { policy[field] = RESTRICTIVE[field]; issues.push(`${field} is invalid`); }
+  }
+  // STAGE 5A: a partially corrupt record must not display (or half-apply) a permissive value for a *different* field. Any issue
+  // means the whole record is untrusted: every field becomes RESTRICTIVE until the owner saves a valid configuration.
+  if (issues.length) return { policy: { ...RESTRICTIVE }, issues, meta: meta(raw) };
+  return { policy, issues, meta: meta(raw) };
+}
+
+/** Pure: validate a change request. Returns { ok, errors, changes }. */
+export function validatePolicyChanges(input) {
+  const errors = [];
+  if (!isPlainObject(input)) return { ok: false, errors: ["changes must be an object"], changes: {} };
+  const changes = {};
+  for (const [k, v] of Object.entries(input)) {
+    if (!Object.hasOwn(POLICY_FIELDS, k)) { errors.push(`unknown setting: ${k}`); continue; }
+    if (typeof v !== "string" || !POLICY_FIELDS[k].includes(v)) { errors.push(`${k} must be one of: ${POLICY_FIELDS[k].join(", ")}`); continue; }
+    changes[k] = v;
+  }
+  if (!errors.length && !Object.keys(changes).length) errors.push("no changes supplied");
+  return { ok: errors.length === 0, errors, changes };
+}
+
+let cache = null; // { at, result }
+export const invalidateOnboardingPolicyCache = () => { cache = null; };
+
+const restrictiveResult = (source, why) => ({
+  policy: { ...RESTRICTIVE }, source, revision: 0, updatedAt: null, updatedBy: null, issues: why ? [why] : [], rowToken: null,
+});
+
+async function readRow() {
+  const { data, error } = await getSupabase()
+    .from("system_settings").select("value, updated_at").eq("key", ONBOARDING_POLICY_KEY).maybeSingle();
+  if (error) throw error;
+  return data || null;
+}
+
+function resultFromRow(row) {
+  if (!row) {
+    return { policy: { ...INITIAL_DEFAULTS }, source: "default", revision: 0, updatedAt: null, updatedBy: null, issues: [], rowToken: null };
+  }
+  const { policy, issues, meta: m } = normalizePolicyValue(row.value);
+  return { policy, source: issues.length ? "invalid" : "database", revision: m.revision, updatedAt: m.updatedAt, updatedBy: m.updatedBy, issues, rowToken: row.updated_at ?? null };
+}
+
+// Test seam. Honoured ONLY when NODE_ENV === "test" so it cannot influence a deployed process.
+let testOverride = null;
+export function __setOnboardingPolicyForTests(partial, source = "database") {
+  if (process.env.NODE_ENV !== "test") throw new Error("test seam is only available in NODE_ENV=test");
+  testOverride = partial === null ? null : { policy: { ...INITIAL_DEFAULTS, ...partial }, source, revision: 1, updatedAt: null, updatedBy: null, issues: [], rowToken: null };
+  invalidateOnboardingPolicyCache();
+}
+
+/** Effective policy. Never throws: any failure yields the RESTRICTIVE policy with source "unavailable". */
+export async function getOnboardingPolicy({ fresh = false } = {}) {
+  if (testOverride && process.env.NODE_ENV === "test") {
+    return testOverride.source === "unavailable" ? { ...restrictiveResult("unavailable", "test"), } : testOverride;
+  }
+  const now = Date.now();
+  if (!fresh && cache && now - cache.at < CACHE_TTL_MS) return cache.result;
+  if (!isSupabaseConnected()) return restrictiveResult("unavailable", "database not connected");
+  try {
+    const result = resultFromRow(await readRow());
+    cache = { at: now, result };
+    return result;
+  } catch (err) {
+    logError("Onboarding policy read failed — using restrictive policy", { error: err?.message || String(err), code: "ONBOARDING_POLICY_READ_FAILED" });
+    return restrictiveResult("unavailable", "read failed");
+  }
+}
+
+/** True when the policy values may be trusted (row missing is trusted: it is the deliberate default). */
+export const isPolicyTrusted = (result) => result?.source === "default" || result?.source === "database";
+
+/**
+ * Apply a validated change with compare-and-swap.
+ * @returns {{before, after}} effective policies (+ revision)
+ * @throws OnboardingPolicyError 400 validation | 409 conflict | 503 store unavailable
+ */
+export async function updateOnboardingPolicy({ changes: rawChanges, expectedRevision, actorId }) {
+  const v = validatePolicyChanges(rawChanges);
+  if (!v.ok) throw new OnboardingPolicyError("ONBOARDING_POLICY_INVALID", "Invalid onboarding settings", 400, { errors: v.errors });
+  if (!Number.isInteger(expectedRevision) || expectedRevision < 0) {
+    throw new OnboardingPolicyError("ONBOARDING_POLICY_REVISION_REQUIRED", "expectedRevision (integer) is required", 400, { errors: ["expectedRevision is required"] });
+  }
+  if (!isSupabaseConnected()) throw new OnboardingPolicyError("ONBOARDING_POLICY_UNAVAILABLE", "Settings store is unavailable", 503);
+
+  let row;
+  try { row = await readRow(); } catch (err) {
+    logError("Onboarding policy write aborted: read failed", { error: err?.message || String(err), code: "ONBOARDING_POLICY_READ_FAILED" });
+    throw new OnboardingPolicyError("ONBOARDING_POLICY_UNAVAILABLE", "Settings store is unavailable", 503);
+  }
+  const current = resultFromRow(row);
+  if (current.revision !== expectedRevision) {
+    throw new OnboardingPolicyError("ONBOARDING_POLICY_CONFLICT", "Settings changed since you loaded them. Reload and review before saving.", 409, { current: publicView(current) });
+  }
+  if (v.changes.privateSellerApprovalMode === "required" && current.policy.privateSellerApprovalMode !== "required") {
+    // Approval mode depends on the persisted capability table. Do not let an administrator
+    // enable a gate that the current database cannot enforce or review.
+    const capabilityCheck = await getSupabase().from("private_seller_capabilities").select("user_id").limit(1);
+    if (capabilityCheck.error) {
+      const missing = ["42P01", "PGRST205", "PGRST204"].includes(String(capabilityCheck.error.code || ""))
+        || /private_seller_capabilities.*(does not exist|schema cache)/i.test(String(capabilityCheck.error.message || ""));
+      if (missing) {
+        throw new OnboardingPolicyError("ONBOARDING_POLICY_PREREQUISITE_MISSING", "Private-seller approval cannot be enabled until the capability-table migration has been reconciled and applied.", 503);
+      }
+      throw new OnboardingPolicyError("ONBOARDING_POLICY_PREREQUISITE_UNAVAILABLE", "Could not verify the private-seller capability table. Settings were not changed.", 503);
+    }
+  }
+  // A corrupt stored policy is repaired from the trusted merge (corrupt fields were already replaced by RESTRICTIVE).
+  const nextRevision = current.revision + 1;
+  const stamp = new Date().toISOString();
+  const value = { schemaVersion: SCHEMA_VERSION, ...current.policy, ...v.changes, revision: nextRevision, updatedAt: stamp, updatedBy: actorId ? String(actorId) : null };
+
+  const sb = getSupabase();
+  let write;
+  if (!row) {
+    write = await sb.from("system_settings").insert({ key: ONBOARDING_POLICY_KEY, value, description: "Owner-controlled onboarding policy (Stage 5)" }).select("key");
+    if (write.error) {
+      if (write.error.code === "23505") throw new OnboardingPolicyError("ONBOARDING_POLICY_CONFLICT", "Settings were created by someone else. Reload and review.", 409);
+      logError("Onboarding policy insert failed", { error: write.error.message, code: "ONBOARDING_POLICY_WRITE_FAILED" });
+      throw new OnboardingPolicyError("ONBOARDING_POLICY_WRITE_FAILED", "Could not save settings", 500);
+    }
+  } else {
+    // Compare-and-swap on the stored revision (a JSON-path filter), not on a timestamp: timestamptz text
+    // round-trips (precision/offset formatting) are a needless way to get a spurious 409. The UPDATE only
+    // matches while the revision we validated is still the stored one; the loser updates zero rows.
+    // A stored value with no/zero revision (never written by this service) is matched on its absence of one.
+    let q = sb.from("system_settings").update({ value, updated_at: stamp }).eq("key", ONBOARDING_POLICY_KEY);
+    q = Number.isInteger(row.value?.revision) ? q.eq("value->>revision", String(row.value.revision)) : q.is("value->>revision", null);
+    write = await q.select("key");
+    if (write.error) {
+      logError("Onboarding policy update failed", { error: write.error.message, code: "ONBOARDING_POLICY_WRITE_FAILED" });
+      throw new OnboardingPolicyError("ONBOARDING_POLICY_WRITE_FAILED", "Could not save settings", 500);
+    }
+  }
+  if (!Array.isArray(write.data) || write.data.length !== 1) {
+    // Zero rows affected: somebody else won the race between our read and our write.
+    throw new OnboardingPolicyError("ONBOARDING_POLICY_CONFLICT", "Settings changed while saving. Reload and review.", 409);
+  }
+  invalidateOnboardingPolicyCache();
+  const after = { policy: { ...current.policy, ...v.changes }, revision: nextRevision, updatedAt: stamp, updatedBy: actorId ? String(actorId) : null, source: "database" };
+  return { before: publicView(current), after: publicView(after) };
+}
+
+/** Shape returned to admins. */
+export function publicView(result) {
+  return {
+    ...result.policy,
+    revision: result.revision,
+    updatedAt: result.updatedAt ?? null,
+    updatedBy: result.updatedBy ?? null,
+    source: result.source,
+    emailVerificationRequiredForSellers: true, // fixed by design; not configurable
+  };
+}
+
+/** Shape returned to the anonymous registration UI: only what is needed to render the right form. */
+export function publicRegistrationView(result) {
+  const trusted = isPolicyTrusted(result);
+  return {
+    privateSellerRegistration: result.policy.privateSellerRegistration,
+    privateSellerApprovalMode: result.policy.privateSellerApprovalMode,
+    privateSellerPackageMode: result.policy.privateSellerPackageMode,
+    dealerOnboardingMode: result.policy.dealerOnboardingMode,
+    available: trusted,
+    emailVerificationRequiredForSellers: true,
+  };
+}
+
+/** Pure: may `user` take an approve/reject decision in `domain` under `result`? */
+export function mayDecide(user, domain, result) {
+  if (!user) return false;
+  const authority = domain === "listing" ? result.policy.listingDecisionAuthority : result.policy.dealerDecisionAuthority;
+  // The owner is identified by EMAIL (config/owners.js) and is exempt from the generic email-verification gate.
+  // If the owner's account did not exist, anyone could register that address and inherit owner power. So for
+  // owner-only authority we additionally require that the owner's own email is VERIFIED.
+  const isOwner = user.effectiveRole === "webhoist" && user.emailVerified === true;
+  if (authority === "admins") return isOwner || user.role === "admin" || user.role === "superadmin";
+  return isOwner; // owner_only (and any untrusted policy): only the verified platform owner
+}
+
+/** Express middleware: enforce the owner's decision-authority setting server-side. */
+export const requireDecisionAuthority = (domain) => async (req, res, next) => {
+  try {
+    const result = await getOnboardingPolicy();
+    if (mayDecide(req.user, domain, result)) return next();
+    logWarn("Decision blocked by owner decision-authority setting", { domain, userId: req.user?.id, role: req.user?.role, source: result.source });
+    return res.status(403).json({
+      success: false,
+      code: "DECISION_AUTHORITY_REQUIRED",
+      message: domain === "listing"
+        ? "Listing approval and rejection are reserved for the platform owner under the current onboarding settings."
+        : "Dealer and seller approval and rejection are reserved for the platform owner under the current onboarding settings.",
+    });
+  } catch (err) {
+    logError("Decision authority check failed — denying", { error: err?.message, code: "DECISION_AUTHORITY_CHECK_FAILED" });
+    return res.status(503).json({ success: false, code: "ONBOARDING_POLICY_UNAVAILABLE", message: "Settings are temporarily unavailable. Try again shortly." });
+  }
+};
+
+/**
+ * May this user put one of THEIR OWN listings straight into a public ("available") state?
+ * Owner and staff: yes (their own moderation authority is enforced elsewhere).
+ * Everyone else: only when the owner chose auto_publish, the policy is trustworthy, and the
+ * seller account itself is approved. hold_for_review / unavailable / invalid ⇒ no.
+ */
+export async function sellerMayPublishDirectly(user) {
+  if (!user) return false;
+  if (user.effectiveRole === "webhoist") return true;
+  if (user.role === "admin" || user.role === "superadmin") return true;
+  const result = await getOnboardingPolicy();
+  if (!isPolicyTrusted(result) || result.policy.listingModeration !== "auto_publish") return false;
+  const personalSeller = ["user", "individual_seller"].includes(String(user.role || ""));
+  const accountStatusOk = user.status === "approved"
+    || (personalSeller && result.policy.privateSellerApprovalMode !== "required" && !["suspended", "revoked", "deactivated", "banned"].includes(String(user.status || "").toLowerCase()));
+  return accountStatusOk && result.policy.privateSellerPackageMode === "free";
+}
+
+export const PUBLICATION_REVIEW_REQUIRED = Object.freeze({
+  success: false,
+  code: "LISTING_PUBLICATION_REQUIRES_REVIEW",
+  message: "Publishing is controlled by listing review. Submit the listing for review (status: pending) and it will go live once approved.",
+});
+
+==================== PRIVATE SELLER CAPABILITY SERVICE ====================
+// ============================================================
+//  PRIVATE SELLER ACCESS — policy-controlled personal-account capability.
+//  Default launch policy is free/open with no seller application or approval. When the administrator enables approval,
+//  public.private_seller_capabilities becomes authoritative. Suspension/revocation remain enforceable in either mode.
+//  Never touches dealers / dealer_verifications / dealer_teams, never changes users.role or users.status, never creates users.
+// ============================================================
+import { getSupabase } from "../utils/supabase.js";
+import { STAFF_ROLES } from "../config/roles.js";
+import { getOnboardingPolicy } from "./onboardingPolicy.service.js";
+
+const TABLE = "private_seller_capabilities";
+const EVENTS_TABLE = "private_seller_listing_visibility_events";
+export const SELLER_STATUSES = ["pending", "approved", "rejected", "suspended", "revoked"];
+// Valid admin transitions (from -> allowed decisions). Applicant transitions: none -> pending, rejected -> pending.
+const DECISIONS = {
+  approve: { to: "approved", from: ["pending", "suspended", "revoked", "rejected"] },
+  reject: { to: "rejected", from: ["pending"] },
+  suspend: { to: "suspended", from: ["approved"] },
+  revoke: { to: "revoked", from: ["approved", "suspended"] },
+};
+export const DECISION_NAMES = Object.keys(DECISIONS);
+const LEGACY_MAP = { approved: "approved", rejected: "rejected", suspended: "suspended" };
+
+const err = (status, code, message) => Object.assign(new Error(message), { status, code });
+const map = (r) => r && ({
+  userId: r.user_id, status: r.status, contactPhone: r.contact_phone ?? null, intendedUse: r.intended_use ?? null, source: r.source,
+  submittedAt: r.submitted_at, reviewedAt: r.reviewed_at ?? null, reviewReason: r.review_reason ?? null,
+});
+
+const isMissingCapabilityTable = (error) =>
+  ["42P01", "PGRST205", "PGRST204"].includes(String(error?.code || ""))
+  || /could not find the table .*private_seller_capabilities.*schema cache|relation .*private_seller_capabilities.* does not exist/i.test(String(error?.message || ""));
+
+export const getCapabilityRow = async (userId) => {
+  const { data, error } = await getSupabase().from(TABLE).select("*").eq("user_id", userId).maybeSingle();
+  // The free/no-approval policy must not depend on the optional review table being deployed.
+  // Only a confirmed missing-table error is treated as absent; outages and other schema errors still fail closed.
+  if (error && isMissingCapabilityTable(error)) return null;
+  if (error) throw error;
+  return data || null;
+};
+
+/** Effective private-seller state for a user ({id, role, status}). Returns { status, source } where status is
+ *  none | pending | approved | rejected | suspended | revoked | not_applicable. */
+export const resolveSellerState = async (user) => {
+  if (!user) return { status: "none", source: "none" };
+  if (user.role === "dealer" || STAFF_ROLES.includes(user.role)) return { status: "not_applicable", source: "role" };
+
+  const policyResult = await getOnboardingPolicy();
+  const approvalRequired = policyResult.policy.privateSellerApprovalMode === "required";
+  const row = await getCapabilityRow(user.id ?? user._id);
+
+  // Suspension/revocation remain enforceable safety controls even while routine seller approval is disabled.
+  if (row && ["suspended", "revoked"].includes(row.status)) {
+    return { status: row.status, source: "capability", application: map(row) };
+  }
+  if (user.role === "individual_seller" && ["suspended", "revoked"].includes(String(user.status || "").toLowerCase())) {
+    return { status: String(user.status).toLowerCase(), source: "legacy_users_status" };
+  }
+  if (!approvalRequired) {
+    return { status: "approved", source: "policy_default", application: map(row) };
+  }
+
+  if (row) return { status: row.status, source: row.source === "legacy_backfill" ? "legacy_backfill" : "capability", application: map(row) };
+  if (user.role === "individual_seller") {
+    const legacyStatus = String(user.status || "").toLowerCase();
+    if (["suspended", "revoked"].includes(legacyStatus)) return { status: legacyStatus, source: "legacy_users_status" };
+    return { status: LEGACY_MAP[user.status] || "pending", source: "legacy_users_status" };
+  }
+  return { status: "none", source: "none" };
+};
+
+export const getMySellerCapability = async (user) => {
+  const policy = await getOnboardingPolicy();
+  const state = await resolveSellerState(user);
+  const row = ["none", "not_applicable"].includes(state.status) ? null : await getCapabilityRow(user.id ?? user._id);
+  return {
+    status: state.status, source: state.source, application: state.application || map(row),
+    canApply: policy.policy.privateSellerApprovalMode === "required" && user.role === "user" && (state.status === "none" || state.status === "rejected"),
+    canList: state.status === "approved" && policy.policy.privateSellerPackageMode === "free",
+    approvalRequired: policy.policy.privateSellerApprovalMode === "required",
+    packageMode: policy.policy.privateSellerPackageMode,
+  };
+};
+
+const PHONE_RE = /^\+?[0-9]{9,15}$/;
+export const submitApplication = async ({ user, contactPhone, intendedUse }) => {
+  const onboarding = await getOnboardingPolicy();
+  if (onboarding.policy.privateSellerApprovalMode !== "required") {
+    throw err(409, "SELLER_APPROVAL_NOT_REQUIRED", "Private selling is open. No application or administrator approval is required.");
+  }
+  if (onboarding.policy.privateSellerPackageMode !== "free") {
+    throw err(503, "SELLER_PACKAGE_CONFIGURATION_INCOMPLETE", "Paid seller packages are not available until package checkout is configured.");
+  }
+  if (user.role !== "user") throw err(403, "SELLER_APPLICATION_NOT_ALLOWED", "Only personal buyer accounts can apply for private-seller access.");
+  if (user.emailVerified !== true) throw err(403, "EMAIL_VERIFICATION_REQUIRED", "Please verify your email address before applying to sell.");
+  const phone = String(contactPhone || "").replace(/[\s-]/g, "");
+  if (!PHONE_RE.test(phone)) throw err(400, "INVALID_PHONE", "A valid contact phone number is required.");
+  const note = intendedUse == null ? null : String(intendedUse).trim().slice(0, 500) || null;
+  const sb = getSupabase();
+  const existing = await getCapabilityRow(user.id);
+  if (existing && existing.status !== "rejected") throw err(409, "SELLER_APPLICATION_EXISTS", `A private-seller application already exists (status: ${existing.status}).`);
+  const now = new Date().toISOString();
+  if (!existing) {
+    const { data, error } = await sb.from(TABLE).insert({ user_id: user.id, status: "pending", contact_phone: phone, intended_use: note, source: "application", submitted_at: now }).select("*").single();
+    // The primary key makes a concurrent double-submit fail closed instead of creating a second application.
+    if (error) { if (error.code === "23505") throw err(409, "SELLER_APPLICATION_EXISTS", "A private-seller application already exists."); throw error; }
+    return map(data);
+  }
+  // Re-application after rejection: only from 'rejected', guarded in the WHERE so a concurrent change cannot be overwritten.
+  const { data, error } = await sb.from(TABLE).update({ status: "pending", contact_phone: phone, intended_use: note, submitted_at: now, reviewed_by: null, reviewed_at: null, review_reason: null, updated_at: now })
+    .eq("user_id", user.id).eq("status", "rejected").select("*").maybeSingle();
+  if (error) throw error;
+  if (!data) throw err(409, "SELLER_APPLICATION_EXISTS", "A private-seller application already exists.");
+  return map(data);
+};
+
+export const decideApplication = async ({ targetUserId, decision, reason, adminId }) => {
+  const rule = DECISIONS[decision];
+  if (!rule) throw err(400, "INVALID_DECISION", "Unknown decision.");
+  const row = await getCapabilityRow(targetUserId);
+  if (!row) throw err(404, "SELLER_APPLICATION_NOT_FOUND", "No private-seller application exists for this user.");
+  if (!rule.from.includes(row.status)) throw err(409, "INVALID_TRANSITION", `Cannot ${decision} an application that is ${row.status}.`);
+  if (["reject", "suspend", "revoke"].includes(decision) && !String(reason || "").trim()) throw err(400, "REASON_REQUIRED", "A reason is required for this decision.");
+  const now = new Date().toISOString();
+  const { data, error } = await getSupabase().from(TABLE).update({ status: rule.to, reviewed_by: adminId, reviewed_at: now, review_reason: reason ? String(reason).slice(0, 500) : null, updated_at: now })
+    .eq("user_id", targetUserId).eq("status", row.status).select("*").maybeSingle();
+  if (error) throw error;
+  if (!data) throw err(409, "INVALID_TRANSITION", "The application changed while it was being reviewed; reload and retry.");
+  // The database visibility trigger hides/restores eligible public listings atomically with the capability
+  // transition above (same statement, same transaction). Phase 13F: report the outcome truthfully. Cache invalidation
+  // runs in strict mode so a Redis failure is surfaced to the administrator instead of being swallowed; the decision
+  // itself is NOT undone because the database (and every public read path's status filter) is authoritative.
+  const visibilityChanged = (["suspended", "revoked"].includes(data.status) && row.status !== data.status)
+    || (data.status === "approved" && ["suspended", "revoked"].includes(row.status));
+  const visibility = { changed: visibilityChanged, cacheInvalidated: null, listingsHiddenByPolicy: null };
+  if (visibilityChanged) {
+    try {
+      const { invalidatePublicListingCaches } = await import("../utils/publicListingCache.js");
+      await invalidatePublicListingCaches({ strict: true });
+      visibility.cacheInvalidated = true;
+    } catch (cacheError) {
+      visibility.cacheInvalidated = false;
+      console.error("Private-seller listing cache invalidation failed", cacheError?.message || cacheError);
+    }
+    try {
+      const { count, error: countError } = await getSupabase().from(EVENTS_TABLE).select("car_id", { count: "exact", head: true }).eq("seller_user_id", targetUserId).is("restored_at", null);
+      if (!countError) visibility.listingsHiddenByPolicy = count ?? 0;
+    } catch { /* informational only */ }
+  }
+  return { before: row.status, after: data.status, application: map(data), visibility };
+};
+
+export const listApplications = async ({ status, limit = 50 } = {}) => {
+  let q = getSupabase().from(TABLE).select("*").order("submitted_at", { ascending: false }).limit(Math.min(Number(limit) || 50, 200));
+  if (status && SELLER_STATUSES.includes(status)) q = q.eq("status", status);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data || []).map(map);
+};
+
+/** Keeps the capability row in step when the LEGACY admin approval endpoint approves an individual_seller.
+ *  Only a pending/rejected row is moved to approved. A suspended/revoked row is deliberately NOT reinstated here (reinstatement
+ *  restores hidden listings and must go through the review workflow); the returned status lets the caller report that truthfully.
+ *  Phase 13F: database errors now propagate (they were silently ignored) and the reviewing administrator is recorded. */
+export const syncLegacyApproval = async (userId, adminId = null) => {
+  const row = await getCapabilityRow(userId);
+  if (!row) return { synced: false, status: null };
+  if (row.status === "approved") return { synced: false, status: "approved" };
+  if (!["pending", "rejected"].includes(row.status)) return { synced: false, status: row.status };
+  const now = new Date().toISOString();
+  const { data, error } = await getSupabase().from(TABLE)
+    .update({ status: "approved", reviewed_by: adminId, reviewed_at: now, updated_at: now })
+    .eq("user_id", userId).in("status", ["pending", "rejected"]).select("status");
+  if (error) throw error;
+  return { synced: (data || []).length > 0, status: (data || [])[0]?.status || row.status };
+};
+
+==================== ACCOUNT CAPABILITIES TESTS ====================
+The system cannot find the file specified.
+
+==================== PHASE 13D REGRESSION ====================
+// ============================================================
+// PHASE 13D — DEALER ISOLATION REGRESSION (Workstreams A, B, C).
+// Drives the REAL routers through the REAL protect/dealerOnly/dealerBusinessOnly/dealerOrgAccess middleware over
+// HTTP; only persistence, controllers' data access and heavy services are mocked (EVIDENCE TIER: mocked local runtime).
+//   A  /api/dealer/* and the dealer-business parts of /api/dealer-platform/* admit only dealer + staff.
+//   B  /api/listing-quality/dealer/:dealerId/* are limited to the owner (or staff); no other id is readable/recalculable.
+//   C  requireDealerVerification never creates a Dealer record for an individual_seller.
+// ============================================================
+import { describe, test, expect, beforeAll, afterAll, beforeEach, jest } from "@jest/globals";
+import http from "http";
+import jwt from "jsonwebtoken";
+import express from "express";
+
+process.env.JWT_SECRET = process.env.JWT_SECRET || "test-secret-key-32-chars-minimum-x";
+process.env.REQUIRE_EMAIL_VERIFICATION = "false";
+process.env.NODE_ENV = "test";
+const SECRET = process.env.JWT_SECRET;
+
+const D1 = "11111111-1111-4111-8111-111111111111"; // dealer owner
+const D2 = "22222222-2222-4222-8222-222222222222"; // unrelated dealer
+const M1 = "33333333-3333-4333-8333-333333333333"; // active team member of D1 (role user)
+const B1 = "44444444-4444-4444-8444-444444444444"; // buyer
+const S_PENDING = "55555555-5555-4555-8555-555555555551";
+const S_APPROVED = "55555555-5555-4555-8555-555555555552";
+const S_SUSPENDED = "55555555-5555-4555-8555-555555555553";
+const S_REJECTED = "55555555-5555-4555-8555-555555555554";
+const U_REVOKED = "66666666-6666-4666-8666-666666666666"; // future capability model: role user, seller capability revoked
+const ADMIN = "77777777-7777-4777-8777-777777777777";
+const MARKETING = "88888888-8888-4888-8888-888888888888";
+const NOBODY = "99999999-9999-4999-8999-999999999999"; // valid UUID, no such dealer
+
+const fixtures = {
+  [D1]: { role: "dealer", status: "approved" },
+  [D2]: { role: "dealer", status: "approved" },
+  [M1]: { role: "user", status: "approved" },
+  [B1]: { role: "user", status: "approved" },
+  [S_PENDING]: { role: "individual_seller", status: "pending" },
+  [S_APPROVED]: { role: "individual_seller", status: "approved" },
+  [S_SUSPENDED]: { role: "individual_seller", status: "suspended" },
+  [S_REJECTED]: { role: "individual_seller", status: "rejected" },
+  [U_REVOKED]: { role: "user", status: "approved", privateSellerStatus: "revoked" },
+  [ADMIN]: { role: "admin", status: "approved" },
+  [MARKETING]: { role: "marketing", status: "approved" },
+};
+const users = {};
+Object.entries(fixtures).forEach(([id, f]) => { users[id] = { _id: id, id, email: `${id.slice(0, 4)}@example.test`, name: id.slice(0, 4), emailVerified: true, ...f }; });
+
+const chain = (value) => {
+  const q = { select: jest.fn(() => q), lean: jest.fn(() => q), catch: jest.fn(() => q), then: (res, rej) => Promise.resolve(value).then(res, rej) };
+  return q;
+};
+const userModel = { findById: jest.fn((id) => chain(users[id] || null)), findByIdAndUpdate: jest.fn(() => chain({})), findOne: jest.fn(() => chain(null)), find: jest.fn(() => chain([])), countDocuments: jest.fn(async () => 0) };
+
+// generic PostgREST-like builder: every call chains, awaiting yields an empty successful result; dealer_teams membership is real fixture data
+const TEAMS = [{ id: "t1", dealer: D1, member: M1, role: "sales_agent", permissions: { canListCars: true }, status: "active" }];
+const sb = {
+  from: jest.fn((table) => {
+    const f = {};
+    const q = new Proxy({}, {
+      get: (_t, prop) => {
+        if (prop === "then") {
+          const rows = table === "dealer_teams" ? TEAMS.filter((t) => Object.entries(f).every(([k, v]) => t[k] === v)) : [];
+          return (res, rej) => Promise.resolve({ data: rows, count: rows.length, error: null }).then(res, rej);
+        }
+        if (prop === "eq") return (k, v) => { f[k] = v; return q; };
+        if (prop === "single" || prop === "maybeSingle") return () => Promise.resolve({ data: null, error: null });
+        return () => q;
+      },
+    });
+    return q;
+  }),
+  rpc: jest.fn(async () => ({ data: null, error: null })),
+};
+const stub = (name) => jest.fn((req, res) => res.json({ success: true, handler: name }));
+
+jest.unstable_mockModule("../../models/User.js", () => ({ default: userModel }));
+jest.unstable_mockModule("../../models/UserAuth.js", () => ({ default: { findOne: jest.fn(() => chain({ tokenVersion: 0 })) } }));
+jest.unstable_mockModule("../../models/RefreshToken.js", () => ({ default: { findActiveSessionById: jest.fn(async () => ({})) } }));
+jest.unstable_mockModule("../../utils/logger.js", () => ({ logInfo: jest.fn(), logWarn: jest.fn(), logError: jest.fn(), default: { info: jest.fn(), warn: jest.fn(), error: jest.fn() } }));
+jest.unstable_mockModule("../../infrastructure/logging/index.js", () => ({ logInfo: jest.fn(), logWarn: jest.fn(), logError: jest.fn() }));
+jest.unstable_mockModule("../../utils/supabase.js", () => ({ isSupabaseConnected: () => true, getSupabase: () => sb }));
+jest.unstable_mockModule("../../utils/securityLogger.js", () => ({ logActionFromReq: jest.fn(async () => {}) }));
+jest.unstable_mockModule("../../db/index.js", () => ({
+  findAll: jest.fn(async () => []), findById: jest.fn(async () => null), findOne: jest.fn(async () => null),
+  create: jest.fn(async (t, d) => ({ id: "new", ...d })), update: jest.fn(async () => ({})), remove: jest.fn(async () => ({})),
+  paginate: jest.fn(async () => ({ data: [], total: 0 })), count: jest.fn(async () => 0),
+}));
+jest.unstable_mockModule("../../middleware/apiCache.js", () => ({
+  cacheDealerData: (q, s, n) => n(), cacheAnalytics: (q, s, n) => n(), cacheUserData: (q, s, n) => n(), invalidateCache: () => (q, s, n) => n(),
+}));
+jest.unstable_mockModule("../../services/paymentService.js", () => ({ initiatePayment: jest.fn() }));
+jest.unstable_mockModule("../../services/pricingRecommendationService.js", () => ({ getPricingRecommendations: jest.fn(async () => []) }));
+jest.unstable_mockModule("../../services/notification.service.js", () => ({ sendNotification: jest.fn(async () => {}) }));
+jest.unstable_mockModule("../../services/dealerSubscription.service.js", () => ({ initiateDealerUpgrade: jest.fn(async () => { throw new Error("must not be reached by non-dealers"); }) }));
+jest.unstable_mockModule("../../services/communicationGateway.service.js", () => ({ deliver: jest.fn(async () => ({})) }));
+jest.unstable_mockModule("../../services/auctionLifecycle.service.js", () => ({ startAuction: jest.fn(), extendAuction: jest.fn(), closeAuction: jest.fn() }));
+jest.unstable_mockModule("../../services/mpesaB2C.service.js", () => ({ disburseB2C: jest.fn() }));
+jest.unstable_mockModule("../../services/dealerVerificationService.js", () => ({ submitDealerVerification: jest.fn(async () => ({})) }));
+jest.unstable_mockModule("../../services/onboardingPolicy.service.js", () => ({
+  sellerMayPublishDirectly: jest.fn(() => false), PUBLICATION_REVIEW_REQUIRED: "review", getOnboardingPolicy: jest.fn(async () => ({ source: "default", policy: { dealerOnboardingMode: "self_onboarding" } })),
+}));
+
+const PLATFORM_FNS = ["getDealerDashboard", "getDealerProfile", "updateDealerProfile", "getInventory", "createListing", "updateListing", "deleteListing", "bulkUpdateListings", "getLeads", "updateLead", "addLeadNote", "getLeadActivities", "createTask", "getSalesPipeline", "getMarketingCampaigns", "createCampaign", "updateCampaign", "getDealerAnalytics", "getAIRecommendations", "getTeamMembers", "inviteTeamMember", "resendTeamInvite", "getTeamRoles", "createTeamRole", "updateTeamRole", "deleteTeamRole", "updateTeamMember", "removeTeamMember", "acceptTeamInvite", "getSubscription", "askDealerCopilot", "getCustomers", "getCustomerTimeline", "getAuctionInventory", "getFinanceApplications", "getInspectionOrders", "getReputation"];
+jest.unstable_mockModule("../../controllers/dealerPlatformController.js", () => Object.fromEntries(PLATFORM_FNS.map((n) => [n, stub(n)])));
+
+const qualityCalls = [];
+const qualityStub = (kind) => jest.fn(async (dealerId) => { qualityCalls.push([kind, dealerId]); return { dealerId, kind }; });
+const svc = { getDealerQualityStats: qualityStub("stats"), generateQualityReport: qualityStub("report"), bulkRecalculateDealerQuality: qualityStub("bulk") };
+jest.unstable_mockModule("../../services/listingQualityService.js", () => ({
+  calculateListingQuality: jest.fn(), recalculateListingQuality: jest.fn(), getListingQuality: jest.fn(), getDealerQualityStats: svc.getDealerQualityStats,
+  getPlatformQualityStats: jest.fn(), getQualityTrends: jest.fn(), getLowQualityListings: jest.fn(), generateQualityReport: svc.generateQualityReport,
+  bulkRecalculateDealerQuality: svc.bulkRecalculateDealerQuality, getQualityBenchmarks: jest.fn(),
+}));
+
+const { default: dealerRoutes } = await import("../../routes/dealerRoutes.js");
+const { default: platformRoutes } = await import("../../routes/dealerPlatformRoutes.js");
+const { default: qualityRoutes } = await import("../../routes/listingQualityRoutes.js");
+
+const token = (id) => jwt.sign({ id, tokenVersion: 0 }, SECRET, { expiresIn: "1h" });
+let server; let base;
+beforeAll(async () => {
+  const app = express();
+  app.use(express.json());
+  app.use("/api/dealer", dealerRoutes);
+  app.use("/api/dealer-platform", platformRoutes);
+  app.use("/api/listing-quality", qualityRoutes);
+  await new Promise((r) => { server = app.listen(0, "127.0.0.1", r); });
+  base = `http://127.0.0.1:${server.address().port}`;
+});
+afterAll(() => new Promise((r) => { server.closeAllConnections?.(); server.close(() => r()); }));
+beforeEach(() => { qualityCalls.length = 0; });
+
+const call = async (method, path, who, body) => {
+  const headers = { "Content-Type": "application/json" };
+  if (who) headers.Authorization = `Bearer ${token(who)}`;
+  // A request that passes the guards may reach a mocked handler that never answers: recorded as status 0
+  // ("guard admitted the caller"), distinct from 401/403 (guard denied).
+  const payload = body && method !== "GET" ? JSON.stringify(body) : undefined;
+  if (payload) headers["Content-Length"] = Buffer.byteLength(payload);
+  return new Promise((resolve) => {
+    const u = new URL(base + path);
+    const req = http.request({ host: u.hostname, port: u.port, path: u.pathname + u.search, method, headers, agent: false }, (res) => {
+      let data = "";
+      res.on("data", (c) => { data += c; });
+      res.on("end", () => { let json = null; try { json = JSON.parse(data); } catch { /* empty */ } resolve({ status: res.statusCode, json }); });
+    });
+    const t = setTimeout(() => { req.destroy(); resolve({ status: 0, json: null }); }, 500);
+    req.on("close", () => clearTimeout(t));
+    req.on("error", () => resolve({ status: 0, json: null }));
+    if (payload) req.write(payload);
+    req.end();
+  });
+};
+const passedGuard = (r) => r.status !== 401 && r.status !== 403;
+
+const PRIVATE_NON_DEALERS = [
+  ["ordinary buyer", B1], ["pending private seller", S_PENDING], ["approved private seller", S_APPROVED],
+  ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED], ["revoked seller capability (role user)", U_REVOKED],
+];
+const rows3 = (rows) => rows.map(([m, p, b]) => [m, p, b ?? null]);
+// Dealer-BUSINESS routes on the legacy router. Caller-scoped listing management (cars, bulk-status/delete, mark-sold, bids,
+// auctions, earnings, escrows, payouts, settlement, analytics) deliberately stays on dealerOnly: it is pinned for private
+// sellers by S1-LIST-04 and is documented as a residual for the C1 stage (see KAYAD_PHASE13D_REMAINING_RISKS_AND_STAGING_GAPS.md).
+const LEGACY_DEALER_ROUTES = rows3([
+  ["GET", "/api/dealer/team"], ["POST", "/api/dealer/team/invite", { email: "x@example.test" }], ["PATCH", `/api/dealer/team/${NOBODY}`, { role: "manager" }],
+  ["DELETE", `/api/dealer/team/${NOBODY}`], ["POST", "/api/dealer/upgrade", { planId: "p", phone: "254712345678" }], ["GET", "/api/dealer/trade-listings"],
+  ["PATCH", `/api/dealer/cars/${NOBODY}/wholesale`, { wholesale: true }], ["POST", "/api/dealer/pricing-recommendations", {}],
+]);
+const LEGACY_SELLER_OWN_ROUTES = rows3([
+  ["GET", "/api/dealer/cars"], ["PATCH", "/api/dealer/cars/bulk-status", { ids: [], status: "pending" }], ["GET", "/api/dealer/earnings"],
+]);
+const PLATFORM_BUSINESS_ROUTES = rows3([
+  ["GET", "/api/dealer-platform/dashboard"], ["GET", "/api/dealer-platform/inventory"], ["POST", "/api/dealer-platform/inventory/bulk", {}],
+  ["GET", "/api/dealer-platform/leads"], ["GET", "/api/dealer-platform/pipeline"], ["GET", "/api/dealer-platform/marketing"], ["POST", "/api/dealer-platform/marketing", {}],
+  ["GET", "/api/dealer-platform/analytics"], ["GET", "/api/dealer-platform/subscription"], ["GET", "/api/dealer-platform/customers"], ["POST", "/api/dealer-platform/copilot", {}],
+]);
+
+describe("Workstream A — legacy /api/dealer/* admits no private seller or buyer", () => {
+  for (const [label, id] of PRIVATE_NON_DEALERS) {
+    test.each(LEGACY_DEALER_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+      const r = await call(method, path, id, body);
+      expect(r.status).toBe(403);
+    });
+  }
+  test.each(LEGACY_SELLER_OWN_ROUTES)("approved private seller KEEPS caller-scoped %s %s (not a dealer-business route; unchanged by 13D)", async (m, p, b) => {
+    expect(passedGuard(await call(m, p, S_APPROVED, b))).toBe(true);
+  });
+  test("suspended and rejected private sellers remain refused by the existing status gate", async () => {
+    for (const id of [S_SUSPENDED, S_REJECTED]) expect((await call("GET", "/api/dealer/cars", id)).status).toBe(403);
+  });
+  // Free private-selling policy: a legacy *pending* seller record is preserved but does not block caller-scoped own-listing
+  // management (it never reaches the dealer-business routes, which are asserted 403 above).
+  test("legacy pending private seller keeps caller-scoped own-listing access under the free policy", async () => {
+    expect(passedGuard(await call("GET", "/api/dealer/cars", S_PENDING))).toBe(true);
+  });
+  test("anonymous → 401", async () => { expect((await call("GET", "/api/dealer/team", null)).status).toBe(401); });
+  test.each(rows3([["GET", "/api/dealer/team"], ["GET", "/api/dealer/trade-listings"], ["GET", "/api/dealer/earnings"]]))("dealer owner keeps %s %s", async (m, p) => {
+    expect(passedGuard(await call(m, p, D1))).toBe(true);
+  });
+  test("staff (admin, marketing) keep their existing access (not broadened, not removed)", async () => {
+    expect(passedGuard(await call("GET", "/api/dealer/team", ADMIN))).toBe(true);
+    expect(passedGuard(await call("GET", "/api/dealer/team", MARKETING))).toBe(true);
+  });
+  test("team member (role user) is not admitted to the owner-level legacy router", async () => {
+    expect((await call("GET", "/api/dealer/team", M1)).status).toBe(403);
+    expect((await call("POST", "/api/dealer/team/invite", M1, { email: "x@example.test" })).status).toBe(403);
+  });
+});
+
+describe("Workstream A — /api/dealer-platform business routes", () => {
+  for (const [label, id] of PRIVATE_NON_DEALERS) {
+    test.each(PLATFORM_BUSINESS_ROUTES)(`${label}: %s %s → 403`, async (method, path, body) => {
+      expect((await call(method, path, id, body)).status).toBe(403);
+    });
+  }
+  test.each(PLATFORM_BUSINESS_ROUTES)("dealer owner keeps %s %s", async (m, p, b) => { expect(passedGuard(await call(m, p, D1, b))).toBe(true); });
+  test("organisation team routes: owner allowed, member without canManageTeam refused (14.7); private seller, buyer and suspended/unrelated denied", async () => {
+    expect(passedGuard(await call("GET", "/api/dealer-platform/team", D1))).toBe(true);
+    // 14.7: the roster exposes invite emails and permission sets, so it needs canManageTeam; M1 holds only canListCars.
+    expect((await call("GET", "/api/dealer-platform/team", M1)).status).toBe(403);
+    for (const id of [S_APPROVED, S_PENDING, S_SUSPENDED, B1, U_REVOKED]) expect((await call("GET", "/api/dealer-platform/team", id)).status).toBe(403);
+  });
+  test("team member cannot perform an owner-permission operation without canManageTeam", async () => {
+    expect((await call("POST", "/api/dealer-platform/team/invite", M1, { email: "x@example.test" })).status).toBe(403);
+  });
+  test("a client-supplied dealer id never selects the organisation (member of D1 cannot act for D2)", async () => {
+    const r = await call("GET", `/api/dealer-platform/team?dealerId=${D2}`, M1);
+    // 14.7: M1 lacks canManageTeam, so the roster is refused; the client-supplied dealerId is never consulted either way.
+    expect(r.status).toBe(403);
+  });
+});
+
+describe("Workstream B — listing-quality ownership (read and recalculation)", () => {
+  const paths = (id) => [["GET", `/api/listing-quality/dealer/${id}/stats`, "stats"], ["GET", `/api/listing-quality/dealer/${id}/report`, "report"], ["POST", `/api/listing-quality/dealer/${id}/bulk-recalculate`, "bulk"]];
+  test.each(paths(D1))("owner may %s %s", async (m, p, kind) => {
+    const r = await call(m, p, D1, {});
+    expect(r.status).toBe(200);
+    expect(qualityCalls).toEqual([[kind, D1]]);
+  });
+  test.each(paths(D1))("unrelated dealer D2 denied %s %s; service never invoked", async (m, p, _kind) => {
+    const r = await call(m, p, D2, {});
+    expect(r.status).toBe(403);
+    expect(qualityCalls).toEqual([]);
+  });
+  for (const [label, id] of [["approved private seller", S_APPROVED], ["pending private seller", S_PENDING], ["suspended private seller", S_SUSPENDED], ["rejected private seller", S_REJECTED]]) {
+    test.each(paths(D1))(`${label} denied another dealer's %s %s`, async (m, p, _kind) => {
+      expect((await call(m, p, id, {})).status).toBe(403);
+      expect(qualityCalls).toEqual([]);
+    });
+  }
+  test("a private seller may read and recalculate only their OWN quality data (existing owner-scoped behaviour)", async () => {
+    for (const [m, p] of paths(S_APPROVED)) expect((await call(m, p, S_APPROVED, {})).status).toBe(200);
+    expect(qualityCalls.map((c) => c[1])).toEqual([S_APPROVED, S_APPROVED, S_APPROVED]);
+  });
+  test("identifier substitution: nonexistent dealer id by a non-owner is 403 (no existence leak), not 404/200", async () => {
+    expect((await call("GET", `/api/listing-quality/dealer/${NOBODY}/stats`, D2)).status).toBe(403);
+    expect(qualityCalls).toEqual([]);
+  });
+  test("malformed identifier → 400 before any ownership or service work", async () => {
+    expect((await call("GET", "/api/listing-quality/dealer/not-a-uuid/stats", D1)).status).toBe(400);
+    expect((await call("POST", "/api/listing-quality/dealer/not-a-uuid/bulk-recalculate", D1, {})).status).toBe(400);
+    expect(qualityCalls).toEqual([]);
+  });
+  test("buyer and team member (neither dealer nor seller) denied; anonymous 401", async () => {
+    expect((await call("GET", `/api/listing-quality/dealer/${D1}/stats`, B1)).status).toBe(403);
+    expect((await call("GET", `/api/listing-quality/dealer/${D1}/stats`, M1)).status).toBe(403);
+    expect((await call("GET", `/api/listing-quality/dealer/${D1}/stats`, null)).status).toBe(401);
+  });
+  test("staff and administrators keep cross-dealer access (existing permission preserved)", async () => {
+    for (const id of [ADMIN, MARKETING]) {
+      expect((await call("GET", `/api/listing-quality/dealer/${D1}/stats`, id)).status).toBe(200);
+      expect((await call("POST", `/api/listing-quality/dealer/${D1}/bulk-recalculate`, id, {})).status).toBe(200);
+    }
+  });
+  test("a caller-supplied dealerId in the query or body cannot override the path/ownership decision", async () => {
+    expect((await call("GET", `/api/listing-quality/dealer/${D1}/stats?dealerId=${D2}`, D2)).status).toBe(403);
+    expect((await call("POST", `/api/listing-quality/dealer/${D1}/bulk-recalculate`, D2, { dealerId: D2 })).status).toBe(403);
+  });
+});
+
+describe("Workstream C — requireDealerVerification creates no dealership for private sellers", () => {
+  let mw; const Dealer = { findOne: jest.fn(), create: jest.fn() }; const DealerVerification = { findOne: jest.fn() };
+  beforeAll(async () => {
+    jest.resetModules();
+    jest.unstable_mockModule("../../models/Dealer.js", () => ({ default: Dealer }));
+    jest.unstable_mockModule("../../models/DealerVerification.js", () => ({ default: DealerVerification }));
+    jest.unstable_mockModule("../../models/Car.js", () => ({ default: { countDocuments: jest.fn(async () => 0) } }));
+    jest.unstable_mockModule("../../models/Referral.js", () => ({ default: {} }));
+    mw = await import("../../middleware/dealerVerification.js?c=1");
+  });
+  beforeEach(() => { Dealer.findOne.mockReset(); Dealer.create.mockReset(); DealerVerification.findOne.mockReset(); DealerVerification.findOne.mockResolvedValue(null); });
+  const run = (user, extra = {}) => new Promise((resolve) => {
+    const req = { user, method: "POST", baseUrl: "/api/cars", path: "/", ...extra };
+    const res = { status(c) { this.c = c; return this; }, json(b) { resolve({ blocked: this.c, body: b, req }); } };
+    mw.requireDealerVerification(req, res, () => resolve({ passed: true, req }));
+  });
+
+  test.each([["pending", "pending"], ["approved", "approved"], ["suspended", "suspended"], ["rejected", "rejected"]])("individual_seller (%s) without a Dealer row: no Dealer.create, request not blocked", async (_n, status) => {
+    Dealer.findOne.mockResolvedValue(null);
+    const r = await run({ id: S_APPROVED, role: "individual_seller", status });
+    expect(Dealer.create).not.toHaveBeenCalled();
+    expect(r.passed).toBe(true);
+    expect(r.req.dealer ?? null).toBeNull();
+  });
+  test("an existing legacy Dealer row grants an individual_seller nothing extra and is not modified", async () => {
+    Dealer.findOne.mockResolvedValue({ id: "legacy", user: S_APPROVED, approved: true });
+    const r = await run({ id: S_APPROVED, role: "individual_seller", status: "approved" });
+    expect(r.passed).toBe(true);
+    expect(Dealer.create).not.toHaveBeenCalled();
+    expect(Dealer.update).toBeUndefined(); // the middleware never mutates a pre-existing row
+  });
+  test("ordinary buyer still gets 403 and no record", async () => {
+    Dealer.findOne.mockResolvedValue(null);
+    const r = await run({ id: B1, role: "user", status: "approved" });
+    expect(r.blocked).toBe(403); expect(Dealer.create).not.toHaveBeenCalled();
+  });
+  test("role dealer without a Dealer row is still refused (no auto-approval path for dealers)", async () => {
+    Dealer.findOne.mockResolvedValue(null);
+    const r = await run({ id: D1, role: "dealer", status: "approved" });
+    expect(r.blocked).toBe(403); expect(Dealer.create).not.toHaveBeenCalled();
+  });
+  test("verified dealer with an approved row passes and req.dealer is set (existing workflow preserved)", async () => {
+    Dealer.findOne.mockResolvedValue({ id: "dl1", user: D1, approved: true });
+    const r = await run({ id: D1, role: "dealer", status: "approved" });
+    expect(r.passed).toBe(true); expect(r.req.dealer).toEqual({ id: "dl1", user: D1, approved: true });
+  });
+  test.each([["suspended", "DEALER_ACCOUNT_SUSPENDED"], ["rejected", "DEALER_VERIFICATION_REJECTED"]])("dealer with a %s verification stays blocked", async (st, code) => {
+    Dealer.findOne.mockResolvedValue({ id: "dl1", user: D1, approved: true });
+    DealerVerification.findOne.mockResolvedValue({ verificationStatus: st });
+    const r = await run({ id: D1, role: "dealer", status: "approved" });
+    expect(r.blocked).toBe(403); expect(r.body.code).toBe(code);
+  });
+  test("dealer with a pending verification and no legacy approval is still gated (progressive logic untouched)", async () => {
+    Dealer.findOne.mockResolvedValue({ id: "dl2", user: D2, approved: false });
+    DealerVerification.findOne.mockResolvedValue({ verificationStatus: "pending" });
+    const r = await run({ id: D2, role: "dealer", status: "approved" }, { method: "GET", path: "/x" });
+    expect(r.blocked).toBe(403);
+  });
+});
+
+==================== PHASE 13E REGRESSION ====================
+// PHASE 13E — private-seller capability (C1): service lifecycle, HTTP routes through the REAL protect/rbac, listing guard, dealer isolation.
+// EVIDENCE TIER: mocked local runtime (in-memory table behind the real service; no database).
+import { describe, test, expect, beforeAll, afterAll, beforeEach, jest } from "@jest/globals";
+import http from "http";
+import jwt from "jsonwebtoken";
+import express from "express";
+
+process.env.JWT_SECRET = process.env.JWT_SECRET || "test-secret-key-32-chars-minimum-x";
+process.env.REQUIRE_EMAIL_VERIFICATION = "false";
+process.env.NODE_ENV = "test";
+
+const ID = (n) => `${String(n).repeat(8)}-${String(n).repeat(4)}-4${String(n).repeat(3)}-8${String(n).repeat(3)}-${String(n).repeat(12)}`;
+const BUYER = ID(1), BUYER2 = ID(2), UNVERIFIED = ID(3), LEGACY_APPROVED = ID(4), LEGACY_PENDING = ID(5), LEGACY_SUSP = ID(6), DEALER = ID(7), ADMIN = ID(8), SUPPORT = ID(9);
+const fx = {
+  [BUYER]: { role: "user", status: "approved", emailVerified: true },
+  [BUYER2]: { role: "user", status: "approved", emailVerified: true },
+  [UNVERIFIED]: { role: "user", status: "approved", emailVerified: false },
+  [LEGACY_APPROVED]: { role: "individual_seller", status: "approved", emailVerified: true },
+  [LEGACY_PENDING]: { role: "individual_seller", status: "pending", emailVerified: true },
+  [LEGACY_SUSP]: { role: "individual_seller", status: "suspended", emailVerified: true },
+  [DEALER]: { role: "dealer", status: "approved", emailVerified: true },
+  [ADMIN]: { role: "admin", status: "approved", emailVerified: true },
+  [SUPPORT]: { role: "support_none", status: "approved", emailVerified: true },
+};
+const users = {}; Object.entries(fx).forEach(([id, f]) => { users[id] = { _id: id, id, email: `${id.slice(0, 3)}@example.test`, name: id.slice(0, 3), ...f }; });
+const chain = (v) => { const q = { select: () => q, lean: () => q, catch: () => q, then: (a, b) => Promise.resolve(v).then(a, b) }; return q; };
+
+// in-memory private_seller_capabilities behind a PostgREST-shaped builder
+let table = new Map();
+let capabilityTableMissing = false;
+const missingCapabilityTableBuilder = () => {
+  const q = { select: () => q, eq: () => q, maybeSingle: async () => ({ data: null, error: { code: "PGRST205", message: "Could not find the table 'public.private_seller_capabilities' in the schema cache" } }) };
+  return q;
+};
+const builder = () => {
+  const st = { op: "select", filters: [], inF: null, patch: null, row: null };
+  const q = {
+    select: () => q, order: () => q, limit: () => q,
+    insert: (row) => { st.op = "insert"; st.row = row; return q; },
+    update: (patch) => { st.op = "update"; st.patch = patch; return q; },
+    eq: (k, v) => { st.filters.push([k, v]); return q; },
+    in: (k, vs) => { st.inF = [k, vs]; return q; },
+    _run() {
+      const match = () => [...table.values()].filter((r) => st.filters.every(([k, v]) => r[k] === v) && (!st.inF || st.inF[1].includes(r[st.inF[0]])));
+      if (st.op === "insert") {
+        if (table.has(st.row.user_id)) return { data: null, error: { code: "23505", message: "duplicate" } };
+        const r = { reviewed_by: null, reviewed_at: null, review_reason: null, ...st.row }; table.set(r.user_id, r); return { data: [r], error: null };
+      }
+      if (st.op === "update") { const rows = match(); rows.forEach((r) => Object.assign(r, st.patch)); return { data: rows.map((r) => ({ ...r })), error: null }; }
+      return { data: match().map((r) => ({ ...r })), error: null };
+    },
+    maybeSingle: async () => { const r = q._run(); return { data: r.data?.[0] ?? null, error: r.error }; },
+    single: async () => { const r = q._run(); return { data: r.data?.[0] ?? null, error: r.error }; },
+    then: (a, b) => Promise.resolve(q._run()).then(a, b),
+  };
+  return q;
+};
+const noop = () => { const q = new Proxy({}, { get: (_t, p) => (p === "then" ? (a, b) => Promise.resolve({ data: [], error: null }).then(a, b) : p === "single" || p === "maybeSingle" ? async () => ({ data: null, error: null }) : () => q) }); return q; };
+const sb = { from: jest.fn((t) => (t === "private_seller_capabilities" ? (capabilityTableMissing ? missingCapabilityTableBuilder() : builder()) : noop())), rpc: jest.fn(async () => ({ data: null, error: null })) };
+
+jest.unstable_mockModule("../../models/User.js", () => ({ default: { findById: jest.fn((id) => chain(users[id] || null)), findByIdAndUpdate: jest.fn(() => chain({})), findOne: jest.fn(() => chain(null)), find: jest.fn(() => chain([])), countDocuments: jest.fn(async () => 0) } }));
+jest.unstable_mockModule("../../models/UserAuth.js", () => ({ default: { findOne: jest.fn(() => chain({ tokenVersion: 0 })) } }));
+jest.unstable_mockModule("../../models/RefreshToken.js", () => ({ default: { findActiveSessionById: jest.fn(async () => ({})) } }));
+jest.unstable_mockModule("../../utils/logger.js", () => ({ logInfo: jest.fn(), logWarn: jest.fn(), logError: jest.fn(), default: { info: jest.fn(), warn: jest.fn(), error: jest.fn() } }));
+jest.unstable_mockModule("../../infrastructure/logging/index.js", () => ({ logInfo: jest.fn(), logWarn: jest.fn(), logError: jest.fn() }));
+jest.unstable_mockModule("../../utils/supabase.js", () => ({ isSupabaseConnected: () => true, getSupabase: () => sb }));
+const audit = jest.fn(async () => {});
+jest.unstable_mockModule("../../utils/securityLogger.js", () => ({ logActionFromReq: audit }));
+
+const svc = await import("../../services/privateSellerCapability.service.js");
+const onboardingPolicy = await import("../../services/onboardingPolicy.service.js");
+const { sellerListingAccess } = await import("../../middleware/sellerCapability.js");
+const { requireApproved } = await import("../../middleware/auth.js");
+const { dealerBusinessOnly } = await import("../../middleware/dealerIsolation.js");
+const { default: routes } = await import("../../routes/privateSellerCapabilityRoutes.js");
+
+const token = (id) => jwt.sign({ id, tokenVersion: 0 }, process.env.JWT_SECRET, { expiresIn: "1h" });
+let server, base;
+beforeAll(async () => { const app = express(); app.use(express.json()); app.use("/api/private-seller-capability", routes); await new Promise((r) => { server = app.listen(0, "127.0.0.1", r); }); base = `http://127.0.0.1:${server.address().port}`; });
+afterAll(() => new Promise((r) => { server.closeAllConnections?.(); server.close(() => r()); }));
+beforeEach(() => {
+  table = new Map();
+  capabilityTableMissing = false;
+  audit.mockClear();
+  // The lifecycle tests below exercise the optional future approval workflow explicitly.
+  onboardingPolicy.__setOnboardingPolicyForTests({ privateSellerApprovalMode: "required", privateSellerPackageMode: "free" });
+});
+const call = (method, path, who, body) => new Promise((resolve) => {
+  const u = new URL(base + path); const payload = body ? JSON.stringify(body) : undefined;
+  const headers = { "Content-Type": "application/json", ...(who ? { Authorization: `Bearer ${token(who)}` } : {}), ...(payload ? { "Content-Length": Buffer.byteLength(payload) } : {}) };
+  const req = http.request({ host: u.hostname, port: u.port, path: u.pathname + u.search, method, headers, agent: false }, (res) => { let d = ""; res.on("data", (c) => { d += c; }); res.on("end", () => { let j = null; try { j = JSON.parse(d); } catch { /* empty */ } resolve({ status: res.statusCode, json: j }); }); });
+  req.on("error", () => resolve({ status: 0, json: null })); if (payload) req.write(payload); req.end();
+});
+const APPLY = { contactPhone: "+254712345678", intendedUse: "Selling my own car", acceptTerms: true };
+
+describe("Identity & application (same users.id, no second account)", () => {
+  test("buyer with no application: status none, canApply true, buyer unaffected", async () => {
+    const r = await call("GET", "/api/private-seller-capability/me", BUYER);
+    expect(r.status).toBe(200); expect(r.json.data).toMatchObject({ status: "none", canApply: true, canList: false });
+  });
+  test("buyer applies → pending, keyed to the SAME user id, role/status untouched", async () => {
+    const r = await call("POST", "/api/private-seller-capability/apply", BUYER, APPLY);
+    expect(r.status).toBe(201); expect(r.json.data.status).toBe("pending");
+    expect([...table.keys()]).toEqual([BUYER]);
+    expect(users[BUYER]).toMatchObject({ role: "user", status: "approved" });
+    expect(audit).toHaveBeenCalledWith(expect.anything(), "private_seller_application_submitted", expect.anything());
+  });
+  test("duplicate submission → 409, still exactly one row", async () => {
+    await call("POST", "/api/private-seller-capability/apply", BUYER, APPLY);
+    const r = await call("POST", "/api/private-seller-capability/apply", BUYER, APPLY);
+    expect(r.status).toBe(409); expect(r.json.code).toBe("SELLER_APPLICATION_EXISTS"); expect(table.size).toBe(1);
+  });
+  test("server-side validation: bad phone, missing terms, unverified email, anonymous, dealer, legacy seller", async () => {
+    expect((await call("POST", "/api/private-seller-capability/apply", BUYER, { ...APPLY, contactPhone: "abc" })).status).toBe(400);
+    expect((await call("POST", "/api/private-seller-capability/apply", BUYER, { ...APPLY, acceptTerms: false })).status).toBe(400);
+    expect((await call("POST", "/api/private-seller-capability/apply", UNVERIFIED, APPLY)).status).toBe(403);
+    expect((await call("POST", "/api/private-seller-capability/apply", null, APPLY)).status).toBe(401);
+    expect((await call("POST", "/api/private-seller-capability/apply", DEALER, APPLY)).json.code).toBe("SELLER_APPLICATION_NOT_ALLOWED");
+    expect((await call("POST", "/api/private-seller-capability/apply", LEGACY_APPROVED, APPLY)).json.code).toBe("SELLER_APPLICATION_NOT_ALLOWED");
+    expect(table.size).toBe(0);
+  });
+  test("pending applicant keeps buyer identity; reject → may re-apply (back to pending)", async () => {
+    await call("POST", "/api/private-seller-capability/apply", BUYER, APPLY);
+    await call("PATCH", `/api/private-seller-capability/admin/${BUYER}/decision`, ADMIN, { decision: "reject", reason: "documents unclear" });
+    expect((await call("GET", "/api/private-seller-capability/me", BUYER)).json.data).toMatchObject({ status: "rejected", canApply: true });
+    expect((await call("POST", "/api/private-seller-capability/apply", BUYER, APPLY)).json.data.status).toBe("pending");
+  });
+});
+
+describe("Review lifecycle (authorized, validated, audited)", () => {
+  beforeEach(async () => { await call("POST", "/api/private-seller-capability/apply", BUYER, APPLY); audit.mockClear(); });
+  const decide = (who, body, id = BUYER) => call("PATCH", `/api/private-seller-capability/admin/${id}/decision`, who, body);
+  test("buyers, sellers, dealers and anonymous cannot decide or list", async () => {
+    for (const who of [BUYER, BUYER2, LEGACY_APPROVED, DEALER]) {
+      expect((await decide(who, { decision: "approve" })).status).toBe(403);
+      expect((await call("GET", "/api/private-seller-capability/admin/applications", who)).status).toBe(403);
+    }
+    expect((await decide(null, { decision: "approve" })).status).toBe(401);
+    expect(table.get(BUYER).status).toBe("pending");
+  });
+  test("a user cannot approve their own application", async () => { expect((await decide(BUYER, { decision: "approve" })).status).toBe(403); expect(table.get(BUYER).status).toBe("pending"); });
+  test("admin approves → approved, reviewer recorded, audited; buyer account untouched", async () => {
+    const r = await decide(ADMIN, { decision: "approve" });
+    expect(r.status).toBe(200); expect(r.json.data).toMatchObject({ before: "pending", after: "approved" });
+    expect(table.get(BUYER)).toMatchObject({ status: "approved", reviewed_by: ADMIN });
+    expect(audit).toHaveBeenCalledWith(expect.anything(), "private_seller_approve", expect.objectContaining({ target: BUYER }));
+    expect(users[BUYER]).toMatchObject({ role: "user", status: "approved" });
+  });
+  test("reject/suspend/revoke need a reason; invalid transitions are 409", async () => {
+    expect((await decide(ADMIN, { decision: "reject" })).json.code).toBe("REASON_REQUIRED");
+    expect((await decide(ADMIN, { decision: "suspend", reason: "x" })).json.code).toBe("INVALID_TRANSITION"); // pending cannot be suspended
+    await decide(ADMIN, { decision: "approve" });
+    expect((await decide(ADMIN, { decision: "suspend", reason: "policy breach" })).json.data.after).toBe("suspended");
+    expect((await decide(ADMIN, { decision: "approve" })).json.data.after).toBe("approved"); // reinstated
+    expect((await decide(ADMIN, { decision: "revoke", reason: "fraud" })).json.data.after).toBe("revoked");
+    expect((await decide(ADMIN, { decision: "reject", reason: "late" })).json.code).toBe("INVALID_TRANSITION");
+  });
+  test("unknown decision / malformed id / no application", async () => {
+    expect((await decide(ADMIN, { decision: "promote" })).status).toBe(400);
+    expect((await decide(ADMIN, { decision: "approve" }, "not-a-uuid")).status).toBe(400);
+    expect((await decide(ADMIN, { decision: "approve" }, BUYER2)).json.code).toBe("SELLER_APPLICATION_NOT_FOUND");
+  });
+  test("admin list returns applications", async () => {
+    const r = await call("GET", "/api/private-seller-capability/admin/applications?status=pending", ADMIN);
+    expect(r.status).toBe(200); expect(r.json.data.map((a) => a.userId)).toEqual([BUYER]);
+  });
+  test("legacy admin approval synchronization updates only an existing pending/rejected capability row", async () => {
+    table.set(BUYER, { user_id: BUYER, status: "pending", source: "application", reviewed_at: null });
+    await svc.syncLegacyApproval(BUYER);
+    expect(table.get(BUYER).status).toBe("approved");
+    expect(table.get(BUYER).reviewed_at).toBeTruthy();
+    table.set(BUYER2, { user_id: BUYER2, status: "suspended", source: "application" });
+    await svc.syncLegacyApproval(BUYER2);
+    expect(table.get(BUYER2).status).toBe("suspended");
+  });
+});
+
+describe("Listing guard (sellerListingAccess): capability enforced at the backend", () => {
+  const run = (user, opts) => new Promise((resolve) => {
+    const req = { user: { ...user, id: user.id || user._id } };
+    const res = { status(c) { this.c = c; return this; }, json(b) { resolve({ status: this.c, body: b, req }); } };
+    sellerListingAccess(opts)(req, res, (e) => resolve({ passed: true, error: e, req }));
+  });
+  const seed = (id, status) => table.set(id, { user_id: id, status, source: "application" });
+  test.each([["none", null, false], ["pending", "pending", false], ["rejected", "rejected", false], ["suspended", "suspended", false], ["revoked", "revoked", false]])("buyer (%s) cannot write listings (direct API)", async (_n, st) => {
+    if (st) seed(BUYER, st);
+    const r = await run(users[BUYER], { write: true });
+    expect(r.passed).toBeUndefined(); expect(r.status).toBe(403); expect(r.body.code).toBe("SELLER_CAPABILITY_REQUIRED");
+  });
+  test("approved buyer-account seller may write; req.sellerCapability is set; no dealer privilege", async () => {
+    seed(BUYER, "approved");
+    const r = await run(users[BUYER], { write: true });
+    expect(r.passed).toBe(true); expect(r.req.sellerCapability.status).toBe("approved");
+    const dealerGuard = await new Promise((resolve) => { const res = { status(c) { this.c = c; return this; }, json() { resolve(this.c); } }; dealerBusinessOnly({ user: users[BUYER] }, res, () => resolve("passed")); });
+    expect(dealerGuard).toBe(403);
+  });
+  test("unverified email cannot sell even when approved", async () => { seed(UNVERIFIED, "approved"); expect((await run(users[UNVERIFIED], { write: true })).status).toBe(403); });
+  test("seller views (write:false) require approved capability; applications remain on their separate status endpoint", async () => {
+    expect((await run(users[BUYER], { write: false })).status).toBe(403);
+    for (const st of ["pending", "rejected", "suspended", "revoked"]) { seed(BUYER, st); expect((await run(users[BUYER], { write: false })).status).toBe(403); }
+    seed(BUYER, "approved");
+    expect((await run(users[BUYER], { write: false })).passed).toBe(true);
+  });
+  test("suspension/revocation blocks seller writes only; buyer reads of the account are not this guard's concern", async () => {
+    seed(BUYER, "suspended"); expect((await run(users[BUYER], { write: true })).status).toBe(403);
+    seed(BUYER, "revoked"); expect((await run(users[BUYER], { write: true })).status).toBe(403);
+  });
+  test("legacy individual_seller: approved works; pending is blocked when approval is required; suspended/revoked remain blocked", async () => {
+    expect((await run(users[LEGACY_APPROVED], { write: true })).passed).toBe(true);
+    expect((await run(users[LEGACY_PENDING], { write: true })).status).toBe(403);
+    const s = await run(users[LEGACY_SUSP], { write: true }); expect(s.status).toBe(403); expect(s.body.code).toBe("SELLER_CAPABILITY_BLOCKED");
+    expect((await run(users[LEGACY_SUSP], { write: false })).status).toBe(403);
+    table.set(LEGACY_APPROVED, { user_id: LEGACY_APPROVED, status: "revoked", source: "legacy_backfill" });
+    expect((await run(users[LEGACY_APPROVED], { write: true })).status).toBe(403); // the capability row is authoritative once present
+  });
+  test("dealers and staff keep dealerOnly behaviour", async () => {
+    expect((await run(users[DEALER], { write: true })).passed).toBe(true);
+    expect((await run(users[ADMIN], { write: true })).passed).toBe(true);
+    expect((await run({ ...users[SUPPORT], role: "buyer_x" }, { write: true })).status).toBe(403);
+  });
+  test("a seller capability never lets one user act on another's capability (state is per users.id)", async () => {
+    seed(BUYER, "approved");
+    expect((await run(users[BUYER2], { write: true })).status).toBe(403);
+  });
+});
+
+describe("Legacy compatibility", () => {
+  test("resolveSellerState: legacy seller without a row falls back to users.status; buyer none; dealer/staff not_applicable", async () => {
+    expect((await svc.resolveSellerState(users[LEGACY_APPROVED])).status).toBe("approved");
+    expect((await svc.resolveSellerState(users[LEGACY_PENDING])).status).toBe("pending");
+    expect((await svc.resolveSellerState(users[LEGACY_SUSP])).status).toBe("suspended");
+    expect((await svc.resolveSellerState(users[BUYER])).status).toBe("none");
+    expect((await svc.resolveSellerState(users[DEALER])).status).toBe("not_applicable");
+    expect((await svc.resolveSellerState(users[ADMIN])).status).toBe("not_applicable");
+  });
+  test("syncLegacyApproval moves only pending/rejected rows to approved", async () => {
+    table.set(LEGACY_PENDING, { user_id: LEGACY_PENDING, status: "pending", source: "legacy_backfill" });
+    table.set(LEGACY_SUSP, { user_id: LEGACY_SUSP, status: "suspended", source: "legacy_backfill" });
+    await svc.syncLegacyApproval(LEGACY_PENDING); await svc.syncLegacyApproval(LEGACY_SUSP);
+    expect(table.get(LEGACY_PENDING).status).toBe("approved"); expect(table.get(LEGACY_SUSP).status).toBe("suspended");
+  });
+});
+
+
+describe("free private-seller default policy", () => {
+  beforeEach(() => {
+    onboardingPolicy.__setOnboardingPolicyForTests({ privateSellerApprovalMode: "disabled", privateSellerPackageMode: "free" });
+  });
+
+  test("a missing capability table does not block free-mode personal selling", async () => {
+    capabilityTableMissing = true;
+    const state = await svc.getMySellerCapability({ id: BUYER, role: "user", status: "approved", emailVerified: true });
+    expect(state).toMatchObject({ status: "approved", source: "policy_default", canList: true, packageMode: "free" });
+  });
+
+  test("a personal buyer account gets seller access without an application row", async () => {
+    const state = await svc.getMySellerCapability({ id: BUYER, role: "user", status: "approved", emailVerified: true });
+    expect(state).toMatchObject({ status: "approved", source: "policy_default", canApply: false, canList: true, approvalRequired: false, packageMode: "free" });
+  });
+
+  test("legacy pending individual seller is treated as active without rewriting identity", async () => {
+    const state = await svc.getMySellerCapability({ id: LEGACY_PENDING, role: "individual_seller", status: "pending", emailVerified: true });
+    expect(state).toMatchObject({ status: "approved", source: "policy_default", canList: true });
+    expect(users[LEGACY_PENDING]).toMatchObject({ role: "individual_seller", status: "pending" });
+  });
+
+  test("old pending or rejected application records do not impose approval while the policy is disabled", async () => {
+    table.set(BUYER, { user_id: BUYER, status: "pending", source: "application" });
+    expect(await svc.resolveSellerState({ id: BUYER, role: "user", status: "approved" })).toMatchObject({ status: "approved", source: "policy_default" });
+    table.set(BUYER, { user_id: BUYER, status: "rejected", source: "application" });
+    expect(await svc.resolveSellerState({ id: BUYER, role: "user", status: "approved" })).toMatchObject({ status: "approved", source: "policy_default" });
+  });
+
+  test("legacy suspension and revocation remain enforceable even when approval is disabled", async () => {
+    expect(await svc.resolveSellerState(users[LEGACY_SUSP])).toMatchObject({ status: "suspended", source: "legacy_users_status" });
+    const revokedLegacy = { id: ID(10), role: "individual_seller", status: "revoked" };
+    expect(await svc.resolveSellerState(revokedLegacy)).toMatchObject({ status: "revoked", source: "legacy_users_status" });
+  });
+
+  test("capability suspension and revocation remain enforceable even when approval is disabled", async () => {
+    table.set(BUYER, { user_id: BUYER, status: "suspended", source: "application" });
+    expect(await svc.resolveSellerState({ id: BUYER, role: "user", status: "approved" })).toMatchObject({ status: "suspended" });
+    table.set(BUYER, { user_id: BUYER, status: "revoked", source: "application" });
+    expect(await svc.resolveSellerState({ id: BUYER, role: "user", status: "approved" })).toMatchObject({ status: "revoked" });
+  });
+
+  test("legacy pending individual_seller passes requireApproved only while approval mode is disabled", async () => {
+    const req = { user: { id: LEGACY_PENDING, role: "individual_seller", status: "pending" } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    const next = jest.fn();
+    await requireApproved(req, res, next);
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.status).not.toHaveBeenCalled();
+  });
+
+  test("approval-required mode blocks a legacy pending individual seller from writing", async () => {
+    onboardingPolicy.__setOnboardingPolicyForTests({ privateSellerApprovalMode: "required", privateSellerPackageMode: "free" });
+    const req = { user: { id: LEGACY_PENDING, role: "individual_seller", status: "pending", emailVerified: true } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    const next = jest.fn();
+    await sellerListingAccess({ write: true })(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(403);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: "SELLER_CAPABILITY_BLOCKED" }));
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  test("seller listing middleware admits verified personal accounts in free mode", async () => {
+    const req = { user: { id: BUYER, role: "user", status: "approved", emailVerified: true } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    const next = jest.fn();
+    await sellerListingAccess({ write: true })(req, res, next);
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.status).not.toHaveBeenCalled();
+  });
+
+  test("paid package mode remains blocked until package checkout is implemented", async () => {
+    onboardingPolicy.__setOnboardingPolicyForTests({ privateSellerApprovalMode: "disabled", privateSellerPackageMode: "required" });
+    const req = { user: { id: BUYER, role: "user", status: "approved", emailVerified: true } };
+    const res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    const next = jest.fn();
+    await sellerListingAccess({ write: true })(req, res, next);
+    expect(res.status).toHaveBeenCalledWith(503);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ code: "SELLER_PACKAGE_CONFIGURATION_INCOMPLETE" }));
+    expect(next).not.toHaveBeenCalled();
+  });
+});

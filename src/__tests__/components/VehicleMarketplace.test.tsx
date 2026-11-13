@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within, act } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import { readEscrowRulesConfig } from '../../features/Admin/hooks/escrowRulesConfig';
 import { VehicleMarketplace } from '../../features/VehicleMarketplace/components/VehicleMarketplace';
@@ -424,12 +424,40 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     }
   });
 
+  it('manual entry: a typed make that is not a listed option is sent as a contains-match, never dropped', async () => {
+    await renderMarketplace({ ...baseProps });
+    const sidebar = screen.getByText('Refine inventory').closest('aside') as HTMLElement;
+    const make = sidebar.querySelector('input[aria-label="Make filter"]') as HTMLInputElement;
+    fireEvent.change(make, { target: { value: 'Subaru' } });
+    fireEvent.keyDown(make, { key: 'Enter' });
+    await waitFor(() => expect(vehicleApiMocks.getCars).toHaveBeenCalledWith(expect.objectContaining({ brandLike: 'Subaru' })));
+    expect(vehicleApiMocks.getCars).not.toHaveBeenCalledWith(expect.objectContaining({ brand: 'Subaru' }));
+    const price = sidebar.querySelector('input[aria-label="Max price"]') as HTMLInputElement;
+    fireEvent.change(price, { target: { value: '2,500,000' } });
+    fireEvent.keyDown(price, { key: 'Enter' });
+    await waitFor(() => expect(vehicleApiMocks.getCars).toHaveBeenCalledWith(expect.objectContaining({ maxPrice: 2500000, brandLike: 'Subaru' })));
+  });
+
+  it('phones get a compact search row with a Filters button that opens the same panel', async () => {
+    await renderMarketplace({ ...baseProps });
+    expect(screen.getByTestId('mobile-search-row')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /^Open filters/ }));
+    const sheet = await screen.findByRole('dialog', { name: /Refine inventory/i });
+    expect(sheet.querySelector('input[aria-label="Make filter"]')).toBeTruthy();
+    expect(sheet.querySelector('input[aria-label="Colour filter"]')).toBeTruthy();
+  });
+
   it('changes the live inventory grid between 3, 4 and 5 columns', async () => {
     await renderMarketplace({ ...baseProps  });
-    const grid = await screen.findByTestId('inventory-grid');
+    await screen.findByTestId('inventory-grid');
+    // The Super Admin layout default arrives asynchronously and is applied once; let it settle so the visitor's own choice is what is measured.
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 60)); });
     for (const columns of [3, 4, 5]) {
-      fireEvent.click(screen.getByRole('button', { name: `${columns}×` }));
       await waitFor(() => {
+        // Re-click inside the retry: the Super Admin default may land asynchronously and re-apply once; the visitor's choice must win afterwards.
+        fireEvent.click(screen.getByRole('button', { name: `${columns}×` }));
+        // Always re-query: the grid is replaced by a loading state and back whenever the first inventory request settles.
+        const grid = screen.getByTestId('inventory-grid');
         expect(grid.getAttribute('data-columns')).toBe(String(columns));
         expect(grid.className).toContain('kayad-inventory-grid');
         expect(grid.style.getPropertyValue('--kayad-grid-columns')).toBe(String(columns));
@@ -553,10 +581,14 @@ describe('VehicleMarketplace - consolidated Make selector (space audit)', () => 
     const sidebarHeading = screen.getByText('Refine inventory');
     const sidebar = sidebarHeading.closest('aside');
     expect(sidebar).toBeTruthy();
-    const sidebarMakeSelect = sidebar?.querySelector('select');
-    expect(sidebarMakeSelect).toBeTruthy();
-    expect(Array.from(sidebarMakeSelect?.options ?? []).some((o) => o.textContent === 'All Makes')).toBe(true);
-    expect(sidebarMakeSelect?.className).not.toMatch(/lg:hidden/);
+    // One shared panel: Make accepts typed entry AND offers the live inventory's makes as suggestions.
+    const makeInput = sidebar?.querySelector('input[aria-label="Make filter"]') as HTMLInputElement | null;
+    expect(makeInput).toBeTruthy();
+    expect(makeInput?.getAttribute('list')).toBeTruthy();
+    expect(makeInput?.getAttribute('placeholder')).toMatch(/pick or type/i);
+    const options = Array.from(sidebar?.querySelectorAll(`datalist[id="${makeInput?.getAttribute('list')}"] option`) ?? []).map((o) => (o as HTMLOptionElement).value);
+    expect(options.length).toBeGreaterThan(0);
+    expect(options).not.toContain('All');
 
     expect(screen.getByText('Reset all filters')).toBeTruthy();
     expect(screen.queryByTitle('Toggle filter sidebar')).toBeNull();

@@ -1,0 +1,31 @@
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js:193:<<<<<<< HEAD
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-194-    expect(r.body.message).toMatch(/does not require a package or seller approval/i);
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-195-    expect(r.body.message).toMatch(/listing moderation is separate/i);
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-196-=======
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-197-    expect(r.body.message).toMatch(/no longer has a separate private-seller account/i);
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-198-    expect(r.body.message).toMatch(/selling is part of your personal account/i);
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-199-    expect(r.body.compatibility).toEqual({ requestedRole: "individual_seller", createdRole: "user", deprecated: true });
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-200->>>>>>> feat/unified-accounts-dealer-team-r9
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-201-  });
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-202-  test("buyer wording is unchanged", async () => {
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-203-    expect((await reg({})).body.message).toBe("Account created successfully. Please verify your email before signing in.");
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-204-  });
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-205-  test("welcome email: dealer/seller copy never says 'ready' or 'approved'; buyer copy is unchanged; names are escaped", async () => {
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-206-    const mail = await import("../../services/email.service.js");
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-207-    for (const role of ["dealer", "individual_seller"]) {
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-208-      const m = mail.buildWelcomeEmail({ name: "Wanjiru", role });
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-209-      expect(`${m.text} ${m.html}`).not.toMatch(/account is ready/i);
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-210-    }
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-211-    expect(mail.buildWelcomeEmail({ name: "Wanjiru", role: "dealer" }).text).toMatch(/not approved|before your dealer account is approved/i);
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-212-    expect(mail.buildWelcomeEmail({ name: "Wanjiru" }).text).toMatch(/Your account is ready/);
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-213-    expect(mail.buildWelcomeEmail({ name: "<script>x</script>", role: "dealer" }).html).not.toContain("<script>x</script>");
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-214-  });
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-215-});
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-216-
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-217-describe("retired individual_seller self-registration is mapped to a personal account", () => {
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-218-  const regWithHeaders = async (body) => {
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-219-    const headers = {};
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-220-    const res = { code: 200, body: null, status(c) { this.code = c; return this; }, json(b) { this.body = b; return this; }, cookie() { return this; }, clearCookie() { return this; }, set(k, v) { headers[k] = v; return this; }, setHeader(k, v) { headers[k] = v; return this; } };
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-221-    await register({ body: { name: "N", email: "legacy@example.test", password: "Str0ng!Passw0rd", ...body }, query: {}, headers: {} }, res);
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-222-    return { res, headers };
+backend/tests/regression/stage5RegistrationAndLifecycle.test.js-223-  };

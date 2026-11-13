@@ -1,5 +1,6 @@
 import './homepage-redesign.css';
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import InventoryFilterPanel, { ANY, type FilterValues } from './InventoryFilterPanel';
 import { CONDITIONS } from '../../../constants/vehicleOptions';
 import { Vehicle, UserProfile } from '../../../types';
 import InventoryCardMedia from './InventoryCardMedia';
@@ -152,7 +153,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [selectedTransmission, setSelectedTransmission] = useState<string>('All');
   const [selectedCondition, setSelectedCondition] = useState<string>('All');
   const [selectedSellerType, setSelectedSellerType] = useState<string>('All');
-  const [minPrice, setMinPrice] = useState<number>(50000);
+  const [selectedColor, setSelectedColor] = useState<string>('All');
+  const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(20000000);
   // 0 means "no minimum year"; the earliest year offered is the Super Admin setting filterOptions.yearFrom.
   const [minYear, setMinYear] = useState<number>(0);
@@ -216,7 +218,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [contactVehicle, setContactVehicle] = useState<{ id: string; title: string } | null>(null);
   const activeSidebarFilters = [
     selectedMake !== 'All', selectedModel !== 'All', selectedBodyStyle !== 'All', selectedFuel !== 'All',
-    selectedTransmission !== 'All', selectedSellerType !== 'All', maxPrice !== 20000000, minYear !== 0, maxYear !== 2026,
+    selectedTransmission !== 'All', selectedSellerType !== 'All', selectedCondition !== 'All', selectedColor !== 'All', maxPrice !== 20000000, minPrice > 0,
+    minYear !== 0, maxYear !== 2026, maxMileage < 250000, onlyAuction,
   ].filter(Boolean).length;
 
   // The selected desktop column count is rendered through a dedicated CSS
@@ -285,6 +288,38 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return Array.from(byId.values());
   }, [vehicles, serverVehicles]);
 
+  // Dynamic Filter Options Extracted directly from backend dataset
+  const makes = useMemo(() => {
+    const canonical = (canonicalFacets?.brands || []).map((item) => item.value).filter(Boolean);
+    const fallback = filterSourceVehicles.map((v) => v.make).filter(Boolean);
+    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
+  }, [filterSourceVehicles, canonicalFacets]);
+
+  const models = useMemo(() => {
+    const canonical = canonicalModelFacets.map((item) => item.value).filter(Boolean);
+    const source = selectedMake === 'All' ? filterSourceVehicles : filterSourceVehicles.filter((v) => v.make.toLowerCase() === selectedMake.toLowerCase());
+    const fallback = source.map((v) => v.model).filter(Boolean);
+    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
+  }, [filterSourceVehicles, selectedMake, canonicalModelFacets]);
+
+  const bodyStyles = useMemo(() => {
+    const canonical = (canonicalFacets?.bodyTypes || []).map((item) => item.value).filter(Boolean);
+    const fallback = filterSourceVehicles.map((v) => v.bodyStyle).filter(Boolean);
+    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
+  }, [filterSourceVehicles, canonicalFacets]);
+
+  const fuelTypes = useMemo(() => {
+    const canonical = (canonicalFacets?.fuels || []).map((item) => item.value).filter(Boolean);
+    const fallback = filterSourceVehicles.map((v) => v.fuelType).filter(Boolean);
+    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
+  }, [filterSourceVehicles, canonicalFacets]);
+
+  const transmissionOptions = ['All', 'Automatic', 'Manual', 'CVT', 'Semi-Automatic'];
+  const conditionOptions = ['All', ...CONDITIONS];
+  const sellerTypeOptions = ['All', 'Verified Dealer', 'Private Seller'];
+
+  const colorOptions = useMemo(() => ['All', ...Array.from(new Set(filterSourceVehicles.map((v) => (v as { color?: string }).color).filter((c): c is string => Boolean(c)))).sort((a, b) => a.localeCompare(b))], [filterSourceVehicles]);
+
   const serverQuery = useMemo<GetCarsParams>(() => {
     const query: GetCarsParams = {
       page: currentPage,
@@ -292,8 +327,16 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     };
 
     if (searchQuery.trim()) query.keyword = searchQuery.trim();
-    if (selectedMake !== 'All') query.brand = selectedMake;
-    if (selectedModel !== 'All') query.model = selectedModel;
+    // A value picked from the suggestions is matched exactly; anything the visitor typed that is not a listed option is matched by
+    // "contains" on the server, so manual entry always works.
+    // Only the backend's canonical facets decide "listed". The option lists shown in the panel are derived from the results themselves,
+    // so using them here would make every response change the next query.
+    const canonicalMakes = (canonicalFacets?.brands || []).map((item) => item.value).filter(Boolean);
+    const canonicalModels = canonicalModelFacets.map((item) => item.value).filter(Boolean);
+    const pick = (value: string, options: string[]) => options.find((o) => o.toLowerCase() === value.toLowerCase());
+    if (selectedMake !== 'All') { const hit = pick(selectedMake, canonicalMakes); if (hit) query.brand = hit; else query.brandLike = selectedMake; }
+    if (selectedModel !== 'All') { const hit = pick(selectedModel, canonicalModels); if (hit) query.model = hit; else query.modelLike = selectedModel; }
+    if (selectedColor !== 'All') query.colorLike = selectedColor;
     if (selectedCounty !== 'All Kenya') query.city = selectedCounty;
     if (minPrice > 0) query.minPrice = minPrice;
     if (maxPrice < 20000000) query.maxPrice = maxPrice;
@@ -323,7 +366,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }, [
     currentPage, pageSize, searchQuery, selectedMake, selectedModel, selectedCounty,
     minPrice, maxPrice, minYear, maxYear, selectedBodyStyle, selectedFuel,
-    selectedTransmission, selectedCondition, maxMileage, selectedSellerType,
+    selectedTransmission, selectedCondition, maxMileage, selectedSellerType, selectedColor, canonicalFacets, canonicalModelFacets,
     onlyAuction, sortBy, dealerScope?.id
   ]);
 
@@ -392,36 +435,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Dynamic Filter Options Extracted directly from backend dataset
-  const makes = useMemo(() => {
-    const canonical = (canonicalFacets?.brands || []).map((item) => item.value).filter(Boolean);
-    const fallback = filterSourceVehicles.map((v) => v.make).filter(Boolean);
-    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
-  }, [filterSourceVehicles, canonicalFacets]);
-
-  const models = useMemo(() => {
-    const canonical = canonicalModelFacets.map((item) => item.value).filter(Boolean);
-    const source = selectedMake === 'All' ? filterSourceVehicles : filterSourceVehicles.filter((v) => v.make.toLowerCase() === selectedMake.toLowerCase());
-    const fallback = source.map((v) => v.model).filter(Boolean);
-    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
-  }, [filterSourceVehicles, selectedMake, canonicalModelFacets]);
-
-  const bodyStyles = useMemo(() => {
-    const canonical = (canonicalFacets?.bodyTypes || []).map((item) => item.value).filter(Boolean);
-    const fallback = filterSourceVehicles.map((v) => v.bodyStyle).filter(Boolean);
-    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
-  }, [filterSourceVehicles, canonicalFacets]);
-
-  const fuelTypes = useMemo(() => {
-    const canonical = (canonicalFacets?.fuels || []).map((item) => item.value).filter(Boolean);
-    const fallback = filterSourceVehicles.map((v) => v.fuelType).filter(Boolean);
-    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
-  }, [filterSourceVehicles, canonicalFacets]);
-
-  const transmissionOptions = ['All', 'Automatic', 'Manual', 'CVT', 'Semi-Automatic'];
-  const conditionOptions = ['All', ...CONDITIONS];
-  const sellerTypeOptions = ['All', 'Verified Dealer', 'Private Seller'];
-
   const locations = useMemo(() => {
     const canonical = (canonicalFacets?.locations || []).map((item) => item.value).filter(Boolean);
     const fallback = filterSourceVehicles.map((v) => v.county || v.location).filter(Boolean);
@@ -453,6 +466,35 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const paginatedVehicles = filteredVehicles;
   const totalPages = Math.max(1, serverTotalPages);
 
+  // One set of filter values and one change handler feed BOTH the desktop sidebar and the mobile sheet.
+  const MAX_PRICE = 20000000, MAX_MILEAGE = 250000;
+  const filterValues: FilterValues = {
+    make: selectedMake, model: selectedModel, body: selectedBodyStyle, fuel: selectedFuel, transmission: selectedTransmission,
+    condition: selectedCondition, color: selectedColor, seller: selectedSellerType,
+    minPrice, maxPrice, minYear, maxYear, maxMileage, auction: onlyAuction,
+  };
+  const applyFilterPatch = (patch: Partial<FilterValues>) => {
+    if (patch.make !== undefined) setSelectedMake(patch.make);
+    if (patch.model !== undefined) setSelectedModel(patch.model);
+    if (patch.body !== undefined) setSelectedBodyStyle(patch.body);
+    if (patch.fuel !== undefined) setSelectedFuel(patch.fuel);
+    if (patch.transmission !== undefined) setSelectedTransmission(patch.transmission);
+    if (patch.condition !== undefined) setSelectedCondition(patch.condition);
+    if (patch.color !== undefined) setSelectedColor(patch.color);
+    if (patch.seller !== undefined) setSelectedSellerType(patch.seller);
+    if (patch.minPrice !== undefined) setMinPrice(patch.minPrice);
+    if (patch.maxPrice !== undefined) setMaxPrice(patch.maxPrice);
+    if (patch.minYear !== undefined) setMinYear(patch.minYear);
+    if (patch.maxYear !== undefined) setMaxYear(patch.maxYear);
+    if (patch.maxMileage !== undefined) setMaxMileage(patch.maxMileage);
+    if (patch.auction !== undefined) setOnlyAuction(patch.auction);
+  };
+  const filterOptionLists = {
+    makes, models, bodies: bodyStyles, fuels: fuelTypes, transmissions: transmissionOptions, conditions: conditionOptions, colors: colorOptions,
+    sellers: sellerTypeOptions, priceSteps, yearFrom: filterOptions.yearFrom, mileageSteps: [50000, 100000, 150000],
+  };
+  const filterLimits = { priceMax: MAX_PRICE, yearMax: 2026, mileageMax: MAX_MILEAGE };
+
   // Reset all filters to default
   const resetFilters = useCallback(() => {
     onSearchChange('');
@@ -463,7 +505,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     setSelectedTransmission('All');
     setSelectedCondition('All');
     setSelectedSellerType('All');
-    setMinPrice(50000);
+    setMinPrice(0);
+    setSelectedColor('All');
     setMaxPrice(20000000);
     setMinYear(0);
     setMaxYear(2026);
@@ -489,13 +532,16 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     if (maxPrice < 20000000) list.push({ id: 'price', label: `Under Ksh ${(maxPrice / 1000000).toFixed(1)}M`, onClear: () => setMaxPrice(20000000) });
     if (minYear > 0) list.push({ id: 'minyear', label: `From ${minYear}`, onClear: () => setMinYear(0) });
     if (maxYear < 2026) list.push({ id: 'maxyear', label: `Up to ${maxYear}`, onClear: () => setMaxYear(2026) });
+    if (selectedColor !== 'All') list.push({ id: 'color', label: `Colour: ${selectedColor}`, onClear: () => setSelectedColor('All') });
+    if (minPrice > 0) list.push({ id: 'minprice', label: `From Ksh ${minPrice.toLocaleString('en-KE')}`, onClear: () => setMinPrice(0) });
+    if (maxMileage < 250000) list.push({ id: 'mileage', label: `Under ${maxMileage.toLocaleString('en-KE')} km`, onClear: () => setMaxMileage(250000) });
     if (onlyAuction) list.push({ id: 'auction', label: 'Live Auction', onClear: () => setOnlyAuction(false) });
     if (dealerScope?.id) list.push({ id: 'dealer', label: `Dealer: ${dealerScope.name}`, onClear: () => onClearDealerScope?.() });
     return list;
   }, [
     searchQuery, selectedCounty, selectedMake, selectedModel, selectedBodyStyle,
     selectedFuel, selectedTransmission, selectedSellerType, selectedCondition,
-    maxPrice, minYear, maxYear, onlyAuction, onSearchChange, onCountyChange, dealerScope, onClearDealerScope
+    maxPrice, minPrice, maxMileage, selectedColor, minYear, maxYear, onlyAuction, onSearchChange, onCountyChange, dealerScope, onClearDealerScope
   ]);
 
   // Recently Viewed Vehicle Objects
@@ -1149,7 +1195,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
                 {/* Approved mobile composition: the center card sits above a dedicated two-car stage.
                     Both transparent vehicle assets remain fully contained and independently visible. */}
-                {(heroLeftVehicle || heroRightVehicle) && <div className="mx-auto mt-2 w-full max-w-[460px]">
+                {(heroLeftVehicle || heroRightVehicle) && <div className="mx-auto mt-2 hidden w-full max-w-[460px] sm:block" data-testid="hero-mobile-stage">
                   <div className="grid grid-cols-2 items-stretch gap-1 min-[390px]:gap-2" aria-label="Featured vehicle pair">
                     {[heroLeftVehicle, heroRightVehicle].map((vehicle, index) => vehicle && heroImageForVehicle(vehicle) ? (
                       <button key={`${vehicle.id}-${index}`} type="button" onClick={() => handleHeroVehicleSelect(vehicle)} className="kayad-public-hero__vehicle-card group flex h-full min-w-0 flex-col justify-end rounded-2xl border border-white/20 bg-[#082D39]/22 px-1.5 pt-1.5 text-center transition-colors hover:bg-[#082D39]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]" aria-label={isShowcaseHeroVehicle(vehicle) ? `Browse vehicles; visual showcase ${vehicle.make} ${vehicle.model}` : `View ${vehicle.make} ${vehicle.model}`}>
@@ -1250,8 +1296,31 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {/* 2. SEARCH BRIDGE - overlaps the hero, real, wired filter fields */}
       {!savedOnly && homeConfig.sectionVisibility.searchTrustCard && (
-      <div className="kayad-search-bridge relative z-10 -mt-10 w-full px-3 sm:-mt-12 sm:px-5 lg:px-8">
-        <div className="w-full rounded-2xl border border-[#D7E7E4] bg-white p-3.5 shadow-[0_18px_45px_rgba(11,29,58,.10)] sm:p-5 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
+      <div className="kayad-search-bridge relative z-10 mt-3 w-full px-3 sm:-mt-12 sm:px-5 lg:px-8">
+        <div className="flex items-center gap-2 rounded-2xl border border-[#D7E7E4] bg-white p-2 shadow-[0_10px_28px_rgba(11,29,58,.08)] sm:hidden" data-testid="mobile-search-row">
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl bg-[#F6FAF9] px-3">
+            <Search className="h-4 w-4 shrink-0 text-[#94A3B8]" aria-hidden="true" />
+            <input
+              type="search"
+              enterKeyHint="search"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="Search make, model or keyword"
+              aria-label="Search vehicles"
+              className="h-11 w-full min-w-0 bg-transparent text-[14px] outline-none placeholder:text-[#94A3B8]"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowMobileFilterDrawer(true)}
+            aria-label={activeSidebarFilters > 0 ? `Open filters, ${activeSidebarFilters} active` : 'Open filters'}
+            className="relative flex h-11 shrink-0 items-center gap-1.5 rounded-xl bg-[#0A3340] px-3.5 text-[13px] font-extrabold text-white"
+          >
+            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" /> Filters
+            {activeSidebarFilters > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-[#13B8A6] px-1 text-[11px] font-black text-[#06303A]">{activeSidebarFilters}</span>}
+          </button>
+        </div>
+        <div className="hidden w-full rounded-2xl border border-[#D7E7E4] bg-white p-3.5 shadow-[0_18px_45px_rgba(11,29,58,.10)] sm:grid sm:p-5 grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
           <div className="col-span-2 lg:col-span-1 flex flex-col gap-1.5 min-w-0">
             <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Search</label>
             <div className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 flex items-center gap-2 bg-[#F6FAF9]">
@@ -1493,7 +1562,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 onClick={() => setShowMobileFilterDrawer(true)}
                 className="lg:hidden flex h-10 items-center gap-1.5 rounded-xl border border-[#D7E7E4] bg-white px-3 text-[11px] font-bold text-[#64748B]"
               >
-                <Filter className="w-3.5 h-3.5" /> Filters
+                <Filter className="w-3.5 h-3.5" /> Filters{activeSidebarFilters > 0 ? ` (${activeSidebarFilters})` : ''}
               </button>
 
               {isAdmin && (
@@ -1536,104 +1605,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 <button onClick={resetFilters} className="rounded-lg px-2 py-1 text-[12.5px] font-bold text-white underline-offset-2 hover:bg-white/10 hover:underline">Reset all</button>
               </div>
             </div>
-            <div className="px-4 pb-4 pt-1">
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Make</label>
-              <select aria-label="Sidebar make filter" value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
-                {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
-              </select>
-            </div>
+            <div className="px-4 pb-4 pt-4">
+            <InventoryFilterPanel idPrefix="sidebar" variant="sidebar" values={filterValues} limits={filterLimits} options={filterOptionLists} onChange={applyFilterPatch} onReset={resetFilters} />
 
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Model</label>
-              <select aria-label="Sidebar model filter" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
-                {models.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Models' : m}</option>)}
-              </select>
-            </div>
-
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Price Range · {formatPriceM(maxPrice)}</label>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="number"
-                  placeholder="Min"
-                  value={minPrice || ''}
-                  onChange={(e) => setMinPrice(Number(e.target.value) || 0)}
-                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
-                />
-                <input
-                  type="number"
-                  placeholder="Max"
-                  value={maxPrice === 20000000 ? '' : maxPrice}
-                  onChange={(e) => setMaxPrice(Number(e.target.value) || 20000000)}
-                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
-                />
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {[...priceSteps.map((v) => ({ label: `< ${shortAmount(v)}`, v })), { label: 'All', v: 20000000 }].map((c) => (
-                  <button
-                    key={c.label}
-                    onClick={() => setMaxPrice(c.v)}
-                    aria-pressed={maxPrice === c.v}
-                    className={`border rounded-full px-3 py-1.5 text-[12px] font-bold transition-colors ${maxPrice === c.v ? 'border-[#176B87] bg-[#176B87] text-white shadow-sm' : 'border-[#CBDAD7] bg-white text-[#475569] hover:border-[#176B87] hover:text-[#176B87]'}`}
-                  >
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Year Range</label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  placeholder="From year" aria-label="Minimum year"
-                  value={minYear || ''}
-                  onChange={(e) => setMinYear(Number(e.target.value) || 0)}
-                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
-                />
-                <input
-                  type="number"
-                  placeholder="To year" aria-label="Maximum year"
-                  value={maxYear === 2026 ? '' : maxYear}
-                  onChange={(e) => setMaxYear(Number(e.target.value) || 2026)}
-                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
-                />
-              </div>
-            </div>
-
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Body Style</label>
-              <select aria-label="Sidebar body style filter" value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
-                {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
-              </select>
-            </div>
-
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Fuel Type</label>
-              <select aria-label="Sidebar fuel filter" value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
-                {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
-              </select>
-            </div>
-
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Transmission</label>
-              <select aria-label="Sidebar transmission filter" value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
-                {transmissionOptions.map((t) => <option key={t} value={t}>{t === 'All' ? 'All Transmissions' : t}</option>)}
-              </select>
-            </div>
-
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Seller Type</label>
-              <select aria-label="Sidebar seller type filter" value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
-                {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
-              </select>
-            </div>
-
-            <button onClick={resetFilters} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0A3340] to-[#176B87] py-3 text-[13px] font-extrabold text-white shadow-md transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]">
-              Reset all filters
-            </button>
 
             {sidebarAds.length > 0 && (
               <div className="mt-4 pt-4 border-t border-[#D7E7E4] space-y-3">
@@ -1976,73 +1950,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               <X className="w-5 h-5 text-[#64748B]" aria-hidden="true" />
             </button>
           </div>
-          <div className="p-4 space-y-4 pb-8">
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Make</label>
-              <select aria-label="Mobile make filter" value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
-                {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Model</label>
-              <select aria-label="Mobile model filter" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
-                {models.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Models' : m}</option>)}
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Min price</label>
-                <input type="number" value={minPrice || ''} onChange={(e) => setMinPrice(Number(e.target.value) || 0)} placeholder="Ksh 50K" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Max price</label>
-                <input type="number" value={maxPrice === 20000000 ? '' : maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value) || 20000000)} placeholder="Ksh 20M" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">From year</label>
-                <input type="number" value={minYear || ''} onChange={(e) => setMinYear(Number(e.target.value) || 0)} placeholder={String(filterOptions.yearFrom)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">To year</label>
-                <input type="number" value={maxYear === 2026 ? '' : maxYear} onChange={(e) => setMaxYear(Number(e.target.value) || 2026)} placeholder="2026" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Body style</label>
-              <select aria-label="Mobile body style filter" value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
-                {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Fuel type</label>
-                <select aria-label="Mobile fuel filter" value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
-                  {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Transmission</label>
-                <select aria-label="Mobile transmission filter" value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
-                  {transmissionOptions.map((t) => <option key={t} value={t}>{t === 'All' ? 'All Transmissions' : t}</option>)}
-                </select>
-              </div>
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Seller type</label>
-              <select aria-label="Mobile seller type filter" value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
-                {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
-              </select>
-            </div>
-            <label className="flex items-center gap-3 rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] px-3 py-3 text-sm font-semibold text-[#12576D]">
-              <input type="checkbox" checked={onlyAuction} onChange={(e) => setOnlyAuction(e.target.checked)} className="accent-navy-600 w-4 h-4" />
-              <span><span className="block text-xs font-bold text-navy-900">Live auction listings</span><span className="block text-[10px] font-normal text-[#64748B] mt-0.5">Show vehicles currently available for bidding.</span></span>
-            </label>
-            <div className="flex gap-2 pt-2">
-              <button onClick={resetFilters} className="flex-1 border border-[#D7E7E4] rounded-xl py-3 text-xs font-bold text-[#64748B] hover:bg-[#F6FAF9]">Reset all</button>
-              <button onClick={() => setShowMobileFilterDrawer(false)} className="flex-1 bg-navy-900 hover:bg-navy-700 text-white rounded-xl py-3 text-xs font-bold">Show results</button>
-            </div>
+          <div className="p-4 pb-28">
+            <InventoryFilterPanel idPrefix="mobile" variant="sheet" values={filterValues} limits={filterLimits} options={filterOptionLists} onChange={applyFilterPatch} onReset={resetFilters} />
+          </div>
+          <div className="sticky bottom-0 border-t border-[#D7E7E4] bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),12px)] pt-3 backdrop-blur">
+            <button onClick={() => setShowMobileFilterDrawer(false)} className="h-12 w-full rounded-xl bg-[#0A3340] text-sm font-extrabold text-white">
+              {serverLoading ? 'Updating…' : `Show ${serverTotal.toLocaleString('en-KE')} ${serverTotal === 1 ? 'vehicle' : 'vehicles'}`}
+            </button>
           </div>
         </div>
       )}

@@ -38,9 +38,9 @@ const FIELDS = [
   },
   {
     key: 'listingModeration',
-    label: 'Listing moderation',
-    help: 'Hold every new listing for review, or publish automatically when the seller account is approved. Rejection is always an explicit decision.',
-    options: { hold_for_review: 'Hold every new listing for review', auto_publish: 'Auto-publish for approved sellers' },
+    label: 'Listing approval',
+    help: 'No approval publishes new listings immediately for personal and dealer accounts in good standing. Admin approval holds every new listing until an admin approves it. Suspended accounts can never publish, and an admin can still remove or reject any listing at any time. Listings already waiting are not changed by this setting.',
+    options: { auto_publish: 'No approval — publish immediately', hold_for_review: 'Admin approval — hold every new listing for review' },
   },
   {
     key: 'dealerDecisionAuthority',

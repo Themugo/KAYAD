@@ -70,3 +70,10 @@
 @media (prefers-reduced-motion: reduce) {
   .kayad-home-quick-action { transition: none; }
 }
+
+/* Phones: the inventory comes first. The four quick-action tiles duplicate the bottom dock and are hidden below 640px. */
+@media (max-width: 639.98px) {
+  .kayad-home-quick-actions { display: none; }
+  .kayad-public-hero__mobile-card p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .kayad-home-category-strip { position: sticky; top: 0; z-index: 20; }
+}

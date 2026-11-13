@@ -24,7 +24,7 @@ describe('AdminSettingsOnboarding', () => {
     expect(await screen.findByLabelText(/Private seller approval/i)).toHaveValue('disabled');
     expect(screen.getByLabelText(/Private seller packages/i)).toHaveValue('free');
     expect(screen.getByLabelText(/Dealer onboarding/i)).toHaveValue('approval_required');
-    expect(screen.getByLabelText(/Listing moderation/i)).toHaveValue('hold_for_review');
+    expect(screen.getByLabelText(/Listing approval/i)).toHaveValue('hold_for_review');
     expect(screen.getByText(/cannot be switched off/i)).toBeInTheDocument();
     expect(screen.getByText(/launch defaults/i)).toBeInTheDocument();
   });
@@ -65,7 +65,7 @@ describe('AdminSettingsOnboarding', () => {
     updateOnboardingSettings.mockRejectedValue({ response: { status: 500, data: { message: 'Could not save settings' } } });
     render(<AdminSettingsOnboarding />);
     const user = userEvent.setup();
-    await user.selectOptions(await screen.findByLabelText(/Listing moderation/i), 'auto_publish');
+    await user.selectOptions(await screen.findByLabelText(/Listing approval/i), 'auto_publish');
     await user.click(screen.getByRole('button', { name: /Save 1 change/i }));
     expect(await screen.findByRole('alert')).toHaveTextContent(/Not saved.*Nothing was changed/i);
   });

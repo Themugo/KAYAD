@@ -100,6 +100,9 @@ export const getCars = async (req, res) => {
       vin,
       engine,
       drivetrain,
+      brandLike,
+      modelLike,
+      colorLike,
       page = 1,
       limit = 12,
     } = req.query;
@@ -126,9 +129,21 @@ export const getCars = async (req, res) => {
     }
 
     if (brand) query.brand = { $in: brand.split(",") };
+    // Manual entry: a typed make/model/colour that is not one of the listed options matches by "contains" (case-insensitive), so a
+    // visitor can type "prad" or "land" and still find vehicles. Values are escaped and length-capped; they never reach the query raw.
+    const likeText = (value) => {
+      if (typeof value !== "string") return null;
+      const text = value.trim().slice(0, 40);
+      return text.length >= 2 ? { $regex: text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" } : null;
+    };
+    const brandContains = !brand && likeText(brandLike);
+    if (brandContains) query.brand = brandContains;
+    const modelContains = !model && likeText(modelLike);
     if (model) {
       const safeModel = model.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       query.model = { $regex: `^${safeModel}$`, $options: "i" };
+    } else if (modelContains) {
+      query.model = modelContains;
     }
     if (city) {
       const safeCity = city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -156,6 +171,7 @@ export const getCars = async (req, res) => {
     if (fuel) query.fuel = isPetrolFuel(fuel) ? { $regex: "^(petrol|gasoline|gas)$", $options: "i" } : exactText(fuel);
     if (transmission) query.transmission = exactText(transmission);
     if (color) query.color = exactText(color);
+    else { const colorContains = likeText(colorLike); if (colorContains) query.color = colorContains; }
     if (condition) query.condition = exactText(condition);
 
     if (mileageMin || mileageMax) {

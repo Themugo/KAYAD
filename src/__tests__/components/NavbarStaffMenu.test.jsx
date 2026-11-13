@@ -135,3 +135,23 @@ describe('role-aware mobile drawer navigation', () => {
     expect((text.match(/Dashboard/g) || []).length).toBe(1);
   });
 });
+
+describe('mobile drawer keeps what the person expanded while account data finishes loading', () => {
+  it('a group opened by the user is not collapsed when activeNav/navigation re-render underneath it', () => {
+    const user = { id: 'u1', name: 'James Mugo', email: 'owner@example.test', role: 'user' };
+    const ui = (activeNav) => (<MemoryRouter initialEntries={['/']}><Navbar {...props} activeNav={activeNav} user={user} /></MemoryRouter>);
+    const { rerender } = render(ui('dashboard'));
+    fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+    const drawer = screen.getByRole('dialog');
+    const toggle = [...drawer.querySelectorAll('button[aria-expanded="false"]')].find((b) => /^Expand .* links$/.test(b.getAttribute('aria-label') || ''));
+    expect(toggle).toBeTruthy();
+    const name = toggle.getAttribute('aria-label').replace(/^Expand /, '');
+    fireEvent.click(toggle);
+    const isOpen = () => !!screen.getByRole('dialog').querySelector(`button[aria-label="Collapse ${name}"][aria-expanded="true"]`);
+    expect(isOpen()).toBe(true);
+    // The account finishes loading and the shell re-renders with a different active destination.
+    rerender(ui('marketplace'));
+    rerender(ui('dashboard'));
+    expect(isOpen()).toBe(true);
+  });
+});

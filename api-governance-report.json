@@ -1,0 +1,1831 @@
+{
+  "generated": "2026-11-12T04:13:25.216Z",
+  "spec": {
+    "version": "3.0.3",
+    "paths": 960,
+    "endpoints": 1150,
+    "schemas": 0,
+    "tags": [
+      "Authentication",
+      "Cars",
+      "Auctions",
+      "Bids",
+      "Escrow",
+      "Users",
+      "Analytics",
+      "Admin",
+      "jobId",
+      "jobId",
+      "failureId",
+      "failureId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "commandId",
+      "commandId",
+      "conversationId",
+      "id",
+      "vehicleId",
+      "commandId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "dealerId",
+      "id",
+      "id",
+      "id",
+      "carId",
+      "carId",
+      "carId",
+      "carId",
+      "carId",
+      "action",
+      "id",
+      "escrowId",
+      "action",
+      "actorId",
+      "targetId",
+      "targetModel",
+      "id",
+      "userId",
+      "id",
+      "tokenId",
+      "token",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "imageIndex",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "chatId",
+      "chatId",
+      "uploadId",
+      "chatId",
+      "chatId",
+      "chatId",
+      "id",
+      "id",
+      "contentId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "slug",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "slug",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "notificationId",
+      "id",
+      "channel",
+      "eventType",
+      "channel",
+      "id",
+      "logId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "key",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "countryCode",
+      "countryCode",
+      "dealerId",
+      "dealerId",
+      "category",
+      "dealerId",
+      "dealerId",
+      "dealerId",
+      "customerId",
+      "listingId",
+      "listingId",
+      "leadId",
+      "leadId",
+      "leadId",
+      "leadId",
+      "campaignId",
+      "dealerId",
+      "dealerId",
+      "memberId",
+      "memberId",
+      "memberId",
+      "roleKey",
+      "roleKey",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "escrowId",
+      "memberId",
+      "memberId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "evidenceId",
+      "id",
+      "evidenceId",
+      "id",
+      "evidenceId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "incidentId",
+      "serviceId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "refundId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "carId",
+      "carId",
+      "carId",
+      "carId",
+      "category",
+      "environment",
+      "key",
+      "role",
+      "key",
+      "key",
+      "key",
+      "key",
+      "key",
+      "id",
+      "reportId",
+      "id",
+      "reportId",
+      "issueIndex",
+      "dealerId",
+      "carId",
+      "dealerId",
+      "carId",
+      "escrowId",
+      "carId",
+      "userId",
+      "fraudId",
+      "carId",
+      "carId",
+      "carId",
+      "carId",
+      "carId",
+      "carId",
+      "carId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "experimentId",
+      "experimentId",
+      "experimentId",
+      "ideaId",
+      "ideaId",
+      "improvementId",
+      "carId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "apiId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "webhookId",
+      "reportId",
+      "leadId",
+      "leadId",
+      "leadId",
+      "offerId",
+      "leadId",
+      "leadId",
+      "leadId",
+      "leadId",
+      "leadId",
+      "leadId",
+      "id",
+      "id",
+      "carId",
+      "carId",
+      "carId",
+      "dealerId",
+      "dealerId",
+      "dealerId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "objectId",
+      "objectId",
+      "objectId",
+      "objectId",
+      "objectId",
+      "objectId",
+      "objectId",
+      "objectId",
+      "objectId",
+      "id",
+      "id",
+      "versionId",
+      "id",
+      "id",
+      "carId",
+      "alertId",
+      "id",
+      "id",
+      "auditId",
+      "userId",
+      "id",
+      "id",
+      "carId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "userId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "vin",
+      "passportId",
+      "passportId",
+      "reminderId",
+      "vehicleId",
+      "vehicleId",
+      "vehicleId",
+      "vehicleId",
+      "vehicleId",
+      "vehicleId",
+      "checkoutRequestId",
+      "id",
+      "brandId",
+      "brandId",
+      "deploymentId",
+      "designId",
+      "productId",
+      "productId",
+      "productId",
+      "productId",
+      "templateId",
+      "id",
+      "reportId",
+      "format",
+      "id",
+      "reportId",
+      "reportId",
+      "sloId",
+      "sliId",
+      "sloId",
+      "id",
+      "id",
+      "dealerId",
+      "id",
+      "id",
+      "id",
+      "carId",
+      "id",
+      "id",
+      "id",
+      "ticketId",
+      "ticketId",
+      "ticketId",
+      "ticketId",
+      "id",
+      "id",
+      "dealerId",
+      "agentId",
+      "id",
+      "id",
+      "carId",
+      "carId",
+      "carId",
+      "logId",
+      "key",
+      "translationId",
+      "translationId",
+      "vehicleId",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id",
+      "id"
+    ],
+    "validationSchemaFiles": 23,
+    "middlewareFiles": 42
+  },
+  "summary": {
+    "totalRoutes": 1136,
+    "routeFiles": 116,
+    "documentedRoutes": 1135,
+    "undocumentedRoutes": 1,
+    "documentationCoverage": 99.9,
+    "routesWithValidation": 921,
+    "routesWithoutValidation": 215,
+    "validationCoverage": 81.1,
+    "overallScore": 90.5
+  },
+  "compliance": {
+    "documentation": true,
+    "validation": true,
+    "overall": true,
+    "threshold": 50
+  },
+  "issues": {
+    "garbledMiddleware": [
+      {
+        "file": "marketRoutes.js",
+        "description": "Line 26 had rovalidateQuery → uther.get split (garbled syntax) — FIXED"
+      }
+    ],
+    "missingImports": [
+      {
+        "file": "dealerRoutes.js",
+        "description": "Missing import for validateQuery, analyticsQuerySchema at line 41 — FIXED"
+      }
+    ]
+  },
+  "undocumentedEndpoints": [
+    {
+      "method": "GET",
+      "path": "/api/dealer-platform/my-workspace",
+      "file": "dealerPlatformRoutes.js",
+      "line": 69
+    }
+  ],
+  "unvalidatedEndpoints": [
+    {
+      "method": "GET",
+      "path": "/api/ai/decision/recommendations",
+      "file": "aiDecisionRoutes.js",
+      "line": 10
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/decision/vehicles/{:param}/explain",
+      "file": "aiDecisionRoutes.js",
+      "line": 17
+    },
+    {
+      "method": "GET",
+      "path": "/api/ai/decision/market-signals",
+      "file": "aiDecisionRoutes.js",
+      "line": 23
+    },
+    {
+      "method": "GET",
+      "path": "/api/new-admin/auction-integrity/dashboard",
+      "file": "auctionIntegrityRoutes.js",
+      "line": 20
+    },
+    {
+      "method": "GET",
+      "path": "/api/new-admin/auction-integrity",
+      "file": "auctionIntegrityRoutes.js",
+      "line": 22
+    },
+    {
+      "method": "GET",
+      "path": "/api/new-admin/auction-integrity/risk-profiles",
+      "file": "auctionIntegrityRoutes.js",
+      "line": 24
+    },
+    {
+      "method": "GET",
+      "path": "/api/new-admin/auction-integrity/{:param}",
+      "file": "auctionIntegrityRoutes.js",
+      "line": 26
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/new-admin/auction-integrity/{:param}/status",
+      "file": "auctionIntegrityRoutes.js",
+      "line": 28
+    },
+    {
+      "method": "POST",
+      "path": "/api/new-admin/auction-integrity/scan",
+      "file": "auctionIntegrityRoutes.js",
+      "line": 30
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/bid-logs/my",
+      "file": "bidLogRoutes.js",
+      "line": 21
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/bid-logs/{:param}",
+      "file": "bidLogRoutes.js",
+      "line": 24
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/bid-logs/car/{:param}",
+      "file": "bidLogRoutes.js",
+      "line": 31
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/bid-logs/car/{:param}/winning",
+      "file": "bidLogRoutes.js",
+      "line": 34
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/bid-logs/car/{:param}/stats",
+      "file": "bidLogRoutes.js",
+      "line": 37
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/bid-logs/admin/all",
+      "file": "bidLogRoutes.js",
+      "line": 44
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/bid-logs/admin/stats",
+      "file": "bidLogRoutes.js",
+      "line": 47
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/bulk/cars/moderate",
+      "file": "bulkAdminRoutes.js",
+      "line": 18
+    },
+    {
+      "method": "POST",
+      "path": "/api/admin/bulk/cars/delete",
+      "file": "bulkAdminRoutes.js",
+      "line": 20
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/bulk/export/cars",
+      "file": "bulkAdminRoutes.js",
+      "line": 22
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/bulk/export/users",
+      "file": "bulkAdminRoutes.js",
+      "line": 24
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/snapshot",
+      "file": "commandCenterRoutes.js",
+      "line": 55
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/mission-control",
+      "file": "commandCenterRoutes.js",
+      "line": 58
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/live-activity",
+      "file": "commandCenterRoutes.js",
+      "line": 59
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/operations",
+      "file": "commandCenterRoutes.js",
+      "line": 62
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/marketplace",
+      "file": "commandCenterRoutes.js",
+      "line": 63
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/dealers",
+      "file": "commandCenterRoutes.js",
+      "line": 64
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/auctions",
+      "file": "commandCenterRoutes.js",
+      "line": 65
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/inspections",
+      "file": "commandCenterRoutes.js",
+      "line": 66
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/finance",
+      "file": "commandCenterRoutes.js",
+      "line": 67
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/support",
+      "file": "commandCenterRoutes.js",
+      "line": 68
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/security",
+      "file": "commandCenterRoutes.js",
+      "line": 69
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/infrastructure",
+      "file": "commandCenterRoutes.js",
+      "line": 70
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/ai",
+      "file": "commandCenterRoutes.js",
+      "line": 71
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/actions",
+      "file": "commandCenterRoutes.js",
+      "line": 74
+    },
+    {
+      "method": "POST",
+      "path": "/api/command-center/actions/execute",
+      "file": "commandCenterRoutes.js",
+      "line": 75
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/notifications",
+      "file": "commandCenterRoutes.js",
+      "line": 78
+    },
+    {
+      "method": "PUT",
+      "path": "/api/command-center/notifications/{:param}/read",
+      "file": "commandCenterRoutes.js",
+      "line": 79
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/decisions",
+      "file": "commandCenterRoutes.js",
+      "line": 82
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/commands",
+      "file": "commandCenterRoutes.js",
+      "line": 85
+    },
+    {
+      "method": "POST",
+      "path": "/api/command-center/commands/execute",
+      "file": "commandCenterRoutes.js",
+      "line": 86
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/war-room",
+      "file": "commandCenterRoutes.js",
+      "line": 89
+    },
+    {
+      "method": "POST",
+      "path": "/api/command-center/war-room/activate",
+      "file": "commandCenterRoutes.js",
+      "line": 90
+    },
+    {
+      "method": "POST",
+      "path": "/api/command-center/war-room/deactivate",
+      "file": "commandCenterRoutes.js",
+      "line": 91
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/timeline",
+      "file": "commandCenterRoutes.js",
+      "line": 94
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/briefing",
+      "file": "commandCenterRoutes.js",
+      "line": 97
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/search",
+      "file": "commandCenterRoutes.js",
+      "line": 100
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/widgets",
+      "file": "commandCenterRoutes.js",
+      "line": 103
+    },
+    {
+      "method": "POST",
+      "path": "/api/command-center/widgets/layout",
+      "file": "commandCenterRoutes.js",
+      "line": 104
+    },
+    {
+      "method": "GET",
+      "path": "/api/command-center/map",
+      "file": "commandCenterRoutes.js",
+      "line": 107
+    },
+    {
+      "method": "GET",
+      "path": "/api/communications/history",
+      "file": "communicationControlRoutes.js",
+      "line": 16
+    },
+    {
+      "method": "GET",
+      "path": "/api/communications/preferences",
+      "file": "communicationControlRoutes.js",
+      "line": 17
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/communications/preferences",
+      "file": "communicationControlRoutes.js",
+      "line": 18
+    },
+    {
+      "method": "GET",
+      "path": "/api/communications/admin/rollout",
+      "file": "communicationControlRoutes.js",
+      "line": 19
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/communications/admin/rollout/channels/{:param}",
+      "file": "communicationControlRoutes.js",
+      "line": 20
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/communications/admin/rollout/events/{:param}/{:param}",
+      "file": "communicationControlRoutes.js",
+      "line": 21
+    },
+    {
+      "method": "GET",
+      "path": "/api/communications/admin/templates",
+      "file": "communicationControlRoutes.js",
+      "line": 22
+    },
+    {
+      "method": "POST",
+      "path": "/api/communications/admin/templates",
+      "file": "communicationControlRoutes.js",
+      "line": 23
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/communications/admin/templates/{:param}",
+      "file": "communicationControlRoutes.js",
+      "line": 24
+    },
+    {
+      "method": "GET",
+      "path": "/api/communications/admin/analytics",
+      "file": "communicationControlRoutes.js",
+      "line": 25
+    },
+    {
+      "method": "GET",
+      "path": "/api/communications/admin/provider-health",
+      "file": "communicationControlRoutes.js",
+      "line": 26
+    },
+    {
+      "method": "GET",
+      "path": "/api/communications/admin/history",
+      "file": "communicationControlRoutes.js",
+      "line": 27
+    },
+    {
+      "method": "POST",
+      "path": "/api/communications/admin/deliveries/{:param}/retry",
+      "file": "communicationControlRoutes.js",
+      "line": 28
+    },
+    {
+      "method": "POST",
+      "path": "/api/communications/webhooks/brevo/events",
+      "file": "communicationWebhookRoutes.js",
+      "line": 31
+    },
+    {
+      "method": "POST",
+      "path": "/api/communications/webhooks/status",
+      "file": "communicationWebhookRoutes.js",
+      "line": 65
+    },
+    {
+      "method": "POST",
+      "path": "/api/communications/webhooks/twilio/status",
+      "file": "communicationWebhookRoutes.js",
+      "line": 71
+    },
+    {
+      "method": "POST",
+      "path": "/api/communications/webhooks/africastalking/status",
+      "file": "communicationWebhookRoutes.js",
+      "line": 85
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/dashboard",
+      "file": "eipRoutes.js",
+      "line": 63
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/apis",
+      "file": "eipRoutes.js",
+      "line": 66
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/apis/{:param}",
+      "file": "eipRoutes.js",
+      "line": 67
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/partners",
+      "file": "eipRoutes.js",
+      "line": 70
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/partners/{:param}",
+      "file": "eipRoutes.js",
+      "line": 71
+    },
+    {
+      "method": "POST",
+      "path": "/api/integration/partners",
+      "file": "eipRoutes.js",
+      "line": 72
+    },
+    {
+      "method": "PUT",
+      "path": "/api/integration/partners/{:param}",
+      "file": "eipRoutes.js",
+      "line": 73
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/integration/partners/{:param}",
+      "file": "eipRoutes.js",
+      "line": 74
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/api-keys",
+      "file": "eipRoutes.js",
+      "line": 77
+    },
+    {
+      "method": "POST",
+      "path": "/api/integration/api-keys",
+      "file": "eipRoutes.js",
+      "line": 78
+    },
+    {
+      "method": "POST",
+      "path": "/api/integration/api-keys/{:param}/revoke",
+      "file": "eipRoutes.js",
+      "line": 79
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/webhooks",
+      "file": "eipRoutes.js",
+      "line": 82
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/webhooks/{:param}",
+      "file": "eipRoutes.js",
+      "line": 83
+    },
+    {
+      "method": "POST",
+      "path": "/api/integration/webhooks",
+      "file": "eipRoutes.js",
+      "line": 84
+    },
+    {
+      "method": "PUT",
+      "path": "/api/integration/webhooks/{:param}",
+      "file": "eipRoutes.js",
+      "line": 85
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/integration/webhooks/{:param}",
+      "file": "eipRoutes.js",
+      "line": 86
+    },
+    {
+      "method": "POST",
+      "path": "/api/integration/webhooks/{:param}/test",
+      "file": "eipRoutes.js",
+      "line": 87
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/webhooks/{:param}/logs",
+      "file": "eipRoutes.js",
+      "line": 88
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/plugins",
+      "file": "eipRoutes.js",
+      "line": 91
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/plugins/{:param}",
+      "file": "eipRoutes.js",
+      "line": 92
+    },
+    {
+      "method": "POST",
+      "path": "/api/integration/plugins",
+      "file": "eipRoutes.js",
+      "line": 93
+    },
+    {
+      "method": "PUT",
+      "path": "/api/integration/plugins/{:param}",
+      "file": "eipRoutes.js",
+      "line": 94
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/integration/plugins/{:param}",
+      "file": "eipRoutes.js",
+      "line": 95
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/templates",
+      "file": "eipRoutes.js",
+      "line": 98
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/templates/{:param}",
+      "file": "eipRoutes.js",
+      "line": 99
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/analytics",
+      "file": "eipRoutes.js",
+      "line": 102
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/sdks",
+      "file": "eipRoutes.js",
+      "line": 105
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/oauth/config",
+      "file": "eipRoutes.js",
+      "line": 108
+    },
+    {
+      "method": "POST",
+      "path": "/api/integration/oauth/clients",
+      "file": "eipRoutes.js",
+      "line": 109
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/events",
+      "file": "eipRoutes.js",
+      "line": 112
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/gateway",
+      "file": "eipRoutes.js",
+      "line": 115
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/sandbox",
+      "file": "eipRoutes.js",
+      "line": 118
+    },
+    {
+      "method": "GET",
+      "path": "/api/integration/certification",
+      "file": "eipRoutes.js",
+      "line": 121
+    },
+    {
+      "method": "POST",
+      "path": "/api/integration/help",
+      "file": "eipRoutes.js",
+      "line": 124
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/dashboard",
+      "file": "improvementRoutes.js",
+      "line": 56
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/opportunities",
+      "file": "improvementRoutes.js",
+      "line": 59
+    },
+    {
+      "method": "POST",
+      "path": "/api/improvement/improvements",
+      "file": "improvementRoutes.js",
+      "line": 60
+    },
+    {
+      "method": "PUT",
+      "path": "/api/improvement/improvements/{:param}",
+      "file": "improvementRoutes.js",
+      "line": 61
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/recommendations",
+      "file": "improvementRoutes.js",
+      "line": 64
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/customer-experience",
+      "file": "improvementRoutes.js",
+      "line": 67
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/ux-analytics",
+      "file": "improvementRoutes.js",
+      "line": 70
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/performance",
+      "file": "improvementRoutes.js",
+      "line": 73
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/experiments",
+      "file": "improvementRoutes.js",
+      "line": 76
+    },
+    {
+      "method": "POST",
+      "path": "/api/improvement/experiments",
+      "file": "improvementRoutes.js",
+      "line": 77
+    },
+    {
+      "method": "PUT",
+      "path": "/api/improvement/experiments/{:param}",
+      "file": "improvementRoutes.js",
+      "line": 78
+    },
+    {
+      "method": "POST",
+      "path": "/api/improvement/experiments/{:param}/start",
+      "file": "improvementRoutes.js",
+      "line": 79
+    },
+    {
+      "method": "POST",
+      "path": "/api/improvement/experiments/{:param}/stop",
+      "file": "improvementRoutes.js",
+      "line": 80
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/health",
+      "file": "improvementRoutes.js",
+      "line": 83
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/ideas",
+      "file": "improvementRoutes.js",
+      "line": 86
+    },
+    {
+      "method": "POST",
+      "path": "/api/improvement/ideas",
+      "file": "improvementRoutes.js",
+      "line": 87
+    },
+    {
+      "method": "POST",
+      "path": "/api/improvement/ideas/{:param}/vote",
+      "file": "improvementRoutes.js",
+      "line": 88
+    },
+    {
+      "method": "PUT",
+      "path": "/api/improvement/ideas/{:param}/status",
+      "file": "improvementRoutes.js",
+      "line": 89
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/roadmap",
+      "file": "improvementRoutes.js",
+      "line": 92
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/optimization/marketplace",
+      "file": "improvementRoutes.js",
+      "line": 95
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/optimization/search",
+      "file": "improvementRoutes.js",
+      "line": 96
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/optimization/revenue",
+      "file": "improvementRoutes.js",
+      "line": 97
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/report",
+      "file": "improvementRoutes.js",
+      "line": 100
+    },
+    {
+      "method": "GET",
+      "path": "/api/improvement/technical-debt",
+      "file": "improvementRoutes.js",
+      "line": 103
+    },
+    {
+      "method": "POST",
+      "path": "/api/improvement/assistant",
+      "file": "improvementRoutes.js",
+      "line": 106
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/dashboard",
+      "file": "intelligenceRoutes.js",
+      "line": 44
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/marketplace",
+      "file": "intelligenceRoutes.js",
+      "line": 47
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/dealers",
+      "file": "intelligenceRoutes.js",
+      "line": 48
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/auctions",
+      "file": "intelligenceRoutes.js",
+      "line": 49
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/finance",
+      "file": "intelligenceRoutes.js",
+      "line": 50
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/inspections",
+      "file": "intelligenceRoutes.js",
+      "line": 51
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/marketing",
+      "file": "intelligenceRoutes.js",
+      "line": 52
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/customers",
+      "file": "intelligenceRoutes.js",
+      "line": 53
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/countries",
+      "file": "intelligenceRoutes.js",
+      "line": 54
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/revenue",
+      "file": "intelligenceRoutes.js",
+      "line": 55
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/forecasts",
+      "file": "intelligenceRoutes.js",
+      "line": 58
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/insights",
+      "file": "intelligenceRoutes.js",
+      "line": 61
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/benchmarks",
+      "file": "intelligenceRoutes.js",
+      "line": 64
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/reports",
+      "file": "intelligenceRoutes.js",
+      "line": 67
+    },
+    {
+      "method": "POST",
+      "path": "/api/intelligence/reports/generate",
+      "file": "intelligenceRoutes.js",
+      "line": 68
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/reports/download/{:param}",
+      "file": "intelligenceRoutes.js",
+      "line": 69
+    },
+    {
+      "method": "POST",
+      "path": "/api/intelligence/query",
+      "file": "intelligenceRoutes.js",
+      "line": 72
+    },
+    {
+      "method": "POST",
+      "path": "/api/intelligence/exports",
+      "file": "intelligenceRoutes.js",
+      "line": 75
+    },
+    {
+      "method": "GET",
+      "path": "/api/intelligence/scheduled",
+      "file": "intelligenceRoutes.js",
+      "line": 78
+    },
+    {
+      "method": "POST",
+      "path": "/api/intelligence/scheduled",
+      "file": "intelligenceRoutes.js",
+      "line": 79
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/localization",
+      "file": "localizationRoutes.js",
+      "line": 26
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/localization/namespaces",
+      "file": "localizationRoutes.js",
+      "line": 29
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/localization/all",
+      "file": "localizationRoutes.js",
+      "line": 32
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/localization/search",
+      "file": "localizationRoutes.js",
+      "line": 35
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/localization/stats",
+      "file": "localizationRoutes.js",
+      "line": 38
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/localization/key/{:param}",
+      "file": "localizationRoutes.js",
+      "line": 41
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/localization/export",
+      "file": "localizationRoutes.js",
+      "line": 44
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/localization",
+      "file": "localizationRoutes.js",
+      "line": 51
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/localization/{:param}",
+      "file": "localizationRoutes.js",
+      "line": 54
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/localization/{:param}",
+      "file": "localizationRoutes.js",
+      "line": 57
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/localization/import",
+      "file": "localizationRoutes.js",
+      "line": 60
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/dashboard",
+      "file": "platformFactoryRoutes.js",
+      "line": 56
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/templates",
+      "file": "platformFactoryRoutes.js",
+      "line": 59
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/templates/{:param}",
+      "file": "platformFactoryRoutes.js",
+      "line": 60
+    },
+    {
+      "method": "POST",
+      "path": "/api/platform-factory/generate",
+      "file": "platformFactoryRoutes.js",
+      "line": 63
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/generate/{:param}/status",
+      "file": "platformFactoryRoutes.js",
+      "line": 64
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/products",
+      "file": "platformFactoryRoutes.js",
+      "line": 67
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/products/{:param}",
+      "file": "platformFactoryRoutes.js",
+      "line": 68
+    },
+    {
+      "method": "PUT",
+      "path": "/api/platform-factory/products/{:param}",
+      "file": "platformFactoryRoutes.js",
+      "line": 69
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/platform-factory/products/{:param}",
+      "file": "platformFactoryRoutes.js",
+      "line": 70
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/components",
+      "file": "platformFactoryRoutes.js",
+      "line": 73
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/domain-models",
+      "file": "platformFactoryRoutes.js",
+      "line": 76
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/services",
+      "file": "platformFactoryRoutes.js",
+      "line": 79
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/brands",
+      "file": "platformFactoryRoutes.js",
+      "line": 82
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/brands/{:param}",
+      "file": "platformFactoryRoutes.js",
+      "line": 83
+    },
+    {
+      "method": "PUT",
+      "path": "/api/platform-factory/brands/{:param}",
+      "file": "platformFactoryRoutes.js",
+      "line": 84
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/deployments",
+      "file": "platformFactoryRoutes.js",
+      "line": 87
+    },
+    {
+      "method": "POST",
+      "path": "/api/platform-factory/deploy",
+      "file": "platformFactoryRoutes.js",
+      "line": 88
+    },
+    {
+      "method": "POST",
+      "path": "/api/platform-factory/deployments/{:param}/rollback",
+      "file": "platformFactoryRoutes.js",
+      "line": 89
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/store",
+      "file": "platformFactoryRoutes.js",
+      "line": 92
+    },
+    {
+      "method": "POST",
+      "path": "/api/platform-factory/store/install",
+      "file": "platformFactoryRoutes.js",
+      "line": 93
+    },
+    {
+      "method": "POST",
+      "path": "/api/platform-factory/design",
+      "file": "platformFactoryRoutes.js",
+      "line": 96
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/design/{:param}/status",
+      "file": "platformFactoryRoutes.js",
+      "line": 97
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/monetization",
+      "file": "platformFactoryRoutes.js",
+      "line": 100
+    },
+    {
+      "method": "POST",
+      "path": "/api/platform-factory/monetization/configure",
+      "file": "platformFactoryRoutes.js",
+      "line": 101
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/health",
+      "file": "platformFactoryRoutes.js",
+      "line": 104
+    },
+    {
+      "method": "GET",
+      "path": "/api/platform-factory/workflows",
+      "file": "platformFactoryRoutes.js",
+      "line": 107
+    },
+    {
+      "method": "GET",
+      "path": "/api/countries",
+      "file": "regionalConfigurationRoutes.js",
+      "line": 8
+    },
+    {
+      "method": "GET",
+      "path": "/api/countries/currency-rate",
+      "file": "regionalConfigurationRoutes.js",
+      "line": 9
+    },
+    {
+      "method": "POST",
+      "path": "/api/countries/currency-convert",
+      "file": "regionalConfigurationRoutes.js",
+      "line": 10
+    },
+    {
+      "method": "GET",
+      "path": "/api/countries/currency-rates",
+      "file": "regionalConfigurationRoutes.js",
+      "line": 11
+    },
+    {
+      "method": "PUT",
+      "path": "/api/countries/currency-rates",
+      "file": "regionalConfigurationRoutes.js",
+      "line": 12
+    },
+    {
+      "method": "GET",
+      "path": "/api/countries/{:param}",
+      "file": "regionalConfigurationRoutes.js",
+      "line": 13
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/countries/{:param}/status",
+      "file": "regionalConfigurationRoutes.js",
+      "line": 14
+    },
+    {
+      "method": "GET",
+      "path": "/api/reliability/slis",
+      "file": "reliabilityRoutes.js",
+      "line": 23
+    },
+    {
+      "method": "GET",
+      "path": "/api/reliability/slis/{:param}",
+      "file": "reliabilityRoutes.js",
+      "line": 38
+    },
+    {
+      "method": "GET",
+      "path": "/api/reliability/slos",
+      "file": "reliabilityRoutes.js",
+      "line": 48
+    },
+    {
+      "method": "GET",
+      "path": "/api/reliability/slos/{:param}",
+      "file": "reliabilityRoutes.js",
+      "line": 55
+    },
+    {
+      "method": "GET",
+      "path": "/api/reliability/error-budgets",
+      "file": "reliabilityRoutes.js",
+      "line": 66
+    },
+    {
+      "method": "GET",
+      "path": "/api/reliability/error-budgets/{:param}",
+      "file": "reliabilityRoutes.js",
+      "line": 72
+    },
+    {
+      "method": "POST",
+      "path": "/api/reliability/error-budgets/refresh",
+      "file": "reliabilityRoutes.js",
+      "line": 81
+    },
+    {
+      "method": "POST",
+      "path": "/api/reliability/alerts/evaluate",
+      "file": "reliabilityRoutes.js",
+      "line": 88
+    },
+    {
+      "method": "GET",
+      "path": "/api/reliability/report",
+      "file": "reliabilityRoutes.js",
+      "line": 94
+    },
+    {
+      "method": "GET",
+      "path": "/api/reliability/health",
+      "file": "reliabilityRoutes.js",
+      "line": 100
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/support",
+      "file": "supportDashboardRoutes.js",
+      "line": 9
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/analytics/support/tickets",
+      "file": "supportDashboardRoutes.js",
+      "line": 10
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preferences",
+      "file": "userPreferenceRoutes.js",
+      "line": 26
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/preferences",
+      "file": "userPreferenceRoutes.js",
+      "line": 29
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/preferences/theme",
+      "file": "userPreferenceRoutes.js",
+      "line": 32
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/preferences/theme/toggle",
+      "file": "userPreferenceRoutes.js",
+      "line": 35
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/preferences/language",
+      "file": "userPreferenceRoutes.js",
+      "line": 38
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/preferences/notifications",
+      "file": "userPreferenceRoutes.js",
+      "line": 41
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/preferences/search/recent",
+      "file": "userPreferenceRoutes.js",
+      "line": 44
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/preferences/search/recent",
+      "file": "userPreferenceRoutes.js",
+      "line": 47
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/preferences/accessibility",
+      "file": "userPreferenceRoutes.js",
+      "line": 50
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/preferences/last-seen",
+      "file": "userPreferenceRoutes.js",
+      "line": 53
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/preferences/stats",
+      "file": "userPreferenceRoutes.js",
+      "line": 60
+    },
+    {
+      "method": "GET",
+      "path": "/api/valuation/matrix",
+      "file": "valuationRoutes.js",
+      "line": 9
+    },
+    {
+      "method": "GET",
+      "path": "/api/valuation/{:param}",
+      "file": "valuationRoutes.js",
+      "line": 20
+    },
+    {
+      "method": "POST",
+      "path": "/api/webhooks/inventory",
+      "file": "webhookRoutes.js",
+      "line": 39
+    }
+  ],
+  "recommendations": [
+    "Document 1 missing endpoints in backend/openapi.yaml",
+    "Add Zod validation schemas for 215 routes with no input validation",
+    "Move app.use(responseWrapper) before all route mounts in server.js for consistent middleware coverage",
+    "Run `node scripts/api-governance-check.js` in CI to enforce compliance"
+  ]
+}

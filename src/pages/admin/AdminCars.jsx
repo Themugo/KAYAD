@@ -109,9 +109,9 @@ function ListingPublishPolicy() {
         </div>
       </div>
       {state.canChange ? (
-        <select className="input" aria-label="Listing moderation" style={{ width: 'auto' }} value={state.policy.listingModeration} disabled={saving} onChange={(e) => change(e.target.value)}>
-          <option value="hold_for_review">Hold every new listing for review</option>
-          <option value="auto_publish">Auto-publish for approved sellers</option>
+        <select className="input" aria-label="Listing approval" style={{ width: 'auto' }} value={state.policy.listingModeration} disabled={saving} onChange={(e) => change(e.target.value)}>
+          <option value="auto_publish">No approval — publish immediately</option>
+          <option value="hold_for_review">Admin approval — hold every new listing</option>
         </select>
       ) : <span className="badge badge-muted">Only the platform owner can change this</span>}
     </div>

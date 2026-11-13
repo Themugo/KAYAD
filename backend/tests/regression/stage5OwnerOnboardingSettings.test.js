@@ -137,7 +137,7 @@ describe("pure policy functions", () => {
       privateSellerApprovalMode: "disabled",
       privateSellerPackageMode: "free",
       dealerOnboardingMode: "approval_required",
-      listingModeration: "hold_for_review",
+      listingModeration: "auto_publish",
       dealerDecisionAuthority: "owner_only",
       listingDecisionAuthority: "owner_only",
     });
@@ -485,5 +485,17 @@ describe("decision authority is enforced on the real approval/moderation routes"
       const r = await call("POST", `/api/admin/cars/${ID}/moderate`, { role, body: { action: "approve" } });
       expect(r.status).toBe(403);
     }
+  });
+});
+
+describe("listing approval default and fail-safe (owner request: no approval rule unless an admin sets one)", () => {
+  test("no saved policy ⇒ listings are NOT held for approval", async () => {
+    const { INITIAL_DEFAULTS } = await import("../../services/onboardingPolicy.service.js");
+    expect(INITIAL_DEFAULTS.listingModeration).toBe("auto_publish");
+  });
+  test("an unreadable or corrupt policy still HOLDS listings (fail-safe unchanged)", async () => {
+    const { RESTRICTIVE, normalizePolicyValue } = await import("../../services/onboardingPolicy.service.js");
+    expect(RESTRICTIVE.listingModeration).toBe("hold_for_review");
+    expect(normalizePolicyValue({ listingModeration: "bogus" }).policy.listingModeration).toBe("hold_for_review");
   });
 });

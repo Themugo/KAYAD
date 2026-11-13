@@ -12,7 +12,7 @@
 //   privateSellerApprovalMode  disabled | required (defaults to disabled)
 //   privateSellerPackageMode   free (paid modes require a later package catalogue + verified checkout integration)
 //   dealerOnboardingMode       self_onboarding | approval_required | closed
-//   listingModeration          hold_for_review | auto_publish
+//   listingModeration          auto_publish (default: no approval) | hold_for_review (admin approves every new listing)
 //   dealerDecisionAuthority    owner_only | admins     (who may approve/reject dealers & sellers)
 //   listingDecisionAuthority   owner_only | admins     (who may approve/reject listings)
 // Email verification for seller actions is NOT a setting: it is always required.
@@ -58,7 +58,10 @@ export const INITIAL_DEFAULTS = Object.freeze({
   privateSellerApprovalMode: "disabled",
   privateSellerPackageMode: "free",
   dealerOnboardingMode: "approval_required",
-  listingModeration: "hold_for_review",
+  // Listings need no approval by default: an account in good standing publishes immediately. The owner/admin can switch this
+  // to "hold_for_review" at any time (Admin → Settings → Onboarding). A missing, unreadable or corrupt policy is still
+  // RESTRICTIVE (hold), so this default only applies when no row has ever been saved.
+  listingModeration: "auto_publish",
   dealerDecisionAuthority: "owner_only",
   listingDecisionAuthority: "owner_only",
 });
