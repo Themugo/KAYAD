@@ -20,6 +20,7 @@ import AuctionInsightsPanel from './AuctionInsightsPanel';
 import DealerAccountStatus from './DealerAccountStatus';
 import DealerTeamPanel from './DealerTeamPanel';
 import { getMyListings, deleteCar, markCarSold } from '../../../services/vehicleApi';
+import { ListingStatusBadge, ListingThumb } from '../../../components/listing/ListingPresentation';
 import type { BackendCar } from '../../../services/vehicleApi';
 import { ParticipantEscrowDesk } from '../../../features/escrow/ParticipantEscrowDesk';
 
@@ -975,27 +976,18 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                         car.city || car.location_city || '',
                       ].filter(Boolean).join(' · ');
                       return (
-                        <div key={car.id} className="p-4 bg-[#F6FAF9] rounded-xl">
+                        <div key={car.id} className="rounded-2xl border border-[#D7E7E4] bg-white p-3 shadow-[0_2px_10px_rgba(11,29,58,0.04)] transition hover:border-[#176B87]/40 hover:shadow-[0_8px_22px_rgba(11,29,58,0.08)] sm:p-4">
                           <div className="flex flex-wrap sm:flex-nowrap items-center gap-4">
                             <span className="w-7 text-center text-sm font-bold text-[#475569] shrink-0" aria-label={`Listing number ${rowIdx + 1}`} data-testid="inventory-row-number">{rowIdx + 1}</span>
-                            <div className="relative w-32 h-24 bg-[#DDF4F0] rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-                              {image ? <img src={image} alt={label} loading="lazy" className="w-full h-full object-cover" /> : <Car className="w-8 h-8 text-[#64748B]" aria-hidden="true" />}
-                              {photoCount > 0 && <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/60 text-white text-[10px] font-semibold">{photoCount} {photoCount === 1 ? 'photo' : 'photos'}</span>}
-                            </div>
+                            <ListingThumb src={image} fallback={car.images?.[0]?.url} alt={label} count={photoCount} priority={rowIdx < 3} className="h-24 w-full sm:w-36" />
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-[#0A3340] truncate">{label}</p>
-                              <p className="text-sm text-[#475569]">{car.price == null ? 'Price unavailable' : `Ksh ${Number(car.price).toLocaleString('en-KE')}`} • {car.views == null ? 'Views unavailable' : `${Number(car.views).toLocaleString('en-KE')} views`}</p>
+                              <p className="truncate text-[15px] font-bold text-[#0A3340]">{label}</p>
+                              <p className="text-sm font-semibold text-[#176B87]">{car.price == null ? 'Price unavailable' : `Ksh ${Number(car.price).toLocaleString('en-KE')}`} • {car.views == null ? 'Views unavailable' : `${Number(car.views).toLocaleString('en-KE')} views`}</p>
                               {detailLine && <p className="text-xs text-[#475569]" data-testid="inventory-details">{detailLine}</p>}
                               {updated && <p className="text-xs text-[#475569]">Updated {updated}</p>}
                             </div>
-                            <span className={`px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap ${
-                              car.status === 'available' || car.status === 'active' ? 'bg-emerald-100 text-emerald-800' :
-                              car.status === 'reserved' ? 'bg-[#DDF4F0] text-[#12576D]' :
-                              'bg-[#EEF7F5] text-[#475569]'
-                            }`}>
-                              {statusText}
-                            </span>
-                            <div className="flex gap-2">
+                            <ListingStatusBadge status={car.status} label={statusText} />
+                            <div className="flex w-full flex-wrap gap-2 sm:w-auto">
                               {!isSoldListing && !(aStatus === 'live') && (
                                 <button type="button" onClick={() => { setSoldError(null); setSoldBuyer(''); setSoldPrice(''); setSoldTargetId(carId); }} className="px-3 py-1 text-xs font-bold text-emerald-800 border border-emerald-300 rounded-lg hover:bg-emerald-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Mark ${car.title || 'vehicle'} as sold`}>Mark sold</button>
                               )}

@@ -8,6 +8,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { buildAuthPath } from '../../../utils/authIntent';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ListingStatusBadge, ListingThumb, ListingFacts, ListingScoreRing } from '../../../components/listing/ListingPresentation';
 import { createCar, getMyListings, VehicleApiError, BackendCar } from '../../../services/vehicleApi';
 import { getMyEscrows, BackendEscrow } from '../../../services/escrowApi';
 import { calculateListingQualityScore } from '../../../utils/listingQualityScore';
@@ -747,66 +748,34 @@ function QuickStat({ icon, value, label, color }: { icon: React.ReactNode; value
 
 /** Whole vehicle visible (object-contain on a neutral ground). A failed load is shown explicitly as "Photo unavailable"
  *  and reported to the console with the failing URL: storage/permission faults are surfaced, not hidden. */
-function VehicleImage({ urls, alt, className = '', compact = false }: { urls: (string | undefined)[]; alt: string; className?: string; compact?: boolean }) {
-  const candidates = urls.filter((u): u is string => Boolean(u));
-  const [index, setIndex] = React.useState(0);
-  const src = candidates[index];
-  if (!src) {
-    return (
-      <div role="img" aria-label={candidates.length ? `${alt}: photo unavailable` : `${alt}: no photo uploaded`} className={`flex h-full w-full flex-col items-center justify-center gap-1 bg-slate-100 text-center text-slate-500 ${className}`}>
-        <Car size={compact ? 22 : 40} aria-hidden="true" />
-        {!compact && <span className="px-2 text-[11px] font-semibold">{candidates.length ? 'Photo unavailable' : 'No photo yet'}</span>}
-      </div>
-    );
-  }
-  return (
-    <img
-      src={src}
-      alt={alt}
-      loading="lazy"
-      className={`h-full w-full bg-slate-100 object-contain ${className}`}
-      onError={() => { console.warn('[KAYAD] vehicle image failed to load:', src); setIndex((i) => i + 1); }}
-    />
-  );
-}
-
 function ListingCard({ listing, delay }: { listing: BackendCar; delay: number }) {
-  const statusColors: Record<string, { bg: string; text: string }> = {
-    available: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
-    active: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
-    draft: { bg: 'bg-[#EEF7F5]', text: 'text-[#64748B]' },
-    sold: { bg: 'bg-[#DDF4F0]', text: 'text-[#12576D]' },
-    pending: { bg: 'bg-[#DDF4F0]', text: 'text-[#12576D]' },
-  };
-  const statusClass = statusColors[listing.status || 'draft'] || statusColors.draft;
   const image = listing.images?.[0]?.thumb || listing.images?.[0]?.url;
+  const photoCount = Array.isArray(listing.images) ? listing.images.length : 0;
+  const city = listing.city || listing.location_city || '';
+  const title = `${listing.year} ${listing.brand} ${listing.model}`;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="rounded-xl overflow-hidden"
-      style={{ backgroundColor: 'white' }}
+      className="overflow-hidden rounded-2xl border border-[#D7E7E4] bg-white shadow-[0_2px_10px_rgba(11,29,58,0.04)] transition hover:border-[#176B87]/40 hover:shadow-[0_8px_22px_rgba(11,29,58,0.08)]"
     >
-      <div className="flex flex-col md:flex-row">
-        <div className="w-full md:w-48 h-32 md:h-auto flex items-center justify-center" style={{ backgroundColor: KAYAD_THEME.slate[100] }}>
-          <VehicleImage urls={[listing.images?.[0]?.thumb, listing.images?.[0]?.url]} alt={`${listing.year} ${listing.brand} ${listing.model}`} />
-        </div>
-        <div className="flex-1 p-4">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <h3 className="font-bold" style={{ color: KAYAD_THEME.navy }}>{listing.year} {listing.brand} {listing.model}</h3>
-              {listing.mileage != null && <p className="text-sm" style={{ color: KAYAD_THEME.slate[500] }}>{listing.mileage.toLocaleString()} km</p>}
+      <div className="flex flex-col gap-3 p-3 sm:flex-row sm:gap-4 sm:p-4">
+        <ListingThumb src={image} fallback={listing.images?.[0]?.url} alt={title} count={photoCount} className="h-36 w-full sm:h-28 sm:w-44" />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h3 className="truncate text-[15px] font-bold" style={{ color: KAYAD_THEME.navy }}>{title}</h3>
+              <ListingFacts className="mt-1" items={[
+                listing.mileage != null && `${listing.mileage.toLocaleString()} km`,
+                city,
+                <span key="views" className="inline-flex items-center gap-1"><EyeIcon size={13} aria-hidden="true" /> {listing.views || 0}</span>,
+              ]} />
             </div>
-            <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${statusClass.bg} ${statusClass.text}`}>
-              {listing.status || 'draft'}
-            </span>
+            <ListingStatusBadge status={listing.status || 'draft'} label={listing.status || 'draft'} className="capitalize" />
           </div>
-          <p className="text-xl font-bold mb-3" style={{ color: KAYAD_THEME.gold }}>KES {Number(listing.price || 0).toLocaleString('en-KE')}</p>
-          <div className="flex flex-wrap gap-3 text-sm" style={{ color: KAYAD_THEME.slate[500] }}>
-            <span className="flex items-center gap-1"><EyeIcon size={14} /> {listing.views || 0}</span>
-          </div>
+          <p className="mt-3 text-xl font-extrabold" style={{ color: KAYAD_THEME.navy }}>KES {Number(listing.price || 0).toLocaleString('en-KE')}</p>
         </div>
       </div>
     </motion.div>
@@ -972,15 +941,19 @@ function ListingQualitySection({ listings, loading }: { listings: BackendCar[]; 
           descriptionLength: l.description?.length || 0,
         });
         return (
-          <div key={l.id} className="rounded-xl p-4 bg-white flex items-center gap-4">
-            <div className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden shrink-0" style={{ backgroundColor: KAYAD_THEME.slate[100] }}>
-              <VehicleImage compact urls={[l.images?.[0]?.thumb, l.images?.[0]?.url]} alt={l.title} />
+          <div key={l.id} className="flex items-center gap-3 rounded-2xl border border-[#D7E7E4] bg-white p-3 shadow-[0_2px_10px_rgba(11,29,58,0.04)] sm:gap-4 sm:p-4">
+            <ListingThumb src={l.images?.[0]?.thumb || l.images?.[0]?.url} fallback={l.images?.[0]?.url} alt={l.title} count={l.images?.length || 0} className="h-16 w-20 sm:h-20 sm:w-28" />
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate font-bold" style={{ color: KAYAD_THEME.navy }}>{l.year} {l.brand} {l.model}</h3>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <ListingStatusBadge status={l.status || 'draft'} label={l.status || 'draft'} className="capitalize" />
+                <span className="text-xs font-semibold text-[#475569]">KES {Number(l.price || 0).toLocaleString('en-KE')}</span>
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="font-bold" style={{ color: KAYAD_THEME.navy }}>{l.year} {l.brand} {l.model}</h3>
-              <p className="text-sm" style={{ color: KAYAD_THEME.slate[500] }}>{l.status || 'draft'}</p>
+            <div className="flex flex-col items-center gap-0.5">
+              <ListingScoreRing score={score} />
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">Quality</span>
             </div>
-            <p className="text-2xl font-bold" style={{ color: score >= 80 ? KAYAD_THEME.emerald : KAYAD_THEME.amber }}>{score}%</p>
           </div>
         );
       })}

@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { BrandingProvider } from './context/BrandingContext';
 import './index.css';
+import { prefetchCars } from './services/vehicleApi';
 
 // Simple error boundary for the entire app
 class ErrorBoundary extends Component<
@@ -64,6 +65,8 @@ class ErrorBoundary extends Component<
 
 const root = document.getElementById('root');
 if (root) {
+  // Start the first inventory page now so it is already in flight (or cached) when the marketplace mounts.
+  prefetchCars({ page: 1, limit: 24, sort: 'newest' });
   ReactDOM.createRoot(root).render(
     <React.StrictMode>
       <ErrorBoundary>

@@ -74,6 +74,13 @@
 /* Phones: the inventory comes first. The four quick-action tiles duplicate the bottom dock and are hidden below 640px. */
 @media (max-width: 639.98px) {
   .kayad-home-quick-actions { display: none; }
-  .kayad-public-hero__mobile-card p { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .kayad-public-hero__mobile-card p { display: none; }
+  .kayad-public-hero__mobile-card { padding: 10px 10px !important; }
   .kayad-home-category-strip { position: sticky; top: 0; z-index: 20; }
 }
+
+/* Inventory refresh: thin sliding bar while results update; the previous results stay readable. */
+.kayad-refresh-bar > span { animation: kayad-refresh-slide 1s ease-in-out infinite; }
+@keyframes kayad-refresh-slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
+.kayad-inventory-results[aria-busy="true"] > .grid, .kayad-inventory-results[aria-busy="true"] > div:not(.kayad-refresh-bar) { opacity: .72; transition: opacity .15s ease; }
+@media (prefers-reduced-motion: reduce) { .kayad-refresh-bar > span { animation: none; width: 100%; } }

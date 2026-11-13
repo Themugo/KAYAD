@@ -1,5 +1,5 @@
 import './homepage-redesign.css';
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
 import InventoryFilterPanel, { ANY, type FilterValues } from './InventoryFilterPanel';
 import { CONDITIONS } from '../../../constants/vehicleOptions';
 import { Vehicle, UserProfile } from '../../../types';
@@ -14,7 +14,7 @@ import MarketingCard, { MarketingCardData } from '../../../components/MarketingC
 import FloatingAdRail from '../../../components/FloatingAdRail';
 import { getVisibleHeroSlides, HeroSlide } from '../../../services/heroApi';
 import { adminAPI } from '../../../api/api';
-import { getCars, getCarById, getCurrentFeaturedCampaignCarIds, mapBackendCarToVehicle, VehicleApiError, type GetCarsParams } from '../../../services/vehicleApi';
+import { getCars, peekCars, getCarById, getCurrentFeaturedCampaignCarIds, mapBackendCarToVehicle, VehicleApiError, type GetCarsParams } from '../../../services/vehicleApi';
 import { classifyInventoryFailure, type InventoryFailure } from '../utils/inventoryAvailability';
 import { getSearchFacets, type SearchFacetsResponse } from '../../../services/searchApi';
 import { getVisibleAdSlots, recordAdEvent, AdSlot } from '../../../services/adApi';
@@ -252,6 +252,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [serverRetryKey, setServerRetryKey] = useState(0);
   const [canonicalFacets, setCanonicalFacets] = useState<SearchFacetsResponse | null>(null);
   const [canonicalModelFacets, setCanonicalModelFacets] = useState<SearchFacetsResponse['models']>([]);
+  // Signatures, not array identities: an empty/new facet array must not look like a changed query and trigger a refetch.
+  const canonicalMakesKey = (canonicalFacets?.brands || []).map((item) => item.value).filter(Boolean).join('\u0001');
+  const canonicalModelsKey = canonicalModelFacets.map((item) => item.value).filter(Boolean).join('\u0001');
   const isLoading = isLoadingReal || serverLoading;
   const inventoryFailure: InventoryFailure | null = serverError
     ? (serverFailure ?? classifyInventoryFailure(serverError))
@@ -331,8 +334,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     // "contains" on the server, so manual entry always works.
     // Only the backend's canonical facets decide "listed". The option lists shown in the panel are derived from the results themselves,
     // so using them here would make every response change the next query.
-    const canonicalMakes = (canonicalFacets?.brands || []).map((item) => item.value).filter(Boolean);
-    const canonicalModels = canonicalModelFacets.map((item) => item.value).filter(Boolean);
+    const canonicalMakes = canonicalMakesKey ? canonicalMakesKey.split('\u0001') : [];
+    const canonicalModels = canonicalModelsKey ? canonicalModelsKey.split('\u0001') : [];
     const pick = (value: string, options: string[]) => options.find((o) => o.toLowerCase() === value.toLowerCase());
     if (selectedMake !== 'All') { const hit = pick(selectedMake, canonicalMakes); if (hit) query.brand = hit; else query.brandLike = selectedMake; }
     if (selectedModel !== 'All') { const hit = pick(selectedModel, canonicalModels); if (hit) query.model = hit; else query.modelLike = selectedModel; }
@@ -366,27 +369,48 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }, [
     currentPage, pageSize, searchQuery, selectedMake, selectedModel, selectedCounty,
     minPrice, maxPrice, minYear, maxYear, selectedBodyStyle, selectedFuel,
-    selectedTransmission, selectedCondition, maxMileage, selectedSellerType, selectedColor, canonicalFacets, canonicalModelFacets,
+    selectedTransmission, selectedCondition, maxMileage, selectedSellerType, selectedColor, canonicalMakesKey, canonicalModelsKey,
     onlyAuction, sortBy, dealerScope?.id
   ]);
 
-  useEffect(() => {
+  // Instant inventory: a page already seen this session is painted before the browser
+  // draws (no skeleton at all) and only refreshed in the background when it is stale.
+  // A page never seen shows the skeleton; while a new filter loads, the previous
+  // results stay on screen (dimmed) instead of collapsing to an empty skeleton.
+  const hasLoadedOnce = useRef(false);
+  const [refreshing, setRefreshing] = useState(false);
+  useLayoutEffect(() => {
     if (savedOnly) return;
     let cancelled = false;
-    setServerLoading(true);
     setServerError(null);
     setServerFailure(null);
 
-    getCars(serverQuery)
-      .then((res) => {
-        if (cancelled) return;
-        const mapped = (res.data || res.cars || []).map(mapBackendCarToVehicle);
-        setServerVehicles(mapped);
-        setServerTotal(res.pagination?.total ?? mapped.length);
-        setServerTotalPages(res.pagination?.pages ?? res.pagination?.totalPages ?? 1);
-      })
+    const apply = (res: Awaited<ReturnType<typeof getCars>>) => {
+      const mapped = (res.data || res.cars || []).map(mapBackendCarToVehicle);
+      setServerVehicles(mapped);
+      setServerTotal(res.pagination?.total ?? mapped.length);
+      setServerTotalPages(res.pagination?.pages ?? res.pagination?.totalPages ?? 1);
+      hasLoadedOnce.current = true;
+    };
+
+    const cached = peekCars(serverQuery);
+    if (cached) {
+      apply(cached.data);
+      setServerLoading(false);
+      if (cached.fresh) { setRefreshing(false); return () => { cancelled = true; }; }
+      setRefreshing(true);
+    } else if (hasLoadedOnce.current) {
+      setRefreshing(true);
+    } else {
+      setServerLoading(true);
+    }
+
+    (cached ? getCars(serverQuery, { force: true }) : getCars(serverQuery))
+      .then((res) => { if (!cancelled) apply(res); })
       .catch((err) => {
         if (cancelled) return;
+        // A background refresh that fails keeps the page the shopper is already looking at.
+        if (cached) return;
         setServerError(err instanceof VehicleApiError ? err.message : 'Unable to load marketplace results.');
         setServerFailure(classifyInventoryFailure(err));
         setServerVehicles([]);
@@ -394,7 +418,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         setServerTotalPages(1);
       })
       .finally(() => {
-        if (!cancelled) setServerLoading(false);
+        if (!cancelled) { setServerLoading(false); setRefreshing(false); }
       });
 
     return () => { cancelled = true; };
@@ -569,7 +593,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       return;
     }
     let cancelled = false;
-    getCars({ page: 1, limit: 100, featured: true, sort: 'newest' })
+    getCars({ page: 1, limit: 24, featured: true, sort: 'newest' })
       .then((res) => {
         if (!cancelled) setFeaturedVehicles((res.data || res.cars || []).map(mapBackendCarToVehicle));
       })
@@ -1458,9 +1482,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
         {/* 5. MARKET HEAD */}
         <div className="kayad-market-toolbar mb-5 rounded-2xl border border-[#D7E7E4] bg-white shadow-[0_10px_30px_rgba(11,29,58,0.06)]">
-          <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2.5">
+              <div className="hidden flex-wrap items-center gap-2.5 sm:flex">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#DDF4F0] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-navy-700">
                   <LayoutGrid className="h-3.5 w-3.5" /> {savedOnly ? 'Saved vehicles' : 'Marketplace inventory'}
                 </span>
@@ -1468,7 +1492,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </div>
               {/* The Saved destination has no hero, so its heading is the page's main heading. */}
               {(() => { const Heading = (savedOnly ? 'h1' : 'h2') as 'h1' | 'h2'; return (
-              <Heading className="mt-2 flex flex-wrap items-center gap-2 font-display text-xl sm:text-2xl font-bold tracking-[-0.02em] text-navy-900">
+              <Heading className="mt-0 flex flex-wrap sm:mt-2 items-center gap-2 font-display text-xl sm:text-2xl font-bold tracking-[-0.02em] text-navy-900">
                 {/* The Saved destination reuses this grid but must identify itself as the buyer's saved list, not the full inventory. */}
                 {savedOnly ? 'Saved Vehicles' : 'Vehicle Inventory'}
                 {!isLoading && (
@@ -1560,7 +1584,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 type="button"
                 aria-label="Open inventory filters"
                 onClick={() => setShowMobileFilterDrawer(true)}
-                className="lg:hidden flex h-10 items-center gap-1.5 rounded-xl border border-[#D7E7E4] bg-white px-3 text-[11px] font-bold text-[#64748B]"
+                className="hidden sm:flex lg:hidden h-10 items-center gap-1.5 rounded-xl border border-[#D7E7E4] bg-white px-3 text-[11px] font-bold text-[#64748B]"
               >
                 <Filter className="w-3.5 h-3.5" /> Filters{activeSidebarFilters > 0 ? ` (${activeSidebarFilters})` : ''}
               </button>
@@ -1631,8 +1655,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           )}
 
           {/* RESULTS */}
-          <div className="kayad-inventory-results min-h-[400px] min-w-0">
-            {isLoading ? (
+          <div className="kayad-inventory-results relative min-h-[400px] min-w-0" aria-busy={refreshing || undefined}>
+            {refreshing && (
+              <div role="progressbar" aria-label="Updating results" data-testid="inventory-refresh-bar" className="kayad-refresh-bar pointer-events-none absolute inset-x-0 top-0 z-10 h-[3px] overflow-hidden rounded-full bg-[#DDF4F0]">
+                <span className="block h-full w-1/3 rounded-full bg-[#13B8A6]" />
+              </div>
+            )}
+            {isLoading && !(hasLoadedOnce.current && serverVehicles.length > 0) ? (
               <SkeletonGrid count={pageSize} />
             ) : (loadError || serverError) ? (
               <div role="status" className="rounded-2xl border border-[#D7E7E4] bg-white px-6 py-14 text-center shadow-sm">
@@ -1729,6 +1758,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                       <InventoryCardMedia
                         title={v.title}
                         images={v.images}
+                        priority={idx < 3}
                         onOpen={() => handleVehicleSelect(v)}
                         className={viewMode === 'list' ? 'aspect-[16/10] w-full sm:aspect-auto sm:min-h-[230px] sm:w-[300px]' : 'aspect-[4/3] w-full'}
                         top={<>
@@ -1943,7 +1973,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {/* MOBILE FULL-SCREEN FILTER DRAWER */}
       {showMobileFilterDrawer && (
-        <div className="fixed inset-0 bg-white z-50 overflow-y-auto lg:hidden" role="dialog" aria-modal="true" aria-labelledby="kayad-mobile-filter-title">
+        <div className="fixed inset-0 bg-white z-[1100] overflow-y-auto lg:hidden" role="dialog" aria-modal="true" aria-labelledby="kayad-mobile-filter-title">
           <div className="sticky top-0 bg-white border-b border-[#D7E7E4] px-4 py-3 flex items-center justify-between">
             <div><h3 id="kayad-mobile-filter-title" className="text-sm font-extrabold text-navy-900">Refine inventory</h3><p className="text-[10px] text-[#64748B] mt-0.5">Adjust any filter, then return to the results.</p></div>
             <button onClick={() => setShowMobileFilterDrawer(false)} className="p-1.5" aria-label="Close filters">

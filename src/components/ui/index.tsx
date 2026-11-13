@@ -417,7 +417,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 // --- SKELETON LOADING PLACEHOLDERS ---
 export const SkeletonCard: React.FC = () => (
   <div className="bg-white rounded-2xl border border-[#D7E7E4] overflow-hidden shadow-sm animate-pulse space-y-4">
-    <div className="h-52 bg-[#DDF4F0]/80 w-full relative" />
+    <div className="aspect-[4/3] bg-[#DDF4F0]/80 w-full relative" />
     <div className="p-5 space-y-4">
       <div className="space-y-2">
         <div className="h-3 bg-[#DDF4F0] rounded w-1/3" />
