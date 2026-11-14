@@ -177,12 +177,12 @@ const NavTab = ({ icon: Icon, label, active, onClick, badge }) => (
     type="button"
     aria-current={active ? 'page' : undefined}
     onClick={onClick}
-    className={`flex shrink-0 lg:w-full items-center gap-3 px-4 py-3 min-h-11 rounded-xl transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87] ${
+    className={`flex w-full items-center gap-3 px-4 py-3 min-h-11 rounded-xl text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87] ${
       active ? 'bg-[#DDF4F0] text-[#12576D]' : 'text-[#64748B] hover:bg-[#F6FAF9]'
     }`}
   >
     <Icon className="w-5 h-5 shrink-0" strokeWidth={2} aria-hidden="true" />
-    <span className="font-medium text-sm whitespace-nowrap lg:whitespace-normal lg:truncate">{label}</span>
+    <span className="font-medium text-sm truncate">{label}</span>
     {badge ? (
       <span className="ml-auto px-2 py-0.5 bg-[#176B87] text-white text-xs rounded-full">
         <span aria-hidden="true">{badge}</span>
@@ -324,6 +324,16 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     setMobileNavOpen(false);
     if (typeof window !== 'undefined') window.scrollTo?.({ top: 0 });
   };
+
+  // Phone drawer: Escape closes it and the page behind it does not scroll while it is open.
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileNavOpen(false); };
+    window.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+  }, [mobileNavOpen]);
 
   // Browser Back/Forward and refreshes resolve to the section named in the URL.
   useEffect(() => {
@@ -643,8 +653,13 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   return (
     <div className="min-h-screen bg-[#F6FAF9] flex flex-col lg:flex-row">
       {/* Sidebar Navigation */}
-      <div className="lg:hidden px-4 pt-3"><button type="button" aria-expanded={mobileNavOpen} aria-controls="dealer-workspace-sidebar" onClick={() => setMobileNavOpen(v => !v)} className="inline-flex items-center gap-2 rounded-lg border border-[#D7E7E4] bg-white px-4 py-2 font-semibold text-[#0A3340]"><Menu className="w-4 h-4" />{mobileNavOpen ? "Close dealer menu" : "Dealer menu"}</button></div>
-      <aside id="dealer-workspace-sidebar" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex w-full lg:w-64 lg:min-w-64 bg-white border-b lg:border-b-0 lg:border-r border-[#D7E7E4] flex-col lg:sticky lg:top-0 lg:h-screen`}>
+      {/* Phone app bar: menu, where you are, notifications. Always reachable while scrolling. */}
+      <div className="sticky top-0 z-40 flex items-center gap-2 border-b border-[#D7E7E4] bg-white/95 px-3 py-2 backdrop-blur lg:hidden" data-testid="dealer-mobile-bar">
+        <button type="button" aria-expanded={mobileNavOpen} aria-controls="dealer-workspace-sidebar" onClick={() => setMobileNavOpen(v => !v)} className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl border border-[#D7E7E4] bg-white px-3 text-sm font-semibold text-[#0A3340] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><Menu className="h-4 w-4" aria-hidden="true" /><span>{mobileNavOpen ? "Close dealer menu" : "Dealer menu"}</span></button>
+        <p className="min-w-0 flex-1 truncate text-center text-sm font-bold text-[#0A3340]" aria-hidden="true">{currentItem.label}</p>
+      </div>
+      {mobileNavOpen && <button type="button" aria-label="Close dealer menu overlay" tabIndex={-1} onClick={() => setMobileNavOpen(false)} className="fixed inset-0 z-[1090] bg-[#071F2A]/55 lg:hidden" />}
+      <aside id="dealer-workspace-sidebar" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex fixed inset-y-0 left-0 z-[1100] w-[88%] max-w-sm overflow-hidden shadow-2xl lg:static lg:z-auto lg:w-64 lg:min-w-64 lg:max-w-none lg:shadow-none bg-white lg:border-r border-[#D7E7E4] flex-col lg:sticky lg:top-0 lg:h-screen`}>
         <div className="p-4 border-b border-[#D7E7E4]">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-[#176B87] to-[#13B8A6] flex items-center justify-center overflow-hidden">
@@ -657,15 +672,15 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           </div>
         </div>
 
-        <nav aria-label="Dealer workspace" className="relative flex-1 min-h-0 p-3 lg:p-4 flex flex-col gap-2 lg:gap-0 overflow-y-auto">
+        <nav aria-label="Dealer workspace" className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 lg:p-4">
           {DEALER_NAV_GROUPS.map((group, index) => (
             <div
               key={group.id}
               role="group"
               aria-labelledby={`dealer-nav-${group.id}`}
-              className={`flex lg:block gap-2 lg:gap-1 lg:space-y-1 ${index > 0 ? 'pl-2 border-l border-[#D7E7E4] lg:pl-0 lg:border-l-0 lg:border-t lg:mt-3 lg:pt-3' : ''}`}
+              className={`space-y-1 ${index > 0 ? 'mt-3 border-t border-[#D7E7E4] pt-3' : ''}`}
             >
-              <p id={`dealer-nav-${group.id}`} className="sr-only lg:not-sr-only lg:px-4 lg:pb-1 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
+              <p id={`dealer-nav-${group.id}`} className="px-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
                 {group.label}
               </p>
               {group.items.map((item) => (
@@ -691,10 +706,10 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
 
       {/* Main Content */}
       <div className="flex-1 min-w-0 overflow-y-auto">
-        <div className="p-4 sm:p-6 lg:p-8">
+        <div className="p-3 sm:p-6 lg:p-8">
           {/* Header */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
-            <div className="min-w-0">
+          <div className="relative mb-5 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+            <div className="min-w-0 pr-12 sm:pr-0">
               <nav aria-label="Breadcrumb" className="mb-1 flex flex-wrap items-center gap-1 text-xs text-[#64748B]">
                 {activeSection === 'overview' ? (
                   <span aria-current="page">Dealer Hub</span>
@@ -710,19 +725,19 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   </>
                 )}
               </nav>
-              <h2 className="text-2xl font-bold text-[#0A3340]">{currentItem.title}</h2>
-              <p className="text-[#64748B]">{activeSection === 'overview' ? `Welcome back, ${user?.name || 'dealer'}` : currentItem.description}</p>
+              <h2 className="text-xl font-bold text-[#0A3340] sm:text-2xl">{currentItem.title}</h2>
+              <p className="text-sm text-[#64748B] sm:text-base">{activeSection === 'overview' ? `Welcome back, ${user?.name || 'dealer'}` : currentItem.description}</p>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="inline-flex items-center rounded-xl border border-[#D7E7E4] bg-white p-1" aria-label="Page history">
+              <div className="hidden items-center rounded-xl border border-[#D7E7E4] bg-white p-1 sm:inline-flex" aria-label="Page history">
                 <button type="button" aria-label="Go to previous page" title="Previous page" onClick={() => window.history.back()} className="rounded-lg p-2 text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><ChevronLeft className="h-4 w-4" /></button>
                 <button type="button" aria-label="Go to next page" title="Next page" onClick={() => window.history.forward()} className="rounded-lg p-2 text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><ChevronRight className="h-4 w-4" /></button>
               </div>
-              <button type="button" aria-label="Notifications" className="p-2 bg-white border border-[#D7E7E4] rounded-xl hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]" onClick={() => { window.location.assign('/notifications'); }}>
+              <button type="button" aria-label="Notifications" className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center sm:static sm:h-auto sm:w-auto p-2 bg-white border border-[#D7E7E4] rounded-xl hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]" onClick={() => { window.location.assign('/notifications'); }}>
                 <Bell className="w-5 h-5 text-[#64748B]" aria-hidden="true" />
               </button>
               {activeSection !== 'inventory' && (
-                <button type="button" onClick={() => setActiveSection('inventory')} className="px-4 py-2 bg-[#176B87] text-white font-medium rounded-xl hover:bg-[#12576D] flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]">
+                <button type="button" onClick={() => setActiveSection('inventory')} className={`${activeSection === 'overview' ? 'flex' : 'hidden sm:flex'} min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#176B87] px-4 py-2 font-medium text-white hover:bg-[#12576D] sm:w-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]`}>
                   <Car className="w-5 h-5" aria-hidden="true" />
                   Manage Inventory
                 </button>
@@ -741,7 +756,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           {activeSection === 'overview' && (
             <>
               {/* Quick Stats */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+              <div className="mb-6 grid grid-cols-2 gap-3 sm:mb-8 sm:gap-4 xl:grid-cols-4">
                 <StatCard
                   title="Total Listings"
                   onOpen={() => setActiveSection('inventory')}
@@ -849,11 +864,11 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           )}
 
           {activeSection === 'inventory' && (
-            <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
+            <div className="bg-white rounded-xl border border-[#D7E7E4] p-3 sm:p-6">
               {listingForm ? null : (
-                <div className="flex items-center justify-between gap-3 mb-6">
-                  <h3 className="text-xl font-bold text-[#0A3340]">Inventory Management</h3>
-                  <button type="button" onClick={() => openListingForm({ mode: 'create' })} className="px-4 py-2 bg-[#176B87] text-white font-medium rounded-xl hover:bg-[#12576D] flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]">
+                <div className="flex items-center justify-between gap-3 mb-4 sm:mb-6">
+                  <h3 className="text-lg font-bold text-[#0A3340] sm:text-xl">Inventory Management</h3>
+                  <button type="button" onClick={() => openListingForm({ mode: 'create' })} className="whitespace-nowrap px-4 py-2.5 bg-[#176B87] text-white font-medium rounded-xl hover:bg-[#12576D] flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]">
                     <Plus className="w-4 h-4" aria-hidden="true" /> Add vehicle
                   </button>
                 </div>
@@ -906,7 +921,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+                  <div className="mb-5 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-5">
                     <div className="p-3 bg-emerald-50 rounded-xl text-center">
                       <p className="text-2xl font-bold text-emerald-700">{myListings.filter((l) => l.status === 'available' || l.status === 'active').length}</p>
                       <p className="text-xs text-emerald-800">Published</p>
@@ -929,9 +944,9 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                     </div>
                   </div>
                   {myListings.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-2 mb-4" data-testid="inventory-controls">
-                      <input type="search" value={invQuery} onChange={(e) => setInvQuery(e.target.value)} placeholder="Search make, model, title…" aria-label="Search your inventory" className="flex-1 min-w-[180px] px-3 py-2 text-sm border border-[#B9D3CF] rounded-lg" />
-                      <select value={invStatus} onChange={(e) => setInvStatus(e.target.value)} aria-label="Filter by status" className="px-3 py-2 text-sm border border-[#B9D3CF] rounded-lg bg-white">
+                    <div className="mb-4 grid grid-cols-2 items-center gap-2 sm:flex sm:flex-wrap" data-testid="inventory-controls">
+                      <input type="search" value={invQuery} onChange={(e) => setInvQuery(e.target.value)} placeholder="Search make, model, title…" aria-label="Search your inventory" className="col-span-2 min-h-11 flex-1 sm:min-w-[180px] px-3 py-2 text-base sm:text-sm border border-[#B9D3CF] rounded-lg" />
+                      <select value={invStatus} onChange={(e) => setInvStatus(e.target.value)} aria-label="Filter by status" className="min-h-11 px-3 py-2 text-sm border border-[#B9D3CF] rounded-lg bg-white">
                         <option value="all">All statuses</option>
                         <option value="published">Published</option>
                         <option value="pending">Pending review</option>
@@ -939,13 +954,13 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                         <option value="reserved">Reserved</option>
                         <option value="sold">Sold</option>
                       </select>
-                      <select value={invSort} onChange={(e) => setInvSort(e.target.value as typeof invSort)} aria-label="Sort inventory" className="px-3 py-2 text-sm border border-[#B9D3CF] rounded-lg bg-white">
+                      <select value={invSort} onChange={(e) => setInvSort(e.target.value as typeof invSort)} aria-label="Sort inventory" className="min-h-11 px-3 py-2 text-sm border border-[#B9D3CF] rounded-lg bg-white">
                         <option value="newest">Newest first</option>
                         <option value="price_desc">Price: high to low</option>
                         <option value="price_asc">Price: low to high</option>
                         <option value="views">Most viewed</option>
                       </select>
-                      <p className="text-xs text-[#475569] ml-auto" data-testid="inventory-count">Showing {visibleListings.length} of {invStatus === 'sold' ? soldListings.length : activeListings.length} {invStatus === 'sold' ? 'sold' : 'active'}</p>
+                      <p className="col-span-2 text-xs text-[#475569] sm:ml-auto" data-testid="inventory-count">Showing {visibleListings.length} of {invStatus === 'sold' ? soldListings.length : activeListings.length} {invStatus === 'sold' ? 'sold' : 'active'}</p>
                     </div>
                   )}
                   <div className="space-y-3">
@@ -976,18 +991,18 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                         car.city || car.location_city || '',
                       ].filter(Boolean).join(' · ');
                       return (
-                        <div key={car.id} className="rounded-2xl border border-[#D7E7E4] bg-white p-3 shadow-[0_2px_10px_rgba(11,29,58,0.04)] transition hover:border-[#176B87]/40 hover:shadow-[0_8px_22px_rgba(11,29,58,0.08)] sm:p-4">
-                          <div className="flex flex-wrap sm:flex-nowrap items-center gap-4">
-                            <span className="w-7 text-center text-sm font-bold text-[#475569] shrink-0" aria-label={`Listing number ${rowIdx + 1}`} data-testid="inventory-row-number">{rowIdx + 1}</span>
-                            <ListingThumb src={image} fallback={car.images?.[0]?.url} alt={label} count={photoCount} priority={rowIdx < 3} className="h-24 w-full sm:w-36" />
+                        <div key={car.id} data-testid="inventory-row" className="rounded-2xl border border-[#D7E7E4] bg-white p-3 shadow-[0_2px_10px_rgba(11,29,58,0.04)] transition hover:border-[#176B87]/40 hover:shadow-[0_8px_22px_rgba(11,29,58,0.08)] sm:p-4">
+                          <div className="grid grid-cols-[104px_minmax(0,1fr)] items-start gap-x-3 gap-y-2 sm:flex sm:items-center sm:gap-4">
+                            <span className="hidden sm:inline w-7 text-center text-sm font-bold text-[#475569] shrink-0" aria-label={`Listing number ${rowIdx + 1}`} data-testid="inventory-row-number">{rowIdx + 1}</span>
+                            <ListingThumb src={image} fallback={car.images?.[0]?.url} alt={label} count={photoCount} priority={rowIdx < 3} className="h-20 w-full sm:h-24 sm:w-36" />
                             <div className="flex-1 min-w-0">
                               <p className="truncate text-[15px] font-bold text-[#0A3340]">{label}</p>
                               <p className="text-sm font-semibold text-[#176B87]">{car.price == null ? 'Price unavailable' : `Ksh ${Number(car.price).toLocaleString('en-KE')}`} • {car.views == null ? 'Views unavailable' : `${Number(car.views).toLocaleString('en-KE')} views`}</p>
                               {detailLine && <p className="text-xs text-[#475569]" data-testid="inventory-details">{detailLine}</p>}
                               {updated && <p className="text-xs text-[#475569]">Updated {updated}</p>}
                             </div>
-                            <ListingStatusBadge status={car.status} label={statusText} />
-                            <div className="flex w-full flex-wrap gap-2 sm:w-auto">
+                            <ListingStatusBadge status={car.status} label={statusText} className="col-start-2 justify-self-start" />
+                            <div className="col-span-2 grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:flex-wrap [&>button]:min-h-10 [&>button]:justify-center">
                               {!isSoldListing && !(aStatus === 'live') && (
                                 <button type="button" onClick={() => { setSoldError(null); setSoldBuyer(''); setSoldPrice(''); setSoldTargetId(carId); }} className="px-3 py-1 text-xs font-bold text-emerald-800 border border-emerald-300 rounded-lg hover:bg-emerald-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Mark ${car.title || 'vehicle'} as sold`}>Mark sold</button>
                               )}
@@ -1156,7 +1171,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   const other = leads.filter((l) => !shown.includes(l.stage || 'new')).length;
                   return other > 0 ? <p className="mb-3 text-xs text-[#475569]">{other} {other === 1 ? 'lead is' : 'leads are'} in other stages (test drive, escrow started or lost) and appear in the Leads table.</p> : null;
                 })()}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
                   {['new', 'contacted', 'negotiating', 'sold'].map((stage, stageIdx) => {
                     const nextStage = ['new', 'contacted', 'negotiating', 'sold'][stageIdx + 1];
                     const stageLeads = leads.filter((l) => (l.stage || 'new') === stage);
@@ -1250,19 +1265,19 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   (impressions/clicks/ROI) are intentionally not shown
                   since no real ad-tracking infrastructure exists to
                   back them honestly. */}
-              <div className="flex gap-2 mb-6">
+              <div className="mb-6 flex flex-col gap-2 sm:flex-row">
                 <input
                   value={newCampaignName}
                   onChange={(e) => setNewCampaignName(e.target.value)}
                   placeholder="New campaign name"
                   aria-label="New campaign name"
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void handleCreateCampaign(); } }}
-                  className="flex-1 border border-[#D7E7E4] rounded-xl px-3 py-2 text-sm"
+                  className="min-h-11 min-w-0 flex-1 border border-[#D7E7E4] rounded-xl px-3 py-2 text-base sm:text-sm"
                 />
                 <button
                   onClick={handleCreateCampaign}
                   disabled={creatingCampaign || !newCampaignName.trim()}
-                  className="px-4 py-2 bg-[#176B87] text-white rounded-xl font-medium hover:bg-[#12576D] disabled:opacity-50"
+                  className="min-h-11 whitespace-nowrap px-4 py-2 bg-[#176B87] text-white rounded-xl font-medium hover:bg-[#12576D] disabled:opacity-50"
                 >
                   {creatingCampaign ? 'Creating…' : 'Create Campaign'}
                 </button>
@@ -1416,7 +1431,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           {activeSection === 'analytics' && (
             <div className="space-y-6">
               {operationsLoading || (!operations.analytics && !operationsError) ? <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#176B87] animate-spin" /></div> : operationsError ? <div className="py-12 text-center"><p className="text-sm text-[#64748B] mb-3">{operationsError}</p><button onClick={() => setOperations((prev) => ({ ...prev, analytics: undefined }))} className="text-xs font-bold text-[#176B87]">Try Again</button></div> : <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
                   <StatCard title="Total Revenue" value={operations.analytics?.overview?.totalRevenue == null ? '—' : `Ksh ${Number(operations.analytics.overview.totalRevenue).toLocaleString('en-KE')}`} icon={DollarSign} color={colors.emerald} />
                   <StatCard title="Total Sales" value={operations.analytics?.overview?.totalSales ?? '—'} icon={ShoppingCart} color={colors.navy} />
                   <StatCard title="Avg Deal Size" value={operations.analytics?.performance?.avgDealSize == null ? '—' : `Ksh ${Number(operations.analytics.performance.avgDealSize).toLocaleString('en-KE')}`} icon={Target} color={colors.purple} />

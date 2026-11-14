@@ -28,7 +28,7 @@ import { atomicCreateDealerListing } from "../utils/atomicTransactions.js";
 import { evaluateEligibilityBatch } from "../services/privateSellerAuctionEligibility.service.js";
 import { randomUUID } from "node:crypto";
 import { registerMediaUploadJob, registerMediaUploadFailure, completeMediaUpload } from "../services/mediaRecovery.service.js";
-import { getOnboardingPolicy, isPolicyTrusted } from "../services/onboardingPolicy.service.js"; // STAGE 5
+import { sellerMayPublishDirectly } from "../services/onboardingPolicy.service.js"; // STAGE 5
 import { getEscrowEnabledForNewOrEditedCar, getEffectiveEscrowForCar } from "../services/escrowCapability.service.js";
 import { listingDeletionBlock, DELETE_BLOCK_CODES } from "../utils/carDeletionGuard.js";
 import { toPublicVehicleDetail, PUBLIC_VEHICLE_POLICY } from "../utils/publicVehicleProjection.js"; // Phase 13K: public responses are allowlisted, never raw rows
@@ -472,9 +472,11 @@ export const createCar = async (req, res) => {
     // ALWAYS creates the listing as `pending`. `auto_publish` keeps the pre-existing eligibility rule
     // (an approved seller account publishes immediately; unapproved stays pending). The client cannot
     // influence either: status is server-assigned and overwrites anything in req.body.
-    const moderation = await getOnboardingPolicy();
-    const sellerPublishable = seller.role === "user" ? req.sellerCapability?.status === "approved" : seller.status === "approved";
-    const autoPublish = isPolicyTrusted(moderation) && moderation.policy.listingModeration === "auto_publish";
+    // One rule for every create path: sellerMayPublishDirectly (the same check the dealer routes use). With the owner's policy on
+    // auto_publish and free private selling, an account in good standing with a verified email goes live immediately; a personal
+    // account needs no separate seller-approval record unless the owner turned approval mode on. hold_for_review, an untrusted
+    // policy read, a blocked account or an unverified email all keep the listing pending.
+    const publishNow = await sellerMayPublishDirectly({ ...req.user, id: req.user.id, role: seller.role, status: seller.status });
     const body = {
       ...req.body,
       dealer: req.user.id,
@@ -484,7 +486,7 @@ export const createCar = async (req, res) => {
       // Phase 13F: a personal (role=user) seller's eligibility is the authoritative private-seller capability that
       // sellerListingAccess already resolved, never users.status (the buyer-account state). A private seller is also
       // never labelled a verified dealer: that flag is dealer identity and a seller capability grants none.
-      status: autoPublish && sellerPublishable ? "available" : "pending",
+      status: publishNow ? "available" : "pending",
       isVerifiedDealer: seller.role === "user" ? false : seller.status === "approved",
     };
     // `city` is the correct app-level alias for the real

@@ -290,10 +290,10 @@ describe("STAGE 5 createCar status follows the owner's listing-moderation settin
     carModel.countDocuments.mockResolvedValue(0);
     userModel.findByIdAndUpdate = jest.fn(async () => ({}));
   });
-  const create = async (sellerStatus, extraBody = {}) => {
-    userModel.findById.mockReturnValue({ select: async () => ({ id: U, role: "individual_seller", status: sellerStatus, location: "Nairobi" }) });
+  const create = async (sellerStatus, extraBody = {}, { role = "individual_seller", emailVerified = true } = {}) => {
+    userModel.findById.mockReturnValue({ select: async () => ({ id: U, role, status: sellerStatus, location: "Nairobi" }) });
     const r = res();
-    await createCar({ user: { id: U, role: "individual_seller" }, body: { title: "T", status: "available", isVerifiedDealer: true, ...extraBody }, files: [{ path: "/tmp/a.jpg" }], get: () => undefined }, r);
+    await createCar({ user: { id: U, role, emailVerified }, body: { title: "T", status: "available", isVerifiedDealer: true, ...extraBody }, files: [{ path: "/tmp/a.jpg" }], get: () => undefined }, r);
     return r;
   };
   test("hold_for_review: an approved seller's listing is created PENDING", async () => {
@@ -302,12 +302,25 @@ describe("STAGE 5 createCar status follows the owner's listing-moderation settin
     expect(r.code).toBe(201);
     expect(carModel.create.mock.calls[0][0].status).toBe("pending");
   });
-  test("auto_publish: an approved seller's listing is published; an unapproved seller's stays pending", async () => {
+  test("auto_publish: a personal seller in good standing is published with no separate approval step", async () => {
     __setOnboardingPolicyForTests({ listingModeration: "auto_publish" });
     expect((await create("approved")).code).toBe(201);
     expect(carModel.create.mock.calls[0][0].status).toBe("available");
     carModel.create.mockClear();
+    // An old "pending" application state is not a gate when the owner has not turned approval on.
     expect((await create("pending")).code).toBe(201);
+    expect(carModel.create.mock.calls[0][0].status).toBe("available");
+    carModel.create.mockClear();
+    // A plain personal (role=user) account is a seller too.
+    expect((await create("active", {}, { role: "user" })).code).toBe(201);
+    expect(carModel.create.mock.calls[0][0].status).toBe("available");
+  });
+  test("auto_publish still holds a suspended account and an unverified email", async () => {
+    __setOnboardingPolicyForTests({ listingModeration: "auto_publish" });
+    await create("suspended");
+    expect(carModel.create.mock.calls[0][0].status).toBe("pending");
+    carModel.create.mockClear();
+    await create("approved", {}, { emailVerified: false });
     expect(carModel.create.mock.calls[0][0].status).toBe("pending");
   });
   test("unavailable policy holds the listing for review (fail safe)", async () => {
