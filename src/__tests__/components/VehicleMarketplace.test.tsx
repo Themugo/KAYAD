@@ -250,13 +250,13 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     window.localStorage.setItem('kayad_home_page_config_v1', JSON.stringify({ filterOptions: { priceSteps: [1500000, 3000000, 12000000], yearFrom: 2012 } }));
     try {
       await renderMarketplace({ ...baseProps });
-      const years = Array.from((screen.getByLabelText('Hero year filter') as HTMLSelectElement).options).map((o) => o.value);
+      const years = Array.from(((screen.getByLabelText('Hero year filter') as HTMLInputElement).list as HTMLDataListElement).options).map((o) => o.value);
       expect(years[0]).toBe('2012');
       expect(years).toContain('2018');
       expect(years).toContain('2026');
       expect(years).not.toContain('2005');
-      const prices = Array.from((screen.getByLabelText('Hero maximum price filter') as HTMLSelectElement).options).map((o) => o.textContent);
-      expect(prices).toEqual(['All', 'Ksh 1.5M', 'Ksh 3M', 'Ksh 12M']);
+      const prices = Array.from(((screen.getByLabelText('Hero maximum price filter') as HTMLInputElement).list as HTMLDataListElement).options).map((o) => o.label);
+      expect(prices).toEqual(['Ksh 1.5M', 'Ksh 3M', 'Ksh 12M']);
     } finally {
       window.localStorage.removeItem('kayad_home_page_config_v1');
     }
@@ -264,11 +264,27 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
 
   it('without settings the search keeps the standard 2005 start and default price steps', async () => {
     await renderMarketplace({ ...baseProps });
-    const years = Array.from((screen.getByLabelText('Hero year filter') as HTMLSelectElement).options).map((o) => o.value);
+    const years = Array.from(((screen.getByLabelText('Hero year filter') as HTMLInputElement).list as HTMLDataListElement).options).map((o) => o.value);
     expect(years[0]).toBe('2005');
     expect(years).toContain('2021');
-    const prices = Array.from((screen.getByLabelText('Hero maximum price filter') as HTMLSelectElement).options).map((o) => o.textContent);
-    expect(prices).toEqual(['All', 'Ksh 2.5M', 'Ksh 4M', 'Ksh 7M', 'Ksh 10M']);
+    const prices = Array.from(((screen.getByLabelText('Hero maximum price filter') as HTMLInputElement).list as HTMLDataListElement).options).map((o) => o.label);
+    expect(prices).toEqual(['Ksh 2.5M', 'Ksh 4M', 'Ksh 7M', 'Ksh 10M']);
+  });
+
+  it('make, price, year and body style are typeable inputs backed by suggestion lists', async () => {
+    await renderMarketplace({ ...baseProps });
+    for (const name of ['Hero make filter', 'Hero maximum price filter', 'Hero year filter', 'Hero body style filter']) {
+      const el = screen.getByLabelText(name) as HTMLInputElement;
+      expect(el.tagName).toBe('INPUT');
+      expect(el.getAttribute('list')).toBeTruthy();
+    }
+  });
+  it('a typed price is applied on Enter, formatted with thousands separators', async () => {
+    await renderMarketplace({ ...baseProps });
+    const price = screen.getByLabelText('Hero maximum price filter') as HTMLInputElement;
+    fireEvent.change(price, { target: { value: '3250000' } });
+    fireEvent.keyDown(price, { key: 'Enter' });
+    await waitFor(() => expect(price.value).toBe('3,250,000'));
   });
 
   it('a featured card whose image fails keeps its label over a neutral placeholder (no broken-image icon)', async () => {

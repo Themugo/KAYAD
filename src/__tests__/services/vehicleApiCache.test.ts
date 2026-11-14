@@ -42,9 +42,17 @@ describe('inventory read cache', () => {
   });
 
   it('never caches a failure', async () => {
-    requestMock.mockRejectedValueOnce(new Error('down'));
+    requestMock.mockRejectedValue(new Error('down'));
     await expect(getCars({ limit: 24 })).rejects.toBeTruthy();
+    expect(requestMock).toHaveBeenCalledTimes(2); // one automatic retry
     expect(peekCars({ limit: 24 })).toBeNull();
+  });
+
+  it('retries once after a transient failure and then succeeds', async () => {
+    requestMock.mockRejectedValueOnce(new Error('timeout')).mockResolvedValueOnce(page(6));
+    const res = await getCars({ limit: 12 });
+    expect(res.pagination?.total).toBe(6);
+    expect(requestMock).toHaveBeenCalledTimes(2);
   });
 
   it('a listing write clears the cache so sellers never see old data', async () => {

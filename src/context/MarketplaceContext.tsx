@@ -218,7 +218,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     let cancelled = false;
     setIsLoading(true);
-    getCars({ limit: 100 })
+    getCars({ limit: 50 })
       .then((response) => {
         if (cancelled) return;
         const mapped = (response.data || []).map(mapBackendCarToVehicle);

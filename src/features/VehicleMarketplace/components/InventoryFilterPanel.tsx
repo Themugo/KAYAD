@@ -31,11 +31,17 @@ type Props = {
 
 const noAny = (list: string[]) => list.filter((v) => v && v !== ANY);
 const labelCls = 'mb-1.5 block text-[11px] font-extrabold uppercase tracking-[.06em] text-[#0A3340]';
+const compactLabelCls = 'mb-1.5 block text-[10px] font-bold uppercase tracking-wide text-[#64748B]';
+const compactInputCls = 'w-full min-h-10 rounded-lg border border-[#D7E7E4] bg-[#F6FAF9] px-3 py-2 text-xs font-medium text-[#0A3340] outline-none transition-colors placeholder:text-[#94A3B8] hover:border-[#176B87] focus:border-[#176B87] focus:bg-white focus:ring-2 focus:ring-[#13B8A6]/30';
 const inputCls = 'w-full h-11 rounded-xl border border-[#CBDAD7] bg-[#F8FCFB] px-3 text-[14px] font-medium text-[#0A3340] outline-none transition-colors placeholder:text-[#94A3B8] hover:border-[#176B87] focus:border-[#176B87] focus:bg-white focus:ring-2 focus:ring-[#13B8A6]/30';
 
 /** Typed value with suggestions. Commits after a short pause, on Enter and on blur, so the server is not queried per keystroke. */
-export function ComboField({ id, label, value, suggestions, placeholder, onCommit, inputMode }: {
+export function ComboField({ id, label, value, suggestions, placeholder, onCommit, inputMode, ariaLabel, compact }: {
   id: string; label: string; value: string; suggestions: string[]; placeholder: string; onCommit: (v: string) => void; inputMode?: 'text' | 'search';
+  /** Overrides the accessible name (defaults to "<label> filter"). */
+  ariaLabel?: string;
+  /** Compact caption + field for the home search bar. */
+  compact?: boolean;
 }) {
   const listId = useId();
   const shown = value === ANY ? '' : value;
@@ -52,7 +58,7 @@ export function ComboField({ id, label, value, suggestions, placeholder, onCommi
   };
   return (
     <div>
-      <label htmlFor={id} className={labelCls}>{label}</label>
+      <label htmlFor={id} className={compact ? compactLabelCls : labelCls}>{label}</label>
       <div className="relative">
         <input
           id={id}
@@ -65,8 +71,8 @@ export function ComboField({ id, label, value, suggestions, placeholder, onCommi
           value={draft}
           placeholder={placeholder}
           maxLength={40}
-          aria-label={`${label} filter`}
-          className={`${inputCls} ${draft ? 'pr-9' : ''}`}
+          aria-label={ariaLabel || `${label} filter`}
+          className={`${compact ? compactInputCls : inputCls} ${draft ? 'pr-9' : ''}`}
           onChange={(e) => { setDraft(e.target.value); window.clearTimeout(timer.current); const v = e.target.value; timer.current = window.setTimeout(() => commit(v), 450); }}
           onBlur={() => commit(draft)}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commit(draft); } }}
@@ -83,9 +89,13 @@ export function ComboField({ id, label, value, suggestions, placeholder, onCommi
 }
 
 /** A number typed by hand, shown with thousands separators. Empty means "no limit". */
-export function NumberField({ id, label, value, emptyValue, placeholder, max, onCommit }: {
+export function NumberField({ id, label, value, emptyValue, placeholder, max, onCommit, ariaLabel, compact, suggestions }: {
   id: string; label: string; value: number; emptyValue: number; placeholder: string; max: number; onCommit: (n: number) => void;
+  ariaLabel?: string; compact?: boolean;
+  /** Optional picks offered while typing; typing any other number is always allowed. */
+  suggestions?: Array<{ value: number; label?: string }>;
 }) {
+  const listId = useId();
   const fmt = (n: number) => (n === emptyValue || !n ? '' : n.toLocaleString('en-KE'));
   const [draft, setDraft] = useState(fmt(value));
   const last = useRef(value);
@@ -99,21 +109,29 @@ export function NumberField({ id, label, value, emptyValue, placeholder, max, on
   };
   return (
     <div className="min-w-0">
-      <label htmlFor={id} className={labelCls}>{label}</label>
+      <label htmlFor={id} className={compact ? compactLabelCls : labelCls}>{label}</label>
       <input
         id={id}
         type="text"
         inputMode="numeric"
+        list={suggestions?.length ? listId : undefined}
         autoComplete="off"
         enterKeyHint="done"
         placeholder={placeholder}
         value={draft}
-        aria-label={label}
-        className={`${inputCls} tabular-nums`}
-        onChange={(e) => setDraft(e.target.value.replace(/[^\d,\s]/g, ''))}
+        aria-label={ariaLabel || label}
+        className={`${compact ? compactInputCls : inputCls} tabular-nums`}
+        onChange={(e) => {
+          const text = e.target.value.replace(/[^\d,\s]/g, '');
+          setDraft(text);
+          // Choosing an item from the suggestion list (not typing) applies straight away.
+          const kind = (e.nativeEvent as InputEvent).inputType;
+          if (suggestions?.length && (kind === undefined || kind === 'insertReplacementText')) commit(text);
+        }}
         onBlur={() => commit(draft)}
         onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commit(draft); } }}
       />
+      {suggestions?.length ? <datalist id={listId}>{suggestions.map((sug) => <option key={sug.value} value={String(sug.value)} label={sug.label} />)}</datalist> : null}
     </div>
   );
 }

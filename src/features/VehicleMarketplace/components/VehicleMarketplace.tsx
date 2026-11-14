@@ -1,6 +1,6 @@
 import './homepage-redesign.css';
 import React, { useState, useMemo, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
-import InventoryFilterPanel, { ANY, type FilterValues } from './InventoryFilterPanel';
+import InventoryFilterPanel, { ANY, ComboField, NumberField, type FilterValues } from './InventoryFilterPanel';
 import { CONDITIONS } from '../../../constants/vehicleOptions';
 import { Vehicle, UserProfile } from '../../../types';
 import InventoryCardMedia from './InventoryCardMedia';
@@ -379,6 +379,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // results stay on screen (dimmed) instead of collapsing to an empty skeleton.
   const hasLoadedOnce = useRef(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [slowLoad, setSlowLoad] = useState(false);
   useLayoutEffect(() => {
     if (savedOnly) return;
     let cancelled = false;
@@ -405,6 +406,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       setServerLoading(true);
     }
 
+    setSlowLoad(false);
+    const slowTimer = window.setTimeout(() => { if (!cancelled) setSlowLoad(true); }, 6000);
     (cached ? getCars(serverQuery, { force: true }) : getCars(serverQuery))
       .then((res) => { if (!cancelled) apply(res); })
       .catch((err) => {
@@ -418,10 +421,11 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         setServerTotalPages(1);
       })
       .finally(() => {
-        if (!cancelled) { setServerLoading(false); setRefreshing(false); }
+        window.clearTimeout(slowTimer);
+        if (!cancelled) { setServerLoading(false); setRefreshing(false); setSlowLoad(false); }
       });
 
-    return () => { cancelled = true; };
+    return () => { cancelled = true; window.clearTimeout(slowTimer); };
   }, [serverQuery, serverRetryKey, savedOnly]);
 
   // Saved surface: use the resolved collection supplied by App rather than
@@ -1320,7 +1324,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {/* 2. SEARCH BRIDGE - overlaps the hero, real, wired filter fields */}
       {!savedOnly && homeConfig.sectionVisibility.searchTrustCard && (
-      <div className="kayad-search-bridge relative z-10 mt-3 w-full px-3 sm:-mt-12 sm:px-5 lg:px-8">
+      <div className="kayad-search-bridge relative z-10 mt-3 w-full px-3 sm:mt-4 sm:px-5 lg:px-8">
         <div className="flex items-center gap-2 rounded-2xl border border-[#D7E7E4] bg-white p-2 shadow-[0_10px_28px_rgba(11,29,58,.08)] sm:hidden" data-testid="mobile-search-row">
           <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl bg-[#F6FAF9] px-3">
             <Search className="h-4 w-4 shrink-0 text-[#94A3B8]" aria-hidden="true" />
@@ -1344,8 +1348,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             {activeSidebarFilters > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-[#13B8A6] px-1 text-[11px] font-black text-[#06303A]">{activeSidebarFilters}</span>}
           </button>
         </div>
-        <div className="hidden w-full rounded-2xl border border-[#D7E7E4] bg-white p-3.5 shadow-[0_18px_45px_rgba(11,29,58,.10)] sm:grid sm:p-5 grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
-          <div className="col-span-2 lg:col-span-1 flex flex-col gap-1.5 min-w-0">
+        <div className={`hidden w-full rounded-2xl border border-[#D7E7E4] bg-white p-3.5 shadow-[0_18px_45px_rgba(11,29,58,.10)] sm:grid sm:p-5 grid-cols-2 sm:grid-cols-2 ${showDesktopSidebar ? 'lg:grid-cols-5' : 'lg:grid-cols-6'} gap-3 items-end`}>
+          <div className={`col-span-2 ${showDesktopSidebar ? 'lg:col-span-2' : 'lg:col-span-1'} flex flex-col gap-1.5 min-w-0`}>
             <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Search</label>
             <div className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 flex items-center gap-2 bg-[#F6FAF9]">
               <Search className="w-3.5 h-3.5 text-[#94A3B8] shrink-0" />
@@ -1360,7 +1364,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
             {/* The label follows its select: when the select is hidden by the sidebar the label stays in the grid cell (layout unchanged) but is invisible, so no orphaned "MAKE" caption remains. */}
-            <label className={`text-[10px] font-bold uppercase tracking-wide text-[#64748B] ${showDesktopSidebar ? 'lg:invisible' : ''}`}>Make</label>
             {/* Fixed: this select was always visible regardless of the
                 sidebar, but the sidebar has its own Make selector too -
                 showing both at once above the lg: breakpoint is
@@ -1369,49 +1372,18 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 always CSS-hidden), matching the sidebar's own
                 already-established pattern for this exact class of
                 redundancy. */}
-            <select
-              value={selectedMake}
-              onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }}
-              aria-label="Hero make filter"
-              className={`border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-xs bg-[#F6FAF9] outline-none ${showDesktopSidebar ? 'lg:hidden' : ''}`}
-            >
-              {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
-            </select>
+            <div className={showDesktopSidebar ? 'lg:hidden' : ''}>
+              <ComboField compact id="hero-make" label="Make" ariaLabel="Hero make filter" value={selectedMake} suggestions={makes.filter((m) => m && m !== 'All')} placeholder="Any make — pick or type" onCommit={(make) => { setSelectedMake(make); setSelectedModel('All'); }} />
+            </div>
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Price up to</label>
-            <select
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(Number(e.target.value))}
-              aria-label="Hero maximum price filter"
-              className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-xs bg-[#F6FAF9] outline-none"
-            >
-              <option value={20000000}>All</option>
-              {priceSteps.map((step) => <option key={step} value={step}>Ksh {shortAmount(step)}</option>)}
-              {maxPrice !== 20000000 && !priceSteps.includes(maxPrice) && <option value={maxPrice}>Ksh {shortAmount(maxPrice)}</option>}
-            </select>
+            <NumberField compact id="hero-max-price" label="Price up to (KES)" ariaLabel="Hero maximum price filter" value={maxPrice} emptyValue={MAX_PRICE} max={MAX_PRICE} placeholder="Any — pick or type" suggestions={priceSteps.map((step) => ({ value: step, label: `Ksh ${shortAmount(step)}` }))} onCommit={(n) => setMaxPrice(n)} />
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Year</label>
-            <select
-              value={minYear || yearChoices[0]}
-              onChange={(e) => { const y = Number(e.target.value); setMinYear(y <= filterOptions.yearFrom ? 0 : y); }}
-              aria-label="Hero year filter"
-              className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-xs bg-[#F6FAF9] outline-none"
-            >
-              {yearChoices.map((y) => <option key={y} value={y}>{y} – {currentYear}</option>)}
-            </select>
+            <NumberField compact id="hero-min-year" label="Year from" ariaLabel="Hero year filter" value={minYear} emptyValue={0} max={currentYear} placeholder={`${filterOptions.yearFrom} – ${currentYear}`} suggestions={yearChoices.map((y) => ({ value: y }))} onCommit={(y) => setMinYear(y > 0 && y <= filterOptions.yearFrom ? 0 : y)} />
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Body Style</label>
-            <select
-              value={selectedBodyStyle}
-              onChange={(e) => setSelectedBodyStyle(e.target.value)}
-              aria-label="Hero body style filter"
-              className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-xs bg-[#F6FAF9] outline-none"
-            >
-              {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
-            </select>
+            <ComboField compact id="hero-body" label="Body style" ariaLabel="Hero body style filter" value={selectedBodyStyle} suggestions={bodyStyles.filter((b) => b && b !== 'All')} placeholder="Any — pick or type" onCommit={(body) => setSelectedBodyStyle(body)} />
           </div>
           <button
             onClick={() => document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })}
@@ -1662,7 +1634,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </div>
             )}
             {isLoading && !(hasLoadedOnce.current && serverVehicles.length > 0) ? (
-              <SkeletonGrid count={pageSize} />
+              <>
+                {slowLoad && (
+                  <p role="status" data-testid="inventory-slow-hint" className="mb-3 rounded-xl border border-[#BDE5DE] bg-[#E6F6F3] px-3 py-2 text-xs font-semibold text-[#12576D]">
+                    Still loading — the server may be waking up. This can take up to a minute; we’ll keep trying.
+                  </p>
+                )}
+                <SkeletonGrid count={pageSize} />
+              </>
             ) : (loadError || serverError) ? (
               <div role="status" className="rounded-2xl border border-[#D7E7E4] bg-white px-6 py-14 text-center shadow-sm">
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF5F3] text-navy-600"><AlertTriangle className="h-5 w-5" aria-hidden="true" /></div>

@@ -182,9 +182,9 @@ function errorDetailsFrom(body: unknown): VehicleApiErrorDetails | undefined {
   return Object.keys(details).length ? details : undefined;
 }
 
-async function vehicleFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function vehicleFetch<T>(path: string, options: RequestInit = {}, timeout?: number): Promise<T> {
   try {
-    return await request<T>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string> });
+    return await request<T>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string>, ...(timeout ? { timeout } : {}) });
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
     const kind: VehicleApiErrorKind = error.status === 404 ? 'not_found' : error.status ? 'server' : 'network';
@@ -237,6 +237,12 @@ export interface GetCarsParams {
 /** GET /api/cars - real, paginated listing. Query params match
  * backend/controllers/carController.js's getCars destructured
  * req.query fields directly. */
+function isTransientInventoryError(err: unknown): boolean {
+  if (!(err instanceof VehicleApiError)) return false;
+  if (err.maintenance) return false;
+  return err.kind === 'network' || err.status === 408 || err.status === 502 || err.status === 503 || err.status === 504;
+}
+
 // ---------------------------------------------------------------------------
 // Inventory read cache (stale-while-revalidate).
 // The marketplace, the app shell and the market context all read the same
@@ -247,6 +253,8 @@ export interface GetCarsParams {
 // ---------------------------------------------------------------------------
 const FRESH_MS = 30_000;
 const STALE_MS = 10 * 60_000;
+const FIRST_ATTEMPT_MS = 20_000;
+const RETRY_ATTEMPT_MS = 45_000;
 const STORE_KEY = 'kayad:cars-cache:v1';
 const MAX_STORED = 6;
 type CacheEntry = { at: number; data: PaginatedCarsResponse };
@@ -322,7 +330,15 @@ export async function getCars(params: GetCarsParams = {}, opts: { force?: boolea
   }
   const pending = carsInflight.get(key);
   if (pending) return pending;
-  const run = vehicleFetch<PaginatedCarsResponse>(`/api/cars${carsQuery(params) ? `?${carsQuery(params)}` : ''}`, { method: 'GET' })
+  const path = `/api/cars${carsQuery(params) ? `?${carsQuery(params)}` : ''}`;
+  // A first attempt that fails for a transient reason (no response, 408/502/503/504 other than maintenance) is retried once
+  // with a longer allowance, which is what a server that is still waking up needs. Skipped under test and for definite answers.
+  const run = vehicleFetch<PaginatedCarsResponse>(path, { method: 'GET' }, cacheEnabled ? FIRST_ATTEMPT_MS : undefined)
+    .catch(async (err) => {
+      if (!cacheEnabled || !isTransientInventoryError(err)) throw err;
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      return vehicleFetch<PaginatedCarsResponse>(path, { method: 'GET' }, RETRY_ATTEMPT_MS);
+    })
     .then((data) => {
       if (cacheEnabled) { carsCache.set(key, { at: Date.now(), data }); saveStore(); }
       return data;
