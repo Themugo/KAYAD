@@ -124,3 +124,10 @@ Method: full automated suites per domain, plus targeted source review of the are
 - Dealer dashboard on phones: sticky app bar, slide-over menu (closes on selection and Escape, page does not scroll behind it), vertical grouped navigation instead of a horizontal strip, 2-column KPI cards, compact inventory rows with a thumbnail, status and three equal-width actions, search/filters on a grid, Marketing form no longer overflows. All 15 sections measured at 390 px: no horizontal overflow.
 - Evidence: full backend batch run (jest in chunks) before the test updates: 4,009 passed, 1 failed, and 3 suites could not load because their mocks lacked the new export; after updating those mocks and the one outdated expectation, the 4 affected suites pass (74 tests). The full backend batch was not re-run end to end after that. Plus 2 new tests, backend vitest 36, node 1. Frontend vitest 194 files / 1,600 passed; tsc clean; build OK.
 - Not verified: real devices, signed-in dealer data shapes (screenshots use stubbed API), live Supabase.
+
+## R14 addendum
+- `backend/openapi.yaml` now documents `GET /api/dealer-platform/my-workspace` (YAML parses).
+- Personal-account pages (dashboard, seller platform, buyer platform, profile, saved, payments, notifications) measured at phone width with a stubbed personal login: no page-level horizontal overflow (only clipped decorative/marquee elements).
+- Private-seller page wording no longer says private selling is added "once approved"; it states no seller approval or package is needed, matching the no-approval listing rule.
+- Verified: frontend vitest 194 files / 1,600 passed, tsc clean, build OK, V14 contract 15/15, mobile-navigation validator run.
+- Still open: members can read and act on inventory/leads/customers through the workspace screen, but there is no create/edit-vehicle form there yet (backend routes already allow it with `canListCars`/`canEditCars`); dashboard/analytics are not surfaced for members; G-20/G-25 owner SQL review; G-26 live policy switch; releasing the already-pending vehicle (owner-run script); live Supabase/provider UAT; real-device check (G-27).

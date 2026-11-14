@@ -337,7 +337,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
           <h1 id="kayad-sell-entry-title">Your next sale should feel simpler.</h1>
           <p>Present your vehicle clearly and manage genuine buyer conversations from one dedicated workspace. Private seller access is free and does not require a seller application or package.</p>
           <div className="kayad-sell-entry__trust-row" aria-label="Seller workflow benefits">
-            <span><ShieldCheck size={16} aria-hidden="true" /> Free private selling · listing moderation remains separate</span>
+            <span><ShieldCheck size={16} aria-hidden="true" /> Free private selling · no seller approval needed</span>
             <span><MessageSquare size={16} aria-hidden="true" /> Buyer conversations</span>
             <span><FileCheck size={16} aria-hidden="true" /> Inspection options</span>
           </div>
@@ -347,7 +347,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
           <div className="kayad-sell-entry__intro">
             <span>CHOOSE YOUR SELLING WORKSPACE</span>
             <h2>Built for how you sell.</h2>
-            <p>{signedInWithoutSellerAccess ? (personalRole ? 'You are signed in with your personal account. Private selling is added to this same account once approved; you do not need a second account.' : 'Your current account is signed in, but seller tools are not enabled for this role. Request the correct access instead of creating a duplicate account.') : 'Start with the right account type. You can sign in with an existing KAYAD account instead of creating another one.'}</p>
+            <p>{signedInWithoutSellerAccess ? (personalRole ? 'You are signed in with your personal account. You can list vehicles from this same account with no seller approval or package; you do not need a second account.' : 'Your current account is signed in, but seller tools are not enabled for this role. Request the correct access instead of creating a duplicate account.') : 'Start with the right account type. You can sign in with an existing KAYAD account instead of creating another one.'}</p>
           </div>
           <div className="kayad-sell-entry__choices">
             <button type="button" aria-pressed={!isDealer} onClick={() => setSellerAccountType('seller')} className={`kayad-sell-choice ${!isDealer ? 'is-selected' : ''}`}>
