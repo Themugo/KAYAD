@@ -301,19 +301,14 @@ export async function reawardAuctionOutcome({ outcomeId, actorId, req = null }) 
   }
   if (!candidate) throw error("No currently eligible losing bidder meeting the auction reserve is available for re-award", 409, "AUCTION_NO_REAWARD_CANDIDATE");
 
-  const setupConfig = setup.config || {};
-  const commitmentCreditEnabled = setupConfig?.commitment?.creditTowardWinningPayment !== false;
-  const winnerCommitment = await findOne("auction_security_holds", {
-    auction_id: outcome.car_id, bidder_id: candidate.user_id,
-    hold_type: "commitment", status: "applied",
-  });
-  const commitmentApplied = commitmentCreditEnabled
-    ? Math.min(Number(winnerCommitment?.amount || 0), Number(candidate.amount || 0))
-    : 0;
-  const paymentDueAmount = Math.max(0, Number(candidate.amount || 0) - commitmentApplied);
-
-  const nextStatus = outcome.settlement_mode === "escrow" ? "escrow_pending_funding" : "payment_due";
-  const paymentDueAt = new Date(Date.now() + Number(setup.config?.paymentDeadlineHours || 24) * 3600000).toISOString();
+  // Commitment credit, bidder status, reserve and payment amount are revalidated
+  // inside the row-locked SQL function. Application checks above only select a
+  // candidate; they are not the financial authority.
+  const paymentDeadlineHours = Number(setup.config?.paymentDeadlineHours || 24);
+  if (!Number.isFinite(paymentDeadlineHours) || paymentDeadlineHours < 1 || paymentDeadlineHours > 168) {
+    throw error("Auction payment deadline is outside the permitted platform range", 409, "AUCTION_PAYMENT_DEADLINE_INVALID");
+  }
+  const paymentDueAt = new Date(Date.now() + paymentDeadlineHours * 3600000).toISOString();
 
   // The PostgreSQL function locks the outcome and candidate bid and commits
   // the winner reassignment as one transaction. Do not emulate this with

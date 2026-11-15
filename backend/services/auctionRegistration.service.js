@@ -5,6 +5,7 @@ import { logActionFromReq } from "../utils/securityLogger.js";
 import { normalizeAuctionSetup, validateConfig } from "./auctionSetup.contract.js";
 import { initiateBidSecurity } from "./bidSecurityService.js";
 import { createAuctionSecurityHold } from "./auctionFinancialIntegrity.service.js";
+import { getAuctionPlatformPolicy } from "./auctionPlatformPolicy.service.js";
 
 const ACTIVE = "active";
 const REGISTRATION_STATES = ["not_registered","registration_started","pending_verification","pending_eligibility","pending_commitment","active","suspended","withdrawn","disqualified","expired"];
@@ -27,7 +28,16 @@ function evaluateEligibility(user, config) {
     { id: "email_verified", required: Boolean(req.emailVerified), ok: Boolean(user?.email && user?.emailVerified) },
     { id: "identity_verified", required: Boolean(req.identityVerified), ok: String(user?.verificationStatus || "").toLowerCase() === "verified" || Boolean(user?.identityVerified) },
     { id: "organization_verified", required: Boolean(req.organizationVerified), ok: Boolean(user?.organizationVerified || user?.businessVerified) },
-    { id: "account_not_banned", required: true, ok: Boolean(user) && user?.isBanned !== true && !["banned", "suspended", "deactivated"].includes(String(user?.status || "").toLowerCase()) && user?.deactivatedAt == null },
+    { id: "account_not_banned", required: true, ok: Boolean(user)
+      && user?.isBanned !== true
+      && user?.is_banned !== true
+      && !["banned", "suspended", "rejected", "deactivated", "deleted"].includes(String(user?.status || "").toLowerCase())
+      && user?.deactivatedAt == null
+      && user?.deactivated_at == null
+      && user?.deletedAt == null
+      && user?.deleted_at == null
+      && user?.isDeleted !== true
+      && user?.is_deleted !== true },
   ];
   const blockers = checks.filter(c => c.required && !c.ok).map(c => c.id);
   return { eligible: blockers.length === 0, blockers, checks };
@@ -135,9 +145,15 @@ export async function initiateRegistrationCommitment({ auctionId, userId, req })
   const config = normalizeAuctionSetup(setup?.config || {});
   const amount = commitmentAmount(config);
   if (!amount || amount <= 0) throw Object.assign(new Error("A fixed commitment amount is required for payment initiation"), { status: 422 });
+  const platformPolicy = await getAuctionPlatformPolicy();
   const hold = await createAuctionSecurityHold({
     auctionId, bidderId: userId, registrationId: registration.id, holdType: "commitment", amount,
-    policySnapshot: { commitmentAmount: amount, creditTowardWinningPayment: true },
+    policySnapshot: {
+      commitmentAmount: amount,
+      creditTowardWinningPayment: platformPolicy.commitmentCreditTowardWinningPayment !== false
+        && config.commitment?.creditTowardWinningPayment !== false,
+      nonWinnerCommitmentRefundRequired: platformPolicy.nonWinnerCommitmentRefundRequired !== false,
+    },
   });
   const result = await initiateBidSecurity({ auctionId, userId, phone: user.phone, amount, registrationId: registration.id, holdId: hold.id, holdType: "commitment" });
   if (!result.success) throw Object.assign(new Error(result.message || "Unable to initiate commitment"), { status: 502 });
@@ -154,6 +170,15 @@ export async function finalizeCommitmentRegistration({ checkoutRequestID, succes
   const registration = await findById("auction_registrations", registrationId);
   if (!registration) return null;
   if (!success) { await update("auction_registrations", registration.id, { commitment_status: "failed", status: "pending_commitment" }); return registration; }
+  // A payment cannot reverse an independent administrative or user withdrawal
+  // state. Record the paid commitment but preserve the registration restriction.
+  if (["suspended", "withdrawn", "disqualified", "expired"].includes(registration.status)) {
+    return update("auction_registrations", registration.id, {
+      commitment_status: "satisfied",
+      commitment_transaction_id: tx.id,
+      commitment_receipt: receipt || null,
+    });
+  }
   // A provider callback proves that money was received; it does not grant
   // bidder eligibility. Re-read the member and current auction requirements
   // before activating the bidder pass.
@@ -192,8 +217,10 @@ export async function finalizeCommitmentRegistration({ checkoutRequestID, succes
 }
 
 export async function assertBidderAuthorized({ auctionId, userId }) {
-  const { setup } = await getContext(auctionId, userId);
+  const { setup, user } = await getContext(auctionId, userId);
   if (!setup || setup.publication_status !== "published") throw Object.assign(new Error("Auction is not published"), { status: 409, code: "AUCTION_NOT_PUBLISHED" });
+  const currentEligibility = evaluateEligibility(user, normalizeAuctionSetup(setup.config || {}));
+  if (!currentEligibility.eligible) throw Object.assign(new Error("Current bidder account eligibility is not satisfied"), { status: 403, code: "BIDDER_NOT_ELIGIBLE", blockers: currentEligibility.blockers });
   const registration = await findOne("auction_registrations", { auction_id: auctionId, bidder_id: userId });
   if (!registration || registration.status !== ACTIVE || registration.eligibility_status !== "eligible") throw Object.assign(new Error("Active auction registration and eligibility are required before bidding"), { status: 403, code: "BIDDER_REGISTRATION_REQUIRED" });
   if (registration.commitment_required && registration.commitment_status !== "satisfied") throw Object.assign(new Error("Auction commitment must be satisfied before bidding"), { status: 403, code: "BIDDER_COMMITMENT_REQUIRED" });
