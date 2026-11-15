@@ -64,6 +64,8 @@ export async function getDealerAuctionCapabilities() {
       min: Number(policy.minPaymentDeadlineHours),
       max: Number(policy.maxPaymentDeadlineHours),
     },
+    commitmentCreditTowardWinningPayment: policy.commitmentCreditTowardWinningPayment !== false,
+    nonWinnerCommitmentRefundRequired: policy.nonWinnerCommitmentRefundRequired !== false,
   };
 }
 
@@ -74,6 +76,11 @@ export async function setAuctionPlatformPolicy({ config, actorId }) {
   }
   if (Number(normalized.minPaymentDeadlineHours) <= 0 || Number(normalized.maxPaymentDeadlineHours) < Number(normalized.minPaymentDeadlineHours) || Number(normalized.maxPaymentDeadlineHours) > 168) {
     throw Object.assign(new Error("Invalid platform payment deadline bounds"), { status: 400 });
+  }
+  for (const key of ["commitmentCreditTowardWinningPayment", "nonWinnerCommitmentRefundRequired"]) {
+    if (typeof normalized[key] !== "boolean") {
+      throw Object.assign(new Error(`Invalid auction platform policy: ${key} must be boolean`), { status: 400 });
+    }
   }
   const existing = await findOne("auction_platform_policies", { id: 1 });
   const payload = { id: 1, config: normalized, updated_by: actorId, updated_at: new Date().toISOString() };

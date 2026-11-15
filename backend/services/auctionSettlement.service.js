@@ -7,7 +7,9 @@ import { getSupabase } from "../utils/supabase.js";
 import { atomicSettleAuctionWinnerPayment, atomicDefaultAuctionWinner } from "../utils/atomicTransactions.js";
 
 const nowIso = () => new Date().toISOString();
-const policyAllowsCommitmentCredit = (config) => config?.commitment?.creditTowardWinningPayment !== false;
+const policyAllowsCommitmentCredit = (config, platformPolicy) =>
+  platformPolicy?.commitmentCreditTowardWinningPayment !== false
+  && config?.commitment?.creditTowardWinningPayment !== false;
 
 export async function ensureAuctionOutcome({ carId, closeResult, req = null }) {
   const car = await findById("cars", carId);
@@ -15,13 +17,14 @@ export async function ensureAuctionOutcome({ carId, closeResult, req = null }) {
   const setup = await findOne("auction_setups", { car_id: carId });
   if (!setup || setup.publicationStatus !== "published") throw Object.assign(new Error("Auction setup is not published"), { status: 409 });
 
+  const platformPolicy = await getAuctionPlatformPolicy();
   const existing = await findOne("auction_outcomes", { car_id: carId });
   if (existing) {
     if (existing.securityReconciliationStatus !== "reconciled" && existing.status !== "no_sale" && existing.winnerUserId) {
       try {
         await reconcileAuctionSecurityHolds({ auctionId: carId, outcomeId: existing.id, winnerUserId: existing.winnerUserId });
-        const winnerCommitment = await findOne("auction_security_holds", { auction_id: carId, bidder_id: existing.winnerUserId, hold_type: "commitment", status: "applied" });
-        const applied = winnerCommitment && policyAllowsCommitmentCredit(setup.config || {}) ? Math.min(Number(winnerCommitment.amount || 0), Number(existing.winningAmount || 0)) : 0;
+        const winnerCommitment = await findOne("auction_security_holds", { auction_id: carId, bidder_id: existing.winnerUserId, hold_type: "commitment", status: "applied", applied_outcome_id: existing.id });
+        const applied = winnerCommitment && policyAllowsCommitmentCredit(setup.config || {}, platformPolicy) ? Math.min(Number(winnerCommitment.amount || 0), Number(existing.winningAmount || 0)) : 0;
         return update("auction_outcomes", existing.id, {
           commitment_applied_amount: applied,
           payment_due_amount: Math.max(0, Number(existing.winningAmount || 0) - applied),
@@ -70,9 +73,9 @@ export async function ensureAuctionOutcome({ carId, closeResult, req = null }) {
     try {
       await reconcileAuctionSecurityHolds({ auctionId: carId, outcomeId: created.id, winnerUserId: winner?.user || null });
       const winnerCommitment = winner?.user
-        ? await findOne("auction_security_holds", { auction_id: carId, bidder_id: winner.user, hold_type: "commitment", status: "applied" })
+        ? await findOne("auction_security_holds", { auction_id: carId, bidder_id: winner.user, hold_type: "commitment", status: "applied", applied_outcome_id: created.id })
         : null;
-      const applied = winnerCommitment && policyAllowsCommitmentCredit(config) ? Math.min(Number(winnerCommitment.amount || 0), amount) : 0;
+      const applied = winnerCommitment && policyAllowsCommitmentCredit(config, platformPolicy) ? Math.min(Number(winnerCommitment.amount || 0), amount) : 0;
       const reconciled = await update("auction_outcomes", created.id, {
         commitment_applied_amount: applied,
         payment_due_amount: Math.max(0, amount - applied),
@@ -223,9 +226,10 @@ export async function defaultAuctionWinner({ outcomeId, actorId, req = null }) {
     throw Object.assign(new Error(e.message), { status });
   }
   if (result.idempotent) return findById("auction_outcomes", outcome.id);
-  if (!reawardAllowed) {
-    await forfeitAuctionWinnerSecurityHolds({ outcomeId: outcome.id, actorId });
-  }
+  // The defaulted winner's commitment is forfeited regardless of whether a
+  // second bidder may receive the vehicle. This prevents that same hold from
+  // being reused as credit if the former winner appears in a later re-award.
+  await forfeitAuctionWinnerSecurityHolds({ outcomeId: outcome.id, actorId });
   await logActionFromReq(req, "auction_winner_defaulted", { target: outcome.carId, targetModel: "Car", details: { outcomeId: outcome.id, reawardAllowed } }).catch(() => {});
   return findById("auction_outcomes", outcome.id);
 }

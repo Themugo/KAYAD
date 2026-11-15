@@ -5,6 +5,8 @@ import { getAuctionPlatformPolicy } from "./auctionPlatformPolicy.service.js";
 import { ownershipService } from "../ownership/services/ownershipService.js";
 import { openDispute as openEscrowDispute } from "./dispute.service.js";
 import { governanceService } from "../governance/services/governanceService.js";
+import { assertBidderAuthorized } from "./auctionRegistration.service.js";
+import { getSupabase } from "../utils/supabase.js";
 
 const nowIso = () => new Date().toISOString();
 const error = (message, status = 409, code = null) => Object.assign(new Error(message), { status, ...(code ? { code } : {}) });
@@ -284,36 +286,50 @@ export async function reawardAuctionOutcome({ outcomeId, actorId, req = null }) 
   const candidates = await findAll("bids", { filters: { car_id: outcome.car_id, status: "lost" }, limit: 500, sort: { amount: -1, created_at: 1 } });
   const reserveMode = car?.reserve_mode || "none";
   const reservePrice = Number(car?.reserve_price || 0);
-  const candidate = candidates.find((bid) => String(bid.user_id) !== String(previousWinner) && (reserveMode !== "hard" || !reservePrice || Number(bid.amount) >= reservePrice));
-  if (!candidate) throw error("No eligible losing bidder meeting the auction reserve is available for re-award", 409, "AUCTION_NO_REAWARD_CANDIDATE");
-
-  const claimedBid = await updateMany("bids", { id: candidate.id, status: "lost" }, { status: "won" });
-  if (!claimedBid.length) throw error("The selected re-award candidate was already claimed; retry", 409, "AUCTION_REAWARD_CONCURRENT");
-
-  const nextStatus = outcome.settlement_mode === "escrow" ? "escrow_pending_funding" : "payment_due";
-  const guarded = await updateMany("auction_outcomes", { id: outcome.id, status: "reaward_pending", reaward_enabled: true }, {
-    status: nextStatus,
-    winner_user_id: candidate.user_id,
-    winning_bid_id: candidate.id,
-    winning_amount: Number(candidate.amount),
-    payment_status: "pending",
-    payment_id: null,
-    payment_receipt: null,
-    payment_due_at: new Date(Date.now() + Number(setup.config?.paymentDeadlineHours || 24) * 3600000).toISOString(),
-    defaulted_at: null,
-    defaulted_by: null,
-    reaward_count: Number(outcome.reaward_count || 0) + 1,
-    collection_status: "pending_payment",
-    transfer_status: "pending_payment",
-    completed_at: null,
-    dispute_reference: null,
-    dispute_opened_at: null,
-  });
-  if (!guarded.length) {
-    await update("bids", candidate.id, { status: "lost" }).catch(() => {});
-    throw error("Auction re-award changed while being processed; retry", 409, "AUCTION_REAWARD_CONCURRENT");
+  let candidate = null;
+  for (const bid of candidates) {
+    if (String(bid.user_id) === String(previousWinner)) continue;
+    if (reserveMode === "hard" && reservePrice > 0 && Number(bid.amount) < reservePrice) continue;
+    try {
+      await assertBidderAuthorized({ auctionId: outcome.car_id, userId: bid.user_id });
+      candidate = bid;
+      break;
+    } catch (_) {
+      // A historical losing bid is not sufficient: registration, eligibility
+      // and required commitment must still be valid at the time of re-award.
+    }
   }
-  const updated = guarded[0];
+  if (!candidate) throw error("No currently eligible losing bidder meeting the auction reserve is available for re-award", 409, "AUCTION_NO_REAWARD_CANDIDATE");
+
+  // Commitment credit, bidder status, reserve and payment amount are revalidated
+  // inside the row-locked SQL function. Application checks above only select a
+  // candidate; they are not the financial authority.
+  const paymentDeadlineHours = Number(setup.config?.paymentDeadlineHours || 24);
+  if (!Number.isFinite(paymentDeadlineHours) || paymentDeadlineHours < 1 || paymentDeadlineHours > 168) {
+    throw error("Auction payment deadline is outside the permitted platform range", 409, "AUCTION_PAYMENT_DEADLINE_INVALID");
+  }
+  const paymentDueAt = new Date(Date.now() + paymentDeadlineHours * 3600000).toISOString();
+
+  // The PostgreSQL function locks the outcome and candidate bid and commits
+  // the winner reassignment as one transaction. Do not emulate this with
+  // separate PostgREST writes and compensating rollback.
+  const { data: atomicResult, error: atomicError } = await getSupabase().rpc(
+    "kayad_reaward_auction_outcome_atomic",
+    {
+      p_outcome_id: outcome.id,
+      p_candidate_bid_id: candidate.id,
+      p_actor_id: actorId,
+      p_expected_previous_winner_id: previousWinner,
+      p_payment_due_at: paymentDueAt,
+    }
+  );
+  if (atomicError) {
+    const conflict = /concurrent|already claimed|not awaiting re-award|candidate bid/i.test(atomicError.message || "");
+    throw error(atomicError.message || "Atomic auction re-award failed", conflict ? 409 : 500,
+      conflict ? "AUCTION_REAWARD_CONCURRENT" : "AUCTION_REAWARD_ATOMIC_FAILED");
+  }
+  const updated = atomicResult?.outcome || atomicResult;
+  if (!updated?.id) throw error("Atomic auction re-award returned no outcome", 500, "AUCTION_REAWARD_ATOMIC_INVALID_RESULT");
 
   await emitCommunication({
     userId: candidate.user_id,
