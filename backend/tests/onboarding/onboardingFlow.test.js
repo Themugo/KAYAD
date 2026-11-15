@@ -45,7 +45,7 @@ const { approveApplication } = await import("../../controllers/inspectorApplicat
 const { createCar } = await import("../../controllers/carController.js");
 const atomicMock = await import("../../utils/atomicTransactions.js");
 const { __setOnboardingPolicyForTests } = await import("../../services/onboardingPolicy.service.js");
-beforeEach(() => __setOnboardingPolicyForTests({})); // STAGE 5 default: approval_required
+beforeEach(() => __setOnboardingPolicyForTests({})); // STAGE 5 default: dealer self_onboarding
 
 const res = () => { const r = { code: 200, body: null, status(c) { this.code = c; return this; }, json(b) { this.body = b; return this; } }; return r; };
 beforeEach(() => { jest.clearAllMocks(); });
@@ -76,22 +76,22 @@ describe("requireDealerVerification: who can list on day one", () => {
     expect(next).toHaveBeenCalled();
   });
 
-  test("new dealer (unapproved, verification submitted) gets progressive access for their first 3 cars ONLY in self_onboarding mode", async () => {
+  test("pending dealer with submitted verification can publish without a listing-count cap", async () => {
     __setOnboardingPolicyForTests({ dealerOnboardingMode: "self_onboarding" });
     dealerModel.findOne.mockResolvedValue({ approved: false });
     verificationModel.findOne.mockResolvedValue({ verificationStatus: "pending" });
-    carModel.countDocuments.mockResolvedValue(0);
+    carModel.countDocuments.mockResolvedValue(25);
     const { next } = await run({ id: U, role: "dealer" });
     expect(next).toHaveBeenCalled();
   });
 
-  test("progressive access ends at 3 cars", async () => {
+  test("dealer self-service access does not stop after the third listing", async () => {
+    __setOnboardingPolicyForTests({ dealerOnboardingMode: "self_onboarding" });
     dealerModel.findOne.mockResolvedValue({ approved: false });
-    verificationModel.findOne.mockResolvedValue({ verificationStatus: "pending" });
-    carModel.countDocuments.mockResolvedValue(3);
-    const { r, next } = await run({ id: U, role: "dealer" });
-    expect(next).not.toHaveBeenCalled();
-    expect(r.code).toBe(403);
+    verificationModel.findOne.mockResolvedValue({ verificationStatus: "under_review" });
+    carModel.countDocuments.mockResolvedValue(250);
+    const { next } = await run({ id: U, role: "dealer" });
+    expect(next).toHaveBeenCalled();
   });
 
   test("progressive access never applies to non-creation requests", async () => {
@@ -231,32 +231,25 @@ describe("inspector (mechanic) approval", () => {
 // ─────────────────────────────────────────────────────────────
 // STAGE 5 — the owner's onboarding policy actually controls the workflow.
 // ─────────────────────────────────────────────────────────────
-describe("STAGE 5 requireDealerVerification follows the owner's dealer mode", () => {
+describe("STAGE 5 pending dealers self-publish after submitting verification", () => {
   const run = async (user, req = {}) => { const r = res(); const next = jest.fn(); await requireDealerVerification({ user, method: "POST", baseUrl: "/api/cars", path: "/", ...req }, r, next); return { r, next }; };
-  const pending = () => { dealerModel.findOne.mockResolvedValue({ approved: false }); verificationModel.findOne.mockResolvedValue({ verificationStatus: "pending" }); carModel.countDocuments.mockResolvedValue(0); };
+  const pending = () => { dealerModel.findOne.mockResolvedValue({ approved: false }); verificationModel.findOne.mockResolvedValue({ verificationStatus: "pending" }); carModel.countDocuments.mockResolvedValue(25); };
 
-  test.each(["approval_required", "closed"])("mode %s: a pending dealer cannot create listings (no progressive access)", async (mode) => {
+  test.each(["self_onboarding", "closed"])("mode %s: an existing pending dealer can publish unlimited inventory after submitting verification", async (mode) => {
     __setOnboardingPolicyForTests({ dealerOnboardingMode: mode });
     pending();
     const { r, next } = await run({ id: U, role: "dealer" });
-    expect(next).not.toHaveBeenCalled();
-    expect(r.code).toBe(403);
-    expect(r.body.code).toBe("DEALER_APPROVAL_PENDING");
-  });
-  test("self_onboarding: a pending dealer gets limited progressive access (still not 'verified')", async () => {
-    __setOnboardingPolicyForTests({ dealerOnboardingMode: "self_onboarding" });
-    pending();
-    const { next } = await run({ id: U, role: "dealer" });
     expect(next).toHaveBeenCalled();
+    expect(r.code).toBe(200);
   });
-  test("untrusted policy (unavailable) behaves like approval_required, never like self_onboarding", async () => {
+  test("untrusted policy (unavailable) fails closed rather than silently changing dealer onboarding", async () => {
     __setOnboardingPolicyForTests({ dealerOnboardingMode: "self_onboarding" }, "unavailable");
     pending();
     const { next, r } = await run({ id: U, role: "dealer" });
     expect(next).not.toHaveBeenCalled();
     expect(r.code).toBe(403);
   });
-  test.each(["approval_required", "self_onboarding", "closed"])("an APPROVED dealer is unaffected by mode %s", async (mode) => {
+  test.each(["self_onboarding", "closed"])("an APPROVED dealer is unaffected by mode %s", async (mode) => {
     __setOnboardingPolicyForTests({ dealerOnboardingMode: mode });
     dealerModel.findOne.mockResolvedValue({ approved: true });
     // Stage 5F.16: set the verification state explicitly. The check used to inherit whatever verification mock the
@@ -266,7 +259,7 @@ describe("STAGE 5 requireDealerVerification follows the owner's dealer mode", ()
     expect(next).toHaveBeenCalled();
   });
   test("a rejected dealer is blocked in every mode and told to resubmit", async () => {
-    for (const mode of ["approval_required", "self_onboarding"]) {
+    for (const mode of ["self_onboarding", "closed"]) {
       __setOnboardingPolicyForTests({ dealerOnboardingMode: mode });
       dealerModel.findOne.mockResolvedValue({ approved: false });
       verificationModel.findOne.mockResolvedValue({ verificationStatus: "rejected" });
@@ -296,11 +289,11 @@ describe("STAGE 5 createCar status follows the owner's listing-moderation settin
     await createCar({ user: { id: U, role, emailVerified }, body: { title: "T", status: "available", isVerifiedDealer: true, ...extraBody }, files: [{ path: "/tmp/a.jpg" }], get: () => undefined }, r);
     return r;
   };
-  test("hold_for_review: an approved seller's listing is created PENDING", async () => {
+  test("legacy hold_for_review cannot re-enable per-listing admin approval", async () => {
     __setOnboardingPolicyForTests({ listingModeration: "hold_for_review" });
     const r = await create("approved");
     expect(r.code).toBe(201);
-    expect(carModel.create.mock.calls[0][0].status).toBe("pending");
+    expect(carModel.create.mock.calls[0][0].status).toBe("available");
   });
   test("auto_publish: a personal seller in good standing is published with no separate approval step", async () => {
     __setOnboardingPolicyForTests({ listingModeration: "auto_publish" });
@@ -323,14 +316,14 @@ describe("STAGE 5 createCar status follows the owner's listing-moderation settin
     await create("approved", {}, { emailVerified: false });
     expect(carModel.create.mock.calls[0][0].status).toBe("pending");
   });
-  test("unavailable policy holds the listing for review (fail safe)", async () => {
+  test("unavailable onboarding policy does not reintroduce listing approval", async () => {
     __setOnboardingPolicyForTests({ listingModeration: "auto_publish" }, "unavailable");
     await create("approved");
-    expect(carModel.create.mock.calls[0][0].status).toBe("pending");
+    expect(carModel.create.mock.calls[0][0].status).toBe("available");
   });
   test("a client-supplied status is never honoured (mass assignment)", async () => {
     __setOnboardingPolicyForTests({ listingModeration: "hold_for_review" });
-    await create("approved", { status: "available", approved: true });
-    expect(carModel.create.mock.calls[0][0].status).toBe("pending");
+    await create("approved", { status: "draft", approved: true });
+    expect(carModel.create.mock.calls[0][0].status).toBe("available");
   });
 });

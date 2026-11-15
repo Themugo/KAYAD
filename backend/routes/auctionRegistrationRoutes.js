@@ -2,7 +2,7 @@ import express from "express";
 import { protect } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
-import { getRegistration, registerForAuction, initiateRegistrationCommitment, assertBidderAuthorized } from "../services/auctionRegistration.service.js";
+import { getRegistration, registerForAuction, refreshBidderEligibility, initiateRegistrationCommitment, assertBidderAuthorized } from "../services/auctionRegistration.service.js";
 import { initiateHighValueDeposit, getAuctionFinancialPolicy, getAuctionSecurityHold } from "../services/auctionFinancialIntegrity.service.js";
 import { getAuctionRoomState } from "../services/auctionRoom.service.js";
 
@@ -42,6 +42,11 @@ router.get("/:id/registration", protect, validateObjectId, asyncHandler(async (r
 router.post("/:id/registration", protect, validateObjectId, asyncHandler(async (req, res) => {
   const result = await registerForAuction({ auctionId: req.params.id, userId: req.user.id, body: req.body || {}, req });
   res.status(result.duplicate ? 200 : 201).json({ success: true, ...result });
+}));
+
+router.post("/:id/registration/refresh-eligibility", protect, validateObjectId, asyncHandler(async (req, res) => {
+  const result = await refreshBidderEligibility({ auctionId: req.params.id, userId: req.user.id, req });
+  res.json({ success: true, ...result });
 }));
 
 router.post("/:id/registration/commitment", protect, validateObjectId, asyncHandler(async (req, res) => {

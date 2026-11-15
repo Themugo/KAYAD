@@ -27,7 +27,7 @@ function evaluateEligibility(user, config) {
     { id: "email_verified", required: Boolean(req.emailVerified), ok: Boolean(user?.email && user?.emailVerified) },
     { id: "identity_verified", required: Boolean(req.identityVerified), ok: String(user?.verificationStatus || "").toLowerCase() === "verified" || Boolean(user?.identityVerified) },
     { id: "organization_verified", required: Boolean(req.organizationVerified), ok: Boolean(user?.organizationVerified || user?.businessVerified) },
-    { id: "account_not_banned", required: true, ok: user?.isBanned !== true && user?.status !== "banned" && user?.deactivatedAt == null },
+    { id: "account_not_banned", required: true, ok: Boolean(user) && user?.isBanned !== true && !["banned", "suspended", "deactivated"].includes(String(user?.status || "").toLowerCase()) && user?.deactivatedAt == null },
   ];
   const blockers = checks.filter(c => c.required && !c.ok).map(c => c.id);
   return { eligible: blockers.length === 0, blockers, checks };
@@ -76,6 +76,56 @@ export async function registerForAuction({ auctionId, userId, body, req }) {
   return { registration, eligibility };
 }
 
+/**
+ * Re-check a previously blocked bidder after they complete profile/identity
+ * requirements. This never skips the published terms, auction window, or a
+ * configured financial commitment. Only pending_eligibility registrations
+ * may be advanced by this member-facing operation.
+ */
+export async function refreshBidderEligibility({ auctionId, userId, req }) {
+  const { car, setup, user } = await getContext(auctionId, userId);
+  if (!car || !setup || setup.publication_status !== "published") {
+    throw Object.assign(new Error("Auction is not published"), { status: 404, code: "AUCTION_NOT_PUBLISHED" });
+  }
+  const config = normalizeAuctionSetup(setup.config || {});
+  if (String(car.auctionStatus || car.auction_status || "").toLowerCase() === "live"
+    || !config.startsAt || Date.parse(config.startsAt) <= Date.now()
+    || (config.registrationDeadline && Date.parse(config.registrationDeadline) < Date.now())) {
+    throw Object.assign(new Error("The registration window has closed. You can watch this auction, but cannot activate a new bidder pass."), { status: 409, code: "AUCTION_REGISTRATION_CLOSED" });
+  }
+  const registration = await findOne("auction_registrations", { auction_id: auctionId, bidder_id: userId });
+  if (!registration) throw Object.assign(new Error("Register for this auction first"), { status: 404, code: "BIDDER_REGISTRATION_REQUIRED" });
+  if (registration.status !== "pending_eligibility") {
+    return { registration, unchanged: true };
+  }
+  const eligibility = evaluateEligibility(user, config);
+  if (!eligibility.eligible) {
+    const updated = await update("auction_registrations", registration.id, {
+      eligibility_status: "pending",
+      eligibility_snapshot: { ...eligibility, capturedAt: new Date().toISOString() },
+    });
+    return { registration: updated, eligibility, unchanged: true };
+  }
+  const commitmentSatisfied = registration.commitment_status === "satisfied";
+  const nextStatus = commitmentRequired(config) && !commitmentSatisfied ? "pending_commitment" : ACTIVE;
+  const updated = await update("auction_registrations", registration.id, {
+    status: nextStatus,
+    eligibility_status: "eligible",
+    eligibility_snapshot: { ...eligibility, capturedAt: new Date().toISOString() },
+    ...(nextStatus === ACTIVE ? { activated_at: new Date().toISOString() } : {}),
+  });
+  await create("auction_registration_events", {
+    registration_id: registration.id,
+    event_type: "eligibility_rechecked",
+    actor_id: userId,
+    metadata: { state: nextStatus, eligibility },
+  });
+  await logActionFromReq(req, "auction_bidder_eligibility_rechecked", {
+    target: auctionId, targetModel: "Car", details: { registrationId: registration.id, state: nextStatus },
+  });
+  return { registration: updated, eligibility, activated: nextStatus === ACTIVE };
+}
+
 export async function initiateRegistrationCommitment({ auctionId, userId, req }) {
   const { setup, user } = await getContext(auctionId, userId);
   const registration = await findOne("auction_registrations", { auction_id: auctionId, bidder_id: userId });
@@ -104,7 +154,39 @@ export async function finalizeCommitmentRegistration({ checkoutRequestID, succes
   const registration = await findById("auction_registrations", registrationId);
   if (!registration) return null;
   if (!success) { await update("auction_registrations", registration.id, { commitment_status: "failed", status: "pending_commitment" }); return registration; }
-  const updated = await update("auction_registrations", registration.id, { commitment_status: "satisfied", commitment_transaction_id: tx.id, commitment_receipt: receipt || null, status: ACTIVE, eligibility_status: "eligible", activated_at: new Date().toISOString() });
+  // A provider callback proves that money was received; it does not grant
+  // bidder eligibility. Re-read the member and current auction requirements
+  // before activating the bidder pass.
+  const { setup, user } = await getContext(registration.auction_id, registration.bidder_id);
+  if (!setup || setup.publication_status !== "published") {
+    return update("auction_registrations", registration.id, {
+      commitment_status: "satisfied",
+      commitment_transaction_id: tx.id,
+      commitment_receipt: receipt || null,
+      status: "pending_eligibility",
+      eligibility_status: "pending",
+    });
+  }
+  const eligibility = evaluateEligibility(user, normalizeAuctionSetup(setup.config || {}));
+  if (!eligibility.eligible) {
+    const blockedStatus = eligibility.blockers.includes("account_not_banned") ? "suspended" : "pending_eligibility";
+    const updatedBlocked = await update("auction_registrations", registration.id, {
+      commitment_status: "satisfied",
+      commitment_transaction_id: tx.id,
+      commitment_receipt: receipt || null,
+      status: blockedStatus,
+      eligibility_status: "pending",
+      eligibility_snapshot: { ...eligibility, capturedAt: new Date().toISOString() },
+    });
+    await create("auction_registration_events", {
+      registration_id: registration.id,
+      event_type: "commitment_confirmed_eligibility_pending",
+      actor_id: registration.bidder_id,
+      metadata: { transactionId: tx.id, receipt, blockers: eligibility.blockers },
+    });
+    return updatedBlocked;
+  }
+  const updated = await update("auction_registrations", registration.id, { commitment_status: "satisfied", commitment_transaction_id: tx.id, commitment_receipt: receipt || null, status: ACTIVE, eligibility_status: "eligible", eligibility_snapshot: { ...eligibility, capturedAt: new Date().toISOString() }, activated_at: new Date().toISOString() });
   await create("auction_registration_events", { registration_id: registration.id, event_type: "commitment_confirmed", actor_id: registration.bidder_id, metadata: { transactionId: tx.id, receipt } });
   return updated;
 }

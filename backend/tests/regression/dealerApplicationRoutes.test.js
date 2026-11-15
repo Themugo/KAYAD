@@ -131,7 +131,7 @@ beforeAll(async () => {
 afterAll(() => new Promise((r) => server.close(r)));
 beforeEach(() => {
   world.users = {}; world.dealers = {}; world.verifications = {}; world.rpcCalls = []; world.notifications = []; world.settings = {};
-  __setOnboardingPolicyForTests({ dealerOnboardingMode: "approval_required" });
+  __setOnboardingPolicyForTests({ dealerOnboardingMode: "self_onboarding" });
   __setDealerPaperworkForTests(null);
 });
 afterAll(() => { __setOnboardingPolicyForTests(null); __setDealerPaperworkForTests(null); });
@@ -148,7 +148,7 @@ const KRA = { pinNumber: "A000000000Z" };
 describe("B. a personal account can NEVER become a dealer; a dealer is a separate business account", () => {
   const strip = () => JSON.stringify(world.users, (k, v) => (k === "lastActive" ? undefined : v));
   test.each(["user", "individual_seller"])("a %s is refused on every dealer-application route, whatever the policy or account state, and nothing is created", async (role) => {
-    for (const mode of ["approval_required", "open", "closed"]) {
+    for (const mode of ["self_onboarding", "open", "closed"]) {
       __setOnboardingPolicyForTests({ dealerOnboardingMode: mode });
       world.users = {}; world.dealers = {}; world.verifications = {};
       mk("p1", role);

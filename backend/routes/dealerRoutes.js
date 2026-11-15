@@ -19,7 +19,7 @@ import { getSupabase } from "../utils/supabase.js";
 const must = ({ data, count, error }) => { if (error) throw error; return { data, count }; };
 const countOf = (r) => must(r).count || 0;
 const WHOLESALE_UNSUPPORTED = /42703|PGRST204|PGRST200|PGRST205|column .*wholesale|wholesale.*does not exist|Could not find/i;
-import { sellerMayPublishDirectly, PUBLICATION_REVIEW_REQUIRED } from "../services/onboardingPolicy.service.js"; // STAGE 5
+import { sellerMayPublishDirectly } from "../services/onboardingPolicy.service.js"; // listing self-publication
 import { sendNotification } from "../services/notification.service.js";
 import { initiateDealerUpgrade } from "../services/dealerSubscription.service.js";
 import { deliver } from "../services/communicationGateway.service.js";
@@ -86,10 +86,10 @@ router.get("/onboarding", protect, allowRoles(...APPLICANT_ROLES), asyncHandler(
     dealer = await create("dealers", { user: req.user.id, approved: false, isSuspended: false });
   }
   if (!dealer) return res.status(409).json({ success: false, code: "DEALER_APPLICATION_NOT_STARTED", message: "Start a dealer application first." });
-  {
-    const company = validateCompanyName(businessName, { personName: req.user.name });
-    if (!company.ok) return res.status(400).json({ success: false, code: company.code, message: company.message });
-  }
+  // GET is a read-only draft retrieval endpoint. Validate businessName on PUT,
+  // where it comes from the parsed request body; never reference an undefined
+  // request variable or block applicants from loading an incomplete draft.
+  res.set("Cache-Control", "no-store");
   res.json({ success: true, dealer });
 }));
 
@@ -103,6 +103,10 @@ router.put("/onboarding", protect, allowRoles(...APPLICANT_ROLES), asyncHandler(
   }
 
   const { businessName, location, bio, paymentDetails, documents } = parsed.data;
+  const company = validateCompanyName(businessName, { personName: req.user.name });
+  if (!company.ok) {
+    return res.status(400).json({ success: false, code: company.code, message: company.message });
+  }
   let dealer = await findOne("dealers", { user: req.user.id });
   if (!dealer && req.user.role === "dealer") {
     dealer = await create("dealers", { user: req.user.id, approved: false, isSuspended: false });
@@ -185,7 +189,15 @@ router.put("/onboarding", protect, allowRoles(...APPLICANT_ROLES), asyncHandler(
 // also hosts caller-scoped listing management that private sellers legitimately use (pinned by S1-LIST-04: cars,
 // bulk-status/delete, mark-sold, bids, auctions, earnings, escrows, payouts). Dealer-BUSINESS routes (team, subscription
 // upgrade, wholesale/trade listings, pricing recommendations) carry the stricter per-route `dealerBusinessOnly` below.
-router.use(protect, dealerOnly, requireApproved);
+const requireDealerWorkspaceStatus = async (req, res, next) => {
+  if (req.user?.role === "dealer" && String(req.user.status || "").toLowerCase() === "pending") {
+    // The verification middleware has a strict self-service inventory allowlist; all other
+    // pending-dealer routes remain blocked until the business is approved.
+    return requireDealerVerification(req, res, next);
+  }
+  return requireApproved(req, res, next);
+};
+router.use(protect, dealerOnly, requireDealerWorkspaceStatus);
 
 // =============================
 // 💰 EARNINGS (FILTERABLE + PAGINATED + CACHED)
@@ -924,8 +936,12 @@ router.post(
       currentBid: 0,
       winner: undefined,
       isPromoted: false,
-      // STAGE 5: a duplicate is a NEW listing; it follows the owner's moderation policy.
-      status: (await sellerMayPublishDirectly(req.user)) ? "available" : "pending",
+      // A duplicate is a new seller-owned listing and self-publishes when the account is eligible.
+      status: (await sellerMayPublishDirectly({
+        ...req.user,
+        progressiveAccess: req.progressiveAccess === true,
+        dealerVerificationStatus: req.verification?.verificationStatus,
+      })) ? "available" : "pending",
     });
 
     await logActionFromReq(req, "duplicate_listing", {
@@ -1024,9 +1040,13 @@ router.patch(
     if (!SELLER_SETTABLE_STATUSES.has(status)) {
       return res.status(400).json({ success: false, code: "INVALID_LISTING_STATUS", message: "Unsupported listing status" });
     }
-    // STAGE 5: sellers cannot self-publish when the owner holds listings for review.
-    if (status === "available" && !(await sellerMayPublishDirectly(req.user))) {
-      return res.status(403).json(PUBLICATION_REVIEW_REQUIRED);
+    // Per-listing admin approval is retired; the owner can publish their own eligible inventory.
+    if (status === "available" && !(await sellerMayPublishDirectly({
+      ...req.user,
+      progressiveAccess: req.progressiveAccess === true,
+      dealerVerificationStatus: req.verification?.verificationStatus,
+    }))) {
+      return res.status(403).json({ success: false, code: "SELLER_ACCOUNT_NOT_ELIGIBLE", message: "This account is not currently eligible to publish listings." });
     }
     const sb = getSupabase();
     // Own listings only; a listing rejected by moderation cannot be re-published here.

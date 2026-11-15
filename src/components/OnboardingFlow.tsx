@@ -144,7 +144,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
     const common = { mode: 'register' as const };
     if (outcome.kind === 'account') {
       const nextStep = role?.id === 'dealer'
-        ? 'After you sign in you will be taken to business verification. Dealer tools stay locked until KAYAD approves it.'
+        ? 'After you sign in, complete business verification. Once you submit the required details, you can publish and manage your own vehicle listings while verification is processed; sensitive dealer features require approval.'
         : (role?.id === 'garage_business' || role?.id === 'inspection_company')
             ? 'After you sign in you will go straight to the provider application. KAYAD reviews it; nothing is published until it is approved.'
             : role?.id === 'professional'

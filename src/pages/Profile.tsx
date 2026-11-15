@@ -58,6 +58,13 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
   const handleEdit = (field: string, currentValue: string) => {
     setEditingField(field);
     setEditValue(currentValue || '');
+    setStepUpPassword('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingField(null);
+    setEditValue('');
+    setStepUpPassword('');
   };
 
   const needsStepUp = editingField === 'phone' && (user.role === 'user' || user.role === 'dealer' || user.role === 'individual_seller') && editValue.trim() !== (user.phone || '');
@@ -191,6 +198,9 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                           <button onClick={handleSaveEdit} disabled={loading} className="text-[#176B87] text-sm font-semibold">
                             {loading ? <Loader2 size={14} className="animate-spin" /> : 'Save'}
                           </button>
+                          <button type="button" onClick={handleCancelEdit} disabled={loading} className="text-[#64748B] text-sm font-semibold hover:text-[#0A3340] disabled:opacity-50">
+                            Cancel
+                          </button>
                         </div>
                       ) : (
                         <p className="font-sans text-sm text-[#0A3340]">{user.name}</p>
@@ -236,6 +246,9 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                           <button onClick={handleSaveEdit} disabled={loading} className="text-[#176B87] text-sm font-semibold">
                             {loading ? <Loader2 size={14} className="animate-spin" /> : 'Save'}
                           </button>
+                          <button type="button" onClick={handleCancelEdit} disabled={loading} className="text-[#64748B] text-sm font-semibold hover:text-[#0A3340] disabled:opacity-50">
+                            Cancel
+                          </button>
                         </div>
                       ) : (
                         <p className="font-sans text-sm text-[#0A3340]">{user.phone || 'Not set'}</p>
@@ -265,6 +278,9 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                           <button onClick={handleSaveEdit} disabled={loading} className="text-[#176B87] text-sm font-semibold">
                             {loading ? <Loader2 size={14} className="animate-spin" /> : 'Save'}
                           </button>
+                          <button type="button" onClick={handleCancelEdit} disabled={loading} className="text-[#64748B] text-sm font-semibold hover:text-[#0A3340] disabled:opacity-50">
+                            Cancel
+                          </button>
                         </div>
                       ) : (
                         <p className="font-sans text-sm text-[#0A3340]">{user.location || 'Not set'}</p>
@@ -274,7 +290,8 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                       <button onClick={() => handleEdit('location', user.location || '')} className="text-[#176B87] text-sm font-semibold hover:text-[#12576D]">Edit</button>
                     )}
                   </div>
-                  <PhoneVerification />
+                  {/* Refresh the server-owned phone verification state whenever the account phone changes. */}
+                  <PhoneVerification key={user.phone || 'no-phone'} />
                 </div>
               </div>
             )}

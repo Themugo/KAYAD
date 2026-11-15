@@ -22,11 +22,12 @@ describe('Dealer Hub account status', () => {
     expect(await screen.findByText('Approved')).toBeInTheDocument();
     expect(screen.queryByText(/Pending KAYAD review/)).toBeNull();
   });
-  it('shows Pending only while the application is genuinely pending', async () => {
+  it('shows business verification as in review without implying listings are blocked', async () => {
     m.getVerificationStatus.mockResolvedValue({ onboardingStage: 'pending_approval' });
     m.getSubscription.mockResolvedValue({ entitlement: { status: 'none', subscriptionRequired: false } });
     render(<DealerAccountStatus />);
-    expect(await screen.findByText(/Pending KAYAD review/)).toBeInTheDocument();
+    expect(await screen.findByText((_, el) => el?.tagName === 'P' && /Business verification:\s*In review/.test(el.textContent || ''))).toBeInTheDocument();
+    expect(screen.getByText(/You can publish and manage your own listings/)).toBeInTheDocument();
   });
   it('says listing is free when no plan is required', async () => {
     m.getSubscription.mockResolvedValue({ entitlement: { status: 'none', listingMax: 0, listingsUsed: 0, subscriptionRequired: false } });

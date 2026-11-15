@@ -105,7 +105,10 @@ export const getAuctionBids = async (req, res) => {
 
     const bids = await Bid.find({
       carId,
-      status: { $in: ["paid", "pending"] },
+      // Public auction history is market history, not a checkout queue.
+      // Pending bids have not cleared the M-Pesa confirmation step and must
+      // not appear as placed bids or influence the visible leaderboard.
+      status: { $in: ["paid", "won", "lost"] },
     })
       .populate("user", "name verifiedBuyer")
       .sort({ amount: -1 })
@@ -118,7 +121,8 @@ export const getAuctionBids = async (req, res) => {
         amount: b.amount,
         bidderTag: b.bidderTag,
         isVerifiedBuyer: b.user?.verifiedBuyer || false,
-        confirmed: b.status === "paid",
+        confirmed: ["paid", "won", "lost"].includes(b.status),
+        status: b.status,
         time: b.createdAt,
       })),
     });
@@ -368,12 +372,29 @@ export const confirmBidPayment = async (req, res) => {
 // =============================
 export const getMyBids = async (req, res) => {
   try {
+    // Never accept a userId from the query string for this private endpoint.
+    // The authenticated principal is the sole ownership boundary.
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 20));
+    const sortBy = req.query.sortBy === "amount" ? "amount" : "createdAt";
+    const sortOrder = req.query.sortOrder === "asc" ? 1 : -1;
+    const sort = { [sortBy]: sortOrder };
     const bids = await Bid.find({ user: req.user.id })
       .populate("car", "title images price brand model year")
-      .sort({ createdAt: -1 })
-      .limit(50)
+      .sort(sort)
+      .skip((page - 1) * limit)
+      .limit(limit)
       .lean();
-    res.json({ success: true, bids });
+    res.json({
+      success: true,
+      bids: bids.map((bid) => ({
+        ...bid,
+        // Preserve private pending/failed checkout attempts in the owner's
+        // history, but distinguish them from market-confirmed bids.
+        marketConfirmed: ["paid", "won", "lost"].includes(String(bid.status || "").toLowerCase()),
+      })),
+      pagination: { page, limit, hasMore: bids.length === limit },
+    });
   } catch (err) {
     logError("Failed to fetch user bids", err);
     res.status(500).json({ success: false, message: "Failed to fetch your bids" });

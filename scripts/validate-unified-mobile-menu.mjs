@@ -12,11 +12,15 @@ assert.ok(navbar.includes('visibleChildren(item, signedIn, isRestrictedWorkspace
 assert.ok(navbar.includes('isDealerUser &&') && navbar.includes('isStaffAccount &&') && navbar.includes('isMechanicAccount &&'), 'workspace list is segmented by account role');
 assert.ok(navbar.includes('Dealer workspace') && navbar.includes('Staff workspace') && navbar.includes('Provider workspace'), 'role workspaces have clear headings');
 assert.ok(navbar.includes('kayad-drawer-list') && css.includes('.kayad-mobile-menu__surface .kayad-drawer-list'), 'account and workspace shortcuts share one vertical list');
+assert.ok(navbar.includes('{user && (') && navbar.includes('aria-labelledby="kayad-drawer-workspace"'), 'role workspace is shown only to signed-in users');
+assert.ok(navbar.includes('aria-labelledby="kayad-drawer-quick-access"') && navbar.includes('>Quick access</span>'), 'Quick access is a distinct section for all account states');
+assert.ok(navbar.indexOf('aria-labelledby="kayad-drawer-quick-access"') > navbar.indexOf('aria-labelledby="kayad-drawer-workspace"'), 'Quick access follows the signed-in workspace when present');
+assert.ok((navbar.match(/>Price Alerts</g) || []).length === 1, 'Price Alerts appears exactly once in Quick access');
 assert.ok(css.includes('.kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__links') && css.includes('flex-direction: column !important;'), 'all primary child destinations are single-column full-width rows');
 assert.ok(!/grid-template-columns:\s*repeat\(2/.test(css.slice(css.lastIndexOf('/* KAYAD unified mobile menu'))), 'final unified menu layer does not restore a two-column grid');
 assert.ok(navConfig.includes('hidePersonalDestinations = false') && navConfig.includes('hidePersonalDestinations && child.requiresAuth'), 'buyer-only links are filtered from restricted workspaces');
 assert.ok(navbar.includes("handleNavSelect('chat')") && navbar.includes("handleNavSelect('payments')") && navbar.includes("handleNavSelect('dealer:inventory')") && navbar.includes("handleAdminRoute('/admin')"), 'existing messages, payment, dealer and admin actions remain wired');
-assert.ok(navbar.includes("navigate('/notifications')") && navbar.includes("handleNavSelect('seller-platform')"), 'notification and seller navigation remain wired');
+assert.ok(navbar.includes("navigate('/notifications')") && navbar.includes("handleNavSelect('seller-dashboard')") && navbar.includes("'seller-platform')"), 'notification and seller navigation remain wired');
 assert.ok(bottom.includes("key: 'home'") && bottom.includes("key: 'showroom'") && bottom.includes("key: 'auction'") && bottom.includes("key: 'services'") && bottom.includes("key: 'saved'"), 'canonical five-item bottom navigation is unchanged');
 assert.ok(navbar.includes('mobileExpandedGroups') && navbar.includes('aria-expanded={!!mobileExpandedGroups[item.id]}'), 'primary categories use accessible expandable child lists');
 assert.ok(navbar.includes('currentSection ? { [currentSection.id]: true } : { marketplace: true }'), 'the active route section opens by default when the drawer opens');

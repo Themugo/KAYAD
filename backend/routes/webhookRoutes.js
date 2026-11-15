@@ -2,10 +2,12 @@ import express from "express";
 import { validateWritePayload } from "../middleware/validateWritePayload.js";
 import Car from "../models/Car.js";
 import User from "../models/User.js";
+import DealerVerification from "../models/DealerVerification.js";
 import { logInfo, logError } from "../utils/logger.js";
 import crypto from "crypto";
 import { findOne, create, update } from "../db/index.js";
 import { withLock } from "../middleware/distributedLock.js";
+import { invalidatePublicListingCaches } from "../utils/publicListingCache.js";
 
 const router = express.Router();
 
@@ -47,9 +49,16 @@ router.post("/inventory", validateWritePayload, async (req, res) => {
       return res.status(400).json({ success: false, message: "Maximum 500 listings per request" });
     }
 
-    const dealer = await User.findOne({ apiKey }).select("_id role apiKey");
+    const dealer = await User.findOne({ apiKey }).select("_id role apiKey status isBanned emailVerified");
     if (!dealer || dealer.role !== "dealer" || !safeEqual(dealer.apiKey, apiKey)) {
       return res.status(401).json({ success: false, message: "Invalid API key" });
+    }
+    if (dealer.isBanned || dealer.emailVerified !== true || !["pending", "approved"].includes(String(dealer.status || "").toLowerCase())) {
+      return res.status(403).json({ success: false, code: "DEALER_ACCOUNT_NOT_ACTIVE", message: "This dealer account is not eligible to synchronize inventory." });
+    }
+    const verification = await DealerVerification.findOne({ user: dealer._id });
+    if (!verification || !["pending", "under_review", "approved"].includes(String(verification.verificationStatus || "").toLowerCase())) {
+      return res.status(403).json({ success: false, code: "DEALER_VERIFICATION_REQUIRED", message: "Submit dealer verification before synchronizing inventory. Rejected or suspended accounts cannot publish." });
     }
 
     // Inventory providers do not reliably send a standard idempotency header.
@@ -104,13 +113,19 @@ router.post("/inventory", validateWritePayload, async (req, res) => {
             await Car.findByIdAndUpdate(existing._id, { $set: { ...safeItem, dealer: dealer._id } });
             results.updated++;
           } else {
-            await Car.create({ ...safeItem, dealer: dealer._id });
+            // Inventory webhook submissions are dealer-owned new listings. Publish immediately;
+            // never trust a caller-supplied moderation/status field (it is not whitelisted).
+            await Car.create({ ...safeItem, dealer: dealer._id, status: "available" });
             results.created++;
           }
         } catch (err) {
           results.errors.push({ item: item?.title || "unknown", error: err.message });
           results.skipped++;
         }
+      }
+
+      if (results.created > 0 || results.updated > 0) {
+        await invalidatePublicListingCaches({ strict: true });
       }
 
       await update("webhook_events", event.id, {

@@ -18,6 +18,9 @@ vi.mock('../../api/api', () => ({
     get: vi.fn().mockResolvedValue({ registration: null, setup: null }),
     register: vi.fn().mockResolvedValue({ registration: { status: 'active' } }),
     initiateCommitment: vi.fn().mockResolvedValue({ registration: { status: 'pending' } }),
+    securityPolicy: vi.fn().mockResolvedValue({ policy: null }),
+    refreshEligibility: vi.fn().mockResolvedValue({ registration: null }),
+    initiateHighValueDeposit: vi.fn().mockResolvedValue({}),
   },
   auctionEngagementAPI: {
     get: vi.fn().mockResolvedValue({ engagement: { watchers: 0, visits: 0, follows: 0, likes: 0, comments: 0, enabled: false, viewer: {} } }),

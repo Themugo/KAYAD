@@ -179,6 +179,7 @@ describe("route inventory guard: every money / bid / registration / message POST
   const EXEMPT = {
     "aiPlatformRoutes.js POST /conversations/:conversationId/message": "AI assistant, not user-to-user chat",
     "auctionRegistrationRoutes.js POST /:id/registration": "registration without payment; the commitment / deposit calls are frozen",
+    "auctionRegistrationRoutes.js POST /:id/registration/refresh-eligibility": "re-evaluates the bidder's own eligibility checks; moves no money and places no bid",
     "bidRoutes.js POST /admin/:bidId/set-winner": "admin settlement action",
     "dealerRoutes.js POST /cars/:id/accept-bid": "seller decision on an existing bid",
     "dealerRoutes.js POST /cars/:id/reject-bid": "seller decision on an existing bid",

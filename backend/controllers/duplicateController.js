@@ -159,11 +159,10 @@ export const confirmAsDuplicate = async (req, res) => {
       });
     }
 
-    // STAGE 4 (S4-C-02): "removed" soft-deletes the listing and sets status
-    // "hidden" (Stage 5A: was "rejected", which the database refuses). A sold listing has a settled sale behind it and is unwound
-    // only through the escrow/refund workflow (utils/carModerationGuard.js), so
-    // refuse BEFORE the log is marked reviewed (a blocked request must not
-    // leave the log in a reviewed state).
+    // Duplicate review is platform moderation, not business inventory ownership.
+    // "removed" hides the duplicate from public discovery but does not soft-delete
+    // or transfer ownership of the seller's listing. A sold listing is protected
+    // and is unwound only through the escrow/refund workflow.
     const car = await Car.findById(log.car);
     if (action === "removed") {
       const blocked = moderationBlockedReason(car);
@@ -172,16 +171,13 @@ export const confirmAsDuplicate = async (req, res) => {
       }
     }
 
-    // STAGE 5A (Gate E): the listing is changed FIRST and the log is marked reviewed only once that succeeded. Previously the
-    // log was marked reviewed before the car write, and a failing car write (status "rejected" violates cars_status_check)
-    // left a reviewed log over an untouched, still-public duplicate. A removed duplicate is soft-deleted AND hidden.
+    // Change visibility FIRST and mark the duplicate log reviewed only after the listing write succeeds.
+    // The seller retains ownership and can review the hidden listing in their own inventory.
     if (car) {
       car.duplicateStatus = "confirmed_duplicate";
 
       if (action === "removed") {
         car.status = "hidden";
-        car.deletedAt = new Date();
-        car.deletedBy = req.user.id;
       } else if (action === "merged") {
         // Keep listing but mark as duplicate
         car.originalListing = log.originalCar;
@@ -202,7 +198,9 @@ export const confirmAsDuplicate = async (req, res) => {
 
     res.json({
       success: true,
-      message: `Duplicate confirmed and ${action}`,
+      message: action === "removed"
+        ? "Duplicate confirmed and hidden from public listings. The seller retains the listing in their inventory."
+        : `Duplicate confirmed and ${action}`,
       log,
     });
   } catch (err) {

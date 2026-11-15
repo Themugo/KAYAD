@@ -10,7 +10,7 @@ const migration = fs.readFileSync('supabase/migrations/20261012140100_dealer_ver
 const checks = [
   ['Admin list endpoint is role protected', routes.includes('router.get("/admin/all", allowRoles("admin", "superadmin")')],
   ['List response validates expected array before replacing records', ui.includes("if (!Array.isArray(data?.verifications)) throw new Error('Unexpected dealer verification response')")],
-  ['Load errors are surfaced rather than treated as an empty queue', ui.includes('setLoadError(err?.response?.data?.message') && ui.includes('Records unavailable until the request succeeds.')],
+  ['Load errors are surfaced rather than treated as an empty queue', ui.includes('AdminLoadNotice error={loadError}') && ui.includes('onRetry={load}')],
   ['Retry and refresh controls exist', ui.includes('onClick={load}') && ui.includes('>Refresh</button>')],
   ['List response hydrates user and dealer relations', controller.includes('findById("users", verification.user)') && controller.includes('findById("dealers", verification.dealer)')],
   ['Server provides global status summary counts', controller.includes('summary.total = await count("dealer_verifications")') && controller.includes('statusCounts')],

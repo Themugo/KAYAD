@@ -19,7 +19,7 @@ import { logWarn, logError } from "../utils/logger.js";
 import { isSupabaseConnected } from "../utils/supabase.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import * as path from "path";
-import { STAFF_ROLES, SELLER_ROLES, canManageAnyListing } from "../config/roles.js";
+import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
 import { detectDuplicates, flagDuplicate } from "../services/duplicateVehicleService.js";
 import { logVehicleCreated, logVehicleEdited, logVehicleDeleted } from "../services/auditService.js";
 import { getDealerEntitlement, assertDealerCanCreateListing } from "../services/dealerSubscription.service.js";
@@ -468,15 +468,17 @@ export const createCar = async (req, res) => {
     // instead of a permanent hard-coded false.
     req.body.escrowEnabled = await getEscrowEnabledForNewOrEditedCar(seller.id, seller.role);
 
-    // STAGE 5: owner-controlled listing moderation. `hold_for_review` (and any untrusted policy read)
-    // ALWAYS creates the listing as `pending`. `auto_publish` keeps the pre-existing eligibility rule
-    // (an approved seller account publishes immediately; unapproved stays pending). The client cannot
-    // influence either: status is server-assigned and overwrites anything in req.body.
-    // One rule for every create path: sellerMayPublishDirectly (the same check the dealer routes use). With the owner's policy on
-    // auto_publish and free private selling, an account in good standing with a verified email goes live immediately; a personal
-    // account needs no separate seller-approval record unless the owner turned approval mode on. hold_for_review, an untrusted
-    // policy read, a blocked account or an unverified email all keep the listing pending.
-    const publishNow = await sellerMayPublishDirectly({ ...req.user, id: req.user.id, role: seller.role, status: seller.status });
+    // Listing-by-listing administrator approval is retired. The server always derives the initial
+    // status from the seller's eligibility: personal sellers need verified email and no suspension;
+    // dealers must have an approved business account. Client-supplied status is never trusted.
+    const publishNow = await sellerMayPublishDirectly({
+      ...req.user,
+      id: req.user.id,
+      role: seller.role,
+      status: seller.status,
+      progressiveAccess: req.progressiveAccess === true,
+      dealerVerificationStatus: req.verification?.verificationStatus,
+    });
     const body = {
       ...req.body,
       dealer: req.user.id,
@@ -711,13 +713,14 @@ export const updateCar = async (req, res) => {
     // before/after state rather than two identical post-save objects.
     const oldData = car.toObject();
 
-    // Listing-management authority (MANAGE_CARS incl. per-user grants, or owner),
-    // not mere STAFF_ROLES membership. See config/roles.js canManageAnyListing.
-    const isStaff = canManageAnyListing(req.user);
+    // Inventory belongs to its seller. Platform staff use the dedicated
+    // moderation/verification routes and cannot edit the seller's business data.
+    // Only the explicitly provisioned webhoist break-glass identity bypasses ownership.
+    const isStaff = req.user?.effectiveRole === "webhoist";
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
 
-    // Permission rules: owners, staff, or the appropriate authorized seller/dealer may edit.
+    // Permission rule: only the listing owner (or explicit webhoist break-glass) may edit.
     const canEdit = isOwner || isStaff;
     if (!canEdit) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
@@ -973,9 +976,10 @@ export const deleteCar = async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    // Listing-management authority (MANAGE_CARS incl. per-user grants, or owner),
-    // not mere STAFF_ROLES membership. See config/roles.js canManageAnyListing.
-    const isStaff = canManageAnyListing(req.user);
+    // Inventory belongs to its seller. Platform staff use the dedicated
+    // moderation/verification routes and cannot edit the seller's business data.
+    // Only the explicitly provisioned webhoist break-glass identity bypasses ownership.
+    const isStaff = req.user?.effectiveRole === "webhoist";
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
     if (!isOwner && !isStaff) {
@@ -1045,9 +1049,10 @@ export const deleteCarImage = async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    // Listing-management authority (MANAGE_CARS incl. per-user grants, or owner),
-    // not mere STAFF_ROLES membership. See config/roles.js canManageAnyListing.
-    const isStaff = canManageAnyListing(req.user);
+    // Inventory belongs to its seller. Platform staff use the dedicated
+    // moderation/verification routes and cannot edit the seller's business data.
+    // Only the explicitly provisioned webhoist break-glass identity bypasses ownership.
+    const isStaff = req.user?.effectiveRole === "webhoist";
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
     if (!isOwner && !isStaff) {
@@ -1109,7 +1114,7 @@ export const setCoverImage = async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    const isStaff = canManageAnyListing(req.user);
+    const isStaff = req.user?.effectiveRole === "webhoist";
     const isOwner = car.dealer?.toString() === req.user.id;
     if (!isOwner && !isStaff) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
@@ -1151,9 +1156,10 @@ export const addCarImages = async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    // Listing-management authority (MANAGE_CARS incl. per-user grants, or owner),
-    // not mere STAFF_ROLES membership. See config/roles.js canManageAnyListing.
-    const isStaff = canManageAnyListing(req.user);
+    // Inventory belongs to its seller. Platform staff use the dedicated
+    // moderation/verification routes and cannot edit the seller's business data.
+    // Only the explicitly provisioned webhoist break-glass identity bypasses ownership.
+    const isStaff = req.user?.effectiveRole === "webhoist";
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
     if (!isOwner && !isStaff) {

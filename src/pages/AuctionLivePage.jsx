@@ -49,6 +49,8 @@ export default function AuctionLivePage() {
   const [placing, setPlacing]     = useState(false);
   const [registration, setRegistration] = useState(null);
   const [registrationSetup, setRegistrationSetup] = useState(null);
+  const [securityPolicy, setSecurityPolicy] = useState(null);
+  const [highValueHold, setHighValueHold] = useState(null);
   const [registrationLoading, setRegistrationLoading] = useState(false);
   const [roomState, setRoomState] = useState(null);
   const [currentBid, setCurrentBid] = useState(0);
@@ -141,6 +143,41 @@ export default function AuctionLivePage() {
   }, [id, isAuth]);
 
   useEffect(() => {
+    let cancelled = false;
+    if (!id || !isAuth) {
+      setSecurityPolicy(null);
+      setHighValueHold(null);
+      return () => { cancelled = true; };
+    }
+    auctionRegistrationAPI.securityPolicy(id).then((data) => {
+      if (cancelled) return;
+      setSecurityPolicy(data.policy || null);
+      setHighValueHold(data.hold || null);
+    }).catch(() => {
+      if (!cancelled) { setSecurityPolicy(null); setHighValueHold(null); }
+    });
+    return () => { cancelled = true; };
+  }, [id, isAuth]);
+
+  useEffect(() => {
+    if (!id || !isAuth || String(highValueHold?.status || '').toLowerCase() !== 'pending') return;
+    let cancelled = false;
+    const refreshHold = async () => {
+      try {
+        const data = await auctionRegistrationAPI.securityPolicy(id);
+        if (!cancelled) {
+          setSecurityPolicy(data.policy || null);
+          setHighValueHold(data.hold || null);
+        }
+      } catch {
+        // Keep the pending state visible and retry without claiming payment failed.
+      }
+    };
+    const timer = window.setInterval(refreshHold, 5000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [id, isAuth, highValueHold?.status]);
+
+  useEffect(() => {
     if (!id || !isAuth) { setOutcome(null); return; }
     const status = String(car?.auctionStatus || '').toLowerCase();
     if (!['ended', 'sold'].includes(status)) return;
@@ -163,6 +200,24 @@ export default function AuctionLivePage() {
     } catch (err) {
       toast(err.response?.data?.message || 'Unable to register for this auction', 'error');
     } finally { setRegistrationLoading(false); }
+  };
+
+  const handleRefreshEligibility = async () => {
+    try {
+      setRegistrationLoading(true);
+      const data = await auctionRegistrationAPI.refreshEligibility(id);
+      setRegistration(data.registration || null);
+      const status = data.registration?.status;
+      toast(status === "active"
+        ? "Eligibility confirmed. Your bidder pass is now active."
+        : status === "pending_commitment"
+          ? "Eligibility confirmed. Complete the required bidder commitment to activate your pass."
+          : "Some bidder requirements are still outstanding. Review your profile and try again.", status === "active" ? "success" : "info");
+    } catch (err) {
+      toast(err.response?.data?.message || "Unable to re-check bidder eligibility", "error");
+    } finally {
+      setRegistrationLoading(false);
+    }
   };
 
   const handleCommitment = async () => {
@@ -247,6 +302,11 @@ export default function AuctionLivePage() {
   const handlePlaceBid = async () => {
     if (!isAuth) { navigate(loginPathFor(location)); return; }
     const amount = Number(bidAmount);
+    const threshold = Number(securityPolicy?.highValueBidThresholdKes || 5000000);
+    if (amount > threshold && !['held', 'applied'].includes(String(highValueHold?.status || '').toLowerCase())) {
+      toast('Complete the high-value security deposit and wait for M-Pesa confirmation before bidding above the threshold.', 'error');
+      return;
+    }
     if (amount <= currentBid) {
       toast(`Bid must be above ${formatKES(currentBid)}`, 'error'); return;
     }
@@ -262,6 +322,20 @@ export default function AuctionLivePage() {
     }
   };
 
+  const handleHighValueDeposit = async () => {
+    if (!isAuth) { navigate(loginPathFor(location)); return; }
+    try {
+      setRegistrationLoading(true);
+      const data = await auctionRegistrationAPI.initiateHighValueDeposit(id);
+      setHighValueHold(data.hold || data.securityHold || { status: "pending" });
+      toast("M-Pesa security deposit initiated. Complete the prompt; bidding remains blocked until provider confirmation.", "info");
+    } catch (err) {
+      toast(err.response?.data?.message || "Unable to initiate high-value security deposit", "error");
+    } finally {
+      setRegistrationLoading(false);
+    }
+  };
+
   const handleWinnerSettlement = async () => {
     if (!isAuth || !outcome) { navigate(loginPathFor(location)); return; }
     setSettling(true);
@@ -272,13 +346,30 @@ export default function AuctionLivePage() {
         return;
       }
       const phone = String(user?.phone || '').trim();
-      if (!phone) { toast('A verified phone number is required to initiate winner payment. Update your profile first.', 'error'); navigate('/?nav=profile'); return; }
-      await initiateAuctionWinnerPayment(id, phone);
-      toast('Winner payment initiated. Complete the M-Pesa prompt to continue.', 'success');
+      if (!phone || user?.phoneVerified !== true) { toast('A verified phone number is required to initiate winner payment. Update your profile first.', 'error'); navigate('/?nav=profile'); return; }
+      const payment = await initiateAuctionWinnerPayment(id, phone);
+      if (payment?.success === false) throw new Error(payment.message || 'Winner payment is already being processed');
+      setOutcome((previous) => previous ? { ...previous, payment_status: 'pending' } : previous);
+      toast('Winner payment initiated. Complete the M-Pesa prompt; settlement is not complete until provider confirmation.', 'info');
     } catch (err) {
       toast(err?.message || 'Unable to initiate winner settlement', 'error');
     } finally { setSettling(false); }
   };
+
+  useEffect(() => {
+    if (!id || !isAuth || !ended || !outcome || !['payment_due', 'payment_pending'].includes(String(outcome.status || '').toLowerCase())) return;
+    let cancelled = false;
+    const refreshOutcome = async () => {
+      try {
+        const data = await fetchAuctionOutcome(id);
+        if (!cancelled && data?.outcome) setOutcome(data.outcome);
+      } catch {
+        // Preserve the last authoritative outcome; retry on the next interval.
+      }
+    };
+    const timer = window.setInterval(refreshOutcome, 10000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [id, isAuth, ended, outcome?.status, outcome?.payment_status]);
 
   const formatTime = (iso) => {
     if (!iso) return '';
@@ -332,7 +423,19 @@ export default function AuctionLivePage() {
         <DomainTrustStrip domain="auction" items={[{ label: scheduled ? 'Published auction data' : 'Authoritative bid stream' }, { label: 'Bidding lock enforced' }, { label: 'Dealer settlement policy' }, { label: 'Escrow only when selected' }]} />
         {id && <div style={{ margin: '12px 0' }}><AuctionEngagementBar auctionId={id} state={engagement} setState={setEngagement} isAuth={isAuth} onNeedLogin={() => navigate(loginPathFor(location))} onMessage={(m) => toast(m, 'info')} /></div>}
         {ended && isAuth && registration && !userWon && <div style={{ margin: '12px 0' }}><Suspense fallback={null}><WalletPanel auctionId={String(car.id || id)} /></Suspense></div>}
-        {ended && userWon && <AuctionWinningCelebration title={car.title} amount={Number(outcome?.winning_amount || topBid?.amount || currentBid || 0)} onSettle={settling ? undefined : handleWinnerSettlement} onHistory={() => navigate('/?nav=discovery')} />}
+        {ended && userWon && <AuctionWinningCelebration title={car.title} amount={Number(outcome?.winning_amount || topBid?.amount || currentBid || 0)} onSettle={settling || ['paid', 'success'].includes(String(outcome?.payment_status || '').toLowerCase()) || outcome?.status !== 'payment_due' ? undefined : handleWinnerSettlement} onHistory={() => navigate('/?nav=discovery')} />}
+        {ended && userWon && <section className="card" aria-live="polite" style={{ margin: '12px 0', padding: 16 }}>
+          <strong>Winner payment status</strong>
+          <p style={{ marginTop: 6, fontSize: 13, color: 'var(--text-muted)' }}>
+            {['paid', 'success'].includes(String(outcome?.payment_status || '').toLowerCase()) || outcome?.status === 'completed'
+              ? 'Payment confirmed. Continue with the handover and fulfilment steps.'
+              : ['pending', 'processing'].includes(String(outcome?.payment_status || '').toLowerCase())
+                ? 'Payment request submitted. Waiting for M-Pesa confirmation; do not make another payment.'
+                : outcome?.status === 'payment_due'
+                  ? `Payment due: ${formatKES(Number(outcome?.payment_due_amount ?? outcome?.winning_amount ?? 0))}.`
+                  : `Current settlement state: ${String(outcome?.status || 'being prepared').replace(/_/g, ' ')}.`}
+          </p>
+        </section>}
         {ended && userWon && <div style={{ margin: '12px 0' }}><button type="button" className="btn btn-outline" style={{ minHeight: 44 }} onClick={() => fetchAuctionCertificate(id).then((d) => setCertificate(d.certificate)).catch(() => toast('Your certificate is not available yet. Please try again shortly.', 'error'))}>View winner certificate</button></div>}
         {ended && userWon && <WinnerHandoverPanel auctionId={id} refreshKey={outcome?.status} />}
         <WinnerModal certificate={certificate} onClose={() => setCertificate(null)} onPayBalance={settling ? undefined : () => { setCertificate(null); handleWinnerSettlement(); }} />
@@ -493,10 +596,25 @@ export default function AuctionLivePage() {
                   <div style={{ fontSize: 13, fontWeight: 700 }}>M-Pesa confirmation uses your verified profile number.</div>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 5 }}>{user?.phone ? `Verified number ending ${String(user.phone).slice(-4)}` : 'A verified phone number is required to bid.'}</div>
                   <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>A nominal KES 1 M-Pesa confirmation payment is requested for each bid; the bid amount itself is not collected at bid placement.</div>
-                  {Number(bidAmount) > 5000000 && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>Platform risk control: bids above KES 5,000,000 require a KES 50,000 pre-authorized escrow deposit before bidding.</div>}
+                  {Number(bidAmount) > Number(securityPolicy?.highValueBidThresholdKes || 5000000) && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>Platform risk control: bids above {formatKES(Number(securityPolicy?.highValueBidThresholdKes || 5000000))} require a confirmed {formatKES(Number(securityPolicy?.highValueDepositKes || 50000))} auction security deposit before bidding.</div>}
                 </div>
 
                 {!registrationLoading && !registration?.id && !isOwner && !auctionLive ? null : null}
+                {auctionLive && !isOwner && registration?.status === 'active'
+                  && Number(bidAmount) > Number(securityPolicy?.highValueBidThresholdKes || 5000000)
+                  && !['held', 'applied'].includes(String(highValueHold?.status || '').toLowerCase()) && (
+                  <div className="card" style={{ padding: 14, marginBottom: 12, border: '1px solid rgba(234,179,8,0.45)' }}>
+                    <strong style={{ display: 'block', marginBottom: 6 }}>High-value bidder security</strong>
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: 10 }}>
+                      A confirmed {formatKES(Number(securityPolicy?.highValueDepositKes || 50000))} security deposit is required before bids above {formatKES(Number(securityPolicy?.highValueBidThresholdKes || 5000000))} can be accepted.
+                    </p>
+                    {String(highValueHold?.status || '').toLowerCase() === 'pending'
+                      ? <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Awaiting M-Pesa confirmation. Bids above the threshold remain blocked.</p>
+                      : <button className="btn btn-gold btn-full" onClick={handleHighValueDeposit} disabled={registrationLoading || !user?.phone || user?.phoneVerified !== true}>
+                          {registrationLoading ? 'Starting payment…' : `Pay ${formatKES(Number(securityPolicy?.highValueDepositKes || 50000))} security deposit`}
+                        </button>}
+                  </div>
+                )}
                 {auctionLive && !isOwner && registration?.status !== 'active' ? (
                   <div className="card" style={{ padding: 16, background: 'var(--surface)', border: '1px solid rgba(234,179,8,0.35)' }}>
                     <strong style={{ display: 'block', marginBottom: 8 }}>👀 Bidding room closed — watching only</strong>
@@ -537,6 +655,20 @@ export default function AuctionLivePage() {
                       <button className="btn btn-gold btn-full" onClick={() => navigate(loginPathFor(location))}>Sign in to register</button>
                     ) : registration?.status === 'active' ? (
                       <div style={{ color: 'var(--green)', fontSize: 12, display: 'flex', alignItems: 'center', gap: 4 }}><Check size={13} aria-hidden="true" /> You are registered and cleared to bid when the auction opens.</div>
+                    ) : registration?.status === 'pending_eligibility' ? (
+                      <>
+                        <div style={{ padding: 12, marginBottom: 10, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 11, color: 'var(--text-muted)' }}>
+                          <strong style={{ color: 'var(--text)' }}>Verification required before your bidder pass can activate.</strong>
+                          {Array.isArray(registration?.eligibility_snapshot?.blockers) && registration.eligibility_snapshot.blockers.length > 0 && (
+                            <ul style={{ margin: '8px 0 0', paddingLeft: 18 }}>
+                              {registration.eligibility_snapshot.blockers.map((blocker) => <li key={blocker}>{String(blocker).replace(/_/g, ' ')}</li>)}
+                            </ul>
+                          )}
+                        </div>
+                        <button className="btn btn-gold btn-full" onClick={handleRefreshEligibility} disabled={registrationLoading || !roomState?.registrationOpen}>
+                          {registrationLoading ? 'Checking requirements…' : 'Re-check my eligibility'}
+                        </button>
+                      </>
                     ) : !roomState?.registrationOpen ? (
                       <div style={{ color: 'var(--red)', fontSize: 12 }}>Registration is closed. You may watch when the auction goes live.</div>
                     ) : !registration ? (
@@ -599,8 +731,8 @@ export default function AuctionLivePage() {
       <AuctionBidConfirmation amount={Number(bidAmount || 0)} open={bidConfirmation} onClose={() => setBidConfirmation(false)} />
       <AuctionMobileActionBar
         live={auctionLive}
-        canBid={Boolean((!isAuth || (isAuth && !isOwner && registration?.status === 'active' && bidAmount && Number(bidAmount) >= minBid)))}
-        label={!isAuth ? 'Sign in to bid' : registration?.status === 'active' ? 'Place bid' : 'Registration required'}
+        canBid={Boolean((!isAuth || (isAuth && !isOwner && registration?.status === 'active' && bidAmount && Number(bidAmount) >= minBid && (Number(bidAmount) <= Number(securityPolicy?.highValueBidThresholdKes || 5000000) || ['held', 'applied'].includes(String(highValueHold?.status || '').toLowerCase())))))}
+        label={!isAuth ? 'Sign in to bid' : registration?.status !== 'active' ? 'Registration required' : Number(bidAmount) > Number(securityPolicy?.highValueBidThresholdKes || 5000000) && !['held', 'applied'].includes(String(highValueHold?.status || '').toLowerCase()) ? 'Deposit required' : 'Place bid'}
         amount={bidAmount}
         onBid={handlePlaceBid}
         disabled={placing}

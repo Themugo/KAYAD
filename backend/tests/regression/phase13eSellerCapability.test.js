@@ -213,9 +213,12 @@ describe("Listing guard (sellerListingAccess): capability enforced at the backen
     table.set(LEGACY_APPROVED, { user_id: LEGACY_APPROVED, status: "revoked", source: "legacy_backfill" });
     expect((await run(users[LEGACY_APPROVED], { write: true })).status).toBe(403); // the capability row is authoritative once present
   });
-  test("dealers and staff keep dealerOnly behaviour", async () => {
+  test("dealers retain seller writes; platform staff are read-only on seller inventory routes", async () => {
     expect((await run(users[DEALER], { write: true })).passed).toBe(true);
-    expect((await run(users[ADMIN], { write: true })).passed).toBe(true);
+    const staffWrite = await run(users[ADMIN], { write: true });
+    expect(staffWrite.status).toBe(403);
+    expect(staffWrite.body.code).toBe("LISTING_OWNER_ACTION_REQUIRED");
+    expect((await run(users[ADMIN], { write: false })).passed).toBe(true);
     expect((await run({ ...users[SUPPORT], role: "buyer_x" }, { write: true })).status).toBe(403);
   });
   test("a seller capability never lets one user act on another's capability (state is per users.id)", async () => {
@@ -326,7 +329,7 @@ describe("free private-seller default policy", () => {
 });
 
 
-describe("direct publication requires a trusted policy and an eligible personal seller capability", () => {
+describe("direct publication is approval-free for eligible personal sellers", () => {
   beforeEach(() => {
     table = new Map();
     capabilityTableMissing = false;
@@ -337,7 +340,7 @@ describe("direct publication requires a trusted policy and an eligible personal 
     });
   });
 
-  test("verified free-mode personal buyer can publish when policy allows auto-publish", async () => {
+  test("verified free-mode personal buyer can publish immediately", async () => {
     expect(await onboardingPolicy.sellerMayPublishDirectly(users[BUYER])).toBe(true);
   });
 
@@ -378,23 +381,29 @@ describe("direct publication requires a trusted policy and an eligible personal 
     expect(await onboardingPolicy.sellerMayPublishDirectly(users[BUYER])).toBe(true);
   });
 
-  test("hold-for-review and unavailable policy never permit direct publication", async () => {
+  test("legacy hold-for-review and unavailable policy cannot reintroduce listing approval", async () => {
     onboardingPolicy.__setOnboardingPolicyForTests({
       privateSellerApprovalMode: "disabled",
       privateSellerPackageMode: "free",
       listingModeration: "hold_for_review",
     });
-    expect(await onboardingPolicy.sellerMayPublishDirectly(users[BUYER])).toBe(false);
+    expect(await onboardingPolicy.sellerMayPublishDirectly(users[BUYER])).toBe(true);
     onboardingPolicy.__setOnboardingPolicyForTests({
       privateSellerApprovalMode: "disabled",
       privateSellerPackageMode: "free",
       listingModeration: "auto_publish",
     }, "unavailable");
-    expect(await onboardingPolicy.sellerMayPublishDirectly(users[BUYER])).toBe(false);
+    expect(await onboardingPolicy.sellerMayPublishDirectly(users[BUYER])).toBe(true);
   });
 
-  test("dealer behaviour remains on its existing account-status path", async () => {
+  test("approved dealer publishes directly; pending dealer publishes after verification middleware admits self-service", async () => {
     expect(await onboardingPolicy.sellerMayPublishDirectly(users[DEALER])).toBe(true);
     expect(await onboardingPolicy.sellerMayPublishDirectly({ ...users[DEALER], status: "pending" })).toBe(false);
+    expect(await onboardingPolicy.sellerMayPublishDirectly({
+      ...users[DEALER], status: "pending", progressiveAccess: true, dealerVerificationStatus: "pending",
+    })).toBe(true);
+    expect(await onboardingPolicy.sellerMayPublishDirectly({
+      ...users[DEALER], status: "pending", progressiveAccess: true, dealerVerificationStatus: "suspended",
+    })).toBe(false);
   });
 });

@@ -13,7 +13,7 @@ describe('SocketContext joinMessages reconnect', () => {
   beforeEach(() => {
     handlers = {}; emitted = [];
     (window as any).io = () => ({
-      connected: false,
+      connected: true,
       on: (e: string, h: any) => { (handlers[e] ||= []).push(h); },
       off: (e: string, h: any) => { handlers[e] = (handlers[e] || []).filter((x) => x !== h); },
       emit: (...a: any[]) => { emitted.push(a); },

@@ -3,6 +3,8 @@ import { render, screen, within, cleanup, fireEvent, waitFor } from '@testing-li
 import { MemoryRouter } from 'react-router-dom';
 
 const api = vi.hoisted(() => ({ cars: vi.fn(), deleteCar: vi.fn(), moderateCar: vi.fn(), getOnboardingSettings: vi.fn(), updateOnboardingSettings: vi.fn() }));
+const vehicleCache = vi.hoisted(() => ({ clearCarsCache: vi.fn() }));
+vi.mock('../../../services/vehicleApi', () => ({ clearCarsCache: vehicleCache.clearCarsCache }));
 vi.mock('../../../api/api', async (orig) => ({ ...(await orig()), adminAPI: api }));
 const { stableToast } = vi.hoisted(() => ({ stableToast: { toast: vi.fn() } }));
 vi.mock('../../../context/ToastContext', () => ({ useToast: () => stableToast }));
@@ -12,7 +14,7 @@ const pendingCar = { id: 'c1', title: 'TOYOTA', price: 3500000, year: 2016, mile
 beforeEach(() => {
   vi.clearAllMocks();
   api.cars.mockResolvedValue({ cars: [pendingCar], pagination: { total: 1 } });
-  api.getOnboardingSettings.mockResolvedValue({ canChange: true, policy: { listingModeration: 'hold_for_review', revision: 4 } });
+  api.getOnboardingSettings.mockResolvedValue({ canChange: true, policy: { listingModeration: 'auto_publish', revision: 4 } });
 });
 afterEach(() => cleanup());
 
@@ -30,6 +32,7 @@ describe('Listing Management shows the real status and lets an admin publish', (
     expect(within(row).getByText('pending')).toBeTruthy();
     fireEvent.click(within(row).getByRole('button', { name: /Approve listing TOYOTA/ }));
     await waitFor(() => expect(api.moderateCar).toHaveBeenCalledWith('c1', { action: 'approve' }));
+    expect(vehicleCache.clearCarsCache).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(within(row).getByText('available')).toBeTruthy());
     expect(within(row).getByRole('button', { name: /Hide listing TOYOTA/ })).toBeTruthy();
   });
@@ -42,20 +45,11 @@ describe('Listing Management shows the real status and lets an admin publish', (
     await waitFor(() => expect(stableToast.toast).toHaveBeenCalledWith(expect.stringContaining('Only the owner can decide listings'), 'error'));
   });
 
-  test('the owner can switch auto-publish on from this page', async () => {
-    api.updateOnboardingSettings.mockResolvedValue({ policy: { listingModeration: 'auto_publish', revision: 5 } });
+  test('listing publication is self-service; admin page retains only safety moderation', async () => {
     render(<MemoryRouter><AdminCars /></MemoryRouter>);
-    const select = await screen.findByLabelText('Listing approval');
-    fireEvent.change(select, { target: { value: 'auto_publish' } });
-    await waitFor(() => expect(api.updateOnboardingSettings).toHaveBeenCalledWith({ listingModeration: 'auto_publish', expectedRevision: 4 }));
-    expect(await screen.findByText(/Auto-publish: listings from approved sellers/)).toBeTruthy();
-  });
-
-  test('a non-owner sees the policy but cannot change it', async () => {
-    api.getOnboardingSettings.mockResolvedValue({ canChange: false, policy: { listingModeration: 'hold_for_review', revision: 4 } });
-    render(<MemoryRouter><AdminCars /></MemoryRouter>);
-    expect(await screen.findByText(/Only the platform owner can change this/)).toBeTruthy();
+    expect(await screen.findByText(/Eligible personal sellers and dealers who have submitted verification publish their own listings immediately/)).toBeTruthy();
     expect(screen.queryByLabelText('Listing approval')).toBeNull();
+    expect(api.updateOnboardingSettings).not.toHaveBeenCalled();
   });
 
   test('rows are numbered', async () => {

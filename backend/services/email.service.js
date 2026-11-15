@@ -121,11 +121,12 @@ export const sendWelcomeEmail = (user) =>
       `
       ${heading(`Welcome, ${esc(user.name)}!`)}
       ${para("Your account is ready. You can now browse premium cars, place live bids, and buy with M-Pesa escrow protection — your dream car is waiting.")}
-      ${user.role === "dealer" ? para("<strong style='color:#13B8A6'>Your dealer account is pending approval.</strong> Our team will review your dealership within 24 hours. You'll receive an email once approved.") : ""}
+      ${user.role === "dealer" ? para("<strong style='color:#13B8A6'>Your dealer application has been received.</strong> Verify your email and submit the required business-verification details. Once submitted, you can publish and manage your own vehicle listings while verification is processed. Auction, payout and other sensitive dealer features unlock after verification approval.") : ""}
       ${btn("Start Browsing →", `${APP_URL}/showroom`)}
       ${divider()}
       ${para(`<strong style='color:#F6FAF9'>What you can do now:</strong><br/>
-        • Browse ${user.role === "dealer" ? "and list " : ""}verified vehicles<br/>
+        • Browse verified vehicles<br/>
+        ${user.role === "dealer" ? "• Submit business verification, then publish and manage your own inventory<br/>" : ""}
         • Join live auctions with real-time bidding<br/>
         • Chat directly with sellers<br/>
         • Secure payments with M-Pesa escrow`)}

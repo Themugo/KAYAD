@@ -65,6 +65,16 @@ import {
 
 const router = express.Router();
 
+// Approved dealers and staff retain the existing workspace behaviour. Only a pending
+// dealer identity (including a delegated team member resolved to that dealer) must pass
+// the submitted-verification self-service allowlist before inventory access.
+const verifyPendingDealerWorkspace = (req, res, next) => {
+  if (req.user?.role === "dealer" && String(req.user.status || "").toLowerCase() === "pending") {
+    return requireDealerVerification(req, res, next);
+  }
+  return next();
+};
+
 // Entry screen data: does this signed-in account work for a dealership?
 router.get("/my-workspace", protect, asyncHandler(myWorkspaceHandler));
 
@@ -76,11 +86,11 @@ router.get("/profile/:dealerId", optionalAuth, asyncHandler(getDealerProfile));
 router.put("/profile/:dealerId", protect, createLimiter, stepUpLimiter, asyncHandler(updateDealerProfile));
 
 // Inventory
-router.get("/inventory", protect, dealerWorkspaceAccess(["canListCars","canEditCars","canDeleteCars"]), asyncHandler(getInventory));
+router.get("/inventory", protect, dealerWorkspaceAccess(["canListCars","canEditCars","canDeleteCars"]), verifyPendingDealerWorkspace, asyncHandler(getInventory));
 router.post("/inventory", protect, dealerWorkspaceAccess(["canListCars"]), requireDealerVerification, uploadLimiter, cleanupUploadsOnError, upload.array("images", 10), handleUploadError, validateCar, createLimiter, asyncHandler(createListing));
-router.put("/inventory/:listingId", protect, dealerWorkspaceAccess(["canEditCars"]), validateCar, createLimiter, asyncHandler(updateListing));
-router.delete("/inventory/:listingId", protect, dealerWorkspaceAccess(["canDeleteCars"]), createLimiter, asyncHandler(deleteListing));
-router.post("/inventory/bulk", protect, dealerWorkspaceAccess(["canEditCars","canDeleteCars"]), createLimiter, asyncHandler(bulkUpdateListings));
+router.put("/inventory/:listingId", protect, dealerWorkspaceAccess(["canEditCars"]), verifyPendingDealerWorkspace, validateCar, createLimiter, asyncHandler(updateListing));
+router.delete("/inventory/:listingId", protect, dealerWorkspaceAccess(["canDeleteCars"]), verifyPendingDealerWorkspace, createLimiter, asyncHandler(deleteListing));
+router.post("/inventory/bulk", protect, dealerWorkspaceAccess(["canEditCars","canDeleteCars"]), verifyPendingDealerWorkspace, createLimiter, asyncHandler(bulkUpdateListings));
 
 // Leads (CRM)
 router.get("/leads", protect, dealerWorkspaceAccess(["canChatBuyers"]), asyncHandler(getLeads));

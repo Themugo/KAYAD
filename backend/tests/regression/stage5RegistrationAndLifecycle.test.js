@@ -180,12 +180,14 @@ describe("verification token lifecycle (GET /verify-email/:token)", () => {
   });
 });
 
-describe("wording: application received ≠ email verified ≠ approved", () => {
+describe("dealer verification status is distinct from immediate seller-owned listing access", () => {
   test("dealer registration response says the application is received and NOT approved", async () => {
     __setOnboardingPolicyForTests({ dealerOnboardingMode: "approval_required" });
     const r = await reg({ role: "dealer", businessName: "Bravo Motors Ltd", location: "L" });
     expect(r.body.message).toMatch(/application received/i);
-    expect(r.body.message).toMatch(/not approved until/i);
+    expect(r.body.message).toMatch(/complete business verification/i);
+    expect(r.body.message).toMatch(/publish and manage your own vehicle listings while verification is processed/i);
+    expect(r.body.message).toMatch(/sensitive dealer features remain restricted/i);
     expect(r.body.message).not.toMatch(/ready/i);
   });
   test("retired seller registration response explains there is no separate seller account", async () => {

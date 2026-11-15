@@ -66,6 +66,8 @@ export const bulkModerateCars = async (req, res) => {
       { _id: { $in: eligibleIds } },
       { $set: { status: newStatus } },
     );
+    // A moderation decision changes public inventory immediately; do not leave stale search/list pages cached.
+    await invalidatePublicListingCaches();
 
     // STAGE 5A (real-DB defect): populated dealers carry `id`, not a string `_id`; the old code threw on dealer._id.toString().
     const idOf = (d) => (typeof d === "string" ? d : d?.id ?? (typeof d?._id === "string" ? d._id : null));

@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { buildAuthPath } from '../utils/authIntent';
+import { useSocket } from '../context/SocketContext';
 import {
   UnifiedChatThread,
   UnifiedMessageItem,
@@ -93,6 +94,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
   const currentUserIdRef = useRef<string | null>(currentUserId);
   currentUserIdRef.current = currentUserId;
   const navigate = useNavigate();
+  const { connected: socketConnected, joinMessages, leaveChannel } = useSocket();
 
   useEffect(() => {
     if (!currentUserId) {
@@ -274,6 +276,39 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
     return () => { cancelled = true; };
   }, [selectedThreadId, currentUserId]);
 
+  // Subscribe to the private conversation room. Socket events are only a
+  // signal to refresh canonical history; the client never trusts event text
+  // as the persisted transcript. Polling/inbox refresh remains the fallback
+  // when realtime is temporarily disconnected.
+  useEffect(() => {
+    if (!currentUserId || !selectedThreadId) return;
+    let cancelled = false;
+    const refreshTranscript = () => getChatMessages(selectedThreadId).then((realMessages) => {
+      if (cancelled || currentUserIdRef.current !== currentUserId) return;
+      const mapped = mapBackendMessagesToUnified(realMessages, selectedThreadId, currentUserId);
+      setThreads((prev) => prev.map((thread) => thread.id === selectedThreadId ? { ...thread, messages: mapped } : thread));
+    });
+    const channel = socketConnected ? joinMessages(selectedThreadId, { onMessage: (event: any) => {
+      if (event?.chatId !== selectedThreadId) return;
+      void refreshTranscript().then(() => markChatSeen(selectedThreadId)).then(() => {
+        if (!cancelled) setThreads((prev) => prev.map((thread) => thread.id === selectedThreadId ? { ...thread, unreadCount: 0 } : thread));
+      }).catch(() => {
+        // A transient history/read-receipt failure leaves the last confirmed transcript intact.
+      });
+    } }) : undefined;
+    // If realtime cannot connect, refresh only the selected transcript as a
+    // bounded fallback instead of silently leaving the open conversation stale.
+    const fallbackTimer = !socketConnected ? window.setInterval(() => {
+      void refreshTranscript().then(() => markChatSeen(selectedThreadId)).then(() => {
+        if (!cancelled) setThreads((prev) => prev.map((thread) => thread.id === selectedThreadId ? { ...thread, unreadCount: 0 } : thread));
+      }).catch(() => {});
+    }, 10000) : null;
+    return () => {
+      cancelled = true;
+      if (fallbackTimer !== null) window.clearInterval(fallbackTimer);
+      if (channel) leaveChannel(channel);
+    };
+  }, [currentUserId, selectedThreadId, socketConnected, joinMessages, leaveChannel]);
 
   // Fixed: this previously never called the real backend at all -
   // purely local state, with the sender hardcoded to "James Mwangi

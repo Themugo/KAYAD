@@ -9,10 +9,10 @@
 //
 // Policy fields (all server-validated enums; unknown keys are rejected):
 //   privateSellerRegistration  enabled | disabled
-//   privateSellerApprovalMode  disabled | required (defaults to disabled)
+//   privateSellerApprovalMode  disabled (legacy required value is normalized to disabled)
 //   privateSellerPackageMode   free (paid modes require a later package catalogue + verified checkout integration)
-//   dealerOnboardingMode       self_onboarding | approval_required | closed
-//   listingModeration          auto_publish (default: no approval) | hold_for_review (admin approves every new listing)
+//   dealerOnboardingMode       self_onboarding | closed (legacy approval_required normalizes to self_onboarding)
+//   listingModeration          auto_publish only; legacy hold_for_review is normalized to auto_publish
 //   dealerDecisionAuthority    owner_only | admins     (who may approve/reject dealers & sellers)
 //   listingDecisionAuthority   owner_only | admins     (who may approve/reject listings)
 // Email verification for seller actions is NOT a setting: it is always required.
@@ -44,35 +44,33 @@ const CACHE_TTL_MS = 5_000;
 
 export const POLICY_FIELDS = Object.freeze({
   privateSellerRegistration: Object.freeze(["enabled", "disabled"]),
-  privateSellerApprovalMode: Object.freeze(["disabled", "required"]),
+  privateSellerApprovalMode: Object.freeze(["disabled"]),
   privateSellerPackageMode: Object.freeze(["free", "optional", "required"]),
-  dealerOnboardingMode: Object.freeze(["self_onboarding", "approval_required", "closed"]),
-  listingModeration: Object.freeze(["hold_for_review", "auto_publish"]),
+  dealerOnboardingMode: Object.freeze(["self_onboarding", "closed"]),
+  listingModeration: Object.freeze(["auto_publish"]),
   dealerDecisionAuthority: Object.freeze(["owner_only", "admins"]),
   listingDecisionAuthority: Object.freeze(["owner_only", "admins"]),
 });
 
-/** Deliberate initial configuration when no row exists. Dealers are NOT opened by default. */
+/** Deliberate initial configuration: dealers may self-onboard and publish after submitting verification; sensitive features remain verified. */
 export const INITIAL_DEFAULTS = Object.freeze({
   privateSellerRegistration: "enabled",
   privateSellerApprovalMode: "disabled",
   privateSellerPackageMode: "free",
-  dealerOnboardingMode: "approval_required",
-  // Listings need no approval by default: an account in good standing publishes immediately. The owner/admin can switch this
-  // to "hold_for_review" at any time (Admin → Settings → Onboarding). A missing, unreadable or corrupt policy is still
-  // RESTRICTIVE (hold), so this default only applies when no row has ever been saved.
+  dealerOnboardingMode: "self_onboarding",
+  // Every eligible personal seller and dealer with submitted verification self-publishes; platform moderation remains available after publication.
   listingModeration: "auto_publish",
   dealerDecisionAuthority: "owner_only",
   listingDecisionAuthority: "owner_only",
 });
 
-/** Used whenever the real value cannot be trusted. Every value is the most restrictive one. */
+/** Used whenever the real value cannot be trusted. Registration and decision controls fail closed; per-listing review remains retired. */
 export const RESTRICTIVE = Object.freeze({
   privateSellerRegistration: "disabled",
   privateSellerApprovalMode: "disabled",
   privateSellerPackageMode: "free",
   dealerOnboardingMode: "closed",
-  listingModeration: "hold_for_review",
+  listingModeration: "auto_publish",
   dealerDecisionAuthority: "owner_only",
   listingDecisionAuthority: "owner_only",
 });
@@ -102,7 +100,16 @@ export function normalizePolicyValue(raw) {
   const policy = {};
   const issues = [];
   for (const [field, allowed] of Object.entries(POLICY_FIELDS)) {
-    if (raw[field] === undefined) policy[field] = INITIAL_DEFAULTS[field]; // older revision without the field
+    if (field === "listingModeration" && raw[field] === "hold_for_review") {
+      // Legacy setting is retired: all eligible seller listings self-publish. Keep old rows readable.
+      policy[field] = "auto_publish";
+    } else if (field === "dealerOnboardingMode" && raw[field] === "approval_required") {
+      // Legacy approval-required dealer onboarding is retired for the self-service listing launch.
+      policy[field] = "self_onboarding";
+    } else if (field === "privateSellerApprovalMode" && raw[field] === "required") {
+      // Legacy private-seller approval is retired for the free self-service launch.
+      policy[field] = "disabled";
+    } else if (raw[field] === undefined) policy[field] = INITIAL_DEFAULTS[field]; // older revision without the field
     else if (typeof raw[field] === "string" && allowed.includes(raw[field])) policy[field] = raw[field];
     else { policy[field] = RESTRICTIVE[field]; issues.push(`${field} is invalid`); }
   }
@@ -305,10 +312,13 @@ export const requireDecisionAuthority = (domain) => async (req, res, next) => {
 };
 
 /**
- * May this user put one of THEIR OWN listings straight into a public ("available") state?
- * Owner and staff: yes (their own moderation authority is enforced elsewhere).
- * Everyone else: only when the owner chose auto_publish, the policy is trustworthy, and the
- * seller account itself is approved. hold_for_review / unavailable / invalid ⇒ no.
+ * May this seller publish one of THEIR OWN listings immediately?
+ * Listing-by-listing administrator approval is retired. Publication is self-service for
+ * eligible personal sellers and dealer accounts admitted by the verification middleware. Email
+ * verification, account suspension/revocation, legacy capability restrictions and free-package rules remain enforced.
+ * This decision deliberately does not depend on the legacy listingModeration setting or
+ * the availability of the onboarding-policy store: an outage must not silently reintroduce
+ * a per-listing admin approval queue.
  */
 export async function sellerMayPublishDirectly(user) {
   if (!user) return false;
@@ -316,8 +326,7 @@ export async function sellerMayPublishDirectly(user) {
   if (user.role === "admin" || user.role === "superadmin") return true;
 
   const result = await getOnboardingPolicy();
-  if (!isPolicyTrusted(result) || result.policy.listingModeration !== "auto_publish") return false;
-  if (result.policy.privateSellerPackageMode !== "free") return false;
+  // Per-listing review is retired. Legacy stored hold_for_review values are normalized to auto_publish.
 
   const role = String(user.role || "");
   const personalSeller = role === "user" || role === "individual_seller";
@@ -329,9 +338,21 @@ export async function sellerMayPublishDirectly(user) {
   // in route middleware so direct callers cannot accidentally bypass the rule.
   if (personalSeller && user.emailVerified !== true) return false;
 
-  // Preserve the existing dealer path: dealers are governed by their own role,
-  // verification and account-status middleware, not the private-seller capability.
-  if (!personalSeller) return accountStatus === "approved";
+  // Dealers are separate business accounts. A fully approved account publishes normally;
+  // a pending/under-review account may publish only after the verification middleware has
+  // admitted it under self_onboarding. The middleware still blocks missing, rejected or suspended verification.
+  if (role === "dealer") {
+    if (accountStatus === "approved") return true;
+    const verificationStatus = String(user.dealerVerificationStatus || "").toLowerCase();
+    return accountStatus === "pending" && (
+      (user.progressiveAccess === true && ["pending", "under_review"].includes(verificationStatus))
+      || verificationStatus === "approved"
+    );
+  }
+  if (!personalSeller) return false;
+  // This package switch applies only to private/personal sellers; dealer plans are governed by
+  // the separate dealer entitlement service.
+  if (result.policy.privateSellerPackageMode !== "free") return false;
 
   const approvalRequired = result.policy.privateSellerApprovalMode === "required";
   let capability = null;
@@ -371,8 +392,3 @@ export async function sellerMayPublishDirectly(user) {
   return role === "individual_seller" && accountStatus === "approved";
 }
 
-export const PUBLICATION_REVIEW_REQUIRED = Object.freeze({
-  success: false,
-  code: "LISTING_PUBLICATION_REQUIRES_REVIEW",
-  message: "Publishing is controlled by listing review. Submit the listing for review (status: pending) and it will go live once approved.",
-});

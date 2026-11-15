@@ -84,3 +84,426 @@
 @keyframes kayad-refresh-slide { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
 .kayad-inventory-results[aria-busy="true"] > .grid, .kayad-inventory-results[aria-busy="true"] > div:not(.kayad-refresh-bar) { opacity: .72; transition: opacity .15s ease; }
 @media (prefers-reduced-motion: reduce) { .kayad-refresh-bar > span { animation: none; width: 100%; } }
+
+
+/* 2026-11-14 — responsive homepage polish pass.
+   Presentation-only: retain the existing API, vehicle selection, filters,
+   navigation actions, admin configuration and listing lifecycle contracts. */
+.kayad-homepage {
+  color: #0A3340;
+  background: linear-gradient(180deg, #F7FBFA 0%, #F1F7F6 42%, #F7FBFA 100%);
+}
+.kayad-public-hero {
+  min-height: 0;
+  box-shadow: inset 0 -1px 0 rgba(255,255,255,.48);
+}
+.kayad-public-hero [data-testid="hero-desktop-vehicle"] img {
+  filter: drop-shadow(0 24px 32px rgba(3,19,27,.34));
+}
+.kayad-public-hero__mobile-card {
+  border: 1px solid rgba(255,255,255,.94) !important;
+  box-shadow: 0 18px 44px rgba(3,30,42,.18), 0 2px 8px rgba(3,30,42,.06) !important;
+}
+.kayad-public-hero__mobile-card h1 {
+  letter-spacing: -.052em;
+  text-wrap: balance;
+}
+.kayad-public-hero__mobile-card p {
+  display: block !important;
+  color: #526D77;
+}
+.kayad-public-hero__primary-cta,
+.kayad-public-hero__secondary-cta {
+  min-width: 0;
+  white-space: nowrap;
+  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease;
+}
+.kayad-public-hero__primary-cta:hover,
+.kayad-public-hero__secondary-cta:hover { transform: translateY(-1px); }
+.kayad-public-hero__mobile-stage {
+  position: relative;
+  padding: 7px;
+  border: 1px solid rgba(255,255,255,.24);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(7,43,54,.22), rgba(7,43,54,.06));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.18);
+}
+.kayad-public-hero__mobile-stage .kayad-public-hero__vehicle-card {
+  min-height: 0;
+  border-color: rgba(255,255,255,.28);
+  background: rgba(7,43,54,.18);
+  border-radius: 16px;
+}
+.kayad-public-hero__mobile-stage [data-testid="hero-pair-image-stage"] {
+  height: clamp(108px, 34vw, 164px) !important;
+}
+.kayad-public-hero__mobile-stage picture img {
+  width: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+}
+.kayad-public-hero__mobile-stage .kayad-public-hero__vehicle-card > div:last-child {
+  min-height: 56px;
+  border-radius: 12px;
+  padding: 8px 7px;
+}
+.kayad-home-quick-actions {
+  margin-top: 18px;
+  margin-bottom: 4px;
+  box-shadow: 0 14px 34px rgba(6,46,58,.085);
+}
+.kayad-home-category-strip {
+  position: relative !important;
+  top: auto !important;
+  z-index: 1 !important;
+  box-shadow: 0 4px 16px rgba(10,51,64,.035);
+}
+.kayad-home-category-strip > div { padding-top: 12px; padding-bottom: 12px; }
+.kayad-search-bridge { scroll-margin-top: 90px; }
+.kayad-market-toolbar {
+  border-radius: 22px;
+  box-shadow: 0 12px 32px rgba(11,29,58,.055);
+}
+.kayad-filter-panel {
+  box-shadow: 0 12px 32px rgba(10,51,64,.075);
+}
+.kayad-inventory-results > .grid { align-items: stretch; }
+.kayad-vehicle-card {
+  border-radius: 18px;
+  box-shadow: 0 7px 24px rgba(11,29,58,.055);
+}
+.kayad-vehicle-card:hover {
+  box-shadow: 0 16px 36px rgba(11,29,58,.11);
+}
+.kayad-vc-body { gap: 0; }
+.kayad-vc-price { color: #12576D; }
+.kayad-vc-cta { min-height: 44px; }
+
+@media (min-width: 1024px) {
+  .kayad-public-hero > div[style*="--hero-stage-h"] { min-height: 430px; }
+  .kayad-public-hero__mobile-card { display: none; }
+  .kayad-home-category-strip > div { gap: 10px; }
+  .kayad-home-category-strip button { padding-left: 18px; padding-right: 18px; }
+  .kayad-market-toolbar { margin-bottom: 22px; }
+  .kayad-inventory-results { scroll-margin-top: 96px; }
+}
+
+@media (max-width: 639.98px) {
+  .kayad-public-hero { padding-bottom: 12px; }
+  .kayad-public-hero__mobile-card {
+    padding: 15px 12px !important;
+    border-radius: 21px !important;
+  }
+  .kayad-public-hero__mobile-card h1 {
+    margin-top: 11px;
+    font-size: clamp(1.55rem, 7.1vw, 2rem);
+    line-height: 1.04;
+  }
+  .kayad-public-hero__mobile-card p {
+    display: block !important;
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .kayad-public-hero__mobile-card > span { font-size: 8px; letter-spacing: .045em; }
+  .kayad-public-hero__mobile-card > div:last-child { margin-top: 12px; }
+  .kayad-public-hero__primary-cta,
+  .kayad-public-hero__secondary-cta { min-height: 43px; padding-left: 12px !important; padding-right: 12px !important; font-size: 10px !important; }
+  .kayad-public-hero__mobile-stage { margin-top: 10px; }
+  .kayad-home-category-strip > div { padding-top: 9px; padding-bottom: 9px; }
+  .kayad-home-category-strip button { min-height: 38px; padding: 7px 13px; font-size: 10px; }
+  .kayad-search-bridge { margin-top: 10px; padding-left: 12px; padding-right: 12px; }
+  .kayad-search-bridge [data-testid="mobile-search-row"] { border-radius: 16px; box-shadow: 0 7px 20px rgba(11,29,58,.065); }
+  .kayad-market-toolbar { margin-bottom: 14px; border-radius: 18px; }
+  .kayad-market-toolbar > div { gap: 10px; padding: 12px; }
+  .kayad-market-toolbar-controls { display: grid; grid-template-columns: minmax(0,1fr) auto; width: 100%; }
+  .kayad-market-toolbar-controls > * { min-width: 0; }
+  .kayad-market-toolbar-controls .kayad-toolbar-control { max-width: 100%; }
+  .kayad-inventory-results { min-height: 260px; }
+  .kayad-vehicle-card { border-radius: 16px; }
+  .kayad-vc-body { padding: 12px !important; }
+  .kayad-vc-price { font-size: clamp(20px, 6vw, 27px) !important; }
+  .kayad-vc-actions { gap: 7px; }
+}
+
+@media (max-width: 379px) {
+  .kayad-public-hero__mobile-stage { padding: 5px; border-radius: 17px; }
+  .kayad-public-hero__mobile-stage .kayad-public-hero__vehicle-card { padding-left: 4px; padding-right: 4px; }
+  .kayad-public-hero__mobile-stage [data-testid="hero-pair-image-stage"] { height: 108px !important; }
+  .kayad-public-hero__mobile-stage .kayad-public-hero__vehicle-card > div:last-child { padding: 6px 5px; }
+  .kayad-public-hero__mobile-stage .kayad-public-hero__vehicle-card > div:last-child div { font-size: 8px; }
+  .kayad-public-hero__mobile-card > div:last-child { gap: 6px; }
+  .kayad-public-hero__primary-cta,
+  .kayad-public-hero__secondary-cta { padding-left: 9px !important; padding-right: 9px !important; font-size: 9px !important; }
+  .kayad-market-toolbar-controls { grid-template-columns: minmax(0,1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kayad-public-hero__primary-cta,
+  .kayad-public-hero__secondary-cta { transition: none; }
+}
+
+
+/* 2026-11-14 — compact home/showroom pass from real-device screenshots.
+   Presentation-only: keep configured hero content, live inventory, filters,
+   category actions and retry behavior intact while reducing vertical travel. */
+@media (max-width: 639.98px) {
+  .kayad-homepage { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+  #market-journey {
+    padding-top: 7px;
+    padding-bottom: 7px;
+    gap: 6px;
+  }
+  #market-journey > span { font-size: 8px; letter-spacing: .09em; }
+  #market-journey [role="group"] { gap: 4px; }
+  #market-journey [role="group"] > * { padding: 4px 8px; font-size: 8px; }
+
+  .kayad-public-hero { padding-bottom: 7px; }
+  .kayad-public-hero__mobile-card {
+    padding: 12px 11px !important;
+    border-radius: 18px !important;
+    box-shadow: 0 10px 26px rgba(3,30,42,.14) !important;
+  }
+  .kayad-public-hero__mobile-card h1 {
+    margin-top: 8px !important;
+    font-size: clamp(1.45rem, 6.2vw, 1.85rem) !important;
+    line-height: 1.02 !important;
+  }
+  .kayad-public-hero__mobile-card p {
+    margin-top: 6px !important;
+    font-size: 11px !important;
+    line-height: 1.35 !important;
+  }
+  .kayad-public-hero__mobile-card > div:last-child { margin-top: 9px !important; }
+  .kayad-public-hero__primary-cta,
+  .kayad-public-hero__secondary-cta {
+    min-height: 39px !important;
+    font-size: 10px !important;
+  }
+  .kayad-public-hero__mobile-stage {
+    margin-top: 7px !important;
+    padding: 5px !important;
+    border-radius: 16px !important;
+  }
+  .kayad-public-hero__mobile-stage [data-testid="hero-pair-image-stage"] {
+    height: clamp(88px, 27vw, 116px) !important;
+  }
+  .kayad-public-hero__mobile-stage .kayad-public-hero__vehicle-card > div:last-child {
+    min-height: 45px !important;
+    padding: 5px 6px !important;
+  }
+  .kayad-public-hero__mobile-stage .kayad-public-hero__vehicle-card > div:last-child div {
+    font-size: 9px;
+    line-height: 1.15;
+  }
+
+  .kayad-home-category-strip > div { padding-top: 7px !important; padding-bottom: 7px !important; }
+  .kayad-home-category-strip button { min-height: 34px !important; padding: 6px 11px !important; }
+
+  .kayad-search-bridge { margin-top: 8px !important; }
+  .kayad-search-bridge [data-testid="mobile-search-row"] { padding: 6px !important; border-radius: 15px !important; }
+  .kayad-search-bridge [data-testid="mobile-search-row"] input { height: 39px !important; font-size: 12px !important; }
+  .kayad-search-bridge [data-testid="mobile-search-row"] button { height: 39px !important; font-size: 11px !important; }
+
+  #market-results { padding-top: 10px !important; }
+  .kayad-market-toolbar { margin-bottom: 10px !important; }
+  .kayad-market-toolbar > div { gap: 8px !important; padding: 10px !important; }
+  .kayad-market-toolbar h1,
+  .kayad-market-toolbar h2 { font-size: 19px !important; line-height: 1.15 !important; }
+  .kayad-toolbar-blurb { margin-top: 3px !important; font-size: 10px !important; line-height: 1.35 !important; }
+  .kayad-inventory-results { min-height: 220px !important; }
+  .kayad-inventory-results [role="status"] {
+    padding: 24px 16px !important;
+    border-radius: 18px !important;
+  }
+  .kayad-inventory-results [role="status"] h2,
+  .kayad-inventory-results [role="status"] h3 { font-size: 17px !important; }
+  .kayad-inventory-results [role="status"] p { font-size: 13px !important; line-height: 1.5 !important; }
+  .kayad-inventory-results [role="status"] button { min-height: 44px; }
+}
+@media (max-width: 379px) {
+  .kayad-public-hero__mobile-card p { max-width: 290px; }
+  .kayad-public-hero__mobile-stage [data-testid="hero-pair-image-stage"] { height: 88px !important; }
+  .kayad-public-hero__mobile-stage .kayad-public-hero__vehicle-card > div:last-child { min-height: 42px !important; }
+}
+
+@media (max-width: 639.98px) {
+  .kayad-mobile-filter-sheet > div:first-child { padding: 10px 14px !important; }
+  .kayad-mobile-filter-sheet > div:nth-child(2) { padding: 12px 14px 104px !important; }
+  .kayad-mobile-filter-sheet [data-testid="mobile-filter-panel"] { gap: 11px !important; }
+  .kayad-mobile-filter-sheet [data-testid="mobile-filter-panel"] fieldset { margin: 0; }
+  .kayad-mobile-filter-sheet [data-testid="mobile-filter-panel"] input {
+    min-height: 39px !important;
+    height: 39px !important;
+    border-radius: 10px !important;
+    font-size: 12px !important;
+  }
+  .kayad-mobile-filter-sheet [data-testid="mobile-filter-panel"] label,
+  .kayad-mobile-filter-sheet [data-testid="mobile-filter-panel"] legend { font-size: 9px !important; }
+  .kayad-mobile-filter-sheet [data-testid="mobile-filter-panel"] [role="group"] button {
+    padding: 5px 9px !important;
+    font-size: 10px !important;
+  }
+}
+
+
+/* 2026-11-14 — design-direction implementation: compact 320–430px home.
+   Keep the existing data/actions and theme; reduce vertical travel and protect
+   the fixed mobile dock from covering the last actionable inventory content. */
+@media (max-width: 639.98px) {
+  .kayad-homepage {
+    padding-bottom: calc(96px + env(safe-area-inset-bottom)) !important;
+  }
+  .kayad-public-hero {
+    padding-top: 8px !important;
+    padding-bottom: 5px !important;
+  }
+  .kayad-public-hero__mobile-card {
+    max-width: 520px;
+    padding: 11px 12px !important;
+    border-radius: 18px !important;
+  }
+  .kayad-public-hero__mobile-card h1 {
+    margin-top: 7px !important;
+    font-size: clamp(1.42rem, 6vw, 1.82rem) !important;
+    line-height: 1.02 !important;
+  }
+  .kayad-public-hero__mobile-card p {
+    max-width: 34rem;
+    margin-top: 5px !important;
+    font-size: 11px !important;
+    line-height: 1.32 !important;
+  }
+  .kayad-public-hero__mobile-card > div:last-child {
+    margin-top: 8px !important;
+    gap: 7px !important;
+  }
+  .kayad-public-hero__primary-cta,
+  .kayad-public-hero__secondary-cta {
+    min-height: 40px !important;
+    padding-inline: 11px !important;
+    font-size: 10px !important;
+  }
+  .kayad-public-hero__mobile-stage {
+    max-width: 520px;
+    margin-top: 6px !important;
+    padding: 5px !important;
+    border-radius: 15px !important;
+  }
+  .kayad-public-hero__mobile-stage [data-testid="hero-pair-image-stage"] {
+    height: clamp(86px, 25vw, 108px) !important;
+  }
+  .kayad-public-hero__mobile-stage .kayad-public-hero__vehicle-card > div:last-child {
+    min-height: 42px !important;
+    padding: 5px !important;
+  }
+  .kayad-public-hero__mobile-stage .kayad-public-hero__vehicle-card > div:last-child div {
+    font-size: 9px !important;
+    line-height: 1.15 !important;
+  }
+  .kayad-home-category-strip > div {
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+    gap: 6px !important;
+  }
+  .kayad-home-category-strip button {
+    min-height: 32px !important;
+    padding: 5px 10px !important;
+    font-size: 10px !important;
+  }
+  .kayad-search-bridge {
+    margin-top: 7px !important;
+    padding-inline: 11px !important;
+    scroll-margin-top: 76px;
+  }
+  .kayad-search-bridge [data-testid="mobile-search-row"] {
+    padding: 5px !important;
+    gap: 6px !important;
+    border-radius: 14px !important;
+  }
+  .kayad-search-bridge [data-testid="mobile-search-row"] input,
+  .kayad-search-bridge [data-testid="mobile-search-row"] button {
+    height: 39px !important;
+    min-height: 39px !important;
+  }
+  #market-results {
+    padding-top: 8px !important;
+    scroll-margin-top: 76px;
+  }
+  .kayad-market-toolbar {
+    margin-bottom: 8px !important;
+    border-radius: 17px !important;
+  }
+  .kayad-market-toolbar > div {
+    gap: 7px !important;
+    padding: 9px !important;
+  }
+  .kayad-market-toolbar h1,
+  .kayad-market-toolbar h2 {
+    font-size: 18px !important;
+    line-height: 1.12 !important;
+  }
+  .kayad-toolbar-blurb {
+    margin-top: 2px !important;
+    font-size: 10px !important;
+    line-height: 1.3 !important;
+  }
+  .kayad-market-toolbar-controls {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px !important;
+    width: 100%;
+  }
+  .kayad-market-toolbar-controls > * { min-width: 0; }
+  .kayad-market-toolbar-controls .kayad-toolbar-control {
+    max-width: 100%;
+    min-width: 0;
+  }
+  .kayad-inventory-results {
+    min-height: 190px !important;
+    scroll-margin-bottom: calc(104px + env(safe-area-inset-bottom));
+  }
+  .kayad-inventory-results [role="status"] {
+    padding: 20px 13px !important;
+  }
+  .kayad-inventory-results [role="status"] button {
+    min-height: 44px !important;
+  }
+  .kayad-vehicle-card { min-width: 0; }
+}
+@media (max-width: 379px) {
+  .kayad-public-hero__mobile-card { padding: 9px 9px !important; }
+  .kayad-public-hero__mobile-card > span {
+    max-width: 100%;
+    font-size: 7px !important;
+    letter-spacing: .035em !important;
+  }
+  .kayad-public-hero__mobile-card h1 {
+    font-size: clamp(1.32rem, 6vw, 1.52rem) !important;
+  }
+  .kayad-public-hero__mobile-card p {
+    max-width: 260px;
+    font-size: 10px !important;
+  }
+  .kayad-public-hero__mobile-card > div:last-child { gap: 5px !important; }
+  .kayad-public-hero__primary-cta,
+  .kayad-public-hero__secondary-cta {
+    min-height: 38px !important;
+    padding-inline: 8px !important;
+    font-size: 9px !important;
+  }
+  .kayad-public-hero__mobile-stage [data-testid="hero-pair-image-stage"] {
+    height: 82px !important;
+  }
+  .kayad-public-hero__mobile-stage .kayad-public-hero__vehicle-card > div:last-child div {
+    font-size: 8px !important;
+  }
+  .kayad-market-toolbar-controls {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+@media (min-width: 380px) and (max-width: 430px) {
+  .kayad-public-hero__mobile-stage [data-testid="hero-pair-image-stage"] {
+    height: 100px !important;
+  }
+}

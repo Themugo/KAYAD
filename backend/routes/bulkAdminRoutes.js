@@ -6,7 +6,6 @@ import { requireDecisionAuthority } from "../services/onboardingPolicy.service.j
 
 import {
   bulkModerateCars,
-  bulkDeleteCars,
   exportCarsCSV,
   exportUsersCSV,
 } from "../controllers/bulkAdminController.js";
@@ -17,7 +16,13 @@ router.use(protect, allowRoles("admin", "superadmin"));
 
 router.post("/cars/moderate", requireDecisionAuthority("listing"), validateWritePayload, asyncHandler(bulkModerateCars));
 
-router.post("/cars/delete", validateWritePayload, asyncHandler(bulkDeleteCars));
+router.post("/cars/delete", validateWritePayload, asyncHandler(async (_req, res) => {
+  return res.status(403).json({
+    success: false,
+    code: "LISTING_OWNER_ACTION_REQUIRED",
+    message: "Platform administrators may approve or hide listings, but only each listing owner may delete their own inventory.",
+  });
+}));
 
 router.get("/export/cars", asyncHandler(exportCarsCSV));
 

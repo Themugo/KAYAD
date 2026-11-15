@@ -14,89 +14,26 @@ vi.mock('../../components/features/common/NotificationCenter', () => ({ default:
 vi.mock('framer-motion', () => ({ motion: { div: ({ children, ...p }) => <div {...p}>{children}</div> }, AnimatePresence: ({ children }) => children }));
 
 const props = { savedCount: 0, activeNav: 'dashboard', onNavClick: vi.fn(), selectedCounty: 'All Kenya', onCountyChange: vi.fn(), onOpenAuth: vi.fn(), onOpenAlerts: vi.fn(), onLogout: vi.fn(), unreadCount: 0 };
-const open = (role) => {
-  render(<MemoryRouter><Navbar {...props} user={{ id: 'u1', name: 'James Mugo', email: 'owner@example.test', role }} /></MemoryRouter>);
-  const panelToggle = document.querySelector('[aria-controls="kayad-account-panel"]');
-  fireEvent.click(panelToggle);
-  return document.getElementById('kayad-account-panel');
-};
+const renderNav = (role, extra = {}) => render(<MemoryRouter initialEntries={['/']}><Navbar {...props} user={{ id: 'u1', name: 'James Mugo', email: 'owner@example.test', role }} {...extra} /></MemoryRouter>);
 afterEach(() => cleanup());
 
-describe('account dropdown by role', () => {
-  it.each(['superadmin', 'admin', 'moderator', 'marketing', 'accounts'])('%s gets the administration menu and no buyer/seller shortcuts', (role) => {
-    const panel = open(role);
-    expect(panel).toBeTruthy();
-    const text = panel.textContent;
-    expect(text).toContain('System Administration');
-    expect(text).toContain('Operations Dashboard');
-    expect(text).not.toContain('Admin Panel');
-    for (const leaked of ['Private Seller / Buyer', 'Buyer Command Center', 'Private Seller Dashboard', 'Sell Vehicle', 'Saved Cars', 'My Garage', 'Payment History', 'Vehicle Financing', 'KAYAD Live']) {
-      expect(text).not.toContain(leaked);
-    }
-    expect(text).toContain('Account Settings');
-    expect(text).toContain('Log Out');
-  });
-  it('superadmin is labelled Super Admin', () => {
-    expect(open('superadmin').textContent).toContain('Super Admin');
-  });
-  it.each(['user', 'individual_seller'])('%s keeps the one personal-account menu (buying and selling) and gets no admin section', (role) => {
-    const text = open(role).textContent;
-    expect(text).toContain('My Account');
-    expect(text).not.toMatch(/Buyer Command Center|Private Seller Dashboard/);
-    expect(text).toContain('Sell Vehicle');
-    expect(text).not.toContain('System Administration');
-  });
-  // A dealer account lives in the Dealer workspace only: buyer and private-seller pages are not offered.
-  it('dealer gets a dealer-only menu: no buyer / private-seller / garage / financing links, no admin section', () => {
-    const panel = open('dealer');
-    const text = panel.textContent;
-    for (const dealerItem of ['Dealer Management', 'Dealer Dashboard', 'Inventory', 'Add Vehicle', 'Leads', 'Analytics', 'Dealer Settings', 'Notifications', 'Messages', 'Log Out']) {
-      expect(text).toContain(dealerItem);
-    }
-    for (const leaked of ['Buyer Command Center', 'Private Seller Dashboard', 'Sell Vehicle', 'Saved Cars', 'My Garage', 'Payment History', 'Vehicle Financing', 'KAYAD Live', 'Account Settings', 'System Administration']) {
-      expect(text).not.toContain(leaked);
-    }
-  });
-  it('dealer menu items open the matching dealer workspace section', () => {
+// The legacy account dropdown was retired: the avatar is an account DESTINATION and the hamburger drawer is the
+// only full navigation menu. These tests make sure the duplicate panel cannot come back.
+describe('profile control and the retired account dropdown', () => {
+  it.each(['user', 'dealer', 'admin', 'superadmin'])('%s: the avatar navigates to the account page and never opens a second menu', (role) => {
     props.onNavClick.mockClear();
-    const expected = { 'Dealer Dashboard': 'dealer:overview', Inventory: 'dealer:inventory', 'Add Vehicle': 'dealer:inventory:new', Leads: 'dealer:leads', Analytics: 'dealer:analytics', 'Dealer Settings': 'dealer:settings' };
-    for (const [label, id] of Object.entries(expected)) {
-      cleanup();
-      props.onNavClick.mockClear();
-      const panel = open('dealer'); // the menu closes after each choice, so open it afresh
-      fireEvent.click([...panel.querySelectorAll('button')].find((b) => b.textContent.trim() === label));
-      expect(props.onNavClick).toHaveBeenCalledWith(id);
-    }
+    renderNav(role);
+    const avatar = document.getElementById('user-profile-menu-button');
+    expect(avatar).toBeTruthy();
+    expect(avatar.getAttribute('aria-label')).toMatch(/open account profile/i);
+    expect(avatar.hasAttribute('aria-expanded')).toBe(false);
+    expect(avatar.hasAttribute('aria-controls')).toBe(false);
+    fireEvent.click(avatar);
+    expect(props.onNavClick).toHaveBeenCalledWith('profile');
+    expect(document.getElementById('kayad-account-panel')).toBeNull();
+    expect(screen.queryByRole('menu')).toBeNull();
+    expect(document.querySelectorAll('[role="dialog"]').length).toBe(0);
   });
-});
-
-
-describe('canonical admin destinations', () => {
-  const LocationProbe = () => {
-    const location = useLocation();
-    return <output data-testid="route-location">{location.pathname}{location.search}</output>;
-  };
-  const renderStaffMenu = (role = 'superadmin') => {
-    render(<MemoryRouter initialEntries={['/']}>
-      <Navbar {...props} user={{ id: 'u1', name: 'James Mugo', email: 'owner@example.test', role }} />
-      <LocationProbe />
-    </MemoryRouter>);
-    fireEvent.click(document.querySelector('[aria-controls="kayad-account-panel"]'));
-  };
-
-  it('opens the existing AdminView command centre from the single Operations Dashboard entry', () => {
-    renderStaffMenu('superadmin');
-    expect(screen.queryByText('Admin Panel')).toBeNull();
-    fireEvent.click(screen.getByText('Operations Dashboard'));
-    expect(screen.getByTestId('route-location').textContent).toBe('/admin');
-  });
-
-  it('gives System Management its distinct existing settings destination', () => {
-    renderStaffMenu('admin');
-    fireEvent.click(screen.getByText('System Management'));
-    expect(screen.getByTestId('route-location').textContent).toBe('/admin/settings');
-  });
-
   it('uses initials instead of leaving a broken profile image when the source fails', () => {
     render(<MemoryRouter><Navbar {...props} user={{ id: 'u1', name: 'James Mugo', email: 'owner@example.test', role: 'superadmin', avatar: 'https://invalid.example/avatar.png' }} /></MemoryRouter>);
     const avatar = document.querySelector('img[src="https://invalid.example/avatar.png"]');
@@ -106,6 +43,47 @@ describe('canonical admin destinations', () => {
   });
 });
 
+describe('unified drawer: one menu for every role', () => {
+  const LocationProbe = () => { const l = useLocation(); return <output data-testid="route-location">{l.pathname}{l.search}</output>; };
+  const openDrawer = (role) => {
+    render(<MemoryRouter initialEntries={['/']}><Navbar {...props} user={{ id: 'u1', name: 'James Mugo', email: 'owner@example.test', role }} /><LocationProbe /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+    return screen.getByRole('dialog');
+  };
+  it.each(['superadmin', 'admin', 'moderator', 'marketing', 'accounts'])('%s drawer carries identity, staff workspaces, Sign out and no buyer/seller shortcuts', (role) => {
+    const text = openDrawer(role).textContent;
+    expect(text).toContain('James Mugo');
+    expect(text).toContain('owner@example.test');
+    expect(text).toContain('Admin Console');
+    expect(text).toMatch(/Account Settings|Settings/);
+    expect(text).toMatch(/Sign out|Log out/i);
+    for (const leaked of ['Private Seller Dashboard', 'Buyer Command Center', 'Sell Vehicle', 'My Garage', 'Payment History', 'Vehicle Financing']) expect(text).not.toContain(leaked);
+  });
+  it('superadmin is labelled Super Admin', () => {
+    expect(openDrawer('superadmin').textContent).toContain('Super Admin');
+  });
+  it.each(['user', 'individual_seller'])('%s drawer keeps buying and selling together and has no admin section', (role) => {
+    const text = openDrawer(role).textContent;
+    expect(text).not.toMatch(/Admin Console|System Administration/);
+    expect(text).not.toMatch(/Buyer Command Center|Private Seller Dashboard/);
+    expect(text).toContain('Messages');
+    expect(text).toContain('Notifications');
+  });
+  it('dealer drawer is dealer-only and its items open the matching workspace section', () => {
+    const drawer = openDrawer('dealer');
+    const text = drawer.textContent;
+    for (const item of ['Dealer workspace', 'Inventory', 'Leads', 'Analytics', 'Add Vehicle', 'Messages', 'Notifications']) expect(text).toContain(item);
+    for (const leaked of ['Buyer Command Center', 'Private Seller Dashboard', 'My Garage', 'Payment History', 'Vehicle Financing', 'Admin Console']) expect(text).not.toContain(leaked);
+    props.onNavClick.mockClear();
+    fireEvent.click([...drawer.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Leads'));
+    expect(props.onNavClick).toHaveBeenCalledWith('dealer:leads');
+  });
+  it('the Admin Console entry opens the existing /admin command centre', () => {
+    const drawer = openDrawer('superadmin');
+    fireEvent.click([...drawer.querySelectorAll('button, a')].find((b) => b.textContent.trim().startsWith('Admin Console')));
+    expect(screen.getByTestId('route-location').textContent).toBe('/admin');
+  });
+});
 
 describe('role-aware mobile drawer navigation', () => {
   const renderMobileMenu = (role) => {

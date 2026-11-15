@@ -729,40 +729,17 @@ router.get(
 );
 
 // =============================
-// ❌ DELETE CAR (HARD DELETE)
+// 🚫 PLATFORM STAFF CANNOT DELETE SELLER INVENTORY
 // =============================
 router.delete(
   "/cars/:id",
   adminOrSuper,
   validateObjectId,
-  asyncHandler(async (req, res) => {
-    const car = await Car.findById(req.params.id);
-
-    if (!car) {
-      return res.status(404).json({
-        success: false,
-        message: "Car not found",
-      });
-    }
-
-    await Car.softDelete(car._id, req.user.id);
-    await invalidatePublicListingCaches(); // Phase C.1: deleted listing must leave every public cache now
-    if (car.dealer) {
-      await User.findByIdAndUpdate(car.dealer, {
-        $inc: { listingCount: -1 },
-      });
-      await User.updateOne({ _id: car.dealer }, [
-        {
-          $set: {
-            listingCount: { $max: ["$listingCount", 0] },
-          },
-        },
-      ]).catch((e) => console.warn("⚠️ Dealer listing count update failed:", e.message));
-    }
-
-    res.json({
-      success: true,
-      message: "Car deleted",
+  asyncHandler(async (_req, res) => {
+    return res.status(403).json({
+      success: false,
+      code: "LISTING_OWNER_ACTION_REQUIRED",
+      message: "Platform administrators may approve or hide listings, but only the listing owner may remove a vehicle from their business inventory.",
     });
   }),
 );
@@ -823,6 +800,10 @@ router.post(
     const newStatus = action === "approve" ? "available" : "hidden";
     await Car.findByIdAndUpdate(req.params.id, { status: newStatus });
     car.status = newStatus;
+
+    // Publishing/hiding must invalidate every public inventory/search response cache immediately.
+    // Otherwise a successfully approved listing can remain absent from the public marketplace until cache expiry.
+    await invalidatePublicListingCaches();
 
     const dealer = car.dealer;
     const listingTitle = car.title || car.brand + " " + (car.model || "");

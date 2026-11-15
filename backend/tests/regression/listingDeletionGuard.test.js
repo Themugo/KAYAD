@@ -63,7 +63,11 @@ describe("DELETE /cars/:id - who may delete", () => {
     expect(Car.softDeleteGuarded).not.toHaveBeenCalled();
   });
   test("unknown listing -> 404", async () => expect((await del(OWNER, "nope")).code).toBe(404));
-  test("staff with listing authority may delete a non-blocked listing", async () => expect((await del(ADMIN)).code).toBe(200));
+  test("platform admin cannot delete another seller's inventory", async () => {
+    const r = await del(ADMIN);
+    expect(r.code).toBe(403);
+    expect(Car.softDeleteGuarded).not.toHaveBeenCalled();
+  });
 });
 
 describe("DELETE /cars/:id - business-rule guard (enforced regardless of caller)", () => {
@@ -75,11 +79,9 @@ describe("DELETE /cars/:id - business-rule guard (enforced regardless of caller)
     ["sold listing", { status: "sold" }, "LISTING_SOLD"],
   ])("%s -> 409 LISTING_DELETE_BLOCKED and no write", async (_n, over, reason) => {
     rows.set("c1", car(over));
-    for (const user of [OWNER, ADMIN]) {
-      const r = await del(user);
-      expect(r.code).toBe(409);
-      expect(r.body).toMatchObject({ success: false, code: "LISTING_DELETE_BLOCKED", reason });
-    }
+    const r = await del(OWNER);
+    expect(r.code).toBe(409);
+    expect(r.body).toMatchObject({ success: false, code: "LISTING_DELETE_BLOCKED", reason });
     expect(Car.softDeleteGuarded).not.toHaveBeenCalled();
     expect(rows.get("c1").deletedAt).toBeNull();
     expect(decrements).toHaveLength(0);
@@ -126,14 +128,12 @@ describe("DELETE /cars/:id - races and idempotency", () => {
 });
 
 describe("listingDeletionBlock (pure rule)", () => {
-  test("14.8 a RESERVED listing cannot be deleted: 409 LISTING_RESERVED, row unchanged (owner and staff)", async () => {
+  test("14.8 a RESERVED listing cannot be deleted by its owner: 409 LISTING_RESERVED", async () => {
     rows.set("c1", car({ status: "reserved" }));
-    for (const who of [OWNER, ADMIN]) {
-      const res = await del(who);
-      expect(res.code).toBe(409);
-      expect(res.body).toMatchObject({ success: false, code: "LISTING_DELETE_BLOCKED", reason: "LISTING_RESERVED" });
-      expect(rows.get("c1").deletedAt).toBeNull();
-    }
+    const res = await del(OWNER);
+    expect(res.code).toBe(409);
+    expect(res.body).toMatchObject({ success: false, code: "LISTING_DELETE_BLOCKED", reason: "LISTING_RESERVED" });
+    expect(rows.get("c1").deletedAt).toBeNull();
     expect(decrements).toEqual([]);
   });
   test("14.8 a reservation committed between the pre-check and the write refuses the delete", async () => {

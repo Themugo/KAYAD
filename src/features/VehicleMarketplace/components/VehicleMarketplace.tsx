@@ -1223,7 +1223,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
                 {/* Approved mobile composition: the center card sits above a dedicated two-car stage.
                     Both transparent vehicle assets remain fully contained and independently visible. */}
-                {(heroLeftVehicle || heroRightVehicle) && <div className="mx-auto mt-2 hidden w-full max-w-[460px] sm:block" data-testid="hero-mobile-stage">
+                {(heroLeftVehicle || heroRightVehicle) && <div className="kayad-public-hero__mobile-stage mx-auto mt-3 block w-full max-w-[520px]" data-testid="hero-mobile-stage">
                   <div className="grid grid-cols-2 items-stretch gap-1 min-[390px]:gap-2" aria-label="Featured vehicle pair">
                     {[heroLeftVehicle, heroRightVehicle].map((vehicle, index) => vehicle && heroImageForVehicle(vehicle) ? (
                       <button key={`${vehicle.id}-${index}`} type="button" onClick={() => handleHeroVehicleSelect(vehicle)} className="kayad-public-hero__vehicle-card group flex h-full min-w-0 flex-col justify-end rounded-2xl border border-white/20 bg-[#082D39]/22 px-1.5 pt-1.5 text-center transition-colors hover:bg-[#082D39]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]" aria-label={isShowcaseHeroVehicle(vehicle) ? `Browse vehicles; visual showcase ${vehicle.make} ${vehicle.model}` : `View ${vehicle.make} ${vehicle.model}`}>
@@ -1739,7 +1739,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                         images={v.images}
                         priority={idx < 3}
                         onOpen={() => handleVehicleSelect(v)}
-                        className={viewMode === 'list' ? 'aspect-[16/10] w-full sm:aspect-auto sm:min-h-[230px] sm:w-[300px]' : 'aspect-[4/3] w-full'}
+                        className={viewMode === 'list' ? 'aspect-[16/10] w-full sm:aspect-auto sm:min-h-[230px] sm:w-[300px]' : 'aspect-[16/11] w-full sm:aspect-[4/3]'}
                         top={<>
                           <div className="flex flex-wrap gap-1 max-w-[78%]">
                             {v.verified && (
@@ -1952,7 +1952,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {/* MOBILE FULL-SCREEN FILTER DRAWER */}
       {showMobileFilterDrawer && (
-        <div className="fixed inset-0 bg-white z-[1100] overflow-y-auto lg:hidden" role="dialog" aria-modal="true" aria-labelledby="kayad-mobile-filter-title">
+        <div className="kayad-mobile-filter-sheet fixed inset-0 bg-white z-[1100] overflow-y-auto lg:hidden" role="dialog" aria-modal="true" aria-labelledby="kayad-mobile-filter-title">
           <div className="sticky top-0 bg-white border-b border-[#D7E7E4] px-4 py-3 flex items-center justify-between">
             <div><h3 id="kayad-mobile-filter-title" className="text-sm font-extrabold text-navy-900">Refine inventory</h3><p className="text-[10px] text-[#64748B] mt-0.5">Adjust any filter, then return to the results.</p></div>
             <button onClick={() => setShowMobileFilterDrawer(false)} className="p-1.5" aria-label="Close filters">

@@ -1,0 +1,1617 @@
+{
+ "ranAt": "2026-11-14T21:40:19.603Z",
+ "total": 230,
+ "withIssues": 0,
+ "rows": [
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "marketplace",
+   "final": "/",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "discovery",
+   "final": "/?nav=discovery",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "auctions",
+   "final": "/?nav=auctions",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "saved",
+   "final": "/login?next=%2F%3Fnav%3Dsaved",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "sell",
+   "final": "/?nav=sell",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "seller-platform",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "seller-dashboard",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "buyer-platform",
+   "final": "/?nav=buyer-platform",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "dashboard",
+   "final": "/login?next=%2F%3Fnav%3Ddashboard",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "profile",
+   "final": "/login?next=%2F%3Fnav%3Dprofile",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "chat",
+   "final": "/?nav=chat",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "payments",
+   "final": "/login?next=%2F%3Fnav%3Dpayments",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "finance",
+   "final": "/?nav=finance",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "financing",
+   "final": "/?nav=financing",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "escrow",
+   "final": "/?nav=escrow",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "inspections",
+   "final": "/?nav=inspections",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "inspection-marketplace",
+   "final": "/?nav=inspection-marketplace",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "dealers",
+   "final": "/?nav=dealers",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "dealer-dashboard",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "dealership-workspace",
+   "final": "/?nav=dealership-workspace",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "support",
+   "final": "/?nav=support",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "kayadlive",
+   "final": "/?nav=kayadlive",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "public",
+   "nav": "admin",
+   "final": "/login?next=%2F%3Fnav%3Dadmin",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "marketplace",
+   "final": "/",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "discovery",
+   "final": "/?nav=discovery",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "auctions",
+   "final": "/?nav=auctions",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "saved",
+   "final": "/?nav=saved",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "sell",
+   "final": "/?nav=sell",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "seller-platform",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "seller-dashboard",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "buyer-platform",
+   "final": "/?nav=buyer-platform",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "dashboard",
+   "final": "/?nav=dashboard",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "profile",
+   "final": "/?nav=profile",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "chat",
+   "final": "/?nav=chat",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "payments",
+   "final": "/?nav=payments",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "finance",
+   "final": "/?nav=finance",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "financing",
+   "final": "/?nav=financing",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "escrow",
+   "final": "/?nav=escrow",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "inspections",
+   "final": "/?nav=inspections",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "inspection-marketplace",
+   "final": "/?nav=inspection-marketplace",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "dealers",
+   "final": "/?nav=dealers",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "dealer-dashboard",
+   "final": "/",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "dealership-workspace",
+   "final": "/?nav=dealership-workspace",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "support",
+   "final": "/?nav=support",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "kayadlive",
+   "final": "/?nav=kayadlive",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "buyer",
+   "nav": "admin",
+   "final": "/?nav=admin",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "marketplace",
+   "final": "/",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "discovery",
+   "final": "/?nav=discovery",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "auctions",
+   "final": "/?nav=auctions",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "saved",
+   "final": "/?nav=saved",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "sell",
+   "final": "/?nav=sell",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "seller-platform",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "seller-dashboard",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "buyer-platform",
+   "final": "/?nav=buyer-platform",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "dashboard",
+   "final": "/?nav=dashboard",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "profile",
+   "final": "/?nav=profile",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "chat",
+   "final": "/?nav=chat",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "payments",
+   "final": "/?nav=payments",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "finance",
+   "final": "/?nav=finance",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "financing",
+   "final": "/?nav=financing",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "escrow",
+   "final": "/?nav=escrow",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "inspections",
+   "final": "/?nav=inspections",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "inspection-marketplace",
+   "final": "/?nav=inspection-marketplace",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "dealers",
+   "final": "/?nav=dealers",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "dealer-dashboard",
+   "final": "/",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "dealership-workspace",
+   "final": "/?nav=dealership-workspace",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "support",
+   "final": "/?nav=support",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "kayadlive",
+   "final": "/?nav=kayadlive",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "seller",
+   "nav": "admin",
+   "final": "/?nav=admin",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "marketplace",
+   "final": "/",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "discovery",
+   "final": "/?nav=discovery",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "auctions",
+   "final": "/?nav=auctions",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "saved",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "sell",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "seller-platform",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "seller-dashboard",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "buyer-platform",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "dashboard",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "profile",
+   "final": "/?nav=dealer-dashboard&section=settings",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "chat",
+   "final": "/?nav=chat",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "payments",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "finance",
+   "final": "/?nav=finance",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "financing",
+   "final": "/?nav=financing",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "escrow",
+   "final": "/?nav=escrow",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "inspections",
+   "final": "/?nav=inspections",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "inspection-marketplace",
+   "final": "/?nav=inspection-marketplace",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "dealers",
+   "final": "/?nav=dealers",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "dealer-dashboard",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "dealership-workspace",
+   "final": "/?nav=dealership-workspace",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "support",
+   "final": "/?nav=support",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "kayadlive",
+   "final": "/?nav=kayadlive",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "dealer",
+   "nav": "admin",
+   "final": "/?nav=admin",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "marketplace",
+   "final": "/",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "discovery",
+   "final": "/?nav=discovery",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "auctions",
+   "final": "/?nav=auctions",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "saved",
+   "final": "/?nav=saved",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "sell",
+   "final": "/?nav=sell",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "seller-platform",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "seller-dashboard",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "buyer-platform",
+   "final": "/?nav=buyer-platform",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "dashboard",
+   "final": "/?nav=dashboard",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "profile",
+   "final": "/?nav=profile",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "chat",
+   "final": "/?nav=chat",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "payments",
+   "final": "/?nav=payments",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "finance",
+   "final": "/?nav=finance",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "financing",
+   "final": "/?nav=financing",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "escrow",
+   "final": "/?nav=escrow",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "inspections",
+   "final": "/?nav=inspections",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "inspection-marketplace",
+   "final": "/?nav=inspection-marketplace",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "dealers",
+   "final": "/?nav=dealers",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "dealer-dashboard",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "dealership-workspace",
+   "final": "/?nav=dealership-workspace",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "support",
+   "final": "/?nav=support",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "kayadlive",
+   "final": "/?nav=kayadlive",
+   "issues": []
+  },
+  {
+   "w": 320,
+   "role": "admin",
+   "nav": "admin",
+   "final": "/admin",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "marketplace",
+   "final": "/",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "discovery",
+   "final": "/?nav=discovery",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "auctions",
+   "final": "/?nav=auctions",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "saved",
+   "final": "/login?next=%2F%3Fnav%3Dsaved",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "sell",
+   "final": "/?nav=sell",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "seller-platform",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "seller-dashboard",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "buyer-platform",
+   "final": "/?nav=buyer-platform",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "dashboard",
+   "final": "/login?next=%2F%3Fnav%3Ddashboard",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "profile",
+   "final": "/login?next=%2F%3Fnav%3Dprofile",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "chat",
+   "final": "/?nav=chat",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "payments",
+   "final": "/login?next=%2F%3Fnav%3Dpayments",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "finance",
+   "final": "/?nav=finance",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "financing",
+   "final": "/?nav=financing",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "escrow",
+   "final": "/?nav=escrow",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "inspections",
+   "final": "/?nav=inspections",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "inspection-marketplace",
+   "final": "/?nav=inspection-marketplace",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "dealers",
+   "final": "/?nav=dealers",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "dealer-dashboard",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "dealership-workspace",
+   "final": "/?nav=dealership-workspace",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "support",
+   "final": "/?nav=support",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "kayadlive",
+   "final": "/?nav=kayadlive",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "public",
+   "nav": "admin",
+   "final": "/login?next=%2F%3Fnav%3Dadmin",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "marketplace",
+   "final": "/",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "discovery",
+   "final": "/?nav=discovery",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "auctions",
+   "final": "/?nav=auctions",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "saved",
+   "final": "/?nav=saved",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "sell",
+   "final": "/?nav=sell",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "seller-platform",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "seller-dashboard",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "buyer-platform",
+   "final": "/?nav=buyer-platform",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "dashboard",
+   "final": "/?nav=dashboard",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "profile",
+   "final": "/?nav=profile",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "chat",
+   "final": "/?nav=chat",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "payments",
+   "final": "/?nav=payments",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "finance",
+   "final": "/?nav=finance",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "financing",
+   "final": "/?nav=financing",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "escrow",
+   "final": "/?nav=escrow",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "inspections",
+   "final": "/?nav=inspections",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "inspection-marketplace",
+   "final": "/?nav=inspection-marketplace",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "dealers",
+   "final": "/?nav=dealers",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "dealer-dashboard",
+   "final": "/",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "dealership-workspace",
+   "final": "/?nav=dealership-workspace",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "support",
+   "final": "/?nav=support",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "kayadlive",
+   "final": "/?nav=kayadlive",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "buyer",
+   "nav": "admin",
+   "final": "/?nav=admin",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "marketplace",
+   "final": "/",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "discovery",
+   "final": "/?nav=discovery",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "auctions",
+   "final": "/?nav=auctions",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "saved",
+   "final": "/?nav=saved",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "sell",
+   "final": "/?nav=sell",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "seller-platform",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "seller-dashboard",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "buyer-platform",
+   "final": "/?nav=buyer-platform",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "dashboard",
+   "final": "/?nav=dashboard",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "profile",
+   "final": "/?nav=profile",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "chat",
+   "final": "/?nav=chat",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "payments",
+   "final": "/?nav=payments",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "finance",
+   "final": "/?nav=finance",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "financing",
+   "final": "/?nav=financing",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "escrow",
+   "final": "/?nav=escrow",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "inspections",
+   "final": "/?nav=inspections",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "inspection-marketplace",
+   "final": "/?nav=inspection-marketplace",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "dealers",
+   "final": "/?nav=dealers",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "dealer-dashboard",
+   "final": "/",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "dealership-workspace",
+   "final": "/?nav=dealership-workspace",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "support",
+   "final": "/?nav=support",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "kayadlive",
+   "final": "/?nav=kayadlive",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "seller",
+   "nav": "admin",
+   "final": "/?nav=admin",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "marketplace",
+   "final": "/",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "discovery",
+   "final": "/?nav=discovery",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "auctions",
+   "final": "/?nav=auctions",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "saved",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "sell",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "seller-platform",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "seller-dashboard",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "buyer-platform",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "dashboard",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "profile",
+   "final": "/?nav=dealer-dashboard&section=settings",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "chat",
+   "final": "/?nav=chat",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "payments",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "finance",
+   "final": "/?nav=finance",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "financing",
+   "final": "/?nav=financing",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "escrow",
+   "final": "/?nav=escrow",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "inspections",
+   "final": "/?nav=inspections",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "inspection-marketplace",
+   "final": "/?nav=inspection-marketplace",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "dealers",
+   "final": "/?nav=dealers",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "dealer-dashboard",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "dealership-workspace",
+   "final": "/?nav=dealership-workspace",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "support",
+   "final": "/?nav=support",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "kayadlive",
+   "final": "/?nav=kayadlive",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "dealer",
+   "nav": "admin",
+   "final": "/?nav=admin",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "marketplace",
+   "final": "/",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "discovery",
+   "final": "/?nav=discovery",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "auctions",
+   "final": "/?nav=auctions",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "saved",
+   "final": "/?nav=saved",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "sell",
+   "final": "/?nav=sell",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "seller-platform",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "seller-dashboard",
+   "final": "/?nav=seller-platform",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "buyer-platform",
+   "final": "/?nav=buyer-platform",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "dashboard",
+   "final": "/?nav=dashboard",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "profile",
+   "final": "/?nav=profile",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "chat",
+   "final": "/?nav=chat",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "payments",
+   "final": "/?nav=payments",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "finance",
+   "final": "/?nav=finance",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "financing",
+   "final": "/?nav=financing",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "escrow",
+   "final": "/?nav=escrow",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "inspections",
+   "final": "/?nav=inspections",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "inspection-marketplace",
+   "final": "/?nav=inspection-marketplace",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "dealers",
+   "final": "/?nav=dealers",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "dealer-dashboard",
+   "final": "/?nav=dealer-dashboard",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "dealership-workspace",
+   "final": "/?nav=dealership-workspace",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "support",
+   "final": "/?nav=support",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "kayadlive",
+   "final": "/?nav=kayadlive",
+   "issues": []
+  },
+  {
+   "w": 390,
+   "role": "admin",
+   "nav": "admin",
+   "final": "/admin",
+   "issues": []
+  }
+ ]
+}

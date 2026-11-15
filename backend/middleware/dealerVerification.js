@@ -7,7 +7,6 @@
 import Dealer from "../models/Dealer.js";
 import DealerVerification from "../models/DealerVerification.js";
 import User from "../models/User.js";
-import Car from "../models/Car.js";
 import Referral from "../models/Referral.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
 import { getOnboardingPolicy } from "../services/onboardingPolicy.service.js"; // STAGE 5
@@ -21,6 +20,31 @@ export const isListingCreationRequest = (req) => {
     .split("?")[0]
     .replace(/\/+$/, "");
   return /\/(cars|add-car|inventory)$/.test(full);
+};
+
+// Pending dealers may manage their own workspace and inventory after submitting verification.
+// This allowlist intentionally excludes auctions, bids, payouts, escrow, subscriptions and finance.
+export const isDealerSelfServiceRequest = (req) => {
+  const method = String(req.method || "").toUpperCase();
+  const full = String(`${req.baseUrl || ""}${req.path || ""}` || req.originalUrl || "")
+    .split("?")[0]
+    .replace(/\/+$/, "") || "/";
+  const patterns = [
+    ["GET", /^\/api\/cars$/],
+    ["POST", /^\/api\/cars$/],
+    ["GET", /^\/api\/dealer\/cars$/],
+    ["GET", /^\/api\/dealer\/(summary|quick-stats|analytics|profile)$/],
+    ["PUT", /^\/api\/dealer\/profile$/],
+    ["POST", /^\/api\/dealer\/cars\/[^/]+\/duplicate$/],
+    ["POST", /^\/api\/dealer\/cars\/bulk-delete$/],
+    ["PATCH", /^\/api\/dealer\/cars\/(bulk-status|[^/]+\/mark-sold)$/],
+    ["GET", /^\/api\/dealer-platform\/inventory$/],
+    ["POST", /^\/api\/dealer-platform\/inventory$/],
+    ["PUT", /^\/api\/dealer-platform\/inventory\/[^/]+$/],
+    ["DELETE", /^\/api\/dealer-platform\/inventory\/[^/]+$/],
+    ["POST", /^\/api\/dealer-platform\/inventory\/bulk$/],
+  ];
+  return patterns.some(([verb, pattern]) => method === verb && pattern.test(full));
 };
 
 // =============================
@@ -116,25 +140,26 @@ export const requireDealerVerification = async (req, res, next) => {
 
     // Check verification status — progressive access for pending/under_review
     if (verification.verificationStatus !== "approved") {
-      // STAGE 5: progressive (pre-approval) listing access exists ONLY in the owner's
-      // `self_onboarding` mode. In `approval_required`/`closed` — and whenever the policy
-      // cannot be trusted — an unapproved dealer cannot create listings at all.
+      // A dealer must submit the configured verification information, but does not need an
+      // administrator approval for each listing. An untrusted policy fails closed; `closed`
+      // only prevents new dealer applications and does not disable existing pending accounts.
       let progressiveAllowed = false;
-      if (["pending", "under_review"].includes(verification.verificationStatus) && isListingCreationRequest(req)) {
+      if (["pending", "under_review"].includes(verification.verificationStatus) && isDealerSelfServiceRequest(req)) {
         const onboarding = await getOnboardingPolicy();
-        progressiveAllowed =
-          (onboarding.source === "default" || onboarding.source === "database") &&
-          onboarding.policy.dealerOnboardingMode === "self_onboarding";
+        // `closed` controls new dealer applications only. An existing dealer who already
+        // submitted verification may continue managing inventory while the review is pending.
+        progressiveAllowed = onboarding.source === "default" || onboarding.source === "database";
       }
-      // Progressive verification: allow listing creation if < 3 cars and not rejected
+      // Self-service dealer listing: once the dealer has submitted the required verification
+      // information, pending/under_review is not a per-listing approval gate. Allow the owner
+      // to publish and manage their full inventory while verification is processed. Rejected,
+      // suspended and missing-verification states remain blocked; sensitive auction/finance
+      // operations retain their own stricter verification guards.
       if (progressiveAllowed) {
-        const carCount = await Car.countDocuments({ dealer: userId });
-        if (carCount < 3) {
-          req.dealer = dealer;
-          req.verification = verification;
-          req.progressiveAccess = true;
-          return next();
-        }
+        req.dealer = dealer;
+        req.verification = verification;
+        req.progressiveAccess = true;
+        return next();
       }
 
       return res.status(403).json({
@@ -145,8 +170,8 @@ export const requireDealerVerification = async (req, res, next) => {
         requiresAction: getRequiredAction(verification.verificationStatus),
         verificationUrl: "/api/verification/status",
         rejectionReason: verification.rejectionReason,
-        progressiveLimit: 3,
-        progressiveUsed: verification.verificationStatus === "pending" || verification.verificationStatus === "under_review",
+        progressiveLimit: null,
+        progressiveUsed: false,
       });
     }
 

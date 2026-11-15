@@ -33,7 +33,8 @@ const fakeClient = {
 jest.unstable_mockModule("../../utils/supabase.js", () => ({ getSupabase: () => fakeClient, isSupabaseConnected: () => true }));
 jest.unstable_mockModule("../../utils/io.js", () => ({ getIO: () => null }));
 jest.unstable_mockModule("../../utils/logger.js", () => ({ logInfo: jest.fn(), logWarn: jest.fn(), logError: jest.fn() }));
-jest.unstable_mockModule("../../utils/cache.js", () => ({ cacheDelPattern: jest.fn(async () => {}) }));
+const cacheDelPattern = jest.fn(async () => {});
+jest.unstable_mockModule("../../utils/cache.js", () => ({ cacheDelPattern }));
 const sendNotification = jest.fn(async () => {});
 jest.unstable_mockModule("../../services/notification.service.js", () => ({ sendNotification }));
 const auditAfterCommit = jest.fn(async () => ({}));
@@ -70,7 +71,7 @@ const ADMIN = { id: "adm-1", role: "admin", name: "A" };
 const dealer = { _id: "seller-1", email: "s@example.test", name: "S" };
 const live = (id, extra = {}) => ({ id, _id: id, title: id, status: "pending", dealer, ...extra });
 
-beforeEach(() => { carList = []; carUpdateMany.mockClear(); sendNotification.mockClear(); auditAfterCommit.mockClear(); markAsReviewed.mockClear(); });
+beforeEach(() => { carList = []; carUpdateMany.mockClear(); cacheDelPattern.mockClear(); sendNotification.mockClear(); auditAfterCommit.mockClear(); markAsReviewed.mockClear(); });
 
 describe("E2 bulk moderation: the negative decision hides, and says so", () => {
   test.each(["hide", "reject"])("action %j ⇒ $set status 'hidden', never 'rejected'; truthful message, notification and audit", async (action) => {
@@ -95,6 +96,8 @@ describe("E2 bulk moderation: the negative decision hides, and says so", () => {
     await bulkModerateCars({ body: { carIds: ["a"], action: "approve" }, user: ADMIN }, res);
     expect(carUpdateMany.mock.calls[0][1]).toEqual({ $set: { status: "available" } });
     expect(res.body.message).toBe("1 listing(s) approved and published");
+    expect(cacheDelPattern).toHaveBeenCalledWith("cars:list:*", { strict: false });
+    expect(cacheDelPattern).toHaveBeenCalledWith("vehicle_search:*", { strict: false });
   });
   test("a sold listing in the batch is never hidden/approved (skipped and reported)", async () => {
     carList = [live("a"), live("s", { status: "sold", sold: true })];
@@ -120,14 +123,15 @@ describe("E3 duplicate removal: valid status, correct order, sold protected", ()
     await confirmAsDuplicate({ params: { id: "log1" }, body: { action, reviewNotes: "n" }, user: ADMIN }, res);
     return res;
   };
-  test("removed ⇒ status 'hidden' + soft-deleted + duplicateStatus; log marked reviewed AFTER the listing was saved", async () => {
+  test("removed ⇒ status 'hidden' without deleting seller inventory; log marked reviewed AFTER the listing was saved", async () => {
     const order = [];
     const car = { ...live("a", { status: "available" }), save: jest.fn(async () => { order.push("car.save"); }) };
     markAsReviewed.mockImplementationOnce(async () => { order.push("log.review"); });
     const res = await run(car);
     expect(res.code).toBe(200);
-    expect([car.status, car.duplicateStatus, car.deletedBy]).toEqual(["hidden", "confirmed_duplicate", "adm-1"]);
-    expect(car.deletedAt).toBeInstanceOf(Date);
+    expect([car.status, car.duplicateStatus]).toEqual(["hidden", "confirmed_duplicate"]);
+    expect(car.deletedAt).toBeUndefined();
+    expect(car.deletedBy).toBeUndefined();
     expect(order).toEqual(["car.save", "log.review"]);
   });
   test("if saving the listing fails, the log is NOT marked reviewed (no reviewed log over a still-public duplicate)", async () => {

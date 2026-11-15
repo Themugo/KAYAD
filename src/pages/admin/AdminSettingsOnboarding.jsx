@@ -15,12 +15,6 @@ const FIELDS = [
     options: { enabled: 'Open — sellers can register themselves', disabled: 'Closed — no new private-seller registrations' },
   },
   {
-    key: 'privateSellerApprovalMode',
-    label: 'Private seller approval',
-    help: 'Disabled means every eligible personal account can sell immediately without an approval queue. Suspensions and revocations remain enforceable. Enabling approval is blocked until the capability-table migration is deployed.',
-    options: { disabled: 'Disabled — free self-service selling for everyone', required: 'Required — administrator approval before selling' },
-  },
-  {
     key: 'privateSellerPackageMode',
     label: 'Private seller packages',
     help: 'Free is the active launch mode. Paid package modes are reserved for rollout after package catalogue, pricing and provider-confirmed checkout are implemented; selecting them safely blocks selling rather than accepting unpaid listings.',
@@ -29,29 +23,22 @@ const FIELDS = [
   {
     key: 'dealerOnboardingMode',
     label: 'Dealer onboarding',
-    help: 'Self-onboarding lets a dealer register and list a few vehicles (up to 3) while unverified. Approval-required keeps dealers unable to list until you approve them.',
+    help: 'Self-onboarding lets a dealer register, submit verification documents and publish/manage their own listings while verification is pending. Rejected or suspended accounts remain blocked; sensitive auction and finance actions still require verification.',
     options: {
-      self_onboarding: 'Self-onboarding — register without an invitation, limited until approved',
-      approval_required: 'Approval required — no listing until you approve',
+      self_onboarding: 'Self-onboarding — publish your own inventory after submitting verification',
       closed: 'Closed — no new dealer registrations',
     },
   },
   {
-    key: 'listingModeration',
-    label: 'Listing approval',
-    help: 'No approval publishes new listings immediately for personal and dealer accounts in good standing. Admin approval holds every new listing until an admin approves it. Suspended accounts can never publish, and an admin can still remove or reject any listing at any time. Listings already waiting are not changed by this setting.',
-    options: { auto_publish: 'No approval — publish immediately', hold_for_review: 'Admin approval — hold every new listing for review' },
-  },
-  {
     key: 'dealerDecisionAuthority',
-    label: 'Who approves or rejects dealer applications and optional seller reviews',
+    label: 'Who approves or rejects dealer business verification',
     help: 'Owner only is the safest launch setting.',
     options: { owner_only: 'Platform owner only', admins: 'Owner and administrators' },
   },
   {
     key: 'listingDecisionAuthority',
-    label: 'Who approves or rejects listings',
-    help: 'Owner only is the safest launch setting.',
+    label: 'Who can moderate legacy pending or flagged listings',
+    help: 'New eligible listings publish immediately. This authority applies to legacy pending records and post-publication moderation decisions.',
     options: { owner_only: 'Platform owner only', admins: 'Owner and administrators' },
   },
 ];

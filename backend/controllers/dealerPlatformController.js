@@ -20,7 +20,7 @@ import { getDealerLeads, getLeadById, updateLeadStage as serviceUpdateLeadStage,
 import { create, findAll, findOne, update } from "../db/index.js";
 import { logAuditEvent } from "../services/auditService.js";
 import crypto from "crypto";
-import { sellerMayPublishDirectly, PUBLICATION_REVIEW_REQUIRED } from "../services/onboardingPolicy.service.js"; // STAGE 5
+import { sellerMayPublishDirectly } from "../services/onboardingPolicy.service.js"; // listing self-publication
 import { sendTeamInviteEmail } from "../services/email.service.js";
 import { listRoles, resolveRole, createCustomRole, updateCustomRole, deleteCustomRole, RoleError, newInviteToken } from "../services/dealerTeamRoles.service.js";
 import { formatPhone } from "../utils/format.js";
@@ -303,9 +303,13 @@ export async function bulkUpdateListings(req, res) {
     if (action !== "status") return res.status(400).json({ success: false, message: "Only status bulk updates are supported" });
     const status = req.body?.data?.status;
     if (!allowedStatuses.has(status)) return res.status(400).json({ success: false, message: "Invalid listing status" });
-    // STAGE 5: no self-publication while listings are held for owner review.
-    if ((status === "available" || status === "active") && !(await sellerMayPublishDirectly(req.user))) {
-      return res.status(403).json(PUBLICATION_REVIEW_REQUIRED);
+    // Per-listing administrator approval is retired. Keep account/email/package eligibility checks.
+    if ((status === "available" || status === "active") && !(await sellerMayPublishDirectly({
+      ...req.user,
+      progressiveAccess: req.progressiveAccess === true,
+      dealerVerificationStatus: req.verification?.verificationStatus,
+    }))) {
+      return res.status(403).json({ success: false, code: "SELLER_ACCOUNT_NOT_ELIGIBLE", message: "This account is not currently eligible to publish listings." });
     }
     const owned = await Car.find({ id: { $in: ids }, dealer: req.user.id, deletedAt: { $exists: false } });
     if (owned.length !== ids.length) return res.status(403).json({ success: false, message: "One or more listings are not owned by this dealer" });

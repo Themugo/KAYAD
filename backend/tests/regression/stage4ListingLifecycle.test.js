@@ -4,8 +4,8 @@
 //   S4-C-01  POST /api/admin/bulk/cars/moderate updated every id it was given:
 //            sold listings could be flipped to available/hidden (the single
 //            moderate route refuses them via utils/carModerationGuard.js).
-//   S4-C-02  duplicate review "removed" soft-deleted + set status "rejected" on
-//            sold listings, and marked the log reviewed before checking.
+//   S4-C-02  duplicate review "removed" soft-deleted seller inventory and marked
+//            the log reviewed before checking. The current contract hides only.
 //   S4-C-03  POST /api/admin/bulk/cars/delete wrote status "deleted" — outside
 //            cars_status_check and not the soft-delete convention — and accepted
 //            sold listings.
@@ -157,13 +157,14 @@ describe("S4-C-02 duplicate review 'removed' cannot remove a sold listing", () =
     expect(car.save).not.toHaveBeenCalled();
     expect(car.status).toBe("sold");
   });
-  test("live + removed → hidden (STAGE 5A: `rejected` is refused by cars_status_check) and soft-deleted", async () => {
+  test("live + removed → hidden without deleting the seller-owned listing", async () => {
     const car = { ...live("a"), save: jest.fn(async () => {}) };
     const res = await run(car, "removed");
     expect(res.code).toBe(200);
     expect(markAsReviewed).toHaveBeenCalledTimes(1);
     expect(car.status).toBe("hidden");
-    expect(car.deletedBy).toBe("adm-1");
+    expect(car.deletedBy).toBeUndefined();
+    expect(car.deletedAt).toBeUndefined();
     expect(car.save).toHaveBeenCalled();
   });
   test("sold + merged is unaffected by the removal guard", async () => {

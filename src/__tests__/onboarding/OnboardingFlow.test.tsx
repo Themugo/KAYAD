@@ -51,7 +51,7 @@ describe('OnboardingFlow', () => {
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
     await waitFor(() => expect(m.register).toHaveBeenCalled());
     expect(m.register.mock.calls[0][0]).toMatchObject({ role: 'dealer', businessName: 'Dan Motors' });
-    expect(await screen.findByText(/taken to business verification/i)).toBeInTheDocument();
+    expect(await screen.findByText(/complete business verification/i)).toBeInTheDocument();
     expect(screen.getAllByRole('link').some((a) => (a.getAttribute('href') || '').includes('next=%2Fdealer%2Fonboarding'))).toBe(true);
   });
 

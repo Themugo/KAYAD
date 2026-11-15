@@ -38,6 +38,7 @@ import MobileBottomNav from './components/MobileBottomNav';
 // CustomerLayout used elsewhere in the app already has its own inline
 // skip link to its own <main id="main-content">, which was not touched).
 import SkipLink from './components/ui/SkipLink';
+import PageJourneyNavigation from './components/navigation/PageJourneyNavigation';
 
 import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
 import { useVehicleCollections } from './hooks/useVehicleCollections';
@@ -144,19 +145,24 @@ function AppInner() {
   // writes its active tab into the URL for shareable deep links; without
   // syncing subsequent navigation, leaving Auctions could leave `?nav=auctions`
   // behind and make a later refresh reopen Auctions instead of Marketplace.
-  const setActiveNav = useCallback((requested: string) => {
+  // User-initiated navigation PUSHES one history entry (so browser Back/Forward work between shell destinations);
+  // URL normalisation and access redirects pass { replace: true } so they never add a stray entry.
+  const setActiveNav = useCallback((requested: string, opts: { replace?: boolean } = {}) => {
     const next = navLocationFor(requested, window.location.href);
     setActiveNavState(next.nav);
     const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-    if (next.href !== current) {
+    if (next.href === current) return;
+    if (opts.replace) {
       window.history.replaceState(window.history.state, '', next.href);
       window.dispatchEvent(new PopStateEvent('popstate'));
+    } else {
+      navigate(next.href);
     }
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     const requested = new URLSearchParams(location.search).get('nav');
-    setActiveNav(normalizeNav(requested));
+    setActiveNav(normalizeNav(requested), { replace: true });
     // Deep link used as a sign-in return destination: /?nav=inspections&action=apply-provider.
     // The action only opens a form; the backend still decides what the account may do.
     const action = new URLSearchParams(location.search).get('action');
@@ -170,14 +176,19 @@ function AppInner() {
   // remains authoritative; this gate prevents accidental cross-surface
   // rendering and stale deep links from landing on the wrong workspace.
   // Opens one section of the dealer workspace (?nav=dealer-dashboard&section=...). Used by the dealer menu and by the redirect below.
-  const openDealerSection = useCallback((section: string, mode?: string) => {
+  const openDealerSection = useCallback((section: string, mode?: string, push = false) => {
     const params = new URLSearchParams({ nav: 'dealer-dashboard' });
     if (section && section !== 'overview') params.set('section', section);
     if (mode === 'new' && section === 'inventory') params.set('mode', 'new');
+    if (push) {
+      navigate(`/?${params.toString()}`);
+      setActiveNavState('dealer-dashboard');
+      return;
+    }
     window.history.replaceState({}, '', `/?${params.toString()}`);
     window.dispatchEvent(new PopStateEvent('popstate'));
-    setActiveNav('dealer-dashboard');
-  }, [setActiveNav]);
+    setActiveNav('dealer-dashboard', { replace: true });
+  }, [navigate, setActiveNav]);
 
   // A dealer account works only in the Dealer workspace. Buyer and private-seller pages are not offered to it in the menu, and a stale
   // link or typed address to them lands in the dealer workspace instead of showing buyer or seller controls.
@@ -198,17 +209,17 @@ function AppInner() {
       return;
     }
     if (activeNav === 'escrow-operations' && !isEscrowStaffRole(authUser?.role)) {
-      setActiveNav('marketplace');
+      setActiveNav('marketplace', { replace: true });
       return;
     }
     if (activeNav === 'admin' && !isAdmin) {
-      setActiveNav('marketplace');
+      setActiveNav('marketplace', { replace: true });
       return;
     }
     if (activeNav === 'dealer-dashboard' && !isDealer && !isAdmin) {
-      setActiveNav('marketplace');
+      setActiveNav('marketplace', { replace: true });
     }
-  }, [activeNav, authLoading, sessionStatus, isAuth, isAdmin, isDealer, authUser?.role, location, navigate]);
+  }, [activeNav, authLoading, sessionStatus, isAuth, isAdmin, isDealer, authUser?.role, location, navigate, setActiveNav]);
   const [selectedCounty, setSelectedCounty] = useState<string>('All Kenya');
   // Where the services finder opens from the global navigation / hub (a canonical taxonomy category, or none).
   const [finderLaunch, setFinderLaunch] = useState<{ category?: string; nonce: number }>({ nonce: 0 });
@@ -504,16 +515,15 @@ function AppInner() {
     // `dealer:<section>[:new]` opens a section of the dealer workspace (inventory, leads, analytics, settings...).
     if (nav.startsWith('dealer:')) {
       const [, section = 'overview', mode] = nav.split(':');
-      openDealerSection(section, mode);
+      openDealerSection(section, mode, true);
       return;
     }
     if (nav.startsWith('auctions:')) {
       const tab = nav.slice('auctions:'.length);
       const params = new URLSearchParams({ nav: 'auctions' });
       if (tab && tab !== 'live') params.set('auctionTab', tab);
-      window.history.replaceState({}, '', `/?${params.toString()}`);
-      window.dispatchEvent(new PopStateEvent('popstate'));
-      setActiveNav('auctions');
+      navigate(`/?${params.toString()}`);
+      setActiveNavState('auctions');
       return;
     }
     // `services:*` ids open an existing destination of the automotive services hub. They create no route.
@@ -533,7 +543,7 @@ function AppInner() {
       return;
     }
     setActiveNav(nav);
-  }, [launchInspections, openDealerSection]);
+  }, [launchInspections, openDealerSection, navigate]);
 
   const isMarketplaceSurface = activeNav === 'marketplace' || activeNav === 'saved';
   const privateWorkspaceNavs = new Set([
@@ -584,10 +594,11 @@ function AppInner() {
         data-kayad-surface={activeNav}
         className={
           isMarketplaceSurface
-            ? `${publicShellClass}flex-1 w-full min-w-0 max-w-none mx-0 px-0 py-0 ${showPublicMobileDock ? 'pb-[calc(5rem+env(safe-area-inset-bottom))]' : ''} lg:pb-0 space-y-0 overflow-x-clip`
-            : `${publicShellClass}flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 ${showPublicMobileDock ? 'pb-[calc(5rem+env(safe-area-inset-bottom))]' : 'pb-6'} lg:pb-6 space-y-6`
+            ? `${publicShellClass}flex-1 w-full min-w-0 max-w-none mx-0 px-0 py-0 ${showPublicMobileDock ? 'pb-[calc(7rem+env(safe-area-inset-bottom)+12px)]' : ''} lg:pb-0 space-y-0 overflow-x-clip`
+            : `${publicShellClass}flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 ${showPublicMobileDock ? 'pb-[calc(7rem+env(safe-area-inset-bottom)+12px)]' : 'pb-6'} lg:pb-6 space-y-6`
         }
       >
+        <PageJourneyNavigation />
         <Suspense fallback={
           <div className="min-h-[420px] flex items-center justify-center px-6" role="status" aria-live="polite">
             <div className="text-center">
@@ -905,6 +916,15 @@ function FooterLogo() {
   return <img src={custom ? branding.logoUrl : '/branding/kayad-road-mark-light.svg'} alt="" aria-hidden="true" width={44} height={32} className="h-8 w-auto max-w-[96px] object-contain shrink-0" decoding="async" />;
 }
 
+function DealerJourneySurface({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen min-w-0 bg-[#F6FAF9]">
+      <PageJourneyNavigation fallbackHref="/?nav=dealer-dashboard" />
+      {children}
+    </div>
+  );
+}
+
 function AuthRouteSurface() {
   const location = useLocation();
   const path = location.pathname;
@@ -972,11 +992,11 @@ function AuthRouteSurface() {
   if (path === '/dealer') return <RequireAuth><RequireDealer><Navigate to="/?nav=dealer-dashboard" replace /></RequireDealer></RequireAuth>;
   if (path === '/inspector/dashboard') return <RequireAuth><Navigate to="/?nav=inspections" replace /></RequireAuth>;
 
-  if (path === '/dealer/setup') return <RequireAuth><DealerTeamInvite /></RequireAuth>;
-  if (path === '/dealer/onboarding') return <RequireAuth><RequireDealerApplicant><DealerOnboarding /></RequireDealerApplicant></RequireAuth>;
-  if (path === '/dealer/auction-setup') return <RequireAuth><RequireDealer><DealerAuctionSetupWizard /></RequireDealer></RequireAuth>;
-  if (path === '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerAuctionOperations /></RequireDealer></RequireAuth>;
-  if (path.startsWith('/dealer/auction-operations/') && path !== '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerAuctionOperationCase /></RequireDealer></RequireAuth>;
+  if (path === '/dealer/setup') return <RequireAuth><DealerJourneySurface><DealerTeamInvite /></DealerJourneySurface></RequireAuth>;
+  if (path === '/dealer/onboarding') return <RequireAuth><RequireDealerApplicant><DealerJourneySurface><DealerOnboarding /></DealerJourneySurface></RequireDealerApplicant></RequireAuth>;
+  if (path === '/dealer/auction-setup') return <RequireAuth><RequireDealer><DealerJourneySurface><DealerAuctionSetupWizard /></DealerJourneySurface></RequireDealer></RequireAuth>;
+  if (path === '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerJourneySurface><DealerAuctionOperations /></DealerJourneySurface></RequireDealer></RequireAuth>;
+  if (path.startsWith('/dealer/auction-operations/') && path !== '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerJourneySurface><DealerAuctionOperationCase /></DealerJourneySurface></RequireDealer></RequireAuth>;
   if (path === '/terms') return <LegalPage kind="terms" />;
   if (path === '/privacy') return <LegalPage kind="privacy" />;
   if (!isKnownPath(path)) return <NotFoundPage />;

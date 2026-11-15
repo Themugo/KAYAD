@@ -37,7 +37,7 @@ const DealerAccountStatus: React.FC = () => {
       .catch(() => { if (live) setStage('unknown'); });
     return () => { live = false; };
   }, []);
-  const verification = stage === null ? 'Checking…' : stage === 'approved' ? 'Approved' : stage === 'unknown' ? 'Unavailable' : 'Pending KAYAD review';
+  const verification = stage === null ? 'Checking…' : stage === 'approved' ? 'Approved' : stage === 'unknown' ? 'Unavailable' : 'In review';
 
   const hasPlan = ent && (ent.status === 'active' || ent.status === 'cancelled');
   return (
@@ -46,7 +46,8 @@ const DealerAccountStatus: React.FC = () => {
         <Shield className="w-5 h-5 text-[#176B87]" aria-hidden="true" />
         <span className="font-semibold text-[#0E4655]">Account status</span>
       </div>
-      <p className="text-xs text-[#0E4655]"><span className="font-semibold">Verification:</span> {verification}</p>
+      <p className="text-xs text-[#0E4655]"><span className="font-semibold">Business verification:</span> {verification}</p>
+      {stage !== 'approved' && stage !== 'unknown' && stage !== null && <p className="mt-1 text-xs text-[#0E4655]">You can publish and manage your own listings after submitting verification. Sensitive dealer features unlock after approval.</p>}
       {state === 'loading' && <p className="mt-1 text-xs text-[#176B87] flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />Checking your plan…</p>}
       {state === 'error' && (
         <p className="mt-1 text-xs text-[#176B87]">Plan details could not be loaded. <button type="button" onClick={() => setRetry((n) => n + 1)} className="font-bold underline">Reload plan</button></p>

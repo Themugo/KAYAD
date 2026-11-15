@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 
 const updateProfile = vi.fn();
 const toast = vi.fn();
-const user = { id: 'u1', name: 'Alice', email: 'a@x.co', role: 'buyer', phone: '254712345678', location: 'Nairobi', createdAt: '2025-01-01', emailVerified: true };
+const user = { id: 'u1', name: 'Alice', email: 'a@x.co', role: 'user', phone: '254712345678', location: 'Nairobi', createdAt: '2025-01-01', emailVerified: true };
 vi.mock('../../context/AuthContext', () => ({ useAuth: () => ({ user, logout: vi.fn(), updateProfile: (...a: any[]) => updateProfile(...a) }) }));
 vi.mock('../../context/ToastContext', () => ({ useToast: () => ({ toast }) }));
 vi.mock('../../components/auction/AuctionExperienceRail', () => ({ AuctionExperienceRail: () => null, BidderIdentityCard: () => null }));
@@ -52,6 +52,19 @@ describe('Profile / Account Settings page', () => {
     await userEvent.click(screen.getByText('Save'));
     await waitFor(() => expect(toast).toHaveBeenCalledWith('Enter a valid Kenyan phone number (e.g. 0712345678).', 'error'));
     expect(toast).not.toHaveBeenCalledWith('Profile updated successfully', 'success');
+  });
+  it('cancels an in-progress phone edit and clears temporary step-up credentials', async () => {
+    renderIt();
+    await userEvent.click(screen.getAllByText('Edit')[1]);
+    const phoneInput = screen.getByDisplayValue('254712345678');
+    await userEvent.clear(phoneInput);
+    await userEvent.type(phoneInput, '0722000111');
+    const passwordInput = screen.getByLabelText('Current password');
+    await userEvent.type(passwordInput, 'Temporary1!');
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByLabelText('Current password')).toBeNull();
+    expect(screen.getByText('254712345678')).toBeInTheDocument();
+    expect(updateProfile).not.toHaveBeenCalled();
   });
   it('security tab shows the real password form and labels 2FA unavailable', async () => {
     renderIt();

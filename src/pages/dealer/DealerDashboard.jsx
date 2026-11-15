@@ -47,32 +47,6 @@ export default function DealerDashboard() {
     } catch { toast.error('Failed to delete'); }
   };
 
-  // Pending approval state
-  if (!user?.approved && user?.role === 'dealer') {
-    return (
-      <DealerHub>
-        <div style={{
-          maxWidth: 600,
-          margin: '80px auto',
-          textAlign: 'center',
-          padding: 40,
-          background: 'var(--dealer-surface)',
-          borderRadius: 'var(--dealer-radius-xl)',
-          border: '1px solid var(--dealer-border)',
-        }}>
-          <div style={{ fontSize: 64, marginBottom: 24 }}>⏳</div>
-          <h2 style={{ marginBottom: 12, color: 'var(--dealer-text)' }}>Awaiting Admin Approval</h2>
-          <p style={{ color: 'var(--dealer-text-muted)', marginBottom: 24 }}>
-            Your dealer account is pending approval. We'll notify you once approved.
-          </p>
-          <p style={{ color: 'var(--dealer-text-dim)', fontSize: 13 }}>
-            Need help? <Link to="/support" style={{ color: 'var(--dealer-gold)' }}>Contact support</Link>
-          </p>
-        </div>
-      </DealerHub>
-    );
-  }
-
   // Use real data from API, with loading state
   const stats = summary || {};
   const totalViews = stats.totalViews || 0;
@@ -102,6 +76,14 @@ export default function DealerDashboard() {
 
   return (
     <DealerHub user={user}>
+      {user?.role === 'dealer' && user?.status !== 'approved' && (
+        <div role="status" style={{ marginBottom: 20, padding: 16, borderRadius: 12, border: '1px solid var(--dealer-border)', background: 'var(--dealer-surface)' }}>
+          <strong>Business verification is in progress.</strong>
+          <p style={{ margin: '6px 0 0', color: 'var(--dealer-text-muted)' }}>
+            You can publish and manage your own listings after submitting the required verification details. Auction, payout and other sensitive dealer features remain restricted until verification is approved.
+          </p>
+        </div>
+      )}
       {/* Welcome Header */}
       <div style={{
         display: 'flex',

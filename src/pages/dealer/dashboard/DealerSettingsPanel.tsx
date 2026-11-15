@@ -19,7 +19,7 @@ const EMPTY: ProfileForm = { businessName: '', location: '', bio: '', phone: '' 
 const STAGE_LABELS: Record<string, string> = {
   email_unverified: 'Email not verified',
   application_not_submitted: 'Application not submitted',
-  pending_approval: 'Pending KAYAD review',
+  pending_approval: 'Business verification in review',
   approved: 'Approved',
   rejected: 'Not approved',
   suspended: 'Suspended',

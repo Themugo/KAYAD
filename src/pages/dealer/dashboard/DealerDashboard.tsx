@@ -652,6 +652,14 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
 
   return (
     <div className="min-h-screen bg-[#F6FAF9] flex flex-col lg:flex-row">
+      {user?.role === 'dealer' && user?.status === 'pending' && (
+        <div role="status" className="mx-3 mt-3 rounded-xl border border-[#D7E7E4] bg-[#EAF7F4] px-4 py-3 text-sm text-[#0A3340] lg:mx-6 lg:mt-5">
+          <strong>Business verification is in progress.</strong>
+          <p className="mb-0 mt-1 text-xs text-[#315B63]">
+            You can publish and manage your own vehicle listings after submitting the required verification details. Auction, payout and other sensitive dealer features remain restricted until verification is approved.
+          </p>
+        </div>
+      )}
       {/* Sidebar Navigation */}
       {/* Phone app bar: menu, where you are, notifications. Always reachable while scrolling. */}
       <div className="sticky top-0 z-40 flex items-center gap-2 border-b border-[#D7E7E4] bg-white/95 px-3 py-2 backdrop-blur lg:hidden" data-testid="dealer-mobile-bar">
