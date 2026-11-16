@@ -5,6 +5,8 @@ const read = (path) => fs.readFileSync(new URL(path, `file://${process.cwd()}/`)
 const navbar = read('src/components/Navbar.tsx');
 const footer = read('src/components/layout/Footer.tsx');
 const admin = read('src/pages/admin/AdminSettingsBranding.jsx');
+// The upload UI moved into the shared LogoUploader component (adds magic-byte sniffing on top of the type/size limits).
+const uploader = read('src/components/admin/LogoUploader.jsx');
 const route = read('backend/routes/adminRoutes.js');
 const context = read('src/context/BrandingContext.tsx');
 const checks = [
@@ -21,10 +23,10 @@ const checks = [
   ['centered footer supports uploaded logo', footer.includes("width: 'min(250px, 68vw)'") && footer.includes('objectPosition: \'center\'' )],
   ['column footer supports uploaded logo', footer.includes("width: 'min(220px, 100%)'") && footer.includes("objectPosition: 'left center'")],
   ['footer preserves text/icon fallback', footer.includes("branding.logoText || 'KAYAD'") && footer.includes('colors.footerAccent')],
-  ['admin preview uses object-contain instead of cropping', admin.includes("objectFit: 'contain'") && admin.includes('Logo preview')],
-  ['admin upload accepts only supported secure image types', admin.includes('image/png,image/jpeg,image/webp') && admin.includes("['image/png', 'image/jpeg', 'image/webp']") && admin.includes('SVG uploads are not supported by the current secure upload service')],
-  ['admin client rejects files over 5 MB', admin.includes('file.size > 5 * 1024 * 1024')],
-  ['upload endpoint remains protected by admin authorization', /"\/upload-logo",\s*protect,\s*adminOnly,\s*uploadMemory\.single\("logo"\)/s.test(route)],
+  ['admin preview uses object-contain instead of cropping', admin.includes("objectFit: 'contain'") && uploader.includes("objectFit: 'contain'")],
+  ['admin upload accepts only supported secure image types', uploader.includes('image/png,image/jpeg,image/webp') && uploader.includes("['image/png', 'image/jpeg', 'image/webp']") && !/svg/i.test(uploader.match(/accept="[^"]*"/)?.[0] || '')],
+  ['admin client rejects files over 5 MB', uploader.includes('MAX_BYTES = 5 * 1024 * 1024') && /file\.size\s*>\s*MAX_BYTES/.test(uploader)],
+  ['upload endpoint remains protected by admin authorization', /"\/upload-logo",\s*protect,\s*adminOrSuper,[^;]*?uploadMemory\.single\("logo"\)/s.test(route)],
   ['server persists logo URL and image mode', /config\.branding = \{ \.\.\.existingBranding, logoType: \"image\", logoUrl: result\.url \}/.test(route) && route.includes('await config.save()')],
   ['branding context normalizes saved config', context.includes('normalizeBrandingConfig(configBranding)')],
 ];

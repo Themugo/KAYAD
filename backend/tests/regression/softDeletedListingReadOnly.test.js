@@ -39,7 +39,7 @@ jest.unstable_mockModule("../../services/mediaRecovery.service.js", () => ({ reg
 jest.unstable_mockModule("../../services/escrowCapability.service.js", () => ({ getEscrowEnabledForNewOrEditedCar: jest.fn(), getEffectiveEscrowForCar: jest.fn() }));
 jest.unstable_mockModule("../../utils/publicListingCache.js", () => ({ invalidatePublicListingCaches: jest.fn(async () => {}) }));
 jest.unstable_mockModule("../../services/privateSellerAuctionEligibility.service.js", () => ({ evaluateEligibilityBatch: jest.fn() }));
-jest.unstable_mockModule("../../services/onboardingPolicy.service.js", () => ({ getOnboardingPolicy: jest.fn(), isPolicyTrusted: jest.fn() }));
+jest.unstable_mockModule("../../services/onboardingPolicy.service.js", () => ({ getOnboardingPolicy: jest.fn(), isPolicyTrusted: jest.fn(), sellerMayPublishDirectly: jest.fn(async () => false) }));
 
 
 const { updateCar, addCarImages, deleteCarImage, getMyListings } = await import("../../controllers/carController.js");
@@ -68,9 +68,10 @@ describe("14.8 a soft-deleted listing is read-only history for its owner", () =>
     const res = mkRes(); await updateCar({ params: { id: "c1" }, user: OTHER, body: { title: "x" }, files: [] }, res);
     expect(res.code).toBe(403);
   });
-  test("staff keep administrative access to the historical record (not refused as deleted)", async () => {
+  test("staff do not manage another business's listing at all: refused as non-owner, never reaching the record", async () => {
+    // Business boundary: the platform moderates (approve/hide) but cannot edit, add or delete a seller's photos.
     const res = mkRes(); await deleteCarImage({ params: { id: "c1", imageIndex: "9" }, user: ADMIN }, res);
-    expect(res.code).toBe(400); // reaches the normal validation (invalid image index) instead of the deleted-listing 404
+    expect(res.code).toBe(403);
   });
   test("an ACTIVE listing is unaffected: owner photo validation still runs", async () => {
     rows.set("c1", car());

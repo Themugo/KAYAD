@@ -148,7 +148,7 @@ export default function AdminStaffPermissions() {
           </div>
         </div>
       ) : catalog.length === 0 ? (
-        <div role="alert" style={{ padding: 16, border: '1px solid #fde68a', borderRadius: 12, background: '#fffbeb', color: '#92400e' }}>The permission catalog is empty. Editing is disabled because no assignable permissions were verified. Retry loading or check the backend role catalog.</div>
+        <div role="alert" style={{ padding: 16, border: '1px solid #fde68a', borderRadius: 12, background: '#fffbeb', color: '#176B87' }}>The permission catalog is empty. Editing is disabled because no assignable permissions were verified. Retry loading or check the backend role catalog.</div>
       ) : filtered.length === 0 ? (
         <div style={{ padding: '2rem 1rem', textAlign: 'center', border: '1px solid var(--border)', borderRadius: 12, color: 'var(--text-muted)' }}>{staff.length === 0 ? 'No staff accounts were returned by the server.' : 'No staff records match this search.'}</div>
       ) : (

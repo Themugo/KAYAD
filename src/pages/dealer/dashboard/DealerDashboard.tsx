@@ -20,6 +20,7 @@ import AuctionInsightsPanel from './AuctionInsightsPanel';
 import DealerAccountStatus from './DealerAccountStatus';
 import DealerTeamPanel from './DealerTeamPanel';
 import { getMyListings, deleteCar, markCarSold } from '../../../services/vehicleApi';
+import { ListingStatusBadge, ListingThumb } from '../../../components/listing/ListingPresentation';
 import type { BackendCar } from '../../../services/vehicleApi';
 import { ParticipantEscrowDesk } from '../../../features/escrow/ParticipantEscrowDesk';
 
@@ -56,28 +57,32 @@ type DealerOperationResponse = {
   };
 };
 
-type StatCardProps = { title: string; value: React.ReactNode; change?: number; icon: React.ElementType; color?: string; onOpen?: () => void; openLabel?: string };
+type StatCardProps = { title: string; value: React.ReactNode; caption?: string; change?: number; icon: React.ElementType; color?: string; onOpen?: () => void; openLabel?: string; loading?: boolean };
 
-const StatCard = ({ title, value, change, icon: Icon, color = colors.navy, onOpen, openLabel }: StatCardProps) => {
+/** Metric card: equal height, wraps long values safely, and tells "unavailable" (—) apart from a real 0 and from "still loading". */
+const StatCard = ({ title, value, caption, change, icon: Icon, onOpen, openLabel, loading }: StatCardProps) => {
   const body = (
-    <div className="flex items-start justify-between">
-      <div>
-        <p className="text-sm text-[#64748B] mb-1">{title}</p>
-        <p className="text-2xl font-bold text-[#0A3340]">{value === '—' ? <span aria-label="Unavailable" role="img">—</span> : value}</p>
+    <div className="flex h-full items-start justify-between gap-3">
+      <div className="min-w-0">
+        <p className="text-xs font-semibold uppercase tracking-wide text-[#64748B] sm:text-[13px]">{title}</p>
+        {loading
+          ? <div className="mt-2 h-8 w-24 animate-pulse rounded-md bg-[#E1EDEB]" role="status" aria-label={`Loading ${title}`} />
+          : <p className="mt-1 break-words text-xl font-bold leading-tight text-[#0A3340] sm:text-2xl">{value === '—' ? <span aria-label="Unavailable" role="img">—</span> : value}</p>}
+        {caption && !loading && <p className="mt-1 text-xs text-[#475569]">{caption}</p>}
         {change !== undefined && (
-          <div className={`flex items-center gap-1 mt-2 ${change >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
-            {change >= 0 ? <ArrowUpRight className="w-4 h-4" aria-hidden="true" /> : <ArrowDownRight className="w-4 h-4" aria-hidden="true" />}
+          <div className={`mt-2 flex items-center gap-1 ${change >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+            {change >= 0 ? <ArrowUpRight className="h-4 w-4" aria-hidden="true" /> : <ArrowDownRight className="h-4 w-4" aria-hidden="true" />}
             <span className="text-sm font-medium">{Math.abs(change)}%</span>
           </div>
         )}
-        {onOpen && <p className="mt-2 inline-flex items-center gap-1 text-xs font-medium text-[#176B87]">{openLabel} <ArrowRight className="w-3 h-3" aria-hidden="true" /></p>}
+        {onOpen && <p className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-[#176B87]">{openLabel} <ArrowRight className="h-3 w-3" aria-hidden="true" /></p>}
       </div>
-      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color}`}>
-        <Icon className="w-6 h-6 text-white" aria-hidden="true" />
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#DDF4F0] text-[#176B87]">
+        <Icon className="h-5 w-5" aria-hidden="true" />
       </div>
     </div>
   );
-  const base = 'bg-white rounded-xl border border-[#D7E7E4] p-5 hover:shadow-md transition-shadow';
+  const base = 'h-full rounded-xl border border-[#D7E7E4] bg-white p-4 transition-shadow hover:shadow-md sm:p-5';
   // Only a card with a real destination becomes a button; the rest stay plain information cards.
   return onOpen ? (
     <button type="button" onClick={onOpen} className={`${base} w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]`}>{body}</button>
@@ -86,71 +91,83 @@ const StatCard = ({ title, value, change, icon: Icon, color = colors.navy, onOpe
   );
 };
 
-/** Lead Pipeline Stage */
-const PipelineStage = ({ stage, count, value, color }: { stage: string; count: number | string; value?: number; color: string }) => (
-  <div className="flex items-center justify-between gap-2 p-3 bg-white rounded-lg border border-[#D7E7E4]">
-    <div className="flex items-center gap-3">
-      <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: color }} />
-      <span className="font-medium text-[#12576D]">{stage}</span>
-    </div>
-    <div className="text-right">
-      <p className="font-bold text-[#0A3340]">{count === '—' ? <span aria-label="Unavailable" role="img">—</span> : count}</p>
-    </div>
-  </div>
-);
+/** Lead pipeline stage: a real count, and a real destination (the existing pipeline workspace). */
+const PipelineStage = ({ stage, count, color, onOpen, loading }: { stage: string; count: number | string; color: string; onOpen?: () => void; loading?: boolean }) => {
+  const inner = (
+    <>
+      <span className="flex min-w-0 items-center gap-2"><span className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ backgroundColor: color }} aria-hidden="true" /><span className="truncate text-sm font-semibold text-[#12576D]">{stage}</span></span>
+      {loading ? <span className="h-5 w-8 animate-pulse rounded bg-[#E1EDEB]" aria-hidden="true" /> : <span className="text-lg font-bold text-[#0A3340]">{count === '—' ? <span aria-label="Unavailable" role="img">—</span> : count}</span>}
+    </>
+  );
+  const cls = 'flex min-h-[52px] items-center justify-between gap-2 rounded-xl border border-[#D7E7E4] bg-white px-3.5 py-2.5 text-left';
+  return onOpen
+    ? <button type="button" onClick={onOpen} aria-label={`${stage}: ${count === '—' ? 'unavailable' : count} leads. Open pipeline`} className={`${cls} transition-colors hover:border-[#91CEC5] hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]`}>{inner}</button>
+    : <div className={cls}>{inner}</div>;
+};
 
-/** Quick Action Button */
-const QuickAction = ({ icon: Icon, label, color, onClick }) => (
+/** Quick action: solid design-system card, 44px+ target, labels wrap instead of clipping. */
+const QuickAction = ({ icon: Icon, label, onClick }: { icon: React.ElementType; label: string; onClick: () => void }) => (
   <button
+    type="button"
     onClick={onClick}
-    className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-dashed ${color} hover:bg-opacity-10 transition-all`}
+    className="flex min-h-[72px] flex-col items-center justify-center gap-1.5 rounded-xl border border-[#D7E7E4] bg-white p-3 text-center transition-colors hover:border-[#91CEC5] hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]"
   >
-    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${color} bg-opacity-10`}>
-      <Icon className="w-6 h-6" style={{ color }} />
-    </div>
-    <span className="text-sm font-medium text-[#12576D]">{label}</span>
+    <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#DDF4F0] text-[#176B87]"><Icon className="h-5 w-5" aria-hidden="true" /></span>
+    <span className="break-words text-xs font-semibold leading-tight text-[#12576D] sm:text-sm">{label}</span>
   </button>
 );
 
-/** Activity Item */
-const ActivityItem = ({ type, message, time, icon: Icon }) => {
-  const typeColors = {
-    lead: colors.emerald,
-    view: colors.softBlue,
-    sale: colors.navy,
-    listing: colors.purple,
-  };
-  return (
-    <div className="flex items-start gap-3 py-3 border-b border-[#D7E7E4] last:border-0">
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0`} style={{ backgroundColor: `${typeColors[type]}20` }}>
-        <Icon className="w-4 h-4" style={{ color: typeColors[type] }} />
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm text-[#12576D]">{message}</p>
-        <p className="text-xs text-[#64748B] mt-1">{time}</p>
-      </div>
-    </div>
-  );
+/** "3 hours ago" style label from a real ISO timestamp; returns null when the time is missing or invalid. */
+const relativeTime = (iso?: string | null): string | null => {
+  if (!iso) return null;
+  const t = new Date(iso).getTime();
+  if (!Number.isFinite(t)) return null;
+  const mins = Math.max(0, Math.round((Date.now() - t) / 60000));
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins} min ago`;
+  const hrs = Math.round(mins / 60);
+  if (hrs < 24) return `${hrs} hr${hrs === 1 ? '' : 's'} ago`;
+  const days = Math.round(hrs / 24);
+  if (days < 30) return `${days} day${days === 1 ? '' : 's'} ago`;
+  return new Date(t).toLocaleDateString('en-KE', { day: 'numeric', month: 'short', year: 'numeric' });
 };
 
-/** Top Vehicle Card */
-const TopVehicle = ({ vehicle, rank }) => (
-  <div className="flex items-center gap-3 p-3 bg-white rounded-lg border border-[#D7E7E4]">
-    <div className="w-8 h-8 rounded-full bg-[#EEF7F5] flex items-center justify-center font-bold text-[#64748B]">
-      {rank}
+/** Activity row: real event, real time, and a link to where it can be actioned. */
+const ActivityItem = ({ message, time, icon: Icon, onOpen }: { message: string; time?: string | null; icon: React.ElementType; onOpen?: () => void }) => {
+  const when = relativeTime(time);
+  const inner = (
+    <>
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#DDF4F0] text-[#176B87]"><Icon className="h-4 w-4" aria-hidden="true" /></span>
+      <span className="min-w-0 flex-1"><span className="block break-words text-sm text-[#12576D]">{message}</span>{when && <time dateTime={time || undefined} className="mt-0.5 block text-xs text-[#64748B]">{when}</time>}</span>
+      {onOpen && <ChevronRight className="h-4 w-4 shrink-0 text-[#94A3B8]" aria-hidden="true" />}
+    </>
+  );
+  const cls = 'flex w-full items-center gap-3 border-b border-[#EEF3F2] py-2.5 text-left last:border-0';
+  return onOpen
+    ? <button type="button" onClick={onOpen} className={`${cls} rounded-md hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]`}>{inner}</button>
+    : <div className={cls}>{inner}</div>;
+};
+
+/** Inventory performance row: the real listing photo (full frame, never cropped), identity, status, price and real counters. */
+const TopVehicle = ({ vehicle, rank, onOpen }: { vehicle: any; rank: number; onOpen?: () => void }) => (
+  <div className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 rounded-xl border border-[#D7E7E4] bg-white p-2.5 sm:grid-cols-[auto_minmax(0,1fr)_auto]">
+    <div className="relative">
+      <ListingThumb src={vehicle.image} alt={vehicle.title ? `Photo of ${vehicle.title}` : 'Vehicle photo'} className="h-16 w-24 sm:h-[72px] sm:w-28" />
+      <span className="absolute left-1 top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#0A3340] px-1 text-[10px] font-bold text-white" aria-label={`Rank ${rank}`}>{rank}</span>
     </div>
-    <div className="w-12 h-12 bg-[#EEF7F5] rounded-lg flex-shrink-0">
-      <Car className="w-6 h-6 text-[#64748B] m-auto" />
-    </div>
-    <div className="flex-1 min-w-0">
-      <p className="font-medium text-[#0A3340] truncate">{vehicle.title}</p>
-      <div className="flex items-center gap-3 text-xs text-[#64748B]">
-        <span className="flex items-center gap-1"><Eye className="w-3 h-3" />{vehicle.views == null ? '—' : Number(vehicle.views).toLocaleString('en-KE')}</span>
-        <span className="flex items-center gap-1"><MessageSquare className="w-3 h-3" />{vehicle.leads == null ? '—' : Number(vehicle.leads).toLocaleString('en-KE')}</span>
+    <div className="min-w-0">
+      <p className="line-clamp-2 break-words text-sm font-semibold text-[#0A3340]">{vehicle.title || 'Untitled listing'}</p>
+      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#475569]">
+        <span className="inline-flex items-center gap-1"><Eye className="h-3.5 w-3.5" aria-hidden="true" />{vehicle.views == null ? '—' : Number(vehicle.views).toLocaleString('en-KE')} views</span>
+        <span className="inline-flex items-center gap-1"><MessageSquare className="h-3.5 w-3.5" aria-hidden="true" />{vehicle.leads == null ? '—' : Number(vehicle.leads).toLocaleString('en-KE')} {Number(vehicle.leads) === 1 ? 'enquiry' : 'enquiries'}</span>
       </div>
     </div>
-    <div className="text-right">
-      <p className="font-bold text-[#0A3340]">{vehicle.price == null || !Number.isFinite(Number(vehicle.price)) ? 'Price unavailable' : `Ksh ${Number(vehicle.price).toLocaleString('en-KE')}`}</p>
+    <div className="col-span-2 flex flex-wrap items-center justify-between gap-2 sm:col-span-1 sm:flex-col sm:items-end">
+      <p className="break-words text-sm font-bold text-[#0A3340]">{vehicle.price == null || !Number.isFinite(Number(vehicle.price)) ? 'Price unavailable' : `Ksh ${Number(vehicle.price).toLocaleString('en-KE')}`}</p>
+      <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1">
+        {vehicle.status && <ListingStatusBadge status={vehicle.status} label={String(vehicle.status).replace(/_/g, ' ')} />}
+        {onOpen && <button type="button" onClick={onOpen} className="min-h-[36px] rounded-lg px-2 text-xs font-semibold text-[#176B87] hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">Manage</button>}
+      </div>
     </div>
   </div>
 );
@@ -176,12 +193,12 @@ const NavTab = ({ icon: Icon, label, active, onClick, badge }) => (
     type="button"
     aria-current={active ? 'page' : undefined}
     onClick={onClick}
-    className={`flex shrink-0 lg:w-full items-center gap-3 px-4 py-3 min-h-11 rounded-xl transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87] ${
+    className={`flex w-full items-center gap-3 px-4 py-3 min-h-11 rounded-xl text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87] ${
       active ? 'bg-[#DDF4F0] text-[#12576D]' : 'text-[#64748B] hover:bg-[#F6FAF9]'
     }`}
   >
     <Icon className="w-5 h-5 shrink-0" strokeWidth={2} aria-hidden="true" />
-    <span className="font-medium text-sm whitespace-nowrap lg:whitespace-normal lg:truncate">{label}</span>
+    <span className="font-medium text-sm truncate">{label}</span>
     {badge ? (
       <span className="ml-auto px-2 py-0.5 bg-[#176B87] text-white text-xs rounded-full">
         <span aria-hidden="true">{badge}</span>
@@ -323,6 +340,16 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     setMobileNavOpen(false);
     if (typeof window !== 'undefined') window.scrollTo?.({ top: 0 });
   };
+
+  // Phone drawer: Escape closes it and the page behind it does not scroll while it is open.
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileNavOpen(false); };
+    window.addEventListener('keydown', onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+  }, [mobileNavOpen]);
 
   // Browser Back/Forward and refreshes resolve to the section named in the URL.
   useEffect(() => {
@@ -614,14 +641,6 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#F6FAF9] flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-[#176B87] animate-spin" />
-      </div>
-    );
-  }
-
   if (!user) {
     return (
       <div className="min-h-screen bg-[#F6FAF9] flex items-center justify-center">
@@ -641,9 +660,22 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
 
   return (
     <div className="min-h-screen bg-[#F6FAF9] flex flex-col lg:flex-row">
+      {user?.role === 'dealer' && user?.status === 'pending' && (
+        <div role="status" className="mx-3 mt-3 rounded-xl border border-[#D7E7E4] bg-[#EAF7F4] px-4 py-3 text-sm text-[#0A3340] lg:mx-6 lg:mt-5">
+          <strong>Business verification is in progress.</strong>
+          <p className="mb-0 mt-1 text-xs text-[#315B63]">
+            You can publish and manage your own vehicle listings after submitting the required verification details. Auction, payout and other sensitive dealer features remain restricted until verification is approved.
+          </p>
+        </div>
+      )}
       {/* Sidebar Navigation */}
-      <div className="lg:hidden px-4 pt-3"><button type="button" aria-expanded={mobileNavOpen} aria-controls="dealer-workspace-sidebar" onClick={() => setMobileNavOpen(v => !v)} className="inline-flex items-center gap-2 rounded-lg border border-[#D7E7E4] bg-white px-4 py-2 font-semibold text-[#0A3340]"><Menu className="w-4 h-4" />{mobileNavOpen ? "Close dealer menu" : "Dealer menu"}</button></div>
-      <aside id="dealer-workspace-sidebar" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex w-full lg:w-64 lg:min-w-64 bg-white border-b lg:border-b-0 lg:border-r border-[#D7E7E4] flex-col lg:sticky lg:top-0 lg:h-screen`}>
+      {/* Phone app bar: menu, where you are, notifications. Always reachable while scrolling. */}
+      <div className="sticky top-0 z-40 flex items-center gap-2 border-b border-[#D7E7E4] bg-white/95 px-3 py-2 backdrop-blur lg:hidden" data-testid="dealer-mobile-bar">
+        <button type="button" aria-expanded={mobileNavOpen} aria-controls="dealer-workspace-sidebar" onClick={() => setMobileNavOpen(v => !v)} className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl border border-[#D7E7E4] bg-white px-3 text-sm font-semibold text-[#0A3340] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><Menu className="h-4 w-4" aria-hidden="true" /><span>{mobileNavOpen ? "Close dealer menu" : "Dealer menu"}</span></button>
+        <p className="min-w-0 flex-1 truncate text-center text-sm font-bold text-[#0A3340]" aria-hidden="true">{currentItem.label}</p>
+      </div>
+      {mobileNavOpen && <button type="button" aria-label="Close dealer menu overlay" tabIndex={-1} onClick={() => setMobileNavOpen(false)} className="fixed inset-0 z-[1090] bg-[#071F2A]/55 lg:hidden" />}
+      <aside id="dealer-workspace-sidebar" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex fixed inset-y-0 left-0 z-[1100] w-[88%] max-w-sm overflow-hidden shadow-2xl lg:static lg:z-auto lg:w-64 lg:min-w-64 lg:max-w-none lg:shadow-none bg-white lg:border-r border-[#D7E7E4] flex-col lg:sticky lg:top-0 lg:h-screen`}>
         <div className="p-4 border-b border-[#D7E7E4]">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-[#176B87] to-[#13B8A6] flex items-center justify-center overflow-hidden">
@@ -656,15 +688,15 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           </div>
         </div>
 
-        <nav aria-label="Dealer workspace" className="relative flex-1 min-h-0 p-3 lg:p-4 flex flex-col gap-2 lg:gap-0 overflow-y-auto">
+        <nav aria-label="Dealer workspace" className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 lg:p-4">
           {DEALER_NAV_GROUPS.map((group, index) => (
             <div
               key={group.id}
               role="group"
               aria-labelledby={`dealer-nav-${group.id}`}
-              className={`flex lg:block gap-2 lg:gap-1 lg:space-y-1 ${index > 0 ? 'pl-2 border-l border-[#D7E7E4] lg:pl-0 lg:border-l-0 lg:border-t lg:mt-3 lg:pt-3' : ''}`}
+              className={`space-y-1 ${index > 0 ? 'mt-3 border-t border-[#D7E7E4] pt-3' : ''}`}
             >
-              <p id={`dealer-nav-${group.id}`} className="sr-only lg:not-sr-only lg:px-4 lg:pb-1 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
+              <p id={`dealer-nav-${group.id}`} className="px-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
                 {group.label}
               </p>
               {group.items.map((item) => (
@@ -690,10 +722,10 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
 
       {/* Main Content */}
       <div className="flex-1 min-w-0 overflow-y-auto">
-        <div className="p-4 sm:p-6 lg:p-8">
+        <div className="p-3 sm:p-6 lg:p-8">
           {/* Header */}
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-8">
-            <div className="min-w-0">
+          <div className="relative mb-5 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+            <div className="min-w-0 pr-12 sm:pr-0">
               <nav aria-label="Breadcrumb" className="mb-1 flex flex-wrap items-center gap-1 text-xs text-[#64748B]">
                 {activeSection === 'overview' ? (
                   <span aria-current="page">Dealer Hub</span>
@@ -709,19 +741,19 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   </>
                 )}
               </nav>
-              <h2 className="text-2xl font-bold text-[#0A3340]">{currentItem.title}</h2>
-              <p className="text-[#64748B]">{activeSection === 'overview' ? `Welcome back, ${user?.name || 'dealer'}` : currentItem.description}</p>
+              <h2 className="text-xl font-bold text-[#0A3340] sm:text-2xl">{currentItem.title}</h2>
+              <p className="text-sm text-[#64748B] sm:text-base">{activeSection === 'overview' ? `Welcome back, ${user?.name || 'dealer'}` : currentItem.description}</p>
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
-              <div className="inline-flex items-center rounded-xl border border-[#D7E7E4] bg-white p-1" aria-label="Page history">
+              <div className="hidden items-center rounded-xl border border-[#D7E7E4] bg-white p-1 sm:inline-flex" aria-label="Page history">
                 <button type="button" aria-label="Go to previous page" title="Previous page" onClick={() => window.history.back()} className="rounded-lg p-2 text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><ChevronLeft className="h-4 w-4" /></button>
                 <button type="button" aria-label="Go to next page" title="Next page" onClick={() => window.history.forward()} className="rounded-lg p-2 text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><ChevronRight className="h-4 w-4" /></button>
               </div>
-              <button type="button" aria-label="Notifications" className="p-2 bg-white border border-[#D7E7E4] rounded-xl hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]" onClick={() => { window.location.assign('/notifications'); }}>
+              <button type="button" aria-label="Notifications" className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center sm:static sm:h-auto sm:w-auto p-2 bg-white border border-[#D7E7E4] rounded-xl hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]" onClick={() => { window.location.assign('/notifications'); }}>
                 <Bell className="w-5 h-5 text-[#64748B]" aria-hidden="true" />
               </button>
               {activeSection !== 'inventory' && (
-                <button type="button" onClick={() => setActiveSection('inventory')} className="px-4 py-2 bg-[#176B87] text-white font-medium rounded-xl hover:bg-[#12576D] flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]">
+                <button type="button" onClick={() => setActiveSection('inventory')} className={`${activeSection === 'overview' ? 'flex' : 'hidden sm:flex'} min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#176B87] px-4 py-2 font-medium text-white hover:bg-[#12576D] sm:w-auto focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]`}>
                   <Car className="w-5 h-5" aria-hidden="true" />
                   Manage Inventory
                 </button>
@@ -737,122 +769,116 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
             </div>
           )}
 
-          {activeSection === 'overview' && (
-            <>
-              {/* Quick Stats */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-                <StatCard
-                  title="Total Listings"
-                  onOpen={() => setActiveSection('inventory')}
-                  openLabel="Open inventory"
-                  value={dashboard?.overview?.totalListings ?? '—'}
-                  icon={Car}
-                  color={colors.softBlue}
-                />
-                <StatCard
-                  title="Total Views"
-                  value={dashboard?.overview?.totalViews == null ? '—' : dashboard.overview.totalViews.toLocaleString()}
-                  icon={Eye}
-                  color={colors.purple}
-                />
-                <StatCard
-                  title="Total Leads"
-                  onOpen={() => setActiveSection('leads')}
-                  openLabel="Open leads"
-                  value={dashboard?.overview?.leads?.total ?? '—'}
-                  icon={Users}
-                  color={colors.emerald}
-                />
-                <StatCard
-                  title="Revenue (released escrow, all time)"
-                  value={dashboard?.overview?.revenue?.total == null ? '—' : `Ksh ${Number(dashboard.overview.revenue.total).toLocaleString('en-KE')}`}
-                  icon={DollarSign}
-                  color={colors.navy}
-                />
+          {activeSection === 'overview' && (() => {
+            const ov = dashboard?.overview;
+            const leadsOv = ov?.leads;
+            const dataReady = !loading && !!dashboard;
+            const num = (v: unknown) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+            const totalLeads = num(leadsOv?.total);
+            const newLeads = num(leadsOv?.new);
+            const sold = num(leadsOv?.sold);
+            const st = ov?.listingStatus;
+            const listingCaption = st ? [st.available != null ? `${st.available} live` : null, st.pending ? `${st.pending} pending review` : null, st.draft ? `${st.draft} draft` : null].filter(Boolean).join(' · ') : undefined;
+            // Conversion is shown only when it can be calculated from real counts (at least one lead, and a real "sold" count).
+            const conversion = totalLeads && totalLeads > 0 && sold != null ? Math.round((sold / totalLeads) * 100) : null;
+            const stages: Array<[string, string, string]> = [
+              ['New', 'new', '#13B8A6'], ['Contacted', 'contacted', '#176B87'], ['Negotiating', 'negotiating', '#0A3340'],
+              ['Inspection booked', 'inspectionBooked', '#5AAFA4'], ['Reserved', 'reserved', '#0E4655'],
+            ];
+            const activity = Array.isArray(dashboard?.recentActivity) ? dashboard.recentActivity : [];
+            const performers = Array.isArray(dashboard?.topPerformers?.vehicles) ? dashboard.topPerformers.vehicles : [];
+            return (
+            <div data-testid="dealer-overview">
+              {/* Business summary: real figures only. "—" = unavailable, 0 = a genuine zero, skeleton = still loading. */}
+              <div className="mb-5 grid grid-cols-1 gap-3 min-[460px]:grid-cols-2 sm:mb-6 sm:gap-4 xl:grid-cols-4">
+                <StatCard title="Total Listings" loading={loading} onOpen={() => setActiveSection('inventory')} openLabel="Open inventory" value={ov?.totalListings ?? '—'} caption={listingCaption} icon={Car} />
+                <StatCard title="Total Leads" loading={loading} onOpen={() => setActiveSection('leads')} openLabel="Open leads" value={totalLeads ?? '—'} caption={newLeads != null ? (newLeads > 0 ? `${newLeads} new, awaiting your response` : 'No new enquiries waiting') : undefined} icon={Users} />
+                <StatCard title="Total Views" loading={loading} value={ov?.totalViews == null ? '—' : Number(ov.totalViews).toLocaleString('en-KE')} caption="All time, across your listings" icon={Eye} />
+                <StatCard title="Revenue (released escrow, all time)" loading={loading} value={ov?.revenue?.total == null ? '—' : `Ksh ${Number(ov.revenue.total).toLocaleString('en-KE')}`} icon={DollarSign} />
               </div>
 
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
-                {/* Lead Pipeline */}
-                <div className="xl:col-span-2 bg-white rounded-xl border border-[#D7E7E4] p-4 sm:p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-[#0A3340]">Lead Pipeline</h3>
-                    <button onClick={() => setActiveSection('leads')} className="text-sm text-[#176B87] font-medium hover:text-[#12576D]">View All</button>
+              <div className="mb-5 grid grid-cols-1 gap-4 sm:mb-6 sm:gap-6 xl:grid-cols-3">
+                {/* Lead pipeline */}
+                <section aria-labelledby="dealer-pipeline-title" className="rounded-xl border border-[#D7E7E4] bg-white p-4 sm:p-5 xl:col-span-2">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <h3 id="dealer-pipeline-title" className="font-bold text-[#0A3340]">Lead pipeline</h3>
+                    <button type="button" onClick={() => setActiveSection('pipeline')} className="min-h-[44px] px-2 text-sm font-semibold text-[#176B87] hover:text-[#12576D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">Open pipeline</button>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <PipelineStage stage="New" count={dashboard?.overview?.leads?.new ?? '—'} color={colors.softBlue} />
-                    <PipelineStage stage="Contacted" count={dashboard?.overview?.leads?.contacted ?? '—'} color={colors.purple} />
-                    <PipelineStage stage="Negotiating" count={dashboard?.overview?.leads?.negotiating ?? '—'} color={colors.amber} />
-                    <PipelineStage stage="Reserved" count={dashboard?.overview?.leads?.reserved ?? '—'} color={colors.emerald} />
-                  </div>
-                  <div className="mt-4 p-4 bg-[#F6FAF9] rounded-xl">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-[#64748B]">Conversion Rate</p>
-                        <p className="text-2xl font-bold text-emerald-700">{dashboard?.overview?.performance?.leadConversion == null ? '—' : `${dashboard.overview.performance.leadConversion}%`}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm text-[#64748B]">Avg Response Rate</p>
-                        <p className="text-2xl font-bold text-[#176B87]">{dashboard?.overview?.performance?.responseRate == null ? '—' : `${dashboard.overview.performance.responseRate}%`}</p>
-                      </div>
+                  {loadError && !dashboard ? (
+                    <p className="rounded-lg bg-[#F6FAF9] p-4 text-sm text-[#475569]">Pipeline figures are unavailable right now. Use “Try Again” above.</p>
+                  ) : dataReady && totalLeads === 0 ? (
+                    <div className="rounded-lg bg-[#F6FAF9] p-4 text-sm text-[#475569]" data-testid="pipeline-empty">
+                      <p className="font-semibold text-[#12576D]">No enquiries yet</p>
+                      <p className="mt-1">When buyers contact you about a vehicle, each lead appears here by stage. Complete, well-photographed listings attract more enquiries.</p>
                     </div>
-                  </div>
-                </div>
+                  ) : (
+                    <div className="grid grid-cols-1 gap-2.5 min-[460px]:grid-cols-2 lg:grid-cols-3">
+                      {stages.map(([label, key, color]) => <PipelineStage key={key} stage={label} color={color} loading={loading} count={num((leadsOv as any)?.[key]) ?? '—'} onOpen={() => setActiveSection('pipeline')} />)}
+                    </div>
+                  )}
+                  {dataReady && totalLeads != null && totalLeads > 0 && (
+                    <dl className="mt-4 grid grid-cols-1 gap-3 rounded-xl bg-[#F6FAF9] p-3.5 min-[460px]:grid-cols-2" data-testid="pipeline-outcomes">
+                      <div><dt className="text-xs text-[#64748B]">Sold from enquiries</dt><dd className="text-xl font-bold text-[#0A3340]">{sold ?? 0} <span className="text-sm font-medium text-[#475569]">of {totalLeads}{conversion != null ? ` · ${conversion}%` : ''}</span></dd></div>
+                      <div><dt className="text-xs text-[#64748B]">Closed without a sale</dt><dd className="text-xl font-bold text-[#0A3340]">{num((leadsOv as any)?.lost) ?? 0}</dd></div>
+                    </dl>
+                  )}
+                </section>
 
-                {/* Recent Activity */}
-                <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
-                  <h3 className="font-bold text-[#0A3340] mb-4">Recent Activity</h3>
-                  <div className="space-y-1">
-                    {dashboard?.recentActivity?.length ? dashboard.recentActivity.map((activity, i) => (
-                      <ActivityItem
-                        key={i}
-                        type={activity.type}
-                        message={activity.message}
-                        time={activity.time}
-                        icon={
-                          activity.type === 'lead' ? MessageSquare :
-                          activity.type === 'view' ? Eye :
-                          activity.type === 'sale' ? CheckCircle2 :
-                          Car
-                        }
-                      />
-                    )) : <p className="py-6 text-sm text-[#64748B]">No recent activity is available.</p>}
-                  </div>
-                </div>
+                {/* Recent activity */}
+                <section aria-labelledby="dealer-activity-title" className="rounded-xl border border-[#D7E7E4] bg-white p-4 sm:p-5">
+                  <h3 id="dealer-activity-title" className="mb-2 font-bold text-[#0A3340]">Recent activity</h3>
+                  {loading ? (
+                    <div className="space-y-3" role="status" aria-label="Loading recent activity">{[0, 1, 2].map((i) => <div key={i} className="h-9 animate-pulse rounded-md bg-[#E1EDEB]" />)}</div>
+                  ) : activity.length ? (
+                    <div>{activity.slice(0, 6).map((a: any, i: number) => <ActivityItem key={a.id || i} message={a.message} time={a.time} icon={a.type === 'view' ? Eye : a.type === 'sale' ? CheckCircle2 : a.type === 'listing' ? Car : MessageSquare} onOpen={() => setActiveSection('leads')} />)}</div>
+                  ) : (
+                    <p className="rounded-lg bg-[#F6FAF9] px-3 py-3 text-sm text-[#475569]" data-testid="activity-empty">{loadError ? 'Activity is unavailable right now.' : 'No activity yet. New enquiries and lead updates will appear here.'}</p>
+                  )}
+                </section>
               </div>
 
-              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                {/* Top Performing Vehicles */}
-                <div className="xl:col-span-2 bg-white rounded-xl border border-[#D7E7E4] p-4 sm:p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-[#0A3340]">Top Performing Vehicles</h3>
-                    <button onClick={() => setActiveSection('inventory')} className="text-sm text-[#176B87] font-medium hover:text-[#12576D]">View Inventory</button>
+              <div className="grid grid-cols-1 gap-4 sm:gap-6 xl:grid-cols-3">
+                {/* Inventory performance */}
+                <section aria-labelledby="dealer-performance-title" className="rounded-xl border border-[#D7E7E4] bg-white p-4 sm:p-5 xl:col-span-2">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <h3 id="dealer-performance-title" className="font-bold text-[#0A3340]">Inventory performance</h3>
+                    <button type="button" onClick={() => setActiveSection('inventory')} className="min-h-[44px] px-2 text-sm font-semibold text-[#176B87] hover:text-[#12576D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">View inventory</button>
                   </div>
-                  <div className="space-y-3">
-                    {dashboard?.topPerformers?.vehicles?.length ? dashboard.topPerformers.vehicles.map((vehicle, i) => (
-                      <TopVehicle key={vehicle.id} vehicle={vehicle} rank={i + 1} />
-                    )) : <p className="py-6 text-sm text-[#64748B]">No vehicle performance data is available.</p>}
-                  </div>
-                </div>
+                  {loading ? (
+                    <div className="space-y-2.5" role="status" aria-label="Loading inventory performance">{[0, 1].map((i) => <div key={i} className="h-[92px] animate-pulse rounded-xl bg-[#E1EDEB]" />)}</div>
+                  ) : performers.length ? (
+                    <div className="space-y-2.5">{performers.map((vehicle: any, i: number) => <TopVehicle key={vehicle.id} vehicle={vehicle} rank={i + 1} onOpen={() => setActiveSection('inventory')} />)}</div>
+                  ) : (
+                    <div className="rounded-lg bg-[#F6FAF9] p-4 text-sm text-[#475569]" data-testid="performance-empty">
+                      <p className="font-semibold text-[#12576D]">{loadError ? 'Inventory performance is unavailable right now.' : 'No listings to rank yet'}</p>
+                      {!loadError && <p className="mt-1">Add your first vehicle and its views and enquiries will be ranked here.</p>}
+                    </div>
+                  )}
+                </section>
 
-                {/* Quick Actions */}
-                <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
-                  <h3 className="font-bold text-[#0A3340] mb-4">Quick Actions</h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <QuickAction icon={Users} label="View Leads" color={colors.purple} onClick={() => setActiveSection('leads')} />
-                    <QuickAction icon={Car} label="Manage Inventory" color={colors.softBlue} onClick={() => setActiveSection('inventory')} />
-                    <QuickAction icon={Calendar} label="Inspections" color={colors.amber} onClick={() => setActiveSection('inspections')} />
+                {/* Quick actions */}
+                <section aria-labelledby="dealer-actions-title" className="rounded-xl border border-[#D7E7E4] bg-white p-4 sm:p-5">
+                  <h3 id="dealer-actions-title" className="mb-3 font-bold text-[#0A3340]">Quick actions</h3>
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <QuickAction icon={Plus} label="Add a vehicle" onClick={() => openListingForm({ mode: 'create' })} />
+                    <QuickAction icon={Car} label="Manage inventory" onClick={() => setActiveSection('inventory')} />
+                    <QuickAction icon={Users} label="View leads" onClick={() => setActiveSection('leads')} />
+                    <QuickAction icon={Target} label="Lead pipeline" onClick={() => setActiveSection('pipeline')} />
+                    <QuickAction icon={Calendar} label="Inspections" onClick={() => setActiveSection('inspections')} />
+                    <QuickAction icon={Settings} label="Dealer settings" onClick={() => setActiveSection('settings')} />
                   </div>
-                </div>
+                </section>
               </div>
-            </>
-          )}
+            </div>
+            );
+          })()}
 
           {activeSection === 'inventory' && (
-            <div className="bg-white rounded-xl border border-[#D7E7E4] p-6">
+            <div className="bg-white rounded-xl border border-[#D7E7E4] p-3 sm:p-6">
               {listingForm ? null : (
-                <div className="flex items-center justify-between gap-3 mb-6">
-                  <h3 className="text-xl font-bold text-[#0A3340]">Inventory Management</h3>
-                  <button type="button" onClick={() => openListingForm({ mode: 'create' })} className="px-4 py-2 bg-[#176B87] text-white font-medium rounded-xl hover:bg-[#12576D] flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]">
+                <div className="flex items-center justify-between gap-3 mb-4 sm:mb-6">
+                  <h3 className="text-lg font-bold text-[#0A3340] sm:text-xl">Inventory Management</h3>
+                  <button type="button" onClick={() => openListingForm({ mode: 'create' })} className="whitespace-nowrap px-4 py-2.5 bg-[#176B87] text-white font-medium rounded-xl hover:bg-[#12576D] flex items-center gap-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]">
                     <Plus className="w-4 h-4" aria-hidden="true" /> Add vehicle
                   </button>
                 </div>
@@ -905,14 +931,14 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                 </div>
               ) : (
                 <>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6">
+                  <div className="mb-5 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-5">
                     <div className="p-3 bg-emerald-50 rounded-xl text-center">
                       <p className="text-2xl font-bold text-emerald-700">{myListings.filter((l) => l.status === 'available' || l.status === 'active').length}</p>
                       <p className="text-xs text-emerald-800">Published</p>
                     </div>
-                    <div className="p-3 bg-amber-50 rounded-xl text-center">
-                      <p className="text-2xl font-bold text-amber-700">{myListings.filter((l) => l.status === 'pending').length}</p>
-                      <p className="text-xs text-amber-800">Pending review</p>
+                    <div className="p-3 bg-teal-50 rounded-xl text-center">
+                      <p className="text-2xl font-bold text-teal-700">{myListings.filter((l) => l.status === 'pending').length}</p>
+                      <p className="text-xs text-teal-800">Pending review</p>
                     </div>
                     <div className="p-3 bg-[#F3FAF9] rounded-xl text-center">
                       <p className="text-2xl font-bold text-[#176B87]">{myListings.filter((l) => l.status === 'draft').length}</p>
@@ -928,9 +954,9 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                     </div>
                   </div>
                   {myListings.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-2 mb-4" data-testid="inventory-controls">
-                      <input type="search" value={invQuery} onChange={(e) => setInvQuery(e.target.value)} placeholder="Search make, model, title…" aria-label="Search your inventory" className="flex-1 min-w-[180px] px-3 py-2 text-sm border border-[#B9D3CF] rounded-lg" />
-                      <select value={invStatus} onChange={(e) => setInvStatus(e.target.value)} aria-label="Filter by status" className="px-3 py-2 text-sm border border-[#B9D3CF] rounded-lg bg-white">
+                    <div className="mb-4 grid grid-cols-2 items-center gap-2 sm:flex sm:flex-wrap" data-testid="inventory-controls">
+                      <input type="search" value={invQuery} onChange={(e) => setInvQuery(e.target.value)} placeholder="Search make, model, title…" aria-label="Search your inventory" className="col-span-2 min-h-11 flex-1 sm:min-w-[180px] px-3 py-2 text-base sm:text-sm border border-[#B9D3CF] rounded-lg" />
+                      <select value={invStatus} onChange={(e) => setInvStatus(e.target.value)} aria-label="Filter by status" className="min-h-11 px-3 py-2 text-sm border border-[#B9D3CF] rounded-lg bg-white">
                         <option value="all">All statuses</option>
                         <option value="published">Published</option>
                         <option value="pending">Pending review</option>
@@ -938,13 +964,13 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                         <option value="reserved">Reserved</option>
                         <option value="sold">Sold</option>
                       </select>
-                      <select value={invSort} onChange={(e) => setInvSort(e.target.value as typeof invSort)} aria-label="Sort inventory" className="px-3 py-2 text-sm border border-[#B9D3CF] rounded-lg bg-white">
+                      <select value={invSort} onChange={(e) => setInvSort(e.target.value as typeof invSort)} aria-label="Sort inventory" className="min-h-11 px-3 py-2 text-sm border border-[#B9D3CF] rounded-lg bg-white">
                         <option value="newest">Newest first</option>
                         <option value="price_desc">Price: high to low</option>
                         <option value="price_asc">Price: low to high</option>
                         <option value="views">Most viewed</option>
                       </select>
-                      <p className="text-xs text-[#475569] ml-auto" data-testid="inventory-count">Showing {visibleListings.length} of {invStatus === 'sold' ? soldListings.length : activeListings.length} {invStatus === 'sold' ? 'sold' : 'active'}</p>
+                      <p className="col-span-2 text-xs text-[#475569] sm:ml-auto" data-testid="inventory-count">Showing {visibleListings.length} of {invStatus === 'sold' ? soldListings.length : activeListings.length} {invStatus === 'sold' ? 'sold' : 'active'}</p>
                     </div>
                   )}
                   <div className="space-y-3">
@@ -975,27 +1001,18 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                         car.city || car.location_city || '',
                       ].filter(Boolean).join(' · ');
                       return (
-                        <div key={car.id} className="p-4 bg-[#F6FAF9] rounded-xl">
-                          <div className="flex flex-wrap sm:flex-nowrap items-center gap-4">
-                            <span className="w-7 text-center text-sm font-bold text-[#475569] shrink-0" aria-label={`Listing number ${rowIdx + 1}`} data-testid="inventory-row-number">{rowIdx + 1}</span>
-                            <div className="relative w-32 h-24 bg-[#DDF4F0] rounded-lg flex items-center justify-center overflow-hidden shrink-0">
-                              {image ? <img src={image} alt={label} loading="lazy" className="w-full h-full object-cover" /> : <Car className="w-8 h-8 text-[#64748B]" aria-hidden="true" />}
-                              {photoCount > 0 && <span className="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/60 text-white text-[10px] font-semibold">{photoCount} {photoCount === 1 ? 'photo' : 'photos'}</span>}
-                            </div>
+                        <div key={car.id} data-testid="inventory-row" className="rounded-2xl border border-[#D7E7E4] bg-white p-3 shadow-[0_2px_10px_rgba(11,29,58,0.04)] transition hover:border-[#176B87]/40 hover:shadow-[0_8px_22px_rgba(11,29,58,0.08)] sm:p-4">
+                          <div className="grid grid-cols-[104px_minmax(0,1fr)] items-start gap-x-3 gap-y-2 sm:flex sm:items-center sm:gap-4">
+                            <span className="hidden sm:inline w-7 text-center text-sm font-bold text-[#475569] shrink-0" aria-label={`Listing number ${rowIdx + 1}`} data-testid="inventory-row-number">{rowIdx + 1}</span>
+                            <ListingThumb src={image} fallback={car.images?.[0]?.url} alt={label} count={photoCount} priority={rowIdx < 3} className="h-20 w-full sm:h-24 sm:w-36" />
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-[#0A3340] truncate">{label}</p>
-                              <p className="text-sm text-[#475569]">{car.price == null ? 'Price unavailable' : `Ksh ${Number(car.price).toLocaleString('en-KE')}`} • {car.views == null ? 'Views unavailable' : `${Number(car.views).toLocaleString('en-KE')} views`}</p>
+                              <p className="truncate text-[15px] font-bold text-[#0A3340]">{label}</p>
+                              <p className="text-sm font-semibold text-[#176B87]">{car.price == null ? 'Price unavailable' : `Ksh ${Number(car.price).toLocaleString('en-KE')}`} • {car.views == null ? 'Views unavailable' : `${Number(car.views).toLocaleString('en-KE')} views`}</p>
                               {detailLine && <p className="text-xs text-[#475569]" data-testid="inventory-details">{detailLine}</p>}
                               {updated && <p className="text-xs text-[#475569]">Updated {updated}</p>}
                             </div>
-                            <span className={`px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap ${
-                              car.status === 'available' || car.status === 'active' ? 'bg-emerald-100 text-emerald-800' :
-                              car.status === 'reserved' ? 'bg-[#DDF4F0] text-[#12576D]' :
-                              'bg-[#EEF7F5] text-[#475569]'
-                            }`}>
-                              {statusText}
-                            </span>
-                            <div className="flex gap-2">
+                            <ListingStatusBadge status={car.status} label={statusText} className="col-start-2 justify-self-start" />
+                            <div className="col-span-2 grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:flex-wrap [&>button]:min-h-10 [&>button]:justify-center">
                               {!isSoldListing && !(aStatus === 'live') && (
                                 <button type="button" onClick={() => { setSoldError(null); setSoldBuyer(''); setSoldPrice(''); setSoldTargetId(carId); }} className="px-3 py-1 text-xs font-bold text-emerald-800 border border-emerald-300 rounded-lg hover:bg-emerald-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Mark ${car.title || 'vehicle'} as sold`}>Mark sold</button>
                               )}
@@ -1164,7 +1181,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   const other = leads.filter((l) => !shown.includes(l.stage || 'new')).length;
                   return other > 0 ? <p className="mb-3 text-xs text-[#475569]">{other} {other === 1 ? 'lead is' : 'leads are'} in other stages (test drive, escrow started or lost) and appear in the Leads table.</p> : null;
                 })()}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
                   {['new', 'contacted', 'negotiating', 'sold'].map((stage, stageIdx) => {
                     const nextStage = ['new', 'contacted', 'negotiating', 'sold'][stageIdx + 1];
                     const stageLeads = leads.filter((l) => (l.stage || 'new') === stage);
@@ -1258,19 +1275,19 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   (impressions/clicks/ROI) are intentionally not shown
                   since no real ad-tracking infrastructure exists to
                   back them honestly. */}
-              <div className="flex gap-2 mb-6">
+              <div className="mb-6 flex flex-col gap-2 sm:flex-row">
                 <input
                   value={newCampaignName}
                   onChange={(e) => setNewCampaignName(e.target.value)}
                   placeholder="New campaign name"
                   aria-label="New campaign name"
                   onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); void handleCreateCampaign(); } }}
-                  className="flex-1 border border-[#D7E7E4] rounded-xl px-3 py-2 text-sm"
+                  className="min-h-11 min-w-0 flex-1 border border-[#D7E7E4] rounded-xl px-3 py-2 text-base sm:text-sm"
                 />
                 <button
                   onClick={handleCreateCampaign}
                   disabled={creatingCampaign || !newCampaignName.trim()}
-                  className="px-4 py-2 bg-[#176B87] text-white rounded-xl font-medium hover:bg-[#12576D] disabled:opacity-50"
+                  className="min-h-11 whitespace-nowrap px-4 py-2 bg-[#176B87] text-white rounded-xl font-medium hover:bg-[#12576D] disabled:opacity-50"
                 >
                   {creatingCampaign ? 'Creating…' : 'Create Campaign'}
                 </button>
@@ -1424,7 +1441,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           {activeSection === 'analytics' && (
             <div className="space-y-6">
               {operationsLoading || (!operations.analytics && !operationsError) ? <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#176B87] animate-spin" /></div> : operationsError ? <div className="py-12 text-center"><p className="text-sm text-[#64748B] mb-3">{operationsError}</p><button onClick={() => setOperations((prev) => ({ ...prev, analytics: undefined }))} className="text-xs font-bold text-[#176B87]">Try Again</button></div> : <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
                   <StatCard title="Total Revenue" value={operations.analytics?.overview?.totalRevenue == null ? '—' : `Ksh ${Number(operations.analytics.overview.totalRevenue).toLocaleString('en-KE')}`} icon={DollarSign} color={colors.emerald} />
                   <StatCard title="Total Sales" value={operations.analytics?.overview?.totalSales ?? '—'} icon={ShoppingCart} color={colors.navy} />
                   <StatCard title="Avg Deal Size" value={operations.analytics?.performance?.avgDealSize == null ? '—' : `Ksh ${Number(operations.analytics.performance.avgDealSize).toLocaleString('en-KE')}`} icon={Target} color={colors.purple} />

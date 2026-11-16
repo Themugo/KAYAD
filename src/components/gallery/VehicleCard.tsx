@@ -148,15 +148,15 @@ export const VehicleCard: FC<VehicleCardProps> = ({ vehicle, viewMode = 'grid' }
         </button>
 
         {images.length > 1 && (
-          <span className="absolute bottom-2 left-2 z-10 rounded-md bg-black/60 px-1.5 py-0.5 text-[11px] font-semibold text-white">{currentImgIndex + 1}/{images.length}</span>
+          <span className="absolute bottom-2 left-2 z-10 rounded-md bg-[#0A3340]/60 px-1.5 py-0.5 text-[11px] font-semibold text-white">{currentImgIndex + 1}/{images.length}</span>
         )}
       </div>
 
       {/* Details */}
       <div className="flex-1 flex flex-col min-w-0 gap-2">
         {availability && (
-          <span className={`self-start inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-bold ${availability.tone === 'ok' ? 'bg-emerald-50 text-emerald-700' : availability.tone === 'sold' ? 'bg-slate-200 text-slate-700' : 'bg-amber-50 text-amber-700'}`}>
-            <span className={`w-1.5 h-1.5 rounded-full ${availability.tone === 'ok' ? 'bg-emerald-500' : availability.tone === 'sold' ? 'bg-slate-500' : 'bg-amber-500'}`} aria-hidden="true" />
+          <span className={`self-start inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-bold ${availability.tone === 'ok' ? 'bg-emerald-50 text-emerald-700' : availability.tone === 'sold' ? 'bg-slate-200 text-slate-700' : 'bg-teal-50 text-teal-700'}`}>
+            <span className={`w-1.5 h-1.5 rounded-full ${availability.tone === 'ok' ? 'bg-emerald-500' : availability.tone === 'sold' ? 'bg-slate-500' : 'bg-teal-500'}`} aria-hidden="true" />
             {availability.text}
           </span>
         )}

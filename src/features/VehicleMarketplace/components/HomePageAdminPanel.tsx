@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { HERO_NUMERIC_LIMITS, isSafeHeroImageUrl, sanitizeHeroPresentation } from '../utils/heroPresentationSafety';
 import { X, Settings, RotateCcw, Eye, EyeOff, ShieldAlert, History, LayoutGrid, List, PanelLeftOpen, CarFront } from 'lucide-react';
 import { HomePageConfig, ACCENT_THEME_OPTIONS, sanitizePriceSteps, sanitizeYearFrom } from '../hooks/useHomePageConfig';
 import {
@@ -25,9 +26,9 @@ interface HomePageAdminPanelProps {
   heroFeaturedMode: 'all' | 'selected';
   heroFeaturedIds: string[];
   heroPresentation: HeroPresentationConfig;
-  heroCardContent: Record<string, { eyebrow?: string; message?: string; detail?: string; ctaLabel?: string; ctaLink?: string }>;
+  heroCardContent: Record<string, { eyebrow?: string; message?: string; detail?: string; ctaLabel?: string; ctaLink?: string; heroImage?: string }>;
   onSaveHeroVehicleSelection: (mode: 'all' | 'selected', ids: string[]) => Promise<void>;
-  onSaveHeroPresentation: (presentation: HeroPresentationConfig, cardContent: Record<string, { eyebrow?: string; message?: string; detail?: string; ctaLabel?: string; ctaLink?: string }>) => Promise<void>;
+  onSaveHeroPresentation: (presentation: HeroPresentationConfig, cardContent: Record<string, { eyebrow?: string; message?: string; detail?: string; ctaLabel?: string; ctaLink?: string; heroImage?: string }>) => Promise<void>;
 }
 
 const SECTION_LABELS: Record<keyof HomePageConfig['sectionVisibility'], string> = {
@@ -98,21 +99,21 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
         ...heroLayout,
         stageHeightPct: Math.max(70, Math.min(120, Number(heroLayout.stageHeightPct) || 100)),
         stageMaxWidthPct: Math.max(90, Math.min(100, Number(heroLayout.stageMaxWidthPct) || 100)),
-        cardScalePct: Math.max(70, Math.min(100, Number(heroLayout.cardScalePct) || 80)),
-        cardWidthPct: Math.max(28, Math.min(50, Number(heroLayout.cardWidthPct) || 42)),
+        cardScalePct: 100,
+        cardWidthPct: Math.max(28, Math.min(50, Number(heroLayout.cardWidthPct) || 38)),
         cardOffsetXPct: Math.max(-10, Math.min(10, Number(heroLayout.cardOffsetXPct) || 0)),
         cardOffsetYPct: Math.max(-10, Math.min(10, Number(heroLayout.cardOffsetYPct) || 0)),
         cardBgOpacityPct: Math.max(70, Math.min(100, Number(heroLayout.cardBgOpacityPct) || 95)),
-        cardBlurPx: Math.max(0, Math.min(40, Number(heroLayout.cardBlurPx) || 18)),
+        cardBlurPx: Math.max(0, Math.min(40, (Number.isFinite(Number(heroLayout.cardBlurPx)) ? Number(heroLayout.cardBlurPx) : 18))),
         backgroundPositionX: Math.max(0, Math.min(100, Number(heroLayout.backgroundPositionX) || 50)),
         backgroundPositionY: Math.max(0, Math.min(100, Number(heroLayout.backgroundPositionY) || 50)),
         backgroundScalePct: Math.max(100, Math.min(130, Number(heroLayout.backgroundScalePct) || 100)),
-        overlayOpacityPct: Math.max(0, Math.min(60, Number(heroLayout.overlayOpacityPct) || 18)),
-        secondaryOverlayOpacityPct: Math.max(0, Math.min(60, Number(heroLayout.secondaryOverlayOpacityPct) || 10)),
+        overlayOpacityPct: Math.max(0, Math.min(60, (Number.isFinite(Number(heroLayout.overlayOpacityPct)) ? Number(heroLayout.overlayOpacityPct) : 8))),
+        secondaryOverlayOpacityPct: Math.max(0, Math.min(60, (Number.isFinite(Number(heroLayout.secondaryOverlayOpacityPct)) ? Number(heroLayout.secondaryOverlayOpacityPct) : 10))),
         leftOffsetPct: Math.max(0, Math.min(30, Number(heroLayout.leftOffsetPct) || 0)),
         rightOffsetPct: Math.max(0, Math.min(30, Number(heroLayout.rightOffsetPct) || 0)),
-        leftVehicleNudgePct: Math.max(0, Math.min(40, Number(heroLayout.leftVehicleNudgePct) || 28)),
-        rightVehicleNudgePct: Math.max(0, Math.min(40, Number(heroLayout.rightVehicleNudgePct) || 28)),
+        leftVehicleNudgePct: Math.max(0, Math.min(40, (Number.isFinite(Number(heroLayout.leftVehicleNudgePct)) ? Number(heroLayout.leftVehicleNudgePct) : 28))),
+        rightVehicleNudgePct: Math.max(0, Math.min(40, (Number.isFinite(Number(heroLayout.rightVehicleNudgePct)) ? Number(heroLayout.rightVehicleNudgePct) : 28))),
         vehicleScalePct: Math.max(75, Math.min(125, Number(heroLayout.vehicleScalePct) || 100)),
         vehicleTopPct: Math.max(35, Math.min(65, Number(heroLayout.vehicleTopPct) || 50)),
         vehicleWidthPct: Math.max(32, Math.min(48, Number(heroLayout.vehicleWidthPct) || 43)),
@@ -124,15 +125,16 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
         showcaseVehicles: Array.isArray(heroLayout.showcaseVehicles) ? heroLayout.showcaseVehicles.slice(0, 6) : [],
         floatingCards: Array.isArray(heroLayout.floatingCards) ? heroLayout.floatingCards.slice(0, 8) : [],
       };
-      await onSaveHeroPresentation(clamped, heroCopy);
-      setHeroLayout(clamped);
+      const safeLayout = sanitizeHeroPresentation(clamped);
+      await onSaveHeroPresentation(safeLayout, heroCopy);
+      setHeroLayout(safeLayout);
     } finally {
       setSavingHeroPresentation(false);
     }
   };
 
   const activeCopy = heroCopyVehicleId ? (heroCopy[heroCopyVehicleId] || {}) : {};
-  const updateActiveCopy = (field: 'eyebrow' | 'message' | 'detail' | 'ctaLabel' | 'ctaLink', value: string) => {
+  const updateActiveCopy = (field: 'eyebrow' | 'message' | 'detail' | 'ctaLabel' | 'ctaLink' | 'heroImage', value: string) => {
     if (!heroCopyVehicleId) return;
     setHeroCopy((prev) => ({ ...prev, [heroCopyVehicleId]: { ...(prev[heroCopyVehicleId] || {}), [field]: value } }));
   };
@@ -188,7 +190,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
             <Settings className="w-4 h-4 text-[#0A3340]" />
             <h2 className="text-sm font-black text-[#0A3340]">Customize Home Page (Admin)</h2>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#EEF7F5] text-[#64748B]">
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-[#EEF7F5] text-[#4B5D6E]">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -283,14 +285,14 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
             </div>
             <div className="grid grid-cols-2 gap-3">
               {[
-                ['stageHeightPct','Hero stage height','70–120%'],
-                ['cardScalePct','Center card scale','70–100%'],
+                ['stageHeightPct','Hero stage minimum height','70–120% (the stage always grows to fit its content)'],
+                ['cardWidthPct','Center card width','28–50%'],
                 ['leftOffsetPct','Left vehicle outward','0–30%'],
                 ['rightOffsetPct','Right vehicle outward','0–30%'],
               ].map(([key,label,hint]) => (
                 <label key={key} className="rounded-xl border border-[#D7E7E4] bg-white p-2.5">
                   <span className="block text-[9px] font-black uppercase tracking-wide text-[#64748B]">{label}</span>
-                  <input type="number" min={key === 'stageHeightPct' ? 70 : key === 'cardScalePct' ? 70 : 0} max={key === 'stageHeightPct' ? 120 : key === 'cardScalePct' ? 100 : 30} value={(heroLayout as any)[key]} onChange={(e) => setHeroLayout((prev) => ({ ...prev, [key]: Number(e.target.value) }))} className="mt-1 w-full rounded-lg border border-[#D7E7E4] px-2.5 py-2 text-xs font-bold text-[#0A3340]" />
+                  <input type="number" min={HERO_NUMERIC_LIMITS[key]?.[0] ?? 0} max={HERO_NUMERIC_LIMITS[key]?.[1] ?? 30} value={(heroLayout as any)[key]} onChange={(e) => setHeroLayout((prev) => ({ ...prev, [key]: Number(e.target.value) }))} className="mt-1 w-full rounded-lg border border-[#D7E7E4] px-2.5 py-2 text-xs font-bold text-[#0A3340]" />
                   <span className="mt-1 block text-[9px] text-[#94A3B8]">{hint}</span>
                 </label>
               ))}
@@ -308,7 +310,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                 {([['stageMaxWidthPct','Hero width','90–100'],['cardWidthPct','Card width','28–50'],['vehicleScalePct','Vehicle scale','75–125'],['leftVehicleNudgePct','Left car outward','0–40'],['rightVehicleNudgePct','Right car outward','0–40'],['vehicleTopPct','Vehicle vertical','35–65'],['vehicleWidthPct','Vehicle stage width','32–48'],['backgroundScalePct','Background scale','100–130'],['backgroundPositionX','Background X','0–100'],['backgroundPositionY','Background Y','0–100'],['cardOffsetXPct','Card X offset','-10–10'],['cardOffsetYPct','Card Y offset','-10–10'],['cardBgOpacityPct','Card opacity','70–100'],['cardBlurPx','Card blur','0–40']] as const).map(([key,label,hint]) => <label key={key} className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">{label}</span><input type="number" value={Number((heroLayout as any)[key])} onChange={(e) => setHeroLayout((p) => ({ ...p, [key]: Number(e.target.value) }))} className="mt-1 w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-xs font-bold" /><span className="block text-[8px] text-[#94A3B8] mt-0.5">{hint}</span></label>)}
               </div>
               <div className="grid grid-cols-2 gap-2">
-                <label className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">Hero background URL</span><input value={heroLayout.backgroundUrl} onChange={(e) => setHeroLayout((p) => ({ ...p, backgroundUrl: e.target.value }))} className="mt-1 w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px]" /></label>
+                <label className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">Custom hero background (optional)</span><input value={heroLayout.backgroundUrl} onChange={(e) => setHeroLayout((p) => ({ ...p, backgroundUrl: e.target.value }))} placeholder="Leave empty for the KAYAD showroom" aria-describedby="hero-bg-hint" aria-invalid={heroLayout.backgroundUrl !== '' && !isSafeHeroImageUrl(heroLayout.backgroundUrl)} className="mt-1 w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px]" /><span id="hero-bg-hint" className={`mt-1 block text-[9px] ${heroLayout.backgroundUrl !== '' && !isSafeHeroImageUrl(heroLayout.backgroundUrl) ? 'text-[#B42318]' : 'text-[#64748B]'}`}>{heroLayout.backgroundUrl !== '' && !isSafeHeroImageUrl(heroLayout.backgroundUrl) ? 'Not allowed: use an app image path such as /hero/name.webp or an https image URL. It will be ignored when saved.' : 'Empty = the approved KAYAD showroom. Only app image paths or https URLs are accepted.'}</span></label>
                 <label className="rounded-lg border border-[#D7E7E4] bg-white p-2"><span className="block text-[9px] font-bold uppercase text-[#64748B]">Ticker fallback text</span><input value={heroLayout.tickerFallbackText} onChange={(e) => setHeroLayout((p) => ({ ...p, tickerFallbackText: e.target.value }))} className="mt-1 w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px]" /></label>
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -373,6 +375,25 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                   <input value={activeCopy.ctaLabel || ''} onChange={(e) => updateActiveCopy('ctaLabel', e.target.value)} placeholder="CTA label" className="rounded-lg border border-[#D7E7E4] px-2.5 py-2 text-xs" />
                   <input value={activeCopy.ctaLink || ''} onChange={(e) => updateActiveCopy('ctaLink', e.target.value)} placeholder="CTA link / route" className="rounded-lg border border-[#D7E7E4] px-2.5 py-2 text-xs" />
                 </div>
+                {(() => {
+                  // R-10: choose which of the listing's OWN gallery photos is used in the hero. The listing and its gallery order are never changed.
+                  const gallery = featuredVehicles.find((vehicle) => vehicle.id === heroCopyVehicleId)?.images || [];
+                  if (gallery.length < 2) return <p className="text-[10px] text-[#64748B]">Hero photo: this listing has one photo, so it is used as is.</p>;
+                  return (
+                    <fieldset className="rounded-xl border border-[#D7E7E4] bg-white p-2.5">
+                      <legend className="px-1 text-[9px] font-black uppercase tracking-wide text-[#64748B]">Hero photo (this vehicle)</legend>
+                      <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Hero photo for this vehicle">
+                        <button type="button" role="radio" aria-checked={!activeCopy.heroImage} onClick={() => updateActiveCopy('heroImage', '')} className={`min-h-[44px] rounded-lg border px-2 text-[10px] font-bold ${!activeCopy.heroImage ? 'border-[#176B87] bg-[#DDF4F0] text-[#0A3340]' : 'border-[#D7E7E4] text-[#475569]'}`}>Primary photo</button>
+                        {gallery.slice(0, 12).map((url, index) => (
+                          <button key={url} type="button" role="radio" aria-checked={activeCopy.heroImage === url} aria-label={`Use photo ${index + 1} as hero photo`} onClick={() => updateActiveCopy('heroImage', url)} className={`h-11 w-16 overflow-hidden rounded-lg border-2 ${activeCopy.heroImage === url ? 'border-[#176B87]' : 'border-transparent'}`}>
+                            <img src={url} alt="" className="h-full w-full object-contain bg-[#F6FAF9]" loading="lazy" />
+                          </button>
+                        ))}
+                      </div>
+                      <p className="mt-1 text-[10px] text-[#64748B]">Shown in full, never cropped. Falls back to the primary photo if the chosen photo is removed.</p>
+                    </fieldset>
+                  );
+                })()}
               </div>}
             </div>
 

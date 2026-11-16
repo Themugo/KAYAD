@@ -176,7 +176,7 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
         </div>
 
         {photoCount > 1 && (
-          <span className="absolute bottom-2 left-2 z-10 rounded-md bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white" data-testid="card-photo-count">{photoCount} photos</span>
+          <span className="absolute bottom-2 left-2 z-10 rounded-md bg-[#0A3340]/60 px-1.5 py-0.5 text-[10px] font-bold text-white" data-testid="card-photo-count">{photoCount} photos</span>
         )}
 
         {/* Action Controls (Save & Compare) */}

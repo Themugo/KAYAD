@@ -154,7 +154,7 @@ export default function AdminPrivateSellerApplications() {
         ))}
       </div>
 
-      {loadErrorView && <div className={`mb-4 flex items-start gap-2 rounded-xl border p-4 text-sm ${loadErrorView.maintenance ? 'border-amber-200 bg-amber-50 text-amber-950' : 'border-rose-200 bg-rose-50 text-rose-800'}`} role="alert">
+      {loadErrorView && <div className={`mb-4 flex items-start gap-2 rounded-xl border p-4 text-sm ${loadErrorView.maintenance ? 'border-teal-200 bg-teal-50 text-teal-900' : 'border-rose-200 bg-rose-50 text-rose-800'}`} role="alert">
         <AlertTriangle size={18} className="mt-0.5 shrink-0" aria-hidden="true" />
         <div className="min-w-0"><p className="font-bold">{loadErrorView.title}</p><p>{loadErrorView.message}</p>
           {hasCurrentFilterData && <p className="mt-1 font-semibold">Showing the last successfully loaded results for this filter; they may be out of date.</p>}

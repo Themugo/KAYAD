@@ -227,7 +227,7 @@ export default function PlatformFactory() {
               <div className="w-12 h-12 bg-[#0A3340] rounded-lg flex items-center justify-center">
                 <ShoppingCart size={24} className="text-white" />
               </div>
-              <span className="px-2 py-0.5 bg-[#EEF7F5] text-[#64748B] rounded text-xs">{template.category}</span>
+              <span className="px-2 py-0.5 bg-[#EEF7F5] text-[#4B5D6E] rounded text-xs">{template.category}</span>
             </div>
             <h3 className="font-semibold text-[#0A3340] mb-2">{template.name}</h3>
             <p className="text-sm text-[#64748B] mb-4">{template.description}</p>
@@ -459,7 +459,7 @@ export default function PlatformFactory() {
               <div className="w-10 h-10 bg-[#DDF4F0] rounded-lg flex items-center justify-center">
                 <Rocket size={20} className="text-[#176B87]" />
               </div>
-              <span className="px-2 py-0.5 bg-[#EEF7F5] text-[#64748B] rounded text-xs">{app.type}</span>
+              <span className="px-2 py-0.5 bg-[#EEF7F5] text-[#4B5D6E] rounded text-xs">{app.type}</span>
             </div>
             <h3 className="font-semibold text-[#0A3340] mb-1">{app.name}</h3>
             <div className="flex items-center gap-3 mb-3 text-sm text-[#64748B]">

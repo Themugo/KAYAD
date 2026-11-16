@@ -39,7 +39,7 @@ const checks = [
   ['focus ring uses theme mint', navCss.includes('outline:2px solid #8DE4DB')],
   ['navigation still derives child destinations from role-aware visibleChildren', navbar.includes('visibleChildren(item, signedIn, isRestrictedWorkspace)')],
   ['navigation configuration remains admin-controlled', navbar.includes('applyNavigationConfig(navigation)')],
-  ['seller CTA remains existing authenticated navigation action', navbar.includes("handleNavSelect('seller-platform')") && navbar.includes('id="cta-sell-car"')],
+  ['seller CTA remains existing authenticated navigation action', navbar.includes("'seller-platform')") && navbar.includes('id="cta-sell-car"')],
   ['saved vehicles remain in canonical Marketplace list and messages remain in workspace list', navbar.includes('visibleChildren(item, signedIn, isRestrictedWorkspace)') && navbar.includes("handleNavSelect('chat')") && !/Saved Vehicles<\/button>/.test(navbar)],
   ['notifications remain reachable in the drawer', navbar.includes("navigate('/notifications')")],
   ['role-specific dealer workspace remains role-gated and unified', navbar.includes("user?.role === 'dealer'") && navbar.includes('Dealer workspace')],

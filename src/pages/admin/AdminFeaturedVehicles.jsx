@@ -11,7 +11,7 @@ const FILTERS = [['all', 'All'], ['current', 'Current'], ['upcoming', 'Upcoming'
 const STATE_LABEL = { current: 'Current', upcoming: 'Upcoming', expired: 'Expired', inactive: 'Inactive' };
 const STATE_STYLE = {
   current: { background: '#E7F6EE', color: '#166534' }, upcoming: { background: '#E8F0F7', color: '#12576D' },
-  expired: { background: '#EEF4F3', color: '#475569' }, inactive: { background: '#FEF3C7', color: '#92400E' },
+  expired: { background: '#EEF4F3', color: '#475569' }, inactive: { background: '#FEF3C7', color: '#176B87' },
 };
 const apiMessage = (e, fallback) => e?.response?.data?.message || e?.message || fallback;
 const fmt = (iso) => (iso ? new Date(iso).toLocaleString('en-KE', { timeZone: TZ, day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }) : '-');

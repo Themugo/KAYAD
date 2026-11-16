@@ -24,13 +24,13 @@ export default function DealerApprovalDialog({ dealer, busy, error, onConfirm, o
   const name = dealer?.businessName || dealer?.name || dealer?.email || 'this dealer';
   return (
     <div role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget && !busy) onCancel(); }}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16 }}>
+      style={{ position: 'fixed', inset: 0, background: 'rgba(10,51,64,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16 }}>
       <div role="dialog" aria-modal="true" aria-labelledby="dealer-approve-title" className="card" style={{ width: 'min(520px, 100%)', padding: 24, maxHeight: '90vh', overflow: 'auto' }}>
         <h2 id="dealer-approve-title" style={{ fontSize: '1.15rem', marginBottom: 4 }}>Approve dealer</h2>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>{name}{dealer?.email ? ` · ${dealer.email}` : ''}</p>
 
         {blocked && (
-          <div role="status" style={{ border: '1px solid var(--warning, #d97706)', borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 13 }}>
+          <div role="status" style={{ border: '1px solid var(--warning, #176B87)', borderRadius: 10, padding: 12, marginBottom: 16, fontSize: 13 }}>
             <strong>Not ready to approve yet.</strong> The dealer still needs to:
             <ul style={{ margin: '8px 0 0 18px' }}>{eligibility.reasons.map((r) => <li key={r}>{r}</li>)}</ul>
           </div>

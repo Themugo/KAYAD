@@ -134,7 +134,7 @@ export default function AdminTrafficAnalytics() {
             <Stat label="Auction page views" value={n(t.auctionPageViews)} hint={`${n(t.auctionPageVisitors)} visitors`} />
           </div>
 
-          <Card title="Traffic trend" testId="trend"><LineChart data={report.daily} series={[{ key: 'visits', label: 'visits', color: '#0A7C8C' }, { key: 'uniqueVisitors', label: 'unique visitors', color: '#B45309' }]} /><Legend items={[['Visits', '#0A7C8C'], ['Unique visitors', '#B45309']]} /></Card>
+          <Card title="Traffic trend" testId="trend"><LineChart data={report.daily} series={[{ key: 'visits', label: 'visits', color: '#0A7C8C' }, { key: 'uniqueVisitors', label: 'unique visitors', color: '#176B87' }]} /><Legend items={[['Visits', '#0A7C8C'], ['Unique visitors', '#176B87']]} /></Card>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 16 }}>
             <Card title="Guest vs registered visitors" testId="guest-vs-registered"><LineChart data={report.daily} series={[{ key: 'guestVisitors', label: 'guest', color: '#64748B' }, { key: 'registeredVisitors', label: 'registered', color: '#0A7C8C' }]} /><Legend items={[['Guest', '#64748B'], ['Registered', '#0A7C8C']]} /></Card>
             <Card title="Registration trend" testId="registration-trend"><LineChart data={report.daily} series={[{ key: 'registrations', label: 'registration events', color: '#15803d' }]} /><p style={{ fontSize: 11, color: 'var(--text-muted)', margin: '4px 0 0' }}>Registration events recorded from visitor sessions.</p></Card>

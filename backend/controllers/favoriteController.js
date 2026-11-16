@@ -144,15 +144,16 @@ export const toggleFavorite = async (req, res) => {
 
   try {
     const { carId } = req.params;
-    const car = await Car.findById(carId).select("title price images brand deletedAt");
+    const car = await Car.findById(carId).select("title price images brand status deletedAt");
     if (!car) {
       return res.status(404).json({ success: false, message: "Car not found" });
     }
 
     const existing = await Favorite.findOne({ user: req.user.id, car: carId });
 
-    // 14.8: an existing favourite of a since-deleted listing can still be removed; a deleted listing cannot be newly favourited.
-    if (!existing && (car.deletedAt || car.deleted_at)) {
+    // Keep an existing hidden/deleted favorite removable, but only allow a
+    // new favorite when the listing is publicly visible (same rule as POST /:carId).
+    if (!existing && (!PUBLIC_CAR_STATUSES.has(car.status) || (car.deletedAt ?? car.deleted_at))) {
       return res.status(404).json({ success: false, message: "Car not found" });
     }
 

@@ -455,7 +455,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
 
       {/* Save bar: always reachable while editing a long page */}
       <div style={{ position: 'sticky', bottom: 0, zIndex: 5, display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', padding: '12px 16px', borderRadius: 14, background: 'var(--card, #fff)', border: '1px solid var(--border)', boxShadow: '0 -4px 18px rgba(10,51,64,0.08)' }}>
-        <span role="status" style={{ fontSize: 13, color: dirty ? 'var(--admin-status-warning, #b45309)' : 'var(--text-muted)' }}>
+        <span role="status" style={{ fontSize: 13, color: dirty ? 'var(--admin-status-warning, #176B87)' : 'var(--text-muted)' }}>
           {saving ? 'Saving…' : dirty ? 'You have unsaved branding changes.' : 'All branding changes are saved.'}
         </span>
         <button

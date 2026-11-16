@@ -105,7 +105,7 @@ const ComplianceCheckItem: React.FC<{
             </Badge>
           )}
           {check.expiryDate && (
-            <Badge variant="neutral" size="sm" className="text-[10px] bg-[#EEF7F5] text-[#64748B] border-[#D7E7E4]">
+            <Badge variant="neutral" size="sm" className="text-[10px] bg-[#EEF7F5] text-[#4B5D6E] border-[#D7E7E4]">
               <Clock className="w-3 h-3 mr-0.5" />
               Expires: {new Date(check.expiryDate).toLocaleDateString()}
             </Badge>

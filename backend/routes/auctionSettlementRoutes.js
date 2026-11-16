@@ -42,16 +42,31 @@ router.post("/:id/outcome/payment", protect, validateObjectId, asyncHandler(asyn
   if (String(outcome.winnerUserId) !== String(req.user.id)) return res.status(403).json({ success: false, message: "Only the auction winner may initiate winner payment" });
   if (outcome.settlementMode !== "direct") return res.status(409).json({ success: false, code: "AUCTION_ESCROW_SELECTED", message: "This auction uses escrow settlement. Use the configured custody funding flow." });
   if (outcome.status !== "payment_due") return res.status(409).json({ success: false, message: "Auction is not awaiting direct winner payment" });
-  const phone = String(req.body?.phone || "").trim();
-  if (!phone) return res.status(400).json({ success: false, message: "Phone is required" });
+  const winner = await findById("users", req.user.id);
+  const verifiedPhone = String(winner?.phone || "").trim();
+  if (!verifiedPhone || winner?.phoneVerified !== true) {
+    return res.status(400).json({ success: false, code: "VERIFIED_PHONE_REQUIRED", message: "A verified phone number on your KAYAD profile is required for winner payment" });
+  }
+  const suppliedPhone = String(req.body?.phone || "").trim();
+  if (suppliedPhone && suppliedPhone !== verifiedPhone) {
+    return res.status(400).json({ success: false, code: "PROFILE_PHONE_MISMATCH", message: "Winner payment must use the verified phone number on your KAYAD profile" });
+  }
   const result = await initiatePayment({
     userId: req.user.id,
     carId: outcome.carId,
     type: "auction_win",
     amount: Number(outcome.paymentDueAmount ?? outcome.winningAmount),
-    phone,
+    phone: verifiedPhone,
     metadata: { auctionOutcomeId: outcome.id },
   });
+  if (!result.success) {
+    return res.status(409).json({
+      success: false,
+      code: result.payment?.status === "pending" ? "WINNER_PAYMENT_IN_PROGRESS" : "WINNER_PAYMENT_NOT_STARTED",
+      message: result.message || "Winner payment could not be initiated",
+      payment: result.payment ? { id: result.payment.id, status: result.payment.status, amount: result.payment.amount } : undefined,
+    });
+  }
   res.json({ success: true, ...result });
 }));
 

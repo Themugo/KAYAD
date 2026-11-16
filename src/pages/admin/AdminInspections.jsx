@@ -5,7 +5,7 @@ import { UserCheck, ClipboardCheck, RefreshCw, AlertCircle, MapPin, CalendarCloc
 
 const STATUS_META = {
   requested: { label: 'Requested', bg: 'rgba(217,119,6,0.10)', color: '#a16207' },
-  assigned: { label: 'Assigned', bg: 'rgba(37,99,235,0.10)', color: '#1d4ed8' },
+  assigned: { label: 'Assigned', bg: 'rgba(23,107,135,0.10)', color: '#1d4ed8' },
   in_progress: { label: 'In Progress', bg: 'rgba(13,148,136,0.10)', color: '#0f766e' },
   completed: { label: 'Completed', bg: 'rgba(22,163,74,0.10)', color: '#15803d' },
   cancelled: { label: 'Cancelled', bg: 'rgba(220,38,38,0.10)', color: '#b91c1c' },

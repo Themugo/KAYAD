@@ -26,7 +26,7 @@ const checks = [
   ],
   [
     'backend enforces dealer business name',
-    /role === "dealer" && !businessName/.test(read('backend/controllers/authController.js')),
+    /if \(role === "dealer"\) \{[\s\S]{0,180}validateCompanyName\(businessName/.test(read('backend/controllers/authController.js')),
   ],
   [
     'backend enforces dealer location',

@@ -292,7 +292,7 @@ const CompletedAuctionCard: React.FC<{ auction: Auction }> = ({ auction }) => (
       <img src={auction.vehicle.image} alt={auction.vehicle.title} className="w-24 h-24 rounded-lg object-cover flex-shrink-0" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <Badge className="bg-[#EEF7F5] text-[#64748B] text-xs">
+          <Badge className="bg-[#EEF7F5] text-[#4B5D6E] text-xs">
             <CheckCircle2 className="w-3 h-3 mr-1" /> Completed
           </Badge>
           {auction.endsAt && <span className="text-xs text-[#64748B]">{formatDate(auction.endsAt)}</span>}

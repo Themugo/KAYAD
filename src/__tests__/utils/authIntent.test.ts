@@ -71,4 +71,13 @@ describe('getPostAuthPath', () => {
     expect(getPostAuthPath(u({ role: 'user', emailVerified: true }), '/')).toBe('/dashboard');
     expect(getPostAuthPath(u({ role: 'user', emailVerified: false }), '/')).toBe('/login?verify=required');
   });
+  it('never sends a non-dealer account to the dealer-only /dealer route (regression: dashboard flashed then collapsed)', () => {
+    for (const status of ['approved', 'pending', undefined]) {
+      expect(getPostAuthPath(u({ role: 'individual_seller', status, emailVerified: true }), '/')).toBe('/dashboard');
+      expect(getPostAuthPath(u({ role: 'user', status, emailVerified: true }), '/')).toBe('/dashboard');
+      expect(getPostAuthPath(u({ role: 'broker', status, emailVerified: true }), '/')).not.toBe('/dealer');
+    }
+    expect(getPostAuthPath(u({ role: 'dealer', status: 'approved' }), '/')).toBe('/dealer');
+    expect(getPostAuthPath(u({ role: 'dealer', status: 'pending' }), '/')).toBe('/dealer/onboarding');
+  });
 });

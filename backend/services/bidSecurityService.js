@@ -6,6 +6,8 @@ import { findById, findOne, create, update } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
 import { createSecurityPayment, findSecurityPaymentByCheckout, updateSecurityPayment } from "./securityPaymentStore.js";
 
+const holdTypeForTransaction = (transaction) => transaction?.metadata?.auctionSecurityHoldType || "commitment";
+
 export async function initiateBidSecurity({ auctionId, userId, phone, amount, registrationId, holdId = null, holdType = "commitment" }) {
   if (holdId) {
     const existingHold = await findById("auction_security_holds", holdId);
@@ -17,7 +19,7 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount, re
   const setup = await findOne("auction_setups", { car_id: auctionId });
   if (!auction || !setup || setup.publication_status !== "published") return { success: false, message: "Auction is not published" };
   const setupConfig = setup.config || {};
-  if (setupConfig.startsAt && Date.parse(setupConfig.startsAt) <= Date.now()) return { success: false, message: "Auction registration commitment window has closed" };
+  if (holdType !== "high_value_deposit" && setupConfig.startsAt && Date.parse(setupConfig.startsAt) <= Date.now()) return { success: false, message: "Auction registration commitment window has closed" };
 
   // No silent default: the amount is the registration/policy amount or the payment is refused.
   const securityAmount = Number(amount || auction.bidSecurityAmount);
@@ -44,7 +46,8 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount, re
   let checkoutID;
   const mode = "mpesa";
   try {
-    const stkRes = await stkPush(phone, securityAmount, { ...(dealerCollection?.overrides || {}), accountReference, transactionDesc: "Bid commitment" });
+    const transactionDesc = holdType === "high_value_deposit" ? "Auction security deposit" : "Bid commitment";
+    const stkRes = await stkPush(phone, securityAmount, { ...(dealerCollection?.overrides || {}), accountReference, transactionDesc });
     checkoutID = stkRes?.CheckoutRequestID;
     if (!checkoutID) throw new Error("M-Pesa did not return a checkout request ID");
   } catch (err) {
@@ -65,9 +68,11 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount, re
     phone,
     checkoutRequestId: checkoutID,
     metadata: {
-      description: recipient === "platform"
-        ? `Bid commitment for auction ${auctionId} — held by KAYAD`
-        : custody === "dealer" ? `Bid commitment for auction ${auctionId} — paid directly to the organizer's verified account` : `Bid commitment for auction ${auctionId} — collected by KAYAD (organizer account ${destination || "n/a"} recorded)`,
+      description: holdType === "high_value_deposit"
+        ? `High-value bid security deposit for auction ${auctionId} — held by KAYAD`
+        : recipient === "platform"
+          ? `Bid commitment for auction ${auctionId} — held by KAYAD`
+          : custody === "dealer" ? `Bid commitment for auction ${auctionId} — paid directly to the organizer's verified account` : `Bid commitment for auction ${auctionId} — collected by KAYAD (organizer account ${destination || "n/a"} recorded)`,
       accountReference, custody, collectedBy: custody === "dealer" ? `dealer_${dealerCollection.kind}_${dealerCollection.shortcode}` : "kayad_shortcode",
       reference: `SEC-${auctionId}-${Date.now()}`,
       auctionRegistrationId: registrationId || null, auctionId, recipient, auctionSecurityHoldId: holdId || null, auctionSecurityHoldType: holdType,
@@ -93,12 +98,27 @@ export async function handleBidSecurityCallback({ checkoutRequestID, resultCode,
 
   if (providerAmount !== null && providerAmount !== undefined && Number(providerAmount) !== Number(transaction.amount)) {
     await updateSecurityPayment(ref, { status: "failed", metadata: { ...(transaction.metadata || {}), amountMismatch: { expected: Number(transaction.amount), received: Number(providerAmount) } } });
+    const mismatchedHoldId = transaction.metadata?.auctionSecurityHoldId || null;
+    if (mismatchedHoldId) {
+      await update("auction_security_holds", mismatchedHoldId, { status: "failed" });
+    }
+    if (transaction.type === "bid_commitment") {
+      const { finalizeCommitmentRegistration } = await import("./auctionRegistration.service.js");
+      await finalizeCommitmentRegistration({ checkoutRequestID, success: false, receipt: null });
+    }
     return { success: false, message: "Payment amount mismatch" };
   }
 
   // Idempotent: a duplicate/retry callback for an already-finalized
   // transaction is acknowledged without re-processing.
   if (transaction.status === "success" || transaction.status === "failed") {
+    // A previously confirmed commitment may have settled its hold but failed
+    // during the registration write. Re-run the idempotent activation check
+    // on provider retries instead of permanently stranding the bidder pass.
+    if (transaction.status === "success" && transaction.type === "bid_commitment") {
+      const { finalizeCommitmentRegistration } = await import("./auctionRegistration.service.js");
+      await finalizeCommitmentRegistration({ checkoutRequestID, success: true, receipt: mpesaReceipt || transaction.mpesaReceipt || null });
+    }
     return { success: transaction.status === "success", transaction, duplicate: true };
   }
 
@@ -120,6 +140,25 @@ export async function handleBidSecurityCallback({ checkoutRequestID, resultCode,
     });
     if (holdError) throw holdError;
     await updateSecurityPayment(ref, { status: resultCode === 0 ? "success" : "failed", mpesaReceipt: mpesaReceipt || null });
+    if (transaction.type === "bid_commitment") {
+      const { finalizeCommitmentRegistration } = await import("./auctionRegistration.service.js");
+      await finalizeCommitmentRegistration({
+        checkoutRequestID,
+        success: resultCode === 0,
+        receipt: mpesaReceipt || null,
+      });
+    }
+    if (resultCode === 0) {
+      const highValue = transaction.metadata?.auctionSecurityHoldType === "high_value_deposit";
+      await sendNotification({
+        userId: transaction.user,
+        title: highValue ? "High-value deposit confirmed" : "Auction commitment confirmed",
+        message: highValue
+          ? `KES ${Number(transaction.amount).toLocaleString("en-KE")} high-value security deposit confirmed for this auction.`
+          : "Your auction commitment payment is confirmed. Your bidder pass has been updated against current eligibility requirements.",
+        type: "bid_security",
+      });
+    }
     return { success: resultCode === 0, transaction: await findById(ref.table, transaction.id), hold: settledHold, duplicate: false };
   }
 
@@ -156,8 +195,10 @@ export async function handleBidSecurityCallback({ checkoutRequestID, resultCode,
 
   await sendNotification({
     userId: transaction.user,
-    title: "Bid Security Confirmed",
-    message: `KES ${Number(transaction.amount).toLocaleString()} secured. You can now place bids.`,
+    title: holdTypeForTransaction(transaction) === "high_value_deposit" ? "High-value deposit confirmed" : "Bid security confirmed",
+    message: holdTypeForTransaction(transaction) === "high_value_deposit"
+      ? `KES ${Number(transaction.amount).toLocaleString()} high-value security deposit confirmed for this auction.`
+      : `KES ${Number(transaction.amount).toLocaleString()} commitment secured. Your bidder pass is being updated.`,
     type: "bid_security",
   });
 

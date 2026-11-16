@@ -48,7 +48,7 @@ const STATUS_META: Record<string, { label: string; tone: string }> = {
   waiting_on_internal: { label: 'With KAYAD', tone: 'bg-[#EEF7F5] text-[#176B87] border-[#D7E7E4]' },
   escalated: { label: 'Escalated', tone: 'bg-rose-50 text-rose-700 border-rose-100' },
   resolved: { label: 'Resolved', tone: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
-  closed: { label: 'Closed', tone: 'bg-[#EEF7F5] text-[#64748B] border-[#D7E7E4]' },
+  closed: { label: 'Closed', tone: 'bg-[#EEF7F5] text-[#4B5D6E] border-[#D7E7E4]' },
 };
 
 const HELP_PATHS = [
@@ -352,7 +352,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
   const activeCases = useMemo(() => visibleTickets.filter(ticket => !['resolved', 'closed'].includes(ticket.status)), [visibleTickets]);
   const pastCases = useMemo(() => visibleTickets.filter(ticket => ['resolved', 'closed'].includes(ticket.status)), [visibleTickets]);
   const renderTicket = (ticket: SupportCaseSummary) => {
-    const status = STATUS_META[ticket.status] || { label: ticket.status, tone: 'bg-[#EEF7F5] text-[#64748B] border-[#D7E7E4]' };
+    const status = STATUS_META[ticket.status] || { label: ticket.status, tone: 'bg-[#EEF7F5] text-[#4B5D6E] border-[#D7E7E4]' };
     return (
       <button key={ticket.id} type="button" onClick={() => void loadTicket(ticket.id)} className={`w-full text-left rounded-2xl border p-4 hover:border-[#176B87]/30 hover:shadow-sm transition-all ${selectedTicketId === ticket.id && selectedTicketOwnerId === userId ? 'border-[#176B87]/40 bg-[#F6FAF9]' : 'border-[#D7E7E4] bg-white'}`}>
         <div className="flex items-start justify-between gap-3">
@@ -589,7 +589,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
                   <div className="pt-4 border-t border-[#D7E7E4]">
                     <p className="text-[10px] font-extrabold uppercase tracking-wider text-[#94A3B8]">How was the resolution?</p>
                     <div className="mt-3 flex gap-2">
-                      {[1, 2, 3, 4, 5].map(value => <button key={value} type="button" aria-label={`Rate support resolution ${value} out of 5`} aria-pressed={rating === value} onClick={() => setRating(value)} className={`w-9 h-9 rounded-xl text-xs font-extrabold ${rating === value ? 'bg-[#176B87] text-white' : 'bg-[#EEF7F5] text-[#64748B] hover:bg-[#EEF7F5] hover:text-[#176B87]'}`}>{value}</button>)}
+                      {[1, 2, 3, 4, 5].map(value => <button key={value} type="button" aria-label={`Rate support resolution ${value} out of 5`} aria-pressed={rating === value} onClick={() => setRating(value)} className={`w-9 h-9 rounded-xl text-xs font-extrabold ${rating === value ? 'bg-[#176B87] text-white' : 'bg-[#EEF7F5] text-[#4B5D6E] hover:bg-[#EEF7F5] hover:text-[#176B87]'}`}>{value}</button>)}
                     </div>
                     <textarea aria-label="Additional feedback about the resolution (optional)" value={ratingNote} onChange={e => setRatingNote(e.target.value)} rows={3} placeholder="Optional feedback" className="mt-3 w-full rounded-xl border border-[#D7E7E4] px-3 py-2.5 text-xs outline-none focus:border-[#176B87]" />
                     <Button variant="outline" size="sm" className="mt-2 w-full" disabled={!rating || ratingSending} onClick={() => void submitRating()}>{ratingSending ? 'Saving…' : 'Save feedback'}</Button>

@@ -134,8 +134,8 @@ export const AdminSupportWorkspace: React.FC = () => {
         ))}
       </div>
       {metrics && <p className="text-[11px] text-[#64748B]">Last {metrics.windowDays} days · {metrics.total} cases · {metrics.slaConfigured ? `Within first-reply target: ${metrics.firstResponseWithinTarget ?? 'n/a'}` : 'No response targets are configured, so no target compliance is reported.'}</p>}
-      {metricsError && <p className="text-xs text-amber-800" role="status">{metricsError}</p>}
-      {teamError && <p className="text-xs text-amber-800" role="status">{teamError}</p>}
+      {metricsError && <p className="text-xs text-teal-800" role="status">{metricsError}</p>}
+      {teamError && <p className="text-xs text-teal-800" role="status">{teamError}</p>}
 
       <Card className="p-4">
         <div className="flex flex-wrap gap-2 items-end">

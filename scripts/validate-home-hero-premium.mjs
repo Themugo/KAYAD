@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 
 const file = 'src/features/VehicleMarketplace/components/VehicleMarketplace.tsx';
+const heroVehicleSource = fs.readFileSync('src/features/VehicleMarketplace/components/HeroDesktopVehicle.tsx', 'utf8');
 const source = fs.readFileSync(file, 'utf8');
 
 const checks = [
@@ -9,11 +10,11 @@ const checks = [
   ['Drive Your Dream headline remains canonical', source.includes('Drive Your Dream') && source.includes('Today')],
   ['desktop featured vehicle subjects remain data-driven', source.includes('heroImageForVehicle(heroLeftVehicle)') && source.includes('heroImageForVehicle(heroRightVehicle)')],
   ['approved cutout showcase assets are configured', source.includes('kayad-land-cruiser-cutout.png') && source.includes('kayad-mercedes-gle-cutout.png')],
-  ['vehicle info cards are contained within vehicle stages', source.includes('overflow-hidden') && source.includes('max-w-[calc(100%-2rem)]')],
+  ['vehicle info cards are contained within vehicle stages', (source + heroVehicleSource).includes('overflow-hidden') && heroVehicleSource.includes('max-w-[calc(100%-2rem)]')],
   ['center card remains configurable', source.includes('cardScalePct') && source.includes('cardWidthPct')],
   ['admin-controlled vehicle positioning remains wired', source.includes('leftVehicleNudgePct') && source.includes('rightVehicleNudgePct')],
   ['existing carousel controls remain wired', source.includes('Previous featured vehicles') && source.includes('Next featured vehicles')],
-  ['mobile hero has its own responsive composition', source.includes('KAYAD mobile hero') && source.includes('grid grid-cols-2 items-stretch gap-1') && source.includes('hero-pair-image-stage') && !source.includes('min-h-[620px]')],
+  ['mobile hero has its own responsive composition', source.includes('KAYAD mobile hero') && source.includes('grid items-stretch gap-1') && source.includes('hero-pair-image-stage') && !source.includes('min-h-[620px]')],
   ['mobile hero preserves the canonical headline and CTAs', source.includes('Explore Vehicles') && source.includes('How It Works')],
   ['existing search bridge remains below hero', source.includes('2. SEARCH BRIDGE') && source.includes('Hero maximum price filter')],
 ];

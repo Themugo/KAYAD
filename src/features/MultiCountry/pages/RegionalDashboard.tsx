@@ -92,7 +92,7 @@ function Stat({ icon, label, value }: { icon: ReactNode; label: string; value: n
 
 function CountryCard({ country, selected, onSelect, compact = false }: { country: Country; selected: boolean; onSelect: () => void; compact?: boolean }) {
   return <button onClick={onSelect} className={`w-full rounded-xl border p-4 text-left transition ${selected ? 'border-[#0A3340] shadow-sm' : 'border-[#D7E7E4] hover:border-[#BDE5DE]'} bg-white`}>
-    <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-3"><span className={compact ? 'text-2xl' : 'text-3xl'}>{country.flagEmoji || '🌍'}</span><div><div className="font-semibold text-[#0A3340]">{country.countryName}</div><div className="text-xs text-[#64748B]">{country.countryCode} · {country.configuration?.currencyCode || 'Currency not configured'}</div></div></div><span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${country.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-[#EEF7F5] text-[#64748B]'}`}>{country.status}</span></div>
+    <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-3"><span className={compact ? 'text-2xl' : 'text-3xl'}>{country.flagEmoji || '🌍'}</span><div><div className="font-semibold text-[#0A3340]">{country.countryName}</div><div className="text-xs text-[#64748B]">{country.countryCode} · {country.configuration?.currencyCode || 'Currency not configured'}</div></div></div><span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${country.status === 'active' ? 'bg-emerald-50 text-emerald-700' : 'bg-[#EEF7F5] text-[#4B5D6E]'}`}>{country.status}</span></div>
   </button>;
 }
 

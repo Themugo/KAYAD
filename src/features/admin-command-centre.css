@@ -311,7 +311,7 @@
 [data-testid="admin-command-centre"] .kayad-command-action-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:rgba(19,184,166,.12);color:var(--admin-brand);transition:background-color .15s ease,color .15s ease}
 [data-testid="admin-command-centre"] .kayad-command-action-label{min-width:0;overflow-wrap:anywhere}
 [data-testid="admin-command-centre"] .kayad-command-action-chevron{color:var(--admin-muted-content);justify-self:end}
-[data-testid="admin-command-centre"] .kayad-command-action-link.is-staff .kayad-command-action-icon{background:rgba(37,99,235,.10);color:#2563eb}
+[data-testid="admin-command-centre"] .kayad-command-action-link.is-staff .kayad-command-action-icon{background:rgba(23,107,135,.10);color:#176B87}
 [data-testid="admin-command-centre"] .kayad-command-action-link.is-approval .kayad-command-action-icon{background:rgba(5,150,105,.12);color:#047857}
 [data-testid="admin-command-centre"] .kayad-command-action-link.is-vehicles .kayad-command-action-icon{background:rgba(8,145,178,.12);color:#0e7490}
 [data-testid="admin-command-centre"] .kayad-command-action-link.is-reports .kayad-command-action-icon{background:rgba(124,58,237,.10);color:#6d28d9}
@@ -319,12 +319,12 @@
 [data-testid="admin-command-centre"] .kayad-command-actions .kayad-command-actions-grid a.kayad-command-action-link:hover .kayad-command-action-icon{background:rgba(19,184,166,.17)}
 [data-testid="admin-command-centre"] .kayad-command-actions .kayad-command-actions-grid a.kayad-command-action-link:focus-visible{outline:3px solid var(--admin-accent-bright);outline-offset:3px}
 [data-testid="admin-command-centre"] .kayad-command-kpi-icon{transition:background-color .15s ease,color .15s ease}
-[data-testid="admin-command-centre"] .kayad-command-kpi-icon.tone-blue{background:rgba(37,99,235,.10);color:#2563eb}
+[data-testid="admin-command-centre"] .kayad-command-kpi-icon.tone-blue{background:rgba(23,107,135,.10);color:#176B87}
 [data-testid="admin-command-centre"] .kayad-command-kpi-icon.tone-teal{background:rgba(19,184,166,.14);color:#0f766e}
 [data-testid="admin-command-centre"] .kayad-command-kpi-icon.tone-violet{background:rgba(124,58,237,.10);color:#6d28d9}
 [data-testid="admin-command-centre"] .kayad-command-kpi-icon.tone-cyan{background:rgba(8,145,178,.11);color:#0e7490}
 [data-testid="admin-command-centre"] .kayad-command-kpi-icon.tone-green{background:rgba(5,150,105,.12);color:#047857}
-[data-testid="admin-command-centre"] .kayad-command-kpi-icon.tone-amber{background:rgba(217,119,6,.12);color:#b45309}
+[data-testid="admin-command-centre"] .kayad-command-kpi-icon.tone-amber{background:rgba(217,119,6,.12);color:#176B87}
 [data-testid="admin-command-centre"] .kayad-command-alert.is-warning{border-color:#f1d6a8;background:#fffaf0;color:#75440b}
 [data-testid="admin-command-centre"] .kayad-command-alert.is-warning>svg{color:#b7791f}
 [data-testid="admin-command-centre"] .kayad-command-alert.is-error{border-color:#f2c7c4;background:#fff7f6;color:#8a2d28}

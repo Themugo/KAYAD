@@ -262,7 +262,7 @@ export const AdManagerPanel: React.FC<AdManagerPanelProps> = ({ onClose, embedde
           {error && <div role="alert" className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 font-semibold flex items-center justify-between gap-3">
             <span>{error}</span><button type="button" onClick={() => void loadSlots()} className="underline whitespace-nowrap">Retry</button>
           </div>}
-          {statsError && <div role="status" className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-900">Campaign settings loaded, but delivery statistics are unavailable: {statsError}</div>}
+          {statsError && <div role="status" className="p-3 bg-teal-50 border border-teal-200 rounded-xl text-xs text-teal-900">Campaign settings loaded, but delivery statistics are unavailable: {statsError}</div>}
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {metrics.map((metric) => <div key={metric.label} className="rounded-xl bg-[#F6FAF9] border border-[#D7E7E4] p-3">
@@ -296,7 +296,7 @@ export const AdManagerPanel: React.FC<AdManagerPanelProps> = ({ onClose, embedde
                   </select>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => void handleToggleVisible(slot)} disabled={savingId === slot.id} aria-label={slot.isVisible ? 'Hide ad' : 'Show ad'} className={`p-2 rounded-lg disabled:opacity-50 ${slot.isVisible ? 'text-emerald-700 bg-emerald-50' : 'text-[#64748B] bg-[#EEF7F5]'}`}>{slot.isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}</button>
+                  <button type="button" onClick={() => void handleToggleVisible(slot)} disabled={savingId === slot.id} aria-label={slot.isVisible ? 'Hide ad' : 'Show ad'} className={`p-2 rounded-lg disabled:opacity-50 ${slot.isVisible ? 'text-emerald-700 bg-emerald-50' : 'text-[#4B5D6E] bg-[#EEF7F5]'}`}>{slot.isVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}</button>
                   <button type="button" onClick={() => void handleDelete(slot)} disabled={savingId === slot.id} aria-label="Delete ad" className="p-2 rounded-lg text-rose-600 hover:bg-rose-50 disabled:opacity-50"><Trash2 className="w-4 h-4" /></button>
                 </div>
               </div>

@@ -179,7 +179,7 @@ export default function AdminSiteDesigns() {
         <h2 style={{ margin: 0 }}>Site Designs</h2>
         <p style={{ margin: '4px 0 0', fontSize: 13, color: 'var(--text-muted)' }}>Create and preview designs, then publish one to change the public site. Supported: brand text and logo, colours, fonts, hero background and overlay, and the announcement strip. Page sections and header layouts are not configurable here.</p>
         <p data-testid="published-summary" style={{ margin: '8px 0 0', fontWeight: 700 }}>{summary}</p>
-        {published && !published.liveMatchesPublication && <p role="note" data-testid="drift-note" style={{ margin: '4px 0 0', fontSize: 13, color: '#92400E' }}>The live settings were changed outside this editor (for example in Settings) after the last publish, so the live site no longer matches "{published.designName}".</p>}
+        {published && !published.liveMatchesPublication && <p role="note" data-testid="drift-note" style={{ margin: '4px 0 0', fontSize: 13, color: '#176B87' }}>The live settings were changed outside this editor (for example in Settings) after the last publish, so the live site no longer matches "{published.designName}".</p>}
       </div>
       {notice && <div role={notice.kind === 'error' ? 'alert' : 'status'} data-testid="notice" style={{ padding: '10px 14px', borderRadius: 8, fontSize: 13, background: notice.kind === 'error' ? 'var(--admin-status-danger-bg)' : 'var(--admin-status-success-bg)' }}>{notice.text}</div>}
 
@@ -192,7 +192,7 @@ export default function AdminSiteDesigns() {
               <li key={d.id}><button type="button" onClick={() => (dirty && selectedId !== d.id ? setDialog({ type: 'discard', next: d.id }) : open(d.id))} aria-current={selectedId === d.id} style={{ width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 8, border: `1px solid ${selectedId === d.id ? 'var(--brand)' : 'var(--border)'}`, background: 'var(--card)', cursor: 'pointer' }}>
                 <strong>{d.name}</strong>
                 {d.isPublished && <span data-testid={`badge-live-${d.name}`} style={{ marginLeft: 6, fontSize: 11, color: '#15803d', fontWeight: 800 }}>LIVE</span>}
-                {d.hasUnpublishedChanges && <span style={{ marginLeft: 6, fontSize: 11, color: '#92400E' }}>unpublished edits</span>}
+                {d.hasUnpublishedChanges && <span style={{ marginLeft: 6, fontSize: 11, color: '#176B87' }}>unpublished edits</span>}
                 <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Updated {fmt(d.updatedAt)}</div></button></li>
             ))}
           </ul>

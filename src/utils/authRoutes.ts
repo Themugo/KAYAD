@@ -67,12 +67,14 @@ export function getPostAuthPath(user: User | undefined, fallback = '/'): string 
   if (hasNext) return next;
   if (user?.role === 'ghost_checker') return '/inspector';
   if (isStaffRole(user?.role)) return '/admin';
-  if (isSellerRole(user?.role)) {
-    if (user?.status === 'approved') return '/dealer';
-    if (user?.role === 'dealer') return '/dealer/onboarding';
-    return '/?nav=seller-platform';
+  // /dealer is a dealer-only route (RequireDealer). Only a dealer account may be sent there; sending any other role would
+  // bounce it straight back to the homepage right after sign-in.
+  if (user?.role === 'dealer') {
+    return user?.status === 'approved' ? '/dealer' : '/dealer/onboarding';
   }
-  if (user?.role === 'user') {
+  if (user?.role === 'broker') return '/?nav=seller-platform';
+  // One personal account: "user" and the legacy "individual_seller" land on the same dashboard, behind the same email check.
+  if (user?.role === 'user' || user?.role === 'individual_seller') {
     if (!user?.emailVerified) return '/login?verify=required';
     return '/dashboard';
   }

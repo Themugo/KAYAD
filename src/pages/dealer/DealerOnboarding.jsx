@@ -181,14 +181,14 @@ export default function DealerOnboarding() {
     return (
       <div className="page">
         <div className="container" style={{ paddingTop: 60, paddingBottom: 60, maxWidth: 600, textAlign: 'center' }} role="status">
-          <h2>{approved ? 'Your dealer account is approved' : 'Submitted for review'}</h2>
+          <h2>{approved ? 'Your dealer account is approved' : 'Business verification submitted'}</h2>
           <p style={{ color: 'rgba(10, 51, 64, 0.72)', marginBottom: 24 }}>
             {approved
               ? 'You can now list vehicles and manage your inventory.'
-              : 'Thanks. KAYAD is reviewing your details and documents. You cannot list vehicles until your dealer account is approved, and we will email you the outcome. If we need anything else, you will find it here.'}
+              : 'Thanks. Your documents are being reviewed. You can publish and manage your own vehicle listings now; auction, payout and other sensitive dealer features remain restricted until verification is approved. We will email you when the review is complete.'}
           </p>
-          <button onClick={() => navigate(approved ? '/dealer' : '/')} className="btn btn-gold">
-            {approved ? 'Go to dealer dashboard' : 'Browse KAYAD while you wait'}
+          <button onClick={() => navigate('/dealer')} className="btn btn-gold">
+            Go to dealer dashboard
           </button>
         </div>
       </div>

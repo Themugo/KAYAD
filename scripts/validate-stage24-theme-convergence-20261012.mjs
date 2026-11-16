@@ -23,7 +23,7 @@ const checks = [
   ['reduced-motion preference included', read('src/styles/kayad-theme-convergence.css').includes('prefers-reduced-motion: reduce')],
   ['role and status color behavior not globally overridden', !read('src/styles/kayad-theme-convergence.css').includes('!important') || read('src/styles/kayad-theme-convergence.css').includes('prefers-reduced-motion')],
   ['homepage full-bleed hero composition remains unflattened', !read('src/styles/kayad-theme-convergence.css').includes('.kayad-public-shell[data-kayad-surface="marketplace"] .kayad-brand-hero')],
-  ['theme audit created before change', fs.existsSync(path.join(root, 'KAYAD_STAGE24_THEME_SWEEP_AUDIT_20261012.md'))],
+  ['theme audit created before change', fs.existsSync(path.join(root, 'KAYAD_STAGE24_THEME_SWEEP_AUDIT_20261012.md')) || fs.existsSync(path.join(root, 'docs', 'history', 'STAGE24_THEME_SWEEP_AUDIT_20261012.md'))],
 ];
 let failed = 0;
 for (const [name, pass] of checks) {

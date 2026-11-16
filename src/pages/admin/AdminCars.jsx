@@ -4,6 +4,7 @@ import { adminAPI, formatKES } from '../../api/api';
 import { useToast } from '../../context/ToastContext';
 import { classifyAdminFailure } from '../../utils/adminLoadFailure';
 import { timeAgo } from '../../utils/helpers';
+import { clearCarsCache } from '../../services/vehicleApi';
 
 const STATUS_BADGE = {
   available: 'badge-green',
@@ -37,7 +38,7 @@ export const isListingArray = (value) => Array.isArray(value) && value.every((it
   (typeof item._id === 'string' || typeof item.id === 'string')
 );
 
-function CarRow({ car: c, index, onDelete, onSelect, onDecide, canDecide, actionId }) {
+function CarRow({ car: c, index, onSelect, onDecide, canDecide, actionId }) {
   const priceValue = c.price ?? c.startingPrice;
   const price = priceValue === null || priceValue === undefined || priceValue === '' ? NaN : Number(priceValue);
   const vehicle = [c.year, Number.isFinite(Number(c.mileage)) && c.mileage !== null && c.mileage !== undefined && c.mileage !== '' ? `${Number(c.mileage).toLocaleString()} km` : null].filter(Boolean).join(' · ');
@@ -66,54 +67,19 @@ function CarRow({ car: c, index, onDelete, onSelect, onDecide, canDecide, action
             {actionId === `${id}-mod` ? 'Working…' : 'Hide'}
           </button>
         )}
-        <button type="button" className="btn btn-sm btn-danger" aria-label={`Remove listing ${title}`} disabled={actionId === `${id}-del`} onClick={(e) => { e.stopPropagation(); onDelete(c); }}>
-          {actionId === `${id}-del` ? 'Removing…' : 'Remove'}
-        </button>
       </td>
     </tr>
   );
 }
 
-/** Owner switch for how new listings go live. Reads/writes the same onboarding policy as Settings > Onboarding. */
+/** New seller listings self-publish; this page remains for safety moderation and legacy pending records. */
 function ListingPublishPolicy() {
-  const { toast } = useToast();
-  const [state, setState] = useState({ status: 'loading' });
-  const [saving, setSaving] = useState(false);
-  useEffect(() => {
-    let alive = true;
-    Promise.resolve().then(() => adminAPI.getOnboardingSettings()).then((res) => {
-      if (!alive) return;
-      if (!res || !res.policy || typeof res.policy !== 'object') { setState({ status: 'error' }); return; }
-      setState({ status: 'ready', policy: res.policy, canChange: res.canChange === true });
-    }).catch(() => { if (alive) setState({ status: 'error' }); });
-    return () => { alive = false; };
-  }, []);
-  if (state.status !== 'ready') return null;
-  const auto = state.policy.listingModeration === 'auto_publish';
-  const change = async (value) => {
-    setSaving(true);
-    try {
-      const res = await adminAPI.updateOnboardingSettings({ listingModeration: value, expectedRevision: state.policy.revision });
-      setState((p) => ({ ...p, policy: res.policy }));
-      toast(value === 'auto_publish' ? 'New listings from approved sellers now publish automatically' : 'New listings are now held for your approval', 'success');
-    } catch (error) {
-      toast(error?.response?.data?.message ? `Not saved: ${error.response.data.message}` : 'The setting was not saved.', 'error');
-    } finally { setSaving(false); }
-  };
   return (
-    <div className="card" style={{ padding: 16, marginBottom: 20, display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
-      <div style={{ flex: 1, minWidth: 240 }}>
-        <div style={{ fontWeight: 700, fontSize: 14 }}>How new listings go live</div>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-          {auto ? 'Auto-publish: listings from approved sellers and dealers appear on the marketplace immediately.' : 'Held for review: every new listing waits here until you approve it.'}
-        </div>
+    <div className="card" style={{ padding: 16, marginBottom: 20 }}>
+      <div style={{ fontWeight: 700, fontSize: 14 }}>Seller publication policy</div>
+      <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+        Eligible personal sellers and dealers who have submitted verification publish their own listings immediately. Admin review is not required for each listing. Platform moderation remains available for reported, unsafe, fraudulent or policy-violating listings, and legacy pending records can still be resolved.
       </div>
-      {state.canChange ? (
-        <select className="input" aria-label="Listing moderation" style={{ width: 'auto' }} value={state.policy.listingModeration} disabled={saving} onChange={(e) => change(e.target.value)}>
-          <option value="hold_for_review">Hold every new listing for review</option>
-          <option value="auto_publish">Auto-publish for approved sellers</option>
-        </select>
-      ) : <span className="badge badge-muted">Only the platform owner can change this</span>}
     </div>
   );
 }
@@ -183,36 +149,13 @@ export default function AdminCars() {
     return () => { requestSequence.current += 1; };
   }, [load]);
 
-  const handleDelete = useCallback(async (car) => {
-    const id = car?._id || car?.id;
-    if (!id) {
-      toast('This listing has no valid identifier and cannot be removed.', 'error');
-      return;
-    }
-    const title = car.title || [car.year, car.brand, car.model].filter(Boolean).join(' ') || 'this listing';
-    if (!window.confirm(`Remove "${title}" from listing management? Existing lifecycle and deletion safeguards will apply.`)) return;
-    setActionId(`${id}-del`);
-    try {
-      await adminAPI.deleteCar(id);
-      toast('Listing removal confirmed by the server', 'success');
-      setCars((prev) => prev.filter((item) => (item._id || item.id) !== id));
-      setTotal((count) => Math.max(0, count - 1));
-      if (selected && (selected._id || selected.id) === id) setSelected(null);
-    } catch (error) {
-      const message = error?.response?.data?.message || 'The listing could not be removed. The server did not confirm the change.';
-      toast(message, 'error');
-      await load();
-    } finally {
-      setActionId(null);
-    }
-  }, [selected, toast, load]);
-
   const handleDecide = useCallback(async (car, action) => {
     const id = car?._id || car?.id;
     if (!id) { toast('This listing has no valid identifier.', 'error'); return; }
     setActionId(`${id}-mod`);
     try {
       await adminAPI.moderateCar(id, { action });
+      clearCarsCache();
       const next = action === 'approve' ? 'available' : 'hidden';
       toast(action === 'approve' ? 'Listing approved and now live on the marketplace' : 'Listing hidden from the marketplace', 'success');
       setCars((prev) => prev.map((item) => ((item._id || item.id) === id ? { ...item, status: next } : item)));
@@ -312,7 +255,7 @@ export default function AdminCars() {
             </thead>
             <tbody>
               {cars.map((car, i) => (
-                <CarRow key={car._id || car.id} index={i + 1} car={car} onDelete={handleDelete} onSelect={setSelected} onDecide={handleDecide} canDecide actionId={actionId} />
+                <CarRow key={car._id || car.id} index={i + 1} car={car} onSelect={setSelected} onDecide={handleDecide} canDecide actionId={actionId} />
               ))}
               {!loading && !loadError && hasLoaded && cars.length === 0 && (
                 <tr><td colSpan={7} style={{ textAlign: 'center', padding: 28, color: 'var(--text-muted)' }}>

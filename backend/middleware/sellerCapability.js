@@ -16,7 +16,16 @@ export const sellerListingAccess = ({ write = true } = {}) => async (req, res, n
   if (req.user?.effectiveRole === "webhoist") return next();
   const role = req.user?.role;
   if (!req.user) return res.status(401).json({ success: false, message: "Not authorized" });
-  if (role === "dealer" || STAFF_ROLES.includes(role)) return dealerOnly(req, res, next);
+  if (role === "dealer") return dealerOnly(req, res, next);
+  // Staff may inspect seller-facing dashboards where explicitly routed, but must
+  // never create or mutate a seller's inventory through the owner API. Cross-owner
+  // moderation is handled by the dedicated /admin/cars/:id/moderate endpoint.
+  if (STAFF_ROLES.includes(role)) {
+    if (write) {
+      return deny(res, 403, "LISTING_OWNER_ACTION_REQUIRED", "Only the listing owner may create or change seller inventory. Use the dedicated moderation workflow for platform actions.");
+    }
+    return dealerOnly(req, res, next);
+  }
   if (role !== "user" && role !== "individual_seller") {
     return res.status(403).json({ success: false, message: "Dealer or seller access only" });
   }

@@ -39,7 +39,9 @@ if (/\.kayad-hero-mobile-slide\s*\{[^}]*animation:[^}]*var\(--kayad-hero-slide-m
 else fail('slide transition must default to 320ms and read --kayad-hero-slide-ms');
 if (/@media \(prefers-reduced-motion: reduce\)\s*\{[^}]*\.kayad-hero-mobile-slide[^}]*animation: none/s.test(css)) pass('reduced motion disables the slide animation');
 else fail('reduced-motion rule missing');
-if (!/setInterval|autoplay/i.test(component.slice(component.indexOf('KAYAD mobile hero')))) pass('no autoplay in the mobile hero block');
+// The mobile hero block holds no timer of its own; rotation is driven by the shared, pausable controller (heroAutoplayAllowed => visible pause control, reduced motion respected).
+const mobileBlock = component.slice(component.indexOf('KAYAD mobile hero'));
+if (!/setInterval/.test(mobileBlock) && /heroUserPaused/.test(mobileBlock) && /<Pause /.test(mobileBlock)) pass('no timer in the mobile hero block; autoplay is user-pausable');
 else fail('mobile hero must not autoplay');
 
 if (failures.length) { console.error(`\nHero mobile asset contract: FAIL (${failures.length})`); process.exit(1); }

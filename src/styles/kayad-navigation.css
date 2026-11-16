@@ -344,7 +344,7 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
 .kayad-mobile-drawer-primary .kayad-drawer-group {
   border-color: rgba(189,229,222,.17);
   background: linear-gradient(155deg, rgba(255,255,255,.075), rgba(255,255,255,.025));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 5px 14px rgba(0,0,0,.06);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.045), 0 5px 14px rgba(10,51,64,.06);
 }
 .kayad-mobile-drawer-primary .kayad-drawer-group__head { min-height: 56px; }
 .kayad-mobile-drawer-primary .kayad-drawer-chip { background: rgba(3,30,39,.38); }
@@ -382,7 +382,7 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
   border-radius: 22px;
   border: 1px solid rgba(141,228,219,.22);
   background: linear-gradient(150deg, rgba(19,184,166,.14), rgba(255,255,255,.04));
-  box-shadow: 0 10px 28px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.06);
+  box-shadow: 0 10px 28px rgba(10,51,64,.18), inset 0 1px 0 rgba(255,255,255,.06);
 }
 .kayad-mobile-menu__surface section:first-child p { color: #fff; }
 .kayad-mobile-menu__surface section:first-child p + p { color: rgba(255,255,255,.72); font-size: 12px; line-height: 1.5; }
@@ -401,7 +401,7 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
   border-radius: 18px;
   border-color: rgba(189,229,222,.16);
   background: linear-gradient(160deg, rgba(255,255,255,.08), rgba(255,255,255,.025));
-  box-shadow: 0 6px 18px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.05);
+  box-shadow: 0 6px 18px rgba(10,51,64,.14), inset 0 1px 0 rgba(255,255,255,.05);
 }
 .kayad-mobile-drawer-primary .kayad-drawer-group__head {
   min-height: 60px; font-size: 14px; font-weight: 800; letter-spacing: .005em; color: #fff;
@@ -484,7 +484,7 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
 .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group {
   border-radius: 18px; border: 1px solid rgba(189,229,222,.14);
   background: linear-gradient(160deg, rgba(255,255,255,.07), rgba(255,255,255,.025));
-  box-shadow: 0 6px 18px rgba(0,0,0,.14);
+  box-shadow: 0 6px 18px rgba(10,51,64,.14);
 }
 .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group:has(.kayad-drawer-group__head[href*="support"]) { grid-column: auto; }
 .kayad-mobile-menu__surface .kayad-mobile-drawer-primary .kayad-drawer-group__head { min-height: 56px; padding: 8px 12px; gap: 12px; font-size: 14px; font-weight: 800; letter-spacing: -.005em; }
@@ -792,7 +792,7 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
   line-height: .98;
   white-space: nowrap;
 }
-.kayad-brand__word-ke { color: #128B83; }
+.kayad-brand__word-ke { color: #0F766E; }
 .kayad-brand__tag--reserved {
   display: block !important;
   max-width: 220px;
@@ -1244,7 +1244,7 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
   font-weight: 900;
   letter-spacing: -.01em;
   line-height: 1;
-  color: #128B83;
+  color: #0F766E;
   flex-direction: row;
 }
 .kayad-brand__kenya-flag {

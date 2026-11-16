@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent, within, act } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import { readEscrowRulesConfig } from '../../features/Admin/hooks/escrowRulesConfig';
 import { VehicleMarketplace } from '../../features/VehicleMarketplace/components/VehicleMarketplace';
@@ -250,13 +250,13 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     window.localStorage.setItem('kayad_home_page_config_v1', JSON.stringify({ filterOptions: { priceSteps: [1500000, 3000000, 12000000], yearFrom: 2012 } }));
     try {
       await renderMarketplace({ ...baseProps });
-      const years = Array.from((screen.getByLabelText('Hero year filter') as HTMLSelectElement).options).map((o) => o.value);
+      const years = Array.from(((screen.getByLabelText('Hero year filter') as HTMLInputElement).list as HTMLDataListElement).options).map((o) => o.value);
       expect(years[0]).toBe('2012');
       expect(years).toContain('2018');
       expect(years).toContain('2026');
       expect(years).not.toContain('2005');
-      const prices = Array.from((screen.getByLabelText('Hero maximum price filter') as HTMLSelectElement).options).map((o) => o.textContent);
-      expect(prices).toEqual(['All', 'Ksh 1.5M', 'Ksh 3M', 'Ksh 12M']);
+      const prices = Array.from(((screen.getByLabelText('Hero maximum price filter') as HTMLInputElement).list as HTMLDataListElement).options).map((o) => o.label);
+      expect(prices).toEqual(['Ksh 1.5M', 'Ksh 3M', 'Ksh 12M']);
     } finally {
       window.localStorage.removeItem('kayad_home_page_config_v1');
     }
@@ -264,11 +264,27 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
 
   it('without settings the search keeps the standard 2005 start and default price steps', async () => {
     await renderMarketplace({ ...baseProps });
-    const years = Array.from((screen.getByLabelText('Hero year filter') as HTMLSelectElement).options).map((o) => o.value);
+    const years = Array.from(((screen.getByLabelText('Hero year filter') as HTMLInputElement).list as HTMLDataListElement).options).map((o) => o.value);
     expect(years[0]).toBe('2005');
     expect(years).toContain('2021');
-    const prices = Array.from((screen.getByLabelText('Hero maximum price filter') as HTMLSelectElement).options).map((o) => o.textContent);
-    expect(prices).toEqual(['All', 'Ksh 2.5M', 'Ksh 4M', 'Ksh 7M', 'Ksh 10M']);
+    const prices = Array.from(((screen.getByLabelText('Hero maximum price filter') as HTMLInputElement).list as HTMLDataListElement).options).map((o) => o.label);
+    expect(prices).toEqual(['Ksh 2.5M', 'Ksh 4M', 'Ksh 7M', 'Ksh 10M']);
+  });
+
+  it('make, price, year and body style are typeable inputs backed by suggestion lists', async () => {
+    await renderMarketplace({ ...baseProps });
+    for (const name of ['Hero make filter', 'Hero maximum price filter', 'Hero year filter', 'Hero body style filter']) {
+      const el = screen.getByLabelText(name) as HTMLInputElement;
+      expect(el.tagName).toBe('INPUT');
+      expect(el.getAttribute('list')).toBeTruthy();
+    }
+  });
+  it('a typed price is applied on Enter, formatted with thousands separators', async () => {
+    await renderMarketplace({ ...baseProps });
+    const price = screen.getByLabelText('Hero maximum price filter') as HTMLInputElement;
+    fireEvent.change(price, { target: { value: '3250000' } });
+    fireEvent.keyDown(price, { key: 'Enter' });
+    await waitFor(() => expect(price.value).toBe('3,250,000'));
   });
 
   it('a featured card whose image fails keeps its label over a neutral placeholder (no broken-image icon)', async () => {
@@ -327,18 +343,31 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
       expect(imageNames).toContain(INITIAL_VEHICLES[1].image);
     });
 
-    it('uses admin-persisted visual showcase artwork when explicitly selected without presenting it as inventory', async () => {
+    const showcaseConfig = () => ({ config: { heroPresentation: { vehicleSource: 'showcase', showcaseFallbackEnabled: true, showcaseVehicles: [
+      { id: 'showcase-land-cruiser', make: 'Toyota', model: 'Land Cruiser 300', year: 0, image: '/hero/kayad-land-cruiser-cutout.png', mobileImage: '/hero/kayad-land-cruiser-mobile.webp', tagline: 'Premium SUV · 4WD · Automatic', enabled: true },
+      { id: 'showcase-mercedes-gle', make: 'Mercedes-Benz', model: 'GLE', year: 0, image: '/hero/kayad-mercedes-gle-cutout.png', mobileImage: '/hero/kayad-mercedes-gle-mobile.webp', tagline: 'Luxury SUV · Automatic', enabled: true },
+    ] } } });
+
+    // Approved policy (15 Nov 2026): showcase artwork is used ONLY when there is no real eligible vehicle, is labelled illustrative, and never shows a price.
+    it('uses admin-persisted showcase artwork only when there is no real vehicle, labelled as not a listing', async () => {
       const { adminAPI } = await import('../../api/api');
-      vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce({ config: { heroPresentation: { vehicleSource: 'showcase', showcaseFallbackEnabled: true, showcaseVehicles: [
-        { id: 'showcase-land-cruiser', make: 'Toyota', model: 'Land Cruiser 300', year: 0, image: '/hero/kayad-land-cruiser-cutout.png', mobileImage: '/hero/kayad-land-cruiser-mobile.webp', tagline: 'Premium SUV · 4WD · Automatic', enabled: true },
-        { id: 'showcase-mercedes-gle', make: 'Mercedes-Benz', model: 'GLE', year: 0, image: '/hero/kayad-mercedes-gle-cutout.png', mobileImage: '/hero/kayad-mercedes-gle-mobile.webp', tagline: 'Luxury SUV · Automatic', enabled: true },
-      ] } } } as never);
-      await renderMarketplace({ ...baseProps });
+      vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce(showcaseConfig() as never);
+      vehicleApiMocks.getCars.mockResolvedValue({ success: true, data: [], pagination: { page: 1, limit: 24, total: 0, pages: 0 } });
+      await renderMarketplace({ ...baseProps, vehicles: [] });
       const view = within(mobileHero());
       await waitFor(() => expect(view.getByText('Toyota Land Cruiser 300')).toBeTruthy());
       expect(view.getByText('Mercedes-Benz GLE')).toBeTruthy();
-      expect(view.getAllByText(/Visual showcase · not a listing/).length).toBe(2);
+      expect(view.getAllByText(/Artwork · not a listing/).length).toBe(2);
       expect(view.queryByText(/Ksh\s+[\d,]+/i)).toBeNull();
+    });
+
+    it('never lets showcase artwork replace real inventory, even when the legacy showcase source is configured', async () => {
+      const { adminAPI } = await import('../../api/api');
+      vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce(showcaseConfig() as never);
+      await renderMarketplace({ ...baseProps });
+      const view = within(mobileHero());
+      await waitFor(() => expect(view.queryByText(/Visual showcase · not a listing/)).toBeNull());
+      expect(view.queryByText('Toyota Land Cruiser 300')).toBeNull();
     });
 
     describe('admin-controlled hero configuration', () => {
@@ -424,12 +453,40 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     }
   });
 
+  it('manual entry: a typed make that is not a listed option is sent as a contains-match, never dropped', async () => {
+    await renderMarketplace({ ...baseProps });
+    const sidebar = screen.getByText('Refine inventory').closest('aside') as HTMLElement;
+    const make = sidebar.querySelector('input[aria-label="Make filter"]') as HTMLInputElement;
+    fireEvent.change(make, { target: { value: 'Subaru' } });
+    fireEvent.keyDown(make, { key: 'Enter' });
+    await waitFor(() => expect(vehicleApiMocks.getCars).toHaveBeenCalledWith(expect.objectContaining({ brandLike: 'Subaru' })));
+    expect(vehicleApiMocks.getCars).not.toHaveBeenCalledWith(expect.objectContaining({ brand: 'Subaru' }));
+    const price = sidebar.querySelector('input[aria-label="Max price"]') as HTMLInputElement;
+    fireEvent.change(price, { target: { value: '2,500,000' } });
+    fireEvent.keyDown(price, { key: 'Enter' });
+    await waitFor(() => expect(vehicleApiMocks.getCars).toHaveBeenCalledWith(expect.objectContaining({ maxPrice: 2500000, brandLike: 'Subaru' })));
+  });
+
+  it('phones get a compact search row with a Filters button that opens the same panel', async () => {
+    await renderMarketplace({ ...baseProps });
+    expect(screen.getByTestId('mobile-search-row')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /^Open filters/ }));
+    const sheet = await screen.findByRole('dialog', { name: /Refine inventory/i });
+    expect(sheet.querySelector('input[aria-label="Make filter"]')).toBeTruthy();
+    expect(sheet.querySelector('input[aria-label="Colour filter"]')).toBeTruthy();
+  });
+
   it('changes the live inventory grid between 3, 4 and 5 columns', async () => {
     await renderMarketplace({ ...baseProps  });
-    const grid = await screen.findByTestId('inventory-grid');
+    await screen.findByTestId('inventory-grid');
+    // The Super Admin layout default arrives asynchronously and is applied once; let it settle so the visitor's own choice is what is measured.
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 60)); });
     for (const columns of [3, 4, 5]) {
-      fireEvent.click(screen.getByRole('button', { name: `${columns}×` }));
       await waitFor(() => {
+        // Re-click inside the retry: the Super Admin default may land asynchronously and re-apply once; the visitor's choice must win afterwards.
+        fireEvent.click(screen.getByRole('button', { name: `${columns}×` }));
+        // Always re-query: the grid is replaced by a loading state and back whenever the first inventory request settles.
+        const grid = screen.getByTestId('inventory-grid');
         expect(grid.getAttribute('data-columns')).toBe(String(columns));
         expect(grid.className).toContain('kayad-inventory-grid');
         expect(grid.style.getPropertyValue('--kayad-grid-columns')).toBe(String(columns));
@@ -553,10 +610,14 @@ describe('VehicleMarketplace - consolidated Make selector (space audit)', () => 
     const sidebarHeading = screen.getByText('Refine inventory');
     const sidebar = sidebarHeading.closest('aside');
     expect(sidebar).toBeTruthy();
-    const sidebarMakeSelect = sidebar?.querySelector('select');
-    expect(sidebarMakeSelect).toBeTruthy();
-    expect(Array.from(sidebarMakeSelect?.options ?? []).some((o) => o.textContent === 'All Makes')).toBe(true);
-    expect(sidebarMakeSelect?.className).not.toMatch(/lg:hidden/);
+    // One shared panel: Make accepts typed entry AND offers the live inventory's makes as suggestions.
+    const makeInput = sidebar?.querySelector('input[aria-label="Make filter"]') as HTMLInputElement | null;
+    expect(makeInput).toBeTruthy();
+    expect(makeInput?.getAttribute('list')).toBeTruthy();
+    expect(makeInput?.getAttribute('placeholder')).toMatch(/pick or type/i);
+    const options = Array.from(sidebar?.querySelectorAll(`datalist[id="${makeInput?.getAttribute('list')}"] option`) ?? []).map((o) => (o as HTMLOptionElement).value);
+    expect(options.length).toBeGreaterThan(0);
+    expect(options).not.toContain('All');
 
     expect(screen.getByText('Reset all filters')).toBeTruthy();
     expect(screen.queryByTitle('Toggle filter sidebar')).toBeNull();

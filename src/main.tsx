@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { BrandingProvider } from './context/BrandingContext';
 import './index.css';
+import { prefetchCars } from './services/vehicleApi';
 
 // Simple error boundary for the entire app
 class ErrorBoundary extends Component<
@@ -37,8 +38,8 @@ class ErrorBoundary extends Component<
         }}>
           <div style={{ textAlign: 'center', maxWidth: '400px' }}>
             <h1 style={{ color: '#0A3340', marginBottom: '16px' }}>Something went wrong</h1>
-            <p style={{ color: '#64748B', marginBottom: '16px' }}>
-              {this.state.error?.message || 'An unexpected error occurred'}
+            <p style={{ color: '#475569', marginBottom: '16px' }}>
+              An unexpected error occurred. Reload the page; if it keeps happening, contact KAYAD support.
             </p>
             <button
               onClick={() => window.location.reload()}
@@ -64,6 +65,8 @@ class ErrorBoundary extends Component<
 
 const root = document.getElementById('root');
 if (root) {
+  // Start the first inventory page now so it is already in flight (or cached) when the marketplace mounts.
+  prefetchCars({ page: 1, limit: 24, sort: 'newest' });
   ReactDOM.createRoot(root).render(
     <React.StrictMode>
       <ErrorBoundary>

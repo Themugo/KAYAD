@@ -174,7 +174,7 @@ export default function AdminUsers() {
   return (
     <div className="page kayad-users-page">
       {readiness && readiness.ready === false && !readiness.unknown && readiness.checks?.some((c) => c.ok === false) && (
-        <div role="alert" className="card" style={{ padding: 16, marginBottom: 16, border: '1px solid var(--warning, #d97706)' }}>
+        <div role="alert" className="card" style={{ padding: 16, marginBottom: 16, border: '1px solid var(--warning, #176B87)' }}>
           <strong>Dealer onboarding is not fully set up in the database.</strong>
           <div style={{ fontSize: 13, marginTop: 4 }}>{readiness.message}</div>
           <ul style={{ fontSize: 13, margin: '8px 0 0 18px' }}>

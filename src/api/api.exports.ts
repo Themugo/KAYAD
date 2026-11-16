@@ -94,6 +94,9 @@ export const auctionRegistrationAPI = {
   room: (auctionId: string) => api.get(`/auctions/${auctionId}/room`).then(unwrap),
   get: (auctionId: string) => api.get(`/auctions/${auctionId}/registration`).then(unwrap),
   register: (auctionId: string, body: any) => api.post(`/auctions/${auctionId}/registration`, body).then(unwrap),
+  refreshEligibility: (auctionId: string) => api.post(`/auctions/${auctionId}/registration/refresh-eligibility`).then(unwrap),
+  securityPolicy: (auctionId: string) => api.get(`/auctions/${auctionId}/registration/security-policy`).then(unwrap),
+  initiateHighValueDeposit: (auctionId: string) => api.post(`/auctions/${auctionId}/registration/high-value-deposit`).then(unwrap),
   initiateCommitment: (auctionId: string) => api.post(`/auctions/${auctionId}/registration/commitment`).then(unwrap),
   authorize: (auctionId: string) => api.get(`/auctions/${auctionId}/registration/authorization`).then(unwrap),
 };

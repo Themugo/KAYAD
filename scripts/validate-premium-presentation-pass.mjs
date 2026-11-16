@@ -25,11 +25,11 @@ pass('Registration is reachable: combined header entry -> /login -> /register CT
 // change, not a regression (the "KAYAD mobile hero" aria-label section and
 // its card inside both still render correctly; see VehicleMarketplace.test.tsx).
 // Updated the literal match to the current className rather than reverting it.
-pass('Hero keeps stable mobile/desktop footprint', hero.includes('lg:h-[var(--hero-stage-h)]') && hero.includes('relative px-3 pb-3 pt-2 lg:hidden'));
+pass('Hero keeps stable mobile/desktop footprint', hero.includes('--hero-stage-h') && hero.includes('lg:min-h-[var(--hero-stage-h)]') && hero.includes('relative px-3 pb-3 pt-2 lg:hidden'));
 pass('Hero keeps real vehicle source', hero.includes('heroSourceVehicles') && hero.includes('heroImageForVehicle'));
 pass('Hero retains existing actions', hero.includes('Explore Vehicles') && hero.includes('How It Works'));
 pass('Hero retains carousel controls', hero.includes('Previous featured vehicles') && hero.includes('Next featured vehicles') && hero.includes('Show featured pair'));
-pass('Hero uses Kenyan-road visual fallback', hero.includes("const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-nairobi-kicc.jpg'"));
+pass('Hero uses the procedural showroom environment (no raster dependency)', /const KENYA_ROAD_HERO_BACKGROUND = ''/.test(hero) && read('src/features/VehicleMarketplace/components/homepage-redesign.css').includes('.kayad-showroom-stage'));
 pass('Hero premium vehicle stage present (desktop pair + mobile carousel + vehicle info cards on real featured inventory)', hero.includes('aria-label="KAYAD mobile hero"') && hero.includes('aria-label="Featured vehicles"') && hero.includes('showVehicleInfoCards') && hero.includes("'KAYAD SELECT'"));
 pass('Login remains canonical standalone surface', /if \(path === '\/login'( \|\| path === '\/admin\/login')?\) return <LoginPage \/>;/.test(app));
 pass('Register remains canonical standalone surface', app.includes("if (path === '/register') return <OnboardingFlow"));

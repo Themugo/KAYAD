@@ -185,7 +185,7 @@ export default function AdminBroadcast() {
         </section>
 
         {sendResult && (
-          <section role="status" className="card" style={{ padding: 20, marginBottom: 28, border: `1px solid ${sendResult.partial ? '#f59e0b' : '#10b981'}` }}>
+          <section role="status" className="card" style={{ padding: 20, marginBottom: 28, border: `1px solid ${sendResult.partial ? '#13B8A6' : '#10b981'}` }}>
             <h2 style={{ marginTop: 0, fontSize: 16 }}>{sendResult.partial ? 'Broadcast completed with failures' : 'Broadcast processing result'}</h2>
             <p style={{ marginBottom: 12, color: '#64748b', fontSize: 13 }}>{sendResult.message}</p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 10 }}>
@@ -223,7 +223,7 @@ export default function AdminBroadcast() {
                       <p style={{ margin: '6px 0', fontSize: 12, color: '#64748b', whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{item.message || ''}</p>
                       <p style={{ margin: 0, fontSize: 11, color: '#64748b' }}>{audienceLabels[item.audience] || item.audience || 'Audience unavailable'} · {item.createdAt ? new Date(item.createdAt).toLocaleString() : 'Date unavailable'}</p>
                     </div>
-                    <span style={{ fontSize: 11, fontWeight: 700, padding: '5px 9px', borderRadius: 999, background: status === 'partial' ? '#fef3c7' : status === 'sent' ? '#d1fae5' : '#f1f5f9', color: status === 'partial' ? '#92400e' : status === 'sent' ? '#065f46' : '#475569', whiteSpace: 'nowrap' }}>{statusLabels[status] || status}</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, padding: '5px 9px', borderRadius: 999, background: status === 'partial' ? '#fef3c7' : status === 'sent' ? '#d1fae5' : '#f1f5f9', color: status === 'partial' ? '#176B87' : status === 'sent' ? '#065f46' : '#475569', whiteSpace: 'nowrap' }}>{statusLabels[status] || status}</span>
                   </div>
                   {item.stats && <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', marginTop: 12, fontSize: 11, color: '#64748b' }}>
                     <span>Targets: {Number(stats.totalRecipients) || 0}</span>

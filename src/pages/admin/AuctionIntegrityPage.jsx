@@ -14,7 +14,7 @@ const STATUSES = ["detected", "under_review", "confirmed", "dismissed", "action_
 const ACTIONS = ["none", "warning", "bid_removed", "auction_cancelled", "user_suspended", "user_banned", "referral_frozen"];
 
 const sevColor = (s) =>
-  ({ critical: "text-red-600 bg-red-100", high: "text-[#176B87] bg-[#DDF4F0]", medium: "text-[#176B87] bg-[#DDF4F0]", low: "text-green-600 bg-green-100" })[s] || "text-[#64748B] bg-[#EEF7F5]";
+  ({ critical: "text-red-600 bg-red-100", high: "text-[#176B87] bg-[#DDF4F0]", medium: "text-[#176B87] bg-[#DDF4F0]", low: "text-green-600 bg-green-100" })[s] || "text-[#4B5D6E] bg-[#EEF7F5]";
 
 const statusBadge = (s) =>
   ({ detected: "badge badge-warning", under_review: "badge badge-info", confirmed: "badge badge-error", dismissed: "badge", action_taken: "badge badge-success" })[s] || "badge";

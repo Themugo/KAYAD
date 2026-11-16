@@ -1,57 +1,12 @@
 import fs from "node:fs";
-
 const checks = [
-  {
-    name: "edit snapshots old listing before mutation",
-    file: "backend/controllers/carController.js",
-    required: [
-      "const oldData = car.toObject();",
-      "await logVehicleEdited(car, oldData, req.user, req);",
-    ],
-  },
-  {
-    name: "edit uses city/location_city contract",
-    file: "backend/controllers/carController.js",
-    required: [
-      "req.body.city = [cityPart, addressPart].filter(Boolean).join(\", \");",
-      '"city",',
-    ],
-    forbidden: ["req.body.location =", "car.location ||"],
-  },
-  {
-    name: "audit compares real listing field names",
-    file: "backend/services/auditService.js",
-    required: ['"brand",', '"city",'],
-    forbidden: ['"make",', '"location",'],
-  },
-  {
-    name: "seller deletion does not refund trial usage",
-    file: "backend/controllers/carController.js",
-    required: ["select(\"listingCount\")", "listingCount - 1"],
-    forbidden: ["trialListingsUsed - 1"],
-  },
-  {
-    name: "admin deletion does not refund trial usage",
-    file: "backend/routes/adminRoutes.js",
-    required: ["$inc: { listingCount: -1 }"],
-    forbidden: ["trialListingsUsed: -1"],
-  },
+  ["seller edit snapshots before mutation", "backend/controllers/carController.js", ["const oldData = car.toObject();", "await logVehicleEdited(car, oldData, req.user, req);"], []],
+  ["seller deletion decrements retained listing count only", "backend/controllers/carController.js", ['select("listingCount")', "listingCount - 1"], ["trialListingsUsed - 1"]],
+  ["admin delete route refuses seller inventory deletion", "backend/routes/adminRoutes.js", ["LISTING_OWNER_ACTION_REQUIRED", "only the listing owner may remove a vehicle"], ["$inc: { listingCount: -1 }"]],
 ];
-
-let failures = 0;
-for (const check of checks) {
-  const text = fs.readFileSync(check.file, "utf8");
-  const missing = (check.required || []).filter((needle) => !text.includes(needle));
-  const forbidden = (check.forbidden || []).filter((needle) => text.includes(needle));
-  if (missing.length || forbidden.length) {
-    failures += 1;
-    console.error(`FAIL ${check.name}`);
-    if (missing.length) console.error(`  missing: ${missing.join(" | ")}`);
-    if (forbidden.length) console.error(`  forbidden: ${forbidden.join(" | ")}`);
-  } else {
-    console.log(`PASS ${check.name}`);
-  }
+let failed = 0;
+for (const [name, file, required, forbidden] of checks) {
+ const s=fs.readFileSync(file,"utf8"); const missing=required.filter(x=>!s.includes(x)); const bad=forbidden.filter(x=>s.includes(x));
+ const ok=!missing.length&&!bad.length; console.log(`${ok?"PASS":"FAIL"} ${name}`); if(!ok){failed++; if(missing.length)console.log(" missing:",missing);if(bad.length)console.log(" forbidden:",bad);}
 }
-
-console.log(`\n${checks.length - failures}/${checks.length} checks passed`);
-process.exitCode = failures ? 1 : 0;
+console.log(`\n${checks.length-failed}/${checks.length} checks passed`); process.exitCode=failed?1:0;

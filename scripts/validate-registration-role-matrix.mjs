@@ -28,12 +28,12 @@ const checks = [
   ['backend schema accepts all three public roles', /z\.enum\(\["dealer", "individual_seller", "user"\]\)/.test(schema)],
   ['dealer requires business name client-side', /backendRole === 'dealer'[\s\S]{0,80}!form\.businessName\.trim\(\)/.test(validation)],
   ['dealer requires location client-side', /backendRole === 'dealer'[\s\S]{0,200}!form\.location\.trim\(\)/.test(validation)],
-  ['dealer requires business name server-side', /role === "dealer" && !businessName/.test(controller)],
+  ['dealer requires business name server-side', /role === "dealer"[\s\S]{0,180}validateCompanyName\(businessName/.test(controller) && /if \(!company\.ok\)/.test(controller)],
   ['dealer requires location server-side', /role === "dealer" && !location/.test(controller)],
   ['personal account does not require business fields for private selling', /const isDealer = role\.backendRole === 'dealer'/.test(flow) && /{isDealer && \(/.test(flow) && /backendRole !== 'user' && form\.businessName\.trim\(\)/.test(flow)],
-  ['backend preserves seller role instead of silently converting it', /requestedRole === "dealer" \|\| requestedRole === "individual_seller" \? requestedRole : "user"/.test(controller)],
+  ['legacy individual_seller registration is explicitly mapped to the canonical personal user role', /const legacySellerRole = requestedRole === "individual_seller"/.test(controller) && /const role = requestedRole === "dealer" \? "dealer" : "user"/.test(controller) && /createdRole: "user"/.test(controller)],
   ['personal and private-seller registrations are active by default', /WHEN p_role = 'individual_seller' AND v_seller_approval_required THEN 'pending'[\s\S]*ELSE 'approved'/.test(freeSellerMigration)],
-  ['future seller approval remains configurable without changing the free default', /privateSellerApprovalMode/.test(freeSellerMigration) && /privateSellerApprovalMode: \"disabled\"/.test(read('backend/services/onboardingPolicy.service.js'))],
+  ['personal seller administrator approval is retired and legacy approval rows normalize to disabled', /privateSellerApprovalMode: Object\.freeze\(\[\"disabled\"\]\)/.test(read('backend/services/onboardingPolicy.service.js')) && /raw\[field\] === \"required\"/.test(read('backend/services/onboardingPolicy.service.js'))],
   ['future package modes remain configurable while free is the default', /privateSellerPackageMode: \"free\"/.test(read('backend/services/onboardingPolicy.service.js')) && /privateSellerPackageMode/.test(read('backend/services/onboardingPolicy.service.js'))],
   ['registration creates user record', /INSERT INTO public\.users/.test(read('supabase/migrations/20261001090000_registration_onboarding_integrity.sql'))],
   ['registration creates credential record', /INSERT INTO public\.user_auth/.test(read('supabase/migrations/20261001090000_registration_onboarding_integrity.sql'))],
@@ -56,7 +56,7 @@ const checks = [
   ['CSRF endpoint remains canonical', /CSRF_BOOTSTRAP_PATH = '\/v1\/auth\/csrf'/.test(httpClient)],
   ['auth response contract accepts created user', /user: z\.object\(\{[\s\S]*_id: z\.string\(\)/.test(responseSchema)],
   ['personal account explains free immediate private selling', /sell your own vehicle for free/.test(flow) && /No package selection, seller application or administrator approval is required/.test(flow)],
-  ['dealer completion messaging is distinct', /taken to business verification/.test(flow)],
+  ['dealer completion messaging explains self-service listings during verification', /complete business verification/.test(flow) && /publish and manage your own vehicle listings while verification is processed/.test(flow)],
 ];
 
 let passed = 0;

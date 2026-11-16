@@ -11,7 +11,7 @@ const STATUSES = [
   { value: 'rejected', label: 'Rejected' },
 ];
 const STATUS_COLORS = {
-  pending: { color: '#92400e', background: '#fef3c7' },
+  pending: { color: '#176B87', background: '#fef3c7' },
   approved: { color: '#166534', background: '#dcfce7' },
   rejected: { color: '#991b1b', background: '#fee2e2' },
 };

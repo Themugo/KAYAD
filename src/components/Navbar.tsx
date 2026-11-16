@@ -2,6 +2,7 @@ import { KenyaFlag } from './CountryBadge';
 import { useMyDealership } from '../features/DealershipWorkspace/useMyDealership';
 import { hasSessionHint } from '../utils/sessionHint';
 import { isStaffRole, staffRoleLabel } from '../utils/staffRoles';
+import { isSellerRole } from '../utils/authRoutes';
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -98,9 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileExpandedGroups, setMobileExpandedGroups] = useState<Record<string, boolean>>({ marketplace: true });
   const [showCountyDropdown, setShowCountyDropdown] = useState(false);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
   const countyRef = useRef<HTMLDivElement>(null);
-  const userRef = useRef<HTMLDivElement>(null);
   const userButtonRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLElement>(null);
@@ -110,13 +109,19 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   // Expand the current section when the drawer opens; keep other sections
   // collapsed until requested so the menu remains short and scannable.
+  // Runs ONLY when the drawer opens. It must not depend on navItems/activeNav: those change identity whenever the navigation
+  // configuration or the signed-in account finishes loading, and re-running this would reset the groups the person has just
+  // expanded — the menu would "open and collapse immediately", most visibly for a personal account whose data loads after sign-in.
+  const latestNav = useRef({ navItems, activeNav });
+  latestNav.current = { navItems, activeNav };
   useEffect(() => {
     if (!mobileMenuOpen) return;
-    const currentSection = navItems.find((item) =>
-      item.match.includes(activeNav) || item.children?.some((child) => child.navId === activeNav),
+    const { navItems: items, activeNav: current } = latestNav.current;
+    const currentSection = items.find((item) =>
+      item.match.includes(current) || item.children?.some((child) => child.navId === current),
     );
     setMobileExpandedGroups(currentSection ? { [currentSection.id]: true } : { marketplace: true });
-  }, [mobileMenuOpen, activeNav, navItems]);
+  }, [mobileMenuOpen]);
 
   const openMobileMenu = useCallback(() => {
     const headerAnchor = headerRef.current?.querySelector('.kayad-header__bar') as HTMLElement | null;
@@ -175,8 +180,25 @@ export const Navbar: React.FC<NavbarProps> = ({
   }, [mobileMenuOpen]);
 
   useEffect(() => {
-    document.body.classList.toggle('kayad-mobile-menu-is-open', mobileMenuOpen);
-    return () => document.body.classList.remove('kayad-mobile-menu-is-open');
+    const body = document.body;
+    const root = document.documentElement;
+    const previousBodyOverflow = body.style.overflow;
+    const previousRootOverflow = root.style.overflow;
+
+    body.classList.toggle('kayad-mobile-menu-is-open', mobileMenuOpen);
+    if (mobileMenuOpen) {
+      // Lock both scrolling roots while the drawer is modal. The drawer's own
+      // content pane remains scrollable; restoring the exact prior inline
+      // values avoids overriding host-page or embedded-layout preferences.
+      body.style.overflow = 'hidden';
+      root.style.overflow = 'hidden';
+    }
+
+    return () => {
+      body.classList.remove('kayad-mobile-menu-is-open');
+      body.style.overflow = previousBodyOverflow;
+      root.style.overflow = previousRootOverflow;
+    };
   }, [mobileMenuOpen]);
 
   // Close dropdowns on click outside.
@@ -185,9 +207,6 @@ export const Navbar: React.FC<NavbarProps> = ({
       const target = e.target as Node;
       if (countyRef.current && !countyRef.current.contains(target)) {
         setShowCountyDropdown(false);
-      }
-      if (userRef.current && !userRef.current.contains(target)) {
-        setShowUserDropdown(false);
       }
       if (!(target as HTMLElement).closest?.('.kayad-nav__group')) {
         setOpenMenu(null);
@@ -206,9 +225,6 @@ export const Navbar: React.FC<NavbarProps> = ({
       if (mobileMenuOpen) {
         setMobileMenuOpen(false);
         hamburgerRef.current?.focus();
-      } else if (showUserDropdown) {
-        setShowUserDropdown(false);
-        userButtonRef.current?.focus();
       } else if (openMenu) {
         const toggle = document.querySelector<HTMLButtonElement>(`[data-nav-toggle="${openMenu}"]`);
         setOpenMenu(null);
@@ -218,7 +234,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [mobileMenuOpen, showUserDropdown, openMenu]);
+  }, [mobileMenuOpen, openMenu]);
 
   // The mobile drawer is a real modal dialog: move focus into it on open and
   // keep Tab inside it until it closes.
@@ -249,13 +265,11 @@ export const Navbar: React.FC<NavbarProps> = ({
   useEffect(() => () => window.clearTimeout(closeTimer.current), []);
 
   const handleAuthNavigation = (path: '/login' | '/register') => {
-    setShowUserDropdown(false);
     setMobileMenuOpen(false);
     navigate(path);
   };
 
   const handleAdminRoute = (path: string) => {
-    setShowUserDropdown(false);
     setMobileMenuOpen(false);
     setOpenMenu(null);
     pinnedMenu.current = null;
@@ -268,7 +282,6 @@ export const Navbar: React.FC<NavbarProps> = ({
       return;
     }
     onNavClick(navId);
-    setShowUserDropdown(false);
     setMobileMenuOpen(false);
     setOpenMenu(null);
     pinnedMenu.current = null;
@@ -508,16 +521,18 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <div className="w-28 h-10 rounded-xl bg-[#EEF7F5] animate-pulse" />
               </div>
             ) : user ? (
-              <div className="relative" ref={userRef}>
+              <div className="relative">
                 <button
                   type="button"
                   ref={userButtonRef}
-                  onClick={() => setShowUserDropdown(!showUserDropdown)}
+                  onClick={() => {
+                    // Account identity is a destination, not a second navigation menu.
+                    // All account/workspace actions live in the canonical KAYAD drawer.
+                    handleNavSelect('profile');
+                  }}
                   className="flex items-center gap-2 p-1.5 pr-2.5 min-h-10 rounded-xl hover:bg-[#F0FAF8] border border-[#D7E7E4] transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]"
                   id="user-profile-menu-button"
-                  aria-expanded={showUserDropdown}
-                  aria-controls="kayad-account-panel"
-                  aria-label={`Account menu for ${user.name}`}
+                  aria-label={`Open account profile for ${user.name}`}
                 >
                   <div className="relative">
                     <AccountAvatar
@@ -533,257 +548,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <span className="text-xs font-bold text-[#0A3340] leading-none">{user.name}</span>
                     <span className="text-[10px] text-[#64748B] capitalize">{user.role}</span>
                   </div>
-                  <ChevronDown className={`w-3.5 h-3.5 text-[#94A3B8] transition-transform ${showUserDropdown ? 'rotate-180' : ''}`} aria-hidden="true" />
                 </button>
-
-                {/* Authenticated Dropdown Menu */}
-                {showUserDropdown && (
-                  <div id="kayad-account-panel" className="absolute right-0 mt-2 w-64 max-h-[calc(100svh-96px)] overflow-y-auto bg-white rounded-2xl shadow-xl border border-[#D7E7E4] py-2 z-50 animate-fade-in text-xs">
-                    {/* User Header Info */}
-                    <div className="px-4 py-3 border-b border-[#D7E7E4] flex items-center gap-3 bg-[#DDF4F0]/60 rounded-t-2xl">
-                      <AccountAvatar src={user.avatar} name={user.name} className="w-9 h-9 rounded-full object-cover border border-[#0A3340]/30 text-[11px] shrink-0" />
-                      <div className="overflow-hidden">
-                        <p className="font-bold text-[#0A3340] truncate">{user.name}</p>
-                        <p className="text-[11px] text-[#64748B] truncate">{user.email}</p>
-                        <span className="inline-block mt-1 px-2 py-0.5 bg-[#0A3340] text-white font-semibold text-[9px] rounded uppercase">
-                          {isStaffRole(user.role) ? staffRoleLabel(user.role) : user.role === 'dealer' ? 'Verified Dealer' : user.role === 'mechanic' ? 'NTSA Mechanic' : user.role === 'admin' ? 'Administrator' : 'Personal account'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* DEALER WORKSPACE: a dealer's whole menu lives here; buyer and private-seller pages are not offered. */}
-                    {isDealerUser && (
-                      <div className="py-1 bg-[#DDF4F0]/50">
-                        <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-[#64748B]">
-                          Dealer Management
-                        </div>
-                        <button
-                          onClick={() => handleNavSelect('dealer:overview')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
-                        >
-                          <Building2 className="w-4 h-4 text-[#0A3340]" />
-                          <span>Dealer Dashboard</span>
-                        </button>
-                        <button
-                          onClick={() => handleNavSelect('dealer:inventory')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
-                        >
-                          <Layers className="w-4 h-4 text-[#0A3340]" />
-                          <span>Inventory</span>
-                        </button>
-                        <button
-                          onClick={() => handleNavSelect('dealer:inventory:new')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
-                        >
-                          <PlusCircle className="w-4 h-4 text-[#0A3340]" />
-                          <span>Add Vehicle</span>
-                        </button>
-                        <button
-                          onClick={() => handleNavSelect('dealer:leads')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
-                        >
-                          <MessageSquare className="w-4 h-4 text-[#0A3340]" />
-                          <span>Leads</span>
-                        </button>
-                        <button
-                          onClick={() => handleNavSelect('dealer:analytics')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
-                        >
-                          <BarChart3 className="w-4 h-4 text-[#0A3340]" />
-                          <span>Analytics</span>
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Standard Links */}
-                    <div className="py-1">
-{!isDealerUser && (
-                      <button
-                        onClick={() => isStaffRole(user.role) ? handleAdminRoute('/admin') : handleNavSelect('dashboard')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
-                      >
-                        <LayoutDashboard className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
-                        <span>{isStaffRole(user.role) ? 'Operations Dashboard' : 'My Account'}</span>
-                      </button>
-)}
-
-                      {!isStaffRole(user.role) && !isDealerUser && (
-                      <button
-                        onClick={() => handleNavSelect('seller-dashboard')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
-                      >
-                        <Car className="w-4 h-4 text-[#176B87] stroke-[1.75]" />
-                        <span>Selling Workspace</span>
-                      </button>
-                      )}
-
-                      {dealershipMembership && (
-                      <button
-                        onClick={() => handleNavSelect('dealership-workspace')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-bold text-[#0A3340]"
-                      >
-                        <Car className="w-4 h-4 text-[#176B87] stroke-[1.75]" />
-                        <span>Dealership Workspace</span>
-                      </button>
-                      )}
-
-                      <button
-                        onClick={() => { navigate('/notifications'); setShowUserDropdown(false); }}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center justify-between font-medium text-[#12576D] hover:text-[#0A3340]"
-                      >
-                        <span className="flex items-center gap-2.5">
-                          <Bell className="w-4 h-4 text-[#176B87] stroke-[1.75]" />
-                          <span>Notifications</span>
-                        </span>
-                        {notificationUnreadCount > 0 && (
-                          <span className="px-2 py-0.5 bg-rose-500 text-white rounded-full text-[10px] font-bold">{notificationUnreadCount}</span>
-                        )}
-                      </button>
-
-                      <button
-                        onClick={() => handleNavSelect('chat')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center justify-between font-bold text-[#0A3340]"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <MessageSquare className="w-4 h-4 text-[#176B87] stroke-[1.75]" />
-                          <span>Messages</span>
-                        </div>
-                        {effectiveUnread > 0 && (
-                          <span className="px-2 py-0.5 bg-rose-500 text-white rounded-full text-[10px] font-bold">
-                            {effectiveUnread}
-                          </span>
-                        )}
-                      </button>
-
-                      {!isStaffRole(user.role) && !isDealerUser && (
-                        <>
-                      <button
-                        onClick={() => handleNavSelect('seller-platform')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
-                      >
-                        <Car className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
-                        <span>Sell Vehicle</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleNavSelect('saved')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center justify-between font-medium text-[#12576D] hover:text-[#0A3340]"
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Heart className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
-                          <span>Saved Cars</span>
-                        </div>
-                        {savedCount > 0 && (
-                          <span className="text-[#94A3B8] font-medium text-[11px]">{savedCount} items</span>
-                        )}
-                      </button>
-
-                      <button
-                        onClick={() => handleNavSelect('kayadlive')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
-                      >
-                        <Sparkles className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
-                        <span>KAYAD Live</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleNavSelect('buyer-platform')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
-                      >
-                        <Car className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
-                        <span>My Garage</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleNavSelect('payments')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
-                      >
-                        <CreditCard className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
-                        <span>Payment History</span>
-                      </button>
-
-                      <button
-                        onClick={() => handleNavSelect('finance')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
-                      >
-                        <CreditCard className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
-                        <span>Vehicle Financing</span>
-                      </button>
-                        </>
-                      )}
-
-                      <button
-                        onClick={() => handleNavSelect(isDealerUser ? 'dealer:settings' : 'profile')}
-                        className="w-full text-left px-4 py-2 hover:bg-[#F0FAF8] flex items-center gap-2.5 font-medium text-[#12576D] hover:text-[#0A3340]"
-                      >
-                        <Settings className="w-4 h-4 text-[#64748B] stroke-[1.75]" />
-                        <span>{isDealerUser ? 'Dealer Settings' : 'Account Settings'}</span>
-                      </button>
-                    </div>
-
-                    {/* A dealer is a SEPARATE account (own registration and verification). The personal account menu offers no in-place dealer upgrade. */}
-
-                    {user.role === 'mechanic' && (
-                      <div className="border-t border-[#D7E7E4] pt-1.5 mt-1.5 bg-emerald-50/50 pb-1">
-                        <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-800">
-                          Pre-Purchase Inspection Portal
-                        </div>
-                        <button
-                          onClick={() => handleNavSelect('inspections')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-emerald-100/70 flex items-center gap-2.5 font-bold text-emerald-900"
-                        >
-                          <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                          <span>Inspections</span>
-                        </button>
-                        <button
-                          onClick={() => handleNavSelect('inspections')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-emerald-100/70 flex items-center gap-2.5 font-bold text-emerald-900"
-                        >
-                          <Calendar className="w-4 h-4 text-emerald-600" />
-                          <span>Bookings Intake</span>
-                        </button>
-                        <button
-                          onClick={() => handleNavSelect('inspections')}
-                          className="w-full text-left px-4 py-1.5 hover:bg-emerald-100/70 flex items-center gap-2.5 font-bold text-emerald-900"
-                        >
-                          <FileText className="w-4 h-4 text-emerald-600" />
-                          <span>Inspection reports</span>
-                        </button>
-                      </div>
-                    )}
-
-                    {isStaffRole(user.role) && (
-                      <div className="border-t border-[#D7E7E4] pt-1.5 mt-1.5 bg-[#EEF7F5]/80 pb-1">
-                        <div className="px-4 py-1 text-[10px] font-bold uppercase tracking-wider text-[#12576D]">
-                          System Administration
-                        </div>
-                        {(user.role === 'superadmin' || user.role === 'admin') && (
-                          <button
-                            onClick={() => handleAdminRoute('/admin/settings')}
-                            className="w-full text-left px-4 py-1.5 hover:bg-[#DDF4F0] flex items-center gap-2.5 font-bold text-[#0A3340]"
-                          >
-                            <Sliders className="w-4 h-4 text-[#12576D]" />
-                            <span>System Management</span>
-                          </button>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Logout Button */}
-                    <div className="border-t border-[#D7E7E4] pt-1 mt-1">
-                      <button
-                        onClick={() => {
-                          if (onLogout) onLogout();
-                          setShowUserDropdown(false);
-                        }}
-                        className="w-full text-left px-4 py-2 hover:bg-rose-50 text-rose-600 flex items-center gap-2.5 font-bold transition-colors"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span>Log Out</span>
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
             ) : (
               <div className="hidden sm:flex items-center gap-2">
@@ -825,12 +590,23 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <button type="button" onClick={() => { setMobileMenuOpen(false); hamburgerRef.current?.focus(); }} className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/15 bg-white/[0.06] text-white hover:bg-white/[0.12]" aria-label="Close navigation menu"><X className="h-5 w-5" aria-hidden="true" /></button>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {user ? (
+                {authLoading && sessionHinted ? (
+                  <section className="mb-4 rounded-[22px] border border-white/10 bg-white/[0.05] p-3.5" aria-label="Checking your account" role="status" aria-live="polite">
+                    <div className="flex items-center gap-3">
+                      <span className="h-11 w-11 shrink-0 animate-pulse rounded-2xl bg-white/10" aria-hidden="true" />
+                      <span className="min-w-0 flex-1">
+                        <span className="block h-3 w-32 max-w-full animate-pulse rounded bg-white/15" aria-hidden="true" />
+                        <span className="mt-2 block h-2.5 w-44 max-w-full animate-pulse rounded bg-white/10" aria-hidden="true" />
+                        <span className="sr-only">Checking your account session</span>
+                      </span>
+                    </div>
+                  </section>
+                ) : user ? (
                   <section className="mb-4 rounded-[22px] border border-white/10 bg-white/[0.07] p-3.5">
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex min-w-0 items-center gap-3">
                         {user.avatar ? <img src={user.avatar} alt="" className="h-11 w-11 shrink-0 rounded-2xl object-cover ring-1 ring-white/15" /> : <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-[#0D7187]"><User className="h-5 w-5" /></div>}
-                        <div className="min-w-0"><p className="truncate text-sm font-black">{user.name}</p><p className="truncate text-[10px] text-white/55">{user.email}</p><p className="mt-1 text-[9px] font-black uppercase tracking-[.14em] text-[#61D7CA]">{user.role}</p></div>
+                        <div className="min-w-0"><p className="truncate text-sm font-black">{user.name}</p><p className="truncate text-[10px] text-white/55">{user.email}</p><p className="mt-1 text-[9px] font-black uppercase tracking-[.14em] text-[#61D7CA]" data-testid="drawer-role-label">{isStaffRole(user.role) ? staffRoleLabel(user.role) : user.role === 'dealer' ? 'Verified Dealer' : user.role === 'mechanic' ? 'NTSA Mechanic' : 'Personal account'}</p></div>
                       </div>
                       <button type="button" onClick={() => { if (onLogout) onLogout(); setMobileMenuOpen(false); }} className="shrink-0 rounded-xl border border-rose-300/20 bg-rose-400/10 px-3 py-2 text-[10px] font-black text-rose-200">Log out</button>
                     </div>
@@ -896,9 +672,10 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </nav>
                 </section>
 
-                <section className="kayad-drawer-panel mb-4 rounded-[22px] border border-white/[0.07] bg-white/[0.035] p-2" aria-labelledby="kayad-drawer-workspace">
+                {user && (
+                  <section className="kayad-drawer-panel mb-4 rounded-[22px] border border-white/[0.07] bg-white/[0.035] p-2" aria-labelledby="kayad-drawer-workspace">
                     <span id="kayad-drawer-workspace" className="block px-2 pb-1 pt-1 text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">
-                      {isDealerUser ? 'Dealer workspace' : isStaffAccount ? 'Staff workspace' : isMechanicAccount ? 'Provider workspace' : user ? 'Your KAYAD' : 'Quick access'}
+                      {isDealerUser ? 'Dealer workspace' : isStaffAccount ? 'Staff workspace' : isMechanicAccount ? 'Provider workspace' : 'Your KAYAD'}
                     </span>
                     <div className="kayad-drawer-list">
                       {user && isDealerUser && <>
@@ -909,14 +686,12 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <button type="button" onClick={() => handleNavSelect('dealer:settings')} className="kayad-drawer-tile"><Settings className="h-4 w-4" />Settings</button>
                         <button type="button" onClick={() => handleNavSelect('chat')} className="kayad-drawer-tile"><MessageSquare className="h-4 w-4" />Messages {effectiveUnread > 0 && <span className="kayad-drawer-count">{effectiveUnread}</span>}</button>
                         <button type="button" onClick={() => { navigate('/notifications'); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Bell className="h-4 w-4" />Notifications {notificationUnreadCount > 0 && <span className="kayad-drawer-count kayad-drawer-count--alert">{notificationUnreadCount}</span>}</button>
-                        {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Sliders className="h-4 w-4" />Compare Vehicles</button>}
                       </>}
                       {user && isStaffAccount && <>
                         <button type="button" onClick={() => handleNavSelect('chat')} className="kayad-drawer-tile"><MessageSquare className="h-4 w-4" />Messages {effectiveUnread > 0 && <span className="kayad-drawer-count">{effectiveUnread}</span>}</button>
                         <button type="button" onClick={() => { navigate('/notifications'); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Bell className="h-4 w-4" />Notifications {notificationUnreadCount > 0 && <span className="kayad-drawer-count kayad-drawer-count--alert">{notificationUnreadCount}</span>}</button>
                         <button type="button" onClick={() => handleAdminRoute('/admin')} className="kayad-drawer-tile"><Settings className="h-4 w-4" />Admin Console</button>
                         <button type="button" onClick={() => handleNavSelect('profile')} className="kayad-drawer-tile"><User className="h-4 w-4" />Account Settings</button>
-                        {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Sliders className="h-4 w-4" />Compare Vehicles</button>}
                       </>}
                       {user && isMechanicAccount && <>
                         <button type="button" onClick={() => handleNavSelect('dashboard')} className="kayad-drawer-tile"><LayoutDashboard className="h-4 w-4" />Dashboard</button>
@@ -925,18 +700,26 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <button type="button" onClick={() => { navigate('/notifications'); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Bell className="h-4 w-4" />Notifications</button>
                         <button type="button" onClick={() => handleNavSelect('profile')} className="kayad-drawer-tile"><User className="h-4 w-4" />Account Settings</button>
                         <button type="button" onClick={() => handleNavSelect('payments')} className="kayad-drawer-tile"><CreditCard className="h-4 w-4" />Payment History</button>
-                        {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Sliders className="h-4 w-4" />Compare Vehicles</button>}
                       </>}
                       {user && !isRestrictedWorkspace && !isMechanicAccount && <>
-                        <button type="button" onClick={() => handleNavSelect('dashboard')} className="kayad-drawer-tile"><LayoutDashboard className="h-4 w-4" />Dashboard</button>
+                        <button type="button" onClick={() => handleNavSelect('dashboard')} className="kayad-drawer-tile"><LayoutDashboard className="h-4 w-4" />{isSellerRole(user.role) ? 'My Account' : 'Buyer Dashboard'}</button>
+                        {isSellerRole(user.role) && <button type="button" onClick={() => handleNavSelect('seller-dashboard')} className="kayad-drawer-tile"><Car className="h-4 w-4" />Selling Workspace</button>}
+                        <button type="button" onClick={() => handleNavSelect('profile')} className="kayad-drawer-tile"><User className="h-4 w-4" />Account Settings</button>
                         <button type="button" onClick={() => handleNavSelect('chat')} className="kayad-drawer-tile"><MessageSquare className="h-4 w-4" />Messages {effectiveUnread > 0 && <span className="kayad-drawer-count">{effectiveUnread}</span>}</button>
                         <button type="button" onClick={() => { navigate('/notifications'); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Bell className="h-4 w-4" />Notifications {notificationUnreadCount > 0 && <span className="kayad-drawer-count kayad-drawer-count--alert">{notificationUnreadCount}</span>}</button>
                         <button type="button" onClick={() => handleNavSelect('payments')} className="kayad-drawer-tile"><CreditCard className="h-4 w-4" />Payment History</button>
-                        {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Sliders className="h-4 w-4" />Compare Vehicles</button>}
                       </>}
-                      <button type="button" onClick={() => { onOpenAlerts(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Bell className="h-4 w-4" />Price Alerts</button>
                     </div>
                   </section>
+                )}
+
+                <section className="kayad-drawer-panel mb-4 rounded-[22px] border border-white/[0.07] bg-white/[0.035] p-2" aria-labelledby="kayad-drawer-quick-access">
+                  <span id="kayad-drawer-quick-access" className="block px-2 pb-1 pt-1 text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">Quick access</span>
+                  <div className="kayad-drawer-list">
+                    <button type="button" onClick={() => { onOpenAlerts(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Bell className="h-4 w-4" />Price Alerts</button>
+                    {onOpenCompare && <button type="button" onClick={() => { onOpenCompare(); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Sliders className="h-4 w-4" />Compare Vehicles</button>}
+                  </div>
+                </section>
 
                 {!isStaffAccount && (
                   <button type="button" onClick={() => handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'seller-platform')} id="mobile-cta-sell-car" className="mb-4 flex min-h-14 w-full items-center justify-between rounded-[20px] border border-[#43D0C2]/40 bg-gradient-to-r from-[#0D7187] to-[#176B87] px-4 text-left text-white shadow-[0_16px_35px_rgba(7,57,68,.22)] active:scale-[.99]"><span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/10"><PlusCircle className="h-5 w-5" /></span><span><strong className="block text-sm font-black">{isDealerUser ? 'Add Vehicle' : 'Sell Vehicle'}</strong><small className="text-[10px] text-white/60">{isDealerUser ? 'Add stock to your inventory' : 'List your vehicle with KAYAD'}</small></span></span><ChevronDown className="h-5 w-5 -rotate-90 text-[#8DE4DB]" /></button>

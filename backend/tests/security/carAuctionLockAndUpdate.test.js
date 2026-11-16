@@ -210,7 +210,7 @@ describe("updateCar — auction terms lock after draft", () => {
     expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
   });
 
-  test("staff/admin can still amend auction terms on a live auction for operational correction", async () => {
+  test("staff/admin cannot amend another business's auction terms (business boundary)", async () => {
     const car = makeCarDoc({ auctionStatus: "live", reservePrice: 1500000 });
     findByIdMock.mockResolvedValue(car);
     const req = { params: { id: "car1" }, user: { id: "admin1", role: "admin" }, body: { reservePrice: 1600000 } };
@@ -218,8 +218,8 @@ describe("updateCar — auction terms lock after draft", () => {
 
     await updateCar(req, res);
 
-    expect(car.reservePrice).toBe(1600000);
-    expect(res.json).toHaveBeenCalledWith(expect.objectContaining({ success: true }));
+    expect(car.reservePrice).toBe(1500000);
+    expect(res.status).toHaveBeenCalledWith(403);
   });
 
   test("a non-owner, non-staff dealer still gets 403 regardless of auction status", async () => {

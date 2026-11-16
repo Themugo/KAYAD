@@ -148,6 +148,31 @@ describe('Navbar', () => {
     expect(alerts[0].className).toContain('kayad-drawer-tile');
   });
 
+  it('keeps Price Alerts in its own Quick access section instead of mixing it into account workspace links', () => {
+    render(<MemoryRouter initialEntries={['/']}>
+      <Navbar {...guestProps} />
+    </MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+    const drawer = screen.getByRole('dialog');
+    const quickAccess = drawer.querySelector('#kayad-drawer-quick-access')?.parentElement;
+    expect(quickAccess).toBeTruthy();
+    expect(quickAccess.textContent).toContain('Price Alerts');
+    expect(drawer.querySelector('#kayad-drawer-workspace')).toBeNull();
+  });
+
+  it('keeps signed-in role workspace separate from Quick access', () => {
+    const buyer = { ...guestProps, user: { id: 'buyer-1', name: 'Buyer', email: 'buyer@example.test', role: 'buyer' } };
+    render(<MemoryRouter><Navbar {...buyer} /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+    const drawer = screen.getByRole('dialog');
+    const workspace = drawer.querySelector('#kayad-drawer-workspace')?.parentElement;
+    const quickAccess = drawer.querySelector('#kayad-drawer-quick-access')?.parentElement;
+    expect(workspace).toBeTruthy();
+    expect(quickAccess).toBeTruthy();
+    expect(workspace.textContent).not.toContain('Price Alerts');
+    expect(quickAccess.textContent).toContain('Price Alerts');
+  });
+
   it('mobile menu is a single readable list with an always-visible close control', () => {
     render(<MemoryRouter><Navbar {...guestProps} /></MemoryRouter>);
     fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
@@ -157,6 +182,31 @@ describe('Navbar', () => {
     expect(drawer.querySelector('.kayad-mobile-drawer-primary')).toBeTruthy();
   });
 
+
+  it('does not show a signed-out prompt while a returning member session is still being checked', () => {
+    localStorage.setItem('kayad_session_hint', '1');
+    render(<MemoryRouter><Navbar {...guestProps} authLoading /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+    const drawer = screen.getByRole('dialog');
+    expect(screen.getByRole('status', { name: /checking your account/i })).toBeTruthy();
+    expect(drawer.querySelector('button')?.textContent).not.toMatch(/sign in|sign up/i);
+    expect(screen.queryByText('Welcome to KAYAD')).toBeNull();
+    localStorage.removeItem('kayad_session_hint');
+  });
+
+  it('locks background page scrolling while the mobile drawer is open and restores prior styles', () => {
+    document.body.style.overflow = 'clip';
+    document.documentElement.style.overflow = 'auto';
+    render(<MemoryRouter><Navbar {...guestProps} /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+    expect(document.body.style.overflow).toBe('hidden');
+    expect(document.documentElement.style.overflow).toBe('hidden');
+    fireEvent.click(screen.getByRole('button', { name: /close navigation menu/i }));
+    expect(document.body.style.overflow).toBe('clip');
+    expect(document.documentElement.style.overflow).toBe('auto');
+    document.body.style.overflow = '';
+    document.documentElement.style.overflow = '';
+  });
 
   it('mobile menu keeps categories compact with accessible expandable child lists', () => {
     render(<MemoryRouter initialEntries={['/']}>
@@ -174,6 +224,21 @@ describe('Navbar', () => {
     fireEvent.click(auctionToggle);
     expect(screen.getByRole('button', { name: /collapse auction links/i }).getAttribute('aria-expanded')).toBe('true');
     expect(drawer.querySelector('#kayad-drawer-links-auction')?.hasAttribute('hidden')).toBe(false);
+  });
+
+  it('keeps Price Alerts and Compare Vehicles together in Quick Access without role-specific duplicates', () => {
+    const onOpenCompare = vi.fn();
+    const buyer = { ...guestProps, user: { id: 'buyer-1', name: 'Buyer', email: 'buyer@example.test', role: 'buyer' }, onOpenCompare };
+    render(<MemoryRouter><Navbar {...buyer} /></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: /toggle navigation menu/i }));
+    const drawer = screen.getByRole('dialog');
+    const quickAccess = drawer.querySelector('#kayad-drawer-quick-access')?.parentElement;
+    expect(quickAccess).toBeTruthy();
+    const compareButtons = Array.from(drawer.querySelectorAll('button')).filter((b) => (b.textContent || '').trim() === 'Compare Vehicles');
+    expect(compareButtons).toHaveLength(1);
+    expect(quickAccess?.contains(compareButtons[0])).toBe(true);
+    fireEvent.click(compareButtons[0]);
+    expect(onOpenCompare).toHaveBeenCalledTimes(1);
   });
 
   it('signed-in buyer sees Saved Vehicles only once in the unified menu list', () => {

@@ -27,6 +27,7 @@ import AuditLog from "../models/AuditLog.js";
 import { auditAfterCommit } from "../utils/auditAfterCommit.js";
 import { logWarn } from "../utils/logger.js";
 import { validateBranding, isAllowedLogoUrl } from "../utils/brandingValidation.js";
+import { validateHeroPresentation, validateHeroCardContent } from "../utils/heroPresentation.js";
 import { keepLogoFile, readLogo, LogoStorageError } from "../services/brandingAssets.service.js";
 import { findAll } from "../db/index.js";
 import * as dealerApproval from "../services/dealerApproval.service.js";
@@ -729,40 +730,17 @@ router.get(
 );
 
 // =============================
-// ❌ DELETE CAR (HARD DELETE)
+// 🚫 PLATFORM STAFF CANNOT DELETE SELLER INVENTORY
 // =============================
 router.delete(
   "/cars/:id",
   adminOrSuper,
   validateObjectId,
-  asyncHandler(async (req, res) => {
-    const car = await Car.findById(req.params.id);
-
-    if (!car) {
-      return res.status(404).json({
-        success: false,
-        message: "Car not found",
-      });
-    }
-
-    await Car.softDelete(car._id, req.user.id);
-    await invalidatePublicListingCaches(); // Phase C.1: deleted listing must leave every public cache now
-    if (car.dealer) {
-      await User.findByIdAndUpdate(car.dealer, {
-        $inc: { listingCount: -1 },
-      });
-      await User.updateOne({ _id: car.dealer }, [
-        {
-          $set: {
-            listingCount: { $max: ["$listingCount", 0] },
-          },
-        },
-      ]).catch((e) => console.warn("⚠️ Dealer listing count update failed:", e.message));
-    }
-
-    res.json({
-      success: true,
-      message: "Car deleted",
+  asyncHandler(async (_req, res) => {
+    return res.status(403).json({
+      success: false,
+      code: "LISTING_OWNER_ACTION_REQUIRED",
+      message: "Platform administrators may approve or hide listings, but only the listing owner may remove a vehicle from their business inventory.",
     });
   }),
 );
@@ -823,6 +801,10 @@ router.post(
     const newStatus = action === "approve" ? "available" : "hidden";
     await Car.findByIdAndUpdate(req.params.id, { status: newStatus });
     car.status = newStatus;
+
+    // Publishing/hiding must invalidate every public inventory/search response cache immediately.
+    // Otherwise a successfully approved listing can remain absent from the public marketplace until cache expiry.
+    await invalidatePublicListingCaches();
 
     const dealer = car.dealer;
     const listingTitle = car.title || car.brand + " " + (car.model || "");
@@ -967,6 +949,18 @@ router.put(
     if (body.branding !== undefined) {
       const checked = validateBranding(body.branding);
       if (!checked.ok) return res.status(400).json({ success: false, code: "BRANDING_INVALID", message: checked.message });
+    }
+    // Homepage hero: numeric settings are clamped to safe ranges and unsafe URLs/colours/links are rejected, so no stored
+    // configuration can clip the hero or inject CSS/navigation. The UI applies the same rules (shared limits + parity test).
+    if (body.heroPresentation !== undefined) {
+      const checkedHero = validateHeroPresentation(body.heroPresentation);
+      if (checkedHero.errors.length) return res.status(400).json({ success: false, code: "HERO_PRESENTATION_INVALID", message: "Invalid hero configuration.", errors: checkedHero.errors });
+      body.heroPresentation = checkedHero.value;
+    }
+    if (body.heroCardContent !== undefined) {
+      const checkedCards = validateHeroCardContent(body.heroCardContent);
+      if (checkedCards.errors.length) return res.status(400).json({ success: false, code: "HERO_CARD_CONTENT_INVALID", message: "Invalid hero card content.", errors: checkedCards.errors });
+      body.heroCardContent = checkedCards.value;
     }
     if (body.bank !== undefined) {
       if (!body.bank || typeof body.bank !== "object" || Array.isArray(body.bank)) {

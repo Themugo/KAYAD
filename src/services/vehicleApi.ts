@@ -182,9 +182,9 @@ function errorDetailsFrom(body: unknown): VehicleApiErrorDetails | undefined {
   return Object.keys(details).length ? details : undefined;
 }
 
-async function vehicleFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+async function vehicleFetch<T>(path: string, options: RequestInit = {}, timeout?: number): Promise<T> {
   try {
-    return await request<T>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string> });
+    return await request<T>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string>, ...(timeout ? { timeout } : {}) });
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
     const kind: VehicleApiErrorKind = error.status === 404 ? 'not_found' : error.status ? 'server' : 'network';
@@ -198,6 +198,10 @@ export interface GetCarsParams {
   keyword?: string;
   brand?: string;
   model?: string;
+  /** Manual entry: typed text that is not a listed option; matched by "contains" on the server. */
+  brandLike?: string;
+  modelLike?: string;
+  colorLike?: string;
   city?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -233,15 +237,115 @@ export interface GetCarsParams {
 /** GET /api/cars - real, paginated listing. Query params match
  * backend/controllers/carController.js's getCars destructured
  * req.query fields directly. */
-export async function getCars(params: GetCarsParams = {}): Promise<PaginatedCarsResponse> {
+function isTransientInventoryError(err: unknown): boolean {
+  if (!(err instanceof VehicleApiError)) return false;
+  if (err.maintenance) return false;
+  return err.kind === 'network' || err.status === 408 || err.status === 502 || err.status === 503 || err.status === 504;
+}
+
+// ---------------------------------------------------------------------------
+// Inventory read cache (stale-while-revalidate).
+// The marketplace, the app shell and the market context all read the same
+// /api/cars pages. Identical requests share one network call (in-flight dedupe),
+// a fresh result is reused for FRESH_MS, and an older result (kept for STALE_MS,
+// also across reloads via sessionStorage) is shown instantly while a background
+// refresh replaces it. Any listing write clears it, so sellers never see old data.
+// ---------------------------------------------------------------------------
+const FRESH_MS = 30_000;
+const STALE_MS = 10 * 60_000;
+const FIRST_ATTEMPT_MS = 20_000;
+const RETRY_ATTEMPT_MS = 45_000;
+const STORE_KEY = 'kayad:cars-cache:v1';
+const MAX_STORED = 6;
+type CacheEntry = { at: number; data: PaginatedCarsResponse };
+const carsCache = new Map<string, CacheEntry>();
+const carsInflight = new Map<string, Promise<PaginatedCarsResponse>>();
+let storeLoaded = false;
+// Tests exercise request shapes and failures, so the cache is off under test unless a test turns it on.
+let cacheEnabled = !(typeof import.meta !== 'undefined' && (import.meta as { env?: { MODE?: string } }).env?.MODE === 'test');
+/** Test hook: turn the inventory cache on or off. */
+export function setCarsCacheEnabled(on: boolean): void { cacheEnabled = on; if (!on) clearCarsCache(); }
+
+function carsQuery(params: GetCarsParams): string {
   const query = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') {
-      query.set(key, String(value));
-    }
+    if (value !== undefined && value !== null && value !== '') query.set(key, String(value));
   });
-  const qs = query.toString();
-  return vehicleFetch<PaginatedCarsResponse>(`/api/cars${qs ? `?${qs}` : ''}`, { method: 'GET' });
+  return query.toString();
+}
+
+/** Cache key: the same filters in any order are the same page. */
+function carsKey(params: GetCarsParams): string {
+  return [...new URLSearchParams(carsQuery(params)).entries()].sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+}
+
+function loadStore() {
+  if (storeLoaded) return;
+  storeLoaded = true;
+  try {
+    const raw = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem(STORE_KEY) : null;
+    if (!raw) return;
+    const parsed = JSON.parse(raw) as Array<[string, CacheEntry]>;
+    parsed.forEach(([k, v]) => { if (v && Date.now() - v.at < STALE_MS && !carsCache.has(k)) carsCache.set(k, v); });
+  } catch { /* storage unavailable or corrupt: run without it */ }
+}
+
+function saveStore() {
+  try {
+    if (typeof sessionStorage === 'undefined') return;
+    const recent = [...carsCache.entries()].sort((a, b) => b[1].at - a[1].at).slice(0, MAX_STORED);
+    sessionStorage.setItem(STORE_KEY, JSON.stringify(recent));
+  } catch { /* quota or private mode: ignore */ }
+}
+
+/** Drop every cached inventory page. Called after any listing write. */
+export function clearCarsCache(): void {
+  carsCache.clear();
+  carsInflight.clear();
+  try { if (typeof sessionStorage !== 'undefined') sessionStorage.removeItem(STORE_KEY); } catch { /* ignore */ }
+}
+
+/** Synchronous read of a previously loaded page. `fresh` says whether it still needs no refresh. */
+export function peekCars(params: GetCarsParams = {}): { data: PaginatedCarsResponse; fresh: boolean } | null {
+  if (!cacheEnabled) return null;
+  loadStore();
+  const entry = carsCache.get(carsKey(params));
+  if (!entry) return null;
+  const age = Date.now() - entry.at;
+  if (age > STALE_MS) return null;
+  return { data: entry.data, fresh: age < FRESH_MS };
+}
+
+/** Warm the cache for a page the user is about to open (fire and forget). */
+export function prefetchCars(params: GetCarsParams = {}): void {
+  if (peekCars(params)?.fresh) return;
+  void getCars(params, { force: true }).catch(() => undefined);
+}
+
+export async function getCars(params: GetCarsParams = {}, opts: { force?: boolean } = {}): Promise<PaginatedCarsResponse> {
+  const key = carsKey(params);
+  if (!opts.force) {
+    const hit = peekCars(params);
+    if (hit?.fresh) return hit.data;
+  }
+  const pending = carsInflight.get(key);
+  if (pending) return pending;
+  const path = `/api/cars${carsQuery(params) ? `?${carsQuery(params)}` : ''}`;
+  // A first attempt that fails for a transient reason (no response, 408/502/503/504 other than maintenance) is retried once
+  // with a longer allowance, which is what a server that is still waking up needs. Skipped under test and for definite answers.
+  const run = vehicleFetch<PaginatedCarsResponse>(path, { method: 'GET' }, cacheEnabled ? FIRST_ATTEMPT_MS : undefined)
+    .catch(async (err) => {
+      if (!cacheEnabled || !isTransientInventoryError(err)) throw err;
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      return vehicleFetch<PaginatedCarsResponse>(path, { method: 'GET' }, RETRY_ATTEMPT_MS);
+    })
+    .then((data) => {
+      if (cacheEnabled) { carsCache.set(key, { at: Date.now(), data }); saveStore(); }
+      return data;
+    })
+    .finally(() => { carsInflight.delete(key); });
+  carsInflight.set(key, run);
+  return run;
 }
 
 /** GET /api/cars/:id - single car by ID. */
@@ -482,6 +586,7 @@ export async function createCar(payload: CreateCarPayload): Promise<CreateCarRes
   (images || []).forEach((file) => formData.append('images', file));
 
   try {
+    clearCarsCache();
     // The shared client defaults to Content-Type: application/json, and axios
     // serialises FormData to JSON (dropping the files) under that header.
     // Declaring multipart lets the browser set the boundary itself.
@@ -493,7 +598,7 @@ export async function createCar(payload: CreateCarPayload): Promise<CreateCarRes
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
     throw new VehicleApiError(serverMessageFrom(error.responseData, error.message), error.status === 404 ? 'not_found' : 'server', error.status, errorDetailsFrom(error.responseData));
-  }
+  } finally { clearCarsCache(); }
 }
 
 export type UpdateCarPayload = Omit<CreateCarPayload, 'images'>;
@@ -508,11 +613,12 @@ export async function updateCar(id: string, payload: UpdateCarPayload): Promise<
     if (value !== undefined && value !== null && value !== '') body[key] = value;
   });
   try {
+    clearCarsCache();
     return await request<CreateCarResponse>(`/api/cars/${encodeURIComponent(id)}`, { method: 'PUT', body });
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
     throw new VehicleApiError(serverMessageFrom(error.responseData, error.message), error.status === 404 ? 'not_found' : error.status ? 'server' : 'network', error.status, errorDetailsFrom(error.responseData));
-  }
+  } finally { clearCarsCache(); }
 }
 
 
@@ -538,34 +644,39 @@ export async function addCarImages(id: string, files: File[]): Promise<ListingIm
   const formData = new FormData();
   files.forEach((file) => formData.append('images', file));
   try {
+    clearCarsCache();
     return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images`, {
       method: 'POST', body: formData, headers: { 'Content-Type': 'multipart/form-data' },
     });
-  } catch (err) { throw toVehicleError(err); }
+  } catch (err) { throw toVehicleError(err); } finally { clearCarsCache(); }
 }
 
 export async function deleteCarImage(id: string, index: number): Promise<ListingImagesResponse> {
   try {
+    clearCarsCache();
     return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images/${index}`, { method: 'DELETE' });
-  } catch (err) { throw toVehicleError(err); }
+  } catch (err) { throw toVehicleError(err); } finally { clearCarsCache(); }
 }
 
 /** Choose the poster: the server moves the photo to the front and returns the new order. */
 export async function setCoverImage(id: string, index: number): Promise<ListingImagesResponse> {
   try {
+    clearCarsCache();
     return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images/cover`, { method: 'PATCH', body: { index } });
-  } catch (err) { throw toVehicleError(err); }
+  } catch (err) { throw toVehicleError(err); } finally { clearCarsCache(); }
 }
 
 /** Dealer marks one of their own listings as sold. Sale details are optional and kept in the audit log. */
 export async function markCarSold(id: string, body: { buyerName?: string; salePrice?: number; notes?: string } = {}): Promise<{ success: boolean; message?: string; code?: string }> {
   try {
+    clearCarsCache();
     return await request<{ success: boolean; message?: string }>(`/api/dealer/cars/${encodeURIComponent(id)}/mark-sold`, { method: 'PATCH', body });
-  } catch (err) { throw toVehicleError(err); }
+  } catch (err) { throw toVehicleError(err); } finally { clearCarsCache(); }
 }
 
 export async function deleteCar(id: string): Promise<{ success: boolean; message?: string }> {
   try {
+    clearCarsCache();
     return await request<{ success: boolean; message?: string }>(`/api/cars/${encodeURIComponent(id)}`, { method: 'DELETE' });
-  } catch (err) { throw toVehicleError(err); }
+  } catch (err) { throw toVehicleError(err); } finally { clearCarsCache(); }
 }

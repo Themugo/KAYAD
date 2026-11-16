@@ -10,7 +10,7 @@ import AdminSettingsOnboarding from '../../../pages/admin/AdminSettingsOnboardin
 
 const policy = (over = {}) => ({
   privateSellerRegistration: 'enabled', privateSellerApprovalMode: 'disabled', privateSellerPackageMode: 'free',
-  dealerOnboardingMode: 'approval_required', listingModeration: 'hold_for_review',
+  dealerOnboardingMode: 'self_onboarding', listingModeration: 'auto_publish',
   dealerDecisionAuthority: 'owner_only', listingDecisionAuthority: 'owner_only',
   revision: 0, source: 'default', updatedAt: null, emailVerificationRequiredForSellers: true, ...over,
 });
@@ -21,10 +21,10 @@ describe('AdminSettingsOnboarding', () => {
   test('shows the current server values and that email verification cannot be disabled', async () => {
     getOnboardingSettings.mockResolvedValue({ policy: policy(), canChange: true });
     render(<AdminSettingsOnboarding />);
-    expect(await screen.findByLabelText(/Private seller approval/i)).toHaveValue('disabled');
-    expect(screen.getByLabelText(/Private seller packages/i)).toHaveValue('free');
-    expect(screen.getByLabelText(/Dealer onboarding/i)).toHaveValue('approval_required');
-    expect(screen.getByLabelText(/Listing moderation/i)).toHaveValue('hold_for_review');
+    expect(await screen.findByLabelText(/Private seller packages/i)).toHaveValue('free');
+    expect(screen.queryByLabelText(/Private seller approval/i)).toBeNull();
+    expect(screen.getByLabelText(/Dealer onboarding/i)).toHaveValue('self_onboarding');
+    expect(screen.queryByLabelText(/Listing approval/i)).toBeNull();
     expect(screen.getByText(/cannot be switched off/i)).toBeInTheDocument();
     expect(screen.getByText(/launch defaults/i)).toBeInTheDocument();
   });
@@ -40,24 +40,21 @@ describe('AdminSettingsOnboarding', () => {
 
   test('saves only the changed fields with the loaded revision and shows the server-confirmed result', async () => {
     getOnboardingSettings.mockResolvedValue({ policy: policy({ revision: 4, source: 'database' }), canChange: true });
-    updateOnboardingSettings.mockResolvedValue({ policy: policy({ revision: 5, source: 'database', dealerOnboardingMode: 'self_onboarding' }) });
+    updateOnboardingSettings.mockResolvedValue({ policy: policy({ revision: 5, source: 'database', dealerOnboardingMode: 'closed' }) });
     render(<AdminSettingsOnboarding />);
     const user = userEvent.setup();
-    await user.selectOptions(await screen.findByLabelText(/Dealer onboarding/i), 'self_onboarding');
+    await user.selectOptions(await screen.findByLabelText(/Dealer onboarding/i), 'closed');
     await user.click(screen.getByRole('button', { name: /Save 1 change/i }));
-    await waitFor(() => expect(updateOnboardingSettings).toHaveBeenCalledWith({ dealerOnboardingMode: 'self_onboarding', expectedRevision: 4 }));
+    await waitFor(() => expect(updateOnboardingSettings).toHaveBeenCalledWith({ dealerOnboardingMode: 'closed', expectedRevision: 4 }));
     expect(await screen.findByText(/Saved\. The new settings apply/i)).toBeInTheDocument();
     expect(screen.getByText(/Revision 5/)).toBeInTheDocument();
   });
 
-  test('owner can configure the future seller approval mode without changing package mode', async () => {
+  test('personal selling has no administrator approval control', async () => {
     getOnboardingSettings.mockResolvedValue({ policy: policy({ revision: 4, source: 'database' }), canChange: true });
-    updateOnboardingSettings.mockResolvedValue({ policy: policy({ revision: 5, source: 'database', privateSellerApprovalMode: 'required' }) });
     render(<AdminSettingsOnboarding />);
-    const user = userEvent.setup();
-    await user.selectOptions(await screen.findByLabelText(/Private seller approval/i), 'required');
-    await user.click(screen.getByRole('button', { name: /Save 1 change/i }));
-    await waitFor(() => expect(updateOnboardingSettings).toHaveBeenCalledWith({ privateSellerApprovalMode: 'required', expectedRevision: 4 }));
+    expect(await screen.findByLabelText(/Private seller packages/i)).toHaveValue('free');
+    expect(screen.queryByLabelText(/Private seller approval/i)).toBeNull();
   });
 
   test('a failed save says nothing was changed and keeps the server values', async () => {
@@ -65,20 +62,21 @@ describe('AdminSettingsOnboarding', () => {
     updateOnboardingSettings.mockRejectedValue({ response: { status: 500, data: { message: 'Could not save settings' } } });
     render(<AdminSettingsOnboarding />);
     const user = userEvent.setup();
-    await user.selectOptions(await screen.findByLabelText(/Listing moderation/i), 'auto_publish');
+    await user.selectOptions(await screen.findByLabelText(/Dealer onboarding/i), 'closed');
     await user.click(screen.getByRole('button', { name: /Save 1 change/i }));
     expect(await screen.findByRole('alert')).toHaveTextContent(/Not saved.*Nothing was changed/i);
   });
 
   test('a conflict (409) shows the latest values and asks the owner to review', async () => {
     getOnboardingSettings.mockResolvedValue({ policy: policy(), canChange: true });
-    updateOnboardingSettings.mockRejectedValue({ response: { status: 409, data: { current: policy({ revision: 7, source: 'database', dealerOnboardingMode: 'closed' }) } } });
+    updateOnboardingSettings.mockRejectedValue({ response: { status: 409, data: { current: policy({ revision: 7, source: 'database', dealerOnboardingMode: 'self_onboarding', dealerDecisionAuthority: 'admins' }) } } });
     render(<AdminSettingsOnboarding />);
     const user = userEvent.setup();
-    await user.selectOptions(await screen.findByLabelText(/Dealer onboarding/i), 'self_onboarding');
+    await user.selectOptions(await screen.findByLabelText(/Dealer onboarding/i), 'closed');
     await user.click(screen.getByRole('button', { name: /Save 1 change/i }));
     expect(await screen.findByText(/changed by someone else/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Dealer onboarding/i)).toHaveValue('closed');
+    expect(screen.getByLabelText(/Dealer onboarding/i)).toHaveValue('self_onboarding');
+    expect(screen.getByLabelText(/Who approves or rejects dealer business verification/i)).toHaveValue('admins');
   });
 
   test('unavailable settings are displayed as restrictive, never as open', async () => {

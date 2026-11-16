@@ -56,7 +56,7 @@ describe('Dealer inventory list', () => {
     expect(screen.getByTestId('inventory-no-match')).toBeTruthy();
     fireEvent.change(screen.getByLabelText('Filter by status'), { target: { value: 'all' } });
     fireEvent.change(screen.getByLabelText('Sort inventory'), { target: { value: 'price_desc' } });
-    const first = screen.getAllByTestId('inventory-row-number')[0].closest('div.p-4') as HTMLElement;
+    const first = screen.getAllByTestId('inventory-row-number')[0].closest('[data-testid="inventory-row"]') as HTMLElement;
     expect(within(first).getByText('2016 Landcruiser V8')).toBeTruthy();
   });
 

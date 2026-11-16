@@ -654,7 +654,7 @@ export default function VisualExperienceStudio() {
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                   ad.status === 'active' ? 'bg-emerald-100 text-emerald-700' :
                   ad.status === 'paused' ? 'bg-[#DDF4F0] text-[#12576D]' :
-                  'bg-[#EEF7F5] text-[#64748B]'
+                  'bg-[#EEF7F5] text-[#4B5D6E]'
                 }`}>
                   {ad.status}
                 </span>

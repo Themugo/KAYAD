@@ -30,8 +30,9 @@ const checks = [
   // backend/tests/regression/stage2EntryCorrections.test.js (S2-ESC-01).
   ['auction fulfilment does not import the admin escrow release service', !/import\s*\{[^}]*\breleaseEscrow\b[^}]*\}\s*from\s*["']\.\/escrow\.service\.js["']/.test(read('backend/services/auctionFulfilment.service.js'))],
   ['auction completion requires a governed release', /ESCROW_RELEASE_REQUIRES_APPROVAL/.test(read('backend/services/auctionFulfilment.service.js'))],
-  ['re-award claims losing bid conditionally', /updateMany\("bids", \{ id: candidate\.id, status: "lost" \}/.test(read('backend/services/auctionFulfilment.service.js'))],
-  ['re-award claims outcome conditionally', /updateMany\("auction_outcomes", \{ id: outcome\.id, status: "reaward_pending"/.test(read('backend/services/auctionFulfilment.service.js'))],
+  // Re-award is now ONE database RPC (all-or-nothing) instead of split conditional writes; see reawardAtomicity.test.js.
+  ['re-award runs as one atomic database RPC', /rpc\(\s*"kayad_reaward_auction_outcome_atomic"/.test(read('backend/services/auctionFulfilment.service.js')) && fs.existsSync(path.join(root, 'supabase/migrations/20261114130000_auction_atomic_reaward.sql'))],
+  ['re-award only proceeds from reaward_pending', /outcome\.status !== "reaward_pending"/.test(read('backend/services/auctionFulfilment.service.js')) && /reaward_pending/.test(read('supabase/migrations/20261114130000_auction_atomic_reaward.sql'))],
   ['re-award never reopens bidding', !/allow_bid:\s*true/.test(read('backend/services/auctionFulfilment.service.js'))],
   ['dealer cancellation blocks paid outcomes', /outcome\.payment_status === "paid"/.test(read('backend/services/auctionFulfilment.service.js'))],
   ['disputes converge to existing governance/escrow authorities', /openEscrowDispute|governanceService\.createDispute/.test(read('backend/services/auctionFulfilment.service.js'))],

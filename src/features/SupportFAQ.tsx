@@ -362,7 +362,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
                 >
                   {category.icon}
                   {category.label}
-                  <span className={`px-1.5 rounded-full text-[10px] ${active ? 'bg-white/15 text-white' : 'bg-[#EEF7F5] text-[#64748B]'}`}>{count}</span>
+                  <span className={`px-1.5 rounded-full text-[10px] ${active ? 'bg-white/10 text-white' : 'bg-[#EEF7F5] text-[#4B5D6E]'}`}>{count}</span>
                 </button>
               );
             })}
@@ -392,7 +392,7 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
                     </div>
                     <h3 className="text-sm sm:text-[15px] font-extrabold text-[#0A3340] leading-snug">{faq.question}</h3>
                   </div>
-                  <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${expanded ? 'bg-[#176B87] text-white' : 'bg-[#EEF7F5] text-[#64748B]'}`}>
+                  <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${expanded ? 'bg-[#176B87] text-white' : 'bg-[#EEF7F5] text-[#4B5D6E]'}`}>
                     {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                   </span>
                 </button>

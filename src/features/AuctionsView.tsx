@@ -353,7 +353,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
           there is no marketing copy independent of what the backend returns. */}
       <section className={`auction-market-header ${failed.live && failed.scheduled && failed.ended ? 'has-auction-error' : ''}`}>
         <div className="auction-market-header-top">
-          <div className="auction-eyebrow"><span className={`auction-status-indicator ${loading ? 'is-loading' : failed.live ? 'is-unavailable' : live.length ? 'is-live' : 'is-idle'}`} aria-label={loading ? 'Auction data loading' : failed.live ? 'Live auction data unavailable' : live.length ? 'Live auction records available' : 'No live auction records returned'} /> KAYAD AUCTIONS <span className="auction-eyebrow-divider" /> CURATED VEHICLE MARKET</div>
+          <div className="auction-eyebrow"><span role="img" className={`auction-status-indicator ${loading ? 'is-loading' : failed.live ? 'is-unavailable' : live.length ? 'is-live' : 'is-idle'}`} aria-label={loading ? 'Auction data loading' : failed.live ? 'Live auction data unavailable' : live.length ? 'Live auction records available' : 'No live auction records returned'} /> KAYAD AUCTIONS <span className="auction-eyebrow-divider" /> CURATED VEHICLE MARKET</div>
           <div className="auction-trust-row">
             <span><ShieldCheck size={13} /> Verified listings</span>
             <span><Lock size={13} /> Published settlement rules</span>

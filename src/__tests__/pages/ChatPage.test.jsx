@@ -13,6 +13,10 @@ vi.mock('../../services/chatApi', () => ({
   ChatApiError: class ChatApiError extends Error {},
 }));
 
+vi.mock('../../context/SocketContext', () => ({
+  useSocket: () => ({ connected: false, joinMessages: vi.fn(), leaveChannel: vi.fn() }),
+}));
+
 const CurrentLocation = () => {
   const location = useLocation();
   return <output data-testid="current-location">{location.pathname}{location.search}</output>;

@@ -8,6 +8,7 @@ import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { buildAuthPath } from '../../../utils/authIntent';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ListingStatusBadge, ListingThumb, ListingFacts, ListingScoreRing } from '../../../components/listing/ListingPresentation';
 import { createCar, getMyListings, VehicleApiError, BackendCar } from '../../../services/vehicleApi';
 import { getMyEscrows, BackendEscrow } from '../../../services/escrowApi';
 import { calculateListingQualityScore } from '../../../utils/listingQualityScore';
@@ -336,7 +337,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
           <h1 id="kayad-sell-entry-title">Your next sale should feel simpler.</h1>
           <p>Present your vehicle clearly and manage genuine buyer conversations from one dedicated workspace. Private seller access is free and does not require a seller application or package.</p>
           <div className="kayad-sell-entry__trust-row" aria-label="Seller workflow benefits">
-            <span><ShieldCheck size={16} aria-hidden="true" /> Free private selling · listing moderation remains separate</span>
+            <span><ShieldCheck size={16} aria-hidden="true" /> Free private selling · no seller approval needed</span>
             <span><MessageSquare size={16} aria-hidden="true" /> Buyer conversations</span>
             <span><FileCheck size={16} aria-hidden="true" /> Inspection options</span>
           </div>
@@ -346,7 +347,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
           <div className="kayad-sell-entry__intro">
             <span>CHOOSE YOUR SELLING WORKSPACE</span>
             <h2>Built for how you sell.</h2>
-            <p>{signedInWithoutSellerAccess ? (personalRole ? 'You are signed in with your personal account. Private selling is added to this same account once approved; you do not need a second account.' : 'Your current account is signed in, but seller tools are not enabled for this role. Request the correct access instead of creating a duplicate account.') : 'Start with the right account type. You can sign in with an existing KAYAD account instead of creating another one.'}</p>
+            <p>{signedInWithoutSellerAccess ? (personalRole ? 'You are signed in with your personal account. You can list vehicles from this same account with no seller approval or package; you do not need a second account.' : 'Your current account is signed in, but seller tools are not enabled for this role. Request the correct access instead of creating a duplicate account.') : 'Start with the right account type. You can sign in with an existing KAYAD account instead of creating another one.'}</p>
           </div>
           <div className="kayad-sell-entry__choices">
             <button type="button" aria-pressed={!isDealer} onClick={() => setSellerAccountType('seller')} className={`kayad-sell-choice ${!isDealer ? 'is-selected' : ''}`}>
@@ -747,66 +748,34 @@ function QuickStat({ icon, value, label, color }: { icon: React.ReactNode; value
 
 /** Whole vehicle visible (object-contain on a neutral ground). A failed load is shown explicitly as "Photo unavailable"
  *  and reported to the console with the failing URL: storage/permission faults are surfaced, not hidden. */
-function VehicleImage({ urls, alt, className = '', compact = false }: { urls: (string | undefined)[]; alt: string; className?: string; compact?: boolean }) {
-  const candidates = urls.filter((u): u is string => Boolean(u));
-  const [index, setIndex] = React.useState(0);
-  const src = candidates[index];
-  if (!src) {
-    return (
-      <div role="img" aria-label={candidates.length ? `${alt}: photo unavailable` : `${alt}: no photo uploaded`} className={`flex h-full w-full flex-col items-center justify-center gap-1 bg-slate-100 text-center text-slate-500 ${className}`}>
-        <Car size={compact ? 22 : 40} aria-hidden="true" />
-        {!compact && <span className="px-2 text-[11px] font-semibold">{candidates.length ? 'Photo unavailable' : 'No photo yet'}</span>}
-      </div>
-    );
-  }
-  return (
-    <img
-      src={src}
-      alt={alt}
-      loading="lazy"
-      className={`h-full w-full bg-slate-100 object-contain ${className}`}
-      onError={() => { console.warn('[KAYAD] vehicle image failed to load:', src); setIndex((i) => i + 1); }}
-    />
-  );
-}
-
 function ListingCard({ listing, delay }: { listing: BackendCar; delay: number }) {
-  const statusColors: Record<string, { bg: string; text: string }> = {
-    available: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
-    active: { bg: 'bg-emerald-100', text: 'text-emerald-700' },
-    draft: { bg: 'bg-[#EEF7F5]', text: 'text-[#64748B]' },
-    sold: { bg: 'bg-[#DDF4F0]', text: 'text-[#12576D]' },
-    pending: { bg: 'bg-[#DDF4F0]', text: 'text-[#12576D]' },
-  };
-  const statusClass = statusColors[listing.status || 'draft'] || statusColors.draft;
   const image = listing.images?.[0]?.thumb || listing.images?.[0]?.url;
+  const photoCount = Array.isArray(listing.images) ? listing.images.length : 0;
+  const city = listing.city || listing.location_city || '';
+  const title = `${listing.year} ${listing.brand} ${listing.model}`;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
-      className="rounded-xl overflow-hidden"
-      style={{ backgroundColor: 'white' }}
+      className="overflow-hidden rounded-2xl border border-[#D7E7E4] bg-white shadow-[0_2px_10px_rgba(11,29,58,0.04)] transition hover:border-[#176B87]/40 hover:shadow-[0_8px_22px_rgba(11,29,58,0.08)]"
     >
-      <div className="flex flex-col md:flex-row">
-        <div className="w-full md:w-48 h-32 md:h-auto flex items-center justify-center" style={{ backgroundColor: KAYAD_THEME.slate[100] }}>
-          <VehicleImage urls={[listing.images?.[0]?.thumb, listing.images?.[0]?.url]} alt={`${listing.year} ${listing.brand} ${listing.model}`} />
-        </div>
-        <div className="flex-1 p-4">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <h3 className="font-bold" style={{ color: KAYAD_THEME.navy }}>{listing.year} {listing.brand} {listing.model}</h3>
-              {listing.mileage != null && <p className="text-sm" style={{ color: KAYAD_THEME.slate[500] }}>{listing.mileage.toLocaleString()} km</p>}
+      <div className="flex flex-col gap-3 p-3 sm:flex-row sm:gap-4 sm:p-4">
+        <ListingThumb src={image} fallback={listing.images?.[0]?.url} alt={title} count={photoCount} className="h-36 w-full sm:h-28 sm:w-44" />
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h3 className="truncate text-[15px] font-bold" style={{ color: KAYAD_THEME.navy }}>{title}</h3>
+              <ListingFacts className="mt-1" items={[
+                listing.mileage != null && `${listing.mileage.toLocaleString()} km`,
+                city,
+                <span key="views" className="inline-flex items-center gap-1"><EyeIcon size={13} aria-hidden="true" /> {listing.views || 0}</span>,
+              ]} />
             </div>
-            <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${statusClass.bg} ${statusClass.text}`}>
-              {listing.status || 'draft'}
-            </span>
+            <ListingStatusBadge status={listing.status || 'draft'} label={listing.status || 'draft'} className="capitalize" />
           </div>
-          <p className="text-xl font-bold mb-3" style={{ color: KAYAD_THEME.gold }}>KES {Number(listing.price || 0).toLocaleString('en-KE')}</p>
-          <div className="flex flex-wrap gap-3 text-sm" style={{ color: KAYAD_THEME.slate[500] }}>
-            <span className="flex items-center gap-1"><EyeIcon size={14} /> {listing.views || 0}</span>
-          </div>
+          <p className="mt-3 text-xl font-extrabold" style={{ color: KAYAD_THEME.navy }}>KES {Number(listing.price || 0).toLocaleString('en-KE')}</p>
         </div>
       </div>
     </motion.div>
@@ -905,7 +874,7 @@ function ListingWizardSection({ draft, setDraft, onNavigate, onPublished }: {
           {currentStep === 2 && <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2"><label className={labelClass}>Make *<input className={fieldClass} maxLength={80} value={form.vehicleInfo.make} onChange={e => updateNested('vehicleInfo','make',e.target.value)} placeholder="e.g. Toyota" /></label><label className={labelClass}>Model *<input className={fieldClass} maxLength={100} value={form.vehicleInfo.model} onChange={e => updateNested('vehicleInfo','model',e.target.value)} placeholder="e.g. Harrier" /></label><label className={labelClass}>Year *<input className={fieldClass} type="number" min="1900" max={new Date().getFullYear()+1} value={form.vehicleInfo.year || ''} onChange={e => updateNested('vehicleInfo','year',Number(e.target.value))}/></label><label className={labelClass}>Body type<select className={fieldClass} value={form.vehicleInfo.bodyType} onChange={e => updateNested('vehicleInfo','bodyType',e.target.value)}><option value="">Select body type</option>{['SUV','Sedan','Hatchback','Wagon','Coupe','Pickup','Van','Truck','Convertible','Other'].map(x=><option key={x}>{x}</option>)}</select></label><label className={labelClass}>Registration number<input className={fieldClass} value={form.vehicleInfo.registration} onChange={e => updateNested('vehicleInfo','registration',e.target.value)} placeholder="Optional" maxLength={50}/></label><label className={labelClass}>VIN / chassis number<input className={fieldClass} value={form.vehicleInfo.vin} onChange={e => updateNested('vehicleInfo','vin',e.target.value)} placeholder="Optional" maxLength={50}/></label></div>}
           {currentStep === 3 && <div className="space-y-4"><div><h2 className="text-lg font-bold text-[#0A3340]">Add vehicle photographs *</h2><p className="mt-1 text-sm text-slate-500">JPEG, PNG or WebP; up to 10 photos in this submission, maximum 5 MB each. Show the full vehicle clearly.</p></div><label className="flex min-h-36 cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-teal-300 bg-teal-50/50 p-5 text-center"><Camera className="mb-2 text-teal-700" size={32}/><span className="font-bold text-[#0A3340]">Choose vehicle photos</span><span className="mt-1 text-xs text-slate-500">Select up to 10 images</span><input className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={e => { const files = Array.from(e.currentTarget.files || []) as File[]; const valid = files.filter(f => ['image/jpeg','image/png','image/webp'].includes(f.type) && f.size <= 5*1024*1024); const hadInvalid = valid.length !== files.length; update('photos', [...form.photos, ...valid].slice(0,10)); if (hadInvalid) setValidationError('Some files were skipped. Use JPG, PNG or WebP images no larger than 5 MB each.'); e.currentTarget.value=''; }}/></label><div className="grid grid-cols-2 gap-3 sm:grid-cols-3">{photoPreviews.map(({file,url},i)=><div key={`${file.name}-${i}`} className="relative overflow-hidden rounded-xl border border-slate-200"><img src={url} alt={`Vehicle photo ${i+1}`} className="h-32 w-full object-contain bg-slate-50"/><button type="button" onClick={()=>update('photos',form.photos.filter((_,index)=>index!==i))} className="absolute right-2 top-2 rounded-full bg-white/95 px-2 py-1 text-xs font-bold text-rose-700">Remove</button></div>)}</div><p className="text-sm text-slate-600">{form.photos.length} of 10 photos selected</p></div>}
           {currentStep === 4 && <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2"><label className={labelClass}>Mileage (km)<input className={fieldClass} type="number" min="0" max="2000000" value={form.details.mileage || ''} onChange={e=>updateNested('details','mileage',Number(e.target.value))}/></label><label className={labelClass}>Fuel type<select className={fieldClass} value={form.details.fuelType} onChange={e=>updateNested('details','fuelType',e.target.value)}>{['Petrol','Diesel','Hybrid','Plug-in Hybrid','Electric'].map(x=><option key={x}>{x}</option>)}</select></label><label className={labelClass}>Transmission<select className={fieldClass} value={form.details.transmission} onChange={e=>updateNested('details','transmission',e.target.value)}>{['Automatic','Manual','CVT','Dual-Clutch'].map(x=><option key={x}>{x}</option>)}</select></label><label className={labelClass}>Exterior colour<input className={fieldClass} value={form.details.color} onChange={e=>updateNested('details','color',e.target.value)} maxLength={60}/></label><label className={`${labelClass} sm:col-span-2`}>Vehicle location / town *<input className={fieldClass} value={form.details.city} onChange={e=>updateNested('details','city',e.target.value)} placeholder="e.g. Nairobi" maxLength={100}/></label><label className={`${labelClass} sm:col-span-2`}>Description *<textarea className={fieldClass} rows={5} maxLength={5000} value={form.details.description} onChange={e=>updateNested('details','description',e.target.value)} placeholder="Describe the vehicle, key features and anything a buyer should know."/><span className="mt-1 block text-xs font-normal text-slate-400">{form.details.description.length}/5000 characters</span></label><label className={labelClass}>Condition<select className={fieldClass} value={form.details.condition} onChange={e=>updateNested('details','condition',e.target.value)}>{['New','Like New','Excellent','Good','Fair','Used','Locally Used','Ex-Japan'].map(x=><option key={x}>{x}</option>)}</select></label></div>}
-          {currentStep === 5 && <div className="max-w-2xl space-y-4"><h2 className="text-lg font-bold text-[#0A3340]">Ownership declaration</h2><p className="text-sm text-slate-600">Only list a vehicle you own or are legally authorised to sell. KAYAD may request supporting documents during its verification process.</p><label className="flex items-start gap-3 rounded-xl bg-[#F6FAF9] p-4 text-sm text-slate-700"><input className="mt-1 h-4 w-4 accent-teal-600" type="checkbox" checked={form.ownership.ownerConfirmed} onChange={e=>updateNested('ownership','ownerConfirmed',e.target.checked)}/><span>I confirm that I am the vehicle owner or have authority from the owner to advertise and sell it. *</span></label><label className="flex items-start gap-3 rounded-xl border border-slate-200 p-4 text-sm text-slate-700"><input className="mt-1 h-4 w-4 accent-teal-600" type="checkbox" checked={form.ownership.logbookAvailable} onChange={e=>updateNested('ownership','logbookAvailable',e.target.checked)}/><span>I have access to the vehicle logbook / ownership documentation.</span></label><p className="text-xs text-amber-700">This declaration is part of the listing form. The current listing API does not store ownership documents or the logbook checkbox; verification remains subject to the Trust Center process.</p></div>}
+          {currentStep === 5 && <div className="max-w-2xl space-y-4"><h2 className="text-lg font-bold text-[#0A3340]">Ownership declaration</h2><p className="text-sm text-slate-600">Only list a vehicle you own or are legally authorised to sell. KAYAD may request supporting documents during its verification process.</p><label className="flex items-start gap-3 rounded-xl bg-[#F6FAF9] p-4 text-sm text-slate-700"><input className="mt-1 h-4 w-4 accent-teal-600" type="checkbox" checked={form.ownership.ownerConfirmed} onChange={e=>updateNested('ownership','ownerConfirmed',e.target.checked)}/><span>I confirm that I am the vehicle owner or have authority from the owner to advertise and sell it. *</span></label><label className="flex items-start gap-3 rounded-xl border border-slate-200 p-4 text-sm text-slate-700"><input className="mt-1 h-4 w-4 accent-teal-600" type="checkbox" checked={form.ownership.logbookAvailable} onChange={e=>updateNested('ownership','logbookAvailable',e.target.checked)}/><span>I have access to the vehicle logbook / ownership documentation.</span></label><p className="text-xs text-teal-700">This declaration is part of the listing form. The current listing API does not store ownership documents or the logbook checkbox; verification remains subject to the Trust Center process.</p></div>}
           {currentStep === 6 && <div className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2">{(['exterior','interior','engine','tyres'] as const).map(key=><label key={key} className={labelClass}>{key[0].toUpperCase()+key.slice(1)} condition<textarea className={fieldClass} rows={3} maxLength={500} value={form.condition[key]} onChange={e=>updateNested('condition',key,e.target.value)} placeholder={`Describe ${key} condition`}/></label>)}</div>}
           {currentStep === 7 && <label className={labelClass}>Known issues / repairs<textarea className={fieldClass} rows={6} maxLength={2000} value={form.condition.knownIssues} onChange={e=>updateNested('condition','knownIssues',e.target.value)} placeholder="Disclose known faults, accident repairs or issues. Enter 'None known' if applicable."/></label>}
           {currentStep === 8 && <label className={labelClass}>Service history<textarea className={fieldClass} rows={6} maxLength={2000} value={form.condition.serviceHistory} onChange={e=>updateNested('condition','serviceHistory',e.target.value)} placeholder="Describe available service records, recent maintenance and major work."/></label>}
@@ -972,15 +941,19 @@ function ListingQualitySection({ listings, loading }: { listings: BackendCar[]; 
           descriptionLength: l.description?.length || 0,
         });
         return (
-          <div key={l.id} className="rounded-xl p-4 bg-white flex items-center gap-4">
-            <div className="w-16 h-16 rounded-lg flex items-center justify-center overflow-hidden shrink-0" style={{ backgroundColor: KAYAD_THEME.slate[100] }}>
-              <VehicleImage compact urls={[l.images?.[0]?.thumb, l.images?.[0]?.url]} alt={l.title} />
+          <div key={l.id} className="flex items-center gap-3 rounded-2xl border border-[#D7E7E4] bg-white p-3 shadow-[0_2px_10px_rgba(11,29,58,0.04)] sm:gap-4 sm:p-4">
+            <ListingThumb src={l.images?.[0]?.thumb || l.images?.[0]?.url} fallback={l.images?.[0]?.url} alt={l.title} count={l.images?.length || 0} className="h-16 w-20 sm:h-20 sm:w-28" />
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate font-bold" style={{ color: KAYAD_THEME.navy }}>{l.year} {l.brand} {l.model}</h3>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <ListingStatusBadge status={l.status || 'draft'} label={l.status || 'draft'} className="capitalize" />
+                <span className="text-xs font-semibold text-[#475569]">KES {Number(l.price || 0).toLocaleString('en-KE')}</span>
+              </div>
             </div>
-            <div className="flex-1">
-              <h3 className="font-bold" style={{ color: KAYAD_THEME.navy }}>{l.year} {l.brand} {l.model}</h3>
-              <p className="text-sm" style={{ color: KAYAD_THEME.slate[500] }}>{l.status || 'draft'}</p>
+            <div className="flex flex-col items-center gap-0.5">
+              <ListingScoreRing score={score} />
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">Quality</span>
             </div>
-            <p className="text-2xl font-bold" style={{ color: score >= 80 ? KAYAD_THEME.emerald : KAYAD_THEME.amber }}>{score}%</p>
           </div>
         );
       })}

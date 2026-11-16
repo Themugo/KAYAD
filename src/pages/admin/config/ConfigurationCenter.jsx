@@ -274,7 +274,7 @@ export default function ConfigurationCenter() {
             <p className="text-sm text-[#64748B] mb-3">{flag.description}</p>
             <div className="flex items-center justify-between pt-3 border-t border-[#D7E7E4]">
               <span className="px-2 py-0.5 bg-[#EEF7F5] rounded text-xs text-[#64748B]">{flag.category}</span>
-              <span className={`px-2 py-0.5 rounded text-xs font-medium ${flag.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-[#EEF7F5] text-[#64748B]'}`}>
+              <span className={`px-2 py-0.5 rounded text-xs font-medium ${flag.status === 'active' ? 'bg-emerald-100 text-emerald-700' : 'bg-[#EEF7F5] text-[#4B5D6E]'}`}>
                 {flag.status}
               </span>
             </div>

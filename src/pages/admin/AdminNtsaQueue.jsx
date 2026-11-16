@@ -4,7 +4,7 @@ import { classifyAdminFailure } from '../../utils/adminLoadFailure';
 import { ShieldCheck, Search, CheckCircle, XCircle, FileText, X, RefreshCw, AlertTriangle, Clock3 } from 'lucide-react';
 
 const STATUS_META = {
-  pending: { label: 'Pending', bg: 'rgba(217, 119, 6, 0.12)', color: '#92400e' },
+  pending: { label: 'Pending', bg: 'rgba(217, 119, 6, 0.12)', color: '#176B87' },
   in_review: { label: 'In review', bg: 'rgba(23, 107, 135, 0.12)', color: '#176b87' },
   passed: { label: 'Passed', bg: 'rgba(22, 163, 74, 0.12)', color: '#15803d' },
   failed: { label: 'Failed', bg: 'rgba(220, 38, 38, 0.10)', color: '#b91c1c' },
@@ -29,7 +29,7 @@ const displayValue = (value) => {
 function Modal({ title, children, onClose, wide = false }) {
   return (
     <div className="ntsa-modal-backdrop" onClick={onClose} role="presentation" style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(10, 35, 44, 0.72)', backdropFilter: 'blur(6px)' }}>
-      <section aria-modal="true" role="dialog" aria-label={title} onClick={(event) => event.stopPropagation()} style={{ background: '#fff', color: '#0a3340', border: '1px solid rgba(10,51,64,.12)', borderRadius: 16, padding: 24, width: wide ? 560 : 440, maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 24px 80px rgba(0,0,0,.22)' }}>
+      <section aria-modal="true" role="dialog" aria-label={title} onClick={(event) => event.stopPropagation()} style={{ background: '#fff', color: '#0a3340', border: '1px solid rgba(10,51,64,.12)', borderRadius: 16, padding: 24, width: wide ? 560 : 440, maxWidth: '100%', maxHeight: '90vh', overflowY: 'auto', position: 'relative', boxShadow: '0 24px 80px rgba(10,51,64,.22)' }}>
         <button type="button" onClick={onClose} aria-label="Close dialog" style={{ position: 'absolute', top: 12, right: 12, background: 'transparent', border: 0, color: '#52656b', cursor: 'pointer', padding: 6 }}><X size={18} /></button>
         <h3 style={{ margin: '0 30px 18px 0', fontSize: 18 }}>{title}</h3>
         {children}

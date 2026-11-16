@@ -82,7 +82,7 @@ export const KAYADLive: React.FC<KAYADLiveProps> = ({ onNavigate, onOpenVehicleD
         {article.excerpt && <p className="text-base text-slate-600">{article.excerpt}</p>}
       </header>
       {article.featured_image && <img src={article.featured_image} alt={article.title} loading="lazy" decoding="async" className="max-h-[420px] w-full rounded-xl object-contain bg-slate-50"/>}
-      {articleLoading ? <div className="flex items-center gap-2 text-sm text-slate-500"><Loader2 className="animate-spin" size={16}/> Loading article…</div> : articleError ? <div role="alert" className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm">This article could not be loaded. <button className="ml-2 font-bold underline" onClick={() => openArticle(article)}>Try again</button></div> : <div className="prose prose-slate max-w-none whitespace-pre-wrap">{article.body || article.excerpt || 'This article has no published body yet.'}</div>}
+      {articleLoading ? <div className="flex items-center gap-2 text-sm text-slate-500"><Loader2 className="animate-spin" size={16}/> Loading article…</div> : articleError ? <div role="alert" className="rounded-lg border border-teal-300 bg-teal-50 p-4 text-sm">This article could not be loaded. <button className="ml-2 font-bold underline" onClick={() => openArticle(article)}>Try again</button></div> : <div className="prose prose-slate max-w-none whitespace-pre-wrap">{article.body || article.excerpt || 'This article has no published body yet.'}</div>}
     </article>
   );
 
@@ -101,7 +101,7 @@ export const KAYADLive: React.FC<KAYADLiveProps> = ({ onNavigate, onOpenVehicleD
   );
 };
 
-function RetryNotice({label,onRetry}:{label:string;onRetry:()=>void}) { return <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-slate-700">{label} <button type="button" onClick={onRetry} className="ml-2 inline-flex items-center gap-1 font-bold text-[#176B87]"><RefreshCw size={13}/> Retry</button></div>; }
+function RetryNotice({label,onRetry}:{label:string;onRetry:()=>void}) { return <div role="alert" className="rounded-lg border border-teal-200 bg-teal-50 p-3 text-sm text-slate-700">{label} <button type="button" onClick={onRetry} className="ml-2 inline-flex items-center gap-1 font-bold text-[#176B87]"><RefreshCw size={13}/> Retry</button></div>; }
 function ContentSection({title,icon,items,error,onOpen,onRetry}:{title:string;icon:React.ReactNode;items:CMSContentItem[];error:boolean;onOpen:(item:CMSContentItem)=>void;onRetry:()=>void}) { return <section><div className="mb-4 flex items-center gap-2 text-[#176B87]">{icon}<h2 className="text-base font-bold">{title}</h2></div>{error ? <RetryNotice label={`${title} could not be loaded.`} onRetry={onRetry}/> : items.length===0 ? <p className="text-xs text-[#94A3B8]">No published {title.toLowerCase()} yet.</p> : <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">{items.map(item=><article key={item.id} className="rounded-xl border border-[#D7E7E4] bg-white p-4"><h3 className="mb-1 text-sm font-bold text-[#176B87]">{item.title}</h3>{item.excerpt && <p className="text-xs text-[#64748B]">{item.excerpt}</p>}{item.reading_time ? <p className="mt-1.5 text-[10px] text-[#94A3B8]">{item.reading_time} min read</p>:null}<button type="button" onClick={()=>onOpen(item)} className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#176B87]">Read article <ArrowRight size={13}/></button></article>)}</div>}</section>; }
 
 export default KAYADLive;

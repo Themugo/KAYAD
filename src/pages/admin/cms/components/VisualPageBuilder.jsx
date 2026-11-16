@@ -419,7 +419,7 @@ export default function VisualPageBuilder({ page = null, onSaved = null }) {
             <div className="w-px h-6 bg-[#DDF4F0] mx-2" />
             <button
               onClick={() => setIsEditing(!isEditing)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${isEditing ? 'bg-[#0A3340] text-white' : 'bg-[#EEF7F5] text-[#64748B]'}`}
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${isEditing ? 'bg-[#0A3340] text-white' : 'bg-[#EEF7F5] text-[#4B5D6E]'}`}
             >
               {isEditing ? 'Editing' : 'Viewing'}
             </button>

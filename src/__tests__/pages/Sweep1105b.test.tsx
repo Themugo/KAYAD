@@ -18,7 +18,8 @@ describe('1105b sweep', () => {
   });
   it('admin screens tolerate missing data from the API', () => {
     const a = fs.readFileSync('src/pages/admin/AdminCars.jsx', 'utf8');
-    expect(a).toContain("typeof res.policy !== 'object'");
+    // AdminCars validates the listing response shape instead of treating a malformed reply as an empty inventory.
+    expect(a).toContain('INVALID_LISTING_RESPONSE');
     const d = fs.readFileSync('src/pages/admin/AdminSiteDesigns.jsx', 'utf8');
     expect(d).toContain('Array.isArray(o?.designs)');
   });

@@ -10,6 +10,8 @@ interface Props {
   top: React.ReactNode;
   /** Optional strip along the bottom of the photo (live auction bid). */
   bottom?: React.ReactNode;
+  /** First cards on screen: load right away at high priority instead of lazily. */
+  priority?: boolean;
 }
 
 const MAX_THUMBS = 4;
@@ -20,8 +22,9 @@ const MAX_THUMBS = 4;
  * an expand control sit on the photo, and a thumbnail strip with a "+N More" tile
  * sits beneath it. Presentation only: it shows the listing's own photos.
  */
-const InventoryCardMedia: React.FC<Props> = ({ title, images = [], className, onOpen, top, bottom }) => {
+const InventoryCardMedia: React.FC<Props> = ({ title, images = [], className, onOpen, top, bottom, priority = false }) => {
   const [index, setIndex] = useState(0);
+  const [loaded, setLoaded] = useState(false);
   const total = images.length;
   const current = Math.min(index, Math.max(total - 1, 0));
   const extra = total > MAX_THUMBS ? total - MAX_THUMBS : 0;
@@ -33,8 +36,14 @@ const InventoryCardMedia: React.FC<Props> = ({ title, images = [], className, on
           <img
             src={images[current]}
             alt={title}
-            className="h-full w-full object-contain p-1 transition-transform duration-500 group-hover:scale-[1.03]"
-            loading="lazy"
+            className={`h-full w-full object-contain p-1 transition duration-500 group-hover:scale-[1.03] ${loaded ? 'opacity-100' : 'opacity-0'}`}
+            loading={priority ? 'eager' : 'lazy'}
+            decoding="async"
+            // @ts-expect-error fetchPriority is valid HTML but older React typings omit it
+            fetchpriority={priority ? 'high' : 'auto'}
+            onLoad={() => setLoaded(true)}
+            onError={() => setLoaded(true)}
+            ref={(el) => { if (el?.complete && !loaded) setLoaded(true); }}
           />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center gap-1 text-[#64748B]">

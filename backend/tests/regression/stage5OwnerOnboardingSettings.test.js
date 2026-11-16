@@ -131,19 +131,19 @@ beforeEach(() => {
 
 // ─────────────────────────────────────────────────────────────
 describe("pure policy functions", () => {
-  test("launch defaults are deliberate: dealers are NOT silently opened", () => {
+  test("launch defaults allow dealer self-onboarding after verification submission", () => {
     expect(INITIAL_DEFAULTS).toEqual({
       privateSellerRegistration: "enabled",
       privateSellerApprovalMode: "disabled",
       privateSellerPackageMode: "free",
-      dealerOnboardingMode: "approval_required",
-      listingModeration: "hold_for_review",
+      dealerOnboardingMode: "self_onboarding",
+      listingModeration: "auto_publish",
       dealerDecisionAuthority: "owner_only",
       listingDecisionAuthority: "owner_only",
     });
   });
-  test("restrictive fallback closes registration and holds listings", () => {
-    expect(RESTRICTIVE).toMatchObject({ privateSellerRegistration: "disabled", dealerOnboardingMode: "closed", listingModeration: "hold_for_review" });
+  test("restrictive fallback closes registration but does not require per-listing approval", () => {
+    expect(RESTRICTIVE).toMatchObject({ privateSellerRegistration: "disabled", dealerOnboardingMode: "closed", listingModeration: "auto_publish" });
   });
   test("corrupt values become restrictive per field and are reported", () => {
     const { policy, issues } = svc.normalizePolicyValue({ privateSellerRegistration: "yes", dealerOnboardingMode: "self_onboarding", listingModeration: 7 });
@@ -155,7 +155,7 @@ describe("pure policy functions", () => {
     expect(svc.normalizePolicyValue(v).policy).toEqual(RESTRICTIVE);
   });
   test.each([
-    [{ dealerOnboardingMode: "open" }], [{ privateSellerRegistration: true }], [{ listingModeration: "auto" }],
+    [{ dealerOnboardingMode: "open" }], [{ dealerOnboardingMode: "approval_required" }], [{ privateSellerRegistration: true }], [{ listingModeration: "auto" }], [{ privateSellerApprovalMode: "required" }],
     [{ nope: "x" }], [{}], [null], [[]], [{ revision: 99 }], [{ updatedBy: "attacker" }], [JSON.parse('{"__proto__":{"x":1}}')],
   ])("validatePolicyChanges rejects %j", (input) => {
     expect(svc.validatePolicyChanges(input).ok).toBe(false);
@@ -164,7 +164,7 @@ describe("pure policy functions", () => {
     expect(svc.validatePolicyChanges({
       dealerOnboardingMode: "self_onboarding",
       listingModeration: "auto_publish",
-      privateSellerApprovalMode: "required",
+      privateSellerApprovalMode: "disabled",
       privateSellerPackageMode: "optional",
     })).toMatchObject({ ok: true });
   });
@@ -229,7 +229,7 @@ describe("GET /api/admin/settings/onboarding — who can view", () => {
     const o = await call("GET", "/api/admin/settings/onboarding", { role: "owner" });
     expect(o.status).toBe(200);
     expect(o.body.canChange).toBe(true);
-    expect(o.body.options.dealerOnboardingMode).toEqual(["self_onboarding", "approval_required", "closed"]);
+    expect(o.body.options.dealerOnboardingMode).toEqual(["self_onboarding", "closed"]);
   });
   test("an owner-email account whose email is NOT verified holds no owner power at all (STAGE 5A: refused at authentication, not merely at the setting)", async () => {
     users["u-owner"].emailVerified = false;
@@ -286,14 +286,14 @@ describe("PUT /api/admin/settings/onboarding — who can change, validation, aud
     expect(r.status).toBe(400);
     expect(stored()).toBeUndefined();
   });
-  test("cannot enable seller approval until the capability table migration exists", async () => {
+  test("personal seller approval cannot be re-enabled", async () => {
     capabilityTableMissing = true;
     const r = await call("PUT", "/api/admin/settings/onboarding", {
       role: "owner",
       body: { privateSellerApprovalMode: "required", expectedRevision: 0 },
     });
-    expect(r.status).toBe(503);
-    expect(r.body.code).toBe("ONBOARDING_POLICY_PREREQUISITE_MISSING");
+    expect(r.status).toBe(400);
+    expect(r.body.code).toBe("ONBOARDING_POLICY_INVALID");
     expect(stored()).toBeUndefined();
   });
 
@@ -305,7 +305,7 @@ describe("PUT /api/admin/settings/onboarding — who can change, validation, aud
     const entry = auditCreate.mock.calls.find((c) => c[0].action === "Onboarding policy updated")[0];
     expect(entry.adminId).toBe("u-owner");
     expect(entry.details).toMatchObject({ outcome: "success" });
-    expect(entry.details.before.dealerOnboardingMode).toBe("approval_required");
+    expect(entry.details.before.dealerOnboardingMode).toBe("self_onboarding");
     expect(entry.details.after.dealerOnboardingMode).toBe("self_onboarding");
     expect(JSON.stringify(entry)).not.toMatch(/password|secret|token/i);
   });
@@ -347,7 +347,7 @@ describe("PUT /api/admin/settings/onboarding — who can change, validation, aud
     beforeWrite = async () => { waiting += 1; if (waiting === 2) release(); await gate; };
     // updated_at granularity: force distinct stamps for the winner so the loser's eq(updated_at) misses.
     const [a, b] = await Promise.all([
-      call("PUT", "/api/admin/settings/onboarding", { role: "owner", body: { listingModeration: "hold_for_review", expectedRevision: 1 } }),
+      call("PUT", "/api/admin/settings/onboarding", { role: "owner", body: { dealerOnboardingMode: "closed", expectedRevision: 1 } }),
       call("PUT", "/api/admin/settings/onboarding", { role: "owner", body: { dealerOnboardingMode: "closed", expectedRevision: 1 } }),
     ]);
     expect([a.status, b.status].filter((s) => s === 200)).toHaveLength(1);
@@ -373,7 +373,7 @@ describe("PUT /api/admin/settings/onboarding — who can change, validation, aud
   });
   test("a corrupt stored policy is repaired to a safe value on the next save (never to an unsafe one)", async () => {
     table.push({ key: svc.ONBOARDING_POLICY_KEY, value: { dealerOnboardingMode: "wide_open", revision: 2 }, updated_at: "2026-10-01T00:00:00.000Z" });
-    const r = await call("PUT", "/api/admin/settings/onboarding", { role: "owner", body: { listingModeration: "hold_for_review", expectedRevision: 2 } });
+    const r = await call("PUT", "/api/admin/settings/onboarding", { role: "owner", body: { dealerOnboardingMode: "closed", expectedRevision: 2 } });
     expect(r.status).toBe(200);
     expect(stored().value.dealerOnboardingMode).toBe("closed");
     expect(r.body.policy.source).toBe("database");
@@ -386,7 +386,7 @@ describe("public registration modes", () => {
     const r = await call("GET", "/api/admin/public/onboarding-policy");
     expect(r.status).toBe(200);
     expect(Object.keys(r.body.policy).sort()).toEqual(["available", "dealerOnboardingMode", "emailVerificationRequiredForSellers", "privateSellerApprovalMode", "privateSellerPackageMode", "privateSellerRegistration"]);
-    expect(r.body.policy).toMatchObject({ privateSellerRegistration: "enabled", privateSellerApprovalMode: "disabled", privateSellerPackageMode: "free", dealerOnboardingMode: "approval_required", available: true });
+    expect(r.body.policy).toMatchObject({ privateSellerRegistration: "enabled", privateSellerApprovalMode: "disabled", privateSellerPackageMode: "free", dealerOnboardingMode: "self_onboarding", available: true });
   });
   test("when the store is unavailable the page learns 'unavailable' and the restrictive values", async () => {
     failRead = true;
@@ -485,5 +485,18 @@ describe("decision authority is enforced on the real approval/moderation routes"
       const r = await call("POST", `/api/admin/cars/${ID}/moderate`, { role, body: { action: "approve" } });
       expect(r.status).toBe(403);
     }
+  });
+});
+
+describe("listing approval default and fail-safe (owner request: no approval rule unless an admin sets one)", () => {
+  test("no saved policy ⇒ listings are NOT held for approval", async () => {
+    const { INITIAL_DEFAULTS } = await import("../../services/onboardingPolicy.service.js");
+    expect(INITIAL_DEFAULTS.listingModeration).toBe("auto_publish");
+  });
+  test("legacy review and seller-approval settings normalize to self-service publication", async () => {
+    const { RESTRICTIVE, normalizePolicyValue } = await import("../../services/onboardingPolicy.service.js");
+    expect(RESTRICTIVE.listingModeration).toBe("auto_publish");
+    expect(normalizePolicyValue({ listingModeration: "bogus" }).policy.listingModeration).toBe("auto_publish");
+    expect(normalizePolicyValue({ listingModeration: "hold_for_review", privateSellerApprovalMode: "required", dealerOnboardingMode: "approval_required" }).policy).toMatchObject({ listingModeration: "auto_publish", privateSellerApprovalMode: "disabled", dealerOnboardingMode: "self_onboarding" });
   });
 });

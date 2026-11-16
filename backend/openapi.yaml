@@ -6981,6 +6981,20 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+  /api/dealer-platform/my-workspace:
+    get:
+      tags:
+      - Api
+      summary: Dealership the signed-in personal account works for
+      description: 'Returns the caller''s active team membership (dealershipName, teamRole, permissions[]) or an empty membership, plus an ambiguous flag when the account belongs to more than one dealership (the client then fails closed). Any authenticated personal account may call it; it reveals nothing beyond the caller''s own membership.'
+      operationId: getApiDealerPlatformMyWorkspace
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
   /api/dealer-platform/pipeline:
     get:
       tags:

@@ -150,10 +150,10 @@ describe("S1-LIST-01 seller cannot self-moderate, self-verify or self-promote th
     expect(saved.at(-1).title).toBe("Prado TX");
     expect(saved.at(-1).status).toBe("pending");
   });
-  test("admin may still change moderation/verification fields via the edit path", async () => {
+  test("admin cannot edit another business's listing through the edit path (moderation uses the dedicated moderate/verify routes)", async () => {
     const res = await put(ADMIN, { ntsaVerified: true, status: "available" });
-    expect(res.code).toBe(200);
-    expect(saved.at(-1)).toMatchObject({ ntsaVerified: true, status: "available" });
+    expect(res.code).toBe(403);
+    expect(saved).toHaveLength(0);
   });
 });
 
@@ -164,9 +164,10 @@ describe("S1-LIST-02 escrowEnabled stays server-computed on edit", () => {
     expect(res.code).toBe(200);
     expect(saved.at(-1).escrowEnabled).toBe(SERVER_ESCROW);
   });
-  test("client escrowEnabled:true is ignored for staff too", async () => {
-    await put(ADMIN, { escrowEnabled: true });
-    expect(saved.at(-1).escrowEnabled).toBe(SERVER_ESCROW);
+  test("staff cannot reach the edit path, so escrowEnabled can never be changed by them", async () => {
+    const res = await put(ADMIN, { escrowEnabled: true });
+    expect(res.code).toBe(403);
+    expect(saved).toHaveLength(0);
   });
 });
 
@@ -185,10 +186,11 @@ describe("S1-LIST-03 cross-owner edit/delete requires listing-management authori
     expect(softDeleteGuarded).not.toHaveBeenCalled();
     expect(softDelete).not.toHaveBeenCalled();
   });
-  test("admin can delete it", async () => {
+  test("admin cannot delete seller inventory", async () => {
     const res = mkRes();
     await deleteCar({ params: { id: "car-1" }, user: ADMIN }, res);
-    expect(softDeleteGuarded).toHaveBeenCalledWith("car-1", "admin-1");
+    expect(res.code).toBe(403);
+    expect(softDeleteGuarded).not.toHaveBeenCalled();
   });
 });
 
@@ -231,13 +233,12 @@ describe("S1-LIST-04 dealer bulk-status", () => {
     expect(r.code).toBe(200);
     expect(lastUpdate.patch).toEqual({ status: "available" });
   });
-  test("STAGE 5: hold_for_review refuses seller self-publication", async () => {
+  test("legacy hold_for_review cannot refuse seller self-publication", async () => {
     __setOnboardingPolicyForTests({ listingModeration: "hold_for_review" });
     currentUser = { ...SELLER, status: "approved" };
     const r = await patch({ ids: ["c1"], status: "available" });
-    expect(r.code).toBe(403);
-    expect(r.body.code).toBe("LISTING_PUBLICATION_REQUIRES_REVIEW");
-    expect(lastUpdate).toBeNull();
+    expect(r.code).toBe(200);
+    expect(lastUpdate.patch).toEqual({ status: "available" });
   });
   test("only own, non-rejected listings are touched", async () => {
     const r = await patch({ ids: ["c1", "c2", "c3"], status: "sold" });

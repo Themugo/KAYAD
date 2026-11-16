@@ -47,7 +47,7 @@ export default function DealerPlanDialog({ dealer, onClose, onGranted }) {
 
   return (
     <div role="presentation" onMouseDown={(e) => { if (e.target === e.currentTarget && !busy) onClose(); }}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16 }}>
+      style={{ position: 'fixed', inset: 0, background: 'rgba(10,51,64,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16 }}>
       <div role="dialog" aria-modal="true" aria-labelledby="dealer-plan-title" className="card" style={{ width: 'min(480px, 100%)', padding: 24 }}>
         <h2 id="dealer-plan-title" style={{ fontSize: '1.15rem', marginBottom: 4 }}>Listing plan</h2>
         <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>{name}{dealer?.email ? ` · ${dealer.email}` : ''}</p>

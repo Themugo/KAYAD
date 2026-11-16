@@ -52,3 +52,6 @@ create or replace function public.rls_auto_enable() returns event_trigger langua
 ```
 
 The shim contains no application schema. It must never be run on a real project.
+
+| G-26 | Existing production policy row may still say "hold every listing" | **Open (admin action)** | The new no-approval default applies only when no policy has ever been saved. Set Admin → Settings → Onboarding → Listing approval to "No approval" to change a saved policy; existing pending listings stay pending until an admin decides them |
+| G-27 | Mobile layout not visually verified on a device | **Open** | Layout changes are covered by unit tests and builds only; check kayad.space on a phone after deploy |

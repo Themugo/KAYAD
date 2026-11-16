@@ -42,7 +42,18 @@ export async function initiateHighValueDeposit({ auctionId, userId, req }) {
   if (!auction || !setup) throw Object.assign(new Error('Auction is not published'), { status: 404 });
   const policy = await getAuctionFinancialPolicy();
   const registration = await findOne('auction_registrations', { auction_id: auctionId, bidder_id: userId });
-  if (!registration || registration.status !== 'active') throw Object.assign(new Error('Active auction registration is required before a high-value deposit'), { status: 403 });
+  if (!registration || registration.status !== 'active' || registration.eligibility_status !== 'eligible'
+    || (registration.commitment_required && registration.commitment_status !== 'satisfied')) {
+    throw Object.assign(new Error('An active, eligible bidder pass is required before a high-value deposit'), { status: 403, code: 'BIDDER_REGISTRATION_REQUIRED' });
+  }
+  const auctionStatus = String(auction.auctionStatus || auction.auction_status || '').toLowerCase();
+  if (auctionStatus !== 'live' || (auction.auctionEnd && Date.parse(auction.auctionEnd) <= Date.now())) {
+    throw Object.assign(new Error('The high-value deposit is available only while the auction is accepting bids'), { status: 409, code: 'AUCTION_NOT_ACCEPTING_BIDS' });
+  }
+  const user = await findById('users', userId);
+  if (!user?.phone || user.phone.length < 8 || user.phoneVerified !== true) {
+    throw Object.assign(new Error('A verified phone number is required for the high-value deposit'), { status: 400, code: 'VERIFIED_PHONE_REQUIRED' });
+  }
   const hold = await createAuctionSecurityHold({
     auctionId,
     bidderId: userId,
@@ -55,7 +66,6 @@ export async function initiateHighValueDeposit({ auctionId, userId, req }) {
     },
   });
   if (hold.status === 'held' || hold.status === 'applied') return { hold, alreadyHeld: true };
-  const user = await findById('users', userId);
   const result = await initiateBidSecurity({
     auctionId,
     userId,

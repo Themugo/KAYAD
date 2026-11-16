@@ -9,9 +9,11 @@ import Dealer from "../models/Dealer.js";
 import InspectionOrder from "../models/InspectionOrder.js";
 import DealerAnalytics from "../models/DealerAnalytics.js";
 import Car from "../models/Car.js";
+import { loadInventoryPage, parseInventoryPaging } from "../services/dealerInventoryQuery.js";
 import Escrow from "../models/Escrow.js";
 import MarketingCampaign from "../models/MarketingCampaign.js";
 import { listDealerReviews } from '../services/review.service.js';
+import { listingStatusBreakdown, buildTopPerformers, buildRecentActivity } from "../services/dealerDashboardSummary.js";
 
 import { createCar, updateCar, deleteCar } from "./carController.js";
 import { logError } from "../utils/logger.js";
@@ -20,7 +22,7 @@ import { getDealerLeads, getLeadById, updateLeadStage as serviceUpdateLeadStage,
 import { create, findAll, findOne, update } from "../db/index.js";
 import { logAuditEvent } from "../services/auditService.js";
 import crypto from "crypto";
-import { sellerMayPublishDirectly, PUBLICATION_REVIEW_REQUIRED } from "../services/onboardingPolicy.service.js"; // STAGE 5
+import { sellerMayPublishDirectly } from "../services/onboardingPolicy.service.js"; // listing self-publication
 import { sendTeamInviteEmail } from "../services/email.service.js";
 import { listRoles, resolveRole, createCustomRole, updateCustomRole, deleteCustomRole, RoleError, newInviteToken } from "../services/dealerTeamRoles.service.js";
 import { formatPhone } from "../utils/format.js";
@@ -62,20 +64,21 @@ export async function getDealerDashboard(req, res) {
       }
     }
 
-    const topPerformers = [...listings]
-      .sort((a, b) => (b.views || 0) - (a.views || 0))
-      .slice(0, 3)
-      .map((l) => ({ id: l.id, title: l.title, views: l.views || 0, price: l.price }));
+    const listingStatus = listingStatusBreakdown(listings);
+    const topPerformers = buildTopPerformers(listings, leads);
+    const recentActivity = buildRecentActivity(listings, leads);
 
     const dashboard = {
       overview: {
         totalListings: listings.length,
         activeListings,
+        listingStatus,
         totalViews,
         leads: { total: leads.length, ...leadStageCounts },
         revenue: { total: totalRevenue },
       },
       topPerformers: { vehicles: topPerformers },
+      recentActivity,
     };
 
     res.json({ success: true, data: dashboard });
@@ -269,19 +272,9 @@ export async function updateDealerProfile(req, res) {
 
 export async function getInventory(req, res) {
   try {
-    const { status, page = 1, limit = 20 } = req.query;
-    const pageNum = Math.max(1, Number.parseInt(page, 10) || 1);
-    const limitNum = Math.min(100, Math.max(1, Number.parseInt(limit, 10) || 20));
-    const filter = { dealer: req.user.id, deletedAt: { $exists: false } }; // 14.8: soft-deleted listings are not inventory
-    if (status) filter.status = status;
-    const all = await Car.find(filter).sort({ createdAt: -1 });
-    const total = all.length;
-    const items = all.slice((pageNum - 1) * limitNum, pageNum * limitNum);
-    const stats = { total: all.length, published: 0, draft: 0, pending: 0, reserved: 0, sold: 0, archived: 0 };
-    for (const car of all) {
-      if (Object.prototype.hasOwnProperty.call(stats, car.status)) stats[car.status]++;
-    }
-    res.json({ success: true, data: { items, pagination: { page: pageNum, limit: limitNum, total, pages: Math.ceil(total / limitNum) }, stats } });
+    const { pageNum, limitNum } = parseInventoryPaging(req.query);
+    const data = await loadInventoryPage(Car, { dealerId: req.user.id, status: req.query.status, page: pageNum, limit: limitNum });
+    res.json({ success: true, data });
   } catch (err) {
     logError("Error fetching dealer inventory:", err);
     res.status(500).json({ success: false, message: "Failed to load dealer inventory" });
@@ -303,9 +296,13 @@ export async function bulkUpdateListings(req, res) {
     if (action !== "status") return res.status(400).json({ success: false, message: "Only status bulk updates are supported" });
     const status = req.body?.data?.status;
     if (!allowedStatuses.has(status)) return res.status(400).json({ success: false, message: "Invalid listing status" });
-    // STAGE 5: no self-publication while listings are held for owner review.
-    if ((status === "available" || status === "active") && !(await sellerMayPublishDirectly(req.user))) {
-      return res.status(403).json(PUBLICATION_REVIEW_REQUIRED);
+    // Per-listing administrator approval is retired. Keep account/email/package eligibility checks.
+    if ((status === "available" || status === "active") && !(await sellerMayPublishDirectly({
+      ...req.user,
+      progressiveAccess: req.progressiveAccess === true,
+      dealerVerificationStatus: req.verification?.verificationStatus,
+    }))) {
+      return res.status(403).json({ success: false, code: "SELLER_ACCOUNT_NOT_ELIGIBLE", message: "This account is not currently eligible to publish listings." });
     }
     const owned = await Car.find({ id: { $in: ids }, dealer: req.user.id, deletedAt: { $exists: false } });
     if (owned.length !== ids.length) return res.status(403).json({ success: false, message: "One or more listings are not owned by this dealer" });

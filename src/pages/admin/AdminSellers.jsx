@@ -247,7 +247,7 @@ export default function AdminSellers() {
                       </span>
                       {s.status === 'pending' && (s.role === 'dealer' || s.applicant) && (() => {
                         const el = approvalEligibility(s.application);
-                        if (el.state === 'blocked') return <div role="note" style={{ fontSize: 11, color: '#92400e', marginTop: 6, maxWidth: 260 }}>Cannot be approved yet: {el.reasons.join(' ')}</div>;
+                        if (el.state === 'blocked') return <div role="note" style={{ fontSize: 11, color: '#176B87', marginTop: 6, maxWidth: 260 }}>Cannot be approved yet: {el.reasons.join(' ')}</div>;
                         if (el.state === 'unknown') return <div role="note" style={{ fontSize: 11, color: '#64748b', marginTop: 6, maxWidth: 260 }}>Application completeness could not be checked; the server will validate on approval.</div>;
                         return null;
                       })()}

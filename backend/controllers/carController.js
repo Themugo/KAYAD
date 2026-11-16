@@ -19,7 +19,7 @@ import { logWarn, logError } from "../utils/logger.js";
 import { isSupabaseConnected } from "../utils/supabase.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import * as path from "path";
-import { STAFF_ROLES, SELLER_ROLES, canManageAnyListing } from "../config/roles.js";
+import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
 import { detectDuplicates, flagDuplicate } from "../services/duplicateVehicleService.js";
 import { logVehicleCreated, logVehicleEdited, logVehicleDeleted } from "../services/auditService.js";
 import { getDealerEntitlement, assertDealerCanCreateListing } from "../services/dealerSubscription.service.js";
@@ -28,7 +28,7 @@ import { atomicCreateDealerListing } from "../utils/atomicTransactions.js";
 import { evaluateEligibilityBatch } from "../services/privateSellerAuctionEligibility.service.js";
 import { randomUUID } from "node:crypto";
 import { registerMediaUploadJob, registerMediaUploadFailure, completeMediaUpload } from "../services/mediaRecovery.service.js";
-import { getOnboardingPolicy, isPolicyTrusted } from "../services/onboardingPolicy.service.js"; // STAGE 5
+import { sellerMayPublishDirectly } from "../services/onboardingPolicy.service.js"; // STAGE 5
 import { getEscrowEnabledForNewOrEditedCar, getEffectiveEscrowForCar } from "../services/escrowCapability.service.js";
 import { listingDeletionBlock, DELETE_BLOCK_CODES } from "../utils/carDeletionGuard.js";
 import { toPublicVehicleDetail, PUBLIC_VEHICLE_POLICY } from "../utils/publicVehicleProjection.js"; // Phase 13K: public responses are allowlisted, never raw rows
@@ -100,6 +100,9 @@ export const getCars = async (req, res) => {
       vin,
       engine,
       drivetrain,
+      brandLike,
+      modelLike,
+      colorLike,
       page = 1,
       limit = 12,
     } = req.query;
@@ -126,9 +129,21 @@ export const getCars = async (req, res) => {
     }
 
     if (brand) query.brand = { $in: brand.split(",") };
+    // Manual entry: a typed make/model/colour that is not one of the listed options matches by "contains" (case-insensitive), so a
+    // visitor can type "prad" or "land" and still find vehicles. Values are escaped and length-capped; they never reach the query raw.
+    const likeText = (value) => {
+      if (typeof value !== "string") return null;
+      const text = value.trim().slice(0, 40);
+      return text.length >= 2 ? { $regex: text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), $options: "i" } : null;
+    };
+    const brandContains = !brand && likeText(brandLike);
+    if (brandContains) query.brand = brandContains;
+    const modelContains = !model && likeText(modelLike);
     if (model) {
       const safeModel = model.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       query.model = { $regex: `^${safeModel}$`, $options: "i" };
+    } else if (modelContains) {
+      query.model = modelContains;
     }
     if (city) {
       const safeCity = city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -156,6 +171,7 @@ export const getCars = async (req, res) => {
     if (fuel) query.fuel = isPetrolFuel(fuel) ? { $regex: "^(petrol|gasoline|gas)$", $options: "i" } : exactText(fuel);
     if (transmission) query.transmission = exactText(transmission);
     if (color) query.color = exactText(color);
+    else { const colorContains = likeText(colorLike); if (colorContains) query.color = colorContains; }
     if (condition) query.condition = exactText(condition);
 
     if (mileageMin || mileageMax) {
@@ -341,7 +357,21 @@ export const getCars = async (req, res) => {
 // private draft/pending listings without authentication).
 export const getMyListings = async (req, res) => {
   try {
-    const cars = await Car.find({ dealer: req.user.id, deletedAt: { $exists: false } }) // 14.8: soft-deleted listings are not inventory
+    const filter = { dealer: req.user.id, deletedAt: { $exists: false } }; // 14.8: soft-deleted listings are not inventory
+    // Backward compatible: with no paging parameters every listing is returned, exactly as before (nothing is silently
+    // truncated). A caller that passes ?page / ?limit gets a database-side page plus a total, so large inventories need not
+    // be transferred in one response.
+    const paged = req.query?.page !== undefined || req.query?.limit !== undefined;
+    if (paged) {
+      const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 20));
+      const page = Math.max(1, Number.parseInt(req.query.page, 10) || 1);
+      const [cars, total] = await Promise.all([
+        Car.find(filter).populate("dealer", "name businessName avatar").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit),
+        Car.countDocuments(filter),
+      ]);
+      return res.json({ success: true, data: cars, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
+    }
+    const cars = await Car.find(filter)
       .populate("dealer", "name businessName avatar")
       .sort({ createdAt: -1 });
     res.json({ success: true, data: cars });
@@ -452,13 +482,17 @@ export const createCar = async (req, res) => {
     // instead of a permanent hard-coded false.
     req.body.escrowEnabled = await getEscrowEnabledForNewOrEditedCar(seller.id, seller.role);
 
-    // STAGE 5: owner-controlled listing moderation. `hold_for_review` (and any untrusted policy read)
-    // ALWAYS creates the listing as `pending`. `auto_publish` keeps the pre-existing eligibility rule
-    // (an approved seller account publishes immediately; unapproved stays pending). The client cannot
-    // influence either: status is server-assigned and overwrites anything in req.body.
-    const moderation = await getOnboardingPolicy();
-    const sellerPublishable = seller.role === "user" ? req.sellerCapability?.status === "approved" : seller.status === "approved";
-    const autoPublish = isPolicyTrusted(moderation) && moderation.policy.listingModeration === "auto_publish";
+    // Listing-by-listing administrator approval is retired. The server always derives the initial
+    // status from the seller's eligibility: personal sellers need verified email and no suspension;
+    // dealers must have an approved business account. Client-supplied status is never trusted.
+    const publishNow = await sellerMayPublishDirectly({
+      ...req.user,
+      id: req.user.id,
+      role: seller.role,
+      status: seller.status,
+      progressiveAccess: req.progressiveAccess === true,
+      dealerVerificationStatus: req.verification?.verificationStatus,
+    });
     const body = {
       ...req.body,
       dealer: req.user.id,
@@ -468,7 +502,7 @@ export const createCar = async (req, res) => {
       // Phase 13F: a personal (role=user) seller's eligibility is the authoritative private-seller capability that
       // sellerListingAccess already resolved, never users.status (the buyer-account state). A private seller is also
       // never labelled a verified dealer: that flag is dealer identity and a seller capability grants none.
-      status: autoPublish && sellerPublishable ? "available" : "pending",
+      status: publishNow ? "available" : "pending",
       isVerifiedDealer: seller.role === "user" ? false : seller.status === "approved",
     };
     // `city` is the correct app-level alias for the real
@@ -693,13 +727,14 @@ export const updateCar = async (req, res) => {
     // before/after state rather than two identical post-save objects.
     const oldData = car.toObject();
 
-    // Listing-management authority (MANAGE_CARS incl. per-user grants, or owner),
-    // not mere STAFF_ROLES membership. See config/roles.js canManageAnyListing.
-    const isStaff = canManageAnyListing(req.user);
+    // Inventory belongs to its seller. Platform staff use the dedicated
+    // moderation/verification routes and cannot edit the seller's business data.
+    // Only the explicitly provisioned webhoist break-glass identity bypasses ownership.
+    const isStaff = req.user?.effectiveRole === "webhoist";
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
 
-    // Permission rules: owners, staff, or the appropriate authorized seller/dealer may edit.
+    // Permission rule: only the listing owner (or explicit webhoist break-glass) may edit.
     const canEdit = isOwner || isStaff;
     if (!canEdit) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
@@ -955,9 +990,10 @@ export const deleteCar = async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    // Listing-management authority (MANAGE_CARS incl. per-user grants, or owner),
-    // not mere STAFF_ROLES membership. See config/roles.js canManageAnyListing.
-    const isStaff = canManageAnyListing(req.user);
+    // Inventory belongs to its seller. Platform staff use the dedicated
+    // moderation/verification routes and cannot edit the seller's business data.
+    // Only the explicitly provisioned webhoist break-glass identity bypasses ownership.
+    const isStaff = req.user?.effectiveRole === "webhoist";
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
     if (!isOwner && !isStaff) {
@@ -1027,9 +1063,10 @@ export const deleteCarImage = async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    // Listing-management authority (MANAGE_CARS incl. per-user grants, or owner),
-    // not mere STAFF_ROLES membership. See config/roles.js canManageAnyListing.
-    const isStaff = canManageAnyListing(req.user);
+    // Inventory belongs to its seller. Platform staff use the dedicated
+    // moderation/verification routes and cannot edit the seller's business data.
+    // Only the explicitly provisioned webhoist break-glass identity bypasses ownership.
+    const isStaff = req.user?.effectiveRole === "webhoist";
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
     if (!isOwner && !isStaff) {
@@ -1091,7 +1128,7 @@ export const setCoverImage = async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    const isStaff = canManageAnyListing(req.user);
+    const isStaff = req.user?.effectiveRole === "webhoist";
     const isOwner = car.dealer?.toString() === req.user.id;
     if (!isOwner && !isStaff) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
@@ -1133,9 +1170,10 @@ export const addCarImages = async (req, res) => {
     const car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
-    // Listing-management authority (MANAGE_CARS incl. per-user grants, or owner),
-    // not mere STAFF_ROLES membership. See config/roles.js canManageAnyListing.
-    const isStaff = canManageAnyListing(req.user);
+    // Inventory belongs to its seller. Platform staff use the dedicated
+    // moderation/verification routes and cannot edit the seller's business data.
+    // Only the explicitly provisioned webhoist break-glass identity bypasses ownership.
+    const isStaff = req.user?.effectiveRole === "webhoist";
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
     if (!isOwner && !isStaff) {

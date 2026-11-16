@@ -27,11 +27,20 @@ for (const id of new Set(navIds)) {
 }
 add('primary nav is exactly Marketplace, Auction, Auto Services, Escrow, Support', ['Marketplace', 'Auction', 'Auto Services', 'Escrow', 'Support'].every((l) => cfg.includes(`label: '${l}'`)) && (cfg.match(/^    id: '/gm) || []).length === 5);
 add('Support stays a direct link (no invented submenu)', !/id: 'support'[\s\S]*?children:/.test(cfg.split("id: 'support'")[1] || ''));
-add('auth-gated entries are presentation only (App protectedNavs + backend remain authority)', /not a\s+\*?\s*security boundary/.test(cfg) && app.includes("protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard', 'escrow-operations'])"));
+const protectedNavsMatch = app.match(/const protectedNavs = new Set\(\[([^\]]+)\]\)/);
+const protectedNavValues = protectedNavsMatch
+  ? [...protectedNavsMatch[1].matchAll(/'([^']+)'/g)].map((match) => match[1])
+  : [];
+const requiredProtectedNavs = ['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard', 'dealership-workspace', 'escrow-operations'];
+const backendAdminGuard = read('backend/routes/adminRoutes.js').includes('router.use(protect, adminOnly)');
+add('auth-gated entries are presentation only (App protectedNavs + backend remain authority)',
+  /not a\s+\*?\s*security boundary/.test(cfg)
+  && requiredProtectedNavs.every((id) => protectedNavValues.includes(id))
+  && backendAdminGuard);
 add('ticker is still rendered above the navigation', app.indexOf('<TopNoticeStrip />') > -1 && app.indexOf('<TopNoticeStrip />') < app.indexOf('<Navbar'));
 add('navigation adds no network call', !/adminAPI|fetch\(|axios|getPublicConfig/.test(navbar) && !/fetch\(|axios/.test(cfg));
 add('dropdowns are disclosure buttons with aria-expanded/aria-controls, not ARIA menus', navbar.includes('aria-expanded={isOpen}') && navbar.includes('aria-controls={panelId}') && !/role="menu"|role="menuitem"/.test(navbar));
-add('Escape closes dropdowns, account menu and drawer', navbar.includes("e.key !== 'Escape'") && navbar.includes('hamburgerRef.current?.focus()') && navbar.includes('userButtonRef.current?.focus()'));
+add('Escape closes dropdowns and the drawer, returning focus to the hamburger; no separate account menu exists', navbar.includes("e.key !== 'Escape'") && navbar.includes('hamburgerRef.current?.focus()') && !navbar.includes('showUserDropdown') && !navbar.includes('kayad-account-panel'));
 add('mobile drawer is a labelled modal dialog with focus handling', navbar.includes('role="dialog"') && navbar.includes('aria-modal="true"') && navbar.includes("e.key !== 'Tab'"));
 add('primary nav is a labelled landmark of real links', navbar.includes('aria-label="Primary"') && navbar.includes('href={item.href}'));
 // Stage 32 deliberately dropped the dock's duplicate 'menu' tab (replaced

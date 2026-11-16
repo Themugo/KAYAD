@@ -138,7 +138,7 @@ const OperationsDashboard = () => {
       case "critical":
         return "text-red-600 bg-red-100";
       default:
-        return "text-[#64748B] bg-[#EEF7F5]";
+        return "text-[#4B5D6E] bg-[#EEF7F5]";
     }
   };
 

@@ -95,8 +95,8 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
 
   useEffect(() => { void fetchProviders(); }, [fetchProviders]);
 
-  const category = useMemo(() => taxonomy?.categories.find((c) => c.code === filters.category) || null, [taxonomy, filters.category]);
-  const suggested = useMemo(() => taxonomy?.symptoms.find((s) => s.code === symptom)?.suggests || [], [taxonomy, symptom]);
+  const category = useMemo(() => taxonomy?.categories?.find((c) => c.code === filters.category) || null, [taxonomy, filters.category]);
+  const suggested = useMemo(() => taxonomy?.symptoms?.find((s) => s.code === symptom)?.suggests || [], [taxonomy, symptom]);
 
   const handleSelectProvider = async (provider: InspectionProvider) => {
     const seq = ++profileRequestSeq.current;
@@ -229,7 +229,7 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
             <p className="text-sm mt-2" style={{ color: C.soft }} role="status">
               These are areas to look in, not a diagnosis. Only a qualified mechanic can tell you what is wrong.{' '}
               Suggested: {suggested.map((code, i) => (
-                <span key={code}>{i > 0 && ', '}<button type="button" className="underline font-semibold min-h-[24px]" style={{ color: C.navy }} onClick={() => chooseCategory(code)}>{taxonomy?.categories.find((c) => c.code === code)?.label || code}</button></span>
+                <span key={code}>{i > 0 && ', '}<button type="button" className="underline font-semibold min-h-[24px]" style={{ color: C.navy }} onClick={() => chooseCategory(code)}>{taxonomy?.categories?.find((c) => c.code === code)?.label || code}</button></span>
               ))}
             </p>
           )}

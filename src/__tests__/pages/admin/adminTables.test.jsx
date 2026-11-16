@@ -74,18 +74,14 @@ describe('admin tables render every declared column and keep their actions reach
     expect(await screen.findByText('No user records returned')).toBeTruthy();
   });
 
-  test('Listings: seven data cells plus a row number per row, a missing price is Unavailable, Delete passes the listing', async () => {
+  test('Listings: seven data cells plus a row number per row, a missing price is Unavailable, and staff cannot delete seller inventory', async () => {
     api.cars.mockResolvedValue({ cars: [{ _id: 'c1', title: '2019 Prado', status: 'live', year: 2019 }], total: 1 });
-    api.deleteCar.mockResolvedValue({});
     render(<MemoryRouter><AdminCars /></MemoryRouter>);
     const row = (await screen.findByText('2019 Prado')).closest('tr');
     expect(row.querySelectorAll('td')).toHaveLength(8); // 7 data cells + the new row-number cell
     expect(within(row).getByText('Unavailable')).toBeTruthy();
-    // The page asks for confirmation before removing a listing and names the button after it.
-    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
-    fireEvent.click(within(row).getByRole('button', { name: 'Remove listing 2019 Prado' }));
-    expect(confirmSpy).toHaveBeenCalledTimes(1);
-    await waitFor(() => expect(api.deleteCar).toHaveBeenCalledWith('c1'));
-    confirmSpy.mockRestore();
+    // Staff can moderate a listing, but business inventory deletion belongs to its owner.
+    expect(within(row).queryByRole('button', { name: 'Remove listing 2019 Prado' })).toBeNull();
+    expect(api.deleteCar).not.toHaveBeenCalled();
   });
 });

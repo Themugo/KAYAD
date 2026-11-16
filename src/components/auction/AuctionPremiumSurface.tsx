@@ -18,7 +18,7 @@ export function AuctionPremiumStats({ items }: { items: Array<{ label: string; v
 }
 
 export function AuctionFulfilmentTimeline({ steps }: { steps: Array<{ label: string; detail?: string; state?: 'complete' | 'current' | 'pending' }> }) {
-  return <div className="auction-fulfilment-timeline" aria-label="Auction fulfilment progress">{steps.map((step, index) => <React.Fragment key={step.label}>
+  return <div className="auction-fulfilment-timeline" role="group" tabIndex={0} aria-label="Auction fulfilment progress">{steps.map((step, index) => <React.Fragment key={step.label}>
     <div className={`auction-fulfilment-step is-${step.state || 'pending'}`}>
       <div className="auction-fulfilment-dot">{step.state === 'complete' ? <Check size={13} /> : step.state === 'current' ? <Circle size={9} fill="currentColor" /> : <LockKeyhole size={11} />}</div>
       <div><strong>{step.label}</strong>{step.detail && <span>{step.detail}</span>}</div>

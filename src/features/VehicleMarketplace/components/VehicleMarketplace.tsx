@@ -1,5 +1,6 @@
 import './homepage-redesign.css';
-import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useMemo, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
+import InventoryFilterPanel, { ANY, ComboField, NumberField, type FilterValues } from './InventoryFilterPanel';
 import { CONDITIONS } from '../../../constants/vehicleOptions';
 import { Vehicle, UserProfile } from '../../../types';
 import InventoryCardMedia from './InventoryCardMedia';
@@ -13,7 +14,7 @@ import MarketingCard, { MarketingCardData } from '../../../components/MarketingC
 import FloatingAdRail from '../../../components/FloatingAdRail';
 import { getVisibleHeroSlides, HeroSlide } from '../../../services/heroApi';
 import { adminAPI } from '../../../api/api';
-import { getCars, getCarById, getCurrentFeaturedCampaignCarIds, mapBackendCarToVehicle, VehicleApiError, type GetCarsParams } from '../../../services/vehicleApi';
+import { getCars, peekCars, getCarById, getCurrentFeaturedCampaignCarIds, mapBackendCarToVehicle, VehicleApiError, type GetCarsParams } from '../../../services/vehicleApi';
 import { classifyInventoryFailure, type InventoryFailure } from '../utils/inventoryAvailability';
 import { getSearchFacets, type SearchFacetsResponse } from '../../../services/searchApi';
 import { getVisibleAdSlots, recordAdEvent, AdSlot } from '../../../services/adApi';
@@ -21,11 +22,17 @@ import { useHomePageConfig, ACCENT_THEME_CLASSES, DEFAULT_HOME_PAGE_CONFIG } fro
 import HomePageAdminPanel from './HomePageAdminPanel';
 import AdManagerPanel from '../../AdManager/AdManagerPanel';
 import HeroEditorPanel from '../../HeroEditor/HeroEditorPanel';
+import HeroDesktopVehicle from './HeroDesktopVehicle';
 import type { HeroPresentationConfig, HeroShowcaseVehicle } from '../types/heroPresentation';
 import { HERO_EXTRAS_DEFAULTS, normalizeHeroExtras } from '../types/heroPresentation';
+import { sanitizeHeroPresentation } from '../utils/heroPresentationSafety';
+import { selectHeroVehicles, pairHeroVehicles, heroComposition, safeHeroCtaLabel, heroImageFor } from '../utils/heroSelection';
+import { Pause, Play } from 'lucide-react';
 
 const kenyaOnlyCopy = (value: string) => value.replace(/East Africa/gi, 'Kenya');
-const KENYA_ROAD_HERO_BACKGROUND = '/hero/kayad-thika-expressway-no-signs.svg';
+// Empty = the built-in procedural KAYAD showroom environment (see homepage-redesign.css). An administrator may still choose an allow-listed custom image.
+const KENYA_ROAD_HERO_BACKGROUND = '';
+const LEGACY_HERO_BACKGROUNDS = ['/hero/kayad-nairobi-kicc.jpg', 'https://commons.wikimedia.org/wiki/Special:FilePath/Nairobi%20skyline%20from%20Uhuru%20Park.jpg?width=2400', '/hero/kayad-kenyan-highlands-road.svg', '/hero/kayad-thika-expressway-no-signs.svg'];
 
 interface VehicleMarketplaceProps {
   vehicles: Vehicle[];
@@ -118,11 +125,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [heroFeaturedMode, setHeroFeaturedMode] = useState<'all' | 'selected'>('all');
   const [heroFeaturedIds, setHeroFeaturedIds] = useState<string[]>([]);
   const [featuredVehicles, setFeaturedVehicles] = useState<Vehicle[]>([]);
+  // Showcase artwork is only ever considered once real inventory has finished loading, so it can never flash in before (or replace) real vehicles.
+  const [featuredResolved, setFeaturedResolved] = useState(false);
+  const [campaignResolved, setCampaignResolved] = useState(false);
   const DEFAULT_HERO_PRESENTATION: HeroPresentationConfig = {
-    stageHeightPct: 100, stageMaxWidthPct: 100, cardScalePct: 80, cardWidthPct: 42, cardOffsetXPct: 0, cardOffsetYPct: 0,
+    stageHeightPct: 100, stageMaxWidthPct: 100, cardScalePct: 100, cardWidthPct: 38, cardOffsetXPct: 0, cardOffsetYPct: 0,
     cardBgOpacityPct: 95, cardBlurPx: 18, cardBorderColor: '#FFFFFF', cardTextColor: 'var(--color-navy-900)',
-    backgroundUrl: '/hero/kayad-thika-expressway-no-signs.svg', backgroundPositionX: 50, backgroundPositionY: 50, backgroundScalePct: 100,
-    overlayColor: '#EEF7F5', overlayOpacityPct: 18, secondaryOverlayColor: '#FFFFFF', secondaryOverlayOpacityPct: 10,
+    backgroundUrl: '', backgroundPositionX: 50, backgroundPositionY: 50, backgroundScalePct: 100,
+    overlayColor: '#061C25', overlayOpacityPct: 8, secondaryOverlayColor: '#071F2A', secondaryOverlayOpacityPct: 10,
     leftOffsetPct: 0, rightOffsetPct: 0, leftVehicleNudgePct: 28, rightVehicleNudgePct: 28, vehicleScalePct: 100, vehicleTopPct: 50, vehicleWidthPct: 43,
     showVehicleInfoCards: true, showVehicleLabels: true, primaryButtonColor: 'var(--kayad-cyan)', secondaryButtonBorderColor: '#C7DAD8',
     arrowEnabled: true, dotsEnabled: true, tickerEnabled: true,
@@ -140,7 +150,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   };
   const [heroPresentation, setHeroPresentation] = useState<HeroPresentationConfig>(DEFAULT_HERO_PRESENTATION);
   const heroRotationMs = heroPresentation.rotationSeconds > 0 ? Math.round(heroPresentation.rotationSeconds * 1000) : 0;
-  const [heroCardContent, setHeroCardContent] = useState<Record<string, { eyebrow?: string; message?: string; detail?: string; ctaLabel?: string; ctaLink?: string }>>({});
+  const [heroCardContent, setHeroCardContent] = useState<Record<string, { eyebrow?: string; message?: string; detail?: string; ctaLabel?: string; ctaLink?: string; heroImage?: string }>>({});
 
   const accent = ACCENT_THEME_CLASSES[homeConfig.accentTheme];
 
@@ -152,7 +162,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [selectedTransmission, setSelectedTransmission] = useState<string>('All');
   const [selectedCondition, setSelectedCondition] = useState<string>('All');
   const [selectedSellerType, setSelectedSellerType] = useState<string>('All');
-  const [minPrice, setMinPrice] = useState<number>(50000);
+  const [selectedColor, setSelectedColor] = useState<string>('All');
+  const [minPrice, setMinPrice] = useState<number>(0);
   const [maxPrice, setMaxPrice] = useState<number>(20000000);
   // 0 means "no minimum year"; the earliest year offered is the Super Admin setting filterOptions.yearFrom.
   const [minYear, setMinYear] = useState<number>(0);
@@ -216,7 +227,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [contactVehicle, setContactVehicle] = useState<{ id: string; title: string } | null>(null);
   const activeSidebarFilters = [
     selectedMake !== 'All', selectedModel !== 'All', selectedBodyStyle !== 'All', selectedFuel !== 'All',
-    selectedTransmission !== 'All', selectedSellerType !== 'All', maxPrice !== 20000000, minYear !== 0, maxYear !== 2026,
+    selectedTransmission !== 'All', selectedSellerType !== 'All', selectedCondition !== 'All', selectedColor !== 'All', maxPrice !== 20000000, minPrice > 0,
+    minYear !== 0, maxYear !== 2026, maxMileage < 250000, onlyAuction,
   ].filter(Boolean).length;
 
   // The selected desktop column count is rendered through a dedicated CSS
@@ -249,6 +261,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [serverRetryKey, setServerRetryKey] = useState(0);
   const [canonicalFacets, setCanonicalFacets] = useState<SearchFacetsResponse | null>(null);
   const [canonicalModelFacets, setCanonicalModelFacets] = useState<SearchFacetsResponse['models']>([]);
+  // Signatures, not array identities: an empty/new facet array must not look like a changed query and trigger a refetch.
+  const canonicalMakesKey = (canonicalFacets?.brands || []).map((item) => item.value).filter(Boolean).join('\u0001');
+  const canonicalModelsKey = canonicalModelFacets.map((item) => item.value).filter(Boolean).join('\u0001');
   const isLoading = isLoadingReal || serverLoading;
   const inventoryFailure: InventoryFailure | null = serverError
     ? (serverFailure ?? classifyInventoryFailure(serverError))
@@ -285,6 +300,38 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return Array.from(byId.values());
   }, [vehicles, serverVehicles]);
 
+  // Dynamic Filter Options Extracted directly from backend dataset
+  const makes = useMemo(() => {
+    const canonical = (canonicalFacets?.brands || []).map((item) => item.value).filter(Boolean);
+    const fallback = filterSourceVehicles.map((v) => v.make).filter(Boolean);
+    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
+  }, [filterSourceVehicles, canonicalFacets]);
+
+  const models = useMemo(() => {
+    const canonical = canonicalModelFacets.map((item) => item.value).filter(Boolean);
+    const source = selectedMake === 'All' ? filterSourceVehicles : filterSourceVehicles.filter((v) => v.make.toLowerCase() === selectedMake.toLowerCase());
+    const fallback = source.map((v) => v.model).filter(Boolean);
+    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
+  }, [filterSourceVehicles, selectedMake, canonicalModelFacets]);
+
+  const bodyStyles = useMemo(() => {
+    const canonical = (canonicalFacets?.bodyTypes || []).map((item) => item.value).filter(Boolean);
+    const fallback = filterSourceVehicles.map((v) => v.bodyStyle).filter(Boolean);
+    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
+  }, [filterSourceVehicles, canonicalFacets]);
+
+  const fuelTypes = useMemo(() => {
+    const canonical = (canonicalFacets?.fuels || []).map((item) => item.value).filter(Boolean);
+    const fallback = filterSourceVehicles.map((v) => v.fuelType).filter(Boolean);
+    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
+  }, [filterSourceVehicles, canonicalFacets]);
+
+  const transmissionOptions = ['All', 'Automatic', 'Manual', 'CVT', 'Semi-Automatic'];
+  const conditionOptions = ['All', ...CONDITIONS];
+  const sellerTypeOptions = ['All', 'Verified Dealer', 'Private Seller'];
+
+  const colorOptions = useMemo(() => ['All', ...Array.from(new Set(filterSourceVehicles.map((v) => (v as { color?: string }).color).filter((c): c is string => Boolean(c)))).sort((a, b) => a.localeCompare(b))], [filterSourceVehicles]);
+
   const serverQuery = useMemo<GetCarsParams>(() => {
     const query: GetCarsParams = {
       page: currentPage,
@@ -292,8 +339,16 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     };
 
     if (searchQuery.trim()) query.keyword = searchQuery.trim();
-    if (selectedMake !== 'All') query.brand = selectedMake;
-    if (selectedModel !== 'All') query.model = selectedModel;
+    // A value picked from the suggestions is matched exactly; anything the visitor typed that is not a listed option is matched by
+    // "contains" on the server, so manual entry always works.
+    // Only the backend's canonical facets decide "listed". The option lists shown in the panel are derived from the results themselves,
+    // so using them here would make every response change the next query.
+    const canonicalMakes = canonicalMakesKey ? canonicalMakesKey.split('\u0001') : [];
+    const canonicalModels = canonicalModelsKey ? canonicalModelsKey.split('\u0001') : [];
+    const pick = (value: string, options: string[]) => options.find((o) => o.toLowerCase() === value.toLowerCase());
+    if (selectedMake !== 'All') { const hit = pick(selectedMake, canonicalMakes); if (hit) query.brand = hit; else query.brandLike = selectedMake; }
+    if (selectedModel !== 'All') { const hit = pick(selectedModel, canonicalModels); if (hit) query.model = hit; else query.modelLike = selectedModel; }
+    if (selectedColor !== 'All') query.colorLike = selectedColor;
     if (selectedCounty !== 'All Kenya') query.city = selectedCounty;
     if (minPrice > 0) query.minPrice = minPrice;
     if (maxPrice < 20000000) query.maxPrice = maxPrice;
@@ -323,27 +378,51 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }, [
     currentPage, pageSize, searchQuery, selectedMake, selectedModel, selectedCounty,
     minPrice, maxPrice, minYear, maxYear, selectedBodyStyle, selectedFuel,
-    selectedTransmission, selectedCondition, maxMileage, selectedSellerType,
+    selectedTransmission, selectedCondition, maxMileage, selectedSellerType, selectedColor, canonicalMakesKey, canonicalModelsKey,
     onlyAuction, sortBy, dealerScope?.id
   ]);
 
-  useEffect(() => {
+  // Instant inventory: a page already seen this session is painted before the browser
+  // draws (no skeleton at all) and only refreshed in the background when it is stale.
+  // A page never seen shows the skeleton; while a new filter loads, the previous
+  // results stay on screen (dimmed) instead of collapsing to an empty skeleton.
+  const hasLoadedOnce = useRef(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [slowLoad, setSlowLoad] = useState(false);
+  useLayoutEffect(() => {
     if (savedOnly) return;
     let cancelled = false;
-    setServerLoading(true);
     setServerError(null);
     setServerFailure(null);
 
-    getCars(serverQuery)
-      .then((res) => {
-        if (cancelled) return;
-        const mapped = (res.data || res.cars || []).map(mapBackendCarToVehicle);
-        setServerVehicles(mapped);
-        setServerTotal(res.pagination?.total ?? mapped.length);
-        setServerTotalPages(res.pagination?.pages ?? res.pagination?.totalPages ?? 1);
-      })
+    const apply = (res: Awaited<ReturnType<typeof getCars>>) => {
+      const mapped = (res.data || res.cars || []).map(mapBackendCarToVehicle);
+      setServerVehicles(mapped);
+      setServerTotal(res.pagination?.total ?? mapped.length);
+      setServerTotalPages(res.pagination?.pages ?? res.pagination?.totalPages ?? 1);
+      hasLoadedOnce.current = true;
+    };
+
+    const cached = peekCars(serverQuery);
+    if (cached) {
+      apply(cached.data);
+      setServerLoading(false);
+      if (cached.fresh) { setRefreshing(false); return () => { cancelled = true; }; }
+      setRefreshing(true);
+    } else if (hasLoadedOnce.current) {
+      setRefreshing(true);
+    } else {
+      setServerLoading(true);
+    }
+
+    setSlowLoad(false);
+    const slowTimer = window.setTimeout(() => { if (!cancelled) setSlowLoad(true); }, 6000);
+    (cached ? getCars(serverQuery, { force: true }) : getCars(serverQuery))
+      .then((res) => { if (!cancelled) apply(res); })
       .catch((err) => {
         if (cancelled) return;
+        // A background refresh that fails keeps the page the shopper is already looking at.
+        if (cached) return;
         setServerError(err instanceof VehicleApiError ? err.message : 'Unable to load marketplace results.');
         setServerFailure(classifyInventoryFailure(err));
         setServerVehicles([]);
@@ -351,10 +430,11 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         setServerTotalPages(1);
       })
       .finally(() => {
-        if (!cancelled) setServerLoading(false);
+        window.clearTimeout(slowTimer);
+        if (!cancelled) { setServerLoading(false); setRefreshing(false); setSlowLoad(false); }
       });
 
-    return () => { cancelled = true; };
+    return () => { cancelled = true; window.clearTimeout(slowTimer); };
   }, [serverQuery, serverRetryKey, savedOnly]);
 
   // Saved surface: use the resolved collection supplied by App rather than
@@ -392,36 +472,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Dynamic Filter Options Extracted directly from backend dataset
-  const makes = useMemo(() => {
-    const canonical = (canonicalFacets?.brands || []).map((item) => item.value).filter(Boolean);
-    const fallback = filterSourceVehicles.map((v) => v.make).filter(Boolean);
-    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
-  }, [filterSourceVehicles, canonicalFacets]);
-
-  const models = useMemo(() => {
-    const canonical = canonicalModelFacets.map((item) => item.value).filter(Boolean);
-    const source = selectedMake === 'All' ? filterSourceVehicles : filterSourceVehicles.filter((v) => v.make.toLowerCase() === selectedMake.toLowerCase());
-    const fallback = source.map((v) => v.model).filter(Boolean);
-    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
-  }, [filterSourceVehicles, selectedMake, canonicalModelFacets]);
-
-  const bodyStyles = useMemo(() => {
-    const canonical = (canonicalFacets?.bodyTypes || []).map((item) => item.value).filter(Boolean);
-    const fallback = filterSourceVehicles.map((v) => v.bodyStyle).filter(Boolean);
-    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
-  }, [filterSourceVehicles, canonicalFacets]);
-
-  const fuelTypes = useMemo(() => {
-    const canonical = (canonicalFacets?.fuels || []).map((item) => item.value).filter(Boolean);
-    const fallback = filterSourceVehicles.map((v) => v.fuelType).filter(Boolean);
-    return ['All', ...Array.from(new Set(canonical.length ? canonical : fallback)).sort((a, b) => a.localeCompare(b))];
-  }, [filterSourceVehicles, canonicalFacets]);
-
-  const transmissionOptions = ['All', 'Automatic', 'Manual', 'CVT', 'Semi-Automatic'];
-  const conditionOptions = ['All', ...CONDITIONS];
-  const sellerTypeOptions = ['All', 'Verified Dealer', 'Private Seller'];
-
   const locations = useMemo(() => {
     const canonical = (canonicalFacets?.locations || []).map((item) => item.value).filter(Boolean);
     const fallback = filterSourceVehicles.map((v) => v.county || v.location).filter(Boolean);
@@ -453,6 +503,35 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const paginatedVehicles = filteredVehicles;
   const totalPages = Math.max(1, serverTotalPages);
 
+  // One set of filter values and one change handler feed BOTH the desktop sidebar and the mobile sheet.
+  const MAX_PRICE = 20000000, MAX_MILEAGE = 250000;
+  const filterValues: FilterValues = {
+    make: selectedMake, model: selectedModel, body: selectedBodyStyle, fuel: selectedFuel, transmission: selectedTransmission,
+    condition: selectedCondition, color: selectedColor, seller: selectedSellerType,
+    minPrice, maxPrice, minYear, maxYear, maxMileage, auction: onlyAuction,
+  };
+  const applyFilterPatch = (patch: Partial<FilterValues>) => {
+    if (patch.make !== undefined) setSelectedMake(patch.make);
+    if (patch.model !== undefined) setSelectedModel(patch.model);
+    if (patch.body !== undefined) setSelectedBodyStyle(patch.body);
+    if (patch.fuel !== undefined) setSelectedFuel(patch.fuel);
+    if (patch.transmission !== undefined) setSelectedTransmission(patch.transmission);
+    if (patch.condition !== undefined) setSelectedCondition(patch.condition);
+    if (patch.color !== undefined) setSelectedColor(patch.color);
+    if (patch.seller !== undefined) setSelectedSellerType(patch.seller);
+    if (patch.minPrice !== undefined) setMinPrice(patch.minPrice);
+    if (patch.maxPrice !== undefined) setMaxPrice(patch.maxPrice);
+    if (patch.minYear !== undefined) setMinYear(patch.minYear);
+    if (patch.maxYear !== undefined) setMaxYear(patch.maxYear);
+    if (patch.maxMileage !== undefined) setMaxMileage(patch.maxMileage);
+    if (patch.auction !== undefined) setOnlyAuction(patch.auction);
+  };
+  const filterOptionLists = {
+    makes, models, bodies: bodyStyles, fuels: fuelTypes, transmissions: transmissionOptions, conditions: conditionOptions, colors: colorOptions,
+    sellers: sellerTypeOptions, priceSteps, yearFrom: filterOptions.yearFrom, mileageSteps: [50000, 100000, 150000],
+  };
+  const filterLimits = { priceMax: MAX_PRICE, yearMax: 2026, mileageMax: MAX_MILEAGE };
+
   // Reset all filters to default
   const resetFilters = useCallback(() => {
     onSearchChange('');
@@ -463,7 +542,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     setSelectedTransmission('All');
     setSelectedCondition('All');
     setSelectedSellerType('All');
-    setMinPrice(50000);
+    setMinPrice(0);
+    setSelectedColor('All');
     setMaxPrice(20000000);
     setMinYear(0);
     setMaxYear(2026);
@@ -489,13 +569,16 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     if (maxPrice < 20000000) list.push({ id: 'price', label: `Under Ksh ${(maxPrice / 1000000).toFixed(1)}M`, onClear: () => setMaxPrice(20000000) });
     if (minYear > 0) list.push({ id: 'minyear', label: `From ${minYear}`, onClear: () => setMinYear(0) });
     if (maxYear < 2026) list.push({ id: 'maxyear', label: `Up to ${maxYear}`, onClear: () => setMaxYear(2026) });
+    if (selectedColor !== 'All') list.push({ id: 'color', label: `Colour: ${selectedColor}`, onClear: () => setSelectedColor('All') });
+    if (minPrice > 0) list.push({ id: 'minprice', label: `From Ksh ${minPrice.toLocaleString('en-KE')}`, onClear: () => setMinPrice(0) });
+    if (maxMileage < 250000) list.push({ id: 'mileage', label: `Under ${maxMileage.toLocaleString('en-KE')} km`, onClear: () => setMaxMileage(250000) });
     if (onlyAuction) list.push({ id: 'auction', label: 'Live Auction', onClear: () => setOnlyAuction(false) });
     if (dealerScope?.id) list.push({ id: 'dealer', label: `Dealer: ${dealerScope.name}`, onClear: () => onClearDealerScope?.() });
     return list;
   }, [
     searchQuery, selectedCounty, selectedMake, selectedModel, selectedBodyStyle,
     selectedFuel, selectedTransmission, selectedSellerType, selectedCondition,
-    maxPrice, minYear, maxYear, onlyAuction, onSearchChange, onCountyChange, dealerScope, onClearDealerScope
+    maxPrice, minPrice, maxMileage, selectedColor, minYear, maxYear, onlyAuction, onSearchChange, onCountyChange, dealerScope, onClearDealerScope
   ]);
 
   // Recently Viewed Vehicle Objects
@@ -520,33 +603,39 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   useEffect(() => {
     if (savedOnly) {
       setFeaturedVehicles([]);
+      setFeaturedResolved(true);
       return;
     }
     let cancelled = false;
-    getCars({ page: 1, limit: 100, featured: true, sort: 'newest' })
+    getCars({ page: 1, limit: 24, featured: true, sort: 'newest' })
       .then((res) => {
         if (!cancelled) setFeaturedVehicles((res.data || res.cars || []).map(mapBackendCarToVehicle));
       })
       .catch(() => {
         if (!cancelled) setFeaturedVehicles([]);
-      });
+      })
+      .finally(() => { if (!cancelled) setFeaturedResolved(true); });
     return () => { cancelled = true; };
   }, [savedOnly]);
 
   // Super Admin featured campaigns: vehicles scheduled to be featured right now (empty when none or unavailable).
   const [campaignVehicles, setCampaignVehicles] = useState<Vehicle[]>([]);
   useEffect(() => {
-    if (savedOnly) { setCampaignVehicles([]); return; }
+    if (savedOnly) { setCampaignVehicles([]); setCampaignResolved(true); return; }
     let cancelled = false;
     const refresh = async () => {
-      const ids = await getCurrentFeaturedCampaignCarIds();
-      if (!ids.length) { if (!cancelled) setCampaignVehicles([]); return; }
-      const cars = await Promise.all(ids.slice(0, 12).map((id) => getCarById(id).catch(() => null)));
-      if (cancelled) return;
-      setCampaignVehicles(cars.filter((c): c is NonNullable<typeof c> => !!c).map(mapBackendCarToVehicle).filter((v) => v.status !== 'sold'));
+      try {
+        const ids = await getCurrentFeaturedCampaignCarIds();
+        if (!ids.length) { if (!cancelled) setCampaignVehicles([]); return; }
+        const cars = await Promise.all(ids.slice(0, 12).map((id) => getCarById(id).catch(() => null)));
+        if (cancelled) return;
+        setCampaignVehicles(cars.filter((c): c is NonNullable<typeof c> => !!c).map(mapBackendCarToVehicle).filter((v) => v.status !== 'sold'));
+      } finally {
+        if (!cancelled) setCampaignResolved(true);
+      }
     };
-    void refresh();
-    const timer = window.setInterval(() => { void refresh(); }, 5 * 60 * 1000);
+    refresh().catch(() => {});
+    const timer = window.setInterval(() => { refresh().catch(() => {}); }, 5 * 60 * 1000);
     return () => { cancelled = true; window.clearInterval(timer); };
   }, [savedOnly]);
 
@@ -561,30 +650,24 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         const mode = cfg?.heroFeaturedMode === 'selected' ? 'selected' : 'all';
         const ids = Array.isArray(cfg?.heroCarIds) ? cfg.heroCarIds.filter(Boolean) : [];
         const presentation = cfg?.heroPresentation || {};
-        const showcase = Array.isArray(presentation.showcaseVehicles) && presentation.showcaseVehicles.length ? presentation.showcaseVehicles : DEFAULT_HERO_PRESENTATION.showcaseVehicles;
         setHeroFeaturedMode(mode);
         setHeroFeaturedIds(ids);
-        setHeroPresentation({
+        // Configurations saved while the old light "road" hero was the default still carry its pale overlay pair; on the graphite showroom
+        // they would wash the scene out, so that exact legacy pair is treated as unset.
+        const legacyOverlay = String(presentation.overlayColor || '').toUpperCase() === '#EEF7F5' && String(presentation.secondaryOverlayColor || '').toUpperCase() === '#FFFFFF';
+        const merged = {
           ...DEFAULT_HERO_PRESENTATION,
           ...presentation,
-          // Migrate only the known built-in skyline defaults; preserve any
-          // custom background URL deliberately saved by the administrator.
-          backgroundUrl: ['/hero/kayad-nairobi-kicc.jpg', 'https://commons.wikimedia.org/wiki/Special:FilePath/Nairobi%20skyline%20from%20Uhuru%20Park.jpg?width=2400', '/hero/kayad-kenyan-highlands-road.svg'].includes(String(presentation.backgroundUrl || ''))
-            ? KENYA_ROAD_HERO_BACKGROUND
-            : (presentation.backgroundUrl || KENYA_ROAD_HERO_BACKGROUND),
-          stageHeightPct: Math.max(70, Math.min(120, Number(presentation.stageHeightPct) || DEFAULT_HERO_PRESENTATION.stageHeightPct)),
-          stageMaxWidthPct: Math.max(90, Math.min(100, Number(presentation.stageMaxWidthPct) || DEFAULT_HERO_PRESENTATION.stageMaxWidthPct)),
-          cardScalePct: Math.max(70, Math.min(100, Number(presentation.cardScalePct) || DEFAULT_HERO_PRESENTATION.cardScalePct)),
-          cardWidthPct: Math.max(28, Math.min(50, Number(presentation.cardWidthPct) || DEFAULT_HERO_PRESENTATION.cardWidthPct)),
-          leftOffsetPct: Math.max(0, Math.min(30, Number(presentation.leftOffsetPct) || DEFAULT_HERO_PRESENTATION.leftOffsetPct)),
-          rightOffsetPct: Math.max(0, Math.min(30, Number(presentation.rightOffsetPct) || DEFAULT_HERO_PRESENTATION.rightOffsetPct)),
-          leftVehicleNudgePct: Math.max(0, Math.min(25, Number(presentation.leftVehicleNudgePct) || DEFAULT_HERO_PRESENTATION.leftVehicleNudgePct)),
-          rightVehicleNudgePct: Math.max(0, Math.min(25, Number(presentation.rightVehicleNudgePct) || DEFAULT_HERO_PRESENTATION.rightVehicleNudgePct)),
-          vehicleScalePct: Math.max(75, Math.min(125, Number(presentation.vehicleScalePct) || DEFAULT_HERO_PRESENTATION.vehicleScalePct)),
-          vehicleTopPct: Math.max(35, Math.min(65, Number(presentation.vehicleTopPct) || DEFAULT_HERO_PRESENTATION.vehicleTopPct)),
-          vehicleWidthPct: Math.max(32, Math.min(48, Number(presentation.vehicleWidthPct) || DEFAULT_HERO_PRESENTATION.vehicleWidthPct)),
-          showcaseVehicles: showcase,
-          floatingCards: Array.isArray(presentation.floatingCards) ? presentation.floatingCards : [],
+          ...(legacyOverlay ? { overlayColor: DEFAULT_HERO_PRESENTATION.overlayColor, secondaryOverlayColor: DEFAULT_HERO_PRESENTATION.secondaryOverlayColor, overlayOpacityPct: DEFAULT_HERO_PRESENTATION.overlayOpacityPct, secondaryOverlayOpacityPct: DEFAULT_HERO_PRESENTATION.secondaryOverlayOpacityPct } : {}),
+          // Known built-in skyline/road backgrounds migrate to the showroom; an allow-listed custom image saved by an administrator is kept.
+          backgroundUrl: LEGACY_HERO_BACKGROUNDS.includes(String(presentation.backgroundUrl || '')) ? KENYA_ROAD_HERO_BACKGROUND : (presentation.backgroundUrl || KENYA_ROAD_HERO_BACKGROUND),
+        };
+        // One shared sanitiser (identical limits to the server): numbers clamp into safe ranges, unsafe URLs/colours/links fall back to defaults.
+        const safe = sanitizeHeroPresentation(merged, DEFAULT_HERO_PRESENTATION);
+        setHeroPresentation({
+          ...safe,
+          showcaseVehicles: Array.isArray(safe.showcaseVehicles) && safe.showcaseVehicles.length ? safe.showcaseVehicles : DEFAULT_HERO_PRESENTATION.showcaseVehicles,
+          floatingCards: Array.isArray(safe.floatingCards) ? safe.floatingCards : [],
           tickerEnabled: presentation.tickerEnabled !== false,
           ...normalizeHeroExtras(presentation),
           vehicleSource: presentation.vehicleSource === 'showcase' ? 'showcase' : presentation.vehicleSource === 'selected' ? 'selected' : 'featured',
@@ -613,7 +696,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // Curated hero artwork is stored in the existing admin-managed platform_config.hero_presentation
   // JSON contract. It is presentation-only and is never inserted into cars/listings, counted as
   // inventory, priced, or sent through a vehicle transaction. Real featured listings take priority;
-  // the curated pair is used when explicitly selected or when fewer than two real featured cars exist.
+  // the curated artwork is used ONLY when there is no real eligible vehicle, and is always labelled illustrative.
   const heroShowcaseVehicles = useMemo(() => (heroPresentation.showcaseVehicles || [])
     .filter((item) => item.enabled !== false && Boolean(item.image))
     .slice(0, 6)
@@ -631,39 +714,44 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       isShowcaseHeroVehicle: true,
     } as Vehicle & { isShowcaseHeroVehicle: boolean })), [heroPresentation.showcaseVehicles]);
 
-  const heroSourceVehicles = useMemo(() => {
-    // A running Super Admin campaign takes priority over the other hero sources (see Admin > Featured Vehicles).
-    if (campaignVehicles.length > 0) return campaignVehicles;
-    const selectedRealVehicles = heroPresentation.vehicleSource === 'selected'
-      ? heroVehicles.filter((vehicle) => heroFeaturedIds.includes(vehicle.id))
-      : heroVehicles;
-    if (heroPresentation.vehicleSource === 'showcase') return heroShowcaseVehicles;
-    if (selectedRealVehicles.length >= 2) return selectedRealVehicles;
-    if (heroPresentation.showcaseFallbackEnabled && heroShowcaseVehicles.length >= 2) return heroShowcaseVehicles;
-    return selectedRealVehicles;
-  }, [campaignVehicles, heroPresentation.vehicleSource, heroPresentation.showcaseFallbackEnabled, heroVehicles, heroFeaturedIds, heroShowcaseVehicles]);
+  // Hero source policy (see ../utils/heroSelection.ts): a running campaign, else real featured/selected inventory, and ONLY when there is
+  // no real eligible vehicle, clearly-labelled illustrative artwork. A vehicle is never repeated and showcase art never replaces real stock.
+  const heroSelection = useMemo(() => selectHeroVehicles<Vehicle>({
+    campaign: campaignVehicles,
+    inventory: heroPresentation.vehicleSource === 'selected' ? heroVehicles.filter((vehicle) => heroFeaturedIds.includes(vehicle.id)) : heroVehicles,
+    // Illustrative artwork is withheld until real inventory has resolved, so it cannot flash in ahead of real vehicles.
+    showcase: featuredResolved && campaignResolved ? heroShowcaseVehicles : [],
+    // A legacy 'showcase' source now means "use the artwork when there is nothing real"; it can no longer displace real stock.
+    showcaseFallbackEnabled: heroPresentation.showcaseFallbackEnabled || heroPresentation.vehicleSource === 'showcase',
+  }), [campaignVehicles, heroVehicles, heroFeaturedIds, heroShowcaseVehicles, heroPresentation.vehicleSource, heroPresentation.showcaseFallbackEnabled, featuredResolved, campaignResolved]);
+  const heroSourceVehicles = heroSelection.vehicles;
+  const heroIllustrative = heroSelection.illustrative;
+  const heroPairs = useMemo(() => pairHeroVehicles(heroSourceVehicles), [heroSourceVehicles]);
+  const heroPairCount = Math.max(1, heroPairs.length);
   const [heroPairIndex, setHeroPairIndex] = useState(0);
   /** Hero images that failed to load; the card keeps its truthful label over a neutral placeholder instead of a broken-image icon. */
   const [brokenHeroImages, setBrokenHeroImages] = useState<Record<string, boolean>>({});
-  const [heroPreviousPairIndex, setHeroPreviousPairIndex] = useState(0);
   const [heroTransitioning, setHeroTransitioning] = useState(false);
   const [heroIncomingVisible, setHeroIncomingVisible] = useState(true);
+  // Carousel pause (WCAG 2.2.2): an explicit control plus automatic pausing while the visitor hovers, focuses or has just interacted.
+  const [heroUserPaused, setHeroUserPaused] = useState(false);
+  const [heroPointerInside, setHeroPointerInside] = useState(false);
+  const [heroFocusInside, setHeroFocusInside] = useState(false);
+  const heroInteractedAt = useRef(0);
+  const markHeroInteraction = () => { heroInteractedAt.current = Date.now(); };
+  const heroAutoplayAllowed = !prefersReducedMotion && heroRotationMs > 0 && heroPairCount > 1;
+  const heroPaused = heroUserPaused || heroPointerInside || heroFocusInside;
 
   useEffect(() => {
     setHeroPairIndex(0);
-    setHeroPreviousPairIndex(0);
     setHeroTransitioning(false);
     setHeroIncomingVisible(true);
   }, [heroSourceVehicles.map((vehicle) => vehicle.id).join('|')]);
 
-  // Change the pair as a single visual state. The previous pair stays mounted
-  // underneath the incoming pair so transparent PNGs never disappear between
-  // frames or expose a half-rendered vehicle while the browser swaps sources.
+  // Change the pair as a single visual state.
   const changeHeroPair = (nextIndex: number) => {
-    const pairCount = Math.max(1, Math.ceil(heroSourceVehicles.length / 2));
-    const normalized = ((nextIndex % pairCount) + pairCount) % pairCount;
-    if (normalized === heroPairIndex || pairCount < 2) return;
-    setHeroPreviousPairIndex(heroPairIndex);
+    const normalized = ((nextIndex % heroPairCount) + heroPairCount) % heroPairCount;
+    if (normalized === heroPairIndex || heroPairCount < 2) return;
     setHeroPairIndex(normalized);
     setHeroIncomingVisible(false);
     setHeroTransitioning(true);
@@ -680,23 +768,20 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }, [heroTransitioning]);
 
   useEffect(() => {
-    // Rotation timing is admin-controlled (0 = no automatic rotation).
-    if (prefersReducedMotion || heroSourceVehicles.length < 2 || !heroRotationMs) return;
+    // Rotation timing is admin-controlled (0 = no automatic rotation). It never advances while paused or just after an interaction.
+    if (!heroAutoplayAllowed || heroPaused) return;
     const timer = window.setInterval(() => {
-      const pairCount = Math.max(1, Math.ceil(heroSourceVehicles.length / 2));
-      changeHeroPair((heroPairIndex + 1) % pairCount);
+      if (Date.now() - heroInteractedAt.current < 8000) return;
+      changeHeroPair((heroPairIndex + 1) % heroPairCount);
     }, heroRotationMs);
     return () => window.clearInterval(timer);
-  }, [heroSourceVehicles.length, heroPairIndex, heroRotationMs, prefersReducedMotion]);
+  }, [heroAutoplayAllowed, heroPaused, heroPairCount, heroPairIndex, heroRotationMs]);
 
-  const heroLeftVehicle = heroSourceVehicles.length ? heroSourceVehicles[(heroPairIndex * 2) % heroSourceVehicles.length] : undefined;
-  const heroRightVehicle = heroSourceVehicles.length > 1
-    ? heroSourceVehicles[(heroPairIndex * 2 + 1) % heroSourceVehicles.length]
-    : heroLeftVehicle;
-  const heroPreviousLeftVehicle = heroSourceVehicles.length ? heroSourceVehicles[(heroPreviousPairIndex * 2) % heroSourceVehicles.length] : undefined;
-  const heroPreviousRightVehicle = heroSourceVehicles.length > 1
-    ? heroSourceVehicles[(heroPreviousPairIndex * 2 + 1) % heroSourceVehicles.length]
-    : heroPreviousLeftVehicle;
+  const heroCurrentPair = heroPairs[Math.min(heroPairIndex, heroPairCount - 1)] || [];
+  const heroComp = heroComposition(heroCurrentPair);
+  const heroLeftVehicle: Vehicle | undefined = heroCurrentPair[0];
+  // Never fill a second position by repeating the first vehicle.
+  const heroRightVehicle: Vehicle | undefined = heroCurrentPair[1];
 
   const heroVehicleNarration = (vehicle?: Vehicle) => {
     if (!vehicle) return '';
@@ -726,10 +811,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return () => { cancelled = true; };
   }, []);
   useEffect(() => {
-    if (prefersReducedMotion || heroSlides.length < 2 || !heroRotationMs) return;
+    if (prefersReducedMotion || heroSlides.length < 2 || !heroRotationMs || heroPaused) return;
     const timer = setInterval(() => setHeroSlideIndex((index) => (index + 1) % heroSlides.length), heroRotationMs);
     return () => clearInterval(timer);
-  }, [heroSlides.length, heroRotationMs, prefersReducedMotion]);
+  }, [heroSlides.length, heroRotationMs, prefersReducedMotion, heroPaused]);
   const activeHeroSlide = heroSlides[heroSlideIndex % Math.max(heroSlides.length, 1)];
 
   const heroEyebrow = activeHeroSlide?.eyebrowText?.trim() || 'KAYAD KE · PREMIUM AUTOMOTIVE MARKETPLACE';
@@ -741,18 +826,25 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // Only the canonical default headline gets the designed line break; any admin-authored headline renders exactly as written.
   const heroHeadlineNode: React.ReactNode = heroHeadline === 'Drive Your Dream Today' ? <>Drive Your Dream<br />Today</> : heroHeadline;
   const heroSubheadline = kenyaOnlyCopy(activeHeroSlide?.subheadline?.trim() || 'Discover quality vehicles across Kenya. Find the right car, make your move, and drive with confidence.');
+  // Only an allow-listed administrator image replaces the built-in showroom; empty means the procedural showroom.
   const heroAdminBackgroundUrl = heroPresentation.backgroundUrl || KENYA_ROAD_HERO_BACKGROUND;
   const heroBackgroundStyle: React.CSSProperties = {
     backgroundImage: `url("${heroAdminBackgroundUrl}")`,
     backgroundSize: 'cover',
     backgroundPosition: `${Math.max(0, Math.min(100, Number(heroPresentation.backgroundPositionX) || 50))}% ${Math.max(0, Math.min(100, Number(heroPresentation.backgroundPositionY) || 50))}%`,
     backgroundRepeat: 'no-repeat',
-    backgroundColor: '#EEF7F5',
+    backgroundColor: 'transparent',
   };
 
   // Vehicle artwork always comes from the vehicle record/configuration.
   // No vehicle-specific asset mapping lives in the hero component.
-  const heroImageForVehicle = (vehicle?: Vehicle) => vehicle?.images?.[0] || vehicle?.image || '';
+  // R-10: an administrator may choose one of the listing's OWN gallery photos for the hero. It is honoured only while that photo is still in the
+  // gallery; otherwise the primary photo is used. The listing record and its photo order are never modified.
+  const heroImageForVehicle = (vehicle?: Vehicle) => {
+    const chosen = vehicle ? heroCardContent[vehicle.id]?.heroImage : '';
+    const valid = chosen && vehicle?.images?.includes(chosen) ? chosen : '';
+    return heroImageFor(vehicle ? { heroImage: valid, images: vehicle.images, image: vehicle.image } : vehicle);
+  };
   // Mobile carousel image: the optional high-resolution mobile asset, else the same image desktop uses.
   const heroMobileImageForVehicle = (vehicle?: Vehicle) => vehicle?.heroMobileImage || heroImageForVehicle(vehicle);
 
@@ -788,6 +880,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // CTA labels: vehicle card content first (existing behaviour), then the admin hero slide's own button text, then the default.
   const heroPrimaryLabel = kenyaOnlyCopy(activeHeroCard?.ctaLabel || activeHeroSlide?.ctaPrimaryText?.trim() || 'Explore Vehicles');
   const heroSecondaryLabel = kenyaOnlyCopy(activeHeroSlide?.ctaSecondaryText?.trim() || 'How It Works');
+  // Administrator-configured labels are capped for display (full text stays in the aria-label) so they can never overflow a button.
+  const heroPrimaryLabelSafe = safeHeroCtaLabel(heroPrimaryLabel);
+  const heroSecondaryLabelSafe = safeHeroCtaLabel(heroSecondaryLabel);
   const heroAuctionMeta = (vehicle?: Vehicle) => {
     if (!vehicle?.isAuction) return '';
     const bid = vehicle.currentBid || vehicle.price || 0;
@@ -817,6 +912,15 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     handleVehicleSelect(vehicle);
   };
 
+  const heroVehicleEyebrow = (vehicle: Vehicle) => {
+    if (isShowcaseHeroVehicle(vehicle)) return 'ILLUSTRATIVE · NOT A LISTING';
+    return heroCardContent[vehicle.id]?.eyebrow || (vehicle.auctionLifecycle === 'live' ? 'Live auction' : vehicle.auctionLifecycle === 'draft' ? 'Upcoming auction' : vehicle.auctionLifecycle === 'ended' ? 'Auction ended' : 'KAYAD SELECT');
+  };
+  const heroVehicleDetailText = (vehicle: Vehicle) => {
+    if (isShowcaseHeroVehicle(vehicle)) return 'KAYAD showroom artwork. Browse real vehicles below.';
+    return vehicle.isAuction ? heroAuctionMeta(vehicle) : heroCardContent[vehicle.id]?.detail || vehicle.description || 'Premium vehicle showcase';
+  };
+
   // Desktop lane geometry. Each vehicle owns a lane on its own side of the
   // centre card; admin values are clamped so a lane can never intersect the
   // card, whatever the stored configuration says. This replaces the previous
@@ -824,9 +928,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // card and was then clipped by the stage overflow boundary.
   const heroLane = (() => {
     const clampNum = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
-    const cardVisualPct = clampNum(Number(heroPresentation.cardWidthPct) || 42, 28, 50)
-      * clampNum((Number(heroPresentation.cardScalePct) || 80) / 100, 0.7, 1);
-    const gutterPct = 2.5;
+    // The card is no longer scaled (it kept shrinking text and touch targets), so its layout width is its visual width.
+    const cardVisualPct = clampNum(Number(heroPresentation.cardWidthPct) || 38, 28, 50);
+    const gutterPct = 3;
     const lanePct = Math.max(18, 50 - cardVisualPct / 2 - gutterPct);
     const widthPct = Math.min(clampNum(Number(heroPresentation.vehicleWidthPct) || 43, 32, 48), lanePct);
     const slackPct = Math.max(0, lanePct - widthPct);
@@ -994,16 +1098,17 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {/* 1. HERO - one continuous commercial composition. */}
       {!savedOnly && homeConfig.sectionVisibility.searchTrustCard && (
-        <section className="kayad-public-hero relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#C7DDDA] bg-[#EEF7F5] text-white">
-          <div
-            className="absolute inset-0 transition-transform duration-500"
+        <section className="kayad-public-hero kayad-showroom-stage relative left-1/2 -translate-x-1/2 w-screen overflow-hidden border-b border-[#C7DDDA] text-white" data-hero-environment={heroAdminBackgroundUrl ? 'custom' : 'showroom'}>
+          {heroAdminBackgroundUrl && <div
+            className="kayad-showroom-stage__custom-background absolute inset-0 transition-transform duration-500"
             style={{
               ...heroBackgroundStyle,
               transform: `scale(${Math.max(1, Math.min(1.3, Number(heroPresentation.backgroundScalePct) / 100 || 1))})`,
               transformOrigin: 'center center',
             }}
             aria-hidden="true"
-          />
+          />}
+          <div className="kayad-showroom-stage__vignette" aria-hidden="true" />
           <div
             className="absolute inset-0"
             style={{
@@ -1029,71 +1134,70 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           )}
 
           <div
-            className="relative mx-auto w-full px-4 sm:px-8 lg:h-[var(--hero-stage-h)] lg:px-10"
+            className="relative mx-auto w-full px-4 sm:px-8 lg:min-h-[var(--hero-stage-h)] lg:px-10"
             style={{
               maxWidth: `${Math.max(90, Math.min(100, heroPresentation.stageMaxWidthPct))}%`,
-              ['--hero-stage-h' as string]: `${Math.round(430 * (Math.max(70, Math.min(120, heroPresentation.stageHeightPct)) / 100))}px`,
+              // Admin height is a floor, never a fixed height: the stage always grows to fit the card (see the in-flow card below).
+              ['--hero-stage-h' as string]: `${Math.max(440, Math.round(430 * (Math.max(70, Math.min(120, heroPresentation.stageHeightPct)) / 100)))}px`,
             } as React.CSSProperties}
           >
-            <div className="relative overflow-hidden lg:h-full">
-              {/* Large vehicle subjects stay at full commercial scale; only their position is configurable. */}
-              <div className="absolute inset-0 hidden lg:block" aria-label="Featured vehicles">
+            <div
+              className="relative overflow-hidden"
+              data-testid="hero-stage"
+              onMouseEnter={() => setHeroPointerInside(true)}
+              onMouseLeave={() => setHeroPointerInside(false)}
+              onFocusCapture={() => setHeroFocusInside(true)}
+              onBlurCapture={(event) => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setHeroFocusInside(false); }}
+              onPointerDownCapture={markHeroInteraction}
+            >
+              {/* Vehicles stay at full commercial scale and are placed in lanes either side of the card. The card is in normal flow, so the
+                  stage grows with its content and nothing can be clipped, whatever stage height an administrator configures. */}
+              <div className="kayad-hero-desktop-layer relative mx-auto hidden w-full max-w-[1440px] lg:flex lg:min-h-[var(--hero-stage-h)] items-center justify-center pb-20 pt-6" aria-label="Featured vehicles" data-hero-composition={heroComp}>
                 {heroLeftVehicle && heroImageForVehicle(heroLeftVehicle) && (
-                  <button
-                    type="button"
-                    onClick={() => handleHeroVehicleSelect(heroLeftVehicle)}
-                    className="group absolute z-10 -translate-y-1/2 text-left"
-                    style={{
-                      top: `${Math.max(35, Math.min(65, heroPresentation.vehicleTopPct))}%`,
-                      left: `${heroLane.leftPct}%`,
-                      width: `${heroLane.widthPct}%`,
-                    }}
-                    aria-label={`View ${heroLeftVehicle.make} ${heroLeftVehicle.model}`}
-                  >
-                    <div className="relative flex h-[380px] flex-col justify-end overflow-visible px-1" data-testid="hero-desktop-vehicle">
-                      <div className="relative flex min-h-0 flex-1 items-end justify-center"><span aria-hidden="true" data-testid="hero-ground-shadow" className="pointer-events-none absolute inset-x-[4%] bottom-[-3px] h-[11%] rounded-[50%] bg-black/70 blur-[8px]" /><span aria-hidden="true" className="pointer-events-none absolute inset-x-[-6%] bottom-[-10px] h-6 rounded-[50%] bg-gradient-to-t from-black/30 to-transparent blur-md" /><img src={heroImageForVehicle(heroLeftVehicle)} alt={isShowcaseHeroVehicle(heroLeftVehicle) ? `KAYAD visual showcase: ${heroLeftVehicle.make} ${heroLeftVehicle.model}` : `${heroLeftVehicle.year} ${heroLeftVehicle.make} ${heroLeftVehicle.model}`} className="max-h-full max-w-full object-contain object-center select-none drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" /></div>
-                      {heroPresentation.showVehicleInfoCards && (
-                        <div className="mx-auto mt-1.5 w-full max-w-[calc(100%-2rem)] rounded-2xl border border-white/20 bg-[#071F2A]/88 px-3.5 py-2.5 text-left backdrop-blur-md">
-                          <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{isShowcaseHeroVehicle(heroLeftVehicle) ? 'KAYAD SELECT · VISUAL SHOWCASE' : heroCardContent[heroLeftVehicle.id]?.eyebrow || (heroLeftVehicle.auctionLifecycle === 'live' ? 'Live auction' : heroLeftVehicle.auctionLifecycle === 'draft' ? 'Upcoming auction' : heroLeftVehicle.auctionLifecycle === 'ended' ? 'Auction ended' : 'KAYAD SELECT')}</div>
-                          <div className="mt-1 truncate text-sm font-black text-white">{heroLeftVehicle.make} {heroLeftVehicle.model}{heroLeftVehicle.year ? ` · ${heroLeftVehicle.year}` : ''}</div>
-                          <div className="mt-0.5 text-[9px] text-white/65">{heroLeftVehicle.isAuction ? heroAuctionMeta(heroLeftVehicle) : heroCardContent[heroLeftVehicle.id]?.detail || heroLeftVehicle.description || 'Premium vehicle showcase'}</div>
-                        </div>
-                      )}
-                    </div>
-                  </button>
+                  <HeroDesktopVehicle
+                    vehicle={heroLeftVehicle}
+                    side={heroComp === 'single' ? 'right' : 'left'}
+                    imageSrc={heroImageForVehicle(heroLeftVehicle)}
+                    broken={Boolean(brokenHeroImages[heroLeftVehicle.id])}
+                    onBroken={() => setBrokenHeroImages((prev) => (prev[heroLeftVehicle.id] ? prev : { ...prev, [heroLeftVehicle.id]: true }))}
+                    topPct={Math.max(35, Math.min(65, heroPresentation.vehicleTopPct))}
+                    offsetPct={heroComp === 'single' ? 2 : heroLane.leftPct}
+                    widthPct={heroComp === 'single' ? Math.min(46, heroLane.widthPct + 8) : heroLane.widthPct}
+                    scale={heroLane.scale}
+                    showInfo={heroPresentation.showVehicleInfoCards}
+                    eyebrow={heroVehicleEyebrow(heroLeftVehicle)}
+                    detail={heroVehicleDetailText(heroLeftVehicle)}
+                    illustrative={isShowcaseHeroVehicle(heroLeftVehicle)}
+                    onSelect={() => handleHeroVehicleSelect(heroLeftVehicle)}
+                  />
                 )}
-
                 {heroRightVehicle && heroImageForVehicle(heroRightVehicle) && (
-                  <button
-                    type="button"
-                    onClick={() => handleHeroVehicleSelect(heroRightVehicle)}
-                    className="group absolute z-10 -translate-y-1/2 text-right"
-                    style={{
-                      top: `${Math.max(35, Math.min(65, heroPresentation.vehicleTopPct))}%`,
-                      right: `${heroLane.rightPct}%`,
-                      width: `${heroLane.widthPct}%`,
-                    }}
-                    aria-label={`View ${heroRightVehicle.make} ${heroRightVehicle.model}`}
-                  >
-                    <div className="relative flex h-[380px] flex-col justify-end overflow-visible px-1" data-testid="hero-desktop-vehicle">
-                      <div className="relative flex min-h-0 flex-1 items-end justify-center"><span aria-hidden="true" data-testid="hero-ground-shadow" className="pointer-events-none absolute inset-x-[4%] bottom-[-3px] h-[11%] rounded-[50%] bg-black/70 blur-[8px]" /><span aria-hidden="true" className="pointer-events-none absolute inset-x-[-6%] bottom-[-10px] h-6 rounded-[50%] bg-gradient-to-t from-black/30 to-transparent blur-md" /><img src={heroImageForVehicle(heroRightVehicle)} alt={isShowcaseHeroVehicle(heroRightVehicle) ? `KAYAD visual showcase: ${heroRightVehicle.make} ${heroRightVehicle.model}` : `${heroRightVehicle.year} ${heroRightVehicle.make} ${heroRightVehicle.model}`} className="max-h-full max-w-full object-contain object-center select-none drop-shadow-[0_28px_38px_rgba(3,19,27,.40)] transition-transform duration-500 group-hover:-translate-y-1" style={{ transform: `scale(${heroLane.scale})` }} loading="eager" decoding="async" /></div>
-                      {heroPresentation.showVehicleInfoCards && (
-                        <div className="mx-auto mt-1.5 w-full max-w-[calc(100%-2rem)] rounded-2xl border border-white/20 bg-[#071F2A]/88 px-3.5 py-2.5 text-left backdrop-blur-md">
-                          <div className="text-[8px] font-black uppercase tracking-[.16em] text-[#49D5C6]">{isShowcaseHeroVehicle(heroRightVehicle) ? 'KAYAD SELECT · VISUAL SHOWCASE' : heroCardContent[heroRightVehicle.id]?.eyebrow || (heroRightVehicle.auctionLifecycle === 'live' ? 'Live auction' : heroRightVehicle.auctionLifecycle === 'draft' ? 'Upcoming auction' : heroRightVehicle.auctionLifecycle === 'ended' ? 'Auction ended' : 'KAYAD SELECT')}</div>
-                          <div className="mt-1 truncate text-sm font-black text-white">{heroRightVehicle.make} {heroRightVehicle.model}{heroRightVehicle.year ? ` · ${heroRightVehicle.year}` : ''}</div>
-                          <div className="mt-0.5 text-[9px] text-white/65">{heroRightVehicle.isAuction ? heroAuctionMeta(heroRightVehicle) : heroCardContent[heroRightVehicle.id]?.detail || heroRightVehicle.description || 'Premium vehicle showcase'}</div>
-                        </div>
-                      )}
-                    </div>
-                  </button>
+                  <HeroDesktopVehicle
+                    vehicle={heroRightVehicle}
+                    side="right"
+                    imageSrc={heroImageForVehicle(heroRightVehicle)}
+                    broken={Boolean(brokenHeroImages[heroRightVehicle.id])}
+                    onBroken={() => setBrokenHeroImages((prev) => (prev[heroRightVehicle.id] ? prev : { ...prev, [heroRightVehicle.id]: true }))}
+                    topPct={Math.max(35, Math.min(65, heroPresentation.vehicleTopPct))}
+                    offsetPct={heroLane.rightPct}
+                    widthPct={heroLane.widthPct}
+                    scale={heroLane.scale}
+                    showInfo={heroPresentation.showVehicleInfoCards}
+                    eyebrow={heroVehicleEyebrow(heroRightVehicle)}
+                    detail={heroVehicleDetailText(heroRightVehicle)}
+                    illustrative={isShowcaseHeroVehicle(heroRightVehicle)}
+                    onSelect={() => handleHeroVehicleSelect(heroRightVehicle)}
+                  />
                 )}
 
-                <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+                <div className={`kayad-hero-card-wrap relative z-20 flex w-full items-center pointer-events-none ${heroComp === 'single' ? 'justify-start pl-[3%]' : 'justify-center'}`}>
                   <div
-                    className="pointer-events-auto origin-center transition-transform duration-300"
+                    className="kayad-hero-card pointer-events-auto origin-center transition-transform duration-300"
                     style={{
-                      width: `${Math.max(28, Math.min(50, heroPresentation.cardWidthPct))}%`,
-                      transform: `translate(${heroLane.cardOffsetX}%, ${heroLane.cardOffsetY}%) scale(${Math.max(0.7, Math.min(1, heroPresentation.cardScalePct / 100))})`,
+                      width: `${Math.max(28, Math.min(heroComp === 'single' ? 44 : 50, heroPresentation.cardWidthPct))}%`,
+                      minWidth: 340,
+                      // Not scaled: shrinking the card also shrank its text and 44px touch targets. Width is controlled by cardWidthPct (28-50%).
+                      transform: `translate(${heroLane.cardOffsetX}%, ${heroLane.cardOffsetY}%)`,
                     }}
                   >
                     <div
@@ -1105,17 +1209,20 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                         backdropFilter: `blur(${Math.max(0, Math.min(40, heroPresentation.cardBlurPx))}px)`,
                       }}
                     >
-                      <span className="inline-flex items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-navy-600"><span className="h-1.5 w-1.5 rounded-full bg-[var(--kayad-cyan)]" />{heroEyebrowDisplay}</span>
+                      <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-3 py-1.5 text-[10px] font-black uppercase tracking-[.18em] text-navy-600"><span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--kayad-cyan)]" /><span className="min-w-0 break-words">{heroEyebrowDisplay}</span></span>
                       <div className="mt-5 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-[.2em] text-[#5F7B86]"><span className="h-px w-9 bg-[var(--kayad-cyan)]" /> MOVE WITH CONFIDENCE <span className="h-px w-9 bg-[var(--kayad-cyan)]" /></div>
-                      <h1 className="mt-4 font-display text-[clamp(2rem,3.4vw,3.25rem)] font-black leading-[1.02] tracking-[-.045em]">{heroHeadlineNode}</h1>
-                      <p className="mx-auto mt-4 max-w-[430px] text-sm font-medium leading-6 text-[#58717B]">{heroSupportCopy}</p>
+                      <h1 className="mt-4 break-words font-display text-[clamp(2rem,3.4vw,3.25rem)] font-black leading-[1.02] tracking-[-.045em]">{heroHeadlineNode}</h1>
+                      <p className="mx-auto mt-4 max-w-[430px] break-words text-sm font-medium leading-6 text-[#58717B]">{heroSupportCopy}</p>
                       <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5">
-                        <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} type="button" aria-label={`${heroPrimaryLabel} — browse KAYAD inventory`} className="inline-flex min-h-[44px] items-center rounded-full px-6 py-3 text-xs font-black text-[#07313D] shadow-[0_12px_28px_rgba(19,184,166,.22)]">{heroPrimaryLabel} <ChevronRight className="ml-1 h-4 w-4" /></button>
-                        <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} type="button" aria-label={`${heroSecondaryLabel} — learn about KAYAD`} className="inline-flex min-h-[44px] items-center rounded-full border bg-white px-6 py-3 text-xs font-black text-navy-900 shadow-sm">{heroSecondaryLabel} <PlayCircle className="ml-2 h-4 w-4" aria-hidden="true" /></button>
+                        <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} type="button" aria-label={`${heroPrimaryLabel} — browse KAYAD inventory`} className="kayad-public-hero__primary-cta inline-flex min-h-[44px] max-w-full items-center justify-center rounded-full px-6 py-3 text-center text-xs font-black leading-tight text-[#07313D] shadow-[0_12px_28px_rgba(19,184,166,.22)]"><span className="min-w-0 break-words">{heroPrimaryLabelSafe}</span> <ChevronRight className="ml-1 h-4 w-4 shrink-0" aria-hidden="true" /></button>
+                        <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} type="button" aria-label={`${heroSecondaryLabel} — learn about KAYAD`} className="kayad-public-hero__secondary-cta inline-flex min-h-[44px] max-w-full items-center justify-center rounded-full border bg-white px-6 py-3 text-center text-xs font-black leading-tight text-navy-900 shadow-sm"><span className="min-w-0 break-words">{heroSecondaryLabelSafe}</span> <PlayCircle className="ml-2 h-4 w-4 shrink-0" aria-hidden="true" /></button>
                       </div>
                       <dl className="mt-6 grid grid-cols-4 border-t border-[#D7E7E4] pt-5">
-                        {[['BROWSE','Listings'],['LIVE','Auctions'],['LOCAL','Sellers'],['KENYA','Marketplace']].map(([a,b]) => <div key={a}><dt className="text-[8px] font-black uppercase tracking-[.13em] text-navy-600">{a}</dt><dd className="mt-1 text-[9px] text-[#6D858D]">{b}</dd></div>)}
+                        {[['BROWSE','Listings'],['LIVE','Auctions'],['LOCAL','Sellers'],['KENYA','Marketplace']].map(([a,b]) => <div key={a}><dt className="text-[10px] font-black uppercase tracking-[.1em] text-navy-600">{a}</dt><dd className="mt-1 text-[11px] text-[#5B737C]">{b}</dd></div>)}
                       </dl>
+                      {heroComp === 'empty' && heroSelection.kind === 'none' && (featuredResolved && campaignResolved) && (
+                        <p className="mt-4 text-[11px] font-semibold text-[#5B737C]" data-testid="hero-empty-note">Featured vehicles appear here as soon as verified sellers list them.</p>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1132,8 +1239,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   return card.ctaLink ? <a key={card.id} href={card.ctaLink} className="absolute z-25" style={{ left: `${card.leftPct ?? 5}%`, top: `${card.topPct ?? 10}%` }}>{cardBody}</a> : <div key={card.id} className="absolute z-25" style={{ left: `${card.leftPct ?? 5}%`, top: `${card.topPct ?? 10}%` }}>{cardBody}</div>;
                 })}
 
-                {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/35 bg-white/85 p-3 text-navy-900 shadow-xl backdrop-blur-md" aria-label="Previous featured vehicles"><ChevronLeft className="h-5 w-5" /></button>}
-                {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/35 bg-white/85 p-3 text-navy-900 shadow-xl backdrop-blur-md" aria-label="Next featured vehicles"><ChevronRight className="h-5 w-5" /></button>}
+                {heroPairCount > 1 && heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/35 bg-white/85 p-3 text-navy-900 shadow-xl backdrop-blur-md" aria-label="Previous featured vehicles"><ChevronLeft className="h-5 w-5" /></button>}
+                {heroPairCount > 1 && heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/35 bg-white/85 p-3 text-navy-900 shadow-xl backdrop-blur-md" aria-label="Next featured vehicles"><ChevronRight className="h-5 w-5" /></button>}
               </div>
 
               <div className="relative px-3 pb-3 pt-2 lg:hidden" aria-label="KAYAD mobile hero">
@@ -1141,50 +1248,53 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   <span className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#B8D9D6] bg-[#F5FBFA] px-2.5 py-1.5 text-[9px] font-bold uppercase leading-tight tracking-[.06em] text-navy-600 min-[430px]:text-[10px] min-[430px]:tracking-[.1em]"><span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--kayad-cyan)]" /><span className="min-w-0 text-balance">{heroEyebrowDisplay}</span></span>
                   <h1 className="mt-3 text-balance font-display text-[clamp(1.75rem,7.2vw,2.25rem)] font-black leading-[1.05] tracking-[-.045em] text-navy-900">{heroHeadlineNode}</h1>
                   <p className="mx-auto mt-2 max-w-[330px] text-[12px] font-medium leading-[1.45rem] text-[#58717B] min-[390px]:text-[13px]">{heroSupportCopy}</p>
-                  <div className="mt-2.5 flex flex-row items-center justify-center gap-2">
-                    <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} type="button" aria-label={`${heroPrimaryLabel} — browse KAYAD inventory`} className="kayad-public-hero__primary-cta inline-flex min-h-[46px] items-center justify-center rounded-full px-4 text-[11px] font-black text-[#07313D] shadow-[0_8px_18px_rgba(19,184,166,.22)]">{heroPrimaryLabel} <ChevronRight className="ml-1 h-3.5 w-3.5 shrink-0" /></button>
-                    <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} type="button" aria-label={`${heroSecondaryLabel} — learn about KAYAD`} className="kayad-public-hero__secondary-cta inline-flex min-h-[46px] items-center justify-center rounded-full border bg-white px-4 text-[11px] font-black text-navy-900 shadow-sm">{heroSecondaryLabel} <PlayCircle className="ml-1.5 h-4 w-4" aria-hidden="true" /></button>
+                  <div className="mt-2.5 flex flex-wrap items-stretch justify-center gap-2">
+                    <button onClick={() => activeHeroSlide?.ctaPrimaryLink ? onNavigate(activeHeroSlide.ctaPrimaryLink) : document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })} style={{ backgroundColor: heroPresentation.primaryButtonColor }} type="button" aria-label={`${heroPrimaryLabel} — browse KAYAD inventory`} className="kayad-public-hero__primary-cta inline-flex min-h-[46px] max-w-full flex-1 items-center justify-center rounded-full px-4 py-2 text-center text-[12px] font-black leading-tight text-[#07313D] shadow-[0_8px_18px_rgba(19,184,166,.22)]"><span className="min-w-0 break-words">{heroPrimaryLabelSafe}</span> <ChevronRight className="ml-1 h-3.5 w-3.5 shrink-0" aria-hidden="true" /></button>
+                    <button onClick={() => activeHeroSlide?.ctaSecondaryLink ? onNavigate(activeHeroSlide.ctaSecondaryLink) : document.getElementById('market-journey')?.scrollIntoView({ behavior: 'smooth', block: 'center' })} style={{ borderColor: heroPresentation.secondaryButtonBorderColor }} type="button" aria-label={`${heroSecondaryLabel} — learn about KAYAD`} className="kayad-public-hero__secondary-cta inline-flex min-h-[46px] max-w-full flex-1 items-center justify-center rounded-full border bg-white px-4 py-2 text-center text-[12px] font-black leading-tight text-navy-900 shadow-sm"><span className="min-w-0 break-words">{heroSecondaryLabelSafe}</span> <PlayCircle className="ml-1.5 h-4 w-4 shrink-0" aria-hidden="true" /></button>
                   </div>
                 </div>
 
+                {heroComp === 'empty' && heroSelection.kind === 'none' && featuredResolved && campaignResolved && <p className="mx-auto mt-3 max-w-[460px] text-center text-[12px] font-semibold text-white/85" data-testid="hero-empty-note-mobile">Featured vehicles appear here as soon as verified sellers list them.</p>}
                 {/* Approved mobile composition: the center card sits above a dedicated two-car stage.
                     Both transparent vehicle assets remain fully contained and independently visible. */}
-                {(heroLeftVehicle || heroRightVehicle) && <div className="mx-auto mt-2 w-full max-w-[460px]">
-                  <div className="grid grid-cols-2 items-stretch gap-1 min-[390px]:gap-2" aria-label="Featured vehicle pair">
-                    {[heroLeftVehicle, heroRightVehicle].map((vehicle, index) => vehicle && heroImageForVehicle(vehicle) ? (
-                      <button key={`${vehicle.id}-${index}`} type="button" onClick={() => handleHeroVehicleSelect(vehicle)} className="kayad-public-hero__vehicle-card group flex h-full min-w-0 flex-col justify-end rounded-2xl border border-white/20 bg-[#082D39]/22 px-1.5 pt-1.5 text-center transition-colors hover:bg-[#082D39]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]" aria-label={isShowcaseHeroVehicle(vehicle) ? `Browse vehicles; visual showcase ${vehicle.make} ${vehicle.model}` : `View ${vehicle.make} ${vehicle.model}`}>
+                {heroCurrentPair.length > 0 && <div className="kayad-public-hero__mobile-stage mx-auto mt-3 block w-full max-w-[520px]" data-testid="hero-mobile-stage" data-hero-composition={heroComp}>
+                  <div className={`grid items-stretch gap-1 min-[390px]:gap-2 ${heroComp === 'single' ? 'mx-auto max-w-[260px] grid-cols-1' : 'grid-cols-2'}`} aria-label={heroComp === 'single' ? 'Featured vehicle' : 'Featured vehicle pair'}>
+                    {heroCurrentPair.map((vehicle, index) => vehicle && heroImageForVehicle(vehicle) ? (
+                      <button key={`${vehicle.id}-${index}`} type="button" onClick={() => handleHeroVehicleSelect(vehicle)} className="kayad-public-hero__vehicle-card group flex h-full min-w-0 flex-col justify-end rounded-2xl border border-white/20 bg-[#082D39]/22 px-1.5 pt-1.5 text-center transition-colors hover:bg-[#082D39]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]" aria-label={isShowcaseHeroVehicle(vehicle) ? `Browse vehicles. ${vehicle.make} ${vehicle.model} is illustrative artwork, not a listing` : `View ${vehicle.make} ${vehicle.model}`}>
                         <div className="relative flex items-end justify-center overflow-visible" style={{ height: `clamp(${Math.min(140, heroPresentation.mobileStageMinPx)}px, 40vw, ${Math.min(180, heroPresentation.mobileStageMaxPx)}px)` }} data-testid="hero-pair-image-stage">
-                          <span aria-hidden="true" className="pointer-events-none absolute inset-x-[6%] bottom-0 h-[10%] rounded-[50%] bg-black/55 blur-[5px]" />
+                          <span aria-hidden="true" className="pointer-events-none absolute inset-x-[6%] bottom-0 h-[10%] rounded-[50%] bg-[#0A3340]/55 blur-[5px]" />
                           {brokenHeroImages[vehicle.id] ? (
                             <div className="grid h-full w-full place-items-center text-white/70" role="img" aria-label={`Photo of ${vehicle.make} ${vehicle.model} is unavailable`}><ImageIcon className="h-8 w-8" aria-hidden="true" /></div>
                           ) : (
                           <picture className="flex h-full w-full items-end justify-center">
                             {heroMobileImageForVehicle(vehicle) && <source media="(max-width: 1023.98px)" srcSet={heroMobileImageForVehicle(vehicle)} type={heroMobileImageForVehicle(vehicle).toLowerCase().endsWith('.webp') ? 'image/webp' : undefined} />}
-                            <img src={heroImageForVehicle(vehicle)} alt={isShowcaseHeroVehicle(vehicle) ? `KAYAD visual showcase: ${vehicle.make} ${vehicle.model}` : `${vehicle.year} ${vehicle.make} ${vehicle.model}`} width={1021} height={634} className="max-h-full max-w-full object-contain object-bottom drop-shadow-[0_12px_18px_rgba(3,19,27,.42)] transition-transform duration-300 group-hover:-translate-y-1" loading="eager" decoding="async" onError={() => setBrokenHeroImages((prev) => (prev[vehicle.id] ? prev : { ...prev, [vehicle.id]: true }))} />
+                            <img src={heroImageForVehicle(vehicle)} alt={isShowcaseHeroVehicle(vehicle) ? `Illustrative KAYAD showroom artwork: ${vehicle.make} ${vehicle.model}` : `${vehicle.year} ${vehicle.make} ${vehicle.model}`} width={1021} height={634} className="max-h-full max-w-full object-contain object-bottom drop-shadow-[0_12px_18px_rgba(3,19,27,.42)] transition-transform duration-300 group-hover:-translate-y-1" loading="eager" decoding="async" onError={() => setBrokenHeroImages((prev) => (prev[vehicle.id] ? prev : { ...prev, [vehicle.id]: true }))} />
                           </picture>
                           )}
                         </div>
                         <div className="mt-auto min-w-0 rounded-xl border border-white/15 bg-[#071F2A]/90 px-2 py-2 text-left backdrop-blur-md">
-                          <div className="text-[8px] font-black uppercase leading-tight tracking-[.06em] text-[#49D5C6]">{isShowcaseHeroVehicle(vehicle) ? 'KAYAD SELECT · SHOWCASE' : vehicle.isAuction ? 'AUCTION VEHICLE' : vehicle.badge || 'FEATURED VEHICLE'}</div>
+                          <div className="text-[8px] font-black uppercase leading-tight tracking-[.06em] text-[#49D5C6]">{isShowcaseHeroVehicle(vehicle) ? 'ILLUSTRATIVE' : vehicle.isAuction ? 'AUCTION VEHICLE' : vehicle.badge || 'FEATURED VEHICLE'}</div>
                           <div className="mt-0.5 line-clamp-2 break-words text-[10px] font-black leading-tight text-white min-[390px]:text-[11px]">{vehicle.make} {vehicle.model}</div>
                           {isShowcaseHeroVehicle(vehicle)
-                            ? <div className="mt-0.5 text-[9px] leading-tight text-white/75">Visual showcase · not a listing</div>
+                            ? <div className="mt-0.5 text-[10px] leading-tight text-white/80">Artwork · not a listing</div>
                             : <div className="mt-0.5 text-[9px] font-semibold leading-tight text-white/85">{vehicle.price > 0 ? formatPriceM(vehicle.price) : heroCaption(vehicle)}</div>}
                         </div>
                       </button>
-                    ) : <div key={`hero-empty-${index}`} className="min-h-[120px]" />)}
+                    ) : null)}
                   </div>
-                  {heroSourceVehicles.length > 2 && (heroPresentation.arrowEnabled || heroPresentation.dotsEnabled) && <div className="mt-1 flex items-center justify-center gap-3" aria-label="Featured vehicle pair controls">
-                    {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="grid h-9 w-9 place-items-center rounded-full border border-white/30 bg-[#071F2A]/75 text-white shadow-md" aria-label="Previous featured vehicles"><ChevronLeft className="h-4 w-4" /></button>}
-                    {heroPresentation.dotsEnabled && <div className="flex items-center" aria-label="Featured vehicle pairs">{Array.from({ length: Math.ceil(heroSourceVehicles.length / 2) }).map((_, index) => <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1}`} aria-current={index === heroPairIndex ? 'true' : undefined} className="grid h-9 w-6 place-items-center"><span className={`h-1.5 rounded-full transition-all ${index === heroPairIndex ? 'w-5 bg-[var(--kayad-cyan)]' : 'w-1.5 bg-white/60'}`} /></button>)}</div>}
-                    {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="grid h-9 w-9 place-items-center rounded-full border border-white/30 bg-[#071F2A]/75 text-white shadow-md" aria-label="Next featured vehicles"><ChevronRight className="h-4 w-4" /></button>}
+                  {heroPairCount > 1 && <div className="mt-1 flex items-center justify-center gap-2" aria-label="Featured vehicle pair controls">
+                    {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="kayad-hero-ctl grid h-11 w-11 place-items-center rounded-full border border-white/30 bg-[#071F2A]/75 text-white shadow-md" aria-label="Previous featured vehicles"><ChevronLeft className="h-4 w-4" aria-hidden="true" /></button>}
+                    {heroAutoplayAllowed && <button type="button" onClick={() => setHeroUserPaused((paused) => !paused)} aria-pressed={heroUserPaused} aria-label={heroUserPaused ? 'Resume automatic vehicle rotation' : 'Pause automatic vehicle rotation'} className="kayad-hero-ctl grid h-11 w-11 place-items-center rounded-full border border-white/30 bg-[#071F2A]/75 text-white shadow-md">{heroUserPaused ? <Play className="h-4 w-4" aria-hidden="true" /> : <Pause className="h-4 w-4" aria-hidden="true" />}</button>}
+                    {heroPresentation.dotsEnabled && <div className="flex items-center" role="group" aria-label="Featured vehicle pairs">{heroPairs.map((_, index) => <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1} of ${heroPairCount}`} aria-current={index === heroPairIndex ? 'true' : undefined} className="grid h-11 w-7 place-items-center"><span className={`h-1.5 rounded-full transition-all ${index === heroPairIndex ? 'w-5 bg-[var(--kayad-cyan)]' : 'w-1.5 bg-white/70'}`} /></button>)}</div>}
+                    {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="kayad-hero-ctl grid h-11 w-11 place-items-center rounded-full border border-white/30 bg-[#071F2A]/75 text-white shadow-md" aria-label="Next featured vehicles"><ChevronRight className="h-4 w-4" aria-hidden="true" /></button>}
                   </div>}
                 </div>}
               </div>
 
-              {heroPresentation.dotsEnabled && heroSourceVehicles.length > 1 && (
-                <div className="absolute bottom-4 left-1/2 z-30 hidden -translate-x-1/2 items-center gap-1.5 rounded-full border border-white/15 bg-[#071F2A]/65 lg:flex px-3 py-1.5 backdrop-blur-md" aria-label="Featured vehicle slides">
-                  {Array.from({ length: Math.ceil(heroSourceVehicles.length / 2) }).map((_, index) => <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1}`} className={`h-1.5 rounded-full transition-all ${index === heroPairIndex ? 'w-6 bg-[var(--kayad-cyan)]' : 'w-1.5 bg-white/45 hover:bg-white/80'}`} />)}
+              {heroPairCount > 1 && (heroPresentation.dotsEnabled || heroAutoplayAllowed) && (
+                <div className="absolute bottom-4 left-1/2 z-30 hidden -translate-x-1/2 items-center gap-1 rounded-full border border-white/15 bg-[#071F2A]/70 px-2 py-0.5 backdrop-blur-md lg:flex" role="group" aria-label="Featured vehicle slides">
+                  {heroAutoplayAllowed && <button type="button" onClick={() => setHeroUserPaused((paused) => !paused)} aria-pressed={heroUserPaused} aria-label={heroUserPaused ? 'Resume automatic vehicle rotation' : 'Pause automatic vehicle rotation'} className="kayad-hero-ctl grid h-9 w-9 place-items-center rounded-full text-white hover:bg-white/10">{heroUserPaused ? <Play className="h-4 w-4" aria-hidden="true" /> : <Pause className="h-4 w-4" aria-hidden="true" />}</button>}
+                  {heroPresentation.dotsEnabled && heroPairs.map((_, index) => <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1} of ${heroPairCount}`} aria-current={index === heroPairIndex ? 'true' : undefined} className="grid h-9 w-6 place-items-center"><span className={`h-1.5 rounded-full transition-all ${index === heroPairIndex ? 'w-6 bg-[var(--kayad-cyan)]' : 'w-1.5 bg-white/55'}`} /></button>)}
                 </div>
               )}
             </div>
@@ -1250,9 +1360,32 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {/* 2. SEARCH BRIDGE - overlaps the hero, real, wired filter fields */}
       {!savedOnly && homeConfig.sectionVisibility.searchTrustCard && (
-      <div className="kayad-search-bridge relative z-10 -mt-10 w-full px-3 sm:-mt-12 sm:px-5 lg:px-8">
-        <div className="w-full rounded-2xl border border-[#D7E7E4] bg-white p-3.5 shadow-[0_18px_45px_rgba(11,29,58,.10)] sm:p-5 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
-          <div className="col-span-2 lg:col-span-1 flex flex-col gap-1.5 min-w-0">
+      <div className="kayad-search-bridge relative z-10 mt-3 w-full px-3 sm:mt-4 sm:px-5 lg:px-8">
+        <div className="flex items-center gap-2 rounded-2xl border border-[#D7E7E4] bg-white p-2 shadow-[0_10px_28px_rgba(11,29,58,.08)] sm:hidden" data-testid="mobile-search-row">
+          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl bg-[#F6FAF9] px-3">
+            <Search className="h-4 w-4 shrink-0 text-[#94A3B8]" aria-hidden="true" />
+            <input
+              type="search"
+              enterKeyHint="search"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              placeholder="Search make, model or keyword"
+              aria-label="Search vehicles"
+              className="h-11 w-full min-w-0 bg-transparent text-[14px] outline-none placeholder:text-[#94A3B8]"
+            />
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowMobileFilterDrawer(true)}
+            aria-label={activeSidebarFilters > 0 ? `Open filters, ${activeSidebarFilters} active` : 'Open filters'}
+            className="relative flex h-11 shrink-0 items-center gap-1.5 rounded-xl bg-[#0A3340] px-3.5 text-[13px] font-extrabold text-white"
+          >
+            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" /> Filters
+            {activeSidebarFilters > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-[#13B8A6] px-1 text-[11px] font-black text-[#06303A]">{activeSidebarFilters}</span>}
+          </button>
+        </div>
+        <div className={`hidden w-full rounded-2xl border border-[#D7E7E4] bg-white p-3.5 shadow-[0_18px_45px_rgba(11,29,58,.10)] sm:grid sm:p-5 grid-cols-2 sm:grid-cols-2 ${showDesktopSidebar ? 'lg:grid-cols-5' : 'lg:grid-cols-6'} gap-3 items-end`}>
+          <div className={`col-span-2 ${showDesktopSidebar ? 'lg:col-span-2' : 'lg:col-span-1'} flex flex-col gap-1.5 min-w-0`}>
             <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Search</label>
             <div className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 flex items-center gap-2 bg-[#F6FAF9]">
               <Search className="w-3.5 h-3.5 text-[#94A3B8] shrink-0" />
@@ -1267,7 +1400,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
             {/* The label follows its select: when the select is hidden by the sidebar the label stays in the grid cell (layout unchanged) but is invisible, so no orphaned "MAKE" caption remains. */}
-            <label className={`text-[10px] font-bold uppercase tracking-wide text-[#64748B] ${showDesktopSidebar ? 'lg:invisible' : ''}`}>Make</label>
             {/* Fixed: this select was always visible regardless of the
                 sidebar, but the sidebar has its own Make selector too -
                 showing both at once above the lg: breakpoint is
@@ -1276,49 +1408,18 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 always CSS-hidden), matching the sidebar's own
                 already-established pattern for this exact class of
                 redundancy. */}
-            <select
-              value={selectedMake}
-              onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }}
-              aria-label="Hero make filter"
-              className={`border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-xs bg-[#F6FAF9] outline-none ${showDesktopSidebar ? 'lg:hidden' : ''}`}
-            >
-              {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
-            </select>
+            <div className={showDesktopSidebar ? 'lg:hidden' : ''}>
+              <ComboField compact id="hero-make" label="Make" ariaLabel="Hero make filter" value={selectedMake} suggestions={makes.filter((m) => m && m !== 'All')} placeholder="Any make — pick or type" onCommit={(make) => { setSelectedMake(make); setSelectedModel('All'); }} />
+            </div>
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Price up to</label>
-            <select
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(Number(e.target.value))}
-              aria-label="Hero maximum price filter"
-              className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-xs bg-[#F6FAF9] outline-none"
-            >
-              <option value={20000000}>All</option>
-              {priceSteps.map((step) => <option key={step} value={step}>Ksh {shortAmount(step)}</option>)}
-              {maxPrice !== 20000000 && !priceSteps.includes(maxPrice) && <option value={maxPrice}>Ksh {shortAmount(maxPrice)}</option>}
-            </select>
+            <NumberField compact id="hero-max-price" label="Price up to (KES)" ariaLabel="Hero maximum price filter" value={maxPrice} emptyValue={MAX_PRICE} max={MAX_PRICE} placeholder="Any — pick or type" suggestions={priceSteps.map((step) => ({ value: step, label: `Ksh ${shortAmount(step)}` }))} onCommit={(n) => setMaxPrice(n)} />
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Year</label>
-            <select
-              value={minYear || yearChoices[0]}
-              onChange={(e) => { const y = Number(e.target.value); setMinYear(y <= filterOptions.yearFrom ? 0 : y); }}
-              aria-label="Hero year filter"
-              className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-xs bg-[#F6FAF9] outline-none"
-            >
-              {yearChoices.map((y) => <option key={y} value={y}>{y} – {currentYear}</option>)}
-            </select>
+            <NumberField compact id="hero-min-year" label="Year from" ariaLabel="Hero year filter" value={minYear} emptyValue={0} max={currentYear} placeholder={`${filterOptions.yearFrom} – ${currentYear}`} suggestions={yearChoices.map((y) => ({ value: y }))} onCommit={(y) => setMinYear(y > 0 && y <= filterOptions.yearFrom ? 0 : y)} />
           </div>
           <div className="flex flex-col gap-1.5 min-w-0">
-            <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Body Style</label>
-            <select
-              value={selectedBodyStyle}
-              onChange={(e) => setSelectedBodyStyle(e.target.value)}
-              aria-label="Hero body style filter"
-              className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 text-xs bg-[#F6FAF9] outline-none"
-            >
-              {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
-            </select>
+            <ComboField compact id="hero-body" label="Body style" ariaLabel="Hero body style filter" value={selectedBodyStyle} suggestions={bodyStyles.filter((b) => b && b !== 'All')} placeholder="Any — pick or type" onCommit={(body) => setSelectedBodyStyle(body)} />
           </div>
           <button
             onClick={() => document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })}
@@ -1389,9 +1490,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
         {/* 5. MARKET HEAD */}
         <div className="kayad-market-toolbar mb-5 rounded-2xl border border-[#D7E7E4] bg-white shadow-[0_10px_30px_rgba(11,29,58,0.06)]">
-          <div className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2.5">
+              <div className="hidden flex-wrap items-center gap-2.5 sm:flex">
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-[#DDF4F0] px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.14em] text-navy-700">
                   <LayoutGrid className="h-3.5 w-3.5" /> {savedOnly ? 'Saved vehicles' : 'Marketplace inventory'}
                 </span>
@@ -1399,7 +1500,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </div>
               {/* The Saved destination has no hero, so its heading is the page's main heading. */}
               {(() => { const Heading = (savedOnly ? 'h1' : 'h2') as 'h1' | 'h2'; return (
-              <Heading className="mt-2 flex flex-wrap items-center gap-2 font-display text-xl sm:text-2xl font-bold tracking-[-0.02em] text-navy-900">
+              <Heading className="mt-0 flex flex-wrap sm:mt-2 items-center gap-2 font-display text-xl sm:text-2xl font-bold tracking-[-0.02em] text-navy-900">
                 {/* The Saved destination reuses this grid but must identify itself as the buyer's saved list, not the full inventory. */}
                 {savedOnly ? 'Saved Vehicles' : 'Vehicle Inventory'}
                 {!isLoading && (
@@ -1470,7 +1571,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   onClick={() => setViewMode('grid')}
                   aria-pressed={viewMode === 'grid'}
                   title="Grid view"
-                  className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${viewMode === 'grid' ? 'bg-[#DDF4F0] text-navy-700' : 'text-[#94A3B8] hover:text-[#12576D]'}`}
+                  className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${viewMode === 'grid' ? 'bg-[#DDF4F0] text-navy-700' : 'text-[#64748B] hover:text-[#12576D]'}`}
                 >
                   <Grid className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Grid</span>
                 </button>
@@ -1479,7 +1580,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   onClick={() => setViewMode('list')}
                   aria-pressed={viewMode === 'list'}
                   title="List view"
-                  className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${viewMode === 'list' ? 'bg-[#DDF4F0] text-navy-700' : 'text-[#94A3B8] hover:text-[#12576D]'}`}
+                  className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${viewMode === 'list' ? 'bg-[#DDF4F0] text-navy-700' : 'text-[#64748B] hover:text-[#12576D]'}`}
                 >
                   <ListIcon className="w-3.5 h-3.5" /> <span className="hidden xl:inline">List</span>
                 </button>
@@ -1491,9 +1592,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 type="button"
                 aria-label="Open inventory filters"
                 onClick={() => setShowMobileFilterDrawer(true)}
-                className="lg:hidden flex h-10 items-center gap-1.5 rounded-xl border border-[#D7E7E4] bg-white px-3 text-[11px] font-bold text-[#64748B]"
+                className="hidden sm:flex lg:hidden h-10 items-center gap-1.5 rounded-xl border border-[#D7E7E4] bg-white px-3 text-[11px] font-bold text-[#64748B]"
               >
-                <Filter className="w-3.5 h-3.5" /> Filters
+                <Filter className="w-3.5 h-3.5" /> Filters{activeSidebarFilters > 0 ? ` (${activeSidebarFilters})` : ''}
               </button>
 
               {isAdmin && (
@@ -1536,104 +1637,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 <button onClick={resetFilters} className="rounded-lg px-2 py-1 text-[12.5px] font-bold text-white underline-offset-2 hover:bg-white/10 hover:underline">Reset all</button>
               </div>
             </div>
-            <div className="px-4 pb-4 pt-1">
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Make</label>
-              <select aria-label="Sidebar make filter" value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
-                {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
-              </select>
-            </div>
+            <div className="px-4 pb-4 pt-4">
+            <InventoryFilterPanel idPrefix="sidebar" variant="sidebar" values={filterValues} limits={filterLimits} options={filterOptionLists} onChange={applyFilterPatch} onReset={resetFilters} />
 
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Model</label>
-              <select aria-label="Sidebar model filter" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
-                {models.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Models' : m}</option>)}
-              </select>
-            </div>
-
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Price Range · {formatPriceM(maxPrice)}</label>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="number"
-                  placeholder="Min"
-                  value={minPrice || ''}
-                  onChange={(e) => setMinPrice(Number(e.target.value) || 0)}
-                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
-                />
-                <input
-                  type="number"
-                  placeholder="Max"
-                  value={maxPrice === 20000000 ? '' : maxPrice}
-                  onChange={(e) => setMaxPrice(Number(e.target.value) || 20000000)}
-                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
-                />
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                {[...priceSteps.map((v) => ({ label: `< ${shortAmount(v)}`, v })), { label: 'All', v: 20000000 }].map((c) => (
-                  <button
-                    key={c.label}
-                    onClick={() => setMaxPrice(c.v)}
-                    aria-pressed={maxPrice === c.v}
-                    className={`border rounded-full px-3 py-1.5 text-[12px] font-bold transition-colors ${maxPrice === c.v ? 'border-[#176B87] bg-[#176B87] text-white shadow-sm' : 'border-[#CBDAD7] bg-white text-[#475569] hover:border-[#176B87] hover:text-[#176B87]'}`}
-                  >
-                    {c.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Year Range</label>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  placeholder="From year" aria-label="Minimum year"
-                  value={minYear || ''}
-                  onChange={(e) => setMinYear(Number(e.target.value) || 0)}
-                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
-                />
-                <input
-                  type="number"
-                  placeholder="To year" aria-label="Maximum year"
-                  value={maxYear === 2026 ? '' : maxYear}
-                  onChange={(e) => setMaxYear(Number(e.target.value) || 2026)}
-                  className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"
-                />
-              </div>
-            </div>
-
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Body Style</label>
-              <select aria-label="Sidebar body style filter" value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
-                {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
-              </select>
-            </div>
-
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Fuel Type</label>
-              <select aria-label="Sidebar fuel filter" value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
-                {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
-              </select>
-            </div>
-
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Transmission</label>
-              <select aria-label="Sidebar transmission filter" value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
-                {transmissionOptions.map((t) => <option key={t} value={t}>{t === 'All' ? 'All Transmissions' : t}</option>)}
-              </select>
-            </div>
-
-            <div className="border-b border-[#E3EEEC] py-3.5">
-              <label className="flex items-center gap-2 text-[12px] font-extrabold uppercase tracking-[.06em] text-[#0A3340] mb-2 before:h-3.5 before:w-1 before:rounded-full before:bg-[#13B8A6] before:content-['']">Seller Type</label>
-              <select aria-label="Sidebar seller type filter" value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full h-10 border border-[#CBDAD7] rounded-lg px-2.5 text-[13.5px] font-medium text-navy-900 bg-[#F8FCFB] hover:border-[#176B87] hover:bg-white transition-colors tabular-nums focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">
-                {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
-              </select>
-            </div>
-
-            <button onClick={resetFilters} className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#0A3340] to-[#176B87] py-3 text-[13px] font-extrabold text-white shadow-md transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]">
-              Reset all filters
-            </button>
 
             {sidebarAds.length > 0 && (
               <div className="mt-4 pt-4 border-t border-[#D7E7E4] space-y-3">
@@ -1657,9 +1663,21 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           )}
 
           {/* RESULTS */}
-          <div className="kayad-inventory-results min-h-[400px] min-w-0">
-            {isLoading ? (
-              <SkeletonGrid count={pageSize} />
+          <div className="kayad-inventory-results relative min-h-[400px] min-w-0" aria-busy={refreshing || undefined}>
+            {refreshing && (
+              <div role="progressbar" aria-label="Updating results" data-testid="inventory-refresh-bar" className="kayad-refresh-bar pointer-events-none absolute inset-x-0 top-0 z-10 h-[3px] overflow-hidden rounded-full bg-[#DDF4F0]">
+                <span className="block h-full w-1/3 rounded-full bg-[#13B8A6]" />
+              </div>
+            )}
+            {isLoading && !(hasLoadedOnce.current && serverVehicles.length > 0) ? (
+              <>
+                {slowLoad && (
+                  <p role="status" data-testid="inventory-slow-hint" className="mb-3 rounded-xl border border-[#BDE5DE] bg-[#E6F6F3] px-3 py-2 text-xs font-semibold text-[#12576D]">
+                    Still loading — the server may be waking up. This can take up to a minute; we’ll keep trying.
+                  </p>
+                )}
+                <SkeletonGrid count={pageSize} />
+              </>
             ) : (loadError || serverError) ? (
               <div role="status" className="rounded-2xl border border-[#D7E7E4] bg-white px-6 py-14 text-center shadow-sm">
                 <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF5F3] text-navy-600"><AlertTriangle className="h-5 w-5" aria-hidden="true" /></div>
@@ -1755,8 +1773,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                       <InventoryCardMedia
                         title={v.title}
                         images={v.images}
+                        priority={idx < 3}
                         onOpen={() => handleVehicleSelect(v)}
-                        className={viewMode === 'list' ? 'aspect-[16/10] w-full sm:aspect-auto sm:min-h-[230px] sm:w-[300px]' : 'aspect-[4/3] w-full'}
+                        className={viewMode === 'list' ? 'aspect-[16/10] w-full sm:aspect-auto sm:min-h-[230px] sm:w-[300px]' : 'aspect-[16/11] w-full sm:aspect-[4/3]'}
                         top={<>
                           <div className="flex flex-wrap gap-1 max-w-[78%]">
                             {v.verified && (
@@ -1969,80 +1988,20 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
       {/* MOBILE FULL-SCREEN FILTER DRAWER */}
       {showMobileFilterDrawer && (
-        <div className="fixed inset-0 bg-white z-50 overflow-y-auto lg:hidden" role="dialog" aria-modal="true" aria-labelledby="kayad-mobile-filter-title">
+        <div className="kayad-mobile-filter-sheet fixed inset-0 bg-white z-[1100] overflow-y-auto lg:hidden" role="dialog" aria-modal="true" aria-labelledby="kayad-mobile-filter-title">
           <div className="sticky top-0 bg-white border-b border-[#D7E7E4] px-4 py-3 flex items-center justify-between">
             <div><h3 id="kayad-mobile-filter-title" className="text-sm font-extrabold text-navy-900">Refine inventory</h3><p className="text-[10px] text-[#64748B] mt-0.5">Adjust any filter, then return to the results.</p></div>
             <button onClick={() => setShowMobileFilterDrawer(false)} className="p-1.5" aria-label="Close filters">
               <X className="w-5 h-5 text-[#64748B]" aria-hidden="true" />
             </button>
           </div>
-          <div className="p-4 space-y-4 pb-8">
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Make</label>
-              <select aria-label="Mobile make filter" value={selectedMake} onChange={(e) => { setSelectedMake(e.target.value); setSelectedModel('All'); }} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
-                {makes.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Makes' : m}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Model</label>
-              <select aria-label="Mobile model filter" value={selectedModel} onChange={(e) => setSelectedModel(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
-                {models.map((m) => <option key={m} value={m}>{m === 'All' ? 'All Models' : m}</option>)}
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Min price</label>
-                <input type="number" value={minPrice || ''} onChange={(e) => setMinPrice(Number(e.target.value) || 0)} placeholder="Ksh 50K" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Max price</label>
-                <input type="number" value={maxPrice === 20000000 ? '' : maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value) || 20000000)} placeholder="Ksh 20M" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">From year</label>
-                <input type="number" value={minYear || ''} onChange={(e) => setMinYear(Number(e.target.value) || 0)} placeholder={String(filterOptions.yearFrom)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">To year</label>
-                <input type="number" value={maxYear === 2026 ? '' : maxYear} onChange={(e) => setMaxYear(Number(e.target.value) || 2026)} placeholder="2026" className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]" />
-              </div>
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Body style</label>
-              <select aria-label="Mobile body style filter" value={selectedBodyStyle} onChange={(e) => setSelectedBodyStyle(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
-                {bodyStyles.map((b) => <option key={b} value={b}>{b === 'All' ? 'All Body Styles' : b}</option>)}
-              </select>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Fuel type</label>
-                <select aria-label="Mobile fuel filter" value={selectedFuel} onChange={(e) => setSelectedFuel(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
-                  {fuelTypes.map((f) => <option key={f} value={f}>{f === 'All' ? 'All Fuel Types' : f}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Transmission</label>
-                <select aria-label="Mobile transmission filter" value={selectedTransmission} onChange={(e) => setSelectedTransmission(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
-                  {transmissionOptions.map((t) => <option key={t} value={t}>{t === 'All' ? 'All Transmissions' : t}</option>)}
-                </select>
-              </div>
-            </div>
-            <div>
-              <label className="block text-[11px] font-bold uppercase tracking-wide text-[#64748B] mb-2">Seller type</label>
-              <select aria-label="Mobile seller type filter" value={selectedSellerType} onChange={(e) => setSelectedSellerType(e.target.value)} className="w-full border border-[#D7E7E4] rounded-xl px-3 py-2.5 text-sm bg-[#F6FAF9]">
-                {sellerTypeOptions.map((s) => <option key={s} value={s}>{s === 'All' ? 'All Sellers' : s}</option>)}
-              </select>
-            </div>
-            <label className="flex items-center gap-3 rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] px-3 py-3 text-sm font-semibold text-[#12576D]">
-              <input type="checkbox" checked={onlyAuction} onChange={(e) => setOnlyAuction(e.target.checked)} className="accent-navy-600 w-4 h-4" />
-              <span><span className="block text-xs font-bold text-navy-900">Live auction listings</span><span className="block text-[10px] font-normal text-[#64748B] mt-0.5">Show vehicles currently available for bidding.</span></span>
-            </label>
-            <div className="flex gap-2 pt-2">
-              <button onClick={resetFilters} className="flex-1 border border-[#D7E7E4] rounded-xl py-3 text-xs font-bold text-[#64748B] hover:bg-[#F6FAF9]">Reset all</button>
-              <button onClick={() => setShowMobileFilterDrawer(false)} className="flex-1 bg-navy-900 hover:bg-navy-700 text-white rounded-xl py-3 text-xs font-bold">Show results</button>
-            </div>
+          <div className="p-4 pb-28">
+            <InventoryFilterPanel idPrefix="mobile" variant="sheet" values={filterValues} limits={filterLimits} options={filterOptionLists} onChange={applyFilterPatch} onReset={resetFilters} />
+          </div>
+          <div className="sticky bottom-0 border-t border-[#D7E7E4] bg-white/95 px-4 pb-[max(env(safe-area-inset-bottom),12px)] pt-3 backdrop-blur">
+            <button onClick={() => setShowMobileFilterDrawer(false)} className="h-12 w-full rounded-xl bg-[#0A3340] text-sm font-extrabold text-white">
+              {serverLoading ? 'Updating…' : `Show ${serverTotal.toLocaleString('en-KE')} ${serverTotal === 1 ? 'vehicle' : 'vehicles'}`}
+            </button>
           </div>
         </div>
       )}

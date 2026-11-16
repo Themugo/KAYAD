@@ -77,7 +77,7 @@ jest.unstable_mockModule("../../utils/supabase.js", () => ({ getSupabase: () => 
 
 const { register, login } = await import("../../controllers/authController.js");
 const { __setOnboardingPolicyForTests } = await import("../../services/onboardingPolicy.service.js");
-beforeEach(() => __setOnboardingPolicyForTests({})); // STAGE 5: launch defaults (sellers enabled, dealers approval_required)
+beforeEach(() => __setOnboardingPolicyForTests({})); // STAGE 5: launch defaults (personal and dealer self-onboarding)
 
 const mkRes = () => {
   const r = { code: 200, body: null, cookies: {} };

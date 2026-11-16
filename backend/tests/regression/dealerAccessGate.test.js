@@ -11,19 +11,38 @@ jest.unstable_mockModule("../../models/User.js", () => ({ default: { findById: j
 jest.unstable_mockModule("../../models/Car.js", () => ({ default: { countDocuments: jest.fn(async () => 0) } }));
 jest.unstable_mockModule("../../models/Referral.js", () => ({ default: { findOne: jest.fn(async () => null) } }));
 jest.unstable_mockModule("../../utils/logger.js", () => ({ logInfo: jest.fn(), logWarn: jest.fn(), logError: jest.fn(), logDebug: jest.fn() }));
-const { requireDealerVerification } = await import("../../middleware/dealerVerification.js");
+const { requireDealerVerification, isDealerSelfServiceRequest } = await import("../../middleware/dealerVerification.js");
 const { __setOnboardingPolicyForTests } = await import("../../services/onboardingPolicy.service.js");
 
 const run = async (req = {}) => {
   const res = { code: 200, status(c) { this.code = c; return this; }, json(b) { this.body = b; return this; } };
   let allowed = false;
   await requireDealerVerification({ method: "GET", baseUrl: "/api/dealer", path: "/inventory-stats", user: { id: "d1", role: "dealer" }, ...req }, res, () => { allowed = true; });
-  return { allowed, res };
+  return { allowed, res, req: { method: "GET", baseUrl: "/api/dealer", path: "/inventory-stats", user: { id: "d1", role: "dealer" }, ...req } };
 };
-beforeEach(() => { dealer = null; verification = null; __setOnboardingPolicyForTests({ dealerOnboardingMode: "approval_required" }); });
+beforeEach(() => { dealer = null; verification = null; __setOnboardingPolicyForTests({ dealerOnboardingMode: "self_onboarding" }); });
+
+describe("pending dealer self-service allowlist", () => {
+  test.each([
+    ["GET", "/api/dealer", "/cars"],
+    ["POST", "/api/cars", "/"],
+    ["GET", "/api/dealer-platform", "/inventory"],
+    ["PUT", "/api/dealer-platform", "/inventory/car-1"],
+    ["POST", "/api/dealer-platform", "/inventory/bulk"],
+  ])("allows submitted dealer inventory action %s %s%s", (method, baseUrl, path) => {
+    expect(isDealerSelfServiceRequest({ method, baseUrl, path })).toBe(true);
+  });
+  test.each([
+    ["POST", "/api/dealer", "/cars/car-1/auction/start"],
+    ["POST", "/api/dealer", "/payouts"],
+    ["GET", "/api/dealer", "/earnings"],
+  ])("does not allow pending dealer sensitive action %s %s%s", (method, baseUrl, path) => {
+    expect(isDealerSelfServiceRequest({ method, baseUrl, path })).toBe(false);
+  });
+});
 
 describe("approval-only dealer features", () => {
-  test("pending dealer (verification submitted, not approved) is refused with DEALER_APPROVAL_PENDING", async () => {
+  test("pending dealer cannot access approval-only inventory statistics while verification is pending", async () => {
     dealer = { user: "d1", approved: false };
     verification = { user: "d1", verificationStatus: "pending" };
     const { allowed, res } = await run();
@@ -31,12 +50,12 @@ describe("approval-only dealer features", () => {
     expect(res.code).toBe(403);
     expect(res.body.code).toBe("DEALER_APPROVAL_PENDING");
   });
-  test("pending dealer cannot create a listing in approval_required mode (no progressive access)", async () => {
+  test("pending dealer can create listings in self_onboarding after submitting verification", async () => {
     dealer = { user: "d1", approved: false };
     verification = { user: "d1", verificationStatus: "pending" };
     const { allowed, res } = await run({ method: "POST", baseUrl: "/api/cars", path: "/" });
-    expect(allowed).toBe(false);
-    expect(res.code).toBe(403);
+    expect(allowed).toBe(true);
+    expect(res.code).toBe(200);
   });
   test("a dealer who has not submitted verification is refused and told to submit it", async () => {
     dealer = { user: "d1", approved: false };

@@ -46,7 +46,7 @@ const checks = [
   ['mobile headline comes from admin hero slide', /\{heroHeadlineNode\}<\/h1>/.test(mobile)],
   ['mobile eyebrow comes from admin hero slide', /\{heroEyebrowDisplay\}<\/span>/.test(mobile)],
   ['mobile supporting copy comes from admin config', /\{heroSupportCopy\}<\/p>/.test(mobile)],
-  ['desktop and mobile CTA labels are admin-controlled', (hero.match(/>\{heroPrimaryLabel\}/g) || []).length === 2 && (hero.match(/\{heroSecondaryLabel\} <PlayCircle/g) || []).length === 2],
+  ['desktop and mobile CTA labels are admin-controlled', (hero.match(/>\{heroPrimaryLabelSafe\}/g) || []).length === 2 && (hero.match(/\{heroSecondaryLabelSafe\}<\/span> <PlayCircle/g) || []).length === 2 && /safeHeroCtaLabel\(heroPrimaryLabel\)/.test(hero)] /* labels stay admin-controlled; a length cap (full text kept in aria-label) stops a long label breaking the layout */,
   ['admin headline is never rewritten (no includes() hack)', !/heroHeadline\.includes\(/.test(hero)],
   ['no literal 6500ms rotation timer', !/\b6500\b/.test(hero)],
   ['rotation timers use admin rotationSeconds', (hero.match(/heroRotationMs/g) || []).length >= 6],

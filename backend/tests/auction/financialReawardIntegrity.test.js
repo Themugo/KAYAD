@@ -33,9 +33,11 @@ describe("auction financial and re-award integrity repair contracts", () => {
       migration.indexOf("CREATE OR REPLACE FUNCTION public.kayad_settle_auction_security_hold_atomic"),
       migration.indexOf("REVOKE ALL ON FUNCTION public.kayad_settle_auction_security_hold_atomic")
     );
-    expect(sqlCallback).toContain("status = 'pending_eligibility'");
-    expect(sqlCallback).toContain("eligibility_status = 'pending'");
-    expect(sqlCallback).not.toMatch(/status\\s*=\\s*'active'/);
+    // The migration sets status via CASE (suspended/withdrawn/disqualified/expired are preserved); the contract is that the
+    // non-terminal outcome is 'pending_eligibility', never 'active'.
+    expect(sqlCallback).toMatch(/status\s*=\s*CASE[\s\S]*?ELSE\s+'pending_eligibility'\s+END/);
+    expect(sqlCallback).toMatch(/eligibility_status\s*=\s*CASE[\s\S]*?ELSE\s+'pending'\s+END/);
+    expect(sqlCallback).not.toMatch(/\bstatus\s*=\s*'active'/); // real check: the upstream pattern had doubled backslashes and could never match
     expect(callback).toContain("finalizeCommitmentRegistration");
     expect(registration).toContain("evaluateEligibility(user, normalizeAuctionSetup(setup.config || {}))");
   });

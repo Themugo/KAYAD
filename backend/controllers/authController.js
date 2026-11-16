@@ -411,7 +411,7 @@ export const register = async (req, res) => {
       user: serializeUser(user, userAuth),
       ...(legacySellerRole ? { compatibility: { requestedRole: "individual_seller", createdRole: "user", deprecated: true } } : {}),
       message: role === "dealer"
-        ? "Dealer application received. Please verify your email. Your dealer account is not approved until our team reviews it, and we will notify you of the decision."
+        ? "Dealer application received. Please verify your email and complete business verification. Once your documents are submitted, you can publish and manage your own vehicle listings while verification is processed; sensitive dealer features remain restricted until verification is approved."
         : legacySellerRole
           ? "Personal account created. KAYAD no longer has a separate private-seller account: selling is part of your personal account. Please verify your email before signing in."
           : "Account created successfully. Please verify your email before signing in.",

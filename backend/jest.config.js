@@ -20,6 +20,11 @@ export default {
     "tests/socketRuntimeSafety\\.test\\.js$",
     "tests/response-lifecycle\\.test\\.js$",
     "tests/regression/healthRouteComposition\\.test\\.js$",
+    "tests/auction/reawardAtomicity\\.test\\.js$",
+    "tests/auction/financialReawardIntegrity\\.test\\.js$",
+    "tests/heroPresentationValidation\\.test\\.js$",
+    "tests/dealerDashboardSummary\\.test\\.js$",
+    "tests/dealerInventoryQuery\\.test\\.js$",
     // node:test file (opt-in, needs a disposable database): run with `npm run test:chat-integrity`.
     "tests/integration/chat-message-integrity\\.integration\\.test\\.js$",
     // node:test file (opt-in, needs a disposable local PostgreSQL + PostgREST): `npm run test:soft-delete-integrity`.
