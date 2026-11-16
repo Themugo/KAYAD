@@ -1,7 +1,9 @@
 # Exact-content duplicate register
 
 Computed by SHA-256 over every file in the supplied ZIP. These are byte-identical groups, not fuzzy/name-based matches.
-Disposition: retained. Historical runbook duplicates are dated snapshots and may be required to reproduce prior checks. The two configuration/security-file pairs are compatibility mirrors.
+> Update 2026-11-16: 25 unreferenced copies from these groups were deleted (see `CLEANUP_REGISTER_20261116.csv`). Copies still referenced by their own phase folder (runbooks are self-contained), and the compatibility mirrors (`.nvmrc`/`.node-version`, `public/security.txt`/`public/.well-known/security.txt`), were kept.
+
+Disposition at the time of this register: retained. Historical runbook duplicates are dated snapshots and may be required to reproduce prior checks. The two configuration/security-file pairs are compatibility mirrors.
 
 ## Group 1 (5 files)
 - SHA-256: `e073c761426a8dde382ae95852fd9dc0e653502196d71ef9e20f8ddaa487024a`

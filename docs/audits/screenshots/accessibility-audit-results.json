@@ -1,0 +1,161 @@
+{
+ "ranAt": "2026-11-16T03:34:34.368Z",
+ "axe": [
+  {
+   "label": "390px public home",
+   "violations": []
+  },
+  {
+   "label": "390px public drawer open",
+   "violations": []
+  },
+  {
+   "label": "390px buyer home",
+   "violations": []
+  },
+  {
+   "label": "390px buyer drawer open",
+   "violations": []
+  },
+  {
+   "label": "390px dealer home",
+   "violations": []
+  },
+  {
+   "label": "390px dealer drawer open",
+   "violations": []
+  },
+  {
+   "label": "390px admin home",
+   "violations": []
+  },
+  {
+   "label": "390px admin drawer open",
+   "violations": []
+  },
+  {
+   "label": "1280px public home",
+   "violations": []
+  },
+  {
+   "label": "1280px buyer home",
+   "violations": []
+  },
+  {
+   "label": "1280px dealer home",
+   "violations": []
+  },
+  {
+   "label": "1280px admin home",
+   "violations": []
+  },
+  {
+   "label": "390px login",
+   "violations": []
+  },
+  {
+   "label": "390px vehicle filters (phone)",
+   "violations": []
+  },
+  {
+   "label": "390px public ?nav=auctions",
+   "violations": []
+  },
+  {
+   "label": "390px public ?nav=discovery",
+   "violations": []
+  },
+  {
+   "label": "390px public ?nav=support",
+   "violations": []
+  },
+  {
+   "label": "390px public ?nav=dealers",
+   "violations": []
+  },
+  {
+   "label": "390px public ?nav=sell",
+   "violations": []
+  },
+  {
+   "label": "390px buyer ?nav=dashboard",
+   "violations": []
+  },
+  {
+   "label": "390px buyer ?nav=saved",
+   "violations": []
+  },
+  {
+   "label": "390px buyer ?nav=payments",
+   "violations": []
+  },
+  {
+   "label": "390px buyer ?nav=profile",
+   "violations": []
+  },
+  {
+   "label": "390px buyer ?nav=chat",
+   "violations": []
+  },
+  {
+   "label": "390px dealer ?nav=dealer-dashboard",
+   "violations": []
+  },
+  {
+   "label": "390px admin ?nav=admin",
+   "violations": []
+  }
+ ],
+ "keyboard": [
+  {
+   "name": "keyboard: Enter on hamburger opens the drawer",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "drawer exposes aria-modal / label",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "focus moves into the drawer on open",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "Tab x40 never leaves the open drawer (focus trap)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "Shift+Tab x40 never leaves the open drawer",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "Escape closes the drawer",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "focus returns to the hamburger after closing",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "first 25 Tab stops all land on real, visible controls",
+   "ok": true,
+   "detail": "25 stops"
+  },
+  {
+   "name": "every focused control shows a visible focus indicator",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "a skip-to-content link exists",
+   "ok": true,
+   "detail": ""
+  }
+ ]
+}

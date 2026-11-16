@@ -6,7 +6,7 @@ This package is the supplied KAYAD project with documentation and file-placement
 ## Recommended handover order
 1. Read the root `README.md` and `docs/README.md`.
 2. Review `handover/STRUCTURE_AUDIT.md` and `handover/FILE_CLEANUP_REGISTER.csv`.
-3. Review `handover/PRIVATE_SELLER_LISTING_WORKFLOW.md` for the repaired private-seller 12-step listing flow and its remaining data-contract boundaries.
+3. Review `audits/KAYAD_PRIVATE_SELLER_LISTING_WORKFLOW.md` for the repaired private-seller 12-step listing flow and its remaining data-contract boundaries.
 4. Review architecture and runtime boundaries in the existing source tree (`src/`, `backend/`, `supabase/`, `scripts/`).
 5. Review operational procedures in `runbooks/`, starting with the dated/current runbooks relevant to the release being handed over.
 6. Review `certification-20261101/` and `audit-artifacts/` as evidence; confirm environment and timestamps before relying on any result.
@@ -38,7 +38,7 @@ This package is the supplied KAYAD project with documentation and file-placement
 
 ## Latest security / finance / database continuation audit (2026-11-09)
 
-Read `SECURITY_AUTH_FINANCE_DATABASE_AUDIT_20261109.md` before release sign-off.
+Read `KAYAD_SECURITY_AUTH_FINANCE_DATABASE_AUDIT_20261109.md` before release sign-off.
 
 - `API_VALIDATION_GAP_REGISTER_20261109.csv` lists the 215 API routes still without route-schema coverage (76 write routes and 139 read routes). This is a review backlog, not a statement that every route is exploitable.
 - `API_GOVERNANCE_REPORT_20261109.json` is the exact route-governance scan output (1,130 routes; 1,130 documented; 915 with schema validation).
