@@ -11,6 +11,7 @@ import {
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../../api/api';
 import { getEffectivePermissions, PAGE_PERMISSIONS, SUPERADMIN_ONLY } from '../../utils/permissions';
+import { useSocket } from '../../context/SocketContext';
 
 interface LinkItem {
   to: string;
@@ -128,6 +129,7 @@ interface AdminSidebarProps {
 
 export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps) {
   const { user } = useAuth();
+  const { connected: realtimeConnected, on } = useSocket();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
@@ -142,8 +144,26 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
   const [alertCount, setAlertCount] = useState(0);
 
   useEffect(() => {
-    adminAPI.alerts({ limit: 1, read: 'false' }).then(data => setAlertCount(data.unreadCount || 0)).catch(() => {});
-  }, []);
+    let active = true;
+    const refreshAlerts = () => {
+      if (document.visibilityState !== 'visible') return;
+      adminAPI.alerts({ limit: 1, read: 'false' })
+        .then(data => { if (active && Number.isFinite(Number(data?.unreadCount))) setAlertCount(Math.max(0, Number(data.unreadCount))); })
+        .catch(() => { /* Keep the last verified count; a failed request is not zero alerts. */ });
+    };
+    refreshAlerts();
+    const interval = window.setInterval(refreshAlerts, 60_000);
+    document.addEventListener('visibilitychange', refreshAlerts);
+    const offAlert = realtimeConnected ? on('adminAlert', refreshAlerts) : undefined;
+    const offControlPlane = realtimeConnected ? on('controlPlaneUpdated', refreshAlerts) : undefined;
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+      document.removeEventListener('visibilitychange', refreshAlerts);
+      offAlert?.();
+      offControlPlane?.();
+    };
+  }, [realtimeConnected, on]);
 
   useEffect(() => {
     if (mobileOpen) setCollapsed(false);

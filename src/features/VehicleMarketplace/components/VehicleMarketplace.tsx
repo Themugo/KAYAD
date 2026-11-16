@@ -618,25 +618,43 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return () => { cancelled = true; };
   }, [savedOnly]);
 
-  // Super Admin featured campaigns: vehicles scheduled to be featured right now (empty when none or unavailable).
+  // Super Admin featured campaigns: vehicles scheduled to be featured right now.
+  // Keep the existing public campaign feed authoritative, but avoid background
+  // polling while the visitor is away. Returning to the tab/window refreshes the
+  // feed immediately so campaign changes are not left stale for a full interval.
   const [campaignVehicles, setCampaignVehicles] = useState<Vehicle[]>([]);
   useEffect(() => {
     if (savedOnly) { setCampaignVehicles([]); setCampaignResolved(true); return; }
     let cancelled = false;
+    let requestVersion = 0;
     const refresh = async () => {
+      if (document.visibilityState === 'hidden') return;
+      const version = ++requestVersion;
       try {
         const ids = await getCurrentFeaturedCampaignCarIds();
-        if (!ids.length) { if (!cancelled) setCampaignVehicles([]); return; }
+        if (cancelled || version !== requestVersion) return;
+        if (!ids.length) { setCampaignVehicles([]); return; }
         const cars = await Promise.all(ids.slice(0, 12).map((id) => getCarById(id).catch(() => null)));
-        if (cancelled) return;
+        if (cancelled || version !== requestVersion) return;
         setCampaignVehicles(cars.filter((c): c is NonNullable<typeof c> => !!c).map(mapBackendCarToVehicle).filter((v) => v.status !== 'sold'));
       } finally {
         if (!cancelled) setCampaignResolved(true);
       }
     };
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === 'visible') refresh().catch(() => {});
+    };
     refresh().catch(() => {});
-    const timer = window.setInterval(() => { refresh().catch(() => {}); }, 5 * 60 * 1000);
-    return () => { cancelled = true; window.clearInterval(timer); };
+    const timer = window.setInterval(refreshWhenVisible, 5 * 60 * 1000);
+    window.addEventListener('focus', refreshWhenVisible);
+    document.addEventListener('visibilitychange', refreshWhenVisible);
+    return () => {
+      cancelled = true;
+      requestVersion += 1;
+      window.clearInterval(timer);
+      window.removeEventListener('focus', refreshWhenVisible);
+      document.removeEventListener('visibilitychange', refreshWhenVisible);
+    };
   }, [savedOnly]);
 
   // Public config is safe to read and keeps hero selection consistent across

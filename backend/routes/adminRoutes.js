@@ -919,6 +919,7 @@ router.put(
       "activePromos",
       "daraja",
       "bank",
+      "featuredCampaignPaymentMethods",
       "reconciliation",
       "branding",
       "heroCarIds",
@@ -961,6 +962,23 @@ router.put(
       const checkedCards = validateHeroCardContent(body.heroCardContent);
       if (checkedCards.errors.length) return res.status(400).json({ success: false, code: "HERO_CARD_CONTENT_INVALID", message: "Invalid hero card content.", errors: checkedCards.errors });
       body.heroCardContent = checkedCards.value;
+    }
+    if (body.featuredCampaignPaymentMethods !== undefined) {
+      const methods = body.featuredCampaignPaymentMethods;
+      if (!methods || typeof methods !== "object" || Array.isArray(methods)) {
+        return res.status(400).json({ success: false, code: "FEATURED_PAYMENT_POLICY_INVALID", message: "Invalid featured-campaign payment policy." });
+      }
+      for (const key of ["manualAllowed", "automaticAllowed"]) {
+        if (methods[key] !== undefined && typeof methods[key] !== "boolean") {
+          return res.status(400).json({ success: false, code: "FEATURED_PAYMENT_POLICY_INVALID", message: `${key} must be allow or deny.` });
+        }
+      }
+      const current = config.featuredCampaignPaymentMethods?.toObject?.() || config.featuredCampaignPaymentMethods || {};
+      body.featuredCampaignPaymentMethods = {
+        manualAllowed: current.manualAllowed === true,
+        automaticAllowed: current.automaticAllowed === true,
+        ...methods,
+      };
     }
     if (body.bank !== undefined) {
       if (!body.bank || typeof body.bank !== "object" || Array.isArray(body.bank)) {

@@ -454,3 +454,11 @@
     height: 30px;
   }
 }
+
+/* Live data sync controls: compact, explicit and consistent with the admin shell. */
+.kayad-command-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.kayad-command-sync-copy{display:grid;gap:3px;min-width:0}
+.kayad-command-sync-copy>span{font-size:12px;font-weight:700;color:var(--admin-ink)}
+.kayad-command-sync-copy>small{font-size:10px;color:var(--admin-muted-content);line-height:1.4}
+.kayad-command-sync-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+@media(max-width:520px){.kayad-command-toolbar{align-items:flex-start}.kayad-command-sync-actions{width:100%;justify-content:flex-start}.kayad-command-sync-actions button{flex:1 1 auto}}

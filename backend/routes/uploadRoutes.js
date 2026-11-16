@@ -33,6 +33,12 @@ router.post(
     if (!FOLDERS.includes(folder)) {
       return res.status(400).json({ success: false, message: `Invalid folder. Must be one of: ${FOLDERS.join(", ")}` });
     }
+    // Public marketing creatives affect the shared marketplace presentation.
+    // Restrict this folder to existing platform/ad-management roles; ordinary
+    // authenticated customers must not be able to publish marketing assets.
+    if (folder === "marketing" && !["admin", "superadmin", "marketing", "ad_manager"].includes(req.user?.role)) {
+      return res.status(403).json({ success: false, code: "MARKETING_UPLOAD_FORBIDDEN", message: "You do not have permission to upload marketing creatives." });
+    }
 
     const isPrivate = PRIVATE_FOLDERS.includes(folder);
     if (folder === CHAT_UPLOAD_FOLDER && !hasImageSignature(req.file.buffer, req.file.mimetype)) {
@@ -74,6 +80,9 @@ router.post(
     const folder = req.body.folder || "temp";
     if (!FOLDERS.includes(folder)) {
       return res.status(400).json({ success: false, message: `Invalid folder. Must be one of: ${FOLDERS.join(", ")}` });
+    }
+    if (folder === "marketing" && !["admin", "superadmin", "marketing", "ad_manager"].includes(req.user?.role)) {
+      return res.status(403).json({ success: false, code: "MARKETING_UPLOAD_FORBIDDEN", message: "You do not have permission to upload marketing creatives." });
     }
 
     if (folder === CHAT_UPLOAD_FOLDER) {

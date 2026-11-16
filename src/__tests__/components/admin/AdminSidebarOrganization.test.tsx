@@ -9,6 +9,7 @@ import path from 'node:path';
 let authUser: any;
 vi.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: authUser, isAuth: true, loading: false, sessionStatus: 'ready' }) }));
 vi.mock('../../../api/api', () => ({ adminAPI: { alerts: vi.fn().mockResolvedValue({ unreadCount: 0, alerts: [] }) } }));
+vi.mock('../../../context/SocketContext', () => ({ useSocket: () => ({ connected: false, on: vi.fn(() => () => {}) }) }));
 
 import AdminSidebar from '../../../components/admin/AdminSidebar';
 import { getEffectivePermissions, PAGE_PERMISSIONS, SUPERADMIN_ONLY } from '../../../utils/permissions';

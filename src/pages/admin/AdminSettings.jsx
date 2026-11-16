@@ -69,6 +69,7 @@ export default function AdminSettings() {
   const [config, setConfig] = useState(DEFAULTS);
   const [daraja, setDaraja] = useState({ environment: 'sandbox', consumerKey: '', consumerSecret: '', passkey: '', shortCode: '' });
   const [bank, setBank] = useState({ bankName: '', accountName: '', accountNumber: '', branch: '', swiftCode: '', reconciliationEmail: '' });
+  const [featuredCampaignPaymentMethods, setFeaturedCampaignPaymentMethods] = useState({ manualAllowed: false, automaticAllowed: false });
   const [reconcile, setReconcile] = useState({ autoReconcile: true, matchThresholdMins: 1440, schedule: 'every 6 hours', notifyOnMismatch: true, defaultNarration: '' });
 
   // Branding state
@@ -114,6 +115,7 @@ export default function AdminSettings() {
       });
       setDaraja({ environment: 'sandbox', consumerKey: '', consumerSecret: '', passkey: '', shortCode: '', ...(c.daraja && typeof c.daraja === 'object' && !Array.isArray(c.daraja) ? c.daraja : {}) });
       setBank({ bankName: '', accountName: '', accountNumber: '', branch: '', swiftCode: '', reconciliationEmail: '', ...(c.bank && typeof c.bank === 'object' && !Array.isArray(c.bank) ? c.bank : {}) });
+      setFeaturedCampaignPaymentMethods({ manualAllowed: false, automaticAllowed: false, ...(c.featuredCampaignPaymentMethods && typeof c.featuredCampaignPaymentMethods === 'object' && !Array.isArray(c.featuredCampaignPaymentMethods) ? c.featuredCampaignPaymentMethods : {}) });
       setReconcile({ autoReconcile: true, matchThresholdMins: 1440, schedule: 'every 6 hours', notifyOnMismatch: true, defaultNarration: '', ...(c.reconciliation && typeof c.reconciliation === 'object' && !Array.isArray(c.reconciliation) ? c.reconciliation : {}) });
       // Load branding config
       if (c.branding && typeof c.branding === 'object' && !Array.isArray(c.branding)) {
@@ -171,6 +173,7 @@ export default function AdminSettings() {
       if (!section || section === 'payments') {
         body.daraja = daraja;
         body.bank = bank;
+        body.featuredCampaignPaymentMethods = featuredCampaignPaymentMethods;
       }
       if (!section || section === 'reconciliation') {
         body.reconciliation = reconcile;
@@ -428,6 +431,26 @@ export default function AdminSettings() {
                     {saving ? <><div className="spinner" style={{ width: 16, height: 16 }} /> Saving...</> : 'Save Payment Settings'}
                   </button>
                 </div>
+              </div>
+            </div>
+
+            <div className="card" style={{ padding: 24 }}>
+              <h3 style={{ fontSize: 18, marginBottom: 8 }}>Featured Vehicle Campaign Payments</h3>
+              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 18 }}>
+                Independently allow or deny the payment methods used for featured-vehicle campaigns. Both default to denied. Changing these controls does not alter existing campaign dates or reverse payments already confirmed.
+              </p>
+              <div style={{ display: 'grid', gap: 14, maxWidth: 700 }}>
+                <Field label="Manual payment verification" hint="Allow campaign payment requests to be submitted for finance-team verification">
+                  <input aria-label="Allow manual featured campaign payments" type="checkbox" checked={featuredCampaignPaymentMethods.manualAllowed === true}
+                    onChange={e => setFeaturedCampaignPaymentMethods(p => ({ ...p, manualAllowed: e.target.checked }))} />
+                </Field>
+                <Field label="Automatic M-Pesa callback" hint="Allow campaign payments to be settled through the configured Daraja callback">
+                  <input aria-label="Allow automatic featured campaign payments" type="checkbox" checked={featuredCampaignPaymentMethods.automaticAllowed === true}
+                    onChange={e => setFeaturedCampaignPaymentMethods(p => ({ ...p, automaticAllowed: e.target.checked }))} />
+                </Field>
+                <button className="btn btn-gold" onClick={() => saveConfig('payments')} disabled={saving || !configLoaded}>
+                  {saving ? 'Saving...' : 'Save Payment Settings'}
+                </button>
               </div>
             </div>
 

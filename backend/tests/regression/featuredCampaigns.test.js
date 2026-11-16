@@ -18,6 +18,11 @@ jest.unstable_mockModule("../../middleware/auth.js", () => ({
 }));
 jest.unstable_mockModule("../../middleware/role.js", () => ({
   authorize: (...roles) => (req, res, next) => (roles.includes(req.user?.role) ? next() : res.status(403).json({ success: false, message: "Forbidden" })),
+  PERMISSIONS: { MANAGE_ADS: "manage_ads" },
+  requirePermission: (permission) => (req, res, next) => {
+    const allowed = req.user?.role === "superadmin" || req.user?.role === "admin" || ["marketing", "ad_manager"].includes(req.user?.role);
+    return allowed ? next() : res.status(403).json({ success: false, message: `Missing permission: ${permission}` });
+  },
 }));
 
 const svc = await import("../../services/featuredCampaigns.service.js");
@@ -139,11 +144,17 @@ describe("HTTP", () => {
   afterAll(() => new Promise((r) => server.close(r)));
   const call = async (method, path, body) => { const r = await fetch(base + path, { method, headers: { "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined }); return { status: r.status, body: await r.json().catch(() => ({})) }; };
 
-  test("admin API refuses anonymous visitors and non-admin roles", async () => {
+  test("campaign API uses MANAGE_ADS and refuses anonymous visitors and roles without it", async () => {
     expect((await call("GET", "/api/admin/featured-campaigns")).status).toBe(401);
     auth.user = { id: "u", role: "buyer" };
     expect((await call("GET", "/api/admin/featured-campaigns")).status).toBe(403);
     expect((await call("POST", "/api/admin/featured-campaigns", { carId: CAR_A, startsAt: at("2030-01-01"), endsAt: at("2030-01-05") })).status).toBe(403);
+  });
+  test("marketing and ad-manager roles with MANAGE_ADS can access campaign operations", async () => {
+    for (const role of ["marketing", "ad_manager"]) {
+      auth.user = { id: `u-${role}`, role };
+      expect((await call("GET", "/api/admin/featured-campaigns")).status).toBe(200);
+    }
   });
   test("an administrator can create, list, pause and (with confirmation) delete", async () => {
     auth.user = { id: "u1", role: "superadmin" };

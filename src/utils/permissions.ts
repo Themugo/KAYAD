@@ -163,7 +163,7 @@ export const PAGE_PERMISSIONS: Record<string, Permission> = {
   "/admin/ads":           PERM.MANAGE_ADS,
   "/admin/settings":      PERM.MANAGE_PLATFORM,
   "/admin/site-designs":  PERM.MANAGE_PLATFORM,
-  "/admin/featured-vehicles": PERM.MANAGE_PLATFORM,
+  "/admin/featured-vehicles": PERM.MANAGE_ADS,
   "/admin/platform-recovery": PERM.PLATFORM_RECOVERY,
 };
 

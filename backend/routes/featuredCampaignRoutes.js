@@ -4,7 +4,7 @@
 import express from "express";
 import { z } from "zod";
 import { protect } from "../middleware/auth.js";
-import { authorize } from "../middleware/role.js";
+import { requirePermission, PERMISSIONS } from "../middleware/role.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import * as svc from "../services/featuredCampaigns.service.js";
@@ -12,7 +12,7 @@ import * as svc from "../services/featuredCampaigns.service.js";
 export const isStoreMissing = (e) => /featured_vehicle_campaign|42P01|PGRST205|schema cache|does not exist/i.test(`${e?.cause || ""} ${e?.message || ""}`);
 
 const router = express.Router();
-router.use(protect, authorize("admin", "superadmin"));
+router.use(protect, requirePermission(PERMISSIONS.MANAGE_ADS));
 
 const handle = (fn) => asyncHandler(async (req, res) => {
   try { await fn(req, res); }

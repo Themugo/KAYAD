@@ -8,6 +8,7 @@ const api = vi.hoisted(() => ({
 vi.mock('../../api/api.exports', () => ({ adminAPI: api }));
 let authUser: any = { id: 'u1', role: 'admin', isOwner: false };
 vi.mock('../../context/AuthContext', () => ({ useAuth: () => ({ user: authUser }) }));
+vi.mock('../../context/SocketContext', () => ({ useSocket: () => ({ connected: false, joinControlPlane: vi.fn(() => undefined), leaveChannel: vi.fn() }) }));
 vi.mock('../../pages/admin/AdminCommunications', () => ({ default: () => <div>comms-panel</div> }));
 vi.mock('../../features/AdminNavigationControl', () => ({ default: () => <div>nav-panel</div> }));
 vi.mock('../../features/AdminProviderGovernance', () => ({ default: () => <div>providers-panel</div> }));
@@ -436,5 +437,18 @@ describe('Command centre — unavailable causes and retry', () => {
     mount();
     await waitFor(() => expect(screen.getAllByText(/unavailable/i).length).toBeGreaterThan(0));
     expect(screen.getByText(/No pending dealers returned/)).toBeTruthy();
+  });
+});
+
+describe('Command centre — live data synchronization', () => {
+  it('shows the last checked state and allows auto-sync to be paused and resumed', async () => {
+    mount();
+    await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
+    expect(screen.getByText(/Last checked/)).toBeTruthy();
+    const pause = screen.getByRole('button', { name: 'Pause auto-sync' });
+    fireEvent.click(pause);
+    expect(screen.getByRole('button', { name: 'Resume auto-sync' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Resume auto-sync' }));
+    expect(screen.getByRole('button', { name: 'Pause auto-sync' })).toBeTruthy();
   });
 });
