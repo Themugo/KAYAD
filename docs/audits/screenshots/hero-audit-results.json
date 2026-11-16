@@ -1,0 +1,1165 @@
+{
+ "ranAt": "2026-11-16T04:09:39.286Z",
+ "loads": 162,
+ "withIssues": 0,
+ "behaviours": [
+  {
+   "name": "autoplay rotates when idle",
+   "pass": true,
+   "a0": "2019 Toyota Prado 0|2020 Toyota Prado 1",
+   "a1": "2021 Toyota Prado 2|2022 Toyota Prado 3"
+  },
+  {
+   "name": "pause button stops rotation (aria-pressed=true)",
+   "pass": true
+  },
+  {
+   "name": "hover over the hero pauses rotation",
+   "pass": true
+  },
+  {
+   "name": "keyboard focus inside the hero pauses rotation",
+   "pass": true
+  },
+  {
+   "name": "prefers-reduced-motion: no automatic rotation",
+   "pass": true
+  }
+ ],
+ "rows": [
+  {
+   "state": "real-0",
+   "w": 320,
+   "issues": [],
+   "heroH": null,
+   "cardH": 175
+  },
+  {
+   "state": "real-0",
+   "w": 360,
+   "issues": [],
+   "heroH": null,
+   "cardH": 176
+  },
+  {
+   "state": "real-0",
+   "w": 375,
+   "issues": [],
+   "heroH": null,
+   "cardH": 178
+  },
+  {
+   "state": "real-0",
+   "w": 390,
+   "issues": [],
+   "heroH": null,
+   "cardH": 187
+  },
+  {
+   "state": "real-0",
+   "w": 414,
+   "issues": [],
+   "heroH": null,
+   "cardH": 190
+  },
+  {
+   "state": "real-0",
+   "w": 430,
+   "issues": [],
+   "heroH": null,
+   "cardH": 192
+  },
+  {
+   "state": "real-0",
+   "w": 640,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-0",
+   "w": 768,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-0",
+   "w": 820,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-0",
+   "w": 900,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-0",
+   "w": 1024,
+   "issues": [],
+   "heroH": null,
+   "cardH": 413
+  },
+  {
+   "state": "real-0",
+   "w": 1100,
+   "issues": [],
+   "heroH": null,
+   "cardH": 418
+  },
+  {
+   "state": "real-0",
+   "w": 1200,
+   "issues": [],
+   "heroH": null,
+   "cardH": 425
+  },
+  {
+   "state": "real-0",
+   "w": 1280,
+   "issues": [],
+   "heroH": null,
+   "cardH": 431
+  },
+  {
+   "state": "real-0",
+   "w": 1366,
+   "issues": [],
+   "heroH": null,
+   "cardH": 437
+  },
+  {
+   "state": "real-0",
+   "w": 1440,
+   "issues": [],
+   "heroH": null,
+   "cardH": 442
+  },
+  {
+   "state": "real-0",
+   "w": 1600,
+   "issues": [],
+   "heroH": null,
+   "cardH": 448
+  },
+  {
+   "state": "real-0",
+   "w": 1920,
+   "issues": [],
+   "heroH": null,
+   "cardH": 448
+  },
+  {
+   "state": "real-1",
+   "w": 320,
+   "issues": [],
+   "heroH": null,
+   "cardH": 175
+  },
+  {
+   "state": "real-1",
+   "w": 360,
+   "issues": [],
+   "heroH": null,
+   "cardH": 176
+  },
+  {
+   "state": "real-1",
+   "w": 375,
+   "issues": [],
+   "heroH": null,
+   "cardH": 178
+  },
+  {
+   "state": "real-1",
+   "w": 390,
+   "issues": [],
+   "heroH": null,
+   "cardH": 187
+  },
+  {
+   "state": "real-1",
+   "w": 414,
+   "issues": [],
+   "heroH": null,
+   "cardH": 190
+  },
+  {
+   "state": "real-1",
+   "w": 430,
+   "issues": [],
+   "heroH": null,
+   "cardH": 192
+  },
+  {
+   "state": "real-1",
+   "w": 640,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-1",
+   "w": 768,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-1",
+   "w": 820,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-1",
+   "w": 900,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-1",
+   "w": 1024,
+   "issues": [],
+   "heroH": null,
+   "cardH": 413
+  },
+  {
+   "state": "real-1",
+   "w": 1100,
+   "issues": [],
+   "heroH": null,
+   "cardH": 418
+  },
+  {
+   "state": "real-1",
+   "w": 1200,
+   "issues": [],
+   "heroH": null,
+   "cardH": 425
+  },
+  {
+   "state": "real-1",
+   "w": 1280,
+   "issues": [],
+   "heroH": null,
+   "cardH": 431
+  },
+  {
+   "state": "real-1",
+   "w": 1366,
+   "issues": [],
+   "heroH": null,
+   "cardH": 437
+  },
+  {
+   "state": "real-1",
+   "w": 1440,
+   "issues": [],
+   "heroH": null,
+   "cardH": 442
+  },
+  {
+   "state": "real-1",
+   "w": 1600,
+   "issues": [],
+   "heroH": null,
+   "cardH": 448
+  },
+  {
+   "state": "real-1",
+   "w": 1920,
+   "issues": [],
+   "heroH": null,
+   "cardH": 448
+  },
+  {
+   "state": "real-2",
+   "w": 320,
+   "issues": [],
+   "heroH": null,
+   "cardH": 175
+  },
+  {
+   "state": "real-2",
+   "w": 360,
+   "issues": [],
+   "heroH": null,
+   "cardH": 176
+  },
+  {
+   "state": "real-2",
+   "w": 375,
+   "issues": [],
+   "heroH": null,
+   "cardH": 178
+  },
+  {
+   "state": "real-2",
+   "w": 390,
+   "issues": [],
+   "heroH": null,
+   "cardH": 187
+  },
+  {
+   "state": "real-2",
+   "w": 414,
+   "issues": [],
+   "heroH": null,
+   "cardH": 190
+  },
+  {
+   "state": "real-2",
+   "w": 430,
+   "issues": [],
+   "heroH": null,
+   "cardH": 192
+  },
+  {
+   "state": "real-2",
+   "w": 640,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-2",
+   "w": 768,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-2",
+   "w": 820,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-2",
+   "w": 900,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-2",
+   "w": 1024,
+   "issues": [],
+   "heroH": null,
+   "cardH": 413
+  },
+  {
+   "state": "real-2",
+   "w": 1100,
+   "issues": [],
+   "heroH": null,
+   "cardH": 418
+  },
+  {
+   "state": "real-2",
+   "w": 1200,
+   "issues": [],
+   "heroH": null,
+   "cardH": 425
+  },
+  {
+   "state": "real-2",
+   "w": 1280,
+   "issues": [],
+   "heroH": null,
+   "cardH": 431
+  },
+  {
+   "state": "real-2",
+   "w": 1366,
+   "issues": [],
+   "heroH": null,
+   "cardH": 437
+  },
+  {
+   "state": "real-2",
+   "w": 1440,
+   "issues": [],
+   "heroH": null,
+   "cardH": 442
+  },
+  {
+   "state": "real-2",
+   "w": 1600,
+   "issues": [],
+   "heroH": null,
+   "cardH": 448
+  },
+  {
+   "state": "real-2",
+   "w": 1920,
+   "issues": [],
+   "heroH": null,
+   "cardH": 448
+  },
+  {
+   "state": "real-3",
+   "w": 320,
+   "issues": [],
+   "heroH": null,
+   "cardH": 175
+  },
+  {
+   "state": "real-3",
+   "w": 360,
+   "issues": [],
+   "heroH": null,
+   "cardH": 176
+  },
+  {
+   "state": "real-3",
+   "w": 375,
+   "issues": [],
+   "heroH": null,
+   "cardH": 178
+  },
+  {
+   "state": "real-3",
+   "w": 390,
+   "issues": [],
+   "heroH": null,
+   "cardH": 187
+  },
+  {
+   "state": "real-3",
+   "w": 414,
+   "issues": [],
+   "heroH": null,
+   "cardH": 190
+  },
+  {
+   "state": "real-3",
+   "w": 430,
+   "issues": [],
+   "heroH": null,
+   "cardH": 192
+  },
+  {
+   "state": "real-3",
+   "w": 640,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-3",
+   "w": 768,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-3",
+   "w": 820,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-3",
+   "w": 900,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-3",
+   "w": 1024,
+   "issues": [],
+   "heroH": null,
+   "cardH": 413
+  },
+  {
+   "state": "real-3",
+   "w": 1100,
+   "issues": [],
+   "heroH": null,
+   "cardH": 418
+  },
+  {
+   "state": "real-3",
+   "w": 1200,
+   "issues": [],
+   "heroH": null,
+   "cardH": 425
+  },
+  {
+   "state": "real-3",
+   "w": 1280,
+   "issues": [],
+   "heroH": null,
+   "cardH": 431
+  },
+  {
+   "state": "real-3",
+   "w": 1366,
+   "issues": [],
+   "heroH": null,
+   "cardH": 437
+  },
+  {
+   "state": "real-3",
+   "w": 1440,
+   "issues": [],
+   "heroH": null,
+   "cardH": 442
+  },
+  {
+   "state": "real-3",
+   "w": 1600,
+   "issues": [],
+   "heroH": null,
+   "cardH": 448
+  },
+  {
+   "state": "real-3",
+   "w": 1920,
+   "issues": [],
+   "heroH": null,
+   "cardH": 448
+  },
+  {
+   "state": "real-dupes",
+   "w": 320,
+   "issues": [],
+   "heroH": null,
+   "cardH": 175
+  },
+  {
+   "state": "real-dupes",
+   "w": 360,
+   "issues": [],
+   "heroH": null,
+   "cardH": 176
+  },
+  {
+   "state": "real-dupes",
+   "w": 375,
+   "issues": [],
+   "heroH": null,
+   "cardH": 178
+  },
+  {
+   "state": "real-dupes",
+   "w": 390,
+   "issues": [],
+   "heroH": null,
+   "cardH": 187
+  },
+  {
+   "state": "real-dupes",
+   "w": 414,
+   "issues": [],
+   "heroH": null,
+   "cardH": 190
+  },
+  {
+   "state": "real-dupes",
+   "w": 430,
+   "issues": [],
+   "heroH": null,
+   "cardH": 192
+  },
+  {
+   "state": "real-dupes",
+   "w": 640,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-dupes",
+   "w": 768,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-dupes",
+   "w": 820,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-dupes",
+   "w": 900,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "real-dupes",
+   "w": 1024,
+   "issues": [],
+   "heroH": null,
+   "cardH": 413
+  },
+  {
+   "state": "real-dupes",
+   "w": 1100,
+   "issues": [],
+   "heroH": null,
+   "cardH": 418
+  },
+  {
+   "state": "real-dupes",
+   "w": 1200,
+   "issues": [],
+   "heroH": null,
+   "cardH": 425
+  },
+  {
+   "state": "real-dupes",
+   "w": 1280,
+   "issues": [],
+   "heroH": null,
+   "cardH": 431
+  },
+  {
+   "state": "real-dupes",
+   "w": 1366,
+   "issues": [],
+   "heroH": null,
+   "cardH": 437
+  },
+  {
+   "state": "real-dupes",
+   "w": 1440,
+   "issues": [],
+   "heroH": null,
+   "cardH": 442
+  },
+  {
+   "state": "real-dupes",
+   "w": 1600,
+   "issues": [],
+   "heroH": null,
+   "cardH": 448
+  },
+  {
+   "state": "real-dupes",
+   "w": 1920,
+   "issues": [],
+   "heroH": null,
+   "cardH": 448
+  },
+  {
+   "state": "broken-image",
+   "w": 320,
+   "issues": [],
+   "heroH": null,
+   "cardH": 175
+  },
+  {
+   "state": "broken-image",
+   "w": 360,
+   "issues": [],
+   "heroH": null,
+   "cardH": 176
+  },
+  {
+   "state": "broken-image",
+   "w": 375,
+   "issues": [],
+   "heroH": null,
+   "cardH": 178
+  },
+  {
+   "state": "broken-image",
+   "w": 390,
+   "issues": [],
+   "heroH": null,
+   "cardH": 187
+  },
+  {
+   "state": "broken-image",
+   "w": 414,
+   "issues": [],
+   "heroH": null,
+   "cardH": 190
+  },
+  {
+   "state": "broken-image",
+   "w": 430,
+   "issues": [],
+   "heroH": null,
+   "cardH": 192
+  },
+  {
+   "state": "broken-image",
+   "w": 640,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "broken-image",
+   "w": 768,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "broken-image",
+   "w": 820,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "broken-image",
+   "w": 900,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "broken-image",
+   "w": 1024,
+   "issues": [],
+   "heroH": null,
+   "cardH": 413
+  },
+  {
+   "state": "broken-image",
+   "w": 1100,
+   "issues": [],
+   "heroH": null,
+   "cardH": 418
+  },
+  {
+   "state": "broken-image",
+   "w": 1200,
+   "issues": [],
+   "heroH": null,
+   "cardH": 425
+  },
+  {
+   "state": "broken-image",
+   "w": 1280,
+   "issues": [],
+   "heroH": null,
+   "cardH": 431
+  },
+  {
+   "state": "broken-image",
+   "w": 1366,
+   "issues": [],
+   "heroH": null,
+   "cardH": 437
+  },
+  {
+   "state": "broken-image",
+   "w": 1440,
+   "issues": [],
+   "heroH": null,
+   "cardH": 442
+  },
+  {
+   "state": "broken-image",
+   "w": 1600,
+   "issues": [],
+   "heroH": null,
+   "cardH": 448
+  },
+  {
+   "state": "broken-image",
+   "w": 1920,
+   "issues": [],
+   "heroH": null,
+   "cardH": 448
+  },
+  {
+   "state": "long-cta",
+   "w": 320,
+   "issues": [],
+   "heroH": null,
+   "cardH": 199
+  },
+  {
+   "state": "long-cta",
+   "w": 360,
+   "issues": [],
+   "heroH": null,
+   "cardH": 188
+  },
+  {
+   "state": "long-cta",
+   "w": 375,
+   "issues": [],
+   "heroH": null,
+   "cardH": 178
+  },
+  {
+   "state": "long-cta",
+   "w": 390,
+   "issues": [],
+   "heroH": null,
+   "cardH": 187
+  },
+  {
+   "state": "long-cta",
+   "w": 414,
+   "issues": [],
+   "heroH": null,
+   "cardH": 190
+  },
+  {
+   "state": "long-cta",
+   "w": 430,
+   "issues": [],
+   "heroH": null,
+   "cardH": 192
+  },
+  {
+   "state": "long-cta",
+   "w": 640,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "long-cta",
+   "w": 768,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "long-cta",
+   "w": 820,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "long-cta",
+   "w": 900,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "long-cta",
+   "w": 1024,
+   "issues": [],
+   "heroH": null,
+   "cardH": 467
+  },
+  {
+   "state": "long-cta",
+   "w": 1100,
+   "issues": [],
+   "heroH": null,
+   "cardH": 472
+  },
+  {
+   "state": "long-cta",
+   "w": 1200,
+   "issues": [],
+   "heroH": null,
+   "cardH": 479
+  },
+  {
+   "state": "long-cta",
+   "w": 1280,
+   "issues": [],
+   "heroH": null,
+   "cardH": 485
+  },
+  {
+   "state": "long-cta",
+   "w": 1366,
+   "issues": [],
+   "heroH": null,
+   "cardH": 491
+  },
+  {
+   "state": "long-cta",
+   "w": 1440,
+   "issues": [],
+   "heroH": null,
+   "cardH": 496
+  },
+  {
+   "state": "long-cta",
+   "w": 1600,
+   "issues": [],
+   "heroH": null,
+   "cardH": 502
+  },
+  {
+   "state": "long-cta",
+   "w": 1920,
+   "issues": [],
+   "heroH": null,
+   "cardH": 502
+  },
+  {
+   "state": "showcase-off",
+   "w": 320,
+   "issues": [],
+   "heroH": null,
+   "cardH": 175
+  },
+  {
+   "state": "showcase-off",
+   "w": 360,
+   "issues": [],
+   "heroH": null,
+   "cardH": 176
+  },
+  {
+   "state": "showcase-off",
+   "w": 375,
+   "issues": [],
+   "heroH": null,
+   "cardH": 178
+  },
+  {
+   "state": "showcase-off",
+   "w": 390,
+   "issues": [],
+   "heroH": null,
+   "cardH": 187
+  },
+  {
+   "state": "showcase-off",
+   "w": 414,
+   "issues": [],
+   "heroH": null,
+   "cardH": 190
+  },
+  {
+   "state": "showcase-off",
+   "w": 430,
+   "issues": [],
+   "heroH": null,
+   "cardH": 192
+  },
+  {
+   "state": "showcase-off",
+   "w": 640,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "showcase-off",
+   "w": 768,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "showcase-off",
+   "w": 820,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "showcase-off",
+   "w": 900,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "showcase-off",
+   "w": 1024,
+   "issues": [],
+   "heroH": null,
+   "cardH": 446
+  },
+  {
+   "state": "showcase-off",
+   "w": 1100,
+   "issues": [],
+   "heroH": null,
+   "cardH": 451
+  },
+  {
+   "state": "showcase-off",
+   "w": 1200,
+   "issues": [],
+   "heroH": null,
+   "cardH": 458
+  },
+  {
+   "state": "showcase-off",
+   "w": 1280,
+   "issues": [],
+   "heroH": null,
+   "cardH": 464
+  },
+  {
+   "state": "showcase-off",
+   "w": 1366,
+   "issues": [],
+   "heroH": null,
+   "cardH": 470
+  },
+  {
+   "state": "showcase-off",
+   "w": 1440,
+   "issues": [],
+   "heroH": null,
+   "cardH": 475
+  },
+  {
+   "state": "showcase-off",
+   "w": 1600,
+   "issues": [],
+   "heroH": null,
+   "cardH": 481
+  },
+  {
+   "state": "showcase-off",
+   "w": 1920,
+   "issues": [],
+   "heroH": null,
+   "cardH": 481
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 320,
+   "issues": [],
+   "heroH": null,
+   "cardH": 175
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 360,
+   "issues": [],
+   "heroH": null,
+   "cardH": 176
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 375,
+   "issues": [],
+   "heroH": null,
+   "cardH": 178
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 390,
+   "issues": [],
+   "heroH": null,
+   "cardH": 187
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 414,
+   "issues": [],
+   "heroH": null,
+   "cardH": 190
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 430,
+   "issues": [],
+   "heroH": null,
+   "cardH": 192
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 640,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 768,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 820,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 900,
+   "issues": [],
+   "heroH": null,
+   "cardH": 224
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 1024,
+   "issues": [],
+   "heroH": null,
+   "cardH": 413
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 1100,
+   "issues": [],
+   "heroH": null,
+   "cardH": 418
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 1200,
+   "issues": [],
+   "heroH": null,
+   "cardH": 425
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 1280,
+   "issues": [],
+   "heroH": null,
+   "cardH": 566
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 1366,
+   "issues": [],
+   "heroH": null,
+   "cardH": 575
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 1440,
+   "issues": [],
+   "heroH": null,
+   "cardH": 528
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 1600,
+   "issues": [],
+   "heroH": null,
+   "cardH": 516
+  },
+  {
+   "state": "unsafe-admin",
+   "w": 1920,
+   "issues": [],
+   "heroH": null,
+   "cardH": 516
+  }
+ ]
+}

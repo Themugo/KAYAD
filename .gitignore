@@ -21,3 +21,7 @@ supabase/.temp/
 # test-run artifact (AA-continuation)
 backend/data/*.sqlite
 backend/data/*.sqlite-*
+
+# regenerable browser-audit screenshots (scripts/browser-audit-*.mjs write here)
+docs/audits/screenshots/hero/
+docs/audits/screenshots/dealer/

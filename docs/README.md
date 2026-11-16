@@ -4,7 +4,9 @@
 - `handover/HANDOVER_GUIDE.md` — canonical handover entry point and review sequence.
 - `handover/STRUCTURE_AUDIT.md` — findings from the supplied `KAYAD-FULL-1106c.zip`.
 - `handover/FILE_CLEANUP_REGISTER.csv` — every file relocated in this cleanup.
-- `handover/EXACT_DUPLICATE_REGISTER.md` — exact-content duplicate groups and disposition.
+- `handover/EXACT_DUPLICATE_REGISTER.md` — exact-content duplicate groups and disposition (as found on 2026-11-06; see the 2026-11-16 register for what was removed).
+- `handover/CLEANUP_REGISTER_20261116.csv` — every file deleted, moved or renamed in the 2026-11-16 structure audit, with the reason.
+- `audits/` — all dated audit, remediation, verification and certification reports (`KAYAD_<TOPIC>_<YYYYMMDD>.md`), plus `audits/20261111-master-audit/` and `audits/screenshots/before-after/`.
 
 ## Architecture and operations
 - `../src/` — frontend application source.
