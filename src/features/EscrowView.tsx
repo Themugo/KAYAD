@@ -39,7 +39,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth, onNavi
       ? 'escrow-operations'
       : role === 'dealer'
         ? 'dealer-dashboard'
-        : 'buyer-platform';
+        : 'dashboard:deals';
     onNavigate?.(destination);
   }, [user, onOpenAuth, onNavigate]);
 

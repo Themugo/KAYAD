@@ -37,7 +37,10 @@ jest.unstable_mockModule("../../middleware/auditLog.js", () => ({ auditLog: () =
 const sendNotification = jest.fn(async () => {});
 jest.unstable_mockModule("../../services/notification.service.js", () => ({ sendNotification }));
 const carFind = jest.fn();
-const carUpdate = jest.fn(async () => ({}));
+const callOrder = [];
+const carUpdate = jest.fn(async () => { callOrder.push("status"); return {}; });
+const recordModeration = jest.fn(async () => { callOrder.push("audit"); });
+jest.unstable_mockModule("../../services/personalListingLifecycle.service.js", () => ({ recordModerationListingLifecycle: recordModeration, transitionPersonalListing: jest.fn() }));
 jest.unstable_mockModule("../../models/Car.js", () => ({ default: { findById: jest.fn(() => ({ populate: async () => carFind() })), findByIdAndUpdate: carUpdate, find: jest.fn() } }));
 
 // ── in-memory system_settings with UNIQUE(key) and a hook to interleave concurrent requests ──
@@ -437,7 +440,20 @@ describe("decision authority is enforced on the real approval/moderation routes"
       const c = { _id: ID, id: ID, title: "Prado", status: "pending", dealer: { _id: "seller-1", email: "s@example.test", name: "S" }, save: jest.fn(async () => {}), ...over };
       return c;
     };
-    beforeEach(() => { sendNotification.mockClear(); carUpdate.mockReset(); carUpdate.mockResolvedValue({}); });
+    beforeEach(() => { sendNotification.mockClear(); carUpdate.mockReset(); carUpdate.mockImplementation(async () => { callOrder.push("status"); return {}; }); recordModeration.mockClear(); callOrder.length = 0; });
+    test("the moderation decision is recorded BEFORE the status changes; a failed record changes nothing (seller can never undo a hide)", async () => {
+      carFind.mockReturnValue(mkCar({ status: "available" }));
+      const ok = await call("POST", `/api/admin/cars/${ID}/moderate`, { role: "owner", body: { action: "hide", adminNote: "policy" } });
+      expect(ok.status).toBe(200);
+      expect(callOrder).toEqual(["audit", "status"]);
+      expect(recordModeration).toHaveBeenCalledWith(expect.objectContaining({ carId: ID, sellerId: "seller-1", nextStatus: "hidden" }));
+      callOrder.length = 0; carUpdate.mockClear();
+      recordModeration.mockRejectedValueOnce(new Error("audit store down"));
+      carFind.mockReturnValue(mkCar({ status: "available" }));
+      const bad = await call("POST", `/api/admin/cars/${ID}/moderate`, { role: "owner", body: { action: "hide", adminNote: "policy" } });
+      expect(bad.status).toBe(500);
+      expect(carUpdate).not.toHaveBeenCalled();
+    });
     test.each(["hide", "reject"])("owner action %j ⇒ status 'hidden' (never the DB-invalid 'rejected'), honest response, audited as hidden", async (action) => {
       const car = mkCar(); carFind.mockReturnValue(car);
       const r = await call("POST", `/api/admin/cars/${ID}/moderate`, { role: "owner", body: { action, adminNote: "blurry photos" } });

@@ -73,11 +73,11 @@ describe('Navigation: the services entry covers more than inspection and invents
   it('is labelled Auto Services with four real destinations', () => {
     expect(item.label).toBe('Auto Services');
     expect(item.children!.map((c) => c.id)).toEqual(['request', 'providers', 'roadside', 'mine']);
-    expect(item.children!.map((c) => c.navId)).toEqual(['services:inspect', 'services:find', 'services:roadside', 'services:mine']);
+    expect(item.children!.map((c) => c.navId)).toEqual(['services:inspect', 'services:find', 'services:roadside', 'dashboard:buying']);
   });
   it('the signed-in-only entry is flagged and the roadside entry does not promise dispatch', () => {
     expect(item.children!.find((c) => c.id === 'mine')!.requiresAuth).toBe(true);
-    expect(item.children!.find((c) => c.id === 'mine')!.href).toBe('/?nav=buyer-platform');
+    expect(item.children!.find((c) => c.id === 'mine')!.href).toBe('/?nav=dashboard&section=buying');
     expect(item.children!.find((c) => c.id === 'roadside')!.description).toMatch(/does not dispatch/);
   });
 });

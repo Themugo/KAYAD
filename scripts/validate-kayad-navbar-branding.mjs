@@ -13,7 +13,7 @@ assert.ok(fs.existsSync(new URL('../public/branding/kayad-mark.png', import.meta
 assert.ok(/\.kayad-brand__word-ke\s*\{[^}]*font-size:\s*\.5em/.test(css) && /\.kayad-brand__kenya-flag\s*\{[^}]*align-self:\s*flex-end/.test(css), 'KE is smaller than KAYAD and the flag sits at the end on the same line');
 for (const selector of ['.kayad-header__bar', '.kayad-brand__image', '.kayad-brand__word-ke', '.kayad-brand__tag--reserved', '.kayad-cta', '.kayad-hamburger']) assert.ok(css.includes(selector), `responsive header style exists: ${selector}`);
 assert.ok(css.includes('@media (max-width: 359px)') && css.includes('@media (max-width: 380px)') && css.includes('@media (min-width: 640px) and (max-width: 1023px)'), 'small phone and tablet breakpoints are defined');
-assert.ok(navbar.includes("handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'seller-platform')"), 'existing seller/dealer CTA routing remains unchanged');
+assert.ok(navbar.includes("handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'dashboard:create-listing')"), 'existing seller/dealer CTA routing remains unchanged');
 assert.ok(navbar.includes('applyNavigationConfig(navigation)'), 'existing admin-configured navigation remains canonical');
 console.log('PASS: KAYAD-KE mark/wordmark/descriptor are separate and responsive.');
 console.log('PASS: custom admin logo overrides, country badge and existing CTA/navigation routing are preserved.');

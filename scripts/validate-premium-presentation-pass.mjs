@@ -28,7 +28,7 @@ pass('Registration is reachable: combined header entry -> /login -> /register CT
 pass('Hero keeps stable mobile/desktop footprint', hero.includes('--hero-stage-h') && hero.includes('lg:min-h-[var(--hero-stage-h)]') && hero.includes('relative px-3 pb-3 pt-2 lg:hidden'));
 pass('Hero keeps real vehicle source', hero.includes('heroSourceVehicles') && hero.includes('heroImageForVehicle'));
 pass('Hero retains existing actions', hero.includes('Explore Vehicles') && hero.includes('How It Works'));
-pass('Hero retains carousel controls', hero.includes('Previous featured vehicles') && hero.includes('Next featured vehicles') && hero.includes('Show featured pair'));
+pass('Hero retains carousel controls', hero.includes('Previous featured vehicle') && hero.includes('Next featured vehicle') && hero.includes('Show featured vehicle ${index + 1} of ${heroPairCount}'));
 pass('Hero uses the procedural showroom environment (no raster dependency)', /const KENYA_ROAD_HERO_BACKGROUND = ''/.test(hero) && read('src/features/VehicleMarketplace/components/homepage-redesign.css').includes('.kayad-showroom-stage'));
 pass('Hero premium vehicle stage present (desktop pair + mobile carousel + vehicle info cards on real featured inventory)', hero.includes('aria-label="KAYAD mobile hero"') && hero.includes('aria-label="Featured vehicles"') && hero.includes('showVehicleInfoCards') && hero.includes("'KAYAD SELECT'"));
 pass('Login remains canonical standalone surface', /if \(path === '\/login'( \|\| path === '\/admin\/login')?\) return <LoginPage \/>;/.test(app));

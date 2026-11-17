@@ -20,7 +20,7 @@ const checks = [
   ['passport search uses canonical db lookup', passport.includes("db.findOne('vehicle_passports'")],
   ['passport public controller uses passport service', controller.includes('vehiclePassportService.getPublicPassport')],
   ['server mounts ownership API', read('backend/server.js').includes('ownershipRoutes')],
-  ['frontend uses real ownership API', exists('src/services/ownershipApi.ts') && read('src/features/OwnershipPlatform/pages/BuyerPlatform.tsx').includes('getOwnershipDashboard')],
+  ['frontend uses real ownership API', exists('src/services/ownershipApi.ts') && read('src/components/DashboardHub.tsx').includes('getOwnershipDashboard')],
   ['migration creates ownership vehicles', migration.includes('create table if not exists public.owner_vehicles')],
   ['migration creates vehicle passports', migration.includes('create table if not exists public.vehicle_passports')],
   ['migration enables RLS', migration.includes('enable row level security')],

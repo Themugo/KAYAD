@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
 const page = read('src/features/FinancePlatform/pages/FinanceMarketplace.tsx');
-const buyer = read('src/features/OwnershipPlatform/pages/BuyerPlatform.tsx');
+const buyer = read('src/features/OwnershipPlatform/pages/PersonalBuyingModule.tsx');
 const app = read('src/App.tsx');
 const dashboard = read('src/components/DashboardHub.tsx');
 const api = read('src/services/loanApi.ts');
@@ -15,10 +15,10 @@ const checks = [
   ['personal application tracker is conditional on account mode', /mode === 'account' && user && \([\s\S]*My Applications/.test(page)],
   ['public mode renders service explanation and not lender offers', /mode === 'public' && \([\s\S]*Verified lender offers, rates and fees are not currently displayed/.test(page)],
   ['public copy explicitly says KAYAD is not a lender', /KAYAD is not a lender/.test(page)],
-  ['public CTA directs signed-in users to My Garage', /user \? onNavigate\?\.\('buyer-platform'\) : onOpenAuth\?\.\(\)/.test(page)],
+  ['public CTA directs signed-in users to the unified Deals section', /user \? onNavigate\?\.\('dashboard:deals'\) : onOpenAuth\?\.\(\)/.test(page)],
   ['public CTA never exposes application records directly', /Applications and their recorded status are available in your private account workspace/.test(page)],
-  ['BuyerPlatform hosts the private financing workspace', /<FinanceMarketplace[\s\S]*mode="account" user=\{user\}/.test(buyer)],
-  ['buyer dashboard has a financing shortcut', /label:'Vehicle financing',nav:'buyer-platform'/.test(dashboard)],
+  ['PersonalBuyingModule hosts the private financing workspace', /<FinanceMarketplace[\s\S]*mode="account" user=\{user\}/.test(buyer)],
+  ['unified dashboard has a financing shortcut', /label:'Vehicle financing',nav:'dashboard:deals'/.test(dashboard)],
   ['loan submission requires authentication', /router\.post\("\/", protect, asyncHandler\(createLoanApplication\)\)/.test(routes)],
   ['applicant list requires authentication', /router\.get\("\/my", protect, asyncHandler\(getMyLoanApplications\)\)/.test(routes)],
   ['admin list and status changes remain protected', /router\.get\("\/all", protect, adminOnly/.test(routes) && /router\.put\("\/:id\/status", protect, adminOnly/.test(routes)],

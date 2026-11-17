@@ -3155,6 +3155,50 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+  /api/cars/my-listing-performance:
+    get:
+      tags:
+      - Api
+      summary: GET /api/cars/my-listing-performance
+      description: 'Personal seller performance for the signed-in personal account only: listing views and privacy-hashed unique visitors for a bounded period (days, max 90), lifetime clicks, lifetime enquiry counts. No conversion rates are reported.'
+      operationId: getApiCarsMyListingPerformance
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Personal account required
+        '500':
+          description: Internal server error
+  /api/cars/{id}/lifecycle:
+    patch:
+      tags:
+      - Api
+      summary: PATCH /api/cars/{id}/lifecycle
+      description: 'Personal owner lifecycle action (hide, publish, mark_sold). Personal accounts only; ownership is enforced from the authenticated identity in one atomic database transaction. 409 when an auction, bid, escrow or purchase protects the listing, or when a moderator or policy hide applies.'
+      operationId: patchApiCarsIdLifecycle
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '409':
+          description: Listing locked or not eligible for the requested transition
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Personal account required
+        '500':
+          description: Internal server error
   /api/cars/{id}:
     delete:
       tags:
@@ -13310,6 +13354,24 @@ paths:
           description: Bad request
         '401':
           description: Unauthorized
+        '500':
+          description: Internal server error
+  /api/leads/mine/seller-enquiries:
+    get:
+      tags:
+      - Api
+      summary: GET /api/leads/mine/seller-enquiries
+      description: 'Enquiries about vehicles owned by the signed-in personal seller. Owner-scoped on the server; no buyer contact data is returned.'
+      operationId: getApiLeadsMineSellerEnquiries
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Personal account required
         '500':
           description: Internal server error
   /api/leads/mine/offers:

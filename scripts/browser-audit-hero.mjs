@@ -92,7 +92,7 @@ for (const name of stateNames) {
       };
     });
     const issues = [];
-    const expected = { 'real-0': 2, 'real-1': 1, 'real-2': 2, 'real-3': 2, 'real-dupes': 2, 'broken-image': 2, 'long-cta': 2, 'showcase-off': 0, 'unsafe-admin': 2 }[name];
+    const expected = { 'real-0': 1, 'real-1': 1, 'real-2': 1, 'real-3': 1, 'real-dupes': 1, 'broken-image': 1, 'long-cta': 1, 'showcase-off': 0, 'unsafe-admin': 1 }[name];
     if (m.missing) issues.push('hero missing');
     else {
       if (m.sw > m.iw) issues.push(`horizontal overflow ${m.sw}>${m.iw}`);
@@ -151,7 +151,7 @@ const beh = [];
   await page.mouse.move(640, 400); const c0 = await cur(); await page.waitForTimeout(7000); const c1 = await cur();
   beh.push({ name: 'hover over the hero pauses rotation', pass: c0 === c1 });
   await page.mouse.move(5, 5);
-  await page.getByRole('button', { name: 'Next featured vehicles' }).first().focus(); const d0 = await cur(); await page.waitForTimeout(7000); const d1 = await cur();
+  await page.getByRole('button', { name: 'Next featured vehicle' }).first().focus(); const d0 = await cur(); await page.waitForTimeout(7000); const d1 = await cur();
   beh.push({ name: 'keyboard focus inside the hero pauses rotation', pass: d0 === d1 });
   await ctx.close();
   const rm = await browser.newContext({ viewport: { width: 1280, height: 900 }, reducedMotion: 'reduce' });

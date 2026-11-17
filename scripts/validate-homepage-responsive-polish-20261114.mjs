@@ -11,7 +11,7 @@ const checks = [
   ['mobile inventory toolbar has responsive control layout', /\.kayad-market-toolbar-controls\s*\{[^}]*display:\s*grid/s.test(css)],
   ['small-screen layout has a dedicated breakpoint', /@media\s*\(max-width:\s*379px\)/.test(css)],
   ['reduced-motion preference is respected', /@media\s*\(prefers-reduced-motion:\s*reduce\)/.test(css)],
-  ['original marketplace routes and actions remain wired', /onNavigate\('seller-platform'\)/.test(component) && /onNavigate\('discovery'\)/.test(component) && /onNavigate\('inspections'\)/.test(component)],
+  ['original marketplace routes and actions remain wired', /onNavigate\('dashboard:create-listing'\)/.test(component) && /onNavigate\('discovery'\)/.test(component) && /onNavigate\('inspections'\)/.test(component)],
   ['hero remains driven by configured/live vehicle data', /heroSourceVehicles/.test(component) && /heroPresentation/.test(component)],
 ];
 let failures = 0;

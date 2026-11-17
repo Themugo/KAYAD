@@ -15,8 +15,8 @@ const checks = [
   ['automatic payment switch is independently editable', /automaticAllowed === true/.test(settings)],
   ['both controls save through existing payments settings action', /body\.featuredCampaignPaymentMethods = featuredCampaignPaymentMethods/.test(settings)],
   ['campaign frontend page permission is MANAGE_ADS', /"\/admin\/featured-vehicles": PERM\.MANAGE_ADS/.test(permissions)],
-  ['campaign API backend permission is MANAGE_ADS', /requirePermission\(PERMISSIONS\.MANAGE_ADS\)/.test(routes)],
-  ['regression test covers marketing and ad-manager access', /marketing and ad-manager roles with MANAGE_ADS/.test(tests)],
+  ['campaign API backend permission is MANAGE_ADS', /requirePermission\((?:PERMISSIONS\.MANAGE_ADS|["']manage_ads["'])\)/.test(routes)],
+  ['regression test covers marketing and ad-manager access', /MANAGE_ADS roles can administer campaigns/.test(tests)],
 ];
 for (const [name, ok] of checks) {
   if (!ok) { console.error(`FAIL ${name}`); process.exitCode = 1; }

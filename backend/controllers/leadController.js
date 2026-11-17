@@ -22,6 +22,7 @@ import { getLeadTimeline } from "../services/leadTimelineService.js";
 import { findById } from "../db/index.js";
 import { logInfo, logError } from "../utils/logger.js";
 import { isRoleAllowed } from "../config/roles.js"; // STAGE 4A (G3): canonical admin check
+import { getPersonalSellerEnquiries } from "../services/personalSellerInsights.service.js";
 
 // =============================
 // 📋 GET DEALER LEADS
@@ -51,6 +52,23 @@ export const getLeads = async (req, res) => {
       success: false,
       message: "Failed to get leads",
     });
+  }
+};
+
+
+// Personal seller inbox: leads are returned only when they belong to the signed-in
+// personal seller AND reference one of that user's currently owned listings. This
+// is intentionally separate from dealer CRM routes and does not expose buyer contact data.
+export const getMySellerEnquiries = async (req, res) => {
+  if (!["user", "individual_seller"].includes(String(req.user?.role || "").toLowerCase())) {
+    return res.status(403).json({ success: false, code: "PERSONAL_ACCOUNT_REQUIRED", message: "This inbox is available to personal seller accounts." });
+  }
+  try {
+    const result = await getPersonalSellerEnquiries(req.user.id, { limit: req.query.limit || 100 });
+    return res.json({ success: true, ...result });
+  } catch (error) {
+    logError("Failed to load personal seller enquiries", error);
+    return res.status(500).json({ success: false, code: "SELLER_ENQUIRIES_UNAVAILABLE", message: "Seller enquiries are temporarily unavailable." });
   }
 };
 

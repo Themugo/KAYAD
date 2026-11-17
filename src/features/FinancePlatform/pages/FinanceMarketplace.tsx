@@ -144,15 +144,15 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
         </div>
         <div className="bg-[#F5F2EB] rounded-xl p-4 flex flex-wrap gap-6">
           <div>
-            <p className="text-[10px] text-[#64748B] uppercase font-bold">Loan Amount</p>
+            <p className="text-[10px] text-[#475569] uppercase font-bold">Loan Amount</p>
             <p className="text-sm font-bold text-[#176B87]">Ksh {loanAmount.toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-[10px] text-[#64748B] uppercase font-bold">Est. Monthly Payment</p>
+            <p className="text-[10px] text-[#475569] uppercase font-bold">Est. Monthly Payment</p>
             <p className="text-sm font-bold text-[#176B87]">Ksh {Math.round(monthlyPayment).toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-[10px] text-[#64748B] uppercase font-bold">Total Cost</p>
+            <p className="text-[10px] text-[#475569] uppercase font-bold">Total Cost</p>
             <p className="text-sm font-bold text-[#176B87]">Ksh {Math.round(totalCost).toLocaleString()}</p>
           </div>
         </div>
@@ -171,7 +171,7 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
             <li>Do not send identity or financial documents through informal messages. Follow only the authenticated process and instructions presented for your request.</li>
           </ul>
           <div className="flex flex-wrap items-center gap-3 border-t border-[#D7E7E4] pt-4">
-            <button type="button" onClick={() => user ? onNavigate?.('buyer-platform') : onOpenAuth?.()} className="rounded-lg bg-[#176B87] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#0A3340]">{user ? 'Manage financing in My Garage' : 'Sign in to manage financing'}</button>
+            <button type="button" onClick={() => user ? onNavigate?.('dashboard:deals') : onOpenAuth?.()} className="rounded-lg bg-[#176B87] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#0A3340]">{user ? 'Manage financing in My Account' : 'Sign in to manage financing'}</button>
             <span className="text-xs text-[#64748B]">Applications and their recorded status are available in your private account workspace.</span>
           </div>
         </section>
@@ -209,7 +209,7 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
                 </select>
               </label>
             </div>
-            <p className="text-[10px] text-[#94A3B8]">Uses the vehicle price, deposit, and term from the calculator above.</p>
+            <p className="text-[10px] text-[#64748B]">Uses the vehicle price, deposit, and term from the calculator above.</p>
             <button type="submit" disabled={submitting} className="bg-[#176B87] hover:bg-[#0A3340] text-white text-xs font-bold rounded-lg px-5 py-2.5 disabled:opacity-50">
               {submitting ? 'Submitting…' : user ? 'Submit Application' : 'Sign In to Apply'}
             </button>
@@ -227,7 +227,7 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
           </div>
           {loadingApps ? (
             <div className="flex items-center justify-center py-8" role="status" aria-live="polite">
-              <Loader2 className="w-5 h-5 text-[#94A3B8] animate-spin" />
+              <Loader2 className="w-5 h-5 text-[#64748B] animate-spin" />
               <span className="ml-2 text-xs text-[#64748B]">Loading your applications…</span>
             </div>
           ) : appsError ? (
@@ -236,7 +236,7 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
               <button type="button" onClick={() => setReloadApps((value) => value + 1)} className="mt-2 font-bold underline">Retry</button>
             </div>
           ) : myApplications.length === 0 ? (
-            <p className="text-xs text-[#94A3B8]">No applications yet.</p>
+            <p className="text-xs text-[#64748B]">No applications yet.</p>
           ) : (
             <div className="space-y-2">
               {myApplications.map((app) => (

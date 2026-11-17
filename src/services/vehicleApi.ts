@@ -379,6 +379,14 @@ export async function getMyListings(): Promise<BackendCar[]> {
   return res.data || [];
 }
 
+export async function transitionMyListing(id: string, action: 'hide' | 'publish' | 'mark_sold') {
+  return vehicleFetch<{ success: boolean; data?: { id: string; previousStatus: string; status: string; action: string }; code?: string; message?: string }>(`/api/cars/${encodeURIComponent(id)}/lifecycle`, { method: 'PATCH', body: JSON.stringify({ action }), headers: { 'Content-Type': 'application/json' } });
+}
+
+export async function getMyListingPerformance(days = 30) {
+  return vehicleFetch<{ success: boolean; data: any }>(`/api/cars/my-listing-performance?days=${encodeURIComponent(String(days))}`, { method: 'GET' });
+}
+
 /** Maps a real backend car row to this frontend's real Vehicle type
  * (src/types/index.ts). Corrected in Phase 5 to reflect the real
  * schema (see file header) - auction fields are now mapped from real
@@ -518,7 +526,7 @@ export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
 // endpoint - not a new API being invented here.
 //
 // Traced directly: the real seller listing wizard
-// (PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx) has no
+// (PersonalSellingModule.tsx) has no
 // per-step form inputs implemented at all for any of its 12 steps -
 // its own `ListingDraft` state is declared but never populated by any
 // real user input anywhere in that file, confirmed by direct

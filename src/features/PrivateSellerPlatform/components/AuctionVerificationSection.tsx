@@ -1,4 +1,4 @@
-// Stage 5F.10 — "Auction verification" section of the EXISTING PrivateSellerPlatform (no second dashboard).
+// Stage 5F.10 — "Auction verification" section of the PersonalSellingModule inside DashboardHub (no second dashboard).
 // Every state shown here is read from the backend; this component never decides eligibility or payment.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {

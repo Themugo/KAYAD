@@ -99,7 +99,7 @@ export const NAV_PRIMARY: NavPrimary[] = [
       { id: 'request', label: 'Inspect a car before you buy', description: 'Get matched with, or choose, an independent inspector', icon: ClipboardCheck, navId: 'services:inspect', href: '/?nav=inspections' },
       { id: 'providers', label: 'Find a mechanic or garage', description: 'Verified independent businesses and specialists', icon: MapPin, navId: 'services:find', href: '/?nav=inspection-marketplace' },
       { id: 'roadside', label: 'Roadside and recovery', description: 'Find providers; KAYAD does not dispatch help', icon: LifeBuoy, navId: 'services:roadside', href: '/?nav=inspection-marketplace' },
-      { id: 'mine', label: 'My requests and reports', description: 'Your private inspections, bookings and reports in My Garage', icon: FileText, navId: 'services:mine', href: '/?nav=buyer-platform', requiresAuth: true },
+      { id: 'mine', label: 'My requests and reports', description: 'Your private inspections, bookings and reports in My Garage', icon: FileText, navId: 'dashboard:buying', href: '/?nav=dashboard&section=buying', requiresAuth: true },
     ],
   },
   {
@@ -111,7 +111,7 @@ export const NAV_PRIMARY: NavPrimary[] = [
     match: ['escrow'],
     children: [
       { id: 'journey', label: 'How escrow works', description: 'Understand the protected transaction journey', icon: ShieldCheck, navId: 'escrow:journey', href: '/?nav=escrow' },
-      { id: 'deals', label: 'My escrow deals', description: 'Open your private participant-scoped escrow workspace', icon: Lock, navId: 'escrow:deals', href: '/?nav=buyer-platform', requiresAuth: true },
+      { id: 'deals', label: 'My escrow deals', description: 'Open your private participant-scoped escrow workspace', icon: Lock, navId: 'dashboard:deals', href: '/?nav=dashboard&section=deals', requiresAuth: true },
       { id: 'create', label: 'Start a protected transaction', description: 'Learn how eligible vehicle deals can use KAYAD escrow', icon: CheckCircle2, navId: 'escrow:create', href: '/?nav=escrow' },
     ],
   },

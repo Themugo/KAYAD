@@ -29,6 +29,10 @@ describe('source contracts for the Phase 13F accessibility findings', () => {
   });
   it('the admin Approve button and the Seller Studio Create Listing button use a text-contrast-safe background', () => {
     expect(read('pages/admin/AdminPrivateSellerApplications.tsx')).not.toContain('bg-emerald-700'); // renders as #16a34a (3.29:1 with white) in this theme
-    expect(read('features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx')).toContain("backgroundColor: '#0F766E'");
+    // The Seller Studio was folded into the unified PersonalSellingModule: its white-on-colour controls must not use the
+    // 2.4:1 light teal (#13B8A6); the active wizard step uses the contrast-safe #0F766E (5.5:1 with white).
+    const selling = read('features/PrivateSellerPlatform/pages/PersonalSellingModule.tsx');
+    expect(selling).toContain("'bg-[#0F766E] text-white'");
+    expect(selling).not.toMatch(/bg-\[#13B8A6\][^'"`]*text-white/);
   });
 });

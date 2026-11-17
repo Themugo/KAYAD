@@ -7,6 +7,7 @@
 import express from "express";
 import {
   getLeads,
+  getMySellerEnquiries,
   getLead,
   createLeadManual,
   updateStage,
@@ -33,6 +34,9 @@ const router = express.Router();
 
 // Get dealer's leads
 router.get("/", protect, validateQuery(analyticsQuerySchema), asyncHandler(getLeads));
+
+// Personal seller inbox must precede the parameterized /:leadId routes.
+router.get("/mine/seller-enquiries", protect, asyncHandler(getMySellerEnquiries));
 
 // Buyer inbox must precede the parameterized /:leadId/offers route.
 router.get("/mine/offers", protect, asyncHandler(getBuyerNegotiations));

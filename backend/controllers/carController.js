@@ -1082,12 +1082,12 @@ export const deleteCarImage = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid image index" });
     }
 
-    const removedImage = car.images[imageIndex];
-
-    // Delete from Cloudinary if it has a public_id
-    if (removedImage?.public_id) {
-      await deleteImage(removedImage.public_id);
+    // A listing that is (or can become) public must keep at least one photo. Enforced here, not just in the UI.
+    if ((car.images || []).length <= 1 && car.status !== "draft" && !isStaff) {
+      return res.status(409).json({ success: false, code: "LAST_PHOTO_REQUIRED", message: "A listing must keep at least one photo. Add another photo before removing this one." });
     }
+
+    const removedImage = car.images[imageIndex];
 
     // Remove from array
     car.images.splice(imageIndex, 1);
@@ -1102,6 +1102,12 @@ export const deleteCarImage = async (req, res) => {
     }
 
     await car.save();
+    // Storage is cleaned only AFTER the listing no longer references the file, so a failed save can never leave a
+    // listing pointing at a deleted asset. A failed cleanup leaves an orphan (logged for the storage sweep), never a broken photo.
+    if (removedImage?.public_id) {
+      try { await deleteImage(removedImage.public_id); }
+      catch (cleanupError) { logError("DELETE IMAGE STORAGE CLEANUP FAILED", { publicId: removedImage.public_id, error: cleanupError?.message }); }
+    }
     // Listing changes refresh every public inventory cache (listing, search, facets, autocomplete). Phase C.1.
     await invalidatePublicListingCaches();
 

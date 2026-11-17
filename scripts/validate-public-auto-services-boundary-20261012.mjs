@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 const read = (p) => fs.readFileSync(new URL(`../${p}`, import.meta.url), 'utf8');
 const page = read('src/features/InspectionsView.tsx');
-const buyer = read('src/features/OwnershipPlatform/pages/BuyerPlatform.tsx');
+const buyer = read('src/features/OwnershipPlatform/pages/PersonalBuyingModule.tsx');
 const app = read('src/App.tsx');
 const nav = read('src/components/navigation/navConfig.ts');
 const routes = read('backend/inspection/routes/inspectionRoutes.js');
@@ -14,8 +14,8 @@ const checks = [
   ['public page does not render personal record tabs', /viewMode === 'account' && signedIn && <div role="tablist"/.test(page) && !/role="tablist" aria-label="Inspection sections"/.test(page)],
   ['public page directs signed-in customers to their account workspace', /View my inspections and reports/.test(page) && /openMyInspections\('mine'\)/.test(page)],
   ['customer record workspace is embedded in My Garage', /<InspectionsView[\s\S]*viewMode="account"/.test(buyer)],
-  ['inspection deep links to private history open buyer dashboard', /next\.tab === 'mine' \|\| next\.tab === 'reports'[\s\S]*setActiveNav\('buyer-platform'\)/.test(app)],
-  ['navigation entry for personal records targets buyer dashboard', /id: 'mine',[^\n]*href: '\/\?nav=buyer-platform', requiresAuth: true/.test(nav)],
+  ['inspection deep links to private history open the Buying section of the unified personal dashboard', /next\.tab === 'mine' \|\| next\.tab === 'reports'[\s\S]*setActiveNav\('dashboard:buying'\)/.test(app)],
+  ['navigation entry for personal records targets the Buying section of the unified personal dashboard', /id: 'mine',[^\n]*href: '\/\?nav=dashboard&section=buying', requiresAuth: true/.test(nav)],
   ['inspection records are bound to a stable account identity', /useInspectionRecords\(ownerKey\)/.test(page) && /ownerKey: string \| null/.test(page)],
   ['prior account data is masked before the next request resolves', /state\.ownerKey === ownerKey \? state : \{ ownerKey, records: \[\]/.test(page)],
   ['stale inspection request responses are sequence guarded', /mine !== seq\.current/.test(page)],

@@ -71,8 +71,6 @@ const PaymentHistoryView = React.lazy(() => import('./features/PaymentHistoryVie
 const WalletPanel = React.lazy(() => import('./components/WalletPanel'));
 const AuctionLivePage = React.lazy(() => import('./pages/AuctionLivePage'));
 const KAYADLive = React.lazy(() => import('./pages/KAYADLive'));
-const BuyerPlatform = React.lazy(() => import('./features/OwnershipPlatform').then((m) => ({ default: m.BuyerPlatform })));
-const PrivateSellerPlatform = React.lazy(() => import('./features/PrivateSellerPlatform').then((module) => ({ default: module.PrivateSellerPlatform })));
 const DealerDashboard = React.lazy(() => import('./pages/dealer/dashboard/DealerDashboard'));
 const DealershipWorkspace = React.lazy(() => import('./features/DealershipWorkspace/DealershipWorkspace'));
 const FinanceMarketplace = React.lazy(() => import('./features/FinancePlatform').then((m) => ({ default: m.FinanceMarketplace })));
@@ -85,20 +83,19 @@ const InspectionMarketplacePage = React.lazy(() => import('./features/Inspection
 // App() is now a thin wrapper providing that, with the real logic in
 // AppInner().
 // Workspaces that require a verified session (backend authorization stays authoritative).
-// Buyer / private-seller workspaces a dealer account does not use (the dealer workspace has its own equivalents).
+// Personal account workspaces are separate from verified dealer organization workspaces.
 const DEALER_REDIRECTED_NAVS = new Set(['dashboard', 'buyer-platform', 'seller-dashboard', 'seller-platform', 'seller', 'sell', 'payments', 'profile', 'saved']);
-const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard', 'dealership-workspace', 'escrow-operations']);
+const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'dealer-dashboard', 'dealership-workspace', 'escrow-operations']);
 // Of the workspaces above, these render their own "Sign in to ..." prompt
 // (with a button into the real auth flow) when `user` is null, instead of
-// an empty screen - ChatView/UnifiedCommunicationHub, BuyerPlatform and
-// DealerDashboard all already handle a signed-out visitor inline. Bouncing
+// an empty screen - ChatView/UnifiedCommunicationHub and DealerDashboard already handle a signed-out visitor inline. Bouncing
 // those straight to the /login portal before that prompt ever gets to
 // render skips it entirely: that was the reported bug - clicking the
 // Messages icon while signed out landed on the login portal instead of
 // the Messages panel's own "Sign in to see your conversations" message.
 // Redirect only the navs with no such fallback, which would otherwise
 // render blank for a signed-out visitor.
-const navsWithOwnSignedOutPrompt = new Set(['chat', 'buyer-platform', 'dealer-dashboard', 'dealership-workspace']);
+const navsWithOwnSignedOutPrompt = new Set(['chat', 'dealer-dashboard', 'dealership-workspace']);
 
 function AppInner() {
   const [activeNav, setActiveNavState] = useState<string>('marketplace');
@@ -148,7 +145,17 @@ function AppInner() {
   // User-initiated navigation PUSHES one history entry (so browser Back/Forward work between shell destinations);
   // URL normalisation and access redirects pass { replace: true } so they never add a stray entry.
   const setActiveNav = useCallback((requested: string, opts: { replace?: boolean } = {}) => {
-    const next = navLocationFor(requested, window.location.href);
+    const role = String(authUser?.role || '').toLowerCase();
+    const isPersonalAccount = ['user', 'buyer', 'individual_seller'].includes(role);
+    const personalDestinations: Record<string, string> = {
+      chat: 'dashboard:messages',
+      profile: 'dashboard:account',
+      settings: 'dashboard:account',
+      saved: 'dashboard:buying',
+      payments: 'dashboard:deals',
+    };
+    const target = isPersonalAccount ? (personalDestinations[requested] || requested) : requested;
+    const next = navLocationFor(target, window.location.href);
     setActiveNavState(next.nav);
     const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
     if (next.href === current) return;
@@ -158,7 +165,7 @@ function AppInner() {
     } else {
       navigate(next.href);
     }
-  }, [navigate]);
+  }, [navigate, authUser?.role]);
 
   useEffect(() => {
     const requested = new URLSearchParams(location.search).get('nav');
@@ -190,8 +197,7 @@ function AppInner() {
     setActiveNav('dealer-dashboard', { replace: true });
   }, [navigate, setActiveNav]);
 
-  // A dealer account works only in the Dealer workspace. Buyer and private-seller pages are not offered to it in the menu, and a stale
-  // link or typed address to them lands in the dealer workspace instead of showing buyer or seller controls.
+  // A dealer account works only in the independent Dealer workspace. Legacy personal-account links are redirected there instead of exposing personal controls to the business identity.
   useEffect(() => {
     if (authLoading || !isAuth || authUser?.role !== 'dealer') return;
     if (DEALER_REDIRECTED_NAVS.has(activeNav)) openDealerSection(activeNav === 'profile' ? 'settings' : 'overview');
@@ -224,7 +230,7 @@ function AppInner() {
   // Where the services finder opens from the global navigation / hub (a canonical taxonomy category, or none).
   const [finderLaunch, setFinderLaunch] = useState<{ category?: string; nonce: number }>({ nonce: 0 });
   const [inspectionLaunch, setInspectionLaunch] = useState<{ vehicle: Vehicle | null; tab: 'service' | 'mine' | 'reports'; action: 'request' | 'apply-provider' | 'manage-business' | null; nonce: number }>({ vehicle: null, tab: 'service', action: null, nonce: 0 });
-  const [buyerInspectionTab, setBuyerInspectionTab] = useState<'mine' | 'reports'>('mine');
+  const [personalInspectionTab, setPersonalInspectionTab] = useState<'mine' | 'reports'>('mine');
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Fixed (Final Integration - real data integration): this was
@@ -413,6 +419,11 @@ function AppInner() {
     savedVehicles,
     savedVehiclesList,
     handleToggleSave,
+    isFetchingFavorites,
+    favoritesError,
+    favoritesErrorUserId,
+    savedVehiclesSessionUserId,
+    refreshSavedVehicles,
   } = useVehicleCollections(vehicles, user?.id ?? null);
 
   // Phase 47: comparison is client-owned state, but it must still have one
@@ -477,13 +488,13 @@ function AppInner() {
     handleCloseVehicleDetails();
     setSelectedChatVehicle(vehicle);
     setActiveNav('escrow');
-  }, [handleCloseVehicleDetails]);
+  }, [handleCloseVehicleDetails, setActiveNav]);
 
   // Inspection launch: keep the vehicle the customer was looking at (it used to be discarded).
   const launchInspections = useCallback((next: { vehicle?: Vehicle | null; tab?: 'service' | 'mine' | 'reports'; action?: 'request' | 'apply-provider' | 'manage-business' | null }) => {
     if (next.tab === 'mine' || next.tab === 'reports') {
-      setBuyerInspectionTab(next.tab);
-      setActiveNav('buyer-platform');
+      setPersonalInspectionTab(next.tab);
+      setActiveNav('dashboard:buying');
       return;
     }
     setInspectionLaunch((prev) => ({ vehicle: next.vehicle ?? null, tab: next.tab ?? 'service', action: next.action ?? null, nonce: prev.nonce + 1 }));
@@ -499,16 +510,24 @@ function AppInner() {
     handleCloseVehicleDetails();
     setSelectedChatVehicle(vehicle);
     setActiveNav('chat');
-  }, [handleCloseVehicleDetails]);
+  }, [handleCloseVehicleDetails, setActiveNav]);
 
   // Select Dealer Vehicles Shortcut
   const handleSelectDealerVehicles = useCallback((dealerName: string, dealerId?: string) => {
     if (dealerId) setDealerScope({ id: dealerId, name: dealerName });
     else setSearchQuery(dealerName);
     setActiveNav('marketplace');
-  }, []);
+  }, [setActiveNav]);
 
   const handleNavClick = useCallback((nav: string) => {
+    if (nav.startsWith('dashboard:')) {
+      const section = nav.slice('dashboard:'.length);
+      const allowed = new Set(['overview','my-vehicles','create-listing','buying','messages','auctions','deals','performance','account','trust','settings','help']);
+      const nextSection = allowed.has(section) ? section : 'overview';
+      navigate(`/?nav=dashboard&section=${encodeURIComponent(nextSection)}`);
+      setActiveNavState('dashboard');
+      return;
+    }
     // `scope:value` ids from global navigation select existing sections of a
     // destination. Auction filters remain in-page; escrow sublinks resolve to
     // the public information page because private deals belong in user portals.
@@ -539,7 +558,7 @@ function AppInner() {
       const destination = nav.slice('escrow:'.length);
       // Public journey/create entries stay on the explainer; participant deal
       // records always open the existing authenticated buyer workspace.
-      setActiveNav(destination === 'deals' ? 'buyer-platform' : 'escrow');
+      setActiveNav(destination === 'deals' ? 'dashboard:deals' : 'escrow');
       return;
     }
     setActiveNav(nav);
@@ -551,14 +570,9 @@ function AppInner() {
     'dashboard',
     'dealer-dashboard',
     'dealership-workspace',
-    'buyer-platform',
-    'seller-platform',
-    'sell',
-    'seller',
-    'seller-dashboard',
     'escrow-operations',
   ]);
-  const showPublicMobileDock = !privateWorkspaceNavs.has(activeNav) && !['auctions', 'payments', 'profile'].includes(activeNav) && !quickViewVehicle && !invalidVehicleId; // the vehicle sheet has its own sticky action bar
+  const showPublicMobileDock = (!privateWorkspaceNavs.has(activeNav) || activeNav === 'dashboard') && !['auctions', 'payments', 'profile'].includes(activeNav) && !quickViewVehicle && !invalidVehicleId; // the vehicle sheet has its own sticky action bar
   const publicShellClass = privateWorkspaceNavs.has(activeNav) ? '' : 'kayad-public-shell ';
 
   return (
@@ -705,8 +719,8 @@ function AppInner() {
             />
           )}
 
-          {activeNav === 'dashboard' && user && (
-            <DashboardHub user={authUser} vehicles={vehicles} onNavigate={(nav) => setActiveNav(nav)} />
+          {activeNav === 'dashboard' && user && String(authUser?.role || '').toLowerCase() !== 'dealer' && (
+            <DashboardHub user={authUser} vehicles={vehicles} savedVehicleCount={savedVehicles.length} savedVehiclesList={savedVehiclesList} savedVehiclesSessionUserId={savedVehiclesSessionUserId} savedVehiclesLoading={isFetchingFavorites} savedVehiclesError={favoritesError || ''} savedVehiclesErrorUserId={favoritesErrorUserId} onRefreshSavedVehicles={refreshSavedVehicles} initialSection={new URLSearchParams(location.search).get('section') || 'overview'} initialInspectionTab={personalInspectionTab} onNavigate={(nav) => setActiveNav(nav)} messagesContent={<ChatView messages={[]} selectedVehicle={selectedChatVehicle} user={user} onQuickViewVehicle={handleOpenVehicleDetails} onNavigateToEscrow={() => setActiveNav('dashboard:deals')} onNavigateToInspections={() => setActiveNav('dashboard:buying')} onNavigateToFinancing={() => setActiveNav('dashboard:deals')} />} profileContent={<Profile setPage={(page) => setActiveNav(['profile', 'settings'].includes(page) ? 'dashboard:account' : page)} authUser={authUser} />} />
           )}
 
           {activeNav === 'chat' && (
@@ -760,9 +774,6 @@ function AppInner() {
             <KAYADLive onNavigate={(nav) => setActiveNav(nav)} onOpenVehicleDetails={handleOpenVehicleDetails} />
           )}
 
-          {activeNav === 'buyer-platform' && (
-            <BuyerPlatform key={`${user?.id || 'guest'}-${buyerInspectionTab}`} user={user} onNavigate={(nav) => setActiveNav(nav)} onOpenAuth={handleOpenAuth} initialInspectionTab={buyerInspectionTab} />
-          )}
 
 
           {activeNav === 'dealership-workspace' && (
@@ -795,22 +806,6 @@ function AppInner() {
             />
           )}
 
-          {(activeNav === 'sell' || activeNav === 'seller' || activeNav === 'seller-dashboard' || activeNav === 'seller-platform') && (
-            // Keep the Sell Vehicle entry role-aware: dealers stay in the dealer
-            // workspace, approved private-seller accounts use Seller Studio, and
-            // signed-in buyers are directed to support for role access rather than
-            // being shown controls their current account cannot use.
-            String(authUser?.role || '').toLowerCase() === 'dealer' ? (
-              <DealerDashboard user={user} onOpenAuth={handleOpenAuth} onNavigate={(nav) => setActiveNav(nav)} />
-            ) : (
-              <PrivateSellerPlatform
-                user={user}
-                onOpenAuth={(intent = 'seller') => handleOpenRegister(intent, '/?nav=seller-platform')}
-                onNavigate={(nav) => setActiveNav(nav)}
-                onLogout={() => { void authLogout(); }}
-              />
-            )
-          )}
         </AuctionSurfaceReveal>
         )}
         </Suspense>
@@ -824,6 +819,7 @@ function AppInner() {
         <MobileBottomNav
           authUser={authUser}
           activeNav={activeNav}
+          activeSection={new URLSearchParams(location.search).get('section') || 'overview'}
           onNavigate={(nav) => handleNavClick(nav)}
           onOpenCompare={() => setShowCompareModal(true)}
           onOpenAuth={handleOpenAuth}
@@ -886,7 +882,7 @@ function AppInner() {
             window.dispatchEvent(new PopStateEvent('popstate'));
             setActiveNav('dealer-dashboard');
           } else {
-            setActiveNav('seller-platform');
+            setActiveNav('dashboard:my-vehicles');
           }
         }}
       />
@@ -982,13 +978,14 @@ function AuthRouteSurface() {
   if (path === '/support') return <Navigate to="/?nav=support" replace />;
   if (path === '/inspections') return <Navigate to="/?nav=inspections" replace />;
   if (path === '/financing') return <Navigate to="/?nav=financing" replace />;
-  if (path === '/sell' || path === '/sell-car' || path === '/sell-vehicle') return <Navigate to="/?nav=seller-platform" replace />;
+  if (path === '/sell' || path === '/sell-car' || path === '/sell-vehicle') return <Navigate to="/?nav=dashboard&section=create-listing" replace />;
   if (path === '/saved') return <RequireAuth><Navigate to="/?nav=saved" replace /></RequireAuth>;
   if (path === '/profile') return <RequireAuth><Navigate to="/?nav=profile" replace /></RequireAuth>;
   if (path === '/payments') return <RequireAuth><Navigate to="/?nav=payments" replace /></RequireAuth>;
   if (path === '/chat') return <RequireAuth><Navigate to="/?nav=chat" replace /></RequireAuth>;
   if (path === '/dashboard') return <RequireAuth><Navigate to="/?nav=dashboard" replace /></RequireAuth>;
-  if (path === '/buyer-platform') return <RequireAuth><Navigate to="/?nav=buyer-platform" replace /></RequireAuth>;
+  if (path === '/buyer-platform') return <RequireAuth><Navigate to="/?nav=dashboard&section=buying" replace /></RequireAuth>;
+  if (path === '/seller-platform' || path === '/seller-dashboard') return <RequireAuth><Navigate to="/?nav=dashboard&section=my-vehicles" replace /></RequireAuth>;
   if (path === '/dealer') return <RequireAuth><RequireDealer><Navigate to="/?nav=dealer-dashboard" replace /></RequireDealer></RequireAuth>;
   if (path === '/inspector/dashboard') return <RequireAuth><Navigate to="/?nav=inspections" replace /></RequireAuth>;
 

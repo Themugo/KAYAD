@@ -34,6 +34,8 @@ import { getSupabase, isSupabaseConnected } from "../utils/supabase.js";
 import { closeAuction } from "../services/auctionClose.service.js";
 import { startAuction } from "../services/auctionLifecycle.service.js";
 import { getVehicleValuation } from "../services/vehicleValuation.service.js";
+import { transitionPersonalListing } from "../services/personalListingLifecycle.service.js";
+import { getPersonalSellerPerformance } from "../services/personalSellerInsights.service.js";
 
 const router = express.Router();
 
@@ -150,6 +152,17 @@ router.get(
 // status) - placed before the public "/" route; no /:id pattern
 // exists in this file that would otherwise capture "/my-listings".
 router.get("/my-listings", protect, asyncHandler(getMyListings));
+
+router.get("/my-listing-performance", protect, sellerListingAccess({ write: false }), asyncHandler(async (req, res) => {
+  if (!["user", "individual_seller"].includes(String(req.user?.role || "").toLowerCase())) {
+    return res.status(403).json({ success: false, code: "PERSONAL_ACCOUNT_REQUIRED", message: "Personal seller analytics are available to personal accounts." });
+  }
+  const data = await getPersonalSellerPerformance(req.user.id, { days: req.query.days || 30 });
+  res.set("Cache-Control", "no-store");
+  res.json({ success: true, data });
+}));
+
+
 
 const requireCarsDatabase = (req, res, next) => {
   // The public inventory endpoint is database-backed. In intentionally
@@ -298,6 +311,34 @@ router.delete(
   validateObjectId,
   invalidateCache("cache:*"),
   asyncHandler(deleteCar),
+);
+
+// 🔐 PERSONAL SELLER LISTING LIFECYCLE (owner-scoped; never uses dealer status routes)
+router.patch(
+  "/:id/lifecycle",
+  protect,
+  sellerListingAccess({ write: true }),
+  createLimiter,
+  validateObjectId,
+  invalidateCache("cache:*"),
+  asyncHandler(async (req, res) => {
+    // Personal identities only: dealers (and staff) keep their own governed status workflows.
+    if (!["user", "individual_seller"].includes(String(req.user?.role || "").toLowerCase())) {
+      return res.status(403).json({ success: false, code: "PERSONAL_ACCOUNT_REQUIRED", message: "Listing lifecycle actions here are for personal accounts. Business accounts use their own workspace." });
+    }
+    const action = String(req.body?.action || "");
+    if (!["hide", "publish", "mark_sold"].includes(action)) {
+      return res.status(400).json({ success: false, code: "INVALID_LISTING_ACTION", message: "Choose hide, publish or mark_sold." });
+    }
+    try {
+      const result = await transitionPersonalListing({ carId: req.params.id, ownerId: req.user.id, action });
+      await logActionFromReq(req, `personal_listing_${action}`, { target: req.params.id, targetModel: "Car", details: result });
+      return res.json({ success: true, data: result });
+    } catch (error) {
+      if (error?.expose) return res.status(error.status).json({ success: false, code: error.code, message: error.message });
+      throw error;
+    }
+  }),
 );
 
 // 🖼 DELETE IMAGE FROM CAR

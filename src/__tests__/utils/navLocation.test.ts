@@ -18,8 +18,42 @@ describe('canonical navigation URL', () => {
     expect(navLocationFor('home', 'https://kayad.space/?vehicleId=car-1&nav=discovery').href).toBe('/?vehicleId=car-1');
   });
   it('normalizes legacy escrow sub-navigation to the public information page', () => {
-    expect(navLocationFor('escrow:deals', 'https://kayad.space/?nav=escrow:deals&escrowId=e1').nav).toBe('escrow');
+    const escrowHref = navLocationFor('escrow:deals', 'https://kayad.space/?nav=escrow:deals&escrowId=e1').href;
+    // Parameter order is not part of the contract; the set of parameters is.
+    expect(Object.fromEntries(new URL(escrowHref, 'https://kayad.space').searchParams)).toEqual({ nav: 'dashboard', section: 'deals', escrowId: 'e1' });
     expect(navLocationFor('escrow:operations', 'https://kayad.space/?nav=escrow:operations').href).toBe('/?nav=escrow');
   });
 
+  it('keeps the mobile Account tab inside DashboardHub and selects the account section', () => {
+    const result = navLocationFor('dashboard:account', 'https://kayad.space/?nav=marketplace&auctionTab=saved');
+    expect(result.nav).toBe('dashboard');
+    expect(result.href).toBe('/?nav=dashboard&section=account');
+  });
+
+
+  it('keeps every personal account section in the same dashboard URL', () => {
+    expect(navLocationFor('dashboard:create-listing', 'https://kayad.space/?nav=marketplace').href).toBe('/?nav=dashboard&section=create-listing');
+    expect(navLocationFor('dashboard:trust', 'https://kayad.space/?nav=dashboard').href).toBe('/?nav=dashboard&section=trust');
+    expect(navLocationFor('dashboard:help', 'https://kayad.space/?nav=dashboard').href).toBe('/?nav=dashboard&section=help');
+  });
+
+  it('normalizes legacy buyer and seller dashboard routes into the one personal dashboard', () => {
+    expect(navLocationFor('buyer-platform', 'https://kayad.space/?nav=buyer-platform').href).toBe('/?nav=dashboard&section=buying');
+    expect(navLocationFor('seller-platform', 'https://kayad.space/?nav=seller-platform').href).toBe('/?nav=dashboard&section=my-vehicles');
+    expect(navLocationFor('seller-dashboard', 'https://kayad.space/?nav=seller-dashboard').href).toBe('/?nav=dashboard&section=my-vehicles');
+    expect(navLocationFor('sell', 'https://kayad.space/?nav=sell').href).toBe('/?nav=dashboard&section=create-listing');
+  });
+
+  it('keeps dashboard section deep links inside the unified account shell', () => {
+    const result = navLocationFor('dashboard:my-vehicles', 'https://kayad.space/?nav=dashboard&section=overview');
+    expect(result.nav).toBe('dashboard');
+    expect(result.href).toBe('/?nav=dashboard&section=my-vehicles');
+  });
+
+
+  it('keeps the dealer workspace section when navigating to the dealer workspace, and drops it elsewhere', () => {
+    expect(navLocationFor('dealer-dashboard', 'https://kayad.space/?nav=dealer-dashboard&section=settings').href).toBe('/?nav=dealer-dashboard&section=settings');
+    expect(navLocationFor('marketplace', 'https://kayad.space/?nav=dealer-dashboard&section=settings').href).toBe('/');
+    expect(navLocationFor('chat', 'https://kayad.space/?nav=dashboard&section=buying').href).toBe('/?nav=chat');
+  });
 });

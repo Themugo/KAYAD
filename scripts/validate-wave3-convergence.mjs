@@ -46,7 +46,7 @@ pass('App uses canonical escrow surface', app.includes("import('./features/Escro
 pass('App uses canonical inspection surface', app.includes("import('./features/InspectionsView')"));
 pass('App uses canonical support surface', app.includes("import('./features/SupportView')"));
 pass('App uses canonical payment-history surface', app.includes("import('./features/PaymentHistoryView')"));
-pass('private seller navigation converges on seller-platform', read('src/components/DashboardHub.tsx').includes("nav:'seller-platform'"));
+pass('private seller navigation converges on the unified personal dashboard', read('src/components/DashboardHub.tsx').includes("nav:'dashboard:create-listing'"));
 
 const obsoletePhaseValidators = [17,18,20,22,24,26,27,28,29,30,31,32,33,41,42,43,44,45,46,47,48,49,52,53,54,55,56,57];
 for (const n of obsoletePhaseValidators) pass(`obsolete phase validator ${n} removed`, !exists(`scripts/validate-phase${n}.mjs`));

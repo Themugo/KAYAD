@@ -2,40 +2,14 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import MobileBottomNav from '../../components/MobileBottomNav';
 
-describe('MobileBottomNav (canonical KAYAD dock)', () => {
-  it('exposes exactly Home, Showroom, Auction, Services, Saved in order', () => {
+describe('MobileBottomNav (approved KAYAD buyer dock)', () => {
+  it('exposes exactly Home, Search, Sell, Messages, Account in order', () => {
     render(<MobileBottomNav activeNav="marketplace" onNavigate={vi.fn()} />);
     const labels = screen.getAllByRole('button').map((b) => b.textContent?.trim());
-    expect(labels).toEqual(['Home', 'Showroom', 'Auction', 'Services', 'Saved']);
+    expect(labels).toEqual(['Home', 'Search', 'Sell', 'Messages', 'Account']);
   });
 
-  it('routes Auction and Services to the canonical existing surfaces', () => {
-    const onNavigate = vi.fn();
-    render(<MobileBottomNav activeNav="marketplace" onNavigate={onNavigate} />);
-    fireEvent.click(screen.getByRole('button', { name: /Auction/i }));
-    fireEvent.click(screen.getByRole('button', { name: /Services/i }));
-    expect(onNavigate).toHaveBeenNthCalledWith(1, 'discovery');
-    expect(onNavigate).toHaveBeenNthCalledWith(2, 'inspections');
-  });
-
-  it('marks only the active tab as current', () => {
-    render(<MobileBottomNav activeNav="inspections" onNavigate={vi.fn()} />);
-    const current = screen.getAllByRole('button').filter((b) => b.getAttribute('aria-current') === 'page');
-    expect(current).toHaveLength(1);
-    expect(current[0].textContent).toContain('Services');
-  });
-
-  it('routes Saved to the existing authenticated saved-vehicles surface', () => {
-    const onNavigate = vi.fn();
-    render(<MobileBottomNav activeNav="marketplace" onNavigate={onNavigate} />);
-    fireEvent.click(screen.getByRole('button', { name: /Saved/i }));
-    expect(onNavigate).toHaveBeenCalledWith('saved');
-  });
-});
-
-
-describe('MobileBottomNav Showroom flow', () => {
-  it('keeps Showroom on the canonical marketplace destination and scrolls to results', () => {
+  it('routes Search to the existing marketplace results surface', () => {
     const onNavigate = vi.fn();
     const scrollIntoView = vi.fn();
     const originalRaf = window.requestAnimationFrame;
@@ -43,22 +17,35 @@ describe('MobileBottomNav Showroom flow', () => {
     window.requestAnimationFrame = ((callback: FrameRequestCallback) => { callback(0); return 1; }) as typeof window.requestAnimationFrame;
     document.getElementById = ((id: string) => id === 'market-results' ? ({ scrollIntoView } as unknown as HTMLElement) : null) as typeof document.getElementById;
     render(<MobileBottomNav activeNav="marketplace" onNavigate={onNavigate} />);
-    fireEvent.click(screen.getByRole('button', { name: /Showroom/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Search/i }));
     expect(onNavigate).toHaveBeenCalledWith('marketplace');
     expect(scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth', block: 'start' });
     window.requestAnimationFrame = originalRaf;
     document.getElementById = originalGetElementById;
   });
+
+  it('routes Sell, Messages and Account to the existing platform destinations', () => {
+    const onNavigate = vi.fn();
+    render(<MobileBottomNav activeNav="marketplace" onNavigate={onNavigate} />);
+    fireEvent.click(screen.getByRole('button', { name: /^Sell$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Messages/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Account/i }));
+    expect(onNavigate).toHaveBeenNthCalledWith(1, 'dashboard:create-listing');
+    expect(onNavigate).toHaveBeenNthCalledWith(2, 'chat');
+    expect(onNavigate).toHaveBeenNthCalledWith(3, 'dashboard:account');
+  });
+
+  it('marks only the active tab as current', () => {
+    render(<MobileBottomNav activeNav="chat" onNavigate={vi.fn()} />);
+    const current = screen.getAllByRole('button').filter((b) => b.getAttribute('aria-current') === 'page');
+    expect(current).toHaveLength(1);
+    expect(current[0].textContent).toContain('Messages');
+  });
 });
 
-describe('MobileBottomNav for dealers', () => {
-  it('shows a dealer-only dock (no buyer Home/Showroom/Saved) and routes to dealer sections', () => {
-    const onNavigate = vi.fn();
-    render(<MobileBottomNav activeNav="marketplace" onNavigate={onNavigate} authUser={{ id: 'd1', role: 'dealer' }} />);
-    expect(screen.getAllByRole('button').map((b) => b.textContent?.trim())).toEqual(['Dashboard', 'Inventory', 'Add', 'Leads', 'Analytics']);
-    fireEvent.click(screen.getByRole('button', { name: /Inventory/ }));
-    fireEvent.click(screen.getByRole('button', { name: /Add/ }));
-    expect(onNavigate).toHaveBeenNthCalledWith(1, 'dealer:inventory');
-    expect(onNavigate).toHaveBeenNthCalledWith(2, 'dealer:inventory:new');
+describe('MobileBottomNav for business accounts', () => {
+  it('does not replace the independent dealer workspace navigation with the personal dock', () => {
+    const { container } = render(<MobileBottomNav activeNav="dealer-dashboard" onNavigate={vi.fn()} authUser={{ id: 'd1', role: 'dealer' }} />);
+    expect(container.querySelector('nav[aria-label="Personal account navigation"]')).toBeNull();
   });
 });

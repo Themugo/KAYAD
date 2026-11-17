@@ -7,6 +7,7 @@ vi.mock('../../../context/AuthContext', () => ({
   useAuth: () => ({ user: authUser, isAuth: true, loading: false, sessionStatus: 'ready' }),
   SessionRecovery: () => null,
 }));
+vi.mock('../../../context/SocketContext', () => ({ useSocket: () => ({ connected: false, on: vi.fn(() => () => {}) }) }));
 vi.mock('../../../api/api', () => ({ adminAPI: { alerts: vi.fn().mockResolvedValue({ unreadCount: 0, alerts: [] }) } }));
 
 import AdminLayout from '../../../components/admin/AdminLayout';

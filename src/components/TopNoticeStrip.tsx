@@ -11,7 +11,7 @@ const kenyaOnlyTickerCopy = (value?: string | null) => (value || '').replace(/Ea
 /** Only allow same-site relative links and ordinary HTTP(S) destinations from CMS/admin content. */
 export function safeTickerHref(value?: string | null): string | null {
   const candidate = String(value || '').trim();
-  if (!candidate || candidate.startsWith('//') || /[\u0000-\u001f\u007f]/.test(candidate)) return null;
+  if (!candidate || candidate.startsWith('//') || /[\u0000-\u001f\u007f]/.test(candidate)) return null; // eslint-disable-line no-control-regex -- deliberately rejects control characters
   if (candidate.startsWith('/') && !candidate.startsWith('\\')) return candidate;
   try {
     const parsed = new URL(candidate);

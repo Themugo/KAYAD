@@ -24,12 +24,9 @@ const NAV_TITLES: Record<string, string> = {
   profile: 'My profile',
   payments: 'Payments',
   dashboard: 'Dashboard',
-  'buyer-platform': 'My KAYAD',
   'dealer-dashboard': 'Dealer workspace',
-  'seller-platform': 'Sell your vehicle',
   sell: 'Sell your vehicle',
   seller: 'Sell your vehicle',
-  'seller-dashboard': 'Seller dashboard',
   kayadlive: 'KAYAD Live',
   admin: 'Admin',
 };

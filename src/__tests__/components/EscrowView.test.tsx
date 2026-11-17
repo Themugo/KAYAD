@@ -45,7 +45,7 @@ describe('Public EscrowView — visitor and signed-in user', () => {
     const onNavigate = vi.fn();
     render(<EscrowView user={buyer} onNavigate={onNavigate} />);
     fireEvent.click(await screen.findByRole('button', { name: 'Open your dashboard' }));
-    expect(onNavigate).toHaveBeenCalledWith('buyer-platform');
+    expect(onNavigate).toHaveBeenCalledWith('dashboard:deals');
     expect(m.getMyEscrowOverview).not.toHaveBeenCalled();
   });
 

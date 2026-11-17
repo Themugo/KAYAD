@@ -1,5 +1,2 @@
-// ============================================================
-// KAYAD PRIVATE SELLER PLATFORM - INDEX
-// ============================================================
-
-export { default as PrivateSellerPlatform } from './pages/PrivateSellerPlatform';
+// Personal selling is a section of the canonical DashboardHub, not a standalone dashboard.
+export { default as PersonalSellingModule } from './pages/PersonalSellingModule';

@@ -299,7 +299,7 @@ export const VehicleDetailPage: FC = () => {
   };
 
   return (
-    <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 bg-[#F6FAF9] pb-28 md:pb-12 text-navy-600 font-sans">
+    <div className="py-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6 bg-[#F6FAF9] pb-28 lg:pb-12 text-navy-600 font-sans">
 
       {/* Toast Notification Floating Alert */}
       {toastMessage && (
@@ -509,7 +509,7 @@ export const VehicleDetailPage: FC = () => {
           {/* Main Hero Gallery Image Frame */}
           <div className="space-y-3">
             <div
-              className="relative h-[420px] sm:h-[520px] lg:h-[580px] rounded-3xl overflow-hidden border border-[#D7E7E4] shadow-xl bg-[#0A3340] select-none cursor-crosshair group"
+              className="relative h-[420px] sm:h-[520px] lg:h-[580px] rounded-3xl overflow-hidden border border-[#D7E7E4] shadow-xl bg-[#EEF7F5] select-none cursor-crosshair group"
               onMouseEnter={() => setIsHoverZooming(true)}
               onMouseLeave={() => setIsHoverZooming(false)}
               onMouseMove={handleImageMouseMove}
@@ -552,7 +552,7 @@ export const VehicleDetailPage: FC = () => {
                         ? 'scale(2)'
                         : 'scale(1)',
                   }}
-                  className={`w-full h-full object-cover ${prefersReducedMotion ? '' : 'transition-transform duration-200 ease-out'} ${
+                  className={`w-full h-full object-contain bg-[#EEF7F5] p-2 ${prefersReducedMotion ? '' : 'transition-transform duration-200 ease-out'} ${
                     isImageLoading ? 'opacity-0' : `opacity-100 ${prefersReducedMotion ? '' : 'transition-opacity duration-300'}`
                   }`}
                 />
@@ -643,7 +643,7 @@ export const VehicleDetailPage: FC = () => {
             </div>
 
             {/* Scrollable Thumbnails Strip (Up to 10 max) */}
-            <div className="flex items-center gap-2.5 overflow-x-auto pb-2 pt-1 no-scrollbar">
+            <div className="flex items-center gap-2.5 overflow-x-auto overscroll-x-contain snap-x snap-mandatory pb-2 pt-1 no-scrollbar">
               {images.map((img, idx) => (
                 <button
                   key={idx}
@@ -654,7 +654,7 @@ export const VehicleDetailPage: FC = () => {
                       : 'border-transparent opacity-70 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt={`Thumb ${idx + 1}`} width={112} height={80} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                  <img src={img} alt={`Thumb ${idx + 1}`} width={112} height={80} loading="lazy" decoding="async" className="w-full h-full object-contain bg-[#EEF7F5] p-1" />
                   <span className="absolute bottom-1 right-1 text-[9px] font-bold bg-navy-600/90 text-white px-1.5 py-0.2 rounded">
                     #{idx + 1}
                   </span>
@@ -1281,7 +1281,7 @@ export const VehicleDetailPage: FC = () => {
                     : 'border-transparent opacity-50 hover:opacity-100'
                 }`}
               >
-                <img src={img} alt={`Modal thumb ${idx + 1}`} width={80} height={56} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                <img src={img} alt={`Modal thumb ${idx + 1}`} width={80} height={56} loading="lazy" decoding="async" className="w-full h-full object-contain bg-[#EEF7F5] p-1" />
               </button>
             ))}
           </div>

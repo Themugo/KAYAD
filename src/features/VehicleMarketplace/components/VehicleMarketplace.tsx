@@ -26,7 +26,7 @@ import HeroDesktopVehicle from './HeroDesktopVehicle';
 import type { HeroPresentationConfig, HeroShowcaseVehicle } from '../types/heroPresentation';
 import { HERO_EXTRAS_DEFAULTS, normalizeHeroExtras } from '../types/heroPresentation';
 import { sanitizeHeroPresentation } from '../utils/heroPresentationSafety';
-import { selectHeroVehicles, pairHeroVehicles, heroComposition, safeHeroCtaLabel, heroImageFor } from '../utils/heroSelection';
+import { selectHeroVehicles, heroComposition, safeHeroCtaLabel, heroImageFor } from '../utils/heroSelection';
 import { Pause, Play } from 'lucide-react';
 
 const kenyaOnlyCopy = (value: string) => value.replace(/East Africa/gi, 'Kenya');
@@ -618,43 +618,25 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     return () => { cancelled = true; };
   }, [savedOnly]);
 
-  // Super Admin featured campaigns: vehicles scheduled to be featured right now.
-  // Keep the existing public campaign feed authoritative, but avoid background
-  // polling while the visitor is away. Returning to the tab/window refreshes the
-  // feed immediately so campaign changes are not left stale for a full interval.
+  // Super Admin featured campaigns: vehicles scheduled to be featured right now (empty when none or unavailable).
   const [campaignVehicles, setCampaignVehicles] = useState<Vehicle[]>([]);
   useEffect(() => {
     if (savedOnly) { setCampaignVehicles([]); setCampaignResolved(true); return; }
     let cancelled = false;
-    let requestVersion = 0;
     const refresh = async () => {
-      if (document.visibilityState === 'hidden') return;
-      const version = ++requestVersion;
       try {
         const ids = await getCurrentFeaturedCampaignCarIds();
-        if (cancelled || version !== requestVersion) return;
-        if (!ids.length) { setCampaignVehicles([]); return; }
+        if (!ids.length) { if (!cancelled) setCampaignVehicles([]); return; }
         const cars = await Promise.all(ids.slice(0, 12).map((id) => getCarById(id).catch(() => null)));
-        if (cancelled || version !== requestVersion) return;
+        if (cancelled) return;
         setCampaignVehicles(cars.filter((c): c is NonNullable<typeof c> => !!c).map(mapBackendCarToVehicle).filter((v) => v.status !== 'sold'));
       } finally {
         if (!cancelled) setCampaignResolved(true);
       }
     };
-    const refreshWhenVisible = () => {
-      if (document.visibilityState === 'visible') refresh().catch(() => {});
-    };
     refresh().catch(() => {});
-    const timer = window.setInterval(refreshWhenVisible, 5 * 60 * 1000);
-    window.addEventListener('focus', refreshWhenVisible);
-    document.addEventListener('visibilitychange', refreshWhenVisible);
-    return () => {
-      cancelled = true;
-      requestVersion += 1;
-      window.clearInterval(timer);
-      window.removeEventListener('focus', refreshWhenVisible);
-      document.removeEventListener('visibilitychange', refreshWhenVisible);
-    };
+    const timer = window.setInterval(() => { refresh().catch(() => {}); }, 5 * 60 * 1000);
+    return () => { cancelled = true; window.clearInterval(timer); };
   }, [savedOnly]);
 
   // Public config is safe to read and keeps hero selection consistent across
@@ -744,7 +726,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   }), [campaignVehicles, heroVehicles, heroFeaturedIds, heroShowcaseVehicles, heroPresentation.vehicleSource, heroPresentation.showcaseFallbackEnabled, featuredResolved, campaignResolved]);
   const heroSourceVehicles = heroSelection.vehicles;
   const heroIllustrative = heroSelection.illustrative;
-  const heroPairs = useMemo(() => pairHeroVehicles(heroSourceVehicles), [heroSourceVehicles]);
+  // Single-vehicle hero rotation: each campaign/inventory/showcase vehicle gets its own slide.
+  // Source precedence and ordering are still owned by selectHeroVehicles().
+  const heroPairs = useMemo(() => heroSourceVehicles.map((vehicle) => [vehicle]), [heroSourceVehicles]);
   const heroPairCount = Math.max(1, heroPairs.length);
   const [heroPairIndex, setHeroPairIndex] = useState(0);
   /** Hero images that failed to load; the card keeps its truthful label over a neutral placeholder instead of a broken-image icon. */
@@ -798,8 +782,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const heroCurrentPair = heroPairs[Math.min(heroPairIndex, heroPairCount - 1)] || [];
   const heroComp = heroComposition(heroCurrentPair);
   const heroLeftVehicle: Vehicle | undefined = heroCurrentPair[0];
-  // Never fill a second position by repeating the first vehicle.
-  const heroRightVehicle: Vehicle | undefined = heroCurrentPair[1];
 
   const heroVehicleNarration = (vehicle?: Vehicle) => {
     if (!vehicle) return '';
@@ -1156,7 +1138,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             style={{
               maxWidth: `${Math.max(90, Math.min(100, heroPresentation.stageMaxWidthPct))}%`,
               // Admin height is a floor, never a fixed height: the stage always grows to fit the card (see the in-flow card below).
-              ['--hero-stage-h' as string]: `${Math.max(440, Math.round(430 * (Math.max(70, Math.min(120, heroPresentation.stageHeightPct)) / 100)))}px`,
+              ['--hero-stage-h' as string]: `${Math.max(360, Math.round(370 * (Math.max(70, Math.min(120, heroPresentation.stageHeightPct)) / 100)))}px`,
             } as React.CSSProperties}
           >
             <div
@@ -1170,17 +1152,17 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             >
               {/* Vehicles stay at full commercial scale and are placed in lanes either side of the card. The card is in normal flow, so the
                   stage grows with its content and nothing can be clipped, whatever stage height an administrator configures. */}
-              <div className="kayad-hero-desktop-layer relative mx-auto hidden w-full max-w-[1440px] lg:flex lg:min-h-[var(--hero-stage-h)] items-center justify-center pb-20 pt-6" aria-label="Featured vehicles" data-hero-composition={heroComp}>
+              <div className="kayad-hero-desktop-layer relative mx-auto hidden w-full max-w-[1320px] lg:flex lg:min-h-[var(--hero-stage-h)] items-center justify-center pb-12 pt-4" aria-label="Featured vehicles" data-hero-composition={heroComp}>
                 {heroLeftVehicle && heroImageForVehicle(heroLeftVehicle) && (
                   <HeroDesktopVehicle
                     vehicle={heroLeftVehicle}
-                    side={heroComp === 'single' ? 'right' : 'left'}
+                    side="left"
                     imageSrc={heroImageForVehicle(heroLeftVehicle)}
                     broken={Boolean(brokenHeroImages[heroLeftVehicle.id])}
                     onBroken={() => setBrokenHeroImages((prev) => (prev[heroLeftVehicle.id] ? prev : { ...prev, [heroLeftVehicle.id]: true }))}
                     topPct={Math.max(35, Math.min(65, heroPresentation.vehicleTopPct))}
-                    offsetPct={heroComp === 'single' ? 2 : heroLane.leftPct}
-                    widthPct={heroComp === 'single' ? Math.min(46, heroLane.widthPct + 8) : heroLane.widthPct}
+                    offsetPct={heroComp === 'single' ? 3 : heroLane.leftPct}
+                    widthPct={heroComp === 'single' ? 48 : heroLane.widthPct}
                     scale={heroLane.scale}
                     showInfo={heroPresentation.showVehicleInfoCards}
                     eyebrow={heroVehicleEyebrow(heroLeftVehicle)}
@@ -1189,31 +1171,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     onSelect={() => handleHeroVehicleSelect(heroLeftVehicle)}
                   />
                 )}
-                {heroRightVehicle && heroImageForVehicle(heroRightVehicle) && (
-                  <HeroDesktopVehicle
-                    vehicle={heroRightVehicle}
-                    side="right"
-                    imageSrc={heroImageForVehicle(heroRightVehicle)}
-                    broken={Boolean(brokenHeroImages[heroRightVehicle.id])}
-                    onBroken={() => setBrokenHeroImages((prev) => (prev[heroRightVehicle.id] ? prev : { ...prev, [heroRightVehicle.id]: true }))}
-                    topPct={Math.max(35, Math.min(65, heroPresentation.vehicleTopPct))}
-                    offsetPct={heroLane.rightPct}
-                    widthPct={heroLane.widthPct}
-                    scale={heroLane.scale}
-                    showInfo={heroPresentation.showVehicleInfoCards}
-                    eyebrow={heroVehicleEyebrow(heroRightVehicle)}
-                    detail={heroVehicleDetailText(heroRightVehicle)}
-                    illustrative={isShowcaseHeroVehicle(heroRightVehicle)}
-                    onSelect={() => handleHeroVehicleSelect(heroRightVehicle)}
-                  />
-                )}
-
-                <div className={`kayad-hero-card-wrap relative z-20 flex w-full items-center pointer-events-none ${heroComp === 'single' ? 'justify-start pl-[3%]' : 'justify-center'}`}>
+                <div className={`kayad-hero-card-wrap relative z-20 flex w-full items-center pointer-events-none ${heroComp === 'single' ? 'justify-end pr-[3%]' : 'justify-center'}`}>
                   <div
                     className="kayad-hero-card pointer-events-auto origin-center transition-transform duration-300"
                     style={{
-                      width: `${Math.max(28, Math.min(heroComp === 'single' ? 44 : 50, heroPresentation.cardWidthPct))}%`,
-                      minWidth: 340,
+                      width: `${Math.max(28, Math.min(heroComp === 'single' ? 42 : 50, heroPresentation.cardWidthPct))}%`,
+                      minWidth: 320,
                       // Not scaled: shrinking the card also shrank its text and 44px touch targets. Width is controlled by cardWidthPct (28-50%).
                       transform: `translate(${heroLane.cardOffsetX}%, ${heroLane.cardOffsetY}%)`,
                     }}
@@ -1257,8 +1220,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   return card.ctaLink ? <a key={card.id} href={card.ctaLink} className="absolute z-25" style={{ left: `${card.leftPct ?? 5}%`, top: `${card.topPct ?? 10}%` }}>{cardBody}</a> : <div key={card.id} className="absolute z-25" style={{ left: `${card.leftPct ?? 5}%`, top: `${card.topPct ?? 10}%` }}>{cardBody}</div>;
                 })}
 
-                {heroPairCount > 1 && heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/35 bg-white/85 p-3 text-navy-900 shadow-xl backdrop-blur-md" aria-label="Previous featured vehicles"><ChevronLeft className="h-5 w-5" /></button>}
-                {heroPairCount > 1 && heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/35 bg-white/85 p-3 text-navy-900 shadow-xl backdrop-blur-md" aria-label="Next featured vehicles"><ChevronRight className="h-5 w-5" /></button>}
+                {heroPairCount > 1 && heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="absolute left-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/35 bg-white/85 p-3 text-navy-900 shadow-xl backdrop-blur-md" aria-label="Previous featured vehicle"><ChevronLeft className="h-5 w-5" /></button>}
+                {heroPairCount > 1 && heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="absolute right-3 top-1/2 z-30 -translate-y-1/2 rounded-full border border-white/35 bg-white/85 p-3 text-navy-900 shadow-xl backdrop-blur-md" aria-label="Next featured vehicle"><ChevronRight className="h-5 w-5" /></button>}
               </div>
 
               <div className="relative px-3 pb-3 pt-2 lg:hidden" aria-label="KAYAD mobile hero">
@@ -1276,10 +1239,10 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 {/* Approved mobile composition: the center card sits above a dedicated two-car stage.
                     Both transparent vehicle assets remain fully contained and independently visible. */}
                 {heroCurrentPair.length > 0 && <div className="kayad-public-hero__mobile-stage mx-auto mt-3 block w-full max-w-[520px]" data-testid="hero-mobile-stage" data-hero-composition={heroComp}>
-                  <div className={`grid items-stretch gap-1 min-[390px]:gap-2 ${heroComp === 'single' ? 'mx-auto max-w-[260px] grid-cols-1' : 'grid-cols-2'}`} aria-label={heroComp === 'single' ? 'Featured vehicle' : 'Featured vehicle pair'}>
+                  <div className={`grid items-stretch gap-1 min-[390px]:gap-2 ${heroComp === 'single' ? 'mx-auto max-w-[420px] grid-cols-1' : 'grid-cols-2'}`} aria-label={heroComp === 'single' ? 'Featured vehicle' : 'Featured vehicle pair'}>
                     {heroCurrentPair.map((vehicle, index) => vehicle && heroImageForVehicle(vehicle) ? (
                       <button key={`${vehicle.id}-${index}`} type="button" onClick={() => handleHeroVehicleSelect(vehicle)} className="kayad-public-hero__vehicle-card group flex h-full min-w-0 flex-col justify-end rounded-2xl border border-white/20 bg-[#082D39]/22 px-1.5 pt-1.5 text-center transition-colors hover:bg-[#082D39]/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]" aria-label={isShowcaseHeroVehicle(vehicle) ? `Browse vehicles. ${vehicle.make} ${vehicle.model} is illustrative artwork, not a listing` : `View ${vehicle.make} ${vehicle.model}`}>
-                        <div className="relative flex items-end justify-center overflow-visible" style={{ height: `clamp(${Math.min(140, heroPresentation.mobileStageMinPx)}px, 40vw, ${Math.min(180, heroPresentation.mobileStageMaxPx)}px)` }} data-testid="hero-pair-image-stage">
+                        <div className="relative flex items-end justify-center overflow-visible" style={{ height: `clamp(${Math.min(112, heroPresentation.mobileStageMinPx)}px, 30vw, ${Math.min(150, heroPresentation.mobileStageMaxPx)}px)` }} data-testid="hero-pair-image-stage">
                           <span aria-hidden="true" className="pointer-events-none absolute inset-x-[6%] bottom-0 h-[10%] rounded-[50%] bg-[#0A3340]/55 blur-[5px]" />
                           {brokenHeroImages[vehicle.id] ? (
                             <div className="grid h-full w-full place-items-center text-white/70" role="img" aria-label={`Photo of ${vehicle.make} ${vehicle.model} is unavailable`}><ImageIcon className="h-8 w-8" aria-hidden="true" /></div>
@@ -1301,18 +1264,18 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                     ) : null)}
                   </div>
                   {heroPairCount > 1 && <div className="mt-1 flex items-center justify-center gap-2" aria-label="Featured vehicle pair controls">
-                    {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="kayad-hero-ctl grid h-11 w-11 place-items-center rounded-full border border-white/30 bg-[#071F2A]/75 text-white shadow-md" aria-label="Previous featured vehicles"><ChevronLeft className="h-4 w-4" aria-hidden="true" /></button>}
+                    {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex - 1)} className="kayad-hero-ctl grid h-11 w-11 place-items-center rounded-full border border-white/30 bg-[#071F2A]/75 text-white shadow-md" aria-label="Previous featured vehicle"><ChevronLeft className="h-4 w-4" aria-hidden="true" /></button>}
                     {heroAutoplayAllowed && <button type="button" onClick={() => setHeroUserPaused((paused) => !paused)} aria-pressed={heroUserPaused} aria-label={heroUserPaused ? 'Resume automatic vehicle rotation' : 'Pause automatic vehicle rotation'} className="kayad-hero-ctl grid h-11 w-11 place-items-center rounded-full border border-white/30 bg-[#071F2A]/75 text-white shadow-md">{heroUserPaused ? <Play className="h-4 w-4" aria-hidden="true" /> : <Pause className="h-4 w-4" aria-hidden="true" />}</button>}
-                    {heroPresentation.dotsEnabled && <div className="flex items-center" role="group" aria-label="Featured vehicle pairs">{heroPairs.map((_, index) => <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1} of ${heroPairCount}`} aria-current={index === heroPairIndex ? 'true' : undefined} className="grid h-11 w-7 place-items-center"><span className={`h-1.5 rounded-full transition-all ${index === heroPairIndex ? 'w-5 bg-[var(--kayad-cyan)]' : 'w-1.5 bg-white/70'}`} /></button>)}</div>}
-                    {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="kayad-hero-ctl grid h-11 w-11 place-items-center rounded-full border border-white/30 bg-[#071F2A]/75 text-white shadow-md" aria-label="Next featured vehicles"><ChevronRight className="h-4 w-4" aria-hidden="true" /></button>}
+                    {heroPresentation.dotsEnabled && <div className="flex items-center" role="group" aria-label="Featured vehicle pairs">{heroPairs.map((_, index) => <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured vehicle ${index + 1} of ${heroPairCount}`} aria-current={index === heroPairIndex ? 'true' : undefined} className="grid h-11 w-7 place-items-center"><span className={`h-1.5 rounded-full transition-all ${index === heroPairIndex ? 'w-5 bg-[var(--kayad-cyan)]' : 'w-1.5 bg-white/70'}`} /></button>)}</div>}
+                    {heroPresentation.arrowEnabled && <button type="button" onClick={() => changeHeroPair(heroPairIndex + 1)} className="kayad-hero-ctl grid h-11 w-11 place-items-center rounded-full border border-white/30 bg-[#071F2A]/75 text-white shadow-md" aria-label="Next featured vehicle"><ChevronRight className="h-4 w-4" aria-hidden="true" /></button>}
                   </div>}
                 </div>}
               </div>
 
               {heroPairCount > 1 && (heroPresentation.dotsEnabled || heroAutoplayAllowed) && (
-                <div className="absolute bottom-4 left-1/2 z-30 hidden -translate-x-1/2 items-center gap-1 rounded-full border border-white/15 bg-[#071F2A]/70 px-2 py-0.5 backdrop-blur-md lg:flex" role="group" aria-label="Featured vehicle slides">
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 min-[1280px]:translate-x-[-50%] max-[1279px]:left-auto max-[1279px]:right-6 max-[1279px]:translate-x-0 z-30 hidden items-center gap-1 rounded-full border border-white/15 bg-[#071F2A]/70 px-2 py-0.5 backdrop-blur-md lg:flex" role="group" aria-label="Featured vehicle slides">
                   {heroAutoplayAllowed && <button type="button" onClick={() => setHeroUserPaused((paused) => !paused)} aria-pressed={heroUserPaused} aria-label={heroUserPaused ? 'Resume automatic vehicle rotation' : 'Pause automatic vehicle rotation'} className="kayad-hero-ctl grid h-9 w-9 place-items-center rounded-full text-white hover:bg-white/10">{heroUserPaused ? <Play className="h-4 w-4" aria-hidden="true" /> : <Pause className="h-4 w-4" aria-hidden="true" />}</button>}
-                  {heroPresentation.dotsEnabled && heroPairs.map((_, index) => <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured pair ${index + 1} of ${heroPairCount}`} aria-current={index === heroPairIndex ? 'true' : undefined} className="grid h-9 w-6 place-items-center"><span className={`h-1.5 rounded-full transition-all ${index === heroPairIndex ? 'w-6 bg-[var(--kayad-cyan)]' : 'w-1.5 bg-white/55'}`} /></button>)}
+                  {heroPresentation.dotsEnabled && heroPairs.map((_, index) => <button key={index} type="button" onClick={() => changeHeroPair(index)} aria-label={`Show featured vehicle ${index + 1} of ${heroPairCount}`} aria-current={index === heroPairIndex ? 'true' : undefined} className="grid h-9 w-6 place-items-center"><span className={`h-1.5 rounded-full transition-all ${index === heroPairIndex ? 'w-6 bg-[var(--kayad-cyan)]' : 'w-1.5 bg-white/55'}`} /></button>)}
                 </div>
               )}
             </div>
@@ -1326,7 +1289,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           <span className="kayad-home-quick-action__title">Find a Car</span>
           <span className="kayad-home-quick-action__desc">Browse listings</span>
         </button>
-        <button type="button" onClick={() => onNavigate('seller-platform')} className="kayad-home-quick-action">
+        <button type="button" onClick={() => onNavigate('dashboard:create-listing')} className="kayad-home-quick-action">
           <span className="kayad-home-quick-action__icon"><CarFront size={24} /></span>
           <span className="kayad-home-quick-action__title">Sell a Car</span>
           <span className="kayad-home-quick-action__desc">List in minutes</span>
@@ -1506,6 +1469,54 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           </div>
         )}
 
+        {/* 6. MARKET BODY: SIDEBAR + RESULTS GRID */}
+        <div className={`kayad-market-layout grid ${showDesktopSidebar ? 'lg:grid-cols-[236px_minmax(0,1fr)]' : 'lg:grid-cols-1'} gap-6 items-start`}>
+          {/* SIDEBAR */}
+          {showDesktopSidebar && (
+          <aside className="kayad-filter-panel hidden lg:block sticky top-20 overflow-hidden rounded-2xl border border-[#CFE3E0] bg-white shadow-[0_14px_40px_rgba(10,51,64,.10)]">
+            <div className="relative overflow-hidden bg-gradient-to-br from-[#0A3340] via-[#12576D] to-[#176B87] px-4 py-4 text-white">
+              <div aria-hidden="true" className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-[#13B8A6]/25 blur-2xl" />
+              <div className="relative flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25"><SlidersHorizontal className="h-5 w-5 text-[#7EE8DB]" aria-hidden="true" /></span>
+                  <div className="min-w-0">
+                    <h3 className="text-[15px] font-extrabold leading-tight">Refine inventory</h3>
+                    <p className="mt-0.5 text-[11.5px] leading-snug text-white/75">Narrow the marketplace without leaving the page.</p>
+                  </div>
+                </div>
+              </div>
+              <div className="relative mt-3 flex items-center justify-between">
+                <span data-testid="sidebar-active-count" className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold ${activeSidebarFilters > 0 ? 'bg-[#13B8A6] text-[#06303A]' : 'bg-white/15 text-white/85'}`}>{activeSidebarFilters > 0 ? `${activeSidebarFilters} filter${activeSidebarFilters === 1 ? '' : 's'} active` : 'No filters active'}</span>
+                <button onClick={resetFilters} className="rounded-lg px-2 py-1 text-[12.5px] font-bold text-white underline-offset-2 hover:bg-white/10 hover:underline">Reset all</button>
+              </div>
+            </div>
+            <div className="px-4 pb-4 pt-4">
+            <InventoryFilterPanel idPrefix="sidebar" variant="sidebar" values={filterValues} limits={filterLimits} options={filterOptionLists} onChange={applyFilterPatch} onReset={resetFilters} />
+
+
+            {sidebarAds.length > 0 && (
+              <div className="mt-4 pt-4 border-t border-[#D7E7E4] space-y-3">
+                {sidebarAds.map((slot) => (
+                  <a
+                    key={slot.id}
+                    href={slot.buttonUrl || undefined}
+                    className="block rounded-xl p-3.5 space-y-1.5"
+                    style={{ backgroundColor: slot.backgroundColor, color: slot.textColor, opacity: slot.opacity / 100 }}
+                  >
+                    <span className="text-[9px] font-bold uppercase tracking-widest opacity-70">Advertisement</span>
+                    <h5 className="text-xs font-bold leading-snug">{slot.title}</h5>
+                    {slot.tagline && <p className="text-[10.5px] opacity-85 leading-snug">{slot.tagline}</p>}
+                    {slot.buttonText && <span className="text-[10.5px] font-bold underline underline-offset-2">{slot.buttonText}</span>}
+                  </a>
+                ))}
+              </div>
+            )}
+            </div>
+          </aside>
+          )}
+
+          {/* RESULTS */}
+          <div className="kayad-inventory-results relative min-h-[400px] min-w-0" aria-busy={refreshing || undefined}>
         {/* 5. MARKET HEAD */}
         <div className="kayad-market-toolbar mb-5 rounded-2xl border border-[#D7E7E4] bg-white shadow-[0_10px_30px_rgba(11,29,58,0.06)]">
           <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
@@ -1634,54 +1645,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           </div>
         </div>
 
-        {/* 6. MARKET BODY: SIDEBAR + RESULTS GRID */}
-        <div className={`grid ${showDesktopSidebar ? 'lg:grid-cols-[236px_minmax(0,1fr)]' : 'lg:grid-cols-1'} gap-6 items-start`}>
-          {/* SIDEBAR */}
-          {showDesktopSidebar && (
-          <aside className="kayad-filter-panel hidden lg:block sticky top-20 overflow-hidden rounded-2xl border border-[#CFE3E0] bg-white shadow-[0_14px_40px_rgba(10,51,64,.10)]">
-            <div className="relative overflow-hidden bg-gradient-to-br from-[#0A3340] via-[#12576D] to-[#176B87] px-4 py-4 text-white">
-              <div aria-hidden="true" className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-[#13B8A6]/25 blur-2xl" />
-              <div className="relative flex items-start justify-between gap-3">
-                <div className="flex min-w-0 items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25"><SlidersHorizontal className="h-5 w-5 text-[#7EE8DB]" aria-hidden="true" /></span>
-                  <div className="min-w-0">
-                    <h3 className="text-[15px] font-extrabold leading-tight">Refine inventory</h3>
-                    <p className="mt-0.5 text-[11.5px] leading-snug text-white/75">Narrow the marketplace without leaving the page.</p>
-                  </div>
-                </div>
-              </div>
-              <div className="relative mt-3 flex items-center justify-between">
-                <span data-testid="sidebar-active-count" className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold ${activeSidebarFilters > 0 ? 'bg-[#13B8A6] text-[#06303A]' : 'bg-white/15 text-white/85'}`}>{activeSidebarFilters > 0 ? `${activeSidebarFilters} filter${activeSidebarFilters === 1 ? '' : 's'} active` : 'No filters active'}</span>
-                <button onClick={resetFilters} className="rounded-lg px-2 py-1 text-[12.5px] font-bold text-white underline-offset-2 hover:bg-white/10 hover:underline">Reset all</button>
-              </div>
-            </div>
-            <div className="px-4 pb-4 pt-4">
-            <InventoryFilterPanel idPrefix="sidebar" variant="sidebar" values={filterValues} limits={filterLimits} options={filterOptionLists} onChange={applyFilterPatch} onReset={resetFilters} />
-
-
-            {sidebarAds.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-[#D7E7E4] space-y-3">
-                {sidebarAds.map((slot) => (
-                  <a
-                    key={slot.id}
-                    href={slot.buttonUrl || undefined}
-                    className="block rounded-xl p-3.5 space-y-1.5"
-                    style={{ backgroundColor: slot.backgroundColor, color: slot.textColor, opacity: slot.opacity / 100 }}
-                  >
-                    <span className="text-[9px] font-bold uppercase tracking-widest opacity-70">Advertisement</span>
-                    <h5 className="text-xs font-bold leading-snug">{slot.title}</h5>
-                    {slot.tagline && <p className="text-[10.5px] opacity-85 leading-snug">{slot.tagline}</p>}
-                    {slot.buttonText && <span className="text-[10.5px] font-bold underline underline-offset-2">{slot.buttonText}</span>}
-                  </a>
-                ))}
-              </div>
-            )}
-            </div>
-          </aside>
-          )}
-
-          {/* RESULTS */}
-          <div className="kayad-inventory-results relative min-h-[400px] min-w-0" aria-busy={refreshing || undefined}>
+          
             {refreshing && (
               <div role="progressbar" aria-label="Updating results" data-testid="inventory-refresh-bar" className="kayad-refresh-bar pointer-events-none absolute inset-x-0 top-0 z-10 h-[3px] overflow-hidden rounded-full bg-[#DDF4F0]">
                 <span className="block h-full w-1/3 rounded-full bg-[#13B8A6]" />
@@ -1977,7 +1941,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           <div className="bg-[#F4F8FC] p-8 sm:p-9 flex flex-col justify-center">
             <h3 className="text-lg font-bold text-navy-900 mb-2 max-w-xs">Ready to sell your vehicle?</h3>
             <p className="text-xs text-[#58717B] mb-4 max-w-xs">Reach interested buyers through the KAYAD marketplace and manage your listing through the existing Seller Studio.</p>
-            <button onClick={() => onNavigate('seller-platform')} className="self-start bg-navy-900 hover:bg-navy-700 text-white text-sm font-bold px-5 py-2.5 rounded-full">
+            <button onClick={() => onNavigate('dashboard:my-vehicles')} className="self-start bg-navy-900 hover:bg-navy-700 text-white text-sm font-bold px-5 py-2.5 rounded-full">
               Sell Your Vehicle →
             </button>
           </div>

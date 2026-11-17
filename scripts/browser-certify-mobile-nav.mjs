@@ -61,7 +61,7 @@ async function measure(page) {
     const box = (el) => { if (!el) return null; const r = el.getBoundingClientRect(); return { x: Math.round(r.x), y: Math.round(r.y + scrollY), w: Math.round(r.width), h: Math.round(r.height), right: Math.round(r.right) }; };
     const q = (s) => document.querySelector(s);
     const header = q('header') || q('nav');
-    const findDock = () => [...document.querySelectorAll('nav, div, aside')].filter((n) => getComputedStyle(n).position === 'fixed' && /Showroom/.test(n.textContent || '') && /Saved/.test(n.textContent || '') && n.getBoundingClientRect().top > innerHeight / 2).sort((a, b) => a.querySelectorAll('*').length - b.querySelectorAll('*').length)[0];
+    const findDock = () => [...document.querySelectorAll('nav, div, aside')].filter((n) => getComputedStyle(n).position === 'fixed' && /Messages/.test(n.textContent || '') && /Account/.test(n.textContent || '') && n.getBoundingClientRect().top > innerHeight / 2).sort((a, b) => a.querySelectorAll('*').length - b.querySelectorAll('*').length)[0];
     const dock = findDock();
     const clipped = [...document.querySelectorAll('body *')].filter((el) => { const r = el.getBoundingClientRect(); const cs = getComputedStyle(el); return r.width > 0 && cs.position !== 'fixed' && r.right > innerWidth + 1 && !el.closest('[aria-hidden="true"], .sr-only, svg') && cs.visibility !== 'hidden' && !el.closest('[class*="overflow-x"], [class*="scroll"], [class*="carousel"], [class*="marquee"]'); }).slice(0, 5).map((el) => el.tagName + '.' + String(el.className).slice(0, 60));
     return {
@@ -97,7 +97,7 @@ async function run() {
     await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
     await page.waitForTimeout(300);
     const clear = await page.evaluate(() => {
-      const findDock = () => [...document.querySelectorAll('nav, div, aside')].filter((n) => getComputedStyle(n).position === 'fixed' && /Showroom/.test(n.textContent || '') && /Saved/.test(n.textContent || '') && n.getBoundingClientRect().top > innerHeight / 2).sort((a, b) => a.querySelectorAll('*').length - b.querySelectorAll('*').length)[0];
+      const findDock = () => [...document.querySelectorAll('nav, div, aside')].filter((n) => getComputedStyle(n).position === 'fixed' && /Messages/.test(n.textContent || '') && /Account/.test(n.textContent || '') && n.getBoundingClientRect().top > innerHeight / 2).sort((a, b) => a.querySelectorAll('*').length - b.querySelectorAll('*').length)[0];
       const dock = findDock();
       if (!dock) return { dock: false };
       const top = dock.getBoundingClientRect().top;
@@ -141,7 +141,7 @@ async function run() {
     if (hasRetry) {
       await retry.scrollIntoViewIfNeeded(); await pt.waitForTimeout(300);
       await pt.screenshot({ path: `${OUT}/mobile/inventory-timeout-retry-${vp.name}.png` });
-      const rb = await retry.boundingBox(); const dockTop = await pt.evaluate(() => { const d = [...document.querySelectorAll('nav, div, aside')].filter((n) => getComputedStyle(n).position === 'fixed' && /Showroom/.test(n.textContent || '') && n.getBoundingClientRect().top > innerHeight / 2).sort((a, b) => a.querySelectorAll('*').length - b.querySelectorAll('*').length)[0]; return d ? d.getBoundingClientRect().top : innerHeight; });
+      const rb = await retry.boundingBox(); const dockTop = await pt.evaluate(() => { const d = [...document.querySelectorAll('nav, div, aside')].filter((n) => getComputedStyle(n).position === 'fixed' && /Messages/.test(n.textContent || '') && /Account/.test(n.textContent || '') && n.getBoundingClientRect().top > innerHeight / 2).sort((a, b) => a.querySelectorAll('*').length - b.querySelectorAll('*').length)[0]; return d ? d.getBoundingClientRect().top : innerHeight; });
       log(`${vp.name}px timeout: Retry button visible above the dock`, rb && rb.y + rb.height <= dockTop + 1, `retryBottom=${rb && Math.round(rb.y + rb.height)} dockTop=${Math.round(dockTop)}`);
       const before = pt.__state.carsCalls; pt.__state.inv = 'ok'; await retry.click(); await pt.waitForTimeout(2500);
       log(`${vp.name}px retry: triggers a real inventory request and recovers`, pt.__state.carsCalls > before && (await pt.locator('[data-testid="inventory-grid"]').count()) > 0, `requests ${before}->${pt.__state.carsCalls}`);
@@ -212,13 +212,14 @@ async function run() {
     const page = await newPage(browser, vp, null);
     await page.goto(BASE + '/', { waitUntil: 'domcontentloaded' }); await page.waitForTimeout(1500);
     const start = page.url(); const seen = [start];
-    for (const label of ['Auction', 'Saved']) {
-      const r = await page.evaluate((l) => { const d = [...document.querySelectorAll('nav,div')].filter((n) => getComputedStyle(n).position === 'fixed' && /Showroom/.test(n.textContent || '')).sort((a, b) => a.querySelectorAll('*').length - b.querySelectorAll('*').length)[0]; if (!d) return 'nodock'; [...d.querySelectorAll('button,a')].find((b) => (b.textContent || '').trim().startsWith(l))?.click(); }, label);
+    for (const label of ['Sell', 'Messages']) {
+      const r = await page.evaluate((l) => { const d = [...document.querySelectorAll('nav,div')].filter((n) => getComputedStyle(n).position === 'fixed' && /Messages/.test(n.textContent || '') && /Account/.test(n.textContent || '')).sort((a, b) => a.querySelectorAll('*').length - b.querySelectorAll('*').length)[0]; if (!d) return 'nodock'; [...d.querySelectorAll('button,a')].find((b) => (b.textContent || '').trim().startsWith(l))?.click(); }, label);
       if (r === 'nodock') console.log('  (no dock on', page.url(), 'before tapping', label, ')');
       await page.waitForTimeout(900);
       if (page.url() !== seen[seen.length - 1]) seen.push(page.url());
     }
-    log('dock taps each add one distinct history entry', seen.length === 3 && new Set(seen).size === 3, seen.join(' > '));
+    // Signed-out, Sell/Messages/Account lead to the sign-in page (no dock there): one tap adds exactly one distinct entry and Back returns to the start.
+    log('dock tap adds one distinct history entry', seen.length >= 2 && new Set(seen).size === seen.length, seen.join(' > '));
     await page.evaluate(() => { for (const b of document.querySelectorAll('button,a')) if (/Showroom/.test(b.textContent||'') && false) b.click(); });
     for (let i = seen.length - 2; i >= 0; i--) { await page.goBack(); await page.waitForTimeout(500); }
     log('Back x2 returns to the starting page', page.url() === start, page.url());

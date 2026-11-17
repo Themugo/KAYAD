@@ -51,6 +51,9 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
   const [savedVehicles, setSavedVehicles] = useState<string[]>([]);
   const [isFetchingFavorites, setIsFetchingFavorites] = useState<boolean>(false);
   const [favoritesError, setFavoritesError] = useState<string | null>(null);
+  const [favoritesErrorUserId, setFavoritesErrorUserId] = useState<string | null>(null);
+  const [savedVehiclesSessionUserId, setSavedVehiclesSessionUserId] = useState<string | null>(null);
+  const [favoritesReloadKey, setFavoritesReloadKey] = useState(0);
   const [resolvedSavedVehicles, setResolvedSavedVehicles] = useState<Record<string, Vehicle>>({});
   // Tracks in-flight optimistic toggles by car ID, so a rapid
   // double-click can't race itself into an inconsistent state - a
@@ -59,6 +62,8 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
   // "don't introduce new race conditions while fixing old ones"
   // caution (Phase 8).
   const pendingToggles = useRef<Set<string>>(new Set());
+  const activeUserIdRef = useRef(userId || null);
+  activeUserIdRef.current = userId || null;
 
   // Fetch real favorites on mount / whenever the authenticated user
   // changes (covers login and logout during the same session, not
@@ -74,12 +79,17 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
       setSavedVehicles(readGuestSaved());
       setResolvedSavedVehicles({});
       setFavoritesError(null);
+      setFavoritesErrorUserId(null);
+      setSavedVehiclesSessionUserId(null);
       setIsFetchingFavorites(false);
       return;
     }
     let cancelled = false;
+    // On account switches the old session key no longer matches and is masked.
+    // On same-account refreshes, retain the last known list until the new result arrives.
     setIsFetchingFavorites(true);
     setFavoritesError(null);
+    setFavoritesErrorUserId(null);
     (async () => {
       try {
         const res = await getFavorites({ limit: 50 });
@@ -119,6 +129,7 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
               });
             }
           }
+          if (!cancelled) setSavedVehiclesSessionUserId(userId);
         }
       } catch (err) {
         if (!cancelled) {
@@ -127,6 +138,7 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
               ? err.message
               : 'Unable to load your saved vehicles right now.';
           setFavoritesError(message);
+          setFavoritesErrorUserId(userId);
           // Deliberately does NOT clear savedVehicles on failure - a
           // logged-in user who briefly loses connectivity shouldn't
           // see their previously-known saved list vanish; it simply
@@ -140,7 +152,7 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, [userId, favoritesReloadKey]);
 
   // Toggle Save - real API call when authenticated, local-only
   // otherwise. Optimistic: UI updates immediately, rolled back if the
@@ -162,14 +174,20 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
     if (pendingToggles.current.has(id)) return; // ignore a rapid re-click while one is in flight
     pendingToggles.current.add(id);
 
-    const wasSaved = savedVehicles.includes(id);
-    // Optimistic update
-    setSavedVehicles((prev) => (wasSaved ? prev.filter((item) => item !== id) : [...prev, id]));
+    const currentAccountSaved = savedVehiclesSessionUserId === userId ? savedVehicles : [];
+    const wasSaved = currentAccountSaved.includes(id);
+    // Optimistic update uses only the active account's confirmed collection.
+    setSavedVehicles(currentAccountSaved.includes(id) ? currentAccountSaved.filter((item) => item !== id) : [...currentAccountSaved, id]);
+    setSavedVehiclesSessionUserId(userId);
     if (wasSaved) setResolvedSavedVehicles((prev) => { const next = { ...prev }; delete next[id]; return next; });
     setFavoritesError(null);
+    setFavoritesErrorUserId(null);
 
     toggleFavorite(id)
       .then((res) => {
+        if (activeUserIdRef.current !== userId) return;
+        setSavedVehiclesSessionUserId(userId);
+        setFavoritesErrorUserId(null);
         // Reconcile with the server's actual result rather than
         // trusting the optimistic guess blindly - protects against a
         // state drift if something else (another tab, a concurrent
@@ -182,29 +200,35 @@ export function useVehicleCollections(vehicles: Vehicle[], userId?: string | nul
         });
       })
       .catch((err) => {
+        if (activeUserIdRef.current !== userId) return;
         // Roll back the optimistic update on failure.
         setSavedVehicles((prev) => (wasSaved ? [...prev, id] : prev.filter((item) => item !== id)));
         const message =
           err instanceof FavoriteApiError ? err.message : 'Unable to update your saved vehicles right now.';
         setFavoritesError(message);
+        setFavoritesErrorUserId(userId);
       })
       .finally(() => {
         pendingToggles.current.delete(id);
       });
-  }, [userId, savedVehicles]);
+  }, [userId, savedVehicles, savedVehiclesSessionUserId]);
 
+  const visibleSavedVehicles = useMemo(() => userId ? (savedVehiclesSessionUserId === userId ? savedVehicles : []) : savedVehicles, [userId, savedVehiclesSessionUserId, savedVehicles]);
   const savedVehiclesList = useMemo(() => {
     const currentById = new Map(vehicles.map((vehicle) => [vehicle.id, vehicle]));
-    return savedVehicles
+    return visibleSavedVehicles
       .map((id) => currentById.get(id) || resolvedSavedVehicles[id])
       .filter((vehicle): vehicle is Vehicle => Boolean(vehicle));
-  }, [vehicles, savedVehicles, resolvedSavedVehicles]);
+  }, [vehicles, visibleSavedVehicles, resolvedSavedVehicles]);
 
   return {
-    savedVehicles,
+    savedVehicles: visibleSavedVehicles,
     savedVehiclesList,
     handleToggleSave,
     isFetchingFavorites,
     favoritesError,
+    favoritesErrorUserId,
+    savedVehiclesSessionUserId,
+    refreshSavedVehicles: () => setFavoritesReloadKey((value) => value + 1),
   };
 }

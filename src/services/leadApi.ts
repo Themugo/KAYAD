@@ -72,6 +72,9 @@ export const leadApi = {
   async addNote(leadId: string, note: string) {
     return apiRequest<{ lead: any }>(`/api/leads/${leadId}/notes`, { method: "POST", body: { note } });
   },
+  async mySellerEnquiries() {
+    return apiRequest<{ enquiries: Array<any>; count: number; listingCount: number }>("/api/leads/mine/seller-enquiries", { method: "GET" });
+  },
   async myNegotiations() {
     return apiRequest<{ leads: Array<{ id: string; vehicle?: string | null; dealer?: string | null; stage?: string; created_at?: string }> }>("/api/leads/mine/offers", { method: "GET" });
   },

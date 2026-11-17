@@ -40,7 +40,7 @@ ok('proposal router mounted', /\/api\/private-seller-auctions/.test(read('backen
 const routes = read('backend/routes/privateSellerAuctionRoutes.js');
 ok('admin routes require admin role AND permission', (routes.match(/requireRole\("admin", "superadmin"\), requirePermission/g) || []).length >= 4);
 ok('mutations require Idempotency-Key', /requireIdempotencyKey/.test(routes));
-ok('seller UI is inside PrivateSellerPlatform (no second dashboard)', /AuctionVerificationSection/.test(read('src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx')));
+ok('seller verification is embedded in PersonalSellingModule (no second dashboard)', /AuctionVerificationSection/.test(read('src/features/PrivateSellerPlatform/pages/PersonalSellingModule.tsx')));
 ok('admin UI mounted in AdminView', /AdminAuctionVerification/.test(read('src/features/AdminView.tsx')));
 
 let fail = 0;

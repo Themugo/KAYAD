@@ -20,7 +20,7 @@ const checks = [
   ['admin provider queue displays business type', /r\.business_type/.test(governance) && /p\.business_type/.test(governance)],
   ['personal membership screen retains invitations, memberships and assigned work', /Invitations/.test(memberships) && /Businesses you work with/.test(memberships) && /My assigned inspections/.test(memberships)],
   ['branch-aware workforce remains on inspection_staff canonical records', /CREATE TABLE IF NOT EXISTS inspection_staff/.test(workforce) && /UPDATE inspection_staff SET access_role/.test(workforce)],
-  ['legacy private-seller accounts remain supported in the platform', fs.existsSync(new URL('../src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx', import.meta.url)) && /individual_seller/.test(read('src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx'))],
+  ['legacy private-seller accounts remain supported in the platform', fs.existsSync(new URL('../src/features/PrivateSellerPlatform/pages/PersonalSellingModule.tsx', import.meta.url)) && /individual_seller/.test(read('src/features/PrivateSellerPlatform/pages/PersonalSellingModule.tsx'))],
 ];
 let failed = false;
 for (const [name, ok] of checks) { console.log(`${ok ? 'PASS' : 'FAIL'}: ${name}`); if (!ok) failed = true; }

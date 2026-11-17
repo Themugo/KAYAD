@@ -60,6 +60,7 @@ import { getEscrowRules, getActiveEscrowAccounts, saveEscrowAccount, removeEscro
 import { setSellerEscrowCapability, getSellerEscrowCapabilityStatus } from "../services/escrowCapability.service.js";
 import { setEscrowCapabilitySchema } from "../validation/escrow.schema.js";
 import { moderationBlockedReason } from "../utils/carModerationGuard.js";
+import { recordModerationListingLifecycle } from "../services/personalListingLifecycle.service.js";
 import { isOwnerUser, isOwnerEmail } from "../config/owners.js";
 import { normalizeNavigation, validateNavigationInput } from "../utils/navigationConfig.js";
 import { presentMessage } from "../services/chatAttachments.js";
@@ -799,6 +800,10 @@ router.post(
     // STAGE 5A (real-DB defect): the car was loaded with a populated dealer object, and car.save() wrote that object back
     // into the uuid column (cars.dealer_id), so every single-listing decision returned 500. Update only the status.
     const newStatus = action === "approve" ? "available" : "hidden";
+    // Record the moderation decision BEFORE changing the status: if the audit write fails nothing has changed, and a
+    // stale record can never let a seller's republish reverse a moderator hide (publish needs the newest event to be a seller hide).
+    const sellerId = typeof car.dealer === "string" ? car.dealer : car.dealer?.id ?? car.dealer?._id;
+    if (sellerId) await recordModerationListingLifecycle({ carId: req.params.id, sellerId, actorId: req.user.id, previousStatus: car.status, nextStatus: newStatus });
     await Car.findByIdAndUpdate(req.params.id, { status: newStatus });
     car.status = newStatus;
 

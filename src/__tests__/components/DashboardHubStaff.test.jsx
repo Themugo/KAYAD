@@ -21,8 +21,17 @@ describe('DashboardHub buyer widgets', () => {
     expect(screen.queryByTestId('auction-rail')).toBeNull();
     expect(screen.queryByTestId('bidder-card')).toBeNull();
   });
-  it.each(['buyer', 'user', 'dealer'])('%s still sees the auction journey and bidder card', (role) => {
-    mount(role);
+  // The unified personal dashboard shows the bidder card in its Auctions section (one personal identity, buying and selling in
+  // the same shell) and no longer repeats the wallet journey rail on every page; the dealer dashboard still shows both at the top.
+  it.each(['buyer', 'user'])('%s sees the bidder card in the personal Auctions section and not on the overview', async (role) => {
+    const { unmount } = render(<DashboardHub user={{ id: 'u1', name: 'James Mugo', role }} vehicles={[]} onNavigate={() => {}} />);
+    expect(screen.queryByTestId('bidder-card')).toBeNull();
+    unmount();
+    render(<DashboardHub user={{ id: 'u1', name: 'James Mugo', role }} vehicles={[]} initialSection="auctions" onNavigate={() => {}} />);
+    expect(await screen.findByTestId('bidder-card')).toBeTruthy();
+  });
+  it('dealer still sees the auction journey and bidder card', () => {
+    mount('dealer');
     expect(screen.getByTestId('auction-rail')).toBeTruthy();
     expect(screen.getByTestId('bidder-card')).toBeTruthy();
   });

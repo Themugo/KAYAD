@@ -113,13 +113,13 @@ export const VehicleCard: React.FC<VehicleCardProps> = React.memo(({
       className="bg-white rounded-2xl overflow-hidden border border-[#D7E7E4]/80 shadow-xs hover:shadow-md hover:border-navy-600/30 transition-all duration-200 flex flex-col group relative cursor-pointer focus:outline-none focus:ring-2 focus:ring-navy-600 focus:ring-offset-2"
     >
       {/* 1. VEHICLE IMAGE CONTAINER */}
-      <div className="relative h-44 sm:h-36 overflow-hidden bg-[#EEF7F5]">
+      <div className="relative h-44 sm:h-36 overflow-hidden bg-[#EEF7F5]" data-testid="vehicle-card-image-stage">
         {vehicle.image ? (
           <LazyImage
             src={vehicle.image}
             alt={vehicle.title}
             wrapperClassName="w-full h-full"
-            className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500 ease-out"
+            className="w-full h-full object-contain p-2 group-hover:scale-[1.015] transition-transform duration-300 ease-out"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-[#64748B]">

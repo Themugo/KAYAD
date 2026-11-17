@@ -17,7 +17,7 @@ pass('showcase vehicle identity and image paths are editable by admin', admin.in
 pass('showcase configuration is persisted via existing platform config endpoint', hero.includes('adminAPI.updateConfig({ ...current, heroPresentation: nextPresentation, heroCardContent: nextCardContent })'));
 pass('database migration seeds/repairs existing JSONB showcase config without creating fake cars', migration.includes('platform_config') && migration.includes('hero_presentation') && migration.includes('showcaseFallbackEnabled') && !/INSERT\s+INTO\s+public\.cars/i.test(migration));
 pass('approved Land Cruiser and Mercedes mobile transparent assets are referenced', migration.includes('/hero/kayad-land-cruiser-mobile.webp') && migration.includes('/hero/kayad-mercedes-gle-mobile.webp'));
-pass('tests cover paired cars and explicit visual-showcase semantics', tests.includes('shows both featured vehicles together') && tests.includes('labelled as not a listing') && tests.includes('never lets showcase artwork replace real inventory'));
+pass('tests cover paired cars and explicit visual-showcase semantics', tests.includes('shows one featured vehicle per slide') && tests.includes('labelled as not a listing') && tests.includes('never lets showcase artwork replace real inventory'));
 let failed = 0;
 for (const c of checks) { console.log(`${c.ok ? 'PASS' : 'FAIL'} ${c.name}`); if (!c.ok) failed++; }
 console.log(`\nStage 35 Home Hero Pair: ${checks.length - failed}/${checks.length} ${failed ? 'FAIL' : 'PASS'}`);

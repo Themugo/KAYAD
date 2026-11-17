@@ -498,7 +498,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           <button
             type="button"
-            onClick={() => handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'seller-platform')}
+            onClick={() => handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'dashboard:create-listing')}
             className="kayad-cta"
             id="cta-sell-car"
             aria-label={isDealerUser ? 'Add Vehicle' : 'Sell Vehicle'}
@@ -702,8 +702,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <button type="button" onClick={() => handleNavSelect('payments')} className="kayad-drawer-tile"><CreditCard className="h-4 w-4" />Payment History</button>
                       </>}
                       {user && !isRestrictedWorkspace && !isMechanicAccount && <>
-                        <button type="button" onClick={() => handleNavSelect('dashboard')} className="kayad-drawer-tile"><LayoutDashboard className="h-4 w-4" />{isSellerRole(user.role) ? 'My Account' : 'Buyer Dashboard'}</button>
-                        {isSellerRole(user.role) && <button type="button" onClick={() => handleNavSelect('seller-dashboard')} className="kayad-drawer-tile"><Car className="h-4 w-4" />Selling Workspace</button>}
+                        <button type="button" onClick={() => handleNavSelect('dashboard')} className="kayad-drawer-tile"><LayoutDashboard className="h-4 w-4" />My Account</button>
+                        {isSellerRole(user.role) && <button type="button" onClick={() => handleNavSelect('dashboard:my-vehicles')} className="kayad-drawer-tile"><Car className="h-4 w-4" />My Vehicles</button>}
                         <button type="button" onClick={() => handleNavSelect('profile')} className="kayad-drawer-tile"><User className="h-4 w-4" />Account Settings</button>
                         <button type="button" onClick={() => handleNavSelect('chat')} className="kayad-drawer-tile"><MessageSquare className="h-4 w-4" />Messages {effectiveUnread > 0 && <span className="kayad-drawer-count">{effectiveUnread}</span>}</button>
                         <button type="button" onClick={() => { navigate('/notifications'); setMobileMenuOpen(false); }} className="kayad-drawer-tile"><Bell className="h-4 w-4" />Notifications {notificationUnreadCount > 0 && <span className="kayad-drawer-count kayad-drawer-count--alert">{notificationUnreadCount}</span>}</button>
@@ -722,7 +722,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </section>
 
                 {!isStaffAccount && (
-                  <button type="button" onClick={() => handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'seller-platform')} id="mobile-cta-sell-car" className="mb-4 flex min-h-14 w-full items-center justify-between rounded-[20px] border border-[#43D0C2]/40 bg-gradient-to-r from-[#0D7187] to-[#176B87] px-4 text-left text-white shadow-[0_16px_35px_rgba(7,57,68,.22)] active:scale-[.99]"><span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/10"><PlusCircle className="h-5 w-5" /></span><span><strong className="block text-sm font-black">{isDealerUser ? 'Add Vehicle' : 'Sell Vehicle'}</strong><small className="text-[10px] text-white/60">{isDealerUser ? 'Add stock to your inventory' : 'List your vehicle with KAYAD'}</small></span></span><ChevronDown className="h-5 w-5 -rotate-90 text-[#8DE4DB]" /></button>
+                  <button type="button" onClick={() => handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'dashboard:create-listing')} id="mobile-cta-sell-car" className="mb-4 flex min-h-14 w-full items-center justify-between rounded-[20px] border border-[#43D0C2]/40 bg-gradient-to-r from-[#0D7187] to-[#176B87] px-4 text-left text-white shadow-[0_16px_35px_rgba(7,57,68,.22)] active:scale-[.99]"><span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/10"><PlusCircle className="h-5 w-5" /></span><span><strong className="block text-sm font-black">{isDealerUser ? 'Add Vehicle' : 'Sell Vehicle'}</strong><small className="text-[10px] text-white/60">{isDealerUser ? 'Add stock to your inventory' : 'List your vehicle with KAYAD'}</small></span></span><ChevronDown className="h-5 w-5 -rotate-90 text-[#8DE4DB]" /></button>
                 )}
                 <div className="flex items-center justify-between border-t border-white/[0.08] px-1 pt-4 text-[10px] text-white/50"><span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-[#79D8CF]" />{selectedCounty}</span></div>
               </div>

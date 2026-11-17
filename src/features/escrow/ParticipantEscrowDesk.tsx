@@ -62,10 +62,14 @@ const SummarySkeleton: React.FC = () => (
 interface Props {
   initialEscrowId?: string | null;
   onNavigate?: (nav: string) => void;
+  initialData?: { escrows: BackendEscrow[]; summary: EscrowParticipantSummary | null } | null;
+  initialDataLoading?: boolean;
+  initialDataError?: boolean;
+  onRefreshOverview?: () => void;
 }
 
-export const ParticipantEscrowDesk: React.FC<Props> = ({ initialEscrowId = null, onNavigate }) => {
-  const [load, setLoad] = useState<Load>({ status: 'loading' });
+export const ParticipantEscrowDesk: React.FC<Props> = ({ initialEscrowId = null, onNavigate, initialData, initialDataLoading = false, initialDataError = false, onRefreshOverview }) => {
+  const [load, setLoad] = useState<Load>(() => initialData ? { status: 'ready', deals: initialData.escrows, summary: initialData.summary } : { status: 'loading' });
   const [filter, setFilter] = useState<Filter>('all');
   const [selectedId, setSelectedId] = useState<string | null>(initialEscrowId);
   const [funding, setFunding] = useState<{ id: string; state: 'loading' | 'error' | 'ready'; data?: FundingInstructions; message?: string } | null>(null);
@@ -87,7 +91,12 @@ export const ParticipantEscrowDesk: React.FC<Props> = ({ initialEscrowId = null,
     }
   }, []);
 
-  useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    if (initialDataLoading) { setLoad({ status: 'loading' }); return; }
+    if (initialDataError) { setLoad({ status: 'error', message: 'Your deals could not be loaded. Please retry.', kind: 'unknown' }); return; }
+    if (initialData) { setLoad({ status: 'ready', deals: initialData.escrows, summary: initialData.summary }); return; }
+    void refresh();
+  }, [refresh, initialData, initialDataLoading, initialDataError]);
 
   const deals = load.status === 'ready' ? load.deals : [];
   const visible = useMemo(() => deals.filter((d) => {
@@ -124,7 +133,8 @@ export const ParticipantEscrowDesk: React.FC<Props> = ({ initialEscrowId = null,
       else if (pending === 'open_dispute') await disputeEscrow(selected.id, reason.trim());
       setNotice(`${ACTION_LABEL[pending]} — done.`);
       setPending(null); setReason('');
-      await refresh(true);
+      if (onRefreshOverview) onRefreshOverview(); else await refresh(true);
+      onRefreshOverview?.();
     } catch (err) {
       const e = errorText(err);
       setActionError(e.kind === 'conflict' ? 'This deal changed while you were looking at it. Refresh to see its current state.' : e.message);
@@ -142,7 +152,7 @@ export const ParticipantEscrowDesk: React.FC<Props> = ({ initialEscrowId = null,
     <section aria-labelledby="my-deals-heading" className="space-y-5">
       <div className="flex items-center justify-between gap-3">
         <h2 id="my-deals-heading" className="text-lg font-semibold text-[#0A3340]">My escrow deals</h2>
-        <button type="button" onClick={() => void refresh()} className="inline-flex items-center gap-1.5 rounded-lg border border-[#D7E7E4] px-3 py-1.5 text-sm text-[#12576D] hover:bg-[#F6FAF9] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4]">
+        <button type="button" onClick={() => onRefreshOverview ? onRefreshOverview() : void refresh()} className="inline-flex items-center gap-1.5 rounded-lg border border-[#D7E7E4] px-3 py-1.5 text-sm text-[#12576D] hover:bg-[#F6FAF9] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4]">
           <RefreshCw className="h-4 w-4" aria-hidden="true" /> Refresh
         </button>
       </div>
@@ -152,7 +162,7 @@ export const ParticipantEscrowDesk: React.FC<Props> = ({ initialEscrowId = null,
         <div role="alert" className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
           <p className="font-medium">We could not load your deals.</p>
           <p className="mt-1">{load.message}</p>
-          <button type="button" onClick={() => void refresh()} className="mt-3 rounded-lg bg-red-700 px-3 py-1.5 text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500">Try again</button>
+          <button type="button" onClick={() => onRefreshOverview ? onRefreshOverview() : void refresh()} className="mt-3 rounded-lg bg-red-700 px-3 py-1.5 text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500">Try again</button>
         </div>
       )}
 

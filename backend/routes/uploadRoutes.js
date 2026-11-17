@@ -1,5 +1,6 @@
 import express from "express";
 import { protect } from "../middleware/auth.js";
+import { requirePermission } from "../middleware/role.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { uploadMemory, handleUploadError } from "../middleware/upload.js";
 import { uploadImage, uploadMultiple, deleteImage } from "../config/cloudinary.js";
@@ -8,6 +9,14 @@ import { getUploadRecord, getUploadRecordByPublicId } from "../services/sqlUploa
 import { bareFolder, hasImageSignature, parseMetadata, CHAT_UPLOAD_FOLDER } from "../services/chatAttachments.js";
 
 const router = express.Router();
+
+// Marketing creatives are public-facing platform assets. Keep ordinary upload
+// folders on their existing authenticated flow, but require the existing
+// MANAGE_ADS capability for the marketing folder on both upload endpoints.
+const requireMarketingUploadPermission = (req, res, next) => {
+  if (req.body?.folder !== "marketing") return next();
+  return requirePermission("manage_ads")(req, res, next);
+};
 
 // Folders whose assets are never publicly deliverable. `chat` holds private conversation files: they are stored as
 // Cloudinary `authenticated` assets and are only reachable through GET /api/chat/:chatId/attachments/:uploadId.
@@ -26,18 +35,13 @@ router.post(
   uploadLimiter,
   uploadMemory.single("file"),
   handleUploadError,
+  requireMarketingUploadPermission,
   asyncHandler(async (req, res) => {
     if (!req.file) return res.status(400).json({ success: false, message: "No file uploaded" });
 
     const folder = req.body.folder || "temp";
     if (!FOLDERS.includes(folder)) {
       return res.status(400).json({ success: false, message: `Invalid folder. Must be one of: ${FOLDERS.join(", ")}` });
-    }
-    // Public marketing creatives affect the shared marketplace presentation.
-    // Restrict this folder to existing platform/ad-management roles; ordinary
-    // authenticated customers must not be able to publish marketing assets.
-    if (folder === "marketing" && !["admin", "superadmin", "marketing", "ad_manager"].includes(req.user?.role)) {
-      return res.status(403).json({ success: false, code: "MARKETING_UPLOAD_FORBIDDEN", message: "You do not have permission to upload marketing creatives." });
     }
 
     const isPrivate = PRIVATE_FOLDERS.includes(folder);
@@ -72,6 +76,7 @@ router.post(
   uploadLimiter,
   uploadMemory.array("files", 20),
   handleUploadError,
+  requireMarketingUploadPermission,
   asyncHandler(async (req, res) => {
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ success: false, message: "No files uploaded" });
@@ -80,9 +85,6 @@ router.post(
     const folder = req.body.folder || "temp";
     if (!FOLDERS.includes(folder)) {
       return res.status(400).json({ success: false, message: `Invalid folder. Must be one of: ${FOLDERS.join(", ")}` });
-    }
-    if (folder === "marketing" && !["admin", "superadmin", "marketing", "ad_manager"].includes(req.user?.role)) {
-      return res.status(403).json({ success: false, code: "MARKETING_UPLOAD_FORBIDDEN", message: "You do not have permission to upload marketing creatives." });
     }
 
     if (folder === CHAT_UPLOAD_FOLDER) {

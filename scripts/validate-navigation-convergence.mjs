@@ -21,6 +21,7 @@ for (const id of new Set(navIds)) {
     ? (scope === 'auctions' ? app.includes("nav.startsWith('auctions:')") && ['live', 'scheduled', 'ended', 'saved'].includes(value) && auctions.includes(`'${value}'`)
       : scope === 'services' ? app.includes("nav.startsWith('services:')") && ['inspect', 'find', 'roadside', 'mine'].includes(value) && app.includes(`where === '${value}'`) || (scope === 'services' && value === 'inspect' && app.includes("nav.startsWith('services:')"))
       : scope === 'escrow' ? app.includes("nav.startsWith('escrow:')") && ['journey', 'deals', 'create'].includes(value)
+      : scope === 'dashboard' ? app.includes("activeNav === 'dashboard'") && ['buying', 'deals'].includes(value) && read('src/components/DashboardHub.tsx').includes(value)
       : false)
     : app.includes(`activeNav === '${scope}'`) || (scope === 'financing' && app.includes("activeNav === 'financing'")) || (scope === 'discovery' && app.includes("activeNav === 'discovery'"));
   add(`nav destination "${id}" resolves to an existing App.tsx surface/tab`, exists);
@@ -31,7 +32,7 @@ const protectedNavsMatch = app.match(/const protectedNavs = new Set\(\[([^\]]+)\
 const protectedNavValues = protectedNavsMatch
   ? [...protectedNavsMatch[1].matchAll(/'([^']+)'/g)].map((match) => match[1])
   : [];
-const requiredProtectedNavs = ['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard', 'dealership-workspace', 'escrow-operations'];
+const requiredProtectedNavs = ['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'dealer-dashboard', 'dealership-workspace', 'escrow-operations'];
 const backendAdminGuard = read('backend/routes/adminRoutes.js').includes('router.use(protect, adminOnly)');
 add('auth-gated entries are presentation only (App protectedNavs + backend remain authority)',
   /not a\s+\*?\s*security boundary/.test(cfg)

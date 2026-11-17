@@ -7,10 +7,13 @@ const app = fs.readFileSync('src/App.tsx', 'utf8');
 // mounted buyer financing surface converged onto FinancePlatform. It is
 // deliberately excluded from both lists below.
 const imports = [
-  './features/AuctionsView','./features/EscrowView','./features/InspectionsView','./features/DealersView','./features/ChatView','./features/AdminView','./features/SupportView','./features/PaymentHistoryView','./pages/KAYADLive','./features/OwnershipPlatform','./features/PrivateSellerPlatform','./pages/dealer/dashboard/DealerDashboard','./features/FinancePlatform','./features/InspectionMarketplace/pages/InspectionMarketplacePage'
+  './features/AuctionsView','./features/EscrowView','./features/InspectionsView','./features/DealersView','./features/ChatView','./features/AdminView','./features/SupportView','./features/PaymentHistoryView','./pages/KAYADLive','./pages/dealer/dashboard/DealerDashboard','./features/FinancePlatform','./features/InspectionMarketplace/pages/InspectionMarketplacePage'
 ];
 let failed=0;
 for(const path of imports){const ok=app.includes(`React.lazy(() => import('${path}')`); console.log(`${ok?'PASS':'FAIL'} lazy ${path}`); if(!ok) failed++;}
+// Personal buying/selling are sections of the ONE personal dashboard: DashboardHub (itself lazy) splits them out, not App.
+const hub=fs.readFileSync(new URL('../src/components/DashboardHub.tsx',import.meta.url),'utf8');
+for(const part of ['PersonalBuyingTools','PersonalSellingTools']){const ok=new RegExp(`${part}\\s*=\\s*React\\.lazy\\(`).test(hub); console.log(`${ok?'PASS':'FAIL'} DashboardHub lazy ${part}`); if(!ok) failed++;}
 const canonicalDiscovery = app.includes("{activeNav === 'discovery' && (") && app.includes('<AuctionsView user={user} onOpenAuth={handleOpenAuth} />');
 console.log(`${canonicalDiscovery?'PASS':'FAIL'} discovery uses canonical AuctionsView surface`); if(!canonicalDiscovery) failed++;
 const okSusp=app.includes('<Suspense fallback='); console.log(`${okSusp?'PASS':'FAIL'} Suspense boundary`); if(!okSusp) failed++;

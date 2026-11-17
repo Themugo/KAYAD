@@ -422,13 +422,13 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   if (e.key === 'Enter' && e.target === e.currentTarget) setIsLightboxOpen(true);
                 }}
                 data-testid="vehicle-gallery-main"
-                className="aspect-[4/3] sm:aspect-[16/10] lg:max-h-[460px] w-full rounded-2xl overflow-hidden bg-[#0A3340] border border-[#D7E7E4] relative group shadow-md cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-[#176B87] focus-visible:ring-offset-2"
+                className="aspect-[4/3] sm:aspect-[16/10] lg:max-h-[460px] w-full rounded-2xl overflow-hidden bg-[#EEF7F5] border border-[#D7E7E4] relative group shadow-md cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-[#176B87] focus-visible:ring-offset-2"
               >
                 <LazyImage
                   src={activeImage}
                   alt={`${vehicle.title}, photo ${allImages.indexOf(activeImage) + 1} of ${allImages.length}`}
                   wrapperClassName="w-full h-full"
-                  className="w-full h-full object-cover motion-safe:group-hover:scale-[1.02] motion-safe:transition-transform motion-safe:duration-700 ease-out"
+                  className="w-full h-full object-contain p-2 motion-safe:group-hover:scale-[1.01] motion-safe:transition-transform motion-safe:duration-300 ease-out"
                 />
 
                 {/* Overlays: Condition & Interactive Media Chips */}
@@ -514,7 +514,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                         activeImage === img ? 'border-[#176B87] ring-2 ring-[#176B87]/25 shadow-xs' : 'border-transparent opacity-70 hover:opacity-100'
                       }`}
                     >
-                      <LazyImage src={img} alt="" wrapperClassName="w-full h-full" className="w-full h-full object-cover" />
+                      <LazyImage src={img} alt="" wrapperClassName="w-full h-full" className="w-full h-full object-contain bg-[#EEF7F5] p-1" />
                     </button>
                   ))}
                 </div>
@@ -1045,7 +1045,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     onClick={() => onSelectVehicle ? onSelectVehicle(rel) : null}
                     className="p-3.5 bg-[#F6FAF9] hover:bg-[#F3FAF9]/80 transition-all cursor-pointer rounded-2xl border border-[#D7E7E4] text-xs flex gap-3.5 items-center group shadow-xs"
                   >
-                    <LazyImage src={rel.image} alt={rel.title} wrapperClassName="w-20 h-16 rounded-xl shrink-0 overflow-hidden" className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    <LazyImage src={rel.image} alt={rel.title} wrapperClassName="w-20 h-16 rounded-xl shrink-0 overflow-hidden" className="w-full h-full object-contain bg-[#EEF7F5] p-1 group-hover:scale-[1.01] transition-transform" />
                     <div className="min-w-0 flex-1 space-y-0.5">
                       <p className="font-extrabold text-[#176B87] truncate group-hover:text-[#0A3340]">{rel.title}</p>
                       <p className="text-xs font-black text-[#0A3340]">Ksh {rel.price.toLocaleString()}</p>
@@ -1150,7 +1150,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                   activeImage === img ? 'border-[#91CEC5] scale-95' : 'border-transparent opacity-60 hover:opacity-100'
                 }`}
               >
-                <LazyImage src={img} alt={`Thumb ${idx + 1}`} wrapperClassName="w-full h-full" className="w-full h-full object-cover" />
+                <LazyImage src={img} alt={`Thumb ${idx + 1}`} wrapperClassName="w-full h-full" className="w-full h-full object-contain bg-[#EEF7F5] p-1" />
               </button>
             ))}
           </div>

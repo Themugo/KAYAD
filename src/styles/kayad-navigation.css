@@ -1303,3 +1303,38 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
 @media (min-width: 1280px) and (max-width: 1439px) {
   .kayad-brand { flex: 0 1 auto; max-width: none; }
 }
+
+/* Reference-led buyer dock: Home / Search / Sell / Messages / Account.
+   Secondary destinations (auctions, services, saved and compare) remain in
+   the existing navigation drawer and retain their original route handlers. */
+.kayad-mobile-bottom-nav {
+  min-height: 78px;
+  border: 1px solid rgba(10,51,64,.10);
+  border-radius: 23px;
+  background: rgba(255,255,255,.97);
+  box-shadow: 0 12px 34px rgba(5,35,48,.18), 0 2px 8px rgba(5,35,48,.08);
+  backdrop-filter: blur(18px);
+}
+.kayad-mobile-bottom-nav__item {
+  color: #294B56;
+  font-size: 10px;
+  font-weight: 800;
+}
+.kayad-mobile-bottom-nav__icon { color: #123F4B; }
+.kayad-mobile-bottom-nav__item.is-active {
+  color: #075E59;
+  background: transparent;
+  box-shadow: none;
+}
+.kayad-mobile-bottom-nav__item.is-active .kayad-mobile-bottom-nav__icon {
+  width: 38px;
+  height: 34px;
+  border-radius: 12px;
+  color: #FFFFFF;
+  background: linear-gradient(145deg,#087F78,#07515C);
+  box-shadow: 0 5px 12px rgba(7,95,91,.20);
+}
+.kayad-mobile-bottom-nav__item--auction .kayad-mobile-bottom-nav__icon,
+.kayad-mobile-bottom-nav__item--services .kayad-mobile-bottom-nav__icon,
+.kayad-mobile-bottom-nav__item--saved .kayad-mobile-bottom-nav__icon { color: #123F4B; background: transparent; }
+.kayad-mobile-bottom-nav__item--saved.is-active .kayad-mobile-bottom-nav__icon { color: #FFFFFF; background: linear-gradient(145deg,#087F78,#07515C); box-shadow: 0 5px 12px rgba(7,95,91,.20); }

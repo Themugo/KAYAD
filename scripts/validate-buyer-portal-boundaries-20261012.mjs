@@ -6,7 +6,7 @@ const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 const checks = [];
 const check = (name, condition, detail) => checks.push({ name, pass: Boolean(condition), detail });
 
-const buyer = read('src/features/OwnershipPlatform/pages/BuyerPlatform.tsx');
+const buyer = read('src/features/OwnershipPlatform/pages/PersonalBuyingModule.tsx');
 const app = read('src/App.tsx');
 const notificationContext = read('src/context/NotificationContext.tsx');
 const dashboardHub = read('src/components/DashboardHub.tsx');
@@ -27,15 +27,15 @@ const notificationController = read('backend/controllers/notificationController.
 const chatRoutes = read('backend/routes/chatRoutes.js');
 const chatController = read('backend/controllers/chatController.js');
 
-check('Buyer portal derives a stable account key from authenticated user id', /const userId = user\?\.id \? String\(user\.id\) : null/.test(buyer), 'Buyer workspace uses the authenticated identity rather than object identity.');
-check('Buyer portal cancels stale account requests', /let cancelled = false/.test(buyer) && /return \(\) => \{ cancelled = true; \}/.test(buyer), 'Old account responses cannot commit after effect cleanup.');
-check('Buyer portal masks data until the active account has loaded it', /dataSessionKey === userId/.test(buyer) && /visibleFavorites = sessionMatches \? favorites : \[\]/.test(buyer) && /visibleOwnedVehicles = sessionMatches \? ownedVehicles : \[\]/.test(buyer), 'Data is masked synchronously during account changes, before effects run.');
-check('Buyer portal does not turn failed APIs into false empty lists', /Promise\.allSettled\(\[getFavorites\(\), getOwnershipDashboard\(\)\]\)/.test(buyer) && /fetchMyBids\(\)\.then/.test(buyer) && /unavailable data has not been treated as an empty list/.test(buyer), 'Independent API failures are surfaced with retry instead of silently becoming empty lists.');
-check('Real owned vehicle response is rendered in My Garage', /visibleOwnedVehicles\.map/.test(buyer) && /Vehicles in your garage/.test(buyer), 'The existing ownership dashboard call is no longer fetched and discarded.');
-check('Saved vehicle action opens the canonical saved-vehicle surface', /onClick=\{\(\) => onNavigate\?\.\('saved'\)\}/.test(buyer), 'Saved-vehicle cards route to saved inventory, not the generic marketplace.');
+check('Personal buying module derives a stable account key from authenticated user id', /const userId = user\?\.id \? String\(user\.id\) : null/.test(buyer), 'Buyer workspace uses the authenticated identity rather than object identity.');
+check('Personal buying module cancels stale account requests', /let cancelled = false/.test(buyer) && /return \(\) => \{ cancelled = true; \}/.test(buyer), 'Old account responses cannot commit after effect cleanup.');
+check('Personal buying module masks data until the active account has loaded it', /savedVehiclesSessionUserId === userId/.test(buyer) && /ownershipSessionKey === userId/.test(buyer) && /visibleFavorites = userId && savedVehiclesSessionUserId === userId \? savedVehicles : \[\]/.test(buyer) && /visibleOwnedVehicles = userId && ownershipSessionKey === userId \? ownedVehicles : \[\]/.test(buyer), 'Data is masked synchronously during account changes, before effects run.');
+check('Personal buying module does not turn failed APIs into false empty lists', /savedVehiclesErrorUserId === userId/.test(buyer) && /fetchMyBids\(\)\.then/.test(buyer) && /ownershipDashboardError/.test(buyer) && read('src/hooks/useVehicleCollections.ts').includes('Unable to load your saved vehicles right now.') && /refreshSavedVehicles/.test(read('src/hooks/useVehicleCollections.ts')), 'Independent API failures are surfaced with retry instead of silently becoming empty lists.');
+check('Real owned vehicle response is rendered in the Buying section', /visibleOwnedVehicles\.map/.test(buyer) && /Vehicles in your garage/.test(buyer), 'The existing ownership dashboard call is no longer fetched and discarded.');
+check('Saved vehicle action stays within the unified Buying section', /onClick=\{\(\) => onNavigate\?\.\('saved'\)\}/.test(buyer), 'Saved-vehicle cards route to saved inventory, not the generic marketplace.');
 check('Private child workspaces are keyed by user identity', /ParticipantEscrowDesk key=\{user\.id\}/.test(buyer) && /finance-\$\{user\.id\}/.test(buyer) && /key=\{`\$\{user\.id\}-\$\{initialInspectionTab\}`\}/.test(buyer), 'Escrow, finance and inspection workspaces remount on account changes.');
-check('Buyer portal is protected and signed-out prompt remains available', /'buyer-platform'/.test(app) && /navsWithOwnSignedOutPrompt = new Set\(\[[^\]]*'buyer-platform'/.test(app), 'The app retains the authenticated navigation boundary and local sign-in prompt.');
-check('Buyer dashboard routes escrow deals to the private buyer workspace and exposes messages', /label:'My escrow deals',nav:'buyer-platform'/.test(dashboardHub) && /label:'Messages',nav:'chat'/.test(dashboardHub), 'Buyer shortcuts do not send participants to the public escrow explainer.');
+check('Legacy buyer route redirects into the protected unified dashboard', app.includes("if (path === '/buyer-platform') return <RequireAuth><Navigate to=\"/?nav=dashboard&section=buying\""), 'Legacy buyer URLs no longer render a separate buyer portal.');
+check('Unified dashboard routes escrow deals to the private deals section and exposes messages', /label:'My escrow deals',nav:'dashboard:deals'/.test(dashboardHub) && /label:'Messages',nav:'chat'/.test(dashboardHub), 'Buyer shortcuts do not send participants to the public escrow explainer.');
 check('Chat state masks prior-account conversations synchronously', /threadsOwnerId === currentUserId/.test(chatHub) && /setThreadsOwnerId\(null\)/.test(chatHub) && /currentUserIdRef\.current !== currentUserId/.test(chatHub), 'Conversation lists are hidden until owned by the current account and stale reads are ignored.');
 check('Notification state masks prior-account rows synchronously', /dataSessionKey === sessionKey/.test(notificationContext) && /visibleNotifications = visibleSession \? notifications : \[\]/.test(notificationContext), 'Notification rows and counts are hidden unless their session key matches.');
 check('Favorites routes require authentication', /router\.use\(protect\)/.test(favoriteRoutes), 'All favorite endpoints inherit authentication middleware.');

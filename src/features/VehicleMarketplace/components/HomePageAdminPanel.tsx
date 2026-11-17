@@ -11,7 +11,6 @@ import {
 import { readLogEntries } from '../../Admin/hooks/adminAuditLog';
 import type { Vehicle } from '../../../types';
 import type { HeroPresentationConfig, HeroFloatingCard, HeroShowcaseVehicle } from '../types/heroPresentation';
-import { uploadFile } from '../../../services/uploadService.js';
 import { normalizeHeroExtras } from '../types/heroPresentation';
 
 interface HomePageAdminPanelProps {
@@ -79,7 +78,6 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
   const [heroCopy, setHeroCopy] = useState(heroCardContent);
   const [heroCopyVehicleId, setHeroCopyVehicleId] = useState<string>(heroFeaturedIds[0] || featuredVehicles[0]?.id || '');
   const [savingHeroPresentation, setSavingHeroPresentation] = useState(false);
-  const [showcaseUploadState, setShowcaseUploadState] = useState<Record<string, string>>({});
 
   const toggleHeroVehicle = (id: string) => {
     setHeroIds((prev) => prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]);
@@ -143,32 +141,6 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
 
   const updateShowcaseVehicle = (index: number, patch: Partial<HeroShowcaseVehicle>) => {
     setHeroLayout((prev) => ({ ...prev, showcaseVehicles: prev.showcaseVehicles.map((item, i) => i === index ? { ...item, ...patch } : item) }));
-  };
-  const uploadShowcaseCreative = async (index: number, field: 'image' | 'mobileImage', file?: File) => {
-    if (!file) return;
-    const key = `${index}:${field}`;
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-      setShowcaseUploadState((prev) => ({ ...prev, [key]: 'Use a JPG, PNG or WebP image.' }));
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      setShowcaseUploadState((prev) => ({ ...prev, [key]: 'Image must be 5 MB or smaller.' }));
-      return;
-    }
-    setShowcaseUploadState((prev) => ({ ...prev, [key]: 'Uploading…' }));
-    try {
-      const result = await uploadFile(file, 'marketing', {
-        compress: false,
-        maxSize: 5 * 1024 * 1024,
-        allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
-      });
-      const url = typeof result?.url === 'string' ? result.url : '';
-      if (!url || !isSafeHeroImageUrl(url)) throw new Error('The upload did not return a valid public image URL.');
-      updateShowcaseVehicle(index, { [field]: url });
-      setShowcaseUploadState((prev) => ({ ...prev, [key]: 'Uploaded. Save the hero composition to publish it.' }));
-    } catch (error) {
-      setShowcaseUploadState((prev) => ({ ...prev, [key]: error instanceof Error ? error.message : 'Upload failed. Try again.' }));
-    }
   };
   const addFloatingCard = () => {
     const next: HeroFloatingCard = { id: `floating-${Date.now()}`, enabled: true, eyebrow: 'KAYAD', title: 'Your message here', body: 'Add a short commercial message.', leftPct: 5, topPct: 12, widthPct: 18, backgroundColor: 'rgba(7,31,42,.78)', textColor: '#FFFFFF', borderColor: 'rgba(255,255,255,.18)', opacityPct: 100, blurPx: 12 };
@@ -373,20 +345,8 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
               {heroLayout.showcaseVehicles.slice(0, 2).map((item, index) => <div key={item.id || index} className="rounded-xl border border-[#D7E7E4] bg-white p-2.5 space-y-2">
                 <div className="flex items-center justify-between"><span className="text-[10px] font-black text-[#0A3340]">Showcase vehicle {index + 1}</span><label className="flex items-center gap-1.5 text-[9px] font-bold text-[#64748B]"><input type="checkbox" checked={item.enabled !== false} onChange={(e) => updateShowcaseVehicle(index, { enabled: e.target.checked })} className="accent-[#176B87]" />Visible</label></div>
                 <div className="grid grid-cols-2 gap-2"><input aria-label={`Showcase ${index + 1} make`} value={item.make} onChange={(e) => updateShowcaseVehicle(index, { make: e.target.value })} placeholder="Make" className="min-w-0 rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px]"/><input aria-label={`Showcase ${index + 1} model`} value={item.model} onChange={(e) => updateShowcaseVehicle(index, { model: e.target.value })} placeholder="Model" className="min-w-0 rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px]"/></div>
-                <div className="space-y-1.5">
-                  <label className="block text-[9px] font-bold text-[#64748B]">Desktop creative</label>
-                  <input aria-label={`Showcase ${index + 1} desktop image`} value={item.image} onChange={(e) => updateShowcaseVehicle(index, { image: e.target.value })} placeholder="Paste approved image URL or app path" className="w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px]"/>
-                  <input aria-label={`Upload showcase ${index + 1} desktop creative`} type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => { void uploadShowcaseCreative(index, 'image', e.target.files?.[0]); e.currentTarget.value = ''; }} className="block w-full text-[10px] text-[#64748B] file:mr-2 file:rounded-lg file:border-0 file:bg-[#DDF4F0] file:px-2 file:py-1.5 file:text-[10px] file:font-bold file:text-[#0A3340]" />
-                  {item.image && isSafeHeroImageUrl(item.image) && <div className="overflow-hidden rounded-lg border border-[#D7E7E4] bg-[#0A3340] p-1"><img src={item.image} alt={`Preview of showcase vehicle ${index + 1} desktop creative`} className="h-24 w-full object-contain" loading="lazy" /></div>}
-                  {showcaseUploadState[`${index}:image`] && <p role="status" className="text-[9px] text-[#176B87]">{showcaseUploadState[`${index}:image`]}</p>}
-                </div>
-                <div className="space-y-1.5">
-                  <label className="block text-[9px] font-bold text-[#64748B]">Mobile creative (optional)</label>
-                  <input aria-label={`Showcase ${index + 1} mobile image`} value={item.mobileImage || ''} onChange={(e) => updateShowcaseVehicle(index, { mobileImage: e.target.value })} placeholder="Paste mobile image URL or app path" className="w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px]"/>
-                  <input aria-label={`Upload showcase ${index + 1} mobile creative`} type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => { void uploadShowcaseCreative(index, 'mobileImage', e.target.files?.[0]); e.currentTarget.value = ''; }} className="block w-full text-[10px] text-[#64748B] file:mr-2 file:rounded-lg file:border-0 file:bg-[#DDF4F0] file:px-2 file:py-1.5 file:text-[10px] file:font-bold file:text-[#0A3340]" />
-                  {item.mobileImage && isSafeHeroImageUrl(item.mobileImage) && <div className="mx-auto w-20 overflow-hidden rounded-lg border border-[#D7E7E4] bg-[#0A3340] p-1"><img src={item.mobileImage} alt={`Preview of showcase vehicle ${index + 1} mobile creative`} className="h-24 w-full object-contain" loading="lazy" /></div>}
-                  {showcaseUploadState[`${index}:mobileImage`] && <p role="status" className="text-[9px] text-[#176B87]">{showcaseUploadState[`${index}:mobileImage`]}</p>}
-                </div>
+                <input aria-label={`Showcase ${index + 1} desktop image`} value={item.image} onChange={(e) => updateShowcaseVehicle(index, { image: e.target.value })} placeholder="Desktop transparent image path" className="w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px]"/>
+                <input aria-label={`Showcase ${index + 1} mobile image`} value={item.mobileImage || ''} onChange={(e) => updateShowcaseVehicle(index, { mobileImage: e.target.value })} placeholder="Mobile transparent image path" className="w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px]"/>
                 <input aria-label={`Showcase ${index + 1} descriptor`} value={item.tagline || ''} onChange={(e) => updateShowcaseVehicle(index, { tagline: e.target.value })} placeholder="Descriptor (no price or listing claims)" className="w-full rounded-md border border-[#D7E7E4] px-2 py-1.5 text-[10px]"/>
               </div>)}
             </div>

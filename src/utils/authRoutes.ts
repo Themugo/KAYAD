@@ -72,7 +72,7 @@ export function getPostAuthPath(user: User | undefined, fallback = '/'): string 
   if (user?.role === 'dealer') {
     return user?.status === 'approved' ? '/dealer' : '/dealer/onboarding';
   }
-  if (user?.role === 'broker') return '/?nav=seller-platform';
+  if (user?.role === 'broker') return '/?nav=dashboard&section=my-vehicles';
   // One personal account: "user" and the legacy "individual_seller" land on the same dashboard, behind the same email check.
   if (user?.role === 'user' || user?.role === 'individual_seller') {
     if (!user?.emailVerified) return '/login?verify=required';

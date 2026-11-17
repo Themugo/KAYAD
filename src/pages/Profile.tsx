@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Phone, MapPin, Shield, Bell, Lock, LogOut, Star, Clock, ChevronRight, Loader2 } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Shield, Bell, Lock, LogOut, Clock, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { formatKES } from '../utils/helpers';
-import { AuctionExperienceRail, BidderIdentityCard } from '../components/auction/AuctionExperienceRail';
 import ChangePasswordForm from '../components/account/ChangePasswordForm';
 import NotificationPreferences from '../components/account/NotificationPreferences';
 import { PhoneVerification } from '../components/PhoneVerification';
-import { AuctionPremiumHeader, AuctionPremiumStats } from '../components/auction/AuctionPremiumSurface';
 
 interface ProfileProps {
   setPage: (page: string) => void;
@@ -35,12 +32,6 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editValue, setEditValue] = useState('');
   const [stepUpPassword, setStepUpPassword] = useState('');
-
-  const stats = [
-    { label: 'Listings', value: user.listingsCount || '0' },
-    { label: 'Purchases', value: user.purchasesCount || '0' },
-    { label: 'Escrows', value: user.escrowsCount || '0' },
-  ];
 
   const menuItems = [
     { key: 'info', label: 'Personal Info', icon: User },
@@ -91,60 +82,23 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
   const memberYear = user.createdAt ? new Date(user.createdAt).getFullYear() : new Date().getFullYear();
 
   return (
-    <div className="min-h-screen bg-[#F6FAF9] pt-16 auction-profile-experience">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-6"><AuctionExperienceRail current="profile" /><AuctionPremiumHeader kicker="BIDDER IDENTITY" title="Your auction profile, ready for the next room." description="Keep your identity, preferences and auction activity in one calm place so every return feels immediate." /><AuctionPremiumStats items={[{ label: 'Listings', value: user.listingsCount || 0 }, { label: 'Purchases', value: user.purchasesCount || 0 }, { label: 'Saved auctions', value: user.savedCount || 0 }, { label: 'Member since', value: memberYear }]} /><BidderIdentityCard user={user} auctionCount={user.auctionsCount || 0} savedCount={user.savedCount || 0} onPayments={() => navigate('/?nav=payments')} /></div>
-      {/* Header */}
-      <div className="bg-[#0A3340] py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-6">
-            {/* Avatar */}
-            <div className="relative">
-              <div className="w-24 h-24 bg-[#13B8A6]/20 rounded-full flex items-center justify-center">
-                {user.avatar ? (
-                  <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
-                ) : (
-                  <span className="text-4xl font-bold text-[#13B8A6]">
-                    {user.name?.charAt(0) || 'U'}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Info */}
-            <div>
-              <h1 className="font-serif text-2xl text-white font-bold">{user.name}</h1>
-              <p className="text-white/50 text-sm flex items-center gap-2 mt-1">
-                <Clock size={12} />
-                Member since {memberYear}
-              </p>
-              {user.rating && (
-                <div className="flex items-center gap-1 mt-2">
-                  {[1, 2, 3, 4, 5].map(i => (
-                    <Star key={i} size={14} className={i <= (user.rating || 0) ? 'text-[#13B8A6] fill-current' : 'text-white/30'} />
-                  ))}
-                  <span className="text-white/50 text-xs ml-1">({user.reviewsCount || 0} reviews)</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-3 gap-4 mt-8">
-            {stats.map(({ label, value }) => (
-              <div key={label} className="bg-white/5 rounded-xl p-4 text-center">
-                <p className="font-serif text-2xl text-[#13B8A6] font-bold">{value}</p>
-                <p className="text-white/50 text-xs mt-1">{label}</p>
-              </div>
-            ))}
-          </div>
+    <div className="w-full min-w-0 space-y-4" data-kayad-personal-account-profile="true">
+      <section className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm sm:p-5">
+        <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-[#DDF4F0] text-xl font-black text-[#0D766F]">
+          {user.avatar ? <img src={user.avatar} alt={user.name || 'Profile'} className="h-full w-full object-cover" /> : (user.name?.charAt(0) || 'U')}
         </div>
-      </div>
-
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#0D766F]">Personal account</p>
+          <h2 className="truncate text-lg font-black text-[#0A3340]">{user.name || 'My account'}</h2>
+          <p className="mt-0.5 flex items-center gap-1 text-xs text-[#64748B]"><Clock size={12}/> Member since {memberYear}</p>
+        </div>
+        <span className="rounded-full bg-[#E8F7F3] px-3 py-1.5 text-[11px] font-bold text-[#0D766F]">Personal information & security</span>
+      </section>
       {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="w-full min-w-0">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-[210px_minmax(0,1fr)]">
           {/* Sidebar */}
-          <div className="md:col-span-1">
+          <div className="min-w-0">
             <div className="bg-white rounded-2xl border border-[#D7E7E4] p-4 sticky top-24">
               {menuItems.map(({ key, label, icon: Icon }) => (
                 <button
@@ -173,7 +127,7 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
           </div>
 
           {/* Main content */}
-          <div className="md:col-span-3">
+          <div className="min-w-0">
             {activeTab === 'info' && (
               <div className="bg-white rounded-2xl border border-[#D7E7E4] p-6">
                 <h2 className="font-serif text-xl text-[#0A3340] font-bold mb-6">Personal Information</h2>

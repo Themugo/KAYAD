@@ -310,7 +310,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             <p className="text-sm text-[#12576D]">Sign in to see your inspection requests, bookings and reports.</p>
             <div className="flex flex-wrap justify-center gap-2">
               <Button variant="primary" className="min-h-[44px]" onClick={onOpenAuth}>Sign in</Button>
-              {onOpenRegister && <Button variant="outline" className="min-h-[44px]" onClick={() => onOpenRegister('buyer', '/?nav=buyer-platform')}>Create an account</Button>}
+              {onOpenRegister && <Button variant="outline" className="min-h-[44px]" onClick={() => onOpenRegister('buyer', '/?nav=dashboard&section=buying')}>Create an account</Button>}
             </div>
           </div>
         ) : (

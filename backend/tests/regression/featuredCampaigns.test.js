@@ -17,11 +17,17 @@ jest.unstable_mockModule("../../middleware/auth.js", () => ({
   optionalAuth: (req, res, next) => next(),
 }));
 jest.unstable_mockModule("../../middleware/role.js", () => ({
-  authorize: (...roles) => (req, res, next) => (roles.includes(req.user?.role) ? next() : res.status(403).json({ success: false, message: "Forbidden" })),
-  PERMISSIONS: { MANAGE_ADS: "manage_ads" },
-  requirePermission: (permission) => (req, res, next) => {
-    const allowed = req.user?.role === "superadmin" || req.user?.role === "admin" || ["marketing", "ad_manager"].includes(req.user?.role);
-    return allowed ? next() : res.status(403).json({ success: false, message: `Missing permission: ${permission}` });
+  requirePermission: (...permissions) => (req, res, next) => {
+    const grants = {
+      marketing: ["manage_ads", "view_analytics"],
+      ad_manager: ["manage_ads", "view_analytics"],
+      admin: ["manage_ads"],
+      superadmin: ["manage_ads"],
+    };
+    const effective = new Set([...(grants[req.user?.role] || []), ...(req.user?.grantedPermissions || [])]);
+    return permissions.every((permission) => effective.has(permission))
+      ? next()
+      : res.status(403).json({ success: false, message: "Forbidden" });
   },
 }));
 
@@ -144,17 +150,19 @@ describe("HTTP", () => {
   afterAll(() => new Promise((r) => server.close(r)));
   const call = async (method, path, body) => { const r = await fetch(base + path, { method, headers: { "content-type": "application/json" }, body: body ? JSON.stringify(body) : undefined }); return { status: r.status, body: await r.json().catch(() => ({})) }; };
 
-  test("campaign API uses MANAGE_ADS and refuses anonymous visitors and roles without it", async () => {
+  test("admin API refuses anonymous visitors and non-admin roles", async () => {
     expect((await call("GET", "/api/admin/featured-campaigns")).status).toBe(401);
     auth.user = { id: "u", role: "buyer" };
     expect((await call("GET", "/api/admin/featured-campaigns")).status).toBe(403);
     expect((await call("POST", "/api/admin/featured-campaigns", { carId: CAR_A, startsAt: at("2030-01-01"), endsAt: at("2030-01-05") })).status).toBe(403);
   });
-  test("marketing and ad-manager roles with MANAGE_ADS can access campaign operations", async () => {
-    for (const role of ["marketing", "ad_manager"]) {
-      auth.user = { id: `u-${role}`, role };
-      expect((await call("GET", "/api/admin/featured-campaigns")).status).toBe(200);
-    }
+  test("MANAGE_ADS roles can administer campaigns while unrelated staff cannot", async () => {
+    auth.user = { id: "marketing-user", role: "marketing" };
+    expect((await call("GET", "/api/admin/featured-campaigns")).status).toBe(200);
+    auth.user = { id: "ads-user", role: "ad_manager" };
+    expect((await call("GET", "/api/admin/featured-campaigns")).status).toBe(200);
+    auth.user = { id: "support-user", role: "technical_support" };
+    expect((await call("GET", "/api/admin/featured-campaigns")).status).toBe(403);
   });
   test("an administrator can create, list, pause and (with confirmation) delete", async () => {
     auth.user = { id: "u1", role: "superadmin" };

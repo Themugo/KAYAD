@@ -45,7 +45,9 @@ for (const file of sourceFiles) {
   if (forbiddenImports.test(text)) fail(`source references retired module: ${path.relative(root, file)}`);
 }
 
-const seller = read('src/features/PrivateSellerPlatform/pages/PrivateSellerPlatform.tsx');
+const seller = read('src/features/PrivateSellerPlatform/pages/PersonalSellingModule.tsx');
+// Own-listings are loaded once by the unified DashboardHub (single data owner) and passed to the selling module.
+const sellerListingsOwner = read('src/components/DashboardHub.tsx');
 // Match the retired setter as a complete identifier. A substring check falsely
 // flagged the legitimate `setListingsError` state setter as the old `setListings` token.
 for (const token of ['SAMPLE_', 'KDG 492A', 'Jimmy Mugo', '7,300,000', 'buyerProgress', 'requiredAction']) {
@@ -53,7 +55,7 @@ for (const token of ['SAMPLE_', 'KDG 492A', 'Jimmy Mugo', '7,300,000', 'buyerPro
 }
 if (/\bsetListings\b/.test(seller)) fail('active private seller dashboard contains stale/fabricated token: setListings');
 if (!/createCar\b/.test(seller)) fail('private seller listing creation is not wired to canonical vehicle service');
-if (!/getMyListings\b/.test(seller)) fail('private seller inventory does not use canonical own-listings service');
+if (!/getMyListings\b/.test(sellerListingsOwner)) fail('private seller inventory does not use canonical own-listings service');
 if (!/publishedCarId/.test(seller) || !/publishError/.test(seller)) fail('private seller publication state is not fail-closed');
 if (/MOCK_|SAMPLE_/i.test(seller)) fail('active private seller platform contains fabricated data language');
 
@@ -66,7 +68,7 @@ if (!activeAuction.includes('fetchActiveAuctions') && !activeAuction.includes('f
 if (activeAuction.includes('SAMPLE_') || activeAuction.includes('MOCK_')) fail('active auction page contains local sample data');
 
 const buyerIndex = read('src/features/OwnershipPlatform/index.ts');
-if (!buyerIndex.includes("./pages/BuyerPlatform")) fail('active BuyerPlatform export was lost');
+if (!buyerIndex.includes("./pages/PersonalBuyingModule")) fail('active PersonalBuyingModule export was lost (buying is a section of the unified personal dashboard)');
 if (buyerIndex.includes('OwnerGarage')) fail('retired OwnerGarage remains exported');
 
 console.log('PHASE 21 DORMANT DEMO SURFACE VALIDATION: PASS');
