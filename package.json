@@ -206,7 +206,9 @@
     "validate:page-journey-navigation": "node scripts/validate-page-journey-navigation.mjs",
     "validate:admin-dealer-page-journey-navigation": "node scripts/validate-admin-dealer-page-journey-navigation.mjs",
     "validate:personal-account-unification": "node scripts/validate-unified-personal-dashboard-consolidation.mjs && node scripts/validate-stage5f5-private-seller-dashboard.mjs && node scripts/validate-stage5f6-buyer-convergence.mjs && node scripts/validate-private-seller-workspace-shell.mjs && node scripts/validate-navigation-convergence.mjs && node scripts/validate-private-seller-listing-workflow.mjs && node scripts/validate-public-escrow-boundary.mjs && node scripts/validate-public-financing-boundary-20261012.mjs && node scripts/validate-buyer-portal-boundaries-20261012.mjs && node scripts/validate-registration-role-matrix.mjs && node scripts/validate-personal-account-pages.mjs",
-    "validate:personal-seller-lifecycle": "node scripts/validate-personal-seller-lifecycle-enquiries-performance.mjs"
+    "validate:personal-seller-lifecycle": "node scripts/validate-personal-seller-lifecycle-enquiries-performance.mjs",
+    "validate:phase3-my-account": "node scripts/validate-phase3-my-account-convergence.mjs",
+    "validate:phase4-personal-activity": "node scripts/validate-phase4-personal-activity-lifecycle.mjs"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

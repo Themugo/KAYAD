@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { navLocationFor } from '../../utils/navLocation';
 
+describe('personal dashboard sections', () => {
+  // Every section DashboardHub can select calls onNavigate(`dashboard:${section}`); each must stay inside the unified dashboard.
+  const sections = ['overview', 'activity', 'my-vehicles', 'create-listing', 'buying', 'messages', 'seller-enquiries', 'auctions', 'deals', 'performance', 'account', 'trust', 'help'];
+  it.each(sections)('dashboard:%s resolves to the dashboard with its section preserved', (section) => {
+    const loc = navLocationFor(`dashboard:${section}`, 'https://kayad.space/');
+    expect(loc.nav).toBe('dashboard');
+    expect(loc.href).toContain(`section=${section}`);
+  });
+});
+
 describe('canonical navigation URL', () => {
   it('uses Marketplace as the clean root landing page', () => {
     expect(navLocationFor('marketplace', 'https://kayad.space/?nav=auctions&auctionTab=scheduled').href).toBe('/');
@@ -30,6 +40,12 @@ describe('canonical navigation URL', () => {
     expect(result.href).toBe('/?nav=dashboard&section=account');
   });
 
+
+  it('keeps the personal activity timeline inside the unified dashboard URL', () => {
+    const result = navLocationFor('dashboard:activity', 'https://kayad.space/?nav=dashboard&section=overview');
+    expect(result.nav).toBe('dashboard');
+    expect(result.href).toBe('/?nav=dashboard&section=activity');
+  });
 
   it('keeps every personal account section in the same dashboard URL', () => {
     expect(navLocationFor('dashboard:create-listing', 'https://kayad.space/?nav=marketplace').href).toBe('/?nav=dashboard&section=create-listing');

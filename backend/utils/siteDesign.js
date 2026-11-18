@@ -19,17 +19,17 @@ const HERO_BG = /^\/(hero|branding)\/[A-Za-z0-9._\-/]+$/;
 const isAllowedHeroBackground = (v) => v === "" || (typeof v === "string" && HERO_BG.test(v) && !v.includes("..")) || isAllowedLogoUrl(v);
 
 export const DEFAULT_DESIGN = Object.freeze({
-  brand: { logoType: "image", logoUrl: "/branding/kayad-road-mark.svg", logoText: "KAYAD", brandTagline: "Kenya's Trusted Vehicle Marketplace",
-    footerDescription: "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services.", footerCopyright: "KAYAD Motors Kenya Ltd. All rights reserved." },
+  brand: { logoType: "image", logoUrl: "/branding/kayard-k-mark.png", logoText: "KAYARD KE", brandTagline: "Premium Automotive Marketplace",
+    footerDescription: "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services.", footerCopyright: "KAYARD MOTOR HUB. All rights reserved." },
   colors: { primaryColor: "#176B87", primaryLight: "#13B8A6", primaryDark: "#0A3340", primaryGlow: "rgba(23, 107, 135, 0.22)", accentColor: "#13B8A6", backgroundColor: "#F6FAF9", surfaceColor: "#EEF7F5", cardColor: "#FFFFFF", textColor: "#0A3340", textMutedColor: "#64748B", textDimColor: "#94A3B8", borderColor: "#D7E7E4", successColor: "#10B981", dangerColor: "#EF4444", warningColor: "#176B87", infoColor: "#176B87" },
   typography: { fontDisplay: "Outfit", fontBody: "Plus Jakarta Sans" },
   hero: { backgroundUrl: "/hero/kayad-thika-expressway-no-signs.svg", overlayColor: "#EEF7F5", overlayOpacityPct: 18, showVehicleInfoCards: true, rotationSeconds: 6.5 },
-  announcement: { enabled: true, text: "KAYAD · Verified vehicles across Kenya · Live auctions · Transparent bidding · Clear transaction workflows", backgroundColor: "#0A3340", textColor: "#FFFFFF", heightPx: 36, scrollSeconds: 34, direction: "left", transition: "scroll" },
+  announcement: { enabled: true, text: "KAYARD · Verified vehicles across Kenya · Live auctions · Transparent bidding · Clear transaction workflows", backgroundColor: "#0A3340", textColor: "#FFFFFF", heightPx: 36, scrollSeconds: 34, direction: "left", transition: "scroll" },
 });
 
 // Starter designs are code, not rows: always available, never deletable, never edited in place.
 export const STARTERS = Object.freeze([
-  { id: "kayad-default", name: "KAYAD default", description: "The standard KAYAD slate-teal look.", config: DEFAULT_DESIGN },
+  { id: "kayad-default", name: "KAYARD default", description: "The standard KAYARD navy-and-teal look.", config: DEFAULT_DESIGN },
   { id: "deep-navy", name: "Deep navy", description: "Darker navy brand with a calmer announcement strip.", config: {
     ...DEFAULT_DESIGN,
     colors: { ...DEFAULT_DESIGN.colors, primaryColor: "#12576D", primaryDark: "#071E26", backgroundColor: "#F2F7F8", surfaceColor: "#E7F0F2", textColor: "#071E26" },

@@ -22,7 +22,7 @@ const checks = [
   // kind; still centered, contained and responsive.
   ['centered footer supports uploaded logo', footer.includes("width: 'min(250px, 68vw)'") && footer.includes('objectPosition: \'center\'' )],
   ['column footer supports uploaded logo', footer.includes("width: 'min(220px, 100%)'") && footer.includes("objectPosition: 'left center'")],
-  ['footer preserves text/icon fallback', footer.includes("branding.logoText || 'KAYAD'") && footer.includes('colors.footerAccent')],
+  ['footer preserves text/icon fallback', footer.includes("branding.logoText || 'KAYARD KE'") && footer.includes('colors.footerAccent')],
   ['admin preview uses object-contain instead of cropping', admin.includes("objectFit: 'contain'") && uploader.includes("objectFit: 'contain'")],
   ['admin upload accepts only supported secure image types', uploader.includes('image/png,image/jpeg,image/webp') && uploader.includes("['image/png', 'image/jpeg', 'image/webp']") && !/svg/i.test(uploader.match(/accept="[^"]*"/)?.[0] || '')],
   ['admin client rejects files over 5 MB', uploader.includes('MAX_BYTES = 5 * 1024 * 1024') && /file\.size\s*>\s*MAX_BYTES/.test(uploader)],

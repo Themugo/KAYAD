@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { adminAPI } from '../../api/api';
 
-export const DEFAULT_LOGO_URL = '/branding/kayad-road-mark.svg';
+export const DEFAULT_LOGO_URL = '/branding/kayard-k-mark.png';
 const MAX_BYTES = 5 * 1024 * 1024;
 const TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 

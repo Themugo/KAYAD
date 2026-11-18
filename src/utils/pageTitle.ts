@@ -4,8 +4,8 @@
  */
 import { isKnownPath } from './knownRoutes';
 
-const BRAND = 'KAYAD';
-export const DEFAULT_TITLE = "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault";
+const BRAND = 'KAYARD KE';
+export const DEFAULT_TITLE = "KAYARD KE | Kenya's Vehicle Marketplace";
 
 const NAV_TITLES: Record<string, string> = {
   marketplace: 'Vehicle marketplace',
@@ -21,13 +21,13 @@ const NAV_TITLES: Record<string, string> = {
   support: 'Support',
   chat: 'Messages',
   saved: 'Saved vehicles',
-  profile: 'My profile',
+  profile: 'My Account',
   payments: 'Payments',
   dashboard: 'Dashboard',
   'dealer-dashboard': 'Dealer workspace',
   sell: 'Sell your vehicle',
   seller: 'Sell your vehicle',
-  kayadlive: 'KAYAD Live',
+  kayadlive: 'KAYARD Live',
   admin: 'Admin',
 };
 

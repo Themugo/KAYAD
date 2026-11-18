@@ -10,10 +10,10 @@ const showroom = read('src/pages/Showroom.tsx') + read('src/pages/Showroom.jsx')
 const marketplace = read('src/features/VehicleMarketplace/components/VehicleMarketplace.tsx');
 const footer = app.slice(app.indexOf('Public-site footer'), app.indexOf('{/* 4. Modals */}'));
 
-for (const label of ['Browse vehicles', 'Dealers & showrooms', 'Auctions', 'Auto services', 'KAYAD Live', 'Support & disputes']) {
+for (const label of ['Browse vehicles', 'Dealers & showrooms', 'Auctions', 'Auto services', 'KAYARD Live', 'Support & disputes']) {
   assert.ok(footer.includes(label), `public footer missing ${label}`);
 }
-assert.match(footer, /aria-label="Explore KAYAD"/);
+assert.match(footer, /aria-label="Explore KAYARD KE"/);
 assert.match(live, /setSearchParams/);
 assert.match(live, /searchParams\.get\('article'\)/);
 assert.match(live, /content\/s\//);

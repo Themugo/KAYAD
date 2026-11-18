@@ -15,5 +15,5 @@ assert.ok(css.includes('.kayad-brand__word-ke') && css.includes('.kayad-brand__k
 assert.ok(hero.includes('Kenyan') === false && hero.includes('1920') && hero.includes('acacia') === false, 'custom vector landscape asset is present');
 assert.ok(!siteDesign.includes('kayad-nairobi-kicc.jpg') && marketplace.includes("'/hero/kayad-kenyan-highlands-road.svg'") /* legacy value still normalized */, 'homepage defaults no longer use Nairobi skyline; legacy stored default is normalized');
 assert.ok(marketplace.includes('/hero/kayad-thika-expressway-no-signs.svg') && siteDesign.includes('/hero/kayad-thika-expressway-no-signs.svg') && fs.existsSync(new URL('../public/hero/kayad-thika-expressway-no-signs.svg', import.meta.url)), 'homepage and site-design defaults point to the custom Kenyan road art asset');
-assert.ok(branding.includes("logoUrl: '/branding/kayad-mark.png'"), 'new front-facing mark remains the default logo');
+assert.ok(branding.includes("logoUrl: '/branding/kayard-k-mark.png'"), 'approved KAYARD K mark is the default logo');
 console.log('PASS: forward-facing automotive mark, flag-under-KE, original Kenyan highlands road art and default asset references.');

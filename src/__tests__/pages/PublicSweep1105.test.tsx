@@ -21,10 +21,10 @@ describe('known routes and 404', () => {
     expect(isKnownPath('/showroom')).toBe(false);
   });
   it('titles the 404 and the legal pages', () => {
-    expect(titleForRoute('/nope', '')).toBe('Page not found | KAYAD');
-    expect(titleForRoute('/terms', '')).toBe('Terms of Service | KAYAD');
-    expect(titleForRoute('/privacy', '')).toBe('Privacy Policy | KAYAD');
-    expect(titleForRoute('/', '')).toMatch(/^KAYAD \|/);
+    expect(titleForRoute('/nope', '')).toBe('Page not found | KAYARD KE');
+    expect(titleForRoute('/terms', '')).toBe('Terms of Service | KAYARD KE');
+    expect(titleForRoute('/privacy', '')).toBe('Privacy Policy | KAYARD KE');
+    expect(titleForRoute('/', '')).toMatch(/^KAYARD KE \|/);
   });
   it('the 404 page does not redirect on its own and offers real destinations', () => {
     vi.useFakeTimers();

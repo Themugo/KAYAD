@@ -832,17 +832,17 @@ function AppInner() {
           <div className="flex items-center gap-3">
             <FooterLogo />
             <div>
-              <p className="font-bold text-white">KAYAD KE</p>
+              <p className="font-bold text-white">KAYARD KE</p>
               <p className="text-[11px] text-[#94A3B8]">Vehicle marketplace · Kenya</p>
             </div>
           </div>
 
-          <nav aria-label="Explore KAYAD" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-[#BDE5DE]">
+          <nav aria-label="Explore KAYARD KE" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-[#BDE5DE]">
             <button type="button" onClick={() => setActiveNav('marketplace')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Browse vehicles</button>
             <button type="button" onClick={() => setActiveNav('dealers')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Dealers & showrooms</button>
             <button type="button" onClick={() => setActiveNav('auctions')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Auctions</button>
             <button type="button" onClick={() => setActiveNav('inspection-marketplace')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Auto services</button>
-            <button type="button" onClick={() => setActiveNav('kayadlive')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">KAYAD Live</button>
+            <button type="button" onClick={() => setActiveNav('kayadlive')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">KAYARD Live</button>
             <button type="button" onClick={() => setActiveNav('escrow')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Escrow Services</button>
             <button type="button" onClick={() => setActiveNav('escrow')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Escrow Services</button>
             <button type="button" onClick={() => setActiveNav('financing')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Financing</button>
@@ -850,7 +850,7 @@ function AppInner() {
           </nav>
         </div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 pt-5 border-t border-[#12576D]/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#94A3B8]">
-          <p className="m-0">&copy; {new Date().getFullYear()} KAYAD KE. All rights reserved.</p>
+          <p className="m-0">&copy; {new Date().getFullYear()} KAYARD KE. All rights reserved.</p>
           <nav aria-label="Legal" className="flex items-center gap-5">
             <Link to="/terms" className="hover:text-[#5AAFA4]">Terms of Service</Link>
             <Link to="/privacy" className="hover:text-[#5AAFA4]">Privacy Policy</Link>
@@ -909,7 +909,7 @@ function AppInner() {
 function FooterLogo() {
   const { branding } = useBranding();
   const custom = branding?.logoType === 'image' && branding?.logoUrl;
-  return <img src={custom ? branding.logoUrl : '/branding/kayad-road-mark-light.svg'} alt="" aria-hidden="true" width={44} height={32} className="h-8 w-auto max-w-[96px] object-contain shrink-0" decoding="async" />;
+  return <img src={custom ? branding.logoUrl : '/branding/kayard-k-mark.png'} alt="" aria-hidden="true" width={44} height={32} className="h-8 w-auto max-w-[96px] object-contain shrink-0" decoding="async" />;
 }
 
 function DealerJourneySurface({ children }: { children: React.ReactNode }) {

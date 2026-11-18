@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 
@@ -16,17 +16,32 @@ vi.mock('../../components/account/ChangePasswordForm', () => ({ default: () => <
 
 import Profile from '../../pages/Profile';
 const renderIt = () => render(<MemoryRouter><Profile setPage={() => {}} /></MemoryRouter>);
+const openTab = async (name: string) => {
+  const nav = screen.getByRole('navigation', { name: 'My Account sections' });
+  await userEvent.click(within(nav).getByRole('button', { name }));
+};
 
 beforeEach(() => { updateProfile.mockReset(); toast.mockReset(); });
 
 describe('Profile / Account Settings page', () => {
-  it('has no inert avatar button and states that email change is unavailable', () => {
+  it('opens on the unified account overview and offers the four account areas', () => {
+    renderIt();
+    expect(screen.getByRole('heading', { name: 'My Account Overview' })).toBeInTheDocument();
+    const nav = screen.getByRole('navigation', { name: 'My Account sections' });
+    expect(within(nav).getByRole('button', { name: 'Overview' })).toHaveAttribute('aria-current', 'page');
+    expect(within(nav).getByRole('button', { name: 'Personal Information' })).toBeInTheDocument();
+    expect(within(nav).getByRole('button', { name: 'Notifications' })).toBeInTheDocument();
+    expect(within(nav).getByRole('button', { name: 'Security' })).toBeInTheDocument();
+  });
+  it('has no inert avatar button and states that email change is unavailable', async () => {
     renderIt();
     expect(document.querySelector('svg.lucide-camera')).toBeNull();
+    await openTab('Personal Information');
     expect(screen.getByText(/Changing your sign-in email is not available yet/)).toBeInTheDocument();
   });
   it('rejects an empty name client-side without calling the server', async () => {
     renderIt();
+    await openTab('Personal Information');
     await userEvent.click(screen.getAllByText('Edit')[0]);
     const input = screen.getByDisplayValue('Alice');
     await userEvent.clear(input);
@@ -37,6 +52,7 @@ describe('Profile / Account Settings page', () => {
   it('saves a valid name once and reports success only after the server accepted it', async () => {
     updateProfile.mockResolvedValue({ success: true });
     renderIt();
+    await openTab('Personal Information');
     await userEvent.click(screen.getAllByText('Edit')[0]);
     const input = screen.getByDisplayValue('Alice');
     await userEvent.clear(input); await userEvent.type(input, 'Alice K');
@@ -48,6 +64,7 @@ describe('Profile / Account Settings page', () => {
   it('shows the server validation message and no success toast on 400', async () => {
     updateProfile.mockRejectedValue({ response: { status: 400, data: { message: 'Enter a valid Kenyan phone number (e.g. 0712345678).' } } });
     renderIt();
+    await openTab('Personal Information');
     await userEvent.click(screen.getAllByText('Edit')[1]);
     await userEvent.click(screen.getByText('Save'));
     await waitFor(() => expect(toast).toHaveBeenCalledWith('Enter a valid Kenyan phone number (e.g. 0712345678).', 'error'));
@@ -55,6 +72,7 @@ describe('Profile / Account Settings page', () => {
   });
   it('cancels an in-progress phone edit and clears temporary step-up credentials', async () => {
     renderIt();
+    await openTab('Personal Information');
     await userEvent.click(screen.getAllByText('Edit')[1]);
     const phoneInput = screen.getByDisplayValue('254712345678');
     await userEvent.clear(phoneInput);
@@ -68,13 +86,13 @@ describe('Profile / Account Settings page', () => {
   });
   it('security tab shows the real password form and labels 2FA unavailable', async () => {
     renderIt();
-    await userEvent.click(screen.getByText('Security'));
+    await openTab('Security');
     expect(screen.getByRole('form', { name: 'Change password' })).toBeInTheDocument();
     expect(screen.getByText('Not available yet')).toBeInTheDocument();
   });
   it('notifications tab renders the persisted-preferences component', async () => {
     renderIt();
-    await userEvent.click(screen.getByText('Notifications'));
+    await openTab('Notifications');
     expect(screen.getByText('notification-prefs')).toBeInTheDocument();
   });
 });

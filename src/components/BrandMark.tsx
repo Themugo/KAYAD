@@ -1,5 +1,4 @@
-import { CarFront } from 'lucide-react';
-import { useBrandingSafe, onBrandLogoError } from '../context/BrandingContext';
+import { useBrandingSafe, onBrandLogoError, DEFAULT_LOGO_URL } from '../context/BrandingContext';
 
 interface BrandMarkProps {
   /** Pixel height of the logo image / icon tile. */
@@ -20,7 +19,7 @@ interface BrandMarkProps {
  */
 export default function BrandMark({ size = 36, showName = true, showTagline = false, className, nameClassName, tileClassName }: BrandMarkProps) {
   const b = useBrandingSafe();
-  const name = b.logoText || 'KAYAD';
+  const name = b.logoText || 'KAYARD KE';
   const isImage = b.logoType === 'image' && !!b.logoUrl;
   return (
     <span className={className} data-testid="brand-mark" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
@@ -28,9 +27,8 @@ export default function BrandMark({ size = 36, showName = true, showTagline = fa
         <img src={b.logoUrl} onError={onBrandLogoError} alt={showName ? '' : name} aria-hidden={showName ? true : undefined} decoding="async"
           style={{ height: size, width: 'auto', maxWidth: size * 4, objectFit: 'contain', flexShrink: 0 }} />
       ) : b.logoType === 'text' ? null : (
-        <span className={tileClassName} aria-hidden="true" style={{ width: size, height: size, borderRadius: Math.round(size / 3), display: 'grid', placeItems: 'center', background: 'linear-gradient(145deg, var(--brand-dark, #0A3340), var(--brand, #176B87))', color: '#fff', flexShrink: 0 }}>
-          <CarFront size={Math.round(size * 0.52)} strokeWidth={2.4} />
-        </span>
+        <img src={DEFAULT_LOGO_URL} onError={onBrandLogoError} alt={showName ? '' : name} aria-hidden={showName ? true : undefined}
+          style={{ height: size, width: size, objectFit: 'contain', flexShrink: 0 }} />
       )}
       {(showName || b.logoType === 'text') && (
         <span style={{ display: 'grid', gap: 2, lineHeight: 1, minWidth: 0 }}>

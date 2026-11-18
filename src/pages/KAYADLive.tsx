@@ -22,7 +22,7 @@ export const KAYADLive: React.FC<KAYADLiveProps> = ({ onNavigate, onOpenVehicleD
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState({ news: false, guides: false, cars: false });
   const [retryKey, setRetryKey] = useState(0);
-  usePageMeta(article?.title || 'KAYAD Live', article?.excerpt || 'Read marketplace news and vehicle buying guides from KAYAD.');
+  usePageMeta(article?.title || 'KAYARD Live', article?.excerpt || 'Read marketplace news and vehicle buying guides from KAYARD KE.');
   const [searchParams, setSearchParams] = useSearchParams();
   const openedSlugRef = useRef<string | null>(null);
 
@@ -74,7 +74,7 @@ export const KAYADLive: React.FC<KAYADLiveProps> = ({ onNavigate, onOpenVehicleD
 
   if (article) return (
     <article className="mx-auto max-w-4xl space-y-5 px-4 py-8">
-      <button type="button" onClick={closeArticle} className="inline-flex items-center gap-2 text-sm font-semibold text-[#176B87]"><ArrowLeft size={16}/> Back to KAYAD Live</button>
+      <button type="button" onClick={closeArticle} className="inline-flex items-center gap-2 text-sm font-semibold text-[#176B87]"><ArrowLeft size={16}/> Back to KAYARD Live</button>
       <header className="space-y-2">
         <p className="text-xs font-bold uppercase tracking-wider text-[#13A89E]">{article.content_type || 'KAYAD'}</p>
         <h1 className="text-2xl sm:text-3xl font-bold text-[#0A3340]">{article.title}</h1>
@@ -88,7 +88,7 @@ export const KAYADLive: React.FC<KAYADLiveProps> = ({ onNavigate, onOpenVehicleD
 
   return (
     <div className="space-y-8 pb-12">
-      <div className="text-center py-6"><h1 className="text-2xl font-bold text-[#176B87]">KAYAD Live</h1><p className="mt-1 text-sm text-[#64748B]">What's new on the marketplace</p></div>
+      <div className="text-center py-6"><h1 className="text-2xl font-bold text-[#176B87]">KAYARD Live</h1><p className="mt-1 text-sm text-[#64748B]">What's new on the marketplace</p></div>
       {loading ? <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-[#94A3B8]"/></div> : <>
         <section>
           <div className="mb-4 flex items-center gap-2"><Sparkles className="h-4 w-4 text-[#176B87]"/><h2 className="text-base font-bold text-[#176B87]">New Arrivals</h2></div>

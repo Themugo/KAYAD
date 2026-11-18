@@ -14,7 +14,7 @@ interface Branding {
   footerDescription: string;
   footerCopyright: string;
 
-  // Primary color palette (KAYAD Slate Teal theme)
+  // Primary color palette (KAYARD navy and teal identity)
   primaryColor: string;      // Main brand color
   primaryLight: string;     // Lighter variant (#13B8A6)
   primaryDark: string;      // Darker variant (#0A3340)
@@ -71,18 +71,18 @@ interface BrandingContextValue {
   getCSSVariables: () => Record<string, string>;
 }
 
-// Default KAYAD Slate Teal scheme for the refined marketplace presentation
+// Default KAYARD navy and teal scheme for the refined marketplace presentation
 const DEFAULT_BRANDING: Branding = {
   logoType: 'image',
-  logoText: 'KAYAD',
-  logoUrl: '/branding/kayad-mark.png',
+  logoText: 'KAYARD KE',
+  logoUrl: '/branding/kayard-k-mark.png',
   brandTagline: "Premium Automotive Marketplace",
   countryBadgeShow: true,
   countryBadgeText: 'KE',
   footerDescription: "Browse vehicle listings, explore auctions, connect with sellers and discover vehicle services across Kenya.",
-  footerCopyright: 'KAYAD Motors Kenya Ltd. All rights reserved.',
+  footerCopyright: 'KAYARD MOTOR HUB. All rights reserved.',
 
-  // Primary KAYAD navy/blue palette
+  // Primary KAYARD navy/teal palette
   primaryColor: '#176B87',      // Slate teal primary
   primaryLight: '#13B8A6',      // Teal accent
   primaryDark: '#0A3340',       // Deep navy
@@ -216,8 +216,10 @@ function normalizeBrandingConfig(config: Partial<Branding> | null | undefined): 
     const value = merged[field];
     if (typeof value === 'string') merged[field] = normalizeLegacyBrandColor(value, field) as never;
   }
-  // Migrate only the built-in legacy mark; explicitly uploaded admin logos remain untouched.
-  if (merged.logoUrl === '/branding/kayad-road-mark.svg' || merged.logoUrl === '/branding/kayad-symbol.svg') merged.logoUrl = '/branding/kayad-mark.png';
+  // Migrate only built-in legacy KAYAD marks and defaults; explicitly uploaded admin logos remain untouched.
+  if (['/branding/kayad-road-mark.svg', '/branding/kayad-road-mark-light.svg', '/branding/kayad-symbol.svg', '/branding/kayad-mark.png'].includes(merged.logoUrl)) merged.logoUrl = '/branding/kayard-k-mark.png';
+  if (merged.logoText?.trim().toUpperCase() === 'KAYAD') merged.logoText = 'KAYARD KE';
+  if (merged.footerCopyright?.includes('KAYAD Motors Kenya Ltd.')) merged.footerCopyright = 'KAYARD MOTOR HUB. All rights reserved.';
   if (merged.brandTagline?.trim().toLowerCase() === "kenya's trusted vehicle marketplace") merged.brandTagline = 'Premium Automotive Marketplace';
   merged.countryBadgeShow = merged.countryBadgeShow !== false;
   merged.countryBadgeText = sanitizeCountryBadgeText(merged.countryBadgeText);
@@ -233,7 +235,7 @@ export const SUPPORTED_FONTS: Record<string, string> = {
   'Arial': "Arial, Helvetica, sans-serif",
 };
 
-export const DEFAULT_LOGO_URL = '/branding/kayad-road-mark.svg';
+export const DEFAULT_LOGO_URL = '/branding/kayard-k-mark.png';
 /** A stored logo can go missing (deleted asset, provider outage). Fall back ONCE to the bundled mark instead of showing a broken image. */
 export function onBrandLogoError(e: { currentTarget: HTMLImageElement }) {
   const img = e.currentTarget;

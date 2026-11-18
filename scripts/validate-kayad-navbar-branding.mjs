@@ -7,9 +7,9 @@ assert.ok(navbar.includes('src={branding.logoUrl}') && navbar.includes('onError=
 assert.ok(navbar.includes('kayad-brand__word-ke">') && navbar.includes('kayad-brand__word-ke">KE</span>') && navbar.includes('branding.logoText'), 'KAYAD-KE wordmark is a separate text element');
 assert.ok(navbar.includes('kayad-brand__tag kayad-brand__tag--reserved'), 'descriptor is independent text outside the logo asset');
 assert.ok(navbar.includes('className="kayad-brand__image"') && navbar.includes('CountryBadge'), 'logo image and country badge remain separate components');
-assert.ok(branding.includes("logoUrl: '/branding/kayad-mark.png'"), 'supplied KAYAD-KE icon mark is the default brand asset');
-assert.ok(branding.includes("merged.logoUrl === '/branding/kayad-road-mark.svg'"), 'legacy default mark migrates without overwriting custom uploads');
-assert.ok(fs.existsSync(new URL('../public/branding/kayad-mark.png', import.meta.url)) && fs.readFileSync(new URL('../public/branding/kayad-mark.png', import.meta.url)).subarray(1,4).toString()==='PNG', 'official square icon mark (PNG, no wordmark) is present');
+assert.ok(branding.includes("logoUrl: '/branding/kayard-k-mark.png'"), 'supplied KAYAD-KE icon mark is the default brand asset');
+assert.ok(branding.includes("'/branding/kayad-road-mark.svg'") && branding.includes("merged.logoUrl = '/branding/kayard-k-mark.png'"), 'legacy default mark migrates without overwriting custom uploads');
+assert.ok(fs.existsSync(new URL('../public/branding/kayard-k-mark.png', import.meta.url)) && fs.readFileSync(new URL('../public/branding/kayard-k-mark.png', import.meta.url)).subarray(1,4).toString()==='PNG', 'official square icon mark (PNG, no wordmark) is present');
 assert.ok(/\.kayad-brand__word-ke\s*\{[^}]*font-size:\s*\.5em/.test(css) && /\.kayad-brand__kenya-flag\s*\{[^}]*align-self:\s*flex-end/.test(css), 'KE is smaller than KAYAD and the flag sits at the end on the same line');
 for (const selector of ['.kayad-header__bar', '.kayad-brand__image', '.kayad-brand__word-ke', '.kayad-brand__tag--reserved', '.kayad-cta', '.kayad-hamburger']) assert.ok(css.includes(selector), `responsive header style exists: ${selector}`);
 assert.ok(css.includes('@media (max-width: 359px)') && css.includes('@media (max-width: 380px)') && css.includes('@media (min-width: 640px) and (max-width: 1023px)'), 'small phone and tablet breakpoints are defined');

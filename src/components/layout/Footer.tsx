@@ -113,7 +113,7 @@ export default function Footer({ setPage }: FooterProps) {
               {branding.logoType === 'image' && branding.logoUrl ? (
                 <img
                   src={branding.logoUrl} onError={onBrandLogoError}
-                  alt={branding.logoText || 'KAYAD'}
+                  alt={branding.logoText || 'KAYARD KE'}
                   loading="lazy"
                   decoding="async"
                   style={{ width: 'min(250px, 68vw)', height: 70, objectFit: 'contain', objectPosition: 'center', display: 'block' }}
@@ -138,7 +138,7 @@ export default function Footer({ setPage }: FooterProps) {
                   textTransform: 'uppercase' as const,
                 }}
               >
-                {branding.logoText || 'KAYAD'}
+                {branding.logoText || 'KAYARD KE'}
               </span>}
             </button>
             <p style={{ fontSize: 13, opacity: 0.5, maxWidth: 400, margin: '0 auto 24px', lineHeight: 1.6 }}>
@@ -209,7 +209,7 @@ export default function Footer({ setPage }: FooterProps) {
                   }}
                 >
                   {branding.logoType === 'image' && branding.logoUrl ? (
-                    <img src={branding.logoUrl} onError={onBrandLogoError} alt={branding.logoText || 'KAYAD'} loading="lazy" decoding="async" style={{ width: 'min(220px, 100%)', height: 64, objectFit: 'contain', objectPosition: 'left center', display: 'block', filter: 'drop-shadow(0 2px 5px rgba(3,19,27,.12))' }} />
+                    <img src={branding.logoUrl} onError={onBrandLogoError} alt={branding.logoText || 'KAYARD KE'} loading="lazy" decoding="async" style={{ width: 'min(220px, 100%)', height: 64, objectFit: 'contain', objectPosition: 'left center', display: 'block', filter: 'drop-shadow(0 2px 5px rgba(3,19,27,.12))' }} />
                   ) : (
                     <div aria-hidden="true" style={{ width: 32, height: 32, backgroundColor: colors.footerAccent, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={colors.footerBg} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -227,7 +227,7 @@ export default function Footer({ setPage }: FooterProps) {
                       textTransform: 'uppercase' as const,
                     }}
                   >
-                    {branding.logoText || 'KAYAD'}
+                    {branding.logoText || 'KAYARD KE'}
                   </span>}
                 </button>
                 <p style={{ fontSize: 13, opacity: 0.4, lineHeight: 1.6 }}>
@@ -297,7 +297,7 @@ export default function Footer({ setPage }: FooterProps) {
           }}
         >
           <p style={{ fontSize: 12, opacity: 0.3, margin: 0 }}>
-            &copy; {new Date().getFullYear()} {branding.footerCopyright || 'KAYAD Motors Kenya Ltd. All rights reserved.'}
+            &copy; {new Date().getFullYear()} {branding.footerCopyright || 'KAYARD MOTOR HUB. All rights reserved.'}
           </p>
           <div style={{ display: 'flex', gap: 20 }}>
             {['Privacy Policy', 'Terms of Service', 'Support'].map(item => (

@@ -106,7 +106,7 @@ const BrandingPreview = ({ branding }) => (
             {branding.logoText?.charAt(0) || 'K'}
           </div>
         )}
-        <span style={{ color: '#FDFAF5', fontWeight: 600, fontSize: 15 }}>{branding.logoText || 'KAYAD'}</span>
+        <span style={{ color: '#FDFAF5', fontWeight: 600, fontSize: 15 }}>{branding.logoText || 'KAYARD KE'}</span>
       </div>
       <div style={{ display: 'flex', gap: 8 }}>
         {['Home', 'Auctions', 'About'].map(item => (
@@ -283,7 +283,7 @@ export default function AdminSettingsBranding({ branding, setBranding, config, s
             <label className="input-label">Footer Copyright Text</label>
             <input aria-label="Footer Copyright Text" className="input" type="text" value={branding.footerCopyright || ''}
               onChange={e => setBranding(p => ({...p, footerCopyright: e.target.value}))}
-              placeholder="KAYAD Motors Kenya Ltd. All rights reserved." style={{ height: 44 }} />
+              placeholder="KAYARD MOTOR HUB. All rights reserved." style={{ height: 44 }} />
           </div>
           {/* A save control right where the logo and identity text are edited, so nobody has to scroll to the bottom bar. */}
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>

@@ -8,6 +8,7 @@ vi.mock('../../services/bidApi', () => ({ fetchMyBids: mocks.fetchMyBids }));
 vi.mock('../../features/escrow/ParticipantEscrowDesk', () => ({ ParticipantEscrowDesk: () => <div data-testid="existing-escrow-desk">Existing escrow desk</div> }));
 vi.mock('../../features/InspectionsView', () => ({ default: () => <div data-testid="existing-inspection-workspace">Existing inspection workspace</div> }));
 vi.mock('../../features/FinancePlatform/pages/FinanceMarketplace', () => ({ default: () => <div data-testid="existing-finance-workspace">Existing finance workspace</div> }));
+vi.mock('../../pages/buyer/components/BuyerNegotiationsPanel', () => ({ default: () => <div data-testid="buyer-negotiations-panel">My offers & negotiations</div> }));
 
 const user = { id: 'personal-1', name: 'Test Member', email: 'member@example.test', role: 'user', isVerified: true, createdAt: '2026-01-01' } as never;
 const baseProps = {
@@ -36,6 +37,7 @@ describe('Personal buying module convergence', () => {
     expect(screen.queryByText('Welcome, Test Member')).toBeNull();
     expect(await screen.findByText('Auction vehicle')).toBeTruthy();
     expect(screen.getByText('Saved vehicle')).toBeTruthy();
+    expect(screen.getByTestId('buyer-negotiations-panel')).toBeTruthy();
     expect(screen.getByTestId('existing-escrow-desk')).toBeTruthy();
     expect(screen.getByTestId('existing-inspection-workspace')).toBeTruthy();
     expect(screen.getByTestId('existing-finance-workspace')).toBeTruthy();
@@ -51,6 +53,7 @@ describe('Personal buying module convergence', () => {
   it('renders buying functions as a section without auction or deals dashboard content', async () => {
     render(<PersonalBuyingModule {...baseProps} section="buying" />);
     expect(await screen.findByText('Saved Vehicles')).toBeTruthy();
+    expect(screen.getByTestId('buyer-negotiations-panel')).toBeTruthy();
     expect(screen.queryByText('My auction activity')).toBeNull();
     expect(screen.queryByTestId('existing-escrow-desk')).toBeNull();
   });

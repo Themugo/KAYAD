@@ -26,7 +26,7 @@ const mount = (role = 'user', onNavigate = () => {}) => render(<DashboardHub use
 const sellerWorkspace = () => screen.queryByLabelText('My vehicles and selling tools');
 const expectBuyerNav = () => {
   const nav = screen.getByRole('navigation', { name: /personal dashboard sections/i });
-  for (const label of [/buying/i, /messages/i, /auctions/i, /deals/i]) expect(within(nav).getAllByRole('button', { name: label }).length).toBeGreaterThan(0);
+  for (const label of [/activity/i, /buying/i, /messages/i, /auctions/i, /deals/i]) expect(within(nav).getAllByRole('button', { name: label }).length).toBeGreaterThan(0);
 };
 
 beforeEach(() => { getMySellerCapability.mockReset(); applyForPrivateSelling.mockReset(); });

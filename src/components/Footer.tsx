@@ -16,11 +16,11 @@ export default function Footer({ setPage }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
           {/* Brand */}
           <div className="md:col-span-1">
-            <button onClick={() => nav('home')} className="flex items-center gap-2 mb-3 min-w-0" aria-label={`${branding.logoText || 'KAYAD'} home`}>
+            <button onClick={() => nav('home')} className="flex items-center gap-2 mb-3 min-w-0" aria-label={`${branding.logoText || 'KAYARD KE'} home`}>
               {branding.logoType === 'image' && branding.logoUrl ? (
-                <img src={branding.logoUrl} onError={onBrandLogoError} alt={branding.logoText || 'KAYAD'} className="h-12 w-auto max-w-[190px] object-contain object-left" loading="lazy" />
+                <img src={branding.logoUrl} onError={onBrandLogoError} alt={branding.logoText || 'KAYARD KE'} className="h-12 w-auto max-w-[190px] object-contain object-left" loading="lazy" />
               ) : (
-                <span className="text-[var(--footer-accent,#13B8A6)] font-sans font-bold tracking-[0.15em] uppercase">{branding.logoText || 'KAYAD'}</span>
+                <span className="text-[var(--footer-accent,#13B8A6)] font-sans font-bold tracking-[0.15em] uppercase">{branding.logoText || 'KAYARD KE'}</span>
               )}
             </button>
             <p className="font-sans text-sm text-[var(--footer-text,rgba(255,255,255,0.4))] leading-relaxed">
@@ -89,7 +89,7 @@ export default function Footer({ setPage }: FooterProps) {
         {/* Bottom bar */}
         <div className="border-t border-[#12576D]/30 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="font-sans text-xs text-white/30">
-            &copy; {new Date().getFullYear()} {branding.footerCopyright || 'KAYAD Motors Kenya Ltd. All rights reserved.'}
+            &copy; {new Date().getFullYear()} {branding.footerCopyright || 'KAYARD MOTOR HUB. All rights reserved.'}
           </p>
           <div className="flex gap-5">
             {['Privacy Policy', 'Terms of Service', 'Support'].map(item => (

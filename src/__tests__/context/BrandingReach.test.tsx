@@ -31,9 +31,16 @@ describe('saved branding reaches the login / register shell', () => {
     await waitFor(() => expect(container.querySelector('img')?.getAttribute('src')).toBe('/api/admin/public/logo/fedcba9876543210.webp'));
   });
 
+  it('migrates the previous built-in KAYAD logo and name to the approved KAYARD identity', async () => {
+    getPublicConfig.mockResolvedValue(cfg({ logoType: 'image', logoUrl: '/branding/kayad-mark.png', logoText: 'KAYAD' }));
+    const { container } = render(<BrandingProvider><BrandMark /></BrandingProvider>);
+    await waitFor(() => expect(container.querySelector('img')?.getAttribute('src')).toBe('/branding/kayard-k-mark.png'));
+    expect(screen.getByText('KAYARD KE')).toBeInTheDocument();
+  });
+
   it('renders built-in branding without a provider (isolated renders do not crash)', () => {
     render(<BrandMark />);
-    expect(screen.getByText('KAYAD')).toBeInTheDocument();
+    expect(screen.getByText('KAYARD KE')).toBeInTheDocument();
   });
 });
 

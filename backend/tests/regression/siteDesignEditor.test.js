@@ -213,7 +213,7 @@ describe("multiple saved designs", () => {
     const d = await mk();
     const r = await call("PUT", `/${d.id}`, "admin-1", { expectedRevision: d.revision, name: "Renamed", description: "x", config: tweak(d, (c) => { c.colors.primaryColor = "#AA0000"; c.brand.logoText = "DRAFT"; }) });
     expect(r.status).toBe(200); expect(r.body.design).toMatchObject({ name: "Renamed", revision: d.revision + 1 });
-    expect((await live()).colors.primaryColor).toBe("#176B87"); expect((await live()).brand.logoText).toBe("KAYAD");
+    expect((await live()).colors.primaryColor).toBe("#176B87"); expect((await live()).brand.logoText).toBe("KAYARD KE");
   });
   test("a draft survives reload (server copy) and stale saves are refused", async () => {
     const d = await mk(); const cfg = tweak(d, (c) => { c.announcement.text = "Draft text"; });

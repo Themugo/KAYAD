@@ -10,7 +10,7 @@ const profileButton = navbar.match(/<button[\s\S]{0,1200}id="user-profile-menu-b
 assert.ok(profileButton.includes("handleNavSelect('profile')"), 'profile identity control routes to account profile');
 assert.ok(!profileButton.includes('setShowUserDropdown(!showUserDropdown)'), 'profile control does not open a second dropdown');
 assert.ok(navbar.includes('id="kayad-mobile-drawer"'), 'canonical drawer exists');
-assert.ok(navbar.includes('Explore KAYAD'), 'canonical drawer contains grouped primary navigation');
+assert.ok(navbar.includes('Explore KAYARD'), 'canonical drawer contains grouped primary navigation');
 assert.ok(navbar.includes('Dealer workspace') && navbar.includes('Staff workspace'), 'drawer provides role-aware workspace links');
 assert.ok(navbar.includes("import { isSellerRole } from '../utils/authRoutes'"), 'seller role uses the canonical role helper');
 assert.ok(navbar.includes("isSellerRole(user.role) && <button type=\"button\" onClick={() => handleNavSelect('dashboard:my-vehicles')}"), 'My Vehicles (personal selling) is visible only to personal seller roles');

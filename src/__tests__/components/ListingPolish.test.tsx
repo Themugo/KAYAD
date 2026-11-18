@@ -80,10 +80,14 @@ describe('vehicle details page presentation', () => {
 
 describe('logo assets', () => {
   const files = ['public/branding/kayad-road-mark.svg', 'public/favicon.svg', 'public/icons/icon-192.svg', 'public/icons/icon-512.svg', 'public/icons/badge-72.svg'];
-  it.each(files)('%s is a symbol with no lettering and no gradients or filters', (f) => {
+  // Phase 2 (KAYARD KE) K road mark: the app icons use a brand-palette background gradient, which is
+  // allowed; lettering and filter effects (unreadable at favicon size) remain forbidden everywhere.
+  // The flat public/branding/kayad-road-mark.svg symbol stays gradient-free.
+  it.each(files)('%s is a symbol with no lettering or filters', (f) => {
     const svg = readFileSync(f, 'utf8');
     expect(svg).not.toMatch(/<text|<tspan|font-family/i);
-    expect(svg).not.toMatch(/linearGradient|radialGradient|<filter/i);
+    expect(svg).not.toMatch(/<filter/i);
+    if (f.endsWith('kayad-road-mark.svg')) expect(svg).not.toMatch(/linearGradient|radialGradient/i);
     expect(svg).toMatch(/#0A3340/);
     expect(svg).toMatch(/#13B8A6/);
   });

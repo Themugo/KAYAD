@@ -8,7 +8,7 @@ import AdminSettingsOnboarding from './AdminSettingsOnboarding';
 import AdminSettingsListing from './AdminSettingsListing';
 
 const DEFAULTS = {
-  platformName: 'KAYAD',
+  platformName: 'KAYARD KE',
   supportEmail: 'support@kayad.space',
   supportPhone: '254700100200',
   dealerCommission: 5,
@@ -19,21 +19,21 @@ const DEFAULTS = {
   requireDealerApproval: true,
 };
 
-// Default branding with KAYAD navy/blue theme
+// Default branding with the approved KAYARD navy-and-teal identity
 const DEFAULT_BRANDING = {
   logoType: 'image',
-  logoText: 'KAYAD',
-  logoUrl: '/branding/kayad-road-mark.svg',
-  brandTagline: "Kenya's Trusted Vehicle Marketplace",
+  logoText: 'KAYARD KE',
+  logoUrl: '/branding/kayard-k-mark.png',
+  brandTagline: 'Premium Automotive Marketplace',
   countryBadgeShow: true,
   countryBadgeText: 'KE',
   navbarBg: '', navbarText: '', navbarNavBg: '', footerBg: '', footerText: '', footerAccent: '',
   primaryColor: '#176B87',
   primaryLight: '#13B8A6',
   primaryDark: '#0A3340',
-  primaryGlow: 'rgba(22, 132, 255, 0.25)',
-  accentColor: '#176B87',
-  backgroundColor: '#F7F9FC',
+  primaryGlow: 'rgba(23, 107, 135, 0.22)',
+  accentColor: '#13B8A6',
+  backgroundColor: '#F6FAF9',
   surfaceColor: '#EEF7F5',
   cardColor: '#FFFFFF',
   textColor: '#0A3340',
@@ -42,7 +42,7 @@ const DEFAULT_BRANDING = {
   borderColor: '#D7E7E4',
   successColor: '#10B981',
   dangerColor: '#EF4444',
-  warningColor: '#176b87',
+  warningColor: '#176B87',
   infoColor: '#176B87',
 };
 

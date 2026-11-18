@@ -50,12 +50,12 @@ export default function NotificationPreferences() {
     <div className="space-y-4">
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
       {ROWS.map(({ key, label, desc }) => (
-        <div key={key} className="flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl">
-          <div>
+        <div key={key} className="flex items-start sm:items-center justify-between gap-3 p-4 bg-[#F6FAF9] rounded-xl">
+          <div className="min-w-0 flex-1">
             <p className="font-sans text-sm font-semibold text-[#0A3340]">{label}</p>
             <p className="font-sans text-xs text-warm-400 mt-0.5">{desc}</p>
           </div>
-          <input type="checkbox" role="switch" aria-label={label} checked={Boolean(prefs[key])} disabled={busy !== null} onChange={() => toggle(key)} className="h-5 w-5 accent-[#13B8A6]" />
+          <input type="checkbox" role="switch" aria-label={label} checked={Boolean(prefs[key])} disabled={busy !== null} onChange={() => toggle(key)} className="mt-0.5 h-5 w-5 shrink-0 accent-[#13B8A6]" />
         </div>
       ))}
       <p className="text-xs text-warm-400">Security codes and essential system messages are always sent. A channel only delivers if it is switched on here and enabled by the platform.</p>

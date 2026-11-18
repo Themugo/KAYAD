@@ -8,6 +8,7 @@ import type { OwnershipDashboard, OwnershipVehicle } from '../../../services/own
 import type { BackendEscrow, EscrowParticipantSummary } from '../../../services/escrowApi';
 import { fetchMyBids } from '../../../services/bidApi';
 import type { UserProfile } from '../../../types';
+import BuyerNegotiationsPanel from '../../../pages/buyer/components/BuyerNegotiationsPanel';
 
 /**
  * Rebuilt entirely - the original ("My Garage", 2591 lines) defined
@@ -167,6 +168,8 @@ export default function PersonalBuyingModule({ user, onNavigate, onOpenAuth, ini
           </section>}
 
           {/* WATCHLIST - real, from the canonical favorites system */}
+          {(!section || section === 'buying') && <BuyerNegotiationsPanel />}
+
           {(!section || section === 'buying') && <section id="personal-saved-vehicles" className="scroll-mt-6 rounded-2xl border border-[#D7E7E4] bg-white p-4 sm:p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2">

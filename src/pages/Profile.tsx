@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Phone, MapPin, Shield, Bell, Lock, LogOut, Clock, Loader2 } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Shield, Bell, Lock, LogOut, Clock, Loader2, LayoutDashboard, ArrowUpRight, CheckCircle2, CircleAlert } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import ChangePasswordForm from '../components/account/ChangePasswordForm';
@@ -16,7 +16,7 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
   const { user: authUser2, logout, updateProfile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('info');
+  const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
 
   // Use auth context user or prop
@@ -34,7 +34,8 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
   const [stepUpPassword, setStepUpPassword] = useState('');
 
   const menuItems = [
-    { key: 'info', label: 'Personal Info', icon: User },
+    { key: 'overview', label: 'Overview', icon: LayoutDashboard },
+    { key: 'info', label: 'Personal Information', icon: User },
     { key: 'notifications', label: 'Notifications', icon: Bell },
     { key: 'security', label: 'Security', icon: Lock },
   ];
@@ -92,28 +93,32 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
           <h2 className="truncate text-lg font-black text-[#0A3340]">{user.name || 'My account'}</h2>
           <p className="mt-0.5 flex items-center gap-1 text-xs text-[#64748B]"><Clock size={12}/> Member since {memberYear}</p>
         </div>
-        <span className="rounded-full bg-[#E8F7F3] px-3 py-1.5 text-[11px] font-bold text-[#0D766F]">Personal information & security</span>
+        <span className="rounded-full bg-[#E8F7F3] px-3 py-1.5 text-[11px] font-bold text-[#0D766F]">One personal identity</span>
       </section>
       {/* Content */}
       <div className="w-full min-w-0">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-[210px_minmax(0,1fr)]">
           {/* Sidebar */}
           <div className="min-w-0">
-            <div className="bg-white rounded-2xl border border-[#D7E7E4] p-4 sticky top-24">
-              {menuItems.map(({ key, label, icon: Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => setActiveTab(key)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-colors ${
-                    activeTab === key
-                      ? 'bg-[#13B8A6] text-[#0A3340]'
-                      : 'text-[#0A3340] hover:bg-[#F6FAF9]'
-                  }`}
-                >
-                  <Icon size={18} />
-                  <span className="font-sans text-sm font-semibold">{label}</span>
-                </button>
-              ))}
+            <div className="bg-white rounded-2xl border border-[#D7E7E4] p-2 sm:p-3 md:sticky md:top-24">
+              <nav aria-label="My Account sections" className="grid grid-cols-2 gap-1">
+                {menuItems.map(({ key, label, icon: Icon }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setActiveTab(key)}
+                    aria-current={activeTab === key ? 'page' : undefined}
+                    className={`min-h-11 w-full flex items-center gap-2 px-3 py-3 rounded-xl text-left transition-colors ${
+                      activeTab === key
+                        ? 'bg-[#DDF4F0] text-[#0A3340] ring-1 ring-inset ring-[#9AD8CD]'
+                        : 'text-[#0A3340] hover:bg-[#F6FAF9]'
+                    }`}
+                  >
+                    <Icon size={17} />
+                    <span className="font-sans text-xs sm:text-sm font-semibold">{label}</span>
+                  </button>
+                ))}
+              </nav>
               <div className="mt-4 pt-4 border-t border-[#D7E7E4]">
                 <button
                   onClick={handleLogout}
@@ -128,21 +133,69 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
 
           {/* Main content */}
           <div className="min-w-0">
+            {activeTab === 'overview' && (
+              <section className="space-y-4" aria-labelledby="my-account-overview-title" data-kayad-my-account-overview="true">
+                <div className="rounded-2xl border border-[#D7E7E4] bg-white p-5 sm:p-6">
+                  <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#0D766F]">Your account at a glance</p>
+                  <h2 id="my-account-overview-title" className="mt-1 text-xl font-black text-[#0A3340]">My Account Overview</h2>
+                  <p className="mt-1 text-sm leading-6 text-[#64748B]">Manage the personal details and settings used for buying and privately selling on KAYARD KE.</p>
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-4">
+                      <div className="flex items-center gap-2 text-[#12576D]"><User size={17}/><span className="text-xs font-bold uppercase tracking-wide">Personal identity</span></div>
+                      <p className="mt-2 truncate text-base font-black text-[#0A3340]">{user.name || 'Name not set'}</p>
+                      <p className="mt-1 truncate text-xs text-[#64748B]">{user.email || 'Email not available'}</p>
+                    </div>
+                    <div className="rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-4">
+                      <div className="flex items-center gap-2 text-[#12576D]"><Shield size={17}/><span className="text-xs font-bold uppercase tracking-wide">Account status</span></div>
+                      <p className="mt-2 flex items-center gap-2 text-sm font-bold text-[#0A3340]">
+                        {user.emailVerified ? <CheckCircle2 size={17} className="text-[#0D9488}"/> : <CircleAlert size={17} className="text-[#B7791F}"/>}
+                        {user.emailVerified ? 'Email verified' : 'Email verification pending'}
+                      </p>
+                      <p className="mt-1 text-xs text-[#64748B]">Member since {memberYear}</p>
+                    </div>
+                    <div className="rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-4">
+                      <div className="flex items-center gap-2 text-[#12576D]"><Phone size={17}/><span className="text-xs font-bold uppercase tracking-wide">Contact details</span></div>
+                      <p className="mt-2 text-sm font-bold text-[#0A3340]">{user.phone || 'Phone number not added'}</p>
+                      <p className="mt-1 text-xs text-[#64748B]">{user.location || 'Location not added'}</p>
+                    </div>
+                    <div className="rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-4">
+                      <div className="flex items-center gap-2 text-[#12576D]"><Lock size={17}/><span className="text-xs font-bold uppercase tracking-wide">Account security</span></div>
+                      <p className="mt-2 text-sm font-bold text-[#0A3340]">Password & sign-in</p>
+                      <p className="mt-1 text-xs text-[#64748B]">Review the security controls currently available to your account.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <button type="button" onClick={() => setActiveTab('info')} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-[#D7E7E4] bg-white p-4 text-left hover:border-[#8ECFC4]">
+                    <span><span className="block text-sm font-bold text-[#0A3340]">Personal Information</span><span className="mt-1 block text-xs text-[#64748B]">Update your name, phone and location</span></span><ArrowUpRight size={18} className="shrink-0 text-[#0D766F]"/>
+                  </button>
+                  <button type="button" onClick={() => setActiveTab('notifications')} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-[#D7E7E4] bg-white p-4 text-left hover:border-[#8ECFC4]">
+                    <span><span className="block text-sm font-bold text-[#0A3340]">Notification Preferences</span><span className="mt-1 block text-xs text-[#64748B]">Choose your communication channels</span></span><ArrowUpRight size={18} className="shrink-0 text-[#0D766F]"/>
+                  </button>
+                  <button type="button" onClick={() => setActiveTab('security')} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-[#D7E7E4] bg-white p-4 text-left hover:border-[#8ECFC4]">
+                    <span><span className="block text-sm font-bold text-[#0A3340]">Security</span><span className="mt-1 block text-xs text-[#64748B]">Change your password and review sign-in security</span></span><ArrowUpRight size={18} className="shrink-0 text-[#0D766F]"/>
+                  </button>
+                  <button type="button" onClick={() => setPage('notifications')} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-[#D7E7E4] bg-white p-4 text-left hover:border-[#8ECFC4]">
+                    <span><span className="block text-sm font-bold text-[#0A3340]">Notification History</span><span className="mt-1 block text-xs text-[#64748B]">View account and transaction alerts</span></span><ArrowUpRight size={18} className="shrink-0 text-[#0D766F]"/>
+                  </button>
+                </div>
+              </section>
+            )}
             {activeTab === 'info' && (
-              <div className="bg-white rounded-2xl border border-[#D7E7E4] p-6">
+              <div className="bg-white rounded-2xl border border-[#D7E7E4] p-4 sm:p-6">
                 <h2 className="font-serif text-xl text-[#0A3340] font-bold mb-6">Personal Information</h2>
 
                 <div className="space-y-6">
-                  <div className="flex items-center gap-4 p-4 bg-[#F6FAF9] rounded-xl">
+                  <div className="flex flex-wrap items-start sm:items-center gap-3 sm:gap-4 p-4 bg-[#F6FAF9] rounded-xl">
                     <div className="w-10 h-10 bg-[#13B8A6]/10 rounded-lg flex items-center justify-center">
                       <User size={18} className="text-[#176B87]" />
                     </div>
-                    <div className="flex-1">
+                    <div className="min-w-0 flex-1">
                       <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
                         Full Name
                       </label>
                       {editingField === 'name' ? (
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <input
                             type="text"
                             value={editValue}
@@ -165,11 +218,11 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-4 p-4 bg-[#F6FAF9] rounded-xl">
+                  <div className="flex flex-wrap items-start sm:items-center gap-3 sm:gap-4 p-4 bg-[#F6FAF9] rounded-xl">
                     <div className="w-10 h-10 bg-[#13B8A6]/10 rounded-lg flex items-center justify-center">
                       <Mail size={18} className="text-[#176B87]" />
                     </div>
-                    <div className="flex-1">
+                    <div className="min-w-0 flex-1">
                       <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
                         Email Address
                       </label>
@@ -178,16 +231,16 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 p-4 bg-[#F6FAF9] rounded-xl">
+                  <div className="flex flex-wrap items-start sm:items-center gap-3 sm:gap-4 p-4 bg-[#F6FAF9] rounded-xl">
                     <div className="w-10 h-10 bg-[#13B8A6]/10 rounded-lg flex items-center justify-center">
                       <Phone size={18} className="text-[#176B87]" />
                     </div>
-                    <div className="flex-1">
+                    <div className="min-w-0 flex-1">
                       <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
                         Phone Number
                       </label>
                       {editingField === 'phone' ? (
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <input
                             type="tel"
                             value={editValue}
@@ -213,16 +266,16 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
                     )}
                   </div>
 
-                  <div className="flex items-center gap-4 p-4 bg-[#F6FAF9] rounded-xl">
+                  <div className="flex flex-wrap items-start sm:items-center gap-3 sm:gap-4 p-4 bg-[#F6FAF9] rounded-xl">
                     <div className="w-10 h-10 bg-[#13B8A6]/10 rounded-lg flex items-center justify-center">
                       <MapPin size={18} className="text-[#176B87]" />
                     </div>
-                    <div className="flex-1">
+                    <div className="min-w-0 flex-1">
                       <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
                         Location
                       </label>
                       {editingField === 'location' ? (
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <input
                             type="text"
                             value={editValue}
@@ -251,14 +304,14 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
             )}
 
             {activeTab === 'notifications' && (
-              <div className="bg-white rounded-2xl border border-[#D7E7E4] p-6">
+              <div className="bg-white rounded-2xl border border-[#D7E7E4] p-4 sm:p-6">
                 <h2 className="font-serif text-xl text-[#0A3340] font-bold mb-6">Notification Preferences</h2>
                 <NotificationPreferences />
               </div>
             )}
 
             {activeTab === 'security' && (
-              <div className="bg-white rounded-2xl border border-[#D7E7E4] p-6">
+              <div className="bg-white rounded-2xl border border-[#D7E7E4] p-4 sm:p-6">
                 <h2 className="font-serif text-xl text-[#0A3340] font-bold mb-6">Security</h2>
 
                 <div className="space-y-4">

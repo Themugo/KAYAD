@@ -93,7 +93,7 @@ describe('Branding tab - logo upload', () => {
     expect(screen.getByText(/unsaved branding changes/i)).toBeInTheDocument();
     await userEvent.click(save);
     await waitFor(() => expect(m.updateConfig).toHaveBeenCalledTimes(1));
-    expect(m.updateConfig.mock.calls[0][0].branding.logoUrl).toBe('/branding/kayad-road-mark.svg');
+    expect(m.updateConfig.mock.calls[0][0].branding.logoUrl).toBe('/branding/kayard-k-mark.png');
   });
   it('navbar and footer colours are editable, sent on save, and can be reset to the default', async () => {
     m.getConfig.mockResolvedValue(cfg({ logoType: 'image', logoUrl: '/branding/kayad-road-mark.svg' }));

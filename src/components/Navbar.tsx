@@ -33,7 +33,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { UserProfile } from '../types';
-import { useBranding, onBrandLogoError } from '../context/BrandingContext';
+import { useBranding, onBrandLogoError, DEFAULT_LOGO_URL } from '../context/BrandingContext';
 import { usePrefersReducedMotion } from '../hooks/useMediaQuery';
 import { applyNavigationConfig, visibleChildren, type NavPrimary } from './navigation/navConfig';
 import '../styles/kayad-navigation.css';
@@ -344,7 +344,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           onClick={(e) => { if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); handleNavSelect('marketplace'); }}
           className="kayad-brand group"
           id="brand-logo"
-          aria-label="KAYAD-KE marketplace home"
+          aria-label="KAYARD KE marketplace home"
         >
           {branding.logoType === 'image' && branding.logoUrl ? (
             <img
@@ -358,11 +358,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               decoding="async"
             />
           ) : (
-            <span className="kayad-brand__mark" aria-hidden="true"><Car className="w-5 h-5 stroke-[2]" /></span>
+            <img src={DEFAULT_LOGO_URL} onError={onBrandLogoError} alt="" aria-hidden="true" className="kayad-brand__image" width="52" height="52" decoding="async" />
           )}
           <span className="kayad-brand__text">
             <span className="kayad-brand__word">
-              {(branding.logoText || 'KAYAD').replace(/\s*[-–]?\s*KE$/i, '')}
+              {(branding.logoText || 'KAYARD KE').replace(/\s*[-–]?\s*KE$/i, '')}
               <span className="kayad-brand__word-ke">KE</span>
               <KenyaFlag className="kayad-brand__kenya-flag" />
             </span>
@@ -546,7 +546,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </div>
                   <div className="hidden sm:flex flex-col text-left">
                     <span className="text-xs font-bold text-[#0A3340] leading-none">{user.name}</span>
-                    <span className="text-[10px] text-[#64748B] capitalize">{user.role}</span>
+                    <span className="text-[10px] text-[#64748B]">{['user', 'buyer', 'individual_seller'].includes(String(user.role || '').toLowerCase()) ? 'Personal account' : isStaffRole(user.role) ? staffRoleLabel(user.role) : user.role === 'dealer' ? 'Verified Dealer' : user.role === 'mechanic' ? 'NTSA Mechanic' : String(user.role || 'Account').replace(/_/g, ' ').replace(/\b\w/g, (letter) => letter.toUpperCase())}</span>
                   </div>
                 </button>
               </div>
@@ -586,7 +586,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <aside ref={drawerRef} id="kayad-mobile-drawer" tabIndex={-1} className="kayad-mobile-menu fixed inset-x-0 bottom-0 z-[60] lg:hidden focus:outline-none" style={{ top: `${mobileDrawerTop}px`, height: `${mobileDrawerHeight}px` }} role="dialog" aria-modal="true" aria-label="KAYAD mobile navigation">
             <div className="kayad-mobile-menu__surface mx-auto flex h-full w-full max-w-[760px] flex-col overflow-hidden rounded-t-[28px] border-x border-t border-[#2C6671] bg-[#062E3A] text-white shadow-[0_30px_90px_rgba(3,30,39,.38)]">
               <div className="kayad-mobile-menu__topbar flex min-h-[58px] shrink-0 items-center justify-between border-b border-white/10 bg-[#071B2E] px-5">
-                <div className="min-w-0"><p className="text-[13px] font-black tracking-[.08em] text-white">KAYAD MENU</p><p className="text-[10px] text-white/55">Explore, manage and get support</p></div>
+                <div className="min-w-0"><p className="text-[13px] font-black tracking-[.08em] text-white">KAYARD MENU</p><p className="text-[10px] text-white/55">Explore, manage and get support</p></div>
                 <button type="button" onClick={() => { setMobileMenuOpen(false); hamburgerRef.current?.focus(); }} className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-white/15 bg-white/[0.06] text-white hover:bg-white/[0.12]" aria-label="Close navigation menu"><X className="h-5 w-5" aria-hidden="true" /></button>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -619,7 +619,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
 
                 <section className="mb-4" aria-labelledby="kayad-drawer-explore">
-                  <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-1"><span id="kayad-drawer-explore" className="text-[10px] font-black uppercase tracking-[.19em] text-[#A9DAD7]">Explore KAYAD</span><span className="text-[10px] font-semibold text-white/45">Your vehicle journey, all in one place</span></div>
+                  <div className="mb-2 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-1"><span id="kayad-drawer-explore" className="text-[10px] font-black uppercase tracking-[.19em] text-[#A9DAD7]">Explore KAYARD</span><span className="text-[10px] font-semibold text-white/45">Your vehicle journey, all in one place</span></div>
                   <nav className="kayad-mobile-drawer-primary" aria-label="Primary">
                     {navItems.map((item) => {
                       const Icon = item.icon;
