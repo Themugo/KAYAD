@@ -14,7 +14,8 @@ const { chromium } = require('playwright');
 
 const BASE = process.argv.find((a) => a.startsWith('http')) || 'http://127.0.0.1:4173';
 const MOBILE = process.argv.includes('--mobile');
-const VP = MOBILE ? { width: 390, height: 844 } : { width: 1280, height: 900 };
+const WIDTH = Number((process.argv.find((a) => a.startsWith('--width=')) || '').slice(8)) || 0;
+const VP = WIDTH ? { width: WIDTH, height: WIDTH < 500 ? 844 : 900 } : MOBILE ? { width: 390, height: 844 } : { width: 1280, height: 900 };
 const results = [];
 const check = (journey, name, ok, detail = '') => { results.push({ journey, name, ok: !!ok, detail }); console.log(`${ok ? 'PASS' : 'FAIL'}  [${journey}] ${name}${detail ? '  — ' + detail : ''}`); };
 
@@ -26,7 +27,8 @@ const iso = (d) => new Date(Date.now() - d * 864e5).toISOString();
 function freshDb() {
   return {
     user: { id: ME, name: 'Wanjiru Kamau', email: 'personal@example.test', phone: '+254700000001', location: 'Nairobi', role: 'user', emailVerified: true, email_verified: true, createdAt: iso(60) },
-    prefs: { email: { marketing: false, offers: true }, sms: { offers: false } },
+    prefs: { emailTransactional: true, smsTransactional: false, whatsappTransactional: false, emailMarketing: false, smsMarketing: false, whatsappMarketing: false },
+    password: 'OldPass#123', phoneVerified: false, otpSent: false, signedOut: false,
     listings: [
       { id: 'car-1', _id: 'car-1', title: '2019 Toyota Harrier', brand: 'Toyota', model: 'Harrier', year: 2019, price: 3400000, mileage: 62000, city: 'Nairobi', description: 'Clean one-owner SUV', status: 'available', approved: true, images: [{ url: '/hero/kayad-prado.png' }, { url: '/hero/kayad-land-cruiser.png' }], dealer: ME, createdAt: iso(10), updatedAt: iso(9) },
       { id: 'car-solo', _id: 'car-solo', title: '2017 Mazda CX-5', brand: 'Mazda', model: 'CX-5', year: 2017, price: 2100000, mileage: 91000, city: 'Mombasa', status: 'available', approved: true, images: [{ url: '/hero/kayad-mercedes-gle.png' }], dealer: ME, createdAt: iso(8), updatedAt: iso(8) },
@@ -76,6 +78,11 @@ async function install(page, db, { role = 'user' } = {}) {
 
     if (/\/auth\/csrf$/.test(p)) return json(200, { success: true, csrfToken: 'x'.repeat(48) });
     if (/\/auth\/me$/.test(p)) return role ? done(200, { success: true, user: { ...db.user, role } }) : done(401, { success: false });
+    if (/\/auth\/change-password$/.test(p) && method === 'PUT') { if (body.currentPassword !== db.password) return done(400, { success: false, message: 'Current password is incorrect.' }); db.password = body.newPassword; return done(200, { success: true, message: 'Password changed.' }); }
+    if (/\/auth\/send-otp$/.test(p) && method === 'POST') { db.otpSent = true; return done(200, { success: true }); }
+    if (/\/auth\/verify-phone$/.test(p) && method === 'POST') { if (!db.otpSent || body.otp !== '123456') return done(400, { success: false, message: 'Invalid or expired code.' }); db.phoneVerified = true; return done(200, { success: true }); }
+    if (/\/auth\/phone-status$/.test(p)) return done(200, { success: true, data: { phone: db.user.phone, verified: db.phoneVerified } });
+    if (/\/auth\/logout$/.test(p)) { db.signedOut = true; return done(200, { success: true }); }
     if (/\/auth\/profile$/.test(p) && method === 'PUT') { Object.assign(db.user, body); delete db.user.currentPassword; return done(200, { success: true, user: db.user }); }
     if (/\/communications\/preferences$/.test(p)) { if (method === 'PATCH') { db.prefs = { ...db.prefs, ...body }; } return done(200, { success: true, data: db.prefs, preferences: db.prefs }); }
     if (/\/cars\/my-listings$/.test(p)) return done(200, { success: true, data: db.listings });
@@ -138,7 +145,8 @@ async function install(page, db, { role = 'user' } = {}) {
       return done(200, { success: true, offer: o, replayed: false });
     }
     if (/\/bids\/my$/.test(p)) return done(200, { success: true, bids: db.bids, pagination: {} });
-    if (/\/escrow\/my$/.test(p)) return done(200, { success: true, data: db.escrows });
+    if (/\/escrow\/my$/.test(p)) { const open = db.escrows.filter((e) => !['released', 'refunded', 'closed', 'cancelled'].includes(e.status)).length; return done(200, { success: true, data: db.escrows, summary: { scope: 'participant', currency: 'KES', totalDeals: db.escrows.length, heldAmount: 0, heldCount: 0, pendingFundingCount: 0, activeCount: open, settledCount: db.escrows.length - open, needsActionCount: 0 } }); }
+    if (/\/ownership\/dashboard$/.test(p)) return done(200, { success: true, data: { profile: {}, currentVehicles: [], soldVehicles: [], upcomingReminders: [], expenseSummary: { monthlyTotal: 0, yearlyTotal: 0, byCategory: {}, currency: 'KES' } } });
     if (/\/cars$/.test(p)) return json(200, { success: true, data: [], cars: [], pagination: { page: 1, limit: 24, total: 0, pages: 0 } });
     if (/private-seller-capability\/me$/.test(p)) return done(200, { success: true, data: { status: 'approved', source: 'users', application: null, canApply: false, canList: true, approvalRequired: true, packageMode: 'free' } });
     return json(200, { success: true, data: [], items: [], notifications: [], unreadCount: 0, leads: [], enquiries: [], bids: [] });
@@ -192,12 +200,12 @@ async function journey1(browser) {
   check(J, 'every section is served from the same authenticated identity (/auth/me, no separate buyer/seller identity endpoint)', meCalls.length >= 1 && ids.size === 1 && !db.log.some((c) => /buyer-account|seller-account|private-seller\/register/.test(c.path)));
   const pageText = await text(page);
   check(J, 'no separate buyer/seller shell is rendered', !/Buyer dashboard|Private seller dashboard|Seller dashboard/i.test(pageText));
-  // My Account tabs
+  // My Account: one workspace, no nested navigation
   await go(page, 'profile');
-  const tabs = ['Overview', 'Personal Information', 'Notifications', 'Security'];
-  const tabResults = [];
-  for (const tname of tabs) { const ok = await clickSection(page, tname, { last: true }); tabResults.push(`${tname}:${ok ? 'ok' : 'missing'}`); }
-  check(J, 'My Account exposes Overview / Personal information / Notifications / Security', tabResults.every((r) => r.endsWith('ok')), tabResults.join(' '));
+  const t1 = await text(page);
+  const nestedNav = await page.locator('nav[aria-label="My Account sections"]').count();
+  check(J, 'My Account shows identity, personal information, notifications and security in one workspace', /Personal Information/.test(t1) && /Notification Preferences/.test(t1) && /Security/.test(t1) && /Wanjiru Kamau/.test(t1));
+  check(J, 'My Account has no nested navigation panel', nestedNav === 0);
   check(J, 'no uncaught page errors during navigation', page.__errors.length === 0, page.__errors.slice(0, 2).join(' | '));
   check(J, 'no horizontal overflow', await noOverflow(page));
   await page.context().close();
@@ -257,6 +265,17 @@ async function journey2photos(browser) {
   const J = 'J2 photos';
   const db = freshDb(); const page = await session(browser, db);
   await go(page, 'dashboard'); await clickSection(page, 'My vehicles');
+  const flt = (n) => page.getByRole('group', { name: 'Filter listings by status' }).getByRole('button', { name: new RegExp(`^${n}`) });
+  const allTxt = await flt('All').innerText();
+  check(J, 'status filters with counts render (All/Drafts/Under review/Active/Paused/Sold)', (await Promise.all(['All', 'Drafts', 'Under review', 'Active', 'Paused', 'Sold'].map((n) => flt(n).count()))).every((c) => c === 1) && /All\s*2/.test(allTxt), allTxt.replace(/\s+/g, ' '));
+  await flt('Sold').click(); await page.waitForTimeout(200);
+  check(J, 'a filter with no matches shows an honest empty state, not a blank page', /No sold listings/i.test(await text(page)));
+  await flt('Active').click(); await page.waitForTimeout(200);
+  check(J, 'Active filter keeps live listings and shows lifecycle labels (not raw DB status)', /Active/.test(await text(page)) && !/\bavailable\b/.test(await page.locator('[data-kayad-listing-card]').first().innerText()));
+  await flt('All').click(); await page.waitForTimeout(200);
+  const toggles = page.getByRole('button', { name: 'Manage photos' });
+  check(J, 'each owned listing offers a Manage photos action (photo manager is closed by default)', (await toggles.count()) === 2 && (await page.getByLabel('Manage vehicle photos').count()) === 0);
+  for (let i = 0; i < 2; i++) await toggles.nth(0).click();
   const mgr = page.getByLabel('Manage vehicle photos');
   check(J, 'photo manager (existing PersonalListingPhotoManager) renders per owned listing', (await mgr.count()) === 2, `managers=${await mgr.count()}`);
   const first = mgr.first();
@@ -394,36 +413,57 @@ async function journey6(browser) {
   const J = 'J6 my account';
   const db = freshDb(); const page = await session(browser, db);
   await go(page, 'profile');
-  await clickSection(page, 'Personal Information').catch(() => {});
   let t = await text(page);
-  check(J, 'personal information shows the signed-in identity', /Wanjiru Kamau/.test(t) && /personal@example\.test/.test(t));
-  const editors = page.getByRole('button', { name: /edit|change|update/i }).filter({ visible: true });
-  let saved = false;
-  if (await editors.count()) {
-    await editors.first().click(); await page.waitForTimeout(300);
-    const input = page.locator('input[type=text], input:not([type])').filter({ visible: true }).first();
-    if (await input.count()) { await input.fill('Wanjiru M. Kamau'); const sv = page.getByRole('button', { name: /^save/i }).first(); if (await sv.count()) { await sv.click(); await page.waitForTimeout(700); saved = true; } }
-  }
+  check(J, 'personal information shows the signed-in identity and real email verification', /Wanjiru Kamau/.test(t) && /personal@example\.test/.test(t) && /Email verified/.test(t));
+  // name edit
+  await page.getByRole('button', { name: /^edit$/i }).filter({ visible: true }).first().click(); await page.waitForTimeout(300);
+  await page.locator('#account-name').fill('Wanjiru M. Kamau');
+  await page.getByRole('button', { name: /^save$/i }).first().click(); await page.waitForTimeout(700);
   const put = db.log.find((c) => /auth\/profile$/.test(c.path) && c.method === 'PUT');
-  check(J, 'profile update sends PUT /auth/profile for the authenticated user (no user id in body)', saved && !!put && !('id' in (put.body || {})) && !('userId' in (put.body || {})), JSON.stringify(put?.body));
+  check(J, 'full-name edit sends PUT /auth/profile (no identity in body)', !!put && put.body?.name === 'Wanjiru M. Kamau' && !('id' in put.body) && !('userId' in put.body), JSON.stringify(put?.body));
   await go(page, 'profile'); t = await text(page);
-  check(J, 'updated personal information persists after refresh', /Wanjiru M\. Kamau/.test(t) || db.user.name === 'Wanjiru M. Kamau' && /Wanjiru M\. Kamau/.test(t));
-  await clickSection(page, 'Notifications');
-  const toggles = page.getByRole('checkbox').filter({ visible: true }).or(page.getByRole('switch').filter({ visible: true }));
-  const tn = await toggles.count();
-  check(J, 'notification preferences render real controls', tn > 0, `controls=${tn}`);
-  if (tn) { await toggles.first().click().catch(() => {}); const sv = page.getByRole('button', { name: /^save/i }).first(); if (await sv.count()) await sv.click(); await page.waitForTimeout(700); }
+  check(J, 'updated name persists after refresh', /Wanjiru M\. Kamau/.test(t));
+  // notifications
+  const sw = page.getByRole('switch', { name: /SMS - news & offers/ });
+  await sw.waitFor({ state: 'visible', timeout: 6000 }).catch(() => {});
+  const before = await sw.isChecked().catch(() => null);
+  await sw.click(); await page.waitForTimeout(700);
   const prefCall = db.log.find((c) => /communications\/preferences$/.test(c.path) && c.method === 'PATCH');
-  check(J, 'changing a preference PATCHes /communications/preferences', !!prefCall, JSON.stringify(prefCall?.body || {}).slice(0, 100));
-  await clickSection(page, 'Security');
+  check(J, 'toggling a preference PATCHes /communications/preferences', prefCall?.body?.smsMarketing === true, JSON.stringify(prefCall?.body));
+  await go(page, 'profile');
+  const sw2 = page.getByRole('switch', { name: /SMS - news & offers/ });
+  await sw2.waitFor({ state: 'visible', timeout: 6000 }).catch(() => {});
+  check(J, 'notification preference persists after refresh', before === false && (await sw2.isChecked()) === true);
+  // phone verification
+  await page.getByRole('button', { name: /Send Verification Code/ }).click(); await page.waitForTimeout(500);
+  await page.getByPlaceholder('123456').fill('000000'); await page.getByRole('button', { name: /^Verify$/ }).click(); await page.waitForTimeout(500);
   t = await text(page);
-  check(J, 'security tab shows password change controls for the same account', /password/i.test(t));
-  const allSameIdentity = db.log.filter((c) => /auth\/profile|communications\/preferences/.test(c.path)).every((c) => !('userId' in (c.body || {})));
-  check(J, 'all account settings calls are identity-less (server derives identity from session)', allSameIdentity);
+  check(J, 'a wrong phone code is rejected and phone stays unverified', /Invalid or expired code/.test(t) && !db.phoneVerified);
+  await page.getByPlaceholder('123456').fill('123456'); await page.getByRole('button', { name: /^Verify$/ }).click(); await page.waitForTimeout(600);
+  t = await text(page);
+  check(J, 'correct phone code verifies the phone', db.phoneVerified && /Phone Verified/.test(t));
+  await go(page, 'profile'); t = await text(page);
+  check(J, 'phone verification persists after refresh', /Phone Verified/.test(t));
+  // password change
+  const form = page.getByRole('form', { name: 'Change password' });
+  const fillPw = async (c, n, k) => { await form.getByLabel('Current password').fill(c); await form.getByLabel('New password', { exact: true }).fill(n); await form.getByLabel('Confirm new password').fill(k); await form.getByRole('button', { name: /change|update|save/i }).click(); await page.waitForTimeout(600); };
+  await fillPw('WrongPass#1', 'NewPass#456', 'NewPass#456');
+  check(J, 'password change rejects a wrong current password', /incorrect/i.test(await text(page)) && db.password === 'OldPass#123');
+  await fillPw('OldPass#123', 'NewPass#456', 'NewPass#456');
+  check(J, 'password change succeeds with the correct current password', db.password === 'NewPass#456');
+  // identity-less calls
+  const idless = db.log.filter((c) => /auth\/profile|communications\/preferences/.test(c.path)).every((c) => !('userId' in (c.body || {})));
+  check(J, 'account calls are identity-less (server derives identity from session)', idless);
+  // sign out
+  await page.getByRole('button', { name: /sign out/i }).filter({ visible: true }).first().click(); await page.waitForTimeout(900);
+  check(J, 'sign out asks for confirmation and calls /auth/logout', page.__dialogs.some((d) => /sign out/i.test(d)) && db.signedOut);
+  check(J, 'no horizontal overflow', await noOverflow(page));
   check(J, 'no uncaught page errors', page.__errors.length === 0, page.__errors.slice(0, 2).join(' | '));
   await page.context().close();
 }
 
+const shot = process.argv.find((a) => a.startsWith('--shot='))?.slice(7); // --shot=<nav>:<section>:<file.png>
+if (shot) { const [nav, sec, file] = shot.split(':'); const b = await chromium.launch(); const d = freshDb(); const pg = await session(b, d); await go(pg, nav); if (sec) await clickSection(pg, sec); await pg.waitForTimeout(800); await pg.screenshot({ path: file, fullPage: true }); console.log('shot', file, 'overflow-free:', await noOverflow(pg), 'errors:', pg.__errors.length); await b.close(); process.exit(0); }
 const dump = process.argv.find((a) => a.startsWith('--dump='))?.slice(7);
 if (dump) { const b = await chromium.launch(); const d = freshDb(); const pg = await session(b, d); await go(pg, 'dashboard'); await clickSection(pg, dump); console.log('ERRORS', JSON.stringify(pg.__errors), pg.url()); console.log((await text(pg)).slice(0, 1800)); console.log('BUTTONS:', (await pg.evaluate(() => [...document.querySelectorAll('button')].filter((e) => e.offsetParent).map((e) => e.getAttribute('aria-label') || e.textContent.trim().slice(0, 40)).join(' | ')))); await b.close(); process.exit(0); }
 const only = process.argv.find((a) => a.startsWith('--only='))?.slice(7);

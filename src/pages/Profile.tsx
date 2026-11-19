@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Mail, Phone, MapPin, Shield, Bell, Lock, LogOut, Clock, Loader2, LayoutDashboard, ArrowUpRight, CheckCircle2, CircleAlert } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Shield, Bell, Lock, LogOut, Clock, Loader2, ArrowUpRight, CheckCircle2, CircleAlert } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import ChangePasswordForm from '../components/account/ChangePasswordForm';
@@ -10,13 +10,25 @@ import { PhoneVerification } from '../components/PhoneVerification';
 interface ProfileProps {
   setPage: (page: string) => void;
   authUser?: any;
+  /** Optional deep-link target inside the single workspace (scrolls to the matching card). */
+  focus?: 'personal' | 'notifications' | 'security';
 }
 
-export default function Profile({ setPage, authUser }: ProfileProps) {
+type EditableField = 'name' | 'phone' | 'location';
+
+const card = 'rounded-2xl border border-[#DCE9E7] bg-white shadow-[0_1px_2px_rgba(8,43,64,.04)]';
+const sectionLabel = 'text-[10px] font-black uppercase tracking-[.16em] text-[#0D766F]';
+const fieldInput = 'min-h-10 w-full max-w-xs rounded-lg border border-[#BDE5DE] bg-white px-3 text-sm text-[#082B40] focus:border-[#11B8A6] focus:outline-none focus:ring-2 focus:ring-[#11B8A6]/25';
+
+/**
+ * My Account — ONE workspace rendered inside the unified personal DashboardHub shell.
+ * There is no nested navigation panel: personal information, notification preferences and security are
+ * stacked cards (deep-linkable by `focus`), and the dashboard sidebar remains the only navigation.
+ */
+export default function Profile({ setPage, authUser, focus }: ProfileProps) {
   const { user: authUser2, logout, updateProfile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
 
   // Use auth context user or prop
@@ -29,16 +41,17 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
     avatar: null,
   };
 
-  const [editingField, setEditingField] = useState<string | null>(null);
+  const [editingField, setEditingField] = useState<EditableField | null>(null);
   const [editValue, setEditValue] = useState('');
   const [stepUpPassword, setStepUpPassword] = useState('');
+  const personalRef = useRef<HTMLElement | null>(null);
+  const notificationsRef = useRef<HTMLElement | null>(null);
+  const securityRef = useRef<HTMLElement | null>(null);
 
-  const menuItems = [
-    { key: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { key: 'info', label: 'Personal Information', icon: User },
-    { key: 'notifications', label: 'Notifications', icon: Bell },
-    { key: 'security', label: 'Security', icon: Lock },
-  ];
+  useEffect(() => {
+    const target = focus === 'notifications' ? notificationsRef.current : focus === 'security' ? securityRef.current : focus === 'personal' ? personalRef.current : null;
+    if (target && typeof target.scrollIntoView === 'function') target.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  }, [focus]);
 
   const handleLogout = async () => {
     if (confirm('Are you sure you want to sign out?')) {
@@ -47,7 +60,7 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
     }
   };
 
-  const handleEdit = (field: string, currentValue: string) => {
+  const handleEdit = (field: EditableField, currentValue: string) => {
     setEditingField(field);
     setEditValue(currentValue || '');
     setStepUpPassword('');
@@ -82,251 +95,111 @@ export default function Profile({ setPage, authUser }: ProfileProps) {
 
   const memberYear = user.createdAt ? new Date(user.createdAt).getFullYear() : new Date().getFullYear();
 
+  /** One editable personal-information row (name / phone / location). Behaviour is identical to the previous per-field blocks. */
+  const renderEditableRow = (field: EditableField, label: string, Icon: typeof User, value: string, inputType: string, extra?: React.ReactNode) => (
+    <div className="flex flex-wrap items-start gap-3 rounded-xl border border-[#E5EFED] bg-[#F4F9F8] p-4 sm:items-center">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#11B8A6]/10 text-[#176B87]"><Icon size={18} aria-hidden="true" /></span>
+      <div className="min-w-0 flex-1">
+        <label htmlFor={`account-${field}`} className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#475569]">{label}</label>
+        {editingField === field ? (
+          <div className="flex flex-wrap items-center gap-2">
+            <input id={`account-${field}`} type={inputType} value={editValue} onChange={(e) => setEditValue(e.target.value)} className={fieldInput} />
+            {field === 'phone' && needsStepUp && (
+              <input type="password" autoComplete="current-password" aria-label="Current password" placeholder="Current password" value={stepUpPassword} onChange={(e) => setStepUpPassword(e.target.value)} className={fieldInput} />
+            )}
+            <button type="button" onClick={handleSaveEdit} disabled={loading} className="min-h-10 rounded-lg px-3 text-sm font-semibold text-[#176B87] hover:bg-[#DDF4F0]">
+              {loading ? <Loader2 size={14} className="animate-spin" aria-label="Saving" /> : 'Save'}
+            </button>
+            <button type="button" onClick={handleCancelEdit} disabled={loading} className="min-h-10 rounded-lg px-3 text-sm font-semibold text-[#475569] hover:text-[#082B40] disabled:opacity-50">Cancel</button>
+          </div>
+        ) : (
+          <p className="text-sm text-[#082B40]">{value || (field === 'name' ? '' : 'Not set')}</p>
+        )}
+        {extra}
+      </div>
+      {!editingField && (
+        <button type="button" onClick={() => handleEdit(field, value || '')} className="min-h-10 rounded-lg px-3 text-sm font-semibold text-[#176B87] hover:bg-[#DDF4F0]">Edit</button>
+      )}
+    </div>
+  );
+
   return (
-    <div className="w-full min-w-0 space-y-4" data-kayad-personal-account-profile="true">
-      <section className="flex flex-wrap items-center gap-3 rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm sm:p-5">
-        <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-[#DDF4F0] text-xl font-black text-[#0D766F]">
+    <div className="w-full min-w-0 space-y-4" data-kayad-personal-account-profile="true" data-kayad-my-account-workspace="true">
+      {/* Identity */}
+      <section className={`${card} flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:p-5`} aria-labelledby="my-account-identity-title" data-kayad-my-account-overview="true">
+        <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-full bg-[#DDF4F0] text-xl font-black text-[#0D766F]">
           {user.avatar ? <img src={user.avatar} alt={user.name || 'Profile'} className="h-full w-full object-cover" /> : (user.name?.charAt(0) || 'U')}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#0D766F]">Personal account</p>
-          <h2 className="truncate text-lg font-black text-[#0A3340]">{user.name || 'My account'}</h2>
-          <p className="mt-0.5 flex items-center gap-1 text-xs text-[#64748B]"><Clock size={12}/> Member since {memberYear}</p>
+          <p className={sectionLabel}>Personal account</p>
+          <h2 id="my-account-identity-title" className="break-words text-xl font-black text-[#082B40]">{user.name || 'My account'}</h2>
+          <p className="mt-0.5 break-all text-sm text-[#475569] sm:break-normal">{user.email || 'Email not available'}</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+            <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 font-bold ${user.emailVerified ? 'bg-[#E8F7F3] text-[#0B6B63]' : 'bg-[#F4F9F8] text-[#475569] ring-1 ring-inset ring-[#DCE9E7]'}`}>
+              {user.emailVerified ? <CheckCircle2 size={13} aria-hidden="true" /> : <CircleAlert size={13} aria-hidden="true" />}
+              {user.emailVerified ? 'Email verified' : 'Email verification pending'}
+            </span>
+            <span className="inline-flex items-center gap-1 text-[#475569]"><Clock size={13} aria-hidden="true" /> Member since {memberYear}</span>
+            <span className="rounded-full bg-[#E8F7F3] px-2.5 py-1 font-bold text-[#0B6B63]">One personal identity</span>
+          </div>
         </div>
-        <span className="rounded-full bg-[#E8F7F3] px-3 py-1.5 text-[11px] font-bold text-[#0D766F]">One personal identity</span>
+        <button type="button" onClick={handleLogout} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#DCE9E7] px-4 text-sm font-semibold text-[#0A3340] hover:bg-[#F4F9F8] sm:w-auto">
+          <LogOut size={17} aria-hidden="true" /> Sign Out
+        </button>
       </section>
-      {/* Content */}
-      <div className="w-full min-w-0">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-[210px_minmax(0,1fr)]">
-          {/* Sidebar */}
-          <div className="min-w-0">
-            <div className="bg-white rounded-2xl border border-[#D7E7E4] p-2 sm:p-3 md:sticky md:top-24">
-              <nav aria-label="My Account sections" className="grid grid-cols-2 gap-1">
-                {menuItems.map(({ key, label, icon: Icon }) => (
-                  <button
-                    key={key}
-                    type="button"
-                    onClick={() => setActiveTab(key)}
-                    aria-current={activeTab === key ? 'page' : undefined}
-                    className={`min-h-11 w-full flex items-center gap-2 px-3 py-3 rounded-xl text-left transition-colors ${
-                      activeTab === key
-                        ? 'bg-[#DDF4F0] text-[#0A3340] ring-1 ring-inset ring-[#9AD8CD]'
-                        : 'text-[#0A3340] hover:bg-[#F6FAF9]'
-                    }`}
-                  >
-                    <Icon size={17} />
-                    <span className="font-sans text-xs sm:text-sm font-semibold">{label}</span>
-                  </button>
-                ))}
-              </nav>
-              <div className="mt-4 pt-4 border-t border-[#D7E7E4]">
-                <button
-                  onClick={handleLogout}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left text-red-700 hover:bg-red-50 transition-colors"
-                >
-                  <LogOut size={18} />
-                  <span className="font-sans text-sm font-semibold">Sign Out</span>
-                </button>
+
+      <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">
+        <div className="min-w-0 space-y-4">
+          {/* Personal information */}
+          <section ref={personalRef} id="account-personal-information" aria-labelledby="account-personal-title" className={`${card} scroll-mt-24 p-4 sm:p-6`} data-kayad-account-section="personal">
+            <p className={sectionLabel}>Profile</p>
+            <h2 id="account-personal-title" className="mt-1 text-xl font-black text-[#082B40]">Personal Information</h2>
+            <p className="mt-1 text-sm text-[#475569]">The details used for buying and privately selling on KAYARD KE.</p>
+            <div className="mt-5 space-y-3">
+              {renderEditableRow('name', 'Full Name', User, user.name || '', 'text')}
+              <div className="flex flex-wrap items-start gap-3 rounded-xl border border-[#E5EFED] bg-[#F4F9F8] p-4 sm:items-center">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[#11B8A6]/10 text-[#176B87]"><Mail size={18} aria-hidden="true" /></span>
+                <div className="min-w-0 flex-1">
+                  <span className="mb-1 block text-xs font-semibold uppercase tracking-wider text-[#475569]">Email Address</span>
+                  <p className="break-words text-sm text-[#082B40]">{user.email}</p>
+                  <p className="mt-1 text-xs text-[#475569]">{user.emailVerified ? 'Verified. ' : ''}Changing your sign-in email is not available yet - contact support if it needs to change.</p>
+                </div>
+              </div>
+              {renderEditableRow('phone', 'Phone Number', Phone, user.phone || '', 'tel')}
+              {renderEditableRow('location', 'Location', MapPin, user.location || '', 'text')}
+              {/* Refresh the server-owned phone verification state whenever the account phone changes. */}
+              <PhoneVerification key={user.phone || 'no-phone'} />
+            </div>
+          </section>
+
+          {/* Notifications */}
+          <section ref={notificationsRef} id="account-notifications" aria-labelledby="account-notifications-title" className={`${card} scroll-mt-24 p-4 sm:p-6`} data-kayad-account-section="notifications">
+            <p className={sectionLabel}>Communication</p>
+            <h2 id="account-notifications-title" className="mt-1 flex items-center gap-2 text-xl font-black text-[#082B40]"><Bell size={18} aria-hidden="true" className="text-[#176B87]" /> Notification Preferences</h2>
+            <div className="mt-5"><NotificationPreferences /></div>
+            <button type="button" onClick={() => setPage('notifications')} className="mt-4 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#DCE9E7] px-4 text-sm font-semibold text-[#0A3340] hover:bg-[#F4F9F8]">
+              Notification History <ArrowUpRight size={16} aria-hidden="true" className="text-[#0D766F]" />
+            </button>
+          </section>
+        </div>
+
+        {/* Security */}
+        <div className="min-w-0 space-y-4">
+          <section ref={securityRef} id="account-security" aria-labelledby="account-security-title" className={`${card} scroll-mt-24 p-4 sm:p-6`} data-kayad-account-section="security">
+            <p className={sectionLabel}>Protection</p>
+            <h2 id="account-security-title" className="mt-1 flex items-center gap-2 text-xl font-black text-[#082B40]"><Lock size={18} aria-hidden="true" className="text-[#176B87]" /> Security</h2>
+            <p className="mt-1 text-sm text-[#475569]">Change your password and review sign-in security.</p>
+            <div className="mt-5 space-y-4">
+              <ChangePasswordForm />
+              <div className="flex items-center justify-between gap-3 rounded-xl border border-[#E5EFED] bg-[#F4F9F8] p-4">
+                <div className="flex items-center gap-3">
+                  <Shield size={18} aria-hidden="true" className="text-[#176B87]" />
+                  <span className="text-sm font-semibold text-[#082B40]">Two-factor authentication</span>
+                </div>
+                <span className="text-xs text-[#475569]">Not available yet</span>
               </div>
             </div>
-          </div>
-
-          {/* Main content */}
-          <div className="min-w-0">
-            {activeTab === 'overview' && (
-              <section className="space-y-4" aria-labelledby="my-account-overview-title" data-kayad-my-account-overview="true">
-                <div className="rounded-2xl border border-[#D7E7E4] bg-white p-5 sm:p-6">
-                  <p className="text-[10px] font-black uppercase tracking-[.16em] text-[#0D766F]">Your account at a glance</p>
-                  <h2 id="my-account-overview-title" className="mt-1 text-xl font-black text-[#0A3340]">My Account Overview</h2>
-                  <p className="mt-1 text-sm leading-6 text-[#64748B]">Manage the personal details and settings used for buying and privately selling on KAYARD KE.</p>
-                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                    <div className="rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-4">
-                      <div className="flex items-center gap-2 text-[#12576D]"><User size={17}/><span className="text-xs font-bold uppercase tracking-wide">Personal identity</span></div>
-                      <p className="mt-2 truncate text-base font-black text-[#0A3340]">{user.name || 'Name not set'}</p>
-                      <p className="mt-1 truncate text-xs text-[#64748B]">{user.email || 'Email not available'}</p>
-                    </div>
-                    <div className="rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-4">
-                      <div className="flex items-center gap-2 text-[#12576D]"><Shield size={17}/><span className="text-xs font-bold uppercase tracking-wide">Account status</span></div>
-                      <p className="mt-2 flex items-center gap-2 text-sm font-bold text-[#0A3340]">
-                        {user.emailVerified ? <CheckCircle2 size={17} className="text-[#0D9488}"/> : <CircleAlert size={17} className="text-[#B7791F}"/>}
-                        {user.emailVerified ? 'Email verified' : 'Email verification pending'}
-                      </p>
-                      <p className="mt-1 text-xs text-[#64748B]">Member since {memberYear}</p>
-                    </div>
-                    <div className="rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-4">
-                      <div className="flex items-center gap-2 text-[#12576D]"><Phone size={17}/><span className="text-xs font-bold uppercase tracking-wide">Contact details</span></div>
-                      <p className="mt-2 text-sm font-bold text-[#0A3340]">{user.phone || 'Phone number not added'}</p>
-                      <p className="mt-1 text-xs text-[#64748B]">{user.location || 'Location not added'}</p>
-                    </div>
-                    <div className="rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-4">
-                      <div className="flex items-center gap-2 text-[#12576D]"><Lock size={17}/><span className="text-xs font-bold uppercase tracking-wide">Account security</span></div>
-                      <p className="mt-2 text-sm font-bold text-[#0A3340]">Password & sign-in</p>
-                      <p className="mt-1 text-xs text-[#64748B]">Review the security controls currently available to your account.</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <button type="button" onClick={() => setActiveTab('info')} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-[#D7E7E4] bg-white p-4 text-left hover:border-[#8ECFC4]">
-                    <span><span className="block text-sm font-bold text-[#0A3340]">Personal Information</span><span className="mt-1 block text-xs text-[#64748B]">Update your name, phone and location</span></span><ArrowUpRight size={18} className="shrink-0 text-[#0D766F]"/>
-                  </button>
-                  <button type="button" onClick={() => setActiveTab('notifications')} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-[#D7E7E4] bg-white p-4 text-left hover:border-[#8ECFC4]">
-                    <span><span className="block text-sm font-bold text-[#0A3340]">Notification Preferences</span><span className="mt-1 block text-xs text-[#64748B]">Choose your communication channels</span></span><ArrowUpRight size={18} className="shrink-0 text-[#0D766F]"/>
-                  </button>
-                  <button type="button" onClick={() => setActiveTab('security')} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-[#D7E7E4] bg-white p-4 text-left hover:border-[#8ECFC4]">
-                    <span><span className="block text-sm font-bold text-[#0A3340]">Security</span><span className="mt-1 block text-xs text-[#64748B]">Change your password and review sign-in security</span></span><ArrowUpRight size={18} className="shrink-0 text-[#0D766F]"/>
-                  </button>
-                  <button type="button" onClick={() => setPage('notifications')} className="flex min-h-16 items-center justify-between gap-3 rounded-xl border border-[#D7E7E4] bg-white p-4 text-left hover:border-[#8ECFC4]">
-                    <span><span className="block text-sm font-bold text-[#0A3340]">Notification History</span><span className="mt-1 block text-xs text-[#64748B]">View account and transaction alerts</span></span><ArrowUpRight size={18} className="shrink-0 text-[#0D766F]"/>
-                  </button>
-                </div>
-              </section>
-            )}
-            {activeTab === 'info' && (
-              <div className="bg-white rounded-2xl border border-[#D7E7E4] p-4 sm:p-6">
-                <h2 className="font-serif text-xl text-[#0A3340] font-bold mb-6">Personal Information</h2>
-
-                <div className="space-y-6">
-                  <div className="flex flex-wrap items-start sm:items-center gap-3 sm:gap-4 p-4 bg-[#F6FAF9] rounded-xl">
-                    <div className="w-10 h-10 bg-[#13B8A6]/10 rounded-lg flex items-center justify-center">
-                      <User size={18} className="text-[#176B87]" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
-                        Full Name
-                      </label>
-                      {editingField === 'name' ? (
-                        <div className="flex flex-wrap items-center gap-2">
-                          <input
-                            type="text"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            className="font-sans text-sm text-[#0A3340] border border-[#BDE5DE] rounded px-2 py-1"
-                          />
-                          <button onClick={handleSaveEdit} disabled={loading} className="text-[#176B87] text-sm font-semibold">
-                            {loading ? <Loader2 size={14} className="animate-spin" /> : 'Save'}
-                          </button>
-                          <button type="button" onClick={handleCancelEdit} disabled={loading} className="text-[#64748B] text-sm font-semibold hover:text-[#0A3340] disabled:opacity-50">
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <p className="font-sans text-sm text-[#0A3340]">{user.name}</p>
-                      )}
-                    </div>
-                    {!editingField && (
-                      <button onClick={() => handleEdit('name', user.name || '')} className="text-[#176B87] text-sm font-semibold hover:text-[#12576D]">Edit</button>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap items-start sm:items-center gap-3 sm:gap-4 p-4 bg-[#F6FAF9] rounded-xl">
-                    <div className="w-10 h-10 bg-[#13B8A6]/10 rounded-lg flex items-center justify-center">
-                      <Mail size={18} className="text-[#176B87]" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
-                        Email Address
-                      </label>
-                      <p className="font-sans text-sm text-[#0A3340]">{user.email}</p>
-                      <p className="font-sans text-xs text-warm-400 mt-1">{user.emailVerified ? 'Verified. ' : ''}Changing your sign-in email is not available yet - contact support if it needs to change.</p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-start sm:items-center gap-3 sm:gap-4 p-4 bg-[#F6FAF9] rounded-xl">
-                    <div className="w-10 h-10 bg-[#13B8A6]/10 rounded-lg flex items-center justify-center">
-                      <Phone size={18} className="text-[#176B87]" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
-                        Phone Number
-                      </label>
-                      {editingField === 'phone' ? (
-                        <div className="flex flex-wrap items-center gap-2">
-                          <input
-                            type="tel"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            className="font-sans text-sm text-[#0A3340] border border-[#BDE5DE] rounded px-2 py-1"
-                          />
-                          {needsStepUp && (
-                            <input type="password" autoComplete="current-password" aria-label="Current password" placeholder="Current password" value={stepUpPassword} onChange={(e) => setStepUpPassword(e.target.value)} className="font-sans text-sm text-[#0A3340] border border-[#BDE5DE] rounded px-2 py-1" />
-                          )}
-                          <button onClick={handleSaveEdit} disabled={loading} className="text-[#176B87] text-sm font-semibold">
-                            {loading ? <Loader2 size={14} className="animate-spin" /> : 'Save'}
-                          </button>
-                          <button type="button" onClick={handleCancelEdit} disabled={loading} className="text-[#64748B] text-sm font-semibold hover:text-[#0A3340] disabled:opacity-50">
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <p className="font-sans text-sm text-[#0A3340]">{user.phone || 'Not set'}</p>
-                      )}
-                    </div>
-                    {!editingField && (
-                      <button onClick={() => handleEdit('phone', user.phone || '')} className="text-[#176B87] text-sm font-semibold hover:text-[#12576D]">Edit</button>
-                    )}
-                  </div>
-
-                  <div className="flex flex-wrap items-start sm:items-center gap-3 sm:gap-4 p-4 bg-[#F6FAF9] rounded-xl">
-                    <div className="w-10 h-10 bg-[#13B8A6]/10 rounded-lg flex items-center justify-center">
-                      <MapPin size={18} className="text-[#176B87]" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <label className="block font-sans text-xs text-warm-400 font-semibold uppercase tracking-wider mb-1">
-                        Location
-                      </label>
-                      {editingField === 'location' ? (
-                        <div className="flex flex-wrap items-center gap-2">
-                          <input
-                            type="text"
-                            value={editValue}
-                            onChange={(e) => setEditValue(e.target.value)}
-                            className="font-sans text-sm text-[#0A3340] border border-[#BDE5DE] rounded px-2 py-1"
-                          />
-                          <button onClick={handleSaveEdit} disabled={loading} className="text-[#176B87] text-sm font-semibold">
-                            {loading ? <Loader2 size={14} className="animate-spin" /> : 'Save'}
-                          </button>
-                          <button type="button" onClick={handleCancelEdit} disabled={loading} className="text-[#64748B] text-sm font-semibold hover:text-[#0A3340] disabled:opacity-50">
-                            Cancel
-                          </button>
-                        </div>
-                      ) : (
-                        <p className="font-sans text-sm text-[#0A3340]">{user.location || 'Not set'}</p>
-                      )}
-                    </div>
-                    {!editingField && (
-                      <button onClick={() => handleEdit('location', user.location || '')} className="text-[#176B87] text-sm font-semibold hover:text-[#12576D]">Edit</button>
-                    )}
-                  </div>
-                  {/* Refresh the server-owned phone verification state whenever the account phone changes. */}
-                  <PhoneVerification key={user.phone || 'no-phone'} />
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'notifications' && (
-              <div className="bg-white rounded-2xl border border-[#D7E7E4] p-4 sm:p-6">
-                <h2 className="font-serif text-xl text-[#0A3340] font-bold mb-6">Notification Preferences</h2>
-                <NotificationPreferences />
-              </div>
-            )}
-
-            {activeTab === 'security' && (
-              <div className="bg-white rounded-2xl border border-[#D7E7E4] p-4 sm:p-6">
-                <h2 className="font-serif text-xl text-[#0A3340] font-bold mb-6">Security</h2>
-
-                <div className="space-y-4">
-                  <ChangePasswordForm />
-                  <div className="flex items-center justify-between p-4 bg-[#F6FAF9] rounded-xl">
-                    <div className="flex items-center gap-3">
-                      <Shield size={18} className="text-[#176B87]" />
-                      <span className="font-sans text-sm font-semibold text-[#0A3340]">Two-factor authentication</span>
-                    </div>
-                    <span className="text-xs text-warm-400">Not available yet</span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
+          </section>
         </div>
       </div>
     </div>
