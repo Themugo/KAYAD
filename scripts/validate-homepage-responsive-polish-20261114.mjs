@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 const component = fs.readFileSync('src/features/VehicleMarketplace/components/VehicleMarketplace.tsx', 'utf8');
 const css = fs.readFileSync('src/features/VehicleMarketplace/components/homepage-redesign.css', 'utf8');
 const checks = [
-  ['mobile featured pair is rendered at phone widths', /kayad-public-hero__mobile-stage mx-auto mt-3 block w-full/.test(component) && !/kayad-public-hero__mobile-stage[^\n]*hidden[^\n]*sm:block/.test(component)],
+  ['mobile featured vehicle is rendered at phone widths (single responsive stage, no hidden breakpoint)', /<PremiumHero/.test(component) && !/kk-hero__stage[^\n]*hidden/.test(fs.readFileSync('src/components/home/PremiumHero.tsx','utf8'))],
   ['mobile hero support copy remains visible', /\.kayad-public-hero__mobile-card p\s*\{[^}]*display:\s*block\s*!important/s.test(css)],
   ['mobile hero pair uses contained images', /\.kayad-public-hero__mobile-stage picture img\s*\{[^}]*object-fit:\s*contain/s.test(css)],
   ['category strip does not stick over the global header', /\.kayad-home-category-strip\s*\{[^}]*position:\s*relative\s*!important/s.test(css)],

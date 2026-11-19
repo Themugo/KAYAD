@@ -16,7 +16,7 @@ export type RegistrationRoute =
   | 'account'                // POST /api/v1/auth/register
   | 'account_then_provider'  // account first, then the provider application (needs a verified, signed-in account)
   | 'account_then_affiliation' // account first, then ask a business to confirm them as staff
-  | 'application';           // POST /api/inspector-applications/apply (no account until KAYAD approves)
+  | 'application';           // POST /api/inspector-applications/apply (no account until KAYARD KE approves)
 
 export interface PublicRole {
   id: PublicRoleId;
@@ -53,7 +53,7 @@ export const PUBLIC_ROLES: PublicRole[] = [
     steps: [
       { title: 'Create your dealer account', body: 'Your dealership name and location. The account starts pending.' },
       { title: 'Verify your email', body: 'Required before you can sign in.' },
-      { title: 'Complete business verification', body: 'After signing in you add payment details, an ID and your KRA PIN. KAYAD reviews them; dealer tools unlock only when approved.' },
+      { title: 'Complete business verification', body: 'After signing in you add payment details, an ID and your KRA PIN. KAYARD KE reviews them; dealer tools unlock only when approved.' },
     ],
   },
   {
@@ -63,7 +63,7 @@ export const PUBLIC_ROLES: PublicRole[] = [
       { title: 'Create your personal account', body: 'The owner signs up with their own name and email; the business is registered separately.' },
       { title: 'Verify your email', body: 'Required before you can sign in.' },
       { title: 'Register your garage', body: 'Add the business identity, branches, service coverage and services offered.' },
-      { title: 'KAYAD review', body: 'Business approval and service verification are separate. Only verified services become bookable.' },
+      { title: 'KAYARD KE review', body: 'Business approval and service verification are separate. Only verified services become bookable.' },
     ],
   },
   {
@@ -73,16 +73,16 @@ export const PUBLIC_ROLES: PublicRole[] = [
       { title: 'Create your personal account', body: 'The company owner signs up with their own name and email.' },
       { title: 'Verify your email', body: 'Required before you can sign in.' },
       { title: 'Register your inspection company', body: 'Add company details, inspection coverage, branches and professional staff.' },
-      { title: 'KAYAD review', body: 'Company verification, inspector credentials and inspection services are reviewed separately.' },
+      { title: 'KAYARD KE review', body: 'Company verification, inspector credentials and inspection services are reviewed separately.' },
     ],
   },
   {
     id: 'professional', title: 'Inspector or mechanic', summary: 'Apply as an individual professional or join an approved business.',
     outcome: 'Your personal account is verified first; professional access requires approval.', intent: 'professional', backendRole: 'user', route: 'account_then_provider', afterSignIn: providerApplicationPath('individual_inspector'),
     steps: [
-      { title: 'Choose how you work', body: 'On your own, or as staff of a garage or inspection company already on KAYAD.' },
-      { title: 'Independent', body: 'Create your personal account first, then submit professional credentials for KAYAD review. Approval adds professional access to that same account.' },
-      { title: 'Employed by a business', body: 'You create an account, then ask the business to confirm you. The business must accept, and KAYAD verifies qualifications separately.' },
+      { title: 'Choose how you work', body: 'On your own, or as staff of a garage or inspection company already on KAYARD KE.' },
+      { title: 'Independent', body: 'Create your personal account first, then submit professional credentials for KAYARD KE review. Approval adds professional access to that same account.' },
+      { title: 'Employed by a business', body: 'You create an account, then ask the business to confirm you. The business must accept, and KAYARD KE verifies qualifications separately.' },
     ],
   },
 ];

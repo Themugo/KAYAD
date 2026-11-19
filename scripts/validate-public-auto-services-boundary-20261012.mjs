@@ -19,7 +19,7 @@ const checks = [
   ['inspection records are bound to a stable account identity', /useInspectionRecords\(ownerKey\)/.test(page) && /ownerKey: string \| null/.test(page)],
   ['prior account data is masked before the next request resolves', /state\.ownerKey === ownerKey \? state : \{ ownerKey, records: \[\]/.test(page)],
   ['stale inspection request responses are sequence guarded', /mine !== seq\.current/.test(page)],
-  ['private record API errors do not echo raw backend messages', /Your KAYAD inspection requests could not be loaded\./.test(page) && /Your provider bookings could not be loaded\./.test(page)],
+  ['private record API errors do not echo raw backend messages', /Your KAYARD KE inspection requests could not be loaded\./.test(page) && /Your provider bookings could not be loaded\./.test(page)],
   ['customer bookings require authentication', /router\.get\('\/bookings', requireAuth, controller\.getCustomerBookings\)/.test(routes)],
   ['customer booking detail requires authentication', /router\.get\('\/bookings\/:reference', requireAuth, controller\.getBooking\)/.test(routes)],
   ['provider management endpoints require authentication and ownership', /router\.get\('\/provider\/:providerId\/dashboard', requireAuth, requireProviderOwnership/.test(routes) && /router\.get\('\/provider\/:providerId\/capabilities', requireAuth, requireProviderOwnership/.test(routes)],

@@ -126,7 +126,7 @@ export const PriceAlertModal: FC<PriceAlertModalProps> = ({
               </div>
               <div>
                 <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#13B8A6] block">
-                  KAYAD Market Sentinel
+                  KAYARD KE Market Sentinel
                 </span>
                 <h3 className="text-lg font-black font-serif text-white">
                   {existingAlert ? 'Edit Price Alert' : 'Set Price Alert'}

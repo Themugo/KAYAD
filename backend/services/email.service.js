@@ -1,7 +1,7 @@
 import { recordMetric, setGauge, incrementCounter } from "../config/metrics.js";
 import { logInfo, logError, logWarn } from "../utils/logger.js";
 
-const APP_NAME = process.env.APP_NAME || "Kayad";
+const APP_NAME = process.env.APP_NAME || "KAYARD KE";
 const APP_URL = process.env.FRONTEND_URL || "https://www.kayad.space";
 const FROM = process.env.BREVO_FROM_EMAIL || process.env.EMAIL_FROM || `noreply@kayad.space`;
 
@@ -220,7 +220,7 @@ export const sendAuctionWonEmail = (user, car, amount) =>
 export const sendPaymentConfirmedEmail = (user, payment, car) =>
   sendEmail({
     to: user.email,
-    subject: `✅ Payment confirmed — ${car?.title || "Kayad"}`,
+    subject: `✅ Payment confirmed — ${car?.title || "KAYARD KE"}`,
     html: layout(
       `
       ${heading("M-Pesa Payment Confirmed")}
@@ -245,7 +245,7 @@ export const sendEscrowReleasedEmail = (seller, escrow, car) =>
       ${para("The escrow for your vehicle sale has been released. Funds should reflect in your M-Pesa within minutes.")}
       ${highlight("Amount Released", `KES ${Number(escrow.amount).toLocaleString("en-KE")}`, true)}
       ${car?.title ? highlight("Vehicle", esc(car.title)) : ""}
-      ${para("Thank you for selling on Kayad. List more vehicles to keep growing your business.")}
+      ${para("Thank you for selling on KAYARD KE. List more vehicles to keep growing your business.")}
       ${btn("List Another Car →", `${APP_URL}/dealer/add-car`)}
     `,
       "Funds Released",
@@ -323,11 +323,11 @@ export const sendVerificationEmail = (email, name, token) => {
     html: layout(
       `
       ${heading("Verify Your Email Address")}
-      ${para(`Hi <strong style="color:#F6FAF9">${esc(name || "there")}</strong>, welcome to Kayad!`)}
+      ${para(`Hi <strong style="color:#F6FAF9">${esc(name || "there")}</strong>, welcome to KAYARD KE!`)}
       ${para("Verify your email to unlock bidding, messaging, and secure M-Pesa escrow payments. Your dream car is waiting.")}
       ${btn("Verify My Email →", verifyUrl)}
       ${divider()}
-      ${para("<em style='color:#94A3B8;font-size:13px;'>This link expires in 24 hours. If you didn't create a Kayad account, you can safely ignore this email.</em>")}
+      ${para("<em style='color:#94A3B8;font-size:13px;'>This link expires in 24 hours. If you didn't create a KAYARD KE account, you can safely ignore this email.</em>")}
     `,
       "Email Verification",
     ),
@@ -345,7 +345,7 @@ export const sendTeamInviteEmail = (inviteeEmail, dealerName, role, token) =>
       ${para("Click below to accept the invitation and set up your account.")}
       ${btn("Accept Invitation →", `${APP_URL}/dealer/setup?invite=${encodeURIComponent(token)}`)}
       ${divider()}
-      ${para("<em style='color:#94A3B8;font-size:13px;'>This invitation expires in 7 days. If you don't have a Kayad account yet, you'll create one when accepting.</em>")}
+      ${para("<em style='color:#94A3B8;font-size:13px;'>This invitation expires in 7 days. If you don't have a KAYARD KE account yet, you'll create one when accepting.</em>")}
     `,
       "Team Invitation",
     ),
@@ -355,7 +355,7 @@ export const sendVerificationReminderEmail = (email, name, token) => {
   const verifyUrl = `${APP_URL}/verify-email?token=${encodeURIComponent(token)}`;
   return sendEmail({
     to: email,
-    subject: "📧 New verification link — Kayad",
+    subject: "📧 New verification link — KAYARD KE",
     html: layout(
       `
       ${heading("New Verification Link")}
@@ -422,11 +422,11 @@ export const buildVerificationEmail = ({ name, verifyUrl, resend = false }) => (
 });
 
 // STAGE 5B: owner governance emails. The invitation carries a one-time, hashed-at-rest, expiring acceptance link; the notice carries NO link or secret.
-export const buildOwnerInvitationEmail = ({ acceptUrl, kind = "invitation", expiresInHours = 24, invitedBy = "a KAYAD owner", resend = false }) => {
-  const what = kind === "recovery" ? "restore your KAYAD platform-owner access" : "become a KAYAD platform owner";
+export const buildOwnerInvitationEmail = ({ acceptUrl, kind = "invitation", expiresInHours = 24, invitedBy = "a KAYARD KE owner", resend = false }) => {
+  const what = kind === "recovery" ? "restore your KAYARD KE platform-owner access" : "become a KAYARD KE platform owner";
   return {
     subject: `${resend ? "New link: " : ""}${kind === "recovery" ? "Restore your owner access" : "Owner invitation"} — ${APP_NAME}`,
-    text: `You have been asked by ${invitedBy} to ${what}. Open this one-time link, ${kind === "recovery" ? "set a new password and " : ""}confirm that this mailbox is yours: ${acceptUrl} (expires in ${expiresInHours} hours). Owner access is granted only after you complete this step and sign in. If you did not expect this, do not open the link and tell the person who runs your KAYAD platform.`,
+    text: `You have been asked by ${invitedBy} to ${what}. Open this one-time link, ${kind === "recovery" ? "set a new password and " : ""}confirm that this mailbox is yours: ${acceptUrl} (expires in ${expiresInHours} hours). Owner access is granted only after you complete this step and sign in. If you did not expect this, do not open the link and tell the person who runs your KAYARD KE platform.`,
     html: layout(`
       ${heading(kind === "recovery" ? "Restore Owner Access" : "Platform Owner Invitation")}
       ${para(`You have been asked by <strong style="color:#F6FAF9">${esc(invitedBy)}</strong> to ${esc(what)}.`)}

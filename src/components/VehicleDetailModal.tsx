@@ -204,7 +204,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               Vehicle #{notFoundId} Not Available
             </h3>
             <p className="text-xs text-[#64748B] max-w-md mx-auto leading-relaxed">
-              This vehicle may have been sold, unlisted, or completed through the KAYAD Escrow Vault.
+              This vehicle may have been sold, unlisted, or completed through the KAYARD KE Escrow Vault.
             </p>
           </div>
 
@@ -290,7 +290,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
     };
     try {
       if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-        await navigator.share({ title: vehicle.title, text: `${vehicle.title} on KAYAD`, url });
+        await navigator.share({ title: vehicle.title, text: `${vehicle.title} on KAYARD KE`, url });
         return;
       }
     } catch (err) {
@@ -705,11 +705,11 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
           </div>
 
           {/* ==========================================
-              5. BUYER ASSURANCE (KAYAD Transaction Safeguards)
+              5. BUYER ASSURANCE (KAYARD KE Transaction Safeguards)
               ========================================== */}
           {(() => {
             const safeguardItems = [
-              { enabled: Boolean(vehicle.verified), title: '✓ Listing Verified', desc: 'KAYAD verification is recorded' },
+              { enabled: Boolean(vehicle.verified), title: '✓ Listing Verified', desc: 'KAYARD KE verification is recorded' },
               { enabled: Boolean(vehicle.isDealerCertified), title: '✓ Dealer Certified', desc: 'Seller has a dealer certification record' },
               { enabled: Boolean(vehicle.inspectionPassed || vehicle.inspection), title: '✓ Inspection Report', desc: 'Inspection data is available' },
               { enabled: Boolean(vehicle.financeAvailable), title: '✓ Finance Available', desc: 'Financing is offered for this listing' },
@@ -720,7 +720,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               return (
                 <div data-testid="safeguards-empty" className="flex items-start gap-3 rounded-2xl border border-[#D7E7E4] bg-[#F6FAF9] px-4 py-3 text-xs text-[#64748B]">
                   <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#176B87]" aria-hidden="true" />
-                  <p><span className="font-extrabold text-[#0A3340]">KAYAD transaction safeguards:</span> none recorded for this listing yet. Request an inspection before you pay.</p>
+                  <p><span className="font-extrabold text-[#0A3340]">KAYARD KE transaction safeguards:</span> none recorded for this listing yet. Request an inspection before you pay.</p>
                 </div>
               );
             }
@@ -728,7 +728,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               <div className="p-5 sm:p-6 bg-gradient-to-r from-[#0A3340] via-[#176B87] to-[#0A3340] text-white rounded-3xl shadow-md space-y-4 border border-[#91CEC5]/20">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <span className="text-sm font-black text-[#13B8A6] uppercase tracking-wider font-display flex items-center gap-2">
-                    <ShieldCheck className="w-5 h-5 text-[#13B8A6]" /> KAYAD Transaction Safeguards
+                    <ShieldCheck className="w-5 h-5 text-[#13B8A6]" /> KAYARD KE Transaction Safeguards
                   </span>
                   <span className="text-xs text-[#BDE5DE] font-semibold">Only recorded safeguards are shown</span>
                 </div>
@@ -894,7 +894,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               <div className="p-3 bg-[#176B87] text-white rounded-2xl shadow-xs"><FileCheck className="w-6 h-6" aria-hidden="true" /></div>
               <div>
                 <h3 id="vd-inspection-title" className="font-extrabold text-[#12576d] text-base font-display">Pre-purchase inspection</h3>
-                <p className="text-xs text-[#64748B]">Carried out by an independent, verified inspection provider, not by KAYAD.</p>
+                <p className="text-xs text-[#64748B]">Carried out by an independent, verified inspection provider, not by KAYARD KE.</p>
               </div>
             </div>
             <p className="text-sm text-[#12576D]">

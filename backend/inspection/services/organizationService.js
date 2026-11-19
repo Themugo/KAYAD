@@ -153,7 +153,7 @@ export async function listMembers(providerId, standing) {
 export async function inviteMember(actor, providerId, { email, accessRole, title, branchId, ttlHours }) {
   const clean = String(email || '').trim().toLowerCase();
   const user = must(await sb().from('users').select('id').ilike('email', clean).maybeSingle(), 'invitee');
-  if (!user) throw new AppError('No eligible KAYAD account uses that email', 404, { code: 'ORG_USER_NOT_ELIGIBLE' });
+  if (!user) throw new AppError('No eligible KAYARD KE account uses that email', 404, { code: 'ORG_USER_NOT_ELIGIBLE' });
   return orgRpc('kayad_org_member_invite', {
     p_actor: actor, p_provider: providerId, p_user: user.id, p_access_role: accessRole, p_tech_role: title ?? null, p_branch: branchId ?? null,
     p_ttl_hours: Math.min(Math.max(Number(ttlHours) || 168, 1), 720),

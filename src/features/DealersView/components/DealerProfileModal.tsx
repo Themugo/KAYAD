@@ -106,7 +106,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
     const startYear = Number.parseInt(dealer.verifiedSince, 10);
     if (!Number.isFinite(startYear) || startYear < 2000 || startYear > new Date().getFullYear()) return '';
     const diff = new Date().getFullYear() - startYear;
-    return `${diff} ${diff === 1 ? 'Year' : 'Years'} on KAYAD`;
+    return `${diff} ${diff === 1 ? 'Year' : 'Years'} on KAYARD KE`;
   }, [dealer?.verifiedSince]);
 
   // Related Verified Dealers (Same county or Enterprise dealers)
@@ -301,7 +301,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                 <div className="flex items-center gap-2">
                   <Lock className="w-4 h-4 text-[#5AAFA4] shrink-0" />
                   <span className="text-[11px] sm:text-xs">
-                    <strong>KAYAD Private Seller Security:</strong> Use the available contact options and confirm the transaction terms. Escrow applies only when the programme and the specific listing explicitly allow it.
+                    <strong>KAYARD KE Private Seller Security:</strong> Use the available contact options and confirm the transaction terms. Escrow applies only when the programme and the specific listing explicitly allow it.
                   </span>
                 </div>
                 <Badge variant="escrow" size="sm" className="shrink-0 font-bold">
@@ -746,7 +746,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
               {isPrivateSeller && (
                 <div className="p-3.5 bg-[#13B8A6]/10 border border-[#91CEC5]/30 rounded-xl text-[#5AAFA4] font-medium leading-relaxed">
                   <strong className="text-white font-extrabold flex items-center gap-1 mb-0.5">
-                    <Lock className="w-4 h-4 text-[#13B8A6]" /> Concise KAYAD Escrow Notice:
+                    <Lock className="w-4 h-4 text-[#13B8A6]" /> Concise KAYARD KE Escrow Notice:
                   </strong>
                   Escrow applies only when the current programme and this specific listing explicitly allow it. Check the current status and deal terms before paying.
                 </div>
@@ -832,7 +832,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {[
-                  { step: '1', title: 'Contact Seller', desc: 'Use KAYAD messages where available and agree the next steps with the seller.', icon: <MessageSquare className="w-4 h-4 text-[#176B87]" /> },
+                  { step: '1', title: 'Contact Seller', desc: 'Use KAYARD KE messages where available and agree the next steps with the seller.', icon: <MessageSquare className="w-4 h-4 text-[#176B87]" /> },
                   { step: '2', title: 'Book Pre-Purchase Inspection', desc: 'Arrange an independent inspection and confirm the provider scope and credentials.', icon: <FileCheck className="w-4 h-4 text-emerald-600" /> },
                   { step: '3', title: 'Escrow Deposit', desc: 'Only fund escrow if the current programme and listing are eligible and the deal terms are clear.', icon: <Lock className="w-4 h-4 text-[#176B87]" /> },
                   { step: '4', title: 'Physical Inspection & Test Drive', desc: 'Arrange a safe viewing or test drive and independently check the vehicle identifiers.', icon: <Car className="w-4 h-4 text-[#176B87]" /> },
@@ -1161,7 +1161,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                       if (dealerVehicles.length > 0 && onContactSeller) {
                         onContactSeller(dealerVehicles[0]);
                       } else {
-                        setToastMessage('Open the existing KAYAD messaging workflow to contact the seller.');
+                        setToastMessage('Open the existing KAYARD KE messaging workflow to contact the seller.');
                       }
                     }}
                     className="w-full p-3.5 bg-[#176B87] hover:bg-[#0A3340] text-white rounded-xl font-bold flex items-center justify-between transition-colors shadow-sm text-left"
@@ -1169,7 +1169,7 @@ export const DealerProfileModal: React.FC<DealerProfileModalProps> = ({
                     <div className="flex items-center gap-3">
                       <MessageSquare className="w-5 h-5 text-[#5AAFA4]" />
                       <div>
-                        <p className="font-extrabold">Message seller through KAYAD</p>
+                        <p className="font-extrabold">Message seller through KAYARD KE</p>
                         <p className="text-[11px] text-[#BDE5DE]">Response times and message security depend on the available service and account settings.</p>
                       </div>
                     </div>

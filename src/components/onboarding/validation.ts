@@ -25,7 +25,7 @@ export function validateAccount(form: AccountForm, backendRole: 'user' | 'indivi
   if (!form.email.trim()) e.email = 'Enter your email address.';
   else if (!isEmail(form.email)) e.email = 'Enter a valid email address, like name@example.co.ke.';
   if (form.phone.trim() && !isPlausiblePhone(form.phone)) e.phone = 'Enter a valid phone number (9–15 digits).';
-  if (backendRole !== 'user' && !form.phone.trim()) e.phone = 'Enter a phone number so KAYAD can reach you about your approval.';
+  if (backendRole !== 'user' && !form.phone.trim()) e.phone = 'Enter a phone number so KAYARD KE can reach you about your approval.';
   if (!form.password) e.password = 'Create a password.';
   else if (passwordProblems(form.password).length) e.password = `Password needs: ${passwordProblems(form.password).join(', ').toLowerCase()}.`;
   if (backendRole === 'dealer') {

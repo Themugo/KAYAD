@@ -640,7 +640,7 @@ class CommunicationsService {
         channels: ['email', 'in_app'],
         subject_template: 'Your Inspection Report is Ready - {{vehicle_name}}',
         title_template: 'Inspection Complete',
-        body_template: 'Hello {{user_name}},\n\nYour 150-point inspection for {{vehicle_name}} (VIN: {{vin}}) is complete.\n\nResults:\n- Overall Grade: {{grade}}\n- Overall Score: {{score}}/100\n\nView your full report: {{report_url}}\n\nThank you for using KAYAD.',
+        body_template: 'Hello {{user_name}},\n\nYour 150-point inspection for {{vehicle_name}} (VIN: {{vin}}) is complete.\n\nResults:\n- Overall Grade: {{grade}}\n- Overall Score: {{score}}/100\n\nView your full report: {{report_url}}\n\nThank you for using KAYARD KE.',
         variables: [
           { name: 'user_name', required: true, type: 'string' },
           { name: 'vehicle_name', required: true, type: 'string' },

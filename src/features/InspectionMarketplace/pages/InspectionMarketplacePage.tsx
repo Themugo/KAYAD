@@ -180,16 +180,16 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center">
             <h1 className="text-3xl md:text-5xl font-bold mb-3 text-white">Find a verified inspector, garage or specialist</h1>
             <p className="text-base md:text-xl mb-5 max-w-3xl mx-auto text-[#B8EEE7]">
-              Independent automotive businesses, checked by KAYAD, matched to your vehicle and what you need done.
+              Independent automotive businesses, checked by KAYARD KE, matched to your vehicle and what you need done.
             </p>
           </motion.div>
           <div role="note" className="max-w-3xl mx-auto rounded-xl bg-white/10 text-white/90 text-sm px-4 py-3 flex gap-2 items-start">
             <Info size={18} className="mt-0.5 shrink-0" aria-hidden />
-            <p>KAYAD is a technology platform. The businesses listed are independent: they do the work, set their prices and are responsible for it. “Verified” means KAYAD reviewed the evidence shown. It reduces risk but is not a guarantee of any outcome.</p>
+            <p>KAYARD KE is a technology platform. The businesses listed are independent: they do the work, set their prices and are responsible for it. “Verified” means KAYARD KE reviewed the evidence shown. It reduces risk but is not a guarantee of any outcome.</p>
           </div>
           <div className="max-w-2xl mx-auto mt-4 flex flex-col sm:flex-row items-center justify-center gap-2 text-xs text-[#DDF4F0]">
             <span>Run an automotive business?</span>
-            <button type="button" className="font-bold text-[#B8EEE7] hover:text-white underline underline-offset-2 min-h-[44px] px-2" onClick={onApplyAsProvider}>Apply to join KAYAD</button>
+            <button type="button" className="font-bold text-[#B8EEE7] hover:text-white underline underline-offset-2 min-h-[44px] px-2" onClick={onApplyAsProvider}>Apply to join KAYARD KE</button>
           </div>
         </div>
       </header>
@@ -239,7 +239,7 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
           <Chip active={!filters.category} onClick={() => chooseCategory(undefined)}>All services</Chip>
           {(taxonomy?.categories || []).map((c) => (
             <Chip key={c.code} active={filters.category === c.code} onClick={() => chooseCategory(c.code)}>
-              {c.label}{c.bookable ? ' · bookable on KAYAD' : ''}
+              {c.label}{c.bookable ? ' · bookable on KAYARD KE' : ''}
             </Chip>
           ))}
         </div>
@@ -248,11 +248,11 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
           <div className="mt-4 rounded-xl border bg-white px-4 py-3 text-sm" style={{ borderColor: C.line, color: C.soft }}>
             <p><strong style={{ color: C.navy }}>{category.label}.</strong> {category.description}</p>
             {category.bookable ? (
-              <p className="mt-1">You can book and pay for this service through KAYAD. The inspection is carried out by the independent business you choose.</p>
+              <p className="mt-1">You can book and pay for this service through KAYARD KE. The inspection is carried out by the independent business you choose.</p>
             ) : (
-              <p className="mt-1">KAYAD helps you find these businesses but does not take bookings or payments for this service yet. Contact the business directly to arrange the work and agree the price.</p>
+              <p className="mt-1">KAYARD KE helps you find these businesses but does not take bookings or payments for this service yet. Contact the business directly to arrange the work and agree the price.</p>
             )}
-            {category.highRisk && <p className="mt-1">Because high-voltage work is dangerous, only businesses whose qualification KAYAD has verified are listed for this service.</p>}
+            {category.highRisk && <p className="mt-1">Because high-voltage work is dangerous, only businesses whose qualification KAYARD KE has verified are listed for this service.</p>}
           </div>
         )}
 
@@ -260,8 +260,8 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
           <div role="note" className="mt-4 rounded-xl border-2 border-[#BDE5DE] bg-[#F3FAF9] px-4 py-3 text-sm text-[#0A3340] flex gap-2">
             <PhoneCall size={18} className="mt-0.5 shrink-0" aria-hidden />
             <div>
-              <p className="font-semibold">KAYAD does not dispatch, track or guarantee roadside help.</p>
-              <p>These businesses say they travel to vehicles. KAYAD cannot tell you whether anyone is available now or how long they will take: call them directly. If anyone is in danger, call emergency services (999 or 112) first.</p>
+              <p className="font-semibold">KAYARD KE does not dispatch, track or guarantee roadside help.</p>
+              <p>These businesses say they travel to vehicles. KAYARD KE cannot tell you whether anyone is available now or how long they will take: call them directly. If anyone is in danger, call emergency services (999 or 112) first.</p>
               {needsLocationForRoadside && <p className="mt-1">To show only businesses whose stated service area covers where you are, share your location below or enter a county. Without it we cannot say who covers you.</p>}
             </div>
           </div>
@@ -341,7 +341,7 @@ export default function InspectionMarketplacePage({ onViewMyInspections, onApply
       <section className="max-w-7xl mx-auto px-4 pb-12">
         <div className="rounded-xl border bg-white px-5 py-4 text-sm text-[#64748B]" style={{ borderColor: C.line }}>
           <div className="flex gap-2"><Shield size={18} className="mt-0.5 shrink-0 text-[#0F766E]" aria-hidden />
-            <p><span className="font-semibold text-[#12576d]">How businesses get listed:</span> each application is reviewed by a KAYAD administrator against submitted evidence, and only active, verified businesses appear here. “Verified” for a service means an administrator reviewed the evidence for that service; “declared” means the business says so and KAYAD has not verified it. KAYAD does not currently show prices, ratings or availability it has not been given.</p>
+            <p><span className="font-semibold text-[#12576d]">How businesses get listed:</span> each application is reviewed by a KAYARD KE administrator against submitted evidence, and only active, verified businesses appear here. “Verified” for a service means an administrator reviewed the evidence for that service; “declared” means the business says so and KAYARD KE has not verified it. KAYARD KE does not currently show prices, ratings or availability it has not been given.</p>
           </div>
         </div>
       </section>
@@ -380,7 +380,7 @@ function EmptyState({ filters, category, onBroaden, onClearAll }: { filters: Sea
       <Wrench className="mx-auto mb-4" size={56} style={{ color: '#5AAFA4' }} aria-hidden />
       <h3 className="text-xl font-semibold mb-2" style={{ color: C.navy }}>No matching businesses{category ? ` for ${category}` : ''}</h3>
       <p className="max-w-xl mx-auto" style={{ color: C.soft }}>
-        No active, verified business currently matches everything you chose. That does not mean no one can help: it means KAYAD has no listed business that fits every filter. Try widening the search.
+        No active, verified business currently matches everything you chose. That does not mean no one can help: it means KAYARD KE has no listed business that fits every filter. Try widening the search.
       </p>
       <div className="mt-5 flex flex-col sm:flex-row flex-wrap gap-2 justify-center">
         {shown.map((o) => <button key={o.label} type="button" onClick={() => onBroaden(o.patch)} className="px-4 min-h-[44px] rounded-lg border font-medium bg-white text-[#12576D]" style={{ borderColor: C.line }}>{o.label}</button>)}

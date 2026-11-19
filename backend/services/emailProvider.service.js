@@ -6,7 +6,7 @@ import { logWarn } from "../utils/logger.js";
 const config = createServiceConfig("brevo", { circuitBreaker: true });
 
 const getFrom = () => process.env.BREVO_FROM_EMAIL || process.env.EMAIL_FROM || "noreply@kayad.space";
-const getFromName = () => process.env.BREVO_FROM_NAME || "KAYAD";
+const getFromName = () => process.env.BREVO_FROM_NAME || "KAYARD KE";
 
 export const getBrevoConfig = () => ({
   provider: "brevo",

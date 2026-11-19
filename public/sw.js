@@ -1,5 +1,5 @@
 /**
- * KAYAD Mobile Service Worker
+ * KAYARD KE Mobile Service Worker
  * Provides offline support and caching for the mobile automotive marketplace
  */
 
@@ -194,7 +194,7 @@ self.addEventListener('push', (event) => {
 
   const data = event.data.json();
   const options = {
-    body: data.body || 'New update from KAYAD',
+    body: data.body || 'New update from KAYARD KE',
     icon: '/icons/icon-192.png',
     badge: '/icons/badge-72.png',
     vibrate: [100, 50, 100],
@@ -208,7 +208,7 @@ self.addEventListener('push', (event) => {
   };
 
   event.waitUntil(
-    self.registration.showNotification(data.title || 'KAYAD', options)
+    self.registration.showNotification(data.title || 'KAYARD KE', options)
   );
 });
 

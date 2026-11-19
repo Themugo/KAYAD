@@ -34,7 +34,7 @@ export default function Showroom() {
   return (
     <>
       <SEOHead
-        title="Showroom - KAYAD"
+        title="Showroom - KAYARD KE"
         description="Browse our showroom of vehicles"
       />
 

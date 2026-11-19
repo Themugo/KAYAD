@@ -200,7 +200,7 @@ export const TrustBadgeMatrix: React.FC<TrustBadgeMatrixProps> = ({
             <p className="font-bold text-[#5AAFA4] text-xs">
               {isPrivateSeller ? 'Escrow Mandatory' : 'Escrow Vault Enabled'}
             </p>
-            <p className="text-[10px] text-[#BDE5DE]">Funds recorded as held by KAYAD</p>
+            <p className="text-[10px] text-[#BDE5DE]">Funds recorded as held by KAYARD KE</p>
           </div>
         )}
 

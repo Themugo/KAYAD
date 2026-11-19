@@ -34,7 +34,7 @@ export function getDashboardOverview() {
     : 0;
 
   return {
-    title: 'KAYAD Media Event Engine',
+    title: 'KAYARD KE Media Event Engine',
     subtitle: 'Real-Time Auction Broadcasting',
     lastUpdated: new Date().toISOString(),
     status: health.mediaEventEngine.status,

@@ -281,8 +281,8 @@ export const approveApplication = async (req, res) => {
       userId: user._id,
       title: "✅ Inspector Application Approved",
       message: setPasswordLink
-        ? "Welcome to the KAYAD Inspector Network! We have emailed you a link to set your password; use it, then log in to receive inspection assignments."
-        : "Welcome to the KAYAD Inspector Network! Your account is now active. Log in to receive inspection assignments.",
+        ? "Welcome to the KAYARD KE Inspector Network! We have emailed you a link to set your password; use it, then log in to receive inspection assignments."
+        : "Welcome to the KAYARD KE Inspector Network! Your account is now active. Log in to receive inspection assignments.",
       type: "system",
       phone: application.phone,
     }).catch((notificationError) => {
@@ -294,9 +294,9 @@ export const approveApplication = async (req, res) => {
         channel: "email",
         eventType: COMMUNICATION_EVENTS.PASSWORD_RESET,
         recipient: application.email,
-        subject: "Welcome to the KAYAD Inspector Network — set your password",
-        text: `Your KAYAD inspector application was approved. Set your password here (valid 72 hours): ${setPasswordLink}`,
-        html: `<p>Your KAYAD inspector application was approved.</p><p><a href="${escHtml(setPasswordLink)}">Set my password</a> (valid 72 hours)</p>`,
+        subject: "Welcome to the KAYARD KE Inspector Network — set your password",
+        text: `Your KAYARD KE inspector application was approved. Set your password here (valid 72 hours): ${setPasswordLink}`,
+        html: `<p>Your KAYARD KE inspector application was approved.</p><p><a href="${escHtml(setPasswordLink)}">Set my password</a> (valid 72 hours)</p>`,
         metadata: { inspectorInvitation: true },
         idempotencyKey: `inspector-invite:${user.id || user._id}:${application.id || id}`,
       }).catch((e) => logError("Inspector invitation email dispatch failed", e, { userId: user.id, event: "inspector.invitation" }));
@@ -335,7 +335,7 @@ export const rejectApplication = async (req, res) => {
     void sendNotification({
       userId: application.user,
       title: "Inspector Application Update",
-      message: `Your KAYAD Inspector application has been reviewed. ${reviewNotes ? `Notes: ${reviewNotes}` : "Please contact support for details."}`,
+      message: `Your KAYARD KE Inspector application has been reviewed. ${reviewNotes ? `Notes: ${reviewNotes}` : "Please contact support for details."}`,
       type: "system",
       email: application.email,
     }).catch((notificationError) => {

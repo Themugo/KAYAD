@@ -28,4 +28,4 @@ export function validateCompanyName(businessName, { personName } = {}) {
 }
 
 /** The only name shown publicly for a dealer. Never falls back to the personal name of the owner. */
-export const dealerPublicName = (dealer) => String(dealer?.businessName || "").trim() || "KAYAD dealer";
+export const dealerPublicName = (dealer) => String(dealer?.businessName || "").trim() || "KAYARD KE dealer";

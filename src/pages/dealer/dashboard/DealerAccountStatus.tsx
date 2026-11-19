@@ -63,7 +63,7 @@ const DealerAccountStatus: React.FC = () => {
       ) : ent.subscriptionRequired === false ? (
         <p className="mt-1 text-xs text-[#0E4655]"><span className="font-semibold">Listing is free.</span> No plan is needed to publish vehicles. Optional plans may be offered later.</p>
       ) : (
-        <p className="mt-1 text-xs text-[#7A271A]"><span className="font-semibold">No active listing plan.</span> You need one before you can publish vehicles. Contact KAYAD support to have a plan activated.</p>
+        <p className="mt-1 text-xs text-[#7A271A]"><span className="font-semibold">No active listing plan.</span> You need one before you can publish vehicles. Contact KAYARD KE support to have a plan activated.</p>
       ))}
     </div>
   );

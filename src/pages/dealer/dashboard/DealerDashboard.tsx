@@ -178,7 +178,7 @@ const AICopilot = () => (
     <div className="p-4 bg-gradient-to-r from-[#176B87] to-[#13B8A6] text-white">
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center"><Bot className="w-5 h-5" /></div>
-        <div><h3 className="font-bold">AI Dealer Copilot</h3><p className="text-xs text-[#DDF4F0]">KAYAD Intelligence</p></div>
+        <div><h3 className="font-bold">AI Dealer Copilot</h3><p className="text-xs text-[#DDF4F0]">KAYARD KE Intelligence</p></div>
       </div>
     </div>
     <div className="p-6 text-sm text-[#64748B]">
@@ -679,10 +679,10 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
         <div className="p-4 border-b border-[#D7E7E4]">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-[#176B87] to-[#13B8A6] flex items-center justify-center overflow-hidden">
-              {branding.logoType === 'image' && branding.logoUrl ? <img src={branding.logoUrl} alt={branding.logoText || 'KAYAD'} className="w-full h-full object-contain bg-white" /> : branding.logoType === 'text' ? <span className="text-xs font-black text-white">{branding.logoText || 'KAYAD'}</span> : <img src={branding.logoUrl || '/branding/kayad-symbol.svg'} alt={branding.logoText || 'KAYAD'} className="w-full h-full object-contain" onError={(event) => { event.currentTarget.style.display = 'none'; }} />}
+              {branding.logoType === 'image' && branding.logoUrl ? <img src={branding.logoUrl} alt={branding.logoText || 'KAYARD KE'} className="w-full h-full object-contain bg-white" /> : branding.logoType === 'text' ? <span className="text-xs font-black text-white">{branding.logoText || 'KAYARD KE'}</span> : <img src={branding.logoUrl || '/branding/kayad-symbol.svg'} alt={branding.logoText || 'KAYARD KE'} className="w-full h-full object-contain" onError={(event) => { event.currentTarget.style.display = 'none'; }} />}
             </div>
             <div className="min-w-0">
-              <h1 className="font-bold text-[#0A3340] truncate">{branding.logoText || 'KAYAD'}</h1>
+              <h1 className="font-bold text-[#0A3340] truncate">{branding.logoText || 'KAYARD KE'}</h1>
               <p className="text-xs text-[#64748B] truncate">{user?.businessName || user?.name || 'Dealer account'}</p>
             </div>
           </div>
@@ -1224,7 +1224,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
             <div className="space-y-4">
               <div>
                 <h2 className="text-xl font-bold text-[#0A3340]">Escrow transactions</h2>
-                <p className="mt-1 text-sm text-[#64748B]">View and manage only the deals associated with your authenticated account. Available actions are supplied by KAYAD’s backend.</p>
+                <p className="mt-1 text-sm text-[#64748B]">View and manage only the deals associated with your authenticated account. Available actions are supplied by KAYARD KE’s backend.</p>
               </div>
               <ParticipantEscrowDesk key={user?.id ?? 'signed-out'} initialEscrowId={new URLSearchParams(window.location.search).get('escrowId')} onNavigate={onNavigate} />
             </div>

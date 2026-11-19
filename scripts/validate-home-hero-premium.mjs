@@ -3,19 +3,20 @@ import fs from 'node:fs';
 const file = 'src/features/VehicleMarketplace/components/VehicleMarketplace.tsx';
 const heroVehicleSource = fs.readFileSync('src/features/VehicleMarketplace/components/HeroDesktopVehicle.tsx', 'utf8');
 const source = fs.readFileSync(file, 'utf8');
+const ph = fs.readFileSync('src/components/home/PremiumHero.tsx', 'utf8');
 
 const checks = [
-  ['continuous hero stage remains canonical', source.includes('w-screen overflow-hidden') && source.includes('heroBackgroundStyle')],
+  ['continuous hero stage remains canonical', ph.includes('w-screen') && ph.includes('overflow-hidden') && source.includes('heroBackgroundStyle')],
   ['full Nairobi background remains configurable', source.includes('backgroundUrl') && source.includes('backgroundScalePct')],
   ['Drive Your Dream headline remains canonical', source.includes('Drive Your Dream') && source.includes('Today')],
   ['desktop featured vehicle subject remains data-driven as a single-vehicle slide', source.includes('heroImageForVehicle(heroLeftVehicle)') && source.includes('heroSourceVehicles.map((vehicle) => [vehicle])')],
   ['approved cutout showcase assets are configured', source.includes('kayad-land-cruiser-cutout.png') && source.includes('kayad-mercedes-gle-cutout.png')],
-  ['vehicle info cards are contained within vehicle stages', (source + heroVehicleSource).includes('overflow-hidden') && heroVehicleSource.includes('max-w-[calc(100%-2rem)]')],
-  ['center card remains configurable', source.includes('cardScalePct') && source.includes('cardWidthPct')],
-  ['admin-controlled vehicle positioning remains wired', source.includes('leftVehicleNudgePct') && source.includes('rightVehicleNudgePct')],
-  ['existing single-vehicle carousel controls remain wired', source.includes('Previous featured vehicle') && source.includes('Next featured vehicle') && source.includes('changeHeroPair(heroPairIndex + 1)')],
-  ['mobile hero has its own responsive composition', source.includes('KAYAD mobile hero') && source.includes('grid items-stretch gap-1') && source.includes('hero-pair-image-stage') && !source.includes('min-h-[620px]')],
-  ['mobile hero preserves the canonical headline and CTAs', source.includes('Explore Vehicles') && source.includes('How It Works')],
+  ['vehicle info chip is contained within the stage', ph.includes('kk-hero__caption')],
+  ['hero CTA colours remain configurable', source.includes('primaryColor={heroPresentation.primaryButtonColor}')],
+  ['premium hero is the single hero component', source.includes('<PremiumHero')],
+  ['existing single-vehicle carousel controls remain wired', ph.includes('Previous featured vehicle') && ph.includes('Next featured vehicle') && source.includes('changeHeroPair(heroPairIndex + 1)')],
+  ['hero has its own responsive composition', ph.includes('kk-hero__stage') && fs.readFileSync('src/components/home/premium-hero.css','utf8').includes('@media (min-width: 1024px)')],
+  ['hero preserves the canonical headline and CTAs', source.includes('Explore Vehicles') && source.includes('Sell Your Vehicle')],
   ['existing search bridge remains below hero', source.includes('2. SEARCH BRIDGE') && source.includes('Hero maximum price filter')],
 ];
 

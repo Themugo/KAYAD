@@ -351,7 +351,7 @@ export function SessionRecovery() {
   const { sessionError, retrySession } = useAuth();
   const loc = useLocation();
   const detail = sessionError?.kind === 'network'
-    ? 'We could not reach the KAYAD servers. Check your connection.'
+    ? 'We could not reach the KAYARD KE servers. Check your connection.'
     : sessionError?.kind === 'server'
       ? `The service is temporarily unavailable${sessionError.status ? ` (error ${sessionError.status})` : ''}.`
       : sessionError?.kind === 'rate_limited'

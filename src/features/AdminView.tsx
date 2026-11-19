@@ -419,7 +419,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
     <div className="mx-auto w-full min-w-0 max-w-[1600px] space-y-5 sm:space-y-6" data-testid="admin-command-centre">
       <section aria-labelledby="admin-command-centre-title" className="kayad-command-hero">
         <div className="kayad-command-hero-content">
-          <div className="kayad-command-eyebrow"><ShieldCheck size={15} aria-hidden="true" /> KAYAD BUSINESS COMMAND CENTRE</div>
+          <div className="kayad-command-eyebrow"><ShieldCheck size={15} aria-hidden="true" /> KAYARD KE BUSINESS COMMAND CENTRE</div>
           <h1 id="admin-command-centre-title">Welcome back, <span>{(typeof sessionUser?.name === 'string' ? sessionUser.name.trim() : '') || 'Administrator'}</span></h1>
           <p className="kayad-command-intro">Oversee your marketplace, team, operations and systems — all from one portal.</p>
           <div className="kayad-command-identity" aria-label="Authenticated administrator">

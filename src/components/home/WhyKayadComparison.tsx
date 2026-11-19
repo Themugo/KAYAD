@@ -46,15 +46,15 @@ export const WhyKayadComparison: FC = () => {
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/20 text-[#13B8A6] font-mono font-black text-xs uppercase tracking-wider">
             <Award className="w-4 h-4 text-[#13B8A6]" />
-            <span>THE UNMATCHED KAYAD SECURITY ADVANTAGE</span>
+            <span>THE UNMATCHED KAYARD KE SECURITY ADVANTAGE</span>
           </div>
 
           <h2 className="text-3xl sm:text-5xl font-black font-serif tracking-tight text-white leading-tight">
-            Why Kenya Chooses KAYAD
+            Why Kenya Chooses KAYARD KE
           </h2>
 
           <p className="text-xs sm:text-sm text-[#BDE5DE] font-sans font-medium leading-relaxed max-w-2xl mx-auto">
-            See how KAYAD brings vehicle listings, seller conversations, inspection options and deal information together in one marketplace.
+            See how KAYARD KE brings vehicle listings, seller conversations, inspection options and deal information together in one marketplace.
           </p>
         </div>
 
@@ -70,7 +70,7 @@ export const WhyKayadComparison: FC = () => {
             </div>
             <div className="text-[#13B8A6] flex items-center gap-2 mt-2 md:mt-0 pt-2 md:pt-0 border-t md:border-t-0 border-white/10">
               <Shield className="w-4 h-4 text-[#13B8A6]" />
-              <span>KAYAD Marketplace</span>
+              <span>KAYARD KE Marketplace</span>
             </div>
           </div>
 
@@ -92,7 +92,7 @@ export const WhyKayadComparison: FC = () => {
                   <span>{row.traditional}</span>
                 </div>
 
-                {/* KAYAD */}
+                {/* KAYARD KE */}
                 <div className="flex items-start gap-2 text-xs sm:text-sm text-[#13B8A6] font-sans font-bold bg-[#13B8A6]/10 p-2.5 rounded-2xl border border-[#13B8A6]/20">
                   <Check className="w-4 h-4 text-[#13B8A6] shrink-0 mt-0.5 stroke-[3]" />
                   <span>{row.kayad}</span>

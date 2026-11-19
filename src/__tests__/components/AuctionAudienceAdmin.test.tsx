@@ -42,16 +42,16 @@ describe('winner handover panel', () => {
     expect(await screen.findByText(/KES 95,000/)).toBeInTheDocument();
     expect(screen.queryByText(/directly with/)).toBeNull();
   });
-  it('after payment shows the dealer contact as a tap-to-call link and says KAYAD is not part of it', async () => {
+  it('after payment shows the dealer contact as a tap-to-call link and says KAYARD KE is not part of it', async () => {
     e.handover.mockResolvedValue({ handover: { steps: steps('done', 'current'), contact: { name: 'Kenya Motors', phone: '0722000111' }, coordinatedByKayad: false } });
     render(<WinnerHandoverPanel auctionId="a1" />);
-    expect(await screen.findByText(/KAYAD is not part of that arrangement/)).toBeInTheDocument();
+    expect(await screen.findByText(/KAYARD KE is not part of that arrangement/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /0722000111/ })).toHaveAttribute('href', 'tel:0722000111');
   });
   it('private seller: no phone, a safety note instead', async () => {
     e.handover.mockResolvedValue({ handover: { steps: steps('done', 'current'), contact: null, coordinatedByKayad: true } });
     render(<WinnerHandoverPanel auctionId="a1" />);
-    expect(await screen.findByText(/KAYAD coordinates collection/)).toBeInTheDocument();
+    expect(await screen.findByText(/KAYARD KE coordinates collection/)).toBeInTheDocument();
     expect(screen.queryByRole('link')).toBeNull();
   });
   it('renders nothing if the handover cannot be loaded', async () => {

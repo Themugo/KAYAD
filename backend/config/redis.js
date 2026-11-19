@@ -20,7 +20,7 @@ if (isProduction && process.env.DISABLE_REDIS === "true") {
   throw new Error("Production Redis cannot be disabled. Remove DISABLE_REDIS=true and configure the managed REDIS_URL.");
 }
 if (isProduction && !redisUrl) {
-  throw new Error("Production Redis requires REDIS_URL. Configure the managed KAYAD Redis service before deployment.");
+  throw new Error("Production Redis requires REDIS_URL. Configure the managed KAYARD KE Redis service before deployment.");
 }
 
 // Temporarily disable Redis auto-connect for debugging

@@ -74,7 +74,7 @@ export const SERVICE_CATEGORIES = Object.freeze([
   },
   {
     code: 'hybrid_ev', label: 'Hybrid and electric vehicles', line: 'owning',
-    description: 'High-voltage systems. Only shown as capable once KAYAD has verified the qualification.',
+    description: 'High-voltage systems. Only shown as capable once KAYARD KE has verified the qualification.',
     highRisk: true, bookable: false, requestable: false, usesLocation: true,
     appliesToPowertrains: ['hybrid', 'plug_in_hybrid', 'electric'],
     subcategories: [
@@ -123,7 +123,7 @@ export const SERVICE_CATEGORIES = Object.freeze([
   },
   {
     code: 'roadside_recovery', label: 'Roadside assistance and recovery', line: 'roadside',
-    description: 'Providers who say they travel to a broken-down vehicle. KAYAD does not dispatch them.',
+    description: 'Providers who say they travel to a broken-down vehicle. KAYARD KE does not dispatch them.',
     highRisk: false, bookable: false, requestable: false, usesLocation: true, travelsToCustomer: true,
     subcategories: [
       { code: 'towing_recovery', label: 'Towing and recovery' },

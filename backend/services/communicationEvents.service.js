@@ -81,7 +81,7 @@ export async function emitAuctionOutcome({ carId, winnerUserId, winnerAmount, ca
     userId,
     eventType: COMMUNICATION_EVENTS.AUCTION_LOST,
     title: "Auction ended",
-    message: `${carTitle || "The vehicle"} auction has ended. Your bid was not the winning bid. If you paid a bid commitment, open the auction page to refund it to your KAYAD wallet or your M-Pesa.`,
+    message: `${carTitle || "The vehicle"} auction has ended. Your bid was not the winning bid. If you paid a bid commitment, open the auction page to refund it to your KAYARD KE wallet or your M-Pesa.`,
     channels: ["in_app", "email", "sms"],
     metadata: { carId },
   }));

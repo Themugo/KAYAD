@@ -91,7 +91,7 @@ export default function ReportButton({ targetType, targetId, onReported }: Repor
                   Report this {targetType}
                 </p>
                 <p className="font-sans text-xs text-warm-400">
-                  Help us keep KAYAD safe and trustworthy.
+                  Help us keep KAYARD KE safe and trustworthy.
                 </p>
               </div>
 

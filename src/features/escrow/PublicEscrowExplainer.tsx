@@ -16,18 +16,18 @@ interface Props {
 
 const STEPS: Array<{ title: string; body: string }> = [
   { title: 'Check that escrow applies', body: 'Check both the current programme status and the individual listing. Escrow applies only to approved vehicles and sellers; if the programme is paused, no new purchase is escrow-protected even if an older listing still shows an Escrow badge.' },
-  { title: 'Fund the escrow', body: 'The buyer pays using the funding method shown for that deal. A payment you have started is not a payment KAYAD has confirmed — the escrow is marked funded only after KAYAD’s records show the money received.' },
-  { title: 'Inspect and accept', body: 'Before accepting, check the vehicle against the listing. You can arrange an independent inspection through KAYAD. Accepting tells KAYAD you are satisfied; it does not pay the seller on its own.' },
+  { title: 'Fund the escrow', body: 'The buyer pays using the funding method shown for that deal. A payment you have started is not a payment KAYARD KE has confirmed — the escrow is marked funded only after KAYARD KE’s records show the money received.' },
+  { title: 'Inspect and accept', body: 'Before accepting, check the vehicle against the listing. You can arrange an independent inspection through KAYARD KE. Accepting tells KAYARD KE you are satisfied; it does not pay the seller on its own.' },
   { title: 'Seller confirms delivery', body: 'After the buyer has accepted the vehicle, the seller confirms the handover.' },
   { title: 'Release', body: 'Release follows the rules published for that deal and the authorized transaction process. If a dispute is recorded, the release path is paused while the case is reviewed. Check the current status and terms in your authenticated deal view.' },
-  { title: 'Payout and closing', body: 'Releasing an escrow and paying the seller are separate steps. Closing is KAYAD’s administrative record that the escrow is finished.' },
+  { title: 'Payout and closing', body: 'Releasing an escrow and paying the seller are separate steps. Closing is KAYARD KE’s administrative record that the escrow is finished.' },
 ];
 
 const NOT_PROMISED: string[] = [
-  'Escrow is not insurance, and it is not an automatic refund promise. A refund happens only when KAYAD staff approve one through the dispute process.',
-  'KAYAD does not inspect a vehicle for you unless you book an inspection, and an escrow badge says nothing about the vehicle’s condition.',
+  'Escrow is not insurance, and it is not an automatic refund promise. A refund happens only when KAYARD KE staff approve one through the dispute process.',
+  'KAYARD KE does not inspect a vehicle for you unless you book an inspection, and an escrow badge says nothing about the vehicle’s condition.',
   'Escrow does not transfer ownership. Collection and ownership transfer are separate steps recorded by the seller.',
-  'This page does not represent KAYAD as a bank, insurer or licensed trust-account provider. Contact Support before paying if you need clarification about the custody arrangement for a specific transaction.',
+  'This page does not represent KAYARD KE as a bank, insurer or licensed trust-account provider. Contact Support before paying if you need clarification about the custody arrangement for a specific transaction.',
 ];
 
 export const PublicEscrowExplainer: React.FC<Props> = ({ program, signedIn, onRetryProgram, onOpenAuth, onOpenDashboard, onNavigate }) => (
@@ -96,8 +96,8 @@ export const HowDealsStart: React.FC<{ signedIn: boolean; onOpenDashboard: () =>
     <p className="text-sm text-[#12576D] leading-relaxed">You can’t open an escrow manually from this page. When the programme is enabled, a deal is created by an approved purchase or auction-settlement workflow for an eligible vehicle, then appears in each party’s authenticated escrow area. If the programme is paused, do not assume a new purchase is escrow-protected.</p>
     <ul className="list-disc pl-5 text-sm text-[#12576D] space-y-1">
       <li>Check the listing for the Escrow badge before you pay anyone.</li>
-      <li>Agree the price and handover details with the seller in KAYAD messages, so the conversation is on the record.</li>
-      <li>If you have paid for an escrow vehicle and no deal appears, contact KAYAD support with your payment reference; do not pay a second time.</li>
+      <li>Agree the price and handover details with the seller in KAYARD KE messages, so the conversation is on the record.</li>
+      <li>If you have paid for an escrow vehicle and no deal appears, contact KAYARD KE support with your payment reference; do not pay a second time.</li>
     </ul>
     {signedIn
       ? <button type="button" onClick={onOpenDashboard} className="min-h-[44px] px-4 rounded-xl bg-[#176B87] text-white text-sm font-bold hover:bg-[#12556b]">Open your dashboard</button>

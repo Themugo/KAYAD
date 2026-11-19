@@ -141,7 +141,7 @@ function ProfileSection({ userId }: { userId: string }) {
         ) : (
           <p className="text-sm text-[#0A3340]" data-testid="verification-stage">{STAGE_LABELS[verification.stage] || STAGE_LABELS.unknown}</p>
         )}
-        <p className="text-xs text-[#475569] mt-1">Approval is decided by KAYAD staff. This card is read-only.</p>
+        <p className="text-xs text-[#475569] mt-1">Approval is decided by KAYARD KE staff. This card is read-only.</p>
       </section>
 
       <section aria-labelledby="profile-heading">
@@ -272,7 +272,7 @@ function NotificationsSection() {
 
   return (
     <form onSubmit={save} noValidate aria-label="Notification settings" className="space-y-5 max-w-2xl">
-      <p className="text-sm text-[#475569]">Choose how KAYAD reaches you. Security codes and essential account notices are always sent.</p>
+      <p className="text-sm text-[#475569]">Choose how KAYARD KE reaches you. Security codes and essential account notices are always sent.</p>
       {saveError && <div role="alert" className="flex items-start gap-2 p-3 rounded-lg bg-[#FEF3F2] border border-[#FDA29B] text-sm text-[#7A271A]"><AlertCircle className="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true" />{saveError}</div>}
       {saved && <p role="status" className="flex items-center gap-2 p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-sm text-emerald-900"><CheckCircle2 className="w-4 h-4" aria-hidden="true" />Notification settings saved.</p>}
       <table className="w-full">
@@ -337,21 +337,21 @@ function PlanSection() {
           <div>
             <p className="text-sm font-medium text-[#0A3340] mb-1">Listings used: {used}{ent.unlimitedListings ? ' (unlimited)' : ` of ${max}`}</p>
             {!ent.unlimitedListings && max > 0 && <div className="h-2 rounded-full bg-[#EEF7F5] overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={max} aria-valuenow={used} aria-label="Listings used"><div className="h-full bg-[#176B87]" style={{ width: `${pct}%` }} /></div>}
-            {ent.locked && <p role="alert" className="mt-2 text-sm text-[#7A271A]">New listings are currently locked on your account. Contact KAYAD support.</p>}
+            {ent.locked && <p role="alert" className="mt-2 text-sm text-[#7A271A]">New listings are currently locked on your account. Contact KAYARD KE support.</p>}
           </div>
         </>
       ) : ent.subscriptionRequired === false ? (
         <div className="p-4 rounded-xl bg-[#ECFDF3] border border-[#ABEFC6]">
           <p className="font-semibold text-[#067647]">Listing is free</p>
-          <p className="text-sm text-[#067647]">You can publish vehicles without a plan. KAYAD may offer optional plans later.</p>
+          <p className="text-sm text-[#067647]">You can publish vehicles without a plan. KAYARD KE may offer optional plans later.</p>
         </div>
       ) : (
         <div role="alert" className="p-4 rounded-xl bg-[#FEF3F2] border border-[#FDA29B]">
           <p className="font-semibold text-[#7A271A]">No active listing plan</p>
-          <p className="text-sm text-[#7A271A]">You cannot publish vehicles until a plan is active. Contact KAYAD support to have a plan activated.</p>
+          <p className="text-sm text-[#7A271A]">You cannot publish vehicles until a plan is active. Contact KAYARD KE support to have a plan activated.</p>
         </div>
       )}
-      <p className="text-xs text-[#475569]">Plans are managed by KAYAD. This page is read-only.</p>
+      <p className="text-xs text-[#475569]">Plans are managed by KAYARD KE. This page is read-only.</p>
     </div>
   );
 }

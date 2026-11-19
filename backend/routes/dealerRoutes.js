@@ -858,9 +858,9 @@ router.post(
       eventType: "dealer.team_invite",
       category: "transactional",
       recipient: email.toLowerCase().trim(),
-      subject: `You've been invited to ${req.user.name || "a KAYAD dealer team"}`,
-      text: `You have been invited to join a KAYAD dealer team as ${role}. Use your invitation token to complete onboarding: ${token}`,
-      html: `<p>You have been invited to join a KAYAD dealer team as <strong>${role}</strong>.</p><p>Use your invitation token to complete onboarding.</p>`,
+      subject: `You've been invited to ${req.user.name || "a KAYARD KE dealer team"}`,
+      text: `You have been invited to join a KAYARD KE dealer team as ${role}. Use your invitation token to complete onboarding: ${token}`,
+      html: `<p>You have been invited to join a KAYARD KE dealer team as <strong>${role}</strong>.</p><p>Use your invitation token to complete onboarding.</p>`,
       metadata: { dealerId: req.user.id, role, inviteToken: token },
     }).catch((e) => console.warn("⚠️ Team invite communication failed:", e.message));
 

@@ -156,14 +156,14 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
             <p className="text-sm font-bold text-[#176B87]">Ksh {Math.round(totalCost).toLocaleString()}</p>
           </div>
         </div>
-        <p className="text-[10px] text-[#64748B] mt-2">Illustration only. The rate is an editable assumption, not a KAYAD offer or a quote from a lender. Actual rates, fees, eligibility and terms must be confirmed with the lender.</p>
+        <p className="text-[10px] text-[#64748B] mt-2">Illustration only. The rate is an editable assumption, not a KAYARD KE offer or a quote from a lender. Actual rates, fees, eligibility and terms must be confirmed with the lender.</p>
       </section>
 
       {mode === 'public' && (
         <section className="bg-white border border-[#D7E7E4] rounded-2xl p-5 space-y-4">
           <div>
-            <h2 className="text-sm font-bold text-[#176B87]">How vehicle financing works through KAYAD</h2>
-            <p className="mt-2 text-sm leading-6 text-[#64748B]">KAYAD can record a financing request and show the status recorded by its backend. KAYAD is not a lender, and a submitted request is not an approval or a lender offer.</p>
+            <h2 className="text-sm font-bold text-[#176B87]">How vehicle financing works through KAYARD KE</h2>
+            <p className="mt-2 text-sm leading-6 text-[#64748B]">KAYARD KE can record a financing request and show the status recorded by its backend. KAYARD KE is not a lender, and a submitted request is not an approval or a lender offer.</p>
           </div>
           <ul className="list-disc space-y-2 pl-5 text-sm leading-6 text-[#64748B]">
             <li>Verified lender offers, rates and fees are not currently displayed on this page.</li>

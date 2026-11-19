@@ -435,7 +435,7 @@ class BookingService {
     // while merely calculating and returning a notional refund amount.
     if (booking.payment_status !== 'pending') {
       throw new AppError(
-        'This booking has a payment record and cannot be cancelled through self-service. Contact KAYAD Support for a reviewed refund.',
+        'This booking has a payment record and cannot be cancelled through self-service. Contact KAYARD KE Support for a reviewed refund.',
         409,
         { paymentStatus: booking.payment_status || null, refundInitiated: false }
       );
@@ -458,7 +458,7 @@ class BookingService {
 
     if (!cancelledRows.length) {
       throw new AppError(
-        'The booking changed while cancellation was being processed. Refresh the booking and contact KAYAD Support if payment was made.',
+        'The booking changed while cancellation was being processed. Refresh the booking and contact KAYARD KE Support if payment was made.',
         409,
         { refundInitiated: false }
       );

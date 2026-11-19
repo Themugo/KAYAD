@@ -74,7 +74,7 @@ class ProviderService {
       const current = await db.findById(providersCollection, providerId);
       if (!current) throw new AppError('Provider not found', 404);
       if (['ACTIVE', 'SUSPENDED'].includes(current.lifecycle_stage)) {
-        throw new AppError('Business identity cannot be changed after verification. Contact KAYAD to correct it.', 409);
+        throw new AppError('Business identity cannot be changed after verification. Contact KAYARD KE to correct it.', 409);
       }
     }
 

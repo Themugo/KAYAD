@@ -47,7 +47,7 @@ export default function SellerCapabilityPanel({ capability, loading, error, onRe
   const reason = capability.application?.reviewReason;
 
   if (capability.packageMode && capability.packageMode !== 'free') {
-    return shell(<p className="mt-2 text-xs text-[#0A3340]" role="status">KAYAD has configured a paid seller-package mode, but package checkout is not available yet. Selling actions remain unavailable until the package catalogue and verified payment flow are launched.</p>, 'border-[#F2D6A2] bg-[#FFFAF0]');
+    return shell(<p className="mt-2 text-xs text-[#0A3340]" role="status">KAYARD KE has configured a paid seller-package mode, but package checkout is not available yet. Selling actions remain unavailable until the package catalogue and verified payment flow are launched.</p>, 'border-[#F2D6A2] bg-[#FFFAF0]');
   }
 
   if (status === 'approved') {
@@ -83,7 +83,7 @@ export default function SellerCapabilityPanel({ capability, loading, error, onRe
       <label className="text-xs font-bold text-[#0A3340]">What will you sell? (optional)
         <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} className="mt-1 w-full rounded-xl border border-[#D7E7E4] px-3 py-2 text-sm font-normal" />
       </label>
-      <label className="flex items-start gap-2 text-xs text-[#0A3340] sm:col-span-2"><input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} className="mt-0.5" /> I confirm the vehicles I list are mine to sell and accept the KAYAD seller terms.</label>
+      <label className="flex items-start gap-2 text-xs text-[#0A3340] sm:col-span-2"><input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} className="mt-0.5" /> I confirm the vehicles I list are mine to sell and accept the KAYARD KE seller terms.</label>
       {formError && <p role="alert" className="text-xs font-bold text-rose-700 sm:col-span-2">{formError}</p>}
       <div className="sm:col-span-2"><button type="submit" disabled={busy || !terms || phone.trim().length < 9} className="inline-flex items-center gap-2 rounded-xl bg-[#0A3340] px-3 py-2 text-xs font-bold text-white disabled:opacity-50"><ClipboardCheck size={14} aria-hidden="true" /> {busy ? 'Submitting…' : 'Apply to sell'}</button></div>
     </form>

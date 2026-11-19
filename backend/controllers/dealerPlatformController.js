@@ -618,7 +618,7 @@ const INVITE_TTL_MS = 7 * 86400000;
 // Sends the invitation e-mail and reports what really happened (the provider returns {success:false} rather than throwing).
 async function deliverInvite(email, inviterName, roleLabel, token) {
   try {
-    const r = await sendTeamInviteEmail(email, inviterName || "KAYAD Dealer", roleLabel, token);
+    const r = await sendTeamInviteEmail(email, inviterName || "KAYARD KE Dealer", roleLabel, token);
     if (r && r.success === true) return { sent: true };
     return { sent: false, reason: r?.disabled ? "Email sending is not configured on the server." : "The email provider did not accept the message." };
   } catch (err) {

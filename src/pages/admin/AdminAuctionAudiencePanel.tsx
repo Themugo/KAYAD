@@ -31,7 +31,7 @@ export default function AdminAuctionAudiencePanel() {
     <section aria-label="Auction audience and custody" data-testid="admin-audience-panel" style={{ marginTop: 32 }} className="space-y-6">
       <div>
         <h2 className="text-lg font-semibold">Dealer collection accounts awaiting verification</h2>
-        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Check the owner against the dealer&rsquo;s verified business before approving. Until approved, KAYAD holds the commitment.</p>
+        <p className="text-sm" style={{ color: 'var(--text-muted)' }}>Check the owner against the dealer&rsquo;s verified business before approving. Until approved, KAYARD KE holds the commitment.</p>
         {accounts === null ? <p aria-busy="true">Loading…</p> : accounts.length === 0 ? <p className="text-sm">Nothing waiting.</p> : (
           <ul className="space-y-2">{accounts.map((a) => (
             <li key={a.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border p-3">

@@ -222,32 +222,30 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     vehicleApiMocks.campaignIds.mockResolvedValue(['camp-a', 'camp-b']);
     vehicleApiMocks.getCarById.mockImplementation(async (id: string) => (id === 'camp-a' ? car('camp-a', 'Campaign', 'Alpha') : car('camp-b', 'Campaign', 'Bravo')));
     await renderMarketplace({ ...baseProps });
-    const view = within(screen.getByLabelText('KAYAD mobile hero'));
-    await waitFor(() => expect(view.getByText('Campaign Alpha')).toBeTruthy());
-    expect(view.queryByText('Campaign Bravo')).toBeNull();          // compact hero: the second campaign vehicle is the next slide
+    const view = within(screen.getByTestId('premium-hero'));
+    await waitFor(() => expect(view.getAllByText(/Campaign Alpha/)[0]).toBeTruthy());
+    expect(view.queryByText(/Campaign Bravo/)).toBeNull();          // compact hero: the second campaign vehicle is the next slide
     await waitFor(() => expect(view.getAllByRole('button', { name: /^Show featured vehicle \d+ of 2$/ }).length).toBe(2));
     fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
-    expect(view.getByText('Campaign Bravo')).toBeTruthy();
-    expect(view.queryByText('Campaign Alpha')).toBeNull();
-    expect(view.queryByText(`${INITIAL_VEHICLES[0].make} ${INITIAL_VEHICLES[0].model}`)).toBeNull();
+    expect(view.getAllByText(/Campaign Bravo/)[0]).toBeTruthy();
+    expect(view.queryByText(/Campaign Alpha/)).toBeNull();
+    expect(view.queryByText(new RegExp(`${INITIAL_VEHICLES[0].make} ${INITIAL_VEHICLES[0].model}`))).toBeNull();
   });
 
   it('with no running campaign the hero keeps its normal featured selection', async () => {
     await renderMarketplace({ ...baseProps });
-    const view = within(screen.getByLabelText('KAYAD mobile hero'));
-    expect(view.getByText(`${INITIAL_VEHICLES[0].make} ${INITIAL_VEHICLES[0].model}`)).toBeTruthy();
+    const view = within(screen.getByTestId('premium-hero'));
+    expect(view.getAllByText(new RegExp(`${INITIAL_VEHICLES[0].make} ${INITIAL_VEHICLES[0].model}`))[0]).toBeTruthy();
   });
 
-  it('desktop hero captions sit beneath each vehicle, never positioned over it', async () => {
+  it('the hero vehicle is eager-loaded, contained and its controls sit outside the vehicle button', async () => {
     await renderMarketplace({ ...baseProps });
-    const stages = screen.getAllByTestId('hero-desktop-vehicle');
-    expect(stages.length).toBeGreaterThanOrEqual(1);
-    for (const stage of stages) {
-      const caption = Array.from(stage.children).find((c) => /rounded-2xl/.test(c.className));
-      if (caption) { expect(caption.className).not.toMatch(/\babsolute\b/); expect(caption.className).toMatch(/\bmt-\d/); }
-      const img = stage.querySelector('img');
-      expect(img?.className).toMatch(/object-contain/);
-    }
+    const stage = screen.getByTestId('hero-stage');
+    const vehicle = within(stage).getByTestId('hero-vehicle');
+    const img = vehicle.querySelector('img');
+    expect(img?.getAttribute('loading')).toBe('eager');
+    expect(img?.className).toMatch(/kk-hero__img/);
+    expect(within(vehicle).queryByRole('button')).toBeNull();
   });
 
   it('year and price choices come from the Super Admin search settings, not fixed values', async () => {
@@ -293,46 +291,42 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
 
   it('a featured card whose image fails keeps its label over a neutral placeholder (no broken-image icon)', async () => {
     await renderMarketplace({ ...baseProps });
-    const pair = within(screen.getByLabelText('KAYAD mobile hero'));
+    const pair = within(screen.getByTestId('premium-hero'));
     const name = `${INITIAL_VEHICLES[0].make} ${INITIAL_VEHICLES[0].model}`;
     fireEvent.error(pair.getByRole('img', { name: new RegExp(name) }));
-    await waitFor(() => expect(pair.getByRole('img', { name: new RegExp(`Photo of ${name} is unavailable`) })).toBeTruthy());
-    expect(pair.getByText(name)).toBeTruthy();
+    await waitFor(() => expect(pair.getByRole('img', { name: new RegExp(`Photo of .*${name}.* is unavailable`) })).toBeTruthy());
+    expect(pair.getAllByText(new RegExp(name))[0]).toBeTruthy();
   });
 
   describe('mobile hero composition (canonical hero collection, one vehicle per slide)', () => {
-    const mobileHero = () => screen.getByLabelText('KAYAD mobile hero');
+    const mobileHero = () => screen.getByTestId('premium-hero');
 
     it('shows one featured vehicle per slide and changes slide using the existing controls', async () => {
       const name = (n: number) => `${INITIAL_VEHICLES[n].make} ${INITIAL_VEHICLES[n].model}`;
       await renderMarketplace({ ...baseProps });
       const view = within(mobileHero());
-      expect(view.getByText(name(0))).toBeTruthy();
-      expect(view.queryByText(name(1))).toBeNull();
+      expect(view.getAllByText(new RegExp(name(0)))[0]).toBeTruthy();
+      expect(view.queryByText(new RegExp(name(1)))).toBeNull();
       expect(view.getAllByRole('img').length).toBe(1);
       expect(view.getByRole('img', { name: new RegExp(name(0)) })).toBeTruthy();
-      expect(view.getByTestId('hero-mobile-stage').getAttribute('data-hero-composition')).toBe('single');
 
       if (INITIAL_VEHICLES.length > 1) {
         await waitFor(() => expect(view.getAllByRole('button', { name: /^Show featured vehicle \d+ of \d+$/ }).length).toBe(INITIAL_VEHICLES.length));
         fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
-        expect(view.getByText(name(1))).toBeTruthy();
-        expect(view.queryByText(name(0))).toBeNull();
+        expect(view.getAllByText(new RegExp(name(1)))[0]).toBeTruthy();
+        expect(view.queryByText(new RegExp(name(0)))).toBeNull();
         fireEvent.click(view.getByRole('button', { name: 'Previous featured vehicle' }));
-        expect(view.getByText(name(0))).toBeTruthy();
+        expect(view.getAllByText(new RegExp(name(0)))[0]).toBeTruthy();
       }
     });
 
-    it('keeps the pair images contained and places the navigation controls outside the image stage', async () => {
+    it('keeps the vehicle image contained inside one stage with the controls beside it, not on the image', async () => {
       await renderMarketplace({ ...baseProps });
       const view = within(mobileHero());
-      // The mobile hero renders one image stage per vehicle in the pair
-      // (left + right), both sharing this testid by design - take either one,
-      // since both share the same height formula.
-      const [stage] = view.getAllByTestId('hero-pair-image-stage');
-      expect(stage.style.height).toContain('clamp(');
-      expect(view.getAllByRole('img').every((img) => img.className.includes('object-contain'))).toBe(true);
-      expect(within(stage).queryByRole('button', { name: /featured vehicles/i })).toBeNull();
+      const stage = view.getByTestId('hero-stage');
+      expect(stage.querySelectorAll('[data-testid="hero-vehicle"]').length).toBe(1);
+      expect(within(view.getByTestId('hero-vehicle')).queryByRole('button', { name: /featured vehicle/i })).toBeNull();
+      expect(view.getByRole('group', { name: /featured vehicle controls/i })).toBeTruthy();
     });
 
     it('uses real featured inventory, one vehicle per slide, in order', async () => {
@@ -359,12 +353,12 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
       await renderMarketplace({ ...baseProps, vehicles: [] });
       const view = within(mobileHero());
       await waitFor(() => expect(view.getByText('Toyota Land Cruiser 300')).toBeTruthy());
-      expect(view.getAllByText(/Artwork · not a listing/).length).toBe(1);
+      expect(view.getAllByText(/ILLUSTRATIVE · NOT A LISTING/i).length).toBe(1);
       expect(view.queryByText(/Ksh\s+[\d,]+/i)).toBeNull();
       await waitFor(() => expect(view.getAllByRole('button', { name: /^Show featured vehicle \d+ of 2$/ }).length).toBe(2));
       fireEvent.click(view.getByRole('button', { name: 'Next featured vehicle' }));
       expect(view.getByText('Mercedes-Benz GLE')).toBeTruthy();
-      expect(view.getAllByText(/Artwork · not a listing/).length).toBe(1);
+      expect(view.getAllByText(/ILLUSTRATIVE · NOT A LISTING/i).length).toBe(1);
       expect(view.queryByText(/Ksh\s+[\d,]+/i)).toBeNull();
     });
 
@@ -400,22 +394,17 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
       it('falls back to the canonical copy when no admin slide exists', async () => {
         await renderMarketplace({ ...baseProps });
         const view = within(mobileHero());
-        expect(view.getByRole('heading', { level: 1 }).textContent).toBe('Drive Your DreamToday');
+        expect(view.getByRole('heading', { level: 1 }).textContent).toBe('Drive Your Dream Today');
         expect(view.getByRole('button', { name: /Explore Vehicles/ })).toBeTruthy();
-        expect(view.getByRole('button', { name: /How It Works/ })).toBeTruthy();
+        expect(view.getByRole('button', { name: /Sell Your Vehicle/ })).toBeTruthy();
       });
 
-      it('applies admin mobile image height bounds, capped by the compact single-vehicle stage', async () => {
+      it('rotation can be disabled by the administrator (no autoplay control, no timer)', async () => {
         const { adminAPI } = await import('../../api/api');
-        vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce({ config: { heroPresentation: { mobileStageMinPx: 130, mobileStageMaxPx: 180, mobileTransitionMs: 0, rotationSeconds: 0 } } } as never);
+        vi.spyOn(adminAPI, 'getPublicConfig').mockResolvedValueOnce({ config: { heroPresentation: { rotationSeconds: 0 } } } as never);
         await renderMarketplace({ ...baseProps });
         const view = within(mobileHero());
-        // See the identical note above: both pair slots share this testid.
-        await waitFor(() => {
-          const [stage] = view.getAllByTestId('hero-pair-image-stage');
-          // Stage 4 compact hero: admin bounds apply but never exceed the compact 112px / 150px stage.
-          expect(stage.style.height).toBe('clamp(112px, 30vw, 150px)');
-        });
+        expect(view.queryByRole('button', { name: /automatic vehicle rotation/i })).toBeNull();
       });
     });
   });

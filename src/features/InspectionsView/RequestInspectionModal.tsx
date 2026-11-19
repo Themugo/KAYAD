@@ -82,7 +82,7 @@ export const RequestInspectionModal: React.FC<RequestInspectionModalProps> = ({
     try {
       const result = await createInspectionOrder(selected.id, phone.trim(), selected.location);
       if (!result.success || !result.order) {
-        setError({ message: result.message || 'KAYAD could not create the inspection request. Please try again.' });
+        setError({ message: result.message || 'KAYARD KE could not create the inspection request. Please try again.' });
         return;
       }
       const record = kayadOrderToRecord({ ...result.order, car: { ...result.order.car, title: result.order.car?.title || selected.title } });
@@ -129,7 +129,7 @@ export const RequestInspectionModal: React.FC<RequestInspectionModalProps> = ({
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={() => { if (!submitting) onClose(); }} title="Get matched with an inspector" description="For a vehicle listed on KAYAD. KAYAD assigns a verified independent inspector; their business carries out the inspection." size="lg">
+    <Modal isOpen={isOpen} onClose={() => { if (!submitting) onClose(); }} title="Get matched with an inspector" description="For a vehicle listed on KAYARD KE. KAYARD KE assigns a verified independent inspector; their business carries out the inspection." size="lg">
       <form onSubmit={submit} noValidate className="space-y-5" aria-busy={submitting}>
         <fieldset className="space-y-2" disabled={submitting}>
           <legend className="text-xs font-bold text-[#64748B] mb-1">Vehicle to inspect</legend>
@@ -142,7 +142,7 @@ export const RequestInspectionModal: React.FC<RequestInspectionModalProps> = ({
               <button type="button" className="text-xs font-bold text-[#12576d] underline underline-offset-2 whitespace-nowrap min-h-[44px] px-1" onClick={() => setChoosing(true)}>Change vehicle</button>
             </div>
           ) : options.length === 0 ? (
-            <p className="text-sm text-[#64748B] rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-4">No KAYAD vehicles are available to inspect right now. Open a vehicle from the marketplace and choose “Request an inspection”.</p>
+            <p className="text-sm text-[#64748B] rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-4">No KAYARD KE vehicles are available to inspect right now. Open a vehicle from the marketplace and choose “Request an inspection”.</p>
           ) : (
             <div className="space-y-2">
               <label htmlFor={searchId} className="sr-only">Search vehicles by make, model or location</label>
@@ -150,7 +150,7 @@ export const RequestInspectionModal: React.FC<RequestInspectionModalProps> = ({
                 <Search className="w-4 h-4 text-[#94A3B8] absolute left-3.5 top-1/2 -translate-y-1/2" aria-hidden="true" />
                 <input id={searchId} type="search" className={`${fieldClass} pl-10 border-[#D7E7E4]`} placeholder="Search by make, model or location" value={query} onChange={(e) => setQuery(e.target.value)} />
               </div>
-              <label htmlFor={vehicleId} className="text-xs font-semibold text-[#64748B] block">KAYAD marketplace vehicle</label>
+              <label htmlFor={vehicleId} className="text-xs font-semibold text-[#64748B] block">KAYARD KE marketplace vehicle</label>
               <select
                 id={vehicleId}
                 value={selectedId}
@@ -162,7 +162,7 @@ export const RequestInspectionModal: React.FC<RequestInspectionModalProps> = ({
                   <option key={v.id} value={v.id}>{v.title} — KSh {v.price.toLocaleString()} ({v.location})</option>
                 ))}
               </select>
-              <p className="text-[11px] text-[#64748B]">Showing vehicles currently loaded from the KAYAD marketplace ({filtered.length}).</p>
+              <p className="text-[11px] text-[#64748B]">Showing vehicles currently loaded from the KAYARD KE marketplace ({filtered.length}).</p>
             </div>
           )}
         </fieldset>
@@ -189,7 +189,7 @@ export const RequestInspectionModal: React.FC<RequestInspectionModalProps> = ({
 
         <div className="bg-[#E8F5F3] p-3.5 rounded-xl border border-[#CDE9E5] text-xs text-[#0A5A50] flex items-start gap-2">
           <ShieldCheck className="w-4 h-4 text-[#13B8A6] shrink-0 mt-0.5" aria-hidden="true" />
-          <span><strong>No payment is taken when you submit.</strong> KAYAD records your request against the vehicle and assigns a verified independent inspector. You will see the inspector’s business name and each step in My inspections.</span>
+          <span><strong>No payment is taken when you submit.</strong> KAYARD KE records your request against the vehicle and assigns a verified independent inspector. You will see the inspector’s business name and each step in My inspections.</span>
         </div>
 
         {error && (
@@ -206,7 +206,7 @@ export const RequestInspectionModal: React.FC<RequestInspectionModalProps> = ({
             {submitting ? 'Submitting request…' : 'Submit inspection request'}
           </Button>
         </div>
-        <p className="flex items-start gap-1.5 text-[11px] text-[#64748B]"><Info className="w-3.5 h-3.5 shrink-0 mt-0.5" aria-hidden="true" />Your phone number is saved with this request so KAYAD can reach you about it.</p>
+        <p className="flex items-start gap-1.5 text-[11px] text-[#64748B]"><Info className="w-3.5 h-3.5 shrink-0 mt-0.5" aria-hidden="true" />Your phone number is saved with this request so KAYARD KE can reach you about it.</p>
       </form>
     </Modal>
   );

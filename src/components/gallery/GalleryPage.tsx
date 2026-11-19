@@ -122,7 +122,7 @@ export const GalleryPage: FC = () => {
   return (
     <div className="pt-3 sm:pt-5 pb-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-5 sm:space-y-6 bg-[#F6FAF9] text-[#176B87] font-sans min-h-screen">
 
-      {/* KAYAD Premium Showroom Hero Card */}
+      {/* KAYARD KE Premium Showroom Hero Card */}
       <div className="p-4 sm:p-5 rounded-2xl bg-[#176B87] text-white border border-white/10 shadow-lg relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Subtle background glow */}
         <div className="absolute top-0 right-0 w-80 h-80 bg-[#13B8A6]/15 rounded-full blur-3xl pointer-events-none" />
@@ -135,7 +135,7 @@ export const GalleryPage: FC = () => {
           </div>
 
           <h1 className="text-xl sm:text-2xl font-serif font-black text-white tracking-tight uppercase leading-snug">
-            KAYAD Premium Showroom
+            KAYARD KE Premium Showroom
           </h1>
 
           <p className="text-xs sm:text-sm text-[#DDF4F0] font-sans font-medium max-w-xl leading-relaxed">
@@ -169,7 +169,7 @@ export const GalleryPage: FC = () => {
         onChange={q => setFilters(prev => ({ ...prev, searchQuery: q }))}
         placeholder="Search make, model, VIN, or city..."
         resultCount={filteredVehicles.length}
-        badgeLabel="KAYAD SHOWROOM INVENTORY"
+        badgeLabel="KAYARD KE SHOWROOM INVENTORY"
         filterOptions={[
           { id: 'all', label: 'All Stock' },
           { id: 'fixed', label: 'Direct Buy' },

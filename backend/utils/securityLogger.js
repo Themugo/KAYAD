@@ -171,7 +171,7 @@ const sendEmailAlert = async ({ action, actor, target, ip }) => {
       eventType: "security.alert",
       category: "system",
       recipient,
-      subject: `[KAYAD Security] ${action}`,
+      subject: `[KAYARD KE Security] ${action}`,
       html: `<h2>Security Alert</h2><p>Action: ${action}</p><p>Actor: ${actor || "unknown"}</p><p>Target: ${target || "N/A"}</p><p>IP: ${ip || "N/A"}</p><p>Time: ${new Date().toISOString()}</p>`,
       text: `Security Alert: ${action}. Actor: ${actor || "unknown"}. Target: ${target || "N/A"}. IP: ${ip || "N/A"}.`,
       metadata: { action, actor, target, ip },

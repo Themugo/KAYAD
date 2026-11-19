@@ -69,7 +69,7 @@ export function WebSiteStructuredData() {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
     url: BASE,
-    name: 'Kayad',
+    name: 'KAYARD KE',
     description: "Kenya's Premium Car Marketplace",
     potentialAction: {
       '@type': 'SearchAction',

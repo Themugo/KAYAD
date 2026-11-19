@@ -29,7 +29,7 @@ export const HeroDesktopVehicle: React.FC<HeroDesktopVehicleProps> = ({
   vehicle, side, imageSrc, broken, onBroken, topPct, offsetPct, widthPct, scale, showInfo, eyebrow, detail, illustrative, onSelect,
 }) => {
   const title = `${vehicle.make} ${vehicle.model}`;
-  const alt = illustrative ? `Illustrative KAYAD showroom artwork: ${title}` : `${vehicle.year} ${title}`;
+  const alt = illustrative ? `Illustrative KAYARD KE showroom artwork: ${title}` : `${vehicle.year} ${title}`;
   const ariaLabel = illustrative ? `Browse vehicles. ${title} is illustrative artwork, not a listing` : `View ${title}`;
   return (
     <button

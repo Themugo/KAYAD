@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
       mode="signin"
       eyebrow="Account recovery"
       title="Reset your password"
-      description="Enter your KAYAD email and we’ll send a secure reset link if the account exists."
+      description="Enter your KAYARD KE email and we’ll send a secure reset link if the account exists."
     >
       {submitted ? (
         <div className="kayad-auth-form">

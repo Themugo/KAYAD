@@ -25,12 +25,12 @@ pass('Registration is reachable: combined header entry -> /login -> /register CT
 // change, not a regression (the "KAYAD mobile hero" aria-label section and
 // its card inside both still render correctly; see VehicleMarketplace.test.tsx).
 // Updated the literal match to the current className rather than reverting it.
-pass('Hero keeps stable mobile/desktop footprint', hero.includes('--hero-stage-h') && hero.includes('lg:min-h-[var(--hero-stage-h)]') && hero.includes('relative px-3 pb-3 pt-2 lg:hidden'));
+pass('Hero keeps stable mobile/desktop footprint', fs.readFileSync('src/components/home/premium-hero.css','utf8').includes('min-height: 420px') && fs.readFileSync('src/components/home/premium-hero.css','utf8').includes('height: 210px'));
 pass('Hero keeps real vehicle source', hero.includes('heroSourceVehicles') && hero.includes('heroImageForVehicle'));
-pass('Hero retains existing actions', hero.includes('Explore Vehicles') && hero.includes('How It Works'));
-pass('Hero retains carousel controls', hero.includes('Previous featured vehicle') && hero.includes('Next featured vehicle') && hero.includes('Show featured vehicle ${index + 1} of ${heroPairCount}'));
+pass('Hero retains existing actions', hero.includes('Explore Vehicles') && hero.includes('Sell Your Vehicle'));
+pass('Hero retains carousel controls', fs.readFileSync('src/components/home/PremiumHero.tsx','utf8').includes('Previous featured vehicle') && fs.readFileSync('src/components/home/PremiumHero.tsx','utf8').includes('Next featured vehicle') && fs.readFileSync('src/components/home/PremiumHero.tsx','utf8').includes('Show featured vehicle ${i + 1} of ${p.slideCount}'));
 pass('Hero uses the procedural showroom environment (no raster dependency)', /const KENYA_ROAD_HERO_BACKGROUND = ''/.test(hero) && read('src/features/VehicleMarketplace/components/homepage-redesign.css').includes('.kayad-showroom-stage'));
-pass('Hero premium vehicle stage present (desktop pair + mobile carousel + vehicle info cards on real featured inventory)', hero.includes('aria-label="KAYAD mobile hero"') && hero.includes('aria-label="Featured vehicles"') && hero.includes('showVehicleInfoCards') && hero.includes("'KAYAD SELECT'"));
+pass('Hero premium vehicle stage present (single responsive stage + vehicle info chip on real featured inventory)', hero.includes('<PremiumHero') && hero.includes('showVehicleInfo={heroPresentation.showVehicleInfoCards}') && hero.includes("'KAYARD KE SELECT'"));
 pass('Login remains canonical standalone surface', /if \(path === '\/login'( \|\| path === '\/admin\/login')?\) return <LoginPage \/>;/.test(app));
 pass('Register remains canonical standalone surface', app.includes("if (path === '/register') return <OnboardingFlow"));
 pass('Login uses shared premium shell', login.includes('<PremiumAuthShell') && shell.includes('kayad-auth-card') && !shell.includes('kayad-auth-ad-panel'));

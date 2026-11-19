@@ -291,7 +291,7 @@ export async function inviteStaff(ownerId, providerId, email, role) {
   const clean = text(email, 254).toLowerCase();
   if (!clean) throw new AppError('Email is required', 400);
   const user = must(await sb().from('users').select('id,name,status,is_banned').ilike('email', clean).maybeSingle());
-  if (!user || user.status !== 'approved' || user.is_banned) throw new AppError('No eligible KAYAD account uses that email', 404);
+  if (!user || user.status !== 'approved' || user.is_banned) throw new AppError('No eligible KAYARD KE account uses that email', 404);
   const live = must(await sb().from('inspection_staff').select('*').eq('provider_id', providerId).eq('user_id', user.id).neq('affiliation_status', 'ended').maybeSingle());
   if (live) return live;
   const [first, ...rest] = String(user.name || '').split(' ');

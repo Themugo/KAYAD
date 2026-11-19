@@ -4,7 +4,7 @@ const source = fs.readFileSync('src/features/AdminView.tsx', 'utf8');
 const css = fs.readFileSync('src/features/admin-command-centre.css', 'utf8');
 const checks = [
   ['Existing AdminView remains the active implementation', source.includes('export const AdminView')],
-  ['Approved Business Command Centre hero and authenticated greeting are present', source.includes('KAYAD BUSINESS COMMAND CENTRE') && source.includes('Welcome back,') && source.includes('sessionUser.name')],
+  ['Approved Business Command Centre hero and authenticated greeting are present', source.includes('KAYARD KE BUSINESS COMMAND CENTRE') && source.includes('Welcome back,') && source.includes('sessionUser.name')],
   ['Marketplace metrics and operational panel hierarchy are present', ['Total Users', 'Active Staff', 'Verified Dealers', 'Vehicles', 'Live Auctions', 'Open Escrows', 'Approval Workflows', 'Recent Vehicle Submissions'].every((label) => source.includes(label))],
   ['Operational work areas include marketplace decisions and customer/risk operations', source.includes('Approval Workflows') && source.includes('Customer &amp; Risk Operations') && source.includes('System Health')],
   ['Missing metric values remain distinct from confirmed zero', source.includes("typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0") && source.includes("'Unavailable'") && source.includes("statsStatus === 'loading'")],

@@ -23,11 +23,11 @@ export default function WinnerHandoverPanel({ auctionId, refreshKey }: { auction
       </ol>
       {h.contact && (
         <div style={{ marginTop: 14, padding: 12, borderRadius: 12, border: '1px solid var(--border)' }}>
-          <p style={{ margin: 0, fontSize: 13 }}>Payment received. Arrange collection and paperwork directly with <strong>{h.contact.name}</strong>. KAYAD is not part of that arrangement.</p>
+          <p style={{ margin: 0, fontSize: 13 }}>Payment received. Arrange collection and paperwork directly with <strong>{h.contact.name}</strong>. KAYARD KE is not part of that arrangement.</p>
           <a href={`tel:${h.contact.phone}`} className="btn btn-outline" style={{ marginTop: 10, minHeight: 44, display: 'inline-flex', alignItems: 'center', gap: 8 }}><Phone size={16} aria-hidden="true" /> {h.contact.phone}</a>
         </div>
       )}
-      {h.coordinatedByKayad && <p style={{ marginTop: 14, fontSize: 13, display: 'flex', gap: 8 }}><ShieldCheck size={16} aria-hidden="true" /> For your safety, KAYAD coordinates collection for private sellers. We will contact you.</p>}
+      {h.coordinatedByKayad && <p style={{ marginTop: 14, fontSize: 13, display: 'flex', gap: 8 }}><ShieldCheck size={16} aria-hidden="true" /> For your safety, KAYARD KE coordinates collection for private sellers. We will contact you.</p>}
     </section>
   );
 }

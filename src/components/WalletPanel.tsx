@@ -36,7 +36,7 @@ export default function WalletPanel({ auctionId }: Props) {
         <div key={r.holdId} className="rounded-lg border p-3 space-y-2" data-testid="refund-option">
           <p className="text-sm">Your bid commitment of <strong>{formatKES(r.amount)}</strong> is ready to be refunded.</p>
           {r.custody === 'dealer'
-            ? <p className="text-sm">This commitment was paid straight to the dealer, so the dealer refunds it. KAYAD cannot move it for you.</p>
+            ? <p className="text-sm">This commitment was paid straight to the dealer, so the dealer refunds it. KAYARD KE cannot move it for you.</p>
             : <div className="flex flex-wrap gap-2">
                 <button className={btn} disabled={busy} onClick={() => act(() => walletAPI.refund(r.holdId, 'wallet'), 'Refund added to your wallet.')}>Keep in wallet</button>
                 <button className={btn} disabled={busy} onClick={() => act(() => walletAPI.refund(r.holdId, 'mpesa'), 'Refund sent to your M-Pesa number. It can take a minute to arrive.')}>Send to my M-Pesa</button>

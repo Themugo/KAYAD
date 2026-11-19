@@ -72,7 +72,7 @@ class AIIntelligenceService {
       depreciationRate: depreciationRate,
       resaleValueEstimate: this.calculateResaleValue(vehicleData, depreciationRate),
       confidenceScore: 78,
-      explanation: 'Estimates based on similar vehicles in the KAYAD marketplace',
+      explanation: 'Estimates based on similar vehicles in the KAYARD KE marketplace',
       dataSources: ['marketplace_data', 'historical_maintenance', 'insurance_claims'],
     };
   }
@@ -308,7 +308,7 @@ class AIIntelligenceService {
       suggestions,
       inconsistencies,
       confidenceScore: 80,
-      explanation: 'Analysis based on KAYAD inspection standards and historical report data',
+      explanation: 'Analysis based on KAYARD KE inspection standards and historical report data',
     };
   }
 

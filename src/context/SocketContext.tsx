@@ -29,7 +29,7 @@ export function SocketProvider({children}:{children:ReactNode}){
   void loadSocketIoClient().then(()=>{if(cancelled||!window.io)return;const s=window.io(socketUrl(),{withCredentials:true,transports:['websocket','polling'],reconnection:true,reconnectionAttempts:Infinity,reconnectionDelay:1000,...(auth?{auth}:{})});socketRef.current=s;const c=()=>setConnected(true),d=()=>setConnected(false);s.on('connect',c);s.on('disconnect',d);s.on('sessionExpired',()=>{s.disconnect();s.connect();});
    // A signed-in tab whose handshake was judged anonymous (ticket unavailable, session refreshing) retries with backoff.
    s.on('authState',(state:{authenticated?:boolean})=>{if(!isAuth||cancelled)return;if(state?.authenticated){reauthDelay=15000;return;}if(reauthTimer)return;reauthTimer=setTimeout(()=>{reauthTimer=null;if(!cancelled){s.disconnect();s.connect();}},reauthDelay);reauthDelay=Math.min(reauthDelay*2,300000);});
-   if(s.connected)setConnected(true);}).catch(e=>{if(!cancelled){console.warn('[KAYAD] Realtime unavailable:',e);setConnected(false);}});
+   if(s.connected)setConnected(true);}).catch(e=>{if(!cancelled){console.warn('[KAYARD KE] Realtime unavailable:',e);setConnected(false);}});
   return()=>{cancelled=true;if(reauthTimer)clearTimeout(reauthTimer);subscriptions.current.forEach(ch=>ch.events.forEach(([ev,h])=>ch.socket.off(ev,h)));subscriptions.current=[];socketRef.current?.disconnect();socketRef.current=null;setConnected(false)};
  },[isAuth]);
  const on=useCallback((event:string,handler:SocketHandler)=>{socketRef.current?.on(event,handler);return()=>socketRef.current?.off(event,handler)},[]);

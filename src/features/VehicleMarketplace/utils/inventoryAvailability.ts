@@ -26,7 +26,7 @@ const TEXT: Record<InventoryFailureKind, Omit<InventoryFailure, 'kind' | 'status
   maintenance: {
     pill: 'Inventory paused',
     title: 'Inventory is paused for maintenance',
-    body: 'KAYAD is under scheduled maintenance, so vehicle listings are paused. Your filters and saved vehicles are kept. Please try again shortly.',
+    body: 'KAYARD KE is under scheduled maintenance, so vehicle listings are paused. Your filters and saved vehicles are kept. Please try again shortly.',
   },
   restricted: {
     pill: 'Inventory restricted',
@@ -40,7 +40,7 @@ const TEXT: Record<InventoryFailureKind, Omit<InventoryFailure, 'kind' | 'status
   },
   network: {
     pill: 'Can’t reach inventory',
-    title: 'We can’t reach KAYAD right now',
+    title: 'We can’t reach KAYARD KE right now',
     body: 'Check your internet connection and retry. Your filters and saved vehicles are kept.',
   },
   unavailable: {

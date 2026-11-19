@@ -7,7 +7,7 @@ const checks = [];
 const check = (name, condition) => checks.push({ name, pass: Boolean(condition) });
 
 const app = read('src/App.tsx');
-const hub = read('src/components/DashboardHub.tsx');
+const hub = ['src/components/DashboardHub.tsx', 'src/components/dashboard/personal/personalNav.ts', 'src/components/dashboard/personal/PersonalSidebar.tsx', 'src/components/dashboard/personal/PersonalGreetingBanner.tsx', 'src/components/dashboard/personal/PersonalOverview.tsx'].map((f) => read(f)).join('\n');
 const seller = read('src/features/PrivateSellerPlatform/pages/PersonalSellingModule.tsx');
 const nav = read('src/utils/navLocation.ts');
 const dock = read('src/components/MobileBottomNav.tsx');
@@ -22,7 +22,7 @@ check('Profile navigation stays inside the account shell', hub.includes("'profil
 check('Messages navigation stays inside the account shell', hub.includes("'chat': 'messages'"));
 check('Buying navigation stays inside the account shell', hub.includes("'buyer-platform': 'buying'"));
 check('Payment navigation stays inside Deals & Escrow', hub.includes("'payments': 'deals'"));
-check('Personal dashboard exposes compact density control', hub.includes("density==='comfortable'?'Compact view':'Comfortable view'"));
+check('Personal dashboard exposes compact density control', /density === 'comfortable' \? 'Compact view' : 'Comfortable view'/.test(hub));
 check('Dealer account does not receive the personal mobile dock', read('src/components/MobileBottomNav.tsx').includes("String(authUser?.role || '').toLowerCase() === 'dealer'"));
 check('Mobile Account tab requests the dashboard account section', dock.includes("onNavigate('dashboard:account')"));
 check('Dashboard account alias resolves to dashboard', nav.includes("'dashboard:account': 'dashboard'"));

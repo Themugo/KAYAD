@@ -111,13 +111,13 @@ function toPayload(form: FormState): CreateCarPayload {
 function describeError(err: unknown): string {
   if (err instanceof VehicleApiError) {
     if (err.status === 401) return 'Your session has expired. Please sign in again.';
-    if (err.code === 'SUBSCRIPTION_REQUIRED') return 'Your dealer account is approved, but it needs an active listing plan before you can publish vehicles. Contact KAYAD support to have a plan activated.';
+    if (err.code === 'SUBSCRIPTION_REQUIRED') return 'Your dealer account is approved, but it needs an active listing plan before you can publish vehicles. Contact KAYARD KE support to have a plan activated.';
     if (err.code === 'SUBSCRIPTION_EXPIRED' || err.code === 'LISTING_LIMIT_REACHED') return err.message;
     if (err.status && err.status >= 400 && err.status < 500 && err.message) return err.message; // validation / duplicate VIN / required field: the server's text is actionable
-    if (err.status && err.status >= 500) return 'KAYAD could not save this listing because of a server problem. Your entries are kept, please try again in a moment. If it keeps happening, contact support.';
+    if (err.status && err.status >= 500) return 'KAYARD KE could not save this listing because of a server problem. Your entries are kept, please try again in a moment. If it keeps happening, contact support.';
     if (err.status === 403) return err.message || 'You do not have permission to do this.';
     if (err.kind === 'not_found') return 'This listing no longer exists.';
-    if (err.kind === 'network') return 'Unable to reach KAYAD. Check your connection and try again.';
+    if (err.kind === 'network') return 'Unable to reach KAYARD KE. Check your connection and try again.';
     return err.message || 'The listing could not be saved. Please try again.';
   }
   return 'The listing could not be saved. Please try again.';

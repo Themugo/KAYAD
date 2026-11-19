@@ -34,7 +34,7 @@ export const EscrowWorkflowSection: FC = () => {
       step: '02',
       title: 'Funding confirmation',
       actor: 'Buyer → Deal funding method',
-      desc: 'Buyer pays using the funding method shown for the deal; KAYAD marks it funded once it verifies receipt.',
+      desc: 'Buyer pays using the funding method shown for the deal; KAYARD KE marks it funded once it verifies receipt.',
       icon: <Lock className="w-5 h-5 text-[#13B8A6]" />,
       badge: 'STATUS CONFIRMED'
     },

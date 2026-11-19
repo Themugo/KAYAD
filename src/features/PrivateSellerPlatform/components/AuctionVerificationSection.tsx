@@ -7,12 +7,12 @@ import {
 import type { BackendCar } from '../../../services/vehicleApi';
 
 const STATUS_COPY: Record<string, string> = {
-  draft: 'Draft — add evidence and submit', submitted: 'Submitted — waiting for KAYAD review', under_review: 'Under KAYAD review',
-  changes_requested: 'Changes requested', approved: 'Approved by KAYAD', rejected: 'Not approved', withdrawn: 'Withdrawn',
+  draft: 'Draft — add evidence and submit', submitted: 'Submitted — waiting for KAYARD KE review', under_review: 'Under KAYARD KE review',
+  changes_requested: 'Changes requested', approved: 'Approved by KAYARD KE', rejected: 'Not approved', withdrawn: 'Withdrawn',
   not_started: 'Not started', awaiting_payment: 'Waiting for inspection fee', assigned: 'Inspection assigned', in_progress: 'Inspection in progress',
   passed: 'Passed', failed: 'Did not pass', inconclusive: 'Inconclusive — reinspection needed', expired: 'Expired — reinspection needed', disputed: 'Disputed',
   awaiting_partner: 'Waiting for a custody partner', handover_scheduled: 'Handover scheduled', received: 'Received — being checked', in_custody: 'In approved custody',
-  release_authorized: 'Release authorised', released: 'Released', refused: 'Custody refused — contact support', incident_hold: 'On hold — KAYAD is reviewing',
+  release_authorized: 'Release authorised', released: 'Released', refused: 'Custody refused — contact support', incident_hold: 'On hold — KAYARD KE is reviewing',
 };
 const label = (v: string) => STATUS_COPY[v] ?? v.replace(/_/g, ' ');
 
@@ -72,8 +72,8 @@ export function AuctionVerificationSection({ listings }: { listings: BackendCar[
       <header>
         <h1 id="auction-verification-title" className="text-2xl font-bold text-slate-900">Auction verification</h1>
         <p className="mt-1 max-w-3xl text-sm text-slate-600">
-          Private-seller vehicles can only go to auction after the inspection fee is paid, the vehicle passes inspection, an approved garage or dealer holds it in custody and KAYAD approves it.
-          KAYAD&apos;s servers decide each step; this page only shows what they report.
+          Private-seller vehicles can only go to auction after the inspection fee is paid, the vehicle passes inspection, an approved garage or dealer holds it in custody and KAYARD KE approves it.
+          KAYARD KE&apos;s servers decide each step; this page only shows what they report.
         </p>
       </header>
 
@@ -118,15 +118,15 @@ export function AuctionVerificationSection({ listings }: { listings: BackendCar[
                 </p>
                 <ol className="space-y-3" aria-label="Verification progress">
                   <Step title="1. Evidence and proposal" done={['submitted', 'under_review', 'approved'].includes(p.proposal_status)} value={label(p.proposal_status)} />
-                  <Step title="2. Inspection fee" done={!!p.inspection_payment_confirmed_at} value={p.inspection_payment_confirmed_at ? 'Payment confirmed by KAYAD' : 'Not confirmed — only a verified M-Pesa confirmation counts, not a page redirect'} />
+                  <Step title="2. Inspection fee" done={!!p.inspection_payment_confirmed_at} value={p.inspection_payment_confirmed_at ? 'Payment confirmed by KAYARD KE' : 'Not confirmed — only a verified M-Pesa confirmation counts, not a page redirect'} />
                   <Step title="3. Vehicle inspection" done={p.verification_status === 'passed'} value={label(p.verification_status)} />
                   <Step title="4. Physical custody" done={p.custody_status === 'in_custody'} value={label(p.custody_status)} />
-                  <Step title="5. KAYAD approval" done={p.proposal_status === 'approved'} value={label(p.proposal_status)} />
+                  <Step title="5. KAYARD KE approval" done={p.proposal_status === 'approved'} value={label(p.proposal_status)} />
                 </ol>
                 {detail.eligibility.blockers.length > 0 && (
                   <div><h2 className="text-sm font-semibold text-slate-800">What is still needed</h2><ul className="mt-1 list-disc pl-5 text-sm text-slate-700">{detail.eligibility.blockers.map((b) => <li key={b}>{b}</li>)}</ul></div>
                 )}
-                {(p.decision_reason || p.custody_hold_reason) && <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-700"><strong>Note from KAYAD:</strong> {p.custody_hold_reason || p.decision_reason}</p>}
+                {(p.decision_reason || p.custody_hold_reason) && <p className="rounded-lg bg-slate-50 p-3 text-sm text-slate-700"><strong>Note from KAYARD KE:</strong> {p.custody_hold_reason || p.decision_reason}</p>}
 
                 <fieldset disabled={busy} className="space-y-4 border-t border-slate-200 pt-4">
                   <legend className="text-sm font-semibold text-slate-800">What you can do now</legend>
@@ -141,14 +141,14 @@ export function AuctionVerificationSection({ listings }: { listings: BackendCar[
                       </div>
                       <div className="flex flex-wrap gap-2">
                         <button type="button" className="min-h-11 rounded-lg border border-teal-700 px-4 text-sm font-semibold text-teal-800 disabled:opacity-50" disabled={!docRef.trim()} onClick={() => send('evidence_submitted', { documents: [{ kind: docKind, reference: docRef.trim() }] }, 'Evidence recorded.')}>Add evidence</button>
-                        <button type="button" className="min-h-11 rounded-lg bg-teal-700 px-4 text-sm font-semibold text-white" onClick={() => send('proposal_submitted', {}, 'Proposal submitted for KAYAD review.')}>Submit proposal</button>
+                        <button type="button" className="min-h-11 rounded-lg bg-teal-700 px-4 text-sm font-semibold text-white" onClick={() => send('proposal_submitted', {}, 'Proposal submitted for KAYARD KE review.')}>Submit proposal</button>
                       </div>
                     </div>
                   )}
                   {['not_started', 'awaiting_payment'].includes(p.verification_status) && (
                     <div className="space-y-2">
                       <label htmlFor="psap-booking" className="block text-xs font-semibold text-slate-700">Paid inspection booking ID</label>
-                      <p className="text-xs text-slate-500">Pay the inspection fee first. KAYAD links the booking only after M-Pesa has confirmed the payment; an unpaid booking is refused.</p>
+                      <p className="text-xs text-slate-500">Pay the inspection fee first. KAYARD KE links the booking only after M-Pesa has confirmed the payment; an unpaid booking is refused.</p>
                       <div className="flex flex-wrap gap-2">
                         <input id="psap-booking" className="min-h-11 min-w-0 flex-1 rounded-lg border border-slate-300 px-2" value={bookingId} onChange={(e) => setBookingId(e.target.value.trim())} />
                         <button type="button" className="min-h-11 rounded-lg bg-teal-700 px-4 text-sm font-semibold text-white disabled:opacity-50" disabled={!bookingId} onClick={() => send('inspection_assigned', { booking_id: bookingId }, 'Inspection booking linked.')}>Link booking</button>
@@ -157,7 +157,7 @@ export function AuctionVerificationSection({ listings }: { listings: BackendCar[
                   )}
                   {(['failed', 'inconclusive', 'expired'].includes(p.verification_status) || p.proposal_status === 'rejected') && (
                     <div className="space-y-2">
-                      <p className="text-sm text-slate-700">This vehicle cannot go to auction yet. {p.proposal_status === 'rejected' ? 'KAYAD did not approve this case; you can appeal that decision.' : 'You can correct the issue and request a reinspection (a new booking and fee apply), or appeal the result.'}</p>
+                      <p className="text-sm text-slate-700">This vehicle cannot go to auction yet. {p.proposal_status === 'rejected' ? 'KAYARD KE did not approve this case; you can appeal that decision.' : 'You can correct the issue and request a reinspection (a new booking and fee apply), or appeal the result.'}</p>
                       <label htmlFor="psap-reason" className="block text-xs font-semibold text-slate-700">Reason (required)</label>
                       <textarea id="psap-reason" rows={3} className="w-full rounded-lg border border-slate-300 p-2" value={reason} onChange={(e) => setReason(e.target.value)} maxLength={1000} />
                       <div className="flex flex-wrap gap-2">

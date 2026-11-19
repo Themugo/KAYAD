@@ -100,7 +100,7 @@ export async function provisionOwners() {
       validateProductionPassword(secondaryPlainPassword, "SEED_WEBHOST_PW");
       pw = hashPw(secondaryPlainPassword);
     }
-    const name = isPrimary ? webhostName : "KAYAD Webhost";
+    const name = isPrimary ? webhostName : "KAYARD KE Webhost";
     try {
       await upsertUser({
         name,
@@ -129,7 +129,7 @@ const seed = async () => {
   try {
     connectDB();
     const result = await provisionOwners();
-    logInfo("KAYAD — SEED COMPLETE", {
+    logInfo("KAYARD KE — SEED COMPLETE", {
       webhost: result.webhost,
       admin: result.admin,
     });

@@ -24,7 +24,7 @@ export function enforceAuctionPlatformPolicy(config, policy) {
   const errors = [];
   const settlementMode = config?.settlement?.mode || "direct";
   if (!policy.allowedSettlementModes.includes(settlementMode)) {
-    errors.push(`Settlement mode '${settlementMode}' is not enabled by KAYAD for this platform.`);
+    errors.push(`Settlement mode '${settlementMode}' is not enabled by KAYARD KE for this platform.`);
   }
   if (settlementMode === "escrow" && config?.settlement?.escrow?.enabled !== true) {
     errors.push("Escrow settlement must explicitly be enabled when escrow mode is selected.");
@@ -34,19 +34,19 @@ export function enforceAuctionPlatformPolicy(config, policy) {
   }
   const deadline = Number(config?.paymentDeadlineHours);
   if (deadline < Number(policy.minPaymentDeadlineHours) || deadline > Number(policy.maxPaymentDeadlineHours)) {
-    errors.push(`Winner payment deadline must be between ${policy.minPaymentDeadlineHours} and ${policy.maxPaymentDeadlineHours} hours under KAYAD policy.`);
+    errors.push(`Winner payment deadline must be between ${policy.minPaymentDeadlineHours} and ${policy.maxPaymentDeadlineHours} hours under KAYARD KE policy.`);
   }
   if (config?.defaultRules?.reawardEnabled && !policy.allowDealerReaward) {
-    errors.push("KAYAD has disabled dealer re-award for this platform.");
+    errors.push("KAYARD KE has disabled dealer re-award for this platform.");
   }
   if (config?.defaultRules && !policy.allowDealerCustomDefaultRules) {
-    errors.push("Dealer custom default rules are disabled by KAYAD.");
+    errors.push("Dealer custom default rules are disabled by KAYARD KE.");
   }
   if (config?.winnerFulfilment && !policy.allowDealerCustomCollectionRules) {
-    errors.push("Dealer custom collection rules are disabled by KAYAD.");
+    errors.push("Dealer custom collection rules are disabled by KAYARD KE.");
   }
   if (config?.cancellationRules && !policy.allowDealerCustomCancellationRules) {
-    errors.push("Dealer custom cancellation rules are disabled by KAYAD.");
+    errors.push("Dealer custom cancellation rules are disabled by KAYARD KE.");
   }
   return errors;
 }

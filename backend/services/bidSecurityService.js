@@ -69,10 +69,10 @@ export async function initiateBidSecurity({ auctionId, userId, phone, amount, re
     checkoutRequestId: checkoutID,
     metadata: {
       description: holdType === "high_value_deposit"
-        ? `High-value bid security deposit for auction ${auctionId} — held by KAYAD`
+        ? `High-value bid security deposit for auction ${auctionId} — held by KAYARD KE`
         : recipient === "platform"
-          ? `Bid commitment for auction ${auctionId} — held by KAYAD`
-          : custody === "dealer" ? `Bid commitment for auction ${auctionId} — paid directly to the organizer's verified account` : `Bid commitment for auction ${auctionId} — collected by KAYAD (organizer account ${destination || "n/a"} recorded)`,
+          ? `Bid commitment for auction ${auctionId} — held by KAYARD KE`
+          : custody === "dealer" ? `Bid commitment for auction ${auctionId} — paid directly to the organizer's verified account` : `Bid commitment for auction ${auctionId} — collected by KAYARD KE (organizer account ${destination || "n/a"} recorded)`,
       accountReference, custody, collectedBy: custody === "dealer" ? `dealer_${dealerCollection.kind}_${dealerCollection.shortcode}` : "kayad_shortcode",
       reference: `SEC-${auctionId}-${Date.now()}`,
       auctionRegistrationId: registrationId || null, auctionId, recipient, auctionSecurityHoldId: holdId || null, auctionSecurityHoldType: holdType,

@@ -221,7 +221,7 @@ export const deliver = async ({
       if (io && userId) {
         io.to(`user_${userId}`).emit("notification", {
           userId,
-          title: subject || metadata.title || "KAYAD notification",
+          title: subject || metadata.title || "KAYARD KE notification",
           message: message || text || "",
           type: eventType,
           data: metadata,

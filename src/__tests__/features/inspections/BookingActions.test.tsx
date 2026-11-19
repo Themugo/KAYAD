@@ -32,7 +32,7 @@ describe('PayBookingModal', () => {
     expect(onPaid).not.toHaveBeenCalled();
     expect(screen.getByText(/do not pay twice/)).toBeTruthy();
     done();
-    await screen.findByText('Payment confirmed by KAYAD');
+    await screen.findByText('Payment confirmed by KAYARD KE');
     expect(onPaid).toHaveBeenCalledTimes(1);
   });
 
@@ -42,7 +42,7 @@ describe('PayBookingModal', () => {
     fireEvent.change(screen.getByLabelText('M-Pesa phone number'), { target: { value: '0712345678' } });
     fireEvent.click(screen.getByRole('button', { name: 'Send M-Pesa prompt' }));
     expect((await screen.findByRole('alert')).textContent).toMatch(/not completed/);
-    expect(screen.queryByText('Payment confirmed by KAYAD')).toBeNull();
+    expect(screen.queryByText('Payment confirmed by KAYARD KE')).toBeNull();
     await waitFor(() => expect((screen.getByRole('button', { name: 'Send M-Pesa prompt' }) as HTMLButtonElement).disabled).toBe(false));
   });
 

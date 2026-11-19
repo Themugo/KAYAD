@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
-const dashboard = read("src/components/DashboardHub.tsx");
+const dashboard = ['src/components/DashboardHub.tsx', 'src/components/dashboard/personal/personalNav.ts', 'src/components/dashboard/personal/PersonalSidebar.tsx', 'src/components/dashboard/personal/PersonalGreetingBanner.tsx', 'src/components/dashboard/personal/PersonalOverview.tsx'].map((f) => read(f)).join('\n');
 const activity = read("src/features/OwnershipPlatform/pages/PersonalActivityTimeline.tsx");
 const buying = read("src/features/OwnershipPlatform/pages/PersonalBuyingModule.tsx");
 const selling = read("src/features/PrivateSellerPlatform/pages/PersonalSellingModule.tsx");

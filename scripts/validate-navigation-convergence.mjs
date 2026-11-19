@@ -26,7 +26,7 @@ for (const id of new Set(navIds)) {
     : app.includes(`activeNav === '${scope}'`) || (scope === 'financing' && app.includes("activeNav === 'financing'")) || (scope === 'discovery' && app.includes("activeNav === 'discovery'"));
   add(`nav destination "${id}" resolves to an existing App.tsx surface/tab`, exists);
 }
-add('primary nav is exactly Marketplace, Auction, Auto Services, Escrow, Support', ['Marketplace', 'Auction', 'Auto Services', 'Escrow', 'Support'].every((l) => cfg.includes(`label: '${l}'`)) && (cfg.match(/^    id: '/gm) || []).length === 5);
+add('primary nav is exactly Marketplace, Auctions, Auto Services, Escrow, Support', ['Marketplace', 'Auctions', 'Auto Services', 'Escrow', 'Support'].every((l) => cfg.includes(`label: '${l}'`)) && (cfg.match(/^    id: '/gm) || []).length === 5);
 add('Support stays a direct link (no invented submenu)', !/id: 'support'[\s\S]*?children:/.test(cfg.split("id: 'support'")[1] || ''));
 const protectedNavsMatch = app.match(/const protectedNavs = new Set\(\[([^\]]+)\]\)/);
 const protectedNavValues = protectedNavsMatch

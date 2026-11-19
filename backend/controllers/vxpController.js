@@ -506,7 +506,7 @@ export async function getDefaultTheme(req, res) {
     res.json({
       success: true,
       data: {
-        name: 'KAYAD Default',
+        name: 'KAYARD KE Default',
         colors: {
           primary: '#176B87',
           secondary: '#F6FAF9',

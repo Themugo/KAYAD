@@ -7,12 +7,12 @@ describe('usePageMeta', () => {
 
   it('sets document title', () => {
     renderHook(() => usePageMeta('Test Page'));
-    expect(document.title).toBe('Test Page | Kayad');
+    expect(document.title).toBe('Test Page | KAYARD KE');
   });
 
   it('uses default title when no title given', () => {
     renderHook(() => usePageMeta());
-    expect(document.title).toContain("Kayad");
+    expect(document.title).toContain("KAYARD KE");
   });
 
   it('sets meta description', () => {
@@ -27,7 +27,7 @@ describe('usePageMeta', () => {
   it('restores previous title on cleanup', () => {
     document.title = 'Original Title';
     const { unmount } = renderHook(() => usePageMeta('New Title'));
-    expect(document.title).toBe('New Title | Kayad');
+    expect(document.title).toBe('New Title | KAYARD KE');
     unmount();
     expect(document.title).toBe('Original Title');
   });

@@ -53,8 +53,8 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
                 Auction Transparency Notice
               </h4>
               <p className="text-sm text-[#12576D] leading-relaxed">
-                Every auction published on KAYAD is independently conducted by the verified
-                Auction Organizer displayed on each listing. KAYAD provides the digital marketplace
+                Every auction published on KAYARD KE is independently conducted by the verified
+                Auction Organizer displayed on each listing. KAYARD KE provides the digital marketplace
                 and auction technology tools.
               </p>
             </div>
@@ -90,7 +90,7 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
                   <Gavel className="w-4 h-4 text-[#176B87]" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-[#12576D] mb-1">KAYAD's Role</p>
+                  <p className="text-xs font-bold text-[#12576D] mb-1">KAYARD KE's Role</p>
                   <p className="text-xs text-[#64748B]">
                     Digital marketplace, bidder registration, live auction technology, and auction management tools.
                   </p>
@@ -102,7 +102,7 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
                   <Shield className="w-4 h-4 text-red-600" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-[#12576D] mb-1">KAYAD Does NOT</p>
+                  <p className="text-xs font-bold text-[#12576D] mb-1">KAYARD KE Does NOT</p>
                   <p className="text-xs text-[#64748B]">
                     Receive bid security deposits or vehicle purchase payments from buyers.
                   </p>
@@ -120,7 +120,7 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
                   </p>
                   <p className="text-xs text-[#64748B] leading-relaxed">
                     Final vehicle payments and bid security follow the payment recipient and settlement mode published
-                    for this auction. KAYAD's bid-confirmation payment is a separate platform transaction; where escrow
+                    for this auction. KAYARD KE's bid-confirmation payment is a separate platform transaction; where escrow
                     is selected, custody funding follows the controlled escrow workflow.
                   </p>
                 </div>
@@ -147,7 +147,7 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
           </h4>
           <div className="space-y-2 text-sm text-[#64748B]">
             <p>
-              Every auction on KAYAD is independently conducted by the verified Auction Organizer
+              Every auction on KAYARD KE is independently conducted by the verified Auction Organizer
               shown on each listing.
             </p>
             <p>
@@ -156,7 +156,7 @@ export const AuctionDisclaimer: React.FC<AuctionDisclaimerProps> = ({
               payment may be required when you submit a bid.
             </p>
             <p className="text-xs text-[#64748B]">
-              KAYAD provides the digital marketplace, bidder registration, live auction technology,
+              KAYARD KE provides the digital marketplace, bidder registration, live auction technology,
               digital certificates and auction management tools. Final vehicle settlement follows the
               published direct or escrow mode.
             </p>

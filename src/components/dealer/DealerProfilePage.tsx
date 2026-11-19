@@ -17,7 +17,7 @@ export const DealerProfilePage: FC = () => {
     return (
       <div className="py-16 px-6 text-center max-w-3xl mx-auto">
         <h1 className="text-2xl font-bold text-[#176B87]">Dealer profile unavailable</h1>
-        <p className="mt-2 text-sm text-[#64748b]">A real dealer profile must be loaded from the KAYAD backend before inventory is displayed.</p>
+        <p className="mt-2 text-sm text-[#64748b]">A real dealer profile must be loaded from the KAYARD KE backend before inventory is displayed.</p>
       </div>
     );
   }
@@ -93,7 +93,7 @@ export const DealerProfilePage: FC = () => {
           </div>
         </div>
 
-        {/* Standardized KAYAD Search Bar */}
+        {/* Standardized KAYARD KE Search Bar */}
         <SearchBar
           value={searchQuery}
           onChange={setSearchQuery}
@@ -124,7 +124,7 @@ export const DealerProfilePage: FC = () => {
           setTestDriveSuccess(false);
         }}
         title={`Schedule Appointment with ${dealer.name}`}
-        subtitle="Private viewing and VIP showroom tour with KAYAD escrow concierge"
+        subtitle="Private viewing and VIP showroom tour with KAYARD KE escrow concierge"
       >
         {testDriveSuccess ? (
           <div className="p-6 text-center space-y-3">

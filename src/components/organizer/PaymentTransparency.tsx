@@ -138,7 +138,7 @@ export const PaymentTransparency: React.FC<PaymentTransparencyProps> = ({
                   <p>• <strong>Payment Deadline:</strong> {paymentDeadline}</p>
                   <p>• <strong>Bid Security:</strong> Paid to organizer (refundable per policy)</p>
                   <p>• <strong>Final Payment:</strong> Complete balance to organizer</p>
-                  <p>• <strong>KAYAD:</strong> A separate nominal bid-confirmation payment may apply</p>
+                  <p>• <strong>KAYARD KE:</strong> A separate nominal bid-confirmation payment may apply</p>
                 </div>
               </div>
             </div>

@@ -206,7 +206,7 @@ export const OrganizerProfile: React.FC<OrganizerProfileProps> = ({
           {organizer.yearsOnPlatform && (
             <div className="text-center p-3 bg-[#F6FAF9] rounded-xl">
               <div className="text-lg font-black text-[#176B87]">{organizer.yearsOnPlatform}</div>
-              <div className="text-xs text-[#64748B]">Years on KAYAD</div>
+              <div className="text-xs text-[#64748B]">Years on KAYARD KE</div>
             </div>
           )}
           {organizer.completedAuctions !== undefined && (

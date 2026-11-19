@@ -17,7 +17,7 @@ const TYPE_META: Record<string, { label: string; desc: string; sub: string }> = 
   },
   listing: {
     label: 'Listing Fee',
-    desc: 'One-time listing fee paid to KAYAD platform to publish your car listing.',
+    desc: 'One-time listing fee paid to KAYARD KE platform to publish your car listing.',
     sub: 'Platform fee · One-time payment',
   },
 };

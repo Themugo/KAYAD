@@ -32,9 +32,9 @@ const CHAT_INBOX_FIELDS = `${CHAT_FIELDS}, messages`;
 const publicChatRole = (role) => {
   if (role === "dealer") return "Dealer";
   if (role === "individual_seller") return "Private seller";
-  if (["technical_support"].includes(role)) return "KAYAD Support";
-  if (role === "escrow_officer") return "KAYAD Escrow Team";
-  if (["admin", "superadmin", "hr", "accounts", "marketing", "ad_manager", "moderator", "ghost_checker"].includes(role)) return "KAYAD Team";
+  if (["technical_support"].includes(role)) return "KAYARD KE Support";
+  if (role === "escrow_officer") return "KAYARD KE Escrow Team";
+  if (["admin", "superadmin", "hr", "accounts", "marketing", "ad_manager", "moderator", "ghost_checker"].includes(role)) return "KAYARD KE Team";
   return "Marketplace member";
 };
 
@@ -104,7 +104,7 @@ export const startChat = async (req, res) => {
       return res.status(403).json({
         success: false,
         code: "CHAT_RECIPIENT_REQUIRES_CASE_ROUTE",
-        message: "Use the relevant KAYAD support or transaction workflow to contact this team",
+        message: "Use the relevant KAYARD KE support or transaction workflow to contact this team",
       });
     }
 

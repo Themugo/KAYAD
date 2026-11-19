@@ -4,11 +4,11 @@ const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "KAYAD API",
+      title: "KAYARD KE API",
       version: "1.0.0",
-      description: "KAYAD Car Marketplace — Live Auctions, M-Pesa Payments, Escrow, Dealer Management",
+      description: "KAYARD KE Car Marketplace — Live Auctions, M-Pesa Payments, Escrow, Dealer Management",
       contact: {
-        name: "KAYAD API Support",
+        name: "KAYARD KE API Support",
         email: "api@kayad.co.ke",
       },
       license: {

@@ -76,6 +76,6 @@ async function performRequest<T>(path: string, options: HttpRequestOptions = {})
         : axiosError.message || 'Request failed.';
       throw new HttpRequestError(message, axiosError.response?.status, data);
     }
-    throw new HttpRequestError('Unable to reach KAYAD servers. Please check your connection and try again.');
+    throw new HttpRequestError('Unable to reach KAYARD KE servers. Please check your connection and try again.');
   }
 }

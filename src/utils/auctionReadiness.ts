@@ -241,7 +241,7 @@ function getChecksForSection(
         {
           id: 'org-verified',
           label: 'Organization Verified',
-          description: 'Your organization identity has been verified by KAYAD',
+          description: 'Your organization identity has been verified by KAYARD KE',
           section: READINESS_SECTIONS[0],
           severity: 'critical',
           isComplete: data.organizerVerified || session.organizer?.isVerified || false,
@@ -485,7 +485,7 @@ function getChecksForSection(
         {
           id: 'inspection-booking',
           label: 'Inspection Booking Available',
-          description: 'Buyers can book inspections through KAYAD Mechanic Marketplace',
+          description: 'Buyers can book inspections through KAYARD KE Mechanic Marketplace',
           section: READINESS_SECTIONS[4],
           severity: 'critical',
           isComplete: data.inspectionBookingAvailable || false,
@@ -583,7 +583,7 @@ function getChecksForSection(
         {
           id: 'terms-accepted',
           label: 'Terms & Conditions Accepted',
-          description: 'KAYAD auction terms have been accepted',
+          description: 'KAYARD KE auction terms have been accepted',
           section: READINESS_SECTIONS[6],
           severity: 'critical',
           isComplete: data.termsAccepted || false,

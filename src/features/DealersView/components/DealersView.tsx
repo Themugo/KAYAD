@@ -27,7 +27,7 @@ export const DealersView: React.FC<DealersViewProps> = ({ onSelectDealerVehicles
           const countyName = location.split(',').map((part: string) => part.trim()).filter(Boolean)[0] || 'Not specified';
           return {
             id: String(row.id),
-            name: String(row.name || 'KAYAD dealer'),
+            name: String(row.name || 'KAYARD KE dealer'),
             type: 'Enterprise Dealer',
             location,
             county: countyName,
@@ -36,7 +36,7 @@ export const DealersView: React.FC<DealersViewProps> = ({ onSelectDealerVehicles
             reviewsCount: 0,
             activeListingsCount: 0,
             logo: row.avatar || '',
-            badges: row.verification?.dealerApproved ? ['KAYAD dealer approval'] : [],
+            badges: row.verification?.dealerApproved ? ['KAYARD KE dealer approval'] : [],
             phone: '',
             email: '',
             description: row.description || undefined,
@@ -64,8 +64,8 @@ export const DealersView: React.FC<DealersViewProps> = ({ onSelectDealerVehicles
       <PageHeader
         badgeIcon={<Building2 className="w-4 h-4 text-[#176B87]" />}
         badgeText="Public Dealer Directory"
-        title="Explore KAYAD Dealer Showrooms"
-        description="Browse dealerships with an approved KAYAD dealer account. Approval confirms the dealer account status; it is not a guarantee of vehicle condition or transaction outcome."
+        title="Explore KAYARD KE Dealer Showrooms"
+        description="Browse dealerships with an approved KAYARD KE dealer account. Approval confirms the dealer account status; it is not a guarantee of vehicle condition or transaction outcome."
       />
 
       <div className="bg-white rounded-2xl p-4 shadow-card border border-[#D7E7E4] flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -123,7 +123,7 @@ export const DealersView: React.FC<DealersViewProps> = ({ onSelectDealerVehicles
                   />
                   {dealer.verifiedSince && (
                     <Badge variant="verified" size="md">
-                      <ShieldCheck className="w-3.5 h-3.5" /> KAYAD approved dealer
+                      <ShieldCheck className="w-3.5 h-3.5" /> KAYARD KE approved dealer
                     </Badge>
                   )}
                 </div>

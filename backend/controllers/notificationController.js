@@ -14,7 +14,7 @@ const safeLocalLink = (value) => {
 // internal action data, delivery metadata or arbitrary ORM fields to the client.
 const mapNotification = (n) => ({
   _id: String(n.id || n._id || ""),
-  title: typeof n.title === "string" ? n.title : "KAYAD update",
+  title: typeof n.title === "string" ? n.title : "KAYARD KE update",
   message: typeof n.message === "string" ? n.message : "",
   type: typeof n.type === "string" ? n.type : "info",
   read: Boolean(n.read),

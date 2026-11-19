@@ -27,7 +27,7 @@ export const DELETE_BLOCK_CODES = Object.freeze({
 const MESSAGES = Object.freeze({
   LISTING_SOLD: "This vehicle has been sold. A completed sale is unwound through the escrow/refund workflow, not by deleting the listing.",
   LISTING_RESERVED: "This vehicle is reserved for a buyer under the sale/escrow flow and cannot be deleted. It becomes deletable again only if that reservation is released through the escrow workflow.",
-  AUCTION_ACTIVE: "This listing has a live auction and cannot be deleted. Contact KAYAD support to cancel an auction.",
+  AUCTION_ACTIVE: "This listing has a live auction and cannot be deleted. Contact KAYARD KE support to cancel an auction.",
   AUCTION_CLOSED: "This listing has a closed auction with settlement records and cannot be deleted.",
   BIDS_PRESENT: "This listing has bids and cannot be deleted.",
 });

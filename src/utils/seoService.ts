@@ -98,12 +98,12 @@ export interface Metadata {
 export const generateVehicleMetadata = (car: Car): Metadata => {
   if (!car) return getDefaultMetadata();
 
-  const title = `${car.year} ${car.brand} ${car.model} - ${car.price ? `KES ${car.price.toLocaleString()}` : 'For Sale'} | Kayad`;
+  const title = `${car.year} ${car.brand} ${car.model} - ${car.price ? `KES ${car.price.toLocaleString()}` : 'For Sale'} | KAYARD KE`;
   const description = car.description
     ? `${car.description.substring(0, 160)}...`
-    : `${car.year} ${car.brand} ${car.model} ${car.bodyType || ''} in ${car.location?.city || 'Kenya'}. ${car.transmission} transmission, ${car.fuel} fuel. ${car.mileage ? `${car.mileage.toLocaleString()} km` : ''}. View details and bid on Kayad.`;
+    : `${car.year} ${car.brand} ${car.model} ${car.bodyType || ''} in ${car.location?.city || 'Kenya'}. ${car.transmission} transmission, ${car.fuel} fuel. ${car.mileage ? `${car.mileage.toLocaleString()} km` : ''}. View details and bid on KAYARD KE.`;
 
-  const imageUrl = typeof car.images?.[0] === 'string' ? car.images[0] : car.images?.[0]?.url || `${BASE_URL}/icon-512.png`;
+  const imageUrl = typeof car.images?.[0] === 'string' ? car.images[0] : car.images?.[0]?.url || `${BASE_URL}/opengraph.jpg`;
   const url = `${BASE_URL}/cars/${car._id}`;
 
   return {
@@ -118,7 +118,7 @@ export const generateVehicleMetadata = (car: Car): Metadata => {
       description,
       url,
       image: imageUrl,
-      siteName: "Kayad",
+      siteName: "KAYARD KE",
       locale: "en_KE",
       priceAmount: car.price || car.currentBid,
       priceCurrency: "KES",
@@ -173,12 +173,12 @@ export const generateVehicleMetadata = (car: Car): Metadata => {
 export const generateDealerMetadata = (dealer: Dealer): Metadata => {
   if (!dealer) return getDefaultMetadata();
 
-  const title = `${dealer.businessName || dealer.name} - Car Dealer in ${dealer.location?.city || 'Kenya'} | Kayad`;
+  const title = `${dealer.businessName || dealer.name} - Car Dealer in ${dealer.location?.city || 'Kenya'} | KAYARD KE`;
   const description = dealer.description
     ? `${dealer.description.substring(0, 160)}...`
-    : `View ${dealer.businessName || dealer.name}'s car listings on Kayad. ${dealer.listingsCount || 0} vehicles available. ${dealer.location?.city || 'Kenya'}. Contact: ${dealer.phone || dealer.email}.`;
+    : `View ${dealer.businessName || dealer.name}'s car listings on KAYARD KE. ${dealer.listingsCount || 0} vehicles available. ${dealer.location?.city || 'Kenya'}. Contact: ${dealer.phone || dealer.email}.`;
 
-  const imageUrl = dealer.logo || dealer.avatar || `${BASE_URL}/icon-512.png`;
+  const imageUrl = dealer.logo || dealer.avatar || `${BASE_URL}/opengraph.jpg`;
   const url = `${BASE_URL}/dealer/${dealer._id}`;
 
   return {
@@ -193,7 +193,7 @@ export const generateDealerMetadata = (dealer: Dealer): Metadata => {
       description,
       url,
       image: imageUrl,
-      siteName: "Kayad",
+      siteName: "KAYARD KE",
       locale: "en_KE",
     },
     twitter: {
@@ -249,13 +249,13 @@ export const generateAuctionMetadata = (auction: Auction): Metadata => {
   if (!auction) return getDefaultMetadata();
 
   const car = auction.car;
-  const title = `${car?.year || ''} ${car?.brand || ''} ${car?.model || ''} - Live Auction | Kayad`.trim();
+  const title = `${car?.year || ''} ${car?.brand || ''} ${car?.model || ''} - Live Auction | KAYARD KE`.trim();
   const bidAmount = auction.currentBid || auction.startingBid || 0;
   const description = car?.description
     ? `Live Auction: ${car.description.substring(0, 140)}...`
-    : `Live auction for ${car?.year || ''} ${car?.brand || ''} ${car?.model || ''}. Current bid: KES ${bidAmount.toLocaleString()}. Ends ${auction.endTime ? new Date(auction.endTime).toLocaleString() : 'soon'}. Bid now on Kayad.`;
+    : `Live auction for ${car?.year || ''} ${car?.brand || ''} ${car?.model || ''}. Current bid: KES ${bidAmount.toLocaleString()}. Ends ${auction.endTime ? new Date(auction.endTime).toLocaleString() : 'soon'}. Bid now on KAYARD KE.`;
 
-  const imageUrl = typeof car?.images?.[0] === 'string' ? car.images[0] : car?.images?.[0]?.url || `${BASE_URL}/icon-512.png`;
+  const imageUrl = typeof car?.images?.[0] === 'string' ? car.images[0] : car?.images?.[0]?.url || `${BASE_URL}/opengraph.jpg`;
   const url = `${BASE_URL}/auctions/${auction._id}`;
 
   return {
@@ -270,7 +270,7 @@ export const generateAuctionMetadata = (auction: Auction): Metadata => {
       description,
       url,
       image: imageUrl,
-      siteName: "Kayad",
+      siteName: "KAYARD KE",
       locale: "en_KE",
     },
     twitter: {
@@ -303,7 +303,7 @@ export const generateAuctionMetadata = (auction: Auction): Metadata => {
       },
       performer: {
         "@type": "Organization",
-        name: "Kayad",
+        name: "KAYARD KE",
         url: BASE_URL,
       },
     },
@@ -315,31 +315,31 @@ export const generateAuctionMetadata = (auction: Auction): Metadata => {
 // =============================
 export const getDefaultMetadata = (): Metadata => {
   return {
-    title: "Kayad – Kenya's Premium Car Marketplace",
+    title: "KAYARD KE – Kenya's Premium Car Marketplace",
     description: "Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.",
     url: BASE_URL,
-    imageUrl: `${BASE_URL}/icon-512.png`,
+    imageUrl: `${BASE_URL}/opengraph.jpg`,
     canonical: BASE_URL,
     openGraph: {
       type: "website",
-      title: "Kayad – Kenya's Premium Car Marketplace",
+      title: "KAYARD KE – Kenya's Premium Car Marketplace",
       description: "Buy, sell and bid on premium cars in Kenya. Live auctions with M-Pesa. Secure escrow payments.",
       url: BASE_URL,
-      image: `${BASE_URL}/icon-512.png`,
-      siteName: "Kayad",
+      image: `${BASE_URL}/opengraph.jpg`,
+      siteName: "KAYARD KE",
       locale: "en_KE",
     },
     twitter: {
       card: "summary_large_image",
-      title: "Kayad – Kenya's Premium Car Marketplace",
+      title: "KAYARD KE – Kenya's Premium Car Marketplace",
       description: "Buy, sell and bid on premium cars in Kenya. Live auctions. Secure escrow.",
-      image: `${BASE_URL}/icon-512.png`,
+      image: `${BASE_URL}/opengraph.jpg`,
     },
     structuredData: {
       "@context": "https://schema.org",
       "@type": "WebSite",
       url: BASE_URL,
-      name: "Kayad",
+      name: "KAYARD KE",
       description: "Kenya's Premium Car Marketplace",
       potentialAction: {
         "@type": "SearchAction",

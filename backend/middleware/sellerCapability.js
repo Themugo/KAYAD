@@ -40,7 +40,7 @@ export const sellerListingAccess = ({ write = true } = {}) => async (req, res, n
   // Paid package modes are represented in the admin policy for future rollout, but must not
   // grant access until a real package catalogue and provider-confirmed checkout are deployed.
   if (onboarding.policy.privateSellerPackageMode !== "free") {
-    return deny(res, 503, "SELLER_PACKAGE_CONFIGURATION_INCOMPLETE", "Paid seller packages are not available yet. Contact KAYAD support.", state.status);
+    return deny(res, 503, "SELLER_PACKAGE_CONFIGURATION_INCOMPLETE", "Paid seller packages are not available yet. Contact KAYARD KE support.", state.status);
   }
   if (role === "individual_seller") {
     const approvalRequired = onboarding.policy.privateSellerApprovalMode === "required";

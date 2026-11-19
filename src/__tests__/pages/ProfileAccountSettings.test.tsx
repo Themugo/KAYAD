@@ -16,22 +16,34 @@ vi.mock('../../components/account/ChangePasswordForm', () => ({ default: () => <
 
 import Profile from '../../pages/Profile';
 const renderIt = () => render(<MemoryRouter><Profile setPage={() => {}} /></MemoryRouter>);
-const openTab = async (name: string) => {
-  const nav = screen.getByRole('navigation', { name: 'My Account sections' });
-  await userEvent.click(within(nav).getByRole('button', { name }));
-};
+// My Account is ONE workspace inside DashboardHub: every area is visible, there is no nested tab navigation.
+const openTab = async (_name: string) => { /* intentionally a no-op: sections are stacked, not tabbed */ };
 
 beforeEach(() => { updateProfile.mockReset(); toast.mockReset(); });
 
 describe('Profile / Account Settings page', () => {
-  it('opens on the unified account overview and offers the four account areas', () => {
+  it('renders one workspace with identity, personal information, notifications and security - and no nested navigation', () => {
     renderIt();
-    expect(screen.getByRole('heading', { name: 'My Account Overview' })).toBeInTheDocument();
-    const nav = screen.getByRole('navigation', { name: 'My Account sections' });
-    expect(within(nav).getByRole('button', { name: 'Overview' })).toHaveAttribute('aria-current', 'page');
-    expect(within(nav).getByRole('button', { name: 'Personal Information' })).toBeInTheDocument();
-    expect(within(nav).getByRole('button', { name: 'Notifications' })).toBeInTheDocument();
-    expect(within(nav).getByRole('button', { name: 'Security' })).toBeInTheDocument();
+    expect(screen.queryByRole('navigation', { name: 'My Account sections' })).toBeNull();
+    expect(screen.queryByRole('navigation')).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Alice' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Personal Information' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Notification Preferences' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Security' })).toBeInTheDocument();
+    expect(screen.getByText('Email verified')).toBeInTheDocument();
+    expect(screen.getByText('phone-verification')).toBeInTheDocument();
+  });
+  it('does not claim email verification when the backend has not confirmed it', () => {
+    user.emailVerified = false;
+    try { renderIt(); expect(screen.getByText('Email verification pending')).toBeInTheDocument(); expect(screen.queryByText('Email verified')).toBeNull(); }
+    finally { user.emailVerified = true; }
+  });
+  it('offers sign-out from the account workspace', async () => {
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    renderIt();
+    await userEvent.click(screen.getByRole('button', { name: /Sign Out/i }));
+    expect(confirmSpy).toHaveBeenCalledWith('Are you sure you want to sign out?');
+    confirmSpy.mockRestore();
   });
   it('has no inert avatar button and states that email change is unavailable', async () => {
     renderIt();
@@ -84,13 +96,13 @@ describe('Profile / Account Settings page', () => {
     expect(screen.getByText('254712345678')).toBeInTheDocument();
     expect(updateProfile).not.toHaveBeenCalled();
   });
-  it('security tab shows the real password form and labels 2FA unavailable', async () => {
+  it('security section shows the real password form and labels 2FA unavailable', async () => {
     renderIt();
     await openTab('Security');
     expect(screen.getByRole('form', { name: 'Change password' })).toBeInTheDocument();
     expect(screen.getByText('Not available yet')).toBeInTheDocument();
   });
-  it('notifications tab renders the persisted-preferences component', async () => {
+  it('notifications section renders the persisted-preferences component', async () => {
     renderIt();
     await openTab('Notifications');
     expect(screen.getByText('notification-prefs')).toBeInTheDocument();

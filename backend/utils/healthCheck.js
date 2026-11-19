@@ -18,7 +18,7 @@ const shallowHealth = (req, res) => {
   res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
   res.json({
     status: dbReady ? "ok" : "degraded",
-    service: "Kayad API",
+    service: "KAYARD KE API",
     version: process.env.APP_VERSION || "1.0.0",
     buildId: req.app?.locals?.kayadBuildId || "unknown",
     checks: {

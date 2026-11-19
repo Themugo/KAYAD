@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 
 /* ==========================================================================
-   KAYAD AUTOMOTIVE DESIGN SYSTEM TOKENS & REUSABLE COMPONENTS
+   KAYARD KE AUTOMOTIVE DESIGN SYSTEM TOKENS & REUSABLE COMPONENTS
    ========================================================================== */
 
 // --- BUTTON COMPONENT ---

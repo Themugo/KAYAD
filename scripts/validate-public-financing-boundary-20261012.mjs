@@ -14,7 +14,7 @@ const checks = [
   ['application form is conditional on account mode', /mode === 'account' && \([\s\S]*Apply for Financing/.test(page)],
   ['personal application tracker is conditional on account mode', /mode === 'account' && user && \([\s\S]*My Applications/.test(page)],
   ['public mode renders service explanation and not lender offers', /mode === 'public' && \([\s\S]*Verified lender offers, rates and fees are not currently displayed/.test(page)],
-  ['public copy explicitly says KAYAD is not a lender', /KAYAD is not a lender/.test(page)],
+  ['public copy explicitly says KAYARD KE is not a lender', /KAYARD KE is not a lender/.test(page)],
   ['public CTA directs signed-in users to the unified Deals section', /user \? onNavigate\?\.\('dashboard:deals'\) : onOpenAuth\?\.\(\)/.test(page)],
   ['public CTA never exposes application records directly', /Applications and their recorded status are available in your private account workspace/.test(page)],
   ['PersonalBuyingModule hosts the private financing workspace', /<FinanceMarketplace[\s\S]*mode="account" user=\{user\}/.test(buyer)],
@@ -29,7 +29,7 @@ const checks = [
   ['stale application responses are cancelled', /let cancelled = false[\s\S]*return \(\) => \{ cancelled = true; \}/.test(page) && /if \(!cancelled\) setMyApplications/.test(page)],
   ['application fetch failure is shown honestly with retry', /Your financing applications could not be loaded\. Try again\./.test(page) && /setReloadApps\(\(value\) => value \+ 1\)/.test(page)],
   ['calculator bounds vehicle, deposit and rate inputs', /min=\{1\}/.test(page) && /vehiclePrice - 1/.test(page) && /max=\{100\}/.test(page)],
-  ['calculator disclaims the rate as an offer', /not a KAYAD offer or a quote from a lender/.test(page)],
+  ['calculator disclaims the rate as an offer', /not a KAYARD KE offer or a quote from a lender/.test(page)],
   ['applicant client contract does not expose reviewer notes', !/reviewerNotes\?: string;/.test(api)],
   ['repeatable validator is registered in package scripts', pkg.scripts['validate:public-financing-boundary'] === 'node scripts/validate-public-financing-boundary-20261012.mjs'],
 ];

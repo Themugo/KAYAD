@@ -23,7 +23,7 @@ const isProduction = process.env.NODE_ENV === "production";
 // no durable queue is actually available. Local development keeps the existing
 // REDIS_HOST/REDIS_PORT behavior.
 if (isProduction && !redisUrl && process.env.DISABLE_REDIS !== "true") {
-  throw new Error("Production queue startup requires REDIS_URL. Configure the managed KAYAD Redis service before deployment.");
+  throw new Error("Production queue startup requires REDIS_URL. Configure the managed KAYARD KE Redis service before deployment.");
 }
 
 const retryStrategy = (times) => {

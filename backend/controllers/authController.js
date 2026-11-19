@@ -333,8 +333,8 @@ export const register = async (req, res) => {
       templateCode: "account_verification_email",
       recipient: user.email,
       ...(await buildEmail("buildVerificationEmail", { name: user.name, verifyUrl }, {
-        subject: "Verify Your Email — KAYAD",
-        text: `Hi ${user.name || "there"}, verify your KAYAD email: ${verifyUrl}`,
+        subject: "Verify Your Email — KAYARD KE",
+        text: `Hi ${user.name || "there"}, verify your KAYARD KE email: ${verifyUrl}`,
         html: `<p>Hi ${escHtml(user.name || "there")},</p><p><a href="${escHtml(verifyUrl)}">Verify my email</a></p>`,
       })),
       metadata: { verification: true },
@@ -388,17 +388,17 @@ export const register = async (req, res) => {
       templateCode: "account_welcome_email",
       recipient: user.email,
       ...(await buildEmail("buildWelcomeEmail", { name: user.name, role: user.role }, {
-        subject: "Welcome to KAYAD",
+        subject: "Welcome to KAYARD KE",
         text: role === "dealer"
-          ? `Welcome to KAYAD, ${user.name || "there"}. Your dealer application is under review.`
+          ? `Welcome to KAYARD KE, ${user.name || "there"}. Your dealer application is under review.`
           : legacySellerRole
-            ? `Welcome to KAYAD, ${user.name || "there"}. Your personal account is ready. Private selling is part of your account; any requirements are shown in your dashboard. Please verify your email.`
-            : `Welcome to KAYAD, ${user.name || "there"}. Your account is ready.`,
+            ? `Welcome to KAYARD KE, ${user.name || "there"}. Your personal account is ready. Private selling is part of your account; any requirements are shown in your dashboard. Please verify your email.`
+            : `Welcome to KAYARD KE, ${user.name || "there"}. Your account is ready.`,
         html: role === "dealer"
-          ? `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>Your dealer application is under review. Please verify your email.</p>`
+          ? `<p>Welcome to KAYARD KE, ${escHtml(user.name || "there")}.</p><p>Your dealer application is under review. Please verify your email.</p>`
           : legacySellerRole
-            ? `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>Your personal account is ready. Private selling is part of your account; any requirements are shown in your dashboard. Please verify your email.</p>`
-            : `<p>Welcome to KAYAD, ${escHtml(user.name || "there")}.</p><p>Your account is ready.</p>`,
+            ? `<p>Welcome to KAYARD KE, ${escHtml(user.name || "there")}.</p><p>Your personal account is ready. Private selling is part of your account; any requirements are shown in your dashboard. Please verify your email.</p>`
+            : `<p>Welcome to KAYARD KE, ${escHtml(user.name || "there")}.</p><p>Your account is ready.</p>`,
       })),
       metadata: { welcome: true },
       idempotencyKey: `registration-welcome:${user.id}`,
@@ -413,7 +413,7 @@ export const register = async (req, res) => {
       message: role === "dealer"
         ? "Dealer application received. Please verify your email and complete business verification. Once your documents are submitted, you can publish and manage your own vehicle listings while verification is processed; sensitive dealer features remain restricted until verification is approved."
         : legacySellerRole
-          ? "Personal account created. KAYAD no longer has a separate private-seller account: selling is part of your personal account. Please verify your email before signing in."
+          ? "Personal account created. KAYARD KE no longer has a separate private-seller account: selling is part of your personal account. Please verify your email before signing in."
           : "Account created successfully. Please verify your email before signing in.",
     });
   } catch (err) {
@@ -996,8 +996,8 @@ export const resendVerification = async (req, res) => {
           templateCode: "account_verification_email",
           recipient: user.email,
           ...(await buildEmail("buildVerificationEmail", { name: user.name, verifyUrl, resend: true }, {
-            subject: "Verify Your Email — KAYAD",
-            text: `Hi ${user.name || "there"}, verify your KAYAD email: ${verifyUrl}`,
+            subject: "Verify Your Email — KAYARD KE",
+            text: `Hi ${user.name || "there"}, verify your KAYARD KE email: ${verifyUrl}`,
             html: `<p>Hi ${escHtml(user.name || "there")},</p><p><a href="${escHtml(verifyUrl)}">Verify my email</a></p>`,
           })),
           metadata: { verification: true, resend: true },
@@ -1055,8 +1055,8 @@ export const forgotPassword = async (req, res) => {
       eventType: COMMUNICATION_EVENTS.PASSWORD_RESET,
       recipient: user.email,
       ...(await buildEmail("buildPasswordResetEmail", { resetUrl }, {
-        subject: "Reset Your KAYAD Password",
-        text: `Reset your KAYAD password: ${resetUrl}. This link expires in 1 hour.`,
+        subject: "Reset Your KAYARD KE Password",
+        text: `Reset your KAYARD KE password: ${resetUrl}. This link expires in 1 hour.`,
         html: `<p><a href="${escHtml(resetUrl)}">Reset my password</a></p><p>This link expires in 1 hour.</p>`,
       })),
       metadata: { passwordReset: true },

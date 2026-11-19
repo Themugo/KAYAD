@@ -39,7 +39,7 @@ export const formatDate = (iso?: string | null): string | null => {
 export const ACTION_LABEL: Record<EscrowPartyAction, string> = {
   view_funding_instructions: 'Funding instructions',
   confirm_vehicle: 'I have inspected and accept this vehicle',
-  request_release: 'Ask KAYAD to release the funds',
+  request_release: 'Ask KAYARD KE to release the funds',
   confirm_delivery: 'Confirm the vehicle was delivered',
   open_dispute: 'Raise a dispute',
 };
@@ -66,8 +66,8 @@ export function storyFor(deal: BackendEscrow, role: EscrowViewerRole): StatusSto
       return {
         headline: buyer ? 'Waiting for your funding to be verified' : seller ? 'Waiting for the buyer’s funding' : 'Awaiting funding',
         detail: buyer
-          ? 'Pay using the instructions below. Starting a payment is not the same as KAYAD confirming it: this escrow only becomes funded after KAYAD verifies your transfer.'
-          : 'Nothing should change hands until KAYAD confirms the escrow is funded.',
+          ? 'Pay using the instructions below. Starting a payment is not the same as KAYARD KE confirming it: this escrow only becomes funded after KAYARD KE verifies your transfer.'
+          : 'Nothing should change hands until KAYARD KE confirms the escrow is funded.',
         waitingOn: buyer ? 'you' : 'other',
         funds: 'No funds are recorded as held yet.',
       };
@@ -75,33 +75,33 @@ export function storyFor(deal: BackendEscrow, role: EscrowViewerRole): StatusSto
       return {
         headline: buyer ? 'Inspect the vehicle, then confirm it' : seller ? 'Waiting for the buyer to inspect and accept' : 'Funds held',
         detail: buyer
-          ? `Check the vehicle against the listing. Accepting it tells KAYAD you are satisfied; it does not pay the seller by itself.${releaseBy ? ` If nobody acts, the escrow becomes eligible for automatic release from ${releaseBy}.` : ''}`
+          ? `Check the vehicle against the listing. Accepting it tells KAYARD KE you are satisfied; it does not pay the seller by itself.${releaseBy ? ` If nobody acts, the escrow becomes eligible for automatic release from ${releaseBy}.` : ''}`
           : `The buyer must inspect and accept the vehicle before delivery is confirmed.${releaseBy ? ` The escrow becomes eligible for automatic release from ${releaseBy} if nobody acts.` : ''}`,
         waitingOn: buyer ? 'you' : 'other',
-        funds: `${amount} is recorded as held in escrow by KAYAD.`,
+        funds: `${amount} is recorded as held in escrow by KAYARD KE.`,
       };
     case 'vehicle_confirmed':
       return {
         headline: seller ? 'Confirm delivery' : buyer ? 'Waiting for the seller to confirm delivery' : 'Vehicle accepted',
         detail: seller
           ? 'The buyer has accepted the vehicle. Confirm delivery once the handover is complete.'
-          : `You have accepted the vehicle. When the handover is complete you can ask KAYAD to release the funds, or raise a dispute if something is wrong.${releaseBy ? ` Automatic release becomes possible from ${releaseBy}.` : ''}`,
+          : `You have accepted the vehicle. When the handover is complete you can ask KAYARD KE to release the funds, or raise a dispute if something is wrong.${releaseBy ? ` Automatic release becomes possible from ${releaseBy}.` : ''}`,
         waitingOn: seller ? 'you' : 'other',
-        funds: `${amount} is recorded as held in escrow by KAYAD.`,
+        funds: `${amount} is recorded as held in escrow by KAYARD KE.`,
       };
     case 'delivered':
       return {
-        headline: buyer ? 'Release the funds or raise an issue' : seller ? 'Waiting for KAYAD to release the funds' : 'Delivery confirmed',
+        headline: buyer ? 'Release the funds or raise an issue' : seller ? 'Waiting for KAYARD KE to release the funds' : 'Delivery confirmed',
         detail: buyer
-          ? 'The seller confirmed delivery. Releasing is done by KAYAD staff after your request; if something is wrong, raise a dispute before release.'
-          : 'Delivery is confirmed. KAYAD staff release the funds; the buyer can still raise a dispute until then.',
+          ? 'The seller confirmed delivery. Releasing is done by KAYARD KE staff after your request; if something is wrong, raise a dispute before release.'
+          : 'Delivery is confirmed. KAYARD KE staff release the funds; the buyer can still raise a dispute until then.',
         waitingOn: buyer ? 'you' : 'kayad',
-        funds: `${amount} is recorded as held in escrow by KAYAD.`,
+        funds: `${amount} is recorded as held in escrow by KAYARD KE.`,
       };
     case 'disputed':
       return {
         headline: 'A dispute is open',
-        detail: 'KAYAD staff are reviewing it. The escrow cannot be released or refunded until staff decide.',
+        detail: 'KAYARD KE staff are reviewing it. The escrow cannot be released or refunded until staff decide.',
         waitingOn: 'kayad',
         funds: wasFunded ? `${amount} stays recorded as held while the dispute is reviewed.` : 'No funds were recorded as received before the dispute was opened.',
       };
@@ -109,15 +109,15 @@ export function storyFor(deal: BackendEscrow, role: EscrowViewerRole): StatusSto
       return {
         headline: seller ? 'Released — payout is processed separately' : 'Released to the seller',
         detail: seller
-          ? 'The escrow has been released for settlement. Paying it out to you is a separate step handled by KAYAD; closing the escrow does not by itself prove the money has arrived.'
-          : 'The escrow has been released for settlement to the seller. Payout is a separate step handled by KAYAD.',
+          ? 'The escrow has been released for settlement. Paying it out to you is a separate step handled by KAYARD KE; closing the escrow does not by itself prove the money has arrived.'
+          : 'The escrow has been released for settlement to the seller. Payout is a separate step handled by KAYARD KE.',
         waitingOn: seller ? 'kayad' : 'none',
         funds: 'Released for settlement. This screen does not show whether the payout has reached the seller.',
       };
     case 'refunded':
       return {
         headline: buyer ? 'Your refund was approved' : 'Refund approved',
-        detail: 'A refund to the buyer was approved. Paying it out is a separate step handled by KAYAD; you will be notified when it is settled.',
+        detail: 'A refund to the buyer was approved. Paying it out is a separate step handled by KAYARD KE; you will be notified when it is settled.',
         waitingOn: buyer ? 'kayad' : 'none',
         funds: 'A refund was approved. This screen does not show whether it has been paid out.',
       };
@@ -125,7 +125,7 @@ export function storyFor(deal: BackendEscrow, role: EscrowViewerRole): StatusSto
     default:
       return {
         headline: 'Closed',
-        detail: 'KAYAD has closed this escrow. A closed escrow is an administrative record; check your payment history for the money movements.',
+        detail: 'KAYARD KE has closed this escrow. A closed escrow is an administrative record; check your payment history for the money movements.',
         waitingOn: 'none',
         funds: 'Closed. No further action is available.',
       };

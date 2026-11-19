@@ -51,7 +51,7 @@ export default function WinnerModal({ certificate, onClose, onDownload, onPayBal
               <p style={{ fontSize: 10, color: 'var(--brand)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Certificate No.</p>
               <p style={{ fontSize: 14, fontFamily: 'monospace', color: 'white' }}>{c.certificateNumber}</p>
             </div>
-            <span style={{ fontWeight: 900, color: 'var(--brand)' }}>KAYAD KE</span>
+            <span style={{ fontWeight: 900, color: 'var(--brand)' }}>KAYARD KE</span>
           </div>
           <div style={{ display: 'grid', gap: 10 }}>
             {row('Vehicle', [c.vehicle?.year, c.vehicle?.title].filter(Boolean).join(' ') || 'Vehicle')}

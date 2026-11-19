@@ -27,7 +27,7 @@ export const EscrowTrustBanner: FC = () => {
     {
       step: '02',
       title: 'Funding confirmation',
-      desc: 'Buyer pays using the funding method shown for the deal; KAYAD marks it funded once it verifies receipt.',
+      desc: 'Buyer pays using the funding method shown for the deal; KAYARD KE marks it funded once it verifies receipt.',
       icon: <Lock className="w-5 h-5 text-[#176B87] group-hover:text-white transition-colors" />
     },
     {

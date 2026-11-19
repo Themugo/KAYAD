@@ -54,7 +54,7 @@ export const handleInboundSms = async (req, res) => {
       "title brand model year auctionStatus currentBid auctionEnd",
     );
     if (!smsBidder || smsBidder.subscriptions.length === 0) {
-      await sendSmsResponse(cleanedPhone, "You are not registered for SMS bidding. Visit KAYAD to link your phone.");
+      await sendSmsResponse(cleanedPhone, "You are not registered for SMS bidding. Visit KAYARD KE to link your phone.");
       return res.json({ success: true, message: "Unregistered phone" });
     }
 
@@ -89,7 +89,7 @@ export const handleInboundSms = async (req, res) => {
 
     // SMS bidding has no payment-integrated bid settlement path yet.
     // Never create a paid bid without a real payment record/callback.
-    await sendSmsResponse(cleanedPhone, "SMS bidding is temporarily unavailable. Please place the bid through KAYAD with M-Pesa payment.");
+    await sendSmsResponse(cleanedPhone, "SMS bidding is temporarily unavailable. Please place the bid through KAYARD KE with M-Pesa payment.");
     return res.json({ success: false, message: "SMS bidding payment integration unavailable" });
 
     // Sniping protection — canonical implementation (env-configured
@@ -108,7 +108,7 @@ export const handleInboundSms = async (req, res) => {
     // Notify bidder
     await sendSmsResponse(
       cleanedPhone,
-      `✅ Bid of KES ${amount.toLocaleString("en-KE")} placed on ${car.title || "vehicle"}. Track it live on KAYAD.`,
+      `✅ Bid of KES ${amount.toLocaleString("en-KE")} placed on ${car.title || "vehicle"}. Track it live on KAYARD KE.`,
     );
 
     // Notify outbid user
@@ -117,7 +117,7 @@ export const handleInboundSms = async (req, res) => {
       if (prevUser?.phone) {
         await sendSmsResponse(
           prevUser.phone,
-          `You've been outbid on ${car.title || "vehicle"} — KES ${amount.toLocaleString("en-KE")}. Bid higher now on KAYAD.`,
+          `You've been outbid on ${car.title || "vehicle"} — KES ${amount.toLocaleString("en-KE")}. Bid higher now on KAYARD KE.`,
         );
       }
     }

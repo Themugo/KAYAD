@@ -251,7 +251,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
           id: String(bid.id || bid._id),
           vehicleId: String(bid.carId?.id || bid.carId?._id || bid.car?.id || bid.car?._id || bid.carId || ''),
           bidderId: String(bid.user?.id || bid.user?._id || bid.user || auth.user.id),
-          bidderName: String(bid.user?.name || auth.user.name || 'KAYAD member'),
+          bidderName: String(bid.user?.name || auth.user.name || 'KAYARD KE member'),
           amount: Number(bid.amount || 0),
           placedAt: bid.createdAt || bid.created_at || new Date().toISOString(),
         })).filter((bid: BidLocal) => Boolean(bid.vehicleId)));
@@ -362,7 +362,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
         id: String(bid.id || bid._id),
         vehicleId: String(bid.carId?.id || bid.carId?._id || bid.car?.id || bid.car?._id || bid.carId || ''),
         bidderId: String(bid.user?.id || bid.user?._id || bid.user || bidderId),
-        bidderName: String(bid.user?.name || bidderName || 'KAYAD member'),
+        bidderName: String(bid.user?.name || bidderName || 'KAYARD KE member'),
         amount: Number(bid.amount || 0),
         placedAt: bid.createdAt || bid.created_at || new Date().toISOString(),
       })).filter((bid: BidLocal) => Boolean(bid.vehicleId)));
@@ -398,7 +398,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
       milestones: [
         { step: 1, title: 'Escrow Agreement Initiated', description: 'Buyer accepted deal terms and inspection policy', status: 'completed', timestamp: 'Just now' },
         { step: 2, title: 'Buyer Funds Deposit', description: `Awaiting wire/card transfer of $${(price + fee).toLocaleString()}`, status: 'current' },
-        { step: 3, title: 'Title & Lien Audit', description: 'KAYAD legal team verifies vehicle ownership and clear title', status: 'upcoming' },
+        { step: 3, title: 'Title & Lien Audit', description: 'KAYARD KE legal team verifies vehicle ownership and clear title', status: 'upcoming' },
         { step: 4, title: 'Collection and handover', description: 'Carrier collects vehicle from seller', status: 'upcoming' },
         { step: 5, title: 'Buyer Inspection Window', description: '48-Hour evaluation period before funds payout', status: 'upcoming' },
         { step: 6, title: 'Disbursement to Seller', description: 'Funds released from segregated escrow account', status: 'upcoming' }
@@ -472,7 +472,7 @@ export const MarketplaceProvider: FC<{ children: React.ReactNode }> = ({ childre
       condition: data.condition || 'Locally Used',
       listingType: data.listingType || 'fixed',
       images: data.images?.length ? data.images : ['https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1200&q=80'],
-      description: data.description || 'Verified KAYAD inventory listing with inspection certification.',
+      description: data.description || 'Verified KAYARD KE inventory listing with inspection certification.',
       features: data.features || ['Navigation', 'Leather Interior', 'Premium Sound'],
       sellerId: data.sellerId || 'dealer_1',
       sellerName: data.sellerName || 'Apex Luxury Motors',

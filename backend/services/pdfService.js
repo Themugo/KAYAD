@@ -12,7 +12,7 @@ export function generateReceipt({ title, buyerName, sellerName, amount, transact
       const dark = "#0A3340";
 
       // ── Header ──
-      doc.fontSize(36).font("Helvetica-Bold").fillColor(brandTeal).text("KAYAD", { align: "center" });
+      doc.fontSize(36).font("Helvetica-Bold").fillColor(brandTeal).text("KAYARD KE", { align: "center" });
       doc.fontSize(10).font("Helvetica").fillColor("#666").text("Kenya's Premium Car Marketplace", { align: "center" });
       doc.moveDown(0.5);
       doc.moveTo(50, doc.y).lineTo(545, doc.y).strokeColor(brandTeal).lineWidth(1).stroke();
@@ -80,7 +80,7 @@ export function generateReceipt({ title, buyerName, sellerName, amount, transact
       // ── Footer ──
       doc.moveDown(3);
       doc.moveTo(50, doc.y).lineTo(545, doc.y).strokeColor(brandTeal).lineWidth(0.5).stroke();
-      doc.fontSize(8).fillColor("#aaa").text("© Kayad Ltd. — Generated automatically", { align: "center" });
+      doc.fontSize(8).fillColor("#aaa").text("© KAYARD KE Ltd. — Generated automatically", { align: "center" });
 
       doc.end();
     } catch (err) {

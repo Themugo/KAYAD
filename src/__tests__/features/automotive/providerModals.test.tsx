@@ -53,7 +53,7 @@ describe('Provider application', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Submit application' }));
     await waitFor(() => expect(declare).toHaveBeenCalledWith('prov-123', expect.objectContaining({ category: 'diagnostics', allMakes: true })));
     expect(register.mock.calls[0][0]).not.toHaveProperty('serviceTypes');
-    expect((await screen.findByRole('status')).textContent).toMatch(/submitted to KAYAD for review/);
+    expect((await screen.findByRole('status')).textContent).toMatch(/submitted to KAYARD KE for review/);
     expect(document.body.textContent).toMatch(/recorded as declared, not verified/);
   });
 
@@ -92,13 +92,13 @@ describe('My business and affiliations', () => {
     listCaps.mockResolvedValue({ capabilities: [{ id: 'k1', category_code: 'diagnostics', status: 'declared', all_makes: true }, { id: 'k2', category_code: 'hybrid_ev', status: 'verified', all_makes: true }] });
     listStaff.mockResolvedValue({ staff: [] }); myAff.mockResolvedValue({ affiliations: [] });
     render(<ProviderServicesModal isOpen onClose={vi.fn()} />);
-    expect(await screen.findByText(/KAYAD asked for: Upload your licence/)).toBeTruthy();
+    expect(await screen.findByText(/KAYARD KE asked for: Upload your licence/)).toBeTruthy();
     expect(screen.getByText('declared, not verified')).toBeTruthy();
-    expect(screen.getByText('verified by KAYAD')).toBeTruthy();
+    expect(screen.getByText('verified by KAYARD KE')).toBeTruthy();
     expect(screen.queryByRole('button', { name: /^verify/i })).toBeNull();
-    expect(screen.getByText(/open once KAYAD approves the business/)).toBeTruthy();
+    expect(screen.getByText(/open once KAYARD KE approves the business/)).toBeTruthy();
     expect(screen.queryByRole('button', { name: 'Open organization workspace' })).toBeNull();
-    expect(screen.queryByPlaceholderText('Email of their KAYAD account')).toBeNull();
+    expect(screen.queryByPlaceholderText('Email of their KAYARD KE account')).toBeNull();
   });
 
   it('a person can accept an invitation addressed to them (via the organization API) and sees where they work', async () => {
@@ -132,7 +132,7 @@ describe('My business and affiliations', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Open organization workspace' }));
     expect(open).toHaveBeenCalledWith('p1');
     expect(invite).not.toHaveBeenCalled();
-    expect(screen.queryByPlaceholderText('Email of their KAYAD account')).toBeNull();
+    expect(screen.queryByPlaceholderText('Email of their KAYARD KE account')).toBeNull();
     expect(document.body.textContent).toMatch(/does not certify their qualifications/);
   });
 
@@ -152,7 +152,7 @@ describe('My business and affiliations', () => {
 });
 
 describe('Product A attribution', () => {
-  it('exposes the business that carried out a KAYAD inspection, from the order, and nothing is invented when absent', () => {
+  it('exposes the business that carried out a KAYARD KE inspection, from the order, and nothing is invented when absent', () => {
     expect(businessNameOf({ id: 'i', name: 'Jane', businessName: 'Acme Inspections' } as never)).toBe('Acme Inspections');
     expect(businessNameOf('some-id' as never)).toBeUndefined();
     expect(businessNameOf({ id: 'i', name: 'Jane' } as never)).toBeUndefined();

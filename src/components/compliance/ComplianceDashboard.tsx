@@ -365,7 +365,7 @@ export const ComplianceDashboard: React.FC<ComplianceDashboardProps> = ({
           <div>
             <p className="text-sm font-bold text-[#0E4655]">Internal Compliance Center</p>
             <p className="text-xs text-[#176B87]">
-              This information is confidential and visible only to Auction Organizers, KAYAD Administrators, and Compliance Officers.
+              This information is confidential and visible only to Auction Organizers, KAYARD KE Administrators, and Compliance Officers.
             </p>
           </div>
         </div>

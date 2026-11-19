@@ -48,7 +48,7 @@ export default function ProviderFilters({ filters, onChange, taxonomy, makes, lo
             <option value="">Any</option>
             {(taxonomy?.powertrains || []).map((p) => <option key={p.code} value={p.code}>{p.label}</option>)}
           </select>
-          {category?.highRisk && <p className="text-xs text-[#64748B] mt-1">High-voltage work only lists businesses KAYAD has verified for it.</p>}
+          {category?.highRisk && <p className="text-xs text-[#64748B] mt-1">High-voltage work only lists businesses KAYARD KE has verified for it.</p>}
         </div>
 
         <div>
@@ -79,7 +79,7 @@ export default function ProviderFilters({ filters, onChange, taxonomy, makes, lo
       </div>
 
       <div className="mt-5 pt-5 border-t border-[#D7E7E4] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        <Check label="Only businesses KAYAD verified for this service" checked={!!filters.verifiedOnly} disabled={!filters.category} onChange={(v) => onChange({ verifiedOnly: v || undefined })} />
+        <Check label="Only businesses KAYARD KE verified for this service" checked={!!filters.verifiedOnly} disabled={!filters.category} onChange={(v) => onChange({ verifiedOnly: v || undefined })} />
         <Check label="Travels to the vehicle (mobile)" checked={!!filters.mobileOnly} onChange={(v) => onChange({ mobileOnly: v || undefined })} />
         <Check label="Has a workshop" checked={!!filters.workshopOnly} onChange={(v) => onChange({ workshopOnly: v || undefined })} />
         <Check label="Same day (declared)" checked={!!filters.sameDayAvailable} onChange={(v) => onChange({ sameDayAvailable: v || undefined })} />

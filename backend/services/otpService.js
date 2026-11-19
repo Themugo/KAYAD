@@ -49,19 +49,19 @@ export const createOtpChallenge = async ({ userId, purpose, channel, recipient, 
   const templateCode = channel === "whatsapp" ? "phone_verification_whatsapp" : channel === "email" ? "account_verification_email" : "phone_verification_sms";
   let rendered = null;
   try { rendered = renderTemplate(await getTemplate(templateCode, channel), { code, minutes: 10 }); } catch { /* compatibility fallback */ }
-  const message = rendered?.body || `Your KAYAD verification code is: ${code}. It expires in 10 minutes. Do not share this code.`;
+  const message = rendered?.body || `Your KAYARD KE verification code is: ${code}. It expires in 10 minutes. Do not share this code.`;
   const delivery = await deliver({
     userId,
     channel,
     eventType,
     templateCode: `otp_${purpose}`,
     recipient,
-    subject: "Your KAYAD verification code",
+    subject: "Your KAYARD KE verification code",
     message,
     text: message,
-    html: `<p>Your KAYAD verification code is <strong>${code}</strong>.</p><p>It expires in 10 minutes. Do not share this code.</p>`,
+    html: `<p>Your KAYARD KE verification code is <strong>${code}</strong>.</p><p>It expires in 10 minutes. Do not share this code.</p>`,
     category: "otp",
-    metadata: { otpChallengeId: challenge.id, purpose, message, text: message, subject: "Your KAYAD verification code", ipHash: ip ? hash(ip) : null, userAgentHash: userAgent ? hash(userAgent) : null },
+    metadata: { otpChallengeId: challenge.id, purpose, message, text: message, subject: "Your KAYARD KE verification code", ipHash: ip ? hash(ip) : null, userAgentHash: userAgent ? hash(userAgent) : null },
   });
 
   // STAGE 5C: a code the provider did not accept must never be reported as sent. `deliver` returns null when the channel/event is

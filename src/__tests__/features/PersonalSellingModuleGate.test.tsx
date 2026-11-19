@@ -17,7 +17,7 @@ describe('Personal selling module inside the unified account', () => {
   it('does not offer a separate seller application or seller account when free personal selling is open', async () => {
     getMySellerCapability.mockResolvedValue({ ...cap('approved'), source: 'policy_default', canApply: false, canList: true });
     mount('user');
-    expect(await screen.findByText(/Manage my vehicles/i)).toBeTruthy();
+    expect(await screen.findByLabelText('My vehicles and selling tools')).toBeTruthy();
     expect(screen.queryByRole('button', { name: /apply to sell/i })).toBeNull();
   });
   it.each(['pending', 'rejected', 'suspended', 'revoked'])('a %s applicant is not admitted to the workspace', async (st) => {
@@ -29,7 +29,8 @@ describe('Personal selling module inside the unified account', () => {
   it('free policy default admits personal accounts without seller application or package', async () => {
     getMySellerCapability.mockResolvedValue({ ...cap('approved'), source: 'policy_default', canApply: false, canList: true });
     mount('user');
-    expect((await screen.findAllByText('Manage my vehicles')).length).toBeGreaterThan(0);
+    expect(await screen.findByLabelText('My vehicles and selling tools')).toBeTruthy();
+    expect(screen.queryByTestId('kayad-seller-access-state')).toBeNull();
   });
 
   it('requires verified email before opening the create-listing wizard', async () => {
@@ -42,12 +43,14 @@ describe('Personal selling module inside the unified account', () => {
   it('an approved personal account is admitted to the workspace', async () => {
     getMySellerCapability.mockResolvedValue(cap('approved'));
     mount('user');
-    expect((await screen.findAllByText('Manage my vehicles')).length).toBeGreaterThan(0);
+    expect(await screen.findByLabelText('My vehicles and selling tools')).toBeTruthy();
+    expect(screen.queryByTestId('kayad-seller-access-state')).toBeNull();
   });
   it('an existing individual_seller keeps the workspace while the status loads (no regression)', async () => {
     getMySellerCapability.mockReturnValue(new Promise(() => {}));
     mount('individual_seller');
-    expect((await screen.findAllByText('Manage my vehicles')).length).toBeGreaterThan(0);
+    expect(await screen.findByLabelText('My vehicles and selling tools')).toBeTruthy();
+    expect(screen.queryByTestId('kayad-seller-access-state')).toBeNull();
   });
   it('a suspended individual_seller is moved out of the workspace', async () => {
     getMySellerCapability.mockResolvedValue(cap('suspended'));

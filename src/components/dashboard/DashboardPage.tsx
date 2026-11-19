@@ -80,7 +80,7 @@ export const DashboardPage: FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <Badge variant="blue" icon={<LayoutDashboard className="w-3.5 h-3.5" />}>
-              KAYAD Workspace
+              KAYARD KE Workspace
             </Badge>
             <span className="text-xs text-[#64748b] capitalize font-bold">Role: {user?.role ?? 'user'}</span>
           </div>
@@ -150,7 +150,7 @@ export const DashboardPage: FC = () => {
         ))}
       </div>
 
-      {/* Standardized KAYAD Search Bar */}
+      {/* Standardized KAYARD KE Search Bar */}
       <SearchBar
         value={searchQuery}
         onChange={setSearchQuery}
@@ -308,7 +308,7 @@ export const DashboardPage: FC = () => {
       <Modal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        title="List New Vehicle on KAYAD"
+        title="List New Vehicle on KAYARD KE"
         subtitle="Add your vehicle details. Buyers can request an independent inspection before they commit"
       >
         <form onSubmit={handleCreateListing} className="space-y-4">

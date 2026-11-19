@@ -617,7 +617,7 @@ function AppInner() {
           <div className="min-h-[420px] flex items-center justify-center px-6" role="status" aria-live="polite">
             <div className="text-center">
               <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#BDE5DE] border-t-[#13B8A6]" aria-hidden="true" />
-              <p className="text-sm font-medium text-[#64748B]">Loading KAYAD workspace…</p>
+              <p className="text-sm font-medium text-[#64748B]">Loading KAYARD KE workspace…</p>
             </div>
           </div>
         }>

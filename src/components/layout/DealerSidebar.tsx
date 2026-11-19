@@ -136,7 +136,7 @@ export default function DealerSidebar({ mobileOpen, onToggle }: DealerSidebarPro
           fontSize: 10, color: 'rgba(255,255,255,0.2)',
           letterSpacing: '0.1em', textTransform: 'uppercase',
         }}>
-          <span style={{ color: 'var(--brand)' }}>◆</span> Kayad Marketplace
+          <span style={{ color: 'var(--brand)' }}>◆</span> KAYARD KE Marketplace
         </div>
       )}
     </div>

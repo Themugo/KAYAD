@@ -15,7 +15,7 @@ export const BuyerProtectionNotice: React.FC<BuyerProtectionNoticeProps> = ({
 }) => {
   const baseText = `This auction is conducted independently by the verified organizer shown above.`;
 
-  const fullText = `This auction is conducted independently by the verified organizer shown above. KAYAD provides the digital marketplace and auction technology. Bid-confirmation payments may be processed through KAYAD's payment rail, while bid security and final vehicle settlement follow the auction's published organizer payment and settlement rules.`;
+  const fullText = `This auction is conducted independently by the verified organizer shown above. KAYARD KE provides the digital marketplace and auction technology. Bid-confirmation payments may be processed through KAYARD KE's payment rail, while bid security and final vehicle settlement follow the auction's published organizer payment and settlement rules.`;
 
   // Compact variant - for use in headers
   if (variant === 'compact') {
@@ -108,7 +108,7 @@ export const TrustFooter: React.FC<{ organizerName?: string }> = ({
   <div className="flex items-center justify-center gap-6 py-4 border-t border-[#D7E7E4] bg-[#F6FAF9]">
     <div className="flex items-center gap-2 text-xs text-[#64748B]">
       <Shield className="w-4 h-4 text-emerald-600" />
-      <span>KAYAD Verified Marketplace</span>
+      <span>KAYARD KE Verified Marketplace</span>
     </div>
     <div className="w-px h-4 bg-[#BDE5DE]"></div>
     <div className="flex items-center gap-2 text-xs text-[#64748B]">

@@ -39,7 +39,7 @@ const errorText = (err: unknown): { message: string; kind: EscrowApiError['kind'
   if (err instanceof EscrowApiError) {
     if (err.kind === 'unauthenticated') return { kind: err.kind, message: 'Your session has ended. Sign in again to see your deals.' };
     if (err.kind === 'forbidden') return { kind: err.kind, message: 'You do not have access to this.' };
-    if (err.kind === 'network') return { kind: err.kind, message: 'We could not reach KAYAD. Check your connection and try again.' };
+    if (err.kind === 'network') return { kind: err.kind, message: 'We could not reach KAYARD KE. Check your connection and try again.' };
     return { kind: err.kind, message: err.message || 'Something went wrong.' };
   }
   return { kind: 'unknown', message: 'Something went wrong.' };
@@ -178,7 +178,7 @@ export const ParticipantEscrowDesk: React.FC<Props> = ({ initialEscrowId = null,
       {load.status === 'ready' && deals.length === 0 && (
         <div className="rounded-xl border border-dashed border-[#BDE5DE] bg-white p-8 text-center" data-testid="escrow-empty">
           <p className="font-medium text-[#0A3340]">You have no escrow deals yet.</p>
-          <p className="mx-auto mt-1 max-w-md text-sm text-[#64748B]">An escrow starts when a vehicle and seller that KAYAD has approved for escrow are bought through KAYAD. If a listing does not show the Escrow badge, it is not escrow-protected.</p>
+          <p className="mx-auto mt-1 max-w-md text-sm text-[#64748B]">An escrow starts when a vehicle and seller that KAYARD KE has approved for escrow are bought through KAYARD KE. If a listing does not show the Escrow badge, it is not escrow-protected.</p>
           {onNavigate && <button type="button" onClick={() => onNavigate('marketplace')} className="mt-4 rounded-lg bg-[#0A3340] px-4 py-2 text-sm text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4]">Browse vehicles</button>}
           <p className="mx-auto mt-4 max-w-md text-xs text-[#64748B]">Dealer team members: deals are currently visible only to the account that owns them, not to its team members.</p>
         </div>
@@ -229,13 +229,13 @@ export const ParticipantEscrowDesk: React.FC<Props> = ({ initialEscrowId = null,
         title={pending ? ACTION_LABEL[pending] : ''}
         description={pending === 'confirm_vehicle' ? 'Confirm that you have inspected the vehicle and accept it. This does not pay the seller by itself.'
           : pending === 'confirm_delivery' ? 'Confirm that the handover to the buyer is complete.'
-          : pending === 'request_release' ? 'Ask KAYAD to release the funds to the seller. KAYAD staff carry out the release; you can still raise a dispute until they do.' : ''}
+          : pending === 'request_release' ? 'Ask KAYARD KE to release the funds to the seller. KAYARD KE staff carry out the release; you can still raise a dispute until they do.' : ''}
         confirmLabel={pending ? ACTION_LABEL[pending] : 'Confirm'} busy={busy} error={actionError}
         onConfirm={() => void runAction()} onClose={() => { if (!busy) setPending(null); }} />
       <ActionDialog
         open={pending === 'open_dispute'} title="Raise a dispute" tone="danger" confirmLabel="Open dispute" busy={busy} error={actionError}
         confirmDisabled={reason.trim().length < 10}
-        description="Opening a dispute stops release and refund until KAYAD staff decide. Describe what is wrong (at least 10 characters)."
+        description="Opening a dispute stops release and refund until KAYARD KE staff decide. Describe what is wrong (at least 10 characters)."
         onConfirm={() => void runAction()} onClose={() => { if (!busy) setPending(null); }}>
         <label className="mt-3 block text-sm font-medium text-[#0A3340]" htmlFor="dispute-reason">What is the problem?</label>
         <textarea id="dispute-reason" value={reason} onChange={(e) => setReason(e.target.value)} rows={4}
@@ -297,7 +297,7 @@ const DealDetail: React.FC<DetailProps> = ({ deal, funding, copied, notice, onLo
       <dl className="grid grid-cols-2 gap-3">
         <Fact label="Amount" value={formatKes(deal.amount)} />
         <Fact label={role === 'buyer' ? 'Seller' : 'Buyer'} value={other?.businessName || other?.name || null} />
-        {role === 'seller' && deal.commission != null && <Fact label="KAYAD commission" value={formatKes(deal.commission)} />}
+        {role === 'seller' && deal.commission != null && <Fact label="KAYARD KE commission" value={formatKes(deal.commission)} />}
         {role === 'seller' && deal.sellerAmount != null && <Fact label="You receive (after commission)" value={formatKes(deal.sellerAmount)} />}
         <Fact label="Opened" value={formatDate(deal.createdAt)} />
         <Fact label="Funding verified" value={formatDate(deal.fundingVerifiedAt)} />
@@ -317,10 +317,10 @@ const DealDetail: React.FC<DetailProps> = ({ deal, funding, copied, notice, onLo
                   <p>Pay {formatKes(funding.data.amount)} to {funding.data.account.accountName} — {funding.data.account.bankName}{funding.data.account.branch ? `, ${funding.data.account.branch}` : ''}</p>
                   <p>Account number: <span className="font-mono">{funding.data.account.accountNumber}</span></p>
                 </>
-              ) : <p>No payment account is available for this deal yet. Contact KAYAD support.</p>}
+              ) : <p>No payment account is available for this deal yet. Contact KAYARD KE support.</p>}
               <p className="flex items-center gap-2">Reference: <span className="font-mono">{funding.data.reference}</span>
                 <button type="button" onClick={() => onCopy(funding.data!.reference)} className="inline-flex items-center gap-1 rounded border border-[#BDE5DE] px-2 py-0.5 text-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-[#5AAFA4]"><Copy className="h-3 w-3" aria-hidden="true" />{copied ? 'Copied' : 'Copy'}</button></p>
-              <p className="text-xs text-[#64748B]">Your deal shows as funded only after KAYAD verifies the transfer.</p>
+              <p className="text-xs text-[#64748B]">Your deal shows as funded only after KAYARD KE verifies the transfer.</p>
             </div>
           )}
         </div>

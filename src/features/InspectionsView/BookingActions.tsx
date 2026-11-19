@@ -63,7 +63,7 @@ export const PayBookingModal: React.FC<PayProps> = ({ record, onClose, onPaid, p
       {state === 'paid' ? (
         <div role="status" className="text-center space-y-3 py-2">
           <CheckCircle2 className="w-10 h-10 mx-auto text-[#13B8A6]" aria-hidden="true" />
-          <p className="text-base font-bold text-[#12576d]">Payment confirmed by KAYAD</p>
+          <p className="text-base font-bold text-[#12576d]">Payment confirmed by KAYARD KE</p>
           <p className="text-sm text-[#64748B]">Your booking is now paid. Its status updates in My inspections.</p>
           <Button variant="primary" onClick={onClose}>Done</Button>
         </div>
@@ -94,7 +94,7 @@ export const PayBookingModal: React.FC<PayProps> = ({ record, onClose, onPaid, p
           {waiting && (
             <p role="status" className="flex items-start gap-2 text-sm text-[#12576D] rounded-xl border border-[#CDE9E5] bg-[#F5FBFA] p-3">
               <Loader2 className="w-4 h-4 animate-spin shrink-0 mt-0.5" aria-hidden="true" />
-              <span>Check your phone and enter your M-Pesa PIN. We are waiting for KAYAD to confirm the payment — do not pay twice.</span>
+              <span>Check your phone and enter your M-Pesa PIN. We are waiting for KAYARD KE to confirm the payment — do not pay twice.</span>
             </p>
           )}
           {error && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}

@@ -1,14 +1,14 @@
 import fs from 'node:fs';
 
 const read = (path) => fs.readFileSync(new URL(`../${path}`, import.meta.url), 'utf8');
-const hub = read('src/components/DashboardHub.tsx');
+const hub = ['src/components/DashboardHub.tsx', 'src/components/dashboard/personal/personalNav.ts', 'src/components/dashboard/personal/PersonalSidebar.tsx', 'src/components/dashboard/personal/PersonalGreetingBanner.tsx', 'src/components/dashboard/personal/PersonalOverview.tsx'].map((f) => read(f)).join('\n');
 const selling = read('src/features/PrivateSellerPlatform/pages/PersonalSellingModule.tsx');
 const buying = read('src/features/OwnershipPlatform/pages/PersonalBuyingModule.tsx');
 const profile = read('src/pages/Profile.tsx');
 const app = read('src/App.tsx');
 const checks = [
   ['DashboardHub remains the only personal dashboard shell', hub.includes('data-kayad-unified-personal-dashboard')],
-  ['My Vehicles is a dashboard section', hub.includes("id: 'my-vehicles'") && hub.includes('personalSection===item.id')],
+  ['My Vehicles is a dashboard section', hub.includes("id: 'my-vehicles'") && hub.includes('active === item.id')],
   ['Create Listing is a dashboard section', hub.includes("'create-listing'") && hub.includes("selectPersonalSection('create-listing')")],
   ['Personal listing edits use the canonical owner API', selling.includes('updateCar(listing.id')],
   ['Personal listing removal uses the canonical owner API', selling.includes('deleteCar(listing.id')],

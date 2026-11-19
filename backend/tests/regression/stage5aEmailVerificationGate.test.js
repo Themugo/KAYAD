@@ -149,7 +149,7 @@ describe("B4 — Brevo adapter wire contract (HTTP stubbed; nothing is sent)", (
     expect(init.headers["api-key"]).toBe(process.env.BREVO_API_KEY);
     expect(init.signal).toBeInstanceOf(AbortSignal);
     const body = JSON.parse(init.body);
-    expect(body.sender).toEqual({ email: "noreply@kayad.space", name: "KAYAD" });
+    expect(body.sender).toEqual({ email: "noreply@kayad.space", name: "KAYARD KE" });
     expect(body.to).toEqual([{ email: "buyer@example.test" }]);
   });
   test("BREVO_FROM_EMAIL / BREVO_FROM_NAME override the sender", async () => {
@@ -175,7 +175,7 @@ describe("B4 — Brevo adapter wire contract (HTTP stubbed; nothing is sent)", (
   });
   test("the status/config object exposes presence flags only, never the secret", () => {
     const cfg = getBrevoConfig();
-    expect(cfg).toMatchObject({ provider: "brevo", configured: true, from: "noreply@kayad.space", fromName: "KAYAD", webhookConfigured: false });
+    expect(cfg).toMatchObject({ provider: "brevo", configured: true, from: "noreply@kayad.space", fromName: "KAYARD KE", webhookConfigured: false });
     expect(JSON.stringify(cfg)).not.toContain(process.env.BREVO_API_KEY);
   });
 });

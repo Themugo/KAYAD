@@ -50,7 +50,7 @@ const buildDefaultMetadata = (title: string, description: string): Metadata => (
     type: 'website',
     url: typeof window !== 'undefined' ? window.location.href : '',
     image: '',
-    siteName: 'KAYAD',
+    siteName: 'KAYARD KE',
     locale: 'en_KE',
   },
   twitter: {

@@ -32,7 +32,7 @@ export const TeamPanel: React.FC<{ org: OrgSummary }> = ({ org }) => {
         <p className="text-sm text-[#64748B]">{me.role === 'branch_manager' ? 'People in your branch.' : 'Everyone who works for this organization. A person is only on the team after they accept an invitation.'}</p>
       </div>
       <Notice msg={msg} />
-      {list.length === 0 ? <Empty title="No team members yet" hint={roles.length ? 'Invite a registered KAYAD user by email below.' : undefined} /> : (
+      {list.length === 0 ? <Empty title="No team members yet" hint={roles.length ? 'Invite a registered KAYARD KE user by email below.' : undefined} /> : (
         <ul className="space-y-2">
           {list.map((m) => (
             <li key={m.id} className="rounded-xl border border-[#D7E7E4] bg-white p-3 text-sm space-y-2">
@@ -86,7 +86,7 @@ export const TeamPanel: React.FC<{ org: OrgSummary }> = ({ org }) => {
         <form className="rounded-xl border border-[#D7E7E4] bg-white p-4 space-y-3" aria-labelledby="org-invite" onSubmit={(e) => { e.preventDefault(); void run(() => organizationApi.invite(org.id, { email: inv.email.trim(), accessRole: inv.accessRole, title: TITLES_FOR[inv.accessRole] ? (inv.title || TITLES_FOR[inv.accessRole]![TITLES_FOR[inv.accessRole]!.length - 1]) : undefined, branchId: mayHaveBranch(inv.accessRole) ? inv.branchId || null : null }), 'Invitation sent. They must accept before they count as part of your team. It expires in 7 days.').then((ok) => ok && setInv({ ...inv, email: '' })); }}>
           <h3 id="org-invite" className="font-bold text-[#0A3340]">Invite someone</h3>
           <div className="grid gap-3 sm:grid-cols-2">
-            <div className="sm:col-span-2"><label className="text-xs font-bold" htmlFor="inv-email">Email of their KAYAD account *</label>
+            <div className="sm:col-span-2"><label className="text-xs font-bold" htmlFor="inv-email">Email of their KAYARD KE account *</label>
               <input id="inv-email" type="email" required className={field} value={inv.email} onChange={(e) => setInv({ ...inv, email: e.target.value })} autoComplete="off" /></div>
             <div><label className="text-xs font-bold" htmlFor="inv-role">Role *</label>
               <select id="inv-role" className={field} value={inv.accessRole} onChange={(e) => { const r = e.target.value as AccessRole; setInv({ ...inv, accessRole: r, title: TITLES_FOR[r]?.[0] || '', branchId: mayHaveBranch(r) ? inv.branchId : '' }); }}>

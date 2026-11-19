@@ -51,7 +51,7 @@ export function validateHeroPresentation(input) {
   }
   if ("cardTextColor" in input && input.cardTextColor !== "" && !isSafeHeroColor(input.cardTextColor)) errors.push("cardTextColor must be a hex, rgb(a) or theme-variable colour");
   if ("primaryButtonColor" in input && input.primaryButtonColor !== "" && !isSafeHeroColor(input.primaryButtonColor)) errors.push("primaryButtonColor must be a hex, rgb(a) or theme-variable colour");
-  if ("backgroundUrl" in input && input.backgroundUrl !== "" && !isSafeHeroImageUrl(input.backgroundUrl)) errors.push("backgroundUrl must be empty (KAYAD showroom), an app image path or an https image URL");
+  if ("backgroundUrl" in input && input.backgroundUrl !== "" && !isSafeHeroImageUrl(input.backgroundUrl)) errors.push("backgroundUrl must be empty (KAYARD KE showroom), an app image path or an https image URL");
   if ("vehicleSource" in input && !["showcase", "featured", "selected"].includes(input.vehicleSource)) errors.push("vehicleSource must be showcase, featured or selected");
   for (const flag of ["showcaseFallbackEnabled", "showVehicleInfoCards", "showVehicleLabels", "arrowEnabled", "dotsEnabled", "tickerEnabled"]) {
     if (flag in input && typeof input[flag] !== "boolean") errors.push(`${flag} must be true or false`);

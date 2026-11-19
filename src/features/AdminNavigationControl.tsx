@@ -86,7 +86,7 @@ export const AdminNavigationControl: React.FC = () => {
       <div>
         <h3 className="font-bold text-[#176B87]">Public navigation</h3>
         <p className="text-sm text-[#64748B] mt-1">
-          Show, hide and reorder the existing destinations. The design, labels and destinations are fixed by KAYAD.
+          Show, hide and reorder the existing destinations. The design, labels and destinations are fixed by KAYARD KE.
           Marketplace and Support are always shown. Hiding a menu item only removes the link — access to the page itself is still enforced by the platform.
           Changes reach visitors on their next page load.
         </p>
@@ -126,7 +126,7 @@ export const AdminNavigationControl: React.FC = () => {
       </ol>
       <div className="flex flex-wrap gap-2">
         <Button variant="primary" disabled={saving || loading} onClick={() => void send(toPayload(model), 'Navigation saved.')}>{saving ? 'Saving…' : 'Save navigation'}</Button>
-        <Button variant="outline" disabled={saving || loading} onClick={() => void send({ items: [] }, 'Navigation reset to the KAYAD default.', () => setModel(toModel(null)))}>Reset to default</Button>
+        <Button variant="outline" disabled={saving || loading} onClick={() => void send({ items: [] }, 'Navigation reset to the KAYARD KE default.', () => setModel(toModel(null)))}>Reset to default</Button>
       </div>
     </Card>
   );

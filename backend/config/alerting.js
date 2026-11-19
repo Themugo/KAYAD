@@ -204,7 +204,7 @@ export const triggerAlert = async (titleOrAlert, message, level = ALERT_LEVELS.M
     : ALERT_LEVELS.MEDIUM;
   const alert = {
     id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    title: structured ? (sourceAlert.title || sourceAlert.source || "KAYAD Alert") : titleOrAlert,
+    title: structured ? (sourceAlert.title || sourceAlert.source || "KAYARD KE Alert") : titleOrAlert,
     message: structured ? (sourceAlert.message || "Operational alert triggered") : message,
     level: safeLevel,
     timestamp: sourceAlert.timestamp || Date.now(),

@@ -13,7 +13,7 @@ export default function usePageMeta(title, description, opts = {}) {
   const { image, url, type = 'website' } = opts;
 
   useEffect(() => {
-    const fullTitle = title ? `${title} | Kayad` : "Kayad — Kenya's Premium Car Marketplace";
+    const fullTitle = title ? `${title} | KAYARD KE` : "KAYARD KE — Kenya's Premium Car Marketplace";
     const prevTitle = document.title;
     document.title = fullTitle;
 

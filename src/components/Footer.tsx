@@ -71,7 +71,7 @@ export default function Footer({ setPage }: FooterProps) {
             <h4 className="text-[var(--footer-accent,#13B8A6)] font-sans font-semibold text-sm mb-4 tracking-wide">Company</h4>
             <ul className="space-y-2.5">
               {[
-                { label: 'About KAYAD', page: 'home' },
+                { label: 'About KAYARD KE', page: 'home' },
                 { label: 'How It Works', page: 'home' },
                 { label: 'Support', page: 'support' },
                 { label: 'Contact', page: 'support' },

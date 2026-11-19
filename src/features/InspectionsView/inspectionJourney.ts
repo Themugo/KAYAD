@@ -57,8 +57,8 @@ const KAYAD_STATUS: Record<string, InspectionStatusView> = {
   // The backend keeps the historical value `pending_payment` for a freshly
   // requested order. A KAYAD vehicle inspection request does not take payment,
   // so the customer-facing meaning is simply "requested".
-  pending_payment: { label: 'Request received', detail: 'Waiting for KAYAD to assign an inspector.', tone: 'neutral', stage: 0 },
-  requested: { label: 'Request received', detail: 'Waiting for KAYAD to assign an inspector.', tone: 'neutral', stage: 0 },
+  pending_payment: { label: 'Request received', detail: 'Waiting for KAYARD KE to assign an inspector.', tone: 'neutral', stage: 0 },
+  requested: { label: 'Request received', detail: 'Waiting for KAYARD KE to assign an inspector.', tone: 'neutral', stage: 0 },
   assigned: { label: 'Inspector assigned', detail: 'An inspector has been assigned to your vehicle.', tone: 'active', stage: 1 },
   in_progress: { label: 'Inspection in progress', detail: 'The inspector has started inspecting the vehicle.', tone: 'active', stage: 2 },
   completed: { label: 'Report ready', detail: 'The inspection is complete and the report is available.', tone: 'success', stage: 3 },
@@ -87,7 +87,7 @@ const PAYMENT_TEXT: Record<string, string> = {
 
 const UNKNOWN_STATUS: InspectionStatusView = {
   label: 'Status unavailable',
-  detail: 'KAYAD returned a status this page does not recognise. Contact support if it does not change.',
+  detail: 'KAYARD KE returned a status this page does not recognise. Contact support if it does not change.',
   tone: 'neutral',
   stage: -1,
 };

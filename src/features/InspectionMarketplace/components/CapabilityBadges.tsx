@@ -28,11 +28,11 @@ export default function CapabilityBadges({ capabilities, taxonomy, max }: { capa
           <li
             key={`${cap.category}-${cap.subcategory || ''}-${i}`}
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium border ${verified ? 'bg-[#E7F7F4] border-[#13B8A6] text-[#12576d]' : 'bg-white border-[#BDE5DE] text-[#64748B]'}`}
-            title={`${verified ? 'Verified by KAYAD' : 'Declared by the business, not verified by KAYAD'} · ${capabilityScope(cap)}`}
+            title={`${verified ? 'Verified by KAYARD KE' : 'Declared by the business, not verified by KAYARD KE'} · ${capabilityScope(cap)}`}
           >
             {verified ? <Shield size={12} aria-hidden /> : <CircleDashed size={12} aria-hidden />}
             <span>{categoryLabel(taxonomy, cap.category)}</span>
-            <span className="sr-only">{verified ? ' (verified by KAYAD)' : ' (declared by the business, not verified)'}</span>
+            <span className="sr-only">{verified ? ' (verified by KAYARD KE)' : ' (declared by the business, not verified)'}</span>
             <span aria-hidden className="opacity-70">· {verified ? 'verified' : 'declared'}</span>
           </li>
         );

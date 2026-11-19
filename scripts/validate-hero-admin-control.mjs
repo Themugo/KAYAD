@@ -10,6 +10,7 @@ const read = (p) => fs.readFileSync(p, 'utf8');
 const types = read('src/features/VehicleMarketplace/types/heroPresentation.ts');
 const panel = read('src/features/VehicleMarketplace/components/HomePageAdminPanel.tsx');
 const hero = read('src/features/VehicleMarketplace/components/VehicleMarketplace.tsx');
+const ph = fs.readFileSync('src/components/home/PremiumHero.tsx', 'utf8');
 const css = read('src/index.css');
 const adminRoutes = read('backend/routes/adminRoutes.js');
 
@@ -43,16 +44,16 @@ else fail('normalizeHeroExtras must be used by both the public page and the admi
 // 4. Public hero reads admin values; no hardcoded copy/timers/dimensions in the JSX.
 const mobile = hero.slice(hero.indexOf('aria-label="KAYAD mobile hero"'));
 const checks = [
-  ['mobile headline comes from admin hero slide', /\{heroHeadlineNode\}<\/h1>/.test(mobile)],
-  ['mobile eyebrow comes from admin hero slide', /\{heroEyebrowDisplay\}<\/span>/.test(mobile)],
-  ['mobile supporting copy comes from admin config', /\{heroSupportCopy\}<\/p>/.test(mobile)],
-  ['desktop and mobile CTA labels are admin-controlled', (hero.match(/>\{heroPrimaryLabelSafe\}/g) || []).length === 2 && (hero.match(/\{heroSecondaryLabelSafe\}<\/span> <PlayCircle/g) || []).length === 2 && /safeHeroCtaLabel\(heroPrimaryLabel\)/.test(hero)] /* labels stay admin-controlled; a length cap (full text kept in aria-label) stops a long label breaking the layout */,
+  ['headline comes from admin hero slide (single responsive hero)', /\{p\.headline\}<\/h1>/.test(ph) && /headline=\{heroHeadlineNode\}/.test(hero)],
+  ['eyebrow comes from admin hero slide', /\{p\.eyebrow\}<\/p>/.test(ph) && /eyebrow=\{heroEyebrowDisplay\}/.test(hero)],
+  ['supporting copy comes from admin config', /\{p\.supportCopy\}<\/p>/.test(ph) && /supportCopy=\{heroSupportCopy\}/.test(hero)],
+  ['CTA labels are admin-controlled (capped for display)', /primaryLabel=\{heroPrimaryLabelSafe\}/.test(hero) && /secondaryLabel=\{heroSecondaryLabelSafe\}/.test(hero) && /safeHeroCtaLabel\(heroPrimaryLabel\)/.test(hero)],
   ['admin headline is never rewritten (no includes() hack)', !/heroHeadline\.includes\(/.test(hero)],
   ['no literal 6500ms rotation timer', !/\b6500\b/.test(hero)],
   ['rotation timers use admin rotationSeconds', (hero.match(/heroRotationMs/g) || []).length >= 6],
-  ['mobile stage height uses admin min/max', /mobileStageMinPx/.test(hero) && /mobileStageMaxPx/.test(hero) && !/clamp\(168px,52vw,260px\)/.test(hero)],
-  ['mobile pair image stage uses admin min/max bounds', /hero-pair-image-stage/.test(hero) && /mobileStageMinPx/.test(hero) && /mobileStageMaxPx/.test(hero)],
-  ['hero colors come from admin config', /heroPresentation\.primaryButtonColor/.test(hero) && /heroPresentation\.secondaryButtonBorderColor/.test(hero) && /heroPresentation\.cardTextColor/.test(hero)],
+  ['hero height is responsive CSS (legacy mobile stage min/max controls are retired and labelled inert in the admin panel)', /@media \(min-width: 1024px\)/.test(fs.readFileSync('src/components/home/premium-hero.css','utf8'))],
+  ['single stage serves desktop and mobile', /data-testid="hero-stage"/.test(ph)],
+  ['hero CTA colors come from admin config', /heroPresentation\.primaryButtonColor/.test(hero) && /heroPresentation\.secondaryButtonBorderColor/.test(hero)],
 ];
 for (const [name, ok] of checks) (ok ? pass : fail)(name);
 

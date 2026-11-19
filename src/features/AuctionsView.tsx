@@ -219,7 +219,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
   }, [loading, tab, live.length, scheduled.length, ended.length, failed.live, failed.scheduled, failed.ended]);
 
   const marketSubcopy = useMemo(() => {
-    if (loading && live.length === 0 && scheduled.length === 0 && ended.length === 0) return 'Checking the latest live, upcoming and completed auction lists from KAYAD.';
+    if (loading && live.length === 0 && scheduled.length === 0 && ended.length === 0) return 'Checking the latest live, upcoming and completed auction lists from KAYARD KE.';
     const unavailable = [
       failed.live ? 'Live now' : null,
       failed.scheduled ? 'Starting soon' : null,
@@ -242,9 +242,9 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
     }
     if (tab === 'live' && live.length > 0) return 'Follow live bidding, save auctions to revisit, and continue from registration to fulfilment in the connected auction journey.';
     if (tab === 'scheduled' && scheduled.length > 0) return 'Published upcoming auctions appear here with their scheduled start times and opening bids.';
-    if (tab === 'ended' && ended.length > 0) return 'Review completed auction listings and the results returned by KAYAD.';
+    if (tab === 'ended' && ended.length > 0) return 'Review completed auction listings and the results returned by KAYARD KE.';
     if (scheduled.length > 0) return 'No auctions are live right now. Published upcoming auctions are available in Starting soon.';
-    return 'KAYAD lists only auctions returned by the backend. Browse the marketplace and check back as verified vehicles become eligible for auction.';
+    return 'KAYARD KE lists only auctions returned by the backend. Browse the marketplace and check back as verified vehicles become eligible for auction.';
   }, [loading, tab, live.length, scheduled.length, ended.length, failed.live, failed.scheduled, failed.ended, favoritesStatus, favoritesError]);
 
   const openAuction = (auction: DisplayAuction) => {
@@ -330,7 +330,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
   const tabFailed = (tab === 'live' && failed.live) || (tab === 'scheduled' && failed.scheduled) || (tab === 'ended' && failed.ended) || (tab === 'saved' && (favoritesStatus === 'loading' || favoritesStatus === 'error' || (failed.live && failed.scheduled && failed.ended)));
   const emptyStateCopy = tab === 'saved'
     ? !user
-      ? { title: 'Sign in to view your saved auctions.', body: 'Save auctions to build a watchlist you can return to whenever you come back to KAYAD.' }
+      ? { title: 'Sign in to view your saved auctions.', body: 'Save auctions to build a watchlist you can return to whenever you come back to KAYARD KE.' }
       : favoritesStatus === 'error'
         ? { title: 'Your saved auctions could not be verified.', body: favoritesError || 'Please retry to load your account watchlist.' }
         : favoritesStatus === 'loading'
@@ -339,7 +339,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
             ? { title: 'Your saved-auction view may be incomplete.', body: 'One or more auction lists could not be checked. Refresh before concluding that no saved auctions are available.' }
             : { title: 'Your watchlist is ready for its first favourite.', body: 'Save an auction to return to it here.' }
     : tab === 'live'
-      ? { title: scheduled.length > 0 ? 'Nothing live this moment.' : 'The auction floor is quiet right now.', body: scheduled.length > 0 ? `${scheduled.length} auction${scheduled.length === 1 ? ' is' : 's are'} scheduled to open soon — check Starting soon or save a search to be notified.` : 'KAYAD shows only auctions returned by the backend; it never manufactures local auction records. New auctions open as verified vehicles clear registration.' }
+      ? { title: scheduled.length > 0 ? 'Nothing live this moment.' : 'The auction floor is quiet right now.', body: scheduled.length > 0 ? `${scheduled.length} auction${scheduled.length === 1 ? ' is' : 's are'} scheduled to open soon — check Starting soon or save a search to be notified.` : 'KAYARD KE shows only auctions returned by the backend; it never manufactures local auction records. New auctions open as verified vehicles clear registration.' }
       : tab === 'scheduled'
         ? { title: 'No auctions are scheduled yet.', body: 'Scheduled auctions will appear here as soon as a dealer publishes one.' }
         : { title: 'No auctions have completed yet.', body: 'Completed auctions and their results will appear here once the first one closes.' };
@@ -353,7 +353,7 @@ export const AuctionsView: React.FC<AuctionsViewProps> = ({ user, onOpenAuth }) 
           there is no marketing copy independent of what the backend returns. */}
       <section className={`auction-market-header ${failed.live && failed.scheduled && failed.ended ? 'has-auction-error' : ''}`}>
         <div className="auction-market-header-top">
-          <div className="auction-eyebrow"><span role="img" className={`auction-status-indicator ${loading ? 'is-loading' : failed.live ? 'is-unavailable' : live.length ? 'is-live' : 'is-idle'}`} aria-label={loading ? 'Auction data loading' : failed.live ? 'Live auction data unavailable' : live.length ? 'Live auction records available' : 'No live auction records returned'} /> KAYAD AUCTIONS <span className="auction-eyebrow-divider" /> CURATED VEHICLE MARKET</div>
+          <div className="auction-eyebrow"><span role="img" className={`auction-status-indicator ${loading ? 'is-loading' : failed.live ? 'is-unavailable' : live.length ? 'is-live' : 'is-idle'}`} aria-label={loading ? 'Auction data loading' : failed.live ? 'Live auction data unavailable' : live.length ? 'Live auction records available' : 'No live auction records returned'} /> KAYARD KE AUCTIONS <span className="auction-eyebrow-divider" /> CURATED VEHICLE MARKET</div>
           <div className="auction-trust-row">
             <span><ShieldCheck size={13} /> Verified listings</span>
             <span><Lock size={13} /> Published settlement rules</span>

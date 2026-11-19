@@ -9,7 +9,7 @@ assert.match(app, /<DealersView\s+onSelectDealerVehicles=\{handleSelectDealerVeh
 assert.match(app, /if \(dealerId\) setDealerScope\(\{ id: dealerId, name: dealerName \}\)/);
 assert.match(view, /api\.get\('\/users\/dealers'\)/);
 assert.doesNotMatch(view, /DealerBusinessView|MANAGEMENT CONSOLE/, 'public directory must not expose the dealer management console');
-assert.match(view, /KAYAD approved dealer/);
+assert.match(view, /KAYARD KE approved dealer/);
 assert.doesNotMatch(view, /100% Audited Sellers|Every enterprise dealership.*verified/i);
 assert.match(view, /onSelectDealerVehicles\(dealer\.name, dealer\.id\)/);
 assert.match(route, /router\.get\(\s*"\/dealers"/);

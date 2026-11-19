@@ -41,7 +41,7 @@ export default function RegionalDashboard() {
         <header className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between">
           <div>
             <div className="flex items-center gap-3"><Globe size={26} color={COLORS.navy} /><h1 className="text-2xl font-bold text-[#0A3340]">Regional Configuration</h1></div>
-            <p className="mt-1 text-sm text-[#64748B]">The live country, currency, language, payment and compliance configuration powering KAYAD.</p>
+            <p className="mt-1 text-sm text-[#64748B]">The live country, currency, language, payment and compliance configuration powering KAYARD KE.</p>
           </div>
           <button onClick={() => void load()} disabled={loading} className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#D7E7E4] px-4 py-2 text-sm font-semibold text-[#12576D] disabled:opacity-50"><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Refresh</button>
         </header>

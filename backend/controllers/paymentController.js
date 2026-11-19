@@ -339,7 +339,7 @@ export const b2cCallback = async (req, res) => {
               userId: paidPayout.dealer,
               eventType: COMMUNICATION_EVENTS.ESCROW_PAYOUT_COMPLETED,
               title: "Seller payout completed",
-              message: `Your KAYAD escrow payout of KES ${Number(paidPayout.net_amount).toLocaleString("en-KE")} has been confirmed by the payment provider.`,
+              message: `Your KAYARD KE escrow payout of KES ${Number(paidPayout.net_amount).toLocaleString("en-KE")} has been confirmed by the payment provider.`,
               channels: ["in_app", "email", "sms"],
               metadata: { payoutId: paidPayout.id, escrowId: paidPayout.escrow || null },
             }).catch((e) => logError("Payout completion notification failed", e));

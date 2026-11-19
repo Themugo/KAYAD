@@ -12,7 +12,7 @@ export const SellCarBanner: FC = () => {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#13B8A6]/20 text-[#13B8A6] border border-[#13B8A6]/30 font-mono text-xs font-black tracking-wider uppercase">
           <Sparkles className="w-3.5 h-3.5 text-[#13B8A6]" />
-          <span>KAYAD VEHICLE MARKETPLACE</span>
+          <span>KAYARD KE VEHICLE MARKETPLACE</span>
         </div>
 
         {/* Title */}

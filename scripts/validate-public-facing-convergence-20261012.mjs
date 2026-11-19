@@ -37,10 +37,10 @@ check('canonical public palette remains centralized', ['--kayad-public-bg', '--k
 check('public shell uses shared soft surface and avoids width overflow', css.includes('.kayad-public-shell') && css.includes('background-color: var(--public-surface-soft)') && css.includes('min-width: 0'));
 check('public controls retain visible keyboard focus', css.includes('.kayad-public-shell :where(button, a, input, select, textarea):focus-visible'));
 check('public shell respects reduced-motion preferences', css.includes('@media (prefers-reduced-motion: reduce) { .kayad-public-shell'));
-check('shared loading spinner uses KAYAD mint instead of legacy amber', read('src/components/ui/index.tsx').includes('border-t-[#13B8A6]') && !read('src/components/ui/index.tsx').includes('border-t-amber-500'));
+check('shared loading spinner uses KAYARD KE mint instead of legacy amber', read('src/components/ui/index.tsx').includes('border-t-[#13B8A6]') && !read('src/components/ui/index.tsx').includes('border-t-amber-500'));
 
 // Public navigation and directory entry.
-check('public dealer destination is a visitor-first backend-backed directory', dealers.includes("api.get('/users/dealers')") && dealers.includes('Explore KAYAD Dealer Showrooms'));
+check('public dealer destination is a visitor-first backend-backed directory', dealers.includes("api.get('/users/dealers')") && dealers.includes('Explore KAYARD KE Dealer Showrooms'));
 check('public directory does not expose dealer management controls', !dealers.includes('DealerBusinessView') && !dealers.includes('MANAGEMENT CONSOLE'));
 check('App connects the directory showroom action to the dealer-scoped marketplace filter', app.includes('<DealersView') && app.includes('onSelectDealerVehicles={handleSelectDealerVehicles}') && app.includes('if (dealerId) setDealerScope({ id: dealerId, name: dealerName })'));
 check('public dealer copy limits approval claims to approved account status', dealers.includes('Approval confirms the dealer account status') && !dealers.includes('100% Audited Sellers'));
@@ -55,7 +55,7 @@ check('purchase CTA avoids claiming all listings are escrow-protected', detail.i
 check('escrow badge includes the current preview/live label', detail.includes('getEscrowBadgeLabel(vehicle)') && detail.includes('Review current escrow availability and terms'));
 check('inspection score uses its actual 0–100 scale', detail.includes('Inspection score: {vehicle.inspection.score}/100') && !detail.includes('150-Pt Score: {vehicle.inspection.score}/100'));
 check('vehicle inspection panel avoids fabricated certificate/pass claims', detail.includes('Inspection Details') && detail.includes('Reported inspection score') && !detail.includes('Grade A Pass Certificate'));
-check('vehicle trust panel gives verification steps rather than guarantees', detail.includes('Before You Buy') && detail.includes('Verify ownership documents') && !detail.includes('100% KAYAD Verified') && !detail.includes('NTSA logbook ownership verified with zero outstanding encumbrances.'));
+check('vehicle trust panel gives verification steps rather than guarantees', detail.includes('Before You Buy') && detail.includes('Verify ownership documents') && !detail.includes('100% KAYARD KE Verified') && !detail.includes('NTSA logbook ownership verified with zero outstanding encumbrances.'));
 check('inspection CTA copy defers scope and pricing to the selected provider', detail.includes('Inspection scope, tests, provider credentials and pricing depend on the selected independent provider and package.'));
 
 // Public marketplace / legacy public surfaces.
@@ -67,9 +67,9 @@ check('legacy gallery removes guaranteed escrow claims', gallery.includes('Escro
 check('legacy home hero uses neutral, verifiable marketplace copy', hero.includes('Explore vehicle listings, compare available details') && !hero.includes('verified logbooks, and secure direct deals'));
 check('home feature pillars do not promise escrow, licensing or KRA vetting', homePillars.includes('Escrow may be available for eligible listings') && homePillars.includes('any verification status displayed') && !homePillars.includes('KRA-vetted, licensed'));
 check('escrow workflow no longer promises instant payout, GPS dispatch or regulated custody', escrowWorkflow.includes('Release and payout follow the authorized deal process') && !escrowWorkflow.includes('real-time GPS tracking') && !escrowWorkflow.includes('Instant Wired Payout') && !escrowWorkflow.includes('Regulated Custody'));
-check('comparison page avoids calling KAYAD a regulated marketplace', comparison.includes('KAYAD Marketplace') && !comparison.includes('KAYAD Regulated Marketplace'));
+check('comparison page avoids calling KAYARD KE a regulated marketplace', comparison.includes('KAYARD KE Marketplace') && !comparison.includes('KAYARD KE Regulated Marketplace'));
 check('legacy escrow banner avoids bank custody and instant payout claims', escrowBanner.includes('How an eligible escrow deal may progress') && !escrowBanner.includes('Instant Disbursal') && !escrowBanner.includes('Regulated Custody') && !escrowBanner.includes('KRA Verified') && !escrowBanner.includes('M-Pesa Digital Contracts'));
-check('legacy seller banner avoids invented popularity and blanket escrow promises', sellBanner.includes('KAYAD VEHICLE MARKETPLACE') && !sellBanner.includes('Join thousands') && !sellBanner.includes('secure M-Pesa & bank escrow transactions'));
+check('legacy seller banner avoids invented popularity and blanket escrow promises', sellBanner.includes('KAYARD KE VEHICLE MARKETPLACE') && !sellBanner.includes('Join thousands') && !sellBanner.includes('secure M-Pesa & bank escrow transactions'));
 check('public trust strip no longer animates fabricated financial or satisfaction statistics', trustMetrics.includes('MARKETPLACE DETAILS TO REVIEW') && !trustMetrics.includes('12842') && !trustMetrics.includes('98.9') && !trustMetrics.includes('3.4 * 10'));
 check('live-auction section only renders backend-confirmed live auctions', liveAuctions.includes("vehicles.filter(v => v.auctionLifecycle === 'live')") && !liveAuctions.includes('vehicles[0]') && !liveAuctions.includes('timeLeft') && liveAuctions.includes('No live auctions right now'));
 check('final public CTA avoids invented inventory totals and universal verification claims', finalCta.includes('Browse available vehicle listings') && !finalCta.includes('thousands of verified listings'));
@@ -84,9 +84,9 @@ check('test-drive modal does not claim to submit a booking without a service', d
 check('seller follow state is not simulated as a persisted subscription', !dealerProfile.includes('handleToggleFollow') && !dealerProfile.includes('1420'));
 
 // Preserve existing private/public and commercial boundaries.
-check('public escrow explainer preserves eligibility and non-bank disclosures', publicEscrow.includes('Escrow is not insurance') && publicEscrow.includes('does not represent KAYAD as a bank'));
+check('public escrow explainer preserves eligibility and non-bank disclosures', publicEscrow.includes('Escrow is not insurance') && publicEscrow.includes('does not represent KAYARD KE as a bank'));
 check('public breadcrumbs do not label escrow as a bank product', breadcrumbs.includes("label: 'Escrow options'") && !breadcrumbs.includes('Bank Escrow Vault'));
-check('public financing remains public-mode and does not render lender offers', finance.includes("mode === 'public'") && finance.includes('KAYAD is not a lender') && finance.includes('not an approval or a lender offer'));
+check('public financing remains public-mode and does not render lender offers', finance.includes("mode === 'public'") && finance.includes('KAYARD KE is not a lender') && finance.includes('not an approval or a lender offer'));
 check('support public entry remains the existing Support workflow', app.includes('<SupportView user={user} onOpenAuth={handleOpenAuth}'));
 check('admin-managed ticker and homepage commercial controls remain intact', app.includes('<TopNoticeStrip') && read('src/features/VehicleMarketplace/components/VehicleMarketplace.tsx').includes('HomePageAdminPanel'));
 check('validator is registered as a package script', packageJson.scripts['validate:public-facing-convergence'] === 'node scripts/validate-public-facing-convergence-20261012.mjs');

@@ -96,7 +96,7 @@ export default function DealerBankingPanel() {
 
   return (
     <form onSubmit={save} className="space-y-6" noValidate>
-      <p className="text-sm text-[#64748B]">Where KAYAD sends your payouts. All fields are optional and you can change them at any time.</p>
+      <p className="text-sm text-[#64748B]">Where KAYARD KE sends your payouts. All fields are optional and you can change them at any time.</p>
       <fieldset className="space-y-3">
         <legend className="text-xs font-bold uppercase tracking-wide text-[#176B87] mb-2">Bank account</legend>
         {field('bankName', 'Bank name', { placeholder: 'e.g. Equity Bank', autoComplete: 'off' })}

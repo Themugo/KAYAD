@@ -145,7 +145,7 @@ export const confirmPayment = async ({ checkoutRequestID, receipt, amount }) => 
     if (user) await emitCommunication({
       userId: payment.user, eventType: COMMUNICATION_EVENTS.PAYMENT_SUCCESS, category: "transactional",
       title: "Payment confirmed",
-      message: `Your KAYAD payment of KES ${Number(payment.amount).toLocaleString("en-KE")} was confirmed.`,
+      message: `Your KAYARD KE payment of KES ${Number(payment.amount).toLocaleString("en-KE")} was confirmed.`,
       channels: ["in_app", "email", "sms", "whatsapp"],
       metadata: { paymentId: payment.id, receipt, carId: payment.car || null },
     });

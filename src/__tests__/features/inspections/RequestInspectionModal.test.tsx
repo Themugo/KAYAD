@@ -32,7 +32,7 @@ describe('RequestInspectionModal', () => {
 
   it('never defaults to the first vehicle and blocks submit until a vehicle and a valid phone exist', () => {
     setup();
-    const select = screen.getByLabelText('KAYAD marketplace vehicle') as HTMLSelectElement;
+    const select = screen.getByLabelText('KAYARD KE marketplace vehicle') as HTMLSelectElement;
     expect(select.value).toBe('');
     fillPhone();
     expect((screen.getByRole('button', { name: 'Submit inspection request' }) as HTMLButtonElement).disabled).toBe(true);

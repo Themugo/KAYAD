@@ -44,7 +44,7 @@ interface AccountAvatarProps { src?: string | null; name?: string | null; classN
 function AccountAvatar({ src, name, className }: AccountAvatarProps) {
   const [failed, setFailed] = useState(!src);
   useEffect(() => { setFailed(!src); }, [src]);
-  const initials = (name || 'KAYAD').trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'K';
+  const initials = (name || 'KAYARD KE').trim().split(/\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase() || 'K';
   if (!src || failed) {
     return <span className={`${className} inline-flex items-center justify-center bg-[#DDF4F0] text-[#0A3340] font-bold`} aria-hidden="true">{initials}</span>;
   }
@@ -583,7 +583,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       {mobileMenuOpen && (
         <>
           <button type="button" aria-label="Dismiss navigation backdrop" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-[55] bg-[#031E27]/55 backdrop-blur-[2px] lg:hidden" />
-          <aside ref={drawerRef} id="kayad-mobile-drawer" tabIndex={-1} className="kayad-mobile-menu fixed inset-x-0 bottom-0 z-[60] lg:hidden focus:outline-none" style={{ top: `${mobileDrawerTop}px`, height: `${mobileDrawerHeight}px` }} role="dialog" aria-modal="true" aria-label="KAYAD mobile navigation">
+          <aside ref={drawerRef} id="kayad-mobile-drawer" tabIndex={-1} className="kayad-mobile-menu fixed inset-x-0 bottom-0 z-[60] lg:hidden focus:outline-none" style={{ top: `${mobileDrawerTop}px`, height: `${mobileDrawerHeight}px` }} role="dialog" aria-modal="true" aria-label="KAYARD KE mobile navigation">
             <div className="kayad-mobile-menu__surface mx-auto flex h-full w-full max-w-[760px] flex-col overflow-hidden rounded-t-[28px] border-x border-t border-[#2C6671] bg-[#062E3A] text-white shadow-[0_30px_90px_rgba(3,30,39,.38)]">
               <div className="kayad-mobile-menu__topbar flex min-h-[58px] shrink-0 items-center justify-between border-b border-white/10 bg-[#071B2E] px-5">
                 <div className="min-w-0"><p className="text-[13px] font-black tracking-[.08em] text-white">KAYARD MENU</p><p className="text-[10px] text-white/55">Explore, manage and get support</p></div>
@@ -613,7 +613,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                   </section>
                 ) : (
                   <section className="mb-4 rounded-[22px] border border-[#3B7E88] bg-gradient-to-br from-[#0B3E4B] to-[#07313D] p-4">
-                    <div className="flex items-start gap-3"><div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-[#DDF4F0] text-[#0A3340]"><User className="h-5 w-5" /></div><div className="min-w-0 flex-1"><p className="text-sm font-black">Welcome to KAYAD</p><p className="mt-0.5 text-[11px] leading-5 text-white/60">Sign in to access saved vehicles, escrow and your account.</p></div></div>
+                    <div className="flex items-start gap-3"><div className="grid h-10 w-10 shrink-0 place-items-center rounded-2xl bg-[#DDF4F0] text-[#0A3340]"><User className="h-5 w-5" /></div><div className="min-w-0 flex-1"><p className="text-sm font-black">Welcome to KAYARD KE</p><p className="mt-0.5 text-[11px] leading-5 text-white/60">Sign in to access saved vehicles, escrow and your account.</p></div></div>
                     <button type="button" onClick={() => handleAuthNavigation('/login')} className="mt-3 flex min-h-12 w-full items-center justify-center gap-2 rounded-2xl bg-[#13B8A6] px-4 text-sm font-black text-[#062E3A] shadow-[0_10px_25px_rgba(19,184,166,.18)]">Sign In / Sign Up <ChevronDown className="h-4 w-4 -rotate-90" /></button>
                   </section>
                 )}
@@ -675,7 +675,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 {user && (
                   <section className="kayad-drawer-panel mb-4 rounded-[22px] border border-white/[0.07] bg-white/[0.035] p-2" aria-labelledby="kayad-drawer-workspace">
                     <span id="kayad-drawer-workspace" className="block px-2 pb-1 pt-1 text-[9px] font-black uppercase tracking-[.2em] text-[#79A9AE]">
-                      {isDealerUser ? 'Dealer workspace' : isStaffAccount ? 'Staff workspace' : isMechanicAccount ? 'Provider workspace' : 'Your KAYAD'}
+                      {isDealerUser ? 'Dealer workspace' : isStaffAccount ? 'Staff workspace' : isMechanicAccount ? 'Provider workspace' : 'Your KAYARD KE'}
                     </span>
                     <div className="kayad-drawer-list">
                       {user && isDealerUser && <>
@@ -722,7 +722,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 </section>
 
                 {!isStaffAccount && (
-                  <button type="button" onClick={() => handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'dashboard:create-listing')} id="mobile-cta-sell-car" className="mb-4 flex min-h-14 w-full items-center justify-between rounded-[20px] border border-[#43D0C2]/40 bg-gradient-to-r from-[#0D7187] to-[#176B87] px-4 text-left text-white shadow-[0_16px_35px_rgba(7,57,68,.22)] active:scale-[.99]"><span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/10"><PlusCircle className="h-5 w-5" /></span><span><strong className="block text-sm font-black">{isDealerUser ? 'Add Vehicle' : 'Sell Vehicle'}</strong><small className="text-[10px] text-white/60">{isDealerUser ? 'Add stock to your inventory' : 'List your vehicle with KAYAD'}</small></span></span><ChevronDown className="h-5 w-5 -rotate-90 text-[#8DE4DB]" /></button>
+                  <button type="button" onClick={() => handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'dashboard:create-listing')} id="mobile-cta-sell-car" className="mb-4 flex min-h-14 w-full items-center justify-between rounded-[20px] border border-[#43D0C2]/40 bg-gradient-to-r from-[#0D7187] to-[#176B87] px-4 text-left text-white shadow-[0_16px_35px_rgba(7,57,68,.22)] active:scale-[.99]"><span className="flex items-center gap-3"><span className="grid h-9 w-9 place-items-center rounded-xl bg-white/10"><PlusCircle className="h-5 w-5" /></span><span><strong className="block text-sm font-black">{isDealerUser ? 'Add Vehicle' : 'Sell Vehicle'}</strong><small className="text-[10px] text-white/60">{isDealerUser ? 'Add stock to your inventory' : 'List your vehicle with KAYARD KE'}</small></span></span><ChevronDown className="h-5 w-5 -rotate-90 text-[#8DE4DB]" /></button>
                 )}
                 <div className="flex items-center justify-between border-t border-white/[0.08] px-1 pt-4 text-[10px] text-white/50"><span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5 text-[#79D8CF]" />{selectedCounty}</span></div>
               </div>

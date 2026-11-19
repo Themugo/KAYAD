@@ -643,7 +643,7 @@ export interface BankDocumentItem {
 
 export interface BankCommunicationMessage {
   id: string;
-  sender: 'Bank Loan Officer' | 'Applicant' | 'KAYAD System';
+  sender: 'Bank Loan Officer' | 'Applicant' | 'KAYARD KE System';
   senderName: string;
   message: string;
   timestamp: string;

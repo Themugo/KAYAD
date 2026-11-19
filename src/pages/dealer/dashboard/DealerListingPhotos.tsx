@@ -29,7 +29,7 @@ function describe(err: unknown, fallback: string): string {
     if (err.status === 401) return 'Your session has expired. Please sign in again.';
     if (err.status === 403) return err.message || 'You do not have permission to change this listing.';
     if (err.kind === 'not_found') return 'This listing no longer exists.';
-    if (err.kind === 'network') return 'Unable to reach KAYAD. Check your connection and try again.';
+    if (err.kind === 'network') return 'Unable to reach KAYARD KE. Check your connection and try again.';
     return err.message || fallback;
   }
   return fallback;

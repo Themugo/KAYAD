@@ -78,7 +78,7 @@ export function commentProblem(text) {
   if (/https?:\/\/|www\.|\b[\w-]+\.(com|co\.ke|ke|net|org|info|me|link)\b|\bwa\.me\b|\bt\.me\b/i.test(text)) return "Links are not allowed in comments.";
   if (/[\w.+-]+@[\w-]+\.\w+/.test(text)) return "Email addresses are not allowed in comments.";
   if (/(?:\d[\s().-]*){9,}/.test(text)) return "Phone or account numbers are not allowed in comments.";
-  if (/\b(whats\s?app|telegram|signal|call me|text me|dm me|inbox me|send (me )?money|pay me|mpesa me)\b/i.test(text)) return "Please keep contact and payments on KAYAD.";
+  if (/\b(whats\s?app|telegram|signal|call me|text me|dm me|inbox me|send (me )?money|pay me|mpesa me)\b/i.test(text)) return "Please keep contact and payments on KAYARD KE.";
   return null;
 }
 

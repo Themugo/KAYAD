@@ -38,7 +38,7 @@ describe('AuctionVerificationSection (seller, real API states)', () => {
     await userEvent.click(await screen.findByRole('button', { name: /Toyota Prado/ }));
     expect(await screen.findByText(/Not yet cleared for auction/)).toBeTruthy();
     expect(screen.getByText(/not a page redirect/i)).toBeTruthy();
-    expect(screen.queryByText(/Payment confirmed by KAYAD/)).toBeNull();
+    expect(screen.queryByText(/Payment confirmed by KAYARD KE/)).toBeNull();
     expect(screen.getByText('Admin approval is not current')).toBeTruthy();
   });
   it('shows payment confirmed and cleared only when the API says so', async () => {
@@ -47,7 +47,7 @@ describe('AuctionVerificationSection (seller, real API states)', () => {
     render(<AuctionVerificationSection listings={[listing]} />);
     await userEvent.click(await screen.findByRole('button', { name: /Toyota Prado/ }));
     expect(await screen.findByText(/Cleared for auction/)).toBeTruthy();
-    expect(screen.getByText(/Payment confirmed by KAYAD/)).toBeTruthy();
+    expect(screen.getByText(/Payment confirmed by KAYARD KE/)).toBeTruthy();
   });
   it('failed inspection offers reinspection/appeal and no auction path; actions need a reason', async () => {
     api.listMyProposals.mockResolvedValue([proposal({ verification_status: 'failed' })]); api.getMyProposal.mockResolvedValue(detail({ verification_status: 'failed' }));

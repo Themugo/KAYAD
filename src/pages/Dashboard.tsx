@@ -22,8 +22,8 @@ export default function Dashboard() {
   return (
     <>
       <SEOHead
-        title="Dashboard - KAYAD"
-        description="Your KAYAD dashboard"
+        title="Dashboard - KAYARD KE"
+        description="Your KAYARD KE dashboard"
       />
 
       <div className="min-h-screen bg-[#F6FAF9] py-8">

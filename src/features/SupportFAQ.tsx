@@ -88,7 +88,7 @@ export const FAQ_DATA: FAQItem[] = [
     category: 'marketplace',
     categoryLabel: 'Marketplace',
     categoryIcon: <Car className={iconClass} />,
-    question: 'How do I buy a vehicle through KAYAD?',
+    question: 'How do I buy a vehicle through KAYARD KE?',
     answer: 'Start with Marketplace discovery, review the listing information available for the vehicle, use the available inspection path when appropriate, and follow the purchase and protected-transaction steps presented for that vehicle. If you already have a deal reference, include it when contacting Support so the team can work from the correct case.',
     nextStep: 'Open Marketplace',
     popular: true,
@@ -107,7 +107,7 @@ export const FAQ_DATA: FAQItem[] = [
     category: 'auctions',
     categoryLabel: 'Auctions',
     categoryIcon: <Gavel className={iconClass} />,
-    question: 'What happens after I win a KAYAD auction?',
+    question: 'What happens after I win a KAYARD KE auction?',
     answer: 'The winner is notified and can open a winner certificate from the auction page. The winner then arranges payment and handover with the dealer or seller within the payment period shown on the auction, using the contact details released once the commitment is paid. The auction screen and certificate are not proof of payment or ownership transfer, so follow the payment instructions on the auction and keep your own record.',
     nextStep: 'Open Auction',
     popular: true,
@@ -127,7 +127,7 @@ export const FAQ_DATA: FAQItem[] = [
     categoryLabel: 'Auctions',
     categoryIcon: <Gavel className={iconClass} />,
     question: 'How does the bid commitment work, and who gets the money?',
-    answer: 'To bid you register and pay the commitment shown on that auction through the M-Pesa prompt or payment details inside KAYAD. For dealer auctions it goes to the dealer\u2019s verified collection account when one is set up; otherwise, and always for private-seller auctions, KAYAD collects and holds it. Never pay a commitment to someone who contacts you directly. After payment you get access to the bidding room and an anonymous bidder ID, so other bidders never see your real name.',
+    answer: 'To bid you register and pay the commitment shown on that auction through the M-Pesa prompt or payment details inside KAYARD KE. For dealer auctions it goes to the dealer\u2019s verified collection account when one is set up; otherwise, and always for private-seller auctions, KAYARD KE collects and holds it. Never pay a commitment to someone who contacts you directly. After payment you get access to the bidding room and an anonymous bidder ID, so other bidders never see your real name.',
     nextStep: 'Open Auction',
     popular: true,
   },
@@ -137,7 +137,7 @@ export const FAQ_DATA: FAQItem[] = [
     categoryLabel: 'Auctions',
     categoryIcon: <Gavel className={iconClass} />,
     question: 'I did not win. How do I get my commitment back?',
-    answer: 'When an auction closes without you as the winner, your commitment is released for refund. Open Payments to keep it in your KAYAD wallet for future auctions or to withdraw it to the M-Pesa number on your profile. If a withdrawal fails it returns to your wallet. Commitments paid straight to a dealer\u2019s account are returned by that dealer under the auction\u2019s stated rules.',
+    answer: 'When an auction closes without you as the winner, your commitment is released for refund. Open Payments to keep it in your KAYARD KE wallet for future auctions or to withdraw it to the M-Pesa number on your profile. If a withdrawal fails it returns to your wallet. Commitments paid straight to a dealer\u2019s account are returned by that dealer under the auction\u2019s stated rules.',
     nextStep: 'Open Payments',
   },
   {
@@ -145,8 +145,8 @@ export const FAQ_DATA: FAQItem[] = [
     category: 'inspections',
     categoryLabel: 'Pre-Purchase Inspection',
     categoryIcon: <ClipboardCheck className={iconClass} />,
-    question: 'What is included in a KAYAD pre-purchase inspection?',
-    answer: 'Inspections are performed by independent inspection providers. Checklist depth and pricing are provider-specific, so KAYAD does not present one fixed inspection point count as a universal standard. The inspection record and report shown for your order are the authoritative source for that inspection.',
+    question: 'What is included in a KAYARD KE pre-purchase inspection?',
+    answer: 'Inspections are performed by independent inspection providers. Checklist depth and pricing are provider-specific, so KAYARD KE does not present one fixed inspection point count as a universal standard. The inspection record and report shown for your order are the authoritative source for that inspection.',
     nextStep: 'Open Inspection',
     popular: true,
   },
@@ -165,7 +165,7 @@ export const FAQ_DATA: FAQItem[] = [
     categoryLabel: 'Pre-Purchase Inspection',
     categoryIcon: <ClipboardCheck className={iconClass} />,
     question: 'Can I use my own mechanic?',
-    answer: 'You can raise the request with the seller and KAYAD Support. If the inspection needs to be part of a KAYAD inspection order, use the inspection workflow so the applicable provider, scheduling and report records remain attached to the transaction.',
+    answer: 'You can raise the request with the seller and KAYARD KE Support. If the inspection needs to be part of a KAYARD KE inspection order, use the inspection workflow so the applicable provider, scheduling and report records remain attached to the transaction.',
     nextStep: 'Open Inspection',
   },
   {
@@ -173,8 +173,8 @@ export const FAQ_DATA: FAQItem[] = [
     category: 'escrow',
     categoryLabel: 'Escrow',
     categoryIcon: <LockKeyhole className={iconClass} />,
-    question: 'How does KAYAD Escrow protect a transaction?',
-    answer: 'KAYAD Escrow is built around a controlled transaction lifecycle. When an escrow is funded, the transaction records the protected funds as held under the applicable custody process; buyer confirmation, delivery, release, dispute and refund states are recorded by the backend. Funds are released or refunded only through the authorized transaction state and financial controls, not simply because a page says they should be.',
+    question: 'How does KAYARD KE Escrow protect a transaction?',
+    answer: 'KAYARD KE Escrow is built around a controlled transaction lifecycle. When an escrow is funded, the transaction records the protected funds as held under the applicable custody process; buyer confirmation, delivery, release, dispute and refund states are recorded by the backend. Funds are released or refunded only through the authorized transaction state and financial controls, not simply because a page says they should be.',
     nextStep: 'Open Escrow',
     popular: true,
   },
@@ -201,7 +201,7 @@ export const FAQ_DATA: FAQItem[] = [
     category: 'financing',
     categoryLabel: 'Financing',
     categoryIcon: <Landmark className={iconClass} />,
-    question: 'How does vehicle financing work through KAYAD?',
+    question: 'How does vehicle financing work through KAYARD KE?',
     answer: 'Financing is partner- and underwriting-dependent. Requirements, rates, approval decisions and final terms come from the applicable financing workflow and partner. Support can help explain where your application sits, but cannot substitute for the lender’s underwriting decision.',
     nextStep: 'Open Financing',
   },
@@ -220,7 +220,7 @@ export const FAQ_DATA: FAQItem[] = [
     categoryLabel: 'Transfer & Ownership',
     categoryIcon: <FileText className={iconClass} />,
     question: 'How do I get help with logbook or ownership transfer?',
-    answer: 'Ownership transfer is a governed post-transaction fulfilment step. KAYAD Support can help you identify the correct transaction and current case state. The support page does not claim a live direct government-registry integration or automatic title clearance.',
+    answer: 'Ownership transfer is a governed post-transaction fulfilment step. KAYARD KE Support can help you identify the correct transaction and current case state. The support page does not claim a live direct government-registry integration or automatic title clearance.',
     nextStep: 'Open a support case',
     popular: true,
   },
@@ -328,14 +328,14 @@ export const SupportFAQ: React.FC<SupportFAQProps> = ({ onContactSupport, onNavi
           <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-5">
             <div className="max-w-2xl space-y-2">
               <div className="inline-flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#9BE5D9]">
-                <ShieldCheck className="w-3.5 h-3.5" /> Checked against how KAYAD actually works
+                <ShieldCheck className="w-3.5 h-3.5" /> Checked against how KAYARD KE actually works
               </div>
               <h2 id="support-knowledge-heading" className="text-2xl sm:text-3xl font-black tracking-tight">Find the answer before you open a case.</h2>
               <p className="text-sm leading-6 text-[#BDE5DE]">Every answer here is written against the real Marketplace, Auction, Inspection, Escrow and Financing workflows, not drafted separately from them. Still stuck after reading? Open a traceable case below.</p>
             </div>
             <div className="w-full lg:w-[380px]">
               <Input
-                aria-label="Search KAYAD help"
+                aria-label="Search KAYARD KE help"
                 placeholder="Search by problem, transaction or service…"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}

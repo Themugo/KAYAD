@@ -21,7 +21,7 @@ pass("M-Pesa callback claims payment atomically", callback.includes("processed: 
 pass("M-Pesa escrow funding is explicitly rejected", callback.includes("Vehicle escrow cannot be funded through M-Pesa STK"));
 pass("M-Pesa purchase/bid settlement remains canonical", callback.includes("atomicSettleBidPayment") && callback.includes("atomicSettlePurchasePayment"));
 pass("Payment initiation creates authoritative intent before provider call", payment.includes("Create the authoritative payment record BEFORE calling M-Pesa"));
-pass("Escrow custody remains bank-transfer only", escrowConfig.includes('fundingMethods: ["bank_transfer"]') && escrowConfig.includes('KAYAD escrow bank account'));
+pass("Escrow custody remains bank-transfer only", escrowConfig.includes('fundingMethods: ["bank_transfer"]') && escrowConfig.includes('KAYARD KE escrow bank account'));
 pass("Canonical escrow funding RPC exists", migration.includes("CREATE OR REPLACE FUNCTION kayad_verify_escrow_funding_atomic"));
 pass("Backend wrapper for canonical funding RPC exists", atomic.includes("export async function atomicVerifyEscrowFunding") && atomic.includes('kayad_verify_escrow_funding_atomic'));
 pass("Funding RPC requires active custodian account", migration.includes("custodian_account IS NULL") && migration.includes("is_active = true"));

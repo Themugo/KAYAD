@@ -6,11 +6,11 @@ const admin = fs.readFileSync('src/features/VehicleMarketplace/components/HomePa
 const types = fs.readFileSync('src/features/VehicleMarketplace/types/heroPresentation.ts', 'utf8');
 const migration = fs.readFileSync('supabase/migrations/20261012103000_home_hero_showcase_pair_and_mobile_composition.sql', 'utf8');
 const tests = fs.readFileSync('src/__tests__/components/VehicleMarketplace.test.tsx', 'utf8');
-pass('mobile hero renders a two-vehicle pair, not a single-car carousel', hero.includes('Featured vehicle pair') && hero.includes('heroCurrentPair.map') && hero.includes("'grid-cols-2'"));
-pass('vehicle images use contain semantics and no crop utility', hero.includes('object-contain object-bottom') && !hero.includes('object-cover drop-shadow-[0_12px_18px_rgba(3,19,27,.42)]'));
-pass('both car images have independent accessible labels', hero.includes('Illustrative KAYAD showroom artwork: ${vehicle.make} ${vehicle.model}') && hero.includes('aria-label={isShowcaseHeroVehicle(vehicle)'));
-pass('desktop hero markup remains a separate lg-only composition', hero.includes('kayad-hero-desktop-layer') && /kayad-hero-desktop-layer[^"]*hidden[^"]*lg:flex/.test(hero) && hero.includes('lg:min-h-[var(--hero-stage-h)]'));
-pass('showcase art is not priced or opened as a listing', hero.includes('Artwork · not a listing') && hero.includes('if (isShowcaseHeroVehicle(vehicle))'));
+pass('hero renders one featured vehicle per slide through the single PremiumHero stage', hero.includes('heroSourceVehicles.map((vehicle) => [vehicle])') && hero.includes('<PremiumHero'));
+pass('vehicle images keep aspect ratio (contain for artwork, masked cover only for rectangular photos)', fs.readFileSync('src/components/home/premium-hero.css','utf8').includes('object-fit: contain'));
+pass('vehicle image has an accessible label distinguishing illustrative artwork', hero.includes('Illustrative KAYARD KE showroom artwork: ${v.make} ${v.model}') && hero.includes('ariaLabel: showcase'));
+pass('hero has a dedicated desktop composition via breakpoint', fs.readFileSync('src/components/home/premium-hero.css','utf8').includes('@media (min-width: 1024px)'));
+pass('showcase art is not priced or opened as a listing', hero.includes('ILLUSTRATIVE · NOT A LISTING') && hero.includes('if (isShowcaseHeroVehicle(vehicle))'));
 pass('real featured inventory takes precedence over showcase artwork (any count of real vehicles)', fs.readFileSync('src/features/VehicleMarketplace/utils/heroSelection.ts','utf8').includes('if (inventory.length > 0) return { vehicles: inventory, kind: \'inventory\', illustrative: false };'));
 pass('showcase fallback is admin-configurable', admin.includes('showcaseFallbackEnabled') && types.includes('showcaseFallbackEnabled: boolean'));
 pass('showcase vehicle identity and image paths are editable by admin', admin.includes('Curated Showcase Pair') && admin.includes('updateShowcaseVehicle(index') && admin.includes('mobileImage'));

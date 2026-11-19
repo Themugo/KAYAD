@@ -22,7 +22,7 @@ export class ErrorBoundary extends Component<Props, State> {
     error: null,
     errorInfo: null,
     showDetails: false,
-    supportReference: `KAYAD-${Date.now().toString(36).toUpperCase()}`, 
+    supportReference: `KAYARD-${Date.now().toString(36).toUpperCase()}`, 
   };
 
   static getDerivedStateFromError(error: Error): Partial<State> {
@@ -89,7 +89,7 @@ export class ErrorBoundary extends Component<Props, State> {
 
             <p className="text-xs text-muted-foreground" role="note">
               Support reference: <strong className="font-mono">{this.state.supportReference}</strong>
-              <br />Share this reference with KAYAD Support if the problem continues.
+              <br />Share this reference with KAYARD KE Support if the problem continues.
             </p>
           </div>
         </div>

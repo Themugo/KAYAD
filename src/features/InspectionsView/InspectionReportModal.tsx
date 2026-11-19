@@ -118,7 +118,7 @@ const KayadReport: React.FC<{ record: InspectionRecord }> = ({ record }) => {
           </ul>
         </section>
       )}
-      <p className="text-xs text-[#64748B] flex items-start gap-1.5"><FileCheck className="w-3.5 h-3.5 shrink-0 mt-0.5" aria-hidden="true" />This report shows only what the inspector submitted to KAYAD. Items that were not recorded are not shown.</p>
+      <p className="text-xs text-[#64748B] flex items-start gap-1.5"><FileCheck className="w-3.5 h-3.5 shrink-0 mt-0.5" aria-hidden="true" />This report shows only what the inspector submitted to KAYARD KE. Items that were not recorded are not shown.</p>
     </div>
   );
 };

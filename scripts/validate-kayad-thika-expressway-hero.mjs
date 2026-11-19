@@ -17,5 +17,5 @@ assert.ok(siteDesign.includes('"/hero/kayad-thika-expressway-no-signs.svg"'), 'b
 assert.ok(marketplace.includes("'/hero/kayad-kenyan-highlands-road.svg'"), 'legacy built-in background is migrated');
 assert.ok(marketplace.includes('(presentation.backgroundUrl || KENYA_ROAD_HERO_BACKGROUND)'), 'custom admin background URLs are preserved');
 assert.ok(marketplace.includes('changeHeroPair') && marketplace.includes('heroRotationMs'), 'existing vehicle-pair carousel and rotation remain');
-assert.ok(marketplace.includes('aria-label="KAYAD mobile hero"'), 'existing mobile hero remains');
-console.log('PASS: KAYAD Thika-style expressway hero defaults, no-location-signage asset, legacy migration, admin override preservation, and existing carousel/mobile hero contracts.');
+assert.ok(marketplace.includes('<PremiumHero') && marketplace.includes('PremiumHero'), 'premium hero (responsive desktop + mobile) is the single hero');
+console.log('PASS: KAYARD KE Thika-style expressway hero defaults, no-location-signage asset, legacy migration, admin override preservation, and existing carousel/mobile hero contracts.');

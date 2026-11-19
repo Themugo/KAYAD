@@ -51,7 +51,7 @@ const ContactSellerSheet: React.FC<Props> = ({ vehicleId, title, onClose, onOpen
   }, [onClose]);
 
   const wa = state.status === 'ready' ? toWhatsAppNumber(state.phone) : '';
-  const message = encodeURIComponent(`Hello, I am interested in the ${title} listed on KAYAD.`);
+  const message = encodeURIComponent(`Hello, I am interested in the ${title} listed on KAYARD KE.`);
 
   return (
     <div className="fixed inset-0 z-[70] flex items-end justify-center bg-[#071F2A]/60 p-3 sm:items-center" role="dialog" aria-modal="true" aria-labelledby="kayad-contact-title" onClick={onClose}>

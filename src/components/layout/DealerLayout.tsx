@@ -59,7 +59,7 @@ export default function DealerLayout({ children }: DealerLayoutProps) {
             </button>
             <Link to="/" style={{ display: 'flex', alignItems: 'center', color: 'var(--brand)', fontWeight: 700, textDecoration: 'none' }} title="Back to homepage">
               <Home size={12} />
-              <span style={{ marginLeft: 4 }}>Kayad</span>
+              <span style={{ marginLeft: 4 }}>KAYARD KE</span>
             </Link>
             {segments.map((seg, i) => (
               <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 4 }}>

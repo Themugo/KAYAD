@@ -77,10 +77,10 @@ export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose, onOpen
                 <section aria-labelledby={`${uid}-status`} className="rounded-xl bg-[#F5F8F8] border border-[#D7E7E4] p-4">
                   <h3 id={`${uid}-status`} className="font-bold text-[#0A3340]">{provider.trading_name || provider.company_name}</h3>
                   <p className="text-sm mt-1">Status: <strong>{provider.lifecycle_stage.replace(/_/g, ' ').toLowerCase()}</strong>{provider.verification_route ? ` (${provider.verification_route} route)` : ''}</p>
-                  {provider.info_requested && <p className="text-sm mt-1 text-[#0A3340]">KAYAD asked for: {provider.info_requested}</p>}
+                  {provider.info_requested && <p className="text-sm mt-1 text-[#0A3340]">KAYARD KE asked for: {provider.info_requested}</p>}
                   {provider.rejection_reason && <p className="text-sm mt-1 text-rose-800">Not approved: {provider.rejection_reason}</p>}
                   {provider.suspended_reason && <p className="text-sm mt-1 text-rose-800">Suspended: {provider.suspended_reason}. You are not listed and cannot take new jobs.</p>}
-                  {!live && <p className="text-xs text-[#64748B] mt-2">You are not listed until a KAYAD administrator approves the business. Services you declare stay “declared” until each is verified.</p>}
+                  {!live && <p className="text-xs text-[#64748B] mt-2">You are not listed until a KAYARD KE administrator approves the business. Services you declare stay “declared” until each is verified.</p>}
                 </section>
 
                 {editable && !live && (
@@ -98,7 +98,7 @@ export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose, onOpen
                 {editable && (
                   <section aria-labelledby={`${uid}-ev`}>
                     <h3 id={`${uid}-ev`} className="font-bold text-[#0A3340]">Evidence</h3>
-                    <p className="text-xs text-[#64748B]">Upload certificates, registrations or licences. KAYAD reviews each one; an expired or document-less item cannot be verified. Business documents do not certify individual staff.</p>
+                    <p className="text-xs text-[#64748B]">Upload certificates, registrations or licences. KAYARD KE reviews each one; an expired or document-less item cannot be verified. Business documents do not certify individual staff.</p>
                     <div className="grid sm:grid-cols-2 gap-2 mt-2">
                       <div><label className="text-xs font-bold block" htmlFor={`${uid}-etype`}>Type</label>
                         <select id={`${uid}-etype`} className={field} value={ev.type} onChange={(e) => setEv({ ...ev, type: e.target.value })}>
@@ -127,7 +127,7 @@ export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose, onOpen
                     {caps.map((c) => (
                       <li key={c.id} className="text-sm flex flex-wrap gap-2 items-center">
                         <strong>{catLabel(c.category_code)}</strong>
-                        <span className={`text-xs rounded-full px-2 py-0.5 border ${c.status === 'verified' ? 'bg-[#E7F7F4] border-[#13B8A6]' : c.status === 'revoked' ? 'bg-rose-50 border-rose-300' : 'border-[#BDE5DE]'}`}>{c.status === 'verified' ? 'verified by KAYAD' : c.status === 'revoked' ? 'revoked' : 'declared, not verified'}</span>
+                        <span className={`text-xs rounded-full px-2 py-0.5 border ${c.status === 'verified' ? 'bg-[#E7F7F4] border-[#13B8A6]' : c.status === 'revoked' ? 'bg-rose-50 border-rose-300' : 'border-[#BDE5DE]'}`}>{c.status === 'verified' ? 'verified by KAYARD KE' : c.status === 'revoked' ? 'revoked' : 'declared, not verified'}</span>
                         <span className="text-xs text-[#64748B]">{c.all_makes ? 'all makes' : (c.vehicle_makes || []).join(', ') || 'makes not stated'}</span>
                       </li>
                     ))}
@@ -139,7 +139,7 @@ export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose, onOpen
                         <option value="">Choose…</option>
                         {(taxonomy?.categories || []).map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}
                       </select>
-                      {selected?.highRisk && <p className="text-xs text-[#0A3340]">High-voltage work is listed only after KAYAD verifies a qualification. Submit that evidence above, then select it here.</p>}
+                      {selected?.highRisk && <p className="text-xs text-[#0A3340]">High-voltage work is listed only after KAYARD KE verifies a qualification. Submit that evidence above, then select it here.</p>}
                       {selected?.highRisk && (
                         <div><label className="text-xs font-bold block" htmlFor={`${uid}-evid`}>Qualification evidence</label>
                           <select id={`${uid}-evid`} className={field} value={cap.evidence} onChange={(e) => setCap({ ...cap, evidence: e.target.value })}>
@@ -163,7 +163,7 @@ export const ProviderServicesModal: React.FC<Props> = ({ isOpen, onClose, onOpen
 
                 <section aria-labelledby={`${uid}-ws`} className="rounded-xl border border-[#D7E7E4] p-4 space-y-2">
                   <h3 id={`${uid}-ws`} className="font-bold text-[#0A3340]">Branches, team and bookings</h3>
-                  <p className="text-sm text-[#64748B]">{live ? 'Add branches, invite staff with a role, route and assign bookings, and see one consolidated report.' : 'Branches, staff and bookings open once KAYAD approves the business.'}</p>
+                  <p className="text-sm text-[#64748B]">{live ? 'Add branches, invite staff with a role, route and assign bookings, and see one consolidated report.' : 'Branches, staff and bookings open once KAYARD KE approves the business.'}</p>
                   {onOpenWorkspace && <Button size="sm" disabled={!live} onClick={() => { onClose(); onOpenWorkspace(provider.id); }}>Open organization workspace</Button>}
                   <p className="text-xs text-[#64748B]">Confirming someone proves a working relationship. It does not certify their qualifications; qualifications are verified separately.</p>
                 </section>

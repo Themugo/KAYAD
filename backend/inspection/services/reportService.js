@@ -586,7 +586,7 @@ class ReportService {
       .replace(/\)/g, '\\)')
       .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F]/g, ' ');
     const lines = [
-      'KAYAD PRE-PURCHASE VEHICLE INSPECTION REPORT',
+      'KAYARD KE PRE-PURCHASE VEHICLE INSPECTION REPORT',
       `Report: ${report.reportNumber || report.report_number || reportId}`,
       `Vehicle: ${report.vehicle?.year || ''} ${report.vehicle?.make || ''} ${report.vehicle?.model || ''}`.trim(),
       `Registration: ${report.vehicle?.registration || 'Not supplied'}`,

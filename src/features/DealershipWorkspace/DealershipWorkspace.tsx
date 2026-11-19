@@ -46,7 +46,7 @@ export default function DealershipWorkspace({ user, onNavigate, onOpenAuth }: Pr
     <main className="mx-auto max-w-3xl p-6">
       <h1 className="text-xl font-black text-[#0A3340]">Dealership workspace</h1>
       <p role="status" className="mt-3 text-sm text-[#475569]">
-        {ambiguous ? 'Your account belongs to more than one dealership. Ask the dealership owner to contact KAYAD support so we can set which one you work for.' : 'You do not currently work for a dealership. If a dealership invited you, open the invitation link from your e-mail while signed in with the invited address. If your access was removed, the dealership owner can invite you again.'}
+        {ambiguous ? 'Your account belongs to more than one dealership. Ask the dealership owner to contact KAYARD KE support so we can set which one you work for.' : 'You do not currently work for a dealership. If a dealership invited you, open the invitation link from your e-mail while signed in with the invited address. If your access was removed, the dealership owner can invite you again.'}
       </p>
       <button className="mt-4 rounded-lg border border-[#D7E7E4] px-4 py-2 text-sm font-bold" onClick={() => { resetMyDealershipCache(); onNavigate('dashboard'); }}>Back to my dashboard</button>
     </main>

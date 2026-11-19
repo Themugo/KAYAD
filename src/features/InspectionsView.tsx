@@ -88,7 +88,7 @@ function useInspectionRecords(ownerKey: string | null) {
     let kayadError: string | null = null;
     let providerError: string | null = null;
     if (kayad.status === 'fulfilled') records.push(...(kayad.value?.orders || []).map(kayadOrderToRecord));
-    else kayadError = 'Your KAYAD inspection requests could not be loaded.';
+    else kayadError = 'Your KAYARD KE inspection requests could not be loaded.';
     if (provider.status === 'fulfilled') records.push(...(provider.value?.bookings || []).map(providerBookingToRecord));
     else providerError = 'Your provider bookings could not be loaded.';
     setState({ ownerKey, records: sortRecords(records), kayadError, providerError });
@@ -195,7 +195,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             <Wrench className="h-4 w-4" aria-hidden="true" /> Automotive services · Kenya
           </p>
           <h1 id="insp-title" className="mt-3 text-2xl sm:text-4xl font-black font-display max-w-2xl">Find the right independent expert for your car</h1>
-          <p className="mt-4 text-sm sm:text-base text-[#EEF7F5] max-w-2xl">KAYAD is the platform connecting you with independent inspection businesses, garages and specialists. They carry out the work, not KAYAD. Review each business and its service verification before you decide.</p>
+          <p className="mt-4 text-sm sm:text-base text-[#EEF7F5] max-w-2xl">KAYARD KE is the platform connecting you with independent inspection businesses, garages and specialists. They carry out the work, not KAYARD KE. Review each business and its service verification before you decide.</p>
           <div className="kayad-services-trust-row mt-5 flex flex-wrap gap-2" aria-label="How automotive services work">
             <span><ShieldCheck className="h-4 w-4" aria-hidden="true" /> Evidence reviewed</span>
             <span><UserCheck className="h-4 w-4" aria-hidden="true" /> Independent providers</span>
@@ -243,7 +243,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                 <h2 id="lane-inspect" className="mt-3 text-lg font-black text-[#12576d]">Inspect a car before you buy</h2>
                 <p className="mt-1.5 text-sm text-[#64748B]">An independent inspector checks the vehicle for you. Two ways to arrange it:</p>
                 <ul className="mt-3 space-y-3 text-sm text-[#64748B] flex-1">
-                  <li><strong className="text-[#0A3340]">Get matched.</strong> For a car listed on KAYAD: send a request and KAYAD assigns one of its verified independent inspectors. Their business name appears once assigned. Submitting takes no payment.</li>
+                  <li><strong className="text-[#0A3340]">Get matched.</strong> For a car listed on KAYARD KE: send a request and KAYARD KE assigns one of its verified independent inspectors. Their business name appears once assigned. Submitting takes no payment.</li>
                   <li><strong className="text-[#0A3340]">Choose yourself.</strong> Compare independent inspection businesses, pick a package and a time slot, and pay by M-Pesa to confirm the booking.</li>
                 </ul>
                 <div className="mt-5 flex flex-wrap gap-2">
@@ -254,7 +254,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
               <article className="kayad-service-lane rounded-2xl border border-[#D7E7E4] bg-white p-6 sm:p-7 flex flex-col" aria-labelledby="lane-fix">
                 <Wrench className="w-6 h-6 text-[#176B87]" aria-hidden="true" />
                 <h2 id="lane-fix" className="mt-3 text-lg font-black text-[#12576d]">Repairs, diagnostics and roadside help</h2>
-                <p className="mt-1.5 text-sm text-[#64748B] flex-1">Find verified independent garages, mechanics and specialists by service, vehicle make and location. Not sure what is wrong? Describe the symptom and see which kind of specialist to look for. KAYAD lists providers; it does not take repair bookings, take payments for them or dispatch roadside help yet, so you contact the provider yourself.</p>
+                <p className="mt-1.5 text-sm text-[#64748B] flex-1">Find verified independent garages, mechanics and specialists by service, vehicle make and location. Not sure what is wrong? Describe the symptom and see which kind of specialist to look for. KAYARD KE lists providers; it does not take repair bookings, take payments for them or dispatch roadside help yet, so you contact the provider yourself.</p>
                 <div className="mt-5 flex flex-wrap gap-2">
                   <Button variant="primary" className="min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.()}>Find a provider <ArrowRight className="w-4 h-4" aria-hidden="true" /></Button>
                   <Button variant="secondary" className="min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.('roadside_recovery')}>Roadside and recovery</Button>
@@ -265,7 +265,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             <section aria-labelledby="insp-trust" className="kayad-service-info rounded-2xl border border-[#D7E7E4] bg-white p-6">
               <h2 id="insp-trust" className="text-base font-black text-[#12576d]">What verified means here</h2>
               <ul className="mt-3 grid md:grid-cols-3 gap-4 text-sm text-[#64748B]">
-                <li><strong className="block text-[#0A3340]">The business is reviewed</strong>KAYAD reviews a business’s identity and evidence before it is listed. It is not verified just by registering.</li>
+                <li><strong className="block text-[#0A3340]">The business is reviewed</strong>KAYARD KE reviews a business’s identity and evidence before it is listed. It is not verified just by registering.</li>
                 <li><strong className="block text-[#0A3340]">Services are checked separately</strong>Each service a business offers is labelled declared or verified. Specialist work such as hybrid and electric vehicles is shown only once verified.</li>
                 <li><strong className="block text-[#0A3340]">People are linked, not assumed</strong>A mechanic is shown as part of a business only when both sides have confirmed it. Verification is not a guarantee of quality.</li>
               </ul>
@@ -294,7 +294,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             <section aria-labelledby="insp-providers" className="kayad-provider-cta rounded-2xl border border-dashed border-[#BDE5DE] bg-[#F6FAF9] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 id="insp-providers" className="text-sm font-black text-[#12576d] flex items-center gap-2"><BriefcaseBusiness className="w-4 h-4" aria-hidden="true" />Run an inspection, garage or specialist business?</h2>
-                <p className="text-xs text-[#64748B] mt-1">Apply to be listed with the services you offer. Applications are reviewed by KAYAD and do not grant access automatically.</p>
+                <p className="text-xs text-[#64748B] mt-1">Apply to be listed with the services you offer. Applications are reviewed by KAYARD KE and do not grant access automatically.</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button variant="secondary" size="sm" className="min-h-[44px]" onClick={() => setProviderOpen(true)}>Apply as a provider</Button>
@@ -340,7 +340,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                       <div className="min-w-0">
                         <h3 className="text-base font-black text-[#12576d] break-words">{r.vehicleTitle}</h3>
-                        <p className="text-xs text-[#64748B] mt-0.5">{r.product === 'kayad' ? `Matched inspection${r.providerName ? ` · carried out by ${r.providerName}` : ' · KAYAD is matching a provider'}` : `Provider booking${r.providerName ? ` · ${r.providerName}` : ''}`} · Ref <span className="font-mono break-all">{r.reference}</span></p>
+                        <p className="text-xs text-[#64748B] mt-0.5">{r.product === 'kayad' ? `Matched inspection${r.providerName ? ` · carried out by ${r.providerName}` : ' · KAYARD KE is matching a provider'}` : `Provider booking${r.providerName ? ` · ${r.providerName}` : ''}`} · Ref <span className="font-mono break-all">{r.reference}</span></p>
                       </div>
                       <span className={`self-start text-xs font-bold px-3 py-1 rounded-full border ${TONE[r.status.tone]}`}>{r.status.label}</span>
                     </div>

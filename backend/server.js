@@ -540,7 +540,7 @@ if (IS_DEVELOPMENT || IS_TEST) {
     swaggerUi.serve,
     swaggerUi.setup(swaggerSpec, {
       customCss: ".swagger-ui .topbar { display: none }",
-      customSiteTitle: "KAYAD API Docs",
+      customSiteTitle: "KAYARD KE API Docs",
     }),
   );
 } else {
@@ -552,7 +552,7 @@ if (IS_DEVELOPMENT || IS_TEST) {
     swaggerUi.serve,
     swaggerUi.setup(swaggerSpec, {
       customCss: ".swagger-ui .topbar { display: none }",
-      customSiteTitle: "KAYAD API Docs",
+      customSiteTitle: "KAYARD KE API Docs",
     }),
   );
 }
@@ -1126,7 +1126,7 @@ const bootstrap = async () => {
       const onListening = () => {
         server.off("error", onError);
         console.log("✅ Server listening callback triggered");
-        logInfo("Kayad API started", {
+        logInfo("KAYARD KE API started", {
           url: `http://${HOST === "0.0.0.0" ? "localhost" : HOST}:${PORT}`,
           host: HOST,
           env: NODE_ENV,
@@ -1164,7 +1164,7 @@ const bootstrap = async () => {
     // that mode: they are non-authoritative for the API contract and can
     // consume the same event loop while the certification probe is running.
     if (process.env.KAYAD_ISOLATED_RUNTIME === "true") {
-      console.log("ℹ️ KAYAD isolated runtime: background services disabled for certification");
+      console.log("ℹ️ KAYARD KE isolated runtime: background services disabled for certification");
       return;
     }
 
@@ -1194,7 +1194,7 @@ const shutdown = async (signal) => {
 
   // Trigger shutdown alert
   if (process.env.SENTRY_DSN) {
-    await triggerAlert("Server Shutdown", `KAYAD backend server shutting down due to ${signal}`, ALERT_LEVELS.MEDIUM, {
+    await triggerAlert("Server Shutdown", `KAYARD KE backend server shutting down due to ${signal}`, ALERT_LEVELS.MEDIUM, {
       signal,
     });
   }

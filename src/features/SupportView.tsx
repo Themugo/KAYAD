@@ -45,7 +45,7 @@ const STATUS_META: Record<string, { label: string; tone: string }> = {
   open: { label: 'Open', tone: 'bg-[#F3FAF9] text-[#12576D] border-[#D7E7E4]' },
   in_progress: { label: 'In progress', tone: 'bg-[#EEF7F5] text-[#176B87] border-[#D7E7E4]' },
   waiting_on_user: { label: 'Waiting for you', tone: 'bg-[#F3FAF9] text-[#12576D] border-[#D7E7E4]' },
-  waiting_on_internal: { label: 'With KAYAD', tone: 'bg-[#EEF7F5] text-[#176B87] border-[#D7E7E4]' },
+  waiting_on_internal: { label: 'With KAYARD KE', tone: 'bg-[#EEF7F5] text-[#176B87] border-[#D7E7E4]' },
   escalated: { label: 'Escalated', tone: 'bg-rose-50 text-rose-700 border-rose-100' },
   resolved: { label: 'Resolved', tone: 'bg-emerald-50 text-emerald-700 border-emerald-100' },
   closed: { label: 'Closed', tone: 'bg-[#EEF7F5] text-[#4B5D6E] border-[#D7E7E4]' },
@@ -103,7 +103,7 @@ function ticketReference(ticket: Pick<SupportCaseSummary, 'id' | 'ticketNumber'>
 function customerSupportError(error: unknown, fallback: string): string {
   if (!(error instanceof SupportApiError)) return fallback;
   switch (error.kind) {
-    case 'network': return 'We could not reach KAYAD. Check your connection and try again; this same attempt can be retried without creating a duplicate case.';
+    case 'network': return 'We could not reach KAYARD KE. Check your connection and try again; this same attempt can be retried without creating a duplicate case.';
     case 'unauthenticated': return 'Your session may have expired. Sign in again to continue.';
     case 'forbidden': return 'You do not have permission to access this support case.';
     case 'not_found': return 'This support case could not be found or is no longer available to this account.';
@@ -376,10 +376,10 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
           <div className="absolute right-8 bottom-[-100px] w-56 h-56 rounded-full bg-[#13B8A6]/10 blur-3xl" />
           <div className="relative z-10 max-w-4xl">
             <div className="inline-flex items-center gap-2 text-[10px] font-extrabold uppercase tracking-[0.18em] text-[#9BE5D9]">
-              <LifeBuoy className="w-4 h-4" /> KAYAD Resolution Center
+              <LifeBuoy className="w-4 h-4" /> KAYARD KE Resolution Center
             </div>
             <h1 className="mt-3 text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight leading-[1.02]">One case number, the whole transaction.</h1>
-            <p className="mt-4 max-w-2xl text-sm sm:text-base leading-6 text-[#BDE5DE]">A KAYAD case can link a vehicle, auction, inspection or escrow reference when the backend can verify the relationship. For payment or financing questions, describe the issue and use only a reference field shown for that case type. One case keeps the follow-up together instead of scattering it across listings, bids and chat.</p>
+            <p className="mt-4 max-w-2xl text-sm sm:text-base leading-6 text-[#BDE5DE]">A KAYARD KE case can link a vehicle, auction, inspection or escrow reference when the backend can verify the relationship. For payment or financing questions, describe the issue and use only a reference field shown for that case type. One case keeps the follow-up together instead of scattering it across listings, bids and chat.</p>
             <div className="mt-6 flex flex-wrap gap-3">
               <button type="button" onClick={scrollToForm} className="inline-flex items-center gap-2 rounded-xl bg-white text-[#0A3340] px-4 py-3 text-xs font-extrabold hover:bg-[#EEF7F5] transition-colors">
                 Open a support case <ArrowRight className="w-4 h-4" />
@@ -393,7 +393,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
 
         <div className="grid grid-cols-2 lg:grid-cols-4 divide-x divide-[#D7E7E4]">
           {[
-            { icon: Search, title: 'Find an answer', text: 'Checked against how KAYAD works' },
+            { icon: Search, title: 'Find an answer', text: 'Checked against how KAYARD KE works' },
             { icon: Ticket, title: 'Open a case', text: 'A case number the moment you submit' },
             { icon: MessageSquare, title: 'Continue the case', text: 'Reply from your account — nothing restarts' },
             { icon: ShieldCheck, title: 'Reach resolution', text: 'Status stays visible until it is closed' },
@@ -412,7 +412,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
         <div className="flex items-end justify-between gap-4 mb-3">
           <div>
             <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-[#176B87]">Where do you need help?</p>
-            <h2 id="support-paths-heading" className="mt-1 text-xl sm:text-2xl font-black tracking-tight text-[#0A3340]">Start with the part of KAYAD you are using.</h2>
+            <h2 id="support-paths-heading" className="mt-1 text-xl sm:text-2xl font-black tracking-tight text-[#0A3340]">Start with the part of KAYARD KE you are using.</h2>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
@@ -457,7 +457,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
               <CheckCircle2 className="w-7 h-7 text-emerald-600" />
               <p className="mt-3 text-sm font-extrabold text-emerald-900">Case created</p>
               <p className="mt-1 text-xs text-emerald-800">Reference: <strong>{ticketReference(visibleSubmittedTicket)}</strong></p>
-              <p className="mt-2 text-xs leading-5 text-emerald-800">Your case is now with KAYAD support. Replies and status changes appear in this page and in your notifications.{minutesLabel(visibleSubmittedTicket.expectations?.firstResponseMinutes) ? ` We aim to reply within ${minutesLabel(visibleSubmittedTicket.expectations.firstResponseMinutes)}.` : ''}</p>
+              <p className="mt-2 text-xs leading-5 text-emerald-800">Your case is now with KAYARD KE support. Replies and status changes appear in this page and in your notifications.{minutesLabel(visibleSubmittedTicket.expectations?.firstResponseMinutes) ? ` We aim to reply within ${minutesLabel(visibleSubmittedTicket.expectations.firstResponseMinutes)}.` : ''}</p>
               {notice && <p className="mt-2 text-xs font-semibold text-[#0A3340]">{notice}</p>}
               <div className="mt-4 flex flex-wrap gap-2">
                 <Button variant="primary" size="sm" onClick={() => loadTicket(visibleSubmittedTicket.id)}>View case</Button>
@@ -557,7 +557,7 @@ export const SupportView: React.FC<SupportViewProps> = ({ user, onOpenAuth, onNa
                 <div className="mt-5 space-y-3">
                   {(selectedTicket.messages || []).map((message, index) => (
                     <div key={message.id || `${message.createdAt || 'message'}-${index}`} className="rounded-2xl border border-[#D7E7E4] p-4">
-                      <div className="flex items-center justify-between gap-3 mb-2"><span className="text-[10px] font-extrabold uppercase tracking-wider text-[#176B87]">{message.from === 'you' ? 'You' : 'KAYAD Support'}</span><span className="text-[10px] text-[#94A3B8]">{formatDate(message.createdAt)}</span></div>
+                      <div className="flex items-center justify-between gap-3 mb-2"><span className="text-[10px] font-extrabold uppercase tracking-wider text-[#176B87]">{message.from === 'you' ? 'You' : 'KAYARD KE Support'}</span><span className="text-[10px] text-[#94A3B8]">{formatDate(message.createdAt)}</span></div>
                       <p className="text-sm leading-6 text-[#12576D] whitespace-pre-wrap">{message.content}</p>
                     </div>
                   ))}

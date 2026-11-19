@@ -4,8 +4,8 @@ import type { FC } from 'react';
 export const PartnerEcosystem: FC = () => {
   const services = [
     { name: 'M-Pesa', role: 'Payment Integration', icon: <CreditCard className="w-5 h-5 text-[#94A3B8]" /> },
-    { name: 'KAYAD Escrow', role: 'Transaction Workflow', icon: <Workflow className="w-5 h-5 text-[#94A3B8]" /> },
-    { name: 'KAYAD Inspections', role: 'Inspection Workflow', icon: <ShieldCheck className="w-5 h-5 text-[#94A3B8]" /> },
+    { name: 'KAYARD KE Escrow', role: 'Transaction Workflow', icon: <Workflow className="w-5 h-5 text-[#94A3B8]" /> },
+    { name: 'KAYARD KE Inspections', role: 'Inspection Workflow', icon: <ShieldCheck className="w-5 h-5 text-[#94A3B8]" /> },
   ];
   return (
     <section className="py-10 bg-[#EEF7F5] dark:bg-[#0a3340] border-b border-[#D7E7E4] dark:border-white/10 transition-colors">

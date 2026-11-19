@@ -12,14 +12,14 @@ export default function DealerCollectionAccountPanel() {
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => setForm((f) => ({ ...f, [k]: e.target.value }));
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); if (saving) return; setSaving(true); setMsg(null);
-    try { const d: any = await walletAPI.saveDealerAccount(form); setAccount(d.account); setForm((f) => ({ ...f, consumerKey: '', consumerSecret: '', passkey: '' })); setMsg('Saved. KAYAD will verify it before bidders can pay into it.'); }
+    try { const d: any = await walletAPI.saveDealerAccount(form); setAccount(d.account); setForm((f) => ({ ...f, consumerKey: '', consumerSecret: '', passkey: '' })); setMsg('Saved. KAYARD KE will verify it before bidders can pay into it.'); }
     catch (err: any) { setMsg(err?.response?.data?.message || 'Could not save.'); } finally { setSaving(false); }
   };
   const cls = 'mt-1 block min-h-11 w-full rounded-lg border border-[#B9D3CF] px-3 text-sm';
   return (
     <section aria-label="Auction commitment account" className="mt-6 space-y-3">
       <h3 className="text-base font-semibold text-[#0A3340]">Auction commitment account</h3>
-      <p className="text-sm text-[#64748B]">Bidders&rsquo; commitment fees go straight to this paybill or till once KAYAD verifies it. Until then, KAYAD holds them. Private sellers cannot use this.</p>
+      <p className="text-sm text-[#64748B]">Bidders&rsquo; commitment fees go straight to this paybill or till once KAYARD KE verifies it. Until then, KAYARD KE holds them. Private sellers cannot use this.</p>
       {loaded && account && <p className="text-sm" data-testid="dealer-account-status">Current: {account.kind} {account.shortcode} — <strong>{account.status}</strong></p>}
       <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
         <label className="text-sm">Type<select className={cls} value={form.kind} onChange={set('kind')}><option value="paybill">Paybill</option><option value="till">Till (Buy Goods)</option></select></label>

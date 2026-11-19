@@ -168,7 +168,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
 
   const handleOpenApply = () => {
     setSelectedBankForApply({
-      id: 'kayad-financing', name: 'KAYAD Financing Request', shortName: 'KAYAD',
+      id: 'kayad-financing', name: 'KAYARD KE Financing Request', shortName: 'KAYARD KE',
       logoBg: 'bg-[#176B87] text-white', rateRange: 'Not quoted', baseRate: annualInterestRate,
       maxFinancing: 'Subject to lender terms', minDepositPercent: depositPercent, maxTermMonths: tenureMonths,
       approvalTime: 'Not quoted', earlyRepaymentPolicy: 'Subject to lender terms',
@@ -200,12 +200,12 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
   // FAQs
   const faqs = [
     {
-      q: "Is KAYAD a direct lender or bank?",
-      a: "KAYAD is an independent automotive fintech marketplace. We are NOT a lender. We help you compare rates from Central Bank regulated financial institutions to enable transparent rate comparison, instant affordability calculation, and direct pre-qualified application routing."
+      q: "Is KAYARD KE a direct lender or bank?",
+      a: "KAYARD KE is an independent automotive fintech marketplace. We are NOT a lender. We help you compare rates from Central Bank regulated financial institutions to enable transparent rate comparison, instant affordability calculation, and direct pre-qualified application routing."
     },
     {
       q: "How long does financing approval take?",
-      a: "Approval timing is determined by the lender after a real application is submitted. KAYAD does not promise a specific turnaround until verified lender terms are connected."
+      a: "Approval timing is determined by the lender after a real application is submitted. KAYARD KE does not promise a specific turnaround until verified lender terms are connected."
     },
     {
       q: "Can I settle a vehicle loan early?",
@@ -217,7 +217,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
     },
     {
       q: "How is vehicle ownership handled during financing?",
-      a: "Ownership and security-interest arrangements depend on the lender and the applicable NTSA process. KAYAD does not claim a specific transfer workflow until the relevant lender contract is connected."
+      a: "Ownership and security-interest arrangements depend on the lender and the applicable NTSA process. KAYARD KE does not claim a specific transfer workflow until the relevant lender contract is connected."
     }
   ];
 
@@ -238,7 +238,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
       <div className="bg-[#0A3340] border-b border-[#91CEC5]/30 px-4 py-3 text-xs shadow-md rounded-2xl">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-3">
           <span className="text-[#13B8A6] font-black text-xs uppercase tracking-wider bg-white/10 px-2.5 py-1 rounded border border-white/15">
-            KAYAD Financing Marketplace
+            KAYARD KE Financing Marketplace
           </span>
           <span className="text-[#BDE5DE] text-[11px] hidden md:inline font-semibold">
             Real application records only; lender offers remain unavailable until a verified feed is connected.
@@ -255,7 +255,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
         <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-[#13B8A6]/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 max-w-3xl space-y-5">
-          {/* KAYAD Marketplace Position Badge */}
+          {/* KAYARD KE Marketplace Position Badge */}
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/15 text-xs font-extrabold text-[#5AAFA4] shadow-xs">
             <Landmark className="w-4 h-4 text-[#13B8A6]" />
             <span>Independent Vehicle Financing Marketplace</span>
@@ -579,7 +579,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
         </div>
 
         <Card className="p-6 bg-[#F6FAF9] border-[#D7E7E4]">
-          <div className="flex items-start gap-3"><Info className="w-5 h-5 text-[#176B87] shrink-0" /><div><p className="font-extrabold text-[#176B87]">Verified lender offers are not connected yet</p><p className="text-sm text-[#64748B] mt-1">KAYAD will not display invented lender rates, fees, approval times, or eligibility claims. Submit a real financing request instead.</p></div></div>
+          <div className="flex items-start gap-3"><Info className="w-5 h-5 text-[#176B87] shrink-0" /><div><p className="font-extrabold text-[#176B87]">Verified lender offers are not connected yet</p><p className="text-sm text-[#64748B] mt-1">KAYARD KE will not display invented lender rates, fees, approval times, or eligibility claims. Submit a real financing request instead.</p></div></div>
         </Card>
       </div>
 
@@ -600,7 +600,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
           <Card className="p-6 bg-[#F6FAF9] border-[#D7E7E4] space-y-4">
             <div className="flex items-center justify-between border-b border-[#D7E7E4] pb-3 flex-wrap gap-2"><div><p className="text-[10px] text-[#64748B] font-extrabold uppercase tracking-wider">Application {currentApplication.id}</p><h3 className="text-base font-extrabold text-[#176B87]">Vehicle Financing Request</h3></div><Badge variant={currentAppStatus === 'Approved' ? 'success' : currentAppStatus === 'Declined' ? 'danger' : 'escrow'} size="md">Current Status: {currentAppStatus}</Badge></div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs"><div className="bg-white p-4 rounded-xl border border-[#D7E7E4]"><p className="text-[#64748B]">Vehicle Asset Value</p><p className="font-extrabold text-[#176B87]">Ksh {Number(currentApplication.vehiclePrice || 0).toLocaleString()}</p></div><div className="bg-white p-4 rounded-xl border border-[#D7E7E4]"><p className="text-[#64748B]">Requested Loan</p><p className="font-extrabold text-emerald-700">Ksh {Number(currentApplication.loanAmount || 0).toLocaleString()}</p></div><div className="bg-white p-4 rounded-xl border border-[#D7E7E4]"><p className="text-[#64748B]">Submitted</p><p className="font-extrabold text-[#176B87]">{new Date(currentApplication.createdAt).toLocaleString('en-KE')}</p></div></div>
-            <p className="text-xs text-[#64748B]">KAYAD does not fabricate lender-side approvals, document verification, disbursement, or callback promises.</p>
+            <p className="text-xs text-[#64748B]">KAYARD KE does not fabricate lender-side approvals, document verification, disbursement, or callback promises.</p>
           </Card>
         ) : (
           <Card className="p-6 bg-[#F6FAF9] border-[#D7E7E4]"><p className="text-sm text-[#64748B]">No financing application has been submitted from this account yet.</p></Card>
@@ -721,7 +721,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
         <div>
           <h2 className="text-xl font-black text-[#176B87] font-display flex items-center gap-2">
             <Car className="w-5 h-5 text-[#176B87]" />
-            Recently Financed Vehicles on KAYAD
+            Recently Financed Vehicles on KAYARD KE
           </h2>
           <p className="text-xs text-[#64748B] font-medium">Only vehicles with a real financing record will appear here.</p>
         </div>
@@ -801,13 +801,13 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
             {/* Modal Header */}
             <div className="border-b border-[#D7E7E4] pb-3 space-y-1">
               <Badge variant="verified" size="sm">
-                KAYAD Financing Request
+                KAYARD KE Financing Request
               </Badge>
               <h3 className="text-xl font-black text-[#176B87] font-display">
                 Submit a Financing Request
               </h3>
               <p className="text-xs text-[#64748B]">
-                This submits a real financing application to the KAYAD backend. It does not imply lender approval or a lender offer.
+                This submits a real financing application to the KAYARD KE backend. It does not imply lender approval or a lender offer.
               </p>
             </div>
 
@@ -819,7 +819,7 @@ export const FinancingView: React.FC<FinancingViewProps> = ({
                 <div className="space-y-1">
                   <h4 className="text-lg font-black text-emerald-950 font-display">Financing Request Submitted</h4>
                   <p className="text-xs text-emerald-800 leading-relaxed max-w-sm mx-auto">
-                    Your financing request was recorded by the KAYAD backend. No lender approval or callback time is promised.
+                    Your financing request was recorded by the KAYARD KE backend. No lender approval or callback time is promised.
                   </p>
                 </div>
                 <Button

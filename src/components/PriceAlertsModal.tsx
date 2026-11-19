@@ -56,7 +56,7 @@ export const PriceAlertsModal: React.FC<PriceAlertsModalProps> = ({ isOpen, onCl
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={<div className="flex items-center gap-2"><Bell className="w-5 h-5 text-[#176B87]" /><span>Instant Price Drop & Search Alerts</span></div>} maxWidth="md">
       <div className="space-y-4 text-xs">
-        <p className="text-[#64748B] font-medium">Manage alerts attached to your saved searches. KAYAD only displays searches returned by your account.</p>
+        <p className="text-[#64748B] font-medium">Manage alerts attached to your saved searches. KAYARD KE only displays searches returned by your account.</p>
         {loading ? (
           <div className="p-8 text-center text-[#64748B]"><RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2" />Loading your saved searches…</div>
         ) : error ? (

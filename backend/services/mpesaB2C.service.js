@@ -39,7 +39,7 @@ const B2C_CALLBACK =
 const B2C_TIMEOUT =
   process.env.MPESA_B2C_TIMEOUT_URL ||
   `${process.env.BACKEND_URL || "http://localhost:5000"}/api/payments/b2c/timeout`;
-const B2C_REMARKS = process.env.MPESA_B2C_REMARKS || "Kayad seller payout";
+const B2C_REMARKS = process.env.MPESA_B2C_REMARKS || "KAYARD KE seller payout";
 const B2C_OCCASION = process.env.MPESA_B2C_OCCASION || "Vehicle sale payout";
 
 // ── OAUTH TOKEN ───────────────────────────────────────────────
@@ -196,7 +196,7 @@ export const handleB2CCallback = async (callbackData) => {
 
 // ── GENERIC B2C SEND (wallet withdrawals) ────────────────────
 // Same Daraja B2C rail as seller payouts, but without a dealer_payouts row. The caller owns idempotency and state.
-export const sendB2CPayment = async ({ phone, amount, remarks = "Kayad wallet withdrawal", occasion = "Wallet withdrawal" }) => {
+export const sendB2CPayment = async ({ phone, amount, remarks = "KAYARD KE wallet withdrawal", occasion = "Wallet withdrawal" }) => {
   if (!B2C_INITIATOR || !process.env.MPESA_B2C_INITIATOR_PW || !B2C_SHORTCODE) {
     const err = new Error("M-Pesa B2C payout is not configured");
     err.code = "MPESA_B2C_NOT_CONFIGURED";

@@ -65,7 +65,7 @@ class SettlementService {
       requestedAmount: refundData?.amount,
     });
     throw new AppError(
-      'Inspection refunds are temporarily unavailable: KAYAD cannot yet verify a completed payment-provider refund. Do not mark this refund as paid; contact Finance for the approved manual process.',
+      'Inspection refunds are temporarily unavailable: KAYARD KE cannot yet verify a completed payment-provider refund. Do not mark this refund as paid; contact Finance for the approved manual process.',
       501,
       { refundInitiated: false, providerRefundConfirmed: false }
     );

@@ -61,7 +61,7 @@ export function NotificationProvider({ children }: NotificationProviderProps) {
   // actually renders. Never carry recipient contacts, internal data or ORM fields.
   const normalizeNotification = useCallback((n: any): Notification => ({
     _id: String(n?._id || n?.id || ''),
-    title: typeof n?.title === 'string' ? n.title : 'KAYAD update',
+    title: typeof n?.title === 'string' ? n.title : 'KAYARD KE update',
     message: typeof n?.message === 'string' ? n.message : '',
     ...(typeof n?.type === 'string' ? { type: n.type } : {}),
     read: Boolean(n?.read),

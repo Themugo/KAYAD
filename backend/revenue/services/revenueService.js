@@ -735,7 +735,7 @@ class RevenueService {
       {
         plan_code: 'auction_basic',
         plan_name: 'Auction Basic',
-        description: 'Host auctions on KAYAD',
+        description: 'Host auctions on KAYARD KE',
         target_type: 'auction',
         billing_cycle: 'monthly',
         base_price: 50000,

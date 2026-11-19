@@ -861,7 +861,7 @@ async function generateAIResponse(message, user) {
     response.content = `I see you want to update something. I've identified the elements you mentioned and prepared the changes. Would you like me to:\n\n1. Show before/after preview\n2. Apply changes directly\n3. Suggest alternative approaches`;
     response.action = { type: 'update', query: message };
   } else if (lower.includes('help') || lower.includes('what can')) {
-    response.content = `I'm your KAYAD AI assistant. Here are some things I can help you with:\n\n**Pages:** "Create a new landing page", "Update the homepage hero"\n**Design:** "Make the navbar more modern", "Change primary color to blue"\n**Campaigns:** "Launch a summer sale campaign", "Create a Toyota promotion"\n**Navigation:** "Add a Fleet menu", "Move Featured above Auctions"\n**Analytics:** "Show dealer growth", "Compare auction performance"\n\nWhat would you like to do?`;
+    response.content = `I'm your KAYARD KE AI assistant. Here are some things I can help you with:\n\n**Pages:** "Create a new landing page", "Update the homepage hero"\n**Design:** "Make the navbar more modern", "Change primary color to blue"\n**Campaigns:** "Launch a summer sale campaign", "Create a Toyota promotion"\n**Navigation:** "Add a Fleet menu", "Move Featured above Auctions"\n**Analytics:** "Show dealer growth", "Compare auction performance"\n\nWhat would you like to do?`;
     response.action = null;
   } else {
     response.content = `I've received your request: "${message}" \n\nI'm analyzing this and preparing a response. For complex actions, I'll show you a preview before making any changes. For simple queries, I'll answer directly.\n\nIs there anything specific you'd like me to help with?`;

@@ -53,5 +53,5 @@ export function verifyTotp(secretBase32, code, { nowMs = Date.now(), window = 1 
   return hit;
 }
 
-export const otpauthUri = ({ secret, account, issuer = "KAYAD KE" }) =>
+export const otpauthUri = ({ secret, account, issuer = "KAYARD KE" }) =>
   `otpauth://totp/${encodeURIComponent(issuer)}:${encodeURIComponent(account)}?secret=${secret}&issuer=${encodeURIComponent(issuer)}&algorithm=SHA1&digits=${TOTP_DIGITS}&period=${TOTP_STEP_SECONDS}`;

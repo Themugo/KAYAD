@@ -27,7 +27,7 @@ export const TopNoticeStrip: React.FC = () => {
   const [fadeIndex, setFadeIndex] = useState(0);
   const [fadeVisible, setFadeVisible] = useState(true);
   const [paused, setPaused] = useState(() => typeof window !== 'undefined' && Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches));
-  const [heroTickerConfig, setHeroTickerConfig] = useState({ enabled: true, fallbackText: 'KAYAD · Vehicle listings across Kenya · Live auctions · Transparent bidding · Eligible escrow services', backgroundColor: '#0A3340', textColor: '#FFFFFF', heightPx: 36, scrollSeconds: 34, direction: 'left' as 'left' | 'right', transition: 'scroll' as 'scroll' | 'fade' | 'pop' | 'slide' });
+  const [heroTickerConfig, setHeroTickerConfig] = useState({ enabled: true, fallbackText: 'KAYARD KE · Vehicle listings across Kenya · Live auctions · Transparent bidding · Eligible escrow services', backgroundColor: '#0A3340', textColor: '#FFFFFF', heightPx: 36, scrollSeconds: 34, direction: 'left' as 'left' | 'right', transition: 'scroll' as 'scroll' | 'fade' | 'pop' | 'slide' });
 
   useEffect(() => {
     const media = window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -91,7 +91,7 @@ export const TopNoticeStrip: React.FC = () => {
   if (!heroTickerConfig.enabled) return null;
 
   const pauseControl = (
-    <button type="button" onClick={() => setPaused((value) => !value)} aria-pressed={paused} aria-label={paused ? 'Resume KAYAD notices' : 'Pause KAYAD notices'}
+    <button type="button" onClick={() => setPaused((value) => !value)} aria-pressed={paused} aria-label={paused ? 'Resume KAYARD KE notices' : 'Pause KAYARD KE notices'}
       className="absolute right-1 top-1 z-10 rounded border border-white/15 bg-[#0A3340] px-2 py-1 text-[10px] font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
       {paused ? 'Resume notices' : 'Pause notices'}
     </button>
@@ -101,7 +101,7 @@ export const TopNoticeStrip: React.FC = () => {
     const fallback = heroTickerConfig.fallbackText.split(' · ').filter(Boolean);
     const items = [...fallback, ...fallback];
     return (
-      <div className="kayad-top-ticker w-full overflow-hidden border-b border-white/10 relative" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }} role="region" aria-label="KAYAD notices">
+      <div className="kayad-top-ticker w-full overflow-hidden border-b border-white/10 relative" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }} role="region" aria-label="KAYARD KE notices">
         {pauseControl}
         <div className="flex min-w-max h-full animate-marquee whitespace-nowrap" style={{ animationDuration: `${heroTickerConfig.scrollSeconds}s`, animationDirection: heroTickerConfig.direction === 'right' ? 'reverse' : 'normal', animationPlayState: paused ? 'paused' : 'running' }}>
           {items.map((item, index) => (
@@ -138,7 +138,7 @@ export const TopNoticeStrip: React.FC = () => {
       <div
         className="kayad-top-ticker w-full overflow-hidden border-b border-white/10 relative" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }}
         role="region"
-        aria-label="KAYAD notices"
+        aria-label="KAYARD KE notices"
         aria-live={paused ? 'off' : 'polite'}
       >
         {pauseControl}
@@ -162,7 +162,7 @@ export const TopNoticeStrip: React.FC = () => {
     <div
       className="kayad-top-ticker w-full overflow-hidden border-b border-white/10 relative" style={{ height: heroTickerConfig.heightPx, backgroundColor: heroTickerConfig.backgroundColor, ['--kayad-ticker-height' as any]: `${heroTickerConfig.heightPx}px` }}
       role="region"
-      aria-label="KAYAD notices"
+      aria-label="KAYARD KE notices"
     >
       {pauseControl}
       <div

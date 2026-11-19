@@ -47,7 +47,7 @@ export const EscrowView: React.FC<EscrowViewProps> = ({ user, onOpenAuth, onNavi
     <div className="mx-auto max-w-6xl space-y-6 p-4 md:p-6">
       <header>
         <h1 className="text-2xl font-semibold text-[#0A3340]">Escrow</h1>
-        <p className="mt-1 text-sm text-[#64748B]">Understand when KAYAD escrow applies, how the transaction is handled, and where to follow your own deal.</p>
+        <p className="mt-1 text-sm text-[#64748B]">Understand when KAYARD KE escrow applies, how the transaction is handled, and where to follow your own deal.</p>
       </header>
 
       <PublicEscrowExplainer

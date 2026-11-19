@@ -78,7 +78,7 @@ describe('Service finder (inspection marketplace route)', () => {
     for (const k of ['status', 'verified', 'sortBy', 'minRating']) expect(p).not.toHaveProperty(k);
   });
 
-  it('states plainly that KAYAD is a platform and businesses are independent', async () => {
+  it('states plainly that KAYARD KE is a platform and businesses are independent', async () => {
     render(<InspectionMarketplacePage />);
     await screen.findByText('Acme Garage');
     const note = screen.getAllByRole('note')[0];
@@ -101,7 +101,7 @@ describe('Service finder (inspection marketplace route)', () => {
     expect(within(list).getByText(/Diagnostics and fault assessment/).closest('li')!.textContent).toMatch(/verified/);
     const hybrid = within(list).getByText(/Hybrid and electric vehicles/).closest('li')!;
     expect(hybrid.textContent).toMatch(/declared/);
-    expect(hybrid.textContent).not.toMatch(/verified by KAYAD/);
+    expect(hybrid.textContent).not.toMatch(/verified by KAYARD KE/);
     expect(hybrid.textContent).toMatch(/not verified/);
     expect(screen.queryByText('EV')).toBeNull();
   });
@@ -114,7 +114,7 @@ describe('Service finder (inspection marketplace route)', () => {
     expect(screen.getByText(/does not take bookings or payments for this service yet/)).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: /Pre-purchase inspection/ }));
     await waitFor(() => expect(lastParams().category).toBe('pre_purchase_inspection'));
-    expect(screen.getByText(/You can book and pay for this service through KAYAD/)).toBeTruthy();
+    expect(screen.getByText(/You can book and pay for this service through KAYARD KE/)).toBeTruthy();
   });
 
   it('a symptom only suggests where to look and says it is not a diagnosis', async () => {
@@ -131,7 +131,7 @@ describe('Service finder (inspection marketplace route)', () => {
   it('high-risk categories explain the verified-only rule', async () => {
     render(<InspectionMarketplacePage />);
     fireEvent.click(await screen.findByRole('button', { name: /Hybrid and electric vehicles/ }));
-    expect(await screen.findByText(/only businesses whose qualification KAYAD has verified are listed/)).toBeTruthy();
+    expect(await screen.findByText(/only businesses whose qualification KAYARD KE has verified are listed/)).toBeTruthy();
   });
 
   it('roadside never promises dispatch, tracking, ETA or availability, and points to emergency services', async () => {

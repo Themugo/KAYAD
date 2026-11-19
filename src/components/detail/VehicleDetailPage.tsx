@@ -273,7 +273,7 @@ export const VehicleDetailPage: FC = () => {
         const refusal = getLastBidRefusal();
         setBidError(
           refusal?.code === 'PRIVATE_SELLER_AUCTION_NOT_ELIGIBLE'
-            ? 'Bidding is paused on this vehicle until KAYAD finishes verifying it and confirming it is in approved custody. No bid or payment was taken.'
+            ? 'Bidding is paused on this vehicle until KAYARD KE finishes verifying it and confirming it is in approved custody. No bid or payment was taken.'
             : refusal?.code === 'ELIGIBILITY_UNAVAILABLE'
               ? 'We could not confirm that bidding is open right now. No bid or payment was taken — please try again shortly.'
               : 'Failed to record bid. Please try again.',
@@ -667,7 +667,7 @@ export const VehicleDetailPage: FC = () => {
           <div className="p-6 rounded-3xl bg-white border border-[#D7E7E4] space-y-4 shadow-xs">
             <h2 className="text-lg font-bold text-navy-600 font-serif flex items-center justify-between">
               <span>Technical Specifications</span>
-              <span className="text-xs font-mono font-bold text-[var(--kayad-cyan)]">KAYAD Verified</span>
+              <span className="text-xs font-mono font-bold text-[var(--kayad-cyan)]">KAYARD KE Verified</span>
             </h2>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
@@ -789,7 +789,7 @@ export const VehicleDetailPage: FC = () => {
             </div>
           )}
 
-          {/* KAYAD Guarantees & Buyer Protection - Redesigned with Brand Theme Colors */}
+          {/* KAYARD KE Guarantees & Buyer Protection - Redesigned with Brand Theme Colors */}
           <div className="p-6 rounded-3xl bg-navy-600 text-white border border-navy-600 space-y-4 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--kayad-cyan)]/15 rounded-full blur-2xl pointer-events-none" />
 

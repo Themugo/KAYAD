@@ -386,7 +386,7 @@ const generateReminderEmailHtml = (reminder) => {
         </a>
       </div>
       <p style="color: #9ca3af; font-size: 12px; margin-top: 20px;">
-        You're receiving this because you have reminders enabled on Kayad.
+        You're receiving this because you have reminders enabled on KAYARD KE.
         <a href="https://www.kayad.space/settings">Manage preferences</a>
       </p>
     </div>

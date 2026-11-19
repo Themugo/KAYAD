@@ -73,7 +73,7 @@ export const Breadcrumbs: FC = () => {
         break;
 
       case 'about':
-        items.push({ label: 'About KAYAD', isCurrent: true });
+        items.push({ label: 'About KAYARD KE', isCurrent: true });
         break;
 
       default:

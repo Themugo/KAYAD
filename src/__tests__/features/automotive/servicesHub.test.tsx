@@ -25,13 +25,13 @@ const renderHub = (props: Record<string, unknown> = {}) =>
 describe('Automotive services hub: states one truthful business model', () => {
   beforeEach(() => { getMy.mockReset().mockResolvedValue({ success: true, orders: [] }); getBookings.mockReset().mockResolvedValue({ bookings: [] }); });
 
-  it('presents KAYAD as the platform and independent providers as the performers', () => {
+  it('presents KAYARD KE as the platform and independent providers as the performers', () => {
     renderHub();
     const text = document.body.textContent || '';
-    expect(text).toMatch(/KAYAD is the platform/);
-    expect(text).toMatch(/They carry out the work, not KAYAD/);
+    expect(text).toMatch(/KAYARD KE is the platform/);
+    expect(text).toMatch(/They carry out the work, not KAYARD KE/);
     expect(text).toMatch(/does not take repair bookings, take payments for them or dispatch roadside help/);
-    expect(text).not.toMatch(/KAYAD vehicle inspection|Request a KAYAD inspection/);
+    expect(text).not.toMatch(/KAYARD KE vehicle inspection|Request a KAYARD KE inspection/);
   });
 
   it('offers both lanes and routes each to the finder with the right canonical category', () => {
@@ -63,7 +63,7 @@ describe('Automotive services hub: states one truthful business model', () => {
     ] });
     getBookings.mockResolvedValue({ bookings: [] });
     renderHub({ viewMode: 'account', initialTab: 'mine' });
-    expect(await screen.findByText(/KAYAD is matching a provider/)).toBeTruthy();
+    expect(await screen.findByText(/KAYARD KE is matching a provider/)).toBeTruthy();
     expect(screen.getByText(/carried out by Ace Garage/)).toBeTruthy();
   });
 });

@@ -13,11 +13,11 @@ const checks = [
  ['Filters still use canonical service taxonomy and backend parameters', /automotiveApi\.getServiceTaxonomy\(\)/.test(marketplace) && /ProviderFilters filters=\{filters\}/.test(marketplace)],
  ['Provider application registration uses canonical existing API', /inspectionApi\.registerProvider\(/.test(modal)],
  ['Provider capabilities remain declared through canonical taxonomy API', /automotiveApi\.declareCapability\(/.test(modal) && /taxonomy\?\.categories/.test(modal)],
- ['Provider onboarding explains account, business and review steps', /aria-label="Provider onboarding steps"/.test(modal) && /KAYAD reviews your application/.test(modal)],
+ ['Provider onboarding explains account, business and review steps', /aria-label="Provider onboarding steps"/.test(modal) && /KAYARD KE reviews your application/.test(modal)],
  ['Provider phone field is semantically required and validated', /required className=/.test(modal) && /isPlausiblePhone\(form\.phone\)/.test(modal)],
  ['Application errors do not expose raw backend exception messages', /Check your connection and try again/.test(modal) && !/setError\(err instanceof Error/.test(modal)],
  ['Mobile refinements are scoped to max-width 639px', /@media \(max-width: 639px\)/.test(css) && /kayad-auto-services-marketplace/.test(css)],
- ['Desktop provider marketplace and shared KAYAD theme remain the base', /linear-gradient\(118deg, #12576D 0%, #176B87 100%\)/.test(css) && /max-width: 639px/.test(css)],
+ ['Desktop provider marketplace and shared KAYARD KE theme remain the base', /linear-gradient\(118deg, #12576D 0%, #176B87 100%\)/.test(css) && /max-width: 639px/.test(css)],
  ['Reduced-motion preference is respected for the Auto Services surface', /prefers-reduced-motion: reduce/.test(css) && /kayad-auto-services-view/.test(css)],
  ['Provider registration and booking API contract file remains present', /registerProvider/.test(api) && /searchProviders/.test(api)],
 ];

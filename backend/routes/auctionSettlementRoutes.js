@@ -45,11 +45,11 @@ router.post("/:id/outcome/payment", protect, validateObjectId, asyncHandler(asyn
   const winner = await findById("users", req.user.id);
   const verifiedPhone = String(winner?.phone || "").trim();
   if (!verifiedPhone || winner?.phoneVerified !== true) {
-    return res.status(400).json({ success: false, code: "VERIFIED_PHONE_REQUIRED", message: "A verified phone number on your KAYAD profile is required for winner payment" });
+    return res.status(400).json({ success: false, code: "VERIFIED_PHONE_REQUIRED", message: "A verified phone number on your KAYARD KE profile is required for winner payment" });
   }
   const suppliedPhone = String(req.body?.phone || "").trim();
   if (suppliedPhone && suppliedPhone !== verifiedPhone) {
-    return res.status(400).json({ success: false, code: "PROFILE_PHONE_MISMATCH", message: "Winner payment must use the verified phone number on your KAYAD profile" });
+    return res.status(400).json({ success: false, code: "PROFILE_PHONE_MISMATCH", message: "Winner payment must use the verified phone number on your KAYARD KE profile" });
   }
   const result = await initiatePayment({
     userId: req.user.id,

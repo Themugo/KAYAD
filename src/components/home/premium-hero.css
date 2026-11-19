@@ -1,0 +1,98 @@
+/* KAYARD KE signature hero. Self-contained: the composition never depends on the vehicle image.
+   Palette: #082B40 deep navy, #0A3545 dark navy, #11B8A6 teal, #12D6CB bright teal. */
+.kk-hero { isolation: isolate; background: #082B40; }
+.kk-hero__bg {
+  position: absolute; inset: 0; z-index: -4;
+  background:
+    radial-gradient(120% 140% at 82% 55%, rgba(17,184,166,.55) 0%, rgba(13,118,111,.35) 32%, rgba(10,53,69,0) 62%),
+    linear-gradient(100deg, #082B40 0%, #0A3545 36%, #0B4A57 62%, #0D766F 100%);
+}
+.kk-hero__custom-bg { position: absolute; inset: 0; z-index: -3; opacity: .38; mix-blend-mode: luminosity; }
+/* Sweeping road/arc: restrained brand device, separating copy from the vehicle stage. */
+.kk-hero__arc {
+  position: absolute; z-index: -2; pointer-events: none;
+  top: -34%; bottom: -34%; left: 41%; width: 62%;
+  border-radius: 50%; border-left: 3px solid rgba(18,214,203,.62);
+  background: radial-gradient(100% 100% at 100% 50%, rgba(18,214,203,.12), rgba(18,214,203,0) 70%);
+  box-shadow: -14px 0 40px -18px rgba(18,214,203,.45);
+}
+.kk-hero__arc--2 { left: 38%; width: 62%; border-left-width: 1px; border-left-color: rgba(255,255,255,.28); background: none; box-shadow: none; }
+/* Controlled fade between the text column and the stage; keeps the copy area dark for contrast. */
+.kk-hero__fade { position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(90deg, rgba(8,43,64,.92) 0%, rgba(8,43,64,.72) 34%, rgba(8,43,64,0) 58%); }
+
+.kk-hero__inner { position: relative; margin: 0 auto; width: 100%; max-width: 1380px; display: grid; grid-template-columns: 1fr; gap: 6px; padding: 22px 16px 16px; }
+.kk-hero__copy { position: relative; z-index: 2; max-width: 640px; }
+.kk-hero__eyebrow { margin: 0; font-size: 11px; font-weight: 800; letter-spacing: .22em; text-transform: uppercase; color: rgba(255,255,255,.86); }
+.kk-hero__title {
+  margin: 10px 0 0; font-family: var(--font-display, 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif);
+  font-size: clamp(2.15rem, 9.4vw, 3rem); font-weight: 800; line-height: 1.02; letter-spacing: -.035em; text-wrap: balance; max-width: 11.5em; color: #fff;
+}
+.kk-hero__lead { margin: 12px 0 0; max-width: 34em; font-size: 15px; line-height: 1.55; font-weight: 500; color: rgba(255,255,255,.84); }
+.kk-hero__ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.kk-hero__cta { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 0 20px; border-radius: 999px; font-size: 15px; font-weight: 800; line-height: 1.1; max-width: 100%; transition: transform .18s ease, background-color .18s ease, border-color .18s ease; }
+.kk-hero__cta--primary { background: #12D6CB; color: #062A36; box-shadow: 0 10px 26px -10px rgba(18,214,203,.7); }
+.kk-hero__cta--primary:hover { background: #3FE4DA; transform: translateY(-1px); }
+.kk-hero__cta--secondary { background: rgba(8,43,64,.32); color: #fff; border: 2px solid rgba(255,255,255,.88); backdrop-filter: blur(4px); }
+.kk-hero__cta--secondary:hover { background: rgba(255,255,255,.12); transform: translateY(-1px); }
+.kk-hero__cta:focus-visible, .kk-hero__ctl:focus-visible, .kk-hero__vehicle:focus-visible, .kk-hero__dot:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.kk-hero__trust { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 18px 0 0; padding: 0; list-style: none; font-size: 13px; font-weight: 700; color: rgba(255,255,255,.9); }
+.kk-hero__trust li { display: inline-flex; align-items: center; gap: 8px; }
+
+.kk-hero__stage { position: relative; z-index: 1; height: 210px; margin-top: 4px; }
+.kk-hero__vehicle { position: absolute; inset: 0 0 26px; display: flex; align-items: flex-end; justify-content: center; cursor: pointer; animation: kk-hero-in .55s ease both; }
+.kk-hero__vehicle--empty { cursor: default; }
+.kk-hero__shadow { position: absolute; left: 10%; right: 10%; bottom: 0; height: 12%; border-radius: 50%; background: radial-gradient(closest-side, rgba(3,24,33,.62), rgba(3,24,33,0)); filter: blur(3px); }
+.kk-hero__img { position: relative; max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; object-position: center bottom; }
+.kk-hero__img--cutout { filter: drop-shadow(0 18px 22px rgba(3,24,33,.45)); }
+/* Real listing photos are rectangular: dissolve every edge into the hero instead of showing a hard box. */
+.kk-hero__img--photo {
+  border-radius: 18px;
+  -webkit-mask-image: radial-gradient(ellipse 78% 74% at 50% 52%, #000 58%, transparent 100%);
+          mask-image: radial-gradient(ellipse 78% 74% at 50% 52%, #000 58%, transparent 100%);
+}
+.kk-hero__fallback { width: min(92%, 520px); height: auto; opacity: .95; }
+.kk-hero__broken { display: grid; place-items: center; width: 100%; height: 100%; }
+.kk-hero__caption { position: absolute; left: 0; bottom: 30px; display: none; flex-direction: column; align-items: flex-start; gap: 2px; max-width: 280px; padding: 10px 14px; border-radius: 12px; text-align: left; color: #fff; background: rgba(6,32,44,.62); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(10px); }
+.kk-hero__caption-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: #12D6CB; }
+.kk-hero__caption-title { font-size: 14px; font-weight: 800; }
+.kk-hero__caption-detail { font-size: 12px; color: rgba(255,255,255,.78); }
+.kk-hero__empty-note { position: absolute; left: 0; right: 0; bottom: 0; margin: 0; text-align: center; font-size: 12px; font-weight: 600; color: rgba(255,255,255,.85); }
+.kk-hero__controls { position: absolute; right: 0; bottom: 0; display: flex; align-items: center; gap: 8px; padding: 4px 6px; border-radius: 999px; background: rgba(6,32,44,.55); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(8px); }
+.kk-hero__ctl { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 999px; color: #fff; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.28); transition: background-color .18s ease; }
+.kk-hero__ctl:hover { background: rgba(255,255,255,.22); }
+.kk-hero__dots { display: flex; align-items: center; }
+.kk-hero__dot { display: grid; place-items: center; width: 24px; height: 44px; }
+.kk-hero__dot span { display: block; width: 7px; height: 7px; border-radius: 999px; background: rgba(255,255,255,.5); transition: width .2s ease, background-color .2s ease; }
+.kk-hero__dot[aria-current='true'] span { width: 22px; background: #12D6CB; }
+
+@keyframes kk-hero-in { from { opacity: 0; transform: translateX(14px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .kk-hero__vehicle { animation: none; } .kk-hero__cta, .kk-hero__ctl, .kk-hero__dot span { transition: none; } .kk-hero__cta:hover { transform: none; } }
+
+@media (min-width: 480px) { .kk-hero__stage { height: 250px; } .kk-hero__lead { font-size: 16px; } }
+@media (min-width: 768px) {
+  .kk-hero__inner { padding: 30px 32px 20px; }
+  .kk-hero__title { font-size: clamp(2.6rem, 6vw, 3.4rem); }
+  .kk-hero__stage { height: 340px; }
+  .kk-hero__caption { display: flex; }
+}
+@media (min-width: 1024px) {
+  .kk-hero__inner { grid-template-columns: minmax(0, 46%) minmax(0, 54%); align-items: center; gap: 0; min-height: 420px; padding: 34px 40px 34px; }
+  .kk-hero__copy { padding-right: 16px; }
+  .kk-hero__title { font-size: clamp(2.75rem, 4.4vw, 3.6rem); max-width: 9.5em; }
+  .kk-hero__stage { height: 380px; margin-top: 0; margin-right: -12px; }
+  .kk-hero__vehicle { inset: 0 0 34px; }
+  .kk-hero__eyebrow { font-size: 12px; letter-spacing: .26em; }
+  .kk-hero__arc { left: 44%; }
+  .kk-hero__arc--2 { left: 41%; }
+}
+@media (min-width: 1440px) { .kk-hero__inner { min-height: 450px; } .kk-hero__stage { height: 410px; } }
+@media (max-width: 359.98px) { .kk-hero__cta { padding: 0 14px; font-size: 14px; } .kk-hero__title { font-size: 2rem; } }
+
+.kk-hero__vehicle picture { display: flex; width: 100%; height: 100%; align-items: flex-end; justify-content: center; }
+.kk-hero__img { width: 100%; height: 100%; }
+.kk-hero__img--photo { max-width: 680px; }
+.kayad-homepage .kk-hero .kk-hero__cta--primary { background: #12D6CB; color: #062A36; font-size: 15px; }
+.kayad-homepage .kk-hero .kk-hero__cta--secondary { background: rgba(8,43,64,.32); color: #fff; font-size: 15px; }
+.kk-hero__img--photo { object-fit: cover; object-position: center; border-radius: 0;
+  -webkit-mask-image: radial-gradient(ellipse 70% 68% at 50% 50%, #000 52%, transparent 100%);
+          mask-image: radial-gradient(ellipse 70% 68% at 50% 50%, #000 52%, transparent 100%); }

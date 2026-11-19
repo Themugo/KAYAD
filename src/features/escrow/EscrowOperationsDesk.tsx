@@ -109,7 +109,7 @@ export const EscrowOperationsDesk: React.FC = () => {
       <div className="rounded-xl border border-[#D7E7E4] bg-white p-4" data-testid="ops-totals">
         <p className="text-xs uppercase tracking-wide text-[#64748B]">Platform-wide (staff view)</p>
         <p className="text-xl font-semibold text-[#0A3340]">{formatKes(dash.totals.heldAmount)} <span className="text-sm font-normal text-[#64748B]">recorded as held across {dash.totals.heldCount} escrow{dash.totals.heldCount === 1 ? '' : 's'}</span></p>
-        <p className="mt-1 text-xs text-[#64748B]">From KAYAD’s escrow records. Not a bank balance.</p>
+        <p className="mt-1 text-xs text-[#64748B]">From KAYARD KE’s escrow records. Not a bank balance.</p>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">

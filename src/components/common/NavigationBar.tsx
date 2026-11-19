@@ -21,7 +21,7 @@ const pageTitles: Record<PageView, string> = {
   support: 'Help & Support',
   sell: 'Sell / List Car',
   how_it_works: 'How Escrow Works',
-  about: 'About KAYAD'
+  about: 'About KAYARD KE'
 };
 
 export const NavigationBar: FC<NavigationBarProps> = ({

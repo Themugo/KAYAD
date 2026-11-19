@@ -163,7 +163,7 @@ export async function markTransfer({ outcomeId, actorId, status = "completed", t
       userId: outcome.winner_user_id,
       eventType: COMMUNICATION_EVENTS.AUCTION_WON,
       title: "Auction completed",
-      message: `${car?.title || "Your auction vehicle"} is now recorded in your KAYAD ownership journey.`,
+      message: `${car?.title || "Your auction vehicle"} is now recorded in your KAYARD KE ownership journey.`,
       channels: ["in_app", "email", "sms", "whatsapp"],
       metadata: { auctionOutcomeId: outcome.id, carId: outcome.car_id, ownerVehicleId },
     }).catch(() => {});
@@ -201,7 +201,7 @@ export async function releaseAuctionEscrowAndComplete({ outcomeId, actorId, req 
   // approval or the database auto-release window) has already happened.
   if (escrow.status !== "released") {
     throw error(
-      "Escrow funds are released only through KAYAD escrow approval or the automatic release window. Complete the auction after the escrow shows as released.",
+      "Escrow funds are released only through KAYARD KE escrow approval or the automatic release window. Complete the auction after the escrow shows as released.",
       409,
       "ESCROW_RELEASE_REQUIRES_APPROVAL",
     );
@@ -221,7 +221,7 @@ export async function cancelAuctionOutcome({ outcomeId, actorId, reason, req = n
   const { outcome, setup } = await getContext(outcomeId);
   requireOrganizer(setup, actorId);
   const policy = await getAuctionPlatformPolicy();
-  if (!policy.allowDealerCustomCancellationRules) throw error("KAYAD has disabled dealer cancellation controls", 403);
+  if (!policy.allowDealerCustomCancellationRules) throw error("KAYARD KE has disabled dealer cancellation controls", 403);
   if (["completed", "defaulted", "cancelled", "disputed"].includes(outcome.status)) throw error("Outcome cannot be cancelled in its current state");
   if (outcome.payment_status === "paid") throw error("A paid auction outcome cannot be cancelled through the dealer control; use the governed refund/dispute process", 409);
   if (outcome.escrow_id) {
@@ -280,7 +280,7 @@ export async function reawardAuctionOutcome({ outcomeId, actorId, req = null }) 
   if (outcome.status !== "reaward_pending") throw error("This auction is not awaiting re-award");
   if (!outcome.reaward_enabled) throw error("Dealer re-award is disabled for this auction");
   const policy = await getAuctionPlatformPolicy();
-  if (!policy.allowDealerReaward) throw error("KAYAD has disabled dealer re-award", 403);
+  if (!policy.allowDealerReaward) throw error("KAYARD KE has disabled dealer re-award", 403);
 
   const previousWinner = outcome.winner_user_id;
   const candidates = await findAll("bids", { filters: { car_id: outcome.car_id, status: "lost" }, limit: 500, sort: { amount: -1, created_at: 1 } });

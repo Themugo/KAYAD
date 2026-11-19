@@ -60,7 +60,7 @@ export default function Footer({ setPage }: FooterProps) {
     {
       title: 'Company',
       links: [
-        { label: 'About KAYAD', page: 'about' },
+        { label: 'About KAYARD KE', page: 'about' },
         { label: 'How It Works', page: 'home' },
         { label: 'Support', page: 'support' },
         { label: 'Contact', page: 'support' },

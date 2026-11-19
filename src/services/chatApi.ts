@@ -161,7 +161,7 @@ export function mapBackendChatToThread(chat: BackendChat, currentUserId: string)
     currentStatus: 'Active Conversation',
     currentStage: '',
 
-    participantName: other?.name || 'KAYAD User',
+    participantName: other?.name || 'KAYARD KE User',
     participantRole: other?.publicRole || 'Marketplace member',
     participantAvatar: other?.avatar || '',
     participantVerified: false,
@@ -176,7 +176,7 @@ export function mapBackendChatToThread(chat: BackendChat, currentUserId: string)
     vehiclePrice: chat.car?.price,
 
     counterpartyInfo: {
-      name: other?.name || 'KAYAD User',
+      name: other?.name || 'KAYARD KE User',
       role: other?.publicRole || 'Marketplace member',
       avatar: other?.avatar,
       location: '',
@@ -199,7 +199,7 @@ export function mapBackendMessagesToUnified(
 ): UnifiedMessageItem[] {
   return messages.map((m) => {
     const senderIsCurrentUser = typeof m.sender === 'object' ? m.sender.id === currentUserId : m.sender === currentUserId;
-    const senderName = typeof m.sender === 'object' ? m.sender.name : 'KAYAD User';
+    const senderName = typeof m.sender === 'object' ? m.sender.name : 'KAYARD KE User';
     const senderAvatar = typeof m.sender === 'object' ? m.sender.avatar : undefined;
     return {
       id: m.id,

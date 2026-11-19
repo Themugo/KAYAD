@@ -147,11 +147,11 @@ export async function getGenerationStatus(req, res) {
 
 export async function getProducts(req, res) {
   const products = [
-    { id: '1', name: 'KAYAD Cars', template: 'Vehicle Marketplace', status: 'production', health: 94.5, users: 23456, revenue: 89245000, createdAt: new Date(Date.now() - 31536000000).toISOString() },
-    { id: '2', name: 'KAYAD Fleet', template: 'Fleet Management', status: 'production', health: 92.3, users: 4567, revenue: 23450000, createdAt: new Date(Date.now() - 15768000000).toISOString() },
-    { id: '3', name: 'KAYAD Rentals', template: 'Vehicle Rental', status: 'production', health: 88.7, users: 7890, revenue: 12340000, createdAt: new Date(Date.now() - 7884000000).toISOString() },
-    { id: '4', name: 'KAYAD Trucks', template: 'Truck Marketplace', status: 'staging', health: 78.5, users: 234, revenue: 0, createdAt: new Date(Date.now() - 2592000000).toISOString() },
-    { id: '5', name: 'KAYAD Parts', template: 'Parts Marketplace', status: 'development', health: 45.2, users: 12, revenue: 0, createdAt: new Date(Date.now() - 604800000).toISOString() },
+    { id: '1', name: 'KAYARD KE Cars', template: 'Vehicle Marketplace', status: 'production', health: 94.5, users: 23456, revenue: 89245000, createdAt: new Date(Date.now() - 31536000000).toISOString() },
+    { id: '2', name: 'KAYARD KE Fleet', template: 'Fleet Management', status: 'production', health: 92.3, users: 4567, revenue: 23450000, createdAt: new Date(Date.now() - 15768000000).toISOString() },
+    { id: '3', name: 'KAYARD KE Rentals', template: 'Vehicle Rental', status: 'production', health: 88.7, users: 7890, revenue: 12340000, createdAt: new Date(Date.now() - 7884000000).toISOString() },
+    { id: '4', name: 'KAYARD KE Trucks', template: 'Truck Marketplace', status: 'staging', health: 78.5, users: 234, revenue: 0, createdAt: new Date(Date.now() - 2592000000).toISOString() },
+    { id: '5', name: 'KAYARD KE Parts', template: 'Parts Marketplace', status: 'development', health: 45.2, users: 12, revenue: 0, createdAt: new Date(Date.now() - 604800000).toISOString() },
   ];
 
   res.json({ success: true, data: products });
@@ -162,7 +162,7 @@ export async function getProductDetails(req, res) {
 
   const product = {
     id: productId,
-    name: 'KAYAD Cars',
+    name: 'KAYARD KE Cars',
     template: 'Vehicle Marketplace',
     status: 'production',
     version: '2.3.1',
@@ -299,9 +299,9 @@ export async function getSharedServices(req, res) {
 
 export async function getBrands(req, res) {
   const brands = [
-    { id: '1', name: 'KAYAD Cars', primaryColor: '#176B87', accentColor: '#13B8A6', logo: 'kayad-logo.svg', status: 'active' },
-    { id: '2', name: 'KAYAD Fleet', primaryColor: '#12576D', accentColor: '#13B8A6', logo: 'fleet-logo.svg', status: 'active' },
-    { id: '3', name: 'KAYAD Rentals', primaryColor: '#176B87', accentColor: '#5AAFA4', logo: 'rentals-logo.svg', status: 'active' },
+    { id: '1', name: 'KAYARD KE Cars', primaryColor: '#176B87', accentColor: '#13B8A6', logo: 'kayad-logo.svg', status: 'active' },
+    { id: '2', name: 'KAYARD KE Fleet', primaryColor: '#12576D', accentColor: '#13B8A6', logo: 'fleet-logo.svg', status: 'active' },
+    { id: '3', name: 'KAYARD KE Rentals', primaryColor: '#176B87', accentColor: '#5AAFA4', logo: 'rentals-logo.svg', status: 'active' },
     { id: '4', name: 'Trucks Kenya', primaryColor: '#0A3340', accentColor: '#13B8A6', logo: 'trucks-logo.svg', status: 'staging' },
   ];
 
@@ -313,7 +313,7 @@ export async function getBrandDetails(req, res) {
 
   const brand = {
     id: brandId,
-    name: 'KAYAD Cars',
+    name: 'KAYARD KE Cars',
     primaryColor: '#176B87',
     secondaryColor: '#F6FAF9',
     accentColor: '#13B8A6',
@@ -514,11 +514,11 @@ export async function getPlatformHealth(req, res) {
   const health = {
     overall: 94.5,
     products: [
-      { id: '1', name: 'KAYAD Cars', health: 94.5, status: 'healthy' },
-      { id: '2', name: 'KAYAD Fleet', health: 92.3, status: 'healthy' },
-      { id: '3', name: 'KAYAD Rentals', health: 88.7, status: 'healthy' },
-      { id: '4', name: 'KAYAD Trucks', health: 78.5, status: 'warning' },
-      { id: '5', name: 'KAYAD Parts', health: 45.2, status: 'critical' },
+      { id: '1', name: 'KAYARD KE Cars', health: 94.5, status: 'healthy' },
+      { id: '2', name: 'KAYARD KE Fleet', health: 92.3, status: 'healthy' },
+      { id: '3', name: 'KAYARD KE Rentals', health: 88.7, status: 'healthy' },
+      { id: '4', name: 'KAYARD KE Trucks', health: 78.5, status: 'warning' },
+      { id: '5', name: 'KAYARD KE Parts', health: 45.2, status: 'critical' },
     ],
     services: [
       { name: 'Authentication', uptime: 99.99, latency: 45 },
@@ -528,8 +528,8 @@ export async function getPlatformHealth(req, res) {
       { name: 'Analytics', uptime: 99.90, latency: 156 },
     ],
     alerts: [
-      { severity: 'warning', message: 'KAYAD Parts health below 50%', product: 'KAYAD Parts' },
-      { severity: 'info', message: 'KAYAD Trucks deployment pending', product: 'KAYAD Trucks' },
+      { severity: 'warning', message: 'KAYARD KE Parts health below 50%', product: 'KAYARD KE Parts' },
+      { severity: 'info', message: 'KAYARD KE Trucks deployment pending', product: 'KAYARD KE Trucks' },
     ],
   };
 

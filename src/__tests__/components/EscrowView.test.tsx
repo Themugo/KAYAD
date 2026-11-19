@@ -151,7 +151,7 @@ describe('ParticipantEscrowDesk — seller', () => {
     m.getMyEscrowOverview.mockResolvedValue({ escrows: [mk({ viewerRole: 'seller', availableActions: [], commission: 125000, sellerAmount: 2375000 })], summary: summary() });
     render(<ParticipantEscrowDesk />);
     fireEvent.click(await screen.findByRole('button', { name: /Toyota Prado/ }));
-    expect(screen.getByText(/KAYAD commission/)).toBeTruthy();
+    expect(screen.getByText(/KAYARD KE commission/)).toBeTruthy();
     expect(screen.getByText(/KES 2,375,000/)).toBeTruthy();
   });
   it('hides commission from the buyer even if a payload carried it', async () => {

@@ -9,7 +9,7 @@ type JourneyTab = { key: string; href: string; label: string };
 let rememberedJourneyTabs: JourneyTab[] = [];
 
 function labelForLocation(pathname: string, search: string): string {
-  const title = titleForRoute(pathname, search).replace(/\s*\|\s*KAYAD\s*$/, '');
+  const title = titleForRoute(pathname, search).replace(/\s*\|\s*KAYARD KE\s*$/, '');
   if (title !== "KAYAD | Kenya's Verified Automotive Marketplace & Escrow Vault") return title;
   const segment = pathname.split('/').filter(Boolean).pop();
   if (!segment) return 'Home';
@@ -63,7 +63,7 @@ export default function PageJourneyNavigation({ fallbackHref = '/' }: { fallback
         <button type="button" onClick={() => navigate(1)} disabled={!canGoForward} aria-label="Go forward to next page" title="Next page" className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#176B87] hover:bg-[#EEF7F5] disabled:cursor-not-allowed disabled:opacity-35">
           <ArrowRight size={17} />
         </button>
-        <button type="button" onClick={() => navigate('/')} aria-label="Go to KAYAD home" title="Home" className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#176B87] hover:bg-[#EEF7F5]">
+        <button type="button" onClick={() => navigate('/')} aria-label="Go to KAYARD KE home" title="Home" className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-[#176B87] hover:bg-[#EEF7F5]">
           <Home size={16} />
         </button>
       </div>

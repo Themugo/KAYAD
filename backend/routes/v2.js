@@ -15,7 +15,7 @@ const router = Router();
 router.get("/", validateQuery(analyticsQuerySchema), (req, res) => {
   res.json({
     success: true,
-    message: "KAYAD API v2 - Coming Soon",
+    message: "KAYARD KE API v2 - Coming Soon",
     version: "2.0.0",
     documentation: "/api-docs",
   });

@@ -9,7 +9,7 @@ const checks = [
   ['drawer content has a constrained scroll region', /min-h-0 flex-1 overflow-y-auto overscroll-contain/.test(navbar)],
   ['safe-area bottom padding is preserved', /pb-\[max\(1\.5rem,env\(safe-area-inset-bottom\)\)\]/.test(navbar)],
   ['body scroll is locked while the menu is open', /kayad-mobile-menu-is-open \{ overflow: hidden !important; \}/.test(css)],
-  ['existing shared drawer and focus-dialog semantics remain', /role="dialog" aria-modal="true" aria-label="KAYAD mobile navigation"/.test(navbar) && /drawer\?\.focus\(\)/.test(navbar)],
+  ['existing shared drawer and focus-dialog semantics remain', /role="dialog" aria-modal="true" aria-label="KAYARD KE mobile navigation"/.test(navbar) && /drawer\?\.focus\(\)/.test(navbar)],
   ['orientation and resize keep the drawer aligned', /addEventListener\('orientationchange', syncDrawerViewport\)/.test(navbar) && /addEventListener\('resize', syncDrawerViewport\)/.test(navbar)],
   ['Android/iOS visual viewport height and browser-chrome changes are tracked', /window\.visualViewport/.test(navbar) && /viewport\.offsetTop \+ viewport\.height/.test(navbar) && /setMobileDrawerHeight/.test(navbar)],
   ['drawer height is explicitly constrained to the visible viewport', /height: `\$\{mobileDrawerHeight\}px`/.test(navbar)],

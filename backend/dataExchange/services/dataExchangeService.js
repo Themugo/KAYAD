@@ -130,7 +130,7 @@ class DataExchangeService {
    */
   async getMarketPriceIndex(countryCode = 'KE') {
     return {
-      indexName: 'KAYAD Kenya Vehicle Price Index',
+      indexName: 'KAYARD KE Kenya Vehicle Price Index',
       indexCode: 'KAYAD-KE-VPI',
       basePeriod: '2024-01',
       currentValue: 124.5,
@@ -431,7 +431,7 @@ class DataExchangeService {
       },
       {
         code: 'price-index',
-        name: 'KAYAD Price Index',
+        name: 'KAYARD KE Price Index',
         category: 'market',
         accessLevel: 'public',
         pricingType: 'free',
@@ -676,7 +676,7 @@ class DataExchangeService {
         {
           path: '/market/price-index',
           method: 'GET',
-          description: 'Get KAYAD Price Index',
+          description: 'Get KAYARD KE Price Index',
           access: 'public',
         },
         {

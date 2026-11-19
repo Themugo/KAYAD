@@ -9,8 +9,8 @@ export const sendDigitalReceipt = async (transaction) => {
     car: transaction.carTitle || transaction.car?.title || "Vehicle",
     ref: transaction.mpesaReceipt || String(transaction.id || "").slice(-8),
   };
-  const message = `KAYAD payment receipt: KES ${receiptData.amount} received for ${receiptData.car}. Ref: ${receiptData.ref}.`;
-  const html = `<div style="font-family:Arial,sans-serif;padding:24px"><h2>KAYAD Payment Receipt</h2><p>Amount: KES ${receiptData.amount}</p><p>Vehicle: ${receiptData.car}</p><p>Reference: ${receiptData.ref}</p></div>`;
+  const message = `KAYARD KE payment receipt: KES ${receiptData.amount} received for ${receiptData.car}. Ref: ${receiptData.ref}.`;
+  const html = `<div style="font-family:Arial,sans-serif;padding:24px"><h2>KAYARD KE Payment Receipt</h2><p>Amount: KES ${receiptData.amount}</p><p>Vehicle: ${receiptData.car}</p><p>Reference: ${receiptData.ref}</p></div>`;
 
   try {
     await sendUserCommunication({
@@ -18,9 +18,9 @@ export const sendDigitalReceipt = async (transaction) => {
       channels: ["email", "sms", "whatsapp"],
       eventType: "payment_receipt",
       templateCode: "payment_receipt",
-      title: "KAYAD Payment Receipt",
+      title: "KAYARD KE Payment Receipt",
       message,
-      subject: "KAYAD Payment Receipt",
+      subject: "KAYARD KE Payment Receipt",
       html,
       metadata: { receipt: receiptData },
     });

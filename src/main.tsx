@@ -21,7 +21,7 @@ class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('[KAYAD] Uncaught error:', error, errorInfo);
+    console.error('[KAYARD KE] Uncaught error:', error, errorInfo);
   }
 
   render() {
@@ -39,7 +39,7 @@ class ErrorBoundary extends Component<
           <div style={{ textAlign: 'center', maxWidth: '400px' }}>
             <h1 style={{ color: '#0A3340', marginBottom: '16px' }}>Something went wrong</h1>
             <p style={{ color: '#475569', marginBottom: '16px' }}>
-              An unexpected error occurred. Reload the page; if it keeps happening, contact KAYAD support.
+              An unexpected error occurred. Reload the page; if it keeps happening, contact KAYARD KE support.
             </p>
             <button
               onClick={() => window.location.reload()}
@@ -79,5 +79,5 @@ if (root) {
     </React.StrictMode>
   );
 } else {
-  console.error('[KAYAD] Root element not found');
+  console.error('[KAYARD KE] Root element not found');
 }

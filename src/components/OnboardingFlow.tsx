@@ -146,9 +146,9 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
       const nextStep = role?.id === 'dealer'
         ? 'After you sign in, complete business verification. Once you submit the required details, you can publish and manage your own vehicle listings while verification is processed; sensitive dealer features require approval.'
         : (role?.id === 'garage_business' || role?.id === 'inspection_company')
-            ? 'After you sign in you will go straight to the provider application. KAYAD reviews it; nothing is published until it is approved.'
+            ? 'After you sign in you will go straight to the provider application. KAYARD KE reviews it; nothing is published until it is approved.'
             : role?.id === 'professional'
-              ? mode === 'independent' ? 'After you sign in, submit your inspector or mechanic credentials from the professional application. KAYAD reviews them and adds approved access to this same account.' : 'After you sign in, ask your garage or inspection company to confirm you as staff. They must accept, and KAYAD verifies qualifications separately.'
+              ? mode === 'independent' ? 'After you sign in, submit your inspector or mechanic credentials from the professional application. KAYARD KE reviews them and adds approved access to this same account.' : 'After you sign in, ask your garage or inspection company to confirm you as staff. They must accept, and KAYARD KE verifies qualifications separately.'
               : 'After email verification you can browse, save, bid and sell your own vehicle for free from this account. No package selection, seller application or administrator approval is required.';
       return (
         <PremiumAuthShell {...common} eyebrow="Account created" title="Check your email." description={`We sent a verification link to ${outcome.email}. You must verify before you can sign in.`}>
@@ -172,31 +172,31 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
     }
     if (outcome.kind === 'application') {
       return (
-        <PremiumAuthShell {...common} eyebrow="Application received" title="Your application is with KAYAD." description="This is an application, not an account yet.">
+        <PremiumAuthShell {...common} eyebrow="Application received" title="Your application is with KAYARD KE." description="This is an application, not an account yet.">
           <div className="space-y-4" role="status">
             <div className="flex items-start gap-3 rounded-2xl border border-[#BDE5DE] bg-[#F3FAF9] p-4 text-sm text-[#0A3340]">
               <Clock3 className="mt-0.5 h-5 w-5 shrink-0" aria-hidden="true" />
-              <p className="m-0">KAYAD reviews applications by hand. If yours is approved we email {form.email.trim() || 'you'} a link to set your password (valid for 72 hours); then you can sign in. Nothing is activated until then.</p>
+              <p className="m-0">KAYARD KE reviews applications by hand. If yours is approved we email {form.email.trim() || 'you'} a link to set your password (valid for 72 hours); then you can sign in. Nothing is activated until then.</p>
             </div>
-            <p className="m-0 text-xs text-[#64748B]">If you work for a garage or inspection company that is already on KAYAD, you do not need to apply on your own: create an account and ask the business to confirm you.</p>
-            <Link to="/" className="kayad-auth-secondary-action px-5 no-underline">Back to KAYAD</Link>
+            <p className="m-0 text-xs text-[#64748B]">If you work for a garage or inspection company that is already on KAYARD KE, you do not need to apply on your own: create an account and ask the business to confirm you.</p>
+            <Link to="/" className="kayad-auth-secondary-action px-5 no-underline">Back to KAYARD KE</Link>
           </div>
         </PremiumAuthShell>
       );
     }
     if (outcome.kind === 'pending-application') {
       return (
-        <PremiumAuthShell {...common} eyebrow="Already applied" title="You already have an application waiting." description="KAYAD has an application for this email address that is still being reviewed.">
+        <PremiumAuthShell {...common} eyebrow="Already applied" title="You already have an application waiting." description="KAYARD KE has an application for this email address that is still being reviewed.">
           <div className="space-y-4" role="status">
             <p className="m-0 text-sm text-[#64748B]">You do not need to apply again. If approved, an email with a link to set your password will be sent to that address.</p>
-            <Link to="/" className="kayad-auth-secondary-action px-5 no-underline">Back to KAYAD</Link>
+            <Link to="/" className="kayad-auth-secondary-action px-5 no-underline">Back to KAYARD KE</Link>
           </div>
         </PremiumAuthShell>
       );
     }
     if (outcome.kind === 'exists') {
       return (
-        <PremiumAuthShell {...common} eyebrow={outcome.recovered ? 'Account found' : 'Existing account'} title={outcome.recovered ? 'Your earlier attempt went through.' : 'This email already has an account.'} description={outcome.recovered ? 'Your first request reached KAYAD even though the reply was lost. Nothing was duplicated: verify your email, then sign in.' : 'You can use it: sign in, finish verifying, or reset the password.'}>
+        <PremiumAuthShell {...common} eyebrow={outcome.recovered ? 'Account found' : 'Existing account'} title={outcome.recovered ? 'Your earlier attempt went through.' : 'This email already has an account.'} description={outcome.recovered ? 'Your first request reached KAYARD KE even though the reply was lost. Nothing was duplicated: verify your email, then sign in.' : 'You can use it: sign in, finish verifying, or reset the password.'}>
           <div className="space-y-4">
             <div className="flex flex-wrap gap-3">
               <Link to={buildAuthPath('login', { next: destination, intent: role?.intent })} state={{ email: form.email.trim() }} className="kayad-auth-submit inline-flex items-center justify-center px-6 no-underline">Sign in</Link>
@@ -213,12 +213,12 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
     }
     if (outcome.kind === 'unavailable') {
       return (
-        <PremiumAuthShell {...common} eyebrow="Temporarily unavailable" title="We couldn’t create your account right now." description="KAYAD answered, but registration is paused for a moment. Nothing was created.">
+        <PremiumAuthShell {...common} eyebrow="Temporarily unavailable" title="We couldn’t create your account right now." description="KAYARD KE answered, but registration is paused for a moment. Nothing was created.">
           <div className="space-y-4" role="alert">
             <p className="m-0 text-sm text-[#12576D]">Your details are still in the form. Please try again in a few minutes.</p>
             <div className="flex flex-wrap gap-3">
               <button type="button" className="kayad-auth-submit px-6" onClick={() => setOutcome(null)}>Go back and try again</button>
-              <Link to="/" className="kayad-auth-secondary-action px-5 no-underline">Back to KAYAD</Link>
+              <Link to="/" className="kayad-auth-secondary-action px-5 no-underline">Back to KAYARD KE</Link>
             </div>
           </div>
         </PremiumAuthShell>
@@ -227,7 +227,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
     return (
       <PremiumAuthShell {...common} eyebrow="Connection problem" title="We couldn’t confirm that went through." description="Your connection dropped before we heard back, so we don’t know whether your details were received.">
         <div className="space-y-4" role="alert">
-          <p className="m-0 text-sm text-[#12576D]">Nothing is duplicated if you try again: KAYAD refuses a second account or application for the same email. If you already received a verification email, you are done - just sign in.</p>
+          <p className="m-0 text-sm text-[#12576D]">Nothing is duplicated if you try again: KAYARD KE refuses a second account or application for the same email. If you already received a verification email, you are done - just sign in.</p>
           <div className="flex flex-wrap gap-3">
             <button type="button" className="kayad-auth-submit px-6" onClick={() => setOutcome(null)}>Go back and try again</button>
             <Link to={buildAuthPath('login', { next: destination, intent: role?.intent })} state={{ email: form.email.trim() }} className="kayad-auth-secondary-action px-5 no-underline">I may already have an account</Link>
@@ -238,20 +238,20 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
   }
 
   /* ---------- step 1: choose how you will use KAYAD ---------- */
-  const rail = role ? { title: `What happens next: ${role.title.toLowerCase()}`, steps: role.steps, note: 'Staff and administrator accounts are provisioned by KAYAD and cannot be created here.' } : {
-    title: 'How KAYAD accounts work',
+  const rail = role ? { title: `What happens next: ${role.title.toLowerCase()}`, steps: role.steps, note: 'Staff and administrator accounts are provisioned by KAYARD KE and cannot be created here.' } : {
+    title: 'How KAYARD KE accounts work',
     steps: [
       { title: 'Everyone starts with an email', body: 'Every account must verify its email before it can sign in.' },
       { title: 'Private selling is free and immediate', body: 'Every verified personal account can list a private vehicle without a package, seller application or administrator approval.' },
       { title: 'Business and professional access stays separate', body: 'Dealer verification, garage and inspection-company reviews, and professional qualifications retain their own approval processes.' },
     ],
-    note: 'Staff and administrator accounts are provisioned by KAYAD and cannot be created here.',
+    note: 'Staff and administrator accounts are provisioned by KAYARD KE and cannot be created here.',
   };
 
   if (!role) {
     return (
-      <PremiumAuthShell mode="register" eyebrow="Create your account" title="Choose your KAYAD account" description="One personal account lets you buy and sell vehicles. Dealerships, garages, inspection companies and professionals apply for additional verified access." rail={rail}>
-        <div role="radiogroup" aria-label="How you will use KAYAD" className="grid gap-3">
+      <PremiumAuthShell mode="register" eyebrow="Create your account" title="Choose your KAYARD KE account" description="One personal account lets you buy and sell vehicles. Dealerships, garages, inspection companies and professionals apply for additional verified access." rail={rail}>
+        <div role="radiogroup" aria-label="How you will use KAYARD KE" className="grid gap-3">
           {PUBLIC_ROLES.map((r, i) => (
             <button
               key={r.id} type="button" role="radio" aria-checked={false} className="kayad-role-card" tabIndex={i === 0 ? 0 : -1}
@@ -292,8 +292,8 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
         <fieldset className="mb-5 grid gap-3">
           <legend className="mb-2 text-sm font-black text-[#0A3340]">How do you work?</legend>
           {([
-            ['independent', 'On my own', 'Create your personal account first, then submit inspector or mechanic credentials for KAYAD review.'],
-            ['employed', 'For a garage or inspection company', 'Create an account, then ask the business to confirm you as staff. No separate KAYAD application.'],
+            ['independent', 'On my own', 'Create your personal account first, then submit inspector or mechanic credentials for KAYARD KE review.'],
+            ['employed', 'For a garage or inspection company', 'Create an account, then ask the business to confirm you as staff. No separate KAYARD KE application.'],
           ] as const).map(([value, title, body]) => (
             <label key={value} className="kayad-role-card cursor-pointer" aria-checked={mode === value}>
               <span className="flex items-center gap-2"><input type="radio" name="professional-mode" value={value} checked={mode === value} onChange={() => { setMode(value); setErrors({}); setServerError(''); }} /><strong>{title}</strong></span>
@@ -315,7 +315,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
 
           <TextField ref={(el) => { refs.current.name = el; }} label="Full name" value={form.name} onChange={set('name')} autoComplete="name" error={errors.name} disabled={submitting} />
           <TextField ref={(el) => { refs.current.email = el; }} label="Email" type="email" inputMode="email" value={form.email} onChange={set('email')} autoComplete="email" error={errors.email} disabled={submitting} />
-          <TextField ref={(el) => { refs.current.phone = el; }} label="Phone" type="tel" inputMode="tel" value={form.phone} onChange={set('phone')} autoComplete="tel" optional={!isDealer} hint={isDealer ? 'KAYAD uses this to reach you about your approval.' : undefined} error={errors.phone} disabled={submitting} />
+          <TextField ref={(el) => { refs.current.phone = el; }} label="Phone" type="tel" inputMode="tel" value={form.phone} onChange={set('phone')} autoComplete="tel" optional={!isDealer} hint={isDealer ? 'KAYARD KE uses this to reach you about your approval.' : undefined} error={errors.phone} disabled={submitting} />
 
           {isDealer && (
             <>

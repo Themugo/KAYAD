@@ -44,7 +44,7 @@ const MESSAGES = {
   OWNER_PASSWORD_REQUIRED: [400, "Choose a password that meets the policy."],
   OWNER_NOT_MEMBER: [404, "That identity is not an active owner."],
   OWNER_PRIMARY_PROTECTED: [403, "The primary owner can only be removed by the primary owner. If the primary owner lost access, use Recover (out-of-band verified) or the emergency procedure."],
-  OWNER_LAST_USABLE: [409, "Blocked: this would leave KAYAD with no verified, active owner. Add and activate another owner first."],
+  OWNER_LAST_USABLE: [409, "Blocked: this would leave KAYARD KE with no verified, active owner. Add and activate another owner first."],
   OWNER_NONE_ESTABLISHED: [409, "No verified, active owner exists yet."],
 };
 export const ownerError = (code, extra) => { const [status, message] = MESSAGES[code] || [400, "The request could not be completed."]; return new OwnerError(code, message, status, extra); };
@@ -136,7 +136,7 @@ async function sendInvitationEmail({ id, email, token, kind, invitedBy, resend }
       userId: null, channel: "email", eventType: COMMUNICATION_EVENTS.OWNER_INVITATION /* secret-bearing: body/URL never persisted */,
       templateCode: "owner_invitation_email", recipient: email,
       ...(await buildEmail("buildOwnerInvitationEmail", { acceptUrl, kind, expiresInHours: ttlHours, invitedBy, resend },
-        { subject: "Owner invitation — KAYAD", text: `Open this one-time link to continue: ${acceptUrl}`, html: `<p><a href="${acceptUrl}">Accept owner invitation</a></p>` })),
+        { subject: "Owner invitation — KAYARD KE", text: `Open this one-time link to continue: ${acceptUrl}`, html: `<p><a href="${acceptUrl}">Accept owner invitation</a></p>` })),
       metadata: { verification: true, resend: !!resend },
       idempotencyKey: `owner-invite:${id}:${sha(token).slice(0, 16)}`,
     });
@@ -385,7 +385,7 @@ export async function bootstrapApply({ operator, resendPending = false }) {
       r = await rpc("kayad_owner_issue_invitation", { p_email: row.email, p_kind: "bootstrap", p_token_hash: sha(token), p_expires: new Date(Date.now() + inviteTtlMs()).toISOString(), p_actor: null, p_actor_label: label_, p_note: "initial owner bootstrap" });
     }
     if (!r?.ok) { out.push({ identity: row.identity, result: `refused:${r?.code}` }); continue; }
-    const mail = await sendInvitationEmail({ id: r.id, email: row.email, token, kind: "bootstrap", invitedBy: "the KAYAD platform operator", resend: row.state === "invitation_pending" });
+    const mail = await sendInvitationEmail({ id: r.id, email: row.email, token, kind: "bootstrap", invitedBy: "the KAYARD KE platform operator", resend: row.state === "invitation_pending" });
     out.push({ identity: row.identity, result: mail.delivered ? "invitation_sent" : `invitation_created_email_${mail.status}` });
   }
   return { operator: String(operator).trim(), results: out };
@@ -407,7 +407,7 @@ export async function emergencyRecovery({ operator, incident }) {
       ? await rpc("kayad_owner_resend_invitation", { p_invitation_id: pend.id, p_token_hash: sha(token), p_expires: new Date(Date.now() + inviteTtlMs()).toISOString(), p_actor: null, p_actor_label: label_, p_cooldown_seconds: 60 })
       : await rpc("kayad_owner_issue_invitation", { p_email: email, p_kind: "recovery", p_token_hash: sha(token), p_expires: new Date(Date.now() + inviteTtlMs()).toISOString(), p_actor: null, p_actor_label: label_, p_note: `emergency recovery, incident ${String(incident).trim().slice(0, 40)}` });
     if (!r?.ok) { out.push({ identity: mask(email), result: `refused:${r?.code}` }); continue; }
-    const mail = await sendInvitationEmail({ id: r.id, email, token, kind: "recovery", invitedBy: "the KAYAD platform operator", resend: !!pend });
+    const mail = await sendInvitationEmail({ id: r.id, email, token, kind: "recovery", invitedBy: "the KAYARD KE platform operator", resend: !!pend });
     out.push({ identity: mask(email), result: mail.delivered ? "recovery_invitation_sent" : `recovery_invitation_created_email_${mail.status}` });
   }
   return { operator: String(operator).trim(), incident: String(incident).trim(), results: out };

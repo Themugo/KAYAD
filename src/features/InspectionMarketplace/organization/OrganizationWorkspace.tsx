@@ -41,7 +41,7 @@ export const OrganizationWorkspace: React.FC<{ organizationId: string; onClose?:
         <Pill tone="neutral">{ROLE_LABEL[o.you.role]}</Pill>
         {o.lifecycleStage !== 'ACTIVE' && <Pill tone="warn">{o.lifecycleStage.replace(/_/g, ' ').toLowerCase()}</Pill>}
       </header>
-      {o.lifecycleStage !== 'ACTIVE' && <p role="status" className="rounded-xl border border-slate-300 bg-slate-50 p-3 text-sm text-slate-900">This business is not currently active on KAYAD, so it cannot take new jobs. You can still review existing work.</p>}
+      {o.lifecycleStage !== 'ACTIVE' && <p role="status" className="rounded-xl border border-slate-300 bg-slate-50 p-3 text-sm text-slate-900">This business is not currently active on KAYARD KE, so it cannot take new jobs. You can still review existing work.</p>}
       {tabs.length === 0 ? (
         <p role="status" className="rounded-xl border border-[#D7E7E4] bg-white p-4 text-sm text-[#64748B]">Your role has no workspace screens. Your assigned inspections appear under “Businesses you work with”.</p>
       ) : (

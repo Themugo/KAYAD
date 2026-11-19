@@ -132,7 +132,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         setThreadsError(err instanceof ChatApiError && err.kind === 'unauthenticated'
           ? 'Your session could not be verified. Sign in again to view your conversations.'
           : err instanceof ChatApiError && err.kind === 'network'
-            ? 'KAYAD could not be reached. Check your connection and try again.'
+            ? 'KAYARD KE could not be reached. Check your connection and try again.'
             : 'Conversations could not be loaded right now. Please try again.');
       })
       .finally(() => {
@@ -356,7 +356,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
       showToast(err instanceof ChatApiError && err.kind === 'unauthenticated'
         ? 'Your session has expired. Sign in again before sending.'
         : err instanceof ChatApiError && err.kind === 'network'
-          ? 'KAYAD could not be reached. Your draft is still here; try again when connected.'
+          ? 'KAYARD KE could not be reached. Your draft is still here; try again when connected.'
           : 'The message could not be confirmed. Your draft is still here; refresh before retrying to avoid a duplicate.');
     }
   };
@@ -403,9 +403,9 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
       <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
         <section className="rounded-3xl border border-[#D7E7E4] bg-white p-7 text-center shadow-sm sm:p-10" aria-labelledby="messages-heading">
           <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-[#DDF4F0] text-[#176B87]"><MessageSquare className="h-7 w-7" aria-hidden="true" /></div>
-          <p className="text-xs font-bold tracking-wide text-[#176B87]">KAYAD MESSAGES</p>
+          <p className="text-xs font-bold tracking-wide text-[#176B87]">KAYARD KE MESSAGES</p>
           <h1 id="messages-heading" className="mt-2 text-2xl font-black text-[#0A3340] sm:text-3xl">Your conversations, kept private</h1>
-          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-600">Sign in to view and reply to conversations connected to your KAYAD account. Your private messages are not shown on this public page.</p>
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-600">Sign in to view and reply to conversations connected to your KAYARD KE account. Your private messages are not shown on this public page.</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <button type="button" onClick={() => navigate(buildAuthPath('login', { next: '/?nav=chat' }))} className="min-h-11 rounded-xl bg-[#176B87] px-5 py-3 text-sm font-bold text-white hover:bg-[#12576D] focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:ring-offset-2">Sign in to Messages</button>
             <button type="button" onClick={() => navigate(buildAuthPath('register', { next: '/?nav=chat', intent: 'buyer' }))} className="min-h-11 rounded-xl border border-[#D7E7E4] bg-white px-5 py-3 text-sm font-bold text-[#176B87] hover:bg-[#F3FAF9] focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:ring-offset-2">Create an account</button>
@@ -432,7 +432,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
           <div className="space-y-2 min-w-0">
             <div className="inline-flex items-center gap-2 text-xs font-bold text-[#176B87]">
               <MessageSquare className="w-4 h-4" aria-hidden="true" />
-              KAYAD MESSAGES
+              KAYARD KE MESSAGES
             </div>
             <h1 id="messages-heading" className="text-2xl sm:text-3xl font-black font-display text-[#0A3340]">
               Your conversations
@@ -880,7 +880,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
                 </div>
               </section>
 
-              <p className="border-t border-[#D7E7E4] pt-4 text-xs leading-relaxed text-slate-500">For escrow, inspections, financing or support cases, use the corresponding KAYAD service. This inbox displays only the conversation and listing information currently available to your account.</p>
+              <p className="border-t border-[#D7E7E4] pt-4 text-xs leading-relaxed text-slate-500">For escrow, inspections, financing or support cases, use the corresponding KAYARD KE service. This inbox displays only the conversation and listing information currently available to your account.</p>
             </div>
           ) : (
             <div className="p-8 text-center text-slate-500">

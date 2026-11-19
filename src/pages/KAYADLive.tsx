@@ -76,7 +76,7 @@ export const KAYADLive: React.FC<KAYADLiveProps> = ({ onNavigate, onOpenVehicleD
     <article className="mx-auto max-w-4xl space-y-5 px-4 py-8">
       <button type="button" onClick={closeArticle} className="inline-flex items-center gap-2 text-sm font-semibold text-[#176B87]"><ArrowLeft size={16}/> Back to KAYARD Live</button>
       <header className="space-y-2">
-        <p className="text-xs font-bold uppercase tracking-wider text-[#13A89E]">{article.content_type || 'KAYAD'}</p>
+        <p className="text-xs font-bold uppercase tracking-wider text-[#13A89E]">{article.content_type || 'KAYARD KE'}</p>
         <h1 className="text-2xl sm:text-3xl font-bold text-[#0A3340]">{article.title}</h1>
         {article.published_at && <p className="text-xs text-slate-500">{new Date(article.published_at).toLocaleDateString()}</p>}
         {article.excerpt && <p className="text-base text-slate-600">{article.excerpt}</p>}

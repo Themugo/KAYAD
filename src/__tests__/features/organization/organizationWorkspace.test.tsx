@@ -115,7 +115,7 @@ describe('team', () => {
     api.get.mockResolvedValue(org('owner')); api.invite.mockResolvedValue({});
     render(<OrganizationWorkspace organizationId={ORG} />);
     fireEvent.click(await screen.findByRole('tab', { name: 'Team' }));
-    fireEvent.change(await screen.findByLabelText(/Email of their KAYAD account/), { target: { value: 'bob@x.co' } });
+    fireEvent.change(await screen.findByLabelText(/Email of their KAYARD KE account/), { target: { value: 'bob@x.co' } });
     fireEvent.change(screen.getByLabelText(/^Role/), { target: { value: 'branch_manager' } });
     const send = screen.getByRole('button', { name: 'Send invitation' }); expect((send as HTMLButtonElement).disabled).toBe(true);
     fireEvent.change(screen.getByLabelText(/^Branch/), { target: { value: 'b2' } });

@@ -25,7 +25,7 @@ const sms = async (phone, message, context = {}, useQueue = QUEUE_MODE) => {
 export const sendWelcomeSMS = (phone, name) =>
   sms(
     phone,
-    `Welcome to Kayad, ${name}! Your gateway to premium cars. Browse showrooms, join live auctions, and drive your dream today. kayad.space`,
+    `Welcome to KAYARD KE, ${name}! Your gateway to premium cars. Browse showrooms, join live auctions, and drive your dream today. kayad.space`,
   );
 
 export const sendBidPlacedSMS = (phone, carTitle, amount) =>
@@ -43,7 +43,7 @@ export const sendOutbidSMS = (phone, carTitle, amount) =>
 export const sendEscrowReleasedSMS = (phone, amount, carTitle) =>
   sms(
     phone,
-    `Payment received! ${formatKES(amount)} for ${carTitle || "vehicle"} is now in your account. Thank you for selling on Kayad!`,
+    `Payment received! ${formatKES(amount)} for ${carTitle || "vehicle"} is now in your account. Thank you for selling on KAYARD KE!`,
     { amount, carTitle },
   );
 
@@ -55,18 +55,18 @@ export const sendEscrowRefundedSMS = (phone, amount, carTitle) =>
   );
 
 export const sendChatMessageSMS = (phone, fromName, carTitle) =>
-  sms(phone, `New message from ${fromName || "a user"} on Kayad${carTitle ? ` about ${carTitle}` : ""}.`, {
+  sms(phone, `New message from ${fromName || "a user"} on KAYARD KE${carTitle ? ` about ${carTitle}` : ""}.`, {
     fromName,
     carTitle,
   });
 
-export const sendOTPSMS = (phone, otp) => sms(phone, `Your Kayad verification code is: ${otp}. Valid for 10 minutes. Do not share this code.`, { otp });
+export const sendOTPSMS = (phone, otp) => sms(phone, `Your KAYARD KE verification code is: ${otp}. Valid for 10 minutes. Do not share this code.`, { otp });
 
 export const sendSMSBidInvalidFormat = (phone) =>
   sms(phone, "Invalid bid format. Reply: BID <amount> — e.g. 'BID 4.3M' or 'BID 500K'");
 
 export const sendSMSBidNotRegistered = (phone) =>
-  sms(phone, "You are not registered for SMS bidding. Visit KAYAD to link your phone.");
+  sms(phone, "You are not registered for SMS bidding. Visit KAYARD KE to link your phone.");
 
 export const sendSMSBidNoAuctions = (phone) => sms(phone, "No active auctions found on your subscribed cars.");
 

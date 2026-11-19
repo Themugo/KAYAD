@@ -71,12 +71,12 @@ export async function removeEscrowAccount(id) {
 
 export async function validatePrivateSellerEscrow({ car, seller, amount }) {
   if (!seller || !["user", "individual_seller"].includes(seller.role)) {
-    throw new Error("KAYAD vehicle escrow is available only for private-seller transactions");
+    throw new Error("KAYARD KE vehicle escrow is available only for private-seller transactions");
   }
 
   const rules = await getEscrowRules();
   if (!rules.enabled || rules.privateSellerRequirement === "disabled") {
-    throw new Error("Private-seller escrow is currently disabled by KAYAD administration");
+    throw new Error("Private-seller escrow is currently disabled by KAYARD KE administration");
   }
   if (rules.minimumAmount > 0 && Number(amount) < Number(rules.minimumAmount)) {
     throw new Error(`Escrow minimum is KES ${Number(rules.minimumAmount).toLocaleString("en-KE")}`);
@@ -86,7 +86,7 @@ export async function validatePrivateSellerEscrow({ car, seller, amount }) {
   }
 
   const account = await getPrimaryEscrowAccount();
-  if (!account) throw new Error("No active KAYAD escrow bank account is configured by an administrator");
+  if (!account) throw new Error("No active KAYARD KE escrow bank account is configured by an administrator");
   return { rules, account };
 }
 
@@ -112,7 +112,7 @@ export async function resolveEscrowCustody({ amount }) {
     throw Object.assign(new Error(`Escrow maximum is KES ${Number(rules.maximumAmount).toLocaleString("en-KE")}`), { status: 409 });
   }
   const account = await getPrimaryEscrowAccount();
-  if (!account) throw Object.assign(new Error("No active KAYAD escrow bank account is configured by an administrator"), { status: 409 });
+  if (!account) throw Object.assign(new Error("No active KAYARD KE escrow bank account is configured by an administrator"), { status: 409 });
   return { custodianAccount: account.id, fundingMethod: "bank_transfer" };
 }
 
@@ -145,7 +145,7 @@ export async function verifyEscrowFunding(escrowId, actorId, fundingReference) {
       eventType: COMMUNICATION_EVENTS.ESCROW_FUNDED,
       category: "transactional",
       title: "Escrow funded",
-      message: `KAYAD has verified the escrow funding for KES ${Number(escrow?.amount || 0).toLocaleString("en-KE")}. Funds are now held under the configured custody process.`,
+      message: `KAYARD KE has verified the escrow funding for KES ${Number(escrow?.amount || 0).toLocaleString("en-KE")}. Funds are now held under the configured custody process.`,
       channels: ["in_app", "email", "sms", "whatsapp"],
       metadata: {
         escrowId,

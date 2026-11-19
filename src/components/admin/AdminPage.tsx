@@ -44,7 +44,7 @@ export const AdminPage: FC = () => {
     const newAd: AdvertItem = {
       id: `ad_${Date.now()}`,
       title: formTitle,
-      subtitle: formSubtitle || 'Exclusive promotion verified by KAYAD Admin.',
+      subtitle: formSubtitle || 'Exclusive promotion verified by KAYARD KE Admin.',
       badge: formBadge || 'FEATURED',
       ctaText: formCta || 'Learn More',
       imageUrl: formImage,
@@ -81,7 +81,7 @@ export const AdminPage: FC = () => {
             <span>Admin Control Panel</span>
           </div>
           <h1 className="text-3xl font-extrabold text-[#176B87] font-serif tracking-tight">
-            KAYAD Platform Oversight & Marketing
+            KAYARD KE Platform Oversight & Marketing
           </h1>
           <p className="text-sm text-[#176b87] mt-1 font-medium">
             Manage active escrow compliance, platform analytics, and live advertisement banners.
@@ -273,7 +273,7 @@ export const AdminPage: FC = () => {
                   {formTitle || 'Your Advert Headline Here'}
                 </h3>
                 <p className="text-xs text-[#DDF4F0] font-medium leading-relaxed">
-                  {formSubtitle || 'Your promotional offer copy and target benefits will display right here on KAYAD.'}
+                  {formSubtitle || 'Your promotional offer copy and target benefits will display right here on KAYARD KE.'}
                 </p>
                 <div className="pt-2">
                   <button className="px-5 py-2 rounded-xl bg-[#13B8A6] text-[#176B87] font-extrabold text-xs shadow-md">

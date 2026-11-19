@@ -15,7 +15,7 @@ export default function VerifyEmailPage() {
   const location = useLocation();
   const ctx = readAuthContext(location, { useStored: true });
   const [state, setState] = useState<'loading' | 'success' | 'error' | 'missing'>('loading');
-  const [message, setMessage] = useState('Verifying your KAYAD email…');
+  const [message, setMessage] = useState('Verifying your KAYARD KE email…');
   const [email, setEmail] = useState('');
   const [resending, setResending] = useState(false);
   const [resent, setResent] = useState(false);
@@ -76,7 +76,7 @@ export default function VerifyEmailPage() {
               {resending ? <Loader2 className="animate-spin" size={16} aria-hidden="true" /> : <RefreshCw size={16} aria-hidden="true" />} {resending ? 'Sending…' : 'Resend verification email'}
             </button>
             {resent && <div className="kayad-auth-notice" role="status">If the account exists and is unverified, a new verification link has been sent.</div>}
-            <Link to="/" className="kayad-auth-secondary-action">Return to KAYAD</Link>
+            <Link to="/" className="kayad-auth-secondary-action">Return to KAYARD KE</Link>
           </>
         )}
       </div>

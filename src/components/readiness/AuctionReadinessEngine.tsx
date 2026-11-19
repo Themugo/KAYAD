@@ -374,7 +374,7 @@ export const AuctionReadinessEngine: React.FC<AuctionReadinessEngineProps> = ({
         <div className="mt-4 pt-4 border-t border-white/10">
           <p className="text-xs text-[#94A3B8] flex items-center gap-2">
             <Info className="w-4 h-4" />
-            This readiness score is visible only to the Auction Organizer and KAYAD Administrators.
+            This readiness score is visible only to the Auction Organizer and KAYARD KE Administrators.
             Buyers will only see fully validated auctions.
           </p>
         </div>

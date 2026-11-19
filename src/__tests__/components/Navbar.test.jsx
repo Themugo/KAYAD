@@ -220,11 +220,11 @@ describe('Navbar', () => {
     expect(marketplaceToggle.getAttribute('aria-expanded')).toBe('true');
     expect(drawer.querySelector('#kayad-drawer-links-marketplace')).toBeTruthy();
 
-    const auctionToggle = screen.getByRole('button', { name: /expand auction links/i });
+    const auctionToggle = screen.getByRole('button', { name: /expand auctions links/i });
     expect(auctionToggle.getAttribute('aria-expanded')).toBe('false');
     expect(drawer.querySelector('#kayad-drawer-links-auction')?.hasAttribute('hidden')).toBe(true);
     fireEvent.click(auctionToggle);
-    expect(screen.getByRole('button', { name: /collapse auction links/i }).getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByRole('button', { name: /collapse auctions links/i }).getAttribute('aria-expanded')).toBe('true');
     expect(drawer.querySelector('#kayad-drawer-links-auction')?.hasAttribute('hidden')).toBe(false);
   });
 

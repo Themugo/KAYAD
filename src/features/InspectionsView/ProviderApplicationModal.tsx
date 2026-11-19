@@ -86,9 +86,9 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
       }
       if (failed.length) setPartial(`Your application was submitted, but these services could not be recorded yet: ${failed.join(', ')}. You can add them again once you are signed in to your business.`);
       const serverMessage = result && typeof result === 'object' ? (result as { message?: unknown }).message : undefined;
-      setDone(typeof serverMessage === 'string' && serverMessage ? serverMessage : 'Your provider application was submitted to KAYAD for review.');
+      setDone(typeof serverMessage === 'string' && serverMessage ? serverMessage : 'Your provider application was submitted to KAYARD KE for review.');
     } catch (err) {
-      setError('The application could not be submitted. Check your connection and try again. If the problem continues, contact KAYAD support.');
+      setError('The application could not be submitted. Check your connection and try again. If the problem continues, contact KAYARD KE support.');
     } finally {
       inFlight.current = false;
       setSubmitting(false);
@@ -107,8 +107,8 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
       {!signedIn ? (
         <div className="kayad-provider-onboarding py-4 text-center space-y-4">
           <BriefcaseBusiness className="w-8 h-8 mx-auto text-[#176B87]" aria-hidden="true" />
-          <p className="text-sm text-[#64748B] max-w-md mx-auto">Start with your KAYAD account, confirm your email, then return here to share your business details and services. KAYAD reviews your application before any provider access is granted.</p>
-          <ol className="kayad-onboarding-steps max-w-md mx-auto grid grid-cols-3 gap-2 text-left" aria-label="Provider onboarding steps"><li><span>1</span><strong>Account</strong><small>Sign in or register</small></li><li><span>2</span><strong>Business</strong><small>Contact and services</small></li><li><span>3</span><strong>Review</strong><small>KAYAD checks details</small></li></ol>
+          <p className="text-sm text-[#64748B] max-w-md mx-auto">Start with your KAYARD KE account, confirm your email, then return here to share your business details and services. KAYARD KE reviews your application before any provider access is granted.</p>
+          <ol className="kayad-onboarding-steps max-w-md mx-auto grid grid-cols-3 gap-2 text-left" aria-label="Provider onboarding steps"><li><span>1</span><strong>Account</strong><small>Sign in or register</small></li><li><span>2</span><strong>Business</strong><small>Contact and services</small></li><li><span>3</span><strong>Review</strong><small>KAYARD KE checks details</small></li></ol>
           <div className="flex flex-wrap justify-center gap-2">
             <Button variant="primary" className="min-h-[44px]" onClick={onOpenAuth}>Sign in to apply</Button>
             {onOpenRegister && <Button variant="outline" className="min-h-[44px]" onClick={() => onOpenRegister('provider', APPLY_PATH)}>Create a business account</Button>}
@@ -118,15 +118,15 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
         <div role="status" className="py-4 text-center space-y-3">
           <CheckCircle2 className="w-10 h-10 mx-auto text-[#13B8A6]" aria-hidden="true" />
           <p className="text-sm text-[#12576D]">{done}</p>
-          {chosen.length > 0 && !partial && <p className="text-xs text-[#64748B]">The services you chose are recorded as declared, not verified. KAYAD verifies each one separately.</p>}
+          {chosen.length > 0 && !partial && <p className="text-xs text-[#64748B]">The services you chose are recorded as declared, not verified. KAYARD KE verifies each one separately.</p>}
           {partial && <p role="alert" className="text-xs text-[#0A3340]">{partial}</p>}
-          <p className="text-xs text-[#64748B]">Submitting an application does not grant provider access. KAYAD decides the outcome.</p>
+          <p className="text-xs text-[#64748B]">Submitting an application does not grant provider access. KAYARD KE decides the outcome.</p>
           <Button variant="primary" onClick={onClose}>Close</Button>
         </div>
       ) : (
         <form onSubmit={submit} noValidate className="kayad-provider-application-form space-y-4" aria-busy={submitting}>
-          <ol className="kayad-onboarding-steps grid grid-cols-3 gap-2 text-left" aria-label="Application progress"><li className="is-current"><span>1</span><strong>Business details</strong><small>Contact and location</small></li><li><span>2</span><strong>Services</strong><small>What you offer</small></li><li><span>3</span><strong>Review</strong><small>Checked by KAYAD</small></li></ol>
-          <p className="rounded-xl bg-[#F5F8F8] border border-[#D7E7E4] p-3.5 text-xs text-[#64748B]">Choose the profile that fits your work. Organizations apply once for the business identity; individual professionals apply using their personal account. Branch and staff access are managed through authorized business controls. Submitting an application does not grant provider access; KAYAD reviews it and decides.</p>
+          <ol className="kayad-onboarding-steps grid grid-cols-3 gap-2 text-left" aria-label="Application progress"><li className="is-current"><span>1</span><strong>Business details</strong><small>Contact and location</small></li><li><span>2</span><strong>Services</strong><small>What you offer</small></li><li><span>3</span><strong>Review</strong><small>Checked by KAYARD KE</small></li></ol>
+          <p className="rounded-xl bg-[#F5F8F8] border border-[#D7E7E4] p-3.5 text-xs text-[#64748B]">Choose the profile that fits your work. Organizations apply once for the business identity; individual professionals apply using their personal account. Branch and staff access are managed through authorized business controls. Submitting an application does not grant provider access; KAYARD KE reviews it and decides.</p>
           <fieldset className="space-y-2" disabled={submitting}>
             <legend className="text-xs font-bold text-[#64748B]">Provider account type</legend>
             <div className="grid sm:grid-cols-2 gap-3">
@@ -161,7 +161,7 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
           {text('address', 'Business / workshop address', { autoComplete: 'street-address' })}
           <fieldset className="space-y-2" disabled={submitting}>
             <legend className="text-xs font-bold text-[#64748B]">Services you offer</legend>
-            <p className="text-xs text-[#64748B]">These are your claims. KAYAD verifies each service separately from evidence you provide; until then it is shown as “declared”.</p>
+            <p className="text-xs text-[#64748B]">These are your claims. KAYARD KE verifies each service separately from evidence you provide; until then it is shown as “declared”.</p>
             {taxonomyError && <p role="alert" className="text-xs text-rose-700">The service list could not be loaded. You can submit now and add services later.</p>}
             <div className="grid sm:grid-cols-2 gap-1">
               {(taxonomy?.categories || []).map((c) => (
@@ -176,7 +176,7 @@ export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, on
             <legend className="text-xs font-bold text-[#64748B]">How you work</legend>
             <label className="flex items-center gap-2 text-sm min-h-[44px]"><input type="checkbox" className="w-4 h-4 accent-[#176B87]" checked={hasWorkshop} onChange={(e) => setHasWorkshop(e.target.checked)} /> I have a workshop or premises customers can visit</label>
             <label className="flex items-center gap-2 text-sm min-h-[44px]"><input type="checkbox" className="w-4 h-4 accent-[#176B87]" checked={offersMobile} onChange={(e) => setOffersMobile(e.target.checked)} /> I travel to the vehicle</label>
-            {['individual_inspector', 'individual_mechanic'].includes(businessType) && !hasWorkshop && <p className="text-xs text-[#64748B]">No premises? That is fine. KAYAD has an evidence-based route for legitimate businesses without customer-facing premises; you will be asked for a registration or tax number and supporting documents.</p>}
+            {['individual_inspector', 'individual_mechanic'].includes(businessType) && !hasWorkshop && <p className="text-xs text-[#64748B]">No premises? That is fine. KAYARD KE has an evidence-based route for legitimate businesses without customer-facing premises; you will be asked for a registration or tax number and supporting documents.</p>}
           </fieldset>
           {error && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}
           <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2 border-t border-[#D7E7E4]">

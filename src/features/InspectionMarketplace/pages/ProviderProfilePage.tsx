@@ -85,7 +85,7 @@ export default function ProviderProfilePage({ provider, loading, error, onBack, 
 
                   <div role="note" className="mb-6 rounded-xl border px-4 py-3 text-sm" style={{ borderColor: COLORS.line, backgroundColor: COLORS.bg, color: COLORS.muted }}>
                     <strong style={{ color: COLORS.navy }}>{provider.tradingName || provider.companyName} is an independent business.</strong>{' '}
-                    It performs and is responsible for its own work and sets its own prices. KAYAD lists businesses and checks the evidence described below;
+                    It performs and is responsible for its own work and sets its own prices. KAYARD KE lists businesses and checks the evidence described below;
                     it does not perform these services, and a verified badge reduces risk but is not a guarantee.
                   </div>
 
@@ -94,7 +94,7 @@ export default function ProviderProfilePage({ provider, loading, error, onBack, 
                   {caps.length > 0 && (
                     <ul className="mt-3 space-y-1 text-xs" style={{ color: COLORS.muted }}>
                       {caps.map((c, i) => (
-                        <li key={i}><strong style={{ color: COLORS.navy }}>{categoryLabel(taxonomy, c.category)}</strong>: {c.status === 'verified' ? 'verified by KAYAD' : 'declared by the business, not verified'} · {capabilityScope(c)}{c.travelsToCustomer ? ' · says it travels to the vehicle' : ''}{c.individual ? ' · specific team member' : ''}</li>
+                        <li key={i}><strong style={{ color: COLORS.navy }}>{categoryLabel(taxonomy, c.category)}</strong>: {c.status === 'verified' ? 'verified by KAYARD KE' : 'declared by the business, not verified'} · {capabilityScope(c)}{c.travelsToCustomer ? ' · says it travels to the vehicle' : ''}{c.individual ? ' · specific team member' : ''}</li>
                       ))}
                     </ul>
                   )}
@@ -120,19 +120,19 @@ export default function ProviderProfilePage({ provider, loading, error, onBack, 
                     {packages.length ? packages.map((pkg) => <PackageRow key={pkg.id} pkg={pkg} />) : <p className="text-sm" style={{ color: COLORS.muted }}>No active packages are currently published.</p>}
                   </div>
                   {packages.length > 0 && <button type="button" onClick={onBook} className="mt-5 w-full rounded-xl py-3.5 font-bold text-white shadow-sm min-h-[44px]" style={{ backgroundColor: '#0F766E' }}>Continue to booking</button>}
-                  {packages.length === 0 && <p className="mt-4 text-sm" style={{ color: COLORS.muted }}>KAYAD does not take bookings or payments for this business’s other services yet. Contact the business directly to arrange work and agree the price.</p>}
+                  {packages.length === 0 && <p className="mt-4 text-sm" style={{ color: COLORS.muted }}>KAYARD KE does not take bookings or payments for this business’s other services yet. Contact the business directly to arrange work and agree the price.</p>}
                   <div className="mt-5 pt-4 border-t text-center" style={{ borderColor: COLORS.line }}>
                     <button type="button" onClick={() => void requestAffiliation()} disabled={aff.state === 'busy'} className="min-h-[44px] px-3 text-sm font-semibold underline" style={{ color: COLORS.navy }}>I work at this business</button>
                     <p className="text-xs" style={{ color: COLORS.muted }}>Asks the business to confirm you as part of its team.</p>
                     {aff.text && <p role={aff.state === 'error' ? 'alert' : 'status'} className="text-xs mt-1" style={{ color: aff.state === 'error' ? '#b91c1c' : COLORS.navy }}>{aff.text}</p>}
                   </div>
-                  <p className="text-xs mt-3 text-center" style={{ color: COLORS.muted }}>Availability is checked again when you choose a time. Roadside help is not dispatched or tracked by KAYAD.</p>
+                  <p className="text-xs mt-3 text-center" style={{ color: COLORS.muted }}>Availability is checked again when you choose a time. Roadside help is not dispatched or tracked by KAYARD KE.</p>
                 </aside>
               </div>
             </section>
 
             {(provider.credentials?.length || provider.recentReviews?.length) ? <section className="mt-6 grid md:grid-cols-2 gap-6">
-              {!!provider.credentials?.length && <Panel title="Credentials checked by KAYAD"><p className="text-xs mb-3" style={{ color: COLORS.muted }}>These are business credentials. They do not certify the qualifications of individual staff.</p><div className="space-y-3">{provider.credentials.map(c => <div key={c.id} className="flex gap-3"><Shield size={17} style={{ color: COLORS.teal }} /><div><p className="font-semibold" style={{ color: COLORS.navy }}>{c.name}</p><p className="text-sm" style={{ color: COLORS.muted }}>{[c.issuingBody, c.expiryDate && `Valid to ${c.expiryDate}`].filter(Boolean).join(' · ')}</p></div></div>)}</div></Panel>}
+              {!!provider.credentials?.length && <Panel title="Credentials checked by KAYARD KE"><p className="text-xs mb-3" style={{ color: COLORS.muted }}>These are business credentials. They do not certify the qualifications of individual staff.</p><div className="space-y-3">{provider.credentials.map(c => <div key={c.id} className="flex gap-3"><Shield size={17} style={{ color: COLORS.teal }} /><div><p className="font-semibold" style={{ color: COLORS.navy }}>{c.name}</p><p className="text-sm" style={{ color: COLORS.muted }}>{[c.issuingBody, c.expiryDate && `Valid to ${c.expiryDate}`].filter(Boolean).join(' · ')}</p></div></div>)}</div></Panel>}
               {!!provider.recentReviews?.length && <Panel title="Recent reviews"><div className="space-y-4">{provider.recentReviews.slice(0, 5).map(r => <div key={r.id}><div className="flex gap-1">{Array.from({length: 5}).map((_, i) => <Star key={i} size={14} fill={i < r.rating ? '#B8EEE7' : 'none'} color="#2F8F87" />)}</div>{r.comment && <p className="mt-1 text-sm leading-6" style={{ color: COLORS.muted }}>{r.comment}</p>}</div>)}</div></Panel>}
             </section> : null}
           </>
