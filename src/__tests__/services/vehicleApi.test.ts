@@ -226,10 +226,10 @@ describe('vehicleApi.createCar / updateCar - real request shape (Phase 14.4)', (
     await expect(createCar({ title: 'x', brand: 'y' })).rejects.toMatchObject({ status: 403, message: 'Dealer verification required' });
   });
 
-  it('updateCar sends a partial JSON PUT to /api/cars/:id and omits empty values', async () => {
+  it('updateCar sends a partial JSON PUT and preserves intentionally cleared text fields', async () => {
     requestMock.mockResolvedValueOnce({ success: true, data: { id: 'c1' } });
-    await updateCar('c1', { price: 90, title: '', city: undefined });
-    expect(requestMock).toHaveBeenCalledWith('/api/cars/c1', { method: 'PUT', body: { price: 90 } });
+    await updateCar('c1', { price: 90, description: '', title: '', city: undefined });
+    expect(requestMock).toHaveBeenCalledWith('/api/cars/c1', { method: 'PUT', body: { price: 90, description: '' } });
   });
 
   it('updateCar maps 404 to not_found and an unreachable server to network', async () => {

@@ -54,9 +54,10 @@ interface PersonalBuyingModuleProps {
   escrowOverviewLoading?: boolean;
   escrowOverviewError?: boolean;
   onRefreshDashboard?: () => void;
+  refreshKey?: number;
 }
 
-export default function PersonalBuyingModule({ user, onNavigate, onOpenAuth, initialInspectionTab = 'mine', section, savedVehicles, savedVehicleCount, savedVehiclesSessionUserId, savedVehiclesLoading, savedVehiclesError = '', savedVehiclesErrorUserId = null, onRefreshSavedVehicles, ownershipDashboard, ownershipDashboardLoading, ownershipDashboardError, escrowOverview, escrowOverviewLoading = false, escrowOverviewError = false, onRefreshDashboard }: PersonalBuyingModuleProps) {
+export default function PersonalBuyingModule({ user, onNavigate, onOpenAuth, initialInspectionTab = 'mine', section, savedVehicles, savedVehicleCount, savedVehiclesSessionUserId, savedVehiclesLoading, savedVehiclesError = '', savedVehiclesErrorUserId = null, onRefreshSavedVehicles, ownershipDashboard, ownershipDashboardLoading, ownershipDashboardError, escrowOverview, escrowOverviewLoading = false, escrowOverviewError = false, onRefreshDashboard, refreshKey = 0 }: PersonalBuyingModuleProps) {
   const userId = user?.id ? String(user.id) : null;
   const [ownedVehicles, setOwnedVehicles] = useState<OwnershipVehicle[]>([]);
   const [myBids, setMyBids] = useState<Array<Record<string, unknown>>>([]);
@@ -73,7 +74,7 @@ export default function PersonalBuyingModule({ user, onNavigate, onOpenAuth, ini
     setMyBids([]);
     setBidsSessionKey(null);
     setFailedResources((current) => current.filter((item) => item === 'owned vehicles'));
-    if (!userId) { setBidLoading(false); return () => { cancelled = true; }; }
+    if (!userId || (section && section !== 'auctions')) { setBidLoading(false); return () => { cancelled = true; }; }
     setBidLoading(true);
     fetchMyBids().then((result) => {
       if (cancelled) return;
@@ -87,7 +88,7 @@ export default function PersonalBuyingModule({ user, onNavigate, onOpenAuth, ini
       setFailedResources((current) => current.includes('auction bids') ? current : [...current, 'auction bids']);
     }).finally(() => { if (!cancelled) setBidLoading(false); });
     return () => { cancelled = true; };
-  }, [userId, reloadKey]);
+  }, [userId, reloadKey, refreshKey, section]);
 
   // Ownership data is sourced once by DashboardHub. This effect masks the previous
   // account's data during identity changes and preserves an unavailable state on errors.
@@ -116,7 +117,10 @@ export default function PersonalBuyingModule({ user, onNavigate, onOpenAuth, ini
   const visibleOwnedVehicles = userId && ownershipSessionKey === userId ? ownedVehicles : [];
   const visibleBids = userId && bidsSessionKey === userId ? myBids : [];
   const visibleError = userId && savedVehiclesErrorUserId === userId ? savedVehiclesError : null;
-  const isLoading = Boolean(userId) && (!sessionMatches || (savedVehiclesLoading && savedVehiclesSessionUserId !== userId) || ownershipDashboardLoading);
+  // Each dashboard section waits only for the data it actually needs. Auction bids and
+  // escrow deals must not be blocked by an unrelated saved-vehicle/ownership request.
+  const buyingCollectionsLoading = !sessionMatches || (savedVehiclesLoading && savedVehiclesSessionUserId !== userId) || ownershipDashboardLoading;
+  const isLoading = Boolean(userId) && (section === 'buying' ? buyingCollectionsLoading : section === 'auctions' || section === 'deals' ? false : buyingCollectionsLoading);
 
 
   if (!user) {
@@ -168,7 +172,7 @@ export default function PersonalBuyingModule({ user, onNavigate, onOpenAuth, ini
           </section>}
 
           {/* WATCHLIST - real, from the canonical favorites system */}
-          {(!section || section === 'buying') && <BuyerNegotiationsPanel />}
+          {(!section || section === 'buying') && <BuyerNegotiationsPanel onOpenConversation={(chatId: string) => onNavigate?.(`open-chat:${chatId}`)} />}
 
           {(!section || section === 'buying') && <section id="personal-saved-vehicles" className="scroll-mt-6 rounded-2xl border border-[#D7E7E4] bg-white p-4 sm:p-5">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -229,13 +233,13 @@ export default function PersonalBuyingModule({ user, onNavigate, onOpenAuth, ini
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EEF7F5] text-[#176B87]"><WalletCards className="h-5 w-5" aria-hidden="true" /></div>
               <div><h2 className="text-base font-bold text-[#0A3340]">Purchases & escrow</h2><p className="mt-1 text-xs leading-5 text-[#64748B]">Confirmed transaction states and actions for deals you participate in. A payment request is not proof of settlement.</p></div>
             </div>
-            <ParticipantEscrowDesk key={user.id} initialEscrowId={new URLSearchParams(window.location.search).get('escrowId')} onNavigate={onNavigate} initialData={escrowOverview} initialDataLoading={escrowOverviewLoading} initialDataError={escrowOverviewError} onRefreshOverview={onRefreshDashboard} />
+            <ParticipantEscrowDesk key={userId || 'account'} initialEscrowId={new URLSearchParams(window.location.search).get('escrowId')} onNavigate={onNavigate} initialData={escrowOverview} initialDataLoading={escrowOverviewLoading} initialDataError={escrowOverviewError} onRefreshOverview={onRefreshDashboard} />
           </section>}
 
           {/* PRIVATE FINANCING WORKSPACE — applications and their status stay inside the signed-in customer's account. */}
           {(!section || section === 'deals') && <section id="buyer-financing-workspace" className="scroll-mt-6 rounded-2xl border border-[#D7E7E4] bg-white p-4 sm:p-5">
             <div className="mb-4 flex items-center gap-2"><WalletCards className="h-4 w-4 text-[#176B87]" aria-hidden="true" /><h2 className="text-base font-bold text-[#176B87]">Financing</h2></div>
-            <FinanceMarketplace key={`finance-${user.id}`} mode="account" user={user} />
+            <FinanceMarketplace key={`finance-${userId || 'account'}`} mode="account" user={user} refreshKey={refreshKey} />
           </section>}
 
           {/* PRIVATE INSPECTION WORKSPACE — requests, provider bookings and reports stay in the authenticated account area. */}

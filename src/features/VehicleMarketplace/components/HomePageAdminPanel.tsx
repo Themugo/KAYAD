@@ -32,7 +32,7 @@ interface HomePageAdminPanelProps {
 }
 
 const SECTION_LABELS: Record<keyof HomePageConfig['sectionVisibility'], string> = {
-  searchTrustCard: 'Search & Trust Info Card',
+  searchTrustCard: 'Hero & Search Discovery',
   featuredPicks: 'Featured Picks Slider',
   savedSearchesAndInventoryHeader: 'Saved Searches, Inventory Count & Sort Controls',
   sponsorCardsInGrid: 'Sponsor/Partner Cards in Grid',
@@ -456,6 +456,20 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                 </select>
               </div>
             </div>
+
+            <button
+              type="button"
+              aria-pressed={config.inventoryLayout.showSidebar}
+              aria-label="Show desktop inventory filter sidebar"
+              onClick={() => onUpdate((prev) => ({ ...prev, inventoryLayout: { ...prev.inventoryLayout, showSidebar: !prev.inventoryLayout.showSidebar } }))}
+              className={`flex w-full items-center justify-between gap-3 rounded-xl border px-3 py-2.5 text-left transition-colors ${config.inventoryLayout.showSidebar ? 'border-[#176B87] bg-[#176B87]/10 text-[#12576D]' : 'border-[#D7E7E4] bg-white text-[#64748B]'}`}
+            >
+              <span className="text-xs font-bold">Desktop filter sidebar</span>
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold">
+                {config.inventoryLayout.showSidebar ? <Eye className="h-3.5 w-3.5" aria-hidden="true" /> : <EyeOff className="h-3.5 w-3.5" aria-hidden="true" />}
+                {config.inventoryLayout.showSidebar ? 'Visible' : 'Hidden'}
+              </span>
+            </button>
 
             <div className="rounded-xl border border-[#D7E7E4] p-3 space-y-2.5">
               <div>

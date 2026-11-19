@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Car } from 'lucide-react';
+import { getQualityScoreColor } from '../../utils/listingQualityScore';
 
 /**
  * Shared presentation pieces for a seller's own listings, used by the dealer
@@ -7,7 +8,7 @@ import { Car } from 'lucide-react';
  * Presentation only: they render the values they are given.
  */
 
-type Tone = 'live' | 'review' | 'draft' | 'reserved' | 'sold' | 'problem';
+type Tone = 'live' | 'review' | 'draft' | 'reserved' | 'sold' | 'hidden' | 'problem';
 
 const TONES: Record<Tone, { chip: string; dot: string }> = {
   live: { chip: 'bg-emerald-50 text-emerald-800 ring-emerald-200', dot: 'bg-emerald-500' },
@@ -15,17 +16,20 @@ const TONES: Record<Tone, { chip: string; dot: string }> = {
   draft: { chip: 'bg-slate-50 text-slate-700 ring-slate-200', dot: 'bg-slate-400' },
   reserved: { chip: 'bg-[#E6F6F3] text-[#12576D] ring-[#BDE5DE]', dot: 'bg-[#13B8A6]' },
   sold: { chip: 'bg-[#EEF3F7] text-[#334155] ring-[#CBD5E1]', dot: 'bg-[#64748B]' },
+  hidden: { chip: 'bg-[#F6FAF9] text-[#0A3340] ring-[#D7E7E4]', dot: 'bg-[#176B87]' },
   problem: { chip: 'bg-rose-50 text-rose-800 ring-rose-200', dot: 'bg-rose-500' },
 };
 
 export function listingTone(status?: string | null): Tone {
-  switch (String(status || 'draft').toLowerCase()) {
-    case 'available': case 'active': case 'published': return 'live';
-    case 'pending': case 'pending_review': case 'under_review': return 'review';
+  switch (String(status || '').trim().toLowerCase()) {
+    case 'available': case 'active': case 'published': case 'approved': return 'live';
+    case 'pending': case 'pending_review': case 'under_review': case 'submitted': return 'review';
     case 'reserved': return 'reserved';
     case 'sold': return 'sold';
+    case 'hidden': case 'paused': return 'hidden';
+    case 'draft': return 'draft';
     case 'rejected': case 'suspended': case 'flagged': return 'problem';
-    default: return 'draft';
+    default: return 'problem';
   }
 }
 
@@ -93,14 +97,14 @@ export const ListingFacts: React.FC<{ items: Array<React.ReactNode | null | unde
   );
 };
 
-/** Listing-quality score as a ring; colour follows the score band. */
+/** Listing-completeness score as a ring; colour follows the completeness band. */
 export const ListingScoreRing: React.FC<{ score: number }> = ({ score }) => {
   const value = Math.max(0, Math.min(100, Math.round(score)));
   const r = 20;
   const c = 2 * Math.PI * r;
-  const color = value >= 80 ? '#059669' : value >= 50 ? '#176B87' : '#DC2626';
+  const color = getQualityScoreColor(value);
   return (
-    <div className="relative h-14 w-14 shrink-0" role="img" aria-label={`Listing quality ${value} percent`}>
+    <div className="relative h-14 w-14 shrink-0" role="img" aria-label={`Listing completeness ${value} percent`}>
       <svg viewBox="0 0 48 48" className="h-full w-full -rotate-90" aria-hidden="true">
         <circle cx="24" cy="24" r={r} fill="none" stroke="#E2ECEA" strokeWidth="5" />
         <circle cx="24" cy="24" r={r} fill="none" stroke={color} strokeWidth="5" strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - value / 100)} />

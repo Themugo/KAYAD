@@ -140,7 +140,9 @@ export default function PersonalOverview({ density, sourceError, listings, listi
           <section className={`${card} p-4 sm:p-5`} aria-labelledby="overview-recent-title">
             <div className="flex items-center justify-between gap-3"><div><p className={label}>Latest</p><h2 id="overview-recent-title" className="text-lg font-black text-[#082B40]">Recent activity</h2></div><button type="button" onClick={() => onGo('activity')} className="text-xs font-bold text-[#0B6B63] hover:underline">View all →</button></div>
             <div className="mt-3">
-              {recent.state === 'loading' ? <p role="status" className="text-sm text-[#5B7480]">Loading recent activity…</p>
+              {recent.state === 'unavailable' && recent.events.length > 0 && <p role="status" className="mb-3 rounded-lg bg-[#F6FAF9] p-3 text-xs text-[#526875]">Some activity sources are unavailable. The records below are confirmed, but this list may be incomplete.</p>}
+              {recent.state === 'loading' && recent.events.length > 0 && <p role="status" className="mb-3 text-xs text-[#64748B]">Updating recent activity…</p>}
+              {recent.state === 'loading' && !recent.events.length ? <p role="status" className="text-sm text-[#5B7480]">Loading recent activity…</p>
                 : recent.state === 'unavailable' && !recent.events.length ? <p role="alert" className="text-sm text-[#0A3545]">Recent activity is temporarily unavailable.</p>
                 : recent.events.length ? <ul className="space-y-3">{recent.events.map((e) => <li key={e.id}><button type="button" onClick={() => onGo(e.go)} className="flex w-full items-start gap-3 text-left"><Clock3 size={15} className="mt-0.5 shrink-0 text-[#11B8A6]" aria-hidden="true" /><span className="min-w-0"><span className="block truncate text-sm font-bold text-[#082B40]">{e.title}</span><span className="block truncate text-xs text-[#5B7480]">{e.detail} · {ago(e.at)}</span></span></button></li>)}</ul>
                 : <p className="text-sm text-[#5B7480]">No activity yet. Listings, enquiries and deals will appear here.</p>}

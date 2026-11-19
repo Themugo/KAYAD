@@ -14,11 +14,11 @@ beforeEach(() => { getMySellerCapability.mockReset(); vi.stubGlobal('fetch', vi.
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
 describe('Seller Studio entry for personal accounts', () => {
-  it('a buyer sees the application (not "contact support") and no workspace', async () => {
-    getMySellerCapability.mockResolvedValue(cap('none'));
-    mount('user');
-    expect(await screen.findByRole('button', { name: /apply to sell/i })).toBeTruthy();
-    expect(screen.queryByText(/Contact Support about seller access/)).toBeNull();
+  it('a legacy buyer role is not offered a separate seller application or workspace', async () => {
+    mount('buyer');
+    expect(await screen.findByText(/seller tools are not enabled for this role/i)).toBeTruthy();
+    expect(getMySellerCapability).not.toHaveBeenCalled();
+    expect(screen.queryByRole('button', { name: /apply to sell/i })).toBeNull();
     expect(screen.queryByText('My Listings')).toBeNull();
   });
   it.each(['pending', 'rejected', 'suspended', 'revoked'])('a %s applicant is not admitted to the workspace', async (st) => {

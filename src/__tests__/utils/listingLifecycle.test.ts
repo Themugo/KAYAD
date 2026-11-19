@@ -31,6 +31,11 @@ describe('listing lifecycle mapping (read-only view of cars.status)', () => {
   it('accepts legacy aliases and surfaces unknown values instead of hiding them', () => {
     expect(getListingLifecycle('under_review').state).toBe('under_review');
     expect(getListingLifecycle('active').state).toBe('active');
+    expect(getListingLifecycle('approved').state).toBe('active');
+    expect(getListingLifecycle('published').state).toBe('active');
+    expect(getListingLifecycle('submitted').state).toBe('under_review');
+    expect(getListingLifecycle('pending_review').state).toBe('under_review');
+    expect(getListingLifecycle('paused').state).toBe('hidden');
     expect(getListingLifecycle('mystery').state).toBe('unknown');
     expect(getListingLifecycle(null).label).toBe('Status unavailable');
   });

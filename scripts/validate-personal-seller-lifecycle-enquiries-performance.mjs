@@ -26,7 +26,7 @@ const checks = [
   ['clicks and enquiries are labelled lifetime metrics', /clicksLifetime/.test(insights) && /enquiriesLifetime/.test(insights)],
   ['conversion is explicitly not inferred', /no verified attribution/.test(insights)],
   ['personal dashboard exposes seller enquiry and performance pages', /personalSection==='seller-enquiries'/.test(dashboard) && /personalSection==='performance'/.test(dashboard)],
-  ['seller UI exposes hide, republish and mark sold', /Hide \/ pause/.test(selling) && /Republish/.test(selling) && /Mark as sold/.test(selling)],
+  ['seller UI exposes hide, republish and mark sold', /canHide &&/.test(selling) && /canRepublish &&/.test(selling) && /canMarkSold &&/.test(selling) && /transitionMyListing/.test(selling) && /Republish/.test(selling) && /Mark as sold/.test(selling)],
   ['regression test covers critical lifecycle locks', /AUCTION_OR_BID_LOCK/.test(tests) && /TRANSACTION_LOCK/.test(tests) && /LISTING_POLICY_HIDDEN/.test(tests)],
 ];
 for (const [name, ok] of checks) { console.log(`${ok ? 'PASS' : 'FAIL'} ${name}`); assert.ok(ok, name); }

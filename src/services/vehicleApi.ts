@@ -66,6 +66,7 @@ export interface BackendCar {
   images?: Array<{ url: string; thumb?: string; public_id?: string }> | null;
   location_city?: string | null;
   city?: string | null;
+  address?: string | null;
   vin?: string | null;
   chassis_number?: string | null;
   registration_number?: string | null;
@@ -118,6 +119,21 @@ export interface BackendCar {
   // had no authoritative backend signal to key off at all.
   escrowEnabled?: boolean | null;
   escrow_enabled?: boolean | null;
+  /** Server-derived read-only owner action eligibility; the lifecycle RPC remains authoritative. */
+  ownerActionEligibility?: {
+    permissionsAvailable: boolean;
+    isSellerHidden: boolean;
+    isPolicyHidden: boolean;
+    canEdit: boolean;
+    canManagePhotos: boolean;
+    canHide: boolean;
+    canRepublish: boolean;
+    canMarkSold: boolean;
+    canRemove: boolean;
+    maxListingImages?: number;
+    maxImagesPerRequest?: number;
+    reason?: string;
+  };
 }
 
 export interface PaginatedCarsResponse {
@@ -516,29 +532,14 @@ export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
   };
 }
 
-// Added (Final Integration Phase 2 - seller listing -> publish ->
-// marketplace). The real backend already has a complete, working
-// POST /api/cars endpoint (backend/controllers/carController.js's
-// createCar, mounted with real auth/ownership/validation middleware
-// - protect, dealerOnly, requireDealerVerification, image upload,
-// createCarSchema validation) - it was simply never called from any
-// real frontend UI. This is the one, real, canonical creation
-// endpoint - not a new API being invented here.
-//
-// Traced directly: the real seller listing wizard
-// (PersonalSellingModule.tsx) has no
-// per-step form inputs implemented at all for any of its 12 steps -
-// its own `ListingDraft` state is declared but never populated by any
-// real user input anywhere in that file, confirmed by direct
-// inspection (no <input>, no onChange handler exists for any listing
-// field in that component). Per this phase's own explicit
-// instruction ("do not add seller functionality, do not redesign the
-// seller wizard"), this function does not invent form fields that
-// were never collected - it sends exactly what the wizard's own
-// draft state actually contains, using FormData so it matches the
-// real backend's multipart/form-data + upload.array("images", 10)
-// contract exactly (never manually set Content-Type here - the
-// browser must set the multipart boundary itself).
+/**
+ * Canonical multipart listing-creation contract used by the unified personal
+ * listing wizard. The browser sends real File objects and lets FormData set
+ * its own multipart boundary; server-side validation and ownership checks are
+ * authoritative. The current API does not persist the wizard's ownership
+ * declaration or logbook-availability checkbox, so neither is represented as
+ * verified evidence by this client contract.
+ */
 export interface CreateCarPayload {
   title?: string;
   brand?: string;
@@ -555,6 +556,8 @@ export interface CreateCarPayload {
   registrationNumber?: string;
   description?: string;
   city?: string;
+  address?: string;
+  features?: string[];
   /** Real image files - the real backend requires at least one
    * (confirmed directly: POST /api/cars rejects with "At least one
    * image is required." when omitted). */
@@ -609,7 +612,7 @@ export async function createCar(payload: CreateCarPayload): Promise<CreateCarRes
   } finally { clearCarsCache(); }
 }
 
-export type UpdateCarPayload = Omit<CreateCarPayload, 'images'>;
+export type UpdateCarPayload = Omit<CreateCarPayload, 'images' | 'vin' | 'registrationNumber'>;
 
 /** PUT /api/cars/:id - the real, canonical edit endpoint. The backend
  * enforces owner-or-staff access, blocks staff-only fields and locks
@@ -617,8 +620,11 @@ export type UpdateCarPayload = Omit<CreateCarPayload, 'images'>;
  * the partial JSON body and surfaces whatever the server decides. */
 export async function updateCar(id: string, payload: UpdateCarPayload): Promise<CreateCarResponse> {
   const body: Record<string, unknown> = {};
+  const clearableTextFields = new Set(['description', 'fuel', 'transmission', 'bodyType', 'color', 'condition', 'address']);
   Object.entries(payload).forEach(([key, value]) => {
-    if (value !== undefined && value !== null && value !== '') body[key] = value;
+    if (value === undefined || value === null) return;
+    if (value === '' && !clearableTextFields.has(key)) return;
+    body[key] = value;
   });
   try {
     clearCarsCache();
@@ -632,7 +638,7 @@ export async function updateCar(id: string, payload: UpdateCarPayload): Promise<
 
 // ---- Phase 14.6: existing-listing photo management and listing removal --------------------------------------------------
 // All three use routes that already exist and enforce owner-or-staff on the server:
-//   POST   /api/cars/:id/images          (multipart, <=10 files per request, 20 per listing, JPG/PNG/WEBP, 5 MB each)
+//   POST   /api/cars/:id/images          (multipart, <=10 files per request, administrator-configured per-listing cap up to 20, JPG/PNG/WEBP, 5 MB each)
 //   DELETE /api/cars/:id/images/:index   (index into the listing's current image array)
 //   DELETE /api/cars/:id                 (soft delete; owner-or-staff)
 export const LISTING_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];

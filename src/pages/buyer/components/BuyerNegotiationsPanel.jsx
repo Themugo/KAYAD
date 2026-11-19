@@ -3,7 +3,7 @@ import leadApi from '../../../services/leadApi';
 import MarketplaceOfferPanel from '../../../components/offers/MarketplaceOfferPanel';
 import { RefreshCw, ChevronDown, ChevronUp, MessageSquareText } from 'lucide-react';
 
-export default function BuyerNegotiationsPanel() {
+export default function BuyerNegotiationsPanel({ onOpenConversation = null } = {}) {
   const [leads, setLeads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -51,7 +51,10 @@ export default function BuyerNegotiationsPanel() {
             <article key={id} className="rounded-xl border border-[#D7E7E4] p-3 sm:p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="min-w-0"><p className="text-sm font-bold text-[#0A3340]">Vehicle enquiry</p><p className="mt-1 text-xs text-[#64748B]">Reference {id.slice(0, 8)} · {String(lead.stage || 'new').replace(/[_-]+/g, ' ')}</p></div>
-                <button type="button" aria-expanded={isExpanded} onClick={() => setExpanded((current) => current === id ? '' : id)} className="inline-flex min-h-9 items-center gap-2 rounded-lg bg-[#0A3340] px-3 text-xs font-bold text-white">{isExpanded ? 'Hide offers' : 'View offers'}{isExpanded ? <ChevronUp size={14}/> : <ChevronDown size={14}/>}</button>
+                <div className="flex flex-wrap items-center gap-2">
+                  {lead.chatId && onOpenConversation && <button type="button" onClick={() => onOpenConversation(lead.chatId)} className="min-h-9 rounded-lg border border-[#BDE5DE] px-3 text-xs font-bold text-[#12576D]">Open conversation</button>}
+                  <button type="button" aria-expanded={isExpanded} onClick={() => setExpanded((current) => current === id ? '' : id)} className="inline-flex min-h-9 items-center gap-2 rounded-lg bg-[#0A3340] px-3 text-xs font-bold text-white">{isExpanded ? 'Hide offers' : 'View offers'}{isExpanded ? <ChevronUp size={14}/> : <ChevronDown size={14}/>}</button>
+                </div>
               </div>
               {isExpanded ? <MarketplaceOfferPanel leadId={id} compact /> : null}
             </article>

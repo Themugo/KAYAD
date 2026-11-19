@@ -1,6 +1,7 @@
 // ============================================================
-// KAYAD PRIVATE SELLER PLATFORM - GUIDED SELLING EXPERIENCE
-// Sections 1-17: Step-by-step seller journey
+// @deprecated Legacy, unmounted seller workspace retained for compatibility tests only.
+// Production personal selling is mounted exclusively through PersonalSellingModule inside DashboardHub.
+// KAYAD PRIVATE SELLER PLATFORM - legacy guided selling experience
 // ============================================================
 
 import BrandMark from '../../../components/BrandMark';
@@ -11,7 +12,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ListingStatusBadge, ListingThumb, ListingFacts, ListingScoreRing } from '../../../components/listing/ListingPresentation';
 import { createCar, getMyListings, VehicleApiError, BackendCar } from '../../../services/vehicleApi';
 import { getMyEscrows, BackendEscrow } from '../../../services/escrowApi';
-import { calculateListingQualityScore } from '../../../utils/listingQualityScore';
+import { calculateListingCompleteness, getListingCompletenessFactors } from '../../../utils/listingQualityScore';
 import PhoneVerification from '../../../components/PhoneVerification';
 import { AuctionVerificationSection } from '../components/AuctionVerificationSection';
 import type { UserProfile } from '../../../types';
@@ -230,10 +231,15 @@ interface PrivateSellerPlatformProps {
   onLogout?: () => void;
 }
 
-export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, onLogout }: PrivateSellerPlatformProps) {
+export default function PrivateSellerPlatform(props: PrivateSellerPlatformProps) {
+  const accountKey = String(props.user?.id || 'signed-out');
+  return <LegacyPrivateSellerPlatform key={accountKey} {...props} />;
+}
+
+function LegacyPrivateSellerPlatform({ user, onOpenAuth, onNavigate, onLogout }: PrivateSellerPlatformProps) {
   const [activeSection, setActiveSection] = useState<PlatformSection>('home');
   // Phase 13E: seller eligibility comes from the real capability state of the SAME personal account.
-  const personalRole = ['user', 'buyer', 'individual_seller'].includes(String(user?.role || '').toLowerCase());
+  const personalRole = ['user', 'individual_seller'].includes(String(user?.role || '').toLowerCase());
   const { capability, loading: capLoading, error: capError, reload: reloadCap } = usePrivateSellerCapability(Boolean(user) && personalRole);
   const [sellerAccountType, setSellerAccountType] = useState<'seller' | 'dealer'>('seller');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -250,24 +256,28 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
       window.removeEventListener('keydown', closeOnEscape);
     };
   }, [mobileMenuOpen]);
+  const legacyPersonalAccountId = String(user?.id || '');
+  const legacyListingDraftStorageKey = legacyPersonalAccountId ? `kayad.privateSeller.listingDraft.v1:${legacyPersonalAccountId}` : null;
   const [listingDraft, setListingDraft] = useState<ListingDraft | null>(() => {
+    if (!legacyListingDraftStorageKey) return null;
     try {
-      const saved = window.localStorage.getItem('kayad.privateSeller.listingDraft.v1');
+      const saved = window.localStorage.getItem(legacyListingDraftStorageKey);
       if (!saved) return null;
       const parsed = JSON.parse(saved) as ListingDraft;
-      return { ...parsed, photos: [] }; // Browsers cannot restore File objects; photos are reselected after reload.
+      return { ...parsed, photos: [], ownership: { ...parsed.ownership, ownerId: '' } }; // Never restore File objects or ownership ID values from browser storage.
     } catch { return null; }
   });
   useEffect(() => {
+    if (!legacyListingDraftStorageKey) return;
     try {
       if (listingDraft) {
-        const { photos: _photos, ...serializable } = listingDraft;
-        window.localStorage.setItem('kayad.privateSeller.listingDraft.v1', JSON.stringify(serializable));
+        const serializable = { ...listingDraft, photos: [], ownership: { ...listingDraft.ownership, ownerId: '' } };
+        window.localStorage.setItem(legacyListingDraftStorageKey, JSON.stringify(serializable));
       } else {
-        window.localStorage.removeItem('kayad.privateSeller.listingDraft.v1');
+        window.localStorage.removeItem(legacyListingDraftStorageKey);
       }
     } catch { /* Storage may be disabled; the in-session draft remains usable. */ }
-  }, [listingDraft]);
+  }, [listingDraft, legacyListingDraftStorageKey]);
 
   // The dashboard uses only the signed-in seller's backend listings and
   // escrow records. Unsupported seller capabilities remain unavailable
@@ -456,7 +466,7 @@ export default function PrivateSellerPlatform({ user, onOpenAuth, onNavigate, on
               transition={{ duration: 0.2 }}
             >
               {activeSection === 'home' && <SellerHomeSection listings={myListings} escrows={myEscrows} loading={dataLoading} listingsError={listingsError} escrowsError={escrowsError} lastRefreshedAt={lastRefreshedAt} onRefresh={loadSellerData} userName={user?.name} onNavigate={handleSectionChange} policyOpen={capability?.source === 'policy_default'} />}
-              {activeSection === 'listing-wizard' && <ListingWizardSection draft={listingDraft} setDraft={setListingDraft} onNavigate={handleSectionChange} onPublished={loadSellerData} />}
+              {activeSection === 'listing-wizard' && <ListingWizardSection draft={listingDraft} setDraft={setListingDraft} draftStorageKey={legacyListingDraftStorageKey} onNavigate={handleSectionChange} onPublished={loadSellerData} />}
               {activeSection === 'auction-verification' && <AuctionVerificationSection listings={myListings} />}
               {activeSection === 'trust-center' && <TrustCenterSection />}
               {activeSection === 'listing-quality' && <ListingQualitySection listings={myListings} loading={dataLoading} />}
@@ -786,9 +796,10 @@ function ListingCard({ listing, delay }: { listing: BackendCar; delay: number })
 // SECTION 2: LISTING WIZARD (Simplified)
 // ============================================================
 
-function ListingWizardSection({ draft, setDraft, onNavigate, onPublished }: {
+function ListingWizardSection({ draft, setDraft, draftStorageKey, onNavigate, onPublished }: {
   draft: ListingDraft | null;
   setDraft: (d: ListingDraft | null) => void;
+  draftStorageKey: string | null;
   onNavigate: (s: PlatformSection) => void;
   onPublished: () => void;
 }) {
@@ -848,7 +859,7 @@ function ListingWizardSection({ draft, setDraft, onNavigate, onPublished }: {
         color: d.color || undefined, condition: d.condition, description, city: d.city.trim(), price: Number(form.pricing.askingPrice), images: form.photos,
       });
       if (!result.success || !result.data?.id) throw new Error(result.message || 'The server did not confirm listing creation.');
-      setPublishedCarId(result.data.id); setDraft(null); window.localStorage.removeItem('kayad.privateSeller.listingDraft.v1'); onPublished();
+      setPublishedCarId(result.data.id); setDraft(null); if (draftStorageKey) window.localStorage.removeItem(draftStorageKey); onPublished();
     } catch (err) {
       setPublishError(err instanceof VehicleApiError ? err.message : err instanceof Error ? err.message : 'Unable to submit your listing. Please try again.');
     } finally { setIsPublishing(false); }
@@ -861,7 +872,7 @@ function ListingWizardSection({ draft, setDraft, onNavigate, onPublished }: {
     <div className="mx-auto w-full min-w-0 max-w-5xl space-y-4 overflow-x-hidden pb-8" data-testid="private-seller-listing-wizard">
       <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
         <div className="min-w-0"><p className="text-xs font-bold uppercase tracking-wider text-teal-700">Private seller workspace</p><h1 className="break-words text-2xl font-bold text-[#0A3340]">Create vehicle listing</h1></div>
-        <button type="button" onClick={() => { const saved = { ...form, step: currentStep }; setDraft(saved); try { const { photos: _photos, ...serializable } = saved; localStorage.setItem('kayad.privateSeller.listingDraft.v1', JSON.stringify(serializable)); } catch {} setValidationError('Draft saved on this device. Selected photos must be added again if you leave or reload this page.'); }} className="rounded-xl bg-[#DDF4F0] px-4 py-2.5 text-sm font-bold text-[#0A3340]">Save draft</button>
+        <button type="button" onClick={() => { const saved = { ...form, step: currentStep }; setDraft(saved); try { const serializable = { ...saved, photos: [], ownership: { ...saved.ownership, ownerId: '' } }; if (draftStorageKey) localStorage.setItem(draftStorageKey, JSON.stringify(serializable)); } catch {} setValidationError('Draft saved on this device. Selected photos must be added again if you leave or reload this page.'); }} className="rounded-xl bg-[#DDF4F0] px-4 py-2.5 text-sm font-bold text-[#0A3340]">Save draft</button>
       </div>
       <section className="min-w-0 rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm sm:p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><span className="font-semibold text-[#0A3340]">Step {currentStep} of {totalSteps}: {sectionTitle}</span><span className="text-sm text-slate-500">{Math.round(currentStep / totalSteps * 100)}%</span></div>
@@ -920,26 +931,7 @@ function ListingQualitySection({ listings, loading }: { listings: BackendCar[]; 
       {listings.length === 0 ? (
         <p className="text-sm text-[#94A3B8]">You haven't listed any vehicles yet.</p>
       ) : listings.map((l) => {
-        const { score } = calculateListingQualityScore({
-          hasTitle: !!l.title,
-          hasBrand: !!l.brand,
-          hasModel: !!l.model,
-          hasYear: !!l.year,
-          hasPrice: !!l.price,
-          hasMileage: l.mileage != null,
-          hasFuel: !!l.fuel,
-          hasTransmission: !!l.transmission,
-          hasBodyType: !!l.body_type,
-          hasDescription: !!l.description,
-          hasLocation: !!l.location_city,
-          hasImages: (l.images?.length || 0) > 0,
-          imageCount: l.images?.length || 0,
-          hasFeatures: (l.features?.length || 0) > 0,
-          featureCount: l.features?.length || 0,
-          hasVin: !!l.vin,
-          hasLogbook: !!l.registration_number,
-          descriptionLength: l.description?.length || 0,
-        });
+        const { score } = calculateListingCompleteness(getListingCompletenessFactors(l));
         return (
           <div key={l.id} className="flex items-center gap-3 rounded-2xl border border-[#D7E7E4] bg-white p-3 shadow-[0_2px_10px_rgba(11,29,58,0.04)] sm:gap-4 sm:p-4">
             <ListingThumb src={l.images?.[0]?.thumb || l.images?.[0]?.url} fallback={l.images?.[0]?.url} alt={l.title} count={l.images?.length || 0} className="h-16 w-20 sm:h-20 sm:w-28" />
@@ -952,7 +944,7 @@ function ListingQualitySection({ listings, loading }: { listings: BackendCar[]; 
             </div>
             <div className="flex flex-col items-center gap-0.5">
               <ListingScoreRing score={score} />
-              <span className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">Quality</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wide text-[#64748B]">Listing completeness</span>
             </div>
           </div>
         );

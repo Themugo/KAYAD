@@ -33,6 +33,24 @@ describe("personal seller insights", () => {
     expect(result).toMatchObject({ count: 1, enquiries: [{ id: "lead-1", listing: { id: "car-1", title: "Toyota" } }] });
   });
 
+  test("chat-sourced seller enquiries expose only their canonical chat reference", async () => {
+    let call = 0;
+    from.mockImplementation((table) => {
+      call += 1;
+      const result = call === 1
+        ? { data: [{ id: "car-1", title: "Toyota", price: 100, images: [], status: "available" }], error: null }
+        : { data: [
+          { id: "lead-chat", vehicle: "car-1", source: "chat", source_reference: "chat-123", stage: "new", created_at: "2026-01-01" },
+          { id: "lead-form", vehicle: "car-1", source: "listing", source_reference: "form-456", stage: "new", created_at: "2026-01-02" },
+        ], error: null };
+      const q = { select: jest.fn(() => q), eq: jest.fn(() => q), is: jest.fn(() => q), in: jest.fn(() => q), order: jest.fn(() => q), limit: jest.fn(() => Promise.resolve(result)), then: (resolve, reject) => Promise.resolve(result).then(resolve, reject) };
+      return q;
+    });
+    const result = await getPersonalSellerEnquiries("owner-1");
+    expect(result.enquiries.find((item) => item.id === "lead-chat").chatId).toBe("chat-123");
+    expect(result.enquiries.find((item) => item.id === "lead-form").chatId).toBeNull();
+  });
+
   test("performance uses listing_view events and does not claim conversion", async () => {
     let call = 0;
     from.mockImplementation((table) => {

@@ -6,10 +6,10 @@
  * Stored values (cars_status_check): available | sold | pending | reserved | hidden | draft
  * (legacy aliases still seen in older payloads: active, approved, under_review, submitted).
  *
- * Known representational limit (owner decision D3, see backend/routes/adminRoutes.js ~807): the database has no
- * `rejected`, `changes_requested`, `withdrawn` or `archived` value. A moderation "reject" is stored as `hidden`.
- * `hidden` therefore means "not published" and is deliberately NOT presented as "Rejected": the stored data cannot
- * tell a moderation decision apart from an owner withdrawal, and inventing that distinction would misinform users.
+ * `hidden` is deliberately represented here as the neutral "Not published" state because the cars.status value alone
+ * does not identify why a listing was hidden. The personal My Vehicles workspace overlays the server-derived owner
+ * action eligibility from the existing lifecycle and policy-visibility event records; it never guesses provenance from
+ * the status string. Unknown or unsupported states remain non-destructive by default.
  */
 export type ListingLifecycleState = 'draft' | 'under_review' | 'active' | 'reserved' | 'hidden' | 'sold' | 'unknown';
 
@@ -27,20 +27,23 @@ const INFO: Record<Exclude<ListingLifecycleState, 'unknown'>, Omit<ListingLifecy
   under_review: { label: 'Under review', description: 'Submitted and waiting for a moderation decision. It stays here until a decision is recorded.', marketplaceVisible: false, ownerActions: ['view'] },
   active: { label: 'Active', description: 'Approved and visible on the marketplace.', marketplaceVisible: true, ownerActions: ['view', 'edit'] },
   reserved: { label: 'Reserved', description: 'A buyer has an active transaction on this vehicle.', marketplaceVisible: true, ownerActions: ['view'] },
-  hidden: { label: 'Not published', description: 'Hidden from the marketplace (a moderation decision or removal). Contact support to find out what is needed to publish it.', marketplaceVisible: false, ownerActions: ['view', 'contact_support'] },
+  hidden: { label: 'Not published', description: 'Hidden from the marketplace. Whether it can be restored depends on its recorded hide source and current protections.', marketplaceVisible: false, ownerActions: ['view', 'contact_support'] },
   sold: { label: 'Sold', description: 'Sale completed.', marketplaceVisible: false, ownerActions: ['view'] },
 };
 
 const ALIASES: Record<string, Exclude<ListingLifecycleState, 'unknown'>> = {
   draft: 'draft',
   pending: 'under_review',
+  pending_review: 'under_review',
   under_review: 'under_review',
   submitted: 'under_review',
   available: 'active',
   active: 'active',
   approved: 'active',
+  published: 'active',
   reserved: 'reserved',
   hidden: 'hidden',
+  paused: 'hidden',
   sold: 'sold',
 };
 

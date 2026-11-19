@@ -76,7 +76,7 @@ export const leadApi = {
     return apiRequest<{ enquiries: Array<any>; count: number; listingCount: number }>("/api/leads/mine/seller-enquiries", { method: "GET" });
   },
   async myNegotiations() {
-    return apiRequest<{ leads: Array<{ id: string; vehicle?: string | null; dealer?: string | null; stage?: string; created_at?: string }> }>("/api/leads/mine/offers", { method: "GET" });
+    return apiRequest<{ leads: Array<{ id: string; vehicle?: string | null; dealer?: string | null; stage?: string; created_at?: string; chatId?: string | null }> }>("/api/leads/mine/offers", { method: "GET" });
   },
   async offers(leadId: string) {
     return apiRequest<{ offers: MarketplaceOffer[]; events: any[] }>(`/api/leads/${leadId}/offers`, { method: "GET" });

@@ -8,7 +8,9 @@ describe('listing presentation', () => {
     expect(listingTone('pending')).toBe('review');
     expect(listingTone('sold')).toBe('sold');
     expect(listingTone('rejected')).toBe('problem');
-    expect(listingTone(undefined)).toBe('draft');
+    expect(listingTone(undefined)).toBe('problem');
+    expect(listingTone('unknown-new-state')).toBe('problem');
+    expect(listingTone('hidden')).toBe('hidden');
   });
   it('shows the wording it is given', () => {
     render(<ListingStatusBadge status="available" label="Available" />);
@@ -27,6 +29,6 @@ describe('listing presentation', () => {
   it('facts skip empty values; score ring is labelled', () => {
     render(<><ListingFacts items={['2018', null, false, 'Nairobi']} /><ListingScoreRing score={86} /></>);
     expect(screen.getAllByRole('listitem')).toHaveLength(2);
-    expect(screen.getByRole('img', { name: /listing quality 86 percent/i })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: /listing completeness 86 percent/i })).toBeInTheDocument();
   });
 });

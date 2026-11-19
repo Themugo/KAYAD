@@ -82,6 +82,16 @@ describe('InventoryFilterPanel — one panel, typed entry everywhere', () => {
     expect(onReset).toHaveBeenCalled();
   });
 
+  it('keeps reset in the mobile sheet but avoids a duplicate reset action in the desktop sidebar', () => {
+    const onReset = vi.fn();
+    const props = { idPrefix: 'sidebar', variant: 'sidebar' as const, values: base, limits, options, onChange: vi.fn(), onReset };
+    const { rerender } = render(<InventoryFilterPanel {...props} />);
+    expect(screen.getByTestId('sidebar-filter-panel')).toHaveAttribute('data-variant', 'sidebar');
+    expect(screen.queryByRole('button', { name: /reset all filters/i })).toBeNull();
+    rerender(<InventoryFilterPanel {...props} idPrefix="mobile" variant="sheet" />);
+    expect(screen.getByRole('button', { name: /reset all filters/i })).toBeTruthy();
+  });
+
   it('an external reset empties the typed text', () => {
     const { rerender } = render(<InventoryFilterPanel idPrefix="t" variant="sheet" values={{ ...base, make: 'Subaru' }} limits={limits} options={options} onChange={vi.fn()} onReset={vi.fn()} />);
     expect((screen.getByLabelText('Make filter') as HTMLInputElement).value).toBe('Subaru');

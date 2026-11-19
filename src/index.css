@@ -293,9 +293,11 @@
   .kayad-inventory-grid[data-columns="3"] {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-}
 
-@container kayad-inventory-results (min-width: 860px) {
+  /* Four columns previously had no matching rule between 680px and 859px.
+     The grid therefore fell back to two columns even though the 4-column
+     control was selected. Keep 4 selectable at the actual desktop result
+     width; minmax(0,1fr) lets cards contract without overflowing. */
   .kayad-inventory-grid[data-columns="4"],
   .kayad-inventory-grid[data-columns="5"] {
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1064,10 +1066,7 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
   border-color: rgba(255,255,255,.14);
   box-shadow: 0 4px 12px rgba(10,51,64,.08);
 }
-.kayad-homepage #market-journey {
-  min-height: 48px;
-  color: #315D68;
-}
+.kayad-homepage #market-journey { min-height: 0; padding-top: 4px; padding-bottom: 4px; color: #315D68; }
 .kayad-homepage #market-journey [data-inventory-state="loading"] {
   color: #526D77;
   background: #F7FBFA;
@@ -1324,5 +1323,190 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
   }
   .kayad-top-ticker .transition-all {
     transition: none !important;
+  }
+}
+
+/* Do not expose desktop column-count choices when the actual inventory
+   result column is too narrow to honour them. The toolbar and grid share
+   this container, so the control follows usable content width rather than
+   the outer viewport alone. */
+@container kayad-inventory-results (max-width: 679px) {
+  .kayad-toolbar-control[aria-label="Desktop grid columns"] {
+    display: none !important;
+  }
+}
+
+
+/* KAYARD inventory view-mode parity on phones.
+   Grid and List are intentionally different mobile presentations, not merely
+   different React state values. Grid keeps the editorial image-first card;
+   List becomes a compact horizontal result with the image on the left. Both
+   modes continue to render the same canonical vehicle card and action handlers. */
+@media (max-width: 639px) {
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="grid"] {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: stretch;
+    gap: .75rem;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="grid"] .kayad-vehicle-card {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100%;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: .625rem;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch;
+    width: 100%;
+    min-height: 156px;
+    border-radius: 16px;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card > .kayad-vc-media {
+    flex: 0 0 36%;
+    width: 36% !important;
+    min-width: 104px;
+    max-width: 148px;
+    height: auto !important;
+    min-height: 156px;
+    aspect-ratio: 4 / 5;
+    align-self: stretch;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card > [data-testid="card-thumbnails"] {
+    display: none !important;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card .kayad-vc-body {
+    flex: 1 1 0;
+    width: 0;
+    min-width: 0;
+    padding: .7rem .75rem;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card .kayad-vc-loc {
+    display: none !important;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card .kayad-vc-main {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch;
+    gap: .25rem;
+    min-width: 0;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card .kayad-vc-main > div:first-child {
+    min-width: 0;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card .kayad-vc-kicker {
+    font-size: 9px;
+    line-height: 1.2;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card .kayad-vc-main h3 {
+    font-size: 13px !important;
+    line-height: 1.25;
+    text-transform: none;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card .kayad-vc-price {
+    margin-top: .25rem;
+    font-size: 18px !important;
+    line-height: 1.2;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card .kayad-vc-specs {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    gap: .2rem !important;
+    margin-top: .35rem !important;
+    padding: 0 !important;
+    border: 0 !important;
+    font-size: 10px !important;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card .kayad-vc-specs > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card .kayad-vc-inspection {
+    display: none !important;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card .kayad-vc-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: .35rem;
+    margin-top: auto !important;
+    padding-top: .5rem;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card .kayad-vc-actions button {
+    min-width: 0;
+    min-height: 40px;
+    padding: .45rem .5rem;
+    font-size: 11px !important;
+    line-height: 1.2;
+  }
+
+  /* Keep the Grid/List switch visibly available and comfortably tappable on
+     phones. Earlier toolbar rules gave this group a 40px button height and
+     could let surrounding responsive control rules shrink it. */
+  .kayad-homepage .kayad-market-toolbar [data-testid="inventory-view-controls"] {
+    display: flex !important;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: 92px;
+    min-height: 48px;
+    width: auto;
+    height: 48px;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    border-radius: 12px;
+  }
+
+  .kayad-homepage .kayad-market-toolbar [data-testid="inventory-view-controls"] button {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 44px;
+    min-width: 44px;
+    min-height: 44px;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border-radius: 9px;
+    touch-action: manipulation;
+  }
+}
+
+@media (max-width: 359px) {
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card > .kayad-vc-media {
+    flex-basis: 34%;
+    width: 34% !important;
+    min-width: 92px;
+  }
+
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card .kayad-vc-body {
+    padding: .6rem;
   }
 }

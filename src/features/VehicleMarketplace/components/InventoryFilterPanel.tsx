@@ -143,7 +143,7 @@ export default function InventoryFilterPanel({ idPrefix, values: v, limits, opti
   const id = (n: string) => `${idPrefix}-${n}`;
   const two = variant === 'sheet' ? 'grid grid-cols-2 gap-3' : 'grid grid-cols-2 gap-2';
   return (
-    <div className="space-y-4" data-testid={`${idPrefix}-filter-panel`}>
+    <div className={variant === 'sidebar' ? 'space-y-3.5' : 'space-y-4'} data-testid={`${idPrefix}-filter-panel`} data-variant={variant}>
       <ComboField id={id('make')} label="Make" value={v.make} suggestions={noAny(o.makes)} placeholder="Any make — pick or type" onCommit={(make) => onChange({ make, model: ANY })} />
       <ComboField id={id('model')} label="Model" value={v.model} suggestions={noAny(o.models)} placeholder="Any model — pick or type" onCommit={(model) => onChange({ model })} />
 
@@ -196,7 +196,7 @@ export default function InventoryFilterPanel({ idPrefix, values: v, limits, opti
         <span><span className="block text-xs font-bold text-[#0A3340]">Live auction listings</span><span className="mt-0.5 block text-[10px] font-normal text-[#64748B]">Only vehicles currently open for bidding</span></span>
       </label>
 
-      <button type="button" onClick={onReset} className="w-full rounded-xl border border-[#CBDAD7] py-3 text-[13px] font-extrabold text-[#12576D] hover:bg-[#F0FAF8]">Reset all filters</button>
+      {variant === 'sheet' && <button type="button" onClick={onReset} className="w-full rounded-xl border border-[#CBDAD7] py-3 text-[13px] font-extrabold text-[#12576D] hover:bg-[#F0FAF8] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]">Reset all filters</button>}
     </div>
   );
 }

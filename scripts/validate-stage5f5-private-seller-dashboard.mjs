@@ -15,7 +15,7 @@ const checks = [
   ['Listing loading failure is distinct from a genuine empty listing state', /Your listings could not be loaded/.test(hub) && /We will not show a false empty state/.test(seller)],
   ['Dashboard listing refresh is protected against stale account responses', /dashboardRequestGeneration/.test(hub) && /generation !== dashboardRequestGeneration\.current/.test(hub)],
   ['Seller module no longer owns a second escrow workspace', !/getMyEscrows|EscrowCenterSection/.test(seller) && /ParticipantEscrowDesk/.test(buyer)],
-  ['Listing imagery retains descriptive alternative text and safe image fallback', /<ListingThumb src=\{l\.images\?\.\[0\]\?\.thumb \|\| l\.images\?\.\[0\]\?\.url\} fallback=\{l\.images\?\.\[0\]\?\.url\} alt=\{l\.title\}/.test(seller)],
+  ['Listing imagery retains descriptive alternative text and safe image fallback', /<ListingThumb src=\{l\.images\?\.\[0\]\?\.thumb \|\| l\.images\?\.\[0\]\?\.url\} fallback=\{l\.images\?\.\[0\]\?\.url\} alt=\{l\.title \|\| `\$\{l\.brand\} \${l\.model}`\}/.test(seller)],
   ['Email verification remains required before personal listing creation', /isEmailVerified/.test(seller) && /Verify your email to publish a vehicle/.test(seller)],
   ['Dealer business dashboard remains separate', /DealerDashboard/.test(app)],
 ];

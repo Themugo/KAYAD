@@ -1338,3 +1338,28 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
 .kayad-mobile-bottom-nav__item--services .kayad-mobile-bottom-nav__icon,
 .kayad-mobile-bottom-nav__item--saved .kayad-mobile-bottom-nav__icon { color: #123F4B; background: transparent; }
 .kayad-mobile-bottom-nav__item--saved.is-active .kayad-mobile-bottom-nav__icon { color: #FFFFFF; background: linear-gradient(145deg,#087F78,#07515C); box-shadow: 0 5px 12px rgba(7,95,91,.20); }
+
+
+/* KAYARD KE — 04D mobile navbar order.
+   The menu is the final sibling in the header bar, after the brand and utility actions. */
+@media (max-width: 767px) {
+  .kayad-header__bar > .kayad-brand { order: 1; }
+  .kayad-header__bar > .kayad-navfield { order: 2; }
+  .kayad-header__bar > .kayad-utilities {
+    order: 3;
+    flex: 0 0 auto;
+    margin-left: 0;
+  }
+  .kayad-header__bar > .kayad-hamburger {
+    order: 4;
+    flex: 0 0 40px;
+    margin-left: 2px;
+    margin-right: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .kayad-header__bar > .kayad-brand { flex: 1 1 0%; }
+}
+@media (max-width: 379px) {
+  .kayad-header__bar > .kayad-hamburger { flex-basis: 40px; margin-left: 1px; }
+}

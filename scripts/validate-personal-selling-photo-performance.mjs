@@ -12,7 +12,7 @@ const checks = [
   ['Photo deletion uses existing deleteCarImage API', selling.includes('deleteCarImage(listing.id, index)')],
   ['Cover selection uses existing setCoverImage API', selling.includes('setCoverImage(listing.id, index)')],
   ['Photo MIME and file-size validation is applied', selling.includes('LISTING_IMAGE_TYPES.includes(file.type)') && selling.includes('LISTING_IMAGE_MAX_BYTES')],
-  ['Listing photo cap is enforced in UI', selling.includes('LISTING_IMAGE_MAX_PER_LISTING') && selling.includes('valid.length > remaining')],
+  ['Listing photo cap is enforced in UI', selling.includes('LISTING_IMAGE_MAX_PER_REQUEST') && selling.includes('files.length > maxPerRequest') && selling.includes('maxImages == null') && selling.includes('remaining !== null') && selling.includes('valid.length > remaining') && selling.includes('ownerActionEligibility')],
   ['Last photo cannot be removed', selling.includes('images.length <= 1')],
   ['Photo API routes remain mounted', backend.includes('/:id/images/:imageIndex') && backend.includes('/:id/images/cover') && backend.includes('/:id/images')],
   ['Performance reads the owner-scoped first-party analytics API', dashboard.includes('getMyListingPerformance(30)') && api.includes('my-listing-performance') && backend.includes('/my-listing-performance')],

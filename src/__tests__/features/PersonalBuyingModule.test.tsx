@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import PersonalBuyingModule from '../../features/OwnershipPlatform/pages/PersonalBuyingModule';
 
@@ -56,6 +56,7 @@ describe('Personal buying module convergence', () => {
     expect(screen.getByTestId('buyer-negotiations-panel')).toBeTruthy();
     expect(screen.queryByText('My auction activity')).toBeNull();
     expect(screen.queryByTestId('existing-escrow-desk')).toBeNull();
+    expect(mocks.fetchMyBids).not.toHaveBeenCalled();
   });
 
   it('renders deals and escrow as a section without a second dashboard shell', async () => {
@@ -63,6 +64,28 @@ describe('Personal buying module convergence', () => {
     expect(await screen.findByTestId('existing-escrow-desk')).toBeTruthy();
     expect(screen.queryByText('My auction activity')).toBeNull();
     expect(screen.queryByText('Saved Vehicles')).toBeNull();
+    expect(mocks.fetchMyBids).not.toHaveBeenCalled();
+  });
+
+
+  it('does not block Deals while unrelated saved-vehicle and ownership sources are loading', async () => {
+    render(<PersonalBuyingModule {...baseProps} section="deals" savedVehiclesLoading={true} savedVehiclesSessionUserId={null} ownershipDashboardLoading={true} />);
+    expect(await screen.findByTestId('existing-escrow-desk')).toBeTruthy();
+  });
+
+  it('does not block Auctions while unrelated saved-vehicle and ownership sources are loading', async () => {
+    render(<PersonalBuyingModule {...baseProps} section="auctions" savedVehiclesLoading={true} savedVehiclesSessionUserId={null} ownershipDashboardLoading={true} />);
+    expect(await screen.findByText('My auction activity')).toBeTruthy();
+    await waitFor(() => expect(mocks.fetchMyBids).toHaveBeenCalledTimes(1));
+  });
+
+
+  it('refreshes auction bid history when the unified dashboard requests a section refresh', async () => {
+    const view = render(<PersonalBuyingModule {...baseProps} section="auctions" refreshKey={0} />);
+    expect(await screen.findByText('My auction activity')).toBeTruthy();
+    await waitFor(() => expect(mocks.fetchMyBids).toHaveBeenCalledTimes(1));
+    view.rerender(<PersonalBuyingModule {...baseProps} section="auctions" refreshKey={1} />);
+    await waitFor(() => expect(mocks.fetchMyBids).toHaveBeenCalledTimes(2));
   });
 
   it('shows an unavailable state instead of inventing an empty bid history', async () => {

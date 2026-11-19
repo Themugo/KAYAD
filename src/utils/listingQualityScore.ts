@@ -1,9 +1,8 @@
 /**
- * Listing Quality Score System
- * Calculates a quality score (0-100) for vehicle listings based on completeness
- * of information, image quality, and listing details.
+ * Listing completeness score (0-100).
+ * This measures how much useful listing information is present. It is not a
+ * verification, inspection, moderation or document-authentication result.
  */
-
 export interface ListingQualityFactors {
   hasTitle: boolean;
   hasBrand: boolean;
@@ -21,6 +20,7 @@ export interface ListingQualityFactors {
   hasFeatures: boolean;
   featureCount: number;
   hasVin: boolean;
+  /** Deprecated compatibility field. Registration numbers are not logbook evidence and this is never scored. */
   hasLogbook: boolean;
   descriptionLength: number;
 }
@@ -31,6 +31,70 @@ export interface ListingQualityResult {
   factors: ListingQualityFactors;
   suggestions: string[];
   missing: string[];
+}
+
+export interface ListingCompletenessSource {
+  title?: string | null;
+  brand?: string | null;
+  model?: string | null;
+  year?: number | string | null;
+  price?: number | string | null;
+  mileage?: number | null;
+  fuel?: string | null;
+  transmission?: string | null;
+  body_type?: string | null;
+  bodyType?: string | null;
+  description?: string | null;
+  location_city?: string | null;
+  city?: string | null;
+  images?: Array<string | { url?: string | null; thumb?: string | null }> | null;
+  features?: string[] | null;
+  vin?: string | null;
+}
+
+export function isUsableVehicleImage(value: unknown): boolean {
+  const candidate = typeof value === 'string'
+    ? value.trim()
+    : value && typeof value === 'object'
+      ? String((value as { url?: unknown }).url ?? '').trim()
+      : '';
+  if (!candidate) return false;
+  if (/^https?:\/\//i.test(candidate)) return true;
+  // Same-origin public upload paths are valid; protocol-relative and executable/data URLs are not.
+  return candidate.startsWith('/') && !candidate.startsWith('//');
+}
+
+/** Map real listing fields to completeness inputs, accepting the known API aliases. */
+export function getListingCompletenessFactors(listing: ListingCompletenessSource): Partial<ListingQualityFactors> {
+  const description = String(listing.description ?? '').trim();
+  const images = Array.isArray(listing.images) ? listing.images.filter(isUsableVehicleImage) : [];
+  const features = Array.isArray(listing.features) ? listing.features.filter((feature) => String(feature ?? '').trim()) : [];
+  const bodyType = String(listing.bodyType ?? listing.body_type ?? '').trim();
+  const location = String(listing.city ?? listing.location_city ?? '').trim();
+  const price = Number(listing.price);
+  const year = Number(listing.year);
+  return {
+    hasTitle: Boolean(String(listing.title ?? '').trim()),
+    hasBrand: Boolean(String(listing.brand ?? '').trim()),
+    hasModel: Boolean(String(listing.model ?? '').trim()),
+    hasYear: Number.isFinite(year) && year >= 1886,
+    hasPrice: Number.isFinite(price) && price > 0,
+    hasMileage: listing.mileage != null && Number.isFinite(Number(listing.mileage)) && Number(listing.mileage) >= 0,
+    hasFuel: Boolean(String(listing.fuel ?? '').trim()),
+    hasTransmission: Boolean(String(listing.transmission ?? '').trim()),
+    hasBodyType: Boolean(bodyType),
+    hasDescription: Boolean(description),
+    hasLocation: Boolean(location),
+    hasImages: images.length > 0,
+    imageCount: images.length,
+    hasFeatures: features.length > 0,
+    featureCount: features.length,
+    hasVin: Boolean(String(listing.vin ?? '').trim()),
+    // The current owner-listing response does not expose authoritative logbook file evidence.
+    // registration_number is deliberately not used here.
+    hasLogbook: false,
+    descriptionLength: description.length,
+  };
 }
 
 export function calculateListingQualityScore(factors: Partial<ListingQualityFactors>): ListingQualityResult {
@@ -47,19 +111,19 @@ export function calculateListingQualityScore(factors: Partial<ListingQualityFact
     hasDescription: factors.hasDescription || false,
     hasLocation: factors.hasLocation || false,
     hasImages: factors.hasImages || false,
-    imageCount: factors.imageCount || 0,
+    imageCount: Math.max(0, Number(factors.imageCount) || 0),
     hasFeatures: factors.hasFeatures || false,
-    featureCount: factors.featureCount || 0,
+    featureCount: Math.max(0, Number(factors.featureCount) || 0),
     hasVin: factors.hasVin || false,
-    hasLogbook: factors.hasLogbook || false,
-    descriptionLength: factors.descriptionLength || 0,
+    hasLogbook: false,
+    descriptionLength: Math.max(0, Number(factors.descriptionLength) || 0),
   };
 
   let score = 0;
   const missing: string[] = [];
   const suggestions: string[] = [];
 
-  // Basic information (40 points)
+  // Core vehicle and commercial information: 40 points.
   if (f.hasTitle) score += 5; else missing.push('Listing title');
   if (f.hasBrand) score += 5; else missing.push('Vehicle brand');
   if (f.hasModel) score += 5; else missing.push('Vehicle model');
@@ -69,78 +133,49 @@ export function calculateListingQualityScore(factors: Partial<ListingQualityFact
   if (f.hasFuel) score += 3; else missing.push('Fuel type');
   if (f.hasTransmission) score += 2; else missing.push('Transmission type');
 
-  // Description (20 points)
+  // Description: 20 points.
   if (f.hasDescription) {
-    if (f.descriptionLength >= 200) {
-      score += 20;
-    } else if (f.descriptionLength >= 100) {
-      score += 15;
-      suggestions.push('Add more details to your description for better quality');
-    } else {
-      score += 10;
-      suggestions.push('Expand your description with vehicle condition, service history, and unique features');
-    }
-  } else {
-    missing.push('Vehicle description');
-  }
+    if (f.descriptionLength >= 200) score += 20;
+    else if (f.descriptionLength >= 100) { score += 15; suggestions.push('Add more useful details to your description.'); }
+    else { score += 10; suggestions.push('Expand your description with condition, service history and notable features.'); }
+  } else missing.push('Vehicle description');
 
-  // Images (25 points)
+  // Usable vehicle photos: 25 points.
   if (f.hasImages) {
-    if (f.imageCount >= 8) {
-      score += 25;
-    } else if (f.imageCount >= 5) {
-      score += 20;
-      suggestions.push('Add more photos (8 recommended) for better visibility');
-    } else if (f.imageCount >= 3) {
-      score += 15;
-      suggestions.push('Add more photos to showcase your vehicle');
-    } else {
-      score += 8;
-      suggestions.push('Upload at least 3-5 high-quality photos');
-    }
-  } else {
-    missing.push('Vehicle photos');
-  }
+    if (f.imageCount >= 8) score += 25;
+    else if (f.imageCount >= 5) { score += 20; suggestions.push('Add more photos; eight clear angles are recommended.'); }
+    else if (f.imageCount >= 3) { score += 15; suggestions.push('Add a few more photos to showcase the vehicle.'); }
+    else { score += 8; suggestions.push('Upload at least three clear vehicle photos.'); }
+  } else missing.push('Vehicle photos');
 
-  // Additional details (15 points)
+  // Additional vehicle context: 15 points. No logbook points are awarded without document evidence.
   if (f.hasBodyType) score += 3; else missing.push('Body type');
   if (f.hasLocation) score += 3; else missing.push('Location');
   if (f.hasFeatures) {
-    if (f.featureCount >= 5) {
-      score += 5;
-    } else if (f.featureCount >= 3) {
-      score += 3;
-      suggestions.push('Add more features to highlight your vehicle');
-    } else {
-      score += 2;
-    }
-  } else {
-    suggestions.push('Add vehicle features to attract more buyers');
-  }
-  if (f.hasVin) score += 2; else suggestions.push('Include VIN for verification');
-  if (f.hasLogbook) score += 2; else suggestions.push('Upload logbook for buyer confidence');
+    if (f.featureCount >= 5) score += 5;
+    else if (f.featureCount >= 3) { score += 3; suggestions.push('Add more vehicle features.'); }
+    else score += 2;
+  } else suggestions.push('Add vehicle features to help buyers compare.');
+  if (f.hasVin) score += 4; else suggestions.push('Add the VIN if available.');
 
-  // Determine quality level
-  let level: 'Poor' | 'Fair' | 'Good' | 'Excellent';
-  if (score >= 85) level = 'Excellent';
-  else if (score >= 65) level = 'Good';
-  else if (score >= 40) level = 'Fair';
+  const boundedScore = Math.max(0, Math.min(100, Math.round(score)));
+  let level: ListingQualityResult['level'];
+  if (boundedScore >= 85) level = 'Excellent';
+  else if (boundedScore >= 65) level = 'Good';
+  else if (boundedScore >= 40) level = 'Fair';
   else level = 'Poor';
 
-  return {
-    score,
-    level,
-    factors: f,
-    suggestions,
-    missing,
-  };
+  return { score: boundedScore, level, factors: f, suggestions, missing };
 }
 
+/** Preferred domain name; the old export remains for compatibility with existing callers. */
+export const calculateListingCompleteness = calculateListingQualityScore;
+
 export function getQualityScoreColor(score: number): string {
-  if (score >= 85) return '#22C55E'; // Green
-  if (score >= 65) return '#5AAFA4'; // Muted brand teal
-  if (score >= 40) return '#176B87'; // Slate Teal brand primary
-  return '#EF4444'; // Red
+  if (score >= 85) return '#22C55E';
+  if (score >= 65) return '#5AAFA4';
+  if (score >= 40) return '#176B87';
+  return '#EF4444';
 }
 
 export function getQualityScoreGradient(score: number): string {

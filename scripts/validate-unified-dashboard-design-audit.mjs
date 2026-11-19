@@ -14,7 +14,7 @@ const dock = read('src/components/MobileBottomNav.tsx');
 const tests = read('src/__tests__/utils/navLocation.test.ts');
 
 check('Personal dashboard has one canonical DashboardHub shell', app.includes('<DashboardHub user={authUser}'));
-check('Personal selling module is embedded inside DashboardHub', hub.includes('<PersonalSellingTools user={user}') && hub.includes('data-kayad-unified-personal-dashboard')); 
+check('Personal selling module is embedded inside DashboardHub', hub.includes('<PersonalSellingTools key=') && hub.includes('data-kayad-unified-personal-dashboard')); 
 check('Selling module is content-only and does not create a second dashboard shell', !seller.includes('data-kayad-seller-sidebar') && !seller.includes('seller-dashboard-shell')); 
 check('Authenticated selling content is routed through the unified dashboard', hub.includes('PersonalSellingTools') && app.includes('DashboardHub')); 
 check('Account section uses the canonical Profile content only', !hub.includes("account: 'settings'"));
@@ -28,7 +28,7 @@ check('Mobile Account tab requests the dashboard account section', dock.includes
 check('Dashboard account alias resolves to dashboard', nav.includes("'dashboard:account': 'dashboard'"));
 check('Dashboard section is persisted in the URL', nav.includes("url.searchParams.set('section', dashboardSection)"));
 check('Unified seller module has no duplicate seller sidebar', !seller.includes('data-kayad-seller-sidebar'));
-check('Embedded seller module uses compact section heading', seller.includes('Personal account ·'));
+check('Dashboard banner owns the single section heading without a duplicate nested seller heading', !seller.includes('Personal account · ${activeSection') && seller.includes('aria-label="My vehicles and selling tools"'));
 check('Seller module does not offer a second navigation toolbar', !seller.includes('Open seller workspace'));
 check('Personal account exposes the complete unified sections including seller enquiries', ['overview','my-vehicles','buying','messages','seller-enquiries','auctions','deals','performance','account'].every((id) => hub.includes(`id: '${id}'`))); 
 check('Personal and business membership boundary remains explicit', hub.includes('Business memberships remain separate.'));

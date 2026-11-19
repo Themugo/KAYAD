@@ -23,7 +23,7 @@ const NAV_TITLES: Record<string, string> = {
   saved: 'Saved vehicles',
   profile: 'My Account',
   payments: 'Payments',
-  dashboard: 'Dashboard',
+  dashboard: 'Overview',
   'dealer-dashboard': 'Dealer workspace',
   sell: 'Sell your vehicle',
   seller: 'Sell your vehicle',
@@ -57,7 +57,19 @@ export function titleForRoute(pathname: string, search: string, vehicleTitle?: s
     if (pattern.test(pathname)) return `${label} | ${BRAND}`;
   }
   if (pathname === '/' || pathname === '') {
-    const nav = new URLSearchParams(search).get('nav');
+    const params = new URLSearchParams(search);
+    const nav = params.get('nav');
+    if (nav === 'dashboard') {
+      const section = params.get('section') || 'overview';
+      const personalSections: Record<string, string> = {
+        overview: 'Overview', activity: 'Activity', 'my-vehicles': 'My Vehicles',
+        'create-listing': 'Create Listing', buying: 'Buying', messages: 'Messages',
+        'seller-enquiries': 'Seller Enquiries', auctions: 'Auctions', deals: 'Deals & Escrow',
+        performance: 'Performance', account: 'My Account', profile: 'My Account',
+        settings: 'My Account', trust: 'Verification & Trust', help: 'Help & Support',
+      };
+      return `${personalSections[section] || 'Overview'} | ${BRAND}`;
+    }
     if (nav && NAV_TITLES[nav]) return `${NAV_TITLES[nav]} | ${BRAND}`;
   }
   if (pathname && pathname !== '/' && !isKnownPath(pathname)) return `Page not found | ${BRAND}`;

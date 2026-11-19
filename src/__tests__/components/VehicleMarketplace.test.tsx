@@ -95,14 +95,14 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     expect(screen.getByText('All Kenya')).toBeInTheDocument();
     expect(screen.queryByText(/East Africa/i)).not.toBeInTheDocument();
     expect(screen.getByLabelText('Sort inventory')).toHaveValue('newest');
-    expect(screen.getByRole('button', { name: 'Open inventory filters' })).toBeInTheDocument();
-    expect(screen.getByRole('textbox', { name: 'Search vehicles by make, model or keyword' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Open inventory filters/ })).toBeInTheDocument();
+    expect(screen.getByRole('searchbox', { name: 'Search vehicles by make, model or keyword' })).toBeInTheDocument();
   });
 
   it('keeps the mobile toolbar controls grouped for responsive layout', async () => {
     await renderMarketplace({ ...baseProps });
     expect(document.querySelector('.kayad-market-toolbar-controls')).toBeInTheDocument();
-    expect(document.querySelector('.kayad-search-bridge')).toBeInTheDocument();
+    expect(document.querySelector('.kayad-inventory-search-row')).toBeInTheDocument();
   });
 
 
@@ -467,10 +467,28 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
   it('phones get a compact search row with a Filters button that opens the same panel', async () => {
     await renderMarketplace({ ...baseProps });
     expect(screen.getByTestId('mobile-search-row')).toBeTruthy();
-    fireEvent.click(screen.getByRole('button', { name: /^Open filters/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Open inventory filters/ }));
     const sheet = await screen.findByRole('dialog', { name: /Refine inventory/i });
     expect(sheet.querySelector('input[aria-label="Make filter"]')).toBeTruthy();
     expect(sheet.querySelector('input[aria-label="Colour filter"]')).toBeTruthy();
+  });
+
+  it('uses one canonical keyword search in the responsive inventory controls and removes duplicate upper quick filters', async () => {
+    const onSearchChange = vi.fn();
+    await renderMarketplace({ ...baseProps, onSearchChange, isHomePage: true });
+    const search = screen.getByRole('searchbox', { name: /Search vehicles by make, model or keyword/i });
+    const row = screen.getByTestId('mobile-search-row');
+    const toolbar = screen.getByRole('heading', { name: /Vehicle Inventory/i }).closest('.kayad-market-toolbar');
+    expect(toolbar).toBeTruthy();
+    expect(row.compareDocumentPosition(toolbar!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(row.parentElement).toHaveClass('kayad-inventory-controls-stack');
+    expect(row.contains(search)).toBe(true);
+    fireEvent.change(search, { target: { value: 'Mazda' } });
+    expect(onSearchChange).toHaveBeenCalledWith('Mazda');
+    expect(screen.queryByLabelText('Hero maximum price filter')).toBeNull();
+    expect(screen.queryByLabelText('Hero year filter')).toBeNull();
+    expect(screen.queryByLabelText('Hero body style filter')).toBeNull();
+    expect(screen.queryByLabelText('Hero make filter')).toBeNull();
   });
 
   it('changes the live inventory grid between 3, 4 and 5 columns', async () => {
@@ -480,15 +498,199 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     await act(async () => { await new Promise((resolve) => setTimeout(resolve, 60)); });
     for (const columns of [3, 4, 5]) {
       await waitFor(() => {
-        // Re-click inside the retry: the Super Admin default may land asynchronously and re-apply once; the visitor's choice must win afterwards.
         fireEvent.click(screen.getByRole('button', { name: `${columns}×` }));
-        // Always re-query: the grid is replaced by a loading state and back whenever the first inventory request settles.
         const grid = screen.getByTestId('inventory-grid');
         expect(grid.getAttribute('data-columns')).toBe(String(columns));
         expect(grid.className).toContain('kayad-inventory-grid');
         expect(grid.style.getPropertyValue('--kayad-grid-columns')).toBe(String(columns));
+        expect(screen.getByRole('button', { name: `${columns}×` }).getAttribute('aria-pressed')).toBe('true');
       });
     }
+  });
+
+  it('resets server pagination atomically when sorting or changing page size from a later page', async () => {
+    vehicleApiMocks.getCars.mockImplementation(async (params: Record<string, unknown> = {}) => ({
+      success: true,
+      data: INITIAL_VEHICLES.slice(0, Number(params.limit ?? 24)),
+      pagination: {
+        page: Number(params.page ?? 1),
+        limit: Number(params.limit ?? 24),
+        total: 50,
+        pages: Math.ceil(50 / Number(params.limit ?? 24)),
+      },
+    }));
+
+    await renderMarketplace({ ...baseProps });
+    await waitFor(() => expect(vehicleApiMocks.getCars.mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({ page: 1, limit: 24 })));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await waitFor(() => expect(vehicleApiMocks.getCars.mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({ page: 2, limit: 24 })));
+
+    const beforeSort = vehicleApiMocks.getCars.mock.calls.length;
+    fireEvent.change(screen.getByLabelText('Sort inventory'), { target: { value: 'price-asc' } });
+    await waitFor(() => expect(vehicleApiMocks.getCars.mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({ page: 1, limit: 24, sort: 'price_asc' })));
+    const sortCalls = vehicleApiMocks.getCars.mock.calls.slice(beforeSort).map(([query]) => query as Record<string, unknown>);
+    expect(sortCalls.some((query) => query.page === 2 && query.sort === 'price_asc')).toBe(false);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Next page' }));
+    await waitFor(() => expect(vehicleApiMocks.getCars.mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({ page: 2, limit: 24, sort: 'price_asc' })));
+
+    const beforePageSize = vehicleApiMocks.getCars.mock.calls.length;
+    fireEvent.click(screen.getByRole('button', { name: '48' }));
+    await waitFor(() => expect(vehicleApiMocks.getCars.mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({ page: 1, limit: 48, sort: 'price_asc' })));
+    const pageSizeCalls = vehicleApiMocks.getCars.mock.calls.slice(beforePageSize).map(([query]) => query as Record<string, unknown>);
+    expect(pageSizeCalls.some((query) => query.page === 2 && query.limit === 48)).toBe(false);
+  });
+
+  it('shows an accurate result range and supports direct page-number navigation', async () => {
+    vehicleApiMocks.getCars.mockImplementation(async (params: Record<string, unknown> = {}) => ({
+      success: true,
+      data: INITIAL_VEHICLES.slice(0, Number(params.limit ?? 24)),
+      pagination: {
+        page: Number(params.page ?? 1),
+        limit: Number(params.limit ?? 24),
+        total: 240,
+        pages: Math.ceil(240 / Number(params.limit ?? 24)),
+      },
+    }));
+
+    await renderMarketplace({ ...baseProps });
+    await waitFor(() => expect(screen.getByTestId('pagination-summary').textContent).toContain('Showing 1–24 of 240 vehicles'));
+    expect(screen.getByRole('navigation', { name: 'Inventory pagination' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Go to page 2' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Go to page 10' })).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Go to page 3' }));
+    await waitFor(() => expect(vehicleApiMocks.getCars.mock.calls.at(-1)?.[0]).toEqual(expect.objectContaining({ page: 3, limit: 24 })));
+    await waitFor(() => expect(screen.getByTestId('pagination-summary').textContent).toContain('Showing 49–72 of 240 vehicles'));
+    expect(screen.getByRole('button', { name: 'Go to page 3' }).getAttribute('aria-current')).toBe('page');
+  });
+
+  it('category shortcuts replace the previous body-style or fuel category instead of leaving a hidden combined filter', async () => {
+    await renderMarketplace({ ...baseProps });
+    await screen.findByTestId('inventory-grid');
+
+    fireEvent.click(screen.getByRole('button', { name: 'SUV' }));
+    await waitFor(() => expect(vehicleApiMocks.getCars).toHaveBeenLastCalledWith(expect.objectContaining({ body: 'SUV' })));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Electric' }));
+    await waitFor(() => expect(vehicleApiMocks.getCars).toHaveBeenLastCalledWith(expect.objectContaining({ fuel: 'Electric' })));
+    const electricQuery = vehicleApiMocks.getCars.mock.calls.at(-1)?.[0] as Record<string, unknown> | undefined;
+    expect(electricQuery?.body).toBeUndefined();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sedan' }));
+    await waitFor(() => expect(vehicleApiMocks.getCars).toHaveBeenLastCalledWith(expect.objectContaining({ body: 'Sedan' })));
+    const sedanQuery = vehicleApiMocks.getCars.mock.calls.at(-1)?.[0] as Record<string, unknown> | undefined;
+    expect(sedanQuery?.fuel).toBeUndefined();
+  });
+
+  it('keeps mobile grid and list controls accessible and switches the canonical inventory view in both directions', async () => {
+    await renderMarketplace({ ...baseProps });
+    await screen.findByTestId('inventory-grid');
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 60)); });
+
+    const gridButton = screen.getByRole('button', { name: 'Grid view' });
+    const listButton = screen.getByRole('button', { name: 'List view' });
+    expect(gridButton).toHaveAttribute('aria-pressed', 'true');
+    expect(listButton).toHaveAttribute('aria-pressed', 'false');
+
+    fireEvent.click(listButton);
+    await waitFor(() => {
+      expect(screen.getByTestId('inventory-grid')).toHaveAttribute('data-view-mode', 'list');
+      expect(screen.getByRole('button', { name: 'List view' })).toHaveAttribute('aria-pressed', 'true');
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Grid view' }));
+    await waitFor(() => {
+      expect(screen.getByTestId('inventory-grid')).toHaveAttribute('data-view-mode', 'grid');
+      expect(screen.getByRole('button', { name: 'Grid view' })).toHaveAttribute('aria-pressed', 'true');
+    });
+  });
+
+  it('keeps the same listing actions connected in both phone view modes', async () => {
+    const onToggleSave = vi.fn();
+    const onQuickView = vi.fn();
+    await renderMarketplace({ ...baseProps, onToggleSave, onQuickView });
+    await screen.findByTestId('inventory-grid');
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 60)); });
+
+    const firstVehicle = INITIAL_VEHICLES[0];
+    const assertCardActions = () => {
+      const card = document.querySelector('.kayad-vehicle-card');
+      expect(card).toBeTruthy();
+      expect(card?.querySelector('.kayad-vc-media')).toBeTruthy();
+      expect(card?.querySelector('.kayad-vc-body')).toBeTruthy();
+      expect(within(card as HTMLElement).getByRole('button', { name: new RegExp(`Save ${firstVehicle.title}`) })).toBeInTheDocument();
+      expect(within(card as HTMLElement).getByRole('button', { name: /View vehicle details/i })).toBeInTheDocument();
+      expect(within(card as HTMLElement).getByRole('button', { name: new RegExp(`Contact seller about ${firstVehicle.title}`) })).toBeInTheDocument();
+    };
+
+    assertCardActions();
+    fireEvent.click(screen.getByRole('button', { name: 'List view' }));
+    await waitFor(() => expect(screen.getByTestId('inventory-grid')).toHaveAttribute('data-view-mode', 'list'));
+    assertCardActions();
+
+    const card = document.querySelector('.kayad-vehicle-card') as HTMLElement;
+    fireEvent.click(within(card).getByRole('button', { name: new RegExp(`Save ${firstVehicle.title}`) }));
+    expect(onToggleSave).toHaveBeenCalledWith(firstVehicle.id);
+    fireEvent.click(within(card).getByRole('button', { name: /View vehicle details/i }));
+    expect(onQuickView).toHaveBeenCalledWith(expect.objectContaining({ id: firstVehicle.id }));
+    fireEvent.click(within(card).getByRole('button', { name: new RegExp(`Contact seller about ${firstVehicle.title}`) }));
+    expect(await screen.findByRole('dialog', { name: /Contact seller/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Grid view' }));
+    await waitFor(() => expect(screen.getByTestId('inventory-grid')).toHaveAttribute('data-view-mode', 'grid'));
+    assertCardActions();
+  });
+
+  it('mobile filter drawer reuses the shared filter state and preserves values when closed and reopened', async () => {
+    await renderMarketplace({ ...baseProps });
+    await screen.findByTestId('inventory-grid');
+
+    fireEvent.click(screen.getByRole('button', { name: /^Open inventory filters/i }));
+    const dialog = screen.getByRole('dialog', { name: /Refine inventory/i });
+    const mobileMake = within(dialog).getByLabelText('Make filter');
+    fireEvent.change(mobileMake, { target: { value: 'Mazda' } });
+    fireEvent.keyDown(mobileMake, { key: 'Enter' });
+
+    await waitFor(() => {
+      const desktopMake = document.querySelector('aside input[aria-label="Make filter"]') as HTMLInputElement | null;
+      expect(desktopMake?.value).toBe('Mazda');
+    });
+
+    fireEvent.click(within(dialog).getByRole('button', { name: /Show .* vehicles/i }));
+    expect(screen.queryByRole('dialog', { name: /Refine inventory/i })).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: /Open inventory filters/i }));
+    const reopened = screen.getByRole('dialog', { name: /Refine inventory/i });
+    expect((within(reopened).getByLabelText('Make filter') as HTMLInputElement).value).toBe('Mazda');
+  });
+
+  it('retains the selected four-column preference when switching to list and back to grid', async () => {
+    await renderMarketplace({ ...baseProps });
+    await screen.findByTestId('inventory-grid');
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 60)); });
+
+    fireEvent.click(screen.getByRole('button', { name: '4×' }));
+    await waitFor(() => expect(screen.getByTestId('inventory-grid').getAttribute('data-columns')).toBe('4'));
+
+    fireEvent.click(screen.getByRole('button', { name: /List view/i }));
+    await waitFor(() => expect(screen.getByTestId('inventory-grid').getAttribute('data-view-mode')).toBe('list'));
+    expect(screen.getByTestId('inventory-grid').hasAttribute('data-columns')).toBe(false);
+
+    fireEvent.click(screen.getByRole('button', { name: /Grid view/i }));
+    await waitFor(() => {
+      const grid = screen.getByTestId('inventory-grid');
+      expect(grid.getAttribute('data-view-mode')).toBe('grid');
+      expect(grid.getAttribute('data-columns')).toBe('4');
+      expect(grid.style.getPropertyValue('--kayad-grid-columns')).toBe('4');
+    });
+
+    fireEvent.change(screen.getByRole('combobox', { name: /Sort inventory/i }), { target: { value: 'price-asc' } });
+    await waitFor(() => {
+      expect(screen.getByTestId('inventory-grid').getAttribute('data-columns')).toBe('4');
+      expect(screen.getByRole('button', { name: '4×' }).getAttribute('aria-pressed')).toBe('true');
+    });
   });
 
   // STAGE 10 MARKETPLACE VISUAL CONVERGENCE FIX: this inventory grid card
@@ -774,8 +976,8 @@ describe('VehicleMarketplace - admin home page customization', () => {
     // Fixed: previously checked for "Escrow Protection" (the trust
     // strip's own heading) - removed per explicit direction along
     // with the Saved Searches row. "Search & Trust Info Card" still
-    // genuinely, visibly toggles the hero + search bridge section
-    // (homeConfig.sectionVisibility.searchTrustCard still gates both),
+    // genuinely, visibly toggles the hero + consolidated inventory search
+    // (homeConfig.sectionVisibility.searchTrustCard still gates the hero and consolidated inventory search),
     // verified here via the search input's real placeholder text
     // instead.
     await waitFor(() => expect(screen.getByPlaceholderText(/Make, model or keyword/)).toBeTruthy());

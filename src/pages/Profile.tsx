@@ -12,6 +12,8 @@ interface ProfileProps {
   authUser?: any;
   /** Optional deep-link target inside the single workspace (scrolls to the matching card). */
   focus?: 'personal' | 'notifications' | 'security';
+  /** Hide the local sign-out action when embedded in DashboardHub, which owns the shared account navigation. */
+  showSignOut?: boolean;
 }
 
 type EditableField = 'name' | 'phone' | 'location';
@@ -25,7 +27,7 @@ const fieldInput = 'min-h-10 w-full max-w-xs rounded-lg border border-[#BDE5DE] 
  * There is no nested navigation panel: personal information, notification preferences and security are
  * stacked cards (deep-linkable by `focus`), and the dashboard sidebar remains the only navigation.
  */
-export default function Profile({ setPage, authUser, focus }: ProfileProps) {
+export default function Profile({ setPage, authUser, focus, showSignOut = true }: ProfileProps) {
   const { user: authUser2, logout, updateProfile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -143,9 +145,9 @@ export default function Profile({ setPage, authUser, focus }: ProfileProps) {
             <span className="rounded-full bg-[#E8F7F3] px-2.5 py-1 font-bold text-[#0B6B63]">One personal identity</span>
           </div>
         </div>
-        <button type="button" onClick={handleLogout} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#DCE9E7] px-4 text-sm font-semibold text-[#0A3340] hover:bg-[#F4F9F8] sm:w-auto">
+        {showSignOut && <button type="button" onClick={handleLogout} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-[#DCE9E7] px-4 text-sm font-semibold text-[#0A3340] hover:bg-[#F4F9F8] sm:w-auto">
           <LogOut size={17} aria-hidden="true" /> Sign Out
-        </button>
+        </button>}
       </section>
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]">

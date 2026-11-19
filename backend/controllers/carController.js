@@ -1,8 +1,9 @@
 import Car from "../models/Car.js";
 import User from "../models/User.js";
 import PlatformConfig from "../models/PlatformConfig.js";
+import { MAX_LISTING_IMAGES_CEILING, MAX_LISTING_IMAGES_PER_REQUEST } from "../config/listingLimits.js";
 
-export const MAX_LISTING_IMAGES_CEILING = 20;
+export { MAX_LISTING_IMAGES_CEILING };
 export async function effectiveMaxListingImages() {
   try {
     const cfg = await PlatformConfig.findOne().lean();
@@ -31,6 +32,7 @@ import { registerMediaUploadJob, registerMediaUploadFailure, completeMediaUpload
 import { sellerMayPublishDirectly } from "../services/onboardingPolicy.service.js"; // STAGE 5
 import { getEscrowEnabledForNewOrEditedCar, getEffectiveEscrowForCar } from "../services/escrowCapability.service.js";
 import { listingDeletionBlock, DELETE_BLOCK_CODES } from "../utils/carDeletionGuard.js";
+import { getPersonalListingActionEligibility, assertPersonalListingMutationAllowed, buildPersonalListingMutationFilter } from "../services/personalListingMutationGuard.service.js";
 import { toPublicVehicleDetail, PUBLIC_VEHICLE_POLICY } from "../utils/publicVehicleProjection.js"; // Phase 13K: public responses are allowlisted, never raw rows
 
 const DEALER_ROLES = SELLER_ROLES; // backward compat
@@ -355,12 +357,52 @@ export const getCars = async (req, res) => {
 // a client-suppliable sellerId filter that bypassed the public
 // status:"available" default would let anyone view any other user's
 // private draft/pending listings without authentication).
+async function addPersonalListingPermissions(cars, owner) {
+  const rows = Array.isArray(cars) ? cars : [];
+  const role = String(owner?.role || "").toLowerCase();
+  // Dealer inventory uses its established dealer dashboard and capability model. Only personal
+  // account roles receive this additive read-only projection, avoiding extra work or contract
+  // changes for dealer inventory consumers of the same owner-scoped endpoint.
+  if (!["user", "individual_seller", "buyer"].includes(role)) return rows;
+  const maxListingImages = await effectiveMaxListingImages();
+  const maxImagesPerRequest = MAX_LISTING_IMAGES_PER_REQUEST;
+  let eligibility;
+  try {
+    eligibility = await getPersonalListingActionEligibility(rows, owner);
+  } catch (error) {
+    // Inventory remains readable during a permissions-data outage, but every mutation is disabled.
+    logWarn("Personal listing action eligibility unavailable; failing closed", { error: error?.message });
+    eligibility = new Map();
+  }
+  return rows.map((row) => {
+    const plain = typeof row?.toObject === "function" ? row.toObject() : { ...row };
+    const permission = eligibility.get(String(plain.id ?? plain._id ?? ""));
+    return {
+      ...plain,
+      ownerActionEligibility: permission
+        ? { ...permission, maxListingImages, maxImagesPerRequest }
+        : {
+            permissionsAvailable: false,
+            isSellerHidden: false,
+            isPolicyHidden: false,
+            canEdit: false,
+            canManagePhotos: false,
+            canHide: false,
+            canRepublish: false,
+            canMarkSold: false,
+            canRemove: false,
+            maxListingImages,
+            maxImagesPerRequest,
+            reason: "We could not verify this listing's permissions. Refresh or contact support before making changes.",
+          },
+    };
+  });
+}
+
 export const getMyListings = async (req, res) => {
   try {
     const filter = { dealer: req.user.id, deletedAt: { $exists: false } }; // 14.8: soft-deleted listings are not inventory
-    // Backward compatible: with no paging parameters every listing is returned, exactly as before (nothing is silently
-    // truncated). A caller that passes ?page / ?limit gets a database-side page plus a total, so large inventories need not
-    // be transferred in one response.
+    // Backward compatible: without paging, every listing is still returned. Eligibility is an additive read-only projection.
     const paged = req.query?.page !== undefined || req.query?.limit !== undefined;
     if (paged) {
       const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit, 10) || 20));
@@ -369,12 +411,14 @@ export const getMyListings = async (req, res) => {
         Car.find(filter).populate("dealer", "name businessName avatar").sort({ createdAt: -1 }).skip((page - 1) * limit).limit(limit),
         Car.countDocuments(filter),
       ]);
-      return res.json({ success: true, data: cars, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
+      const data = await addPersonalListingPermissions(cars, req.user);
+      return res.json({ success: true, data, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
     }
     const cars = await Car.find(filter)
       .populate("dealer", "name businessName avatar")
       .sort({ createdAt: -1 });
-    res.json({ success: true, data: cars });
+    const data = await addPersonalListingPermissions(cars, req.user);
+    res.json({ success: true, data });
   } catch (err) {
     logError("Error fetching my listings:", err);
     res.status(500).json({ success: false, message: "Failed to fetch your listings" });
@@ -720,7 +764,7 @@ export const createCar = async (req, res) => {
 // =============================
 export const updateCar = async (req, res) => {
   try {
-    const car = await Car.findById(req.params.id);
+    let car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
     // Snapshot before any mutation so the audit trail records the real
@@ -733,6 +777,7 @@ export const updateCar = async (req, res) => {
     const isStaff = req.user?.effectiveRole === "webhoist";
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
+    const isPersonalOwner = !isStaff && ["user", "individual_seller"].includes(String(req.user?.role || "").toLowerCase());
 
     // Permission rule: only the listing owner (or explicit webhoist break-glass) may edit.
     const canEdit = isOwner || isStaff;
@@ -743,6 +788,10 @@ export const updateCar = async (req, res) => {
     // 14.8: a soft-deleted listing is read-only history. Owners cannot edit it or change its photos (404, as for any missing
     // listing); staff keep administrative access.
     if ((car.deletedAt || car.deleted_at) && !isStaff) return res.status(404).json({ success: false, message: "Car not found" });
+    if (!isStaff) await assertPersonalListingMutationAllowed({ car, owner: req.user, action: "edit" });
+    if (!isStaff && ["user", "individual_seller"].includes(String(req.user?.role || "").toLowerCase()) && req.body && ("images" in req.body || "coverImage" in req.body)) {
+      return res.status(400).json({ success: false, code: "PERSONAL_PHOTO_ROUTE_REQUIRED", message: "Manage listing photos through the dedicated photo-management actions." });
+    }
 
     // ── ESCROW ENFORCEMENT ON UPDATE ─────────────────────
     // STAGE 9: see createCar's identical comment — this is now derived
@@ -961,7 +1010,28 @@ export const updateCar = async (req, res) => {
       car.coverImage = !isNaN(idx) && idx >= 0 && idx < totalImages ? idx : findFirstValidIdx(car.images);
     }
 
-    await car.save();
+    if (isPersonalOwner) {
+      // Personal edits write only changed fields. The conditional UPDATE rechecks owner, status,
+      // auction and bid state at write time, avoiding a stale whole-row save that could overwrite
+      // a concurrent reservation, bid counter or auction transition.
+      const patch = {};
+      for (const field of allowedFields) {
+        if (["images", "coverImage"].includes(field)) continue;
+        if (JSON.stringify(car[field]) !== JSON.stringify(oldData[field])) patch[field] = car[field];
+      }
+      if (JSON.stringify(car.priceHistory) !== JSON.stringify(oldData.priceHistory)) patch.priceHistory = car.priceHistory;
+      patch.escrowEnabled = car.escrowEnabled;
+      patch.updatedAt = new Date();
+      const updated = await Car.findOneAndUpdate(
+        buildPersonalListingMutationFilter({ car, ownerId: req.user.id, expectedUpdatedAt: oldData.updatedAt }),
+        { $set: patch },
+        { new: true },
+      );
+      if (!updated) return res.status(409).json({ success: false, code: "LISTING_MUTATION_RACE", message: "This listing changed or became protected while you were editing it. Refresh the listing and try again." });
+      car = updated;
+    } else {
+      await car.save();
+    }
 
     // Listing changes refresh every public inventory cache (listing, search, facets, autocomplete). Phase C.1.
     await invalidatePublicListingCaches();
@@ -977,6 +1047,7 @@ export const updateCar = async (req, res) => {
 
     res.json({ success: true, data: car });
   } catch (err) {
+    if (err?.expose && Number.isInteger(err.status)) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
     logError("UPDATE ERROR", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to update car" });
   }
@@ -1005,6 +1076,7 @@ export const deleteCar = async (req, res) => {
     if (car.deletedAt || car.deleted_at) {
       return res.json({ success: true, message: "Already deleted", alreadyDeleted: true });
     }
+    if (!isStaff) await assertPersonalListingMutationAllowed({ car, owner: req.user, action: "remove" });
 
     // Phase 14.7: the backend, not the UI, refuses to delete a listing that is part of an auction/settlement record.
     // Readable pre-check first (precise error); the write below re-enforces the same rule atomically.
@@ -1050,6 +1122,7 @@ export const deleteCar = async (req, res) => {
       message: "Deleted",
     });
   } catch (err) {
+    if (err?.expose && Number.isInteger(err.status)) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
     logError("DELETE ERROR", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to fetch cars", data: [] });
   }
@@ -1060,7 +1133,7 @@ export const deleteCar = async (req, res) => {
 // =============================
 export const deleteCarImage = async (req, res) => {
   try {
-    const car = await Car.findById(req.params.id);
+    let car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
     // Inventory belongs to its seller. Platform staff use the dedicated
@@ -1069,6 +1142,7 @@ export const deleteCarImage = async (req, res) => {
     const isStaff = req.user?.effectiveRole === "webhoist";
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
+    const isPersonalOwner = !isStaff && ["user", "individual_seller"].includes(String(req.user?.role || "").toLowerCase());
     if (!isOwner && !isStaff) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
     }
@@ -1076,6 +1150,7 @@ export const deleteCarImage = async (req, res) => {
     // 14.8: a soft-deleted listing is read-only history. Owners cannot edit it or change its photos (404, as for any missing
     // listing); staff keep administrative access.
     if ((car.deletedAt || car.deleted_at) && !isStaff) return res.status(404).json({ success: false, message: "Car not found" });
+    if (!isStaff) await assertPersonalListingMutationAllowed({ car, owner: req.user, action: "photos" });
 
     const imageIndex = Number(req.params.imageIndex);
     if (isNaN(imageIndex) || imageIndex < 0 || imageIndex >= (car.images || []).length) {
@@ -1087,6 +1162,7 @@ export const deleteCarImage = async (req, res) => {
       return res.status(409).json({ success: false, code: "LAST_PHOTO_REQUIRED", message: "A listing must keep at least one photo. Add another photo before removing this one." });
     }
 
+    const originalImages = [...(car.images || [])];
     const removedImage = car.images[imageIndex];
 
     // Remove from array
@@ -1101,7 +1177,17 @@ export const deleteCarImage = async (req, res) => {
       car.coverImage = 0;
     }
 
-    await car.save();
+    if (isPersonalOwner) {
+      const updated = await Car.findOneAndUpdate(
+        buildPersonalListingMutationFilter({ car, ownerId: req.user.id, expectedImages: originalImages, expectedUpdatedAt: car.updatedAt }),
+        { $set: { images: car.images, coverImage: car.coverImage, updatedAt: new Date() } },
+        { new: true },
+      );
+      if (!updated) return res.status(409).json({ success: false, code: "LISTING_PHOTO_CONFLICT", message: "The vehicle photos changed in another session. Refresh the photo manager and try again." });
+      car = updated;
+    } else {
+      await car.save();
+    }
     // Storage is cleaned only AFTER the listing no longer references the file, so a failed save can never leave a
     // listing pointing at a deleted asset. A failed cleanup leaves an orphan (logged for the storage sweep), never a broken photo.
     if (removedImage?.public_id) {
@@ -1119,6 +1205,7 @@ export const deleteCarImage = async (req, res) => {
 
     res.json({ success: true, data: { images: car.images, coverImage: car.coverImage } });
   } catch (err) {
+    if (err?.expose && Number.isInteger(err.status)) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
     logError("DELETE IMAGE ERROR", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to delete image" });
   }
@@ -1131,17 +1218,20 @@ export const deleteCarImage = async (req, res) => {
 // SEO) and every consumer that honours `coverImage` agree on the poster without each page having to be taught about the index.
 export const setCoverImage = async (req, res) => {
   try {
-    const car = await Car.findById(req.params.id);
+    let car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
     const isStaff = req.user?.effectiveRole === "webhoist";
     const isOwner = car.dealer?.toString() === req.user.id;
+    const isPersonalOwner = !isStaff && ["user", "individual_seller"].includes(String(req.user?.role || "").toLowerCase());
     if (!isOwner && !isStaff) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
     }
     if ((car.deletedAt || car.deleted_at) && !isStaff) return res.status(404).json({ success: false, message: "Car not found" });
+    if (!isStaff) await assertPersonalListingMutationAllowed({ car, owner: req.user, action: "photos" });
 
     const images = [...(car.images || [])];
+    const originalImages = [...images];
     const index = Number(req.body?.index);
     if (!Number.isInteger(index) || index < 0 || index >= images.length) {
       return res.status(400).json({ success: false, message: "Invalid image index" });
@@ -1152,7 +1242,17 @@ export const setCoverImage = async (req, res) => {
       images.unshift(chosen);
       car.images = images;
       car.coverImage = 0;
-      await car.save();
+      if (isPersonalOwner) {
+        const updated = await Car.findOneAndUpdate(
+          buildPersonalListingMutationFilter({ car, ownerId: req.user.id, expectedImages: originalImages, expectedUpdatedAt: car.updatedAt }),
+          { $set: { images: car.images, coverImage: 0, updatedAt: new Date() } },
+          { new: true },
+        );
+        if (!updated) return res.status(409).json({ success: false, code: "LISTING_PHOTO_CONFLICT", message: "The vehicle photos changed in another session. Refresh the photo manager and try again." });
+        car = updated;
+      } else {
+        await car.save();
+      }
       await invalidatePublicListingCaches();
       await logActionFromReq(req, "set_car_cover_image", {
         target: car._id,
@@ -1163,6 +1263,7 @@ export const setCoverImage = async (req, res) => {
 
     res.json({ success: true, data: { images: car.images, coverImage: car.coverImage } });
   } catch (err) {
+    if (err?.expose && Number.isInteger(err.status)) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
     logError("SET COVER IMAGE ERROR", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to set the poster image" });
   }
@@ -1173,7 +1274,7 @@ export const setCoverImage = async (req, res) => {
 // =============================
 export const addCarImages = async (req, res) => {
   try {
-    const car = await Car.findById(req.params.id);
+    let car = await Car.findById(req.params.id);
     if (!car) return res.status(404).json({ success: false, message: "Car not found" });
 
     // Inventory belongs to its seller. Platform staff use the dedicated
@@ -1182,6 +1283,7 @@ export const addCarImages = async (req, res) => {
     const isStaff = req.user?.effectiveRole === "webhoist";
     const isDealer = DEALER_ROLES.includes(req.user.role);
     const isOwner = car.dealer?.toString() === req.user.id;
+    const isPersonalOwner = !isStaff && ["user", "individual_seller"].includes(String(req.user?.role || "").toLowerCase());
     if (!isOwner && !isStaff) {
       return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
     }
@@ -1189,10 +1291,10 @@ export const addCarImages = async (req, res) => {
     // 14.8: a soft-deleted listing is read-only history. Owners cannot edit it or change its photos (404, as for any missing
     // listing); staff keep administrative access.
     if ((car.deletedAt || car.deleted_at) && !isStaff) return res.status(404).json({ success: false, message: "Car not found" });
-
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ success: false, message: "No images provided" });
     }
+    if (!isStaff) await assertPersonalListingMutationAllowed({ car, owner: req.user, action: "photos" });
 
     // Admin setting `maxListingImages` (Settings > Marketplace) is the per-listing photo cap; the hard ceiling stays 20. An unset or
     // invalid value (or an unreadable config) falls back to the ceiling rather than blocking uploads.
@@ -1217,11 +1319,31 @@ export const addCarImages = async (req, res) => {
       });
     }
 
+    const originalImages = [...(car.images || [])];
     const newImages = await uploadMultiple(req.files, "kayad/cars");
     cleanupFiles(req.files);
 
-    car.images = [...(car.images || []), ...newImages];
-    await car.save();
+    car.images = [...originalImages, ...newImages];
+    if (isPersonalOwner) {
+      let updated;
+      try {
+        updated = await Car.findOneAndUpdate(
+          buildPersonalListingMutationFilter({ car, ownerId: req.user.id, expectedImages: originalImages, expectedUpdatedAt: car.updatedAt }),
+          { $set: { images: car.images, updatedAt: new Date() } },
+          { new: true },
+        );
+      } catch (writeError) {
+        await Promise.all(newImages.filter((image) => image?.public_id).map((image) => deleteImage(image.public_id).catch((cleanupError) => logError("PHOTO UPLOAD RACE CLEANUP FAILED", { publicId: image.public_id, error: cleanupError?.message }))));
+        throw writeError;
+      }
+      if (!updated) {
+        await Promise.all(newImages.filter((image) => image?.public_id).map((image) => deleteImage(image.public_id).catch((cleanupError) => logError("PHOTO UPLOAD RACE CLEANUP FAILED", { publicId: image.public_id, error: cleanupError?.message }))));
+        return res.status(409).json({ success: false, code: "LISTING_PHOTO_CONFLICT", message: "The vehicle photos changed in another session. Your new upload was not attached; refresh and try again." });
+      }
+      car = updated;
+    } else {
+      await car.save();
+    }
     // Listing changes refresh every public inventory cache (listing, search, facets, autocomplete). Phase C.1.
     await invalidatePublicListingCaches();
 
@@ -1233,6 +1355,10 @@ export const addCarImages = async (req, res) => {
 
     res.json({ success: true, data: { images: car.images } });
   } catch (err) {
+    if (err?.expose && Number.isInteger(err.status)) {
+      cleanupFiles(req.files);
+      return res.status(err.status).json({ success: false, code: err.code, message: err.message });
+    }
     logError("ADD IMAGES ERROR", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to add images" });
   }

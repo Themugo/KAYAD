@@ -53,7 +53,8 @@ import {
   Info,
   Shield,
   Layers,
-  ChevronRight
+  ChevronRight,
+  RefreshCw
 } from 'lucide-react';
 import { Card, Badge, Button, Input, Modal, LazyImage } from '../components/ui';
 
@@ -64,6 +65,8 @@ interface UnifiedCommunicationHubProps {
   onNavigateToInspections?: () => void;
   onNavigateToFinancing?: () => void;
   onNavigateToAuctions?: () => void;
+  embedded?: boolean;
+  initialThreadId?: string | null;
 }
 
 export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = ({
@@ -72,7 +75,9 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
   onNavigateToEscrow,
   onNavigateToInspections,
   onNavigateToFinancing,
-  onNavigateToAuctions
+  onNavigateToAuctions,
+  embedded = false,
+  initialThreadId = null
 }) => {
   // Fixed: this entire hub previously started from, and only ever
   // showed, MOCK_UNIFIED_THREADS - elaborate, specific fake sample
@@ -89,6 +94,10 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
   const [threadsLoading, setThreadsLoading] = useState<boolean>(true);
   const [threadsError, setThreadsError] = useState<string | null>(null);
   const [selectedThreadId, setSelectedThreadId] = useState<string>('');
+  const selectedThreadIdRef = useRef<string>('');
+  selectedThreadIdRef.current = selectedThreadId;
+  const appliedInitialThreadIdRef = useRef<string | null>(null);
+  const [requestedThreadUnavailable, setRequestedThreadUnavailable] = useState(false);
   const [threadsReloadKey, setThreadsReloadKey] = useState(0);
   const currentUserId = user?.id ? String(user.id) : null;
   const currentUserIdRef = useRef<string | null>(currentUserId);
@@ -101,6 +110,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
       setThreads([]);
       setThreadsOwnerId(null);
       setSelectedThreadId('');
+      setRequestedThreadUnavailable(false);
       setThreadsError(null);
       setThreadsLoading(false);
       setInputText('');
@@ -112,11 +122,14 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
       return;
     }
     let cancelled = false;
+    const initialSelectionChanged = initialThreadId !== appliedInitialThreadIdRef.current;
+    if (initialSelectionChanged) appliedInitialThreadIdRef.current = initialThreadId;
     // Clear the previous identity's inbox immediately. Never leave another
     // account's conversations visible while the next account is loading.
     setThreads([]);
     setThreadsOwnerId(null);
     setSelectedThreadId('');
+    setRequestedThreadUnavailable(false);
     setThreadsLoading(true);
     setThreadsError(null);
     getMyChats()
@@ -125,7 +138,11 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         const mapped = chats.map((c) => mapBackendChatToThread(c, currentUserId));
         setThreads(mapped);
         setThreadsOwnerId(currentUserId);
-        setSelectedThreadId(mapped[0]?.id || '');
+        const requestedThread = initialSelectionChanged && initialThreadId ? mapped.find((thread) => thread.id === initialThreadId) : undefined;
+        const preservedThread = !initialSelectionChanged ? mapped.find((thread) => thread.id === selectedThreadIdRef.current) : undefined;
+        const requestedMissing = Boolean(initialSelectionChanged && initialThreadId && !requestedThread);
+        setRequestedThreadUnavailable(requestedMissing);
+        setSelectedThreadId(requestedMissing ? '' : (requestedThread?.id || preservedThread?.id || mapped[0]?.id || ''));
       })
       .catch((err) => {
         if (cancelled || currentUserIdRef.current !== currentUserId) return;
@@ -139,7 +156,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         if (!cancelled) setThreadsLoading(false);
       });
     return () => { cancelled = true; };
-  }, [currentUserId, threadsReloadKey]);
+  }, [currentUserId, threadsReloadKey, initialThreadId]);
 
   // Keep inbox and active conversation synchronized with the authoritative API.
   // This is deliberately polling rather than a second local event store because
@@ -195,8 +212,9 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
 
   // Active Selected Thread
   const activeThread = useMemo(() => {
+    if (requestedThreadUnavailable) return undefined;
     return visibleThreads.find((t) => t.id === selectedThreadId) || visibleThreads[0];
-  }, [visibleThreads, selectedThreadId]);
+  }, [visibleThreads, selectedThreadId, requestedThreadUnavailable]);
 
 
 
@@ -241,6 +259,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
   }, [activeThread?.messages.length, selectedThreadId]);
 
   const handleSelectThread = (threadId: string) => {
+    setRequestedThreadUnavailable(false);
     setSelectedThreadId(threadId);
     setMobileView('chat');
   };
@@ -404,7 +423,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
         <section className="rounded-3xl border border-[#D7E7E4] bg-white p-7 text-center shadow-sm sm:p-10" aria-labelledby="messages-heading">
           <div className="mx-auto mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-[#DDF4F0] text-[#176B87]"><MessageSquare className="h-7 w-7" aria-hidden="true" /></div>
           <p className="text-xs font-bold tracking-wide text-[#176B87]">KAYARD KE MESSAGES</p>
-          <h1 id="messages-heading" className="mt-2 text-2xl font-black text-[#0A3340] sm:text-3xl">Your conversations, kept private</h1>
+          {embedded ? <h2 id="messages-heading" className="mt-2 text-2xl font-black text-[#0A3340] sm:text-3xl">Your conversations, kept private</h2> : <h1 id="messages-heading" className="mt-2 text-2xl font-black text-[#0A3340] sm:text-3xl">Your conversations, kept private</h1>}
           <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-slate-600">Sign in to view and reply to conversations connected to your KAYARD KE account. Your private messages are not shown on this public page.</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <button type="button" onClick={() => navigate(buildAuthPath('login', { next: '/?nav=chat' }))} className="min-h-11 rounded-xl bg-[#176B87] px-5 py-3 text-sm font-bold text-white hover:bg-[#12576D] focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:ring-offset-2">Sign in to Messages</button>
@@ -434,14 +453,12 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               <MessageSquare className="w-4 h-4" aria-hidden="true" />
               KAYARD KE MESSAGES
             </div>
-            <h1 id="messages-heading" className="text-2xl sm:text-3xl font-black font-display text-[#0A3340]">
-              Your conversations
-            </h1>
+            {embedded ? <h2 id="messages-heading" className="text-2xl sm:text-3xl font-black font-display text-[#0A3340]">Your conversations</h2> : <h1 id="messages-heading" className="text-2xl sm:text-3xl font-black font-display text-[#0A3340]">Your conversations</h1>}
             <p className="text-sm text-slate-600 max-w-2xl leading-relaxed">
               Keep your vehicle and marketplace conversations in one place. You’ll only see conversations your account is authorized to access.
             </p>
           </div>
-          <div className="flex items-center gap-3 shrink-0" aria-live="polite">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0" aria-live="polite">
             <div className="rounded-2xl bg-[#F3FAF9] border border-[#D7E7E4] px-4 py-3 min-w-[104px]">
               <div className="text-[11px] font-semibold text-slate-500">Conversations</div>
               <div className="text-xl font-black text-[#0A3340]">{inboxLoading || threadsError ? '—' : visibleThreads.length}</div>
@@ -450,6 +467,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               <div className="text-[11px] font-semibold text-slate-500">Unread</div>
               <div className="text-xl font-black text-[#0A3340]">{inboxLoading || threadsError ? '—' : totalUnreadCount}</div>
             </div>
+            <button type="button" onClick={() => { setThreadsError(null); setThreadsLoading(true); setThreadsReloadKey((value) => value + 1); }} disabled={threadsLoading} className="inline-flex min-h-10 items-center gap-2 rounded-xl border border-[#D7E7E4] bg-white px-3 text-xs font-bold text-[#12576D] disabled:opacity-50"><RefreshCw size={14} className={threadsLoading ? 'animate-spin' : ''} aria-hidden="true" /> Refresh inbox</button>
           </div>
         </div>
       </section>
@@ -821,7 +839,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
           ) : (
             <div className="p-12 text-center text-[#94A3B8] flex flex-col items-center justify-center h-full space-y-3">
               <MessageSquare className="w-12 h-12 text-[#BDE5DE]" />
-              <p className="font-bold text-sm">Select a conversation to read and reply.</p>
+              <p className="font-bold text-sm">{requestedThreadUnavailable ? 'The conversation linked to this enquiry is not available in your inbox. Select another conversation from the list.' : 'Select a conversation to read and reply.'}</p>
             </div>
           )}
         </Card>

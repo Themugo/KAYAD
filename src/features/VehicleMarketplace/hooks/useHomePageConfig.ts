@@ -166,7 +166,7 @@ function loadConfig(): HomePageConfig {
         ...parsed.inventoryLayout,
         viewMode: parsed.inventoryLayout?.viewMode === 'list' ? 'list' : 'grid',
         columns: [3, 4, 5].includes(parsed.inventoryLayout?.columns) ? parsed.inventoryLayout.columns : DEFAULT_HOME_PAGE_CONFIG.inventoryLayout.columns,
-        showSidebar: true,
+        showSidebar: parsed.inventoryLayout?.showSidebar !== false,
         cardDensity: ['compact', 'standard', 'comfortable'].includes(parsed.inventoryLayout?.cardDensity)
           ? parsed.inventoryLayout.cardDensity
           : DEFAULT_HOME_PAGE_CONFIG.inventoryLayout.cardDensity,

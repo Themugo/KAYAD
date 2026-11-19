@@ -50,6 +50,15 @@ describe('InspectionsView', () => {
     expect(await screen.findByText('No inspections yet')).toBeTruthy();
   });
 
+
+  it('does not render a second page hero when embedded in the personal dashboard', async () => {
+    getMy.mockResolvedValue({ success: true, orders: [] });
+    getBookings.mockResolvedValue({ bookings: [] });
+    renderView({ viewMode: 'account', initialTab: 'mine' });
+    expect(await screen.findByText('No inspections yet')).toBeTruthy();
+    expect(screen.queryByRole('heading', { level: 1 })).toBeNull();
+  });
+
   it('merges both sources, newest first, with real statuses and actions', async () => {
     getMy.mockResolvedValue({ success: true, orders: [kayadDone] });
     getBookings.mockResolvedValue({ bookings: [booking] });

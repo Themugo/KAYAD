@@ -6,6 +6,10 @@ describe('titleForRoute', () => {
   it('names each main screen', () => {
     expect(titleForRoute('/', '?nav=discovery')).toBe('Auctions | KAYARD KE');
     expect(titleForRoute('/', '?nav=saved')).toBe('Saved vehicles | KAYARD KE');
+    expect(titleForRoute('/', '?nav=dashboard')).toBe('Overview | KAYARD KE');
+    expect(titleForRoute('/', '?nav=dashboard&section=my-vehicles')).toBe('My Vehicles | KAYARD KE');
+    expect(titleForRoute('/', '?nav=dashboard&section=seller-enquiries')).toBe('Seller Enquiries | KAYARD KE');
+    expect(titleForRoute('/', '?nav=dashboard&section=account')).toBe('My Account | KAYARD KE');
     expect(titleForRoute('/login', '')).toBe('Sign in | KAYARD KE');
     expect(titleForRoute('/auction/abc', '')).toBe('Live auction | KAYARD KE');
     expect(titleForRoute('/admin/cars', '')).toBe('Admin | KAYARD KE');

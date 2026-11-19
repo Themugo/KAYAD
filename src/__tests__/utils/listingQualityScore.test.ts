@@ -92,7 +92,7 @@ describe('calculateListingQualityScore', () => {
 
       expect(result.score).toBe(60);
       expect(result.suggestions).not.toContain(
-        'Add more details to your description for better quality'
+        'Add more useful details to your description.'
       );
     });
 
@@ -105,7 +105,7 @@ describe('calculateListingQualityScore', () => {
 
       expect(result.score).toBe(55);
       expect(result.suggestions).toContain(
-        'Add more details to your description for better quality'
+        'Add more useful details to your description.'
       );
     });
 
@@ -118,7 +118,7 @@ describe('calculateListingQualityScore', () => {
 
       expect(result.score).toBe(50);
       expect(result.suggestions).toContain(
-        'Expand your description with vehicle condition, service history, and unique features'
+        'Expand your description with condition, service history and notable features.'
       );
     });
 
@@ -162,7 +162,7 @@ describe('calculateListingQualityScore', () => {
       });
 
       expect(result.suggestions).toContain(
-        'Add more photos (8 recommended) for better visibility'
+        'Add more photos; eight clear angles are recommended.'
       );
     });
 
@@ -187,15 +187,16 @@ describe('calculateListingQualityScore', () => {
       expect(five.score).toBe(45);
       expect(three.score).toBe(43);
       expect(one.score).toBe(42);
-      expect(three.suggestions).toContain('Add more features to highlight your vehicle');
+      expect(three.suggestions).toContain('Add more vehicle features.');
     });
 
-    it('suggests VIN and logbook instead of marking them missing', () => {
+    it('suggests VIN but never awards points or suggests logbook without authoritative document evidence', () => {
       const result = calculateListingQualityScore(basicInfoOnly);
 
       expect(result.missing).not.toContain('VIN');
-      expect(result.suggestions).toContain('Include VIN for verification');
-      expect(result.suggestions).toContain('Upload logbook for buyer confidence');
+      expect(result.suggestions).toContain('Add the VIN if available.');
+      expect(result.suggestions).not.toContain('Upload logbook for buyer confidence');
+      expect(result.factors.hasLogbook).toBe(false);
     });
   });
 
@@ -277,5 +278,27 @@ describe('getQualityScoreGradient', () => {
     [10, 'linear-gradient(135deg, #EF4444, #DC2626)'],
   ])('returns the expected gradient for score %i', (score, expectedGradient) => {
     expect(getQualityScoreGradient(score)).toBe(expectedGradient);
+  });
+});
+
+
+describe('listing completeness source-field normalization', () => {
+  it('accepts camelCase bodyType and city aliases and ignores whitespace descriptions', async () => {
+    const { getListingCompletenessFactors } = await import('../../utils/listingQualityScore');
+    const factors = getListingCompletenessFactors({ bodyType: 'SUV', city: 'Nairobi', description: '   ', images: [] });
+    expect(factors.hasBodyType).toBe(true);
+    expect(factors.hasLocation).toBe(true);
+    expect(factors.hasDescription).toBe(false);
+  });
+
+  it('does not treat a registration number as logbook evidence and counts only usable image URLs', async () => {
+    const { getListingCompletenessFactors } = await import('../../utils/listingQualityScore');
+    const factors = getListingCompletenessFactors({
+      registration_number: 'KAA 123A',
+      images: [{ url: 'https://cdn.example.test/car.jpg' }, { url: '' }, { url: 'javascript:alert(1)' }, { url: '/uploads/car-2.webp' }],
+    } as any);
+    expect(factors.hasLogbook).toBe(false);
+    expect(factors.imageCount).toBe(2);
+    expect(factors.hasImages).toBe(true);
   });
 });

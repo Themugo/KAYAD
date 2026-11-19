@@ -16,6 +16,7 @@ import { STAFF_ROLES, PERM } from "../config/roles.js";
 import { requireDealerVerification } from "../middleware/dealerVerification.js";
 import { sellerListingAccess } from "../middleware/sellerCapability.js"; // Phase 13E
 import { requirePermission } from "../middleware/rbac.js";
+import { MAX_LISTING_IMAGES_PER_REQUEST } from "../config/listingLimits.js";
 
 import {
   getCars,
@@ -283,7 +284,7 @@ router.post(
   requireDealerVerification,
   uploadLimiter,
   cleanupUploadsOnError,
-  upload.array("images", 10),
+  upload.array("images", MAX_LISTING_IMAGES_PER_REQUEST),
   handleUploadError,
   validateCar,
   invalidateCache("cache:*"),
@@ -368,7 +369,7 @@ router.post(
   sellerListingAccess({ write: true }),
   uploadLimiter,
   cleanupUploadsOnError,
-  upload.array("images", 10),
+  upload.array("images", MAX_LISTING_IMAGES_PER_REQUEST),
   handleUploadError,
   invalidateCache("cache:*"),
   asyncHandler(addCarImages),

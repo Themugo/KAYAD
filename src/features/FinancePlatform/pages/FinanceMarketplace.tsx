@@ -35,9 +35,10 @@ interface FinanceMarketplaceProps {
   onOpenAuth?: () => void;
   onNavigate?: (section: string) => void;
   mode?: 'public' | 'account';
+  refreshKey?: number;
 }
 
-export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, onOpenAuth, onNavigate, mode = 'public' }) => {
+export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, onOpenAuth, onNavigate, mode = 'public', refreshKey = 0 }) => {
   const userId = String(user?.id || (user as UserProfile & { _id?: string } | null | undefined)?._id || '');
   const [vehiclePrice, setVehiclePrice] = useState(2500000);
   const [deposit, setDeposit] = useState(500000);
@@ -82,7 +83,7 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
       .catch(() => { if (!cancelled) setAppsError('Your financing applications could not be loaded. Try again.'); })
       .finally(() => { if (!cancelled) setLoadingApps(false); });
     return () => { cancelled = true; };
-  }, [mode, userId, submitted, reloadApps]);
+  }, [mode, userId, submitted, reloadApps, refreshKey]);
 
   const handleSubmitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,10 +109,10 @@ export const FinanceMarketplace: React.FC<FinanceMarketplaceProps> = ({ user, on
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-12">
-      <div className="text-center py-6">
+      {mode === 'public' && <div className="text-center py-6">
         <h1 className="text-2xl font-bold text-[#176B87] font-display">Vehicle Financing</h1>
-        <p className="text-sm text-[#64748B] mt-1">{mode === 'account' ? 'Manage your private financing request and review its recorded status.' : 'Explore affordability estimates and understand the financing request process.'}</p>
-      </div>
+        <p className="text-sm text-[#64748B] mt-1">Explore affordability estimates and understand the financing request process.</p>
+      </div>}
 
       {/* CALCULATOR - honest, local arithmetic, no named lenders */}
       <section className="bg-white border border-[#D7E7E4] rounded-2xl p-5">

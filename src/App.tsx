@@ -321,7 +321,7 @@ function AppInner() {
   const [dealerScope, setDealerScope] = useState<{ id: string; name: string } | null>(null);
   // Browser-tab title follows the screen (and the open vehicle) so tabs and history are distinguishable.
   useEffect(() => {
-    document.title = titleForRoute(location.pathname, activeNav && activeNav !== 'marketplace' ? `?nav=${encodeURIComponent(activeNav)}` : '', quickViewVehicle?.title);
+    document.title = titleForRoute(location.pathname, activeNav && activeNav !== 'marketplace' ? (activeNav === 'dashboard' ? location.search : `?nav=${encodeURIComponent(activeNav)}`) : '', quickViewVehicle?.title);
   }, [location.pathname, activeNav, quickViewVehicle?.title]);
 
   // Central Navigation Handler: Opens Vehicle Details & Updates URL
@@ -612,7 +612,10 @@ function AppInner() {
             : `${publicShellClass}flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 ${showPublicMobileDock ? 'pb-[calc(7rem+env(safe-area-inset-bottom)+12px)]' : 'pb-6'} lg:pb-6 space-y-6`
         }
       >
-        <PageJourneyNavigation />
+        {/* The public marketplace home starts directly beneath the global navbar.
+            Keep page-history controls on internal routes, but do not insert a
+            second navigation band above the homepage hero. */}
+        {activeNav !== 'marketplace' && <PageJourneyNavigation />}
         <Suspense fallback={
           <div className="min-h-[420px] flex items-center justify-center px-6" role="status" aria-live="polite">
             <div className="text-center">
@@ -720,7 +723,7 @@ function AppInner() {
           )}
 
           {activeNav === 'dashboard' && user && String(authUser?.role || '').toLowerCase() !== 'dealer' && (
-            <DashboardHub user={authUser} vehicles={vehicles} savedVehicleCount={savedVehicles.length} savedVehiclesList={savedVehiclesList} savedVehiclesSessionUserId={savedVehiclesSessionUserId} savedVehiclesLoading={isFetchingFavorites} savedVehiclesError={favoritesError || ''} savedVehiclesErrorUserId={favoritesErrorUserId} onRefreshSavedVehicles={refreshSavedVehicles} initialSection={new URLSearchParams(location.search).get('section') || 'overview'} initialInspectionTab={personalInspectionTab} onNavigate={(nav) => setActiveNav(nav)} messagesContent={<ChatView messages={[]} selectedVehicle={selectedChatVehicle} user={user} onQuickViewVehicle={handleOpenVehicleDetails} onNavigateToEscrow={() => setActiveNav('dashboard:deals')} onNavigateToInspections={() => setActiveNav('dashboard:buying')} onNavigateToFinancing={() => setActiveNav('dashboard:deals')} />} profileContent={<Profile setPage={(page) => setActiveNav(['profile', 'settings'].includes(page) ? 'dashboard:account' : page)} authUser={authUser} />} />
+            <DashboardHub user={authUser} onSignOut={authLogout} vehicles={vehicles} savedVehicleCount={savedVehicles.length} savedVehiclesList={savedVehiclesList} savedVehiclesSessionUserId={savedVehiclesSessionUserId} savedVehiclesLoading={isFetchingFavorites} savedVehiclesError={favoritesError || ''} savedVehiclesErrorUserId={favoritesErrorUserId} onRefreshSavedVehicles={refreshSavedVehicles} initialSection={new URLSearchParams(location.search).get('section') || 'overview'} initialInspectionTab={personalInspectionTab} onNavigate={(nav) => setActiveNav(nav)} messagesContent={(initialThreadId) => <ChatView embedded initialThreadId={initialThreadId} messages={[]} selectedVehicle={selectedChatVehicle} user={user} onQuickViewVehicle={handleOpenVehicleDetails} onNavigateToEscrow={() => setActiveNav('dashboard:deals')} onNavigateToInspections={() => setActiveNav('dashboard:buying')} onNavigateToFinancing={() => setActiveNav('dashboard:deals')} />} profileContent={<Profile setPage={(page) => setActiveNav(['profile', 'settings'].includes(page) ? 'dashboard:account' : page)} authUser={authUser} showSignOut={false} />} />
           )}
 
           {activeNav === 'chat' && (

@@ -70,7 +70,7 @@ export function AuctionVerificationSection({ listings }: { listings: BackendCar[
   return (
     <section aria-labelledby="auction-verification-title" className="space-y-5">
       <header>
-        <h1 id="auction-verification-title" className="text-2xl font-bold text-slate-900">Auction verification</h1>
+        <h2 id="auction-verification-title" className="text-xl font-bold text-slate-900">Your auction eligibility</h2>
         <p className="mt-1 max-w-3xl text-sm text-slate-600">
           Private-seller vehicles can only go to auction after the inspection fee is paid, the vehicle passes inspection, an approved garage or dealer holds it in custody and KAYARD KE approves it.
           KAYARD KE&apos;s servers decide each step; this page only shows what they report.

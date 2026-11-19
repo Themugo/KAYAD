@@ -24,7 +24,7 @@ const vehicles = Array.from({ length: 6 }, (_, index) => ({
   dealer: index % 2 === 0 ? { name: 'Verified Dealer', role: 'dealer', dealerApprovedAt: '2026-01-01' } : null,
 }));
 
-async function installVehicleApi(page: import('@playwright/test').Page) {
+async function installVehicleApi(page: import('@playwright/test').Page, sourceVehicles = vehicles) {
   const requests: URL[] = [];
   await page.route('**/api/cars**', async (route) => {
     const url = new URL(route.request().url());
@@ -39,7 +39,7 @@ async function installVehicleApi(page: import('@playwright/test').Page) {
     const dealerType = url.searchParams.get('dealerType');
     const sort = url.searchParams.get('sort');
 
-    let data = [...vehicles];
+    let data = [...sourceVehicles];
     if (keyword) data = data.filter((v) => `${v.title} ${v.brand} ${v.model}`.toLowerCase().includes(keyword.toLowerCase()));
     if (brand) data = data.filter((v) => v.brand === brand);
     if (model) data = data.filter((v) => v.model === model);
@@ -52,13 +52,15 @@ async function installVehicleApi(page: import('@playwright/test').Page) {
     if (sort === 'price_asc') data.sort((a, b) => a.price - b.price);
     if (sort === 'price_desc') data.sort((a, b) => b.price - a.price);
 
+    const pageNumber = Math.max(1, Number(url.searchParams.get('page') || '1'));
+    const start = (pageNumber - 1) * limit;
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify({
         success: true,
-        data: data.slice(0, limit),
-        pagination: { page: Number(url.searchParams.get('page') || '1'), limit, total: data.length, pages: Math.max(1, Math.ceil(data.length / limit)) },
+        data: data.slice(start, start + limit),
+        pagination: { page: pageNumber, limit, total: data.length, pages: Math.max(1, Math.ceil(data.length / limit)) },
       }),
     });
   });
@@ -166,6 +168,186 @@ test.describe('KAYAD marketplace controls — browser interaction certification'
 
     await page.getByTitle('Grid view').click();
     await expect(page.getByTestId('inventory-grid')).toHaveAttribute('data-view-mode', 'grid');
+  });
+
+  test('server pagination supports direct pages, previous/next boundaries and page-size resets', async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    const pagedVehicles = Array.from({ length: 60 }, (_, index) => ({
+      ...vehicles[index % vehicles.length],
+      id: `paged-car-${index + 1}`,
+      title: `${vehicles[index % vehicles.length].brand} Test Vehicle ${index + 1}`,
+    }));
+    const requests = await installVehicleApi(page, pagedVehicles);
+    await waitForInventory(page);
+
+    const pagination = page.getByTestId('inventory-pagination');
+    const previous = pagination.getByRole('button', { name: 'Previous page' });
+    const next = pagination.getByRole('button', { name: 'Next page' });
+    const summary = page.getByTestId('pagination-summary');
+
+    await expect(summary).toContainText('Showing 1–24 of 60 vehicles');
+    await expect(previous).toBeDisabled();
+    await expect(next).toBeEnabled();
+    await expect(page.getByRole('button', { name: 'Go to page 1' })).toHaveAttribute('aria-current', 'page');
+
+    await page.getByRole('button', { name: 'Go to page 3' }).click();
+    await expect.poll(() => requests.at(-1)?.searchParams.get('page')).toBe('3');
+    await expect(summary).toContainText('Showing 49–60 of 60 vehicles');
+    await expect(page.locator('.kayad-vehicle-card').first()).toContainText('Test Vehicle 49');
+    await expect(next).toBeDisabled();
+    await expect(previous).toBeEnabled();
+
+    await previous.click();
+    await expect.poll(() => requests.at(-1)?.searchParams.get('page')).toBe('2');
+    await expect(summary).toContainText('Showing 25–48 of 60 vehicles');
+    await expect(page.locator('.kayad-vehicle-card').first()).toContainText('Test Vehicle 25');
+
+    await page.getByRole('button', { name: '48', exact: true }).click();
+    await expect.poll(() => requests.at(-1)?.searchParams.get('page')).toBe('1');
+    await expect.poll(() => requests.at(-1)?.searchParams.get('limit')).toBe('48');
+    await expect(summary).toContainText('Showing 1–48 of 60 vehicles');
+    await expect(previous).toBeDisabled();
+    await expect(next).toBeEnabled();
+
+    await next.click();
+    await expect.poll(() => requests.at(-1)?.searchParams.get('page')).toBe('2');
+    await expect(summary).toContainText('Showing 49–60 of 60 vehicles');
+    await expect(next).toBeDisabled();
+  });
+
+  test('phone Grid/List switch changes the rendered card layout, preserves actions and never overflows', async ({ page }) => {
+    await installVehicleApi(page);
+
+    for (const width of [390, 360]) {
+      await page.setViewportSize({ width, height: 844 });
+      await waitForInventory(page);
+
+      const grid = page.getByTestId('inventory-grid');
+      const controls = page.getByTestId('inventory-view-controls');
+      const gridButton = page.getByRole('button', { name: 'Grid view' });
+      const listButton = page.getByRole('button', { name: 'List view' });
+      const card = page.locator('.kayad-vehicle-card').first();
+
+      await expect(controls).toBeVisible();
+      await expect(gridButton).toBeVisible();
+      await expect(listButton).toBeVisible();
+      await expect.poll(() => gridButton.evaluate((el) => Math.min(el.getBoundingClientRect().width, el.getBoundingClientRect().height))).toBeGreaterThanOrEqual(44);
+      await expect.poll(() => listButton.evaluate((el) => Math.min(el.getBoundingClientRect().width, el.getBoundingClientRect().height))).toBeGreaterThanOrEqual(44);
+
+      // Grid is a full-width, image-first vertical card on phones.
+      await gridButton.click();
+      await expect(grid).toHaveAttribute('data-view-mode', 'grid');
+      await expect.poll(() => card.evaluate((el) => getComputedStyle(el).flexDirection)).toBe('column');
+      await expect.poll(() => grid.evaluate((el) => getComputedStyle(el).gridTemplateColumns.trim().split(/\s+/).length)).toBe(1);
+
+      // List must materially change the card, not just the selected button state.
+      await listButton.click();
+      await expect(grid).toHaveAttribute('data-view-mode', 'list');
+      await expect.poll(() => card.evaluate((el) => getComputedStyle(el).flexDirection)).toBe('row');
+      await expect.poll(() => card.locator('.kayad-vc-media').evaluate((el) => el.getBoundingClientRect().width)).toBeLessThanOrEqual(148);
+      await expect.poll(() => card.locator('.kayad-vc-body').evaluate((el) => el.getBoundingClientRect().width)).toBeGreaterThan(0);
+
+      // Shared card actions remain available in either layout.
+      await expect(card.getByRole('button', { name: /Save .*$/ })).toBeVisible();
+      await expect(card.getByRole('button', { name: /View vehicle details/i })).toBeVisible();
+      await expect(card.getByRole('button', { name: /Contact seller about/i })).toBeVisible();
+      await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+
+      await gridButton.click();
+      await expect.poll(() => card.evaluate((el) => getComputedStyle(el).flexDirection)).toBe('column');
+      await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    }
+
+    // Also verify that the desktop list is a genuinely horizontal card, while
+    // returning to grid restores the selected column layout.
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await expect.poll(() => gridButton.isVisible()).toBe(true);
+    await listButton.click();
+    await expect.poll(() => card.evaluate((el) => getComputedStyle(el).flexDirection)).toBe('row');
+    await gridButton.click();
+    await expect.poll(() => card.evaluate((el) => getComputedStyle(el).flexDirection)).toBe('column');
+    await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  });
+
+  test('inventory Grid/List renders correctly at all six supported viewport widths', async ({ page }) => {
+    await installVehicleApi(page);
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await waitForInventory(page);
+
+    const widths = [1440, 1280, 1024, 768, 390, 360];
+    const grid = page.getByTestId('inventory-grid');
+    const controls = page.getByTestId('inventory-view-controls');
+    const gridButton = page.getByRole('button', { name: 'Grid view' });
+    const listButton = page.getByRole('button', { name: 'List view' });
+    const card = page.locator('.kayad-vehicle-card').first();
+
+    for (const width of widths) {
+      await page.setViewportSize({ width, height: width <= 768 ? 900 : 1000 });
+      await expect(controls).toBeVisible();
+      await expect(gridButton).toBeVisible();
+      await expect(listButton).toBeVisible();
+
+      for (const mode of ['grid', 'list'] as const) {
+        const toggle = mode === 'grid' ? gridButton : listButton;
+        await toggle.click();
+        await expect(grid).toHaveAttribute('data-view-mode', mode);
+        await expect.poll(() => card.evaluate((el) => getComputedStyle(el).flexDirection))
+          .toBe(mode === 'grid' ? 'column' : 'row');
+
+        const geometry = await page.evaluate(() => {
+          const inventory = document.querySelector('[data-testid="inventory-grid"]');
+          const firstCard = inventory?.querySelector('.kayad-vehicle-card');
+          const media = firstCard?.querySelector('.kayad-vc-media');
+          const body = firstCard?.querySelector('.kayad-vc-body');
+          const rect = firstCard?.getBoundingClientRect();
+          return {
+            viewportWidth: window.innerWidth,
+            documentWidth: document.documentElement.scrollWidth,
+            bodyWidth: document.body.scrollWidth,
+            cardLeft: rect?.left ?? -1,
+            cardRight: rect?.right ?? Number.POSITIVE_INFINITY,
+            cardWidth: rect?.width ?? 0,
+            mediaWidth: media?.getBoundingClientRect().width ?? 0,
+            contentWidth: body?.getBoundingClientRect().width ?? 0,
+            gridColumns: inventory ? getComputedStyle(inventory).gridTemplateColumns.trim().split(/\s+/).length : 0,
+          };
+        });
+
+        expect(geometry.documentWidth, `document overflow at ${width}px in ${mode}`).toBeLessThanOrEqual(width);
+        expect(geometry.bodyWidth, `body overflow at ${width}px in ${mode}`).toBeLessThanOrEqual(width);
+        expect(geometry.cardLeft, `card starts outside viewport at ${width}px in ${mode}`).toBeGreaterThanOrEqual(0);
+        expect(geometry.cardRight, `card ends outside viewport at ${width}px in ${mode}`).toBeLessThanOrEqual(width + 1);
+        expect(geometry.cardWidth, `card has no width at ${width}px in ${mode}`).toBeGreaterThan(0);
+        expect(geometry.mediaWidth, `vehicle media missing at ${width}px in ${mode}`).toBeGreaterThan(0);
+        expect(geometry.contentWidth, `vehicle content missing at ${width}px in ${mode}`).toBeGreaterThan(0);
+
+        if (width <= 639 && mode === 'grid') {
+          expect(geometry.gridColumns, `phone grid must be one column at ${width}px`).toBe(1);
+        }
+        if (mode === 'list') {
+          expect(geometry.mediaWidth, `list media must remain narrower than card at ${width}px`)
+            .toBeLessThan(geometry.cardWidth);
+        }
+
+        await expect(card.getByRole('button', { name: /Save .*$/ })).toBeVisible();
+        await expect(card.getByRole('button', { name: /View vehicle details/i })).toBeVisible();
+        await expect(card.getByRole('button', { name: /Contact seller about/i })).toBeVisible();
+
+        if (width <= 390) {
+          const bounds = await toggle.evaluate((el) => {
+            const rect = el.getBoundingClientRect();
+            return { width: rect.width, height: rect.height };
+          });
+          expect(bounds.width, `touch target width at ${width}px`).toBeGreaterThanOrEqual(44);
+          expect(bounds.height, `touch target height at ${width}px`).toBeGreaterThanOrEqual(44);
+        }
+
+        await page.screenshot({
+          path: `test-results/inventory-responsive-06d/${width}-${mode}.png`,
+          fullPage: false,
+        });
+      }
+    }
   });
 
   test('mobile filter drawer exposes working selectors and closes cleanly', async ({ page }) => {

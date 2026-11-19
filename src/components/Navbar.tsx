@@ -564,19 +564,21 @@ export const Navbar: React.FC<NavbarProps> = ({
               </div>
             )}
 
-            {/* Mobile Hamburger Button */}
-            <button
-              type="button"
-              ref={hamburgerRef}
-              onClick={() => { if (mobileMenuOpen) setMobileMenuOpen(false); else openMobileMenu(); }}
-              className="kayad-util kayad-hamburger"
-              aria-label="Toggle navigation menu"
-              aria-expanded={mobileMenuOpen}
-              aria-controls="kayad-mobile-drawer"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6 text-[#0A3340]" aria-hidden="true" /> : <Menu className="w-6 h-6 text-[#0A3340]" aria-hidden="true" />}
-            </button>
         </div>
+
+        {/* Keep the mobile menu as the final, independent header control.
+            This guarantees the mobile order: brand, utility actions, menu. */}
+        <button
+          type="button"
+          ref={hamburgerRef}
+          onClick={() => { if (mobileMenuOpen) setMobileMenuOpen(false); else openMobileMenu(); }}
+          className="kayad-util kayad-hamburger"
+          aria-label="Toggle navigation menu"
+          aria-expanded={mobileMenuOpen}
+          aria-controls="kayad-mobile-drawer"
+        >
+          {mobileMenuOpen ? <X className="w-6 h-6 text-[#0A3340]" aria-hidden="true" /> : <Menu className="w-6 h-6 text-[#0A3340]" aria-hidden="true" />}
+        </button>
       </div>
 
       {/* MOBILE DRAWER NAVIGATION — one premium, scroll-safe surface. */}

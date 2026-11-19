@@ -52,6 +52,20 @@ describe('Navbar', () => {
     expect(screen.getAllByText('KAYAD').length).toBeGreaterThan(0);
   });
 
+  it('places the mobile menu as the final header control after the brand and utility actions', () => {
+    render(<MemoryRouter><Navbar {...guestProps} /></MemoryRouter>);
+    const headerBar = document.querySelector('.kayad-header__bar');
+    const brand = headerBar?.querySelector(':scope > .kayad-brand');
+    const utilities = headerBar?.querySelector(':scope > .kayad-utilities');
+    const menu = screen.getByRole('button', { name: /toggle navigation menu/i });
+    expect(headerBar).toBeTruthy();
+    expect(brand).toBeTruthy();
+    expect(utilities).toBeTruthy();
+    expect(menu.parentElement).toBe(headerBar);
+    expect(Array.from(headerBar.children).indexOf(menu)).toBe(Array.from(headerBar.children).indexOf(utilities) + 1);
+    expect(utilities.contains(menu)).toBe(false);
+  });
+
   it('uses the supplied authoritative unread count for the Messages badge', () => {
     render(<MemoryRouter><Navbar {...guestProps} user={{ id: 'u1', name: 'Test User', role: 'buyer' }} unreadCount={4} /></MemoryRouter>);
     expect(screen.getByRole('button', { name: 'Messages, 4 unread' })).toBeInTheDocument();

@@ -69,7 +69,7 @@ describe('Personal activity timeline', () => {
     expect(screen.queryByText('Offer submitted')).toBeNull();
   });
 
-  it('does not call the seller inbox for a legacy buyer role', async () => {
+  it('keeps the legacy buyer role within its supported buying-only seller-inbox boundary', async () => {
     render(<PersonalActivityTimeline {...baseProps} role="buyer" />);
     await screen.findByText('Buyer enquiry opened');
     expect(mocks.mySellerEnquiries).not.toHaveBeenCalled();

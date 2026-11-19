@@ -1,12 +1,12 @@
 import './homepage-redesign.css';
 import React, { useState, useMemo, useEffect, useLayoutEffect, useCallback, useRef } from 'react';
-import InventoryFilterPanel, { ANY, ComboField, NumberField, type FilterValues } from './InventoryFilterPanel';
+import InventoryFilterPanel, { ANY, type FilterValues } from './InventoryFilterPanel';
 import { CONDITIONS } from '../../../constants/vehicleOptions';
 import { Vehicle, UserProfile } from '../../../types';
 import InventoryCardMedia from './InventoryCardMedia';
 import ContactSellerSheet from './ContactSellerSheet';
 import VehicleCard from '../../../components/VehicleCard';
-import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, Filter, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon, Gauge, Fuel, MapPin, PlayCircle, Heart, CarFront, Phone } from 'lucide-react';
+import { SlidersHorizontal, Search, RotateCcw, Grid, List as ListIcon, ArrowRightLeft, X, ChevronLeft, ChevronRight, Gavel, ShieldCheck, CheckCircle2, Lock, Landmark, Clock, Bell, PanelLeftOpen, LayoutGrid, Settings, AlertTriangle, Megaphone, Image as ImageIcon, Gauge, Fuel, MapPin, PlayCircle, Heart, CarFront, Phone } from 'lucide-react';
 import { usePrefersReducedMotion } from '../../../hooks/useMediaQuery';
 import { Select, Button, Card, SkeletonGrid } from '../../../components/ui';
 import { isEscrowApplicable } from '../../../utils/escrow';
@@ -16,6 +16,7 @@ import { getVisibleHeroSlides, HeroSlide } from '../../../services/heroApi';
 import { adminAPI } from '../../../api/api';
 import { getCars, peekCars, getCarById, getCurrentFeaturedCampaignCarIds, mapBackendCarToVehicle, VehicleApiError, type GetCarsParams } from '../../../services/vehicleApi';
 import { classifyInventoryFailure, type InventoryFailure } from '../utils/inventoryAvailability';
+import { getEffectiveGridColumns, validateInventoryFilterRanges } from '../utils/inventoryPresentation';
 import { getSearchFacets, type SearchFacetsResponse } from '../../../services/searchApi';
 import { getVisibleAdSlots, recordAdEvent, AdSlot } from '../../../services/adApi';
 import { useHomePageConfig, ACCENT_THEME_CLASSES, DEFAULT_HOME_PAGE_CONFIG } from '../hooks/useHomePageConfig';
@@ -30,6 +31,14 @@ import { selectHeroVehicles, heroComposition, safeHeroCtaLabel, heroImageFor } f
 import { Pause, Play } from 'lucide-react';
 
 const kenyaOnlyCopy = (value: string) => value.replace(/East Africa/gi, 'Kenya');
+
+/** Compact, accessible page-number window for the server-owned inventory pagination. */
+const getInventoryPageItems = (currentPage: number, totalPages: number): Array<number | 'ellipsis'> => {
+  if (totalPages <= 7) return Array.from({ length: totalPages }, (_, index) => index + 1);
+  if (currentPage <= 4) return [1, 2, 3, 4, 5, 'ellipsis', totalPages];
+  if (currentPage >= totalPages - 3) return [1, 'ellipsis', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+  return [1, 'ellipsis', currentPage - 1, currentPage, currentPage + 1, 'ellipsis', totalPages];
+};
 // Empty = the built-in procedural KAYAD showroom environment (see homepage-redesign.css). An administrator may still choose an allow-listed custom image.
 const KENYA_ROAD_HERO_BACKGROUND = '';
 const LEGACY_HERO_BACKGROUNDS = ['/hero/kayad-nairobi-kicc.jpg', 'https://commons.wikimedia.org/wiki/Special:FilePath/Nairobi%20skyline%20from%20Uhuru%20Park.jpg?width=2400', '/hero/kayad-kenyan-highlands-road.svg', '/hero/kayad-thika-expressway-no-signs.svg'];
@@ -169,6 +178,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [minYear, setMinYear] = useState<number>(0);
   const [maxYear, setMaxYear] = useState<number>(2026);
   const [maxMileage, setMaxMileage] = useState<number>(250000);
+  const [filterRangeError, setFilterRangeError] = useState<string | null>(null);
 
   // Boolean Feature Toggles
   const [onlyAuction, setOnlyAuction] = useState<boolean>(false);
@@ -189,9 +199,21 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [sortBy, setSortBy] = useState<
     'newest' | 'price-asc' | 'price-desc' | 'mileage' | 'year' | 'most-viewed' | 'auction-ending'
   >('newest');
-  // The desktop filter panel is a core marketplace surface and remains visible.
-  const showDesktopSidebar = true;
+  // Admin controls desktop sidebar visibility. Mobile retains the filter drawer.
+  const showDesktopSidebar = homeConfig.inventoryLayout.showSidebar;
   const [showMobileFilterDrawer, setShowMobileFilterDrawer] = useState<boolean>(false);
+  const inventoryResultsRef = useRef<HTMLDivElement | null>(null);
+  const [inventoryResultsWidth, setInventoryResultsWidth] = useState(0);
+
+  useEffect(() => {
+    const element = inventoryResultsRef.current;
+    if (!element || typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(([entry]) => {
+      setInventoryResultsWidth(Math.round(entry.contentRect.width));
+    });
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
 
   // Admin presentation settings are the default layout. Visitor toolbar
   // controls can still make a temporary local change without changing the
@@ -214,23 +236,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     },
   }[homeConfig.inventoryLayout.cardDensity];
 
+  // Mirror the CSS container-query breakpoints so requested and effective columns stay explicit.
+  const effectiveGridColumns = getEffectiveGridColumns(gridColumns, inventoryResultsWidth);
+
   // Super Admin configurable search choices (Home page settings): price steps and the earliest year offered.
   const filterOptions = homeConfig.filterOptions ?? DEFAULT_HOME_PAGE_CONFIG.filterOptions;
   const priceSteps = filterOptions.priceSteps;
-  const currentYear = Math.max(new Date().getFullYear(), 2026);
-  const yearChoices = useMemo(() => {
-    const first = Math.min(filterOptions.yearFrom, currentYear);
-    const years = Array.from({ length: currentYear - first + 1 }, (_, i) => first + i);
-    return minYear === 0 || years.includes(minYear) ? years : [...years, minYear].sort((a, b) => a - b);
-  }, [filterOptions.yearFrom, currentYear, minYear]);
-  const shortAmount = (v: number) => (v >= 1000000 ? `${Number((v / 1000000).toFixed(2))}M` : `${Math.round(v / 1000)}K`);
   const [contactVehicle, setContactVehicle] = useState<{ id: string; title: string } | null>(null);
-  const activeSidebarFilters = [
-    selectedMake !== 'All', selectedModel !== 'All', selectedBodyStyle !== 'All', selectedFuel !== 'All',
-    selectedTransmission !== 'All', selectedSellerType !== 'All', selectedCondition !== 'All', selectedColor !== 'All', maxPrice !== 20000000, minPrice > 0,
-    minYear !== 0, maxYear !== 2026, maxMileage < 250000, onlyAuction,
-  ].filter(Boolean).length;
-
   // The selected desktop column count is rendered through a dedicated CSS
   // contract instead of dynamically assembled Tailwind grid classes. This
   // keeps the 3/4/5 control deterministic in production builds and at every
@@ -496,7 +508,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     pageSize, searchQuery, selectedCounty, selectedMake, selectedModel,
     selectedBodyStyle, selectedFuel, selectedTransmission, selectedCondition,
     selectedSellerType, minPrice, maxPrice, minYear, maxYear, maxMileage,
-    onlyAuction, sortBy, dealerScope?.id
+    onlyAuction, sortBy, selectedColor, dealerScope?.id
   ]);
 
   // The backend has already paginated this page. Do not slice it again.
@@ -511,6 +523,21 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     minPrice, maxPrice, minYear, maxYear, maxMileage, auction: onlyAuction,
   };
   const applyFilterPatch = (patch: Partial<FilterValues>) => {
+    const nextMinPrice = patch.minPrice ?? minPrice;
+    const nextMaxPrice = patch.maxPrice ?? maxPrice;
+    const nextMinYear = patch.minYear ?? minYear;
+    const nextMaxYear = patch.maxYear ?? maxYear;
+    const rangeError = validateInventoryFilterRanges({
+      minPrice: nextMinPrice, maxPrice: nextMaxPrice, minYear: nextMinYear, maxYear: nextMaxYear,
+    });
+    if (rangeError) {
+      setFilterRangeError(rangeError);
+      return;
+    }
+    setFilterRangeError(null);
+    // Filter changes must request page one in the same render. Relying only on
+    // the later reset effect can briefly fetch the new filter on an old page.
+    setCurrentPage(1);
     if (patch.make !== undefined) setSelectedMake(patch.make);
     if (patch.model !== undefined) setSelectedModel(patch.model);
     if (patch.body !== undefined) setSelectedBodyStyle(patch.body);
@@ -534,6 +561,8 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
   // Reset all filters to default
   const resetFilters = useCallback(() => {
+    setFilterRangeError(null);
+    setCurrentPage(1);
     onSearchChange('');
     setSelectedMake('All');
     setSelectedModel('All');
@@ -557,29 +586,32 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // Compute active removable chips for Summary Bar
   const activeFilters = useMemo(() => {
     const list: { id: string; label: string; onClear: () => void }[] = [];
-    if (searchQuery) list.push({ id: 'search', label: `"${searchQuery}"`, onClear: () => onSearchChange('') });
-    if (selectedCounty !== 'All Kenya') list.push({ id: 'county', label: `Location: ${selectedCounty}`, onClear: () => onCountyChange('All Kenya') });
-    if (selectedMake !== 'All') list.push({ id: 'make', label: `Make: ${selectedMake}`, onClear: () => { setSelectedMake('All'); setSelectedModel('All'); } });
-    if (selectedModel !== 'All') list.push({ id: 'model', label: `Model: ${selectedModel}`, onClear: () => setSelectedModel('All') });
-    if (selectedBodyStyle !== 'All') list.push({ id: 'body', label: `Body: ${selectedBodyStyle}`, onClear: () => setSelectedBodyStyle('All') });
-    if (selectedFuel !== 'All') list.push({ id: 'fuel', label: `Fuel: ${selectedFuel}`, onClear: () => setSelectedFuel('All') });
-    if (selectedTransmission !== 'All') list.push({ id: 'trans', label: `Trans: ${selectedTransmission}`, onClear: () => setSelectedTransmission('All') });
-    if (selectedSellerType !== 'All') list.push({ id: 'seller', label: `Seller: ${selectedSellerType}`, onClear: () => setSelectedSellerType('All') });
-    if (selectedCondition !== 'All') list.push({ id: 'cond', label: `Condition: ${selectedCondition}`, onClear: () => setSelectedCondition('All') });
-    if (maxPrice < 20000000) list.push({ id: 'price', label: `Under Ksh ${(maxPrice / 1000000).toFixed(1)}M`, onClear: () => setMaxPrice(20000000) });
-    if (minYear > 0) list.push({ id: 'minyear', label: `From ${minYear}`, onClear: () => setMinYear(0) });
-    if (maxYear < 2026) list.push({ id: 'maxyear', label: `Up to ${maxYear}`, onClear: () => setMaxYear(2026) });
-    if (selectedColor !== 'All') list.push({ id: 'color', label: `Colour: ${selectedColor}`, onClear: () => setSelectedColor('All') });
-    if (minPrice > 0) list.push({ id: 'minprice', label: `From Ksh ${minPrice.toLocaleString('en-KE')}`, onClear: () => setMinPrice(0) });
-    if (maxMileage < 250000) list.push({ id: 'mileage', label: `Under ${maxMileage.toLocaleString('en-KE')} km`, onClear: () => setMaxMileage(250000) });
-    if (onlyAuction) list.push({ id: 'auction', label: 'Live Auction', onClear: () => setOnlyAuction(false) });
-    if (dealerScope?.id) list.push({ id: 'dealer', label: `Dealer: ${dealerScope.name}`, onClear: () => onClearDealerScope?.() });
+    if (searchQuery) list.push({ id: 'search', label: `"${searchQuery}"`, onClear: () => { setCurrentPage(1); onSearchChange(''); } });
+    if (selectedCounty !== 'All Kenya') list.push({ id: 'county', label: `Location: ${selectedCounty}`, onClear: () => { setCurrentPage(1); onCountyChange('All Kenya'); } });
+    if (selectedMake !== 'All') list.push({ id: 'make', label: `Make: ${selectedMake}`, onClear: () => { setCurrentPage(1); setSelectedMake('All'); setSelectedModel('All'); } });
+    if (selectedModel !== 'All') list.push({ id: 'model', label: `Model: ${selectedModel}`, onClear: () => { setCurrentPage(1); setSelectedModel('All'); } });
+    if (selectedBodyStyle !== 'All') list.push({ id: 'body', label: `Body: ${selectedBodyStyle}`, onClear: () => { setCurrentPage(1); setSelectedBodyStyle('All'); } });
+    if (selectedFuel !== 'All') list.push({ id: 'fuel', label: `Fuel: ${selectedFuel}`, onClear: () => { setCurrentPage(1); setSelectedFuel('All'); } });
+    if (selectedTransmission !== 'All') list.push({ id: 'trans', label: `Trans: ${selectedTransmission}`, onClear: () => { setCurrentPage(1); setSelectedTransmission('All'); } });
+    if (selectedSellerType !== 'All') list.push({ id: 'seller', label: `Seller: ${selectedSellerType}`, onClear: () => { setCurrentPage(1); setSelectedSellerType('All'); } });
+    if (selectedCondition !== 'All') list.push({ id: 'cond', label: `Condition: ${selectedCondition}`, onClear: () => { setCurrentPage(1); setSelectedCondition('All'); } });
+    if (maxPrice < 20000000) list.push({ id: 'price', label: `Under Ksh ${(maxPrice / 1000000).toFixed(1)}M`, onClear: () => { setCurrentPage(1); setMaxPrice(20000000); } });
+    if (minYear > 0) list.push({ id: 'minyear', label: `From ${minYear}`, onClear: () => { setCurrentPage(1); setMinYear(0); } });
+    if (maxYear < 2026) list.push({ id: 'maxyear', label: `Up to ${maxYear}`, onClear: () => { setCurrentPage(1); setMaxYear(2026); } });
+    if (selectedColor !== 'All') list.push({ id: 'color', label: `Colour: ${selectedColor}`, onClear: () => { setCurrentPage(1); setSelectedColor('All'); } });
+    if (minPrice > 0) list.push({ id: 'minprice', label: `From Ksh ${minPrice.toLocaleString('en-KE')}`, onClear: () => { setCurrentPage(1); setMinPrice(0); } });
+    if (maxMileage < 250000) list.push({ id: 'mileage', label: `Under ${maxMileage.toLocaleString('en-KE')} km`, onClear: () => { setCurrentPage(1); setMaxMileage(250000); } });
+    if (onlyAuction) list.push({ id: 'auction', label: 'Live Auction', onClear: () => { setCurrentPage(1); setOnlyAuction(false); } });
+    if (dealerScope?.id) list.push({ id: 'dealer', label: `Dealer: ${dealerScope.name}`, onClear: () => { setCurrentPage(1); onClearDealerScope?.(); } });
     return list;
   }, [
     searchQuery, selectedCounty, selectedMake, selectedModel, selectedBodyStyle,
     selectedFuel, selectedTransmission, selectedSellerType, selectedCondition,
     maxPrice, minPrice, maxMileage, selectedColor, minYear, maxYear, onlyAuction, onSearchChange, onCountyChange, dealerScope, onClearDealerScope
   ]);
+
+  // Badge, mobile trigger and summary chips share this exact removable-filter count.
+  const activeSidebarFilters = activeFilters.length;
 
   // Recently Viewed Vehicle Objects
   const recentlyViewedVehicles = useMemo(() => {
@@ -945,15 +977,11 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
     };
   })();
 
-  // FEATURED PICKS — a small, curated strip shown above the full
-  // filterable inventory grid. Home-page redesign pass: the page
-  // previously went straight from the trust strip into "browse
-  // everything," with no editorial moment giving a first-time visitor
-  // 2-3 reasons to trust what they're looking at before committing to
-  // filtering through the full catalog. Reuses real, already-computed
-  // fields (marketPriceAvg, viewsCount, auctionEndsAt) rather than
-  // introducing new data - each pick is drawn from the actual vehicles
-  // prop, not separately curated/mocked content.
+  // FEATURED PICKS — a small curated strip built from real inventory.
+  // It is rendered after the main inventory so the approved homepage
+  // path from category navigation into the filterable catalogue stays
+  // direct. Reuses existing marketPriceAvg, viewsCount and auctionEndsAt
+  // fields; no mock or separately curated vehicle data is introduced.
   const featuredPicks = useMemo(() => {
     const picks: { vehicle: Vehicle; reason: string }[] = [];
 
@@ -1083,7 +1111,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           layer changed, not the data or behavior. */}
 
       {/* Marketplace discovery shell: compact by design. The marketplace opens directly into the automotive experience rather than a second dashboard-like layer. */}
-      <div id="market-journey" className="mx-auto flex w-full max-w-[1480px] items-center justify-between gap-x-3 gap-y-1.5 px-4 pb-2 pt-3 sm:px-6 sm:pt-4 lg:px-8">
+      <div id="market-journey" className="mx-auto flex w-full max-w-[1480px] items-center justify-between gap-x-3 gap-y-1 px-4 py-1 sm:px-6 lg:px-8">
         <span className="min-w-0 flex-1 text-[9px] font-black uppercase leading-snug tracking-[0.14em] text-navy-600 sm:text-[10px] sm:tracking-[0.22em]">KAYARD KE MARKETPLACE · VERIFIED INVENTORY</span>
         <div role="group" aria-label="Marketplace at a glance" className="flex shrink-0 flex-wrap items-center justify-end gap-1.5 text-[9px] font-bold text-[#64748B] sm:gap-2 sm:text-[10px]">
           {inventoryStatusText ? (
@@ -1097,6 +1125,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       </div>
 
       {/* 1. HERO - one continuous commercial composition. */}
+      {/* This legacy config key intentionally controls the combined hero/search discovery surface. */}
       {!savedOnly && homeConfig.sectionVisibility.searchTrustCard && (
         <PremiumHero
           environment={heroPresentation.backgroundUrl ? 'custom' : 'brand'}
@@ -1181,14 +1210,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
       {!savedOnly && <section className="kayad-home-category-strip border-y border-[#D7E7E4] bg-white" aria-label="Vehicle categories">
         <div className="mx-auto flex max-w-[1480px] items-center gap-2 overflow-x-auto px-4 py-3 sm:px-6 lg:px-8">
           {[
-            ['All', () => { setSelectedBodyStyle('All'); setSelectedFuel('All'); }],
-            ['SUV', () => setSelectedBodyStyle('SUV')],
-            ['Sedan', () => setSelectedBodyStyle('Sedan')],
-            ['Pickup', () => setSelectedBodyStyle('Pickup')],
-            ['Hatchback', () => setSelectedBodyStyle('Hatchback')],
-            ['Truck', () => setSelectedBodyStyle('Truck')],
-            ['Electric', () => setSelectedFuel('Electric')],
-            ['Hybrid', () => setSelectedFuel('Hybrid')],
+            ['All', () => { setCurrentPage(1); setSelectedBodyStyle('All'); setSelectedFuel('All'); }],
+            ['SUV', () => { setCurrentPage(1); setSelectedBodyStyle('SUV'); setSelectedFuel('All'); }],
+            ['Sedan', () => { setCurrentPage(1); setSelectedBodyStyle('Sedan'); setSelectedFuel('All'); }],
+            ['Pickup', () => { setCurrentPage(1); setSelectedBodyStyle('Pickup'); setSelectedFuel('All'); }],
+            ['Hatchback', () => { setCurrentPage(1); setSelectedBodyStyle('Hatchback'); setSelectedFuel('All'); }],
+            ['Truck', () => { setCurrentPage(1); setSelectedBodyStyle('Truck'); setSelectedFuel('All'); }],
+            ['Electric', () => { setCurrentPage(1); setSelectedBodyStyle('All'); setSelectedFuel('Electric'); }],
+            ['Hybrid', () => { setCurrentPage(1); setSelectedBodyStyle('All'); setSelectedFuel('Hybrid'); }],
           ].map(([label, action]) => (
             <button
               key={label as string}
@@ -1197,6 +1226,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 : label === 'Electric' || label === 'Hybrid' ? selectedFuel === label
                 : selectedBodyStyle === label
               }
+              aria-label={label === 'All' ? 'All vehicle categories (does not clear other filters)' : `${label} category`}
               type="button"
               onClick={action as () => void}
               className={`shrink-0 min-h-10 rounded-full border px-4 py-2 text-[11px] font-extrabold transition ${(label === 'All' ? selectedBodyStyle === 'All' && selectedFuel === 'All' : label === 'Electric' || label === 'Hybrid' ? selectedFuel === label : selectedBodyStyle === label) ? 'border-navy-600 bg-navy-600 text-white shadow-sm' : 'border-[#D7E7E4] bg-white text-[#64748B] hover:border-navy-600 hover:text-navy-600'}`}
@@ -1210,116 +1240,15 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
         </div>
       </section>}
 
-      {/* 2. SEARCH BRIDGE - overlaps the hero, real, wired filter fields */}
-      {!savedOnly && homeConfig.sectionVisibility.searchTrustCard && (
-      <div className="kayad-search-bridge relative z-10 mt-3 w-full px-3 sm:mt-4 sm:px-5 lg:px-8">
-        <div className="flex items-center gap-2 rounded-2xl border border-[#D7E7E4] bg-white p-2 shadow-[0_10px_28px_rgba(11,29,58,.08)] sm:hidden" data-testid="mobile-search-row">
-          <div className="flex min-w-0 flex-1 items-center gap-2 rounded-xl bg-[#F6FAF9] px-3">
-            <Search className="h-4 w-4 shrink-0 text-[#94A3B8]" aria-hidden="true" />
-            <input
-              type="search"
-              enterKeyHint="search"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder="Search make, model or keyword"
-              aria-label="Search vehicles"
-              className="h-11 w-full min-w-0 bg-transparent text-[14px] outline-none placeholder:text-[#94A3B8]"
-            />
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowMobileFilterDrawer(true)}
-            aria-label={activeSidebarFilters > 0 ? `Open filters, ${activeSidebarFilters} active` : 'Open filters'}
-            className="relative flex h-11 shrink-0 items-center gap-1.5 rounded-xl bg-[#0A3340] px-3.5 text-[13px] font-extrabold text-white"
-          >
-            <SlidersHorizontal className="h-4 w-4" aria-hidden="true" /> Filters
-            {activeSidebarFilters > 0 && <span className="grid h-5 min-w-5 place-items-center rounded-full bg-[#13B8A6] px-1 text-[11px] font-black text-[#06303A]">{activeSidebarFilters}</span>}
-          </button>
-        </div>
-        <div className={`hidden w-full rounded-2xl border border-[#D7E7E4] bg-white p-3.5 shadow-[0_18px_45px_rgba(11,29,58,.10)] sm:grid sm:p-5 grid-cols-2 sm:grid-cols-2 ${showDesktopSidebar ? 'lg:grid-cols-5' : 'lg:grid-cols-6'} gap-3 items-end`}>
-          <div className={`col-span-2 ${showDesktopSidebar ? 'lg:col-span-2' : 'lg:col-span-1'} flex flex-col gap-1.5 min-w-0`}>
-            <label className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Search</label>
-            <div className="border border-[#D7E7E4] rounded-lg px-3 py-2.5 flex items-center gap-2 bg-[#F6FAF9]">
-              <Search className="w-3.5 h-3.5 text-[#94A3B8] shrink-0" />
-              <input
-                value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Make, model or keyword…"
-                aria-label="Search vehicles by make, model or keyword"
-                className="w-full bg-transparent text-xs outline-none min-w-0"
-              />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5 min-w-0">
-            {/* The label follows its select: when the select is hidden by the sidebar the label stays in the grid cell (layout unchanged) but is invisible, so no orphaned "MAKE" caption remains. */}
-            {/* Fixed: this select was always visible regardless of the
-                sidebar, but the sidebar has its own Make selector too -
-                showing both at once above the lg: breakpoint is
-                redundant. Hidden via CSS only (never JS-removed, so it
-                stays reachable below lg: where the sidebar itself is
-                always CSS-hidden), matching the sidebar's own
-                already-established pattern for this exact class of
-                redundancy. */}
-            <div className={showDesktopSidebar ? 'lg:hidden' : ''}>
-              <ComboField compact id="hero-make" label="Make" ariaLabel="Hero make filter" value={selectedMake} suggestions={makes.filter((m) => m && m !== 'All')} placeholder="Any make — pick or type" onCommit={(make) => { setSelectedMake(make); setSelectedModel('All'); }} />
-            </div>
-          </div>
-          <div className="flex flex-col gap-1.5 min-w-0">
-            <NumberField compact id="hero-max-price" label="Price up to (KES)" ariaLabel="Hero maximum price filter" value={maxPrice} emptyValue={MAX_PRICE} max={MAX_PRICE} placeholder="Any — pick or type" suggestions={priceSteps.map((step) => ({ value: step, label: `Ksh ${shortAmount(step)}` }))} onCommit={(n) => setMaxPrice(n)} />
-          </div>
-          <div className="flex flex-col gap-1.5 min-w-0">
-            <NumberField compact id="hero-min-year" label="Year from" ariaLabel="Hero year filter" value={minYear} emptyValue={0} max={currentYear} placeholder={`${filterOptions.yearFrom} – ${currentYear}`} suggestions={yearChoices.map((y) => ({ value: y }))} onCommit={(y) => setMinYear(y > 0 && y <= filterOptions.yearFrom ? 0 : y)} />
-          </div>
-          <div className="flex flex-col gap-1.5 min-w-0">
-            <ComboField compact id="hero-body" label="Body style" ariaLabel="Hero body style filter" value={selectedBodyStyle} suggestions={bodyStyles.filter((b) => b && b !== 'All')} placeholder="Any — pick or type" onCommit={(body) => setSelectedBodyStyle(body)} />
-          </div>
-          <button
-            onClick={() => document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth' })}
-            type="button"
-            aria-label="Apply vehicle filters and view inventory"
-            className="col-span-2 lg:col-span-1 min-h-11 bg-navy-600 hover:bg-navy-700 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-colors whitespace-nowrap shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]"
-          >
-            Filter Vehicles
-          </button>
-        </div>
-      </div>
-      )}
 
-      {!savedOnly && featuredPicks.length > 0 && !serverError && (
-        <section className="mx-auto w-full max-w-[1480px] px-4 pt-7 sm:px-6 lg:px-8" aria-labelledby="featured-vehicles-heading">
-          <div className="mb-3 flex items-end justify-between gap-4">
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-navy-600">KAYARD KE SELECT</span>
-              <h2 id="featured-vehicles-heading" className="mt-1 font-display text-xl font-black tracking-[-0.025em] text-navy-900">Featured vehicles</h2>
-              <p className="mt-0.5 text-xs text-[#64748B]">Real listings worth a closer look, selected from the live catalogue.</p>
-            </div>
-            <button type="button" onClick={() => document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="hidden text-[11px] font-extrabold text-navy-600 sm:block">View all →</button>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredPicks.map(({ vehicle, reason }) => (
-              <div key={vehicle.id} className="relative">
-                <span className="absolute left-3 top-3 z-20 rounded-full border border-white/30 bg-navy-900/85 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#BDF5EE] shadow-md backdrop-blur">{reason}</span>
-                <VehicleCard
-                  vehicle={vehicle}
-                  isSaved={savedVehicles.includes(vehicle.id)}
-                  isCompared={comparedVehicles.includes(vehicle.id)}
-                  onToggleSave={onToggleSave}
-                  onToggleCompare={onToggleCompare}
-                  onQuickView={handleVehicleSelect}
-                  onStartEscrow={onStartEscrow}
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+
 
       <div className="w-full min-w-0 px-0 pt-5 flex gap-0 lg:gap-4 items-start" id="market-results">
         {/* Left floating ad rail - its own column, never overlapping
             the search/filter/grid content next to it. */}
-        <div className="hidden 2xl:block shrink-0 w-16"><FloatingAdRail placement="left_rail" /></div>
+        <FloatingAdRail placement="left_rail" />
 
-        <div className="w-full flex-1 min-w-0 px-3 sm:px-5 lg:px-8 2xl:px-10">
+        <div className="w-full flex-1 min-w-0 px-3 sm:px-4 lg:px-4 2xl:px-6">
         {/* 4. FILTER SUMMARY CHIPS */}
         {activeFilters.length > 0 && (
           <div className="flex flex-wrap items-center gap-2 mb-4">
@@ -1334,18 +1263,15 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
               </button>
             ))}
-            <button onClick={resetFilters} className={`text-[11px] font-bold ${accent.text600} hover:underline px-1`}>
-              Clear all
-            </button>
           </div>
         )}
 
         {/* 6. MARKET BODY: SIDEBAR + RESULTS GRID */}
-        <div className={`kayad-market-layout grid ${showDesktopSidebar ? 'lg:grid-cols-[236px_minmax(0,1fr)]' : 'lg:grid-cols-1'} gap-6 items-start`}>
+        <div className={`kayad-market-layout grid ${showDesktopSidebar ? 'lg:grid-cols-[252px_minmax(0,1fr)]' : 'lg:grid-cols-1'} gap-6 items-start`}>
           {/* SIDEBAR */}
           {showDesktopSidebar && (
-          <aside className="kayad-filter-panel hidden lg:block sticky top-20 overflow-hidden rounded-2xl border border-[#CFE3E0] bg-white shadow-[0_14px_40px_rgba(10,51,64,.10)]">
-            <div className="relative overflow-hidden bg-gradient-to-br from-[#0A3340] via-[#12576D] to-[#176B87] px-4 py-4 text-white">
+          <aside className="kayad-filter-panel hidden lg:flex lg:flex-col sticky top-20 overflow-hidden rounded-2xl border border-[#CFE3E0] bg-white shadow-[0_14px_40px_rgba(10,51,64,.10)]" aria-label="Vehicle inventory filters">
+            <div className="kayad-filter-panel__header relative z-10 shrink-0 overflow-hidden bg-gradient-to-br from-[#0A3340] via-[#12576D] to-[#176B87] px-4 py-4 text-white">
               <div aria-hidden="true" className="pointer-events-none absolute -right-8 -top-10 h-28 w-28 rounded-full bg-[#13B8A6]/25 blur-2xl" />
               <div className="relative flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
@@ -1361,7 +1287,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 <button onClick={resetFilters} className="rounded-lg px-2 py-1 text-[12.5px] font-bold text-white underline-offset-2 hover:bg-white/10 hover:underline">Reset all</button>
               </div>
             </div>
-            <div className="px-4 pb-4 pt-4">
+            <div className="kayad-filter-panel__body min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-4 pt-4">
             <InventoryFilterPanel idPrefix="sidebar" variant="sidebar" values={filterValues} limits={filterLimits} options={filterOptionLists} onChange={applyFilterPatch} onReset={resetFilters} />
 
 
@@ -1387,7 +1313,35 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           )}
 
           {/* RESULTS */}
-          <div className="kayad-inventory-results relative min-h-[400px] min-w-0" aria-busy={refreshing || undefined}>
+          <div ref={inventoryResultsRef} className="kayad-inventory-results relative min-h-[400px] min-w-0" aria-busy={refreshing || undefined}>
+        {filterRangeError && <div role="alert" aria-live="polite" className="mb-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-xs font-semibold text-rose-800">{filterRangeError}</div>}
+        <div className="kayad-inventory-controls-stack">
+        {!savedOnly && homeConfig.sectionVisibility.searchTrustCard && (
+          <div className="kayad-inventory-search-row" data-testid="mobile-search-row">
+            <label className="kayad-inventory-search-field">
+              <Search className="h-4 w-4 shrink-0 text-[#7A98A2]" aria-hidden="true" />
+              <span className="sr-only">Search vehicles by make, model or keyword</span>
+              <input
+                type="search"
+                enterKeyHint="search"
+                value={searchQuery}
+                onChange={(event) => { setCurrentPage(1); onSearchChange(event.target.value); }}
+                placeholder="Make, model or keyword…"
+                aria-label="Search vehicles by make, model or keyword"
+              />
+            </label>
+            <button
+              type="button"
+              onClick={() => setShowMobileFilterDrawer(true)}
+              aria-label={activeSidebarFilters > 0 ? `Open inventory filters, ${activeSidebarFilters} active` : 'Open inventory filters'}
+              className="kayad-inventory-search-filter lg:hidden"
+            >
+              <SlidersHorizontal className="h-4 w-4" aria-hidden="true" />
+              <span>Filters</span>
+              {activeSidebarFilters > 0 && <span className="kayad-inventory-filter-count">{activeSidebarFilters}</span>}
+            </button>
+          </div>
+        )}
         {/* 5. MARKET HEAD */}
         <div className="kayad-market-toolbar mb-5 rounded-2xl border border-[#D7E7E4] bg-white shadow-[0_10px_30px_rgba(11,29,58,0.06)]">
           <div className="flex flex-col gap-3 p-3 sm:gap-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
@@ -1421,7 +1375,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   <button
                     type="button"
                     key={n}
-                    onClick={() => setPageSize(n)}
+                    onClick={() => { setCurrentPage(1); setPageSize(n); }}
                     aria-pressed={pageSize === n}
                     className={`h-8 min-w-9 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${pageSize === n ? 'bg-navy-900 text-white shadow-sm' : 'text-[#64748B] hover:bg-white hover:text-navy-900'}`}
                   >
@@ -1434,7 +1388,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 <span className="text-[10px] font-bold uppercase tracking-wide text-[#64748B]">Sort</span>
                 <select
                   value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                  onChange={(e) => { setCurrentPage(1); setSortBy(e.target.value as typeof sortBy); }}
                   aria-label="Sort inventory"
                   className="min-w-0 flex-1 bg-transparent text-xs font-bold text-navy-900 outline-none focus-visible:ring-2 focus-visible:ring-[#13B8A6]"
                 >
@@ -1449,28 +1403,35 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </label>
 
               {viewMode === 'grid' && (
-                <div className="kayad-toolbar-control hidden h-10 items-center gap-1 rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-1 md:flex" role="group" aria-label="Desktop grid columns">
+                <div className="kayad-toolbar-control hidden h-10 items-center gap-1 rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-1 lg:flex" role="group" aria-label="Desktop grid columns">
                   {[3, 4, 5].map((n) => (
                     <button
                       key={n}
+                      type="button"
                       onClick={() => setGridColumns(n as 3 | 4 | 5)}
                       aria-pressed={gridColumns === n}
                       className={`h-8 min-w-9 rounded-lg px-2 text-[11px] font-bold transition-colors ${gridColumns === n ? 'bg-navy-600 text-white' : 'text-[#64748B] hover:bg-white hover:text-navy-900'}`}
-                      title={`${n} columns`}
-                      aria-label={`${n}×`}
+                      title={`Request ${n} columns`}
+                      aria-label={`Request ${n} columns; ${effectiveGridColumns} currently displayed`}
                     >
                       <span className="hidden sm:inline">{n} columns</span><span className="sm:hidden">{n}×</span>
                     </button>
                   ))}
                 </div>
               )}
+              {viewMode === 'grid' && inventoryResultsWidth > 0 && (
+                <span className="hidden lg:inline text-[10px] font-semibold text-[#64748B]" aria-live="polite" data-testid="effective-grid-columns">
+                  Showing {effectiveGridColumns} column{effectiveGridColumns === 1 ? '' : 's'}
+                </span>
+              )}
 
-              <div className="kayad-toolbar-control flex h-10 items-center rounded-xl border border-[#D7E7E4] bg-white p-1" role="group" aria-label="Inventory view">
+              <div className="kayad-toolbar-control kayad-inventory-view-toggle flex h-10 items-center rounded-xl border border-[#D7E7E4] bg-white p-1" role="group" aria-label="Inventory view" data-testid="inventory-view-controls">
                 <button
                   type="button"
                   onClick={() => setViewMode('grid')}
                   aria-pressed={viewMode === 'grid'}
                   title="Grid view"
+                  aria-label="Grid view"
                   className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${viewMode === 'grid' ? 'bg-[#DDF4F0] text-navy-700' : 'text-[#64748B] hover:text-[#12576D]'}`}
                 >
                   <Grid className="w-3.5 h-3.5" /> <span className="hidden xl:inline">Grid</span>
@@ -1480,22 +1441,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   onClick={() => setViewMode('list')}
                   aria-pressed={viewMode === 'list'}
                   title="List view"
+                  aria-label="List view"
                   className={`flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-[11px] font-bold transition-colors ${viewMode === 'list' ? 'bg-[#DDF4F0] text-navy-700' : 'text-[#64748B] hover:text-[#12576D]'}`}
                 >
                   <ListIcon className="w-3.5 h-3.5" /> <span className="hidden xl:inline">List</span>
                 </button>
               </div>
 
-
-
-              <button
-                type="button"
-                aria-label="Open inventory filters"
-                onClick={() => setShowMobileFilterDrawer(true)}
-                className="hidden sm:flex lg:hidden h-10 items-center gap-1.5 rounded-xl border border-[#D7E7E4] bg-white px-3 text-[11px] font-bold text-[#64748B]"
-              >
-                <Filter className="w-3.5 h-3.5" /> Filters{activeSidebarFilters > 0 ? ` (${activeSidebarFilters})` : ''}
-              </button>
 
               {isAdmin && (
                 <button onClick={() => setShowAdminPanel(true)} className="flex items-center gap-1.5 rounded-xl bg-navy-900 px-3 py-2 text-[10px] font-bold text-white shadow-sm hover:bg-navy-700" title="Customize Home Page">
@@ -1514,6 +1466,9 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               )}
             </div>
           </div>
+        </div>
+
+
         </div>
 
           
@@ -1567,6 +1522,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 data-testid="inventory-grid"
                 data-view-mode={viewMode}
                 data-columns={viewMode === 'grid' ? gridColumns : undefined}
+                data-effective-columns={viewMode === 'grid' ? effectiveGridColumns : undefined}
                 className={viewMode === 'grid'
                   ? `kayad-inventory-grid ${inventoryDensity.gap}`
                   : `flex flex-col ${inventoryDensity.gap}`
@@ -1723,13 +1679,14 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                           ) : (
                             <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-[#64748B]">
                               <span>No inspection report yet</span>
-                              <button onClick={() => onNavigate('inspections')} className="text-navy-600 font-bold hover:text-navy-700 whitespace-nowrap">Request →</button>
+                              <button type="button" onClick={() => onNavigate('inspections')} className="text-navy-600 font-bold hover:text-navy-700 whitespace-nowrap">Request →</button>
                             </div>
                           )}
                         </div>
 
                         <div className={`kayad-vc-actions mt-auto pt-3 flex flex-col gap-2 ${viewMode === 'list' ? 'sm:flex-row sm:justify-end' : ''} max-sm:mt-4 max-sm:grid max-sm:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]`}>
                           <button
+                            type="button"
                             onClick={() => handleVehicleSelect(v)}
                             className={`kayad-vc-cta w-full max-sm:capitalize max-sm:min-h-12 max-sm:text-[14px] inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#B8D9D6] bg-white hover:bg-[#DDF4F0] hover:border-navy-600/40 py-2.5 text-xs font-extrabold text-navy-700 transition-colors ${viewMode === 'list' ? 'sm:w-auto sm:px-6' : ''}`}
                           >
@@ -1751,38 +1708,55 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
               </div>
             )}
 
-            {/* PAGINATION */}
-            {serverTotalPages > 1 && (
-              // STAGE 12 PHASE E: the two buttons below were sized to their
-              // icon plus p-2 (~30px hit area), short of a ~44px minimum
-              // practical touch target -- a documented Stage 11 carry-
-              // forward. min-h-11/min-w-11 (44px, Tailwind's scale already
-              // matches the common touch-target guideline) brings each
-              // button's hit area up without changing the icon size or the
-              // card/grid layout around it; gap-3 (was gap-2) gives a
-              // little more breathing room between the two buttons and the
-              // page-count text now that the buttons are slightly larger,
-              // so they stay comfortably separated rather than crowding
-              // each other.
-              <div className="flex items-center justify-center gap-3 mt-8">
-                <button
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="min-h-11 min-w-11 flex items-center justify-center border border-[#D7E7E4] rounded-lg disabled:opacity-40"
-                  aria-label="Previous page"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" aria-hidden="true" />
-                </button>
-                <span className="text-xs text-[#64748B] font-medium">Page {currentPage} of {totalPages}</span>
-                <button
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="min-h-11 min-w-11 flex items-center justify-center border border-[#D7E7E4] rounded-lg disabled:opacity-40"
-                  aria-label="Next page"
-                >
-                  <ChevronRight className="w-3.5 h-3.5" aria-hidden="true" />
-                </button>
-              </div>
+            {/* Server-owned pagination: keep the result range visible even on a single page. */}
+            {serverTotal > 0 && (
+              <nav
+                className="kayad-inventory-pagination mt-7 flex flex-col gap-3 rounded-2xl border border-[#D7E7E4] bg-white px-4 py-3 shadow-[0_5px_18px_rgba(10,51,64,.045)] sm:flex-row sm:items-center sm:justify-between"
+                aria-label="Inventory pagination"
+                data-testid="inventory-pagination"
+              >
+                <p className="text-xs font-medium text-[#64748B]" aria-live="polite" data-testid="pagination-summary">
+                  Showing <strong className="font-extrabold text-navy-900">{Math.min((currentPage - 1) * pageSize + 1, serverTotal)}–{Math.min(currentPage * pageSize, serverTotal)}</strong> of <strong className="font-extrabold text-navy-900">{serverTotal.toLocaleString()}</strong> vehicles
+                </p>
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between gap-1.5 sm:justify-end" data-testid="pagination-controls">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-[#D7E7E4] bg-white text-navy-700 transition-colors hover:border-[#176B87] hover:bg-[#F1F8F7] disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Previous page"
+                    >
+                      <ChevronLeft className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                    <div className="flex min-w-0 items-center gap-1" aria-label="Choose inventory page">
+                      {getInventoryPageItems(currentPage, totalPages).map((item, index) => item === 'ellipsis' ? (
+                        <span key={`ellipsis-${index}`} className="px-1.5 text-sm text-[#8AA1A8]" aria-hidden="true">…</span>
+                      ) : (
+                        <button
+                          key={item}
+                          type="button"
+                          onClick={() => setCurrentPage(item)}
+                          aria-label={`Go to page ${item}`}
+                          aria-current={currentPage === item ? 'page' : undefined}
+                          className={`kayad-pagination-page inline-flex min-h-10 min-w-10 items-center justify-center rounded-xl border px-2 text-xs font-bold transition-colors ${currentPage === item ? 'border-[#0A3340] bg-[#0A3340] text-white shadow-sm' : 'border-transparent bg-transparent text-[#526B78] hover:border-[#D7E7E4] hover:bg-[#F1F8F7]'}`}
+                        >
+                          {item}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl border border-[#D7E7E4] bg-white text-navy-700 transition-colors hover:border-[#176B87] hover:bg-[#F1F8F7] disabled:cursor-not-allowed disabled:opacity-40"
+                      aria-label="Next page"
+                    >
+                      <ChevronRight className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+              </nav>
             )}
           </div>
         </div>
@@ -1792,6 +1766,35 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
             the grid next to it. */}
         <div className="hidden 2xl:block shrink-0 w-16"><FloatingAdRail placement="right_rail" /></div>
       </div>
+
+      {!savedOnly && featuredPicks.length > 0 && !serverError && (
+        <section className="mx-auto w-full max-w-[1480px] px-4 pt-7 sm:px-6 lg:px-8" aria-labelledby="featured-vehicles-heading">
+          <div className="mb-3 flex items-end justify-between gap-4">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-navy-600">KAYARD KE SELECT</span>
+              <h2 id="featured-vehicles-heading" className="mt-1 font-display text-xl font-black tracking-[-0.025em] text-navy-900">Featured vehicles</h2>
+              <p className="mt-0.5 text-xs text-[#64748B]">Real listings worth a closer look, selected from the live catalogue.</p>
+            </div>
+            <button type="button" onClick={() => document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' })} className="hidden text-[11px] font-extrabold text-navy-600 sm:block">View all →</button>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {featuredPicks.map(({ vehicle, reason }) => (
+              <div key={vehicle.id} className="relative">
+                <span className="absolute left-3 top-3 z-20 rounded-full border border-white/30 bg-navy-900/85 px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.12em] text-[#BDF5EE] shadow-md backdrop-blur">{reason}</span>
+                <VehicleCard
+                  vehicle={vehicle}
+                  isSaved={savedVehicles.includes(vehicle.id)}
+                  isCompared={comparedVehicles.includes(vehicle.id)}
+                  onToggleSave={onToggleSave}
+                  onToggleCompare={onToggleCompare}
+                  onQuickView={handleVehicleSelect}
+                  onStartEscrow={onStartEscrow}
+                />
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {!savedOnly && <div className="w-full px-3 sm:px-5 lg:px-7 2xl:px-10">
         {/* 7. CTA BANDS */}

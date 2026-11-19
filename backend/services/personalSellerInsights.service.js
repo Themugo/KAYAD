@@ -12,7 +12,7 @@ export async function getPersonalSellerEnquiries(ownerId, { limit = 100 } = {}) 
   if (!listings.length) return { enquiries: [], count: 0, listingCount: 0 };
   const ids = listings.map((car) => car.id);
   const { data: rows, error } = await sb.from("leads")
-    .select("id,vehicle,source,stage,is_hot,archived,last_activity_at,created_at,estimated_value")
+    .select("id,vehicle,source,source_reference,stage,is_hot,archived,last_activity_at,created_at,estimated_value")
     .eq("dealer", ownerId).in("vehicle", ids)
     .order("last_activity_at", { ascending: false }).limit(Math.min(Math.max(Number(limit) || 100, 1), 200));
   if (error) throw error;
@@ -27,6 +27,7 @@ export async function getPersonalSellerEnquiries(ownerId, { limit = 100 } = {}) 
       status: byId.get(lead.vehicle).status,
     } : null,
     source: lead.source || "Marketplace",
+    chatId: lead.source === "chat" && typeof lead.source_reference === "string" ? lead.source_reference : null,
     stage: lead.stage || "new",
     isHot: lead.is_hot === true,
     archived: lead.archived === true,

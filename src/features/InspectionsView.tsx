@@ -206,14 +206,7 @@ export const InspectionsView: React.FC<InspectionsViewProps> = ({
             <Button variant="outline" size="lg" className="!text-white !border-white/60" onClick={() => onOpenInspectionMarketplace?.()}>Find a mechanic or garage</Button>
           </div>
         </div>
-      </section> : (
-        <section className="kayad-brand-hero rounded-3xl text-white p-6 sm:p-8" aria-labelledby="insp-account-title">
-          <p className="text-xs font-bold uppercase tracking-wider text-[#B8EEE7]">My account</p>
-          <h1 id="insp-account-title" className="mt-2 text-2xl sm:text-3xl font-black font-display">My inspections and reports</h1>
-          <p className="mt-2 text-sm text-[#EEF7F5] max-w-2xl">Private requests, bookings, payment status and reports linked to your account.</p>
-          <Button variant="accent" className="mt-4 min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.()}>Browse automotive services</Button>
-        </section>
-      )}
+      </section> : null}
 
       {viewMode === 'account' && signedIn && <div role="tablist" aria-label="Your inspection records" className="flex gap-1 border-b border-[#D7E7E4] overflow-x-auto">
         {tabs.map((t, i) => (

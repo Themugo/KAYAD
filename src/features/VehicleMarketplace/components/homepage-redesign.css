@@ -159,7 +159,6 @@
   box-shadow: 0 4px 16px rgba(10,51,64,.035);
 }
 .kayad-home-category-strip > div { padding-top: 12px; padding-bottom: 12px; }
-.kayad-search-bridge { scroll-margin-top: 90px; }
 .kayad-market-toolbar {
   border-radius: 22px;
   box-shadow: 0 12px 32px rgba(11,29,58,.055);
@@ -212,8 +211,6 @@
   .kayad-public-hero__mobile-stage { margin-top: 10px; }
   .kayad-home-category-strip > div { padding-top: 9px; padding-bottom: 9px; }
   .kayad-home-category-strip button { min-height: 38px; padding: 7px 13px; font-size: 10px; }
-  .kayad-search-bridge { margin-top: 10px; padding-left: 12px; padding-right: 12px; }
-  .kayad-search-bridge [data-testid="mobile-search-row"] { border-radius: 16px; box-shadow: 0 7px 20px rgba(11,29,58,.065); }
   .kayad-market-toolbar { margin-bottom: 14px; border-radius: 18px; }
   .kayad-market-toolbar > div { gap: 10px; padding: 12px; }
   .kayad-market-toolbar-controls { display: grid; grid-template-columns: minmax(0,1fr) auto; width: 100%; }
@@ -299,11 +296,6 @@
 
   .kayad-home-category-strip > div { padding-top: 7px !important; padding-bottom: 7px !important; }
   .kayad-home-category-strip button { min-height: 34px !important; padding: 6px 11px !important; }
-
-  .kayad-search-bridge { margin-top: 8px !important; }
-  .kayad-search-bridge [data-testid="mobile-search-row"] { padding: 6px !important; border-radius: 15px !important; }
-  .kayad-search-bridge [data-testid="mobile-search-row"] input { height: 39px !important; font-size: 12px !important; }
-  .kayad-search-bridge [data-testid="mobile-search-row"] button { height: 39px !important; font-size: 11px !important; }
 
   #market-results { padding-top: 10px !important; }
   .kayad-market-toolbar { margin-bottom: 10px !important; }
@@ -410,21 +402,6 @@
     min-height: 32px !important;
     padding: 5px 10px !important;
     font-size: 10px !important;
-  }
-  .kayad-search-bridge {
-    margin-top: 7px !important;
-    padding-inline: 11px !important;
-    scroll-margin-top: 76px;
-  }
-  .kayad-search-bridge [data-testid="mobile-search-row"] {
-    padding: 5px !important;
-    gap: 6px !important;
-    border-radius: 14px !important;
-  }
-  .kayad-search-bridge [data-testid="mobile-search-row"] input,
-  .kayad-search-bridge [data-testid="mobile-search-row"] button {
-    height: 39px !important;
-    min-height: 39px !important;
   }
   #market-results {
     padding-top: 8px !important;
@@ -725,10 +702,6 @@
     font-size: 11px;
     scroll-snap-align: start;
   }
-  .kayad-homepage .kayad-search-bridge {
-    margin-top: 10px;
-    padding-inline: 12px;
-  }
   .kayad-homepage [data-testid="mobile-search-row"] {
     gap: 7px;
     padding: 7px;
@@ -1023,4 +996,367 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .kayad-home-category-strip button { transition: none !important; }
+}
+
+/* 2026-11-19 — Implementation 05A: consolidate search and bring inventory directly after categories.
+   Presentation only: the canonical VehicleMarketplace search/filter state and drawer remain authoritative. */
+.kayad-homepage #market-results {
+  margin-top: 0;
+  padding-top: 8px;
+}
+.kayad-homepage #market-results > .flex-1 {
+  min-width: 0;
+}
+.kayad-homepage .kayad-market-toolbar {
+  margin-bottom: 10px;
+}
+.kayad-inventory-search-row {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: stretch;
+  gap: 10px;
+  margin: 0 0 18px;
+}
+.kayad-inventory-search-field {
+  display: flex;
+  min-width: 0;
+  min-height: 46px;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #CFE3E0;
+  border-radius: 13px;
+  background: #F7FBFA;
+  padding: 0 14px;
+  color: #78939C;
+  transition: border-color .16s ease, box-shadow .16s ease, background-color .16s ease;
+}
+.kayad-inventory-search-field:focus-within {
+  border-color: #168D91;
+  background: #FFFFFF;
+  box-shadow: 0 0 0 3px rgba(19,184,166,.12);
+}
+.kayad-inventory-search-field input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #0A3340;
+  font-size: 13px;
+}
+.kayad-inventory-search-field input::placeholder { color: #809AA2; opacity: 1; }
+.kayad-inventory-search-filter {
+  display: inline-flex;
+  min-height: 46px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #0A3340;
+  border-radius: 12px;
+  background: #0A3340;
+  padding: 0 15px;
+  color: #FFFFFF;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.kayad-inventory-search-filter:focus-visible {
+  outline: 2px solid #13B8A6;
+  outline-offset: 2px;
+}
+.kayad-inventory-filter-count {
+  display: inline-grid;
+  min-width: 19px;
+  height: 19px;
+  place-items: center;
+  border-radius: 999px;
+  background: #13B8A6;
+  padding: 0 5px;
+  color: #06303A;
+  font-size: 10px;
+  font-weight: 900;
+}
+.kayad-homepage .kayad-home-category-strip + #market-results { border-top: 0; }
+.kayad-homepage #market-results .kayad-market-layout { gap: 16px; }
+
+@media (min-width: 1024px) {
+  .kayad-homepage #market-results { padding-top: 8px; }
+  .kayad-homepage .kayad-market-toolbar > div { min-height: 82px; padding: 14px 17px; gap: 14px; }
+  .kayad-inventory-search-row { margin-bottom: 16px; }
+}
+@media (max-width: 1023.98px) {
+  .kayad-homepage #market-results { padding-top: 8px; }
+  .kayad-homepage #market-results > .flex-1 { padding-inline: 14px; }
+  .kayad-homepage .kayad-market-toolbar { margin-bottom: 9px; }
+  .kayad-homepage .kayad-market-toolbar > div { gap: 10px; padding: 12px; }
+  .kayad-inventory-search-row { margin-bottom: 14px; }
+}
+@media (max-width: 639.98px) {
+  .kayad-homepage #market-results { padding-top: 6px; padding-bottom: 24px; }
+  .kayad-homepage #market-results > .flex-1 { padding-inline: 12px; }
+  .kayad-homepage .kayad-market-toolbar { margin-bottom: 8px; border-radius: 15px; }
+  .kayad-homepage .kayad-market-toolbar > div { gap: 9px; padding: 11px; }
+  .kayad-homepage .kayad-market-toolbar-controls { display: flex; width: 100%; flex-wrap: wrap; gap: 7px; }
+  .kayad-inventory-search-row { gap: 7px; margin-bottom: 12px; }
+  .kayad-inventory-search-field { min-height: 44px; gap: 7px; border-radius: 12px; padding-inline: 11px; }
+  .kayad-inventory-search-field input { min-height: 42px; font-size: 12px; }
+  .kayad-inventory-search-filter { min-height: 44px; gap: 5px; padding-inline: 11px; font-size: 11px; }
+  .kayad-homepage #market-results .kayad-market-layout { gap: 12px; }
+}
+@media (max-width: 379px) {
+  .kayad-inventory-search-row { gap: 6px; }
+  .kayad-inventory-search-field { padding-inline: 9px; }
+  .kayad-inventory-search-field input { font-size: 11px; }
+  .kayad-inventory-search-filter { padding-inline: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kayad-inventory-search-field { transition: none; }
+}
+
+.kayad-inventory-controls-stack {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+.kayad-inventory-controls-stack .kayad-market-toolbar { order: 1; }
+.kayad-inventory-controls-stack .kayad-inventory-search-row { order: 2; }
+@media (max-width: 1023.98px) {
+  .kayad-inventory-controls-stack .kayad-inventory-search-row { order: 1; }
+  .kayad-inventory-controls-stack .kayad-market-toolbar { order: 2; }
+}
+@media (min-width: 1024px) {
+  .kayad-inventory-search-filter { display: none; }
+}
+
+
+/* 2026-11-19 — Implementation 05B: premium filter rail alignment and scroll hierarchy.
+   Keep one canonical filter component/state; the sidebar header stays visible while its fields scroll. */
+@media (min-width: 1024px) {
+  .kayad-homepage #market-results {
+    padding-inline: 0;
+  }
+  .kayad-homepage #market-results > .flex-1 {
+    padding-inline: clamp(12px, 1.15vw, 18px);
+  }
+  .kayad-homepage .kayad-market-layout {
+    grid-template-columns: 252px minmax(0, 1fr);
+    gap: 18px;
+  }
+  .kayad-homepage .kayad-filter-panel {
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 92px;
+    width: 252px;
+    height: calc(100vh - 112px);
+    min-height: 460px;
+    max-height: 920px;
+    overflow: hidden;
+    border-radius: 18px;
+    background: #fff;
+    box-shadow: 0 12px 30px rgba(10, 51, 64, .085);
+  }
+  .kayad-homepage .kayad-filter-panel__header {
+    position: relative;
+    z-index: 2;
+    flex: 0 0 auto;
+    box-shadow: 0 5px 14px rgba(4, 39, 49, .10);
+  }
+  .kayad-homepage .kayad-filter-panel__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+    scrollbar-color: #9fcac5 transparent;
+    padding: 14px 14px 18px;
+  }
+  .kayad-homepage .kayad-filter-panel__body::-webkit-scrollbar { width: 7px; }
+  .kayad-homepage .kayad-filter-panel__body::-webkit-scrollbar-thumb {
+    border: 2px solid #fff;
+    border-radius: 999px;
+    background: #9fcac5;
+  }
+}
+@media (min-width: 1280px) {
+  .kayad-homepage .kayad-market-layout {
+    grid-template-columns: 276px minmax(0, 1fr);
+    gap: 20px;
+  }
+  .kayad-homepage .kayad-filter-panel { width: 276px; }
+  .kayad-homepage .kayad-filter-panel__body { padding-inline: 16px; }
+}
+@media (min-width: 1024px) and (max-width: 1279.98px) {
+  .kayad-homepage #market-results > .flex-1 { padding-inline: 12px; }
+  .kayad-homepage .kayad-market-layout { grid-template-columns: 252px minmax(0, 1fr); gap: 14px; }
+  .kayad-homepage .kayad-filter-panel { width: 252px; }
+  .kayad-homepage .kayad-filter-panel__body { padding-inline: 12px; }
+}
+@media (max-width: 1023.98px) {
+  .kayad-homepage .kayad-filter-panel { display: none !important; }
+}
+
+/* 2026-11-19 — 06E inventory grid, card rhythm and pagination polish.
+   The canonical query, server pagination and card actions remain unchanged. */
+.kayad-homepage .kayad-market-toolbar > div:first-child {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 14px;
+}
+.kayad-homepage .kayad-market-toolbar .kayad-market-toolbar-controls {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid #E8F0EE;
+}
+.kayad-homepage .kayad-market-toolbar .kayad-market-toolbar-controls > * {
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+.kayad-homepage .kayad-market-toolbar .kayad-toolbar-control {
+  min-width: 0;
+}
+.kayad-homepage .kayad-market-toolbar .kayad-toolbar-control[aria-label="Results per page"] {
+  width: auto;
+}
+.kayad-homepage .kayad-inventory-grid {
+  width: 100%;
+  min-width: 0;
+  grid-auto-flow: row;
+  grid-auto-rows: 1fr;
+  align-items: stretch;
+  justify-content: stretch;
+}
+.kayad-homepage .kayad-inventory-grid > .kayad-vehicle-card,
+.kayad-homepage .kayad-inventory-grid > * {
+  min-width: 0;
+  max-width: 100%;
+}
+.kayad-homepage .kayad-inventory-grid > .kayad-vehicle-card {
+  display: flex;
+  height: 100%;
+  min-width: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #FFFFFF;
+}
+.kayad-homepage .kayad-inventory-grid > .kayad-vehicle-card .kayad-vc-media {
+  flex: 0 0 auto;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  min-height: 0;
+  overflow: hidden;
+  background: #EEF5F3;
+}
+.kayad-homepage .kayad-inventory-grid > .kayad-vehicle-card .kayad-vc-body {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0;
+  padding: clamp(12px, 1.1vw, 17px);
+}
+.kayad-homepage .kayad-inventory-grid > .kayad-vehicle-card .kayad-vc-main {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+}
+.kayad-homepage .kayad-inventory-grid > .kayad-vehicle-card .kayad-vc-main h3 {
+  min-height: 2.65em;
+  font-size: clamp(13px, .95vw, 15px);
+  line-height: 1.35;
+}
+.kayad-homepage .kayad-inventory-grid > .kayad-vehicle-card .kayad-vc-price {
+  margin-top: 9px;
+  color: #0B5965;
+  font-size: clamp(17px, 1.2vw, 21px);
+  line-height: 1.2;
+}
+.kayad-homepage .kayad-inventory-grid > .kayad-vehicle-card .kayad-vc-specs {
+  min-width: 0;
+  margin-top: 10px;
+  row-gap: 7px;
+}
+.kayad-homepage .kayad-inventory-grid > .kayad-vehicle-card .kayad-vc-specs > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kayad-homepage .kayad-inventory-grid > .kayad-vehicle-card .kayad-vc-inspection {
+  margin-top: 12px;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+}
+.kayad-homepage .kayad-inventory-grid > .kayad-vehicle-card .kayad-vc-actions {
+  margin-top: auto;
+  padding-top: 12px;
+}
+.kayad-homepage .kayad-inventory-grid > .kayad-vehicle-card .kayad-vc-cta {
+  min-height: 44px;
+  border-radius: 11px;
+}
+
+.kayad-homepage .kayad-inventory-pagination {
+  min-width: 0;
+}
+.kayad-homepage .kayad-pagination-page[aria-current="page"] {
+  background: #0A3340;
+  color: #FFFFFF;
+}
+.kayad-homepage .kayad-inventory-pagination button:focus-visible {
+  outline: 2px solid #13B8A6;
+  outline-offset: 2px;
+}
+@media (max-width: 639.98px) {
+  .kayad-homepage .kayad-market-toolbar > div:first-child {
+    gap: 10px;
+    padding: 12px;
+  }
+  .kayad-homepage .kayad-market-toolbar .kayad-market-toolbar-controls {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 7px;
+    padding-top: 10px;
+  }
+  .kayad-homepage .kayad-market-toolbar .kayad-market-toolbar-controls > * {
+    width: 100%;
+    min-width: 0;
+  }
+  .kayad-homepage .kayad-market-toolbar .kayad-market-toolbar-controls > [aria-label="Inventory view"] {
+    width: 100%;
+    justify-content: center;
+  }
+  .kayad-homepage .kayad-market-toolbar .kayad-market-toolbar-controls > label {
+    width: 100%;
+  }
+  .kayad-homepage .kayad-inventory-pagination {
+    padding: 12px;
+  }
+  .kayad-homepage .kayad-inventory-pagination [data-testid="pagination-controls"] {
+    width: 100%;
+  }
+  .kayad-homepage .kayad-pagination-page:not([aria-current="page"]) {
+    display: none;
+  }
+}
+@media (min-width: 640px) and (max-width: 1023.98px) {
+  .kayad-homepage .kayad-market-toolbar .kayad-market-toolbar-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .kayad-homepage .kayad-market-toolbar .kayad-market-toolbar-controls > * {
+    width: 100%;
+  }
 }

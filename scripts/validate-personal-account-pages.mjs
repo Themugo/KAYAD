@@ -15,7 +15,7 @@ const checks = [
   ['Listing update waits for server success', selling.includes('The server did not confirm the listing update.')],
   ['Listing removal requires explicit confirmation', selling.includes('window.confirm(`Remove')],
   ['Listing errors are surfaced', selling.includes('role="alert"') && selling.includes('Unable to update this listing')],
-  ['Personal seller lifecycle controls use dedicated owner API', selling.includes('transitionMyListing') && selling.includes('Hide / pause') && selling.includes('Republish') && selling.includes('Mark as sold')],
+  ['Personal seller lifecycle controls use dedicated owner API', selling.includes('transitionMyListing') && selling.includes('canHide &&') && selling.includes('canRepublish &&') && selling.includes('canMarkSold &&') && selling.includes('Pause listing') && selling.includes('Republish') && selling.includes('Mark as sold')],
   ['Personal listing photo manager remains integrated without duplication', selling.includes('PersonalListingPhotoManager') && selling.includes('addCarImages') && selling.includes('setCoverImage')],
   ['Seller enquiries use their own personal dashboard section', hub.includes("personalSection==='seller-enquiries'") && hub.includes('leadApi.mySellerEnquiries')],
   ['Performance uses first-party personal analytics API', hub.includes('getMyListingPerformance') && hub.includes('personalPerformance.totals?.listingViews')],

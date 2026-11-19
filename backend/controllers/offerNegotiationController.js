@@ -37,10 +37,18 @@ export async function getBuyerNegotiations(req, res) {
   const buyerId = String(req.user?.id || "");
   if (!buyerId) throw Object.assign(new Error("Authentication required"), { statusCode: 401 });
   const { data, error } = await getSupabase().from("leads")
-    .select("id,vehicle,dealer,stage,created_at")
+    .select("id,vehicle,dealer,stage,created_at,source,source_reference")
     .eq("buyer", buyerId)
     .order("created_at", { ascending: false })
     .limit(100);
   if (error) throw error;
-  res.json({ success: true, leads: data || [] });
+  const leads = (data || []).map((lead) => ({
+    id: lead.id,
+    vehicle: lead.vehicle,
+    dealer: lead.dealer,
+    stage: lead.stage,
+    created_at: lead.created_at,
+    chatId: lead.source === "chat" && typeof lead.source_reference === "string" ? lead.source_reference : null,
+  }));
+  res.json({ success: true, leads });
 }

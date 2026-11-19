@@ -11,6 +11,9 @@ interface ChatViewProps {
   onNavigateToEscrow?: () => void;
   onNavigateToInspections?: () => void;
   onNavigateToFinancing?: () => void;
+  /** True when this chat surface is embedded inside DashboardHub, which owns the page H1. */
+  embedded?: boolean;
+  initialThreadId?: string | null;
 }
 
 export const ChatView: React.FC<ChatViewProps> = (props) => {
@@ -21,6 +24,8 @@ export const ChatView: React.FC<ChatViewProps> = (props) => {
       onNavigateToEscrow={props.onNavigateToEscrow}
       onNavigateToInspections={props.onNavigateToInspections}
       onNavigateToFinancing={props.onNavigateToFinancing}
+      embedded={props.embedded}
+      initialThreadId={props.initialThreadId}
     />
   );
 };
