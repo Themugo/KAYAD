@@ -26,6 +26,13 @@ export type PremiumHeroVehicle = {
   ariaLabel: string;
 };
 
+export type PremiumHeroShortcut = {
+  label: string;
+  ariaLabel: string;
+  icon: React.ReactNode;
+  onClick: () => void;
+};
+
 export interface PremiumHeroProps {
   eyebrow: string;
   headline: React.ReactNode;
@@ -59,6 +66,8 @@ export interface PremiumHeroProps {
   floating?: React.ReactNode;
   stageHandlers?: React.HTMLAttributes<HTMLDivElement>;
   environment: 'custom' | 'brand';
+  /** Optional canonical marketplace actions rendered inside the hero instead of large CTAs. */
+  shortcuts?: PremiumHeroShortcut[];
 }
 
 const TRUST = [
@@ -106,17 +115,30 @@ export default function PremiumHero(p: PremiumHeroProps) {
           <p className="kk-hero__eyebrow">{p.eyebrow}</p>
           <h1 className="kk-hero__title">{p.headline}</h1>
           <p className="kk-hero__lead">{p.supportCopy}</p>
-          <div className="kk-hero__ctas">
-            <button type="button" onClick={p.onPrimary} aria-label={p.primaryAria} className="kk-hero__cta kk-hero__cta--primary" style={p.primaryColor ? { backgroundColor: p.primaryColor } : undefined}>
-              <span className="min-w-0 truncate">{p.primaryLabel}</span><ArrowRight className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
-            </button>
-            <button type="button" onClick={p.onSecondary} aria-label={p.secondaryAria} className="kk-hero__cta kk-hero__cta--secondary" style={p.secondaryBorderColor ? { borderColor: p.secondaryBorderColor } : undefined}>
-              <Car className="h-[18px] w-[18px] shrink-0" aria-hidden="true" /><span className="min-w-0 truncate">{p.secondaryLabel}</span>
-            </button>
-          </div>
-          <ul className="kk-hero__trust" aria-label="Why buyers choose KAYARD KE">
-            {TRUST.map(({ icon: Icon, label }) => <li key={label}><Icon className="h-[18px] w-[18px] shrink-0 text-[#12D6CB]" aria-hidden="true" /><span>{label}</span></li>)}
-          </ul>
+          {p.shortcuts?.length ? (
+            <nav className="kk-hero__shortcuts" aria-label="Marketplace shortcuts">
+              {p.shortcuts.map((item) => (
+                <button key={item.label} type="button" onClick={item.onClick} aria-label={item.ariaLabel} className="kk-hero__shortcut">
+                  <span className="kk-hero__shortcut-icon" aria-hidden="true">{item.icon}</span>
+                  <span className="kk-hero__shortcut-label">{item.label}</span>
+                </button>
+              ))}
+            </nav>
+          ) : (
+            <>
+              <div className="kk-hero__ctas">
+                <button type="button" onClick={p.onPrimary} aria-label={p.primaryAria} className="kk-hero__cta kk-hero__cta--primary" style={p.primaryColor ? { backgroundColor: p.primaryColor } : undefined}>
+                  <span className="min-w-0 truncate">{p.primaryLabel}</span><ArrowRight className="h-[18px] w-[18px] shrink-0" aria-hidden="true" />
+                </button>
+                <button type="button" onClick={p.onSecondary} aria-label={p.secondaryAria} className="kk-hero__cta kk-hero__cta--secondary" style={p.secondaryBorderColor ? { borderColor: p.secondaryBorderColor } : undefined}>
+                  <Car className="h-[18px] w-[18px] shrink-0" aria-hidden="true" /><span className="min-w-0 truncate">{p.secondaryLabel}</span>
+                </button>
+              </div>
+              <ul className="kk-hero__trust" aria-label="Why buyers choose KAYARD KE">
+                {TRUST.map(({ icon: Icon, label }) => <li key={label}><Icon className="h-[18px] w-[18px] shrink-0 text-[#12D6CB]" aria-hidden="true" /><span>{label}</span></li>)}
+              </ul>
+            </>
+          )}
         </div>
 
         <div className="kk-hero__stage" data-testid="hero-stage" {...p.stageHandlers}>

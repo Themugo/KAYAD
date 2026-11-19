@@ -53,4 +53,25 @@ describe('PremiumHero (presentation only)', () => {
     render(<PremiumHero {...props({ vehicle: { ...vehicle, illustrative: true, eyebrow: 'ILLUSTRATIVE · NOT A LISTING', ariaLabel: 'Browse vehicles. Prado is illustrative artwork, not a listing' } })} />);
     expect(screen.getByTestId('hero-vehicle').getAttribute('data-illustrative')).toBe('true'); expect(screen.getByText('ILLUSTRATIVE · NOT A LISTING')).toBeTruthy();
   });
+  it('renders integrated marketplace shortcuts and suppresses duplicate hero CTAs and trust row', () => {
+    const handlers = [vi.fn(), vi.fn(), vi.fn(), vi.fn()];
+    const shortcuts = [
+      { label: 'Find a Car', ariaLabel: 'Find a Car', icon: 'search', onClick: handlers[0] },
+      { label: 'Sell a Car', ariaLabel: 'Sell a Car', icon: 'car', onClick: handlers[1] },
+      { label: 'Auctions', ariaLabel: 'Auctions', icon: 'gavel', onClick: handlers[2] },
+      { label: 'Verified', ariaLabel: 'Verified', icon: 'shield', onClick: handlers[3] },
+    ];
+    render(<PremiumHero {...props({ shortcuts })} />);
+    const nav = screen.getByRole('navigation', { name: 'Marketplace shortcuts' });
+    for (const label of ['Find a Car', 'Sell a Car', 'Auctions', 'Verified']) {
+      fireEvent.click(within(nav).getByRole('button', { name: label }));
+    }
+    handlers.forEach((handler) => expect(handler).toHaveBeenCalledTimes(1));
+    expect(screen.queryByRole('button', { name: 'Explore Vehicles' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Sell Your Vehicle' })).toBeNull();
+    expect(screen.queryByText('Verified Listings')).toBeNull();
+    expect(screen.queryByText('Trusted Sellers')).toBeNull();
+    expect(screen.queryByText('Secure Transactions')).toBeNull();
+  });
+
 });

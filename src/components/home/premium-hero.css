@@ -652,3 +652,86 @@
   .kk-hero__ctl { width: 20px; height: 20px; }
   .kk-hero__dot { width: 10px; height: 20px; }
 }
+
+
+/* Approved 2026-11-19 marketplace composition: compact hero with four functional
+   discovery shortcuts integrated into the copy column. The legacy CTA/trust layout
+   remains available to other PremiumHero consumers that do not pass shortcuts. */
+.kk-hero:has(.kk-hero__shortcuts) .kk-hero__inner {
+  min-height: 336px;
+  grid-template-columns: minmax(0, 46%) minmax(0, 54%);
+  align-items: center;
+  gap: 0;
+  padding: 22px 40px;
+}
+.kk-hero__shortcuts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+  width: min(100%, 560px);
+  margin-top: 18px;
+  padding: 7px;
+  overflow: hidden;
+  border: 1px solid rgba(18,214,203,.88);
+  border-radius: 20px;
+  background: rgba(2,35,46,.58);
+  box-shadow: 0 0 0 1px rgba(18,214,203,.12), 0 0 22px rgba(18,214,203,.2), inset 0 0 18px rgba(18,214,203,.08);
+  backdrop-filter: blur(10px);
+}
+.kk-hero__shortcut {
+  display: flex;
+  min-width: 0;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 5px 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.15;
+  border-right: 1px solid rgba(255,255,255,.25);
+  transition: background-color .18s ease, color .18s ease;
+}
+.kk-hero__shortcut:last-child { border-right: 0; }
+.kk-hero__shortcut:hover { background: rgba(18,214,203,.14); color: #62fff0; }
+.kk-hero__shortcut:focus-visible { position: relative; z-index: 1; outline: 3px solid #fff; outline-offset: -3px; border-radius: 10px; }
+.kk-hero__shortcut-icon { display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; }
+.kk-hero__shortcut-icon svg { width: 25px; height: 25px; }
+.kk-hero__shortcut-label { min-width: 0; white-space: nowrap; }
+.kk-hero:has(.kk-hero__shortcuts) .kk-hero__stage { height: 300px; margin-top: 0; }
+.kk-hero:has(.kk-hero__shortcuts) .kk-hero__vehicle { inset: 0 0 28px; }
+.kk-hero:has(.kk-hero__shortcuts) .kk-hero__caption { left: 0; bottom: 25px; max-width: 285px; }
+@media (min-width: 1440px) {
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__inner { min-height: 350px; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__stage { height: 320px; }
+}
+@media (max-width: 1023.98px) {
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__inner {
+    grid-template-columns: 1fr;
+    min-height: 0;
+    padding: 18px 22px 14px;
+  }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__copy { max-width: none; padding-right: 0; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__title { max-width: 12em; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__shortcuts { margin-top: 14px; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__stage { height: clamp(190px, 34vw, 280px); margin-top: 8px; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__caption { display: flex; left: 0; bottom: 24px; }
+}
+@media (max-width: 479.98px) {
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__inner { padding: 17px 15px 12px; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__eyebrow { display: none; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__title { margin-top: 0; font-size: clamp(2rem, 9vw, 2.45rem); line-height: .98; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__lead { margin-top: 9px; font-size: 14px; line-height: 1.38; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__shortcuts { width: 100%; margin-top: 13px; padding: 5px 3px; border-radius: 16px; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__shortcut { min-height: 58px; flex-direction: column; gap: 3px; padding: 4px 2px; font-size: 10px; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__shortcut-icon svg { width: 23px; height: 23px; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__stage { height: clamp(190px, 58vw, 235px); margin-top: 6px; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__caption { display: flex; left: 0; bottom: 23px; max-width: min(76%, 260px); padding: 8px 10px; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__caption-title { font-size: 12px; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__caption-detail { font-size: 10px; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__controls { right: 0; bottom: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kk-hero__shortcut { transition: none; }
+}

@@ -1110,25 +1110,17 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           sort, pagination, saved/compare, admin config) - only the visual
           layer changed, not the data or behavior. */}
 
-      {/* Marketplace discovery shell: compact by design. The marketplace opens directly into the automotive experience rather than a second dashboard-like layer. */}
-      <div id="market-journey" className="mx-auto flex w-full max-w-[1480px] items-center justify-between gap-x-3 gap-y-1 px-4 py-1 sm:px-6 lg:px-8">
-        <span className="min-w-0 flex-1 text-[9px] font-black uppercase leading-snug tracking-[0.14em] text-navy-600 sm:text-[10px] sm:tracking-[0.22em]">KAYARD KE MARKETPLACE · VERIFIED INVENTORY</span>
-        <div role="group" aria-label="Marketplace at a glance" className="flex shrink-0 flex-wrap items-center justify-end gap-1.5 text-[9px] font-bold text-[#64748B] sm:gap-2 sm:text-[10px]">
-          {inventoryStatusText ? (
-            <button type="button" onClick={retryInventory} aria-label={`Retry loading vehicles. Status: ${inventoryStatusText}`} data-inventory-state={inventoryFailure?.kind} className="inline-flex min-h-[28px] items-center gap-1 whitespace-nowrap rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1 text-navy-700 hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#13B8A6]">{inventoryStatusText}<RotateCcw className="h-3 w-3" aria-hidden="true" /></button>
-          ) : (
-            <span data-inventory-state={isLoading && !savedOnly ? 'loading' : 'loaded'} className="whitespace-nowrap rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{isLoading && !savedOnly ? 'Loading inventory' : savedOnly ? `${serverTotal.toLocaleString()} saved` : `${serverTotal.toLocaleString()} vehicle${serverTotal === 1 ? '' : 's'}`}</span>
-          )}
-          {savedVehicles.length > 0 && <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{savedVehicles.length} saved</span>}
-          {comparedVehicles.length > 0 && <span className="rounded-full border border-[#D7E7E4] bg-white px-2.5 py-1">{comparedVehicles.length} compare</span>}
-        </div>
-      </div>
-
       {/* 1. HERO - one continuous commercial composition. */}
       {/* This legacy config key intentionally controls the combined hero/search discovery surface. */}
       {!savedOnly && homeConfig.sectionVisibility.searchTrustCard && (
         <PremiumHero
           environment={heroPresentation.backgroundUrl ? 'custom' : 'brand'}
+          shortcuts={[
+            { label: 'Find a Car', ariaLabel: 'Find a car — browse vehicle inventory', icon: <Search size={25} strokeWidth={2} />, onClick: () => { document.getElementById('market-results')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); } },
+            { label: 'Sell a Car', ariaLabel: 'Sell a car — create a vehicle listing', icon: <CarFront size={25} strokeWidth={2} />, onClick: () => onNavigate?.('dashboard:create-listing') },
+            { label: 'Auctions', ariaLabel: 'Auctions — browse vehicle auctions', icon: <Gavel size={25} strokeWidth={2} />, onClick: () => onNavigate?.('discovery') },
+            { label: 'Verified', ariaLabel: 'Verified vehicles — view inspection information', icon: <ShieldCheck size={25} strokeWidth={2} />, onClick: () => onNavigate?.('inspections') },
+          ]}
           eyebrow={heroEyebrowDisplay}
           headline={heroHeadlineNode}
           supportCopy={heroSupportCopy}
@@ -1182,29 +1174,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
           }}
         />
       )}
-
-      {!savedOnly && <section className="kayad-home-quick-actions" aria-label="Quick marketplace actions">
-        <button type="button" onClick={() => onNavigate('marketplace')} className="kayad-home-quick-action">
-          <span className="kayad-home-quick-action__icon"><Search size={23} /></span>
-          <span className="kayad-home-quick-action__title">Find a Car</span>
-          <span className="kayad-home-quick-action__desc">Browse listings</span>
-        </button>
-        <button type="button" onClick={() => onNavigate('dashboard:create-listing')} className="kayad-home-quick-action">
-          <span className="kayad-home-quick-action__icon"><CarFront size={24} /></span>
-          <span className="kayad-home-quick-action__title">Sell a Car</span>
-          <span className="kayad-home-quick-action__desc">List in minutes</span>
-        </button>
-        <button type="button" onClick={() => onNavigate('discovery')} className="kayad-home-quick-action">
-          <span className="kayad-home-quick-action__icon"><Gavel size={23} /></span>
-          <span className="kayad-home-quick-action__title">Auctions</span>
-          <span className="kayad-home-quick-action__desc">Bid &amp; win</span>
-        </button>
-        <button type="button" onClick={() => onNavigate('inspections')} className="kayad-home-quick-action">
-          <span className="kayad-home-quick-action__icon"><ShieldCheck size={23} /></span>
-          <span className="kayad-home-quick-action__title">Verified</span>
-          <span className="kayad-home-quick-action__desc">Trusted vehicles</span>
-        </button>
-      </section>}
 
       {/* Marketplace categories: the visual bridge from hero to inventory, matching the original discovery concept without adding a second dashboard. */}
       {!savedOnly && <section className="kayad-home-category-strip border-y border-[#D7E7E4] bg-white" aria-label="Vehicle categories">

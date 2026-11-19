@@ -65,6 +65,9 @@ for (const file of sourceFiles) {
 check(`source syntax/transpile audit (${sourceFiles.length - syntaxFailures}/${sourceFiles.length})`, syntaxFailures === 0);
 
 const maintainedValidators = [
+  'validate-home-hero-premium.mjs',
+  'validate-dealer-workspace-navigation.mjs',
+  'validate-admin-dealer-page-journey-navigation.mjs',
   'validate-recovery-repair.mjs',
   'validate-phase35.mjs',
   'validate-phase36.mjs',
