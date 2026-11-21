@@ -75,8 +75,8 @@ interface BrandingContextValue {
 const DEFAULT_BRANDING: Branding = {
   logoType: 'image',
   logoText: 'KAYARD KE',
-  logoUrl: '/branding/kayard-k-mark.png',
-  brandTagline: "Premium Automotive Marketplace",
+  logoUrl: '/branding/kayard-ke-logo.png',
+  brandTagline: "Premium Vehicle Marketplace",
   countryBadgeShow: true,
   countryBadgeText: 'KE',
   footerDescription: "Browse vehicle listings, explore auctions, connect with sellers and discover vehicle services across Kenya.",
@@ -220,7 +220,9 @@ function normalizeBrandingConfig(config: Partial<Branding> | null | undefined): 
   if (['/branding/kayad-road-mark.svg', '/branding/kayad-road-mark-light.svg', '/branding/kayad-symbol.svg', '/branding/kayad-mark.png'].includes(merged.logoUrl)) merged.logoUrl = '/branding/kayard-k-mark.png';
   if (merged.logoText?.trim().toUpperCase() === 'KAYAD') merged.logoText = 'KAYARD KE';
   if (merged.footerCopyright?.includes('KAYAD Motors Kenya Ltd.')) merged.footerCopyright = 'KAYARD MOTOR HUB. All rights reserved.';
-  if (merged.brandTagline?.trim().toLowerCase() === "kenya's trusted vehicle marketplace") merged.brandTagline = 'Premium Automotive Marketplace';
+  if (merged.brandTagline?.trim().toLowerCase() === "kenya's trusted vehicle marketplace") merged.brandTagline = 'Premium Vehicle Marketplace';
+  // The previous built-in descriptor is replaced by the approved one; any other custom tagline is untouched.
+  if (merged.brandTagline?.trim().toLowerCase() === 'premium automotive marketplace') merged.brandTagline = 'Premium Vehicle Marketplace';
   merged.countryBadgeShow = merged.countryBadgeShow !== false;
   merged.countryBadgeText = sanitizeCountryBadgeText(merged.countryBadgeText);
   return merged;
@@ -235,7 +237,7 @@ export const SUPPORTED_FONTS: Record<string, string> = {
   'Arial': "Arial, Helvetica, sans-serif",
 };
 
-export const DEFAULT_LOGO_URL = '/branding/kayard-k-mark.png';
+export const DEFAULT_LOGO_URL = '/branding/kayard-ke-logo.png';
 /** A stored logo can go missing (deleted asset, provider outage). Fall back ONCE to the bundled mark instead of showing a broken image. */
 export function onBrandLogoError(e: { currentTarget: HTMLImageElement }) {
   const img = e.currentTarget;

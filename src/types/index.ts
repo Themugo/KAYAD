@@ -336,6 +336,8 @@ export interface Vehicle {
   inspection?: VehicleInspection;
   inspectionStatus?: string;
   inspectionPassed?: boolean;
+  /** Derived server-side reservation flag (accepted offer in settlement). Never carries buyer identity. */
+  reserved?: boolean;
   inspectionReportId?: string;
   escrowEligible?: boolean;
   dutyPaid?: boolean;

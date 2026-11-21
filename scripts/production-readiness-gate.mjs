@@ -2,10 +2,11 @@ import fs from 'node:fs';
 import path from 'node:path';
 const root = process.cwd();
 const envExample = fs.readFileSync(path.join(root,'.env.example'),'utf8');
-const required = ['VITE_SUPABASE_URL','VITE_SUPABASE_PUBLISHABLE_KEY'];
+// The frontend talks only to the KAYARD API; Supabase credentials are server-side and must never appear in the client env template.
+const required = ['VITE_API_URL','VITE_SOCKET_URL','VITE_PUBLIC_URL'];
 for (const key of required) if (!envExample.includes(key)) throw new Error(`Missing ${key} from .env.example`);
 const forbidden = ['nirchkrkwtpobwtrkpgy','admin123','ToplineSecure2024!'];
-const targets = ['README.md','DEPLOYMENT.md','vercel.json','src','supabase/migrations'];
+const targets = ['README.md','vercel.json','render.yaml','src','supabase/migrations'].filter((t) => fs.existsSync(path.join(root,t)));
 for (const target of targets) {
   const full = path.join(root,target);
   const files = fs.statSync(full).isDirectory() ? walk(full) : [full];

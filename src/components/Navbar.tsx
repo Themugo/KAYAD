@@ -9,6 +9,7 @@ import {
   Car,
   PlusCircle,
   Menu,
+  Search,
   X,
   MapPin,
   ShieldCheck,
@@ -97,6 +98,13 @@ export const Navbar: React.FC<NavbarProps> = ({
   const navItems = useMemo(() => applyNavigationConfig(navigation), [navigation]);
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // A wide, self-contained logo (lock-up with wordmark + descriptor) is drawn alone at its natural aspect ratio;
+  // a square mark keeps the mark + live wordmark + tagline layout. Decided from the loaded image, so any admin-uploaded logo works.
+  const [brandWide, setBrandWide] = useState(false);
+  const onBrandLogoLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
+    const { naturalWidth, naturalHeight } = e.currentTarget;
+    setBrandWide(naturalHeight > 0 && naturalWidth / naturalHeight >= 1.8);
+  }, []);
   const [mobileExpandedGroups, setMobileExpandedGroups] = useState<Record<string, boolean>>({ marketplace: true });
   const [showCountyDropdown, setShowCountyDropdown] = useState(false);
   const countyRef = useRef<HTMLDivElement>(null);
@@ -287,6 +295,16 @@ export const Navbar: React.FC<NavbarProps> = ({
     pinnedMenu.current = null;
   };
 
+  // Mobile header search: go to the catalogue and put the cursor in its (single, canonical) search box.
+  const focusMobileSearch = () => {
+    handleNavSelect('marketplace');
+    window.setTimeout(() => {
+      const box = document.querySelector<HTMLInputElement>('input[aria-label="Search vehicles by make, model or keyword"]');
+      box?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      box?.focus({ preventScroll: true });
+    }, 120);
+  };
+
   // Real <a href> links that the SPA intercepts: plain clicks navigate in-app,
   // modified clicks (new tab, copy link, middle-click) keep native behaviour.
   const handleLinkClick = (e: React.MouseEvent, navId: string) => {
@@ -333,7 +351,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const hasNotifications = notificationUnreadCount > 0 || effectiveUnread > 0;
 
   return (
-    <header ref={headerRef} className="kayad-header">
+    <header ref={headerRef} className={`kayad-header${brandWide ? ' kayad-header--lockup' : ''}`}>
       {/* The broadcast notice board is rendered by TopNoticeStrip above this navigation. */}
       <div className="kayad-header__bar">
 
@@ -342,24 +360,26 @@ export const Navbar: React.FC<NavbarProps> = ({
         <a
           href="/?nav=marketplace"
           onClick={(e) => { if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; e.preventDefault(); handleNavSelect('marketplace'); }}
-          className="kayad-brand group"
+          className={`kayad-brand group${brandWide ? ' kayad-brand--lockup' : ''}`}
           id="brand-logo"
           aria-label="KAYARD KE marketplace home"
         >
-          {branding.logoType === 'image' && branding.logoUrl ? (
-            <img
-              src={branding.logoUrl}
-              onError={onBrandLogoError}
-              alt=""
-              aria-hidden="true"
-              className="kayad-brand__image"
-              width="52"
-              height="52"
-              decoding="async"
-            />
-          ) : (
-            <img src={DEFAULT_LOGO_URL} onError={onBrandLogoError} alt="" aria-hidden="true" className="kayad-brand__image" width="52" height="52" decoding="async" />
-          )}
+          {(() => {
+            const lockupAlt = `${branding.logoText || 'KAYARD KE'}${branding.brandTagline ? ` – ${branding.brandTagline}` : ''}`;
+            const src = branding.logoType === 'image' && branding.logoUrl ? branding.logoUrl : DEFAULT_LOGO_URL;
+            return (
+              <img
+                src={src}
+                onError={onBrandLogoError}
+                onLoad={onBrandLogoLoad}
+                alt={brandWide ? lockupAlt : ''}
+                aria-hidden={brandWide ? undefined : true}
+                className="kayad-brand__image"
+                {...(brandWide ? {} : { width: 52, height: 52 })}
+                decoding="async"
+              />
+            );
+          })()}
           <span className="kayad-brand__text">
             <span className="kayad-brand__word">
               {(branding.logoText || 'KAYARD KE').replace(/\s*[-–]?\s*KE$/i, '')}
@@ -367,7 +387,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <KenyaFlag className="kayad-brand__kenya-flag" />
             </span>
             <span className="kayad-brand__tag kayad-brand__tag--reserved">
-              {branding.brandTagline || 'Premium Automotive Marketplace'}
+              {branding.brandTagline || 'Premium Vehicle Marketplace'}
             </span>
           </span>
         </a>
@@ -568,6 +588,15 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Keep the mobile menu as the final, independent header control.
             This guarantees the mobile order: brand, utility actions, menu. */}
+        <button
+          type="button"
+          onClick={focusMobileSearch}
+          className="kayad-util kayad-search-mobile"
+          aria-label="Search vehicles"
+          id="btn-mobile-search"
+        >
+          <Search className="w-5 h-5 text-[#0A3340]" aria-hidden="true" />
+        </button>
         <button
           type="button"
           ref={hamburgerRef}

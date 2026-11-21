@@ -236,7 +236,7 @@ describe('VehicleDetailModal', () => {
         notFoundId={null}
       />
     );
-    fireEvent.click(screen.getByText('Request an Inspection'));
+    fireEvent.click(screen.getByRole("button", { name: /Book an inspection of this vehicle/ }));
     expect(onRequestInspection).toHaveBeenCalledWith(dealerVehicleNoEscrow);
     expect(onContactSeller).not.toHaveBeenCalled();
   });
@@ -355,7 +355,7 @@ describe('VehicleDetailModal inspection entry point on every vehicle type', () =
           notFoundId={null}
         />
       );
-      fireEvent.click(screen.getByRole('button', { name: /Request an Inspection/ }));
+      fireEvent.click(screen.getByRole('button', { name: /Book an inspection of this vehicle/ }));
       expect(onRequestInspection).toHaveBeenCalledWith(v);
       unmount();
     }
@@ -459,7 +459,7 @@ describe('VehicleDetailModal polish', () => {
   it('shows the full safeguards banner when a safeguard is recorded', () => {
     show(mk({ verified: true }));
     expect(screen.queryByTestId('safeguards-empty')).toBeNull();
-    expect(document.body.textContent).toContain('Listing Verified');
+    expect(document.body.textContent).toContain("Verified Dealer");
   });
   it('writes transmission in full', () => {
     show(mk({ transmission: 'Automatic' }));
@@ -501,5 +501,40 @@ describe('VehicleDetailModal actions', () => {
     fireEvent.click(screen.getByRole('button', { name: /share listing/i }));
     await Promise.resolve();
     expect(share).toHaveBeenCalledWith(expect.objectContaining({ title: expect.any(String), url: expect.any(String) }));
+  });
+});
+
+describe('VehicleDetailModal gallery and reservation accuracy', () => {
+  const props = { allVehicles: [] as any[], onClose: () => {}, onStartEscrow: () => {}, onContactSeller: () => {}, isSaved: false, onToggleSave: () => {}, notFoundId: null };
+
+  it('a vehicle with no photos shows a clear placeholder, no "0 / 0" counter and no fullscreen control', () => {
+    const v = { ...INITIAL_VEHICLES[0], image: undefined, images: [], additionalImages: [] } as any;
+    render(<VehicleDetailModal vehicle={v} {...props} />);
+    expect(screen.getByTestId('vehicle-gallery-empty').textContent).toContain('Photo not available');
+    expect(screen.queryByLabelText('View photos fullscreen')).toBeNull();
+    expect(document.body.textContent).not.toContain('0 / 0');
+  });
+
+  it('switching vehicle never keeps the previous vehicle\'s photo', () => {
+    const a = { ...INITIAL_VEHICLES[0], id: 'a', image: '/a1.jpg', images: ['/a1.jpg', '/a2.jpg'] } as any;
+    const b = { ...INITIAL_VEHICLES[1], id: 'b', image: undefined, images: [], additionalImages: [] } as any;
+    const { rerender } = render(<VehicleDetailModal vehicle={a} {...props} />);
+    expect(screen.getByTestId('vehicle-gallery-main')).toBeTruthy();
+    rerender(<VehicleDetailModal vehicle={b} {...props} />);
+    expect(screen.getByTestId('vehicle-gallery-empty')).toBeTruthy();
+  });
+
+  it('shows a Reserved status and notice for a reserved vehicle without revealing a buyer', () => {
+    const v = { ...INITIAL_VEHICLES[0], reserved: true, isAuction: false } as any;
+    render(<VehicleDetailModal vehicle={v} {...props} />);
+    expect(screen.getByTestId('reserved-notice').textContent).toMatch(/reserved/i);
+    expect(screen.getByTestId('reserved-notice').textContent).not.toMatch(/buyer name|@/i);
+  });
+
+  it('has a single inspection booking CTA (the section); the top action only jumps to it', () => {
+    const v = { ...INITIAL_VEHICLES.find((x: any) => !x.isAuction && x.sellerType !== 'Private Seller' && !x.escrowEligible)! } as any;
+    render(<VehicleDetailModal vehicle={v} {...props} onRequestInspection={() => {}} />);
+    expect(screen.getAllByRole('button', { name: /inspection/i }).filter((b) => /book an inspection/i.test(b.textContent || ''))).toHaveLength(1);
+    expect(screen.getByTestId('jump-to-inspection')).toBeTruthy();
   });
 });

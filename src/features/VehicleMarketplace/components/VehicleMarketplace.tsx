@@ -16,7 +16,8 @@ import { getVisibleHeroSlides, HeroSlide } from '../../../services/heroApi';
 import { adminAPI } from '../../../api/api';
 import { getCars, peekCars, getCarById, getCurrentFeaturedCampaignCarIds, mapBackendCarToVehicle, VehicleApiError, type GetCarsParams } from '../../../services/vehicleApi';
 import { classifyInventoryFailure, type InventoryFailure } from '../utils/inventoryAvailability';
-import { getEffectiveGridColumns, validateInventoryFilterRanges } from '../utils/inventoryPresentation';
+import { readCatalogueUrl, writeCatalogueUrl } from '../utils/catalogueUrlState';
+import { getAvailableGridColumns, getEffectiveGridColumns, validateInventoryFilterRanges } from '../utils/inventoryPresentation';
 import { getSearchFacets, type SearchFacetsResponse } from '../../../services/searchApi';
 import { getVisibleAdSlots, recordAdEvent, AdSlot } from '../../../services/adApi';
 import { useHomePageConfig, ACCENT_THEME_CLASSES, DEFAULT_HOME_PAGE_CONFIG } from '../hooks/useHomePageConfig';
@@ -87,6 +88,8 @@ interface VehicleMarketplaceProps {
   onRetryLoad?: () => void;
   /** Render the same canonical marketplace grid against the user's saved-vehicle collection only. */
   savedOnly?: boolean;
+  /** Reports the vehicles currently shown (filtered, sorted, current page) so details previous/next follow them. */
+  onVisibleVehiclesChange?: (vehicles: Vehicle[]) => void;
   /** Show only one dealer's vehicles (their showroom). */
   dealerScope?: { id: string; name: string } | null;
   onClearDealerScope?: () => void;
@@ -114,6 +117,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   loadError,
   onRetryLoad,
   savedOnly = false,
+  onVisibleVehiclesChange,
   dealerScope = null,
   onClearDealerScope
 }) => {
@@ -163,25 +167,28 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
   const accent = ACCENT_THEME_CLASSES[homeConfig.accentTheme];
 
+  // Shareable catalogue state: read once from the URL (invalid values are ignored by the reader).
+  const initialUrl = useRef(readCatalogueUrl(typeof window === 'undefined' ? '' : window.location.search)).current;
+
   // Filter States
-  const [selectedMake, setSelectedMake] = useState<string>('All');
-  const [selectedModel, setSelectedModel] = useState<string>('All');
-  const [selectedBodyStyle, setSelectedBodyStyle] = useState<string>('All');
-  const [selectedFuel, setSelectedFuel] = useState<string>('All');
-  const [selectedTransmission, setSelectedTransmission] = useState<string>('All');
-  const [selectedCondition, setSelectedCondition] = useState<string>('All');
-  const [selectedSellerType, setSelectedSellerType] = useState<string>('All');
-  const [selectedColor, setSelectedColor] = useState<string>('All');
-  const [minPrice, setMinPrice] = useState<number>(0);
-  const [maxPrice, setMaxPrice] = useState<number>(20000000);
+  const [selectedMake, setSelectedMake] = useState<string>(initialUrl.make);
+  const [selectedModel, setSelectedModel] = useState<string>(initialUrl.model);
+  const [selectedBodyStyle, setSelectedBodyStyle] = useState<string>(initialUrl.body);
+  const [selectedFuel, setSelectedFuel] = useState<string>(initialUrl.fuel);
+  const [selectedTransmission, setSelectedTransmission] = useState<string>(initialUrl.transmission);
+  const [selectedCondition, setSelectedCondition] = useState<string>(initialUrl.condition);
+  const [selectedSellerType, setSelectedSellerType] = useState<string>(initialUrl.seller);
+  const [selectedColor, setSelectedColor] = useState<string>(initialUrl.color);
+  const [minPrice, setMinPrice] = useState<number>(initialUrl.minPrice);
+  const [maxPrice, setMaxPrice] = useState<number>(initialUrl.maxPrice);
   // 0 means "no minimum year"; the earliest year offered is the Super Admin setting filterOptions.yearFrom.
-  const [minYear, setMinYear] = useState<number>(0);
-  const [maxYear, setMaxYear] = useState<number>(2026);
-  const [maxMileage, setMaxMileage] = useState<number>(250000);
+  const [minYear, setMinYear] = useState<number>(initialUrl.minYear);
+  const [maxYear, setMaxYear] = useState<number>(initialUrl.maxYear);
+  const [maxMileage, setMaxMileage] = useState<number>(initialUrl.maxMileage);
   const [filterRangeError, setFilterRangeError] = useState<string | null>(null);
 
   // Boolean Feature Toggles
-  const [onlyAuction, setOnlyAuction] = useState<boolean>(false);
+  const [onlyAuction, setOnlyAuction] = useState<boolean>(initialUrl.onlyAuction);
 
   // Layout & Navigation States
   // Went through 2 revisions: originally defaulted to 'grid' (fewer
@@ -194,11 +201,11 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // not just a column-count variation. Defaults to 'grid' (the
   // consolidated mode) rather than requiring a toggle click to reach
   // the standard dense layout.
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>(homeConfig.inventoryLayout.viewMode);
-  const [gridColumns, setGridColumns] = useState<3 | 4 | 5>(homeConfig.inventoryLayout.columns);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(initialUrl.view ?? homeConfig.inventoryLayout.viewMode);
+  const [gridColumns, setGridColumns] = useState<3 | 4 | 5>(initialUrl.cols ?? homeConfig.inventoryLayout.columns);
   const [sortBy, setSortBy] = useState<
     'newest' | 'price-asc' | 'price-desc' | 'mileage' | 'year' | 'most-viewed' | 'auction-ending'
-  >('newest');
+  >(initialUrl.sort);
   // Admin controls desktop sidebar visibility. Mobile retains the filter drawer.
   const showDesktopSidebar = homeConfig.inventoryLayout.showSidebar;
   const [showMobileFilterDrawer, setShowMobileFilterDrawer] = useState<boolean>(false);
@@ -219,7 +226,13 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   // controls can still make a temporary local change without changing the
   // saved admin configuration. When an admin changes the presentation in
   // the panel, the live page follows it immediately.
+  const layoutConfigMounted = useRef(false);
   useEffect(() => {
+    // First run must not clobber a layout chosen by a shared link (?view= / ?cols=).
+    if (!layoutConfigMounted.current) {
+      layoutConfigMounted.current = true;
+      if (initialUrl.view || initialUrl.cols) return;
+    }
     setViewMode(homeConfig.inventoryLayout.viewMode);
     setGridColumns(homeConfig.inventoryLayout.columns);
   }, [homeConfig.inventoryLayout.viewMode, homeConfig.inventoryLayout.columns, homeConfig.inventoryLayout.showSidebar]);
@@ -238,6 +251,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
   // Mirror the CSS container-query breakpoints so requested and effective columns stay explicit.
   const effectiveGridColumns = getEffectiveGridColumns(gridColumns, inventoryResultsWidth);
+  const availableGridColumns = getAvailableGridColumns(inventoryResultsWidth);
 
   // Super Admin configurable search choices (Home page settings): price steps and the earliest year offered.
   const filterOptions = homeConfig.filterOptions ?? DEFAULT_HOME_PAGE_CONFIG.filterOptions;
@@ -252,12 +266,39 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Pagination States
-  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(initialUrl.page);
   // Defaults to 24 rather than 12 - now that compact mode (also the new
   // default view) fits up to 5 per row on large screens, 12 would only
   // fill ~2.4 rows per page. 24 uses the space better and halves how
   // often visitors need to paginate at real scale.
   const [pageSize, setPageSize] = useState<number>(24);
+
+  // Mirror the canonical catalogue state into the URL (replaceState: filter tweaks do not
+  // pile up history entries, and the Back button still leaves the catalogue). Other
+  // params (nav, vehicleId, ...) are preserved. Skipped for the saved-vehicles view.
+  useEffect(() => {
+    if (savedOnly || typeof window === 'undefined') return;
+    const next = writeCatalogueUrl(window.location.search, {
+      q: searchQuery.trim(), county: selectedCounty,
+      make: selectedMake, model: selectedModel, body: selectedBodyStyle, fuel: selectedFuel,
+      transmission: selectedTransmission, condition: selectedCondition, seller: selectedSellerType, color: selectedColor,
+      minPrice, maxPrice, minYear, maxYear, maxMileage, onlyAuction, sort: sortBy, page: currentPage,
+      view: viewMode === homeConfig.inventoryLayout.viewMode ? null : viewMode,
+      cols: gridColumns === homeConfig.inventoryLayout.columns ? null : gridColumns,
+    });
+    if (next === window.location.search) return;
+    window.history.replaceState(window.history.state, '', `${window.location.pathname}${next}${window.location.hash}`);
+  }, [savedOnly, searchQuery, selectedCounty, selectedMake, selectedModel, selectedBodyStyle, selectedFuel,
+    selectedTransmission, selectedCondition, selectedSellerType, selectedColor, minPrice, maxPrice, minYear, maxYear,
+    maxMileage, onlyAuction, sortBy, currentPage, viewMode, gridColumns, homeConfig.inventoryLayout.viewMode, homeConfig.inventoryLayout.columns]);
+
+  // A shared link may carry a search / location: hand them to the owning parent state once.
+  useEffect(() => {
+    if (initialUrl.q && !searchQuery) onSearchChange(initialUrl.q);
+    if (initialUrl.county !== 'All Kenya' && selectedCounty === 'All Kenya') onCountyChange(initialUrl.county);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   // Phase 42: the marketplace query is authoritative and paginated by the
   // real /api/cars endpoint. App.tsx still supplies the initial inventory
@@ -513,6 +554,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
 
   // The backend has already paginated this page. Do not slice it again.
   const paginatedVehicles = filteredVehicles;
+  useEffect(() => { onVisibleVehiclesChange?.(paginatedVehicles); }, [paginatedVehicles, onVisibleVehiclesChange]);
   const totalPages = Math.max(1, serverTotalPages);
 
   // One set of filter values and one change handler feed BOTH the desktop sidebar and the mobile sheet.
@@ -1333,7 +1375,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 )}
               </Heading>); })()}
               <p className="kayad-toolbar-blurb mt-1 max-w-2xl text-xs sm:text-[13px] leading-relaxed text-[#64748B]">
-                {savedOnly ? 'The vehicles you have saved, with their inspection status, pricing and auction availability.' : 'Compare vehicle listings, available inspection status, pricing and auction availability in one clear view.'}
+                {savedOnly ? 'The vehicles you have saved, with their inspection status, pricing and auction availability.' : 'Compare vehicle listings, pricing and auction availability in one clear view.'}
               </p>
             </div>
 
@@ -1371,17 +1413,17 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                 </select>
               </label>
 
-              {viewMode === 'grid' && (
+              {viewMode === 'grid' && availableGridColumns.length > 0 && (
                 <div className="kayad-toolbar-control hidden h-10 items-center gap-1 rounded-xl border border-[#D7E7E4] bg-[#F6FAF9] p-1 lg:flex" role="group" aria-label="Desktop grid columns">
-                  {[3, 4, 5].map((n) => (
+                  {availableGridColumns.map((n) => (
                     <button
                       key={n}
                       type="button"
-                      onClick={() => setGridColumns(n as 3 | 4 | 5)}
-                      aria-pressed={gridColumns === n}
-                      className={`h-8 min-w-9 rounded-lg px-2 text-[11px] font-bold transition-colors ${gridColumns === n ? 'bg-navy-600 text-white' : 'text-[#64748B] hover:bg-white hover:text-navy-900'}`}
-                      title={`Request ${n} columns`}
-                      aria-label={`Request ${n} columns; ${effectiveGridColumns} currently displayed`}
+                      onClick={() => setGridColumns(n)}
+                      aria-pressed={effectiveGridColumns === n}
+                      className={`h-8 min-w-9 rounded-lg px-2 text-[11px] font-bold transition-colors ${effectiveGridColumns === n ? 'bg-navy-600 text-white' : 'text-[#64748B] hover:bg-white hover:text-navy-900'}`}
+                      title={`${n} columns`}
+                      aria-label={`${n} columns${effectiveGridColumns === n ? ' (showing)' : ''}`}
                     >
                       <span className="hidden sm:inline">{n} columns</span><span className="sm:hidden">{n}×</span>
                     </button>
@@ -1546,6 +1588,7 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                   return (
                     <article
                       key={v.id}
+                      data-layout={viewMode}
                       className={`kayad-vehicle-card group bg-white border border-[#D7E7E4] rounded-2xl overflow-hidden flex shadow-[0_6px_22px_rgba(11,29,58,0.055)] hover:shadow-[0_14px_34px_rgba(11,29,58,0.12)] hover:-translate-y-0.5 hover:border-[#176B87]/45 transition-all duration-200 ${viewMode === 'list' ? 'flex-col sm:flex-row' : 'flex-col'}`}
                     >
                       <InventoryCardMedia
@@ -1553,12 +1596,17 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                         images={v.images}
                         priority={idx < 3}
                         onOpen={() => handleVehicleSelect(v)}
-                        className={viewMode === 'list' ? 'aspect-[16/10] w-full sm:aspect-auto sm:min-h-[230px] sm:w-[300px]' : 'aspect-[16/11] w-full sm:aspect-[4/3]'}
+                        className={viewMode === 'list' ? 'aspect-[16/10] w-full sm:aspect-[4/3] sm:h-auto sm:w-[260px] sm:shrink-0 sm:self-stretch' : 'aspect-[16/11] w-full sm:aspect-[4/3]'}
                         top={<>
                           <div className="flex flex-wrap gap-1 max-w-[78%]">
                             {v.verified && (
-                              <span className="hidden max-sm:inline-flex items-center gap-1.5 text-[13px] font-bold px-3 py-1.5 rounded-full text-white shadow-sm bg-[#0A3340]/90">
-                                <ShieldCheck className="w-4 h-4 text-[#13B8A6]" aria-hidden="true" />Verified
+                              <span className="hidden max-sm:inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full text-white shadow-sm bg-[#0A3340]/90 whitespace-nowrap">
+                                <ShieldCheck className="w-3.5 h-3.5 text-[#13B8A6]" aria-hidden="true" /><span aria-hidden="true">Verified</span><span className="sr-only">Verified dealer</span>
+                              </span>
+                            )}
+                            {v.reserved && (
+                              <span data-testid="reserved-badge" className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full text-white shadow-sm bg-[#9A5B13]">
+                                <Lock className="w-3 h-3" aria-hidden="true" />Reserved
                               </span>
                             )}
                             {showLiveAuction && (
@@ -1620,12 +1668,12 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                         <div className="kayad-vc-main flex flex-col max-sm:grid max-sm:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)] max-sm:items-center max-sm:gap-x-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="kayad-vc-kicker text-[11px] font-bold text-[#176B87] mb-1">{showLiveAuction ? 'Live auction' : showUpcomingAuction ? 'Upcoming auction' : showEndedAuction ? 'Auction ended' : v.verified ? 'Verified listing' : v.isFeatured ? 'Featured vehicle' : 'Marketplace listing'}</p>
+                            <p className="kayad-vc-kicker text-[11px] font-bold text-[#176B87] mb-1">{showLiveAuction ? 'Live auction' : showUpcomingAuction ? 'Upcoming auction' : showEndedAuction ? 'Auction ended' : v.verified ? 'Verified dealer' : v.isFeatured ? 'Featured vehicle' : 'Marketplace listing'}</p>
                             <h3 className={`${inventoryDensity.title} font-extrabold leading-snug tracking-[-0.01em] text-navy-900 line-clamp-2 max-sm:text-[18px] max-sm:uppercase ${viewMode === 'grid' ? 'sm:min-h-[2.6em]' : ''}`}>
                               {v.year} {v.make} {v.model}
                             </h3>
                           </div>
-                          {v.verified && <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5 max-sm:hidden" aria-label="Verified listing" />}
+                          {v.verified && <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5 max-sm:hidden" aria-label="Verified dealer" />}
                         </div>
 
                         <div className={`kayad-vc-price mt-2 ${inventoryDensity.price} font-black tracking-tight text-navy-900 max-sm:text-[30px] max-sm:leading-none max-sm:!text-[#176B87]`}>{formatPriceM(v.price)}</div>
@@ -1637,20 +1685,6 @@ export const VehicleMarketplace: React.FC<VehicleMarketplaceProps> = ({
                           {v.location && <span className="inline-flex items-center gap-1.5 min-w-0"><MapPin className="w-3 h-3 text-[#94A3B8] shrink-0" /><span className="truncate">{v.location}</span></span>}
                         </div>
 
-                        </div>
-
-                        <div className={`kayad-vc-inspection mt-3 rounded-xl border ${v.inspectionPassed ? 'border-emerald-100 bg-emerald-50/70' : 'border-[#D7E7E4] bg-[#F6FAF9]'} px-2.5 ${inventoryDensity.detail}`}>
-                          {v.inspectionPassed ? (
-                            <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-700">
-                              <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                              <span>Inspection report available</span>
-                            </div>
-                          ) : (
-                            <div className="flex items-center justify-between gap-2 text-[11px] font-semibold text-[#64748B]">
-                              <span>No inspection report yet</span>
-                              <button type="button" onClick={() => onNavigate('inspections')} className="text-navy-600 font-bold hover:text-navy-700 whitespace-nowrap">Request →</button>
-                            </div>
-                          )}
                         </div>
 
                         <div className={`kayad-vc-actions mt-auto pt-3 flex flex-col gap-2 ${viewMode === 'list' ? 'sm:flex-row sm:justify-end' : ''} max-sm:mt-4 max-sm:grid max-sm:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]`}>

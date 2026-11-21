@@ -19,7 +19,7 @@ const HERO_BG = /^\/(hero|branding)\/[A-Za-z0-9._\-/]+$/;
 const isAllowedHeroBackground = (v) => v === "" || (typeof v === "string" && HERO_BG.test(v) && !v.includes("..")) || isAllowedLogoUrl(v);
 
 export const DEFAULT_DESIGN = Object.freeze({
-  brand: { logoType: "image", logoUrl: "/branding/kayard-k-mark.png", logoText: "KAYARD KE", brandTagline: "Premium Automotive Marketplace",
+  brand: { logoType: "image", logoUrl: "/branding/kayard-ke-logo.png", logoText: "KAYARD KE", brandTagline: "Premium Vehicle Marketplace",
     footerDescription: "Kenya's trusted vehicle marketplace for buying, selling, auctions, inspections and eligible escrow services.", footerCopyright: "KAYARD MOTOR HUB. All rights reserved." },
   colors: { primaryColor: "#176B87", primaryLight: "#13B8A6", primaryDark: "#0A3340", primaryGlow: "rgba(23, 107, 135, 0.22)", accentColor: "#13B8A6", backgroundColor: "#F6FAF9", surfaceColor: "#EEF7F5", cardColor: "#FFFFFF", textColor: "#0A3340", textMutedColor: "#64748B", textDimColor: "#94A3B8", borderColor: "#D7E7E4", successColor: "#10B981", dangerColor: "#EF4444", warningColor: "#176B87", infoColor: "#176B87" },
   typography: { fontDisplay: "Outfit", fontBody: "Plus Jakarta Sans" },

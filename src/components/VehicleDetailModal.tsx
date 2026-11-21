@@ -50,6 +50,7 @@ import {
   Camera
 } from 'lucide-react';
 import { Modal, Badge, Button, Card, LazyImage } from './ui';
+import { VehicleInspectionSection } from './detail/VehicleInspectionSection';
 
 interface VehicleDetailModalProps {
   vehicle: Vehicle | null;
@@ -59,6 +60,8 @@ interface VehicleDetailModalProps {
   onStartEscrow: (vehicle: Vehicle) => void;
   onContactSeller: (vehicle: Vehicle) => void;
   onRequestInspection?: (vehicle: Vehicle) => void;
+  /** Opens the buyer's existing My inspections / Reports tab. */
+  onViewMyInspections?: (tab: 'mine' | 'reports') => void;
   onViewAuctionLot?: (vehicle: Vehicle) => void;
   onNavigateToFinancing?: (vehicle: Vehicle) => void;
   onViewShowroom?: (sellerName: string, vehicle?: Vehicle) => void;
@@ -81,6 +84,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   onStartEscrow,
   onContactSeller,
   onRequestInspection,
+  onViewMyInspections,
   onViewAuctionLot,
   onNavigateToFinancing,
   onViewShowroom,
@@ -145,11 +149,13 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
   // Sync active image when vehicle changes
   useEffect(() => {
     if (vehicle) {
-      setActiveImage(vehicle.image);
+      // First available photo of THIS vehicle; never keep the previous vehicle's photo (stale selection).
+      setActiveImage(allImages[0] || '');
+      setIsLightboxOpen(false);
       setTestDriveBooked(false);
       setShareSuccess(false);
     }
-  }, [vehicle]);
+  }, [vehicle, allImages]);
 
   // Grouped Features Categorization.
   // MUST stay above the early returns below: React hooks may not be
@@ -273,7 +279,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
     if (isAuction) return { label: vehicle.auctionEndsAt ? 'Auction Listing' : 'Auction', variant: 'live' as const };
     const rawStatus = String((vehicle as { status?: string }).status || '');
     if (rawStatus === 'sold') return { label: 'Sold', variant: 'neutral' as const };
-    if (rawStatus === 'reserved' || (vehicle as { reservation?: { reserved?: boolean } }).reservation?.reserved) return { label: 'Reserved', variant: 'neutral' as const };
+    if (rawStatus === 'reserved' || (vehicle as { reservation?: { reserved?: boolean } }).reservation?.reserved || vehicle.reserved) return { label: 'Reserved', variant: 'neutral' as const };
     if (isPrivateSeller) return { label: 'Private sale', variant: 'neutral' as const };
     return { label: 'Available', variant: 'verified' as const };
   };
@@ -364,7 +370,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
 
   return (
     <>
-      <Modal isOpen={!!vehicle} onClose={onClose} title={modalTitle} maxWidth="5xl">
+      <Modal isOpen={!!vehicle} onClose={onClose} title={modalTitle} maxWidth="5xl" presentation="sheet">
         <div className="space-y-8 sm:space-y-10 pb-28 lg:pb-8 relative bg-white">
 
           {/* ==========================================
@@ -401,7 +407,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
             <div className="lg:col-span-7 space-y-4">
               {/* Primary Large Image Viewer */}
               <div
-                onClick={() => setIsLightboxOpen(true)}
+                onClick={() => { if (allImages.length) setIsLightboxOpen(true); }}
                 onTouchStart={(e) => { touchStartX.current = e.touches[0]?.clientX ?? null; }}
                 onTouchEnd={(e) => {
                   const start = touchStartX.current; touchStartX.current = null;
@@ -424,12 +430,18 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 data-testid="vehicle-gallery-main"
                 className="aspect-[4/3] sm:aspect-[16/10] lg:max-h-[460px] w-full rounded-2xl overflow-hidden bg-[#EEF7F5] border border-[#D7E7E4] relative group shadow-md cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-[#176B87] focus-visible:ring-offset-2"
               >
+                {allImages.length === 0 ? (
+                  <div data-testid="vehicle-gallery-empty" className="w-full h-full grid place-items-center text-center text-[#64748B]">
+                    <div><Car className="mx-auto mb-2 h-10 w-10 text-[#94A3B8]" aria-hidden="true" /><p className="text-sm font-bold">Photo not available</p></div>
+                  </div>
+                ) : (
                 <LazyImage
                   src={activeImage}
                   alt={`${vehicle.title}, photo ${allImages.indexOf(activeImage) + 1} of ${allImages.length}`}
                   wrapperClassName="w-full h-full"
                   className="w-full h-full object-contain p-2 motion-safe:group-hover:scale-[1.01] motion-safe:transition-transform motion-safe:duration-300 ease-out"
                 />
+                )}
 
                 {/* Overlays: Condition & Interactive Media Chips */}
                 <div className="absolute top-4 left-4 flex items-center gap-2 flex-wrap z-10">
@@ -449,6 +461,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 </div>
 
                 {/* Counter & Fullscreen Controls */}
+                {allImages.length > 0 && (
                 <div className="absolute bottom-4 right-4 flex items-center gap-2 z-10">
                   <span className="bg-[#0A3340]/75 text-white text-[11px] font-extrabold px-3 py-1.5 rounded-xl backdrop-blur-md border border-white/10">
                     <Camera className="inline w-3.5 h-3.5 -mt-0.5 mr-1" aria-hidden="true" />{allImages.indexOf(activeImage) + 1} / {allImages.length}
@@ -466,6 +479,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     <Maximize2 className="w-4 h-4" aria-hidden="true" />
                   </button>
                 </div>
+                )}
 
                 {/* Touch Previous / Next Controls */}
                 {allImages.length > 1 && (
@@ -651,26 +665,29 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                     variant="primary"
                     size="lg"
                     fullWidth
-                    onClick={() => (onRequestInspection ? onRequestInspection(vehicle) : onContactSeller(vehicle))}
+                    onClick={() => onContactSeller(vehicle)}
                     className="shadow-md font-black text-sm"
                   >
                     <MessageSquare className="w-5 h-5 text-white" />
-                    <span>Request an Inspection</span>
+                    <span>Contact seller</span>
                   </Button>
                 )}
-                {/* The primary action above is the inspection itself only in the fallback case. Every other
-                    vehicle still needs a way to reach the pre-purchase inspection. */}
-                {onRequestInspection && (isAuction || isPrivateSeller || isEscrowActive) && (
-                  <Button
-                    variant="secondary"
-                    size="md"
-                    fullWidth
-                    onClick={() => onRequestInspection(vehicle)}
-                    className="font-bold text-sm"
-                  >
-                    <ShieldCheck className="w-4 h-4 text-[#176B87]" />
-                    <span>Request an Inspection</span>
-                  </Button>
+                {/* Inspection is its own section below; this is only a pointer to it, never a second booking CTA. */}
+                <Button
+                  variant="secondary"
+                  size="md"
+                  fullWidth
+                  onClick={() => document.getElementById('vd-inspection')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                  className="font-bold text-sm"
+                  data-testid="jump-to-inspection"
+                >
+                  <ShieldCheck className="w-4 h-4 text-[#176B87]" />
+                  <span>Inspection options</span>
+                </Button>
+                {statusChip.label === 'Reserved' && (
+                  <p data-testid="reserved-notice" className="rounded-xl bg-[#FFF6E5] border border-[#F1D9A8] px-3 py-2 text-xs font-semibold text-[#7A4A06]">
+                    This vehicle is reserved. Another buyer has an accepted offer in progress; you can still contact the seller.
+                  </p>
                 )}
               </div>
 
@@ -693,7 +710,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
                 { label: 'Drive', val: vehicle.driveType, icon: <Car className="w-4 h-4 text-[#176B87]" /> },
                 { label: 'Engine', val: vehicle.engineSize, icon: <Zap className="w-4 h-4 text-[#176B87]" /> },
                 { label: 'Condition', val: vehicle.condition, icon: <Award className="w-4 h-4 text-[#176B87]" /> },
-                { label: 'Verification', val: vehicle.verified ? 'Verified' : 'Pending', icon: <ShieldCheck className="w-4 h-4 text-emerald-600" /> }
+                { label: 'Dealer', val: vehicle.verified ? 'Verified' : '', icon: <ShieldCheck className="w-4 h-4 text-emerald-600" /> }
               ].filter((chip) => chip.val !== undefined && chip.val !== null && String(chip.val).trim() !== '').map((chip, idx) => (
                 <div key={idx} className="p-3 sm:p-3.5 bg-[#F6FAF9] hover:bg-[#EEF7F5]/80 rounded-2xl border border-[#D7E7E4]/80 text-center space-y-1 transition-colors min-w-0">
                   <div className="flex justify-center">{chip.icon}</div>
@@ -709,7 +726,7 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               ========================================== */}
           {(() => {
             const safeguardItems = [
-              { enabled: Boolean(vehicle.verified), title: '✓ Listing Verified', desc: 'KAYARD KE verification is recorded' },
+              { enabled: Boolean(vehicle.verified), title: '✓ Verified Dealer', desc: 'The seller is a KAYARD KE verified dealer' },
               { enabled: Boolean(vehicle.isDealerCertified), title: '✓ Dealer Certified', desc: 'Seller has a dealer certification record' },
               { enabled: Boolean(vehicle.inspectionPassed || vehicle.inspection), title: '✓ Inspection Report', desc: 'Inspection data is available' },
               { enabled: Boolean(vehicle.financeAvailable), title: '✓ Finance Available', desc: 'Financing is offered for this listing' },
@@ -889,26 +906,13 @@ export const VehicleDetailModal: React.FC<VehicleDetailModalProps> = ({
               structure, zero encumbrances) was rendered for EVERY vehicle. That was an invented report. This panel states
               only what is known: whether the listing carries an inspection-passed flag, and how to get an independent one.
               ========================================== */}
-          <section aria-labelledby="vd-inspection-title" className="bg-[#F6FAF9] border border-[#D7E7E4] rounded-3xl p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-3 bg-[#176B87] text-white rounded-2xl shadow-xs"><FileCheck className="w-6 h-6" aria-hidden="true" /></div>
-              <div>
-                <h3 id="vd-inspection-title" className="font-extrabold text-[#12576d] text-base font-display">Pre-purchase inspection</h3>
-                <p className="text-xs text-[#64748B]">Carried out by an independent, verified inspection provider, not by KAYARD KE.</p>
-              </div>
-            </div>
-            <p className="text-sm text-[#12576D]">
-              {vehicle.inspectionPassed
-                ? 'This listing is marked as having passed an inspection. Findings are only shown in the report of the customer who requested it, so you should still arrange your own inspection before you commit.'
-                : 'No inspection report is attached to this listing. Ask an independent provider to inspect the vehicle before you commit.'}
-            </p>
-            {onRequestInspection && (
-              <Button variant="secondary" size="md" onClick={() => onRequestInspection(vehicle)} className="font-bold text-sm">
-                <ShieldCheck className="w-4 h-4 text-[#176B87]" aria-hidden="true" />
-                <span>Arrange an inspection of this vehicle</span>
-              </Button>
-            )}
-          </section>
+          <VehicleInspectionSection
+            vehicle={vehicle}
+            viewer={viewer}
+            isOwnListing={isOwnListing}
+            onRequestInspection={onRequestInspection}
+            onViewMyInspections={onViewMyInspections}
+          />
 
           {/* ==========================================
               9. ASSET FINANCING ESTIMATOR MODULE

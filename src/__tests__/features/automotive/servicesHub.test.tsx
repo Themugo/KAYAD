@@ -101,7 +101,7 @@ describe('Vehicle details no longer render an invented inspection certificate', 
   });
   it('the panel action starts the inspection with this vehicle', () => {
     const fn = renderModal({ ...base, inspectionPassed: false } as typeof base);
-    fireEvent.click(screen.getByRole('button', { name: /Arrange an inspection of this vehicle/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Book an inspection of this vehicle/ }));
     expect(fn).toHaveBeenCalledWith(expect.objectContaining({ id: base.id }));
   });
 });

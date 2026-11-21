@@ -312,6 +312,8 @@ function AppInner() {
 
   // Modal Trigger States
   const [quickViewVehicle, setQuickViewVehicle] = useState<Vehicle | null>(null);
+  // Vehicles as currently shown in the catalogue (filtered + sorted + page): previous/next in details follows this.
+  const [catalogueResults, setCatalogueResults] = useState<Vehicle[]>([]);
   const [invalidVehicleId, setInvalidVehicleId] = useState<string | null>(null);
   const resolvedVehicleIds = React.useRef(new Set<string>());
   const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
@@ -638,6 +640,7 @@ function AppInner() {
               onToggleSave={handleToggleSave}
               onToggleCompare={handleToggleCompare}
               onQuickView={handleOpenVehicleDetails}
+              onVisibleVehiclesChange={setCatalogueResults}
               onStartEscrow={handleStartEscrow}
               selectedCounty={selectedCounty}
               onCountyChange={(c) => setSelectedCounty(c)}
@@ -866,11 +869,12 @@ function AppInner() {
       <VehicleDetailModal
         vehicle={quickViewVehicle}
         notFoundId={invalidVehicleId}
-        allVehicles={vehicles}
+        allVehicles={quickViewVehicle && catalogueResults.some((v) => v.id === quickViewVehicle.id) ? catalogueResults : vehicles}
         onClose={handleCloseVehicleDetails}
         onStartEscrow={handleStartEscrow}
         onContactSeller={handleContactSeller}
         onRequestInspection={handleRequestInspection}
+        onViewMyInspections={(tab) => { handleCloseVehicleDetails(); launchInspections({ tab }); }}
         isSaved={quickViewVehicle ? savedVehicles.includes(quickViewVehicle.id) : false}
         onToggleSave={handleToggleSave}
         onSelectVehicle={handleOpenVehicleDetails}

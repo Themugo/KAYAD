@@ -12,18 +12,18 @@ const checks = [];
 const check = (name, fn) => { fn(); checks.push(name); };
 
 check('3/4/5 controls all update the same canonical gridColumns state', () => {
-  assert.match(component, /\[3,\s*4,\s*5\]\.map\(\(n\)\s*=>/);
-  assert.match(component, /onClick=\{\(\)\s*=>\s*setGridColumns\(n as 3 \| 4 \| 5\)\}/);
+  assert.match(component, /getAvailableGridColumns\(inventoryResultsWidth\)|availableGridColumns\.map\(\(n\)\s*=>/);
+  assert.match(component, /onClick=\{\(\)\s*=>\s*setGridColumns\(n\)\}/);
   assert.match(component, /data-columns=\{viewMode === 'grid' \? gridColumns : undefined\}/);
   assert.match(component, /'--kayad-grid-columns': gridColumns/);
 });
 
 check('4-column selection has a real container-query rule at desktop result widths', () => {
-  assert.match(css, /@container kayad-inventory-results \(min-width: 680px\)[\s\S]*?\.kayad-inventory-grid\[data-columns="4"\][\s\S]*?grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(css, /@container kayad-inventory-results \(min-width: 940px\)[\s\S]*?\.kayad-inventory-grid\[data-columns="4"\][\s\S]*?grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/);
 });
 
 check('5-column selection upgrades to five only when the result container is wide enough', () => {
-  assert.match(css, /@container kayad-inventory-results \(min-width: 1120px\)[\s\S]*?\.kayad-inventory-grid\[data-columns="5"\][\s\S]*?grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\)/);
+  assert.match(css, /@container kayad-inventory-results \(min-width: 1280px\)[\s\S]*?\.kayad-inventory-grid\[data-columns="5"\][\s\S]*?grid-template-columns:\s*repeat\(5,\s*minmax\(0,\s*1fr\)\)/);
 });
 
 check('tablet and mobile retain responsive fallback grids without exposing desktop column controls', () => {

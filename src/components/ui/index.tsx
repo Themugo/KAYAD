@@ -284,6 +284,8 @@ export interface ModalProps {
   title?: React.ReactNode;
   children: React.ReactNode;
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl';
+  /** 'sheet' = full-screen on phones (no inset, no rounded corners), normal dialog from the sm breakpoint up. */
+  presentation?: 'dialog' | 'sheet';
 }
 
 export const Modal: React.FC<ModalProps> = ({
@@ -291,8 +293,10 @@ export const Modal: React.FC<ModalProps> = ({
   onClose,
   title,
   children,
-  maxWidth = 'md'
+  maxWidth = 'md',
+  presentation = 'dialog'
 }) => {
+  const sheet = presentation === 'sheet';
   const panelRef = useRef<HTMLDivElement | null>(null);
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -337,7 +341,7 @@ export const Modal: React.FC<ModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-[#0A3340]/60 backdrop-blur-sm flex items-center justify-center p-2 sm:p-4 overflow-y-auto"
+      className={`fixed inset-0 z-50 bg-[#0A3340]/60 backdrop-blur-sm flex items-center justify-center ${sheet ? 'p-0' : 'p-2'} sm:p-4 overflow-y-auto`}
       onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}
     >
       <div
@@ -346,7 +350,7 @@ export const Modal: React.FC<ModalProps> = ({
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
         tabIndex={-1}
-        className={`bg-white rounded-2xl w-full ${widthStyles[maxWidth]} max-h-[92vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl border border-[#D7E7E4] relative animate-fade-in outline-none`}
+        className={`bg-white ${sheet ? 'max-sm:rounded-none max-sm:border-0 max-sm:h-[100dvh] max-sm:max-h-none max-sm:max-w-none' : ''} rounded-2xl w-full ${widthStyles[maxWidth]} max-h-[92vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl border border-[#D7E7E4] relative animate-fade-in outline-none`}
       >
         {title && (
           <div className="sticky top-0 z-10 bg-white border-b border-[#D7E7E4] px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-2">

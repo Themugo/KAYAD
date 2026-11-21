@@ -62,8 +62,30 @@ describe('Navbar', () => {
     expect(brand).toBeTruthy();
     expect(utilities).toBeTruthy();
     expect(menu.parentElement).toBe(headerBar);
-    expect(Array.from(headerBar.children).indexOf(menu)).toBe(Array.from(headerBar.children).indexOf(utilities) + 1);
+    // Approved mobile order: brand (left), utilities, search, then the menu as the extreme-right, final control.
+    const kids = Array.from(headerBar.children);
+    const search = screen.getByRole('button', { name: 'Search vehicles' });
+    expect(search.parentElement).toBe(headerBar);
+    expect(kids.indexOf(search)).toBe(kids.indexOf(utilities) + 1);
+    expect(kids.indexOf(menu)).toBe(kids.length - 1);
+    expect(kids.indexOf(menu)).toBe(kids.indexOf(search) + 1);
     expect(utilities.contains(menu)).toBe(false);
+  });
+
+  it('draws a wide admin-managed logo alone at its natural ratio and keeps square marks with the live wordmark', () => {
+    render(<MemoryRouter><Navbar {...guestProps} /></MemoryRouter>);
+    const img = document.querySelector('.kayad-brand__image');
+    expect(img).toBeTruthy();
+    Object.defineProperty(img, 'naturalWidth', { value: 1200, configurable: true });
+    Object.defineProperty(img, 'naturalHeight', { value: 403, configurable: true });
+    fireEvent.load(img);
+    expect(document.querySelector('.kayad-brand--lockup')).toBeTruthy();
+    expect(document.querySelector('.kayad-header--lockup')).toBeTruthy();
+    expect(img.getAttribute('alt')).toMatch(/KAYA/);
+    Object.defineProperty(img, 'naturalWidth', { value: 512, configurable: true });
+    Object.defineProperty(img, 'naturalHeight', { value: 512, configurable: true });
+    fireEvent.load(img);
+    expect(document.querySelector('.kayad-brand--lockup')).toBeNull();
   });
 
   it('uses the supplied authoritative unread count for the Messages badge', () => {
