@@ -101,7 +101,7 @@ export default function LogoUploader({ value, onUploaded, onReset, disabled = fa
               Use default logo
             </button>
           </div>
-          <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" aria-label="Upload KAYAD logo" onChange={(e) => handleFile(e.target.files?.[0])} style={{ display: 'none' }} />
+          <input ref={inputRef} type="file" accept="image/png,image/jpeg,image/webp" aria-label="Upload KAYARD KE logo" onChange={(e) => handleFile(e.target.files?.[0])} style={{ display: 'none' }} />
           <small id="logo-help" style={{ color: 'var(--text-muted)', lineHeight: 1.5 }}>
             Drag a file here or choose one. PNG, JPEG or WebP, up to 5 MB. A transparent symbol without lettering fits best; the site adds the wordmark beside it.
           </small>

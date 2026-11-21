@@ -85,7 +85,7 @@ export default function DealerSettings() {
             <div style={{ padding: 18, border: '1px solid var(--border)', borderRadius: 10, color: 'var(--text-muted)', marginBottom: 8 }}>
               <strong style={{ color: 'var(--text)' }}>Not available yet</strong>
               <p style={{ margin: '8px 0 0', fontSize: 13 }}>
-                This dealer setting has no authoritative database contract in the current migration chain, so KAYAD will not fabricate or persist it locally.
+                This dealer setting has no authoritative database contract in the current migration chain, so KAYARD KE will not fabricate or persist it locally.
               </p>
             </div>
           )}

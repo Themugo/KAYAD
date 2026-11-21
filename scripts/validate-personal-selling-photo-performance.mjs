@@ -8,7 +8,7 @@ const api = read('src/services/vehicleApi.ts');
 const backend = read('backend/routes/carRoutes.js');
 const checks = [
   ['Personal listing photo manager is embedded', selling.includes('PersonalListingPhotoManager listing={l}')],
-  ['Photo upload uses existing addCarImages API', selling.includes('addCarImages(listing.id, valid)')],
+  ['Photo upload uses existing addCarImages API', selling.includes('addCarImages(listing.id, valid, setProgress)')],
   ['Photo deletion uses existing deleteCarImage API', selling.includes('deleteCarImage(listing.id, index)')],
   ['Cover selection uses existing setCoverImage API', selling.includes('setCoverImage(listing.id, index)')],
   ['Photo MIME and file-size validation is applied', selling.includes('LISTING_IMAGE_TYPES.includes(file.type)') && selling.includes('LISTING_IMAGE_MAX_BYTES')],

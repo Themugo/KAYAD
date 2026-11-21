@@ -116,7 +116,7 @@ export default function Footer({ setPage }: FooterProps) {
                   alt={branding.logoText || 'KAYARD KE'}
                   loading="lazy"
                   decoding="async"
-                  style={{ width: 'min(250px, 68vw)', height: 70, objectFit: 'contain', objectPosition: 'center', display: 'block' }}
+                  style={{ width: 'min(250px, 68vw)', height: 70, objectFit: 'contain', objectPosition: 'center', display: 'block', background: '#FFFFFF', borderRadius: 12, padding: '6px 12px', boxSizing: 'border-box' }}
                 />
               ) : (
                 <div

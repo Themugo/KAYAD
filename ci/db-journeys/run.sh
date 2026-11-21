@@ -53,7 +53,7 @@ for i in $(seq 1 30); do curl -s -m 2 "http://127.0.0.1:$PROXY_PORT/" >/dev/null
 ( cd "$ROOT/backend" && exec env NODE_ENV=development PORT=$API_PORT JWT_SECRET="$JWT_SECRET" SUPABASE_URL="http://127.0.0.1:$PROXY_PORT" SUPABASE_SERVICE_ROLE_KEY="$SR_JWT" \
   REDIS_URL="redis://127.0.0.1:$REDIS_PORT" CLOUDINARY_CLOUD_NAME=disposable-local-placeholder CLOUDINARY_API_KEY=placeholder CLOUDINARY_API_SECRET=placeholder \
   AUTH_RATE_LIMIT_MAX=100000 RATE_LIMIT_MAX=1000000 ADMIN_RATE_LIMIT_MAX=1000000 VERIFICATION_RATE_LIMIT_MAX=100000 REGISTRATION_RATE_LIMIT_MAX=100000 \
-  PAYMENT_RATE_LIMIT_MAX=1000 MPESA_ENV=production WEBHOIST_EMAIL=jimmythemugo@gmail.com node bootstrap.js >"$OUT/backend.log" 2>&1 ) & PIDS+=($!)
+  PAYMENT_RATE_LIMIT_MAX=1000 MPESA_ENV=production WEBHOIST_EMAIL="${WEBHOIST_EMAIL:-ci-owner@example.test}" node bootstrap.js >"$OUT/backend.log" 2>&1 ) & PIDS+=($!)
 UP=0; for i in $(seq 1 60); do curl -s -m 2 "http://127.0.0.1:$API_PORT/api/health" | grep -q '"status":"ok"' && { UP=1; break; }; sleep 1; done
 [ "$UP" = 1 ] || { echo "backend did not become healthy"; tail -20 "$OUT/backend.log"; exit 2; }
 { echo "stack up $(date -u +%FT%TZ)"; echo "postgres: $($P -d postgres -At -c 'show server_version')"; echo "postgrest: $("$POSTGREST_BIN" --version 2>&1 | head -1)"; echo "node: $(node -v)"; echo "redis: $(redis-server --version 2>&1 | head -1)"; echo "ports: pgrst=$PGRST_PORT proxy=$PROXY_PORT redis=$REDIS_PORT api=$API_PORT"; echo "backend health: $(curl -s -m 2 http://127.0.0.1:$API_PORT/api/health | cut -c1-120)"; } >"$OUT/stack.txt" 2>&1
@@ -65,7 +65,7 @@ run_j() { local name="$1"; shift; ( cd "$1" && shift && timeout 280 node "$@" ) 
 # Legacy chain (state passes through state.json in the working dir): registration, personal listing + moderation, enquiry, offers, payments gate, inspection, dealer, capabilities.
 WORK="$(mktemp -d)"; cp "$LEG"/*.mjs "$WORK"/
 for j in j1_registration_idempotency j1_personal_register_login j2 j3 j4_offers j5 j6 j7 j8 j9_capabilities j10_legacy_and_dealer; do run_j "legacy-$j" "$WORK" "$j.mjs"; done
-for j in 03_reconciliation_issues 05_offer_payment; do run_j "$j" "$HERE" "$j.mjs"; done
+for j in 03_reconciliation_issues 05_offer_payment 07_personal_listing_management; do run_j "$j" "$HERE" "$j.mjs"; done
 # model-layer journey: talks to the disposable PostgREST directly (loopback key generated above)
 SUPABASE_URL="http://127.0.0.1:$PROXY_PORT" SUPABASE_SERVICE_ROLE_KEY="$SR_JWT" run_j 06_aggregate_shim "$HERE" 06_aggregate_shim.mjs
 echo "overall=$([ $RC = 0 ] && [ $FAILED_MIG = 0 ] && echo PASS || echo FAIL)" | tee -a "$OUT/summary.txt"

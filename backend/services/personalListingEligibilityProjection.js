@@ -31,7 +31,9 @@ export function buildPersonalListingMutationFilter({ car, ownerId, expectedImage
       { auctionStatus: null, bidsCount: null },
     ],
   };
-  if (Array.isArray(expectedImages)) filter.images = expectedImages;
+  // `images` is a jsonb column. A raw array would be sent as a Postgres array literal and PostgREST rejects it ("invalid input syntax for
+  // type json"), which made every owner photo write fail against a real database; serialise the snapshot as JSON text instead.
+  if (Array.isArray(expectedImages)) filter.images = JSON.stringify(expectedImages);
   if (expectedUpdatedAt !== undefined) {
     filter.updatedAt = expectedUpdatedAt instanceof Date ? expectedUpdatedAt.toISOString() : expectedUpdatedAt;
   }
@@ -39,7 +41,7 @@ export function buildPersonalListingMutationFilter({ car, ownerId, expectedImage
 }
 
 /** Pure read-model projection; it never writes or replaces the canonical lifecycle RPC. */
-export function buildPersonalListingActionEligibility({ cars, events = [], visibility = [], bids = [], escrows = [], outcomes = [], capabilityStatus = "", sellerWriteAllowed = true, sellerWriteReason = "" }) {
+export function buildPersonalListingActionEligibility({ cars, events = [], visibility = [], bids = [], escrows = [], outcomes = [], settlements = [], capabilityStatus = "", sellerWriteAllowed = true, sellerWriteReason = "" }) {
   const rows = Array.isArray(cars) ? cars : [];
   const latestAction = new Map();
   for (const event of events) {
@@ -50,6 +52,7 @@ export function buildPersonalListingActionEligibility({ cars, events = [], visib
   const bidLocked = new Set(bids.map((row) => String(row?.car_id || "")).filter(Boolean));
   const escrowLocked = new Set(escrows.map((row) => String(row?.car || "")).filter(Boolean));
   const outcomeLocked = new Set(outcomes.map((row) => String(row?.car_id || "")).filter(Boolean));
+  const settlementLocked = new Set(settlements.map((row) => String(row?.vehicle_id || "")).filter(Boolean));
   const capability = String(capabilityStatus || "").toLowerCase();
 
   const eligibility = new Map();
@@ -67,7 +70,7 @@ export function buildPersonalListingActionEligibility({ cars, events = [], visib
     const transactionLocked =
       ["sold", "reserved", "rejected"].includes(status) || car?.sold === true ||
       !auctionStatusKnown || ["live", "ended"].includes(auctionStatus) || bidCount > 0 || bidCount < 0 || Boolean(highestBidderOf(car)) ||
-      bidLocked.has(id) || escrowLocked.has(id) || outcomeLocked.has(id);
+      bidLocked.has(id) || escrowLocked.has(id) || outcomeLocked.has(id) || settlementLocked.has(id);
     const mutableStatus = ["draft", "pending", "available"].includes(status);
     const canPublish = sellerWriteAllowed && sellerHidden && car?.approved === true && !transactionLocked && !["suspended", "revoked"].includes(capability);
     const canMarkSold = sellerWriteAllowed && (status === "available" || sellerHidden) && !transactionLocked && !hasPolicyHide;
@@ -75,8 +78,17 @@ export function buildPersonalListingActionEligibility({ cars, events = [], visib
     const canEdit = sellerWriteAllowed && mutableStatus && !transactionLocked && !moderatedOrUnknownHidden && !hasPolicyHide;
     const canManagePhotos = canEdit;
     const canRemove = sellerWriteAllowed && (["draft", "pending", "available"].includes(status) || sellerHidden) && !transactionLocked && !moderatedOrUnknownHidden && !hasPolicyHide;
+    const isSold = status === "sold" || car?.sold === true;
     const reason = !sellerWriteAllowed
       ? sellerWriteReason || "Your selling access is not currently enabled. Contact support."
+      : isSold
+        ? "This vehicle is marked as sold. Sold listings are kept as a record and can no longer be edited."
+      : status === "reserved"
+        ? "This vehicle is reserved for a buyer, so its details and photos are locked until the reservation ends."
+      : status === "rejected"
+        ? "This listing was not approved. Contact support before making changes."
+      : settlementLocked.has(id)
+        ? "An accepted offer is awaiting payment or has been paid for this vehicle, so its status and details cannot be changed here."
       : transactionLocked
         ? "This listing is protected by an auction, bid or transaction. Its details and photos cannot be changed right now."
       : hasPolicyHide || moderatedOrUnknownHidden
@@ -102,6 +114,7 @@ export function buildPersonalListingActionEligibility({ cars, events = [], visib
       canMarkSold,
       canRemove,
       reason,
+      reasonCode: !reason ? "" : !sellerWriteAllowed ? "SELLER_ACCESS" : isSold ? "SOLD" : status === "reserved" ? "RESERVED" : settlementLocked.has(id) ? "OFFER_SETTLEMENT_LOCK" : transactionLocked ? "TRANSACTION_LOCK" : hasPolicyHide || moderatedOrUnknownHidden ? "MODERATION_HIDDEN" : "STATE",
     });
   }
   return eligibility;

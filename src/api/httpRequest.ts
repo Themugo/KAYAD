@@ -18,6 +18,8 @@ export interface HttpRequestOptions {
   params?: Record<string, unknown>;
   /** Per-request timeout override in ms (defaults to the shared client's 30s). */
   timeout?: number;
+  /** Upload progress as a whole percentage (0-100) for multipart uploads. */
+  onUploadProgress?: (percent: number) => void;
 }
 
 /** Fetch-shaped adapter over KAYAD's single Axios transport. Service modules
@@ -43,7 +45,7 @@ export async function request<T>(path: string, options: HttpRequestOptions = {})
 }
 
 async function performRequest<T>(path: string, options: HttpRequestOptions = {}): Promise<T> {
-  const { method = 'GET', body, headers, params, timeout } = options;
+  const { method = 'GET', body, headers, params, timeout, onUploadProgress } = options;
   // httpClient always carries the canonical /api prefix in baseURL.
   // Strip an optional /api prefix from service paths so legacy /api/v1/...
   // auth callers and newer /v1/... callers both resolve exactly once.
@@ -59,6 +61,7 @@ async function performRequest<T>(path: string, options: HttpRequestOptions = {})
       headers,
       params,
       ...(timeout ? { timeout } : {}),
+      ...(onUploadProgress ? { onUploadProgress: (event: { loaded: number; total?: number }) => { if (event.total) onUploadProgress(Math.min(100, Math.round((event.loaded * 100) / event.total))); } } : {}),
     });
     return response.data;
   } catch (error) {

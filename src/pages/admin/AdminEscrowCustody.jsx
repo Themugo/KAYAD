@@ -80,7 +80,7 @@ export default function AdminEscrowCustody() {
     <div className="card" style={{ padding: 24, border: '1px solid var(--border)' }}>
       <h3 style={{ fontSize: 18, marginBottom: 8 }}>🏦 Vehicle Escrow Custody</h3>
       <p style={{ color: 'var(--text-muted)', fontSize: 13, lineHeight: 1.6, marginBottom: 18 }}>
-        Vehicle escrow is for private-seller transactions only. KAYAD does <strong>not</strong> use M-Pesa STK to collect full vehicle purchase funds. Until the future KAYAD e-wallet is built, buyers fund escrow by bank transfer into an administrator-configured custody account.
+        Vehicle escrow is for private-seller transactions only. KAYARD KE does <strong>not</strong> use M-Pesa STK to collect full vehicle purchase funds. Until the future KAYARD KE e-wallet is built, buyers fund escrow by bank transfer into an administrator-configured custody account.
       </p>
       <div style={{ display: 'grid', gap: 14, maxWidth: 720 }}>
         <label style={{ display: 'flex', alignItems: 'center', gap: 10 }}><input type="checkbox" checked={!!rules.enabled} onChange={e => setRules(r => ({ ...r, enabled: e.target.checked }))} /> Enable private-seller vehicle escrow</label>
@@ -91,14 +91,14 @@ export default function AdminEscrowCustody() {
           <label>Release window (days)<input className="input" type="number" min="0" max="90" value={rules.releaseDays} onChange={e => setRules(r => ({ ...r, releaseDays: e.target.value }))} /></label>
           <label>Escrow fee (%)<input className="input" type="number" min="0" max="50" value={rules.commissionPct} onChange={e => setRules(r => ({ ...r, commissionPct: e.target.value }))} /></label>
         </div>
-        <div style={{ padding: 12, background: 'var(--surface)', borderRadius: 8, fontSize: 12 }}><strong>Funding rail:</strong> Bank transfer only. <strong>Future:</strong> KAYAD e-wallet remains disabled and is not represented as a live funding method.</div>
+        <div style={{ padding: 12, background: 'var(--surface)', borderRadius: 8, fontSize: 12 }}><strong>Funding rail:</strong> Bank transfer only. <strong>Future:</strong> KAYARD KE e-wallet remains disabled and is not represented as a live funding method.</div>
         <button className="btn btn-gold" onClick={saveRules} disabled={saving || !canConfigure || !!loadError}>{saving ? 'Saving…' : 'Save Escrow Rules'}</button>
       </div>
     </div>
 
     <div className="card" style={{ padding: 24 }}>
       <h3 style={{ fontSize: 18, marginBottom: 8 }}>Custody Accounts</h3>
-      <p style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 16 }}>These are KAYAD/admin-controlled bank accounts where private-seller vehicle escrow funds are instructed to be deposited. Never enter a seller's personal account here.</p>
+      <p style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 16 }}>These are KAYARD KE/admin-controlled bank accounts where private-seller vehicle escrow funds are instructed to be deposited. Never enter a seller's personal account here.</p>
       <div style={{ display: 'grid', gap: 10, gridTemplateColumns: '1fr 1fr' }}>
         {['accountName','bankName','accountNumber','branch'].map(key => <input key={key} className="input" placeholder={key.replace(/([A-Z])/g, ' $1')} value={account[key]} onChange={e => setAccount(a => ({ ...a, [key]: e.target.value }))} />)}
         <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}><input type="checkbox" checked={account.isPrimary} onChange={e => setAccount(a => ({ ...a, isPrimary: e.target.checked }))} /> Primary custody account</label>

@@ -17,7 +17,7 @@ import { invalidatePublicListingCaches } from "../utils/publicListingCache.js";
 import { uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
 import { logWarn, logError } from "../utils/logger.js";
-import { isSupabaseConnected } from "../utils/supabase.js";
+import { isSupabaseConnected, getSupabase } from "../utils/supabase.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import * as path from "path";
 import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
@@ -359,6 +359,24 @@ export const getCars = async (req, res) => {
 // a client-suppliable sellerId filter that bypassed the public
 // status:"available" default would let anyone view any other user's
 // private draft/pending listings without authentication).
+/**
+ * Stable per-seller listing numbers: 1 = the seller's first listing ever, 2 = the second, and so on. The number is derived from creation
+ * order (created_at, then id) over ALL of the seller's listings INCLUDING soft-deleted ones, so it never changes with filters, sorting,
+ * paging, status changes or removal of another listing, and it is never a database id. Read-only: nothing is stored or reset.
+ */
+export async function personalListingNumbers(ownerId) {
+  const numbers = new Map();
+  if (!ownerId) return numbers;
+  try {
+    const { data, error } = await getSupabase().from("cars").select("id,created_at").eq("dealer_id", ownerId).order("created_at", { ascending: true }).order("id", { ascending: true }).limit(10000);
+    if (error) throw error;
+    (data || []).forEach((row, index) => numbers.set(String(row.id), index + 1));
+  } catch (error) {
+    logWarn("Listing numbers unavailable", { error: error?.message });
+  }
+  return numbers;
+}
+
 async function addPersonalListingPermissions(cars, owner) {
   const rows = Array.isArray(cars) ? cars : [];
   const role = String(owner?.role || "").toLowerCase();
@@ -369,18 +387,23 @@ async function addPersonalListingPermissions(cars, owner) {
   const maxListingImages = await effectiveMaxListingImages();
   const maxImagesPerRequest = MAX_LISTING_IMAGES_PER_REQUEST;
   let eligibility;
+  let outageSource = "";
   try {
     eligibility = await getPersonalListingActionEligibility(rows, owner);
   } catch (error) {
-    // Inventory remains readable during a permissions-data outage, but every mutation is disabled.
-    logWarn("Personal listing action eligibility unavailable; failing closed", { error: error?.message });
+    // Inventory remains readable during a permissions-data outage, but every mutation is disabled. The real cause is
+    // logged (which record set failed and why) so operations can tell a schema/database fault from a genuine permission denial.
+    outageSource = String(error?.source || "unknown");
+    logWarn("Personal listing action eligibility unavailable; failing closed", { source: outageSource, error: error?.message, cause: error?.cause?.message || error?.cause?.code });
     eligibility = new Map();
   }
+  const numbers = await personalListingNumbers(owner?.id);
   return rows.map((row) => {
     const plain = typeof row?.toObject === "function" ? row.toObject() : { ...row };
     const permission = eligibility.get(String(plain.id ?? plain._id ?? ""));
     return {
       ...plain,
+      listingNumber: numbers.get(String(plain.id ?? plain._id ?? "")) ?? null,
       ownerActionEligibility: permission
         ? { ...permission, maxListingImages, maxImagesPerRequest }
         : {
@@ -395,7 +418,8 @@ async function addPersonalListingPermissions(cars, owner) {
             canRemove: false,
             maxListingImages,
             maxImagesPerRequest,
-            reason: "We could not verify this listing's permissions. Refresh or contact support before making changes.",
+            reasonCode: "PERMISSION_CHECK_UNAVAILABLE",
+            reason: "Listing tools are temporarily unavailable because KAYARD KE could not load this listing's account records. Your listing is unchanged and still visible to you. Try again shortly; if this continues, contact support.",
           },
     };
   });
@@ -1268,6 +1292,53 @@ export const setCoverImage = async (req, res) => {
     if (err?.expose && Number.isInteger(err.status)) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
     logError("SET COVER IMAGE ERROR", { error: err.message });
     res.status(500).json({ success: false, message: "Failed to set the poster image" });
+  }
+};
+
+// =============================
+// ↕ REORDER PHOTOS
+// =============================
+// Body: { order: [i0, i1, ...] } - a permutation of the listing's CURRENT image indexes (new position -> old index). Photo 0 becomes the poster.
+// Same ownership, lifecycle-eligibility and optimistic-concurrency rules as the cover/delete routes; no storage object is touched.
+export const reorderCarImages = async (req, res) => {
+  try {
+    let car = await Car.findById(req.params.id);
+    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+    const isStaff = req.user?.effectiveRole === "webhoist";
+    const isOwner = car.dealer?.toString() === req.user.id;
+    const isPersonalOwner = !isStaff && ["user", "individual_seller"].includes(String(req.user?.role || "").toLowerCase());
+    if (!isOwner && !isStaff) return res.status(403).json({ success: false, message: "Not authorized to edit this listing" });
+    if ((car.deletedAt || car.deleted_at) && !isStaff) return res.status(404).json({ success: false, message: "Car not found" });
+    if (!isStaff) await assertPersonalListingMutationAllowed({ car, owner: req.user, action: "photos" });
+
+    const original = [...(car.images || [])];
+    const order = req.body?.order;
+    const valid = Array.isArray(order) && order.length === original.length && order.every((n) => Number.isInteger(n) && n >= 0 && n < original.length) && new Set(order).size === original.length;
+    if (!valid) return res.status(400).json({ success: false, code: "INVALID_IMAGE_ORDER", message: "The photo order must list every current photo exactly once." });
+
+    const reordered = order.map((n) => original[n]);
+    const unchanged = order.every((n, i) => n === i);
+    if (!unchanged) {
+      if (isPersonalOwner) {
+        const updated = await Car.findOneAndUpdate(
+          buildPersonalListingMutationFilter({ car, ownerId: req.user.id, expectedImages: original, expectedUpdatedAt: car.updatedAt }),
+          { $set: { images: reordered, coverImage: 0, updatedAt: new Date() } },
+          { new: true },
+        );
+        if (!updated) return res.status(409).json({ success: false, code: "LISTING_PHOTO_CONFLICT", message: "The vehicle photos changed in another session. Refresh the photo manager and try again." });
+        car = updated;
+      } else {
+        car.images = reordered; car.coverImage = 0;
+        await car.save();
+      }
+      await invalidatePublicListingCaches();
+      await logActionFromReq(req, "reorder_car_images", { target: car._id, targetModel: "Car", details: { order } });
+    }
+    res.json({ success: true, data: { images: car.images, coverImage: car.coverImage } });
+  } catch (err) {
+    if (err?.expose && Number.isInteger(err.status)) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
+    logError("REORDER IMAGES ERROR", { error: err.message });
+    res.status(500).json({ success: false, message: "Failed to reorder photos" });
   }
 };
 

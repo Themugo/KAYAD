@@ -38,7 +38,7 @@ describe('LoginPage', () => {
       </MemoryRouter>
     );
     expect(screen.getByText('Welcome back.')).toBeInTheDocument();
-    expect(screen.getByText(/Sign in to your KAYAD account and continue/i)).toBeInTheDocument();
+    expect(screen.getByText(/Sign in to your KAYARD KE account and continue/i)).toBeInTheDocument();
   });
 
   it('has email and password fields', () => {
@@ -61,7 +61,7 @@ describe('LoginPage', () => {
         </AuthProvider>
       </MemoryRouter>
     );
-    expect(screen.getByRole('button', { name: /continue to KAYAD/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /continue to KAYARD KE/i })).toBeInTheDocument();
   });
 
   it('has register link', () => {
@@ -72,7 +72,7 @@ describe('LoginPage', () => {
         </AuthProvider>
       </MemoryRouter>
     );
-    expect(screen.getByText(/Create your KAYAD account/i)).toBeInTheDocument();
+    expect(screen.getByText(/Create your KAYARD KE account/i)).toBeInTheDocument();
   });
 
   it('carries a validated next/intent to the register link', () => {
@@ -81,7 +81,7 @@ describe('LoginPage', () => {
         <AuthProvider><LoginPage /></AuthProvider>
       </MemoryRouter>
     );
-    const link = screen.getByText(/Create your KAYAD account/i).closest('a');
+    const link = screen.getByText(/Create your KAYARD KE account/i).closest('a');
     expect(link.getAttribute('href')).toBe('/register?next=%2Fauctions%2F42&intent=seller');
   });
 
@@ -91,7 +91,7 @@ describe('LoginPage', () => {
         <AuthProvider><LoginPage /></AuthProvider>
       </MemoryRouter>
     );
-    const link = screen.getByText(/Create your KAYAD account/i).closest('a');
+    const link = screen.getByText(/Create your KAYARD KE account/i).closest('a');
     expect(link.getAttribute('href')).toBe('/register');
   });
 

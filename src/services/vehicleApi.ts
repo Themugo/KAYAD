@@ -135,7 +135,11 @@ export interface BackendCar {
     maxListingImages?: number;
     maxImagesPerRequest?: number;
     reason?: string;
+    /** Why an action is unavailable: SOLD, RESERVED, TRANSACTION_LOCK, OFFER_SETTLEMENT_LOCK, MODERATION_HIDDEN, SELLER_ACCESS, STATE or PERMISSION_CHECK_UNAVAILABLE (a service fault, not a denial). */
+    reasonCode?: string;
   };
+  /** Stable per-seller listing number: 1 is the seller's first listing ever. Server-derived (creation order, removed listings keep their number); never a database id. */
+  listingNumber?: number | null;
 }
 
 export interface PaginatedCarsResponse {
@@ -657,13 +661,13 @@ function toVehicleError(err: unknown): VehicleApiError {
   return new VehicleApiError(error.message, error.status === 404 ? 'not_found' : error.status ? 'server' : 'network', error.status);
 }
 
-export async function addCarImages(id: string, files: File[]): Promise<ListingImagesResponse> {
+export async function addCarImages(id: string, files: File[], onProgress?: (percent: number) => void): Promise<ListingImagesResponse> {
   const formData = new FormData();
   files.forEach((file) => formData.append('images', file));
   try {
     clearCarsCache();
     return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images`, {
-      method: 'POST', body: formData, headers: { 'Content-Type': 'multipart/form-data' },
+      method: 'POST', body: formData, headers: { 'Content-Type': 'multipart/form-data' }, onUploadProgress: onProgress,
     });
   } catch (err) { throw toVehicleError(err); } finally { clearCarsCache(); }
 }
@@ -680,6 +684,14 @@ export async function setCoverImage(id: string, index: number): Promise<ListingI
   try {
     clearCarsCache();
     return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images/cover`, { method: 'PATCH', body: { index } });
+  } catch (err) { throw toVehicleError(err); } finally { clearCarsCache(); }
+}
+
+/** Save a new photo order. `order[newPosition] = currentIndex`; photo 0 becomes the poster. The server re-checks ownership and eligibility. */
+export async function reorderCarImages(id: string, order: number[]): Promise<ListingImagesResponse> {
+  try {
+    clearCarsCache();
+    return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images/order`, { method: 'PATCH', body: { order } });
   } catch (err) { throw toVehicleError(err); } finally { clearCarsCache(); }
 }
 

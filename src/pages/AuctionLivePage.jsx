@@ -314,7 +314,7 @@ export default function AuctionLivePage() {
     try {
       const data = await placeBid(id, amount);
       setBidConfirmation(true);
-      toast('Bid request sent. Complete the KAYAD M-Pesa confirmation to make the bid market-active.', 'info');
+      toast('Bid request sent. Complete the KAYARD KE M-Pesa confirmation to make the bid market-active.', 'info');
     } catch (err) {
       toast(err instanceof BidApiError ? err.message : err?.response?.data?.message || 'Failed to place bid', 'error');
     } finally {
@@ -394,14 +394,14 @@ export default function AuctionLivePage() {
       <div className="page auction-live-premium" style={{ background: 'var(--bg)' }}>
         <div className="container" style={{ maxWidth: 760, margin: '0 auto', paddingTop: 48, paddingBottom: 64 }}>
           <section className="card" role="alert" aria-live="assertive" style={{ padding: 28, borderRadius: 20, background: 'var(--surface)', border: '1px solid var(--border)' }}>
-            <p style={{ margin: 0, fontSize: 11, fontWeight: 800, letterSpacing: '.14em', color: 'var(--text-muted)' }}>KAYAD AUCTION ROOM</p>
+            <p style={{ margin: 0, fontSize: 11, fontWeight: 800, letterSpacing: '.14em', color: 'var(--text-muted)' }}>KAYARD KE AUCTION ROOM</p>
             <h1 style={{ margin: '10px 0 8px', fontSize: 26, lineHeight: 1.2, fontWeight: 800, color: 'var(--text)' }}>
               {isNotFound ? 'This auction is unavailable' : 'We could not load this auction'}
             </h1>
             <p style={{ margin: 0, maxWidth: 560, lineHeight: 1.65, color: 'var(--text-muted)' }}>
               {isNotFound
                 ? 'This auction may have been withdrawn, is no longer published, or the link may be incorrect.'
-                : 'KAYAD could not retrieve the auction details right now. Please retry, or return to the auction list and open the listing again.'}
+                : 'KAYARD KE could not retrieve the auction details right now. Please retry, or return to the auction list and open the listing again.'}
             </p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10, marginTop: 22 }}>
               {!isNotFound && <button type="button" className="btn btn-primary btn-sm" onClick={() => setLoadAttempt((attempt) => attempt + 1)}>Try again</button>}
@@ -417,7 +417,7 @@ export default function AuctionLivePage() {
   return (
     <div className="page auction-live-premium" style={{ background: 'var(--bg)' }}>
       <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
-        <DomainPremiumHeader domain="auction" kicker="KAYAD AUCTION ROOM · LIVE MARKET" title={ended ? 'The auction room has closed.' : car.title} description={ended ? 'The vehicle is now in its authoritative post-auction journey.' : 'A focused live room for bidding, market pulse and the next settlement step—without leaving the vehicle context.'} meta={<><span>{auctionLive ? 'Live bidding' : ended ? 'Auction concluded' : 'Registration'}</span><span>{bidCount} bids</span>{currentBid > 0 && <span>{formatKES(currentBid)}</span>}</>} action={<button type="button" className="btn btn-outline btn-sm" onClick={() => navigate('/?nav=discovery')}>← All Auctions</button>} />
+        <DomainPremiumHeader domain="auction" kicker="KAYARD KE AUCTION ROOM · LIVE MARKET" title={ended ? 'The auction room has closed.' : car.title} description={ended ? 'The vehicle is now in its authoritative post-auction journey.' : 'A focused live room for bidding, market pulse and the next settlement step—without leaving the vehicle context.'} meta={<><span>{auctionLive ? 'Live bidding' : ended ? 'Auction concluded' : 'Registration'}</span><span>{bidCount} bids</span>{currentBid > 0 && <span>{formatKES(currentBid)}</span>}</>} action={<button type="button" className="btn btn-outline btn-sm" onClick={() => navigate('/?nav=discovery')}>← All Auctions</button>} />
         <DomainPremiumStats domain="auction" items={[{ label: scheduled ? 'Starting bid' : 'Current bid', value: currentBid > 0 ? formatKES(currentBid) : '—', detail: scheduled ? 'Published opening value' : 'Authoritative live value' }, { label: 'Bids', value: bidCount, detail: 'Live bid count' }, { label: 'Room', value: auctionLive ? 'Open' : ended ? 'Closed' : 'Registration', detail: 'Canonical auction state' }, { label: 'Connection', value: connected ? 'Live' : 'Reconnecting', detail: 'Auction market stream' }]} />
         <DomainJourneyRail domain="auction" steps={[{ label: 'Register', state: ended ? 'complete' : registration ? 'complete' : 'current' }, { label: 'Bid', state: ended ? 'complete' : auctionLive ? 'current' : 'pending' }, { label: 'Outcome', state: ended ? 'current' : 'pending' }, { label: 'Settlement', state: 'pending' }, { label: 'Fulfilment', state: 'pending' }]} />
         <DomainTrustStrip domain="auction" items={[{ label: scheduled ? 'Published auction data' : 'Authoritative bid stream' }, { label: 'Bidding lock enforced' }, { label: 'Dealer settlement policy' }, { label: 'Escrow only when selected' }]} />
@@ -676,7 +676,7 @@ export default function AuctionLivePage() {
                     ) : registration.status === 'pending_commitment' || registration.commitment_status === 'payment_pending' ? (
                       <>
                         <div style={{ padding: 12, marginBottom: 10, borderRadius: 10, background: 'var(--surface)', border: '1px solid var(--border)', fontSize: 11, color: 'var(--text-muted)' }}>
-                          <strong style={{ color: 'var(--text)' }}>Bidder commitment:</strong> {formatKES(Number(registration.commitment_amount || 0))} · {registrationSetup?.config?.commitment?.recipient === 'platform' ? 'KAYAD' : 'auction organizer'} · {registrationSetup?.config?.commitment?.refundable === false ? 'non-refundable' : 'refundable according to the published terms'}
+                          <strong style={{ color: 'var(--text)' }}>Bidder commitment:</strong> {formatKES(Number(registration.commitment_amount || 0))} · {registrationSetup?.config?.commitment?.recipient === 'platform' ? 'KAYARD KE' : 'auction organizer'} · {registrationSetup?.config?.commitment?.refundable === false ? 'non-refundable' : 'refundable according to the published terms'}
                         </div>
                         <button className="btn btn-gold btn-full" onClick={handleCommitment} disabled={registrationLoading || registration.commitment_status === 'payment_pending'}>
                           {registration.commitment_status === 'payment_pending' ? 'Awaiting M-Pesa confirmation…' : 'Pay bidder commitment'}
@@ -698,7 +698,7 @@ export default function AuctionLivePage() {
                 <div style={{ fontSize: 12, color: 'var(--text-muted)', lineHeight: 1.7 }}>
                   <strong style={{ color: 'var(--text)', display: 'block', marginBottom: 6 }}><Lock size={13} aria-hidden="true" style={{ marginRight: 6, verticalAlign: '-2px' }} />How Bidding Works</strong>
                   <p>1. Register before the room opens and satisfy any required bidder commitment.</p>
-                  <p>2. Place bids using your verified profile. Bid confirmation is completed through KAYAD's M-Pesa flow.</p>
+                  <p>2. Place bids using your verified profile. Bid confirmation is completed through KAYARD KE's M-Pesa flow.</p>
                   <p>3. If you win, settlement follows the auction's published <strong>{String(registrationSetup?.config?.settlement?.mode || outcome?.settlement_mode || 'direct') === 'escrow' ? 'escrow' : 'direct settlement'}</strong> rule.</p>
                   <p>4. Collection and ownership transfer are completed through the controlled post-auction fulfilment workflow.</p>
                 </div>

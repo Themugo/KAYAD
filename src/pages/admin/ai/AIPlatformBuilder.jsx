@@ -88,7 +88,7 @@ const exampleCommands = [
 export default function AIPlatformBuilder() {
   const [activeModule, setActiveModule] = useState('assistant');
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Hello! I\'m your KAYAD AI assistant. I can help you manage the platform through natural language commands. Try saying things like:\n\n• "Create a Toyota promotion"\n• "Make the homepage more premium"\n• "Launch auction week campaign"\n\nWhat would you like to do?', timestamp: new Date().toISOString() }
+    { role: 'assistant', content: 'Hello! I\'m your KAYARD KE AI assistant. I can help you manage the platform through natural language commands. Try saying things like:\n\n• "Create a Toyota promotion"\n• "Make the homepage more premium"\n• "Launch auction week campaign"\n\nWhat would you like to do?', timestamp: new Date().toISOString() }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -213,7 +213,7 @@ export default function AIPlatformBuilder() {
               {msg.role === 'assistant' && (
                 <div className="flex items-center gap-2 mb-2">
                   <Bot size={16} className="text-[#0A3340]" />
-                  <span className="text-xs font-medium text-[#64748B]">KAYAD AI</span>
+                  <span className="text-xs font-medium text-[#64748B]">KAYARD KE AI</span>
                 </div>
               )}
               <p className="whitespace-pre-wrap text-sm">{msg.content}</p>

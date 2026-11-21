@@ -3356,6 +3356,30 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+  /api/cars/{id}/images/order:
+    patch:
+      tags:
+      - Api
+      summary: Reorder the photos of an owned vehicle listing
+      description: Persists a new photo order (first image is the cover). Owner-only; rejected while the listing is locked; the order must contain exactly the existing photos.
+      operationId: patchApiCarsIdImagesOrder
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '409':
+          description: Listing locked or changed concurrently
+        '500':
+          description: Internal server error
   /api/cars/{id}/images/cover:
     patch:
       tags:

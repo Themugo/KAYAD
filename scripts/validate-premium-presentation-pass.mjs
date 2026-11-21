@@ -34,10 +34,10 @@ pass('Hero premium vehicle stage present (single responsive stage + vehicle info
 pass('Login remains canonical standalone surface', /if \(path === '\/login'( \|\| path === '\/admin\/login')?\) return <LoginPage \/>;/.test(app));
 pass('Register remains canonical standalone surface', app.includes("if (path === '/register') return <OnboardingFlow"));
 pass('Login uses shared premium shell', login.includes('<PremiumAuthShell') && shell.includes('kayad-auth-card') && !shell.includes('kayad-auth-ad-panel'));
-pass('Login primary action is explicit', login.includes('Continue to KAYAD') && login.includes('type="submit"'));
+pass('Login primary action is explicit', login.includes('Continue to KAYARD KE') && login.includes('type="submit"'));
 pass('Auth screens carry no advertising or decorative artwork', !shell.includes('/hero/') && !shell.includes('kayad-auth-ad'));
 pass('Reduced-motion preserved', css.includes('@media (prefers-reduced-motion: reduce)') && /prefers-reduced-motion[\s\S]{0,400}kayad-auth|kayad-auth[\s\S]{0,2000}prefers-reduced-motion/.test(css));
-pass('Login test contract matches current presentation', loginTest.includes("Welcome back.") && loginTest.includes('Enter your password') && loginTest.includes('/continue to KAYAD/i'));
+pass('Login test contract matches current presentation', loginTest.includes("Welcome back.") && loginTest.includes('Enter your password') && loginTest.includes('/continue to KAYARD KE/i'));
 
 const failed = checks.filter((c) => !c.ok);
 console.log(`Premium presentation validation: ${checks.length - failed.length}/${checks.length} PASS`);
