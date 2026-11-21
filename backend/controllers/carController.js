@@ -1183,6 +1183,13 @@ export const deleteCarImage = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid image index" });
     }
 
+    // Optional identity check: the client names the photo it means to remove, so a double-click or a stale second tab can never
+    // delete a DIFFERENT photo that has since moved into that index.
+    const expectedPublicId = String(req.query?.publicId || "").trim();
+    if (expectedPublicId && String(car.images[imageIndex]?.public_id || "") !== expectedPublicId) {
+      return res.status(409).json({ success: false, code: "LISTING_PHOTO_CONFLICT", message: "The vehicle photos changed in another session. Refresh the photo manager and try again." });
+    }
+
     // A listing that is (or can become) public must keep at least one photo. Enforced here, not just in the UI.
     if ((car.images || []).length <= 1 && car.status !== "draft" && !isStaff) {
       return res.status(409).json({ success: false, code: "LAST_PHOTO_REQUIRED", message: "A listing must keep at least one photo. Add another photo before removing this one." });
@@ -1262,6 +1269,10 @@ export const setCoverImage = async (req, res) => {
     if (!Number.isInteger(index) || index < 0 || index >= images.length) {
       return res.status(400).json({ success: false, message: "Invalid image index" });
     }
+    const expectedCoverId = String(req.body?.publicId || "").trim();
+    if (expectedCoverId && String(images[index]?.public_id || "") !== expectedCoverId) {
+      return res.status(409).json({ success: false, code: "LISTING_PHOTO_CONFLICT", message: "The vehicle photos changed in another session. Refresh the photo manager and try again." });
+    }
 
     if (index !== 0 || car.coverImage !== 0) {
       const [chosen] = images.splice(index, 1);
@@ -1315,6 +1326,12 @@ export const reorderCarImages = async (req, res) => {
     const order = req.body?.order;
     const valid = Array.isArray(order) && order.length === original.length && order.every((n) => Number.isInteger(n) && n >= 0 && n < original.length) && new Set(order).size === original.length;
     if (!valid) return res.status(400).json({ success: false, code: "INVALID_IMAGE_ORDER", message: "The photo order must list every current photo exactly once." });
+
+    // Optional identity check: the order the client was looking at must still be the current order.
+    const currentOrder = req.body?.currentOrder;
+    if (Array.isArray(currentOrder) && JSON.stringify(currentOrder.map(String)) !== JSON.stringify(original.map((img) => String(img?.public_id || "")))) {
+      return res.status(409).json({ success: false, code: "LISTING_PHOTO_CONFLICT", message: "The vehicle photos changed in another session. Refresh the photo manager and try again." });
+    }
 
     const reordered = order.map((n) => original[n]);
     const unchanged = order.every((n, i) => n === i);

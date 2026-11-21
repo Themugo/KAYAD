@@ -9,8 +9,8 @@ const backend = read('backend/routes/carRoutes.js');
 const checks = [
   ['Personal listing photo manager is embedded', selling.includes('PersonalListingPhotoManager listing={l}')],
   ['Photo upload uses existing addCarImages API', selling.includes('addCarImages(listing.id, valid, setProgress)')],
-  ['Photo deletion uses existing deleteCarImage API', selling.includes('deleteCarImage(listing.id, index)')],
-  ['Cover selection uses existing setCoverImage API', selling.includes('setCoverImage(listing.id, index)')],
+  ['Photo deletion uses existing deleteCarImage API', selling.includes('deleteCarImage(listing.id, index, idOf(images[index])')],
+  ['Cover selection uses existing setCoverImage API', selling.includes('setCoverImage(listing.id, index, idOf(images[index])')],
   ['Photo MIME and file-size validation is applied', selling.includes('LISTING_IMAGE_TYPES.includes(file.type)') && selling.includes('LISTING_IMAGE_MAX_BYTES')],
   ['Listing photo cap is enforced in UI', selling.includes('LISTING_IMAGE_MAX_PER_REQUEST') && selling.includes('files.length > maxPerRequest') && selling.includes('maxImages == null') && selling.includes('remaining !== null') && selling.includes('valid.length > remaining') && selling.includes('ownerActionEligibility')],
   ['Last photo cannot be removed', selling.includes('images.length <= 1')],

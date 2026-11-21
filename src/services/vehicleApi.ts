@@ -137,6 +137,12 @@ export interface BackendCar {
     reason?: string;
     /** Why an action is unavailable: SOLD, RESERVED, TRANSACTION_LOCK, OFFER_SETTLEMENT_LOCK, MODERATION_HIDDEN, SELLER_ACCESS, STATE or PERMISSION_CHECK_UNAVAILABLE (a service fault, not a denial). */
     reasonCode?: string;
+    /** Why pause / republish / mark-as-sold are unavailable while edit and photos still work (e.g. the status service is not enabled yet). */
+    lifecycleReason?: string;
+    lifecycleReasonCode?: string;
+    /** Record sets that are not deployed on this platform (treated as empty) and sets that could not be read right now. */
+    degraded?: string[];
+    unavailableSources?: string[];
   };
   /** Stable per-seller listing number: 1 is the seller's first listing ever. Server-derived (creation order, removed listings keep their number); never a database id. */
   listingNumber?: number | null;
@@ -672,26 +678,26 @@ export async function addCarImages(id: string, files: File[], onProgress?: (perc
   } catch (err) { throw toVehicleError(err); } finally { clearCarsCache(); }
 }
 
-export async function deleteCarImage(id: string, index: number): Promise<ListingImagesResponse> {
+export async function deleteCarImage(id: string, index: number, publicId?: string): Promise<ListingImagesResponse> {
   try {
     clearCarsCache();
-    return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images/${index}`, { method: 'DELETE' });
+    return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images/${index}`, { method: 'DELETE', ...(publicId ? { params: { publicId } } : {}) });
   } catch (err) { throw toVehicleError(err); } finally { clearCarsCache(); }
 }
 
 /** Choose the poster: the server moves the photo to the front and returns the new order. */
-export async function setCoverImage(id: string, index: number): Promise<ListingImagesResponse> {
+export async function setCoverImage(id: string, index: number, publicId?: string): Promise<ListingImagesResponse> {
   try {
     clearCarsCache();
-    return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images/cover`, { method: 'PATCH', body: { index } });
+    return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images/cover`, { method: 'PATCH', body: { index, ...(publicId ? { publicId } : {}) } });
   } catch (err) { throw toVehicleError(err); } finally { clearCarsCache(); }
 }
 
 /** Save a new photo order. `order[newPosition] = currentIndex`; photo 0 becomes the poster. The server re-checks ownership and eligibility. */
-export async function reorderCarImages(id: string, order: number[]): Promise<ListingImagesResponse> {
+export async function reorderCarImages(id: string, order: number[], currentOrder?: string[]): Promise<ListingImagesResponse> {
   try {
     clearCarsCache();
-    return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images/order`, { method: 'PATCH', body: { order } });
+    return await request<ListingImagesResponse>(`/api/cars/${encodeURIComponent(id)}/images/order`, { method: 'PATCH', body: { order, ...(currentOrder ? { currentOrder } : {}) } });
   } catch (err) { throw toVehicleError(err); } finally { clearCarsCache(); }
 }
 

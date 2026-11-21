@@ -41,8 +41,17 @@ export function buildPersonalListingMutationFilter({ car, ownerId, expectedImage
 }
 
 /** Pure read-model projection; it never writes or replaces the canonical lifecycle RPC. */
-export function buildPersonalListingActionEligibility({ cars, events = [], visibility = [], bids = [], escrows = [], outcomes = [], settlements = [], capabilityStatus = "", sellerWriteAllowed = true, sellerWriteReason = "" }) {
+export function buildPersonalListingActionEligibility({ cars, events = [], visibility = [], bids = [], escrows = [], outcomes = [], settlements = [], recordSets = null, capabilityStatus = "", sellerWriteAllowed = true, sellerWriteReason = "", sellerWriteCode = "SELLER_ACCESS" }) {
   const rows = Array.isArray(cars) ? cars : [];
+  // Record-set availability (ok | missing | error). Omitted = every set was read successfully (the original contract).
+  //  - content actions (edit / photos / remove) depend on the hold and lock sets: visibility, bids, escrows, outcomes, settlements;
+  //  - status actions (pause / republish / mark sold) additionally depend on lifecycle history and on the status service being deployed;
+  //  - lifecycle history only classifies an ALREADY-hidden listing (seller-paused vs moderation-hidden), so it never gates a published one.
+  // A "missing" set (table not deployed) is an empty set; an "error" set is unknown and fails closed for exactly the actions that need it.
+  const stateOf = (name) => recordSets?.[name]?.state || "ok";
+  const unknownContentSources = ["visibility", "bids", "escrows", "outcomes", "settlements"].filter((name) => stateOf(name) === "error").map((name) => recordSets[name].source || name);
+  const eventsState = stateOf("events");
+  const degraded = Object.entries(recordSets || {}).filter(([, set]) => set?.state === "missing").map(([, set]) => set.source);
   const latestAction = new Map();
   for (const event of events) {
     const carId = String(event?.car_id || "");
@@ -72,13 +81,21 @@ export function buildPersonalListingActionEligibility({ cars, events = [], visib
       !auctionStatusKnown || ["live", "ended"].includes(auctionStatus) || bidCount > 0 || bidCount < 0 || Boolean(highestBidderOf(car)) ||
       bidLocked.has(id) || escrowLocked.has(id) || outcomeLocked.has(id) || settlementLocked.has(id);
     const mutableStatus = ["draft", "pending", "available"].includes(status);
-    const canPublish = sellerWriteAllowed && sellerHidden && car?.approved === true && !transactionLocked && !["suspended", "revoked"].includes(capability);
-    const canMarkSold = sellerWriteAllowed && (status === "available" || sellerHidden) && !transactionLocked && !hasPolicyHide;
-    const canHide = sellerWriteAllowed && status === "available" && !transactionLocked && !hasPolicyHide;
-    const canEdit = sellerWriteAllowed && mutableStatus && !transactionLocked && !moderatedOrUnknownHidden && !hasPolicyHide;
-    const canManagePhotos = canEdit;
-    const canRemove = sellerWriteAllowed && (["draft", "pending", "available"].includes(status) || sellerHidden) && !transactionLocked && !moderatedOrUnknownHidden && !hasPolicyHide;
     const isSold = status === "sold" || car?.sold === true;
+    // Unknown (not "denied"): a record set this car's actions depend on could not be read for a reason other than "table not deployed".
+    const contentUnknown = unknownContentSources.length > 0 || (status === "hidden" && eventsState === "error");
+    const lifecycleUnknown = unknownContentSources.length > 0 || eventsState === "error";
+    const statusServiceMissing = eventsState === "missing";
+    const canPublish = sellerWriteAllowed && sellerHidden && car?.approved === true && !transactionLocked && !["suspended", "revoked"].includes(capability) && !lifecycleUnknown && !statusServiceMissing;
+    const canMarkSold = sellerWriteAllowed && (status === "available" || sellerHidden) && !transactionLocked && !hasPolicyHide && !lifecycleUnknown && !statusServiceMissing;
+    const canHide = sellerWriteAllowed && status === "available" && !transactionLocked && !hasPolicyHide && !lifecycleUnknown && !statusServiceMissing;
+    const canEdit = sellerWriteAllowed && mutableStatus && !transactionLocked && !moderatedOrUnknownHidden && !hasPolicyHide && !contentUnknown;
+    const canManagePhotos = canEdit;
+    const canRemove = sellerWriteAllowed && (["draft", "pending", "available"].includes(status) || sellerHidden) && !transactionLocked && !moderatedOrUnknownHidden && !hasPolicyHide && !contentUnknown;
+    // A definite denial (sold, reserved, rejected, locked) is a known truth and wins over an unrelated unknown.
+    const knownDenial = !sellerWriteAllowed || isSold || ["reserved", "rejected"].includes(status) || transactionLocked;
+    const sellerUnknown = !sellerWriteAllowed && sellerWriteCode === "SELLER_ACCESS_UNAVAILABLE";
+    const temporarilyUnknown = contentUnknown && !knownDenial;
     const reason = !sellerWriteAllowed
       ? sellerWriteReason || "Your selling access is not currently enabled. Contact support."
       : isSold
@@ -91,6 +108,8 @@ export function buildPersonalListingActionEligibility({ cars, events = [], visib
         ? "An accepted offer is awaiting payment or has been paid for this vehicle, so its status and details cannot be changed here."
       : transactionLocked
         ? "This listing is protected by an auction, bid or transaction. Its details and photos cannot be changed right now."
+      : temporarilyUnknown
+        ? "We could not check this listing's moderation, bid or purchase records just now, so changes are paused. Your listing is unchanged and still visible. Try again."
       : hasPolicyHide || moderatedOrUnknownHidden
         ? "This listing is hidden by a moderation or account-safety process. Contact support before changing it."
         : sellerHidden && car?.approved !== true
@@ -103,8 +122,20 @@ export function buildPersonalListingActionEligibility({ cars, events = [], visib
                 ? "This listing's current status does not allow owner changes."
                 : "";
 
+    // Status actions (pause / republish / mark sold) can be unavailable while edit and photos are fully usable; say why, separately.
+    const statusActionRelevant = sellerWriteAllowed && !isSold && !transactionLocked && !hasPolicyHide && ["available", "hidden", "pending", "draft"].includes(status);
+    const lifecycleReasonCode = !statusActionRelevant ? "" : statusServiceMissing ? "LISTING_STATUS_SERVICE_UNAVAILABLE" : lifecycleUnknown ? "PERMISSION_CHECK_UNAVAILABLE" : "";
+    const lifecycleReason = lifecycleReasonCode === "LISTING_STATUS_SERVICE_UNAVAILABLE"
+      ? "Pausing, republishing and marking as sold are not enabled on this platform yet. Editing details and managing photos are not affected."
+      : lifecycleReasonCode === "PERMISSION_CHECK_UNAVAILABLE"
+        ? "We could not check this listing's status records just now, so pausing, republishing and marking as sold are paused. Try again."
+        : "";
     eligibility.set(id, {
-      permissionsAvailable: true,
+      permissionsAvailable: !(temporarilyUnknown || sellerUnknown),
+      degraded,
+      unavailableSources: unknownContentSources,
+      lifecycleReason,
+      lifecycleReasonCode,
       isSellerHidden: sellerHidden,
       isPolicyHidden: hasPolicyHide,
       canEdit,
@@ -114,7 +145,7 @@ export function buildPersonalListingActionEligibility({ cars, events = [], visib
       canMarkSold,
       canRemove,
       reason,
-      reasonCode: !reason ? "" : !sellerWriteAllowed ? "SELLER_ACCESS" : isSold ? "SOLD" : status === "reserved" ? "RESERVED" : settlementLocked.has(id) ? "OFFER_SETTLEMENT_LOCK" : transactionLocked ? "TRANSACTION_LOCK" : hasPolicyHide || moderatedOrUnknownHidden ? "MODERATION_HIDDEN" : "STATE",
+      reasonCode: !reason ? "" : !sellerWriteAllowed ? sellerWriteCode : isSold ? "SOLD" : status === "reserved" ? "RESERVED" : settlementLocked.has(id) ? "OFFER_SETTLEMENT_LOCK" : transactionLocked ? "TRANSACTION_LOCK" : temporarilyUnknown ? "PERMISSION_CHECK_UNAVAILABLE" : hasPolicyHide || moderatedOrUnknownHidden ? "MODERATION_HIDDEN" : "STATE",
     });
   }
   return eligibility;

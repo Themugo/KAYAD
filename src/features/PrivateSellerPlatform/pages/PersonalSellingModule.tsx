@@ -479,6 +479,7 @@ function PersonalListingPhotoManager({ listing, onChanged }: { listing: BackendC
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const images = Array.isArray(listing.images) ? listing.images : [];
+  const idOf = (image: unknown) => String((image as { public_id?: string; publicId?: string } | null)?.public_id || (image as { publicId?: string } | null)?.publicId || '');
   const permissions = listing.ownerActionEligibility;
   const canManage = permissions?.permissionsAvailable === true && permissions.canManagePhotos === true;
   const maxImages = Number.isInteger(permissions?.maxListingImages) ? Number(permissions?.maxListingImages) : null;
@@ -507,7 +508,7 @@ function PersonalListingPhotoManager({ listing, onChanged }: { listing: BackendC
     if (images.length <= 1 && status !== 'draft') { setError('A submitted listing must keep at least one photo. Add another photo before removing this one.'); return; }
     if (!window.confirm('Remove this vehicle photo?')) return;
     setBusy(true); setError(''); setMessage('');
-    try { const result = await deleteCarImage(listing.id, index); if (!result?.success) throw new Error(result?.message || 'The server did not confirm photo removal.'); setMessage('Photo removed.'); onChanged(); }
+    try { const result = await deleteCarImage(listing.id, index, idOf(images[index]) || undefined); if (!result?.success) throw new Error(result?.message || 'The server did not confirm photo removal.'); setMessage('Photo removed.'); onChanged(); }
     catch (e) { setError(e instanceof Error ? e.message : 'Unable to remove this photo.'); } finally { setBusy(false); }
   };
   const move = async (index: number, delta: -1 | 1) => {
@@ -516,13 +517,13 @@ function PersonalListingPhotoManager({ listing, onChanged }: { listing: BackendC
     if (target < 0 || target >= images.length) return;
     const order = images.map((_, i) => i); [order[index], order[target]] = [order[target], order[index]];
     setBusy(true); setError(''); setMessage('');
-    try { const result = await reorderCarImages(listing.id, order); if (!result?.success) throw new Error(result?.message || 'The server did not confirm the new photo order.'); setMessage(target === 0 ? 'Photo moved to the front and set as the cover photo.' : 'Photo order saved.'); onChanged(); }
+    try { const result = await reorderCarImages(listing.id, order, images.every((image) => idOf(image)) ? images.map(idOf) : undefined); if (!result?.success) throw new Error(result?.message || 'The server did not confirm the new photo order.'); setMessage(target === 0 ? 'Photo moved to the front and set as the cover photo.' : 'Photo order saved.'); onChanged(); }
     catch (e) { setError(e instanceof Error ? e.message : 'Unable to save the photo order.'); } finally { setBusy(false); }
   };
   const cover = async (index: number) => {
     if (!canManage) { setError(permissions?.reason || 'Photo permissions could not be verified.'); return; }
     setBusy(true); setError(''); setMessage('');
-    try { const result = await setCoverImage(listing.id, index); if (!result?.success) throw new Error(result?.message || 'The server did not confirm the cover change.'); setMessage('Cover photo updated.'); onChanged(); }
+    try { const result = await setCoverImage(listing.id, index, idOf(images[index]) || undefined); if (!result?.success) throw new Error(result?.message || 'The server did not confirm the cover change.'); setMessage('Cover photo updated.'); onChanged(); }
     catch (e) { setError(e instanceof Error ? e.message : 'Unable to update cover photo.'); } finally { setBusy(false); }
   };
   return <section className="mt-4 border-t border-[#E5EFED] pt-4" aria-label="Manage vehicle photos">
@@ -682,8 +683,9 @@ function ListingQualitySection({ listings, loading, error, onRefresh, onNavigate
               {canMarkSold && <button type="button" disabled={busy} onClick={() => void changeLifecycle(l, 'mark_sold')} className={`${btn} border-[#B8D9D6] text-[#082B40]`}>Mark as sold</button>}
               {canRemove && <button type="button" onClick={() => void removeListing(l)} disabled={removingId === l.id || savingId === l.id} className={`${btn} ml-auto border-rose-200 text-rose-700`}>{removingId === l.id ? 'Removing…' : 'Remove'}</button>}
             </div>
-            {permissions?.permissionsAvailable === false && <div role="status" data-testid="permissions-unavailable" className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#B8D9D6] bg-[#F5FBFA] p-2.5 text-xs text-[#0A3340]"><span className="min-w-0 flex-1">{permissions.reason || 'Listing tools are temporarily unavailable. Your listing is unchanged. Try again shortly or contact support.'}</span><button type="button" onClick={onRefresh} className="min-h-9 rounded-lg border border-[#082B40] px-3 text-xs font-bold text-[#082B40]">Try again</button></div>}
+            {permissions?.permissionsAvailable === false && <div role="status" data-testid="permissions-unavailable" className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#B8D9D6] bg-[#F5FBFA] p-2.5 text-xs text-[#0A3340]"><span className="min-w-0 flex-1">{permissions.reason || 'Listing tools are temporarily unavailable. Your listing is unchanged. Try again shortly or contact support.'}</span><button type="button" onClick={onRefresh} disabled={loading} className="min-h-9 rounded-lg border border-[#082B40] px-3 text-xs font-bold text-[#082B40] disabled:opacity-60">{loading ? 'Checking…' : 'Try again'}</button></div>}
             {permissions?.permissionsAvailable === true && permissions.reason && <p data-testid="action-reason" className="mt-2 rounded-lg bg-[#F6FAF9] px-2.5 py-2 text-xs text-[#0A3340]">{permissions.reason}</p>}
+            {permissions?.lifecycleReason && <p data-testid="lifecycle-reason" className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg bg-[#F6FAF9] px-2.5 py-2 text-xs text-[#0A3340]"><span className="min-w-0 flex-1">{permissions.lifecycleReason}</span>{permissions.lifecycleReasonCode === 'PERMISSION_CHECK_UNAVAILABLE' && <button type="button" onClick={onRefresh} disabled={loading} className="min-h-9 rounded-lg border border-[#082B40] px-3 text-xs font-bold text-[#082B40] disabled:opacity-60">{loading ? 'Checking…' : 'Try again'}</button>}</p>}
             {!permissions && <p className="mt-2 text-xs text-[#0A3340]">Listing actions are not available for this listing yet. Refresh the page; if this continues, contact support.</p>}
             {isEditing && <form className="mt-4 space-y-4 border-t border-[#E5EFED] pt-4" onSubmit={(event) => { event.preventDefault(); void saveEdit(l); }}>
               <section className="grid gap-3 sm:grid-cols-2"><div className="sm:col-span-2"><h4 className="text-xs font-black uppercase tracking-wide text-[#176B87]">Vehicle identity</h4></div>

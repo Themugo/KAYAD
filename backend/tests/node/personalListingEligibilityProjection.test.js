@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { buildPersonalListingActionEligibility, buildPersonalListingMutationFilter } from "../../services/personalListingEligibilityProjection.js";
+import { readRecordSet } from "../../services/personalListingMutationGuard.service.js";
 
 const base = (overrides = {}) => ({ id: "car-1", status: "available", approved: true, auction_status: "none", bids_count: 0, ...overrides });
 const get = (input, id = "car-1") => buildPersonalListingActionEligibility(input).get(id);
@@ -196,4 +197,88 @@ test("the unlocked action set is unchanged when no reason applies", () => {
   const result = get({ cars: [base()] });
   assert.equal(result.reason, "");
   assert.equal(result.reasonCode, "");
+});
+
+// ---- Partial availability of record sets (hosted databases that predate some tables, or a transient read failure) ----
+const sets = (over = {}) => ({
+  events: { state: "ok", source: "lifecycle history" }, visibility: { state: "ok", source: "policy visibility" }, bids: { state: "ok", source: "bids" },
+  escrows: { state: "ok", source: "escrow activity" }, outcomes: { state: "ok", source: "purchase outcomes" }, settlements: { state: "ok", source: "offer settlements" }, ...over,
+});
+
+test("readRecordSet: ok rows, missing table = empty, any other error = unknown", () => {
+  assert.deepEqual(readRecordSet({ data: [{ a: 1 }] }, "x"), { state: "ok", rows: [{ a: 1 }], source: "x" });
+  assert.equal(readRecordSet({ error: { code: "PGRST205", message: "Could not find the table 'public.t' in the schema cache" } }, "x").state, "missing");
+  assert.equal(readRecordSet({ error: { code: "42P01", message: 'relation "t" does not exist' } }, "x").state, "missing");
+  assert.equal(readRecordSet({ error: { code: "57014", message: "canceling statement due to statement timeout" } }, "x").state, "error");
+  assert.equal(readRecordSet({ error: { message: "fetch failed" } }, "x").state, "error");
+  assert.equal(readRecordSet({ error: { code: "42501", message: "permission denied for table t" } }, "x").state, "error");
+});
+
+test("tables that are not deployed (hosted drift) do not disable edit, photos or remove on a clean published listing", () => {
+  const result = get({ cars: [base()], recordSets: sets({ events: { state: "missing", source: "lifecycle history" }, visibility: { state: "missing", source: "policy visibility" }, outcomes: { state: "missing", source: "purchase outcomes" }, settlements: { state: "missing", source: "offer settlements" } }) });
+  assert.equal(result.permissionsAvailable, true);
+  assert.equal(result.canEdit, true);
+  assert.equal(result.canManagePhotos, true);
+  assert.equal(result.canRemove, true);
+  assert.equal(result.reason, "");
+  assert.deepEqual(result.degraded, ["lifecycle history", "policy visibility", "purchase outcomes", "offer settlements"]);
+});
+
+test("a missing status service disables only pause / republish / mark sold, with its own explicit reason", () => {
+  const result = get({ cars: [base()], recordSets: sets({ events: { state: "missing", source: "lifecycle history" } }) });
+  assert.equal(result.canHide, false);
+  assert.equal(result.canMarkSold, false);
+  assert.equal(result.lifecycleReasonCode, "LISTING_STATUS_SERVICE_UNAVAILABLE");
+  assert.match(result.lifecycleReason, /not enabled on this platform yet/);
+  assert.equal(result.canEdit, true);
+  assert.equal(result.reason, "");
+});
+
+test("a failed lifecycle-history read does not block editing a published listing but does pause status actions", () => {
+  const result = get({ cars: [base()], recordSets: sets({ events: { state: "error", source: "lifecycle history" } }) });
+  assert.equal(result.canEdit, true);
+  assert.equal(result.canManagePhotos, true);
+  assert.equal(result.canMarkSold, false);
+  assert.equal(result.lifecycleReasonCode, "PERMISSION_CHECK_UNAVAILABLE");
+});
+
+test("a hidden listing cannot be classified without lifecycle history, so it fails closed and asks to retry", () => {
+  const result = get({ cars: [base({ status: "hidden" })], recordSets: sets({ events: { state: "error", source: "lifecycle history" } }) });
+  assert.equal(result.canEdit, false);
+  assert.equal(result.permissionsAvailable, false);
+  assert.equal(result.reasonCode, "PERMISSION_CHECK_UNAVAILABLE");
+});
+
+test("an unreadable lock set (bids, escrow, outcomes, holds, settlements) fails closed for content and status actions", () => {
+  for (const name of ["visibility", "bids", "escrows", "outcomes", "settlements"]) {
+    const result = get({ cars: [base()], recordSets: sets({ [name]: { state: "error", source: name } }) });
+    assert.equal(result.canEdit, false, name);
+    assert.equal(result.canManagePhotos, false, name);
+    assert.equal(result.canRemove, false, name);
+    assert.equal(result.canMarkSold, false, name);
+    assert.equal(result.permissionsAvailable, false, name);
+    assert.equal(result.reasonCode, "PERMISSION_CHECK_UNAVAILABLE", name);
+    assert.deepEqual(result.unavailableSources, [name]);
+  }
+});
+
+test("a definite denial (sold) wins over an unrelated unknown and is not reported as a temporary outage", () => {
+  const result = get({ cars: [base({ status: "sold", sold: true })], recordSets: sets({ bids: { state: "error", source: "bids" } }) });
+  assert.equal(result.reasonCode, "SOLD");
+  assert.equal(result.permissionsAvailable, true);
+  assert.equal(result.canEdit, false);
+});
+
+test("an unconfirmable seller capability is a retryable unknown, not a permanent denial", () => {
+  const result = get({ cars: [base()], sellerWriteAllowed: false, sellerWriteCode: "SELLER_ACCESS_UNAVAILABLE", sellerWriteReason: "We could not confirm your selling access just now." });
+  assert.equal(result.canEdit, false);
+  assert.equal(result.permissionsAvailable, false);
+  assert.equal(result.reasonCode, "SELLER_ACCESS_UNAVAILABLE");
+});
+
+test("without recordSets the original contract is unchanged (every set read successfully)", () => {
+  const result = get({ cars: [base()] });
+  assert.equal(result.permissionsAvailable, true);
+  assert.deepEqual(result.degraded, []);
+  assert.equal(result.lifecycleReason, "");
 });
