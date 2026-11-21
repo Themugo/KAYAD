@@ -6,7 +6,7 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"; HERE="$ROOT/ci/db-journeys"
 export PGHOST="${PGHOST:-127.0.0.1}" PGPORT="${PGPORT:-5432}" PGUSER="${PGUSER:-postgres}"
 DB="${KAYAD_CI_DB:-kayad_ci}"; OUT="${KAYAD_CI_OUT:-$ROOT/ci/db-journeys/out}"
-PGRST_PORT="${PGRST_PORT:-54340}"; PROXY_PORT="${PROXY_PORT:-54341}"; REDIS_PORT="${REDIS_PORT:-6391}"; API_PORT="${API_PORT:-5065}"
+PGRST_PORT="${PGRST_PORT:-54340}"; PROXY_PORT="${PROXY_PORT:-54341}"; REDIS_PORT="${REDIS_PORT:-6391}"; API_PORT="${API_PORT:-5065}"; STUB_PORT="${CLOUDINARY_STUB_PORT:-9443}"
 POSTGREST_BIN="${POSTGREST_BIN:-postgrest}"
 case "$PGHOST" in 127.0.0.1|localhost|::1) ;; *) echo "REFUSING: PGHOST=$PGHOST is not loopback"; exit 2;; esac
 [[ "$DB" =~ ^kayad_(t|ci|test|recon|journey) ]] || { echo "REFUSING: database name $DB is not a disposable name"; exit 2; }
@@ -18,7 +18,7 @@ cleanup() {
     if [ "${KAYAD_CI_KEEP_DB:-0}" != 1 ] && [[ "$DB" =~ ^kayad_(ci|test|journey) ]]; then
       $P -d postgres -c "select pg_terminate_backend(pid) from pg_stat_activity where datname='$DB'" >/dev/null 2>&1; $P -d postgres -c "drop database if exists $DB" >/dev/null 2>&1 && echo "database $DB dropped" || echo "database $DB drop FAILED"
     else echo "database $DB kept (KAYAD_CI_KEEP_DB=1 or non-ephemeral name)"; fi
-    for port in $PGRST_PORT $PROXY_PORT $REDIS_PORT $API_PORT; do (exec 3<>/dev/tcp/127.0.0.1/$port) 2>/dev/null && echo "port $port STILL LISTENING" || echo "port $port closed"; done
+    for port in $PGRST_PORT $PROXY_PORT $REDIS_PORT $API_PORT $STUB_PORT; do (exec 3<>/dev/tcp/127.0.0.1/$port) 2>/dev/null && echo "port $port STILL LISTENING" || echo "port $port closed"; done
   } >"$OUT/cleanup.txt" 2>&1
 }; trap cleanup EXIT
 P="psql -X -q -v ON_ERROR_STOP=1"
@@ -49,9 +49,13 @@ EOF
 "$POSTGREST_BIN" "$OUT/pgrst.conf" >"$OUT/postgrest.log" 2>&1 & PIDS+=($!)
 PGRST_PORT=$PGRST_PORT PROXY_PORT=$PROXY_PORT node "$HERE/rest_prefix_proxy.cjs" >"$OUT/proxy.log" 2>&1 & PIDS+=($!)
 redis-server --port "$REDIS_PORT" --save "" --appendonly no --bind 127.0.0.1 >"$OUT/redis.log" 2>&1 & PIDS+=($!)
+# Local Cloudinary-compatible stub (loopback only): lets the REAL photo upload/destroy code run without internet. It is not Cloudinary.
+export CLOUDINARY_STUB_LOG="$OUT/cloudinary-stub.log" CLOUDINARY_STUB_FAIL_FILE="$OUT/cloudinary-stub.fail" CLOUDINARY_STUB_PORT="$STUB_PORT"
+node "$HERE/cloudinary_stub.cjs" >"$OUT/cloudinary-stub.out" 2>&1 & PIDS+=($!)
 for i in $(seq 1 30); do curl -s -m 2 "http://127.0.0.1:$PROXY_PORT/" >/dev/null && break; sleep 1; done
 ( cd "$ROOT/backend" && exec env NODE_ENV=development PORT=$API_PORT JWT_SECRET="$JWT_SECRET" SUPABASE_URL="http://127.0.0.1:$PROXY_PORT" SUPABASE_SERVICE_ROLE_KEY="$SR_JWT" \
   REDIS_URL="redis://127.0.0.1:$REDIS_PORT" CLOUDINARY_CLOUD_NAME=disposable-local-placeholder CLOUDINARY_API_KEY=placeholder CLOUDINARY_API_SECRET=placeholder \
+  CLOUDINARY_URL="cloudinary://placeholder:placeholder@disposable-local-placeholder?upload_prefix=http://127.0.0.1:$STUB_PORT" \
   AUTH_RATE_LIMIT_MAX=100000 RATE_LIMIT_MAX=1000000 ADMIN_RATE_LIMIT_MAX=1000000 VERIFICATION_RATE_LIMIT_MAX=100000 REGISTRATION_RATE_LIMIT_MAX=100000 \
   PAYMENT_RATE_LIMIT_MAX=1000 MPESA_ENV=production WEBHOIST_EMAIL="${WEBHOIST_EMAIL:-ci-owner@example.test}" node bootstrap.js >"$OUT/backend.log" 2>&1 ) & PIDS+=($!)
 UP=0; for i in $(seq 1 60); do curl -s -m 2 "http://127.0.0.1:$API_PORT/api/health" | grep -q '"status":"ok"' && { UP=1; break; }; sleep 1; done
@@ -68,5 +72,7 @@ for j in j1_registration_idempotency j1_personal_register_login j2 j3 j4_offers 
 for j in 03_reconciliation_issues 05_offer_payment 07_personal_listing_management; do run_j "$j" "$HERE" "$j.mjs"; done
 # model-layer journey: talks to the disposable PostgREST directly (loopback key generated above)
 SUPABASE_URL="http://127.0.0.1:$PROXY_PORT" SUPABASE_SERVICE_ROLE_KEY="$SR_JWT" run_j 06_aggregate_shim "$HERE" 06_aggregate_shim.mjs
+# MUST run last: it drops the objects that are absent on the hosted project (a hosted-shaped schema) and then drives the whole owner lifecycle.
+run_j 08_personal_listing_hosted_schema "$HERE" 08_personal_listing_hosted_schema.mjs
 echo "overall=$([ $RC = 0 ] && [ $FAILED_MIG = 0 ] && echo PASS || echo FAIL)" | tee -a "$OUT/summary.txt"
 [ $RC = 0 ] && [ $FAILED_MIG = 0 ]

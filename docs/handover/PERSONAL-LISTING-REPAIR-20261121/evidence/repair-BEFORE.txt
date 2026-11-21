@@ -1,0 +1,7 @@
+my-listings                        [200,1]
+eligibility                        {"permissionsAvailable":false,"canEdit":false,"canManagePhotos":false,"canMarkSold":false,"code":"PERMISSION_CHECK_UNAVAILABLE"}
+PUT edit                           [503,"LISTING_PERMISSION_CHECK_UNAVAILABLE","Could not verify listing permissions (lifecycle history)."]
+PATCH cover                        [503,"LISTING_PERMISSION_CHECK_UNAVAILABLE","Could not verify listing permissions (lifecycle history)."]
+DELETE photo                       [503,"LISTING_PERMISSION_CHECK_UNAVAILABLE","Could not verify listing permissions (lifecycle history)."]
+PATCH mark_sold                    [500,null,"Could not find the function public.kayad_personal_listing_lifecycle_atomic(p_action, p_car_id, p_owner_id) in the schema cache"]
+ID=97ffc6bc-6f60-49b4-9a5b-f299196a3373 EMAIL=hosted-dax749puis@example.test

@@ -1,0 +1,7 @@
+my-listings                        [200,1]
+eligibility                        {"permissionsAvailable":true,"canEdit":true,"canManagePhotos":true,"canMarkSold":false,"code":""}
+PUT edit                           [200,null,null]
+PATCH cover                        [200,null,null]
+DELETE photo                       [200,null,null]
+PATCH mark_sold                    [503,"LISTING_STATUS_SERVICE_UNAVAILABLE","Pausing, republishing and marking as sold are not enabled on this platform yet. Your listing is unchanged. Editing details and photos still work."]
+ID=5a64b8a8-fd13-4d19-80c8-f9a62890950e EMAIL=hosted-nugdnbqv8d@example.test

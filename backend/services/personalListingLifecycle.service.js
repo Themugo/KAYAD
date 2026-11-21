@@ -30,6 +30,11 @@ export async function transitionPersonalListing({ carId, ownerId, action }) {
       const [status, code, safeMessage] = ERROR_MAP[key];
       throw Object.assign(new Error(safeMessage), { status, code, expose: true });
     }
+    // The atomic lifecycle function (or a table it needs) is not deployed in this database. Say so plainly; never leak the internal
+    // function name, and never fall back to a non-atomic status write (the RPC is the only safe writer of a status change).
+    if (["PGRST202", "42883", "42P01", "PGRST205"].includes(String(error.code || "")) || /could not find the function|does not exist/i.test(message)) {
+      throw Object.assign(new Error("Pausing, republishing and marking as sold are not enabled on this platform yet. Your listing is unchanged. Editing details and photos still work."), { status: 503, code: "LISTING_STATUS_SERVICE_UNAVAILABLE", expose: true });
+    }
     throw error;
   }
   return data;

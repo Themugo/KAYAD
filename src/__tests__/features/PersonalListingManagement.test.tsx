@@ -158,7 +158,7 @@ describe('Manage photos', () => {
   it('reorders photos by sending a permutation and confirms the saved order', async () => {
     const section = await open();
     fireEvent.click(within(section).getByRole('button', { name: 'Move photo 1 later' }));
-    await waitFor(() => expect(api.reorderCarImages).toHaveBeenCalledWith('c1', [1, 0, 2]));
+    await waitFor(() => expect(api.reorderCarImages).toHaveBeenCalledWith('c1', [1, 0, 2], ['p/1', 'p/2', 'p/3']));
     expect((await screen.findByText(/moved to the front|order saved/i))).toBeTruthy();
     expect(onRefresh).toHaveBeenCalled();
   });
@@ -167,19 +167,19 @@ describe('Manage photos', () => {
     expect((within(section).getByRole('button', { name: 'Move photo 1 earlier' }) as HTMLButtonElement).disabled).toBe(true);
     expect((within(section).getByRole('button', { name: 'Move photo 3 later' }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(within(section).getByRole('button', { name: 'Move photo 2 earlier' }));
-    await waitFor(() => expect(api.reorderCarImages).toHaveBeenCalledWith('c1', [1, 0, 2]));
+    await waitFor(() => expect(api.reorderCarImages).toHaveBeenCalledWith('c1', [1, 0, 2], ['p/1', 'p/2', 'p/3']));
     expect(await screen.findByText(/set as the cover photo/i)).toBeTruthy();
   });
   it('makes a photo the cover through the existing cover route', async () => {
     const section = await open();
     fireEvent.click(within(section).getAllByRole('button', { name: 'Make cover' })[0]);
-    await waitFor(() => expect(api.setCoverImage).toHaveBeenCalledWith('c1', 1));
+    await waitFor(() => expect(api.setCoverImage).toHaveBeenCalledWith('c1', 1, 'p/2'));
   });
   it('removes a photo only after confirmation and through the existing delete route', async () => {
     const section = await open();
     fireEvent.click(within(section).getByRole('button', { name: 'Remove photo 2' }));
     expect(window.confirm).toHaveBeenCalled();
-    await waitFor(() => expect(api.deleteCarImage).toHaveBeenCalledWith('c1', 1));
+    await waitFor(() => expect(api.deleteCarImage).toHaveBeenCalledWith('c1', 1, 'p/2'));
     (window.confirm as ReturnType<typeof vi.fn>).mockReturnValue(false);
     api.deleteCarImage.mockClear();
     fireEvent.click(within(section).getByRole('button', { name: 'Remove photo 3' }));
@@ -232,5 +232,43 @@ describe('permission verification failures', () => {
     expect(onRefresh).toHaveBeenCalled();
     expect((screen.getByRole('button', { name: 'Edit details' }) as HTMLButtonElement).disabled).toBe(true);
     expect(screen.queryByRole('button', { name: 'Mark as sold' })).toBeNull();
+  });
+});
+
+describe('partial availability (hosted databases that predate some tables) and photo identity', () => {
+  const statusServiceOff = { ...eligible, canHide: false, canMarkSold: false, lifecycleReasonCode: 'LISTING_STATUS_SERVICE_UNAVAILABLE', degraded: ['lifecycle history'],
+    lifecycleReason: 'Pausing, republishing and marking as sold are not enabled on this platform yet. Editing details and managing photos are not affected.' };
+  it('Edit details and Manage photos stay actionable while status actions explain why they are unavailable', async () => {
+    mount([car({ id: 'p', title: 'Mazda CX5', listingNumber: 1, ownerActionEligibility: statusServiceOff })]);
+    await screen.findByLabelText('My vehicles and selling tools');
+    expect((screen.getByRole('button', { name: 'Edit details' }) as HTMLButtonElement).disabled).toBe(false);
+    expect((screen.getByRole('button', { name: 'Manage photos' }) as HTMLButtonElement).disabled).toBe(false);
+    expect(screen.queryByRole('button', { name: 'Mark as sold' })).toBeNull();
+    expect(screen.getByTestId('lifecycle-reason').textContent).toMatch(/not enabled on this platform yet/i);
+    expect(screen.queryByTestId('permissions-unavailable')).toBeNull();
+    expect(screen.queryByText(/could not load this listing's account records/i)).toBeNull();
+  });
+  it('a temporary status-record failure offers Try again next to the status explanation, not a blanket lock', async () => {
+    const temp = { ...eligible, canHide: false, canMarkSold: false, lifecycleReasonCode: 'PERMISSION_CHECK_UNAVAILABLE', lifecycleReason: "We could not check this listing's status records just now, so pausing, republishing and marking as sold are paused. Try again." };
+    mount([car({ id: 'p', title: 'T', listingNumber: 1, ownerActionEligibility: temp })]);
+    const note = await screen.findByTestId('lifecycle-reason');
+    fireEvent.click(within(note).getByRole('button', { name: 'Try again' }));
+    expect(onRefresh).toHaveBeenCalled();
+    expect((screen.getByRole('button', { name: 'Edit details' }) as HTMLButtonElement).disabled).toBe(false);
+  });
+  it('after a successful retry the controls are enabled again (no indefinitely disabled state)', async () => {
+    const down = { ...locked('Listing tools are temporarily unavailable. Try again.', 'PERMISSION_CHECK_UNAVAILABLE'), permissionsAvailable: false };
+    const view = mount([car({ id: 'r', title: 'R', listingNumber: 1, ownerActionEligibility: down })]);
+    expect((await screen.findByRole('button', { name: 'Edit details' }) as HTMLButtonElement).disabled).toBe(true);
+    view.rerender(<MemoryRouter><PersonalSellingModule user={{ id: 'u1', name: 'J', role: 'user' } as never} initialSection="listing-quality" isEmailVerified={true} listings={[car({ id: 'r', title: 'R', listingNumber: 1 })] as never} listingsLoading={false} onRefreshListings={onRefresh} onNavigate={() => {}} /></MemoryRouter>);
+    expect((await screen.findByRole('button', { name: 'Edit details' }) as HTMLButtonElement).disabled).toBe(false);
+    expect(screen.queryByTestId('permissions-unavailable')).toBeNull();
+  });
+  it('the photo manager still works on a degraded-but-permitted listing and names the photo it acts on', async () => {
+    mount([car({ id: 'p', title: 'Mazda CX5', listingNumber: 1, ownerActionEligibility: statusServiceOff })]);
+    fireEvent.click(await screen.findByRole('button', { name: 'Manage photos' }));
+    const section = await screen.findByLabelText('Manage vehicle photos');
+    fireEvent.click(within(section).getByRole('button', { name: 'Remove photo 3' }));
+    await waitFor(() => expect(api.deleteCarImage).toHaveBeenCalledWith('p', 2, 'p/3'));
   });
 });

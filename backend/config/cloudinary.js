@@ -237,8 +237,18 @@ export const uploadRawBuffer = async (buffer, { folder = "kayad/inspection-repor
   });
 };
 
+/**
+ * All-or-nothing: if any file fails, every file that DID upload is removed from storage before the error is rethrown, so a failed
+ * request can never leave orphaned assets that no listing references. (Promise.all alone abandons the successful ones.)
+ */
 export const uploadMultiple = async (files, folder, options = {}) => {
-  return Promise.all(files.map((file) => uploadImage(file, folder, options)));
+  const settled = await Promise.allSettled(files.map((file) => uploadImage(file, folder, options)));
+  const failed = settled.find((entry) => entry.status === "rejected");
+  if (failed) {
+    await Promise.all(settled.filter((entry) => entry.status === "fulfilled" && entry.value?.public_id).map((entry) => deleteImage(entry.value.public_id)));
+    throw failed.reason;
+  }
+  return settled.map((entry) => entry.value);
 };
 
 // =============================

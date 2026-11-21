@@ -334,6 +334,13 @@ router.patch(
       return res.status(400).json({ success: false, code: "INVALID_LISTING_ACTION", message: "Choose hide, publish or mark_sold." });
     }
     try {
+      // Ownership is verified by the server before any status change, independent of the status function being deployed (the atomic
+      // function re-checks it inside its transaction). A listing that is missing, removed or someone else's is reported identically.
+      const { data: ownedRow, error: ownershipError } = await getSupabase().from("cars").select("id,dealer_id,deleted_at").eq("id", req.params.id).maybeSingle();
+      if (ownershipError) throw ownershipError;
+      if (!ownedRow || ownedRow.deleted_at || String(ownedRow.dealer_id) !== String(req.user.id)) {
+        return res.status(404).json({ success: false, code: "LISTING_NOT_FOUND", message: "Listing not found." });
+      }
       const result = await transitionPersonalListing({ carId: req.params.id, ownerId: req.user.id, action });
       await logActionFromReq(req, `personal_listing_${action}`, { target: req.params.id, targetModel: "Car", details: result });
       // Pausing, republishing or selling changes what the public marketplace may show; clear the public search/list caches too.

@@ -85,14 +85,15 @@ check('legacy individual_seller keeps edit/photo access and numbering', le.owner
 // ---- fail-safe service fault (a required record set unavailable) -----------------------------------------------------------
 const fs = await makeUser({ tag: 'fault' }); // fresh account: the per-user write limiter (10/min) is a real control and is not bypassed
 const f = await mk(fs, 'Fault probe');
-q('alter table purchase_outcomes rename to purchase_outcomes_x');
+// A genuine read failure (permission error), not a missing table: a table that is not deployed is an empty set (see journey 08).
+q('revoke select on public.purchase_outcomes from service_role'); q("notify pgrst, 'reload schema'");
 await new Promise((res) => setTimeout(res, 1500));
 try {
   const row = (await mine(fs)).find((x) => x.id === f);
-  check('service fault is reported as such, not as a permission denial', row.ownerActionEligibility.permissionsAvailable === false && row.ownerActionEligibility.reasonCode === 'PERMISSION_CHECK_UNAVAILABLE' && /temporarily unavailable/i.test(row.ownerActionEligibility.reason) && !/could not verify this listing/i.test(row.ownerActionEligibility.reason));
+  check('service fault is reported as such, not as a permission denial', row.ownerActionEligibility.permissionsAvailable === false && row.ownerActionEligibility.reasonCode === 'PERMISSION_CHECK_UNAVAILABLE' && /could not check this listing/i.test(row.ownerActionEligibility.reason) && !/could not verify this listing/i.test(row.ownerActionEligibility.reason));
   check('mutations fail closed during the fault', (await fs.raw(`/api/cars/${f}`, { method: 'PUT', body: { price: 123456 } })).status === 503);
   check('the listing itself stays readable during the fault', (await fs.raw('/api/cars/my-listings')).status === 200);
-} finally { q('alter table purchase_outcomes_x rename to purchase_outcomes'); }
+} finally { q('grant select on public.purchase_outcomes to service_role'); q("notify pgrst, 'reload schema'"); }
 await new Promise((res) => setTimeout(res, 1500));
 const rec = await fs.raw(`/api/cars/${f}`, { method: 'PUT', body: { price: 5300000 } });
 check('recovers when the records return', rec.status === 200, { status: rec.status, body: rec.j });
