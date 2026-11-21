@@ -1,5 +1,0 @@
--- KAYAD MIGRATION HISTORY PRESERVED AS NO-OP
--- Canonical migration: 20260921230000_reconcile_system_status_control_plane.sql
--- This version was an exact duplicate of the canonical migration.
--- The version remains present so already-applied remote migration history is preserved.
--- Fresh databases receive the canonical DDL once; this historical version intentionally performs no work.
