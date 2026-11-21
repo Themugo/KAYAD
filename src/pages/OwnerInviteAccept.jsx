@@ -32,12 +32,12 @@ export default function OwnerInviteAccept() {
   const needsPassword = info?.mode === 'set_password';
   return (
     <main style={{ maxWidth: 460, margin: '48px auto', padding: '0 16px' }} aria-labelledby="oi-h">
-      <h1 id="oi-h" style={{ fontSize: '1.4rem', marginBottom: 12 }}>KAYAD owner invitation</h1>
+      <h1 id="oi-h" style={{ fontSize: '1.4rem', marginBottom: 12 }}>KAYARD KE owner invitation</h1>
       {phase === 'loading' && <p>Checking your invitation…</p>}
       {phase === 'error' && <div role="alert" style={{ padding: 14, borderRadius: 8, background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B' }}>{message}</div>}
       {phase === 'done' && (
         <div role="status" style={{ padding: 14, borderRadius: 8, background: '#ECFDF5', border: '1px solid #6EE7B7', color: '#065F46' }}>
-          You are now a KAYAD owner. <a href="/login">Sign in</a> to continue.
+          You are now a KAYARD KE owner. <a href="/login">Sign in</a> to continue.
         </div>
       )}
       {phase === 'form' && (
@@ -52,7 +52,7 @@ export default function OwnerInviteAccept() {
               <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>At least 8 characters with upper and lower case, a number and a symbol.</p>
             </>
           ) : (
-            <p style={{ fontSize: 13, marginBottom: 12 }}>You already have a KAYAD account with this address. Make sure you are signed in to it in this browser, then accept.</p>
+            <p style={{ fontSize: 13, marginBottom: 12 }}>You already have a KAYARD KE account with this address. Make sure you are signed in to it in this browser, then accept.</p>
           )}
           {message && <div role="alert" style={{ padding: 10, marginBottom: 12, borderRadius: 8, background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#991B1B', fontSize: 13 }}>{message}</div>}
           <button type="submit" className="btn btn-primary" disabled={busy || (needsPassword && !password)}>{busy ? 'Working…' : 'Accept ownership'}</button>

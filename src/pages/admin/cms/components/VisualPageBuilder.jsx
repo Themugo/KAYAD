@@ -24,7 +24,7 @@ const blockTypes = [
   {
     category: 'Layout',
     blocks: [
-      { type: 'hero', label: 'Hero Section', icon: Layout, defaultProps: { title: 'Welcome to KAYAD', subtitle: 'Your trusted automotive marketplace', buttonText: 'Get Started', buttonLink: '/browse' } },
+      { type: 'hero', label: 'Hero Section', icon: Layout, defaultProps: { title: 'Welcome to KAYARD KE', subtitle: 'Your trusted automotive marketplace', buttonText: 'Get Started', buttonLink: '/browse' } },
       { type: 'container', label: 'Container', icon: Box, defaultProps: { backgroundColor: '#FFFFFF', padding: 'large' } },
       { type: 'columns', label: 'Columns', icon: Layout, defaultProps: { columns: 2, gap: 'medium' } },
     ]
@@ -56,7 +56,7 @@ const blockTypes = [
     ]
   },
   {
-    category: 'KAYAD Specific',
+    category: 'KAYARD KE Specific',
     blocks: [
       { type: 'vehicleCarousel', label: 'Vehicle Carousel', icon: Car, defaultProps: { title: 'Featured Vehicles', vehicles: [], limit: 6 } },
       { type: 'dealerCarousel', label: 'Dealer Carousel', icon: Users, defaultProps: { title: 'Top Dealers', dealers: [], limit: 4 } },

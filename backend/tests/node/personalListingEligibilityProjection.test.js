@@ -140,7 +140,8 @@ test("personal owner writes use a conditional owner/status/auction/bid filter an
   assert.ok(filter.status.$in.includes("available"));
   assert.equal(filter.highestBidderId, null);
   assert.equal(filter.$or.length, 4);
-  assert.equal(filter.images, images);
+  assert.equal(typeof filter.images, "string", "jsonb snapshot must be JSON text, not a raw array");
+  assert.deepEqual(JSON.parse(filter.images), images);
   assert.equal(filter.updatedAt, "2026-11-19T08:00:00.000Z");
 });
 
@@ -153,4 +154,46 @@ test("a suspended or revoked seller cannot republish even their own hidden listi
     });
     assert.equal(result.canRepublish, false);
   }
+});
+
+test("a sold listing says it is sold (not that it is protected by an auction or transaction) and is fully locked", () => {
+  const result = get({ cars: [base({ status: "sold", sold: true })] });
+  assert.equal(result.canEdit, false);
+  assert.equal(result.canManagePhotos, false);
+  assert.equal(result.canMarkSold, false);
+  assert.equal(result.canRemove, false);
+  assert.equal(result.reasonCode, "SOLD");
+  assert.match(result.reason, /marked as sold/i);
+  assert.doesNotMatch(result.reason, /auction, bid or transaction/i);
+});
+
+test("a reserved listing explains the reservation lock", () => {
+  const result = get({ cars: [base({ status: "reserved" })] });
+  assert.equal(result.canMarkSold, false);
+  assert.equal(result.reasonCode, "RESERVED");
+  assert.match(result.reason, /reserved/i);
+});
+
+test("an accepted offer awaiting payment (or paid) blocks Mark as sold, pause, edit and photos", () => {
+  for (const status of ["awaiting_payment", "paid"]) {
+    const result = get({ cars: [base()], settlements: [{ vehicle_id: "car-1", status }] });
+    assert.equal(result.canMarkSold, false, status);
+    assert.equal(result.canHide, false, status);
+    assert.equal(result.canEdit, false, status);
+    assert.equal(result.canManagePhotos, false, status);
+    assert.equal(result.reasonCode, "OFFER_SETTLEMENT_LOCK");
+    assert.match(result.reason, /accepted offer/i);
+  }
+});
+
+test("a settlement on another vehicle does not lock this one", () => {
+  const result = get({ cars: [base()], settlements: [{ vehicle_id: "car-2", status: "awaiting_payment" }] });
+  assert.equal(result.canMarkSold, true);
+  assert.equal(result.reason, "");
+});
+
+test("the unlocked action set is unchanged when no reason applies", () => {
+  const result = get({ cars: [base()] });
+  assert.equal(result.reason, "");
+  assert.equal(result.reasonCode, "");
 });

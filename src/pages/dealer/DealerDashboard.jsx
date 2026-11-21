@@ -383,7 +383,7 @@ export default function DealerDashboard() {
                 AI Dealer Insights
               </h3>
               <p style={{ margin: 0, fontSize: 'var(--dealer-text-xs)', color: 'var(--dealer-text-muted)' }}>
-                Powered by KAYAD Analytics
+                Powered by KAYARD KE Analytics
               </p>
             </div>
           </div>

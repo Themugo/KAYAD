@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { countByLifecycle, getListingLifecycle, type ListingLifecycleState } from '../../../utils/listingLifecycle';
 import { ListingStatusBadge, ListingThumb, ListingFacts, ListingScoreRing } from '../../../components/listing/ListingPresentation';
-import { createCar, updateCar, deleteCar, addCarImages, deleteCarImage, setCoverImage, LISTING_IMAGE_TYPES, LISTING_IMAGE_MAX_BYTES, LISTING_IMAGE_MAX_PER_REQUEST, transitionMyListing, VehicleApiError, BackendCar } from '../../../services/vehicleApi';
+import { createCar, updateCar, deleteCar, addCarImages, reorderCarImages, deleteCarImage, setCoverImage, LISTING_IMAGE_TYPES, LISTING_IMAGE_MAX_BYTES, LISTING_IMAGE_MAX_PER_REQUEST, transitionMyListing, VehicleApiError, BackendCar } from '../../../services/vehicleApi';
 import { calculateListingCompleteness, getListingCompletenessFactors } from '../../../utils/listingQualityScore';
 import PhoneVerification from '../../../components/PhoneVerification';
 import { AuctionVerificationSection } from '../components/AuctionVerificationSection';
@@ -475,6 +475,7 @@ function TrustCenterSection({ user }: { user?: (UserProfile & { emailVerified?: 
 
 function PersonalListingPhotoManager({ listing, onChanged }: { listing: BackendCar; onChanged: () => void }) {
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<number | null>(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const images = Array.isArray(listing.images) ? listing.images : [];
@@ -492,13 +493,13 @@ function PersonalListingPhotoManager({ listing, onChanged }: { listing: BackendC
     if (valid.length !== files.length) { setError('Some photos were skipped. Use JPG, PNG or WebP up to 5 MB each.'); return; }
     if (!valid.length) return;
     if (remaining !== null && valid.length > remaining) { setError(`You can add ${remaining} more photo(s) under the current platform limit.`); return; }
-    setBusy(true);
+    setBusy(true); setProgress(0);
     try {
-      const result = await addCarImages(listing.id, valid);
+      const result = await addCarImages(listing.id, valid, setProgress);
       if (!result?.success) throw new Error(result?.message || 'The server did not confirm the photo upload.');
-      setMessage('Photos uploaded successfully.'); onChanged();
-    } catch (e) { setError(e instanceof Error ? e.message : 'Unable to upload photos.'); }
-    finally { setBusy(false); }
+      setMessage(`${valid.length} photo${valid.length === 1 ? '' : 's'} uploaded and saved to this listing.`); onChanged();
+    } catch (e) { setError(e instanceof Error ? `Upload failed: ${e.message} Your existing photos are unchanged.` : 'Upload failed. Your existing photos are unchanged.'); }
+    finally { setBusy(false); setProgress(null); }
   };
   const remove = async (index: number) => {
     if (!canManage) { setError(permissions?.reason || 'Photo permissions could not be verified.'); return; }
@@ -509,6 +510,15 @@ function PersonalListingPhotoManager({ listing, onChanged }: { listing: BackendC
     try { const result = await deleteCarImage(listing.id, index); if (!result?.success) throw new Error(result?.message || 'The server did not confirm photo removal.'); setMessage('Photo removed.'); onChanged(); }
     catch (e) { setError(e instanceof Error ? e.message : 'Unable to remove this photo.'); } finally { setBusy(false); }
   };
+  const move = async (index: number, delta: -1 | 1) => {
+    const target = index + delta;
+    if (!canManage) { setError(permissions?.reason || 'Photo permissions could not be verified.'); return; }
+    if (target < 0 || target >= images.length) return;
+    const order = images.map((_, i) => i); [order[index], order[target]] = [order[target], order[index]];
+    setBusy(true); setError(''); setMessage('');
+    try { const result = await reorderCarImages(listing.id, order); if (!result?.success) throw new Error(result?.message || 'The server did not confirm the new photo order.'); setMessage(target === 0 ? 'Photo moved to the front and set as the cover photo.' : 'Photo order saved.'); onChanged(); }
+    catch (e) { setError(e instanceof Error ? e.message : 'Unable to save the photo order.'); } finally { setBusy(false); }
+  };
   const cover = async (index: number) => {
     if (!canManage) { setError(permissions?.reason || 'Photo permissions could not be verified.'); return; }
     setBusy(true); setError(''); setMessage('');
@@ -517,10 +527,11 @@ function PersonalListingPhotoManager({ listing, onChanged }: { listing: BackendC
   };
   return <section className="mt-4 border-t border-[#E5EFED] pt-4" aria-label="Manage vehicle photos">
     <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><div><h4 className="text-sm font-bold text-[#0A3340]">Vehicle photos</h4><p className="text-xs text-[#64748B]">{images.length} uploaded · Cover photo appears first{maxImages !== null ? ` · ${remaining} remaining of ${maxImages}` : ' · Current platform limit is checked by the server'}</p><p className="mt-0.5 text-[11px] text-[#64748B]">JPG, PNG or WebP · 5 MB maximum per photo · Up to {maxPerRequest} per upload</p></div>
-      <label className={`inline-flex min-h-10 items-center rounded-lg bg-[#0A3340] px-3 text-xs font-bold text-white ${busy || !canManage || remaining === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}>{busy ? 'Please wait…' : 'Add photos'}<input className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={busy || !canManage || remaining === 0} onChange={(event) => { const files = Array.from(event.currentTarget.files || []); event.currentTarget.value = ''; void upload(files); }}/></label></div>
+      <label className={`inline-flex min-h-11 items-center rounded-lg bg-[#0A3340] px-4 text-xs font-bold text-white ${busy || !canManage || remaining === 0 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}`}>{busy ? (progress !== null ? `Uploading ${progress}%` : 'Please wait…') : 'Add photos'}<input className="sr-only" type="file" accept="image/jpeg,image/png,image/webp" multiple disabled={busy || !canManage || remaining === 0} onChange={(event) => { const files = Array.from(event.currentTarget.files || []); event.currentTarget.value = ''; void upload(files); }}/></label></div>
+    {progress !== null && <div className="mb-2" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} aria-label="Photo upload progress"><div className="h-2 overflow-hidden rounded-full bg-[#E6F0EE]"><div className="h-full rounded-full bg-[#13B8A6] transition-all" style={{ width: `${progress}%` }} /></div></div>}
     {!canManage && <p className="mb-2 rounded-lg border border-[#D7E7E4] bg-[#F6FAF9] p-2 text-xs text-[#0A3340]">{permissions?.reason || 'Photo permissions could not be verified. Refresh before making changes.'}</p>}
     {error && <p role="alert" className="mb-2 rounded-lg bg-rose-50 p-2 text-xs text-rose-800">{error}</p>}{message && <p role="status" className="mb-2 rounded-lg bg-emerald-50 p-2 text-xs text-emerald-800">{message}</p>}
-    {images.length ? <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">{images.map((image, index) => <div key={`${image.url}-${index}`} className="overflow-hidden rounded-xl border border-[#D7E7E4] bg-[#F6FAF9]"><img src={image.thumb || image.url} alt={`Vehicle photo ${index + 1}`} loading="lazy" decoding="async" className="h-28 w-full object-contain"/><div className="flex flex-wrap items-center justify-between gap-1 p-2"><span className="text-[10px] font-bold text-[#526875]">{index === 0 ? 'Cover photo' : `Photo ${index + 1}`}</span><div className="flex gap-1">{index !== 0 && <button type="button" disabled={busy || !canManage} onClick={() => void cover(index)} className="min-h-8 rounded border border-[#BDE5DE] px-2 py-1 text-[10px] font-bold text-[#12576D] disabled:opacity-50">Make cover</button>}<button type="button" disabled={busy || !canManage} onClick={() => void remove(index)} className="min-h-8 rounded border border-rose-200 px-2 py-1 text-[10px] font-bold text-rose-700 disabled:opacity-50">Remove</button></div></div></div>)}</div> : <p className="rounded-lg bg-[#F6FAF9] p-3 text-xs text-[#64748B]">No photos are attached to this listing yet.</p>}
+    {images.length ? <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">{images.map((image, index) => <div key={`${image.url}-${index}`} className="overflow-hidden rounded-xl border border-[#D7E7E4] bg-[#F6FAF9]"><img src={image.thumb || image.url} alt={`Vehicle photo ${index + 1}`} loading="lazy" decoding="async" className="h-28 w-full object-contain"/><div className="flex flex-wrap items-center justify-between gap-1 p-2"><span className="text-[10px] font-bold text-[#526875]">{index === 0 ? 'Cover photo' : `Photo ${index + 1}`}</span><div className="flex flex-wrap gap-1"><button type="button" disabled={busy || !canManage || index === 0} onClick={() => void move(index, -1)} aria-label={`Move photo ${index + 1} earlier`} className="min-h-9 min-w-9 rounded border border-[#BDE5DE] px-2 py-1 text-[11px] font-bold text-[#12576D] disabled:opacity-40">←</button><button type="button" disabled={busy || !canManage || index === images.length - 1} onClick={() => void move(index, 1)} aria-label={`Move photo ${index + 1} later`} className="min-h-9 min-w-9 rounded border border-[#BDE5DE] px-2 py-1 text-[11px] font-bold text-[#12576D] disabled:opacity-40">→</button>{index !== 0 && <button type="button" disabled={busy || !canManage} onClick={() => void cover(index)} className="min-h-9 rounded border border-[#BDE5DE] px-2 py-1 text-[10px] font-bold text-[#12576D] disabled:opacity-50">Make cover</button>}<button type="button" disabled={busy || !canManage} onClick={() => void remove(index)} aria-label={`Remove photo ${index + 1}`} className="min-h-9 rounded border border-rose-200 px-2 py-1 text-[10px] font-bold text-rose-700 disabled:opacity-50">Remove</button></div></div></div>)}</div> : <p className="rounded-lg bg-[#F6FAF9] p-3 text-xs text-[#64748B]">No photos are attached to this listing yet.</p>}
   </section>;
 }
 
@@ -589,7 +600,8 @@ function ListingQualitySection({ listings, loading, error, onRefresh, onNavigate
     try {
       const result = await transitionMyListing(listing.id, action);
       if (!result?.success) throw new Error(result?.message || 'The server did not confirm this listing status change.');
-      setActionNotice(action === 'hide' ? 'Listing paused and hidden from the public marketplace.' : action === 'publish' ? 'Listing republished.' : 'Listing marked as sold. No payment or ownership transfer was recorded by this action.');
+      setActionNotice(action === 'hide' ? 'Listing paused and hidden from the public marketplace.' : action === 'publish' ? 'Listing republished.' : 'Listing marked as sold and moved to your Sold tab. It is no longer in public inventory. No payment or ownership transfer was recorded by this action.');
+      if (action === 'mark_sold') setFilter('sold');
       onRefresh();
     } catch (err) { setActionError(err instanceof Error ? err.message : 'Unable to change this listing status.'); }
     finally { setLifecycleBusyId(null); }
@@ -656,22 +668,23 @@ function ListingQualitySection({ listings, loading, error, onRefresh, onNavigate
             <div className="flex min-w-0 flex-row items-start gap-3 sm:gap-4">
               <ListingThumb src={l.images?.[0]?.thumb || l.images?.[0]?.url} fallback={l.images?.[0]?.url} alt={l.title || `${l.brand} ${l.model}`} count={l.images?.length || 0} className="h-24 w-28 sm:h-28 sm:w-40" />
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-start justify-between gap-2"><div className="min-w-0 flex-1"><h3 className="break-words text-sm font-black leading-5 text-[#082B40] sm:text-base">{l.title || `${l.year} ${l.brand} ${l.model}`}</h3><p className="mt-1 text-[11px] leading-4 text-[#475569]">{facts || 'Vehicle details need completing'}</p></div><ListingStatusBadge status={l.status || 'unknown'} label={statusLabel}/></div>
-                <div className="mt-2 flex flex-wrap items-center justify-between gap-2"><div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1"><span className="text-base font-black text-[#0B6B63]">{Number(l.price) > 0 ? `KES ${Number(l.price).toLocaleString('en-KE')}` : 'Price not set'}</span>{typeof l.views === 'number' && <span className="text-[11px] font-semibold text-[#5B7480]">{l.views.toLocaleString('en-KE')} views</span>}</div><div className="flex items-center gap-2" title="Listing completeness"><ListingScoreRing score={completeness.score}/><span className="max-w-[86px] text-[10px] font-semibold uppercase leading-4 tracking-wide text-[#5B7480]">Listing completeness</span></div></div>
+                <div className="flex flex-wrap items-start justify-between gap-2"><div className="min-w-0 flex-1">{typeof l.listingNumber === 'number' && <p data-testid="listing-number" className="mb-0.5 text-[11px] font-black uppercase tracking-wider text-[#176B87]" title="Your listing number: 1 is your first listing. It does not change when you filter or sort.">Listing #{l.listingNumber}</p>}<h3 className="break-words text-sm font-black leading-5 text-[#082B40] sm:text-base">{l.title || `${l.year} ${l.brand} ${l.model}`}</h3><p className="mt-1 text-[11px] leading-4 text-[#475569]">{facts || 'Vehicle details need completing'}</p></div><ListingStatusBadge status={l.status || 'unknown'} label={statusLabel}/></div>
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-2"><div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1"><span className="text-base font-black text-[#0B6B63]">{Number(l.price) > 0 ? `KES ${Number(l.price).toLocaleString('en-KE')}` : 'Price not set'}</span><span data-testid="photo-count" className="text-[11px] font-semibold text-[#5B7480]">{(l.images?.length || 0)} photo{(l.images?.length || 0) === 1 ? '' : 's'}</span>{typeof l.views === 'number' && <span className="text-[11px] font-semibold text-[#5B7480]">{l.views.toLocaleString('en-KE')} views</span>}</div><div className="flex items-center gap-2" title="Listing completeness"><ListingScoreRing score={completeness.score}/><span className="max-w-[86px] text-[10px] font-semibold uppercase leading-4 tracking-wide text-[#5B7480]">Listing completeness</span></div></div>
               </div>
             </div>
             <details className="mt-3 rounded-lg border border-[#E5EFED] bg-[#F8FBFA] px-3 py-2"><summary className="cursor-pointer text-xs font-bold text-[#0A4A5C]">Improve listing completeness · {completeness.score}%</summary><div className="mt-2 space-y-2 text-xs text-[#526875]">{completeness.missing.length > 0 && <div><p className="font-bold text-[#0A3340]">Missing information</p><ul className="mt-1 list-disc space-y-1 pl-4">{completeness.missing.map((item) => <li key={item}>{item}</li>)}</ul></div>}{completeness.suggestions.length > 0 && <div><p className="font-bold text-[#0A3340]">Suggestions</p><ul className="mt-1 list-disc space-y-1 pl-4">{completeness.suggestions.map((item) => <li key={item}>{item}</li>)}</ul></div>}<p className="text-[11px] text-[#64748B]">Completeness describes the information supplied. It is not vehicle verification, logbook validation or inspection approval.</p></div></details>
             <div className="mt-3 flex flex-wrap gap-2 border-t border-[#E5EFED] pt-3">
               {['active', 'sold'].includes(info.state) && <Link to={`/cars/${encodeURIComponent(l.id)}`} className={`${btn} border-[#DCE9E7] text-[#0A4A5C]`}>View listing</Link>}
-              <button type="button" disabled={(!canEdit && !isEditing) || savingId === l.id} title={!canEdit && !isEditing ? permissions?.reason || 'Listing permissions could not be verified.' : 'Edit vehicle details'} onClick={() => toggleEditor(l)} className={`${btn} border-[#BDE5DE] text-[#0A4A5C]`}>{isEditing ? 'Close editor' : 'Edit details'}</button>
-              <button type="button" disabled={!canPhotos && !photosOpen.includes(l.id)} title={!canPhotos && !photosOpen.includes(l.id) ? permissions?.reason || 'Photo permissions could not be verified.' : 'Manage vehicle photos'} aria-expanded={photosOpen.includes(l.id)} onClick={() => setPhotosOpen((cur) => cur.includes(l.id) ? cur.filter((x) => x !== l.id) : [...cur, l.id])} className={`${btn} border-[#DCE9E7] text-[#0A4A5C]`}>{photosOpen.includes(l.id) ? 'Close photos' : 'Manage photos'}</button>
+              <button type="button" disabled={(!canEdit && !isEditing) || savingId === l.id} title={!canEdit && !isEditing ? permissions?.reason || 'Listing actions are unavailable right now.' : 'Edit vehicle details'} onClick={() => toggleEditor(l)} className={`${btn} border-[#BDE5DE] text-[#0A4A5C]`}>{isEditing ? 'Close editor' : 'Edit details'}</button>
+              <button type="button" disabled={!canPhotos && !photosOpen.includes(l.id)} title={!canPhotos && !photosOpen.includes(l.id) ? permissions?.reason || 'Photo actions are unavailable right now.' : 'Manage vehicle photos'} aria-expanded={photosOpen.includes(l.id)} onClick={() => setPhotosOpen((cur) => cur.includes(l.id) ? cur.filter((x) => x !== l.id) : [...cur, l.id])} className={`${btn} border-[#DCE9E7] text-[#0A4A5C]`}>{photosOpen.includes(l.id) ? 'Close photos' : 'Manage photos'}</button>
               {canHide && <button type="button" disabled={busy} onClick={() => void changeLifecycle(l, 'hide')} className={`${btn} border-[#DCE9E7] text-[#0A4A5C]`}>{busy ? 'Please wait…' : 'Pause listing'}</button>}
               {canRepublish && <button type="button" disabled={busy} onClick={() => void changeLifecycle(l, 'publish')} className={`${btn} border-[#BDE5DE] text-[#0D766F]`}>Republish</button>}
               {canMarkSold && <button type="button" disabled={busy} onClick={() => void changeLifecycle(l, 'mark_sold')} className={`${btn} border-[#B8D9D6] text-[#082B40]`}>Mark as sold</button>}
               {canRemove && <button type="button" onClick={() => void removeListing(l)} disabled={removingId === l.id || savingId === l.id} className={`${btn} ml-auto border-rose-200 text-rose-700`}>{removingId === l.id ? 'Removing…' : 'Remove'}</button>}
             </div>
-            {permissions?.permissionsAvailable === false && <p className="mt-2 text-xs text-[#0A3340]">{permissions.reason || 'Listing permissions could not be verified. Refresh or contact support before making changes.'}</p>}
-            {permissions?.permissionsAvailable === true && permissions.reason && <p className="mt-2 text-xs text-[#0A3340]">{permissions.reason}</p>}
+            {permissions?.permissionsAvailable === false && <div role="status" data-testid="permissions-unavailable" className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#B8D9D6] bg-[#F5FBFA] p-2.5 text-xs text-[#0A3340]"><span className="min-w-0 flex-1">{permissions.reason || 'Listing tools are temporarily unavailable. Your listing is unchanged. Try again shortly or contact support.'}</span><button type="button" onClick={onRefresh} className="min-h-9 rounded-lg border border-[#082B40] px-3 text-xs font-bold text-[#082B40]">Try again</button></div>}
+            {permissions?.permissionsAvailable === true && permissions.reason && <p data-testid="action-reason" className="mt-2 rounded-lg bg-[#F6FAF9] px-2.5 py-2 text-xs text-[#0A3340]">{permissions.reason}</p>}
+            {!permissions && <p className="mt-2 text-xs text-[#0A3340]">Listing actions are not available for this listing yet. Refresh the page; if this continues, contact support.</p>}
             {isEditing && <form className="mt-4 space-y-4 border-t border-[#E5EFED] pt-4" onSubmit={(event) => { event.preventDefault(); void saveEdit(l); }}>
               <section className="grid gap-3 sm:grid-cols-2"><div className="sm:col-span-2"><h4 className="text-xs font-black uppercase tracking-wide text-[#176B87]">Vehicle identity</h4></div>
                 <label className="text-xs font-bold text-[#526875] sm:col-span-2">Listing title<input required minLength={2} maxLength={200} value={editValues.title} onChange={(event) => setEditValues((current) => ({ ...current, title: event.target.value }))} className="mt-1 min-h-11 w-full rounded-lg border border-[#DCE9E7] px-3 text-sm text-[#0A3340]"/></label>

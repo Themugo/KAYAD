@@ -217,7 +217,7 @@ function normalizeBrandingConfig(config: Partial<Branding> | null | undefined): 
     if (typeof value === 'string') merged[field] = normalizeLegacyBrandColor(value, field) as never;
   }
   // Migrate only built-in legacy KAYAD marks and defaults; explicitly uploaded admin logos remain untouched.
-  if (['/branding/kayad-road-mark.svg', '/branding/kayad-road-mark-light.svg', '/branding/kayad-symbol.svg', '/branding/kayad-mark.png'].includes(merged.logoUrl)) merged.logoUrl = '/branding/kayard-k-mark.png';
+  if (['/branding/kayad-road-mark.svg', '/branding/kayad-road-mark-light.svg', '/branding/kayad-symbol.svg', '/branding/kayad-mark.png', '/branding/kayard-k-mark.png'].includes(merged.logoUrl)) merged.logoUrl = DEFAULT_LOGO_URL;
   if (merged.logoText?.trim().toUpperCase() === 'KAYAD') merged.logoText = 'KAYARD KE';
   if (merged.footerCopyright?.includes('KAYAD Motors Kenya Ltd.')) merged.footerCopyright = 'KAYARD MOTOR HUB. All rights reserved.';
   if (merged.brandTagline?.trim().toLowerCase() === "kenya's trusted vehicle marketplace") merged.brandTagline = 'Premium Vehicle Marketplace';

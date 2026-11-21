@@ -22,7 +22,7 @@ export default function NotFoundPage() {
   return (
     <main className="min-h-screen bg-[#F6FAF9] grid place-items-center px-4 py-10" data-testid="not-found-page">
       <div className="w-full max-w-md text-center space-y-5">
-        <Link to="/" className="inline-flex justify-center" aria-label="KAYAD home"><BrandMark size={40} /></Link>
+        <Link to="/" className="inline-flex justify-center" aria-label="KAYARD KE home"><BrandMark size={40} /></Link>
         <p className="text-6xl font-black tracking-tight text-[#176B87] m-0" aria-hidden="true">404</p>
         <h1 className="text-2xl font-extrabold text-[#0A3340] m-0">Page not found</h1>
         <p className="text-sm text-[#475569] m-0">

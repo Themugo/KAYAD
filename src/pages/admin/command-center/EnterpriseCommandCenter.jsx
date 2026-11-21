@@ -56,7 +56,7 @@ export default function EnterpriseCommandCenter() {
 
   return <section className="space-y-6 p-6 md:p-8">
     <header className="flex flex-col gap-4 rounded-3xl border border-[#D7E7E4] bg-[#0A3340] p-6 text-white shadow-lg md:flex-row md:items-center md:justify-between">
-      <div><div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-[#94A3B8]"><ShieldCheck size={15} /> Enterprise operations</div><h1 className="mt-2 text-2xl font-semibold">Command Center</h1><p className="mt-1 max-w-2xl text-sm text-[#BDE5DE]">Live, evidence-backed operational state across the KAYAD platform. No synthetic KPIs or arbitrary execution.</p></div>
+      <div><div className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-[#94A3B8]"><ShieldCheck size={15} /> Enterprise operations</div><h1 className="mt-2 text-2xl font-semibold">Command Center</h1><p className="mt-1 max-w-2xl text-sm text-[#BDE5DE]">Live, evidence-backed operational state across the KAYARD KE platform. No synthetic KPIs or arbitrary execution.</p></div>
       <button type="button" onClick={load} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-medium text-[#0A3340] hover:bg-[#EEF7F5]"><RefreshCw size={16} className={loading ? 'animate-spin' : ''} /> Refresh</button>
     </header>
 

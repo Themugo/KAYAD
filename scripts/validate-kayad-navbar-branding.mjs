@@ -8,7 +8,7 @@ assert.ok(navbar.includes('kayad-brand__word-ke">') && navbar.includes('kayad-br
 assert.ok(navbar.includes('kayad-brand__tag kayad-brand__tag--reserved'), 'descriptor is independent text outside the logo asset');
 assert.ok(navbar.includes('className="kayad-brand__image"') && navbar.includes('CountryBadge'), 'logo image and country badge remain separate components');
 assert.ok(branding.includes("logoUrl: '/branding/kayard-ke-logo.png'"), 'approved KAYARD KE standalone logo is the default brand asset (K mark stays the icon/favicon)');
-assert.ok(branding.includes("'/branding/kayad-road-mark.svg'") && branding.includes("merged.logoUrl = '/branding/kayard-k-mark.png'"), 'legacy default mark migrates without overwriting custom uploads');
+assert.ok(branding.includes("'/branding/kayad-road-mark.svg'") && branding.includes("merged.logoUrl = DEFAULT_LOGO_URL"), 'legacy default mark migrates without overwriting custom uploads');
 assert.ok(fs.existsSync(new URL('../public/branding/kayard-k-mark.png', import.meta.url)) && fs.readFileSync(new URL('../public/branding/kayard-k-mark.png', import.meta.url)).subarray(1,4).toString()==='PNG', 'official square icon mark (PNG, no wordmark) is present');
 assert.ok(/\.kayad-brand__word-ke\s*\{[^}]*font-size:\s*\.5em/.test(css) && /\.kayad-brand__kenya-flag\s*\{[^}]*align-self:\s*flex-end/.test(css), 'KE is smaller than KAYAD and the flag sits at the end on the same line');
 for (const selector of ['.kayad-header__bar', '.kayad-brand__image', '.kayad-brand__word-ke', '.kayad-brand__tag--reserved', '.kayad-cta', '.kayad-hamburger']) assert.ok(css.includes(selector), `responsive header style exists: ${selector}`);

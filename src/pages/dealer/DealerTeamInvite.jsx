@@ -21,7 +21,7 @@ export default function DealerTeamInvite() {
   const [state, setState] = useState({ phase: token.length === 64 ? 'ready' : 'invalid', message: '' });
   const busy = useRef(false);
 
-  useEffect(() => { document.title = 'Accept team invitation - KAYAD'; }, []);
+  useEffect(() => { document.title = 'Accept team invitation - KAYARD KE'; }, []);
 
   const accept = async () => {
     if (busy.current) return;
@@ -43,7 +43,7 @@ export default function DealerTeamInvite() {
         {state.phase === 'invalid' && <p role="alert">This invitation link is incomplete. Open the link from the e-mail again, or ask the dealership to resend it.</p>}
         {(state.phase === 'ready' || state.phase === 'working' || state.phase === 'error') && (
           <>
-            <p style={{ marginBottom: 16 }}>You have been invited to join a dealership team on KAYAD. Accepting adds you to their team with the role they chose for you.</p>
+            <p style={{ marginBottom: 16 }}>You have been invited to join a dealership team on KAYARD KE. Accepting adds you to their team with the role they chose for you.</p>
             {state.phase === 'error' && <p role="alert" style={{ color: 'var(--danger, #b42318)', marginBottom: 12 }}>{state.message}</p>}
             <button type="button" className="btn btn-primary" onClick={accept} disabled={state.phase === 'working'}>
               {state.phase === 'working' ? 'Accepting…' : state.phase === 'error' ? 'Try again' : 'Accept invitation'}
@@ -53,7 +53,7 @@ export default function DealerTeamInvite() {
         {state.phase === 'done' && (
           <div role="status">
             <p style={{ marginBottom: 12 }}><strong>You have joined the team.</strong> Your access follows the role the dealership gave you.</p>
-            <a className="btn btn-outline" href="/">Go to KAYAD</a>
+            <a className="btn btn-outline" href="/">Go to KAYARD KE</a>
           </div>
         )}
       </div>

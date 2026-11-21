@@ -34,7 +34,7 @@ describe('saved branding reaches the login / register shell', () => {
   it('migrates the previous built-in KAYAD logo and name to the approved KAYARD identity', async () => {
     getPublicConfig.mockResolvedValue(cfg({ logoType: 'image', logoUrl: '/branding/kayad-mark.png', logoText: 'KAYAD' }));
     const { container } = render(<BrandingProvider><BrandMark /></BrandingProvider>);
-    await waitFor(() => expect(container.querySelector('img')?.getAttribute('src')).toBe('/branding/kayard-k-mark.png'));
+    await waitFor(() => expect(container.querySelector('img')?.getAttribute('src')).toBe('/branding/kayard-ke-logo.png'));
     expect(screen.getByText('KAYARD KE')).toBeInTheDocument();
   });
 

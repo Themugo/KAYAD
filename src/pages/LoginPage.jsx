@@ -88,7 +88,7 @@ export function LoginPage() {
       mode="signin"
       eyebrow="Secure marketplace access"
       title="Welcome back."
-      description="Sign in to your KAYAD account and continue buying, selling, comparing and transacting with confidence."
+      description="Sign in to your KAYARD KE account and continue buying, selling, comparing and transacting with confidence."
     >
       {verifiedNow && !verificationRequired && (
         <div className="kayad-auth-notice" role="status">Email verified. Sign in to continue.</div>
@@ -96,7 +96,7 @@ export function LoginPage() {
       {verificationRequired && (
         <div className="kayad-auth-alert" role="alert">
           <div className="kayad-auth-alert-title">Email verification required</div>
-          <p>Verify your KAYAD email before signing in. If you did not receive the message, request another verification email.</p>
+          <p>Verify your KAYARD KE email before signing in. If you did not receive the message, request another verification email.</p>
           <button type="button" disabled={resending || !form.email.trim()} onClick={resend} className="kayad-auth-alert-button">
             {resending ? 'Sending…' : 'Resend verification email'}
           </button>
@@ -124,12 +124,12 @@ export function LoginPage() {
           />
         )}
         <button className="kayad-auth-submit" type="submit" disabled={loading}>
-          {loading ? <><span className="kayad-auth-spinner" /> Signing in…</> : <>Continue to KAYAD <ArrowRight size={16} /></>}
+          {loading ? <><span className="kayad-auth-spinner" /> Signing in…</> : <>Continue to KAYARD KE <ArrowRight size={16} /></>}
         </button>
       </form>
 
-      <div className="kayad-auth-divider"><span>New to KAYAD?</span></div>
-      <Link to={buildAuthPath('register', ctx)} className="kayad-auth-secondary-action">Create your KAYAD account</Link>
+      <div className="kayad-auth-divider"><span>New to KAYARD KE?</span></div>
+      <Link to={buildAuthPath('register', ctx)} className="kayad-auth-secondary-action">Create your KAYARD KE account</Link>
 
       <div className="kayad-auth-trust-row">
         <span><ShieldCheck size={14} /> Secure sessions</span>

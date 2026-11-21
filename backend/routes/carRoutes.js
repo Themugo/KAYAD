@@ -28,6 +28,7 @@ import {
   deleteCarImage,
   setCoverImage,
   addCarImages,
+  reorderCarImages,
 } from "../controllers/carController.js";
 
 import { findAll, findById, findOne, create, update, remove, paginate } from "../db/index.js";
@@ -35,6 +36,7 @@ import { getSupabase, isSupabaseConnected } from "../utils/supabase.js";
 import { closeAuction } from "../services/auctionClose.service.js";
 import { startAuction } from "../services/auctionLifecycle.service.js";
 import { getVehicleValuation } from "../services/vehicleValuation.service.js";
+import { invalidatePublicListingCaches } from "../utils/publicListingCache.js";
 import { transitionPersonalListing } from "../services/personalListingLifecycle.service.js";
 import { getPersonalSellerPerformance } from "../services/personalSellerInsights.service.js";
 
@@ -334,6 +336,8 @@ router.patch(
     try {
       const result = await transitionPersonalListing({ carId: req.params.id, ownerId: req.user.id, action });
       await logActionFromReq(req, `personal_listing_${action}`, { target: req.params.id, targetModel: "Car", details: result });
+      // Pausing, republishing or selling changes what the public marketplace may show; clear the public search/list caches too.
+      await invalidatePublicListingCaches();
       return res.json({ success: true, data: result });
     } catch (error) {
       if (error?.expose) return res.status(error.status).json({ success: false, code: error.code, message: error.message });
@@ -350,6 +354,16 @@ router.delete(
   validateObjectId,
   invalidateCache("cache:*"),
   asyncHandler(deleteCarImage),
+);
+
+// ↕ REORDER PHOTOS (new order of the current images; first photo is the poster)
+router.patch(
+  "/:id/images/order",
+  protect,
+  sellerListingAccess({ write: true }),
+  validateObjectId,
+  invalidateCache("cache:*"),
+  asyncHandler(reorderCarImages),
 );
 
 // ⭐ CHOOSE POSTER IMAGE (moves the chosen photo to the front)

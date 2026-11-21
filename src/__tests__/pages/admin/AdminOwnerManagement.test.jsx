@@ -122,7 +122,7 @@ describe('OwnerInviteAccept', () => {
     render(<OwnerInviteAccept />);
     await u.type(await screen.findByLabelText(/Choose a password/), 'Str0ng!pass');
     await u.click(screen.getByRole('button', { name: /Accept ownership/ }));
-    expect(await screen.findByRole('status')).toHaveTextContent(/now a KAYAD owner/);
+    expect(await screen.findByRole('status')).toHaveTextContent(/now a KAYARD KE owner/);
     expect(api.acceptInvitation).toHaveBeenCalledTimes(1);
     expect(api.acceptInvitation).toHaveBeenCalledWith({ token: T, name: undefined, password: 'Str0ng!pass' });
   });

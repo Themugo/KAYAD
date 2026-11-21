@@ -8,6 +8,7 @@ const ERROR_MAP = {
   LISTING_STATE_LOCKED: [409, "LISTING_STATE_LOCKED", "Sold, reserved or moderated listings cannot be changed here."],
   AUCTION_OR_BID_LOCK: [409, "AUCTION_OR_BID_LOCK", "This listing has auction activity or bids and cannot be changed by the seller."],
   TRANSACTION_LOCK: [409, "TRANSACTION_LOCK", "An active purchase or escrow transaction protects this listing."],
+  OFFER_SETTLEMENT_LOCK: [409, "OFFER_SETTLEMENT_LOCK", "An accepted offer is awaiting payment or has been paid for this vehicle, so its status cannot be changed here."],
   LISTING_NOT_PUBLISHED: [409, "LISTING_NOT_PUBLISHED", "Only a currently published listing can be hidden."],
   LISTING_NOT_ELIGIBLE_TO_PUBLISH: [409, "LISTING_NOT_ELIGIBLE_TO_PUBLISH", "This listing is not eligible to be republished."],
   LISTING_NOT_SELLER_HIDDEN: [409, "LISTING_NOT_SELLER_HIDDEN", "This listing was hidden by moderation or another workflow and cannot be republished here."],

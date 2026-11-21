@@ -49,25 +49,25 @@ describe('LoginPage: owner second factor (Phase 16)', () => {
   it('does not show a code field until the server asks for one, then does', async () => {
     render(<MemoryRouter><AuthProvider><LoginPage /></AuthProvider></MemoryRouter>);
     expect(screen.queryByLabelText(/authenticator code/i)).toBeNull();
-    fill(); fireEvent.click(screen.getByRole('button', { name: /continue to kayad/i }));
+    fill(); fireEvent.click(screen.getByRole('button', { name: /continue to kayard ke/i }));
     await waitFor(() => expect(screen.getByLabelText(/authenticator code/i)).toBeInTheDocument());
     expect(loginBodies[0]).toEqual({ email: 'owner-disposable@example.test', password: 'disposable-pass-1' });
   });
   it('resubmits the same credentials with the typed code', async () => {
     render(<MemoryRouter><AuthProvider><LoginPage /></AuthProvider></MemoryRouter>);
-    fill(); fireEvent.click(screen.getByRole('button', { name: /continue to kayad/i }));
+    fill(); fireEvent.click(screen.getByRole('button', { name: /continue to kayard ke/i }));
     const field = await screen.findByLabelText(/authenticator code/i);
     fireEvent.change(field, { target: { value: '123456' } });
-    fireEvent.click(screen.getByRole('button', { name: /continue to kayad/i }));
+    fireEvent.click(screen.getByRole('button', { name: /continue to kayard ke/i }));
     await waitFor(() => expect(loginBodies.length).toBe(2));
     expect(loginBodies[1]).toEqual({ email: 'owner-disposable@example.test', password: 'disposable-pass-1', mfaCode: '123456' });
   });
   it('an invalid code shows the server message and clears the field', async () => {
     render(<MemoryRouter><AuthProvider><LoginPage /></AuthProvider></MemoryRouter>);
-    fill(); fireEvent.click(screen.getByRole('button', { name: /continue to kayad/i }));
+    fill(); fireEvent.click(screen.getByRole('button', { name: /continue to kayard ke/i }));
     const field = await screen.findByLabelText(/authenticator code/i);
     fireEvent.change(field, { target: { value: '000000' } });
-    fireEvent.click(screen.getByRole('button', { name: /continue to kayad/i }));
+    fireEvent.click(screen.getByRole('button', { name: /continue to kayard ke/i }));
     await waitFor(() => expect(screen.getByText(/code is not valid/i)).toBeInTheDocument());
     expect(screen.getByLabelText(/authenticator code/i).value).toBe('');
   });

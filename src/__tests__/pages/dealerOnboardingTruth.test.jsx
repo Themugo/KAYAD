@@ -33,7 +33,7 @@ describe('DealerOnboarding completion screen', () => {
     mockUser = { id: 'd1', role: 'dealer', status: 'suspended' };
     show();
     expect(screen.getByText('Your dealer account is suspended')).toBeInTheDocument();
-    expect(screen.getByText(/cannot list vehicles until KAYAD reinstates/i)).toBeInTheDocument();
+    expect(screen.getByText(/cannot list vehicles until KAYARD KE reinstates/i)).toBeInTheDocument();
     expect(screen.queryByText('Your dealer account is approved')).toBeNull();
   });
   it('an approved account is told so', () => {

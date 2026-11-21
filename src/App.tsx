@@ -53,7 +53,7 @@ import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
 import { navLocationFor } from './utils/navLocation';
 import { isStaffRole as isEscrowStaffRole } from './features/escrow/escrowModel';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import { useBranding } from './context/BrandingContext';
+import { useBranding, DEFAULT_LOGO_URL } from './context/BrandingContext';
 
 // Views
 // Heavy authenticated/admin surfaces are loaded on demand. This keeps the
@@ -912,10 +912,10 @@ function AppInner() {
   );
 }
 
-/** Footer logo: the admin-managed logo when one is set, otherwise the built-in KAYAD vehicle mark (symbol only). */
+/** Footer logo: the admin-managed logo when one is set, otherwise the built-in KAYARD KE K mark (symbol only). */
 function FooterLogo() {
   const { branding } = useBranding();
-  const custom = branding?.logoType === 'image' && branding?.logoUrl;
+  const custom = branding?.logoType === 'image' && branding?.logoUrl && branding.logoUrl !== DEFAULT_LOGO_URL;
   return <img src={custom ? branding.logoUrl : '/branding/kayard-k-mark.png'} alt="" aria-hidden="true" width={44} height={32} className="h-8 w-auto max-w-[96px] object-contain shrink-0" decoding="async" />;
 }
 

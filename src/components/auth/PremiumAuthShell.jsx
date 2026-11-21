@@ -17,7 +17,7 @@ export default function PremiumAuthShell({ mode = 'signin', eyebrow, title, desc
   const isRegister = mode === 'register';
   const ctx = readAuthContext(location);
   const switchTo = headerAction?.to || buildAuthPath(isRegister ? 'login' : 'register', ctx);
-  const switchPrompt = headerAction?.prompt ?? (isRegister ? 'Already have an account?' : 'New to KAYAD?');
+  const switchPrompt = headerAction?.prompt ?? (isRegister ? 'Already have an account?' : 'New to KAYARD KE?');
   const switchLabel = headerAction?.label ?? (isRegister ? 'Sign in' : 'Create account');
 
   return (
@@ -58,7 +58,7 @@ export default function PremiumAuthShell({ mode = 'signin', eyebrow, title, desc
       </section>
 
       <footer className="kayad-auth-footer">
-        <span>© {new Date().getFullYear()} KAYAD</span>
+        <span>© {new Date().getFullYear()} KAYARD KE</span>
         <span><Link to="/?nav=support">Help and support</Link></span>
       </footer>
     </main>

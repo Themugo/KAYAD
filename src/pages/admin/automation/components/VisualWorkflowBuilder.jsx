@@ -50,7 +50,7 @@ const nodeTypes = [
     ]
   },
   {
-    category: 'KAYAD Specific',
+    category: 'KAYARD KE Specific',
     nodes: [
       { type: 'dealer_suspend', label: 'Suspend Dealer', icon: Users, color: colors.mutedCrimson, defaultData: { reason: '' } },
       { type: 'dealer_activate', label: 'Activate Dealer', icon: CheckCircle, color: colors.emerald, defaultData: {} },

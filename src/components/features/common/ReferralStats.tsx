@@ -8,7 +8,7 @@ export default function ReferralStats() {
     referrals: 12,
     pendingRewards: 3,
     totalEarned: 45000,
-    referralCode: 'KAYAD-JM2024',
+    referralCode: 'KAYARD-JM2024',
   };
 
   const referralLink = `https://kayad.co.ke/ref/${stats.referralCode}`;

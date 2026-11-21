@@ -46,7 +46,7 @@ const componentLibrary = [
   { category: 'Interactive', items: ['Button', 'Input', 'Select', 'Checkbox', 'Radio', 'Toggle', 'Slider', 'Search'] },
   { category: 'Display', items: ['Card', 'Badge', 'Alert', 'Tooltip', 'Modal', 'Drawer'] },
   { category: 'Data', items: ['Table', 'List', 'Timeline', 'Progress', 'Chart', 'Stat'] },
-  { category: 'KAYAD', items: ['Vehicle Card', 'Dealer Card', 'Auction Card', 'Search Form', 'Map Widget', 'Finance Calc'] },
+  { category: 'KAYARD KE', items: ['Vehicle Card', 'Dealer Card', 'Auction Card', 'Search Form', 'Map Widget', 'Finance Calc'] },
 ];
 
 const sectionTemplates = [

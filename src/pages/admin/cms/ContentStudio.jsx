@@ -320,7 +320,7 @@ export default function ContentStudio() {
                 </div>
                 <div>
                   <h1 className="text-lg font-bold text-[#0A3340]">Content Studio</h1>
-                  <p className="text-xs text-[#64748B]">KAYAD Enterprise CMS</p>
+                  <p className="text-xs text-[#64748B]">KAYARD KE Enterprise CMS</p>
                 </div>
               </div>
             </div>

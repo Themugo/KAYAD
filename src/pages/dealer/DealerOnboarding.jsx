@@ -170,10 +170,10 @@ export default function DealerOnboarding() {
             <h2>{user.status === 'suspended' ? 'Your dealer account is suspended' : 'Your dealer application was not approved'}</h2>
             <p style={{ color: 'rgba(10, 51, 64, 0.72)', marginBottom: 24 }}>
               {user.status === 'suspended'
-                ? 'You cannot list vehicles until KAYAD reinstates the account. Contact support if you need help.'
+                ? 'You cannot list vehicles until KAYARD KE reinstates the account. Contact support if you need help.'
                 : 'Review the details you submitted and contact support if you would like the decision reviewed.'}
             </p>
-            <button onClick={() => navigate('/')} className="btn btn-gold">Back to KAYAD</button>
+            <button onClick={() => navigate('/')} className="btn btn-gold">Back to KAYARD KE</button>
           </div>
         </div>
       );
@@ -200,9 +200,9 @@ export default function DealerOnboarding() {
       <div className="page">
         <div className="container" style={{ paddingTop: 60, paddingBottom: 60, maxWidth: 600, textAlign: 'center' }}>
           <div className="section-eyebrow">Become a dealer</div>
-          <h2>Sell on KAYAD with your existing account</h2>
+          <h2>Sell on KAYARD KE with your existing account</h2>
           <p style={{ color: 'rgba(10, 51, 64, 0.72)', marginBottom: 24 }}>
-            You keep this account, your bids, saved cars and history. Applying does not change how you buy. Dealer features switch on only after KAYAD approves your application.
+            You keep this account, your bids, saved cars and history. Applying does not change how you buy. Dealer features switch on only after KAYARD KE approves your application.
           </p>
           <button onClick={startApplication} disabled={saving} className="btn btn-gold">{saving ? 'Starting…' : 'Start dealer application'}</button>
         </div>

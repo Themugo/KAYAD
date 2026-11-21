@@ -18,7 +18,7 @@ export default function Footer({ setPage }: FooterProps) {
           <div className="md:col-span-1">
             <button onClick={() => nav('home')} className="flex items-center gap-2 mb-3 min-w-0" aria-label={`${branding.logoText || 'KAYARD KE'} home`}>
               {branding.logoType === 'image' && branding.logoUrl ? (
-                <img src={branding.logoUrl} onError={onBrandLogoError} alt={branding.logoText || 'KAYARD KE'} className="h-12 w-auto max-w-[190px] object-contain object-left" loading="lazy" />
+                <img src={branding.logoUrl} onError={onBrandLogoError} alt={branding.logoText || 'KAYARD KE'} className="h-12 w-auto max-w-[190px] object-contain object-left rounded-xl bg-white px-3 py-1.5" loading="lazy" />
               ) : (
                 <span className="text-[var(--footer-accent,#13B8A6)] font-sans font-bold tracking-[0.15em] uppercase">{branding.logoText || 'KAYARD KE'}</span>
               )}

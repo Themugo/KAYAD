@@ -43,7 +43,7 @@ describe('LoginPage: owner identity unverified', () => {
     render(<MemoryRouter><AuthProvider><LoginPage /></AuthProvider></MemoryRouter>);
     fireEvent.change(screen.getByPlaceholderText('you@example.com'), { target: { value: 'owner-disposable@example.test' } });
     fireEvent.change(screen.getByPlaceholderText('Enter your password'), { target: { value: 'disposable-pass-1' } });
-    fireEvent.click(screen.getByRole('button', { name: /continue to kayad/i }));
+    fireEvent.click(screen.getByRole('button', { name: /continue to kayard ke/i }));
 
     await waitFor(() => expect(screen.getByText(/platform-owner account is not verified/i)).toBeInTheDocument());
     const resend = screen.getByRole('button', { name: /resend verification email/i });
@@ -63,7 +63,7 @@ describe('LoginPage: owner identity unverified', () => {
     render(<MemoryRouter><AuthProvider><LoginPage /></AuthProvider></MemoryRouter>);
     fireEvent.change(screen.getByPlaceholderText('you@example.com'), { target: { value: 'x-disposable@example.test' } });
     fireEvent.change(screen.getByPlaceholderText('Enter your password'), { target: { value: 'disposable-pass-1' } });
-    fireEvent.click(screen.getByRole('button', { name: /continue to kayad/i }));
+    fireEvent.click(screen.getByRole('button', { name: /continue to kayard ke/i }));
     await waitFor(() => expect(screen.getByText(/platform-owner account is not verified/i)).toBeInTheDocument());
     expect(screen.queryByRole('button', { name: /resend verification email/i })).toBeNull();
   });

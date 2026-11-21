@@ -14,6 +14,8 @@ function resultError(result, source) {
     const error = new Error(`Could not verify listing permissions (${source}).`);
     error.status = 503;
     error.code = "LISTING_PERMISSION_CHECK_UNAVAILABLE";
+    error.source = source;
+    error.cause = result.error;
     error.expose = true;
     throw error;
   }
@@ -31,7 +33,7 @@ export async function getPersonalListingActionEligibility(cars, owner) {
   if (!ids.length) return new Map();
 
   const supabase = getSupabase();
-  const [eventsResult, visibilityResult, bidsResult, escrowsResult, outcomesResult, sellerCapability] = await Promise.all([
+  const [eventsResult, visibilityResult, bidsResult, escrowsResult, outcomesResult, settlementsResult, sellerCapability] = await Promise.all([
     supabase.from("personal_listing_lifecycle_events")
       .select("id,car_id,action,created_at")
       .in("car_id", ids)
@@ -45,6 +47,7 @@ export async function getPersonalListingActionEligibility(cars, owner) {
     supabase.from("bids").select("car_id").in("car_id", ids).limit(10000),
     supabase.from("escrows").select("car,status").in("car", ids).in("status", ACTIVE_ESCROW_STATUSES),
     supabase.from("purchase_outcomes").select("car_id,status").in("car_id", ids).in("status", ACTIVE_OUTCOME_STATUSES),
+    supabase.from("marketplace_offer_settlements").select("vehicle_id,status").in("vehicle_id", ids).in("status", ["awaiting_payment", "paid"]),
     getMySellerCapability(owner),
   ]);
 
@@ -53,6 +56,9 @@ export async function getPersonalListingActionEligibility(cars, owner) {
   const bids = resultError(bidsResult, "bids");
   const escrows = resultError(escrowsResult, "escrow activity");
   const outcomes = resultError(outcomesResult, "purchase outcomes");
+  // A database that predates offer settlements cannot hold one, so a missing relation is an empty set (anything else still fails closed).
+  const missingRelation = ["42P01", "PGRST205"].includes(String(settlementsResult?.error?.code || ""));
+  const settlements = missingRelation ? [] : resultError(settlementsResult, "offer settlements");
   const role = String(owner?.role || "").toLowerCase();
   const roleAllowed = PERSONAL_ROLES.has(role);
   const emailVerified = role !== "user" || owner?.emailVerified === true;
@@ -74,6 +80,7 @@ export async function getPersonalListingActionEligibility(cars, owner) {
     bids,
     escrows,
     outcomes,
+    settlements,
     capabilityStatus: sellerCapability?.status,
     sellerWriteAllowed,
     sellerWriteReason,
