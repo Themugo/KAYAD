@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   LayoutDashboard, Car, Users, TrendingUp, TrendingDown, DollarSign,
   Eye, MessageSquare, Phone, Calendar, ShoppingCart, Target, Clock,
@@ -311,6 +311,35 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const { signOut } = useAuth();
   const branding = useBrandingSafe();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
+  const asideRef = useRef<HTMLElement | null>(null);
+  // Desktop sidebar height = the part of the viewport that is below whatever sits above the workspace (site header, banners), so the
+  // account status and Sign out block is always inside the viewport instead of 110px below the fold (DA-06).
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || typeof window === 'undefined') return;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const top = Math.max(0, Math.round(root.getBoundingClientRect().top));
+      if (root.style.getPropertyValue('--dealer-aside-top') !== `${top}px`) root.style.setProperty('--dealer-aside-top', `${top}px`);
+    };
+    const schedule = () => { if (!raf) raf = window.requestAnimationFrame(update); };
+    update();
+    // The position of the workspace changes when the site header, banners or fonts settle after mount, without any scroll or resize event:
+    // observe layout changes too, and re-measure shortly after mount (measured at 1280x800 / 1024x768 before this: Sign out was below the fold).
+    const timers = [60, 300, 1000].map((ms) => window.setTimeout(schedule, ms));
+    // The header above the workspace can mount late (lazy chunks) or sit inside an inner scroll container, so no single event is guaranteed
+    // to fire when it appears. A cheap low-frequency check (one layout read, style written only when the value changed) closes that gap.
+    const poll = window.setInterval(update, 400);
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(schedule) : null;
+    ro?.observe(document.body); ro?.observe(root);
+    window.addEventListener('scroll', schedule, { passive: true, capture: true });
+    window.addEventListener('resize', schedule);
+    window.addEventListener('load', schedule);
+    return () => { window.removeEventListener('scroll', schedule, true); window.removeEventListener('resize', schedule); window.removeEventListener('load', schedule); ro?.disconnect(); timers.forEach((t) => window.clearTimeout(t)); window.clearInterval(poll); if (raf) window.cancelAnimationFrame(raf); };
+  }, []);
   const [logoutError, setLogoutError] = useState<string | null>(null);
   const handleDealerLogout = async () => {
     setLogoutError(null);
@@ -344,11 +373,24 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   // Phone drawer: Escape closes it and the page behind it does not scroll while it is open.
   useEffect(() => {
     if (!mobileNavOpen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileNavOpen(false); };
+    const aside = asideRef.current;
+    const focusables = () => Array.from(aside?.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])') || []).filter((el) => el.offsetParent !== null);
+    focusables()[0]?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setMobileNavOpen(false); return; }
+      if (e.key !== 'Tab') return;
+      // Keep keyboard focus inside the open drawer.
+      const items = focusables();
+      if (!items.length) return;
+      const first = items[0]; const last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
     window.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
+    const trigger = menuButtonRef.current;
+    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; trigger?.focus?.(); };
   }, [mobileNavOpen]);
 
   // Browser Back/Forward and refreshes resolve to the section named in the URL.
@@ -412,7 +454,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
       if (res && res.success === false) throw new Error(res.message || 'Could not mark this vehicle as sold.');
       setMyListings((prev) => prev.map((c) => (String(c.id || c._id) === id ? { ...c, status: 'sold', sold: true } : c)));
       setSoldTargetId(null); setSoldBuyer(''); setSoldPrice('');
-      setListingNotice('Marked as sold. It moved to your Sold list and the active inventory renumbered.');
+      setListingNotice('Marked as sold. It moved to your Sold list. Its listing number stays the same.');
     } catch (err) {
       setSoldError((err as Error)?.message || 'Could not mark this vehicle as sold. Nothing was changed — please try again.');
     } finally { setSoldBusy(false); }
@@ -659,7 +701,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const leadBadge = dashboard?.overview?.leads?.new;
 
   return (
-    <div className="min-h-screen bg-[#F6FAF9] flex flex-col lg:flex-row">
+    <div ref={rootRef} className="min-h-screen bg-[#F6FAF9] flex flex-col lg:flex-row">
       {user?.role === 'dealer' && user?.status === 'pending' && (
         <div role="status" className="mx-3 mt-3 rounded-xl border border-[#D7E7E4] bg-[#EAF7F4] px-4 py-3 text-sm text-[#0A3340] lg:mx-6 lg:mt-5">
           <strong>Business verification is in progress.</strong>
@@ -671,11 +713,11 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
       {/* Sidebar Navigation */}
       {/* Phone app bar: menu, where you are, notifications. Always reachable while scrolling. */}
       <div className="sticky top-0 z-40 flex items-center gap-2 border-b border-[#D7E7E4] bg-white/95 px-3 py-2 backdrop-blur lg:hidden" data-testid="dealer-mobile-bar">
-        <button type="button" aria-expanded={mobileNavOpen} aria-controls="dealer-workspace-sidebar" onClick={() => setMobileNavOpen(v => !v)} className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl border border-[#D7E7E4] bg-white px-3 text-sm font-semibold text-[#0A3340] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><Menu className="h-4 w-4" aria-hidden="true" /><span>{mobileNavOpen ? "Close dealer menu" : "Dealer menu"}</span></button>
+        <button ref={menuButtonRef} type="button" aria-expanded={mobileNavOpen} aria-controls="dealer-workspace-sidebar" onClick={() => setMobileNavOpen(v => !v)} className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl border border-[#D7E7E4] bg-white px-3 text-sm font-semibold text-[#0A3340] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><Menu className="h-4 w-4" aria-hidden="true" /><span>{mobileNavOpen ? "Close dealer menu" : "Dealer menu"}</span></button>
         <p className="min-w-0 flex-1 truncate text-center text-sm font-bold text-[#0A3340]" aria-hidden="true">{currentItem.label}</p>
       </div>
       {mobileNavOpen && <button type="button" aria-label="Close dealer menu overlay" tabIndex={-1} onClick={() => setMobileNavOpen(false)} className="fixed inset-0 z-[1090] bg-[#071F2A]/55 lg:hidden" />}
-      <aside id="dealer-workspace-sidebar" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex fixed inset-y-0 left-0 z-[1100] w-[88%] max-w-sm overflow-hidden shadow-2xl lg:static lg:z-auto lg:w-64 lg:min-w-64 lg:max-w-none lg:shadow-none bg-white lg:border-r border-[#D7E7E4] flex-col lg:sticky lg:top-0 lg:h-screen`}>
+      <aside ref={asideRef} id="dealer-workspace-sidebar" aria-label="Dealer workspace menu" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex fixed inset-y-0 left-0 z-[1100] w-[88%] max-w-sm overflow-hidden shadow-2xl lg:static lg:z-auto lg:w-64 lg:min-w-64 lg:max-w-none lg:shadow-none bg-white lg:border-r border-[#D7E7E4] flex-col lg:sticky lg:top-0 lg:h-[calc(100dvh-var(--dealer-aside-top,0px))]`}>
         <div className="p-4 border-b border-[#D7E7E4]">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-[#176B87] to-[#13B8A6] flex items-center justify-center overflow-hidden">
@@ -713,8 +755,15 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-[#D7E7E4] space-y-3">
-          <DealerAccountStatus />
+        <div className="shrink-0 p-3 lg:p-4 border-t border-[#D7E7E4] space-y-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" data-testid="dealer-sidebar-footer">
+          {/* Collapsed by default so the menu keeps its room (DA-06); the status stays one tap away and Sign out is always visible. */}
+          <details className="group rounded-xl border border-[#D7E7E4] bg-[#F4FAF9]" data-testid="dealer-account-status-toggle">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-xl px-3 text-sm font-semibold text-[#0A3340] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87] [&::-webkit-details-marker]:hidden">
+              <span>Account status</span>
+              <span aria-hidden="true" className="text-xs text-[#475569] transition group-open:rotate-180">▾</span>
+            </summary>
+            <div className="max-h-[40vh] overflow-y-auto p-1"><DealerAccountStatus /></div>
+          </details>
           {logoutError && <p role="alert" className="text-sm text-red-700">{logoutError}</p>}
           <button type="button" onClick={handleDealerLogout} className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-[#D7E7E4] px-4 py-2 text-sm font-semibold text-[#0A3340] hover:bg-[#EEF7F5]"><LogOut className="w-4 h-4" />Sign out</button>
         </div>
@@ -1003,10 +1052,10 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                       return (
                         <div key={car.id} data-testid="inventory-row" className="rounded-2xl border border-[#D7E7E4] bg-white p-3 shadow-[0_2px_10px_rgba(11,29,58,0.04)] transition hover:border-[#176B87]/40 hover:shadow-[0_8px_22px_rgba(11,29,58,0.08)] sm:p-4">
                           <div className="grid grid-cols-[104px_minmax(0,1fr)] items-start gap-x-3 gap-y-2 sm:flex sm:items-center sm:gap-4">
-                            <span className="hidden sm:inline w-7 text-center text-sm font-bold text-[#475569] shrink-0" aria-label={`Listing number ${rowIdx + 1}`} data-testid="inventory-row-number">{rowIdx + 1}</span>
+                            <span className="hidden sm:inline min-w-9 text-center text-sm font-bold text-[#475569] shrink-0" aria-label={car.listingNumber != null ? `Listing number ${car.listingNumber}` : 'Listing number not assigned'} data-testid="inventory-row-number">{car.listingNumber != null ? `#${car.listingNumber}` : '—'}</span>
                             <ListingThumb src={image} fallback={car.images?.[0]?.url} alt={label} count={photoCount} priority={rowIdx < 3} className="h-20 w-full sm:h-24 sm:w-36" />
                             <div className="flex-1 min-w-0">
-                              <p className="truncate text-[15px] font-bold text-[#0A3340]">{label}</p>
+                              <p className="truncate text-[15px] font-bold text-[#0A3340]"><span className="sm:hidden mr-1.5 rounded-md bg-[#EEF7F5] px-1.5 py-0.5 text-xs font-bold text-[#475569]" data-testid="inventory-row-number-mobile">{car.listingNumber != null ? `#${car.listingNumber}` : '—'}</span>{label}</p>
                               <p className="text-sm font-semibold text-[#176B87]">{car.price == null ? 'Price unavailable' : `Ksh ${Number(car.price).toLocaleString('en-KE')}`} • {car.views == null ? 'Views unavailable' : `${Number(car.views).toLocaleString('en-KE')} views`}</p>
                               {detailLine && <p className="text-xs text-[#475569]" data-testid="inventory-details">{detailLine}</p>}
                               {updated && <p className="text-xs text-[#475569]">Updated {updated}</p>}
@@ -1016,7 +1065,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                               {!isSoldListing && !(aStatus === 'live') && (
                                 <button type="button" onClick={() => { setSoldError(null); setSoldBuyer(''); setSoldPrice(''); setSoldTargetId(carId); }} className="px-3 py-1 text-xs font-bold text-emerald-800 border border-emerald-300 rounded-lg hover:bg-emerald-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Mark ${car.title || 'vehicle'} as sold`}>Mark sold</button>
                               )}
-                              <button type="button" onClick={() => openListingForm({ mode: 'edit', id: carId })} className="px-3 py-1 text-xs font-bold text-[#176B87] border border-[#B9D3CF] rounded-lg hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Edit ${car.title || 'vehicle'}`}>Edit</button>
+                              {isSoldListing && <span className="col-span-3 inline-flex min-h-10 items-center justify-center rounded-lg bg-[#EEF7F5] px-3 text-xs font-semibold text-[#475569]" data-testid="sold-read-only">Sold · read-only</span>}
+                              {!isSoldListing && <button type="button" onClick={() => openListingForm({ mode: 'edit', id: carId })} className="px-3 py-1 text-xs font-bold text-[#176B87] border border-[#B9D3CF] rounded-lg hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Edit ${car.title || 'vehicle'}`}>Edit</button>}
                               {!isAuctionListing && !isSoldListing && (
                                 <button type="button" disabled={Boolean(deletingId)} onClick={() => { setDeleteError(null); setDeleteTargetId(carId); }} className="px-3 py-1 text-xs font-bold text-[#B42318] border border-[#B9D3CF] rounded-lg hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Remove ${car.title || 'vehicle'}`}>Remove</button>
                               )}
@@ -1071,7 +1121,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                             return (
                               <li key={String(car.id || car._id)} className="flex items-center gap-3 p-2 rounded-lg bg-[#EEF7F5]">
                                 <div className="w-14 h-10 rounded-md bg-[#DDF4F0] overflow-hidden shrink-0 flex items-center justify-center">{img ? <img src={img} alt="" loading="lazy" className="w-full h-full object-cover grayscale" /> : <Car className="w-5 h-5 text-[#64748B]" aria-hidden="true" />}</div>
-                                <div className="min-w-0 flex-1"><p className="text-sm font-medium text-[#0A3340] truncate">{name}</p><p className="text-xs text-[#475569]">{car.price == null ? '' : `Listed at Ksh ${Number(car.price).toLocaleString('en-KE')}`}</p></div>
+                                <div className="min-w-0 flex-1"><p className="text-sm font-medium text-[#0A3340] truncate">{car.listingNumber != null && <span className="mr-1.5 text-xs font-bold text-[#475569]" data-testid="sold-row-number">#{car.listingNumber}</span>}{name}</p><p className="text-xs text-[#475569]">{car.price == null ? '' : `Listed at Ksh ${Number(car.price).toLocaleString('en-KE')}`}</p></div>
                                 <span className="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-[#DDE7E5] text-[#475569]">Sold</span>
                               </li>
                             );

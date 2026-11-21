@@ -67,7 +67,19 @@ jest.unstable_mockModule("../../services/escrowCapability.service.js", () => ({
 let dealerCars = [];
 let updateError = null;
 let lastUpdate = null;
+let rpcCalls = [];
 const sb = {
+  // Bulk status now runs through the atomic lifecycle function, one call per listing. This fake database enforces the same ownership
+  // and moderation refusals the real function does.
+  rpc: async (name, args) => {
+    rpcCalls.push({ name, ...args });
+    if (updateError) return { data: null, error: updateError };
+    const car = dealerCars.find((c) => c.id === args.p_car_id && c.dealer === args.p_dealer_id);
+    if (!car) return { data: null, error: { message: "LISTING_NOT_FOUND" } };
+    if (car.status === "rejected") return { data: null, error: { message: "LISTING_STATE_LOCKED" } };
+    lastUpdate = { action: args.p_action, ids: [...(lastUpdate?.ids || []), args.p_car_id] };
+    return { data: { id: car.id, action: args.p_action }, error: null };
+  },
   from: () => {
     const q = {
       _ids: null, _dealer: null, _patch: null,
@@ -202,7 +214,7 @@ describe("S1-LIST-04 dealer bulk-status", () => {
       { id: "c2", dealer: "seller-1", status: "rejected" },
       { id: "c3", dealer: "seller-2", status: "pending" },
     ];
-    updateError = null; lastUpdate = null; currentUser = SELLER;
+    updateError = null; lastUpdate = null; rpcCalls = []; currentUser = SELLER;
     if (!server) {
       const app = express();
       app.use(express.json());
@@ -231,19 +243,22 @@ describe("S1-LIST-04 dealer bulk-status", () => {
     currentUser = { ...SELLER, status: "approved" };
     const r = await patch({ ids: ["c1"], status: "active" });
     expect(r.code).toBe(200);
-    expect(lastUpdate.patch).toEqual({ status: "available" });
+    expect(lastUpdate.action).toBe("publish"); // canonical 'available' = the publish transition
+    expect(rpcCalls[0].p_car_id).toBe("c1");
   });
   test("legacy hold_for_review cannot refuse seller self-publication", async () => {
     __setOnboardingPolicyForTests({ listingModeration: "hold_for_review" });
     currentUser = { ...SELLER, status: "approved" };
     const r = await patch({ ids: ["c1"], status: "available" });
     expect(r.code).toBe(200);
-    expect(lastUpdate.patch).toEqual({ status: "available" });
+    expect(lastUpdate.action).toBe("publish");
   });
   test("only own, non-rejected listings are touched", async () => {
     const r = await patch({ ids: ["c1", "c2", "c3"], status: "sold" });
     expect(r.body.modified).toBe(1);
     expect(lastUpdate.ids).toEqual(["c1"]);
+    // the others are reported, not silently dropped
+    expect(Object.fromEntries(r.body.skipped.map((x) => [x.id, x.code]))).toEqual({ c2: "LISTING_STATE_LOCKED", c3: "CAR_NOT_FOUND" });
   });
   test("a failed write is not reported as success", async () => {
     updateError = { message: "violates check constraint" };

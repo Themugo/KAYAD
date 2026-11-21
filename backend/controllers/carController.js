@@ -368,9 +368,14 @@ export async function personalListingNumbers(ownerId) {
   const numbers = new Map();
   if (!ownerId) return numbers;
   try {
-    const { data, error } = await getSupabase().from("cars").select("id,created_at").eq("dealer_id", ownerId).order("created_at", { ascending: true }).order("id", { ascending: true }).limit(10000);
+    // DA-07: the permanent counter (cars.listing_number) is authoritative once the migration is applied. Where the column does not exist
+    // yet (older schema) the previous derived creation-order number is used so the screen keeps working.
+    let { data, error } = await getSupabase().from("cars").select("id,created_at,listing_number").eq("dealer_id", ownerId).order("created_at", { ascending: true }).order("id", { ascending: true }).limit(10000);
+    if (error && /listing_number/i.test(String(error.message || ""))) {
+      ({ data, error } = await getSupabase().from("cars").select("id,created_at").eq("dealer_id", ownerId).order("created_at", { ascending: true }).order("id", { ascending: true }).limit(10000));
+    }
     if (error) throw error;
-    (data || []).forEach((row, index) => numbers.set(String(row.id), index + 1));
+    (data || []).forEach((row, index) => numbers.set(String(row.id), Number.isInteger(row.listing_number) ? row.listing_number : index + 1));
   } catch (error) {
     logWarn("Listing numbers unavailable", { error: error?.message });
   }
@@ -383,7 +388,15 @@ async function addPersonalListingPermissions(cars, owner) {
   // Dealer inventory uses its established dealer dashboard and capability model. Only personal
   // account roles receive this additive read-only projection, avoiding extra work or contract
   // changes for dealer inventory consumers of the same owner-scoped endpoint.
-  if (!["user", "individual_seller", "buyer"].includes(role)) return rows;
+  if (!["user", "individual_seller", "buyer"].includes(role)) {
+    // Dealers keep their own capability model, plus the permanent listing number (read-only, additive).
+    if (!rows.length || !owner?.id) return rows;
+    const dealerNumbers = await personalListingNumbers(owner.id);
+    return rows.map((row) => {
+      const plain = typeof row?.toObject === "function" ? row.toObject() : { ...row };
+      return { ...plain, listingNumber: dealerNumbers.get(String(plain.id ?? plain._id ?? "")) ?? null };
+    });
+  }
   const maxListingImages = await effectiveMaxListingImages();
   const maxImagesPerRequest = MAX_LISTING_IMAGES_PER_REQUEST;
   let eligibility;

@@ -26,6 +26,7 @@ import { sellerMayPublishDirectly } from "../services/onboardingPolicy.service.j
 import { sendTeamInviteEmail } from "../services/email.service.js";
 import { listRoles, resolveRole, createCustomRole, updateCustomRole, deleteCustomRole, RoleError, newInviteToken } from "../services/dealerTeamRoles.service.js";
 import { formatPhone } from "../utils/format.js";
+import { bulkChangeDealerListingStatus } from "../services/dealerListingSale.service.js";
 import { DEALER_TEAM_PERMISSIONS } from "../middleware/dealerOrgAccess.js";
 
 import { validateCompanyName, dealerPublicName } from '../utils/companyName.js';
@@ -291,7 +292,7 @@ export async function bulkUpdateListings(req, res) {
   try {
     const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
     const action = req.body?.action;
-    const allowedStatuses = new Set(["available", "active", "draft", "pending", "reserved", "sold", "archived"]);
+    const allowedStatuses = new Set(["available", "active", "draft", "pending", "hidden", "paused", "sold"]);
     if (!ids.length || !action) return res.status(400).json({ success: false, message: "ids and action are required" });
     if (action !== "status") return res.status(400).json({ success: false, message: "Only status bulk updates are supported" });
     const status = req.body?.data?.status;
@@ -304,18 +305,14 @@ export async function bulkUpdateListings(req, res) {
     }))) {
       return res.status(403).json({ success: false, code: "SELLER_ACCOUNT_NOT_ELIGIBLE", message: "This account is not currently eligible to publish listings." });
     }
-    const owned = await Car.find({ id: { $in: ids }, dealer: req.user.id, deletedAt: { $exists: false } });
-    if (owned.length !== ids.length) return res.status(403).json({ success: false, message: "One or more listings are not owned by this dealer" });
-    // STAGE 5A (Gate E): sold listings are governed by the sale/escrow workflow, never by a seller bulk status edit.
-    if (owned.some((c) => c.status === "sold" || c.sold === true)) {
-      return res.status(409).json({ success: false, code: "LISTING_MODERATION_BLOCKED", message: "Sold listings cannot be changed in bulk." });
-    }
-    for (const car of owned) {
-      car.status = status;
-      await car.save();
-    }
-    res.json({ success: true, data: { updated: owned.length, status } });
+    // Same canonical lifecycle as /api/dealer/cars/bulk-status: itemised, atomic per listing, sold/escrow/settlement locks enforced.
+    const normalized = status === "active" ? "available" : status;
+    const result = await bulkChangeDealerListingStatus({ dealerId: req.user.id, actorId: req.actingMember?.id || req.user.id, ids, status: normalized, sale: req.body?.data?.sale || {} });
+    const allBlocked = result.updated.length === 0 && result.skipped.length > 0;
+    if (allBlocked) return res.status(409).json({ success: false, code: result.skipped[0].code, message: result.skipped[0].message, data: { updated: 0, status: normalized, skipped: result.skipped } });
+    res.json({ success: true, data: { updated: result.updated.length, status: normalized, updatedIds: result.updated, skipped: result.skipped } });
   } catch (err) {
+    if (err?.expose) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
     logError("Error bulk updating dealer inventory:", err);
     res.status(500).json({ success: false, message: "Failed to update dealer inventory" });
   }

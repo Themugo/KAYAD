@@ -56,13 +56,26 @@ jest.unstable_mockModule("../../services/escrowCapability.service.js", () => ({
 let dealerCars = [];
 let updateError = null;
 let lastUpdate = null;
+let rpcCalls = [];
+// Fake of kayad_dealer_listing_lifecycle_atomic: enforces ownership and the sold / moderation refusals the real function enforces.
+const NEXT = { publish: "available", hide: "hidden", mark_sold: "sold" };
 const sb = {
+  rpc: async (name, a) => {
+    rpcCalls.push({ name, ...a });
+    const car = [...platformOwned, ...dealerCars].find((c) => (c.id === a.p_car_id) && (c.dealer === a.p_dealer_id));
+    if (!car) return { data: null, error: { message: "LISTING_NOT_FOUND" } };
+    if (car.status === "sold" || car.sold === true) return { data: null, error: { message: "ALREADY_SOLD" } };
+    car.status = NEXT[a.p_action]; if (a.p_action === "mark_sold") car.sold = true;
+    lastUpdate = { action: a.p_action, ids: [...(lastUpdate?.ids || []), car.id] };
+    return { data: { id: car.id, action: a.p_action }, error: null };
+  },
   from: () => {
     const q = {
       _ids: null, _dealer: null, _patch: null,
       select() { return q; },
       in(_c, ids) { q._ids = ids; return q; },
-      eq(_c, v) { q._dealer = v; return q; },
+      eq(c, v) { q._dealer = v; (q._eqs = q._eqs || {})[c] = v; return q; },
+      maybeSingle() { const car = [...platformOwned, ...dealerCars].find((x) => x.id === q._eqs?.id && x.dealer === q._eqs?.dealer_id); return Promise.resolve({ data: car || null, error: null }); },
       update(p) { q._patch = p; return q; },
       then(res, rej) {
         if (q._patch) {
@@ -127,7 +140,7 @@ afterAll(() => server && server.close());
 const post = (path, body) => fetch(`${base}/api/dealer${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body || {}) }).then(async (r) => ({ code: r.status, body: await r.json().catch(() => ({})) }));
 const patch = (path, body) => fetch(`${base}/api/dealer${path}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then(async (r) => ({ code: r.status, body: await r.json().catch(() => ({})) }));
 
-beforeEach(() => { dealerCars = []; updateError = null; lastUpdate = null; currentUser = APPROVED; platformOwned = []; dbCreate.mockClear(); dbFindOne.mockReset(); __setOnboardingPolicyForTests({}); });
+beforeEach(() => { rpcCalls = []; dealerCars = []; updateError = null; lastUpdate = null; currentUser = APPROVED; platformOwned = []; dbCreate.mockClear(); dbFindOne.mockReset(); __setOnboardingPolicyForTests({}); });
 
 describe("POST /dealer-platform/inventory/bulk (bulkUpdateListings)", () => {
   test.each(["available", "active"])("legacy hold_for_review cannot block seller publication: %j is saved", async (status) => {
@@ -135,15 +148,15 @@ describe("POST /dealer-platform/inventory/bulk (bulkUpdateListings)", () => {
     __setOnboardingPolicyForTests({ listingModeration: "hold_for_review" });
     const r = await bulkCall(APPROVED, { ids: ["c1"], action: "status", data: { status } });
     expect(r.code).toBe(200);
-    expect(platformOwned[0].status).toBe(status === "active" ? "active" : "available");
-    expect(platformOwned[0].save).toHaveBeenCalledTimes(1);
+    expect(platformOwned[0].status).toBe("available"); // the dashboard label 'active' is the canonical 'available'
+    expect(rpcCalls).toHaveLength(1);
   });
   test.each(["unavailable", "invalid"])("policy source %s does not reintroduce listing approval", async (source) => {
     platformOwned = [mkOwned()];
     __setOnboardingPolicyForTests({ listingModeration: "auto_publish" }, source);
     const r = await bulkCall(APPROVED, { ids: ["c1"], action: "status", data: { status: "available" } });
     expect(r.code).toBe(200);
-    expect(platformOwned[0].save).toHaveBeenCalledTimes(1);
+    expect(rpcCalls).toHaveLength(1);
   });
   test("auto_publish + approved seller ⇒ allowed", async () => {
     platformOwned = [mkOwned()];
@@ -157,7 +170,7 @@ describe("POST /dealer-platform/inventory/bulk (bulkUpdateListings)", () => {
     __setOnboardingPolicyForTests({ listingModeration: "auto_publish" });
     const r = await bulkCall(PENDING, { ids: ["c1"], action: "status", data: { status: "available" } });
     expect(r.code).toBe(403);
-    expect(platformOwned[0].save).not.toHaveBeenCalled();
+    expect(rpcCalls).toHaveLength(0);
   });
   test("pending dealer with submitted verification can self-publish without admin approval", async () => {
     platformOwned = [mkOwned()];
@@ -165,7 +178,7 @@ describe("POST /dealer-platform/inventory/bulk (bulkUpdateListings)", () => {
     const r = await bulkCall(PENDING, { ids: ["c1"], action: "status", data: { status: "available" } }, { progressiveAccess: true, verification: { verificationStatus: "pending" } });
     expect(r.code).toBe(200);
     expect(platformOwned[0].status).toBe("available");
-    expect(platformOwned[0].save).toHaveBeenCalledTimes(1);
+    expect(rpcCalls).toHaveLength(1);
   });
   test("non-publishing statuses are unaffected by hold_for_review (a seller may still draft/hide their own)", async () => {
     platformOwned = [mkOwned()];
@@ -173,13 +186,21 @@ describe("POST /dealer-platform/inventory/bulk (bulkUpdateListings)", () => {
     const r = await bulkCall(APPROVED, { ids: ["c1"], action: "status", data: { status: "draft" } });
     expect(r.code).toBe(200);
   });
-  test("a SOLD listing cannot be changed by a seller bulk edit (409), and no listing in the batch is touched", async () => {
+  test("a SOLD listing is never changed by a seller bulk edit: it is reported as skipped (ALREADY_SOLD) while the others proceed", async () => {
     const a = mkOwned({ id: "c1" }); const sold = mkOwned({ id: "c2", status: "sold", sold: true });
     platformOwned = [a, sold];
     __setOnboardingPolicyForTests({ listingModeration: "auto_publish" });
     const r = await bulkCall(APPROVED, { ids: ["c1", "c2"], action: "status", data: { status: "available" } });
-    expect([r.code, r.body.code]).toEqual([409, "LISTING_MODERATION_BLOCKED"]);
-    expect(a.save).not.toHaveBeenCalled(); expect(sold.save).not.toHaveBeenCalled();
+    expect(r.code).toBe(200);
+    expect(r.body.data.updated).toBe(1);
+    expect(r.body.data.skipped).toEqual([{ id: "c2", code: "ALREADY_SOLD", message: expect.any(String) }]);
+    expect(sold.status).toBe("sold");
+  });
+  test("a batch made only of sold listings is a 409 with the reason code", async () => {
+    platformOwned = [mkOwned({ id: "c2", status: "sold", sold: true })];
+    __setOnboardingPolicyForTests({ listingModeration: "auto_publish" });
+    const r = await bulkCall(APPROVED, { ids: ["c2"], action: "status", data: { status: "available" } });
+    expect([r.code, r.body.code]).toEqual([409, "ALREADY_SOLD"]);
   });
 });
 

@@ -1,0 +1,8 @@
+KAYARD KE | {"tagline": "KAYAD Motors keeps this", "logoText": "KAYARD KE"}
+KAYARD KE | {"logoText": "KAYARD KE"}
+Eric Kamau Motors | {"logoText": "kayad.space"}
+KAYARD KE | {"logoText": "KAYARD KE"}
+other "KAYAD"
+platform_name "KAYARD KE"
+KAYARD KE
+idempotent: second run changed nothing

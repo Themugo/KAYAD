@@ -60,10 +60,15 @@ export const cacheResponse = (ttl, keyPrefix = "") => {
 // 📊 CACHE INVALIDATION MIDDLEWARE
 // =============================
 
+// Keys are `${prefix}:${userId}:${path}:${query}`. A bare prefix ("dealer", "user") used to be passed to Redis SCAN MATCH as a literal,
+// which matches no key, so a successful write never invalidated the cached GET (DA-04: saved banking details read back blank for 5
+// minutes). A pattern without a glob character now means "everything under that prefix".
+export const normalizeInvalidationPattern = (pattern) => (/[*?[\]]/.test(pattern) ? pattern : `${pattern}:*`);
+
 export const invalidateCache = (pattern) => {
   return async (req, res, next) => {
     onJsonResponse(res, () => {
-      if (pattern) cacheDelPattern(pattern);
+      if (pattern) cacheDelPattern(normalizeInvalidationPattern(pattern));
     });
 
     next();

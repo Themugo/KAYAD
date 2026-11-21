@@ -27,10 +27,13 @@ describe("real-schema pins (STAGE 5A)", () => {
     expect(seg).toMatch(/Car\.findByIdAndUpdate\(req\.params\.id, \{ status: newStatus \}\)/);
     expect(seg).not.toMatch(/await car\.save\(\)/);
   });
-  test("seller bulk endpoints query the physical column cars.dealer_id", () => {
-    const s = src("backend/routes/dealerRoutes.js");
-    const seg = s.slice(s.indexOf('"/cars/bulk-status"'));
-    expect(seg.slice(0, 3000)).toMatch(/\.eq\("dealer_id", req\.user\.id\)/);
+  test("seller bulk endpoints scope every write to the physical column cars.dealer_id (through the dealer lifecycle service)", () => {
+    const route = src("backend/routes/dealerRoutes.js");
+    const seg = route.slice(route.indexOf('"/cars/bulk-status"'));
+    expect(seg.slice(0, 3000)).toMatch(/bulkChangeDealerListingStatus\(\{ dealerId: req\.user\.id/);
+    const svc = src("backend/services/dealerListingSale.service.js");
+    expect(svc).toMatch(/p_dealer_id: dealerId/);
+    expect(svc).toMatch(/\.eq\("dealer_id", dealerId\)/);
   });
   test("the owner onboarding settings page is mounted in the live admin console", () => {
     const s = src("src/features/AdminView.tsx");
