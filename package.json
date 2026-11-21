@@ -213,7 +213,7 @@
     "validate:dealer-workspace-navigation": "node scripts/validate-dealer-workspace-navigation.mjs"
   },
   "dependencies": {
-    "@sentry/react": "10.69.0",
+    "@sentry/react": "11.14.0",
     "@tailwindcss/vite": "4.3.3",
     "@vitejs/plugin-react": "6.0.5",
     "axios": "1.20.0",
