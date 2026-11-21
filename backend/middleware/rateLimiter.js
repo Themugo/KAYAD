@@ -147,9 +147,10 @@ export const bidLimiter = rateLimit({
 // =============================
 // 💳 PAYMENT LIMITER
 // =============================
+// Default stays 5/min per user. The override exists only so disposable CI journeys can drive many payment attempts.
 export const paymentLimiter = rateLimit({
   windowMs: 60 * 1000,
-  max: 5,
+  max: Number(process.env.PAYMENT_RATE_LIMIT_MAX || 5),
   keyGenerator,
   handler: (req, res) => {
     logWarn("RATE LIMIT (PAYMENT)", {

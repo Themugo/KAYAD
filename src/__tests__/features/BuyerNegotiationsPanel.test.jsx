@@ -25,4 +25,11 @@ describe('BuyerNegotiationsPanel conversation navigation', () => {
     fireEvent.click(buttons[0]);
     expect(onOpenConversation).toHaveBeenCalledWith('chat-123');
   });
+
+  it('a failed negotiations source shows an alert, not an empty "no offers" state', async () => {
+    mocks.myNegotiations.mockRejectedValue(new Error('down'));
+    render(<BuyerNegotiationsPanel onOpenConversation={vi.fn()} />);
+    expect((await screen.findByRole('alert')).textContent).toMatch(/down/);
+    expect(screen.queryByText(/No offer conversations yet/)).toBeNull();
+  });
 });

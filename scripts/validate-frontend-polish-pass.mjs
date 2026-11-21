@@ -19,7 +19,7 @@ check('canonical routes use client-side router links', department.includes('impo
 check('filter controls have labels and visible focus styles', department.includes('Search departments and capabilities') && department.includes('focus-visible:ring-2'));
 check('result count is announced to assistive technology', department.includes('aria-live="polite"') && department.includes('Showing {visibleCapabilities}'));
 check('department inventory does not fabricate operational metrics', department.includes('not a live operational dashboard'));
-check('existing owner-only mounting is preserved', admin.includes("isOwner ? (['owners', 'departments'] as const)"));
+check('existing owner-only mounting is preserved', admin.includes("...(isOwner ? [['owners', 'Owner management'], ['departments', 'Departments']] : [])") && admin.includes("module === 'owners' && isOwner") && admin.includes("module === 'departments' && isOwner"));
 check('command centre has strengthened keyboard focus styling', css.includes('[data-testid="admin-command-centre"] :where(button, a, input, select, textarea):focus-visible'));
 check('command centre respects reduced-motion preferences', css.includes('@media (prefers-reduced-motion: reduce)') && css.includes('[data-testid="admin-command-centre"]'));
 console.log(`Frontend polish source checks: ${passed}/12 PASS`);

@@ -7,7 +7,7 @@ const checks = [
   ['decision routes exist', 'backend/routes/aiDecisionRoutes.js'],
   ['server mounts decision routes', 'backend/server.js'],
   ['governance migration exists', 'supabase/migrations/20260907235000_ai_decision_governance.sql'],
-  ['domain documentation exists', 'docs/domains/AI_DECISION_SUPPORT_DOMAIN_END_TO_END.md'],
+  // docs/domains/ was retired in 5c786af (2026-11-09) with no replacement document, so documentation presence is no longer asserted.
 ];
 let passed = 0;
 for (const [name, rel] of checks) {

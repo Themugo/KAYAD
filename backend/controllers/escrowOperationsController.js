@@ -3,13 +3,14 @@
 import Escrow from "../models/Escrow.js";
 import EscrowAnomaly from "../models/EscrowAnomaly.js";
 import EscrowAudit from "../models/EscrowAudit.js";
-import ReconciliationReport from "../models/ReconciliationReport.js";
+import { fetchIssueRows, groupRowsByReport } from "../utils/reconciliationIssues.js";
 import Refund from "../models/Refund.js";
 import { getAuditTrail } from "../services/escrowAuditService.js";
 import { triggerManualReconciliation } from "../services/reconciliationCron.js";
 import { runAnomalyDetection } from "../services/escrowAnomalyDetectionService.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
 import { getSupabase } from "../utils/supabase.js";
+import { logError } from "../utils/logger.js";
 import { disburseB2C } from "../services/mpesaB2C.service.js";
 import { escrowStaffCapabilities } from "../utils/escrowAccess.js";
 import { staffActionsFor } from "../utils/escrowViewModel.js";
@@ -33,31 +34,43 @@ const safeEscrow = (e) => ({
   payout: e.payout ? { id: e.payout.id || e.payout._id, status: e.payout.status, amount: Number(e.payout.amount || 0), netAmount: Number(e.payout.net_amount || e.payout.netAmount || 0), conversationId: e.payout.conversation_id || e.payout.conversationId || null, transactionId: e.payout.transaction_id || e.payout.transactionId || null, failureReason: e.payout.failure_reason || e.payout.failureReason || null } : null,
 });
 
+const settleQueue = async (label, fn) => {
+  try { return { ok: true, value: await fn() }; }
+  catch (err) { logError(`Escrow operations dashboard: ${label} unavailable`, err); return { ok: false, value: null }; }
+};
+
 export const getEscrowOperationsDashboard = async (req, res) => {
   const limit = Math.min(Math.max(Number(req.query.limit) || 12, 1), 50);
-  const [funded, vehicleConfirmed, delivered, released, disputed, refundsPending, reconciliation, anomalies] = await Promise.all([
+  const [funded, vehicleConfirmed, delivered, released, disputed, refundsPending, unresolvedRows, anomalies] = await Promise.all([
     Escrow.find({ status: "funded" }).sort({ fundedAt: 1 }).limit(limit).populate("buyer", "name").populate("seller", "name").populate("car", "title registrationNumber vin").lean(),
     Escrow.find({ status: "vehicle_confirmed" }).sort({ vehicleConfirmedAt: 1 }).limit(limit).populate("buyer", "name").populate("seller", "name").populate("car", "title registrationNumber vin").lean(),
     Escrow.find({ status: "delivered" }).sort({ updatedAt: 1 }).limit(limit).populate("buyer", "name").populate("seller", "name").populate("car", "title registrationNumber vin").lean(),
     Escrow.find({ status: "released" }).sort({ releasedAt: -1 }).limit(limit).populate("buyer", "name").populate("seller", "name").populate("car", "title registrationNumber vin").lean(),
     Escrow.find({ status: "disputed" }).sort({ disputedAt: -1 }).limit(limit).populate("buyer", "name").populate("seller", "name").populate("car", "title registrationNumber vin").lean(),
     Refund.find({ status: { $in: ["pending", "processing", "approved"] } }).sort({ createdAt: 1 }).limit(limit).lean(),
-    ReconciliationReport.find({ "issueDetails.resolved": false }).sort({ createdAt: -1 }).limit(limit).lean(),
-    EscrowAnomaly.find({ status: { $in: ["detected", "under_review", "confirmed"] } }).sort({ createdAt: -1 }).limit(limit).lean(),
+    fetchIssueRows({ state: "unresolved" }),
+    // The anomaly store has its own schema drift (GAP-ANOMALY). A failure there must not take the whole staff desk down,
+    // but it must never look like "zero anomalies": the queue is flagged unavailable and the error is logged.
+    settleQueue("anomalies", () => EscrowAnomaly.find({ status: { $in: ["detected", "under_review", "confirmed"] } }).sort({ createdAt: -1 }).limit(limit).lean()),
   ]);
 
-  const [fundedCount, vehicleConfirmedCount, deliveredCount, disputedCount, releasedCount, refundsPendingCount, unreconciledCount, anomalyCount, heldAgg, allHeldAgg] = await Promise.all([
+  const [fundedCount, vehicleConfirmedCount, deliveredCount, disputedCount, releasedCount, refundsPendingCount, anomalyCount, heldAgg, allHeldAgg] = await Promise.all([
     Escrow.countDocuments({ status: "funded" }),
     Escrow.countDocuments({ status: "vehicle_confirmed" }),
     Escrow.countDocuments({ status: "delivered" }),
     Escrow.countDocuments({ status: "disputed" }),
     Escrow.countDocuments({ status: "released" }),
     Refund.countDocuments({ status: { $in: ["pending", "processing", "approved"] } }),
-    ReconciliationReport.countDocuments({ "issueDetails.resolved": false }),
-    EscrowAnomaly.countDocuments({ status: { $in: ["detected", "under_review", "confirmed"] } }),
+    settleQueue("anomalies-count", () => EscrowAnomaly.countDocuments({ status: { $in: ["detected", "under_review", "confirmed"] } })),
     Escrow.aggregate([{ $match: { status: "funded" } }, { $group: { _id: null, total: { $sum: "$amount" } } }]),
     Escrow.aggregate([{ $match: { status: { $in: ["funded", "vehicle_confirmed", "delivered", "disputed"] } } }, { $group: { _id: null, total: { $sum: "$amount" }, count: { $sum: 1 } } }]),
   ]);
+
+  // Reports that still hold at least one unresolved issue (JSONB `issues`), most recent first; count is of ALL such reports.
+  const unresolvedReports = groupRowsByReport(unresolvedRows);
+  const unreconciledCount = unresolvedReports.length;
+  const anomaliesUnavailable = !anomalies.ok || !anomalyCount.ok;
+  const reconciliation = unresolvedReports.slice(0, limit);
 
   res.json({
     success: true,
@@ -69,8 +82,8 @@ export const getEscrowOperationsDashboard = async (req, res) => {
         released: { count: releasedCount, items: released.map(safeEscrow) },
         disputed: { count: disputedCount, items: disputed.map(safeEscrow) },
         refunds: { count: refundsPendingCount, items: refundsPending.map(r => ({ id: r.id || r._id, status: r.status, amount: Number(r.amount || 0), escrow: r.escrow || r.escrowId || null, createdAt: r.createdAt })) },
-        reconciliation: { count: unreconciledCount, items: reconciliation.map(r => ({ id: r.id || r._id, status: r.status, createdAt: r.createdAt, issueCount: Array.isArray(r.issueDetails) ? r.issueDetails.filter(i => i.resolved === false).length : 0 })) },
-        anomalies: { count: anomalyCount, items: anomalies.map(a => ({ id: a.id || a._id, category: a.category, severity: a.severity, status: a.status, escrow: a.escrow || null, createdAt: a.createdAt, summary: a.summary })) },
+        reconciliation: { count: unreconciledCount, items: reconciliation.map(r => ({ id: r.id, status: r.status, createdAt: r.createdAt, issueCount: r.issues.length })) },
+        anomalies: anomaliesUnavailable ? { count: null, items: [], unavailable: true } : { count: anomalyCount.value, items: anomalies.value.map(a => ({ id: a.id || a._id, category: a.category, severity: a.severity, status: a.status, escrow: a.escrow || null, createdAt: a.createdAt, summary: a.summary })) },
       },
       // Platform-wide totals for staff. `scope` makes that explicit so the UI
       // can never present them as a customer's own balance.
@@ -91,7 +104,7 @@ export const getEscrowOperationsCase = async (req, res) => {
   const [audits, anomalies, reconciliation, refund, payout] = await Promise.all([
     getAuditTrail(req.params.id),
     EscrowAnomaly.find({ escrow: req.params.id }).sort({ createdAt: -1 }).limit(20).lean(),
-    ReconciliationReport.find({ $or: [{ "issueDetails.escrowId": req.params.id }, { "issueDetails.escrow": req.params.id }] }).sort({ createdAt: -1 }).limit(10).lean(),
+    fetchIssueRows({ state: "any", escrowId: req.params.id, reportLimit: 10 }).then(groupRowsByReport),
     Refund.findOne({ escrow: req.params.id }).sort({ createdAt: -1 }).lean(),
     getSupabase().from("dealer_payouts").select("id,status,amount,net_amount,conversation_id,transaction_id,failure_reason,metadata").eq("escrow", req.params.id).maybeSingle().then(r => r.data || null),
   ]);

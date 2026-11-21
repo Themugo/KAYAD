@@ -11,10 +11,10 @@ import { AdManagerPanel } from '../../features/AdManager/AdManagerPanel';
  */
 export default function AdManager() {
   return (
-    <main className="page">
+    <div className="page">
       <div className="container" style={{ paddingTop: 24, paddingBottom: 32 }}>
         <AdManagerPanel embedded />
       </div>
-    </main>
+    </div>
   );
 }

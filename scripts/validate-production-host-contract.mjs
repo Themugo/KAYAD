@@ -26,7 +26,9 @@ if (server.includes('kayad-motors.vercel.app') || server.includes('kayad-motors-
 pass('backend CORS uses current stable Vercel aliases');
 
 if (vercel.rewrites?.[0]?.source !== '/api/:path*' || vercel.rewrites?.[0]?.destination !== 'https://api.kayad.space/api/:path*') fail('Vercel API compatibility rewrite');
-if (vercel.rewrites?.[1]?.source !== '/((?!api/|assets/).*)' || vercel.rewrites?.[1]?.destination !== '/index.html') fail('Vercel SPA fallback');
+// uploads/ is proxied to the API (stored media), so the SPA fallback must not capture it.
+if (vercel.rewrites?.[1]?.source !== '/((?!api/|assets/|uploads/).*)' || vercel.rewrites?.[1]?.destination !== '/index.html') fail('Vercel SPA fallback');
+if (vercel.rewrites?.[2]?.source !== '/uploads/:path*' || vercel.rewrites?.[2]?.destination !== 'https://api.kayad.space/uploads/:path*') fail('Vercel uploads proxy');
 pass('Vercel retains API-before-SPA compatibility routing');
 
 if (!verifier.includes('https://www.kayad.space') || !verifier.includes('https://api.kayad.space')) fail('production verifier canonical endpoints');

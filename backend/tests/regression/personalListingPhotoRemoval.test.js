@@ -1,5 +1,12 @@
 // Personal listing photo removal: server-side ownership, last-photo rule, and storage-cleanup ordering (REAL carController.deleteCarImage).
-import { jest, describe, test, expect, beforeEach } from "@jest/globals";
+import { jest, describe, test, expect, beforeEach, beforeAll, afterAll } from "@jest/globals";
+
+// addCarImages refuses to run when cloud storage is unconfigured (a production guard we must keep). The storage module itself is
+// mocked below, so the test only needs the credentials to be *present*; supply placeholders so it does not depend on the runner's env.
+const CLOUDINARY_KEYS = ["CLOUDINARY_CLOUD_NAME", "CLOUDINARY_API_KEY", "CLOUDINARY_API_SECRET"];
+const savedCloudinaryEnv = Object.fromEntries(CLOUDINARY_KEYS.map((k) => [k, process.env[k]]));
+beforeAll(() => { for (const k of CLOUDINARY_KEYS) process.env[k] = process.env[k] || "test-placeholder"; });
+afterAll(() => { for (const k of CLOUDINARY_KEYS) { if (savedCloudinaryEnv[k] === undefined) delete process.env[k]; else process.env[k] = savedCloudinaryEnv[k]; } });
 
 let doc; let order; let storageFails; let audits = [];
 const Car = {

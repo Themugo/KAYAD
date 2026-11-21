@@ -180,12 +180,13 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     // A failed request must not be presented as a genuinely empty marketplace.
     expect(screen.queryByText(/^0 vehicles$/i)).toBeNull();
     expect(screen.queryByText(/No vehicles match your filters/i)).toBeNull();
-    const glance = screen.getByLabelText(/Marketplace at a glance/i);
-    expect(glance.textContent).toContain('Inventory unavailable');
-    expect(glance.textContent).not.toMatch(/\b0\b/);
+    // The inventory heading's count chip carries the same truthful status (the former "at a glance" pill was retired).
+    const heading = screen.getByRole('heading', { name: /Vehicle Inventory/i });
+    expect(heading.textContent).toContain('Inventory unavailable');
+    expect(heading.textContent).not.toMatch(/\b0\b/);
   });
 
-  it('names a maintenance pause (HTTP 503 + maintenance body) instead of calling it a brief outage, and the status pill retries', async () => {
+  it('names a maintenance pause (HTTP 503 + maintenance body) instead of calling it a brief outage, and the retry control recovers', async () => {
     vehicleApiMocks.getCars.mockReset();
     const { VehicleApiError } = await import('../../services/vehicleApi');
     const emptyPage = { success: true, data: [], pagination: { page: 1, limit: 24, total: 0, pages: 1 } };
@@ -200,11 +201,11 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     await waitFor(() => expect(screen.getByText(/Inventory is paused for maintenance/i)).toBeTruthy(), { timeout: 3000 });
     expect(screen.queryByText(/usually brief/i)).toBeNull();
     expect(screen.getByText(/Reference: HTTP 503/i)).toBeTruthy();
-    const glance = screen.getByLabelText(/Marketplace at a glance/i);
-    expect(glance.textContent).toContain('Inventory paused');
-    // Recovery: the compact status pill is itself a retry control.
+    const heading = screen.getByRole('heading', { name: /Vehicle Inventory/i });
+    expect(heading.textContent).toContain('Inventory paused');
+    // Recovery: the unavailable panel offers a retry control (the former status-pill retry was retired).
     maintenance = false;
-    fireEvent.click(within(glance).getByRole('button', { name: /Retry loading vehicles/i }));
+    fireEvent.click(screen.getByRole('button', { name: /Retry inventory/i }));
     await waitFor(() => expect(screen.queryByText(/Inventory is paused for maintenance/i)).toBeNull(), { timeout: 3000 });
   });
 
@@ -248,17 +249,17 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     expect(within(vehicle).queryByRole('button')).toBeNull();
   });
 
+  // The hero no longer carries its own year/price/make inputs (approved 2026-11-19 composition: shortcut rail in the hero).
+  // The same Super Admin search settings and typeable inputs now live in the unified inventory filter panel.
+  const sidebar = () => within(screen.getByTestId('sidebar-filter-panel'));
+  const quickPrices = () => within(sidebar().getByRole('group', { name: 'Quick maximum price' })).getAllByRole('button').map((b) => b.textContent);
+
   it('year and price choices come from the Super Admin search settings, not fixed values', async () => {
     window.localStorage.setItem('kayad_home_page_config_v1', JSON.stringify({ filterOptions: { priceSteps: [1500000, 3000000, 12000000], yearFrom: 2012 } }));
     try {
       await renderMarketplace({ ...baseProps });
-      const years = Array.from(((screen.getByLabelText('Hero year filter') as HTMLInputElement).list as HTMLDataListElement).options).map((o) => o.value);
-      expect(years[0]).toBe('2012');
-      expect(years).toContain('2018');
-      expect(years).toContain('2026');
-      expect(years).not.toContain('2005');
-      const prices = Array.from(((screen.getByLabelText('Hero maximum price filter') as HTMLInputElement).list as HTMLDataListElement).options).map((o) => o.label);
-      expect(prices).toEqual(['Ksh 1.5M', 'Ksh 3M', 'Ksh 12M']);
+      expect((sidebar().getByLabelText('From year') as HTMLInputElement).placeholder).toBe('2012');
+      expect(quickPrices()).toEqual(['< 1.5M', '< 3M', '< 12M', 'Any']);
     } finally {
       window.localStorage.removeItem('kayad_home_page_config_v1');
     }
@@ -266,24 +267,26 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
 
   it('without settings the search keeps the standard 2005 start and default price steps', async () => {
     await renderMarketplace({ ...baseProps });
-    const years = Array.from(((screen.getByLabelText('Hero year filter') as HTMLInputElement).list as HTMLDataListElement).options).map((o) => o.value);
-    expect(years[0]).toBe('2005');
-    expect(years).toContain('2021');
-    const prices = Array.from(((screen.getByLabelText('Hero maximum price filter') as HTMLInputElement).list as HTMLDataListElement).options).map((o) => o.label);
-    expect(prices).toEqual(['Ksh 2.5M', 'Ksh 4M', 'Ksh 7M', 'Ksh 10M']);
+    expect((sidebar().getByLabelText('From year') as HTMLInputElement).placeholder).toBe('2005');
+    expect(quickPrices()).toEqual(['< 2.5M', '< 4M', '< 7M', '< 10M', 'Any']);
   });
 
-  it('make, price, year and body style are typeable inputs backed by suggestion lists', async () => {
+  it('make, price, year and body style are typeable inputs; make and body style are backed by suggestion lists', async () => {
     await renderMarketplace({ ...baseProps });
-    for (const name of ['Hero make filter', 'Hero maximum price filter', 'Hero year filter', 'Hero body style filter']) {
-      const el = screen.getByLabelText(name) as HTMLInputElement;
+    for (const name of ['Make filter', 'Body style filter']) {
+      const el = sidebar().getByLabelText(name) as HTMLInputElement;
       expect(el.tagName).toBe('INPUT');
       expect(el.getAttribute('list')).toBeTruthy();
+    }
+    for (const name of ['Max price', 'From year']) {
+      const el = sidebar().getByLabelText(name) as HTMLInputElement;
+      expect(el.tagName).toBe('INPUT');
+      expect(el.getAttribute('inputmode')).toBe('numeric');
     }
   });
   it('a typed price is applied on Enter, formatted with thousands separators', async () => {
     await renderMarketplace({ ...baseProps });
-    const price = screen.getByLabelText('Hero maximum price filter') as HTMLInputElement;
+    const price = sidebar().getByLabelText('Max price') as HTMLInputElement;
     fireEvent.change(price, { target: { value: '3250000' } });
     fireEvent.keyDown(price, { key: 'Enter' });
     await waitFor(() => expect(price.value).toBe('3,250,000'));
@@ -386,8 +389,10 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
         await waitFor(() => expect(view.getByText('ADMIN EYEBROW')).toBeTruthy());
         expect(view.getByRole('heading', { level: 1 }).textContent).toBe('Find Your Dream Today');
         expect(view.getByText('Admin supporting copy.')).toBeTruthy();
-        expect(view.getByRole('button', { name: /Browse Inventory/ })).toBeTruthy();
-        expect(view.getByRole('button', { name: /See How/ })).toBeTruthy();
+        // Approved 2026-11-19 composition: the hero carries the four functional shortcuts instead of two CTA buttons, so the
+        // admin CTA labels are not rendered here (tracked as a Super Admin control gap, see the failure register).
+        const shortcuts = view.getByRole('navigation', { name: 'Marketplace shortcuts' });
+        expect(within(shortcuts).getAllByRole('button')).toHaveLength(4);
         expect(view.queryByText('How It Works')).toBeNull();
       });
 
@@ -395,8 +400,8 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
         await renderMarketplace({ ...baseProps });
         const view = within(mobileHero());
         expect(view.getByRole('heading', { level: 1 }).textContent).toBe('Drive Your Dream Today');
-        expect(view.getByRole('button', { name: /Explore Vehicles/ })).toBeTruthy();
-        expect(view.getByRole('button', { name: /Sell Your Vehicle/ })).toBeTruthy();
+        const shortcuts = within(view.getByRole('navigation', { name: 'Marketplace shortcuts' }));
+        for (const label of [/Find a car/, /Sell a car/, /^Auctions/, /Verified vehicles/]) expect(shortcuts.getByRole('button', { name: label })).toBeTruthy();
       });
 
       it('rotation can be disabled by the administrator (no autoplay control, no timer)', async () => {
@@ -411,10 +416,10 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
 
   it('marks the active category chip and keeps it in sync with the Body Style filter', async () => {
     await renderMarketplace({ ...baseProps });
-    const suv = screen.getByRole('button', { name: 'SUV', pressed: false });
+    const suv = screen.getByRole('button', { name: 'SUV category', pressed: false });
     fireEvent.click(suv);
-    await waitFor(() => expect(screen.getByRole('button', { name: 'SUV', pressed: true })).toBeTruthy());
-    expect(screen.getByRole('button', { name: 'All', pressed: false })).toBeTruthy();
+    await waitFor(() => expect(screen.getByRole('button', { name: 'SUV category', pressed: true })).toBeTruthy());
+    expect(screen.getByRole('button', { name: /^All vehicle categories/, pressed: false })).toBeTruthy();
   });
 
   it('renders the full-width inventory grid using the admin presentation defaults', async () => {
@@ -498,12 +503,12 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     await act(async () => { await new Promise((resolve) => setTimeout(resolve, 60)); });
     for (const columns of [3, 4, 5]) {
       await waitFor(() => {
-        fireEvent.click(screen.getByRole('button', { name: `${columns}×` }));
+        fireEvent.click(screen.getByRole('button', { name: new RegExp(`^Request ${columns} columns;`) }));
         const grid = screen.getByTestId('inventory-grid');
         expect(grid.getAttribute('data-columns')).toBe(String(columns));
         expect(grid.className).toContain('kayad-inventory-grid');
         expect(grid.style.getPropertyValue('--kayad-grid-columns')).toBe(String(columns));
-        expect(screen.getByRole('button', { name: `${columns}×` }).getAttribute('aria-pressed')).toBe('true');
+        expect(screen.getByRole('button', { name: new RegExp(`^Request ${columns} columns;`) }).getAttribute('aria-pressed')).toBe('true');
       });
     }
   });
@@ -570,15 +575,15 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     await renderMarketplace({ ...baseProps });
     await screen.findByTestId('inventory-grid');
 
-    fireEvent.click(screen.getByRole('button', { name: 'SUV' }));
+    fireEvent.click(screen.getByRole('button', { name: 'SUV category' }));
     await waitFor(() => expect(vehicleApiMocks.getCars).toHaveBeenLastCalledWith(expect.objectContaining({ body: 'SUV' })));
 
-    fireEvent.click(screen.getByRole('button', { name: 'Electric' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Electric category' }));
     await waitFor(() => expect(vehicleApiMocks.getCars).toHaveBeenLastCalledWith(expect.objectContaining({ fuel: 'Electric' })));
     const electricQuery = vehicleApiMocks.getCars.mock.calls.at(-1)?.[0] as Record<string, unknown> | undefined;
     expect(electricQuery?.body).toBeUndefined();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Sedan' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Sedan category' }));
     await waitFor(() => expect(vehicleApiMocks.getCars).toHaveBeenLastCalledWith(expect.objectContaining({ body: 'Sedan' })));
     const sedanQuery = vehicleApiMocks.getCars.mock.calls.at(-1)?.[0] as Record<string, unknown> | undefined;
     expect(sedanQuery?.fuel).toBeUndefined();
@@ -671,7 +676,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     await screen.findByTestId('inventory-grid');
     await act(async () => { await new Promise((resolve) => setTimeout(resolve, 60)); });
 
-    fireEvent.click(screen.getByRole('button', { name: '4×' }));
+    fireEvent.click(screen.getByRole('button', { name: /^Request 4 columns;/ }));
     await waitFor(() => expect(screen.getByTestId('inventory-grid').getAttribute('data-columns')).toBe('4'));
 
     fireEvent.click(screen.getByRole('button', { name: /List view/i }));
@@ -689,7 +694,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     fireEvent.change(screen.getByRole('combobox', { name: /Sort inventory/i }), { target: { value: 'price-asc' } });
     await waitFor(() => {
       expect(screen.getByTestId('inventory-grid').getAttribute('data-columns')).toBe('4');
-      expect(screen.getByRole('button', { name: '4×' }).getAttribute('aria-pressed')).toBe('true');
+      expect(screen.getByRole('button', { name: /^Request 4 columns;/ }).getAttribute('aria-pressed')).toBe('true');
     });
   });
 
@@ -818,7 +823,7 @@ describe('VehicleMarketplace - consolidated Make selector (space audit)', () => 
     expect(options.length).toBeGreaterThan(0);
     expect(options).not.toContain('All');
 
-    expect(screen.getByText('Reset all filters')).toBeTruthy();
+    expect(screen.getByText('Reset all')).toBeTruthy();
     expect(screen.queryByTitle('Toggle filter sidebar')).toBeNull();
   });
 
@@ -981,7 +986,7 @@ describe('VehicleMarketplace - admin home page customization', () => {
     // verified here via the search input's real placeholder text
     // instead.
     await waitFor(() => expect(screen.getByPlaceholderText(/Make, model or keyword/)).toBeTruthy());
-    fireEvent.click(screen.getByText('Search & Trust Info Card'));
+    fireEvent.click(screen.getByText('Hero & Search Discovery'));
     await waitFor(() => {
       expect(screen.queryByPlaceholderText(/Make, model or keyword/)).toBeNull();
     });
@@ -999,7 +1004,7 @@ describe('VehicleMarketplace - admin home page customization', () => {
   it('persists the config to localStorage so a page reload (a fresh render) keeps the admin\'s changes', async () => {
     const { unmount } = await renderMarketplace({ ...baseProps, user: adminUser, isHomePage: true });
     fireEvent.click(screen.getByText('Customize Home Page'));
-    fireEvent.click(screen.getByText('Search & Trust Info Card'));
+    fireEvent.click(screen.getByText('Hero & Search Discovery'));
     await waitFor(() => expect(screen.queryByPlaceholderText(/Make, model or keyword/)).toBeNull());
     unmount();
 
@@ -1012,7 +1017,7 @@ describe('VehicleMarketplace - admin home page customization', () => {
   it('Reset to Defaults in the admin panel restores hidden sections and edited text', async () => {
     await renderMarketplace({ ...baseProps, user: adminUser, isHomePage: true });
     fireEvent.click(screen.getByText('Customize Home Page'));
-    fireEvent.click(screen.getByText('Search & Trust Info Card'));
+    fireEvent.click(screen.getByText('Hero & Search Discovery'));
     await waitFor(() => expect(screen.queryByPlaceholderText(/Make, model or keyword/)).toBeNull());
 
     fireEvent.click(screen.getByText('Reset to Defaults'));

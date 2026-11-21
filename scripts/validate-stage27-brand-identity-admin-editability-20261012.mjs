@@ -10,7 +10,7 @@ const checks = [
   // later brand-lockup redesign, not a reversion. Both assets still exist
   // under public/branding/; only the default BrandingContext value moved to
   // the new one. Updated the literal to match rather than reverting Stage 33.
-  ['default branding uses bundled master logo', /logoType:\s*'image'[\s\S]*?logoUrl:\s*'\/branding\/kayad-road-mark\.svg'/.test(read('src/context/BrandingContext.tsx')) && fs.existsSync(path.join(root, 'public/branding/kayad-road-mark.svg'))],
+  ['default branding uses bundled master logo', /logoType:\s*'image'[\s\S]*?logoUrl:\s*'\/branding\/kayard-k-mark\.png'/.test(read('src/context/BrandingContext.tsx')) && fs.existsSync(path.join(root, 'public/branding/kayard-k-mark.png')) && /'\/branding\/kayad-road-mark\.svg'[\s\S]{0,200}merged\.logoUrl = '\/branding\/kayard-k-mark\.png'/.test(read('src/context/BrandingContext.tsx'))],
   ['shared navbar uses admin-managed logo URL', /branding\.logoType === 'image' && branding\.logoUrl/.test(read('src/components/Navbar.tsx'))],
   ['legacy EA badge is removed from navbar wordmark', !/kayad-brand__ea/.test(read('src/components/Navbar.tsx'))],
   ['primary footer uses same admin-managed logo URL', /branding\.logoType === 'image' && branding\.logoUrl/.test(read('src/components/layout/Footer.tsx'))],

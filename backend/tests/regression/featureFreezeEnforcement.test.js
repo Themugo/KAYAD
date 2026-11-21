@@ -198,7 +198,7 @@ describe("route inventory guard: every money / bid / registration / message POST
     "supportTicketAdminRoutes.js POST /:id/messages": "support ticket thread, not chat",
     "heroPlacementRoutes.js POST /": "route file is not mounted anywhere in server.js / v1.js",
   };
-  const FROZEN_FILES = new Set(["bidRoutes.js POST /:id/bid", "paymentRoutes.js POST /initiate", "auctionSettlementRoutes.js POST /:id/outcome/payment", "authRoutes.js POST /register", "chatRoutes.js POST /:chatId/message", "dealerRoutes.js POST /upgrade", "subscriptionRoutes.js POST /upgrade", "subscriptionRoutes.js POST /reactivate", "auctionRegistrationRoutes.js POST /:id/registration/commitment", "auctionRegistrationRoutes.js POST /:id/registration/high-value-deposit"]);
+  const FROZEN_FILES = new Set(["bidRoutes.js POST /:id/bid", "paymentRoutes.js POST /initiate", "leadRoutes.js POST /:leadId/offers/:offerId/pay", "auctionSettlementRoutes.js POST /:id/outcome/payment", "authRoutes.js POST /register", "chatRoutes.js POST /:chatId/message", "dealerRoutes.js POST /upgrade", "subscriptionRoutes.js POST /upgrade", "subscriptionRoutes.js POST /reactivate", "auctionRegistrationRoutes.js POST /:id/registration/commitment", "auctionRegistrationRoutes.js POST /:id/registration/high-value-deposit"]);
   test("no unclassified candidate route exists", async () => {
     const fs = await import("node:fs"); const path = await import("node:path");
     const { fileURLToPath } = await import("node:url");

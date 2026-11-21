@@ -5,6 +5,8 @@ jest.unstable_mockModule('../../db/index.js', () => ({ findById: jest.fn() }));
 jest.unstable_mockModule('../../utils/supabase.js', () => ({ getSupabase: () => ({ from }) }));
 jest.unstable_mockModule('../../services/offerNegotiation.service.js', () => ({ listLeadOffers: jest.fn(), performOfferAction: jest.fn() }));
 
+jest.unstable_mockModule('../../services/offerSettlement.service.js', () => ({ payAcceptedOffer: jest.fn(), getSettlementForOffer: jest.fn(), cancelSettlement: jest.fn() }));
+
 const { getBuyerNegotiations } = await import('../../controllers/offerNegotiationController.js');
 
 describe('buyer negotiation inbox conversation references', () => {

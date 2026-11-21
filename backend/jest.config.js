@@ -31,6 +31,8 @@ export default {
     "tests/integration/soft-delete-integrity\\.integration\\.test\\.js$",
     // node:test file (opt-in, needs a local Redis): `npm run test:cache-invalidation`.
     "tests/integration/cache-invalidation\\.integration\\.test\\.js$",
+    // node:test files (`npm run test:node`): they import `node:test`, which Jest cannot resolve.
+    "tests/node/",
   ],
   // Coverage instrumentation is not reliable with this native ESM/Jest setup.
   // Keep it opt-in via test:coverage instead of making npm test fail on bogus 0% data.

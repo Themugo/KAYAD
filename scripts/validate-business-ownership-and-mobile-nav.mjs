@@ -13,7 +13,7 @@ const bulkRoutes = read("backend/routes/bulkAdminRoutes.js");
 const bulkController = read("backend/controllers/bulkAdminController.js");
 const duplicateController = read("backend/controllers/duplicateController.js");
 const autoMergeWorkflow = path.join(root, ".github/workflows/dependabot-auto-merge.yml");
-const gitPolicy = read("docs/handover/GIT_CONFLICT_AND_RELEASE_POLICY_20261114.md");
+const gitPolicy = read("docs/handover/GIT_CONFLICT_AND_RELEASE_POLICY_20261119.md");
 
 assert.ok(!navbar.includes('showUserDropdown') && !navbar.includes('kayad-account-panel') && navbar.includes('id="user-profile-menu-button"'),
   "The standalone account dropdown is retired; the avatar is a profile destination and account actions live in the hamburger drawer.");

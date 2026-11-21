@@ -10,8 +10,8 @@ const results = [];
 const check = (label, condition) => results.push({ label, pass: Boolean(condition) });
 
 check('Canonical mobile search row remains present', component.includes('data-testid="mobile-search-row"'));
-check('Search row uses existing searchQuery state', component.includes('value={searchQuery}') && component.includes('onSearchChange(e.target.value)'));
-check('Mobile filter entry opens canonical filter drawer', component.includes('onClick={() => setShowMobileFilterDrawer(true)}') && component.includes('aria-label={activeSidebarFilters > 0 ? `Open filters'));
+check('Search row uses existing searchQuery state', component.includes('value={searchQuery}') && component.includes('onSearchChange(event.target.value)'));
+check('Mobile filter entry opens canonical filter drawer', component.includes('onClick={() => setShowMobileFilterDrawer(true)}') && component.includes('aria-label={activeSidebarFilters > 0 ? `Open inventory filters'));
 check('Mobile drawer reuses InventoryFilterPanel and shared values', component.includes('idPrefix="mobile" variant="sheet" values={filterValues}'));
 check('Category shortcuts remain bound to existing body/fuel filter state', component.includes("setSelectedBodyStyle('SUV')") && component.includes("setSelectedFuel('Electric')"));
 check('Inventory count remains server-backed', component.includes('serverTotal.toLocaleString()') && component.includes('inventoryStatusText'));

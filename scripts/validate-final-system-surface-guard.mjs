@@ -17,11 +17,11 @@ const checks = [
   // set, including the existing escrow-operations route") — a strictly more
   // restrictive change, not a weakening. This check's literal string was never
   // updated to match; fixed here rather than reverting the source.
-  ['Private buyer surfaces are auth-gated', app.includes("protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'buyer-platform', 'dealer-dashboard', 'escrow-operations'])")],
+  ['Private buyer surfaces are auth-gated', app.includes("protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'dealer-dashboard', 'dealership-workspace', 'escrow-operations'])") && app.includes("path === '/buyer-platform') return <RequireAuth><Navigate to=\"/?nav=dashboard&section=buying\"")], // buyer-platform is now an authenticated redirect into the unified personal dashboard
   ['Legacy direct routes canonicalize instead of falling through to Marketplace', ['/admin/login','/gallery','/marketplace','/auctions','/escrow','/support','/inspections','/financing','/saved','/profile','/payments','/chat','/dashboard','/buyer-platform','/dealer','/admin'].every(p => app.includes(`path === '${p}'`))],
   ['Support FAQ marketplace navigation uses canonical nav', faq.includes("faq.nextStep === 'Open Marketplace' ? 'marketplace'") && !faq.includes("faq.nextStep === 'Marketplace' ? 'gallery'")],
   ['Support FAQ auction navigation uses canonical discovery nav', faq.includes("faq.nextStep === 'Open Auction' ? 'discovery'")],
-  ['Private workspaces suppress the public mobile dock', mobileNav.includes('Mobile marketplace navigation') && app.includes('privateWorkspaceNavs')],
+  ['Private workspaces suppress the public mobile dock', mobileNav.includes('Personal account navigation') && /showPublicMobileDock = \(!privateWorkspaceNavs\.has\(activeNav\) \|\| activeNav === 'dashboard'\)/.test(app)],  // only the personal dashboard keeps its own dock; admin and dealer workspaces suppress it
   ['Private workspaces suppress the public notice strip', app.includes('{!privateWorkspaceNavs.has(activeNav) && <TopNoticeStrip />}')],
   ['Support FAQ case CTA uses its actual data label', faq.includes("if (faq.nextStep === 'Open a support case')")],
   // Stage 32 (validate-stage32-mobile-menu-polish.mjs, documented in

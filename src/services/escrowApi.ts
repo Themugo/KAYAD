@@ -193,7 +193,7 @@ export interface OpsDashboard {
   queues: Record<'funded' | 'vehicleConfirmed' | 'delivered' | 'released' | 'disputed', OpsQueue> & {
     refunds: { count: number; items: Array<{ id: string; status: string; amount: number; escrow: string | null; createdAt?: string }> };
     reconciliation: { count: number; items: Array<{ id: string; status: string; createdAt?: string; issueCount: number }> };
-    anomalies: { count: number; items: Array<{ id: string; category?: string; severity?: string; status: string; escrow: string | null; createdAt?: string; summary?: string }> };
+    anomalies: { count: number | null; unavailable?: boolean; items: Array<{ id: string; category?: string; severity?: string; status: string; escrow: string | null; createdAt?: string; summary?: string }> };
   };
   totals: { scope: 'platform'; currency: 'KES'; heldAmount: number; heldCount: number };
   operator: { can: EscrowStaffCapabilities; role: string };

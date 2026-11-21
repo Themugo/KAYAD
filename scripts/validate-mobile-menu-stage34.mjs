@@ -12,7 +12,7 @@ const checks = [
   ['destination child links use full-width single-column rows', css.includes('flex-direction: column !important;') && css.includes('width: 100% !important;')],
   ['very narrow phones retain single-column child links', css.includes('@media (max-width: 340px)')],
   ['existing canonical nav config remains in use', navbar.includes('navItems.map((item) =>') && navbar.includes('visibleChildren(item, signedIn, isRestrictedWorkspace)')],
-  ['existing role-aware action handlers preserved', navbar.includes("handleNavSelect('dashboard')") && navbar.includes("handleNavSelect('seller-platform')") && navbar.includes("handleNavSelect('dealer:inventory:new')")],
+  ['role-aware action handlers preserved (personal sell opens the unified dashboard create-listing section; no separate seller platform)', navbar.includes("handleNavSelect('dashboard')") && navbar.includes("handleNavSelect(isDealerUser ? 'dealer:inventory:new' : 'dashboard:create-listing')") && !navbar.includes("handleNavSelect('seller-platform')")],
   ['reduced-motion support preserved', css.includes('prefers-reduced-motion: reduce')],
   ['keyboard focus treatment preserved', css.includes('.kayad-mobile-menu__surface button:focus-visible,.kayad-mobile-menu__surface a:focus-visible')],
 ];

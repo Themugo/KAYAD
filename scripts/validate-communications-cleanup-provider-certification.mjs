@@ -44,7 +44,9 @@ if (direct) process.exit(1);
 const required = [
   ['backend/services/communicationRetryCron.js', ['deliveryId: row.id', 'runCommunicationRetries']],
   ['backend/services/auctionReminderCron.js', ['COMMUNICATION_EVENTS.AUCTION_ENDING_SOON', 'emitCommunication']],
-  ['backend/services/savedSearchCron.js', ['COMMUNICATION_EVENTS.SAVED_SEARCH_MATCH', 'category: "marketing"']],
+  // The cron is now a thin scheduler; the canonical event emission lives in the notification job it runs.
+  ['backend/services/savedSearchCron.js', ['savedSearchNotificationJob']],
+  ['backend/services/savedSearchNotificationJob.js', ['COMMUNICATION_EVENTS.SAVED_SEARCH_MATCH', 'category: "marketing"', 'emitCommunication']],
   ['backend/services/reminderAutomationService.js', ['COMMUNICATION_EVENTS.REMINDER', 'emitCommunication']],
   ['backend/routes/communicationWebhookRoutes.js', ['/twilio/status', '/africastalking/status', '/brevo/events']],
   ['backend/services/communicationControl.service.js', ['getProviderHealth', 'retryDelivery']],

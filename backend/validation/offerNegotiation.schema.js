@@ -17,3 +17,7 @@ export const respondOfferSchema = z.object({
 }).superRefine((value, context) => {
   if (value.action === "counter" && value.amount === undefined) context.addIssue({ code: "custom", path: ["amount"], message: "A counter-offer amount is required" });
 });
+
+// The browser supplies a phone number only; the amount is read from the server-side settlement.
+export const payOfferSchema = z.object({ phone: z.string().regex(/^2547\d{8}$/, "Phone must be a valid Kenyan number") }).strict();
+export const cancelSettlementSchema = z.object({ reason: z.string().trim().max(500).optional() }).strict();

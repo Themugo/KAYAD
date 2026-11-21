@@ -213,7 +213,76 @@ const notifyAdminsOfPendingSeller = async (seller) => {
 // =============================
 // 📝 REGISTER
 // =============================
+
+// ----- Registration idempotency (lost-response recovery) -----
+// The browser sends ONE Idempotency-Key per logical registration attempt and re-sends the SAME key when the outcome of an
+// attempt is unknown (timeout, dropped connection). The email-verification token is then derived (HMAC with a server secret)
+// from key + normalised email + effective role + password, so a retry of the same attempt is recognised by comparing the
+// stored token hash. No schema change and no extra store. A key alone proves nothing: a different key, password or role,
+// a missing/malformed key, or an already verified account all fall through to the ordinary 409 "account exists" answer.
+const REGISTRATION_IDEMPOTENCY_KEY_RE = /^[A-Za-z0-9_-]{16,128}$/;
+const parseRegistrationIdempotencyKey = (raw) => {
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  return typeof value === "string" && REGISTRATION_IDEMPOTENCY_KEY_RE.test(value) ? value : null;
+};
+const deriveRegistrationVerifyToken = ({ key, email, role, password }) => {
+  const secret = process.env.JWT_SECRET;
+  if (!key || !secret) return null;
+  return crypto.createHmac("sha256", secret)
+    .update(["kayad-registration-v1", key, email, role, password].join("\u0000"))
+    .digest("hex");
+};
+const registrationMessage = (role, legacySellerRole) => role === "dealer"
+        ? "Dealer application received. Please verify your email and complete business verification. Once your documents are submitted, you can publish and manage your own vehicle listings while verification is processed; sensitive dealer features remain restricted until verification is approved."
+        : legacySellerRole
+          ? "Personal account created. KAYARD KE no longer has a separate private-seller account: selling is part of your personal account. Please verify your email before signing in."
+          : "Account created successfully. Please verify your email before signing in.";
+
+const buildRegistrationVerificationPayload = async (user, verifyToken) => {
+  const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
+  return {
+    userId: user.id,
+    channel: "email",
+    eventType: COMMUNICATION_EVENTS.EMAIL_VERIFICATION,
+    templateCode: "account_verification_email",
+    recipient: user.email,
+    ...(await buildEmail("buildVerificationEmail", { name: user.name, verifyUrl }, {
+      subject: "Verify Your Email — KAYARD KE",
+      text: `Hi ${user.name || "there"}, verify your KAYARD KE email: ${verifyUrl}`,
+      html: `<p>Hi ${escHtml(user.name || "there")},</p><p><a href="${escHtml(verifyUrl)}">Verify my email</a></p>`,
+    })),
+    metadata: { verification: true },
+    idempotencyKey: `registration-verification:${user.id}`,
+  };
+};
+
+// True when `existingUser` was created by THIS attempt (unverified, token hash equals the one the attempt would have stored).
+const isReplayOfSameAttempt = async (existingUser, ctx) => {
+  if (!ctx || !existingUser || existingUser.emailVerified) return false;
+  const auth = await UserAuth.findOne({ user: existingUser._id }).select("+emailVerifyToken +emailVerifyExpire");
+  if (!auth?.emailVerifyToken) return false;
+  const expected = Buffer.from(hashToken(ctx.derivedVerifyToken));
+  const stored = Buffer.from(String(auth.emailVerifyToken));
+  return expected.length === stored.length && crypto.timingSafeEqual(expected, stored);
+};
+
+// The first response was lost but this same attempt created the account: answer exactly as the original success did.
+const respondReplay = (res, user, ctx) => {
+  void (async () => {
+    // deliver() de-duplicates on the idempotency key, so a delivered original is not re-sent.
+    await deliver(await buildRegistrationVerificationPayload(user, ctx.derivedVerifyToken));
+  })().catch((e) => logError("Verification email dispatch failed (replay)", e, { userId: user.id }));
+  return res.status(200).json({
+    success: true,
+    replayed: true,
+    user: serializeUser(user, { tokenVersion: 0, mustChangePassword: false }),
+    ...(ctx.legacySellerRole ? { compatibility: { requestedRole: "individual_seller", createdRole: "user", deprecated: true } } : {}),
+    message: registrationMessage(ctx.role, ctx.legacySellerRole),
+  });
+};
+
 export const register = async (req, res) => {
+  let replayContext = null;
   try {
     let { name, email, password, phone } = req.body;
 
@@ -283,8 +352,13 @@ export const register = async (req, res) => {
       }
     }
 
+    const idempotencyKey = parseRegistrationIdempotencyKey(req.headers?.["idempotency-key"]);
+    const derivedVerifyToken = deriveRegistrationVerifyToken({ key: idempotencyKey, email, role, password });
+    replayContext = derivedVerifyToken ? { derivedVerifyToken, role, legacySellerRole } : null;
+
     const existing = await User.findOne({ email });
     if (existing) {
+      if (await isReplayOfSameAttempt(existing, replayContext)) return respondReplay(res, existing, replayContext);
       return R.error(res, "An account with that email already exists", 409);
     }
 
@@ -301,7 +375,7 @@ export const register = async (req, res) => {
 
     const rawPhone = (phone || "").trim();
     const validPhone = rawPhone ? formatPhone(rawPhone) || rawPhone : "";
-    const verifyToken = crypto.randomBytes(32).toString("hex");
+    const verifyToken = derivedVerifyToken || crypto.randomBytes(32).toString("hex");
     const passwordHash = await bcrypt.hash(password, 12);
 
     // Identity creation is one PostgreSQL transaction: users + the automatic
@@ -325,21 +399,7 @@ export const register = async (req, res) => {
     const user = mapRowIn("users", createdRow);
     const userAuth = { tokenVersion: 0, mustChangePassword: false };
 
-    const verifyUrl = `${process.env.FRONTEND_URL || "https://www.kayad.space"}/verify-email?token=${encodeURIComponent(verifyToken)}`;
-    const verificationPayload = {
-      userId: user.id,
-      channel: "email",
-      eventType: COMMUNICATION_EVENTS.EMAIL_VERIFICATION,
-      templateCode: "account_verification_email",
-      recipient: user.email,
-      ...(await buildEmail("buildVerificationEmail", { name: user.name, verifyUrl }, {
-        subject: "Verify Your Email — KAYARD KE",
-        text: `Hi ${user.name || "there"}, verify your KAYARD KE email: ${verifyUrl}`,
-        html: `<p>Hi ${escHtml(user.name || "there")},</p><p><a href="${escHtml(verifyUrl)}">Verify my email</a></p>`,
-      })),
-      metadata: { verification: true },
-      idempotencyKey: `registration-verification:${user.id}`,
-    };
+    const verificationPayload = await buildRegistrationVerificationPayload(user, verifyToken);
 
     // Email delivery is external I/O and must never decide whether registration
     // succeeds. The account, credential row and hashed verification token are
@@ -410,11 +470,7 @@ export const register = async (req, res) => {
       success: true,
       user: serializeUser(user, userAuth),
       ...(legacySellerRole ? { compatibility: { requestedRole: "individual_seller", createdRole: "user", deprecated: true } } : {}),
-      message: role === "dealer"
-        ? "Dealer application received. Please verify your email and complete business verification. Once your documents are submitted, you can publish and manage your own vehicle listings while verification is processed; sensitive dealer features remain restricted until verification is approved."
-        : legacySellerRole
-          ? "Personal account created. KAYARD KE no longer has a separate private-seller account: selling is part of your personal account. Please verify your email before signing in."
-          : "Account created successfully. Please verify your email before signing in.",
+      message: registrationMessage(role, legacySellerRole),
     });
   } catch (err) {
     logError("REGISTER ERROR", err);
@@ -426,6 +482,16 @@ export const register = async (req, res) => {
       details: err?.details,
       hint: err?.hint,
     });
+    if ((String(err?.code) === "23505" || err?.code === 11000) && replayContext) {
+      // A concurrent duplicate of the SAME attempt (double submit, retry racing a slow first request) loses the unique
+      // constraint (email or dealer business name). If the winner is this attempt, answer as the original success.
+      try {
+        const winner = await User.findOne({ email: normalizeEmail(req.body?.email) });
+        if (winner && await isReplayOfSameAttempt(winner, replayContext)) return respondReplay(res, winner, replayContext);
+      } catch (replayErr) {
+        logError("Registration replay lookup failed", replayErr);
+      }
+    }
     if ((String(err?.code) === "23505" || err?.code === 11000) && /dealers_business_name_unique|business_name/i.test(`${err?.message || ""} ${err?.details || ""}`)) {
       return res.status(409).json({ success: false, code: "COMPANY_NAME_TAKEN", message: "A dealership with that company name already exists. Use your registered company name." });
     }

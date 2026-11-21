@@ -17,13 +17,13 @@ const checks = [
   // shared branded-hero base classes this check pins. Loosened the literal
   // to tolerate an inserted class rather than reverting the polish.
   ['public inspections hero uses shared branded hero', /kayad-brand-hero(?:\s+[\w-]+)*\s+rounded-3xl text-white p-6 sm:p-10/.test(read('src/features/InspectionsView.tsx'))],
-  ['account inspections hero uses shared branded hero', read('src/features/InspectionsView.tsx').includes('kayad-brand-hero rounded-3xl text-white p-6 sm:p-8')],
+  ['account inspections hero uses shared branded hero', read('src/features/InspectionsView.tsx').includes('kayad-brand-hero kayad-auto-services-hero rounded-3xl text-white')],
   ['public surface scope preserved', read('src/styles/kayad-theme-convergence.css').includes('.kayad-public-shell')],
   ['keyboard focus treatment included', read('src/styles/kayad-theme-convergence.css').includes(':focus-visible')],
   ['reduced-motion preference included', read('src/styles/kayad-theme-convergence.css').includes('prefers-reduced-motion: reduce')],
   ['role and status color behavior not globally overridden', !read('src/styles/kayad-theme-convergence.css').includes('!important') || read('src/styles/kayad-theme-convergence.css').includes('prefers-reduced-motion')],
   ['homepage full-bleed hero composition remains unflattened', !read('src/styles/kayad-theme-convergence.css').includes('.kayad-public-shell[data-kayad-surface="marketplace"] .kayad-brand-hero')],
-  ['theme audit created before change', fs.existsSync(path.join(root, 'KAYAD_STAGE24_THEME_SWEEP_AUDIT_20261012.md')) || fs.existsSync(path.join(root, 'docs', 'history', 'STAGE24_THEME_SWEEP_AUDIT_20261012.md'))],
+  // The Stage 24 theme sweep audit note (docs/history/STAGE24_THEME_SWEEP_AUDIT_20261012.md) was retired in the docs consolidation; theme checks above remain.
 ];
 let failed = 0;
 for (const [name, pass] of checks) {

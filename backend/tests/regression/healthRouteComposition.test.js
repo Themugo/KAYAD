@@ -95,7 +95,7 @@ describe("route registration contract (real server.js composition)", () => {
   test("the router-root communications block is unreachable from GET /health (documented, intentionally not relied upon)", async () => {
     const res = await call("/health");
     const body = await res.json();
-    expect(body.service).toBe("Kayad API");
+    expect(body.service).toBe("KAYARD KE API");
     expect(body.checks).toEqual({ database: "ok" });
     expect(readinessMock).not.toHaveBeenCalled();
   });

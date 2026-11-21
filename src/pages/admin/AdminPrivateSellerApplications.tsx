@@ -133,7 +133,7 @@ export default function AdminPrivateSellerApplications() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-8" aria-labelledby="private-seller-review-title">
+    <section className="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-8" aria-labelledby="private-seller-review-title">
       <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#176B87]">Account governance</p>
@@ -198,6 +198,6 @@ export default function AdminPrivateSellerApplications() {
           </div> : null}
       </section>
       <p className="mt-4 rounded-xl border border-[#D7E7E4] bg-[#F7FAF9] p-4 text-xs leading-relaxed text-[#526B72]"><strong className="text-[#0A3340]">Lifecycle safeguards:</strong> Suspending or revoking a private seller hides eligible public, approved listings through the database lifecycle trigger. Listing records and ownership are retained. Reinstatement restores only listings hidden by this policy that remain eligible. Private-seller approval does not create a dealer account, remove buyer access, or grant dealer or financial permissions.</p>
-    </main>
+    </section>
   );
 }

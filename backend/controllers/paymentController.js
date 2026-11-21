@@ -9,6 +9,7 @@ import { handleMpesaCallback } from "../services/paymentCallback.service.js";
 import { logInfo } from "../utils/logger.js";
 import { logError } from "../infrastructure/logging/index.js";
 import { findAll, count } from "../db/index.js";
+import { getActiveSettlementForVehicle } from "../services/offerSettlement.service.js";
 import { getEffectiveEscrowForCar } from "../services/escrowCapability.service.js";
 import { isRoleAllowed } from "../config/roles.js"; // STAGE 4A (G3): canonical admin check
 
@@ -82,10 +83,23 @@ export const initiatePayment = async (req, res) => {
           return res.status(404).json({ success: false, message: "Car not found" });
         }
       }
+      // GAP-OFFER-TXN: an accepted offer is the authoritative price for its vehicle. While one is active only the bound
+      // buyer may pay, and only the agreed amount (the database trigger enforces the same for every code path).
+      let agreedSettlement = null;
+      if (normalizedType === "purchase") {
+        agreedSettlement = await getActiveSettlementForVehicle(carId);
+        if (agreedSettlement?.status === "paid") {
+          return res.status(409).json({ success: false, code: "OFFER_SETTLEMENT_ALREADY_PAID", message: "This vehicle has already been purchased." });
+        }
+        if (agreedSettlement && String(agreedSettlement.buyer_id) !== String(req.user.id)) {
+          return res.status(409).json({ success: false, code: "VEHICLE_RESERVED_BY_ACCEPTED_OFFER", message: "This vehicle is currently held for another buyer." });
+        }
+      }
       const winnerUser = carForAmount.winner?.user?.toString?.() || carForAmount.winner?.user;
       const winnerAmount = Number(carForAmount.winner?.amount);
-      const serverAmount =
-        winnerUser && winnerUser === req.user.id && Number.isFinite(winnerAmount) && winnerAmount > 0
+      const serverAmount = agreedSettlement
+        ? Number(agreedSettlement.agreed_amount)
+        : winnerUser && winnerUser === req.user.id && Number.isFinite(winnerAmount) && winnerAmount > 0
           ? winnerAmount
           : Number(carForAmount.price);
 

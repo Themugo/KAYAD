@@ -31,8 +31,8 @@ describe("comment screening (anti-scam)", () => {
     ["see https://evil.example/pay", /Links/],
     ["pay at kayad-deals.com", /Links/],
     ["mail me a@b.co", /Email/],
-    ["whatsapp me for a better price", /KAYAD/],
-    ["send money first", /KAYAD/],
+    ["whatsapp me for a better price", /KAYARD KE/],
+    ["send money first", /KAYARD KE/],
   ])("rejects %s", (t, re) => expect(svc.commentProblem(t)).toMatch(re));
   it("allows normal talk, short numbers and prices", () => {
     expect(svc.commentProblem("Lovely 2016 cruiser, is the service history complete? 165,000 km is fair")).toBeNull();

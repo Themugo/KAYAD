@@ -13501,6 +13501,117 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+  /api/leads/{leadId}/offers/{offerId}/settlement:
+    get:
+      tags:
+      - Api
+      summary: GET /api/leads/{leadId}/offers/{offerId}/settlement
+      description: 'Returns the accepted-offer settlement (agreed amount, status, payment window) for a participant. Returns settlement null when the offer was not accepted.'
+      operationId: getApiLeadsLeadidOffersOfferidSettlement
+      parameters:
+      - name: leadId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: offerId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Unauthorized
+        '403':
+          description: Not a participant, or not the buyer
+        '409':
+          description: Refused (not accepted, expired, cancelled, already paid, vehicle unavailable, payment in progress)
+  /api/leads/{leadId}/offers/{offerId}/pay:
+    post:
+      tags:
+      - Api
+      summary: POST /api/leads/{leadId}/offers/{offerId}/pay
+      description: 'Starts the purchase payment for an accepted offer. The buyer supplies only a phone number; the amount is the server-side agreed amount. Rate limited like the generic payment route and covered by the payments freeze.'
+      operationId: postApiLeadsLeadidOffersOfferidPay
+      parameters:
+      - name: leadId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: offerId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+              - phone
+              properties:
+                phone:
+                  type: string
+                  pattern: ^2547\d{8}$
+      responses:
+        '200':
+          description: Success
+        '201':
+          description: Payment initiated at the agreed amount
+        '400':
+          description: Bad request (unknown fields such as amount are rejected)
+        '401':
+          description: Unauthorized
+        '403':
+          description: Not a participant, or not the buyer
+        '409':
+          description: Refused (not accepted, expired, cancelled, already paid, vehicle unavailable, payment in progress)
+  /api/leads/{leadId}/offers/{offerId}/settlement/cancel:
+    post:
+      tags:
+      - Api
+      summary: POST /api/leads/{leadId}/offers/{offerId}/settlement/cancel
+      description: 'Cancels an accepted offer that is still awaiting payment (buyer or seller). Refused while a payment is in progress or after payment.'
+      operationId: postApiLeadsLeadidOffersOfferidSettlementCancel
+      parameters:
+      - name: leadId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: offerId
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                reason:
+                  type: string
+                  maxLength: 500
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Not a participant, or not the buyer
+        '409':
+          description: Refused (not accepted, expired, cancelled, already paid, vehicle unavailable, payment in progress)
   /api/leads/{leadId}:
     get:
       tags:

@@ -3,6 +3,7 @@
 // client claims) and that the buyer experience is identical in every seller state. Real API/DB behaviour: phase13i_personal_account_matrix.mjs.
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, cleanup, waitFor, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import DashboardHub from '../../components/DashboardHub';
 
 const getMySellerCapability = vi.fn();
@@ -28,7 +29,7 @@ const serverState = (status, role = 'user', extra = {}) => ({
   canList: status === 'approved',
   approvalRequired: true,
 });
-const mount = (role = 'user', user = {}) => render(<DashboardHub user={{ id: 'u1', name: 'James', role, ...user }} vehicles={[]} initialSection="my-vehicles" onNavigate={() => {}} />);
+const mount = (role = 'user', user = {}) => render(<MemoryRouter><DashboardHub user={{ id: 'u1', name: 'James', role, ...user }} vehicles={[]} initialSection="create-listing" onNavigate={() => {}} /></MemoryRouter>);
 const expectBuyerIntact = () => expectBuyerNav();
 
 // The seller state lives in the Selling section of the ONE personal dashboard (PersonalSellingModule gate + canonical

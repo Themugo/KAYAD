@@ -5,6 +5,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import ReconciliationReport from "../models/ReconciliationReport.js";
+import { fetchIssueRows, groupRowsByReport, tallyBy } from "../utils/reconciliationIssues.js";
 import { triggerManualReconciliation, getReconciliationCronStatus } from "../services/reconciliationCron.js";
 import { resolveIssue as resolveReconciliationIssue } from "../services/reconciliationService.js";
 import { logInfo, logWarn, logError } from "../utils/logger.js";
@@ -87,29 +88,15 @@ export const getUnresolvedIssues = async (req, res) => {
   try {
     const { severity, type, limit = 100 } = req.query;
 
-    const query = {
-      "issueDetails.resolved": false,
-    };
-
-    if (severity) query["issueDetails.severity"] = severity;
-    if (type) query["issueDetails.type"] = type;
-
-    const reports = await ReconciliationReport.find(query).sort({ createdAt: -1 }).limit(parseInt(limit)).lean();
-
-    const issues = [];
-    for (const report of reports) {
-      const unresolvedIssues = report.issueDetails.filter((issue) => !issue.resolved);
-      for (const issue of unresolvedIssues) {
-        if (severity && issue.severity !== severity) continue;
-        if (type && issue.type !== type) continue;
-        issues.push({
-          ...issue,
-          reportId: report.reportId,
-          reportType: report.reportType,
-          reportCreatedAt: report.createdAt,
-        });
-      }
-    }
+    // Unresolved findings come from the JSONB `issues` column through the shared database function (limit = most recent reports).
+    const reportLimit = Math.min(Math.max(parseInt(limit, 10) || 100, 1), 500);
+    const rows = await fetchIssueRows({ state: "unresolved", severity: severity || null, type: type || null, reportLimit });
+    const issues = rows.map((row) => ({
+      ...row.issue,
+      reportId: row.reportId,
+      reportType: row.reportType,
+      reportCreatedAt: row.reportCreatedAt,
+    }));
 
     res.json({
       success: true,
@@ -217,10 +204,7 @@ export const getReconciliationStatistics = async (req, res) => {
       completedReports,
       failedReports,
       byReportType,
-      totalIssues,
-      resolvedIssues,
-      byIssueType,
-      byIssueSeverity,
+      allIssueRows,
       avgSuccessRate,
     ] = await Promise.all([
       ReconciliationReport.countDocuments({ createdAt: { $gte: fromDate } }),
@@ -230,31 +214,19 @@ export const getReconciliationStatistics = async (req, res) => {
         { $match: { createdAt: { $gte: fromDate } } },
         { $group: { _id: "$reportType", count: { $sum: 1 } } },
       ]),
-      ReconciliationReport.aggregate([
-        { $match: { createdAt: { $gte: fromDate } } },
-        { $group: { _id: null, total: { $sum: "$issueDetails.0" } } },
-      ]),
-      ReconciliationReport.aggregate([
-        { $match: { createdAt: { $gte: fromDate } } },
-        { $unwind: "$issueDetails" },
-        { $match: { "issueDetails.resolved": true } },
-        { $count: "resolved" },
-      ]),
-      ReconciliationReport.aggregate([
-        { $match: { createdAt: { $gte: fromDate } } },
-        { $unwind: "$issueDetails" },
-        { $group: { _id: "$issueDetails.type", count: { $sum: 1 } } },
-      ]),
-      ReconciliationReport.aggregate([
-        { $match: { createdAt: { $gte: fromDate } } },
-        { $unwind: "$issueDetails" },
-        { $group: { _id: "$issueDetails.severity", count: { $sum: 1 } } },
-      ]),
+      // Every issue of every report in the window (resolved or not), read from the JSONB `issues` column.
+      fetchIssueRows({ state: "any", since: fromDate }),
       ReconciliationReport.aggregate([
         { $match: { createdAt: { $gte: fromDate }, status: "completed" } },
         { $group: { _id: null, avgRate: { $avg: "$successRate" } } },
       ]),
     ]);
+
+    const totalIssues = [{ total: allIssueRows.length }];
+    const resolvedIssues = [{ resolved: allIssueRows.filter((r) => r.issue?.resolved === true || r.issue?.resolved === "true").length }];
+    const toPairs = (obj) => Object.entries(obj).map(([_id, count]) => ({ _id, count }));
+    const byIssueType = toPairs(tallyBy(allIssueRows, "type"));
+    const byIssueSeverity = toPairs(tallyBy(allIssueRows, "severity"));
 
     const totalIssuesCount = totalIssues[0]?.total || 0;
     const resolvedIssuesCount = resolvedIssues[0]?.resolved || 0;
@@ -343,7 +315,7 @@ export const exportReportData = async (req, res) => {
         successRate: report.successRate,
       },
       issues: report.issues,
-      issueDetails: report.issueDetails,
+      issueDetails: Array.isArray(report.issues) ? report.issues : [], // legacy export key kept for existing consumers; data comes from `issues`
       status: report.status,
       generatedBy: report.generatedBy,
       duration: report.duration,

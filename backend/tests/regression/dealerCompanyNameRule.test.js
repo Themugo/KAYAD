@@ -19,7 +19,7 @@ describe("dealer company-name rule", () => {
     }
   });
   it("public name never falls back to the personal name", () => {
-    expect(dealerPublicName({ name: "Jane Wanjiku" })).toBe("KAYAD dealer");
+    expect(dealerPublicName({ name: "Jane Wanjiku" })).toBe("KAYARD KE dealer");
     expect(dealerPublicName({ name: "Jane", businessName: "Prime Motors" })).toBe("Prime Motors");
   });
 });

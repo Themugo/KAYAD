@@ -46,6 +46,7 @@ const FREEZE_ROUTES = Object.freeze([
   ["POST", /^\/sms-bidding\/webhook\/inbound$/, "auctions", true],
 
   ["POST", /^\/payments\/initiate$/, "payments", false],
+  ["POST", new RegExp(`^/leads/${ID}/offers/${ID}/pay$`), "payments", false], // accepted-offer payment (GAP-OFFER-TXN): the Panic Room payments pause must cover it
   ["POST", new RegExp(`^/auctions/${ID}/outcome/payment$`), "payments", false],
   ["POST", new RegExp(`^/auctions/${ID}/registration/commitment$`), "payments", false],
   ["POST", new RegExp(`^/auctions/${ID}/registration/high-value-deposit$`), "payments", false],

@@ -51,7 +51,7 @@ describe("registration e2e (csrf -> register)", () => {
     return { token: body.csrfToken, cookie };
   };
 
-  const post = async (payload, { csrf = true } = {}) => {
+  const post = async (payload, { csrf = true, headers = {} } = {}) => {
     const { token, cookie } = await bootstrap();
     return fetch(`${base}/api/v1/auth/register`, {
       method: "POST",
@@ -59,6 +59,7 @@ describe("registration e2e (csrf -> register)", () => {
         "content-type": "application/json",
         cookie,
         ...(csrf ? { "x-csrf-token": token } : {}),
+        ...headers,
       },
       body: JSON.stringify(payload),
     });
@@ -95,6 +96,87 @@ describe("registration e2e (csrf -> register)", () => {
   it("rejects duplicates with 409 and weak passwords with 400", async () => {
     expect((await post({ name: "Dup", email: "dealer@example.com", password: "Str0ng!Pass" })).status).toBe(409);
     expect((await post({ name: "Weak", email: "weak@example.com", password: "weak" })).status).toBe(400);
+  });
+
+  describe("registration idempotency (lost-response recovery)", () => {
+    const withKey = (key) => ({ headers: { "idempotency-key": key } });
+    const rowsFor = (email) => fake.db.users.filter((u) => u.email === email);
+
+    it("a retry of the SAME attempt is answered as the original success: 200, replayed, same user, one row", async () => {
+      const key = "replay-user-0123456789abcdef";
+      const payload = { name: "Lost Reply", email: "lost.reply@example.com", password: "Str0ng!Pass", role: "user" };
+      const first = await post(payload, withKey(key));
+      expect(first.status).toBe(201);
+      const firstBody = await first.json();
+      const second = await post({ ...payload, email: "LOST.reply@example.com" }, withKey(key));
+      const secondBody = await second.json();
+      expect(second.status).toBe(200);
+      expect(secondBody.replayed).toBe(true);
+      expect(secondBody.user.id).toBe(firstBody.user.id);
+      expect(secondBody.message).toBe(firstBody.message);
+      expect(rowsFor("lost.reply@example.com")).toHaveLength(1);
+      expect(fake.db.user_auth.filter((a) => a.user_id === firstBody.user.id)).toHaveLength(1);
+      expect(JSON.stringify(secondBody)).not.toMatch(/Str0ng|passwordHash|emailVerifyToken|\$2[aby]\$/);
+    });
+
+    it("a dealer attempt replays too, and stays a pending dealer", async () => {
+      const key = "replay-dealer-0123456789abcd";
+      const payload = { name: "Dealer Owner", email: "replay.dealer@example.com", password: "Str0ng!Pass", role: "dealer", businessName: "Replay Motors Ltd", location: "Nairobi" };
+      expect((await post(payload, withKey(key))).status).toBe(201);
+      const again = await post(payload, withKey(key));
+      expect(again.status).toBe(200);
+      expect((await again.json()).user.role).toBe("dealer");
+      expect(rowsFor("replay.dealer@example.com")).toHaveLength(1);
+    });
+
+    it("the retired individual_seller role still maps to a personal account on replay, with the compatibility note", async () => {
+      const key = "replay-legacy-0123456789abcd";
+      const payload = { name: "Legacy Client", email: "legacy.client@example.com", password: "Str0ng!Pass", role: "individual_seller" };
+      const first = await (await post(payload, withKey(key))).json();
+      expect(first.user.role).toBe("user");
+      const second = await post(payload, withKey(key));
+      const body = await second.json();
+      expect(second.status).toBe(200);
+      expect(body.user.role).toBe("user");
+      expect(body.compatibility).toMatchObject({ requestedRole: "individual_seller", createdRole: "user", deprecated: true });
+    });
+
+    it("is bound to key + email + role + password and to unverified accounts: everything else is a 409", async () => {
+      const key = "bound-key-0123456789abcdef";
+      const payload = { name: "Bound Key", email: "bound.key@example.com", password: "Str0ng!Pass", role: "user" };
+      expect((await post(payload, withKey(key))).status).toBe(201);
+      expect((await post(payload, withKey("another-key-0123456789abcd"))).status).toBe(409);
+      expect((await post({ ...payload, password: "Str0ng!Pass2" }, withKey(key))).status).toBe(409);
+      expect((await post({ ...payload, role: "dealer", businessName: "Bound Motors Ltd", location: "Nairobi" }, withKey(key))).status).not.toBe(200);
+      expect((await post(payload, withKey("short"))).status).toBe(409);
+      expect((await post(payload)).status).toBe(409);
+      rowsFor("bound.key@example.com")[0].email_verified = true;
+      expect((await post(payload, withKey(key))).status).toBe(409);
+      expect(rowsFor("bound.key@example.com")).toHaveLength(1);
+    });
+
+    it("concurrent submissions of one attempt create exactly one account (one 201, the rest replays)", async () => {
+      const key = "concurrent-key-0123456789ab";
+      const payload = { name: "Race Cond", email: "race@example.com", password: "Str0ng!Pass", role: "user" };
+      const results = await Promise.all(Array.from({ length: 6 }, () => post(payload, withKey(key))));
+      expect(results.every((r) => [200, 201].includes(r.status))).toBe(true);
+      expect(results.filter((r) => r.status === 201)).toHaveLength(1);
+      expect(rowsFor("race@example.com")).toHaveLength(1);
+    });
+
+    it("concurrent submissions with DIFFERENT keys still create exactly one account", async () => {
+      const payload = { name: "Race Two", email: "race2@example.com", password: "Str0ng!Pass", role: "user" };
+      const results = await Promise.all(Array.from({ length: 5 }, (_, i) => post(payload, withKey(`distinct-key-${i}-0123456789abcd`))));
+      expect(results.filter((r) => r.status === 201)).toHaveLength(1);
+      expect(results.filter((r) => r.status === 409)).toHaveLength(4);
+      expect(rowsFor("race2@example.com")).toHaveLength(1);
+    });
+
+    it("no Idempotency-Key keeps the previous behaviour (409 on a second attempt)", async () => {
+      const payload = { name: "No Key", email: "no.key@example.com", password: "Str0ng!Pass", role: "user" };
+      expect((await post(payload)).status).toBe(201);
+      expect((await post(payload)).status).toBe(409);
+    });
   });
 
   it("does not block or roll back registration when email delivery fails", async () => {

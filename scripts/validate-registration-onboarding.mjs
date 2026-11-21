@@ -224,7 +224,7 @@ const checks = [
   ],
   [
     'frontend registration uses canonical auth API service',
-    /authRegister\(body\)/.test(read('src/components/OnboardingFlow.tsx')) &&
+    /authRegister\(body[,)]/.test(read('src/components/OnboardingFlow.tsx')) &&
     /authFetch\('\/api\/v1\/auth\/register'/.test(read('src/services/authApi.ts')),
   ],
   [

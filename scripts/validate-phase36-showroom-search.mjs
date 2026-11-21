@@ -16,7 +16,7 @@ const checks = [
   ['Model filter is part of URL state and API query', showroom.includes("searchParams.get('model')") && showroom.includes('model:        filters.model') && showroom.includes("'model', 'location'")],
   ['Body/fuel/transmission/location options are dynamic facets', ['facets?.locations','facets?.bodyTypes','facets?.fuels','facets?.transmissions'].every(x=>sidebar.includes(x))],
   ['Autocomplete uses full database distinct values, not 500-row sample', searchService.includes("db.distinct('cars', 'brand'") && !searchService.includes("select: 'brand,model,locationCity,bodyType', limit: 500")],
-  ['Listing mutations invalidate facet and autocomplete caches', (carController.match(/cacheDelPattern\("kayad:search:facets:\*"\)/g)||[]).length >= 3 && carController.includes('kayad:search:suggestions:*')],
+  ['Listing mutations invalidate facet and autocomplete caches', (carController.match(/await invalidatePublicListingCaches\(\)/g)||[]).length >= 3 && fs.readFileSync('backend/utils/publicListingCache.js', 'utf8').includes('"kayad:search:facets:*"') && fs.readFileSync('backend/utils/publicListingCache.js', 'utf8').includes('"kayad:search:suggestions:*"')],
   ['Hard-coded default brand suggestions removed', !searchBar.includes('DEFAULT_BRANDS') && searchBar.includes('suggestions = []')],
   ['Unsupported Sold category removed from UI', !showroom.includes("label: 'Sold'")],
   ['Phone-first showroom refinements are scoped to mobile', css.includes('@media (max-width: 768px)') && css.includes('Stage 36')],

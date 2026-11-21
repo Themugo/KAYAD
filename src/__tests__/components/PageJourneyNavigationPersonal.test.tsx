@@ -3,6 +3,16 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import PageJourneyNavigation from '../../components/navigation/PageJourneyNavigation';
 
+/** Segments are separate spans with a decorative aria-hidden "/" (spacing is CSS), so assert the ordered segments. */
+function expectBreadcrumb(section: string) {
+  const crumb = screen.getByLabelText('Breadcrumb');
+  const visible = Array.from(crumb.children)
+    .filter((el) => el.getAttribute('aria-hidden') !== 'true')
+    .map((el) => el.textContent);
+  expect(visible).toEqual(['Personal Account', section]);
+  expect(crumb.querySelector('[aria-hidden="true"]')).toHaveTextContent('/');
+}
+
 describe('PageJourneyNavigation on the unified personal dashboard', () => {
   it('replaces recently visited tabs with a section-aware personal-account breadcrumb', () => {
     render(
@@ -12,7 +22,7 @@ describe('PageJourneyNavigation on the unified personal dashboard', () => {
     );
 
     expect(screen.queryByRole('tablist', { name: 'Recently visited pages' })).not.toBeInTheDocument();
-    expect(screen.getByLabelText('Breadcrumb')).toHaveTextContent('Personal Account / My Vehicles');
+    expectBreadcrumb('My Vehicles');
     expect(screen.getByRole('button', { name: 'Go to previous page' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Go forward to next page' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Go to KAYARD KE home' })).toBeInTheDocument();
@@ -24,7 +34,7 @@ describe('PageJourneyNavigation on the unified personal dashboard', () => {
         <PageJourneyNavigation />
       </MemoryRouter>,
     );
-    expect(screen.getByLabelText('Breadcrumb')).toHaveTextContent('Personal Account / My Account');
+    expectBreadcrumb('My Account');
     first.unmount();
 
     render(
@@ -32,6 +42,6 @@ describe('PageJourneyNavigation on the unified personal dashboard', () => {
         <PageJourneyNavigation />
       </MemoryRouter>,
     );
-    expect(screen.getByLabelText('Breadcrumb')).toHaveTextContent('Personal Account / Overview');
+    expectBreadcrumb('Overview');
   });
 });

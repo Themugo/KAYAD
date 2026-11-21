@@ -119,7 +119,7 @@ export const EscrowOperationsDesk: React.FC = () => {
           )}
           {QUEUES.map((q) => <QueueBlock key={q.key} title={q.label} count={dash.queues[q.key].count} items={dash.queues[q.key].items} onOpen={openCase} />)}
           <div className="rounded-xl border border-[#D7E7E4] bg-white p-4 text-sm text-[#12576D]">
-            <p>Refunds in progress: <b>{dash.queues.refunds.count}</b> · Open anomalies: <b>{dash.queues.anomalies.count}</b> · Reconciliation issues: <b>{dash.queues.reconciliation.count}</b></p>
+            <p>Refunds in progress: <b>{dash.queues.refunds.count}</b> · Open anomalies: <b>{dash.queues.anomalies.unavailable || dash.queues.anomalies.count == null ? 'Unavailable' : dash.queues.anomalies.count}</b> · Reconciliation issues: <b>{dash.queues.reconciliation.count}</b></p>
           </div>
         </div>
 

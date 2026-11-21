@@ -14,7 +14,7 @@ const tests = read('src/__tests__/features/adManagerControl.test.tsx');
 const checks = [
   ['admin route uses canonical AdSlot control panel', /AdManagerPanel embedded/.test(page)],
   ['legacy /admin/ads API is not used by page', !page.includes('adsAPI')],
-  ['page includes the existing admin surface', /<main className="page">/.test(page)],
+  ['page includes the existing admin surface', /<div className="page">/.test(page)],
   ['embedded panel prop is supported', /embedded\?: boolean/.test(panel)],
   ['campaign list uses canonical API', /getAllAdSlots\(\)/.test(panel)],
   ['statistics are loaded independently', /Promise\.allSettled/.test(panel)],

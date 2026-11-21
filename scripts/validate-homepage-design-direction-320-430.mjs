@@ -9,7 +9,7 @@ const checks = [
   ['small-phone 320–379px has dedicated hero sizing', /@media\s*\(max-width:\s*379px\)[\s\S]*?kayad-public-hero__mobile-card h1[\s\S]*?font-size/s.test(css)],
   ['380–430px has a dedicated vehicle-stage sizing rule', /@media\s*\(min-width:\s*380px\)\s*and\s*\(max-width:\s*430px\)/.test(css)],
   ['hero vehicles remain contained and undistorted', /\.kayad-public-hero__mobile-stage picture img\s*\{[^}]*object-fit:\s*contain/s.test(css)],
-  ['search controls retain a 39px minimum touch height', /mobile-search-row[\s\S]*?height:\s*39px\s*!important/s.test(css)],
+  ['search controls retain a 44px+ minimum touch height (approved 2026-11-19 composition raised the former 39px)', /\.kayad-inventory-search-field\s*\{[^}]*min-height:\s*44px/s.test(css.slice(css.indexOf('.kayad-inventory-search-row'))) && /\.kayad-inventory-search-filter\s*\{[^}]*min-height:\s*46px/s.test(css)],
   ['inventory toolbar collapses on narrow phones', /@media\s*\(max-width:\s*379px\)[\s\S]*?kayad-market-toolbar-controls[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)/s.test(css)],
   ['inventory has scroll margin above fixed dock', /kayad-inventory-results\s*\{[^}]*scroll-margin-bottom:\s*calc\(104px/s.test(css)],
   ['homepage reserves space for fixed dock and safe area', /kayad-homepage\s*\{[^}]*padding-bottom:\s*calc\(96px \+ env\(safe-area-inset-bottom\)\)/s.test(css)],

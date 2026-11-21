@@ -68,7 +68,7 @@ interface AuthContextValue {
     (credentials: { email: string; password: string }): Promise<any>;
     (email: string, password: string): Promise<any>;
   };
-  register: (body: any) => Promise<any>;
+  register: (body: any, options?: { idempotencyKey?: string }) => Promise<any>;
   /** Server-confirmed sign-out. On failure the session is kept and a visible notice explains why. */
   logout: () => Promise<{ ok: boolean; message?: string }>;
   /** Server-confirmed sign-out: only clears the client session when the backend revoked it (or reports it already gone). */
@@ -239,12 +239,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
     return data;
   }, []);
 
-  const register = useCallback(async (body: any) => {
+  const register = useCallback(async (body: any, options?: { idempotencyKey?: string }) => {
     // Registration is intentionally not authentication. The backend creates
     // the account without issuing session cookies; the user must verify email
     // when required and then explicitly sign in. Keep the current auth state
     // untouched so registration cannot silently replace an existing session.
-    const user = await authRegister(body);
+    const user = await authRegister(body, options);
     trackRegistration(); // anonymous conversion marker for traffic analytics (no personal data)
     return { success: true, user };
   }, []);

@@ -9,10 +9,14 @@ const migrations = fs.readdirSync(migrationsDir).filter((f) => f.endsWith('.sql'
 if (new Set(migrations.map((f) => f.match(/^\d+/)[0])).size !== migrations.length) throw new Error('Duplicate migration timestamps detected.');
 
 const npxCommand = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+// GAP-CLI (2026-11-21): pinned. supabase@3.x rejects the [inbucket] section of supabase/config.toml ("no longer supported. Use local_smtp"),
+// supabase@2.75.0 parses it (verified: it proceeds to the Docker check). The FULL start/reset/lint/test/gen sequence has not been executed
+// because the audit machine has no Docker daemon. Before moving to 3.x, migrate config.toml to local_smtp and re-run the whole sequence.
+const SUPABASE_CLI = process.env.SUPABASE_CLI_VERSION || '2.75.0';
 
 function run(args, label) {
   try {
-    const out = execFileSync(npxCommand, ['supabase', ...args], { cwd: root, encoding: 'utf8', stdio: ['ignore','pipe','pipe'] });
+    const out = execFileSync(npxCommand, ['--yes', `supabase@${SUPABASE_CLI}`, ...args], { cwd: root, encoding: 'utf8', stdio: ['ignore','pipe','pipe'] });
     console.log(`${label}: passed`);
     if (out.trim()) console.log(out.trim());
     return out;

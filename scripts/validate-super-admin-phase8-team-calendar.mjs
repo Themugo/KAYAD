@@ -21,7 +21,7 @@ const checks = [
   ['calendar does not expose an inert event-creation modal', !calendar.includes('showEventModal') && !calendar.includes('Schedule New Content')],
   ['staff creation options align with the existing create endpoint', staff.includes("CREATABLE_STAFF_ROLES = STAFF_ROLES.filter(role => role !== 'ghost_checker')") && createModal.includes("role !== 'ghost_checker'") && /if \(!staffRoles\.includes\(role\)\)/.test(routes)],
   ['ghost_checker remains available for existing role catalog and role updates', routes.includes('ROLE_PERMISSIONS[role] || []') && routes.slice(routes.indexOf('UPDATE STAFF ROLE')).includes('"ghost_checker"')],
-  ['permission API failure is shown separately from an empty staff result', permissions.includes("const [loadError, setLoadError] = useState('')") && permissions.includes('No matching staff records were returned') && permissions.includes('role="alert"')],
+  ['permission API failure is shown separately from an empty staff result', permissions.includes("const [loadError, setLoadError] = useState('')") && permissions.includes('No staff accounts were returned by the server.') && permissions.includes('No staff records match this search.') && permissions.includes('role="alert"')],
   ['staff governance regression covers create-vs-update ghost_checker contract', staffTests.includes('ghost_checker remains an existing assignable staff role but is not accepted by the create endpoint')],
 ];
 

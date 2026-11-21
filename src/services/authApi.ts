@@ -159,10 +159,20 @@ export async function login(email: string, password: string, mfaCode?: string): 
   return res.user;
 }
 
-export async function register(body: Record<string, unknown>): Promise<BackendUser> {
+/** A fresh key per registration attempt. The caller re-sends the SAME key when the outcome of an attempt is unknown. */
+export function newRegistrationIdempotencyKey(): string {
+  const c = typeof globalThis !== 'undefined' ? (globalThis as { crypto?: Crypto }).crypto : undefined;
+  if (c?.randomUUID) return c.randomUUID();
+  const bytes = new Uint8Array(24);
+  if (c?.getRandomValues) c.getRandomValues(bytes); else for (let i = 0; i < bytes.length; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+export async function register(body: Record<string, unknown>, options: { idempotencyKey?: string } = {}): Promise<BackendUser> {
   const res = await authFetch('/api/v1/auth/register', {
     method: 'POST',
     body: JSON.stringify(body),
+    ...(options.idempotencyKey ? { headers: { 'Idempotency-Key': options.idempotencyKey } } : {}),
   });
   if (!res.user) throw new AuthApiError(res.message || 'Registration failed.', 'unknown', 500);
   return res.user;

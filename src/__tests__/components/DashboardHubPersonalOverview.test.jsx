@@ -2,6 +2,7 @@
 // EVIDENCE TIER: component tests with mocked API modules (real DashboardHub + overview components).
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, cleanup, waitFor, within, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import DashboardHub from '../../components/DashboardHub';
 
 const mySellerEnquiries = vi.fn();
@@ -25,7 +26,7 @@ vi.mock('../../components/auction/AuctionExperienceRail', () => ({ AuctionExperi
 
 const listing = (o = {}) => ({ id: 'c1', brand: 'Mazda', model: 'CX-5', year: 2017, price: 2100000, mileage: 91000, fuel: 'Petrol', city: 'Mombasa', status: 'available', views: 12, images: [{ url: 'https://img.test/a.jpg' }], updatedAt: new Date().toISOString(), ...o });
 const user = { id: 'u1', name: 'Wanjiru Kamau', role: 'user', emailVerified: true };
-const mount = (props = {}) => render(<DashboardHub user={user} vehicles={[]} savedVehicleCount={4} savedVehiclesSessionUserId="u1" savedVehiclesList={[]} initialSection="overview" onNavigate={props.onNavigate || (() => {})} {...props} />);
+const mount = (props = {}) => render(<MemoryRouter><DashboardHub user={user} vehicles={[]} savedVehicleCount={4} savedVehiclesSessionUserId="u1" savedVehiclesList={[]} initialSection="overview" onNavigate={props.onNavigate || (() => {})} {...props} /></MemoryRouter>);
 const metric = (title) => document.querySelector(`[data-kayad-metric="${title}"]`);
 
 beforeEach(() => {
@@ -137,13 +138,13 @@ describe('grouped navigation', () => {
 });
 
 describe('enquiries received vs sent (Gate D)', () => {
-  it('Buying lists enquiries YOU sent, with offers for that conversation, and never the ones you received', async () => {
+  it('Buying delegates sent enquiries/offers to the negotiations panel: no second list and no second fetch (Phase 3C)', async () => {
     mount({ initialSection: 'buying' });
-    const sent = await waitFor(() => { const e = document.querySelector('[data-kayad-personal-sent-enquiries]'); expect(e.textContent).toMatch(/Subaru Forester/); return e; });
-    expect(sent.textContent).not.toMatch(/Mazda CX-5/);
-    fireEvent.click(within(sent).getByRole('button', { name: /view offers/i }));
-    expect((await screen.findByTestId('offer-panel')).textContent).toBe('offers for n1');
-    expect(screen.getByText('buying-tools')).toBeTruthy();
+    expect(await screen.findByText('buying-tools')).toBeTruthy();
+    expect(document.querySelector('[data-kayad-personal-sent-enquiries]')).toBeNull();
+    expect(screen.queryByText(/Enquiries & offers you sent/i)).toBeNull();
+    expect(myNegotiations).not.toHaveBeenCalled();
+    expect(screen.queryByText(/Subaru Forester/)).toBeNull();
   });
 
   it('Seller enquiries shows only enquiries received on your listings, inside the same shell', async () => {
@@ -151,12 +152,6 @@ describe('enquiries received vs sent (Gate D)', () => {
     const sec = await waitFor(() => { const e = document.querySelector('[data-kayad-personal-seller-enquiries]'); expect(e.textContent).toMatch(/Mazda CX-5/); return e; });
     expect(sec.textContent).not.toMatch(/Subaru Forester/);
     expect(screen.getByRole('navigation', { name: /personal dashboard sections/i })).toBeTruthy();
-  });
-
-  it('a failed sent-enquiries source says so instead of showing an empty list', async () => {
-    myNegotiations.mockRejectedValue(new Error('down'));
-    mount({ initialSection: 'buying' });
-    expect(await screen.findByText(/sent enquiries are temporarily unavailable/i)).toBeTruthy();
   });
 
   it('each enquiry appears once on the overview feed (no duplicated records)', async () => {

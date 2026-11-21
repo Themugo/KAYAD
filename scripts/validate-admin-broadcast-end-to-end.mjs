@@ -27,7 +27,9 @@ const checks = [
   ['server trims and validates message', /normalizedMessage/.test(controller) && /MAX_MESSAGE_LENGTH/.test(controller)],
   ['server validates supported audiences', /VALID_AUDIENCES/.test(controller)],
   ['server validates specific-user audience input', /Select at least one target user/.test(controller)],
-  ['dealer audience includes individual sellers', /SELLER_ROLES = \["dealer", "individual_seller"\]/.test(controller)],
+  // Unified personal account: "dealers" targets business dealer accounts only; the personal audience covers user, the retired buyer role and legacy individual_seller records.
+  ['dealer audience targets dealer accounts only', /DEALER_ROLES = \["dealer"\]/.test(controller) && /case "dealers":[\s\S]{0,80}DEALER_ROLES/.test(controller)],
+  ['personal audience covers user and legacy individual_seller', /PERSONAL_ROLES = \["user", "buyer", "individual_seller"\]/.test(controller) && /case "buyers":[\s\S]{0,80}PERSONAL_ROLES/.test(controller)],
   ['notification null results count as failures', /r\.status === "fulfilled" && r\.value/.test(controller)],
   ['partial delivery is persisted distinctly', /failCount > 0 \? "partial" : "sent"/.test(controller)],
   ['partial and sent announcements cannot be sent again automatically', /\["sent", "partial", "sending"\]/.test(controller)],

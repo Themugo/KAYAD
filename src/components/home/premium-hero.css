@@ -709,6 +709,10 @@
 @media (max-width: 1023.98px) {
   .kk-hero:has(.kk-hero__shortcuts) .kk-hero__inner {
     grid-template-columns: 1fr;
+    /* Single-column stack (copy, shortcut rail, vehicle stage): the fixed
+       compact-hero heights from the legacy 04B/04C blocks cannot apply here
+       or the stage is clipped by the hero section's overflow:hidden. */
+    height: auto;
     min-height: 0;
     padding: 18px 22px 14px;
   }

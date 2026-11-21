@@ -23,8 +23,9 @@ import { protect, adminOnly, dealerOnly } from "../middleware/auth.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validate, validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 import { createLeadSchema, leadNoteSchema } from "../validation/lead.schema.js";
-import { submitOfferSchema, respondOfferSchema } from "../validation/offerNegotiation.schema.js";
-import { getOffers, submitOffer, respondToOffer, getBuyerNegotiations } from "../controllers/offerNegotiationController.js";
+import { paymentLimiter } from "../middleware/rateLimiter.js";
+import { submitOfferSchema, respondOfferSchema, payOfferSchema, cancelSettlementSchema } from "../validation/offerNegotiation.schema.js";
+import { getOffers, submitOffer, respondToOffer, getBuyerNegotiations, payOffer, getOfferSettlement, cancelOfferSettlement } from "../controllers/offerNegotiationController.js";
 
 const router = express.Router();
 
@@ -45,6 +46,9 @@ router.get("/mine/offers", protect, asyncHandler(getBuyerNegotiations));
 router.get("/:leadId/offers", protect, asyncHandler(getOffers));
 router.post("/:leadId/offers", protect, validate(submitOfferSchema), asyncHandler(submitOffer));
 router.post("/:leadId/offers/:offerId/actions", protect, validate(respondOfferSchema), asyncHandler(respondToOffer));
+router.get("/:leadId/offers/:offerId/settlement", protect, asyncHandler(getOfferSettlement));
+router.post("/:leadId/offers/:offerId/pay", protect, paymentLimiter, validate(payOfferSchema), asyncHandler(payOffer));
+router.post("/:leadId/offers/:offerId/settlement/cancel", protect, validate(cancelSettlementSchema), asyncHandler(cancelOfferSettlement));
 
 // Get lead details
 router.get("/:leadId", protect, validateObjectId, asyncHandler(getLead));

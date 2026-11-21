@@ -12,7 +12,7 @@ const checks = [
   ["failed loads are visible and distinct from empty results", /setLoadError\(message\)/.test(page) && /Could not load moderation queue/.test(page)],
   ["malformed success responses are rejected", /isValidListingArray\(items\)/.test(page)],
   ["stale requests are ignored", /requestSequence\.current/.test(page)],
-  ["prior records are retained on refresh errors", /Previously loaded records are retained and may be stale/.test(page)],
+  ["prior records are retained on refresh errors", /Previously loaded records are retained and are <strong>stale<\/strong>/.test(page)],
   ["refresh and retry controls are present", /aria-label="Refresh moderation queue"/.test(page) && /Try again/.test(page)],
   ["approved status filter uses canonical available status", /option value="available">Approved \/ Live/.test(page)],
   ["known status variants are normalized", /car\?\.status \?\? car\?\.auctionStatus \?\? car\?\.auction_status/.test(page)],

@@ -6,6 +6,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import ReconciliationReport from "../models/ReconciliationReport.js";
+import { fetchIssueRows, tallyBy, sumDirectional, issuesOf, isIssueResolved } from "../utils/reconciliationIssues.js";
 import ReconciliationRecord from "../models/ReconciliationRecord.js";
 import AdminAlert from "../models/AdminAlert.js";
 import {
@@ -48,48 +49,18 @@ export const getReconciliationDashboard = async (req, res) => {
       integrityScore = latestReport.financialIntegrityScore;
     }
 
-    const unresolvedAgg = await ReconciliationReport.aggregate([
-      { $match: { createdAt: { $gte: startDate, $lte: endDate }, "issueDetails.resolved": false } },
-      { $unwind: "$issueDetails" },
-      { $match: { "issueDetails.resolved": false } },
-      { $count: "total" },
-    ]);
-
-    const issueBreakdown = await ReconciliationReport.aggregate([
-      { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
-      { $unwind: "$issueDetails" },
-      { $match: { "issueDetails.resolved": false } },
-      { $group: { _id: "$issueDetails.severity", count: { $sum: 1 } } },
-    ]);
-
-    const issueTypeBreakdown = await ReconciliationReport.aggregate([
-      { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
-      { $unwind: "$issueDetails" },
-      { $match: { "issueDetails.resolved": false } },
-      { $group: { _id: "$issueDetails.type", count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-    ]);
+    // Open findings in the window, read from the JSONB `issues` column (one shared definition of "unresolved").
+    const unresolvedRows = await fetchIssueRows({ state: "unresolved", since: startDate, until: endDate });
+    const unresolvedAgg = [{ total: unresolvedRows.length }];
+    const issueBreakdown = Object.entries(tallyBy(unresolvedRows, "severity")).map(([_id, count]) => ({ _id, count }));
+    const issueTypeBreakdown = Object.entries(tallyBy(unresolvedRows, "type")).map(([_id, count]) => ({ _id, count })).sort((x, y) => y.count - x.count);
 
     const ledgerGateway = await compareLedgerVsGateway(startDate, endDate);
     const escrowBalances = await compareEscrowBalances(startDate, endDate);
 
-    // Directional totals from reports
-    const directionalAgg = await ReconciliationReport.aggregate([
-      { $match: { createdAt: { $gte: startDate, $lte: endDate } } },
-      {
-        $group: {
-          _id: null,
-          totalMatched: { $sum: "$matched" },
-          totalUnmatched: { $sum: "$unmatched" },
-          totalMissing: { $sum: "$missing" },
-          totalOverpaid: { $sum: "$overpaid" },
-          totalUnderpaid: { $sum: "$underpaid" },
-          overpaidAmount: { $sum: "$financials.overpaidTotal" },
-          underpaidAmount: { $sum: "$financials.underpaidTotal" },
-          missingAmount: { $sum: "$financials.missingTotal" },
-        },
-      },
-    ]);
+    // Directional totals from the reports in the window (columns + the `financials` JSONB), summed explicitly.
+    const windowReports = await ReconciliationReport.find({ createdAt: { $gte: startDate, $lte: endDate } }).lean();
+    const directionalAgg = windowReports.length ? [sumDirectional(windowReports)] : [];
 
     const cronStatus = getReconciliationCronStatus();
 
@@ -430,7 +401,7 @@ export const exportReconciliationReport = async (req, res) => {
 
     if (format === "csv") {
       const csvHeaders = "Type,Severity,Description,Transaction ID,Model,Amount Difference,Resolved,Resolved At,Resolved By\n";
-      const csvRows = report.issueDetails
+      const csvRows = issuesOf(report)
         .map((issue) =>
           [
             issue.type,
@@ -439,7 +410,7 @@ export const exportReconciliationReport = async (req, res) => {
             issue.transactionId || "",
             issue.transactionModel || "",
             issue.amountDifference || 0,
-            issue.resolved ? "Yes" : "No",
+            isIssueResolved(issue) ? "Yes" : "No",
             issue.resolvedAt || "",
             issue.resolvedBy || "",
           ].join(","),

@@ -1,0 +1,15 @@
+import {Client,q,PW,rec,results} from './lib.mjs';
+import fs from 'fs';
+const st=JSON.parse(fs.readFileSync('state.json'));
+const buyer=new Client(); await buyer.raw('/api/v1/auth/login',{method:'POST',body:{email:`b-${st.run}@example.test`,password:PW}}); buyer.csrf=null;
+const anon=new Client();
+const cb=await anon.raw('/api/payments/callback',{method:'POST',body:{Body:{stkCallback:{ResultCode:0,CheckoutRequestID:'x'}}}});
+rec('M-Pesa callback from non-allowlisted source: HTTP 200 ResultCode 1 Rejected (Safaricom no-retry convention), no state change',cb.status===200&&cb.j?.ResultCode===1,[cb.status,cb.j]);
+const pr=await anon.raw('/api/inspection/providers'); rec('public provider search works',pr.status===200,[pr.status,JSON.stringify(pr.j).slice(0,120)]);
+const bk0=await anon.raw('/api/inspection/bookings',{method:'POST',body:{}}); rec('anonymous booking rejected',[401,403].includes(bk0.status),bk0.status);
+const bk=await buyer.raw('/api/inspection/bookings',{method:'POST',body:{providerId:'00000000-0000-0000-0000-000000000000',vehicleId:st.carId}});
+rec('booking against nonexistent provider is a clean 4xx (no 5xx)',bk.status>=400&&bk.status<500,[bk.status,bk.j?.message]);
+const lst=await buyer.raw('/api/inspection/bookings'); rec('customer lists own bookings',lst.status===200,lst.status);
+const dash=await buyer.raw('/api/inspection/provider/00000000-0000-0000-0000-000000000000/dashboard'); rec('non-owner blocked from provider dashboard',[401,403,404].includes(dash.status),dash.status);
+console.log(results.filter(r=>r.ok).length+'/'+results.length);
+fs.writeFileSync('j6-results.json',JSON.stringify(results,null,1));

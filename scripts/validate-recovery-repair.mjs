@@ -16,7 +16,8 @@ check('package.json is valid', (() => { try { JSON.parse(read('package.json')); 
 check('Phase 37 validator exists', exists('scripts/validate-phase37.mjs'));
 check('Phase 39 validator exists', exists('scripts/validate-phase39.mjs'));
 check('Canonical auth methods restored', /export async function login\b/.test(read('src/services/authApi.ts')) && /export async function register\b/.test(read('src/services/authApi.ts')) && /export async function updateProfile\b/.test(read('src/services/authApi.ts')));
-check('DealerBusinessView import resolves', exists('src/features/DealersView/components/DealerBusinessView.tsx') && /\.\/DealersView\/components\/DealerBusinessView/.test(read('src/features/DealersView.tsx')));
+// DealersView became a directory module (index.ts -> components/DealersView). The earlier DealerBusinessView import no longer exists (the component is currently unreferenced; see register D4).
+check('DealersView resolves unambiguously to the directory module', exists('src/features/DealersView/index.ts') && /components\/DealersView/.test(read('src/features/DealersView/index.ts')) && !exists('src/features/DealersView.tsx') && exists('src/features/DealersView/components/DealersView.tsx'));
 check('Fixture type imports resolve', /from ['"]\.\.\/\.\.\/\.\.\/types['"]/.test(read('src/__tests__/fixtures/data/mockDealersData.ts')) && /from ['"]\.\.\/\.\.\/types['"]/.test(read('src/__tests__/fixtures/mockVehicles.ts')) && /from ['"]\.\.\/\.\.\/types['"]/.test(read('src/__tests__/fixtures/mockAuctions.ts')));
 check('Private seller stale fabricated consumers removed', !/\boffers\.filter\b|\binspectionRequests\.length\b|\bcompletedSales\.length\b/.test(read('src/features/PrivateSellerPlatform/pages/PersonalSellingModule.tsx')));
 check('Financing page does not label marketplace inventory as financed', !/financedBank|Funded & Delivered|partner bank network \(Privacy Protected\)/i.test(read('src/features/FinancingView.tsx')));

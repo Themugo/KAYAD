@@ -14,7 +14,7 @@ const checks = [
   ['auction bidding/navigation still opens canonical detail route', /navigate\(`\/auction\/\$\{encodeURIComponent/.test(auction)],
   ['saved auction toggle still calls canonical favorites API', /toggleFavorite\(id\)/.test(auction)],
   ['marketplace toolbar polish is mobile-only', /@media\s*\(max-width:\s*639px\)[\s\S]*?\.kayad-market-toolbar/.test(themeCss)],
-  ['sort select keeps real controlled state and accessible label', /value=\{sortBy\}[\s\S]*?onChange=\{\(e\) => setSortBy/.test(marketplace) && /aria-label="Sort inventory"/.test(marketplace)],
+  ['sort select keeps real controlled state and accessible label', /value=\{sortBy\}[\s\S]*?onChange=\{\(e\) => \{[^}]*setSortBy/.test(marketplace) && /aria-label="Sort inventory"/.test(marketplace)],
   ['real vehicle feed remains canonical', /getCars\(/.test(marketplace) && /mapBackendCarToVehicle/.test(marketplace)],
   ['desktop marketplace rules are not globally overwritten', /@media\s*\(max-width:\s*639px\)\s*\{[\s\S]*?\.kayad-market-toolbar/.test(themeCss) && /\.kayad-market-toolbar\s*\{[^}]*grid-template-columns/s.test(themeCss) === false],
 ];

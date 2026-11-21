@@ -2,12 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
-const m = vi.hoisted(() => ({ register: vi.fn(), apply: vi.fn(), resend: vi.fn() }));
+const m = vi.hoisted(() => ({ register: vi.fn(), apply: vi.fn(), resend: vi.fn(), keySeq: 0 }));
 vi.mock('../../context/AuthContext', () => ({ useAuth: () => ({ register: m.register }) }));
 vi.mock('../../api/api', () => ({ inspectorAPI: { apply: m.apply } }));
 vi.mock('../../services/authApi', () => ({
   AuthApiError: class AuthApiError extends Error { kind: string; status?: number; code?: string; constructor(message: string, kind = 'unknown', status?: number, code?: string) { super(message); this.kind = kind; this.status = status; this.code = code; } },
   resendVerification: m.resend,
+  newRegistrationIdempotencyKey: () => `key-${++m.keySeq}-0123456789abcdef`,
 }));
 
 import OnboardingFlow from '../../components/OnboardingFlow';
@@ -133,7 +134,22 @@ describe('OnboardingFlow', () => {
     expect(link.getAttribute('href')).toMatch(/intent=buyer/);
   });
 
-  it('lost response, then retry: the 409 is explained as the first attempt having succeeded', async () => {
+  it('lost response, then retry: the SAME idempotency key is re-sent and the server replay shows the account screen', async () => {
+    m.register.mockRejectedValueOnce(new AuthApiError('offline', 'network'));
+    m.register.mockResolvedValueOnce({ user: { id: 'u' } });
+    mount('/register?intent=buyer');
+    fillBuyer();
+    await screen.findByText(/couldn’t confirm that went through/i);
+    fireEvent.click(screen.getByRole('button', { name: /go back and try again/i }));
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    expect(await screen.findByText(/We sent a verification link to/)).toBeInTheDocument();
+    expect(m.register).toHaveBeenCalledTimes(2);
+    const [first, second] = [m.register.mock.calls[0][1], m.register.mock.calls[1][1]];
+    expect(first.idempotencyKey).toMatch(/^key-\d+-/);
+    expect(second.idempotencyKey).toBe(first.idempotencyKey);
+  });
+
+  it('lost response, then a 409: never claims the first request reached the server (it may be someone else\'s account)', async () => {
     m.register.mockRejectedValueOnce(new AuthApiError('offline', 'network'));
     m.register.mockRejectedValueOnce(new AuthApiError('exists', 'conflict', 409));
     mount('/register?intent=buyer');
@@ -141,9 +157,29 @@ describe('OnboardingFlow', () => {
     await screen.findByText(/couldn’t confirm that went through/i);
     fireEvent.click(screen.getByRole('button', { name: /go back and try again/i }));
     fireEvent.click(screen.getByRole('button', { name: /create account/i }));
-    expect(await screen.findByText(/Your earlier attempt went through/i)).toBeInTheDocument();
-    expect(m.register).toHaveBeenCalledTimes(2);
+    expect(await screen.findByText(/This email already has an account/i)).toBeInTheDocument();
+    expect(screen.queryByText(/earlier attempt went through/i)).toBeNull();
+    expect(screen.queryByText(/first request reached/i)).toBeNull();
+    expect(screen.getByText(/cannot tell whether this account is one you just created/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /resend verification email/i })).toBeInTheDocument();
+  });
+
+  it('a definitive failure drops the key: the next attempt is a NEW attempt', async () => {
+    m.register.mockRejectedValueOnce(new AuthApiError('offline', 'network'));
+    m.register.mockRejectedValueOnce(new AuthApiError('bad', 'validation', 400));
+    m.register.mockResolvedValueOnce({ user: { id: 'u' } });
+    mount('/register?intent=buyer');
+    fillBuyer();
+    await screen.findByText(/couldn’t confirm that went through/i);
+    fireEvent.click(screen.getByRole('button', { name: /go back and try again/i }));
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await waitFor(() => expect(m.register).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.getByRole('button', { name: /create account/i })).not.toBeDisabled());
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await waitFor(() => expect(m.register).toHaveBeenCalledTimes(3));
+    const keys = m.register.mock.calls.map((c) => c[1].idempotencyKey);
+    expect(keys[1]).toBe(keys[0]);
+    expect(keys[2]).not.toBe(keys[0]);
   });
 
   it('a plain 409 with no earlier uncertainty keeps the ordinary existing-account wording', async () => {

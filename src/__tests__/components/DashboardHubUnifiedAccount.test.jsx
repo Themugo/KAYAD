@@ -1,6 +1,7 @@
 // Phase 13E — one personal dashboard for buyer + private seller. EVIDENCE TIER: component tests with mocked API modules.
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, cleanup, waitFor, fireEvent, within } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import DashboardHub from '../../components/DashboardHub';
 
 const getMySellerCapability = vi.fn();
@@ -19,7 +20,7 @@ vi.mock('../../components/auction/AuctionExperienceRail', () => ({
 }));
 
 const cap = (status, extra = {}) => ({ status, source: 'capability', approvalRequired: true, application: status === 'none' ? null : { status, reviewReason: null, submittedAt: 'x', reviewedAt: null, ...extra }, canApply: status === 'none' || status === 'rejected', canList: status === 'approved' });
-const mount = (role = 'user', onNavigate = () => {}) => render(<DashboardHub user={{ id: 'u1', name: 'James', role }} vehicles={[]} initialSection="my-vehicles" onNavigate={onNavigate} />);
+const mount = (role = 'user', onNavigate = () => {}) => render(<MemoryRouter><DashboardHub user={{ id: 'u1', name: 'James', role }} vehicles={[]} initialSection="create-listing" onNavigate={onNavigate} /></MemoryRouter>);
 
 // The seller state lives in the Selling section of the ONE personal dashboard (PersonalSellingModule gate + canonical
 // SellerCapabilityPanel). Buyer sections stay reachable from the same dashboard navigation in every seller state.

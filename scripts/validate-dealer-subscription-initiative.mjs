@@ -11,7 +11,9 @@ const checks=[
  ['canonical payout ledger','supabase/migrations/20260909091703_dealer_commercial_payout_lifecycle.sql','CREATE TABLE IF NOT EXISTS public.dealer_payouts'],
  ['atomic payout preparation','backend/routes/dealerRoutes.js','kayad_prepare_dealer_payout_atomic'],
  ['payout provider callback reconciliation','backend/controllers/paymentController.js','kayad_mark_dealer_payout_atomic'],
- ['canonical admin verification mutation','backend/routes/adminRoutes.js','kayad_apply_dealer_verification_atomic'],
+ // The atomic RPC call moved from the admin route into the shared approval service, which adminRoutes imports.
+ ['canonical admin verification mutation','backend/services/dealerApproval.service.js','kayad_apply_dealer_verification_atomic'],
+ ['admin route delegates verification to the approval service','backend/routes/adminRoutes.js','from "../services/dealerApproval.service.js"'],
  ['dealer inventory ownership','backend/routes/dealerRoutes.js','dealer: req.user.id'],
 ];
 let pass=0; for(const [n,f,x] of checks){const ok=read(f).includes(x); console.log(`${ok?'PASS':'FAIL'} ${n}`); if(ok)pass++;}

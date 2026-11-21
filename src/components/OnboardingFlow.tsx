@@ -7,7 +7,7 @@ import {
   AFFILIATION_PATH, PUBLIC_ROLES, roleById, roleForIntent, providerApplicationPath, type PublicRoleId,
 } from './onboarding/roles';
 import { validateAccount, type FieldErrors } from './onboarding/validation';
-import { AuthApiError, resendVerification } from '../services/authApi';
+import { AuthApiError, newRegistrationIdempotencyKey, resendVerification } from '../services/authApi';
 import { useAuth } from '../context/AuthContext';
 import { buildAuthPath, readAuthContext, rememberAuthIntent } from '../utils/authIntent';
 
@@ -20,7 +20,7 @@ type Mode = 'independent' | 'employed';
 type Outcome =
   | { kind: 'account'; email: string }
   | { kind: 'application' }
-  | { kind: 'exists'; recovered?: boolean }
+  | { kind: 'exists'; afterUncertainty?: boolean }
   | { kind: 'unavailable' }
   | { kind: 'pending-application' }
   | { kind: 'unknown' };
@@ -67,8 +67,11 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
   const [outcome, setOutcome] = useState<Outcome | null>(null);
   const [resend, setResend] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
   const inFlight = useRef(false);
-  // Set when an earlier attempt ended with an unknown outcome. A later 409 for the same
-  // email is then most likely OUR OWN first request having succeeded, so say that.
+  // One key per logical registration attempt. It survives an unknown outcome (lost response) so the server can recognise a
+  // retry as the SAME attempt and answer with the original success; it is dropped as soon as the outcome is known.
+  const idempotencyKey = useRef<string | null>(null);
+  // Set when an earlier attempt ended with an unknown outcome. The 409 screen then adds a hedged hint. It never claims the
+  // first request reached the server: only the server's replay answer can prove that.
   const earlierUncertain = useRef(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const refs = useRef<Record<string, HTMLInputElement | null>>({});
@@ -110,7 +113,10 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
         ...(backendRole !== 'user' && form.businessName.trim() ? { businessName: form.businessName.trim() } : {}),
         ...(backendRole !== 'user' && form.location.trim() ? { location: form.location.trim() } : {}),
       };
-      const result = await authRegister(body);
+      if (!idempotencyKey.current) idempotencyKey.current = newRegistrationIdempotencyKey();
+      const result = await authRegister(body, { idempotencyKey: idempotencyKey.current });
+      idempotencyKey.current = null;
+      earlierUncertain.current = false;
       // Registration is account creation, not sign-in: the backend issues no session until
       // the email is verified and the person signs in explicitly. Remember only the
       // (non-sensitive) purpose so it survives the verification round trip.
@@ -120,7 +126,8 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
       onComplete?.(result?.user);
     } catch (err) {
       const status = statusOf(err);
-      if (status === 409) setOutcome({ kind: 'exists', recovered: earlierUncertain.current });
+      if (!outcomeUnknown(err)) idempotencyKey.current = null;
+      if (status === 409) setOutcome({ kind: 'exists', afterUncertainty: earlierUncertain.current });
       else if (status === 503 && err instanceof AuthApiError && err.code) setOutcome({ kind: 'unavailable' });
       else if (outcomeUnknown(err)) { earlierUncertain.current = true; setOutcome({ kind: 'unknown' }); }
       else if (status === 429) setServerError('Too many attempts. Please wait a few minutes and try again.');
@@ -196,8 +203,9 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
     }
     if (outcome.kind === 'exists') {
       return (
-        <PremiumAuthShell {...common} eyebrow={outcome.recovered ? 'Account found' : 'Existing account'} title={outcome.recovered ? 'Your earlier attempt went through.' : 'This email already has an account.'} description={outcome.recovered ? 'Your first request reached KAYARD KE even though the reply was lost. Nothing was duplicated: verify your email, then sign in.' : 'You can use it: sign in, finish verifying, or reset the password.'}>
+        <PremiumAuthShell {...common} eyebrow="Existing account" title="This email already has an account." description="You can use it: sign in, finish verifying, or reset the password.">
           <div className="space-y-4">
+            {outcome.afterUncertainty && <p className="m-0 text-sm text-[#12576D]" role="status">Your connection dropped on an earlier try, so we cannot tell whether this account is one you just created. If it is yours, sign in or resend the verification email; if not, use a different email.</p>}
             <div className="flex flex-wrap gap-3">
               <Link to={buildAuthPath('login', { next: destination, intent: role?.intent })} state={{ email: form.email.trim() }} className="kayad-auth-submit inline-flex items-center justify-center px-6 no-underline">Sign in</Link>
               <Link to="/forgot-password" className="kayad-auth-secondary-action px-5 no-underline">Reset password</Link>

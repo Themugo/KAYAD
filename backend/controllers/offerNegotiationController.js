@@ -1,6 +1,7 @@
 import { findById } from "../db/index.js";
 import { getSupabase } from "../utils/supabase.js";
 import { listLeadOffers, performOfferAction } from "../services/offerNegotiation.service.js";
+import { payAcceptedOffer, getSettlementForOffer, cancelSettlement } from "../services/offerSettlement.service.js";
 
 const participant = (lead, userId) => [lead?.buyer, lead?.dealer].some((value) => String(value?.id || value?._id || value || "") === String(userId));
 
@@ -31,6 +32,42 @@ export async function respondToOffer(req, res) {
   res.json({ success: true, ...result });
 }
 
+// Business refusals carry a machine-readable code (the generic error handler only forwards the message).
+const refusal = (res, err) => {
+  if (err?.code && typeof err.code === "string" && /^[A-Z_]+$/.test(err.code) && err.statusCode >= 400 && err.statusCode < 500) {
+    return res.status(err.statusCode).json({ success: false, code: err.code, message: err.message });
+  }
+  throw err;
+};
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+// Accepted offer -> purchase payment. The amount is the settlement's agreed amount; the request carries only a phone number.
+export async function payOffer(req, res) {
+  if (!UUID.test(String(req.params.offerId || ""))) throw Object.assign(new Error("Invalid offer reference"), { statusCode: 400 });
+  const lead = await authorizedLead(req);
+  try {
+    const result = await payAcceptedOffer({ leadId: lead.id, offerId: req.params.offerId, buyerId: req.user.id, phone: req.body.phone });
+    res.status(201).json({ success: true, ...result });
+  } catch (err) { return refusal(res, err); }
+}
+
+export async function getOfferSettlement(req, res) {
+  if (!UUID.test(String(req.params.offerId || ""))) throw Object.assign(new Error("Invalid offer reference"), { statusCode: 400 });
+  const lead = await authorizedLead(req);
+  const settlement = await getSettlementForOffer(req.params.offerId);
+  res.json({ success: true, settlement: settlement && settlement.lead_id === lead.id ? settlement : null });
+}
+
+export async function cancelOfferSettlement(req, res) {
+  if (!UUID.test(String(req.params.offerId || ""))) throw Object.assign(new Error("Invalid offer reference"), { statusCode: 400 });
+  const lead = await authorizedLead(req);
+  const settlement = await getSettlementForOffer(req.params.offerId);
+  if (!settlement || settlement.lead_id !== lead.id) throw Object.assign(new Error("Settlement not found"), { statusCode: 404 });
+  try {
+    const result = await cancelSettlement({ settlementId: settlement.id, actorId: req.user.id, reason: req.body?.reason });
+    res.json({ success: true, ...result });
+  } catch (err) { return refusal(res, err); }
+}
 
 // Buyer-scoped negotiation inbox. Returns only the buyer's own canonical leads.
 export async function getBuyerNegotiations(req, res) {

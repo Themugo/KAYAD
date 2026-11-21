@@ -1,0 +1,46 @@
+[
+ {
+  "s": "1-happy-buyer",
+  "screen": "Check your email.",
+  "users": "1"
+ },
+ {
+  "s": "2-lost-response-then-retry",
+  "afterLost": "We couldn’t confirm that went through.",
+  "usersAfterLost": "1",
+  "formEmailKept": "lost1@example.test",
+  "pwKept": "yes",
+  "afterRetry": "Your earlier attempt went through.",
+  "usersAfterRetry": "1",
+  "posts": 2,
+  "idempotencyKeys": [
+   null,
+   null
+  ]
+ },
+ {
+  "s": "3-pure-network-failure + already-have-account",
+  "screen": "We couldn’t confirm that went through.",
+  "landed": "/login?intent=buyer",
+  "landedScreen": "Welcome back.",
+  "emailPrefilled": "noserver@example.test"
+ },
+ {
+  "s": "4-csrf-bootstrap-unreachable (INCONCLUSIVE: cookie already set by /me, bootstrap never requested)",
+  "screen": "Check your email.",
+  "users": "1"
+ },
+ {
+  "s": "5-double-tap",
+  "posts": 1,
+  "users": "1",
+  "screen": "Check your email."
+ },
+ {
+  "s": "6-personal account (the former private-seller path) then duplicate w/ different case",
+  "sellerScreen": "Check your email.",
+  "sellerRole": "user",
+  "dupScreen": "This email already has an account.",
+  "usersForEmail": "1"
+ }
+]

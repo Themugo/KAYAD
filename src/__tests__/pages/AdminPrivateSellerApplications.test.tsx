@@ -191,7 +191,10 @@ describe('admin private-seller application review', () => {
     getPrivateSellerApplications.mockResolvedValue([pending]);
     render(<AdminPrivateSellerApplications />);
     await screen.findByText(/Sell my own vehicle/);
-    expect(screen.getByRole('main').getAttribute('aria-labelledby')).toBe('private-seller-review-title');
+    // AdminLayout owns the single <main> landmark; this page is a labelled region inside it (a nested <main> is an a11y defect).
+    expect(screen.queryByRole('main')).toBeNull();
+    const region = screen.getByRole('region', { name: 'Private-seller applications' });
+    expect(region.getAttribute('aria-labelledby')).toBe('private-seller-review-title');
     expect(screen.getByRole('heading', { level: 1, name: 'Private-seller applications' })).toBeTruthy();
     const textarea = screen.getByLabelText(/Decision reason/) as HTMLTextAreaElement;
     expect(textarea.tagName).toBe('TEXTAREA');

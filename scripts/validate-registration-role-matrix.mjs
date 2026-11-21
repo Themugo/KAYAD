@@ -51,7 +51,7 @@ const checks = [
     return !/sendAuthResponse\(res,/.test(register);
   })()],
   ['registration route uses canonical auth endpoint', /router\.post\("\/register"/.test(routes)],
-  ['frontend uses canonical auth service', /authRegister\(body\)/.test(flow) && /authFetch\('\/api\/v1\/auth\/register'/.test(authApi)],
+  ['frontend uses canonical auth service', /authRegister\(body[,)]/.test(flow) && /authFetch\('\/api\/v1\/auth\/register'/.test(authApi)],
   ['state-changing requests bootstrap CSRF', /await ensureCsrfToken\(\)/.test(httpClient)],
   ['CSRF endpoint remains canonical', /CSRF_BOOTSTRAP_PATH = '\/v1\/auth\/csrf'/.test(httpClient)],
   ['auth response contract accepts created user', /user: z\.object\(\{[\s\S]*_id: z\.string\(\)/.test(responseSchema)],
