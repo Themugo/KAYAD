@@ -1,9 +1,0 @@
-tsc exit 0
-build exit 0
-frontend exit 1
-jest exit 137
-backend-vitest exit 0
-node:test exit 0
-validators done
-ALLDONE
-jest2 exit 0
