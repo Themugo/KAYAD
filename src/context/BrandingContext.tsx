@@ -205,6 +205,13 @@ export function sanitizeCountryBadgeText(value: unknown): string {
   return t || 'KE';
 }
 
+/** Exact brand-name variants (any case, stray or doubled spaces) map to the approved name. Longer text that merely contains the word is untouched. */
+export function normalizeBrandName(value: string | null | undefined): string | null | undefined {
+  if (typeof value !== 'string') return value;
+  // Matches only the whole value: the two historical spellings of the name, with or without "KE", any case or spacing.
+  return /^KAYA(?:R)?D(?: KE)?$/.test(value.replace(/\s+/g, ' ').trim().toUpperCase()) ? 'KAYARD KE' : value;
+}
+
 function normalizeBrandingConfig(config: Partial<Branding> | null | undefined): Branding {
   const merged = { ...DEFAULT_BRANDING, ...(config && typeof config === 'object' ? config : {}) } as Branding;
   const colorFields: Array<keyof Branding> = [
@@ -219,6 +226,8 @@ function normalizeBrandingConfig(config: Partial<Branding> | null | undefined): 
   // Migrate only built-in legacy KAYAD marks and defaults; explicitly uploaded admin logos remain untouched.
   if (['/branding/kayad-road-mark.svg', '/branding/kayad-road-mark-light.svg', '/branding/kayad-symbol.svg', '/branding/kayad-mark.png', '/branding/kayard-k-mark.png'].includes(merged.logoUrl)) merged.logoUrl = DEFAULT_LOGO_URL;
   if (merged.logoText?.trim().toUpperCase() === 'KAYAD') merged.logoText = 'KAYARD KE';
+  // Also repairs the other stored spellings ("KAYARD ", "kayad ke", doubled spaces) that the exact check above misses (DA-05).
+  merged.logoText = normalizeBrandName(merged.logoText) as typeof merged.logoText;
   if (merged.footerCopyright?.includes('KAYAD Motors Kenya Ltd.')) merged.footerCopyright = 'KAYARD MOTOR HUB. All rights reserved.';
   if (merged.brandTagline?.trim().toLowerCase() === "kenya's trusted vehicle marketplace") merged.brandTagline = 'Premium Vehicle Marketplace';
   // The previous built-in descriptor is replaced by the approved one; any other custom tagline is untouched.

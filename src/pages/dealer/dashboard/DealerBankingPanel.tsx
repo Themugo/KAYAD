@@ -22,7 +22,15 @@ export default function DealerBankingPanel() {
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof BankingForm, string>>>({});
+  const [summary, setSummary] = useState<{ bankName: string; bankAccountMasked: string; mpesaBusinessMasked: string; configured: boolean } | null>(null);
   const savingRef = useRef(false);
+
+  const applyStored = (body: any) => {
+    const st = body?.settlement || {};
+    const pd = st.paymentDetails || {};
+    setForm({ ...EMPTY, ...Object.fromEntries(KEYS.map((k) => [k, typeof pd[k] === 'string' ? pd[k] : ''])) } as BankingForm);
+    setSummary({ bankName: st.bankName || '', bankAccountMasked: st.bankAccountMasked || '', mpesaBusinessMasked: st.mpesaBusinessMasked || '', configured: Boolean(st.configured) });
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -31,8 +39,7 @@ export default function DealerBankingPanel() {
     dealerAPI.getSettlement()
       .then((body: any) => {
         if (cancelled) return;
-        const pd = body?.settlement?.paymentDetails || {};
-        setForm({ ...EMPTY, ...Object.fromEntries(KEYS.map((k) => [k, typeof pd[k] === 'string' ? pd[k] : ''])) } as BankingForm);
+        applyStored(body);
       })
       .catch(() => { if (!cancelled) setLoadError('Could not load your banking details. Please try again.'); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -65,6 +72,8 @@ export default function DealerBankingPanel() {
     try {
       const paymentDetails = Object.fromEntries(KEYS.map((k) => [k, form[k].trim()]));
       await dealerAPI.updateSettlement({ paymentDetails });
+      // Read back from the server so the screen shows what actually persisted, not what was typed.
+      applyStored(await dealerAPI.getSettlement());
       setSaved(true);
     } catch (err: any) {
       const data = err?.response?.data;
@@ -97,6 +106,15 @@ export default function DealerBankingPanel() {
   return (
     <form onSubmit={save} className="space-y-6" noValidate>
       <p className="text-sm text-[#64748B]">Where KAYARD KE sends your payouts. All fields are optional and you can change them at any time.</p>
+      <div className="rounded-xl border border-[#B9D3CF] bg-[#F4FAF9] p-4 text-sm text-[#0A3340]" data-testid="banking-summary" aria-live="polite">
+        <p className="text-xs font-bold uppercase tracking-wide text-[#176B87] mb-1">Saved payout details</p>
+        {summary?.configured ? (
+          <ul className="space-y-0.5">
+            {summary.bankName && <li>Bank: {summary.bankName}{summary.bankAccountMasked ? ` · ${summary.bankAccountMasked}` : ''}</li>}
+            {summary.mpesaBusinessMasked && <li>Paybill / Till: {summary.mpesaBusinessMasked}</li>}
+          </ul>
+        ) : <p className="text-[#64748B]">No payout details saved yet.</p>}
+      </div>
       <fieldset className="space-y-3">
         <legend className="text-xs font-bold uppercase tracking-wide text-[#176B87] mb-2">Bank account</legend>
         {field('bankName', 'Bank name', { placeholder: 'e.g. Equity Bank', autoComplete: 'off' })}

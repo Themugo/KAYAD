@@ -108,7 +108,18 @@ export async function getPersonalListingActionEligibility(cars, owner) {
 /** Fail-closed backend guard for owner mutations outside the atomic lifecycle RPC. */
 export async function assertPersonalListingMutationAllowed({ car, owner, action }) {
   const role = String(owner?.role || "").toLowerCase();
-  if (!PERSONAL_ROLES.has(role)) return { allowed: true, skipped: true };
+  if (!PERSONAL_ROLES.has(role)) {
+    // Business (dealer) owners: a sold listing is read-only for edits, price, photos and removal (DA-03). Corrections go through the
+    // audited admin function kayad_admin_correct_sold_listing; the database trigger trg_cars_sold_read_only is the final backstop.
+    // Removal keeps its established contract (409 LISTING_DELETE_BLOCKED / reason LISTING_SOLD from listingDeletionBlock), so only edit and
+    // photo changes are refused here.
+    if (action !== "remove" && car && (car.status === "sold" || car.sold === true)) {
+      const error = new Error("Sold listings are read-only.");
+      error.status = 409; error.code = "LISTING_SOLD_READ_ONLY"; error.expose = true;
+      throw error;
+    }
+    return { allowed: true, skipped: true };
+  }
   if (!PERSONAL_MUTATION_ACTIONS.has(action)) {
     const error = new Error("Unsupported listing mutation.");
     error.status = 400; error.code = "INVALID_LISTING_MUTATION"; error.expose = true;

@@ -1,4 +1,4 @@
-import { markDealerListingSold } from "../services/dealerListingSale.service.js";
+import { markDealerListingSold, bulkChangeDealerListingStatus } from "../services/dealerListingSale.service.js";
 import express from "express";
 import { protect, dealerOnly, requireApproved, allowRoles } from "../middleware/auth.js";
 import { dealerBusinessOnly } from "../middleware/dealerIsolation.js"; // PHASE 13D
@@ -672,14 +672,19 @@ const settlementView = (pd = {}) => ({
   bankName: pd.bankName || "",
   bankAccount: pd.accountNumber || "",
 });
+// Presentation helper: the full account/paybill number is only ever returned to the business owner (this router is owner-only);
+// the *Masked fields are what the UI shows by default.
+const maskTail = (v) => { const s = String(v || ""); return s.length > 4 ? `${"•".repeat(Math.min(s.length - 4, 8))}${s.slice(-4)}` : (s ? "••••" : ""); };
+const settlementViewMasked = (pd = {}) => ({ ...settlementView(pd), bankAccountMasked: maskTail(pd.accountNumber), mpesaBusinessMasked: maskTail(pd.paybillNumber), configured: Boolean(pd.bankName || pd.accountNumber || pd.paybillNumber || pd.mpesaPhone) });
 const cleanSettlementString = (v) => (typeof v === "string" ? v.trim().slice(0, 200) : null);
 
+// Banking details are private financial data: never cached (a cached copy served stale blanks after a save) and never shared.
 router.get(
   "/settlement",
-  cacheDealerData,
   asyncHandler(async (req, res) => {
+    res.set("Cache-Control", "private, no-store");
     const dealer = await findOne("dealers", { user: req.user.id });
-    res.json({ success: true, settlement: settlementView(dealer?.paymentDetails || {}) });
+    res.json({ success: true, settlement: settlementViewMasked(dealer?.paymentDetails || {}) });
   }),
 );
 
@@ -733,7 +738,10 @@ router.put(
     const merged = { ...(dealer.paymentDetails || {}), ...incoming };
     const saved = await update("dealers", dealer.id, { paymentDetails: merged });
     await logActionFromReq(req, "update_settlement", { details: { fields: Object.keys(incoming) } });
-    res.json({ success: true, settlement: settlementView(saved?.paymentDetails || merged) });
+    res.set("Cache-Control", "private, no-store");
+    // Read back what is actually stored (not an echo of the request) so the caller sees exactly what persisted.
+    const stored = await findOne("dealers", { user: req.user.id });
+    res.json({ success: true, settlement: settlementViewMasked(stored?.paymentDetails || saved?.paymentDetails || merged) });
   }),
 );
 
@@ -1010,7 +1018,7 @@ router.patch(
   asyncHandler(async (req, res) => {
     let result;
     try {
-      result = await markDealerListingSold(req.user.id, req.params.id, req.body || {});
+      result = await markDealerListingSold(req.user.id, req.params.id, req.body || {}, req.actingMember?.id || req.user.id);
     } catch (err) {
       if (err?.expose) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
       throw err;
@@ -1028,17 +1036,10 @@ router.patch(
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const { ids } = req.body;
-    // Seller-settable listing states. "rejected" is admin-moderation-only (it
-    // freezes bidding — same rule as carController.updateCar), "reserved" belongs
-    // to the sale/escrow flow, and anything else is outside the cars.status CHECK.
-    // "active" is the dashboard's label for a live listing → canonical "available".
-    const SELLER_SETTABLE_STATUSES = new Set(["available", "sold", "pending", "hidden", "draft"]);
+    // "rejected" is admin-moderation-only, "reserved" belongs to the sale/escrow flow, "active" is the dashboard label for "available".
     const status = req.body.status === "active" ? "available" : req.body.status;
     if (!Array.isArray(ids) || !status) {
       return res.status(400).json({ success: false, message: "ids (array) and status required" });
-    }
-    if (!SELLER_SETTABLE_STATUSES.has(status)) {
-      return res.status(400).json({ success: false, code: "INVALID_LISTING_STATUS", message: "Unsupported listing status" });
     }
     // Per-listing admin approval is retired; the owner can publish their own eligible inventory.
     if (status === "available" && !(await sellerMayPublishDirectly({
@@ -1048,30 +1049,18 @@ router.patch(
     }))) {
       return res.status(403).json({ success: false, code: "SELLER_ACCOUNT_NOT_ELIGIBLE", message: "This account is not currently eligible to publish listings." });
     }
-    const sb = getSupabase();
-    // Own listings only; a listing rejected by moderation cannot be re-published here.
-    const { data: toUpdate, error: selErr } = await sb
-      .from("cars")
-      .select("id,status")
-      .in("id", ids)
-      .eq("dealer_id", req.user.id); // STAGE 5A: physical column is dealer_id (cars.dealer does not exist)
-    if (selErr) throw new Error(`Bulk status lookup failed: ${selErr.message}`);
-    // STAGE 5A (Gate E): a sold listing's state belongs to the sale/escrow workflow; a seller bulk edit must not hide, re-open
-    // or re-publish it (same invariant as utils/carModerationGuard.js for admin paths).
-    const updateIds = (toUpdate || []).filter((r) => r.status !== "rejected" && r.status !== "sold").map((r) => r.id);
-    let modified = 0;
-    if (updateIds.length > 0) {
-      const { error: updErr } = await sb.from("cars").update({ status }).in("id", updateIds);
-      // Do not report success for a write that did not persist.
-      if (updErr) throw new Error(`Bulk status update failed: ${updErr.message}`);
-      modified = updateIds.length;
+    // One canonical lifecycle (services/dealerListingSale.service.js): each listing is an atomic, itemised transaction that refuses
+    // sold, escrow-locked, settlement-locked and auction listings with a reason code.
+    let result;
+    try {
+      result = await bulkChangeDealerListingStatus({ dealerId: req.user.id, actorId: req.actingMember?.id || req.user.id, ids, status, sale: req.body.sale || {} });
+    } catch (err) {
+      if (err?.expose) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
+      throw err;
     }
-
-    await logActionFromReq(req, "bulk_status_update", {
-      details: { ids, status, modified },
-    });
-
-    res.json({ success: true, modified });
+    await logActionFromReq(req, "bulk_status_update", { details: { ids: result.updated, skipped: result.skipped, status, modified: result.updated.length } });
+    const allBlocked = result.updated.length === 0 && result.skipped.length > 0;
+    res.status(allBlocked ? 409 : 200).json({ success: !allBlocked, modified: result.updated.length, updated: result.updated, skipped: result.skipped, ...(allBlocked ? { code: result.skipped[0].code, message: result.skipped[0].message } : {}) });
   }),
 );
 
