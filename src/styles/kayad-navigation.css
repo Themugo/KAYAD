@@ -1363,3 +1363,32 @@ body.kayad-mobile-menu-is-open nav[aria-label="Mobile marketplace navigation"] {
 @media (max-width: 379px) {
   .kayad-header__bar > .kayad-hamburger { flex-basis: 40px; margin-left: 1px; }
 }
+
+/* ===== Wide logo lock-up (approved KAYARD KE standalone logo) =====
+ * Applied when the admin-managed logo is a wide, self-contained lock-up (decided from the
+ * loaded image in Navbar.tsx). Natural aspect ratio, left-aligned, no live wordmark/tagline
+ * beside it (the lock-up already carries them). Square marks keep the original layout.
+ * !important is used only on the image box: older breakpoint rules in this file force a
+ * square 36-70px box on .kayad-brand__image. */
+.kayad-search-mobile { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 44px; border-radius: 12px; border: 1px solid #D7E7E4; background: #fff; }
+@media (min-width: 1024px) { .kayad-search-mobile { display: none; } }
+/* Mobile/tablet order: brand (left) · utilities · search · menu (always the extreme right). */
+.kayad-header__bar > .kayad-search-mobile { order: 4; }
+.kayad-header__bar > .kayad-hamburger { order: 5; }
+
+.kayad-header .kayad-brand.kayad-brand--lockup { gap: 0; flex: 1 1 auto; width: auto; max-width: none; min-width: 0; justify-content: flex-start; }
+@media (min-width: 1024px) { .kayad-header .kayad-brand.kayad-brand--lockup { flex: 0 0 auto; } }
+.kayad-header .kayad-brand--lockup .kayad-brand__text { display: none; }
+.kayad-header .kayad-brand--lockup .kayad-brand__image {
+  width: auto !important; height: 44px !important; max-width: min(46vw, 190px) !important; aspect-ratio: auto;
+  object-fit: contain; border-radius: 0; background: none; box-shadow: none; padding: 0; flex: 0 0 auto;
+}
+@media (min-width: 640px) { .kayad-header .kayad-brand--lockup .kayad-brand__image { height: 52px !important; max-width: 210px !important; } }
+@media (min-width: 1024px) {
+  .kayad-header--lockup .kayad-header__bar { min-height: 84px; }
+  .kayad-header .kayad-brand--lockup .kayad-brand__image { height: 64px !important; max-width: 240px !important; }
+}
+@media (max-width: 359px) { .kayad-header .kayad-brand--lockup .kayad-brand__image { height: 38px !important; } }
+/* Phones: Sell stays one tap away in the mobile dock and drawer, so the bar is not crowded. */
+@media (max-width: 639px) { .kayad-header--lockup .kayad-cta { display: none; } .kayad-header--lockup .kayad-utilities { display: none; } }
+@media (max-width: 1023px) { .kayad-header--lockup .kayad-header__bar > .kayad-hamburger { width: 44px; height: 44px; flex: 0 0 44px; } }

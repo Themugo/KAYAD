@@ -40,6 +40,8 @@ import type { Vehicle } from '../types';
  * version this file originally used). */
 export interface BackendCar {
   id: string;
+  /** Derived reservation flag from the server (no buyer identity). */
+  reservation?: { reserved?: boolean } | null;
   /** Canonical public /api/cars responses use camelCase after the backend field mapper.
    * Legacy snake_case aliases remain accepted because older fixtures and some
    * direct database-backed paths still expose them. */
@@ -524,6 +526,7 @@ export function mapBackendCarToVehicle(car: BackendCar): Vehicle {
     savedCount: 0,
     inspectionStatus: inspectionStatus || undefined,
     inspectionPassed: inspectionStatus.toLowerCase() === 'passed',
+    reserved: Boolean(car.reservation?.reserved) || String(car.status || '').toLowerCase() === 'reserved',
     escrowEligible,
     dutyPaid: dutyStatus.toLowerCase() === 'duty_paid',
     status: car.status === 'sold' ? 'sold' : car.status === 'pending' ? 'pending' : car.status === 'draft' ? 'draft' : 'active',

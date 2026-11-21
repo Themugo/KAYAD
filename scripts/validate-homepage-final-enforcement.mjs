@@ -19,9 +19,9 @@ assert.match(config, /showSidebar: parsed\.inventoryLayout\?\.showSidebar !== fa
 assert.match(admin, /Show desktop inventory filter sidebar/);
 assert.match(admin, /searchTrustCard: 'Hero & Search Discovery'/);
 assert.match(helper, /containerWidth < 520/);
-assert.match(helper, /containerWidth < 680/);
-assert.match(helper, /containerWidth < 1120/);
+assert.match(helper, /containerWidth < 760/);
+assert.match(helper, /containerWidth < 1280/);
 assert.match(css, /@container kayad-inventory-results \(min-width: 520px\)/);
-assert.match(css, /@container kayad-inventory-results \(min-width: 680px\)/);
-assert.match(css, /@container kayad-inventory-results \(min-width: 1120px\)/);
+assert.match(css, /@container kayad-inventory-results \(min-width: 760px\)/);
+assert.match(css, /@container kayad-inventory-results \(min-width: 1280px\)/);
 console.log('Homepage final enforcement: 15/15 contract checks passed.');

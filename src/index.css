@@ -272,7 +272,7 @@
 }
 
 .kayad-inventory-grid {
-  --kayad-grid-columns: 5;
+  --kayad-grid-columns: 4;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   min-width: 0;
@@ -280,36 +280,55 @@
   align-items: stretch;
 }
 
-/* Phones: one readable card; small tablets: two when there is enough room. */
+/* Phones: one readable card; small tablets: two when there is enough room.
+ * Thresholds mirror getEffectiveGridColumns() in inventoryPresentation.ts:
+ * <520 -> 1, <760 -> 2, <940 -> 3, <1280 -> max 4, >=1280 -> requested. */
 @container kayad-inventory-results (min-width: 520px) {
   .kayad-inventory-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* Selected desktop layout. The thresholds are based on actual result-area
- * width, so the sidebar and page gutters are already accounted for. */
-@container kayad-inventory-results (min-width: 680px) {
-  .kayad-inventory-grid[data-columns="3"] {
+@container kayad-inventory-results (min-width: 760px) {
+  .kayad-inventory-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+}
 
-  /* Four columns previously had no matching rule between 680px and 859px.
-     The grid therefore fell back to two columns even though the 4-column
-     control was selected. Keep 4 selectable at the actual desktop result
-     width; minmax(0,1fr) lets cards contract without overflowing. */
+@container kayad-inventory-results (min-width: 940px) {
   .kayad-inventory-grid[data-columns="4"],
   .kayad-inventory-grid[data-columns="5"] {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
-@container kayad-inventory-results (min-width: 1120px) {
+@container kayad-inventory-results (min-width: 1280px) {
   .kayad-inventory-grid[data-columns="5"] {
     grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 
+
+/* LIST layout: a genuine comparison row, not a stretched card.
+ * [image | title + key specs | price + actions]. Below 640px the standard
+ * stacked mobile card is used. */
+@media (min-width: 640px) {
+  .kayad-vehicle-card[data-layout="list"] .kayad-vc-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(190px, 220px);
+    grid-template-areas: "title price" "specs actions";
+    column-gap: 24px;
+    row-gap: 10px;
+    align-content: space-between;
+    align-items: start;
+  }
+  .kayad-vehicle-card[data-layout="list"] .kayad-vc-main { display: contents; }
+  .kayad-vehicle-card[data-layout="list"] .kayad-vc-main > div:first-child { grid-area: title; }
+  .kayad-vehicle-card[data-layout="list"] .kayad-vc-price { grid-area: price; margin: 0; text-align: right; }
+  .kayad-vehicle-card[data-layout="list"] .kayad-vc-specs { grid-area: specs; margin: 0; grid-template-columns: repeat(auto-fit, minmax(110px, max-content)); gap: 6px 18px; }
+  .kayad-vehicle-card[data-layout="list"] .kayad-vc-actions { grid-area: actions; margin: 0; padding: 0; flex-direction: column; align-self: end; }
+  .kayad-vehicle-card[data-layout="list"] .kayad-vc-cta { width: 100%; }
+}
 
 /* Premium authentication experience: shared sign-in / sign-up surface. */
 .kayad-auth-page {

@@ -30,6 +30,6 @@ check('dashboard role shell', dashboard.includes('const configs') && dashboard.i
 check('dashboard live control-plane source', dashboard.includes('getControlPlaneSnapshot') && dashboard.includes('getDealerDashboard') && dashboard.includes('getOwnershipDashboard'));
 check('dashboard wired into app', app.includes('<DashboardHub user={authUser} onSignOut={authLogout} vehicles={vehicles}') && app.includes("activeNav === 'dashboard'"));
 check('catalogue grid/list controls', marketplace.includes("useState<'grid' | 'list'>") && marketplace.includes('gridColumns') && marketplace.includes("setViewMode('list')") && marketplace.includes('data-view-mode'));
-check('detail trust is data-driven', detail.includes("vehicle.verified ? 'Verified' : 'Pending'") && detail.includes('vehicle.isDealerCertified') && detail.includes('vehicle.financeAvailable'));
+check('detail trust is data-driven', detail.includes("vehicle.verified ? 'Verified' : ''") && detail.includes('vehicle.isDealerCertified') && detail.includes('vehicle.financeAvailable'));
 check('backend stores seller onboarding fields', backendAuth.includes('businessName') && backendAuth.includes('location'));
 console.log('Platform integration UX validation: PASS');

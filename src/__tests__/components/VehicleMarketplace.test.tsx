@@ -59,6 +59,7 @@ const renderMarketplace = async (props: MarketplaceProps) => {
 
 describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
   beforeEach(() => {
+    window.history.replaceState({}, '', '/'); // catalogue state is URL-backed; isolate tests
     vehicleApiMocks.campaignIds.mockReset(); vehicleApiMocks.campaignIds.mockResolvedValue([]); vehicleApiMocks.getCarById.mockReset();
     vehicleApiMocks.getCars.mockReset();
     vehicleApiMocks.getCars.mockResolvedValue({
@@ -105,6 +106,57 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     expect(document.querySelector('.kayad-inventory-search-row')).toBeInTheDocument();
   });
 
+
+  it('catalogue cards carry no inspection banner or booking CTA (inspection lives on vehicle details)', async () => {
+    await renderMarketplace({ ...baseProps });
+    await screen.findByTestId('inventory-grid');
+    expect(document.querySelector('.kayad-vc-inspection')).toBeNull();
+    const grid = screen.getByTestId('inventory-grid');
+    expect(grid.textContent).not.toMatch(/No inspection report yet/i);
+    expect(within(grid).queryByRole('button', { name: /^Request/ })).toBeNull();
+  });
+
+  it('shows a Reserved badge only for vehicles the server marks reserved, and no verified-listing claim', async () => {
+    const first = INITIAL_VEHICLES[0];
+    vehicleApiMocks.getCars.mockResolvedValue({
+      success: true,
+      data: [
+        { id: first.id, title: first.title, brand: first.make, model: first.model, year: first.year, price: first.price, images: [], reservation: { reserved: true }, is_verified_dealer: true },
+        { id: 'other', title: 'Other', brand: 'Mazda', model: 'CX-5', year: 2020, price: 3150000, images: [], is_verified_dealer: false },
+      ],
+      pagination: { page: 1, limit: 24, total: 2, pages: 1 },
+    });
+    await renderMarketplace({ ...baseProps });
+    await waitFor(() => expect(screen.getAllByTestId('reserved-badge')).toHaveLength(1));
+    expect(screen.getByTestId('inventory-grid').textContent).not.toContain('Verified listing');
+  });
+
+  it('list mode is a distinct row layout hook (not just a column change) and grid restores columns', async () => {
+    await renderMarketplace({ ...baseProps });
+    await screen.findByTestId('inventory-grid');
+    expect(document.querySelector('.kayad-vehicle-card')?.getAttribute('data-layout')).toBe('grid');
+    fireEvent.click(screen.getByRole('button', { name: 'List view' }));
+    await waitFor(() => expect(document.querySelector('.kayad-vehicle-card')?.getAttribute('data-layout')).toBe('list'));
+    expect(screen.getByTestId('inventory-grid').hasAttribute('data-columns')).toBe(false);
+    expect(screen.queryByRole('group', { name: 'Desktop grid columns' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Grid view' }));
+    await waitFor(() => expect(screen.getByTestId('inventory-grid').getAttribute('data-columns')).toBe('4'));
+  });
+
+  it('filters, sort and layout are written to the URL and restored from a shared link', async () => {
+    const { unmount } = await renderMarketplace({ ...baseProps });
+    await screen.findByTestId('inventory-grid');
+    fireEvent.change(screen.getByLabelText('Sort inventory'), { target: { value: 'price-asc' } });
+    fireEvent.click(screen.getByRole('button', { name: 'List view' }));
+    await waitFor(() => {
+      expect(window.location.search).toContain('sort=price-asc');
+      expect(window.location.search).toContain('view=list');
+    });
+    unmount();
+    await renderMarketplace({ ...baseProps });
+    expect(screen.getByLabelText('Sort inventory')).toHaveValue('price-asc');
+    await waitFor(() => expect(screen.getByTestId('inventory-grid')).toHaveAttribute('data-view-mode', 'list'));
+  });
 
   it('phone inventory scaling: every card carries the compact-layout hooks and omits blank specs', async () => {
     vehicleApiMocks.getCars.mockResolvedValue({
@@ -427,9 +479,9 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     await waitFor(() => {
       const inventoryGrid = screen.getByTestId('inventory-grid');
       expect(inventoryGrid.getAttribute('data-view-mode')).toBe('grid');
-      expect(inventoryGrid.getAttribute('data-columns')).toBe('5');
+      expect(inventoryGrid.getAttribute('data-columns')).toBe('4');
       expect(inventoryGrid.className).toContain('kayad-inventory-grid');
-      expect(inventoryGrid.style.getPropertyValue('--kayad-grid-columns')).toBe('5');
+      expect(inventoryGrid.style.getPropertyValue('--kayad-grid-columns')).toBe('4');
     }, { timeout: 2000 });
   });
 
@@ -503,12 +555,12 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     await act(async () => { await new Promise((resolve) => setTimeout(resolve, 60)); });
     for (const columns of [3, 4, 5]) {
       await waitFor(() => {
-        fireEvent.click(screen.getByRole('button', { name: new RegExp(`^Request ${columns} columns;`) }));
+        fireEvent.click(screen.getByRole('button', { name: new RegExp(`^${columns} columns`) }));
         const grid = screen.getByTestId('inventory-grid');
         expect(grid.getAttribute('data-columns')).toBe(String(columns));
         expect(grid.className).toContain('kayad-inventory-grid');
         expect(grid.style.getPropertyValue('--kayad-grid-columns')).toBe(String(columns));
-        expect(screen.getByRole('button', { name: new RegExp(`^Request ${columns} columns;`) }).getAttribute('aria-pressed')).toBe('true');
+        expect(screen.getByRole('button', { name: new RegExp(`^${columns} columns`) }).getAttribute('aria-pressed')).toBe('true');
       });
     }
   });
@@ -676,7 +728,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     await screen.findByTestId('inventory-grid');
     await act(async () => { await new Promise((resolve) => setTimeout(resolve, 60)); });
 
-    fireEvent.click(screen.getByRole('button', { name: /^Request 4 columns;/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^4 columns/ }));
     await waitFor(() => expect(screen.getByTestId('inventory-grid').getAttribute('data-columns')).toBe('4'));
 
     fireEvent.click(screen.getByRole('button', { name: /List view/i }));
@@ -694,7 +746,7 @@ describe('VehicleMarketplace - real inventory grid (redesigned layout)', () => {
     fireEvent.change(screen.getByRole('combobox', { name: /Sort inventory/i }), { target: { value: 'price-asc' } });
     await waitFor(() => {
       expect(screen.getByTestId('inventory-grid').getAttribute('data-columns')).toBe('4');
-      expect(screen.getByRole('button', { name: /^Request 4 columns;/ }).getAttribute('aria-pressed')).toBe('true');
+      expect(screen.getByRole('button', { name: /^4 columns/ }).getAttribute('aria-pressed')).toBe('true');
     });
   });
 
@@ -962,16 +1014,16 @@ describe('VehicleMarketplace - admin home page customization', () => {
 
     const columns = screen.getByLabelText('Desktop inventory columns') as HTMLSelectElement;
     const density = screen.getByLabelText('Inventory card density') as HTMLSelectElement;
-    expect(columns.value).toBe('5');
+    expect(columns.value).toBe('4'); // approved default: four columns
     expect(density.value).toBe('compact');
 
-    fireEvent.change(columns, { target: { value: '4' } });
+    fireEvent.change(columns, { target: { value: '3' } });
     fireEvent.change(density, { target: { value: 'standard' } });
     fireEvent.click(screen.getByText('List view'));
 
     await waitFor(() => {
       const saved = JSON.parse(localStorage.getItem('kayad_home_page_config_v1') || '{}');
-      expect(saved.inventoryLayout).toMatchObject({ columns: 4, cardDensity: 'standard', viewMode: 'list' });
+      expect(saved.inventoryLayout).toMatchObject({ columns: 3, cardDensity: 'standard', viewMode: 'list' });
     });
   });
 

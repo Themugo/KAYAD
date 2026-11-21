@@ -23,8 +23,8 @@ const DEFAULTS = {
 const DEFAULT_BRANDING = {
   logoType: 'image',
   logoText: 'KAYARD KE',
-  logoUrl: '/branding/kayard-k-mark.png',
-  brandTagline: 'Premium Automotive Marketplace',
+  logoUrl: '/branding/kayard-ke-logo.png',
+  brandTagline: 'Premium Vehicle Marketplace',
   countryBadgeShow: true,
   countryBadgeText: 'KE',
   navbarBg: '', navbarText: '', navbarNavBg: '', footerBg: '', footerText: '', footerAccent: '',

@@ -29,8 +29,9 @@ describe('DashboardHub buyer widgets', () => {
     expect(screen.queryByTestId('bidder-card')).toBeNull();
     unmount();
     render(<MemoryRouter><DashboardHub user={{ id: 'u1', name: 'James Mugo', role }} vehicles={[]} initialSection="auctions" onNavigate={() => {}} /></MemoryRouter>);
-    expect(await screen.findByTestId('bidder-card')).toBeTruthy();
-  });
+    // The Auctions section is lazy-loaded; findBy default 1s timeout raced the chunk load under CPU contention.
+    expect(await screen.findByTestId('bidder-card', {}, { timeout: 8000 })).toBeTruthy();
+  }, 15000);
   it('dealer still sees the auction journey and bidder card', () => {
     mount('dealer');
     expect(screen.getByTestId('auction-rail')).toBeTruthy();

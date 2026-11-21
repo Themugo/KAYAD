@@ -59,7 +59,7 @@ check('vehicle trust panel gives verification steps rather than guarantees', det
 check('inspection CTA copy defers scope and pricing to the selected provider', detail.includes('Inspection scope, tests, provider credentials and pricing depend on the selected independent provider and package.'));
 
 // Public marketplace / legacy public surfaces.
-check('marketplace inventory copy avoids universal verified-listing claims', marketplace.includes('Compare vehicle listings, available inspection status') && !marketplace.includes('Compare verified marketplace listings'));
+check('marketplace inventory copy avoids universal verified-listing claims', marketplace.includes('Compare vehicle listings, pricing and auction availability') && !marketplace.includes('Compare verified marketplace listings'));
 check('marketplace auction teaser asks visitors to review listing details', marketplace.includes('Review each listing and seller details before bidding.'));
 check('inspection marketing does not promise permanent report sharing', marketplace.includes('Report access depends on the booking and sharing terms'));
 check('seller CTA describes the existing Seller Studio workflow', marketplace.includes('manage your listing through the existing Seller Studio'));

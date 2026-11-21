@@ -124,7 +124,7 @@ export const DEFAULT_HOME_PAGE_CONFIG: HomePageConfig = {
   ],
   inventoryLayout: {
     viewMode: 'grid',
-    columns: 5,
+    columns: 4,
     showSidebar: true,
     cardDensity: 'compact',
   },
@@ -165,7 +165,12 @@ function loadConfig(): HomePageConfig {
         ...DEFAULT_HOME_PAGE_CONFIG.inventoryLayout,
         ...parsed.inventoryLayout,
         viewMode: parsed.inventoryLayout?.viewMode === 'list' ? 'list' : 'grid',
-        columns: [3, 4, 5].includes(parsed.inventoryLayout?.columns) ? parsed.inventoryLayout.columns : DEFAULT_HOME_PAGE_CONFIG.inventoryLayout.columns,
+        // Rev < 2 configs were saved while the default was 5 columns; an
+        // un-revisioned 5 is that old default, not a deliberate choice, so it
+        // becomes the new 4-column default. Rev 2 keeps any explicit choice.
+        columns: [3, 4, 5].includes(parsed.inventoryLayout?.columns)
+          ? (parsed.inventoryLayoutRev !== 2 && parsed.inventoryLayout.columns === 5 ? 4 : parsed.inventoryLayout.columns)
+          : DEFAULT_HOME_PAGE_CONFIG.inventoryLayout.columns,
         showSidebar: parsed.inventoryLayout?.showSidebar !== false,
         cardDensity: ['compact', 'standard', 'comfortable'].includes(parsed.inventoryLayout?.cardDensity)
           ? parsed.inventoryLayout.cardDensity
@@ -190,7 +195,7 @@ export function useHomePageConfig() {
     setConfig((prev) => {
       const next = updater(prev);
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...next, inventoryLayoutRev: 2 }));
       } catch {
         // Storage can fail (private browsing, quota, disabled storage) -
         // the config still updates in-memory for this session even if
