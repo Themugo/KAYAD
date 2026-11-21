@@ -1,0 +1,24 @@
+PASS U1.1 empty state is honest (no cases yet)
+PASS U1.2 the page explains the requirements and who decides
+PASS U2.1 opening a case creates a real row
+PASS U2.2 shows NOT cleared, with server-provided blockers
+PASS U2.3 payment is not shown as confirmed (no redirect-based confirmation)
+PASS U3.1 evidence + submission persisted
+PASS U3.2 a booking that does not exist is refused and nothing is claimed
+PASS U3.3 desktop axe WCAG2A/AA: no serious/critical
+PASS U4.tablet.1 no horizontal page scroll
+PASS U4.tablet.2 interactive controls are at least 28px
+PASS U4.tablet.3 axe WCAG2A/AA: no serious/critical
+PASS U4.phone.1 no horizontal page scroll
+PASS U4.phone.2 interactive controls are at least 28px
+PASS U4.phone.3 axe WCAG2A/AA: no serious/critical
+PASS U5.1 keyboard Tab moves focus to a focusable element
+PASS A1.1 admin sees the case with the DB gate verdict and blockers
+PASS A1.2 payment is shown as not confirmed (server-recorded only)
+PASS A2.1 approving an unverified, not-in-custody case is refused by the server and not reported as success
+PASS A2.2 the case is still not approved in the database
+PASS A2.3 non-approval decisions require a written reason
+PASS A3.1 admin tab axe WCAG2A/AA: no serious/critical
+PASS A4.1 a plain user does not get the admin console
+PASS CX.1 no 5xx API responses observed in any journey
+pass=23 fail=0

@@ -1,0 +1,5 @@
+-- KAYAD MIGRATION HISTORY PRESERVED AS NO-OP
+-- Canonical migration: 20260909084443_dispute_canonical_escrow_lifecycle.sql
+-- This version was an exact duplicate of the canonical migration.
+-- The version remains present so already-applied remote migration history is preserved.
+-- Fresh databases receive the canonical DDL once; this historical version intentionally performs no work.

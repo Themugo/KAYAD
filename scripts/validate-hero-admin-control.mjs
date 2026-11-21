@@ -1,0 +1,61 @@
+// Hero admin-control contract: every hero setting must be controlled from the admin panel,
+// persisted by the existing platform-config endpoint, and read (not hardcoded) by the public hero.
+import fs from 'node:fs';
+
+const failures = [];
+const pass = (m) => console.log(`PASS ${m}`);
+const fail = (m) => { failures.push(m); console.error(`FAIL ${m}`); };
+const read = (p) => fs.readFileSync(p, 'utf8');
+
+const types = read('src/features/VehicleMarketplace/types/heroPresentation.ts');
+const panel = read('src/features/VehicleMarketplace/components/HomePageAdminPanel.tsx');
+const hero = read('src/features/VehicleMarketplace/components/VehicleMarketplace.tsx');
+const ph = fs.readFileSync('src/components/home/PremiumHero.tsx', 'utf8');
+const css = read('src/index.css');
+const adminRoutes = read('backend/routes/adminRoutes.js');
+
+const interfaceKeys = (name) => {
+  const start = types.indexOf(`export interface ${name}`);
+  const body = types.slice(start, types.indexOf('\n}', start));
+  return [...body.matchAll(/^ {2}(\w+)\??: /gm)].map((m) => m[1]);
+};
+
+// 1. Every active public/admin config key has an admin control.
+// HeroShowcaseVehicle is an active, presentation-only admin control stored in the existing platform_config JSONB.
+for (const name of ['HeroPresentationConfig', 'HeroFloatingCard']) {
+  const missing = interfaceKeys(name).filter((k) => !new RegExp(`\\b${k}\\b`).test(panel));
+  if (missing.length === 0) pass(`${name}: every field has an admin control`);
+  else fail(`${name}: no admin control for ${missing.join(', ')}`);
+}
+
+if (/Curated Showcase Pair/.test(panel) && /updateShowcaseVehicle\(/.test(panel) && /showcaseFallbackEnabled/.test(panel)) pass('curated showcase pair and fallback are admin-editable');
+else fail('curated showcase pair and fallback must be admin-editable');
+
+// 2. Persistence: the existing platform-config endpoint accepts every hero config object.
+for (const key of ['heroPresentation', 'heroCardContent', 'heroFeaturedMode', 'heroCarIds']) {
+  if (new RegExp(`"${key}"`).test(adminRoutes)) pass(`backend persists ${key}`);
+  else fail(`backend does not allow saving ${key}`);
+}
+
+// 3. One normalizer for public + admin so stored values cannot break the layout.
+if (/normalizeHeroExtras\(presentation\)/.test(hero) && /normalizeHeroExtras\(heroLayout\)/.test(panel)) pass('public page and admin save share normalizeHeroExtras');
+else fail('normalizeHeroExtras must be used by both the public page and the admin save path');
+
+// 4. Public hero reads admin values; no hardcoded copy/timers/dimensions in the JSX.
+const mobile = hero.slice(hero.indexOf('aria-label="KAYAD mobile hero"'));
+const checks = [
+  ['headline comes from admin hero slide (single responsive hero)', /\{p\.headline\}<\/h1>/.test(ph) && /headline=\{heroHeadlineNode\}/.test(hero)],
+  ['eyebrow comes from admin hero slide', /\{p\.eyebrow\}<\/p>/.test(ph) && /eyebrow=\{heroEyebrowDisplay\}/.test(hero)],
+  ['supporting copy comes from admin config', /\{p\.supportCopy\}<\/p>/.test(ph) && /supportCopy=\{heroSupportCopy\}/.test(hero)],
+  ['CTA labels are admin-controlled (capped for display)', /primaryLabel=\{heroPrimaryLabelSafe\}/.test(hero) && /secondaryLabel=\{heroSecondaryLabelSafe\}/.test(hero) && /safeHeroCtaLabel\(heroPrimaryLabel\)/.test(hero)],
+  ['admin headline is never rewritten (no includes() hack)', !/heroHeadline\.includes\(/.test(hero)],
+  ['no literal 6500ms rotation timer', !/\b6500\b/.test(hero)],
+  ['rotation timers use admin rotationSeconds', (hero.match(/heroRotationMs/g) || []).length >= 6],
+  ['hero height is responsive CSS (legacy mobile stage min/max controls are retired and labelled inert in the admin panel)', /@media \(min-width: 1024px\)/.test(fs.readFileSync('src/components/home/premium-hero.css','utf8'))],
+  ['single stage serves desktop and mobile', /data-testid="hero-stage"/.test(ph)],
+  ['hero CTA colors come from admin config', /heroPresentation\.primaryButtonColor/.test(hero) && /heroPresentation\.secondaryButtonBorderColor/.test(hero)],
+];
+for (const [name, ok] of checks) (ok ? pass : fail)(name);
+
+if (failures.length) { console.error(`\nHero admin-control contract: FAIL (${failures.length})`); process.exit(1); }
+console.log('\nHero admin-control contract: PASS');

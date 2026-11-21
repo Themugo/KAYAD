@@ -1,0 +1,31 @@
+-- KAYAD STAGE 5A — GATE C MIGRATION CANDIDATE.  *** NOT APPLIED. DO NOT RUN WITHOUT THE OWNER'S WRITTEN AUTHORIZATION. ***
+-- This file contains no executable DDL on purpose: the candidate is the repository's own ordered migration chain
+-- (supabase/migrations, 181 files), which was replayed from empty on a disposable PostgreSQL 17 with 0 failures
+-- (evidence/pg_replay_20261019.log).  The hosted project "KAYAD EA" (ubvgixwhfybbyjuvxboj) is missing objects the app needs
+-- (see HOSTED_DB_READONLY_VERIFICATION_REPORT.md), and its migration history does NOT match the repo's file names, so the
+-- Supabase CLI cannot simply "push"; history must be reconciled deliberately.
+--
+-- APPROVAL GATE (all required before any step below):
+--   [ ] Owner authorizes in writing: project ref, window, and that sellers/dealers are NOT being onboarded during it.
+--   [ ] A fresh backup / Supabase point-in-time-recovery marker is recorded (verify:backup must be run for real).
+--   [ ] GATE_C_PREFLIGHT_READONLY.sql output saved BEFORE.
+--   [ ] The sequence below has been rehearsed on a Supabase BRANCH (create_branch) of the project, and the preflight shows all OK there.
+--
+-- STEPS (each is a separate, individually-approved action):
+--   1. Create a Supabase branch of ubvgixwhfybbyjuvxboj; apply the delta there; run GATE_C_PREFLIGHT_READONLY.sql  -> expect all OK.
+--   2. Run the application's DB-contract checks against the branch (npm run certify:* that apply; Stage 5A acceptance with a disposable owner).
+--   3. Only then, in the production window: apply, in strict filename order, the repository migrations whose objects are MISSING
+--      per the preflight, at minimum the identity chain:
+--        20260930110000_advanced_identity_session_hardening.sql
+--        20260930112000_identity_email_normalization.sql
+--        20261001090000_registration_onboarding_integrity.sql        (kayad_register_identity_atomic)
+--        20261001220000_database_contract_alignment.sql              (RPC grants / contract alignment)
+--        20261011090000_users_security_state_columns.sql
+--        20261011093000_revoke_client_execute_on_kayad_rpcs.sql
+--        20261011120000_client_role_least_privilege.sql
+--      plus every earlier file they depend on that the preflight reports missing. Because many of the 154 un-matched files are
+--      re-numbered duplicates of already-applied work, DO NOT apply by filename blindly: compare object-by-object with the preflight.
+--   4. Re-run GATE_C_PREFLIGHT_READONLY.sql -> expect all OK.  Save output AFTER.
+--
+-- NOT part of this candidate (separate owner decision D3): a migration admitting 'rejected' in cars_status_check
+--   (runbooks/stage4-rehearsal-20261018/03B_G2_CANDIDATE_cars_status_rejected_LOW_LOCK_NOT_APPLIED.sql). Hide is used meanwhile.

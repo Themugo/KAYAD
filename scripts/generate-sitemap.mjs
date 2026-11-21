@@ -1,0 +1,136 @@
+/**
+ * Build-time sitemap generator.
+ *
+ * Run:  node scripts/generate-sitemap.mjs
+ * Uses VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY (legacy anon key supported) when available.
+ *
+ * Outputs: public/sitemap.xml
+ */
+
+import { createClient } from '@supabase/supabase-js';
+import { readFileSync, writeFileSync } from 'fs';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const root = resolve(__dirname, '..');
+
+// Load .env
+let supabaseUrl = process.env.VITE_SUPABASE_URL;
+let supabaseKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  try {
+    const envFile = readFileSync(resolve(root, '.env'), 'utf-8');
+    for (const line of envFile.split('\n')) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith('#')) continue;
+      const eqIdx = trimmed.indexOf('=');
+      if (eqIdx === -1) continue;
+      const key = trimmed.slice(0, eqIdx).trim();
+      const val = trimmed.slice(eqIdx + 1).trim();
+      if (key === 'VITE_SUPABASE_URL') supabaseUrl = val;
+      if (key === 'VITE_SUPABASE_PUBLISHABLE_KEY') supabaseKey = val;
+      if (!supabaseKey && key === 'VITE_SUPABASE_ANON_KEY') supabaseKey = val;
+    }
+  } catch {
+    // .env not found
+  }
+}
+
+const hasSupabase = Boolean(supabaseUrl && supabaseKey);
+const supabase = hasSupabase ? createClient(supabaseUrl, supabaseKey) : null;
+let BASE = process.env.VITE_SITE_URL?.trim();
+if (!BASE) {
+  try {
+    const example = readFileSync(resolve(root, '.env.example'), 'utf-8');
+    const match = example.match(/^VITE_SITE_URL=(.+)$/m);
+    if (match?.[1]) BASE = match[1].trim();
+  } catch {
+    // .env.example is optional at runtime.
+  }
+}
+if (!BASE) {
+  console.error('Missing VITE_SITE_URL. Set the canonical Topline production domain before generating a sitemap.');
+  process.exit(1);
+}
+const today = new Date().toISOString().split('T')[0];
+
+const staticUrls = [
+  { loc: '/', changefreq: 'weekly', priority: '1.0' },
+  { loc: '/shop', changefreq: 'weekly', priority: '0.9' },
+  { loc: '/services', changefreq: 'weekly', priority: '0.9' },
+  { loc: '/portfolio', changefreq: 'weekly', priority: '0.8' },
+  { loc: '/about', changefreq: 'monthly', priority: '0.7' },
+  { loc: '/faq', changefreq: 'monthly', priority: '0.6' },
+  { loc: '/contact', changefreq: 'monthly', priority: '0.8' },
+  { loc: '/quotation', changefreq: 'monthly', priority: '0.8' },
+  { loc: '/industries', changefreq: 'monthly', priority: '0.8' },
+  { loc: '/market', changefreq: 'monthly', priority: '0.6' },
+];
+
+function escXml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+async function fetchSlugs(table, slugCol = 'slug', activeCol = 'is_active') {
+  if (!supabase) {
+    return [];
+  }
+
+  try {
+    let query = supabase.from(table).select(slugCol);
+    if (activeCol) query = query.eq(activeCol, true);
+    const { data, error } = await query;
+    if (error) throw error;
+    return (data || []).map((r) => r[slugCol]).filter(Boolean);
+  } catch (err) {
+    console.warn(`  Warning: could not fetch ${table}: ${err.message}`);
+    return [];
+  }
+}
+
+async function main() {
+  console.log('Generating sitemap.xml...');
+  if (!hasSupabase) console.log('  Supabase not configured; generating static sitemap routes only.');
+
+  const [productSlugs, serviceSlugs, projectSlugs] = await Promise.all([
+    fetchSlugs('products'),
+    fetchSlugs('services'),
+    fetchSlugs('public_projects', 'slug', null), // view: active projects only; base table is staff-only
+  ]);
+
+  console.log(`  Products: ${productSlugs.length}, Services: ${serviceSlugs.length}, Projects: ${projectSlugs.length}`);
+
+  const urls = [...staticUrls];
+
+  for (const slug of productSlugs) {
+    urls.push({ loc: `/product/${slug}`, changefreq: 'weekly', priority: '0.8' });
+  }
+  for (const slug of serviceSlugs) {
+    urls.push({ loc: `/service/${slug}`, changefreq: 'monthly', priority: '0.7' });
+  }
+  for (const slug of projectSlugs) {
+    urls.push({ loc: `/portfolio/${slug}`, changefreq: 'monthly', priority: '0.6' });
+  }
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((u) => `  <url>
+    <loc>${BASE}${escXml(u.loc)}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${u.changefreq}</changefreq>
+    <priority>${u.priority}</priority>
+  </url>`).join('\n')}
+</urlset>
+`;
+
+  const outPath = resolve(root, 'public', 'sitemap.xml');
+  writeFileSync(outPath, xml, 'utf-8');
+  console.log(`  Written to ${outPath}`);
+}
+
+main().catch((err) => {
+  console.error('Failed to generate sitemap:', err);
+  process.exit(1);
+});

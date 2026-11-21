@@ -1,0 +1,5 @@
+# Stage 5E — No-mutation declaration
+
+**Not done in this stage:** no hosted DDL, DML, migration (`apply_migration`, `supabase db push`, branch create/merge/reset) or function call with side effects; no change to any user, role, verification flag, password, token or session on any hosted or real account; no owner invitation, activation or bootstrap run; no modification of `jimmythemugo@gmail.com` or its dealer data; no deletion or reset of any record; no deployment of any kind; no change to deployment settings or secrets; no real e-mail or SMS and no payment operation; no commit, push, branch rewrite, force-push, reset or Git cleanup (the public repository clone was only `fetch`ed, in the sandbox); the user's Windows tree was not touched; earlier ZIPs and the 5A local backup were left in place.
+
+**Done:** read-only `SELECT`s against the hosted catalog and migration history (listed in the report); static analysis; local tests; disposable databases (`kayad5e_owner_disposable`, `kayad5e_priv_disposable`, loopback only, names end `_disposable`) and a disposable local stack with stub providers; new source/doc files in this archive only.

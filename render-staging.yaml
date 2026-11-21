@@ -1,0 +1,111 @@
+# render-staging.yaml — Kayad Backend Staging Environment
+# Deploy on Render: Create separate service for staging
+
+services:
+  - type: web
+    name: kayad-backend-staging
+    env: node
+    region: oregon
+    plan: starter
+    buildCommand: cd backend && npm ci
+    startCommand: cd backend && node bootstrap.js
+    healthCheckPath: /health/live
+    autoDeploy: true
+    disk:
+      name: uploads-staging
+      mountPath: /app/uploads
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: staging
+      - key: SESSION_SECRET
+        sync: false
+      - key: CUSTOM_DOMAIN
+        value: staging.kayad.space
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: REFRESH_TOKEN_SECRET
+        sync: false
+      - key: FRONTEND_URL
+        value: https://kayad-motors-staging.vercel.app
+      - key: EXTRA_CORS_ORIGINS
+        sync: false
+      - key: WEBHOIST_EMAIL
+        sync: false
+      - key: SEED_ADMIN_EMAIL
+        sync: false
+      - key: SEED_ADMIN_PASSWORD
+        sync: false
+      - key: MPESA_ENV
+        value: sandbox
+      - key: MPESA_CONSUMER_KEY
+        sync: false
+      - key: MPESA_CONSUMER_SECRET
+        sync: false
+      - key: MPESA_SHORTCODE
+        sync: false
+      - key: MPESA_PASSKEY
+        sync: false
+      - key: MPESA_CALLBACK_URL
+        value: https://kayad-backend-staging.onrender.com/api/payments/callback
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: POSTHOG_API_KEY
+        sync: false
+      - key: POSTHOG_HOST
+        value: https://us.i.posthog.com
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: kayad-redis-staging
+          property: connectionString
+      - key: REDIS_HOST
+        value: 127.0.0.1
+      - key: REDIS_PORT
+        value: "6379"
+      - key: REDIS_PASSWORD
+        sync: false
+      - key: AT_API_KEY
+        sync: false
+      - key: AT_USERNAME
+        sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_FROM_EMAIL
+        value: staging@kayad.space
+      - key: BREVO_FROM_NAME
+        value: KAYAD Staging
+      - key: BREVO_WEBHOOK_TOKEN
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
+        sync: false
+      - key: TWILIO_WHATSAPP_NUMBER
+        sync: false
+      - key: ESCROW_ACCOUNT_NUMBER
+        sync: false
+      - key: ESCROW_BANK_NAME
+        value: Equity Bank Kenya
+      - key: ADMIN_EMAIL
+        value: admin-staging@kayad.space
+      - key: ADMIN_PHONE
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
+      - key: APP_VERSION
+        value: 2.0.0-staging
+      - key: APP_NAME
+        value: Kayad Staging
+
+# Background queue workers are started by the backend worker manager when Redis is configured.
+# A separate worker service is intentionally not declared here to avoid launching a nonexistent
+# scripts/startWorkers.js entrypoint and duplicating workers.

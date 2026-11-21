@@ -1,0 +1,250 @@
+import { describeDealerDecisionError, isReasonValid, DEALER_REASON_MIN } from '../../utils/dealerDecision';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { adminAPI } from '../../api/api';
+import { useToast } from '../../context/ToastContext';
+import AdminLoadNotice from '../../components/admin/AdminLoadNotice';
+import DealerApprovalDialog from '../../components/admin/DealerApprovalDialog';
+import DealerPlanDialog from '../../components/admin/DealerPlanDialog';
+import { formatDate, initials } from '../../utils/helpers';
+
+const ROLE_BADGE = { user: 'badge-blue', dealer: 'badge-gold', admin: 'badge-red', superadmin: 'badge-red', webhoist: 'badge-red', individual_seller: 'badge-blue' };
+const isBanned = (u) => Boolean(u.isBanned ?? u.is_banned);
+const getStatus = (u) => {
+  if (isBanned(u)) return { label: 'Banned', className: 'badge-red' };
+  if (u.status === 'rejected') return { label: 'Rejected', className: 'badge-red' };
+  if (u.status === 'pending' || (u.role === 'dealer' && !u.approved)) return { label: 'Pending approval', className: 'badge-orange' };
+  return { label: 'Active', className: 'badge-green' };
+};
+
+function UserRow({ user: u, onBan, onApprove, onPlan, actionId }) {
+  const banned = isBanned(u);
+  const needsApproval = u.role === 'dealer' && (u.status === 'pending' || u.approved === false);
+  const status = getStatus(u);
+  return (
+    <tr>
+      <td><span className="kayad-user-avatar" aria-hidden="true">{initials(u.name || u.email || '?')}</span></td>
+      <td>
+        <div className="kayad-user-name">{u.name || 'Name unavailable'}</div>
+        <div className="kayad-user-subtle">{u.location || 'Location not provided'}</div>
+      </td>
+      <td className="kayad-user-email">{u.email || '—'}</td>
+      <td><span className={`badge ${ROLE_BADGE[u.role] || 'badge-muted'}`}>{(u.role || 'user').replaceAll('_', ' ')}</span></td>
+      <td>{u.phone || '—'}</td>
+      <td>{u.createdAt || u.created_at ? formatDate(u.createdAt || u.created_at) : '—'}</td>
+      <td><span className={`badge ${status.className}`}>{status.label}</span></td>
+      <td>
+        <div className="kayad-user-row-actions">
+          {needsApproval && u.application?.blockers?.length > 0 && (
+            <span className="kayad-user-subtle" title={u.application.blockers.map((b) => b.message).join(' ')} style={{ alignSelf: 'center' }}>Application incomplete</span>
+          )}
+          {needsApproval && (
+            <button type="button" className="btn btn-sm btn-primary" disabled={actionId === `${u._id}-app`} onClick={() => onApprove(u)}>
+              {actionId === `${u._id}-app` ? 'Approving…' : 'Approve'}
+            </button>
+          )}
+          {u.role === 'dealer' && !needsApproval && (
+            <button type="button" className="btn btn-sm btn-outline" onClick={() => onPlan(u)}>Plan</button>
+          )}
+          <button type="button" className="btn btn-sm btn-outline" disabled={actionId === `${u._id}-ban`} onClick={() => onBan(u)}>
+            {actionId === `${u._id}-ban` ? 'Saving…' : banned ? 'Unban' : 'Ban'}
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+export default function AdminUsers() {
+  const { toast } = useToast();
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
+  const [loadError, setLoadError] = useState(null);
+  const [lastSuccessAt, setLastSuccessAt] = useState(null);
+  const loadedKeyRef = useRef(null);
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(null);
+  const [summary, setSummary] = useState(null);
+  const [actionId, setActionId] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    const queryKey = JSON.stringify([page, search.trim(), roleFilter, statusFilter]);
+    try {
+      const params = { page, limit: 20 };
+      if (search.trim()) params.search = search.trim();
+      if (roleFilter !== 'all') params.role = roleFilter;
+      if (statusFilter === 'banned') params.banned = true;
+      if (statusFilter === 'pending') params.pendingApproval = true;
+      const data = await adminAPI.users(params);
+      const rows = data?.users ?? data?.data;
+      if (!Array.isArray(rows)) throw new Error('The server returned an unexpected user-list response.');
+      setUsers(rows);
+      setTotal(Number.isFinite(Number(data?.pagination?.total ?? data?.total)) ? Number(data?.pagination?.total ?? data?.total) : rows.length);
+      setSummary(data?.summary && typeof data.summary === 'object' ? data.summary : null);
+      setHasLoaded(true);
+      setLastSuccessAt(new Date());
+      loadedKeyRef.current = queryKey;
+    } catch (err) {
+      setLoadError(err || new Error('User records could not be loaded.'));
+      // Keep the previous summary/rows (labelled stale) only when they answer the SAME query; never relabel another filter's rows.
+      if (loadedKeyRef.current !== queryKey) { setUsers([]); setTotal(null); setSummary(null); }
+      toast('Could not load users. Existing records have not been changed.', 'error');
+    } finally {
+      setLoading(false);
+    }
+  }, [page, search, roleFilter, statusFilter, toast]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleBan = useCallback(async (u) => {
+    const currentBanned = isBanned(u);
+    const action = currentBanned ? 'Unban' : 'Ban';
+    if (!window.confirm(`${action} ${u.name || u.email || 'this user'}?`)) return;
+    setActionId(`${u._id}-ban`);
+    try {
+      const res = await adminAPI.toggleBan(u._id, !currentBanned);
+      const confirmed = typeof res?.isBanned === 'boolean' ? res.isBanned : typeof res?.user?.isBanned === 'boolean' ? res.user.isBanned : null;
+      if (confirmed === null) {
+        await load();
+        toast('Ban request returned no confirmed status. The list has been refreshed.', 'error');
+        return;
+      }
+      setUsers(prev => prev.map(x => (x._id && x._id === u._id) ? { ...x, isBanned: confirmed, is_banned: confirmed } : x));
+      setSummary(prev => prev ? { ...prev, banned: Math.max(0, Number(prev.banned || 0) + (confirmed === currentBanned ? 0 : confirmed ? 1 : -1)) } : prev);
+      toast(confirmed ? 'User banned' : 'User unbanned', 'success');
+    } catch (err) {
+      toast(err?.response?.data?.message || 'Could not change the ban status. No success was assumed.', 'error');
+    } finally {
+      setActionId(null);
+    }
+  }, [load, toast]);
+
+  const [readiness, setReadiness] = useState(null);
+  useEffect(() => {
+    let live = true;
+    // Advisory only: a failed check shows nothing rather than a false alarm.
+    adminAPI.dealerOnboardingReadiness?.().then((r) => { if (live) setReadiness(r); }).catch(() => {});
+    return () => { live = false; };
+  }, []);
+  const [approving, setApproving] = useState(null); // the dealer row whose approval dialog is open
+  const [approveError, setApproveError] = useState(null);
+  const [planFor, setPlanFor] = useState(null); // approved dealer whose listing-plan dialog is open
+  const handleApprove = useCallback((u) => { setApproveError(null); setApproving(u); }, []);
+  const closeApprove = useCallback(() => { setApproving(null); setApproveError(null); }, []);
+
+  const confirmApprove = useCallback(async (reason) => {
+    // The server requires an auditable reason for every dealer decision; it is the operator's, never a canned value.
+    const targetId = approving?._id;
+    if (!targetId) { setApproveError('This row has no account id, so it cannot be approved. Nothing was changed.'); return; }
+    setApproveError(null);
+    setActionId(`${targetId}-app`);
+    try {
+      const res = await adminAPI.approveDealer(targetId, { reason });
+      // Only the approved account's row changes - matched by its exact id, never by a value that could be shared or missing.
+      setUsers(prev => prev.map(x => (x._id && x._id === targetId) ? { ...x, approved: true, status: 'approved' } : x));
+      if (res?.changed !== false) setSummary(prev => prev ? { ...prev, pendingApproval: Math.max(0, Number(prev.pendingApproval || 0) - 1) } : prev);
+      toast(res?.changed === false ? 'This dealer was already approved.' : 'Dealer approved', 'success');
+      setApproving(null);
+      await load(); // reconcile every row and count from the server
+    } catch (err) {
+      // Stay open with the server's own reason so the operator can act on it; a failed approval is never shown as done.
+      setApproveError(describeDealerDecisionError(err, 'Dealer approval failed. No change was assumed.'));
+    } finally {
+      setActionId(null);
+    }
+  }, [approving, toast, load]);
+
+  const stats = [
+    { label: 'Total users', value: summary?.totalUsers, note: 'All accounts', tone: 'brand', mark: 'U' },
+    { label: 'Administrators', value: summary?.admins, note: 'Privileged roles', tone: 'purple', mark: 'A' },
+    { label: 'Dealers', value: summary?.dealers, note: 'Dealer accounts', tone: 'blue', mark: 'D' },
+    { label: 'Banned', value: summary?.banned, note: 'Restricted accounts', tone: 'danger', mark: '!' },
+    { label: 'Pending approval', value: summary?.pendingApproval, note: 'Dealer and seller queue', tone: 'warning', mark: '…' },
+  ];
+
+  if (loading && !hasLoaded) {
+    return <div className="page loading-center" role="status" aria-live="polite"><div className="spinner" /><span>Loading user management…</span></div>;
+  }
+
+  return (
+    <div className="page kayad-users-page">
+      {readiness && readiness.ready === false && !readiness.unknown && readiness.checks?.some((c) => c.ok === false) && (
+        <div role="alert" className="card" style={{ padding: 16, marginBottom: 16, border: '1px solid var(--warning, #176B87)' }}>
+          <strong>Dealer onboarding is not fully set up in the database.</strong>
+          <div style={{ fontSize: 13, marginTop: 4 }}>{readiness.message}</div>
+          <ul style={{ fontSize: 13, margin: '8px 0 0 18px' }}>
+            {readiness.checks.filter((c) => c.ok === false).map((c) => <li key={c.id}>{c.label}: missing</li>)}
+          </ul>
+        </div>
+      )}
+      <div className="kayad-users-heading">
+        <div>
+          <div className="section-eyebrow">Business operations</div>
+          <h1>User Management</h1>
+          <p>Review accounts, monitor access status and manage user actions from one workspace.</p>
+        </div>
+        <button type="button" className="btn btn-outline kayad-users-refresh" onClick={load} disabled={loading}>
+          <span aria-hidden="true">↻</span> {loading ? 'Refreshing…' : 'Refresh records'}
+        </button>
+      </div>
+
+      <div className="kayad-users-stat-grid" aria-label="User account summary">
+        {stats.map(s => (
+          <section className={`kayad-users-stat kayad-users-stat--${s.tone}`} key={s.label}>
+            <div className="kayad-users-stat-top"><span>{s.label}</span><span className="kayad-users-stat-mark" aria-hidden="true">{s.mark}</span></div>
+            <div className="kayad-users-stat-value">{Number.isFinite(Number(s.value)) && s.value !== null && s.value !== undefined ? Number(s.value).toLocaleString() : '—'}</div>
+            <div className="kayad-users-stat-note">{s.note}</div>
+          </section>
+        ))}
+      </div>
+
+      <AdminLoadNotice error={loadError} subject="User records" hasData={users.length > 0} lastSuccessAt={lastSuccessAt} onRetry={load} retrying={loading}
+        unverifiedNote="Summary values are not replaced with zero when the server is unavailable." />
+
+      <section className="kayad-users-workspace" aria-label="User records">
+        <div className="kayad-users-workspace-heading">
+          <div><h2>Accounts</h2><p>Search, filter and review account access.</p></div>
+          <span className="kayad-users-record-count">{total === null ? 'Count unavailable' : `${total.toLocaleString()} matching ${total === 1 ? 'account' : 'accounts'}`}</span>
+        </div>
+        <div className="data-table-controls kayad-users-filters">
+          <label className="kayad-users-search"><span className="kayad-users-search-icon" aria-hidden="true">⌕</span><input className="input" placeholder="Search name or email" value={search} onChange={e => { setSearch(e.target.value); setPage(1); }} aria-label="Search users by name or email" /></label>
+          <label className="kayad-users-filter"><span>Role</span><select className="input" value={roleFilter} onChange={e => { setRoleFilter(e.target.value); setPage(1); }} aria-label="Filter by role"><option value="all">All roles</option><option value="user">Users</option><option value="dealer">Dealers</option><option value="individual_seller">Private sellers</option><option value="admin">Admins</option><option value="superadmin">Super Admins</option></select></label>
+          <label className="kayad-users-filter"><span>Status</span><select className="input" value={statusFilter} onChange={e => { setStatusFilter(e.target.value); setPage(1); }} aria-label="Filter by status"><option value="all">All statuses</option><option value="pending">Pending approval</option><option value="banned">Banned</option></select></label>
+        </div>
+
+        <div className="data-table kayad-users-table-wrap" aria-busy={loading}>
+          <table>
+            <thead><tr><th aria-label="Avatar" className="kayad-users-avatar-col"></th><th>Name</th><th>Email</th><th>Role</th><th>Phone</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+              {loading && hasLoaded && <tr><td colSpan={8} className="kayad-users-table-message">Refreshing account records…</td></tr>}
+              {!loading && users.map(u => <UserRow key={u._id} user={u} onBan={handleBan} onApprove={handleApprove} onPlan={setPlanFor} actionId={actionId} />)}
+              {!loading && !loadError && users.length === 0 && <tr><td colSpan={8} className="kayad-users-empty"><span className="kayad-users-empty-icon" aria-hidden="true">⌕</span><strong>{search || roleFilter !== 'all' || statusFilter !== 'all' ? 'No matching accounts' : 'No user records returned'}</strong><span>{search || roleFilter !== 'all' || statusFilter !== 'all' ? 'Try changing the search or filters.' : 'The request succeeded, but the server returned an empty user list.'}</span></td></tr>}
+              {loadError && users.length === 0 && <tr><td colSpan={8} className="kayad-users-table-message">The table is unavailable until user records can be retrieved.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+
+        <div className="kayad-users-pagination">
+          <span>{total === null ? 'Total unavailable' : `${total.toLocaleString()} total matching accounts`}</span>
+          <div className="kayad-users-page-controls">
+            <button className="btn btn-sm btn-outline" disabled={page <= 1 || loading} onClick={() => setPage(p => p - 1)}>← Previous</button>
+            <span aria-current="page">Page {page}</span>
+            <button className="btn btn-sm btn-outline" disabled={loading || total === null || page * 20 >= total} onClick={() => setPage(p => p + 1)}>Next →</button>
+          </div>
+        </div>
+      </section>
+      {planFor && (
+        <DealerPlanDialog dealer={planFor} onClose={() => setPlanFor(null)}
+          onGranted={(pkg) => { toast(pkg === 'none' ? 'Plan removed' : 'Plan granted. The dealer can now list vehicles.', 'success'); setPlanFor(null); }} />
+      )}
+      {approving && (
+        <DealerApprovalDialog dealer={approving} busy={actionId === `${approving._id}-app`} error={approveError} onConfirm={confirmApprove} onCancel={closeApprove} />
+      )}
+    </div>
+  );
+}

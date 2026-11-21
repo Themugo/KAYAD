@@ -1,0 +1,105 @@
+import React from 'react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+
+const svc = vi.hoisted(() => ({ fetchList: vi.fn(), getFavorites: vi.fn() }));
+vi.mock('../../services/auctionService', () => ({ fetchList: svc.fetchList }));
+vi.mock('../../services/favoriteApi', () => ({ getFavorites: svc.getFavorites, toggleFavorite: vi.fn(), FavoriteApiError: class extends Error {} }));
+import AuctionsView from '../../features/AuctionsView';
+
+const live = { id: 'a1', carId: 'a1', status: 'active', startingBid: 100, highestBid: 150, startTime: null, endTime: new Date(Date.now() + 3600_000).toISOString(), bidIncrement: 10, bidCount: 2, allowBid: true, allowBuy: false, car: { title: 'Toyota Prado', brand: 'Toyota', model: 'Prado' } };
+const ended = { ...live, id: 'a2', carId: 'a2', status: 'ended', endTime: new Date(Date.now() - 3600_000).toISOString(), car: { title: 'Nissan X-Trail' } };
+const boom = () => Object.assign(new Error('Internal server error'), { status: 500 });
+const renderView = () => render(<MemoryRouter><AuctionsView user={null} /></MemoryRouter>);
+
+beforeEach(() => { vi.clearAllMocks(); svc.getFavorites.mockResolvedValue({ favorites: [] }); window.history.replaceState({}, '', '/'); });
+
+describe('AuctionsView load failure handling', () => {
+  it('one failing list (scheduled) does not blank live/completed and is not shown as zero', async () => {
+    svc.fetchList.mockImplementation(async ({ status }: { status: string }) => {
+      if (status === 'draft') throw boom();
+      return { auctions: status === 'live' ? [live] : [ended] };
+    });
+    renderView();
+    await screen.findByText(/Live now responded, but Starting soon could not be loaded/);
+    expect(screen.getAllByText('Toyota Prado').length).toBeGreaterThan(0);          // live data still shown
+    const scheduledTab = screen.getByRole('tab', { name: /Starting soon/ });
+    expect(scheduledTab.textContent).toContain('—');                                 // unavailable, not 0
+    expect(scheduledTab.textContent).not.toMatch(/\b0\b/);
+    fireEvent.click(scheduledTab);
+    expect(screen.queryByText('No auctions are scheduled yet.')).toBeNull();          // no false "empty" claim
+    expect(screen.getByText(/Scheduled auctions could not be loaded/)).toBeTruthy();
+    expect(screen.queryByText(/Internal server error/)).toBeNull();
+  });
+
+  it('when everything fails the error is shown and nothing claims the floor is empty', async () => {
+    svc.fetchList.mockRejectedValue(boom());
+    renderView();
+    await screen.findByText('Live auctions are temporarily unavailable');
+    expect(screen.queryByText(/The auction floor is quiet right now/)).toBeNull();
+    expect(screen.queryByText('Nothing live this moment.')).toBeNull();
+    expect(screen.getByText(/Live auctions are temporarily unavailable/)).toBeTruthy();
+  });
+
+  it('reports the error beside each failed section instead of attributing one error to every section', async () => {
+    svc.fetchList.mockImplementation(async ({ status }: { status: string }) => {
+      if (status === 'draft') throw Object.assign(new Error('setup table unavailable'), { status: 503 });
+      if (status === 'ended') throw Object.assign(new Error('database timeout'), { status: 504 });
+      return { auctions: [live] };
+    });
+    renderView();
+    await screen.findByText(/Live now responded, but Starting soon and Completed could not be loaded/);
+    expect(screen.queryByText(/setup table unavailable|database timeout/)).toBeNull();
+    expect(screen.getAllByText('Toyota Prado').length).toBeGreaterThan(0);
+  });
+
+  it('keeps the last successful rows visible if a later refresh fails', async () => {
+    let scheduledCalls = 0;
+    svc.fetchList.mockImplementation(async ({ status }: { status: string }) => {
+      if (status === 'draft') {
+        scheduledCalls += 1;
+        if (scheduledCalls > 1) throw boom();
+        return { auctions: [] };
+      }
+      return { auctions: status === 'live' ? [live] : [ended] };
+    });
+    renderView();
+    expect((await screen.findAllByText('Toyota Prado')).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole('button', { name: /Refresh/ }));
+    await screen.findByText(/Live now responded, but Starting soon could not be loaded/);
+    expect(screen.getAllByText('Toyota Prado').length).toBeGreaterThan(0);
+    expect(screen.queryByText(/Internal server error/)).toBeNull();
+  });
+
+  it('a genuinely empty, healthy backend still says the floor is quiet', async () => {
+    svc.fetchList.mockResolvedValue({ auctions: [] });
+    renderView();
+    await waitFor(() => expect(screen.getAllByText(/auction floor is quiet right now/i).length).toBeGreaterThan(0));
+    expect(screen.queryByText(/could not be loaded/)).toBeNull();
+  });
+
+  it('treats a malformed fulfilled list envelope as unavailable, not an empty list', async () => {
+    svc.fetchList.mockImplementation(async ({ status }: { status: string }) => status === 'live'
+      ? {}
+      : { auctions: status === 'ended' ? [ended] : [] });
+    renderView();
+    await screen.findByText(/Live auction data could not be loaded/);
+    expect(screen.getByRole('tab', { name: /Live now/ }).textContent).toContain('—');
+    expect(screen.queryByText('The auction floor is quiet right now.')).toBeNull();
+    // The live failure must not blank the completed list: switch tab and confirm its real record is still present.
+    fireEvent.click(screen.getByRole('tab', { name: /Completed/ }));
+    expect((await screen.findAllByText('Nissan X-Trail')).length).toBeGreaterThan(0);
+  });
+
+  it('does not present a failed saved-auction request as a verified empty watchlist', async () => {
+    svc.fetchList.mockResolvedValue({ auctions: [] });
+    svc.getFavorites.mockRejectedValue(new Error('service unavailable'));
+    render(<MemoryRouter><AuctionsView user={{ id: 'u1' } as any} /></MemoryRouter>);
+    fireEvent.click(await screen.findByRole('tab', { name: /Saved for you/ }));
+    await screen.findByText(/Saved auctions could not be loaded/);
+    expect(screen.queryByText('Your watchlist is ready for its first favourite.')).toBeNull();
+    expect(screen.getByRole('button', { name: /Retry saved auctions/ })).toBeTruthy();
+  });
+
+});

@@ -1,0 +1,34 @@
+PASS U1-desktop public home renders the KAYAD shell
+PASS U2-desktop active vehicle detail opens with its title
+PASS U3-desktop soft-deleted vehicle is not shown publicly (deep link)
+PASS U4-desktop marketplace lists the active fixture and never the deleted one
+PASS U1-4-desktop no uncaught page errors
+PASS U1-4-desktop no 5xx API responses
+PASS U1-phone public home renders the KAYAD shell
+PASS U1-phone home has no horizontal overflow
+PASS U2-phone active vehicle detail opens with its title
+PASS U3-phone soft-deleted vehicle is not shown publicly (deep link)
+PASS U4-phone marketplace lists the active fixture and never the deleted one
+PASS U4-phone marketplace has no horizontal overflow
+PASS U1-4-phone no uncaught page errors
+PASS U1-4-phone no 5xx API responses
+PASS U5 admin opens the Business Command Centre
+PASS U6 admin opens the CMS Content Studio (Phase B build fix) without crashing
+PASS U7 admin users page lists the seeded dealer
+PASS U8 admin is refused the super-admin-only control room
+PASS U5-8 admin no uncaught page errors
+FAIL U5-8 admin no 5xx API responses :: 500 /api/admin/alerts?limit=1&read=false | 500 /api/admin/alerts?limit=1&read=false | 500 /api/admin/alerts?limit=1&read=false | 500 /api/admin/alerts?limit=1&read=false | 500 /api/admin/alerts?limit=1&read=false
+PASS U9 Command Centre renders on a phone without horizontal overflow
+PASS U9 admin-phone no uncaught page errors
+FAIL U9 admin-phone no 5xx API responses :: 500 /api/admin/alerts?limit=1&read=false
+PASS U10 dealer opens the Dealer Hub
+PASS U10 dealer no uncaught page errors
+PASS U10 dealer no 5xx API responses
+PASS U11 buyer cannot open the Business Command Centre
+phase_c1_ui_journeys: pass=25 fail=2
+A11Y home-desktop: critical=0 serious=1 color-contrast(serious,18)
+A11Y marketplace-desktop: critical=0 serious=1 color-contrast(serious,18)
+A11Y home-phone: critical=0 serious=2 aria-prohibited-attr(serious,1) color-contrast(serious,13)
+A11Y marketplace-phone: critical=0 serious=2 aria-prohibited-attr(serious,1) color-contrast(serious,13)
+A11Y admin-command-centre: critical=1 serious=1 button-name(critical,1) color-contrast(serious,13)
+A11Y dealer-hub: critical=1 serious=0 button-name(critical,1)

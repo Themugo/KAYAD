@@ -1,0 +1,83 @@
+PASS B1 buyer logs in and opens the personal dashboard (buyer content)
+PASS B2 dashboard offers the seller application in the same account; no seller workspace action
+PASS B3 submitting the application shows the REAL pending state from the server
+PASS B4 database: one pending capability row for the buyer's users.id; role/status untouched
+PASS B5 pending: buyer sections still present, no seller workspace entry
+PASS B6 pending seller is NOT admitted to Seller Studio via /sell (sees status, no My Listings)
+PASS B1-6 buyer no uncaught page errors
+PASS B1-6 buyer no 5xx API responses
+PASS U1 buyer cannot open the application review page
+PASS U2 buyer's direct self-approval request from the browser is refused (401/403) and state unchanged
+PASS A1 administrator opens the review page inside the admin shell
+PASS A2 the pending queue shows the buyer's real application
+PASS A3 database: approved by the admin account, buyer identity untouched
+PASS A4 the UI refreshed from the server: the application left the Pending queue
+PASS D1 approved: buyer sections AND seller workspace in ONE dashboard of the same account
+PASS D2 alias /sell admits the approved buyer to Seller Studio
+PASS D2 alias /sell-car admits the approved buyer to Seller Studio
+PASS D2 alias /sell-vehicle admits the approved buyer to Seller Studio
+PASS D2 alias /?nav=seller-platform admits the approved buyer to Seller Studio
+PASS L1 approved buyer creates a listing through the real API (same account)
+PASS L2 the listing appears in the seller's own management view (real API)
+PASS L3 anonymous visitor can open the public vehicle detail deep link
+PASS L4 the public marketplace lists the vehicle
+PASS KS1 keyword search by a unique brand token finds the listing in the real UI
+PASS KS2 a keyword that matches nothing does not show the listing
+PASS KS3.1 hostile keyword "50%_off" neither crashes the page nor widens results
+PASS KS3.2 hostile keyword "a\",id.is.null,\"b" neither crashes the page nor widens results
+PASS KS3.3 hostile keyword "x*,y)(z" neither crashes the page nor widens results
+PASS KS3.4 hostile keyword "\\\\" neither crashes the page nor widens results
+PASS KS4 the search recovers and finds the listing again
+PASS KS anon-search no uncaught page errors
+PASS KS anon-search no 5xx API responses
+PASS S1 database: suspended, listing hidden, same owner, event tracked
+PASS S2 direct URL to the suspended seller's listing no longer shows it (fresh anonymous browser)
+PASS S3 the already-open public page does not show the hidden listing after refresh (cache refreshed)
+PASS S4 the marketplace no longer lists it
+PASS S5 buyer dashboard stays available and shows the REAL suspended status
+PASS S6 suspended seller is not admitted to Seller Studio
+PASS S7 stale-state check: a seller-only write from the suspended session is refused by the backend (401/403)
+PASS R1 database: approved again, listing restored to available, ownership intact
+PASS R2 the listing is publicly visible again after reinstatement
+PASS R3 reinstated seller is admitted to Seller Studio again
+PASS V1 database: revoked and listing hidden
+PASS V2 buyer dashboard shows the REAL revoked status; buyer sections remain
+PASS V3 administrator can reinstate a revoked seller; listing restored
+PASS X1 second buyer applies; pending
+PASS X2 rejected with a reason recorded
+PASS X3 rejected buyer sees the REAL rejection + reason, may re-apply, buyer dashboard intact
+PASS X4 rejected seller is not admitted to Seller Studio
+PASS X5 re-application after rejection returns to pending
+PASS DL1 dealer owner opens the Dealer Hub (existing workflow intact)
+PASS DL2 an APPROVED private seller does not get the Dealer Hub
+PASS DL3 approved private seller is refused by the dealer-business API (403)
+PASS DL4 no dealer record was created for any personal seller
+PASS DL dealer no uncaught page errors
+PASS DL dealer no 5xx API responses
+PASS N1 session restoration: reloading /dashboard keeps the buyer signed in
+PASS N2 unauthenticated /dashboard does not leak the dashboard (login prompt)
+PASS N3 unauthenticated /sell does not enter Seller Studio and does not redirect-loop
+PASS N4 anonymous cannot reach the admin review page
+PASS N5 logout through the UI ends the session (dashboard no longer accessible)
+PASS AL1 admin console loads and the alerts endpoint answers 200 (no 500 from a missing table)
+PASS AL2 the seeded alert is returned by the admin alerts API
+PASS AL3 a non-admin account is denied the alerts API (403/401)
+PASS AL4 the System Alerts card shows the alert text from data.description (13H fix; was 'Alert message unavailable')
+PASS AL5 no 'Alert message unavailable' placeholder is shown for the writer-shaped alert
+PASS AL admin-alerts no uncaught page errors
+PASS AL admin-alerts no 5xx API responses
+PASS M1 phone: personal dashboard (pending seller state) renders without horizontal overflow
+PASS M2 phone: admin review page renders without horizontal overflow
+PASS A admin no uncaught page errors
+PASS A admin no 5xx API responses
+PASS M phone no uncaught page errors
+PASS M phone no 5xx API responses
+PASS M admin-phone no uncaught page errors
+PASS M admin-phone no 5xx API responses
+phase13h_ui_journeys: pass=76 fail=0
+A11Y buyer-dashboard-none: critical=0 serious=0 
+A11Y admin-review-pending: critical=0 serious=0 
+A11Y seller-studio-approved: critical=0 serious=0 
+A11Y dealer-hub: critical=0 serious=0 
+A11Y admin-console: critical=0 serious=0 
+A11Y buyer-dashboard-phone: critical=0 serious=0 

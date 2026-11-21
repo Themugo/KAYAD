@@ -1,0 +1,78 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
+const root = process.cwd();
+const fail = (message) => { console.error(`PHASE 21 VALIDATION: FAIL - ${message}`); process.exit(1); };
+const exists = (rel) => fs.existsSync(path.join(root, rel));
+const read = (rel) => fs.readFileSync(path.join(root, rel), 'utf8');
+
+const removed = [
+  'src/features/DataExchange',
+  'src/features/DigitalInspection',
+  'src/features/GovernanceCenter',
+  'src/features/OperationsCenter',
+  'src/features/Platform',
+  'src/features/Quality',
+  'src/features/PartnerPlatform',
+  'src/features/CommunicationsHub',
+  'src/features/InspectionBusinessCenter',
+  'src/features/CMS',
+  'src/features/IAMPlatform',
+  'src/features/RevenuePlatform',
+  'src/features/VehiclePassport',
+  'src/features/OwnershipPlatform/pages/OwnerGarage.tsx',
+  'src/features/AuctionsView/components',
+  'src/features/AuctionsView/hooks',
+  'src/components/CreateAuctionModal.tsx',
+];
+for (const rel of removed) if (exists(rel)) fail(`retired demo/dormant surface still exists: ${rel}`);
+
+const sourceFiles = [];
+function walk(dir) {
+  for (const name of fs.readdirSync(dir)) {
+    if (['node_modules', 'dist', '.git'].includes(name)) continue;
+    const full = path.join(dir, name);
+    const stat = fs.statSync(full);
+    if (stat.isDirectory()) walk(full);
+    else if (/\.(tsx?|jsx?|mjs|cjs)$/.test(name)) sourceFiles.push(full);
+  }
+}
+walk(path.join(root, 'src'));
+
+const forbiddenImports = /(AuctionsView\/components\/|useAuctionPageConfig|features\/(DataExchange|DigitalInspection|GovernanceCenter|OperationsCenter|Platform|Quality|PartnerPlatform|CommunicationsHub|InspectionBusinessCenter|CMS|IAMPlatform|RevenuePlatform|VehiclePassport))/;
+for (const file of sourceFiles) {
+  const text = fs.readFileSync(file, 'utf8');
+  if (forbiddenImports.test(text)) fail(`source references retired module: ${path.relative(root, file)}`);
+}
+
+const seller = read('src/features/PrivateSellerPlatform/pages/PersonalSellingModule.tsx');
+// Own-listings are loaded once by the unified DashboardHub (single data owner) and passed to the selling module.
+const sellerListingsOwner = read('src/components/DashboardHub.tsx');
+// Match the retired setter as a complete identifier. A substring check falsely
+// flagged the legitimate `setListingsError` state setter as the old `setListings` token.
+for (const token of ['SAMPLE_', 'KDG 492A', 'Jimmy Mugo', '7,300,000', 'buyerProgress', 'requiredAction']) {
+  if (seller.includes(token)) fail(`active private seller dashboard contains stale/fabricated token: ${token}`);
+}
+if (/\bsetListings\b/.test(seller)) fail('active private seller dashboard contains stale/fabricated token: setListings');
+if (!/createCar\b/.test(seller)) fail('private seller listing creation is not wired to canonical vehicle service');
+if (!/getMyListings\b/.test(sellerListingsOwner)) fail('private seller inventory does not use canonical own-listings service');
+if (!/publishedCarId/.test(seller) || !/publishError/.test(seller)) fail('private seller publication state is not fail-closed');
+if (/MOCK_|SAMPLE_/i.test(seller)) fail('active private seller platform contains fabricated data language');
+
+const activeAuction = read('src/features/AuctionsView.tsx');
+// Canonical tabbed browsing (live/draft/ended) uses fetchList({status}); the
+// homepage rail separately uses fetchActiveAuctions via marketplaceCore.ts.
+// Either call is real, backend-driven auction transport (GET /api/auctions or
+// GET /api/auctions/active, both served from live auction_setups/Car records).
+if (!activeAuction.includes('fetchActiveAuctions') && !activeAuction.includes('fetchList(')) fail('active auction page is not backend-driven');
+if (activeAuction.includes('SAMPLE_') || activeAuction.includes('MOCK_')) fail('active auction page contains local sample data');
+
+const buyerIndex = read('src/features/OwnershipPlatform/index.ts');
+if (!buyerIndex.includes("./pages/PersonalBuyingModule")) fail('active PersonalBuyingModule export was lost (buying is a section of the unified personal dashboard)');
+if (buyerIndex.includes('OwnerGarage')) fail('retired OwnerGarage remains exported');
+
+console.log('PHASE 21 DORMANT DEMO SURFACE VALIDATION: PASS');
+console.log(`Production source files scanned: ${sourceFiles.length}`);
+console.log('Retired demo/dormant feature surfaces: removed');
+console.log('Active private-seller mutations: fail-closed');
+console.log('Active auction browser: backend-driven');

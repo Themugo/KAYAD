@@ -1,0 +1,603 @@
+import express from "express";
+import { protect, dealerOnly, adminOnly, optionalAuth } from "../middleware/auth.js";
+
+import asyncHandler from "../middleware/asyncHandler.js";
+import { validateObjectId, validateCar, validateQuery, carListQuerySchema, validateResponse, carResponseSchema, carListResponseSchema } from "../middleware/validate.js";
+
+import upload, { handleUploadError, cleanupUploadsOnError } from "../middleware/upload.js"; // STAGE 5C.1
+import { uploadLimiter, createLimiter } from "../middleware/rateLimiter.js";
+import { cacheResponse, cacheResponseAnonymous, invalidateCache } from "../middleware/cacheMiddleware.js";
+import { requirePublicListing } from "../middleware/publicListingVisibility.js"; // Phase 13F
+import { cacheVehicleSearch, invalidateVehicleSearchCache } from "../middleware/searchCache.js";
+import { trackCarSearch } from "../middleware/searchTracking.js";
+import { trackVehicleSearchLatency } from "../middleware/searchLatencyTracking.js";
+import { logActionFromReq } from "../utils/securityLogger.js";
+import { STAFF_ROLES, PERM } from "../config/roles.js";
+import { requireDealerVerification } from "../middleware/dealerVerification.js";
+import { sellerListingAccess } from "../middleware/sellerCapability.js"; // Phase 13E
+import { requirePermission } from "../middleware/rbac.js";
+import { MAX_LISTING_IMAGES_PER_REQUEST } from "../config/listingLimits.js";
+
+import {
+  getCars,
+  getMyListings,
+  getCar,
+  createCar,
+  updateCar,
+  deleteCar,
+  deleteCarImage,
+  setCoverImage,
+  addCarImages,
+} from "../controllers/carController.js";
+
+import { findAll, findById, findOne, create, update, remove, paginate } from "../db/index.js";
+import { getSupabase, isSupabaseConnected } from "../utils/supabase.js";
+import { closeAuction } from "../services/auctionClose.service.js";
+import { startAuction } from "../services/auctionLifecycle.service.js";
+import { getVehicleValuation } from "../services/vehicleValuation.service.js";
+import { transitionPersonalListing } from "../services/personalListingLifecycle.service.js";
+import { getPersonalSellerPerformance } from "../services/personalSellerInsights.service.js";
+
+const router = express.Router();
+
+// =============================
+// 🧑‍💼 DEALER DASHBOARD
+// =============================
+router.get(
+  "/dealer/my-cars",
+  protect,
+  sellerListingAccess({ write: false }),
+  asyncHandler(async (req, res) => {
+    const cars = await findAll("cars", {
+      filters: { dealer: req.user.id, deletedAt: { $exists: false } }, // 14.8: soft-deleted listings are not inventory
+      select: "title,price,images,views,clicks,bidsCount,createdAt,status,auctionStatus",
+      orderBy: "createdAt",
+      ascending: false,
+    });
+
+    res.json({
+      success: true,
+      data: cars,
+    });
+  }),
+);
+
+// =============================
+// 📊 DEALER ANALYTICS (UPGRADED 🔥)
+// =============================
+router.get(
+  "/dealer/analytics",
+  protect,
+  sellerListingAccess({ write: false }),
+  asyncHandler(async (req, res) => {
+    const dealerCars = await findAll("cars", {
+      filters: { dealer: req.user.id },
+      select: "views,clicks,bidsCount,price",
+    });
+
+    const stats = {
+      totalCars: dealerCars.length,
+      totalViews: dealerCars.reduce((s, c) => s + (c.views || 0), 0),
+      totalClicks: dealerCars.reduce((s, c) => s + (c.clicks || 0), 0),
+      totalBids: dealerCars.reduce((s, c) => s + (c.bidsCount || 0), 0),
+      avgPrice: dealerCars.length > 0 ? dealerCars.reduce((s, c) => s + (c.price || 0), 0) / dealerCars.length : 0,
+    };
+
+    res.json({
+      success: true,
+      data: stats,
+    });
+  }),
+);
+
+// =============================
+// =============================
+// 🚗 PUBLIC ROUTES
+// =============================
+
+// 🔍 GET ALL CARS
+/**
+ * @swagger
+ * /api/v1/cars:
+ *   get:
+ *     summary: Get all cars
+ *     description: Get paginated list of cars with optional filters
+ *     tags: [Cars]
+ *     security: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *         description: Items per page
+ *       - in: query
+ *         name: brand
+ *         schema:
+ *           type: string
+ *         description: Filter by brand
+ *       - in: query
+ *         name: minPrice
+ *         schema:
+ *           type: number
+ *         description: Minimum price
+ *       - in: query
+ *         name: maxPrice
+ *         schema:
+ *           type: number
+ *         description: Maximum price
+ *     responses:
+ *       200:
+ *         description: Cars retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       type: array
+ *                       items:
+ *                         $ref: '#/components/schemas/Car'
+ *                     meta:
+ *                       $ref: '#/components/schemas/PaginationMeta'
+ */
+// 📋 GET MY LISTINGS (real, signed-in seller's own inventory, every
+// status) - placed before the public "/" route; no /:id pattern
+// exists in this file that would otherwise capture "/my-listings".
+router.get("/my-listings", protect, asyncHandler(getMyListings));
+
+router.get("/my-listing-performance", protect, sellerListingAccess({ write: false }), asyncHandler(async (req, res) => {
+  if (!["user", "individual_seller"].includes(String(req.user?.role || "").toLowerCase())) {
+    return res.status(403).json({ success: false, code: "PERSONAL_ACCOUNT_REQUIRED", message: "Personal seller analytics are available to personal accounts." });
+  }
+  const data = await getPersonalSellerPerformance(req.user.id, { days: req.query.days || 30 });
+  res.set("Cache-Control", "no-store");
+  res.json({ success: true, data });
+}));
+
+
+
+const requireCarsDatabase = (req, res, next) => {
+  // The public inventory endpoint is database-backed. In intentionally
+  // degraded/local mode, terminate here before optional cache/analytics
+  // middleware can touch external infrastructure. Production behavior is
+  // unchanged because a configured Supabase connection falls through.
+  if (!isSupabaseConnected()) {
+    return res.status(503).json({
+      success: false,
+      code: "DATABASE_UNAVAILABLE",
+      message: "Marketplace data is temporarily unavailable because the database is not configured.",
+      data: [],
+      cars: [],
+    });
+  }
+  next();
+};
+
+router.get(
+  "/",
+  requireCarsDatabase,
+  validateQuery(carListQuerySchema),
+  validateResponse(carListResponseSchema),
+  cacheVehicleSearch,
+  trackVehicleSearchLatency,
+  trackCarSearch,
+  asyncHandler(getCars),
+);
+
+// 🔎 GET SINGLE CAR
+/**
+ * @swagger
+ * /api/v1/cars/{id}:
+ *   get:
+ *     summary: Get single car
+ *     description: Get detailed information about a specific car
+ *     tags: [Cars]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Car ID
+ *     responses:
+ *       200:
+ *         description: Car retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/SuccessResponse'
+ *                 - type: object
+ *                   properties:
+ *                     data:
+ *                       $ref: '#/components/schemas/Car'
+ *       404:
+ *         description: Car not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
+router.get(
+  "/:id",
+  optionalAuth,
+  validateObjectId,
+  cacheResponseAnonymous(600), // 10 minutes cache; Phase 13F: anonymous viewers only (owner/staff views are never shared)
+  asyncHandler(getCar),
+);
+
+// =============================
+// 📈 TRACKING (ANTI-SPAM READY)
+// =============================
+
+// 👁 TRACK CLICK (rate-limited, optional auth to prevent bot inflation)
+router.post(
+  "/:id/click",
+  optionalAuth,
+  createLimiter,
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const car = await findById("cars", req.params.id, "clicks,deleted_at");
+    // 14.8: counters never move for a missing or soft-deleted listing.
+    if (!car || car.deletedAt || car.deleted_at) return res.status(404).json({ success: false, message: "Car not found" });
+    await update("cars", req.params.id, { clicks: (car?.clicks || 0) + 1 });
+
+    res.json({ success: true });
+  }),
+);
+
+// ❤️ TRACK FAVORITE (rate-limited, optional auth to prevent bot inflation)
+router.post(
+  "/:id/favorite",
+  optionalAuth,
+  createLimiter,
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const car = await findById("cars", req.params.id, "favoritesCount,deleted_at");
+    if (!car || car.deletedAt || car.deleted_at) return res.status(404).json({ success: false, message: "Car not found" });
+    await update("cars", req.params.id, { favoritesCount: (car?.favoritesCount || 0) + 1 });
+
+    res.json({ success: true });
+  }),
+);
+
+// =============================
+// 🔐 DEALER ROUTES
+// =============================
+
+// ➕ CREATE CAR
+router.post(
+  "/",
+  protect,
+  sellerListingAccess({ write: true }),
+  requireDealerVerification,
+  uploadLimiter,
+  cleanupUploadsOnError,
+  upload.array("images", MAX_LISTING_IMAGES_PER_REQUEST),
+  handleUploadError,
+  validateCar,
+  invalidateCache("cache:*"),
+  asyncHandler(createCar),
+);
+
+// ✏️ UPDATE CAR
+router.put(
+  "/:id",
+  protect,
+  sellerListingAccess({ write: true }),
+  createLimiter,
+  validateObjectId,
+  validateCar,
+  invalidateCache("cache:*"),
+  asyncHandler(updateCar),
+);
+
+// ❌ DELETE CAR
+router.delete(
+  "/:id",
+  protect,
+  sellerListingAccess({ write: true }),
+  createLimiter,
+  validateObjectId,
+  invalidateCache("cache:*"),
+  asyncHandler(deleteCar),
+);
+
+// 🔐 PERSONAL SELLER LISTING LIFECYCLE (owner-scoped; never uses dealer status routes)
+router.patch(
+  "/:id/lifecycle",
+  protect,
+  sellerListingAccess({ write: true }),
+  createLimiter,
+  validateObjectId,
+  invalidateCache("cache:*"),
+  asyncHandler(async (req, res) => {
+    // Personal identities only: dealers (and staff) keep their own governed status workflows.
+    if (!["user", "individual_seller"].includes(String(req.user?.role || "").toLowerCase())) {
+      return res.status(403).json({ success: false, code: "PERSONAL_ACCOUNT_REQUIRED", message: "Listing lifecycle actions here are for personal accounts. Business accounts use their own workspace." });
+    }
+    const action = String(req.body?.action || "");
+    if (!["hide", "publish", "mark_sold"].includes(action)) {
+      return res.status(400).json({ success: false, code: "INVALID_LISTING_ACTION", message: "Choose hide, publish or mark_sold." });
+    }
+    try {
+      const result = await transitionPersonalListing({ carId: req.params.id, ownerId: req.user.id, action });
+      await logActionFromReq(req, `personal_listing_${action}`, { target: req.params.id, targetModel: "Car", details: result });
+      return res.json({ success: true, data: result });
+    } catch (error) {
+      if (error?.expose) return res.status(error.status).json({ success: false, code: error.code, message: error.message });
+      throw error;
+    }
+  }),
+);
+
+// 🖼 DELETE IMAGE FROM CAR
+router.delete(
+  "/:id/images/:imageIndex",
+  protect,
+  sellerListingAccess({ write: true }),
+  validateObjectId,
+  invalidateCache("cache:*"),
+  asyncHandler(deleteCarImage),
+);
+
+// ⭐ CHOOSE POSTER IMAGE (moves the chosen photo to the front)
+router.patch(
+  "/:id/images/cover",
+  protect,
+  sellerListingAccess({ write: true }),
+  validateObjectId,
+  invalidateCache("cache:*"),
+  asyncHandler(setCoverImage),
+);
+
+// 📤 ADD IMAGES TO CAR
+router.post(
+  "/:id/images",
+  protect,
+  sellerListingAccess({ write: true }),
+  uploadLimiter,
+  cleanupUploadsOnError,
+  upload.array("images", MAX_LISTING_IMAGES_PER_REQUEST),
+  handleUploadError,
+  invalidateCache("cache:*"),
+  asyncHandler(addCarImages),
+);
+
+// =============================
+// 📈 PRICE HISTORY
+// =============================
+router.get(
+  "/:id/price-history",
+  validateObjectId,
+  requirePublicListing, // Phase 13F: hidden/pending/deleted listings are not served or cached
+  cacheResponse(600), // 10 minutes cache
+  asyncHandler(async (req, res) => {
+    const car = await findById("cars", req.params.id, "price,priceHistory");
+
+    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+    const history = (car.priceHistory || []).map((h) => ({
+      price: h.price,
+      date: h.date,
+    }));
+
+    history.push({ price: car.price, date: new Date() });
+
+    res.json({ success: true, history });
+  }),
+);
+
+// =============================
+// 🧠 PRICE INSIGHTS (NEW 🔥)
+// =============================
+router.get(
+  "/:id/insights",
+  validateObjectId,
+  requirePublicListing, // Phase 13F: hidden/pending/deleted listings are not served or cached
+  cacheResponse(600), // 10 minutes cache
+  asyncHandler(async (req, res) => {
+    const car = await findById("cars", req.params.id);
+
+    if (!car) {
+      return res.status(404).json({
+        success: false,
+        message: "Car not found",
+      });
+    }
+
+    const sb = getSupabase();
+    const { data: similar } = await sb
+      .from("cars")
+      .select("price")
+      .eq("brand", car.brand)
+      .gte("year", car.year - 1)
+      .lte("year", car.year + 1)
+      .limit(20);
+
+    const avg = similar.reduce((sum, c) => sum + c.price, 0) / (similar.length || 1);
+
+    let rating = "fair";
+
+    if (car.price < avg * 0.8) rating = "great";
+    else if (car.price < avg * 0.95) rating = "good";
+    else if (car.price > avg * 1.2) rating = "overpriced";
+
+    res.json({
+      success: true,
+      data: {
+        avgMarketPrice: avg,
+        dealRating: rating,
+      },
+    });
+  }),
+);
+
+// =============================
+// 📊 LIVE MARKETPLACE VALUATION
+// =============================
+router.get(
+  "/:id/valuation",
+  requirePublicListing, // Phase 13F: hidden/pending/deleted listings are not served or cached
+  cacheResponse(600),
+  asyncHandler(async (req, res) => {
+    const data = await getVehicleValuation(req.params.id);
+    if (!data) return res.status(404).json({ success: false, message: "Car not found" });
+    res.json({ success: true, valuation: data });
+  }),
+);
+
+// =============================
+// 🚨 FRAUD CHECK (ADMIN TOOL 🔥)
+// =============================
+router.get(
+  "/admin/:id/fraud",
+  protect,
+  adminOnly,
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const car = await findById("cars", req.params.id);
+    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+    let score = 0;
+
+    if (car.price < 300000) score += 30;
+    if (!car.images?.length) score += 20;
+    if (!car.dealerPhone) score += 20;
+
+    res.json({
+      success: true,
+      data: {
+        fraudScore: score,
+        riskLevel: score > 60 ? "high" : score > 30 ? "medium" : "low",
+      },
+    });
+  }),
+);
+
+// =============================
+// 🧠 ADMIN AUCTION CONTROL
+// =============================
+
+// ▶️ START AUCTION
+router.post(
+  "/admin/:id/start",
+  protect,
+  adminOnly,
+  requirePermission(PERM.MANAGE_AUCTIONS),
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const car = await findById("cars", req.params.id);
+
+    if (!car) {
+      return res.status(404).json({
+        success: false,
+        message: "Car not found",
+      });
+    }
+
+    const dealer = await findById("users", car.dealer, "commissionBalance,listingsLocked");
+
+    if (dealer && dealer.listingsLocked && dealer.commissionBalance > 0) {
+      return res.status(403).json({
+        success: false,
+        message: "Cannot start auction — dealer has outstanding commission balance and listings are locked.",
+      });
+    }
+
+    const result = await startAuction({
+      carId: req.params.id,
+      durationMs: 60 * 60 * 1000,
+      startingBid: Number(car.startingBid || car.price || 0),
+      reservePrice: car.reservePrice ?? null,
+      reserveMode: car.reserveMode || "none",
+      req,
+    });
+
+    res.json({ success: true, result });
+  }),
+);
+
+// ⛔ END AUCTION
+router.post(
+  "/admin/:id/end",
+  protect,
+  adminOnly,
+  requirePermission(PERM.MANAGE_AUCTIONS),
+  validateObjectId,
+  asyncHandler(async (req, res) => {
+    const car = await findById("cars", req.params.id);
+
+    if (!car) {
+      return res.status(404).json({
+        success: false,
+        message: "Car not found",
+      });
+    }
+
+    const result = await closeAuction(req.params.id, { req, actor: req.user, reason: "car_admin_end" });
+    if (!result.success && !result.alreadyClosed) {
+      return res.status(500).json({ success: false, message: result.message || "Failed to end auction" });
+    }
+
+    res.json({ success: true, result });
+  }),
+);
+
+// =============================
+// 📊 BATCH COMPARE (fetch multiple cars by IDs)
+// =============================
+router.post(
+  "/batch",
+  protect,
+  createLimiter,
+  asyncHandler(async (req, res) => {
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0 || ids.length > 10) {
+      return res.status(400).json({ success: false, message: "Provide an array of up to 10 car IDs" });
+    }
+    const sb = getSupabase();
+    const { data: cars } = await sb
+      .from("cars")
+      .select("*, dealer:dealer(name, dealerRating)")
+      .in("id", ids);
+    res.json({ success: true, cars });
+  }),
+);
+
+// 📌 PROMOTE / PIN TO FRONT PAGE (dealer owns it OR admin)
+router.patch(
+  "/:id/promote",
+  protect,
+  validateObjectId,
+  invalidateCache("cache:*"),
+  asyncHandler(async (req, res) => {
+    const car = await findById("cars", req.params.id);
+    if (!car) return res.status(404).json({ success: false, message: "Car not found" });
+
+    const isOwner = car.dealer === req.user.id;
+    const isStaff = STAFF_ROLES.includes(req.user.role);
+    if (!isOwner && !isStaff) return res.status(403).json({ success: false, message: "Not authorized" });
+
+    const { isPromoted, coverImage } = req.body;
+    const updateData = {};
+    if (isPromoted !== undefined) updateData.isPromoted = Boolean(isPromoted);
+    if (coverImage !== undefined) updateData.coverImage = Number(coverImage) || 0;
+    const updated = await update("cars", req.params.id, updateData);
+
+    res.json({ success: true, data: updated });
+  }),
+);
+
+export default router;

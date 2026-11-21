@@ -1,0 +1,192 @@
+import React, { useEffect, useId, useRef, useState } from 'react';
+import { BriefcaseBusiness, CheckCircle2 } from 'lucide-react';
+import { Button } from '../../components/ui';
+import { Modal } from '../../components/ui/Modal';
+import { inspectionApi, automotiveApi } from '../InspectionMarketplace/services/api';
+import type { ServiceTaxonomy } from '../InspectionMarketplace/types/inspection';
+import { isPlausiblePhone } from './inspectionJourney';
+
+const APPLY_PATH = '/?nav=inspections&action=apply-provider';
+
+interface Props {
+  isOpen: boolean;
+  signedIn: boolean;
+  onClose: () => void;
+  onOpenAuth?: () => void;
+  onOpenRegister?: (intent: string, next: string) => void;
+}
+
+const fieldClass =
+  'w-full px-3.5 py-3 bg-[#F6FAF9] text-[#0A3340] placeholder-[#91CEC5] border border-[#D7E7E4] rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#176B87] focus:bg-white';
+
+/** Provider application: authenticated, reviewed by KAYAD, grants no access by itself. */
+export const ProviderApplicationModal: React.FC<Props> = ({ isOpen, signedIn, onClose, onOpenAuth, onOpenRegister }) => {
+  const uid = useId();
+  const [form, setForm] = useState({ companyName: '', phone: '', county: '', town: '', address: '' });
+  const [businessType, setBusinessType] = useState<'individual_inspector' | 'individual_mechanic' | 'garage_business' | 'inspection_company'>('individual_inspector');
+  const [hasWorkshop, setHasWorkshop] = useState(false);
+  const [offersMobile, setOffersMobile] = useState(false);
+  const [chosen, setChosen] = useState<string[]>([]);
+  const [taxonomy, setTaxonomy] = useState<ServiceTaxonomy | null>(null);
+  const [taxonomyError, setTaxonomyError] = useState(false);
+  const [partial, setPartial] = useState<string | null>(null);
+  const [touched, setTouched] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [done, setDone] = useState<string | null>(null);
+  const inFlight = useRef(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const requested = new URLSearchParams(window.location.search).get('providerType');
+    if (requested === 'garage_business' || requested === 'inspection_company' || requested === 'individual_mechanic' || requested === 'individual_inspector') setBusinessType(requested);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || taxonomy) return;
+    let alive = true;
+    automotiveApi.getServiceTaxonomy().then((t) => { if (alive) setTaxonomy(t); }).catch(() => { if (alive) setTaxonomyError(true); });
+    return () => { alive = false; };
+  }, [isOpen, taxonomy]);
+
+  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => setForm((v) => ({ ...v, [key]: e.target.value }));
+  const phoneInvalid = touched && !isPlausiblePhone(form.phone);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (inFlight.current) return;
+    setTouched(true);
+    if (['garage_business', 'inspection_company'].includes(businessType) && !form.companyName.trim()) { setError('Enter the registered business or trading name for this organization application.'); return; }
+    if (!isPlausiblePhone(form.phone)) return;
+    inFlight.current = true;
+    setSubmitting(true);
+    setError(null);
+    try {
+      const result = (await inspectionApi.registerProvider({
+        companyName: form.companyName.trim() || undefined,
+        businessType,
+        phone: form.phone.trim(),
+        country: 'Kenya',
+        county: form.county.trim() || undefined,
+        town: form.town.trim() || undefined,
+        address: form.address.trim() || undefined,
+        hasWorkshop,
+        offersMobile,
+      })) as unknown;
+      // The registration call returns the business id. Services are then declared against the canonical taxonomy.
+      const providerId = typeof result === 'string' ? result : (result as { id?: string; providerId?: string } | null)?.id || (result as { providerId?: string } | null)?.providerId;
+      const failed: string[] = [];
+      if (providerId) {
+        for (const code of chosen) {
+          try { await automotiveApi.declareCapability(providerId, { category: code, allMakes: true, travelsToCustomer: offersMobile }); }
+          catch { failed.push(taxonomy?.categories.find((c) => c.code === code)?.label || code); }
+        }
+      } else if (chosen.length) {
+        failed.push(...chosen);
+      }
+      if (failed.length) setPartial(`Your application was submitted, but these services could not be recorded yet: ${failed.join(', ')}. You can add them again once you are signed in to your business.`);
+      const serverMessage = result && typeof result === 'object' ? (result as { message?: unknown }).message : undefined;
+      setDone(typeof serverMessage === 'string' && serverMessage ? serverMessage : 'Your provider application was submitted to KAYARD KE for review.');
+    } catch (err) {
+      setError('The application could not be submitted. Check your connection and try again. If the problem continues, contact KAYARD KE support.');
+    } finally {
+      inFlight.current = false;
+      setSubmitting(false);
+    }
+  };
+
+  const text = (key: keyof typeof form, label: string, extra: Partial<React.InputHTMLAttributes<HTMLInputElement>> = {}) => (
+    <div className="space-y-1.5">
+      <label htmlFor={`${uid}-${key}`} className="text-xs font-bold text-[#64748B] block">{label}</label>
+      <input id={`${uid}-${key}`} className={fieldClass} value={form[key]} onChange={set(key)} disabled={submitting} {...extra} />
+    </div>
+  );
+
+  return (
+    <Modal isOpen={isOpen} onClose={() => { if (!submitting) onClose(); }} title={businessType === 'garage_business' ? "Apply as a garage / workshop" : businessType === 'inspection_company' ? "Apply as an inspection company" : businessType === 'individual_mechanic' ? "Apply as a mechanic / technician" : "Apply as an independent inspector"} size="lg">
+      {!signedIn ? (
+        <div className="kayad-provider-onboarding py-4 text-center space-y-4">
+          <BriefcaseBusiness className="w-8 h-8 mx-auto text-[#176B87]" aria-hidden="true" />
+          <p className="text-sm text-[#64748B] max-w-md mx-auto">Start with your KAYARD KE account, confirm your email, then return here to share your business details and services. KAYARD KE reviews your application before any provider access is granted.</p>
+          <ol className="kayad-onboarding-steps max-w-md mx-auto grid grid-cols-3 gap-2 text-left" aria-label="Provider onboarding steps"><li><span>1</span><strong>Account</strong><small>Sign in or register</small></li><li><span>2</span><strong>Business</strong><small>Contact and services</small></li><li><span>3</span><strong>Review</strong><small>KAYARD KE checks details</small></li></ol>
+          <div className="flex flex-wrap justify-center gap-2">
+            <Button variant="primary" className="min-h-[44px]" onClick={onOpenAuth}>Sign in to apply</Button>
+            {onOpenRegister && <Button variant="outline" className="min-h-[44px]" onClick={() => onOpenRegister('provider', APPLY_PATH)}>Create a business account</Button>}
+          </div>
+        </div>
+      ) : done ? (
+        <div role="status" className="py-4 text-center space-y-3">
+          <CheckCircle2 className="w-10 h-10 mx-auto text-[#13B8A6]" aria-hidden="true" />
+          <p className="text-sm text-[#12576D]">{done}</p>
+          {chosen.length > 0 && !partial && <p className="text-xs text-[#64748B]">The services you chose are recorded as declared, not verified. KAYARD KE verifies each one separately.</p>}
+          {partial && <p role="alert" className="text-xs text-[#0A3340]">{partial}</p>}
+          <p className="text-xs text-[#64748B]">Submitting an application does not grant provider access. KAYARD KE decides the outcome.</p>
+          <Button variant="primary" onClick={onClose}>Close</Button>
+        </div>
+      ) : (
+        <form onSubmit={submit} noValidate className="kayad-provider-application-form space-y-4" aria-busy={submitting}>
+          <ol className="kayad-onboarding-steps grid grid-cols-3 gap-2 text-left" aria-label="Application progress"><li className="is-current"><span>1</span><strong>Business details</strong><small>Contact and location</small></li><li><span>2</span><strong>Services</strong><small>What you offer</small></li><li><span>3</span><strong>Review</strong><small>Checked by KAYARD KE</small></li></ol>
+          <p className="rounded-xl bg-[#F5F8F8] border border-[#D7E7E4] p-3.5 text-xs text-[#64748B]">Choose the profile that fits your work. Organizations apply once for the business identity; individual professionals apply using their personal account. Branch and staff access are managed through authorized business controls. Submitting an application does not grant provider access; KAYARD KE reviews it and decides.</p>
+          <fieldset className="space-y-2" disabled={submitting}>
+            <legend className="text-xs font-bold text-[#64748B]">Provider account type</legend>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {([
+                ['individual_inspector', 'Independent inspector', 'Conduct vehicle inspections and prepare condition reports.'],
+                ['individual_mechanic', 'Independent mechanic / technician', 'Provide diagnostics, repairs and mechanical services.'],
+                ['garage_business', 'Garage / workshop', 'A registered repair, maintenance or vehicle-service organization.'],
+                ['inspection_company', 'Inspection company', 'An organization offering vehicle inspections and condition reports.'],
+              ] as const).map(([value, title, description]) => (
+                <label key={value} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${businessType === value ? 'border-[#176B87] bg-[#F3FAF9] ring-1 ring-[#176B87]' : 'border-[#D7E7E4] bg-white'}`}>
+                  <input type="radio" name="providerBusinessType" value={value} className="mt-1 accent-[#176B87]" checked={businessType === value} onChange={() => setBusinessType(value)} />
+                  <span><strong className="block text-sm text-[#0A3340]">{title}</strong><span className="mt-1 block text-xs text-[#64748B]">{description}</span></span>
+                </label>
+              ))}
+            </div>
+            {['garage_business', 'inspection_company'].includes(businessType) && <p className="rounded-lg border border-[#B8E3DC] bg-[#F0FBF8] p-3 text-xs text-[#12576D]">This application represents the organization. Branches and staff memberships are added through authorized business controls. Business approval does not automatically verify every service or staff credential.</p>}
+          </fieldset>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {text('companyName', ['garage_business', 'inspection_company'].includes(businessType) ? 'Registered business / trading name' : 'Professional / trading name (optional)', { autoComplete: 'organization', required: ['garage_business', 'inspection_company'].includes(businessType) })}
+            <div className="space-y-1.5">
+              <label htmlFor={`${uid}-phone`} className="text-xs font-bold text-[#64748B] block">Contact phone</label>
+              <input
+                id={`${uid}-phone`} type="tel" inputMode="tel" autoComplete="tel" required className={`${fieldClass} ${phoneInvalid ? 'border-rose-400' : ''}`}
+                value={form.phone} onChange={set('phone')} onBlur={() => setTouched(true)} disabled={submitting} aria-required="true"
+                aria-invalid={phoneInvalid || undefined} aria-describedby={phoneInvalid ? `${uid}-phone-error` : undefined}
+              />
+              {phoneInvalid && <p id={`${uid}-phone-error`} className="text-xs font-semibold text-rose-600">Enter a valid phone number (9–15 digits).</p>}
+            </div>
+            {text('county', 'County')}
+            {text('town', 'Town / city')}
+          </div>
+          {text('address', 'Business / workshop address', { autoComplete: 'street-address' })}
+          <fieldset className="space-y-2" disabled={submitting}>
+            <legend className="text-xs font-bold text-[#64748B]">Services you offer</legend>
+            <p className="text-xs text-[#64748B]">These are your claims. KAYARD KE verifies each service separately from evidence you provide; until then it is shown as “declared”.</p>
+            {taxonomyError && <p role="alert" className="text-xs text-rose-700">The service list could not be loaded. You can submit now and add services later.</p>}
+            <div className="grid sm:grid-cols-2 gap-1">
+              {(taxonomy?.categories || []).map((c) => (
+                <label key={c.code} className="flex items-start gap-2 text-sm min-h-[44px] items-center">
+                  <input type="checkbox" className="w-4 h-4 accent-[#176B87]" checked={chosen.includes(c.code)} onChange={(e) => setChosen((v) => (e.target.checked ? [...v, c.code] : v.filter((x) => x !== c.code)))} />
+                  <span>{c.label}{c.highRisk ? ' (needs evidence)' : ''}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <fieldset className="space-y-1" disabled={submitting}>
+            <legend className="text-xs font-bold text-[#64748B]">How you work</legend>
+            <label className="flex items-center gap-2 text-sm min-h-[44px]"><input type="checkbox" className="w-4 h-4 accent-[#176B87]" checked={hasWorkshop} onChange={(e) => setHasWorkshop(e.target.checked)} /> I have a workshop or premises customers can visit</label>
+            <label className="flex items-center gap-2 text-sm min-h-[44px]"><input type="checkbox" className="w-4 h-4 accent-[#176B87]" checked={offersMobile} onChange={(e) => setOffersMobile(e.target.checked)} /> I travel to the vehicle</label>
+            {['individual_inspector', 'individual_mechanic'].includes(businessType) && !hasWorkshop && <p className="text-xs text-[#64748B]">No premises? That is fine. KAYARD KE has an evidence-based route for legitimate businesses without customer-facing premises; you will be asked for a registration or tax number and supporting documents.</p>}
+          </fieldset>
+          {error && <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{error}</p>}
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-2 border-t border-[#D7E7E4]">
+            <Button type="button" variant="secondary" onClick={onClose} disabled={submitting}>Cancel</Button>
+            <Button type="submit" variant="primary" disabled={submitting}>{submitting ? 'Submitting…' : 'Submit application'}</Button>
+          </div>
+        </form>
+      )}
+    </Modal>
+  );
+};
+
+export default ProviderApplicationModal;

@@ -1,0 +1,376 @@
+// backend/middleware/auth.js
+
+import jwt from "jsonwebtoken";
+import User from "../models/User.js";
+import UserAuth from "../models/UserAuth.js";
+import RefreshToken from "../models/RefreshToken.js";
+import { STAFF_ROLES, SELLER_ROLES } from "../config/roles.js";
+import { OWNER_EMAILS, isOwnerEmail, isOwnerUser, isUnverifiedOwner, OWNER_IDENTITY_UNVERIFIED_RESPONSE } from "../config/owners.js";
+import { enforceMaintenance } from "./maintenanceEnforcement.js";
+import { ensureFresh as ensureOwnerRegistryFresh } from "../services/ownerRegistry.service.js"; // STAGE 5B
+import { logError, logWarn } from "../utils/logger.js";
+import { getOnboardingPolicy } from "../services/onboardingPolicy.service.js";
+
+// OWNER_EMAILS / isOwnerEmail now come from config/owners.js, which supports a
+// comma-separated WEBHOIST_EMAIL list (multiple platform owners).
+
+// =============================
+// ⚡ LIGHTWEIGHT USER CACHE
+// FIX: protect() ran a DB query on every single authenticated request.
+// Under load (live auctions, many bidders) this creates a thundering-herd
+// of identical lookups. Cache the lean user doc for 20s per user ID.
+// Cache is invalidated automatically whenever tokenVersion changes
+// (logout, password change, ban) since the cached copy becomes stale
+// and the next read just re-fetches — worst case is a 20s staleness
+// window on non-security fields like name/avatar, which is acceptable.
+// =============================
+const USER_CACHE_TTL_MS = 20_000;
+const userCache = new Map(); // id -> { user, expiresAt }
+
+function getCachedUser(id) {
+  const entry = userCache.get(id);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) {
+    userCache.delete(id);
+    return null;
+  }
+  return entry.user;
+}
+
+function setCachedUser(id, user) {
+  userCache.set(id, { user, expiresAt: Date.now() + USER_CACHE_TTL_MS });
+  // Periodic cleanup so the map doesn't grow unbounded on a long-running process
+  if (userCache.size > 5000) {
+    const now = Date.now();
+    for (const [k, v] of userCache) if (now > v.expiresAt) userCache.delete(k);
+  }
+}
+
+export function invalidateUserCache(id) {
+  userCache.delete(String(id));
+}
+
+// =============================
+// 🔐 PROTECT ROUTES
+// =============================
+export const protect = async (req, res, next) => {
+  try {
+    await ensureOwnerRegistryFresh(); // STAGE 5B: owner membership is read fresh (TTL-bounded) before any owner decision
+    let token;
+
+    // =============================
+    // 📥 EXTRACT TOKEN (HEADER + COOKIE READY)
+    // =============================
+    const authHeader = req.headers.authorization;
+
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+    }
+
+    // 🔥 future-ready (cookies)
+    if (!token && req.cookies?.token) {
+      token = req.cookies.token;
+    }
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Not authorized, token missing",
+      });
+    }
+
+    // =============================
+    // 🔓 VERIFY TOKEN
+    // =============================
+    let decoded;
+
+    if (!process.env.JWT_SECRET) {
+      logError("JWT_SECRET is not set");
+      return res.status(500).json({ success: false, message: "Server config error" });
+    }
+
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
+    } catch (err) {
+      logError("TOKEN VERIFY FAILED", { error: err.message });
+
+      return res.status(401).json({
+        success: false,
+        message: err.name === "TokenExpiredError" ? "Session expired, please login again" : "Invalid token",
+      });
+    }
+
+    // =============================
+    // 🔍 FETCH USER (CACHED, LEAN 🔥)
+    // =============================
+    let user = getCachedUser(decoded.id);
+    if (!user) {
+      user = await User.findById(decoded.id).lean();
+      if (user) {
+        setCachedUser(decoded.id, user);
+      }
+    }
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Security state is deliberately read fresh on every protected request. The
+    // lightweight user cache may serve non-security profile fields, but must not
+    // allow a banned/deactivated/role-revoked identity to remain authorized.
+    const securityUser = await User.findById(decoded.id).select("_id,email,role,status,isBanned,deactivatedAt,deletedAt,emailVerified,grantedPermissions,revokedPermissions").lean();
+    const userAuth = await UserAuth.findOne({ user: decoded.id }).select("+tokenVersion +mustChangePassword").lean();
+    if (!securityUser || !userAuth) {
+      return res.status(401).json({ success: false, code: "AUTH_SESSION_EXPIRED", message: "Session invalid" });
+    }
+    // Non-security profile fields (display name) come from the cached profile
+    // row; the security-only select below deliberately omits them. Without this,
+    // req.user.name was always undefined (audit actorName, team-invite emails).
+    const profileName = user.name ?? securityUser.name;
+    user = securityUser;
+    if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== (userAuth.tokenVersion ?? 0)) {
+      return res.status(401).json({ success: false, code: "AUTH_SESSION_EXPIRED", message: "Session invalidated, please login again" });
+    }
+    if (decoded.sessionId) {
+      const activeSession = await RefreshToken.findActiveSessionById(decoded.sessionId, decoded.id);
+      if (!activeSession) {
+        return res.status(401).json({ success: false, code: "AUTH_SESSION_EXPIRED", message: "Session revoked, please login again" });
+      }
+    }
+
+    // 🚫 BLOCK BANNED USERS (OWNER EXEMPT)
+    if (user.isBanned && !isOwnerUser(user)) {
+      return res.status(403).json({ success: false, code: "AUTH_FORBIDDEN", message: "Account suspended" });
+    }
+    if (user.deactivatedAt && !isOwnerUser(user)) {
+      return res.status(403).json({ success: false, code: "AUTH_FORBIDDEN", message: "Account deactivated" });
+    }
+    // Phase 14.9: soft-deleted accounts (staff deletion) have no valid session.
+    if (user.deletedAt && !isOwnerUser(user)) {
+      return res.status(401).json({ success: false, code: "AUTH_SESSION_EXPIRED", message: "Session invalid" });
+    }
+
+    // STAGE 5A (Gate A): the owner exemptions above and below apply ONLY to a verified owner identity.
+    if (isUnverifiedOwner(user)) {
+      return res.status(403).json(OWNER_IDENTITY_UNVERIFIED_RESPONSE);
+    }
+
+    // 📧 EMAIL VERIFICATION (config-gated; OWNER + DEMO EXEMPT)
+    // Mirror the login gate: only enforce when verification is actually possible.
+    const _emailConfigured = !!process.env.BREVO_API_KEY;
+    const _requireVerification = process.env.REQUIRE_EMAIL_VERIFICATION
+      ? process.env.REQUIRE_EMAIL_VERIFICATION === "true"
+      : _emailConfigured;
+    if (_requireVerification && !user.emailVerified && !isOwnerUser(user)) {
+      return res.status(403).json({
+        success: false,
+        message: "Please verify your email before accessing this resource",
+      });
+    }
+
+    // =============================
+    // ✅ ATTACH USER (WITH OWNER BYPASS)
+    // =============================
+    // 🔄 Update lastActive (fire-and-forget)
+    User.findByIdAndUpdate(user._id ?? user.id, { lastActive: new Date() }).catch((e) =>
+      logWarn("lastActive update failed", { error: e.message }),
+    );
+
+    const isOwner = isOwnerUser(user);
+    // Central maintenance policy: every authenticated route (any stale session, direct API call or alternative path) is judged here with the
+    // caller's fresh server-side identity. No-op unless maintenance is active.
+    if (await enforceMaintenance(req, res, user, isOwner)) return;
+    req.user = {
+      id: String(user._id ?? user.id),
+      role: isOwner ? "superadmin" : user.role,
+      effectiveRole: isOwner ? "webhoist" : user.role,
+      name: profileName,
+      email: user.email,
+      status: user.status || "approved",
+      emailVerified: user.emailVerified === true, // STAGE 5: strict boolean; never inferred
+      grantedPermissions: user.grantedPermissions || [],
+      revokedPermissions: user.revokedPermissions || [],
+    };
+
+    next();
+  } catch (err) {
+    // Every *authentication* failure (missing/invalid/expired token, unknown user,
+    // revoked session, token-version mismatch) returns its own explicit 401 above.
+    // Reaching this catch means the server could not DECIDE (database/PostgREST/
+    // network error, unexpected exception). That is not "the user is logged out":
+    // answering 401 made the SPA discard a valid session. Stay fail-closed (no
+    // req.user, request rejected) but say so honestly with a retryable 503.
+    logError("AUTH ERROR", err);
+
+    res.set("Retry-After", "2");
+    return res.status(503).json({
+      success: false,
+      code: "AUTH_TEMPORARILY_UNAVAILABLE",
+      retryable: true,
+      message: "Authentication is temporarily unavailable. Please try again.",
+    });
+  }
+};
+
+export const authenticate = protect;
+
+// =============================
+// 👑 ADMIN ONLY (all staff roles + webhoist bypass)
+// =============================
+export const adminOnly = (req, res, next) => {
+  // Webhoist (platform owner) bypasses all admin checks
+  if (req.user?.effectiveRole === "webhoist") {
+    return next();
+  }
+
+  if (!req.user || !STAFF_ROLES.includes(req.user.role)) {
+    return res.status(403).json({
+      success: false,
+      message: "Admin access only",
+    });
+  }
+
+  next();
+};
+
+// =============================
+// 🧑‍💼 DEALER & SELLER (ADMIN INCLUDED)
+// =============================
+export const dealerOnly = (req, res, next) => {
+  if (req.user?.effectiveRole === "webhoist") return next();
+  if (!req.user || ![...SELLER_ROLES, ...STAFF_ROLES].includes(req.user.role)) {
+    return res.status(403).json({
+      success: false,
+      message: "Dealer or seller access only",
+    });
+  }
+
+  // STAGE 5: verified email is ALWAYS required for seller actions. Unlike the login/protect gate this is
+  // not provider-gated: an unset BREVO_API_KEY must never turn seller email verification off. Staff are
+  // governed by their own provisioning; the owner returned above. Fail closed on anything but `true`.
+  if (SELLER_ROLES.includes(req.user.role) && !STAFF_ROLES.includes(req.user.role) && req.user.emailVerified !== true) {
+    return res.status(403).json({
+      success: false,
+      code: "EMAIL_VERIFICATION_REQUIRED",
+      message: "Please verify your email address before using seller features.",
+    });
+  }
+
+  next();
+};
+
+// =============================
+// 🧠 FLEXIBLE ROLE CHECK
+// =============================
+export const allowRoles = (...roles) => {
+  return (req, res, next) => {
+    if (req.user?.effectiveRole === "webhoist") return next();
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: "Access denied",
+      });
+    }
+
+    next();
+  };
+};
+
+// =============================
+// RETIRED: `privateSellerOnly` and `buyerOnly`.
+// KAYAD has ONE personal account (role `user`) that buys and sells; a role gate that admits only a "buyer" or only a "private
+// seller" cannot be correct. Selling is gated by `sellerListingAccess` (policy/capability), dealers by `dealerOnly` /
+// `dealerBusinessOnly`. A guard test (unifiedPersonalAccountParity) fails if these are reintroduced.
+// =============================
+
+// =============================
+// ✅ REQUIRE APPROVED STATUS
+// =============================
+export const requireApproved = async (req, res, next) => {
+  if (req.user?.effectiveRole === "webhoist") return next();
+  if (!req.user) {
+    return res.status(403).json({ success: false, message: "Account must be approved to access this resource" });
+  }
+  if (req.user.status === "approved") return next();
+
+  // Existing individual_seller rows used users.status='pending' as a seller-approval flag.
+  // Under the free default policy this legacy flag must not block the personal account.
+  // Dealers and other account states continue to use the normal approval gate.
+  if (req.user.role === "individual_seller" && req.user.status === "pending") {
+    const policy = await getOnboardingPolicy();
+    if (policy.policy.privateSellerApprovalMode !== "required") return next();
+  }
+
+  return res.status(403).json({
+    success: false,
+    message: "Account must be approved to access this resource",
+  });
+};
+
+export const optionalAuth = async (req, res, next) => {
+  try {
+    await ensureOwnerRegistryFresh();
+    let token;
+
+    const authHeader = req.headers.authorization;
+
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+    }
+
+    if (!token) return next();
+
+    if (!process.env.JWT_SECRET) return next();
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ["HS256"] });
+
+    const user = await User.findById(decoded.id).lean();
+
+    // 🚫 Don't attach banned/deactivated users on public routes
+    if (user && !user.isBanned && !user.deactivatedAt && !user.deletedAt) {
+      // A token that protect() would reject as revoked (logout, password
+      // change, session revocation → tokenVersion/session mismatch) must not
+      // still identify the caller — or their staff role, which unlocks
+      // non-public listing visibility — on optional-auth routes.
+      const userAuth = await UserAuth.findOne({ user: decoded.id }).select("+tokenVersion").lean();
+      if (!userAuth) return next();
+      if (decoded.tokenVersion !== undefined && decoded.tokenVersion !== (userAuth.tokenVersion ?? 0)) return next();
+      if (decoded.sessionId) {
+        const activeSession = await RefreshToken.findActiveSessionById(decoded.sessionId, decoded.id);
+        if (!activeSession) return next();
+      }
+      if (isUnverifiedOwner(user)) return next(); // STAGE 5A (Gate A): never identify an unverified owner-email row as owner
+      const isOwner = isOwnerUser(user);
+      req.user = {
+        id: String(user._id ?? user.id),
+        role: isOwner ? "superadmin" : user.role,
+        effectiveRole: isOwner ? "webhoist" : user.role,
+        email: user.email,
+      };
+    }
+
+    next();
+  } catch {
+    next(); // 🔥 ignore errors (public route)
+  }
+};
+
+
+// Compatibility aliases used by canonical route modules.
+export const requireAuth = protect;
+// Same semantics as the canonical rbac.requireRole: platform owner (webhoist)
+// and superadmin pass; everyone else must hold one of the listed roles.
+// Previously this compared `effectiveRole || role`, so the owner ("webhoist")
+// and superadmin were denied on routes listing only ['admin'].
+export const requireRole = (...roles) => {
+  const allowed = roles.flat().filter(Boolean);
+  return (req, res, next) => {
+    if (!req.user) return res.status(401).json({ success: false, message: "Authentication required" });
+    if (req.user.effectiveRole === "webhoist" || req.user.role === "superadmin") return next();
+    if (allowed.length && !allowed.includes(req.user.role)) return res.status(403).json({ success: false, message: "Insufficient permissions" });
+    return next();
+  };
+};

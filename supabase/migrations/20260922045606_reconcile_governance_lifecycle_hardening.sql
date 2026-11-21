@@ -1,0 +1,5 @@
+-- KAYAD MIGRATION HISTORY PRESERVED AS NO-OP
+-- Canonical migration: 20260921231000_reconcile_governance_lifecycle_hardening.sql
+-- This version was an exact duplicate of the canonical migration.
+-- The version remains present so already-applied remote migration history is preserved.
+-- Fresh databases receive the canonical DDL once; this historical version intentionally performs no work.

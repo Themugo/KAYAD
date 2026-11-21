@@ -1,0 +1,25 @@
+PASS B0 modal is opaque and not covered by the site header
+PASS B1 owner sees Bookings/Branches/Team/Report tabs
+PASS B2 workspace shows the real organization name from the server
+PASS B3 Branches tab lists real seeded branches (Nairobi HQ, Mombasa Road) and not org B's
+PASS B4 Team tab shows only org A members
+PASS B5 Report tab renders without error
+PASS B6 ArrowRight moves focus and selection to next tab
+PASS B7 End goes to last tab
+PASS B8 Home goes to first tab
+PASS B9 no uncaught page errors (owner desktop)
+PASS B10 inviting an unregistered email shows an honest error
+PASS B12 mgrA1 sees exactly the role's tabs Bookings/Branches/Team/Report
+PASS B13 branch manager of A1 does not see branch A2's name in tabs it can open
+PASS B14 no uncaught page errors (mgrA1)
+PASS B12 inspA1 sees exactly the role's tabs My inspections/Branches
+PASS B14 no uncaught page errors (inspA1)
+PASS B12 finA sees exactly the role's tabs Branches/Report
+PASS B14 no uncaught page errors (finA)
+PASS B11 stranger (no membership) is offered no organization workspace
+PASS B20 no horizontal page scroll at 320px
+PASS B20 no horizontal page scroll at 360px
+PASS B20 no horizontal page scroll at 390px
+PASS B20 no horizontal page scroll at 430px
+PASS B30 revoked member's still-valid session loses the workspace on reload
+ui_5f16: pass=24 fail=0

@@ -1,0 +1,83 @@
+import React, { Component, type ReactNode, type ErrorInfo } from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+import { BrandingProvider } from './context/BrandingContext';
+import './index.css';
+import { prefetchCars } from './services/vehicleApi';
+
+// Simple error boundary for the entire app
+class ErrorBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean; error?: Error }
+> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('[KAYARD KE] Uncaught error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#EEF7F5',
+          fontFamily: 'system-ui, sans-serif',
+          padding: '20px',
+        }}>
+          <div style={{ textAlign: 'center', maxWidth: '400px' }}>
+            <h1 style={{ color: '#0A3340', marginBottom: '16px' }}>Something went wrong</h1>
+            <p style={{ color: '#475569', marginBottom: '16px' }}>
+              An unexpected error occurred. Reload the page; if it keeps happening, contact KAYARD KE support.
+            </p>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                padding: '10px 20px',
+                backgroundColor: '#0A3340',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+              }}
+            >
+              Reload Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+const root = document.getElementById('root');
+if (root) {
+  // Start the first inventory page now so it is already in flight (or cached) when the marketplace mounts.
+  prefetchCars({ page: 1, limit: 24, sort: 'newest' });
+  ReactDOM.createRoot(root).render(
+    <React.StrictMode>
+      <ErrorBoundary>
+        <BrowserRouter>
+          <BrandingProvider>
+            <App />
+          </BrandingProvider>
+        </BrowserRouter>
+      </ErrorBoundary>
+    </React.StrictMode>
+  );
+} else {
+  console.error('[KAYARD KE] Root element not found');
+}

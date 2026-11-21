@@ -1,0 +1,87 @@
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest';
+import { render, screen, within, cleanup, fireEvent, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+
+const api = vi.hoisted(() => ({ users: vi.fn(), toggleBan: vi.fn(), approveDealer: vi.fn(), cars: vi.fn(), deleteCar: vi.fn() }));
+vi.mock('../../../api/api', async (orig) => ({ ...(await orig()), adminAPI: api }));
+// Production useToast().toast is a stable (memoised) function; the mock must be stable too, or load() is re-created every render.
+const { stableToast } = vi.hoisted(() => ({ stableToast: { toast: vi.fn() } }));
+vi.mock('../../../context/ToastContext', () => ({ useToast: () => stableToast }));
+
+import AdminUsers from '../../../pages/admin/AdminUsers';
+import AdminCars from '../../../pages/admin/AdminCars';
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.spyOn(window, 'confirm').mockReturnValue(true);
+});
+afterEach(() => cleanup());
+
+describe('admin tables render every declared column and keep their actions reachable', () => {
+  test('Users: eight cells per row, with Approve for pending dealers and Ban for everyone', async () => {
+    api.users.mockResolvedValue({ users: [
+      { _id: 'd1', name: 'Dealer One', email: 'd1@x.test', role: 'dealer', approved: false, createdAt: '2026-10-01T00:00:00Z' },
+      { _id: 'u1', name: 'Buyer One', email: 'b1@x.test', role: 'user', approved: true, isBanned: true },
+    ], total: 2 });
+    api.toggleBan.mockResolvedValue({ isBanned: false });
+    api.approveDealer.mockResolvedValue({});
+    render(<AdminUsers />);
+    const dealerRow = (await screen.findByText('Dealer One')).closest('tr');
+    expect(dealerRow.querySelectorAll('td')).toHaveLength(8);
+    expect(within(dealerRow).getByText('Pending approval')).toBeTruthy();
+    // The server requires an auditable reason: cancelling the dialog sends nothing, a given reason is sent as the operator wrote it.
+    fireEvent.click(within(dealerRow).getByRole('button', { name: 'Approve' }));
+    fireEvent.click(within(await screen.findByRole('dialog')).getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(api.approveDealer).not.toHaveBeenCalled();
+    fireEvent.click(within(dealerRow).getByRole('button', { name: 'Approve' }));
+    const dlg = await screen.findByRole('dialog');
+    fireEvent.change(within(dlg).getByLabelText(/Reason for approval/), { target: { value: 'Documents verified against registry' } });
+    fireEvent.click(within(dlg).getByRole('button', { name: 'Approve dealer' }));
+    await waitFor(() => expect(api.approveDealer).toHaveBeenCalledWith('d1', { reason: 'Documents verified against registry' }));
+    expect(api.approveDealer).toHaveBeenCalledTimes(1);
+    const buyerRow = screen.getByText('Buyer One').closest('tr');
+    expect(within(buyerRow).getByText('Banned')).toBeTruthy();
+    fireEvent.click(within(buyerRow).getByRole('button', { name: 'Unban' }));
+    await waitFor(() => expect(api.toggleBan).toHaveBeenCalledWith('u1', false)); // Phase 15: explicit target state, idempotent on the server
+    await waitFor(() => expect(within(screen.getByText('Buyer One').closest('tr')).queryByText('Banned')).toBeNull()); // UI adopts the server-confirmed state
+  });
+
+  test('Users: renders authoritative global summary and distinguishes unavailable counts from zero', async () => {
+    api.users.mockResolvedValue({
+      users: [{ _id: 'u2', name: 'Sample User', email: 'sample@x.test', role: 'user', status: 'approved' }],
+      pagination: { total: 1, page: 1, limit: 20, pages: 1 },
+      summary: { totalUsers: 83, admins: 3, dealers: 21, banned: 2, pendingApproval: 4 },
+    });
+    render(<AdminUsers />);
+    expect(await screen.findByText('Sample User')).toBeTruthy();
+    expect(screen.getByText('83')).toBeTruthy();
+    expect(screen.getByText('21')).toBeTruthy();
+    expect(screen.getByText('4')).toBeTruthy();
+  });
+
+  test('Users: failed request is not presented as an empty user list or zero counts and can be retried', async () => {
+    api.users.mockRejectedValueOnce(new Error('Service unavailable'))
+      .mockResolvedValueOnce({ users: [], pagination: { total: 0 }, summary: { totalUsers: 0, admins: 0, dealers: 0, banned: 0, pendingApproval: 0 } });
+    render(<AdminUsers />);
+    expect(await screen.findByRole('alert')).toBeTruthy();
+    // The shared classifier states the cause; raw server text is deliberately not echoed to the operator.
+    expect(screen.getByRole('alert').textContent).toMatch(/could not reach the API/i);
+    expect(screen.queryByText('Service unavailable')).toBeNull();
+    expect(screen.queryByText('No user records returned')).toBeNull();
+    expect(screen.getAllByText('—').length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
+    expect(await screen.findByText('No user records returned')).toBeTruthy();
+  });
+
+  test('Listings: seven data cells plus a row number per row, a missing price is Unavailable, and staff cannot delete seller inventory', async () => {
+    api.cars.mockResolvedValue({ cars: [{ _id: 'c1', title: '2019 Prado', status: 'live', year: 2019 }], total: 1 });
+    render(<MemoryRouter><AdminCars /></MemoryRouter>);
+    const row = (await screen.findByText('2019 Prado')).closest('tr');
+    expect(row.querySelectorAll('td')).toHaveLength(8); // 7 data cells + the new row-number cell
+    expect(within(row).getByText('Unavailable')).toBeTruthy();
+    // Staff can moderate a listing, but business inventory deletion belongs to its owner.
+    expect(within(row).queryByRole('button', { name: 'Remove listing 2019 Prado' })).toBeNull();
+    expect(api.deleteCar).not.toHaveBeenCalled();
+  });
+});

@@ -1,0 +1,5 @@
+-- KAYAD MIGRATION HISTORY PRESERVED AS NO-OP
+-- Canonical migration: 20260909074048_vehicle_identity_registry.sql
+-- This version was an exact duplicate of the canonical migration.
+-- The version remains present so already-applied remote migration history is preserved.
+-- Fresh databases receive the canonical DDL once; this historical version intentionally performs no work.

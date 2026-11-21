@@ -1,0 +1,136 @@
+// backend/middleware/searchTracking.js - Production Hardened v7.0
+// ─────────────────────────────────────────────────────────────
+// Search Tracking middleware
+// Tracks user search behavior for analytics
+// ─────────────────────────────────────────────────────────────
+
+import { onJsonResponse } from "../utils/responseHooks.js";
+import { trackSearch } from "../services/searchInsightsService.js";
+import { logInfo, logError } from "../utils/logger.js";
+
+// =============================
+// EXTRACT
+// =============================
+
+export const extractSearchFilters = (req) => {
+  const query = req.query || {};
+  const body = req.body || {};
+
+  // Extract filters from query or body
+  const filters = {
+    brand: query.brand || body.brand,
+    model: query.model || body.model,
+    year: {
+      min: query.yearMin || body.yearMin,
+      max: query.yearMax || body.yearMax,
+    },
+    price: {
+      min: query.minPrice || body.minPrice,
+      max: query.maxPrice || body.maxPrice,
+    },
+    location: query.city || body.city,
+    county: query.county || body.county,
+    bodyType: query.body || body.bodyType,
+    fuelType: query.fuel || body.fuel,
+    transmission: query.transmission || body.transmission,
+    mileage: {
+      max: query.mileageMax || body.mileageMax,
+    },
+    condition: query.condition || body.condition,
+  };
+
+  // Clean up undefined values
+  Object.keys(filters).forEach((key) => {
+    if (typeof filters[key] === "object") {
+      Object.keys(filters[key]).forEach((subKey) => {
+        if (filters[key][subKey] === undefined || filters[key][subKey] === "") {
+          delete filters[key][subKey];
+        }
+      });
+    } else if (filters[key] === undefined || filters[key] === "") {
+      delete filters[key];
+    }
+  });
+
+  return filters;
+};
+
+// =============================
+// NORMALIZE
+// =============================
+
+export const normalizeSearchTerm = (term) => {
+  if (!term) return "";
+  return term.toLowerCase().trim();
+};
+
+// =============================
+// TRACK
+// =============================
+
+export const trackSearchMiddleware = (options = {}) => {
+  return (req, res, next) => {
+    onJsonResponse(res, (data) => {
+      process.nextTick(async () => {
+        try {
+          const searchTerm = req.query?.keyword || req.body?.keyword || "";
+          const filters = extractSearchFilters(req);
+          const resultCount = data?.data?.length || data?.cars?.length || data?.results?.length || 0;
+          await trackSearch({
+            searchTerm, filters, resultCount, userId: req.user?._id, userRole: req.user?.role,
+            ipAddress: req.ip || req.connection.remoteAddress, userAgent: req.get("user-agent"),
+            searchType: options.searchType || "quick_search", category: options.category || "all",
+          });
+        } catch (err) { logError("Failed to track search in middleware", err); }
+      });
+    });
+
+    next();
+  };
+};
+
+// =============================
+// TRACK
+// =============================
+
+export const trackCarSearch = trackSearchMiddleware({
+  searchType: "quick_search",
+  category: "listings",
+});
+
+// =============================
+// TRACK
+// =============================
+
+export const trackAuctionSearch = trackSearchMiddleware({
+  searchType: "quick_search",
+  category: "auctions",
+});
+
+// =============================
+// TRACK
+// =============================
+
+export const trackAdvancedSearch = trackSearchMiddleware({
+  searchType: "advanced_search",
+  category: "all",
+});
+
+// =============================
+// TRACK
+// =============================
+
+export const trackSavedSearch = trackSearchMiddleware({
+  searchType: "saved_search",
+  category: "all",
+});
+
+export default {
+  extractSearchFilters,
+  normalizeSearchTerm,
+  trackSearchMiddleware,
+  trackCarSearch,
+  trackAuctionSearch,
+  trackAdvancedSearch,
+  trackSavedSearch,
+};

@@ -1,0 +1,47 @@
+PASS H1 unauthenticated seller list -> 401
+PASS H2 missing Idempotency-Key -> 400
+PASS H3 non-owner cannot open proposal for someone else's car
+PASS H4 dealer cannot use admin queue
+PASS H5 seller cannot use admin queue
+PASS H6 buyer cannot use admin capability route
+PASS H7 seller creates proposal
+PASS H8 same Idempotency-Key replays the same proposal
+PASS H9a proposal id is a UUID
+PASS H9 other seller cannot read the case (404, not 403)
+PASS H10 seller cannot post a provider event
+PASS H11 seller cannot approve own proposal via seller route
+PASS H12 submit without evidence refused
+PASS H13 evidence
+PASS H14 submit
+PASS H15 eligibility reported as blocked with reasons
+PASS H17 unpaid booking cannot be linked
+PASS H18 paid booking links
+PASS H19 admin cannot approve capability before partner requested
+PASS H20 stranger cannot request capability for a garage they do not represent
+PASS H21 garage owner requests capability
+PASS H22 garage cannot approve itself
+PASS H23 admin approves capability
+PASS H24 admin assigns custody
+PASS H25 stranger cannot record inspection result
+PASS H26 inspector records passed result
+PASS H27 approving before custody is refused
+PASS H28 wrong VIN at intake -> discrepancy hold, not custody
+PASS H29 vehicle with VIN mismatch is not in custody
+PASS H30 admin lifts hold (back to review, evidence bumped)
+PASS H31 correct VIN -> in custody
+PASS H32 admin verifies seller authority
+PASS H33 dealer-role user cannot approve via admin route
+PASS H34 admin approves (or states exactly what is missing)
+PASS H35 eligible live auction is publicly listed
+PASS H36 eligible live auction detail is public
+PASS H37 live room reports bidding open
+PASS H38 admin suspends custody capability
+PASS H39 ineligible live auction disappears from public list
+PASS H40 ineligible live auction detail is hidden
+PASS H41 live room never reports bidding open when ineligible
+PASS H42 bid is refused (never accepted) while ineligible
+PASS H43 no bid row or payment was created
+PASS H44 admin reinstates capability
+PASS H45 reinstated -> public again
+PASS H46 new evidence version invalidates approval (seller edits evidence during live auction is locked)
+pass=46 fail=0

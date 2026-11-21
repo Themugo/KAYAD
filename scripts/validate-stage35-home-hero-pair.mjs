@@ -1,0 +1,24 @@
+import fs from 'node:fs';
+const checks = [];
+const pass = (name, ok) => checks.push({ name, ok });
+const hero = fs.readFileSync('src/features/VehicleMarketplace/components/VehicleMarketplace.tsx', 'utf8');
+const admin = fs.readFileSync('src/features/VehicleMarketplace/components/HomePageAdminPanel.tsx', 'utf8');
+const types = fs.readFileSync('src/features/VehicleMarketplace/types/heroPresentation.ts', 'utf8');
+const migration = fs.readFileSync('supabase/migrations/20261012103000_home_hero_showcase_pair_and_mobile_composition.sql', 'utf8');
+const tests = fs.readFileSync('src/__tests__/components/VehicleMarketplace.test.tsx', 'utf8');
+pass('hero renders one featured vehicle per slide through the single PremiumHero stage', hero.includes('heroSourceVehicles.map((vehicle) => [vehicle])') && hero.includes('<PremiumHero'));
+pass('vehicle images keep aspect ratio (contain for artwork, masked cover only for rectangular photos)', fs.readFileSync('src/components/home/premium-hero.css','utf8').includes('object-fit: contain'));
+pass('vehicle image has an accessible label distinguishing illustrative artwork', hero.includes('Illustrative KAYARD KE showroom artwork: ${v.make} ${v.model}') && hero.includes('ariaLabel: showcase'));
+pass('hero has a dedicated desktop composition via breakpoint', fs.readFileSync('src/components/home/premium-hero.css','utf8').includes('@media (min-width: 1024px)'));
+pass('showcase art is not priced or opened as a listing', hero.includes('ILLUSTRATIVE · NOT A LISTING') && hero.includes('if (isShowcaseHeroVehicle(vehicle))'));
+pass('real featured inventory takes precedence over showcase artwork (any count of real vehicles)', fs.readFileSync('src/features/VehicleMarketplace/utils/heroSelection.ts','utf8').includes('if (inventory.length > 0) return { vehicles: inventory, kind: \'inventory\', illustrative: false };'));
+pass('showcase fallback is admin-configurable', admin.includes('showcaseFallbackEnabled') && types.includes('showcaseFallbackEnabled: boolean'));
+pass('showcase vehicle identity and image paths are editable by admin', admin.includes('Curated Showcase Pair') && admin.includes('updateShowcaseVehicle(index') && admin.includes('mobileImage'));
+pass('showcase configuration is persisted via existing platform config endpoint', hero.includes('adminAPI.updateConfig({ ...current, heroPresentation: nextPresentation, heroCardContent: nextCardContent })'));
+pass('database migration seeds/repairs existing JSONB showcase config without creating fake cars', migration.includes('platform_config') && migration.includes('hero_presentation') && migration.includes('showcaseFallbackEnabled') && !/INSERT\s+INTO\s+public\.cars/i.test(migration));
+pass('approved Land Cruiser and Mercedes mobile transparent assets are referenced', migration.includes('/hero/kayad-land-cruiser-mobile.webp') && migration.includes('/hero/kayad-mercedes-gle-mobile.webp'));
+pass('tests cover paired cars and explicit visual-showcase semantics', tests.includes('shows one featured vehicle per slide') && tests.includes('labelled as not a listing') && tests.includes('never lets showcase artwork replace real inventory'));
+let failed = 0;
+for (const c of checks) { console.log(`${c.ok ? 'PASS' : 'FAIL'} ${c.name}`); if (!c.ok) failed++; }
+console.log(`\nStage 35 Home Hero Pair: ${checks.length - failed}/${checks.length} ${failed ? 'FAIL' : 'PASS'}`);
+process.exitCode = failed ? 1 : 0;

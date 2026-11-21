@@ -1,0 +1,312 @@
+// backend/controllers/reportController.js - Report & Feedback System
+// ─────────────────────────────────────────────────────────────
+// Handles user-submitted reports for content moderation
+// ─────────────────────────────────────────────────────────────
+
+import Report from "../models/Report.js";
+import Car from "../models/Car.js";
+import User from "../models/User.js";
+import { moderationBlockedReason } from "../utils/carModerationGuard.js";
+import { STAFF_ROLES } from "../config/roles.js";
+import { isOwnerAccountEmail } from "../config/owners.js";
+import { logInfo, logWarn, logError } from "../utils/logger.js";
+
+// =============================
+// 📝 SUBMIT REPORT
+// =============================
+export const submitReport = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { targetType, targetId, category, description } = req.body;
+
+    if (!targetType || !targetId) {
+      return res.status(400).json({
+        success: false,
+        message: "targetType and targetId are required",
+      });
+    }
+
+    if (!category) {
+      return res.status(400).json({
+        success: false,
+        message: "category is required",
+      });
+    }
+
+    if (description && description.length > 2000) {
+      return res.status(400).json({
+        success: false,
+        message: "Description must be at most 2000 characters",
+      });
+    }
+
+    // Prevent duplicate reports from same reporter on same target+category
+    const existing = await Report.findOne({
+      reporter: userId,
+      targetType,
+      targetId,
+      category,
+      status: { $in: ["pending", "under_review"] },
+    });
+
+    if (existing) {
+      return res.json({
+        success: true,
+        message: "Report already submitted",
+        report: existing,
+      });
+    }
+
+    const report = await Report.create({
+      reporter: userId,
+      targetType,
+      targetId,
+      category,
+      description,
+    });
+
+    logInfo("Report submitted", { userId, targetType, targetId, category });
+
+    res.status(201).json({
+      success: true,
+      message: "Report submitted successfully",
+      report,
+    });
+  } catch (err) {
+    logError("Submit report error", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to submit report",
+    });
+  }
+};
+
+// =============================
+// 👤 GET MY REPORTS
+// =============================
+export const getMyReports = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { page = 1, limit = 20 } = req.query;
+
+    const skip = (page - 1) * limit;
+
+    const [reports, total] = await Promise.all([
+      Report.find({ reporter: userId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+      Report.countDocuments({ reporter: userId }),
+    ]);
+
+    res.json({
+      success: true,
+      reports,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (err) {
+    logError("Get my reports error", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get reports",
+    });
+  }
+};
+
+// =============================
+// 👮 ADMIN: GET ALL REPORTS
+// =============================
+export const getAllReports = async (req, res) => {
+  try {
+    const { status, targetType, category, search = "", page = 1, limit = 20 } = req.query;
+    const safePage = Math.max(1, Number.parseInt(page, 10) || 1);
+    const safeLimit = Math.min(50, Math.max(1, Number.parseInt(limit, 10) || 20));
+    const filter = {};
+    if (status) filter.status = status;
+    if (targetType) filter.targetType = targetType;
+    if (category) filter.category = category;
+    if (search.trim()) {
+      // Escape user-controlled input before building a regex and search only known report fields.
+      const { escapeRegex } = await import("../utils/escapeRegex.js");
+      const term = escapeRegex(search.trim().slice(0, 100));
+      filter.$or = [
+        { description: { $regex: term, $options: "i" } },
+        { category: { $regex: term, $options: "i" } },
+        { targetType: { $regex: term, $options: "i" } },
+        // targetId may be stored as an ObjectId; use exact matching to avoid regex cast errors.
+        { targetId: search.trim().slice(0, 100) },
+      ];
+    }
+
+    const skip = (safePage - 1) * safeLimit;
+    const statuses = ["pending", "under_review", "reviewed", "dismissed", "action_taken"];
+    const [reports, total, allTotal, counts] = await Promise.all([
+      Report.find(filter)
+        .populate("reporter", "name email")
+        .populate("reviewedBy", "name email")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(safeLimit)
+        .lean(),
+      Report.countDocuments(filter),
+      Report.countDocuments({}),
+      Promise.all(statuses.map((value) => Report.countDocuments({ status: value }))),
+    ]);
+
+    res.set("Cache-Control", "no-store");
+    const stats = { total: allTotal };
+    statuses.forEach((value, index) => { stats[value] = counts[index]; });
+    res.json({
+      success: true,
+      reports,
+      stats,
+      pagination: {
+        page: safePage,
+        limit: safeLimit,
+        total,
+        pages: Math.max(1, Math.ceil(total / safeLimit)),
+      },
+    });
+  } catch (err) {
+    logError("Get all reports error", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get reports",
+    });
+  }
+};
+
+// =============================
+// 👮 ADMIN: GET REPORT BY ID
+// =============================
+export const getReportById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const report = await Report.findById(id)
+      .populate("reporter", "name email")
+      .populate("reviewedBy", "name email")
+      .lean();
+
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        message: "Report not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      report,
+    });
+  } catch (err) {
+    logError("Get report by ID error", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get report",
+    });
+  }
+};
+
+// =============================
+// 👮 ADMIN: UPDATE REPORT STATUS
+// =============================
+export const updateReportStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, resolution, actionTaken } = req.body;
+    const allowedStatuses = new Set(["pending", "under_review", "reviewed", "dismissed", "action_taken", "open", "resolved"]);
+    const allowedActions = new Set(["listing_removed", "user_banned"]);
+    if (status !== undefined && !allowedStatuses.has(status)) {
+      return res.status(400).json({ success: false, code: "INVALID_REPORT_STATUS", message: "Unsupported report status." });
+    }
+    if (actionTaken !== undefined && !allowedActions.has(actionTaken)) {
+      return res.status(400).json({ success: false, code: "INVALID_REPORT_ACTION", message: "Unsupported report moderation action." });
+    }
+    if (resolution !== undefined && (typeof resolution !== "string" || resolution.length > 2000)) {
+      return res.status(400).json({ success: false, code: "INVALID_REPORT_RESOLUTION", message: "Resolution must be text of at most 2000 characters." });
+    }
+    if (status === undefined && resolution === undefined && actionTaken === undefined) {
+      return res.status(400).json({ success: false, code: "EMPTY_REPORT_UPDATE", message: "Provide a status, resolution, or moderation action." });
+    }
+
+    const report = await Report.findById(id);
+
+    if (!report) {
+      return res.status(404).json({
+        success: false,
+        message: "Report not found",
+      });
+    }
+    if (actionTaken === "listing_removed" && report.targetType !== "listing") {
+      return res.status(400).json({ success: false, code: "REPORT_ACTION_TARGET_MISMATCH", message: "Listing removal can only be used for listing reports." });
+    }
+    if (actionTaken === "user_banned" && report.targetType !== "user") {
+      return res.status(400).json({ success: false, code: "REPORT_ACTION_TARGET_MISMATCH", message: "User suspension can only be used for user reports." });
+    }
+
+    // Stage 3A (2026-10-18): enforcement actions taken from the report queue
+    // (open to moderators) are checked BEFORE anything is persisted.
+    //  - listing_removed: same sold-listing guard as admin moderation
+    //    (utils/carModerationGuard.js) — a completed sale is unwound through
+    //    escrow/refund, not by flipping the listing to "rejected".
+    //  - user_banned: may not target staff or platform-owner accounts; staff
+    //    suspension stays with admin user management. Without this a moderator
+    //    could ban an admin or superadmin from the report queue.
+    if (actionTaken === "listing_removed" && report.targetType === "listing") {
+      const targetCar = await Car.findById(report.targetId);
+      if (!targetCar) return res.status(404).json({ success: false, code: "REPORT_TARGET_NOT_FOUND", message: "Reported listing was not found." });
+      const blocked = moderationBlockedReason(targetCar);
+      if (blocked) return res.status(409).json({ success: false, code: "LISTING_MODERATION_BLOCKED", message: blocked });
+    }
+    if (actionTaken === "user_banned") {
+      const targetUser = await User.findById(report.targetId).select("email role");
+      if (!targetUser) return res.status(404).json({ success: false, code: "REPORT_TARGET_NOT_FOUND", message: "Reported user was not found." });
+      if (STAFF_ROLES.includes(targetUser.role) || isOwnerAccountEmail(targetUser.email)) {
+        return res.status(403).json({ success: false, code: "BAN_TARGET_PROTECTED", message: "Staff and platform-owner accounts cannot be suspended from the report queue." });
+      }
+    }
+
+    if (status) report.status = status;
+    if (resolution) report.resolution = resolution;
+    if (actionTaken) report.actionTaken = actionTaken;
+    report.reviewedBy = req.user.id;
+    report.reviewedAt = new Date();
+
+    await report.save();
+
+    // Execute action based on actionTaken
+    if (actionTaken === "listing_removed" && report.targetType === "listing") {
+      await Car.findByIdAndUpdate(report.targetId, { status: "rejected" });
+    }
+
+    if (actionTaken === "user_banned") {
+      await User.findByIdAndUpdate(report.targetId, { isBanned: true });
+    }
+
+    logInfo("Report status updated", {
+      reportId: id,
+      status,
+      actionTaken,
+      adminId: req.user.id,
+    });
+
+    res.json({
+      success: true,
+      message: "Report updated successfully",
+      report,
+    });
+  } catch (err) {
+    logError("Update report status error", err);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update report",
+    });
+  }
+};

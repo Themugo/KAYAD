@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1000" preserveAspectRatio="xMidYMid slice">
+<defs>
+ <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#5BB8E8"/><stop offset=".56" stop-color="#C7E7E7"/><stop offset="1" stop-color="#F7D7A2"/></linearGradient>
+ <linearGradient id="hills" x2="0" y2="1"><stop stop-color="#7DAF75"/><stop offset="1" stop-color="#164E42"/></linearGradient>
+ <linearGradient id="road" x2="0" y2="1"><stop stop-color="#5B6970"/><stop offset="1" stop-color="#172D3A"/></linearGradient>
+ <linearGradient id="verge" x2="0" y2="1"><stop stop-color="#8CB46D"/><stop offset="1" stop-color="#28553E"/></linearGradient>
+ <radialGradient id="sun"><stop stop-color="#FFF5D9" stop-opacity=".95"/><stop offset="1" stop-color="#FFF5D9" stop-opacity="0"/></radialGradient>
+ <filter id="soft"><feGaussianBlur stdDeviation="22"/></filter>
+</defs>
+<rect width="1920" height="1000" fill="url(#sky)"/>
+<circle cx="1530" cy="205" r="210" fill="url(#sun)"/>
+<path d="M0 490 180 360 310 410 470 260 610 390 760 300 930 415 1110 255 1260 390 1430 240 1580 380 1760 280 1920 410V680H0Z" fill="#769BA1" opacity=".62"/>
+<path d="m0 500 210-160 120 76 210-250 175 240 150-130 185 215 210-290 170 230 210-175 280 255v220H0Z" fill="#E4F0E8" opacity=".88"/>
+<path d="m0 530 210-160 120 76 210-250 175 240 150-130 185 215 210-290 170 230 210-175 280 255v80H0Z" fill="#527C83" opacity=".76"/>
+<path d="M0 565Q260 450 500 535T970 520T1440 500T1920 540V1000H0Z" fill="url(#hills)"/>
+<path d="M0 610Q240 480 470 590T920 560T1360 575T1920 560V1000H0Z" fill="#5F965F"/>
+<path d="M0 680Q270 555 540 670T1080 625T1600 640T1920 620V1000H0Z" fill="#356C4E"/>
+<g fill="#A9C47A" opacity=".75"><path d="M0 700q240-110 430 5t390-8q210-100 410 0t390-20q150-55 300 5v70H0Z"/><path d="M0 800q230-80 470 5t500-5q230-85 430 5t520-8v80H0Z"/></g>
+<!-- Acacia silhouettes, a distinctive East African landscape cue -->
+<g fill="#214B3D">
+ <path d="M145 630h20v-130h-20zM155 510q-100-8-120-55 65-35 130 6 55-50 145-18-20 65-145 67Z"/>
+ <path d="M1640 600h17V470h-17zM1648 490q-88-8-110-48 60-34 118 4 55-48 130-18-22 60-138 62Z"/>
+ <path d="M430 645h12v-78h-12zM436 580q-55-5-68-32 38-25 73 3 35-30 80-10-12 40-85 39Z"/>
+</g>
+<path d="M0 1000 0 810Q420 710 740 700q210-10 390 65t790 30v205Z" fill="url(#verge)"/>
+<!-- Winding highway, kept open in the centre so the real vehicle cutouts remain legible -->
+<path d="M-80 1000Q260 810 620 790q280-18 500 55 250 84 470-4 180-70 410-155v314Z" fill="#243D48"/>
+<path d="M-80 1000Q260 810 620 790q280-18 500 55 250 84 470-4 180-70 410-155" fill="none" stroke="#AEBCC0" stroke-width="12" opacity=".8"/>
+<path d="M-80 1000Q260 810 620 790q280-18 500 55 250 84 470-4 180-70 410-155" fill="none" stroke="#F5F1D9" stroke-width="5" stroke-dasharray="48 44" opacity=".95"/>
+<path d="M0 860q340-140 650-110" fill="none" stroke="#D5E1D8" stroke-width="5" opacity=".5"/>
+<g fill="#F8E7B4" opacity=".45"><path d="M90 730q180-80 330-75l-45 10q-130 10-260 80Z"/><path d="M1510 700q190-90 340-120l-40 20q-170 50-280 110Z"/></g>
+<rect width="1920" height="1000" fill="#082F3B" opacity=".08"/>
+</svg>

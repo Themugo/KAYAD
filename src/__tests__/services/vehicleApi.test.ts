@@ -1,0 +1,304 @@
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { getCars, getCarById, createCar, updateCar, addCarImages, deleteCarImage, deleteCar, mapBackendCarToVehicle, VehicleApiError, BackendCar } from '../../services/vehicleApi';
+import { HttpRequestError, request } from '../../api/httpRequest';
+
+vi.mock('../../api/httpRequest', async () => {
+  const actual = await vi.importActual<typeof import('../../api/httpRequest')>('../../api/httpRequest');
+  return { ...actual, request: vi.fn() };
+});
+
+const requestMock = vi.mocked(request);
+
+/**
+ * KAYAD Fusion Phase 4/5 tests. Updated in Phase 5 to match the
+ * corrected real schema (brand not make, fuel not fuel_type,
+ * location_city not location, images as JSONB objects not URL
+ * strings, and real denormalized auction fields on the car row) -
+ * see vehicleApi.ts's file header for the full correction story.
+ */
+
+
+describe('vehicleApi.getCars - real request shape', () => {
+  afterEach(() => { vi.restoreAllMocks(); requestMock.mockReset(); });
+
+  it('calls GET /api/cars with credentials included', async () => {
+    requestMock.mockResolvedValueOnce({ success: true, data: [], pagination: { page: 1, limit: 12, total: 0 } });
+
+    await getCars();
+
+    expect(requestMock).toHaveBeenCalledWith('/api/cars', { method: 'GET' });
+  });
+
+  it('encodes real query params matching the backend controller\'s actual req.query fields', async () => {
+    requestMock.mockResolvedValueOnce({ success: true, data: [], pagination: { page: 2, limit: 24, total: 0 } });
+
+    await getCars({ page: 2, limit: 24, brand: 'Toyota', minPrice: 500000 });
+
+    expect(requestMock.mock.calls[0][0]).toBe('/api/cars?page=2&limit=24&brand=Toyota&minPrice=500000');
+  });
+
+  it('a network failure throws a clear, honest VehicleApiError, not a silent failure', async () => {
+    requestMock.mockRejectedValueOnce(new HttpRequestError('Unable to reach KAYAD servers. Please check your connection and try again.'));
+
+    let caughtError: unknown;
+    try {
+      await getCars();
+    } catch (err) {
+      caughtError = err;
+    }
+    expect(caughtError).toBeInstanceOf(VehicleApiError);
+    expect((caughtError as VehicleApiError).message).toContain('Unable to reach KAYAD servers');
+    expect((caughtError as VehicleApiError).kind).toBe('network');
+  });
+});
+
+describe('vehicleApi.getCarById', () => {
+  afterEach(() => { vi.restoreAllMocks(); requestMock.mockReset(); });
+
+  it('calls the correct real endpoint for a specific ID', async () => {
+    requestMock.mockResolvedValueOnce({ success: true, data: { id: 'car-1', title: 'Test', brand: 'Toyota', model: 'Corolla', year: 2020, price: 1000000 } });
+
+    await getCarById('car-1');
+    expect(requestMock).toHaveBeenCalledWith('/api/cars/car-1', { method: 'GET' });
+  });
+
+  it('returns null (not a thrown error) for a genuine 404 - a normal, expected case', async () => {
+    requestMock.mockRejectedValueOnce(new HttpRequestError('Car not found', 404, { success: false, message: 'Car not found' }));
+    const result = await getCarById('nonexistent');
+    expect(result).toBeNull();
+  });
+});
+
+describe('mapBackendCarToVehicle - matches the real, corrected schema (Phase 5)', () => {
+  const realCar: BackendCar = {
+    id: 'car-42',
+    dealer_id: 'dealer-7',
+    title: '2021 Toyota Land Cruiser Prado',
+    brand: 'Toyota', // real column name - NOT "make"
+    model: 'Land Cruiser Prado',
+    year: 2021,
+    price: 8500000,
+    mileage: 45000,
+    fuel: 'Diesel', // real column name - NOT "fuel_type"
+    transmission: 'Automatic',
+    body_type: 'SUV',
+    condition: 'Foreign Used',
+    images: [{ url: 'https://example.com/1.jpg' }, { url: 'https://example.com/2.jpg' }], // real shape - JSONB objects, not plain strings
+    location_city: 'Nairobi', // real column name - NOT "location"
+    vin: 'JT3HP10V5X7123456',
+    features: ['Sunroof', 'Leather Seats'],
+    has_auction: true,
+    // Real, denormalized auction fields - corrected in Phase 5 to
+    // actually exist and be mapped, not defaulted to undefined.
+    current_bid: 8200000,
+    bids_count: 14,
+    auction_end: '2026-09-01T12:00:00Z',
+    is_verified_dealer: true,
+  };
+
+
+  it('maps the canonical /api/cars camelCase response shape used by the live backend', () => {
+    const canonicalCar: BackendCar = {
+      id: 'car-live-1',
+      title: '2025 Toyota Land Cruiser',
+      brand: 'Toyota',
+      model: 'Land Cruiser',
+      year: 2025,
+      price: 9500000,
+      mileage: 18000,
+      fuel: 'Diesel',
+      transmission: 'Automatic',
+      bodyType: 'SUV',
+      city: 'Nairobi',
+      images: [{ url: 'https://example.com/live.jpg' }],
+      dealer: { id: 'dealer-live-1', name: 'KAYAD Motors', role: 'dealer', dealerApprovedAt: '2026-01-01T00:00:00Z' },
+      auctionStatus: 'live',
+      currentBid: 9100000,
+      bidsCount: 8,
+      auctionEnd: '2026-10-08T12:00:00Z',
+      isVerifiedDealer: true,
+      isPromoted: true,
+      inspectionStatus: 'passed',
+      createdAt: '2026-10-01T00:00:00Z',
+    };
+
+    const mapped = mapBackendCarToVehicle(canonicalCar);
+    expect(mapped.sellerId).toBe('dealer-live-1');
+    expect(mapped.sellerName).toBe('KAYAD Motors');
+    expect(mapped.sellerType).toBe('Verified Dealer');
+    expect(mapped.location).toBe('Nairobi');
+    expect(mapped.isAuction).toBe(true);
+    expect(mapped.currentBid).toBe(9100000);
+    expect(mapped.bidsCount).toBe(8);
+    expect(mapped.auctionEndsAt).toBe('2026-10-08T12:00:00Z');
+    expect(mapped.verified).toBe(true);
+    expect(mapped.isFeatured).toBe(true);
+    expect(mapped.inspectionStatus).toBe('passed');
+    expect(mapped.inspectionPassed).toBe(true);
+  });
+  it('correctly maps every field that genuinely exists on the backend car row, using the real column names', () => {
+    const mapped = mapBackendCarToVehicle(realCar);
+    expect(mapped.id).toBe('car-42');
+    expect(mapped.title).toBe('2021 Toyota Land Cruiser Prado');
+    expect(mapped.make).toBe('Toyota'); // mapped from the real "brand" column
+    expect(mapped.year).toBe(2021);
+    expect(mapped.price).toBe(8500000);
+    expect(mapped.mileage).toBe(45000);
+    expect(mapped.fuelType).toBe('Diesel'); // mapped from the real "fuel" column
+    expect(mapped.bodyStyle).toBe('SUV');
+    expect(mapped.vin).toBe('JT3HP10V5X7123456');
+    expect(mapped.location).toBe('Nairobi'); // mapped from the real "location_city" column
+    // Real JSONB image objects correctly unwrapped to plain URL strings
+    expect(mapped.images).toEqual(['https://example.com/1.jpg', 'https://example.com/2.jpg']);
+    expect(mapped.isAuction).toBe(true);
+  });
+
+  it('Phase 5 correction: auction data is now genuinely populated from real, denormalized car-row fields, not defaulted', () => {
+    const mapped = mapBackendCarToVehicle(realCar);
+    expect(mapped.currentBid).toBe(8200000);
+    expect(mapped.bidsCount).toBe(14);
+    expect(mapped.auctionEndsAt).toBe('2026-09-01T12:00:00Z');
+  });
+
+  it('Phase 5 correction: is_verified_dealer maps to real verified/isDealerCertified signals', () => {
+    const mapped = mapBackendCarToVehicle(realCar);
+    expect(mapped.verified).toBe(true);
+    expect(mapped.isDealerCertified).toBe(true);
+  });
+
+  it('does NOT fabricate a real seller name - a genuine gap not present anywhere on the cars row', () => {
+    const mapped = mapBackendCarToVehicle(realCar);
+    expect(mapped.sellerName).toBe('Unknown Seller');
+    expect(mapped.sellerId).toBe('dealer-7');
+  });
+
+  it('a car with no dealer_id (private seller) maps sellerType correctly without fabricating dealer status', () => {
+    const privateCar: BackendCar = { ...realCar, dealer_id: null };
+    const mapped = mapBackendCarToVehicle(privateCar);
+    expect(mapped.sellerType).toBe('Private Seller');
+    expect(mapped.sellerId).toBe('');
+  });
+
+  it('a non-auction car correctly has no bid/auction data, not zeroed-out fake values', () => {
+    const nonAuctionCar: BackendCar = { ...realCar, has_auction: false, current_bid: null, bids_count: null, auction_end: null };
+    const mapped = mapBackendCarToVehicle(nonAuctionCar);
+    expect(mapped.isAuction).toBe(false);
+    expect(mapped.currentBid).toBeUndefined();
+    expect(mapped.bidsCount).toBeUndefined();
+    expect(mapped.auctionEndsAt).toBeUndefined();
+  });
+
+  it('handles missing optional fields gracefully without throwing', () => {
+    const sparseCar: BackendCar = {
+      id: 'car-99',
+      title: 'Bare Minimum Car',
+      brand: 'Honda',
+      model: 'Civic',
+      year: 2019,
+      price: 1200000,
+    };
+    expect(() => mapBackendCarToVehicle(sparseCar)).not.toThrow();
+    const mapped = mapBackendCarToVehicle(sparseCar);
+    expect(mapped.mileage).toBe(0);
+    expect(mapped.images).toEqual([]);
+    expect(mapped.isAuction).toBe(false);
+  });
+});
+
+describe('vehicleApi.createCar / updateCar - real request shape (Phase 14.4)', () => {
+  afterEach(() => { requestMock.mockReset(); });
+
+  it('createCar posts multipart FormData with images and declares multipart so the shared JSON default cannot flatten the files', async () => {
+    requestMock.mockResolvedValueOnce({ success: true, data: { id: 'c1' } });
+    const img = new File(['x'], 'a.jpg', { type: 'image/jpeg' });
+    await createCar({ title: 'Prado', brand: 'Toyota', price: 100, images: [img] });
+    const [path, opts] = requestMock.mock.calls[0] as [string, { method: string; body: FormData; headers: Record<string, string> }];
+    expect(path).toBe('/api/cars');
+    expect(opts.method).toBe('POST');
+    expect(opts.headers['Content-Type']).toBe('multipart/form-data');
+    expect(opts.body).toBeInstanceOf(FormData);
+    expect(opts.body.get('title')).toBe('Prado');
+    expect(opts.body.getAll('images')).toHaveLength(1);
+  });
+
+  it('createCar surfaces a server rejection as VehicleApiError with the status', async () => {
+    requestMock.mockRejectedValueOnce(new HttpRequestError('Dealer verification required', 403));
+    await expect(createCar({ title: 'x', brand: 'y' })).rejects.toMatchObject({ status: 403, message: 'Dealer verification required' });
+  });
+
+  it('updateCar sends a partial JSON PUT and preserves intentionally cleared text fields', async () => {
+    requestMock.mockResolvedValueOnce({ success: true, data: { id: 'c1' } });
+    await updateCar('c1', { price: 90, description: '', title: '', city: undefined });
+    expect(requestMock).toHaveBeenCalledWith('/api/cars/c1', { method: 'PUT', body: { price: 90, description: '' } });
+  });
+
+  it('updateCar maps 404 to not_found and an unreachable server to network', async () => {
+    requestMock.mockRejectedValueOnce(new HttpRequestError('gone', 404));
+    await expect(updateCar('c1', { price: 1 })).rejects.toMatchObject({ kind: 'not_found' });
+    requestMock.mockRejectedValueOnce(new HttpRequestError('offline'));
+    await expect(updateCar('c1', { price: 1 })).rejects.toMatchObject({ kind: 'network' });
+  });
+});
+
+describe('vehicleApi photo management and delete (Phase 14.6)', () => {
+  afterEach(() => { requestMock.mockReset(); });
+
+  it('addCarImages posts multipart to /api/cars/:id/images', async () => {
+    requestMock.mockResolvedValueOnce({ success: true, data: { images: [] } });
+    await addCarImages('c 1', [new File(['x'], 'a.png', { type: 'image/png' })]);
+    const [path, opts] = requestMock.mock.calls[0] as [string, { method: string; body: FormData; headers: Record<string, string> }];
+    expect(path).toBe('/api/cars/c%201/images');
+    expect(opts.method).toBe('POST');
+    expect(opts.headers['Content-Type']).toBe('multipart/form-data');
+    expect(opts.body.getAll('images')).toHaveLength(1);
+  });
+
+  it('deleteCarImage and deleteCar use the existing DELETE routes', async () => {
+    requestMock.mockResolvedValue({ success: true });
+    await deleteCarImage('c1', 2);
+    await deleteCar('c1');
+    expect(requestMock).toHaveBeenNthCalledWith(1, '/api/cars/c1/images/2', { method: 'DELETE' });
+    expect(requestMock).toHaveBeenNthCalledWith(2, '/api/cars/c1', { method: 'DELETE' });
+  });
+
+  it('maps 403/404/network failures to VehicleApiError', async () => {
+    requestMock.mockRejectedValueOnce(new HttpRequestError('no', 403));
+    await expect(deleteCar('c1')).rejects.toMatchObject({ status: 403, kind: 'server' });
+    requestMock.mockRejectedValueOnce(new HttpRequestError('gone', 404));
+    await expect(deleteCarImage('c1', 0)).rejects.toMatchObject({ kind: 'not_found' });
+    requestMock.mockRejectedValueOnce(new HttpRequestError('offline'));
+    await expect(addCarImages('c1', [])).rejects.toMatchObject({ kind: 'network' });
+  });
+});
+
+describe('vehicleApi.createCar / updateCar - what the server said reaches the caller (listing audit)', () => {
+  afterEach(() => { requestMock.mockReset(); });
+  const reject = (status: number, data: unknown) => requestMock.mockRejectedValueOnce(new HttpRequestError(String((data as any)?.message ?? 'x'), status, data));
+
+  it('createCar carries the server error CODE (so SUBSCRIPTION_REQUIRED / DUPLICATE_VIN can be recognised)', async () => {
+    reject(409, { success: false, code: 'DUPLICATE_VIN', message: 'A vehicle with this VIN is already listed.' });
+    await expect(createCar({ title: 'Prado', brand: 'Toyota' })).rejects.toMatchObject({ code: 'DUPLICATE_VIN', status: 409, message: 'A vehicle with this VIN is already listed.' });
+  });
+  it('createCar shows the field-level validation text instead of the generic "Validation failed"', async () => {
+    reject(400, { success: false, message: 'Validation failed', errors: 'year: Year is required; price: Price is required' });
+    await expect(createCar({ title: 'Prado', brand: 'Toyota' })).rejects.toMatchObject({ status: 400, message: 'year: Year is required; price: Price is required' });
+  });
+  it('updateCar behaves the same', async () => {
+    reject(400, { success: false, message: 'Validation failed', errors: 'mileage: Mileage must not exceed 2,000,000 km' });
+    await expect(updateCar('c1', { mileage: 1 })).rejects.toMatchObject({ message: expect.stringContaining('Mileage must not exceed') });
+  });
+});
+
+describe('mapBackendCar engine and drive', () => {
+  it('passes the seller-entered engine and drive type through to the vehicle', async () => {
+    const mod: any = await import('../../services/vehicleApi');
+    const fn = mod.mapBackendCarToVehicle;
+    expect(typeof fn).toBe('function');
+    const v = fn({ id: '1', title: 't', brand: 'Toyota', model: 'LC', year: 2016, price: 1, engine: '4500 cc', driveType: '4WD' });
+    expect(v.engineSize).toBe('4500 cc');
+    expect(v.driveType).toBe('4WD');
+    const none = fn({ id: '2', title: 't', brand: 'Toyota', model: 'LC', year: 2016, price: 1 });
+    expect(none.engineSize).toBeUndefined();
+    expect(none.driveType).toBeUndefined();
+  });
+});

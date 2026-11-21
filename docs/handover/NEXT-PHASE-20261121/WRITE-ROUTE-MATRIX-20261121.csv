@@ -1,0 +1,691 @@
+tier,file,line,method,mount,path,auth,authz,validation,rate_limit,idempotency,csrf,handler
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,63,POST,/api/inspection;/api/inspections,/bookings,yes,none,yes,none,none,global(/api),controller.createBooking
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,72,POST,/api/inspection;/api/inspections,/bookings/:bookingId/cancel,yes,none,none,none,none,global(/api),controller.cancelBooking
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,75,POST,/api/inspection;/api/inspections,/reviews,yes,none,none,none,none,global(/api),controller.submitReview
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,92,POST,/api/inspection;/api/inspections,/provider/:providerId/capabilities,yes,yes,yes,none,none,global(/api),gov.declareCapability
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,96,POST,/api/inspection;/api/inspections,/provider/:providerId/staff,yes,yes,yes,none,none,global(/api),gov.inviteStaff
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,97,POST,/api/inspection;/api/inspections,/provider/:providerId/staff/:staffId/confirm,yes,yes,none,none,none,global(/api),gov.confirmStaff
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,98,POST,/api/inspection;/api/inspections,/provider/:providerId/staff/:staffId/end,yes,yes,none,none,none,global(/api),gov.endStaff
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,102,POST,/api/inspection;/api/inspections,/affiliations,yes,none,yes,none,none,global(/api),gov.requestAffiliation
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,103,POST,/api/inspection;/api/inspections,/affiliations/:staffId/accept,yes,none,none,none,none,global(/api),gov.acceptAffiliation
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,104,POST,/api/inspection;/api/inspections,/affiliations/:staffId/leave,yes,none,none,none,none,global(/api),gov.leaveAffiliation
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,110,PUT,/api/inspection;/api/inspections,/provider/:providerId,yes,yes,none,none,none,global(/api),controller.updateProvider
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,113,POST,/api/inspection;/api/inspections,/provider/:providerId/credentials,yes,yes,yes,none,none,global(/api),controller.addCredential
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,119,POST,/api/inspection;/api/inspections,/provider/:providerId/bookings/:bookingId/status,yes,yes,none,none,none,global(/api),controller.updateBookingStatus
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,122,POST,/api/inspection;/api/inspections,/provider/:providerId/bookings/:bookingId/assign,yes,yes,none,none,none,global(/api),controller.assignInspector
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,125,POST,/api/inspection;/api/inspections,/provider/:providerId/bookings/:bookingId/report,yes,yes,none,none,none,global(/api),controller.createReport
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,128,POST,/api/inspection;/api/inspections,/provider/:providerId/reports/:reportId/pdf,yes,yes,none,none,none,global(/api),controller.generatePDF
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,132,POST,/api/inspection;/api/inspections,/provider/:providerId/reports/:reportId/share,yes,yes,none,none,none,global(/api),controller.shareReport
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,135,DELETE,/api/inspection;/api/inspections,/provider/:providerId/reports/:reportId/share,yes,yes,none,none,none,global(/api),controller.revokeReportShare
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,144,POST,/api/inspection;/api/inspections,/provider/:providerId/settlements,yes,yes,none,none,none,global(/api),controller.generateSettlement
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,147,POST,/api/inspection;/api/inspections,/provider/:providerId/settlements/:settlementId/pay,yes,yes,none,none,none,global(/api),controller.markSettlementPaid
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,162,POST,/api/inspection;/api/inspections,/bookings/:bookingId/payment/initiate,yes,none,yes,yes,yes,global(/api),controller.initiateInspectionPayment
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,163,POST,/api/inspection;/api/inspections,/bookings/:bookingId/payment,yes,yes,yes,none,none,global(/api),controller.processPayment
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,166,POST,/api/inspection;/api/inspections,/bookings/:bookingId/refund,yes,yes,none,none,none,global(/api),controller.processRefund
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,188,POST,/api/inspection;/api/inspections,/order,yes,none,none,none,none,global(/api),legacy.createOrder
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,189,POST,/api/inspection;/api/inspections,/confirm-payment,yes,none,none,none,none,global(/api),legacy.confirmPayment
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,194,POST,/api/inspection;/api/inspections,/:id/assign,yes,yes,none,none,none,global(/api),legacy.assign
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,195,POST,/api/inspection;/api/inspections,/:id/start,yes,none,none,none,none,global(/api),legacy.start
+T2 listings/moderation,inspection/routes/inspectionRoutes.js,196,POST,/api/inspection;/api/inspections,/:id/submit,yes,none,none,none,none,global(/api),legacy.submit
+T2 listings/moderation,inspection/routes/organizationRoutes.js,43,POST,/api/inspection/org;/api/inspections/org,/me/memberships/:staffId/accept,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {   response.success(res, a"
+T2 listings/moderation,inspection/routes/organizationRoutes.js,47,POST,/api/inspection/org;/api/inspections/org,/me/memberships/:staffId/leave,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   response.success(res, a"
+T2 listings/moderation,inspection/routes/organizationRoutes.js,61,POST,/api/inspection/org;/api/inspections/org,/:providerId/branches,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   response.created(res, a"
+T2 listings/moderation,inspection/routes/organizationRoutes.js,64,PATCH,/api/inspection/org;/api/inspections/org,/:providerId/branches/:branchId,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   await org.assertBranchI"
+T2 listings/moderation,inspection/routes/organizationRoutes.js,70,POST,/api/inspection/org;/api/inspections/org,/:providerId/branches/:branchId/status,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   await org.assertBranchI"
+T2 listings/moderation,inspection/routes/organizationRoutes.js,79,POST,/api/inspection/org;/api/inspections/org,/:providerId/members/invite,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const b = req.body;   r"
+T2 listings/moderation,inspection/routes/organizationRoutes.js,83,POST,/api/inspection/org;/api/inspections/org,/:providerId/members/:staffId/confirm,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {   await org.assertMemberI"
+T2 listings/moderation,inspection/routes/organizationRoutes.js,87,PATCH,/api/inspection/org;/api/inspections/org,/:providerId/members/:staffId,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   await org.assertMemberI"
+T2 listings/moderation,inspection/routes/organizationRoutes.js,95,POST,/api/inspection/org;/api/inspections/org,/:providerId/members/:staffId/status,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   await org.assertMemberI"
+T2 listings/moderation,inspection/routes/organizationRoutes.js,104,POST,/api/inspection/org;/api/inspections/org,/:providerId/bookings/:bookingId/route,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   await org.assertBooking"
+T2 listings/moderation,inspection/routes/organizationRoutes.js,108,POST,/api/inspection/org;/api/inspections/org,/:providerId/bookings/:bookingId/assign,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   await org.assertBooking"
+T2 listings/moderation,inspection/routes/organizationRoutes.js,112,POST,/api/inspection/org;/api/inspections/org,/:providerId/bookings/:bookingId/transition,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   await org.assertBooking"
+T2 listings/moderation,inspection/routes/phase22Routes.js,14,POST,/api/v1/phase22,/providers/register,yes,none,yes,none,none,global(/api),c.registerProvider
+T2 listings/moderation,inspection/routes/phase22Routes.js,17,POST,/api/v1/phase22,/reports/:reportId/purchase,yes,none,yes,none,none,global(/api),c.purchaseReport
+T2 listings/moderation,inspection/routes/phase22Routes.js,18,POST,/api/v1/phase22,/bookings/:bookingId/disputes,yes,none,yes,none,none,global(/api),c.openInspectionDispute
+T2 listings/moderation,inspection/routes/phase22Routes.js,19,POST,/api/v1/phase22,/disputes/:disputeId/evidence,yes,none,yes,none,none,global(/api),c.addInspectionEvidence
+T2 listings/moderation,inspection/routes/phase22Routes.js,20,POST,/api/v1/phase22,/service-jobs/:jobId/transition,yes,none,yes,none,none,global(/api),c.transitionServiceJob
+T2 listings/moderation,inspection/routes/phase22Routes.js,21,POST,/api/v1/phase22,/service-jobs/:jobId/disputes,yes,none,yes,none,none,global(/api),c.openServiceJobDispute
+T2 listings/moderation,inspection/routes/phase22Routes.js,22,POST,/api/v1/phase22,/service-job-disputes/:disputeId/evidence,yes,none,yes,none,none,global(/api),c.addServiceJobEvidence
+T2 listings/moderation,inspection/routes/phase22Routes.js,23,POST,/api/v1/phase22,/admin/service-job-disputes/:requestId/resolve,yes,yes,yes,none,none,global(/api),c.resolveServiceJobDispute
+T2 listings/moderation,inspection/routes/phase22Routes.js,24,POST,/api/v1/phase22,/admin/inspection-disputes/:requestId/resolve,yes,yes,yes,none,none,global(/api),c.resolveInspectionDispute
+T7 other,routes/adSlotRoutes.js,25,POST,/api/ads;/api/v1/ads,/:id/events,NONE,none,none,none,none,global(/api),asyncHandler(recordAdEvent)
+T7 other,routes/adSlotRoutes.js,26,POST,/api/ads;/api/v1/ads,/,yes,yes,none,none,none,global(/api),asyncHandler(createAdSlot)
+T7 other,routes/adSlotRoutes.js,27,PUT,/api/ads;/api/v1/ads,/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateAdSlot)
+T7 other,routes/adSlotRoutes.js,28,DELETE,/api/ads;/api/v1/ads,/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteAdSlot)
+T2 listings/moderation,routes/adminInspectionGovernanceRoutes.js,14,POST,/api/admin/inspection-governance;/api/v1/admin/inspection-governance,/providers/:id/decision,NONE,none,yes,yes,none,global(/api),c.adminProviderDecision
+T2 listings/moderation,routes/adminInspectionGovernanceRoutes.js,15,POST,/api/admin/inspection-governance;/api/v1/admin/inspection-governance,/credentials/:id/decision,NONE,none,yes,yes,none,global(/api),c.adminCredentialDecision
+T2 listings/moderation,routes/adminInspectionGovernanceRoutes.js,16,POST,/api/admin/inspection-governance;/api/v1/admin/inspection-governance,/capabilities/:id/decision,NONE,none,yes,yes,none,global(/api),c.adminCapabilityDecision
+T2 listings/moderation,routes/adminInspectionGovernanceRoutes.js,17,POST,/api/admin/inspection-governance;/api/v1/admin/inspection-governance,/staff/:id/end,NONE,none,none,yes,none,global(/api),c.adminEndStaff
+T6 admin/dealer,routes/adminRoutes.js,445,POST,/api/admin;/api/v1/admin,/users/:id/toggle-ban,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const user = await Us"
+T6 admin/dealer,routes/adminRoutes.js,528,POST,/api/admin;/api/v1/admin,/users/:id/approve-dealer,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const user = await Us"
+T6 admin/dealer,routes/adminRoutes.js,628,PUT,/api/admin;/api/v1/admin,/users/:id/seller-settings,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const user = await Us"
+T6 admin/dealer,routes/adminRoutes.js,736,DELETE,/api/admin;/api/v1/admin,/cars/:id,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (_req, res) => {     return res.status(40"
+T6 admin/dealer,routes/adminRoutes.js,752,POST,/api/admin;/api/v1/admin,/cars/:id/verify,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const { ntsaVerified,"
+T6 admin/dealer,routes/adminRoutes.js,772,POST,/api/admin;/api/v1/admin,/cars/:id/moderate,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     // STAGE 5A (Gate E):"
+T6 admin/dealer,routes/adminRoutes.js,891,PUT,/api/admin;/api/v1/admin,/config,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     let config = await Pl"
+T6 admin/dealer,routes/adminRoutes.js,1122,PUT,/api/admin;/api/v1/admin,/config/packages,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     let config = await Pl"
+T6 admin/dealer,routes/adminRoutes.js,1172,POST,/api/admin;/api/v1/admin,/audit-log,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const { action, detai"
+T6 admin/dealer,routes/adminRoutes.js,1235,PUT,/api/admin;/api/v1/admin,/settings/onboarding,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const { expectedRevis"
+T6 admin/dealer,routes/adminRoutes.js,1298,PUT,/api/admin;/api/v1/admin,/settings/dealer-paperwork,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const { expectedRevis"
+T6 admin/dealer,routes/adminRoutes.js,1335,PUT,/api/admin;/api/v1/admin,/settings/dealer-listing-policy,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const actor = { admin"
+T6 admin/dealer,routes/adminRoutes.js,1356,POST,/api/admin;/api/v1/admin,/system/kill-switch,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const { type } = req."
+T6 admin/dealer,routes/adminRoutes.js,1379,POST,/api/admin;/api/v1/admin,/system/recover,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const { type } = req."
+T6 admin/dealer,routes/adminRoutes.js,1400,PUT,/api/admin;/api/v1/admin,/dealers/:id/subdomain,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const { subdomain } ="
+T6 admin/dealer,routes/adminRoutes.js,1427,POST,/api/admin;/api/v1/admin,/users/:id/verify-dealer,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const { action } = re"
+T6 admin/dealer,routes/adminRoutes.js,1482,POST,/api/admin;/api/v1/admin,/daraja/test,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const currentPlatform"
+T6 admin/dealer,routes/adminRoutes.js,1521,DELETE,/api/admin;/api/v1/admin,/users/:id,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const user = await Us"
+T6 admin/dealer,routes/adminRoutes.js,1596,PUT,/api/admin;/api/v1/admin,/users/:id/deactivate,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const user = await Us"
+T6 admin/dealer,routes/adminRoutes.js,1727,PUT,/api/admin;/api/v1/admin,/staff/:id/permissions,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     let { grantedPermissi"
+T6 admin/dealer,routes/adminRoutes.js,1817,POST,/api/admin;/api/v1/admin,/staff/levels,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     try {       const con"
+T6 admin/dealer,routes/adminRoutes.js,1830,PUT,/api/admin;/api/v1/admin,/staff/levels/:key,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     try {       const { l"
+T6 admin/dealer,routes/adminRoutes.js,1849,DELETE,/api/admin;/api/v1/admin,/staff/levels/:key,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     try {       await del"
+T6 admin/dealer,routes/adminRoutes.js,1862,PUT,/api/admin;/api/v1/admin,/staff/email-policy,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     try {       const con"
+T6 admin/dealer,routes/adminRoutes.js,1876,POST,/api/admin;/api/v1/admin,/staff,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const { name, passwor"
+T6 admin/dealer,routes/adminRoutes.js,1953,PUT,/api/admin;/api/v1/admin,/staff/:id,yes,yes,yes,yes,none,global(/api),or `internalFlags` via the request body. const AD_ALLOWED_FI
+T6 admin/dealer,routes/adminRoutes.js,2034,DELETE,/api/admin;/api/v1/admin,/staff/:id,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const user = await Us"
+T6 admin/dealer,routes/adminRoutes.js,2067,POST,/api/admin;/api/v1/admin,/seed-departments,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const isProd = proces"
+T6 admin/dealer,routes/adminRoutes.js,2153,POST,/api/admin;/api/v1/admin,/ads,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const payload = {};  "
+T6 admin/dealer,routes/adminRoutes.js,2168,PUT,/api/admin;/api/v1/admin,/ads/:id,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const ad = await Ad.f"
+T6 admin/dealer,routes/adminRoutes.js,2183,DELETE,/api/admin;/api/v1/admin,/ads/:id,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const ad = await Ad.f"
+T6 admin/dealer,routes/adminRoutes.js,2247,PATCH,/api/admin;/api/v1/admin,/dealers/:id/package,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const { dealerPackage"
+T6 admin/dealer,routes/adminRoutes.js,2302,POST,/api/admin;/api/v1/admin,/zero-cost-onboarding,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const { dealerIds, du"
+T6 admin/dealer,routes/adminRoutes.js,2348,POST,/api/admin;/api/v1/admin,/upload-logo,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     if (!req.file) return"
+T6 admin/dealer,routes/adminRoutes.js,2394,PATCH,/api/admin;/api/v1/admin,/reviews/:id/status,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const review = await "
+T6 admin/dealer,routes/adminRoutes.js,2403,DELETE,/api/admin;/api/v1/admin,/reviews/:id,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     await deleteDealerRev"
+T6 admin/dealer,routes/adminRoutes.js,2493,POST,/api/admin;/api/v1/admin,/referrals/:id/credit,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     // STAGE 4A (G9): the"
+T6 admin/dealer,routes/adminRoutes.js,2586,POST,/api/admin;/api/v1/admin,/referrals/:id/expire,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const referral = awai"
+T6 admin/dealer,routes/adminRoutes.js,2712,DELETE,/api/admin;/api/v1/admin,/chats/:chatId/messages/:messageId,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const chat = await Ch"
+T6 admin/dealer,routes/adminRoutes.js,2745,POST,/api/admin;/api/v1/admin,/chats/:chatId/block,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const chat = await Ch"
+T6 admin/dealer,routes/adminRoutes.js,2763,POST,/api/admin;/api/v1/admin,/chats/:chatId/unblock,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const chat = await Ch"
+T6 admin/dealer,routes/adminRoutes.js,2841,POST,/api/admin;/api/v1/admin,/market-data,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const {       brand, "
+T6 admin/dealer,routes/adminRoutes.js,2884,PUT,/api/admin;/api/v1/admin,/market-data/:id,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const allowed = [    "
+T6 admin/dealer,routes/adminRoutes.js,2931,DELETE,/api/admin;/api/v1/admin,/market-data/:id,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const entry = await M"
+T6 admin/dealer,routes/adminRoutes.js,2948,POST,/api/admin;/api/v1/admin,/market-data/bulk,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const { entries } = r"
+T6 admin/dealer,routes/adminRoutes.js,3034,POST,/api/admin;/api/v1/admin,/alerts/:id/read,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const alert = await A"
+T6 admin/dealer,routes/adminRoutes.js,3047,POST,/api/admin;/api/v1/admin,/alerts/read-all,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     await AdminAlert.upda"
+T6 admin/dealer,routes/adminRoutes.js,3134,POST,/api/admin;/api/v1/admin,/escrow/accounts,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {   res.status(201).json({ "
+T6 admin/dealer,routes/adminRoutes.js,3138,PATCH,/api/admin;/api/v1/admin,/escrow/accounts/:id,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {   res.json({ success: tru"
+T6 admin/dealer,routes/adminRoutes.js,3142,DELETE,/api/admin;/api/v1/admin,/escrow/accounts/:id,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {   await removeEscrowAccou"
+T6 admin/dealer,routes/adminRoutes.js,3170,PATCH,/api/admin;/api/v1/admin,/escrow/sellers/:userId/capability,yes,yes,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/aiPlatformRoutes.js,61,POST,/api/ai,/command,yes,none,none,none,none,global(/api),asyncHandler(processAICommand)
+T7 other,routes/aiPlatformRoutes.js,62,POST,/api/ai,/command/:commandId/approve,yes,yes,none,none,none,global(/api),asyncHandler(approveAICommand)
+T7 other,routes/aiPlatformRoutes.js,63,POST,/api/ai,/command/:commandId/reject,yes,yes,none,none,none,global(/api),asyncHandler(rejectAICommand)
+T7 other,routes/aiPlatformRoutes.js,65,POST,/api/ai,/history/:commandId/rollback,yes,yes,none,none,none,global(/api),asyncHandler(rollbackCommand)
+T7 other,routes/aiPlatformRoutes.js,73,POST,/api/ai,/conversations/:conversationId/message,yes,none,none,none,none,global(/api),asyncHandler(addMessageToConversation)
+T7 other,routes/aiPlatformRoutes.js,80,POST,/api/ai,/prompts,yes,yes,none,none,none,global(/api),asyncHandler(createPrompt)
+T7 other,routes/aiPlatformRoutes.js,81,PUT,/api/ai,/prompts/:id,yes,yes,none,none,none,global(/api),asyncHandler(updatePrompt)
+T7 other,routes/aiPlatformRoutes.js,82,DELETE,/api/ai,/prompts/:id,yes,yes,none,none,none,global(/api),asyncHandler(deletePrompt)
+T7 other,routes/aiPlatformRoutes.js,83,POST,/api/ai,/prompts/execute,yes,none,none,none,none,global(/api),asyncHandler(executePrompt)
+T7 other,routes/aiPlatformRoutes.js,90,POST,/api/ai,/knowledge,yes,yes,none,none,none,global(/api),asyncHandler(addKnowledge)
+T7 other,routes/aiPlatformRoutes.js,91,PUT,/api/ai,/knowledge/:id,yes,yes,none,none,none,global(/api),asyncHandler(updateKnowledge)
+T7 other,routes/aiPlatformRoutes.js,92,DELETE,/api/ai,/knowledge/:id,yes,yes,none,none,none,global(/api),asyncHandler(deleteKnowledge)
+T7 other,routes/aiPlatformRoutes.js,99,POST,/api/ai,/workspaces,yes,yes,none,none,none,global(/api),asyncHandler(createWorkspace)
+T7 other,routes/aiPlatformRoutes.js,100,PUT,/api/ai,/workspaces/:id,yes,yes,none,none,none,global(/api),asyncHandler(updateWorkspace)
+T7 other,routes/aiPlatformRoutes.js,101,DELETE,/api/ai,/workspaces/:id,yes,yes,none,none,none,global(/api),asyncHandler(deleteWorkspace)
+T6 admin/dealer,routes/analyticsAdminRoutes.js,65,POST,/api/admin/analytics,/purge,yes,yes,none,yes,none,global(/api),"guarded(async (req, res) => {   const out = await purgeExpir"
+T7 other,routes/analyticsRoutes.js,32,POST,/api/analytics,/collect,NONE,none,none,yes,none,global(/api),"asyncHandler(async (req, res) => {   const parsed = collectS"
+T7 other,routes/announcementRoutes.js,18,POST,/api/announcements,/,yes,yes,none,none,none,global(/api),asyncHandler(createAnnouncement)
+T7 other,routes/announcementRoutes.js,20,POST,/api/announcements,/:id/send,yes,yes,yes,none,none,global(/api),asyncHandler(sendAnnouncement)
+T7 other,routes/announcementRoutes.js,26,DELETE,/api/announcements,/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteAnnouncement)
+T6 admin/dealer,routes/auctionAdminRoutes.js,29,POST,/api/auction-admin;/api/v1/auction-admin,/:carId/start,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const car = await Car"
+T6 admin/dealer,routes/auctionAdminRoutes.js,92,POST,/api/auction-admin;/api/v1/auction-admin,/:carId/end,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const carId = req.par"
+T6 admin/dealer,routes/auctionAdminRoutes.js,117,POST,/api/auction-admin;/api/v1/auction-admin,/:carId/extend,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const { extraMs } = r"
+T6 admin/dealer,routes/auctionAdminRoutes.js,176,POST,/api/auction-admin;/api/v1/auction-admin,/:carId/set-winner,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const { bidId } = req"
+T7 other,routes/auctionEngagementRoutes.js,13,POST,/api/auctions;/api/v1/auctions,/:id/visit,NONE,none,yes,none,none,global(/api),"asyncHandler(async (req, res) =>   res.json({ success: true,"
+T7 other,routes/auctionEngagementRoutes.js,16,POST,/api/auctions;/api/v1/auctions,/:id/follow,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => res.json({ success: true, e"
+T7 other,routes/auctionEngagementRoutes.js,17,DELETE,/api/auctions;/api/v1/auctions,/:id/follow,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => res.json({ success: true, e"
+T7 other,routes/auctionEngagementRoutes.js,18,POST,/api/auctions;/api/v1/auctions,/:id/like,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => res.json({ success: true, e"
+T7 other,routes/auctionEngagementRoutes.js,19,DELETE,/api/auctions;/api/v1/auctions,/:id/like,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => res.json({ success: true, e"
+T7 other,routes/auctionEngagementRoutes.js,23,POST,/api/auctions;/api/v1/auctions,/:id/comments,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) =>   res.status(201).json({ su"
+T7 other,routes/auctionEngagementRoutes.js,25,DELETE,/api/auctions;/api/v1/auctions,/:id/comments/:commentId,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) =>   res.json({ success: true,"
+T7 other,routes/auctionEngagementRoutes.js,28,POST,/api/auctions;/api/v1/auctions,/:id/comments/:commentId/report,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => res.json({ success: true, ."
+T4 payments/settlement,routes/auctionFulfilmentRoutes.js,43,POST,/api/auctions;/api/v1/auctions,/:id/collection,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const outcome = await f"
+T4 payments/settlement,routes/auctionFulfilmentRoutes.js,50,POST,/api/auctions;/api/v1/auctions,/:id/transfer,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const updated = await m"
+T4 payments/settlement,routes/auctionFulfilmentRoutes.js,55,POST,/api/auctions;/api/v1/auctions,/:id/escrow/release,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const updated = await r"
+T4 payments/settlement,routes/auctionFulfilmentRoutes.js,60,POST,/api/auctions;/api/v1/auctions,/:id/cancel,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const updated = await c"
+T4 payments/settlement,routes/auctionFulfilmentRoutes.js,65,POST,/api/auctions;/api/v1/auctions,/:id/dispute,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const result = await op"
+T4 payments/settlement,routes/auctionFulfilmentRoutes.js,70,POST,/api/auctions;/api/v1/auctions,/:id/reaward,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const updated = await r"
+T7 other,routes/auctionIntegrityRoutes.js,28,PATCH,/api/new-admin/auction-integrity,/:id/status,yes,yes,yes,none,yes,global(/api),asyncHandler(updateFlagStatus)
+T7 other,routes/auctionIntegrityRoutes.js,30,POST,/api/new-admin/auction-integrity,/scan,yes,yes,yes,none,yes,global(/api),asyncHandler(triggerScan)
+T3 offers/negotiation,routes/auctionRegistrationRoutes.js,42,POST,/api/auctions;/api/v1/auctions,/:id/registration,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const result = await re"
+T3 offers/negotiation,routes/auctionRegistrationRoutes.js,47,POST,/api/auctions;/api/v1/auctions,/:id/registration/refresh-eligibility,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const result = await re"
+T3 offers/negotiation,routes/auctionRegistrationRoutes.js,52,POST,/api/auctions;/api/v1/auctions,/:id/registration/commitment,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const result = await in"
+T3 offers/negotiation,routes/auctionRegistrationRoutes.js,63,POST,/api/auctions;/api/v1/auctions,/:id/registration/high-value-deposit,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const result = await in"
+T4 payments/settlement,routes/auctionSettlementRoutes.js,39,POST,/api/auctions;/api/v1/auctions,/:id/outcome/payment,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const outcome = await g"
+T4 payments/settlement,routes/auctionSettlementRoutes.js,73,POST,/api/auctions;/api/v1/auctions,/:id/outcome/escrow,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const setup = await fin"
+T4 payments/settlement,routes/auctionSettlementRoutes.js,82,POST,/api/auctions;/api/v1/auctions,/:id/outcome/default,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const setup = await fin"
+T4 payments/settlement,routes/auctionSettlementRoutes.js,95,PUT,/api/auctions;/api/v1/auctions,/platform/policy,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {   const policy = await se"
+T7 other,routes/auctionSetupRoutes.js,17,PUT,/api/dealer;/api/v1/dealer,/cars/:id/auction/setup,yes,none,none,none,none,global(/api),"asyncHandler(async (req, res) => {   const result = await sa"
+T7 other,routes/auctionSetupRoutes.js,22,POST,/api/dealer;/api/v1/dealer,/cars/:id/auction/publish,yes,none,none,none,none,global(/api),"asyncHandler(async (req, res) => {   try {     const result "
+T7 other,routes/auctionSetupRoutes.js,32,POST,/api/dealer;/api/v1/dealer,/cars/:id/auction/amendments,yes,none,none,none,none,global(/api),"asyncHandler(async (req, res) => {   const amendment = await"
+T1 auth/account,routes/authRoutes.js,127,POST,/api/auth;/api/v1/auth,/register,NONE,none,yes,yes,none,global(/api),asyncHandler(register)
+T1 auth/account,routes/authRoutes.js,184,POST,/api/auth;/api/v1/auth,/login,NONE,none,yes,yes,none,global(/api),asyncHandler(login)
+T1 auth/account,routes/authRoutes.js,188,POST,/api/auth;/api/v1/auth,/refresh,NONE,none,yes,yes,none,global(/api),asyncHandler(refreshToken)
+T1 auth/account,routes/authRoutes.js,301,POST,/api/auth;/api/v1/auth,/logout,yes,none,none,yes,none,global(/api),// 🔥 MUST be protected to invalidate tokenVersion   asyncHan
+T1 auth/account,routes/authRoutes.js,354,PUT,/api/auth;/api/v1/auth,/profile,yes,none,none,yes,none,global(/api),asyncHandler(updateProfile)
+T1 auth/account,routes/authRoutes.js,407,PUT,/api/auth;/api/v1/auth,/change-password,yes,none,none,yes,none,global(/api),asyncHandler(changePassword)
+T1 auth/account,routes/authRoutes.js,465,POST,/api/auth;/api/v1/auth,/resend-verification,NONE,none,none,yes,none,global(/api),asyncHandler(resendVerification)
+T1 auth/account,routes/authRoutes.js,545,POST,/api/auth;/api/v1/auth,/forgot-password,NONE,none,none,yes,none,global(/api),asyncHandler(forgotPassword)
+T1 auth/account,routes/authRoutes.js,546,POST,/api/auth;/api/v1/auth,/reset-password,NONE,none,none,yes,none,global(/api),asyncHandler(resetPassword)
+T1 auth/account,routes/authRoutes.js,654,DELETE,/api/auth;/api/v1/auth,/sessions/:tokenId,yes,none,none,yes,none,global(/api),asyncHandler(revokeSession)
+T1 auth/account,routes/authRoutes.js,655,POST,/api/auth;/api/v1/auth,/sessions/revoke-all,yes,none,none,yes,none,global(/api),asyncHandler(revokeAllSessions)
+T1 auth/account,routes/authRoutes.js,663,POST,/api/auth;/api/v1/auth,/send-otp,yes,none,none,yes,none,global(/api),asyncHandler(sendPhoneOTP)
+T1 auth/account,routes/authRoutes.js,664,POST,/api/auth;/api/v1/auth,/verify-phone,yes,none,none,yes,none,global(/api),asyncHandler(verifyPhoneOTP)
+T7 other,routes/automationRoutes.js,84,POST,/api/automation,/workflows,yes,yes,none,none,none,global(/api),asyncHandler(createWorkflow)
+T7 other,routes/automationRoutes.js,85,PUT,/api/automation,/workflows/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateWorkflow)
+T7 other,routes/automationRoutes.js,86,DELETE,/api/automation,/workflows/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteWorkflow)
+T7 other,routes/automationRoutes.js,87,POST,/api/automation,/workflows/:id/publish,yes,yes,yes,none,none,global(/api),asyncHandler(publishWorkflow)
+T7 other,routes/automationRoutes.js,88,POST,/api/automation,/workflows/:id/pause,yes,yes,yes,none,none,global(/api),asyncHandler(pauseWorkflow)
+T7 other,routes/automationRoutes.js,89,POST,/api/automation,/workflows/:id/simulate,yes,yes,yes,none,none,global(/api),asyncHandler(simulateWorkflow)
+T7 other,routes/automationRoutes.js,97,POST,/api/automation,/rules,yes,yes,none,none,none,global(/api),asyncHandler(createBusinessRule)
+T7 other,routes/automationRoutes.js,98,PUT,/api/automation,/rules/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateBusinessRule)
+T7 other,routes/automationRoutes.js,99,DELETE,/api/automation,/rules/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteBusinessRule)
+T7 other,routes/automationRoutes.js,100,POST,/api/automation,/rules/evaluate,yes,yes,none,none,none,global(/api),asyncHandler(evaluateRules)
+T7 other,routes/automationRoutes.js,108,POST,/api/automation,/approvals,yes,yes,none,none,none,global(/api),asyncHandler(createApprovalChain)
+T7 other,routes/automationRoutes.js,109,PUT,/api/automation,/approvals/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateApprovalChain)
+T7 other,routes/automationRoutes.js,110,DELETE,/api/automation,/approvals/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteApprovalChain)
+T7 other,routes/automationRoutes.js,111,POST,/api/automation,/approvals/initiate,yes,yes,none,none,none,global(/api),asyncHandler(initiateApproval)
+T7 other,routes/automationRoutes.js,119,POST,/api/automation,/tasks,yes,yes,none,none,none,global(/api),asyncHandler(createTask)
+T7 other,routes/automationRoutes.js,120,PUT,/api/automation,/tasks/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateTask)
+T7 other,routes/automationRoutes.js,121,POST,/api/automation,/tasks/:id/complete,yes,yes,yes,none,none,global(/api),asyncHandler(completeTask)
+T7 other,routes/automationRoutes.js,122,POST,/api/automation,/tasks/:id/escalate,yes,yes,yes,none,none,global(/api),asyncHandler(escalateTask)
+T7 other,routes/automationRoutes.js,130,POST,/api/automation,/templates/notifications,yes,yes,none,none,none,global(/api),asyncHandler(createNotificationTemplate)
+T7 other,routes/automationRoutes.js,131,PUT,/api/automation,/templates/notifications/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateNotificationTemplate)
+T7 other,routes/automationRoutes.js,132,DELETE,/api/automation,/templates/notifications/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteNotificationTemplate)
+T7 other,routes/automationRoutes.js,133,POST,/api/automation,/templates/notifications/preview,yes,yes,none,none,none,global(/api),asyncHandler(previewNotification)
+T7 other,routes/automationRoutes.js,140,POST,/api/automation,/scheduled,yes,yes,none,none,none,global(/api),asyncHandler(createScheduledJob)
+T7 other,routes/automationRoutes.js,141,PUT,/api/automation,/scheduled/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateScheduledJob)
+T7 other,routes/automationRoutes.js,142,DELETE,/api/automation,/scheduled/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteScheduledJob)
+T7 other,routes/automationRoutes.js,143,POST,/api/automation,/scheduled/:id/run,yes,yes,yes,none,none,global(/api),asyncHandler(runScheduledJobNow)
+T3 offers/negotiation,routes/bidRoutes.js,35,POST,/api/bids;/api/v1/bids,/:id/bid,yes,none,yes,yes,yes,global(/api),asyncHandler(placeBid)
+T3 offers/negotiation,routes/bidRoutes.js,53,POST,/api/bids;/api/v1/bids,/mpesa/callback,signature/apikey,none,yes,none,yes,global(/api),asyncHandler(confirmBidPayment)
+T3 offers/negotiation,routes/bidRoutes.js,64,POST,/api/bids;/api/v1/bids,/:id/end,yes,yes,yes,none,yes,global(/api),asyncHandler(endAuction)
+T3 offers/negotiation,routes/bidRoutes.js,140,POST,/api/bids;/api/v1/bids,/admin/:bidId/set-winner,yes,yes,yes,none,yes,global(/api),"asyncHandler(async (req, res) => {     const bid = await Bid"
+T6 admin/dealer,routes/bulkAdminRoutes.js,17,POST,/api/admin/bulk,/cars/moderate,yes,yes,yes,none,none,global(/api),asyncHandler(bulkModerateCars)
+T6 admin/dealer,routes/bulkAdminRoutes.js,19,POST,/api/admin/bulk,/cars/delete,yes,yes,yes,none,none,global(/api),"asyncHandler(async (_req, res) => {   return res.status(403)"
+T2 listings/moderation,routes/carRoutes.js,245,POST,/api/cars;/api/v1/cars,/:id/click,NONE,none,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const car = await fin"
+T2 listings/moderation,routes/carRoutes.js,261,POST,/api/cars;/api/v1/cars,/:id/favorite,NONE,none,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     const car = await fin"
+T2 listings/moderation,routes/carRoutes.js,280,POST,/api/cars;/api/v1/cars,/,yes,yes,yes,yes,none,global(/api),asyncHandler(createCar)
+T2 listings/moderation,routes/carRoutes.js,295,PUT,/api/cars;/api/v1/cars,/:id,yes,none,yes,yes,none,global(/api),asyncHandler(updateCar)
+T2 listings/moderation,routes/carRoutes.js,307,DELETE,/api/cars;/api/v1/cars,/:id,yes,none,yes,yes,none,global(/api),asyncHandler(deleteCar)
+T2 listings/moderation,routes/carRoutes.js,318,PATCH,/api/cars;/api/v1/cars,/:id/lifecycle,yes,none,yes,yes,none,global(/api),"asyncHandler(async (req, res) => {     // Personal identitie"
+T2 listings/moderation,routes/carRoutes.js,346,DELETE,/api/cars;/api/v1/cars,/:id/images/:imageIndex,yes,none,yes,none,none,global(/api),asyncHandler(deleteCarImage)
+T2 listings/moderation,routes/carRoutes.js,356,PATCH,/api/cars;/api/v1/cars,/:id/images/cover,yes,none,yes,none,none,global(/api),asyncHandler(setCoverImage)
+T2 listings/moderation,routes/carRoutes.js,366,POST,/api/cars;/api/v1/cars,/:id/images,yes,none,none,yes,none,global(/api),asyncHandler(addCarImages)
+T2 listings/moderation,routes/carRoutes.js,494,POST,/api/cars;/api/v1/cars,/admin/:id/start,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const car = await fin"
+T2 listings/moderation,routes/carRoutes.js,533,POST,/api/cars;/api/v1/cars,/admin/:id/end,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const car = await fin"
+T2 listings/moderation,routes/carRoutes.js,561,POST,/api/cars;/api/v1/cars,/batch,yes,none,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const { ids } = req.b"
+T2 listings/moderation,routes/carRoutes.js,580,PATCH,/api/cars;/api/v1/cars,/:id/promote,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const car = await fin"
+T3 offers/negotiation,routes/chatRoutes.js,20,POST,/api/chat;/api/v1/chat,/,yes,none,yes,yes,none,global(/api),asyncHandler(startChat)
+T3 offers/negotiation,routes/chatRoutes.js,30,POST,/api/chat;/api/v1/chat,/:chatId/message,yes,none,yes,yes,none,global(/api),asyncHandler(sendMessage)
+T3 offers/negotiation,routes/chatRoutes.js,39,POST,/api/chat;/api/v1/chat,/:chatId/seen,yes,none,yes,none,none,global(/api),asyncHandler(markAsSeen)
+T3 offers/negotiation,routes/chatRoutes.js,41,DELETE,/api/chat;/api/v1/chat,/:chatId,yes,none,yes,none,none,global(/api),asyncHandler(deleteChat)
+T6 admin/dealer,routes/cmsRoutes.js,82,POST,/api/cms,/analytics/track,NONE,none,none,none,none,global(/api),asyncHandler(trackAnalytics)
+T6 admin/dealer,routes/cmsRoutes.js,86,POST,/api/cms,/faqs/:id/popularity,NONE,none,yes,yes,none,global(/api),asyncHandler(incrementFaqPopularity)
+T6 admin/dealer,routes/cmsRoutes.js,97,POST,/api/cms,/pages,yes,yes,none,none,none,global(/api),asyncHandler(createPage)
+T6 admin/dealer,routes/cmsRoutes.js,98,PUT,/api/cms,/pages/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updatePage)
+T6 admin/dealer,routes/cmsRoutes.js,99,DELETE,/api/cms,/pages/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deletePage)
+T6 admin/dealer,routes/cmsRoutes.js,100,POST,/api/cms,/pages/:id/publish,yes,yes,yes,none,none,global(/api),asyncHandler(publishPage)
+T6 admin/dealer,routes/cmsRoutes.js,101,POST,/api/cms,/pages/:id/unpublish,yes,yes,yes,none,none,global(/api),asyncHandler(unpublishPage)
+T6 admin/dealer,routes/cmsRoutes.js,102,POST,/api/cms,/pages/:id/schedule,yes,yes,yes,none,none,global(/api),asyncHandler(schedulePage)
+T6 admin/dealer,routes/cmsRoutes.js,103,POST,/api/cms,/pages/:id/rollback,yes,yes,yes,none,none,global(/api),asyncHandler(rollbackPage)
+T6 admin/dealer,routes/cmsRoutes.js,106,POST,/api/cms,/content,yes,yes,none,none,none,global(/api),asyncHandler(createContent)
+T6 admin/dealer,routes/cmsRoutes.js,107,PUT,/api/cms,/content/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateContent)
+T6 admin/dealer,routes/cmsRoutes.js,108,DELETE,/api/cms,/content/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteContent)
+T6 admin/dealer,routes/cmsRoutes.js,111,POST,/api/cms,/faqs,yes,yes,none,none,none,global(/api),asyncHandler(createFaq)
+T6 admin/dealer,routes/cmsRoutes.js,112,PUT,/api/cms,/faqs/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateFaq)
+T6 admin/dealer,routes/cmsRoutes.js,113,DELETE,/api/cms,/faqs/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteFaq)
+T6 admin/dealer,routes/cmsRoutes.js,118,POST,/api/cms,/campaigns,yes,yes,none,none,none,global(/api),asyncHandler(createCampaign)
+T6 admin/dealer,routes/cmsRoutes.js,119,PUT,/api/cms,/campaigns/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateCampaign)
+T6 admin/dealer,routes/cmsRoutes.js,120,DELETE,/api/cms,/campaigns/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteCampaign)
+T6 admin/dealer,routes/cmsRoutes.js,125,POST,/api/cms,/banners,yes,yes,none,none,none,global(/api),asyncHandler(createBanner)
+T6 admin/dealer,routes/cmsRoutes.js,126,PUT,/api/cms,/banners/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateBanner)
+T6 admin/dealer,routes/cmsRoutes.js,127,DELETE,/api/cms,/banners/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteBanner)
+T6 admin/dealer,routes/cmsRoutes.js,128,POST,/api/cms,/banners/reorder,yes,yes,none,none,none,global(/api),asyncHandler(reorderBanners)
+T6 admin/dealer,routes/cmsRoutes.js,133,POST,/api/cms,/media,yes,yes,none,none,none,global(/api),asyncHandler(uploadMedia)
+T6 admin/dealer,routes/cmsRoutes.js,134,PUT,/api/cms,/media/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateMedia)
+T6 admin/dealer,routes/cmsRoutes.js,135,DELETE,/api/cms,/media/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteMedia)
+T6 admin/dealer,routes/cmsRoutes.js,139,POST,/api/cms,/taxonomies,yes,yes,none,none,none,global(/api),asyncHandler(createTaxonomy)
+T6 admin/dealer,routes/cmsRoutes.js,140,PUT,/api/cms,/taxonomies/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateTaxonomy)
+T6 admin/dealer,routes/cmsRoutes.js,141,DELETE,/api/cms,/taxonomies/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteTaxonomy)
+T6 admin/dealer,routes/cmsRoutes.js,149,POST,/api/cms,/ab-tests,yes,yes,none,none,none,global(/api),asyncHandler(createABTest)
+T6 admin/dealer,routes/cmsRoutes.js,150,PUT,/api/cms,/ab-tests/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateABTest)
+T6 admin/dealer,routes/cmsRoutes.js,151,DELETE,/api/cms,/ab-tests/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteABTest)
+T7 other,routes/commandCenterRoutes.js,75,POST,/api/command-center,/actions/execute,yes,yes,yes,none,none,global(/api),asyncHandler(executeAction)
+T7 other,routes/commandCenterRoutes.js,79,PUT,/api/command-center,/notifications/:notificationId/read,yes,yes,yes,none,none,global(/api),asyncHandler(markNotificationRead)
+T7 other,routes/commandCenterRoutes.js,86,POST,/api/command-center,/commands/execute,yes,yes,yes,none,none,global(/api),asyncHandler(executeCommand)
+T7 other,routes/commandCenterRoutes.js,90,POST,/api/command-center,/war-room/activate,yes,yes,yes,none,none,global(/api),asyncHandler(activateWarRoom)
+T7 other,routes/commandCenterRoutes.js,91,POST,/api/command-center,/war-room/deactivate,yes,yes,yes,none,none,global(/api),asyncHandler(deactivateWarRoom)
+T7 other,routes/commandCenterRoutes.js,104,POST,/api/command-center,/widgets/layout,yes,yes,yes,none,none,global(/api),asyncHandler(saveWidgetLayout)
+T7 other,routes/communicationControlRoutes.js,18,PATCH,/api/communications,/preferences,yes,none,yes,none,none,global(/api),asyncHandler(updateUserCommunicationPreferences)
+T7 other,routes/communicationControlRoutes.js,20,PATCH,/api/communications,/admin/rollout/channels/:channel,yes,yes,yes,none,none,global(/api),asyncHandler(adminUpdateChannelControl)
+T7 other,routes/communicationControlRoutes.js,21,PATCH,/api/communications,/admin/rollout/events/:eventType/:channel,yes,yes,yes,none,none,global(/api),asyncHandler(adminUpdateEventControl)
+T7 other,routes/communicationControlRoutes.js,23,POST,/api/communications,/admin/templates,yes,yes,yes,none,none,global(/api),asyncHandler(adminSaveTemplate)
+T7 other,routes/communicationControlRoutes.js,24,PATCH,/api/communications,/admin/templates/:id,yes,yes,yes,none,none,global(/api),asyncHandler(adminSaveTemplate)
+T7 other,routes/communicationControlRoutes.js,28,POST,/api/communications,/admin/deliveries/:id/retry,yes,yes,yes,none,none,global(/api),asyncHandler(adminRetry)
+T7 other,routes/communicationWebhookRoutes.js,31,POST,/api/communications/webhooks,/brevo/events,NONE,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   if (!verifyBrevoWebhook"
+T7 other,routes/communicationWebhookRoutes.js,65,POST,/api/communications/webhooks,/status,NONE,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const { provider = ""unk"
+T7 other,routes/communicationWebhookRoutes.js,71,POST,/api/communications/webhooks,/twilio/status,NONE,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const authToken = proce"
+T7 other,routes/communicationWebhookRoutes.js,85,POST,/api/communications/webhooks,/africastalking/status,NONE,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const result = await ha"
+T6 admin/dealer,routes/configurationRoutes.js,79,POST,/api/config,/entries,yes,yes,none,none,none,global(/api),asyncHandler(createConfigEntry)
+T6 admin/dealer,routes/configurationRoutes.js,80,PUT,/api/config,/entries/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateConfigEntry)
+T6 admin/dealer,routes/configurationRoutes.js,81,DELETE,/api/config,/entries/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteConfigEntry)
+T6 admin/dealer,routes/configurationRoutes.js,82,POST,/api/config,/entries/bulk,yes,yes,none,none,none,global(/api),asyncHandler(bulkUpdateConfigEntries)
+T6 admin/dealer,routes/configurationRoutes.js,91,POST,/api/config,/features,yes,yes,none,none,none,global(/api),asyncHandler(createFeatureFlag)
+T6 admin/dealer,routes/configurationRoutes.js,92,PUT,/api/config,/features/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateFeatureFlag)
+T6 admin/dealer,routes/configurationRoutes.js,93,DELETE,/api/config,/features/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteFeatureFlag)
+T6 admin/dealer,routes/configurationRoutes.js,94,POST,/api/config,/features/:id/toggle,yes,yes,yes,none,none,global(/api),asyncHandler(toggleFeatureFlag)
+T6 admin/dealer,routes/configurationRoutes.js,104,POST,/api/config,/reference,yes,yes,none,none,none,global(/api),asyncHandler(createReferenceData)
+T6 admin/dealer,routes/configurationRoutes.js,105,PUT,/api/config,/reference/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateReferenceData)
+T6 admin/dealer,routes/configurationRoutes.js,106,DELETE,/api/config,/reference/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteReferenceData)
+T6 admin/dealer,routes/configurationRoutes.js,117,POST,/api/config,/vehicle,yes,yes,none,none,none,global(/api),asyncHandler(createVehicleMasterData)
+T6 admin/dealer,routes/configurationRoutes.js,118,PUT,/api/config,/vehicle/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateVehicleMasterData)
+T6 admin/dealer,routes/configurationRoutes.js,119,DELETE,/api/config,/vehicle/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteVehicleMasterData)
+T6 admin/dealer,routes/configurationRoutes.js,130,POST,/api/config,/location,yes,yes,none,none,none,global(/api),asyncHandler(createLocationMasterData)
+T6 admin/dealer,routes/configurationRoutes.js,131,PUT,/api/config,/location/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateLocationMasterData)
+T6 admin/dealer,routes/configurationRoutes.js,132,DELETE,/api/config,/location/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteLocationMasterData)
+T6 admin/dealer,routes/configurationRoutes.js,140,POST,/api/config,/countries,yes,yes,none,none,none,global(/api),asyncHandler(createCountryConfig)
+T6 admin/dealer,routes/configurationRoutes.js,141,PUT,/api/config,/countries/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateCountryConfig)
+T6 admin/dealer,routes/configurationRoutes.js,142,DELETE,/api/config,/countries/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteCountryConfig)
+T6 admin/dealer,routes/configurationRoutes.js,149,POST,/api/config,/audit/:logId/rollback,yes,yes,none,none,none,global(/api),asyncHandler(rollbackConfig)
+T6 admin/dealer,routes/configurationRoutes.js,156,POST,/api/config,/import,yes,yes,none,none,none,global(/api),asyncHandler(importConfig)
+T7 other,routes/contactRoutes.js,15,POST,/api/contact;/api/v1/contact,/,NONE,none,none,yes,none,global(/api),submitContact
+T7 other,routes/contactRoutes.js,17,PATCH,/api/contact;/api/v1/contact,/:id/read,yes,yes,yes,none,none,global(/api),markRead
+T7 other,routes/conversionFunnelRoutes.js,23,POST,/api/funnel,/cars/:carId/view,NONE,none,yes,none,none,global(/api),asyncHandler(trackView)
+T7 other,routes/conversionFunnelRoutes.js,26,POST,/api/funnel,/cars/:carId/favorite,yes,none,yes,none,none,global(/api),asyncHandler(trackFavorite)
+T7 other,routes/conversionFunnelRoutes.js,29,POST,/api/funnel,/cars/:carId/chat,yes,none,yes,none,none,global(/api),asyncHandler(trackChat)
+T7 other,routes/conversionFunnelRoutes.js,32,POST,/api/funnel,/cars/:carId/offer,yes,none,yes,none,none,global(/api),asyncHandler(trackOffer)
+T7 other,routes/conversionFunnelRoutes.js,35,POST,/api/funnel,/cars/:carId/escrow,yes,none,yes,none,none,global(/api),asyncHandler(trackEscrow)
+T7 other,routes/conversionFunnelRoutes.js,38,POST,/api/funnel,/cars/:carId/sale,yes,none,yes,none,none,global(/api),asyncHandler(trackSale)
+T6 admin/dealer,routes/dealerHealthScoreRoutes.js,52,POST,/api/dealer-health-score,/admin/recalculate/:dealerId,yes,yes,yes,none,none,global(/api),asyncHandler(recalculateDealerScore)
+T6 admin/dealer,routes/dealerHealthScoreRoutes.js,55,POST,/api/dealer-health-score,/admin/recalculate-all,yes,yes,none,none,none,global(/api),asyncHandler(recalculateAllScoresAdmin)
+T6 admin/dealer,routes/dealerHealthScoreRoutes.js,58,PUT,/api/dealer-health-score,/admin/override/:dealerId,yes,yes,yes,none,none,global(/api),asyncHandler(overrideDealerScore)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,86,PUT,/api/dealer-platform,/profile/:dealerId,yes,none,none,yes,none,global(/api),asyncHandler(updateDealerProfile)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,90,POST,/api/dealer-platform,/inventory,yes,yes,yes,yes,none,global(/api),asyncHandler(createListing)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,91,PUT,/api/dealer-platform,/inventory/:listingId,yes,none,yes,yes,none,global(/api),asyncHandler(updateListing)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,92,DELETE,/api/dealer-platform,/inventory/:listingId,yes,none,none,yes,none,global(/api),asyncHandler(deleteListing)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,93,POST,/api/dealer-platform,/inventory/bulk,yes,none,none,yes,none,global(/api),asyncHandler(bulkUpdateListings)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,97,PUT,/api/dealer-platform,/leads/:leadId,yes,none,none,none,none,global(/api),asyncHandler(updateLead)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,99,POST,/api/dealer-platform,/leads/:leadId/notes,yes,none,none,yes,none,global(/api),asyncHandler(addLeadNote)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,100,POST,/api/dealer-platform,/leads/:leadId/tasks,yes,none,none,none,none,global(/api),asyncHandler(createTask)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,107,POST,/api/dealer-platform,/marketing,yes,none,none,yes,none,global(/api),asyncHandler(createCampaign)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,108,PUT,/api/dealer-platform,/marketing/:campaignId,yes,none,none,yes,none,global(/api),asyncHandler(updateCampaign)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,117,POST,/api/dealer-platform,/team/invite,yes,none,none,none,none,global(/api),asyncHandler(inviteTeamMember)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,118,POST,/api/dealer-platform,/team/:memberId/resend,yes,none,none,yes,none,global(/api),asyncHandler(resendTeamInvite)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,120,POST,/api/dealer-platform,/team/roles,yes,none,none,yes,none,global(/api),asyncHandler(createTeamRole)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,121,PUT,/api/dealer-platform,/team/roles/:roleKey,yes,none,none,yes,none,global(/api),asyncHandler(updateTeamRole)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,122,DELETE,/api/dealer-platform,/team/roles/:roleKey,yes,none,none,yes,none,global(/api),asyncHandler(deleteTeamRole)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,123,PUT,/api/dealer-platform,/team/:memberId,yes,none,none,yes,none,global(/api),asyncHandler(updateTeamMember)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,124,DELETE,/api/dealer-platform,/team/:memberId,yes,none,none,yes,none,global(/api),asyncHandler(removeTeamMember)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,125,POST,/api/dealer-platform,/team/accept,yes,none,none,none,none,global(/api),asyncHandler(acceptTeamInvite)
+T6 admin/dealer,routes/dealerPlatformRoutes.js,131,POST,/api/dealer-platform,/copilot,yes,none,none,none,none,global(/api),asyncHandler(askDealerCopilot)
+T6 admin/dealer,routes/dealerRoutes.js,65,POST,/api/dealer;/api/v1/dealer,/application,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {   const u = req.user;   i"
+T6 admin/dealer,routes/dealerRoutes.js,96,PUT,/api/dealer;/api/v1/dealer,/onboarding,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {   const parsed = dealerOn"
+T6 admin/dealer,routes/dealerRoutes.js,686,PUT,/api/dealer;/api/v1/dealer,/settlement,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const dealer = await "
+T6 admin/dealer,routes/dealerRoutes.js,756,PUT,/api/dealer;/api/v1/dealer,/profile,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const changes = {};  "
+T6 admin/dealer,routes/dealerRoutes.js,807,POST,/api/dealer;/api/v1/dealer,/team/invite,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const { email, role ="
+T6 admin/dealer,routes/dealerRoutes.js,872,PATCH,/api/dealer;/api/v1/dealer,/team/:memberId,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const record = await "
+T6 admin/dealer,routes/dealerRoutes.js,896,DELETE,/api/dealer;/api/v1/dealer,/team/:memberId,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const record = await "
+T6 admin/dealer,routes/dealerRoutes.js,916,POST,/api/dealer;/api/v1/dealer,/cars/:id/duplicate,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const car = await fin"
+T6 admin/dealer,routes/dealerRoutes.js,960,POST,/api/dealer;/api/v1/dealer,/cars/bulk-delete,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const { ids } = req.b"
+T6 admin/dealer,routes/dealerRoutes.js,1007,PATCH,/api/dealer;/api/v1/dealer,/cars/:id/mark-sold,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     let result;     try {"
+T6 admin/dealer,routes/dealerRoutes.js,1026,PATCH,/api/dealer;/api/v1/dealer,/cars/bulk-status,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const { ids } = req.b"
+T6 admin/dealer,routes/dealerRoutes.js,1081,POST,/api/dealer;/api/v1/dealer,/cars/:id/accept-bid,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const { bidId } = req"
+T6 admin/dealer,routes/dealerRoutes.js,1131,POST,/api/dealer;/api/v1/dealer,/cars/:id/reject-bid,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const { bidId } = req"
+T6 admin/dealer,routes/dealerRoutes.js,1175,POST,/api/dealer;/api/v1/dealer,/cars/:id/auction/start,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const car = await fin"
+T6 admin/dealer,routes/dealerRoutes.js,1238,POST,/api/dealer;/api/v1/dealer,/cars/:id/auction/end,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const car = await fin"
+T6 admin/dealer,routes/dealerRoutes.js,1262,POST,/api/dealer;/api/v1/dealer,/cars/:id/auction/extend,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const { hours } = req"
+T6 admin/dealer,routes/dealerRoutes.js,1307,POST,/api/dealer;/api/v1/dealer,/payouts/:escrowId/initiate,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const escrowId = req."
+T6 admin/dealer,routes/dealerRoutes.js,1350,POST,/api/dealer;/api/v1/dealer,/upgrade,yes,yes,none,none,none,global(/api),"// PHASE 13D   asyncHandler(async (req, res) => {     const "
+T6 admin/dealer,routes/dealerRoutes.js,1381,PATCH,/api/dealer;/api/v1/dealer,/cars/:id/wholesale,yes,yes,none,none,none,global(/api),"// PHASE 13D   asyncHandler(async (req, res) => {     const "
+T6 admin/dealer,routes/dealerRoutes.js,1426,POST,/api/dealer;/api/v1/dealer,/pricing-recommendations,yes,yes,none,none,none,global(/api),"// PHASE 13D   asyncHandler(async (req, res) => {     const "
+T7 other,routes/digitalTwinRoutes.js,45,POST,/api/digital-twin,/simulations,yes,yes,none,none,none,global(/api),asyncHandler(createSimulation)
+T7 other,routes/digitalTwinRoutes.js,46,POST,/api/digital-twin,/simulations/:id/run,yes,yes,yes,none,none,global(/api),asyncHandler(runSimulation)
+T7 other,routes/digitalTwinRoutes.js,47,DELETE,/api/digital-twin,/simulations/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteSimulation)
+T7 other,routes/digitalTwinRoutes.js,49,POST,/api/digital-twin,/simulations/compare,yes,none,none,none,none,global(/api),asyncHandler(compareSimulations)
+T7 other,routes/digitalTwinRoutes.js,58,POST,/api/digital-twin,/scenarios,yes,yes,none,none,none,global(/api),asyncHandler(createScenario)
+T7 other,routes/digitalTwinRoutes.js,59,PUT,/api/digital-twin,/scenarios/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateScenario)
+T7 other,routes/digitalTwinRoutes.js,60,DELETE,/api/digital-twin,/scenarios/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteScenario)
+T7 other,routes/digitalTwinRoutes.js,61,POST,/api/digital-twin,/scenarios/:id/run,yes,yes,yes,none,none,global(/api),asyncHandler(runScenario)
+T7 other,routes/digitalTwinRoutes.js,68,POST,/api/digital-twin,/predictions,yes,none,none,none,none,global(/api),asyncHandler(generatePrediction)
+T7 other,routes/digitalTwinRoutes.js,74,POST,/api/digital-twin,/what-if,yes,none,none,none,none,global(/api),asyncHandler(whatIfAnalysis)
+T5 escrow/reconciliation,routes/disputeRoutes.js,68,POST,/api/disputes,/,yes,none,yes,none,yes,global(/api),asyncHandler(createDispute)
+T5 escrow/reconciliation,routes/disputeRoutes.js,78,PATCH,/api/disputes,/:id/status,yes,yes,yes,none,yes,global(/api),asyncHandler(transitionDisputeState)
+T5 escrow/reconciliation,routes/disputeRoutes.js,83,POST,/api/disputes,/:id/assign,yes,yes,yes,none,yes,global(/api),asyncHandler(assignDispute)
+T5 escrow/reconciliation,routes/disputeRoutes.js,89,POST,/api/disputes,/:id/evidence,yes,none,yes,none,yes,global(/api),asyncHandler(uploadEvidence)
+T5 escrow/reconciliation,routes/disputeRoutes.js,98,DELETE,/api/disputes,/:id/evidence/:evidenceId,yes,none,none,none,yes,global(/api),asyncHandler(deleteEvidence)
+T5 escrow/reconciliation,routes/disputeRoutes.js,99,POST,/api/disputes,/:id/evidence/:evidenceId/verify,yes,yes,none,none,yes,global(/api),asyncHandler(verifyEvidence)
+T5 escrow/reconciliation,routes/disputeRoutes.js,104,POST,/api/disputes,/:id/notes,yes,yes,yes,none,yes,global(/api),asyncHandler(addInternalNote)
+T5 escrow/reconciliation,routes/disputeRoutes.js,109,POST,/api/disputes,/:id/mediation/start,yes,yes,yes,none,yes,global(/api),asyncHandler(startMediation)
+T5 escrow/reconciliation,routes/disputeRoutes.js,110,POST,/api/disputes,/:id/mediation/complete,yes,yes,yes,none,yes,global(/api),asyncHandler(completeMediation)
+T5 escrow/reconciliation,routes/disputeRoutes.js,115,POST,/api/disputes,/:id/resolve,yes,yes,yes,yes,yes,global(/api),asyncHandler(resolveDispute)
+T5 escrow/reconciliation,routes/disputeRoutes.js,120,POST,/api/disputes,/:id/appeal,yes,none,yes,none,yes,global(/api),asyncHandler(submitAppeal)
+T5 escrow/reconciliation,routes/disputeRoutes.js,121,POST,/api/disputes,/:id/appeal/review,yes,yes,yes,none,yes,global(/api),asyncHandler(reviewAppeal)
+T7 other,routes/duplicateRoutes.js,42,POST,/api/duplicates,/:id/false-positive,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/duplicateRoutes.js,56,POST,/api/duplicates,/:id/confirm,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/duplicateRoutes.js,70,POST,/api/duplicates,/:id/under-review,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/ecpRoutes.js,68,POST,/api/ecp,/incidents,yes,yes,none,yes,none,global(/api),asyncHandler(createIncident)
+T7 other,routes/ecpRoutes.js,69,PUT,/api/ecp,/incidents/:id,yes,yes,yes,yes,none,global(/api),asyncHandler(updateIncident)
+T7 other,routes/ecpRoutes.js,70,DELETE,/api/ecp,/incidents/:id,yes,yes,yes,yes,none,global(/api),asyncHandler(deleteIncident)
+T7 other,routes/ecpRoutes.js,74,POST,/api/ecp,/alerts,yes,yes,none,yes,none,global(/api),asyncHandler(createAlert)
+T7 other,routes/ecpRoutes.js,75,POST,/api/ecp,/alerts/:id/acknowledge,yes,yes,yes,yes,none,global(/api),asyncHandler(acknowledgeAlert)
+T7 other,routes/ecpRoutes.js,76,POST,/api/ecp,/alerts/:id/resolve,yes,yes,yes,yes,none,global(/api),asyncHandler(resolveAlert)
+T7 other,routes/ecpRoutes.js,81,POST,/api/ecp,/self-healing/execute,yes,yes,none,yes,none,global(/api),asyncHandler(executeSelfHealingAction)
+T7 other,routes/ecpRoutes.js,85,POST,/api/ecp,/ask,yes,yes,none,none,none,global(/api),asyncHandler(askOperationsQuestion)
+T7 other,routes/eipRoutes.js,72,POST,/api/integration,/partners,yes,yes,yes,none,none,global(/api),asyncHandler(createPartner)
+T7 other,routes/eipRoutes.js,73,PUT,/api/integration,/partners/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updatePartner)
+T7 other,routes/eipRoutes.js,74,DELETE,/api/integration,/partners/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deletePartner)
+T7 other,routes/eipRoutes.js,78,POST,/api/integration,/api-keys,yes,yes,yes,none,none,global(/api),asyncHandler(createAPIKey)
+T7 other,routes/eipRoutes.js,79,POST,/api/integration,/api-keys/:id/revoke,yes,yes,yes,none,none,global(/api),asyncHandler(revokeAPIKey)
+T7 other,routes/eipRoutes.js,84,POST,/api/integration,/webhooks,yes,yes,yes,none,none,global(/api),asyncHandler(createWebhook)
+T7 other,routes/eipRoutes.js,85,PUT,/api/integration,/webhooks/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateWebhook)
+T7 other,routes/eipRoutes.js,86,DELETE,/api/integration,/webhooks/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteWebhook)
+T7 other,routes/eipRoutes.js,87,POST,/api/integration,/webhooks/:id/test,yes,yes,yes,none,none,global(/api),asyncHandler(testWebhook)
+T7 other,routes/eipRoutes.js,93,POST,/api/integration,/plugins,yes,yes,yes,none,none,global(/api),asyncHandler(createPlugin)
+T7 other,routes/eipRoutes.js,94,PUT,/api/integration,/plugins/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updatePlugin)
+T7 other,routes/eipRoutes.js,95,DELETE,/api/integration,/plugins/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deletePlugin)
+T7 other,routes/eipRoutes.js,109,POST,/api/integration,/oauth/clients,yes,yes,yes,none,none,global(/api),asyncHandler(createOAuthClient)
+T7 other,routes/eipRoutes.js,124,POST,/api/integration,/help,yes,yes,yes,none,none,global(/api),asyncHandler(getIntegrationHelp)
+T5 escrow/reconciliation,routes/escrowRoutes.js,66,POST,/api/escrow;/api/v1/escrow,/operations/reconcile,yes,none,none,none,yes,global(/api),asyncHandler(runEscrowReconciliation)
+T5 escrow/reconciliation,routes/escrowRoutes.js,67,POST,/api/escrow;/api/v1/escrow,/operations/anomaly-scan,yes,none,none,none,yes,global(/api),asyncHandler(runEscrowAnomalyScan)
+T5 escrow/reconciliation,routes/escrowRoutes.js,68,POST,/api/escrow;/api/v1/escrow,/operations/case/:id/payout,yes,none,yes,none,yes,global(/api),asyncHandler(initiateEscrowPayout)
+T5 escrow/reconciliation,routes/escrowRoutes.js,178,POST,/api/escrow;/api/v1/escrow,/:id/confirm-vehicle,yes,none,yes,none,yes,global(/api),asyncHandler(confirmVehicleHandler)
+T5 escrow/reconciliation,routes/escrowRoutes.js,189,POST,/api/escrow;/api/v1/escrow,/:id/confirm-delivery,yes,none,yes,none,yes,global(/api),asyncHandler(confirmDelivery)
+T5 escrow/reconciliation,routes/escrowRoutes.js,200,POST,/api/escrow;/api/v1/escrow,/:id/request-release,yes,none,yes,none,yes,global(/api),asyncHandler(requestRelease)
+T5 escrow/reconciliation,routes/escrowRoutes.js,211,POST,/api/escrow;/api/v1/escrow,/:id/dispute,yes,none,yes,none,yes,global(/api),asyncHandler(disputeEscrow)
+T5 escrow/reconciliation,routes/escrowRoutes.js,222,POST,/api/escrow;/api/v1/escrow,/:id/release,yes,none,yes,yes,yes,global(/api),asyncHandler(releaseEscrow)
+T5 escrow/reconciliation,routes/escrowRoutes.js,236,POST,/api/escrow;/api/v1/escrow,/:id/refund,yes,none,yes,yes,yes,global(/api),asyncHandler(refundEscrow)
+T5 escrow/reconciliation,routes/escrowRoutes.js,247,POST,/api/escrow;/api/v1/escrow,/:id/refund/:refundId/complete,yes,none,yes,yes,yes,global(/api),asyncHandler(completeEscrowRefund)
+T5 escrow/reconciliation,routes/escrowRoutes.js,298,POST,/api/escrow;/api/v1/escrow,/:id/close,yes,yes,yes,yes,yes,global(/api),asyncHandler(closeEscrowHandler)
+T5 escrow/reconciliation,routes/escrowRoutes.js,321,POST,/api/escrow;/api/v1/escrow,/:id/verify-funding,yes,none,yes,none,yes,global(/api),"asyncHandler(async (req, res) => {   const reference = Strin"
+T7 other,routes/eventRoutes.js,57,POST,/api/events,/track,yes,none,yes,none,none,global(/api),asyncHandler(track)
+T7 other,routes/eventRoutes.js,60,POST,/api/events,/search,yes,none,yes,none,none,global(/api),asyncHandler(trackSearchEvent)
+T7 other,routes/eventRoutes.js,63,POST,/api/events,/vehicle-view,yes,none,yes,none,none,global(/api),asyncHandler(trackVehicleViewEvent)
+T7 other,routes/eventRoutes.js,66,POST,/api/events,/offer,yes,none,yes,none,none,global(/api),asyncHandler(trackOfferEvent)
+T7 other,routes/eventRoutes.js,69,POST,/api/events,/bid,yes,none,yes,none,none,global(/api),asyncHandler(trackBidEvent)
+T7 other,routes/eventRoutes.js,72,POST,/api/events,/escrow,yes,none,yes,none,none,global(/api),asyncHandler(trackEscrowEvent)
+T7 other,routes/favoriteRoutes.js,18,POST,/api/favorites;/api/v1/favorites,/:carId,yes,none,none,none,none,global(/api),asyncHandler(addFavorite)
+T7 other,routes/favoriteRoutes.js,19,DELETE,/api/favorites;/api/v1/favorites,/:carId,yes,none,none,none,none,global(/api),asyncHandler(removeFavorite)
+T7 other,routes/favoriteRoutes.js,20,POST,/api/favorites;/api/v1/favorites,/:carId/toggle,yes,none,none,none,none,global(/api),asyncHandler(toggleFavorite)
+T7 other,routes/favoriteRoutes.js,21,PUT,/api/favorites;/api/v1/favorites,/:carId/price-alert,yes,none,none,none,none,global(/api),asyncHandler(updateFavoritePriceAlert)
+T7 other,routes/featureFlagRoutes.js,51,POST,/api/feature-flags,/,yes,yes,none,none,none,global(/api),asyncHandler(createFlagHandler)
+T7 other,routes/featureFlagRoutes.js,54,PUT,/api/feature-flags,/:key,yes,yes,none,none,none,global(/api),asyncHandler(updateFlagHandler)
+T7 other,routes/featureFlagRoutes.js,57,DELETE,/api/feature-flags,/:key,yes,yes,none,none,none,global(/api),asyncHandler(deleteFlagHandler)
+T7 other,routes/featureFlagRoutes.js,60,POST,/api/feature-flags,/:key/toggle,yes,yes,none,none,none,global(/api),asyncHandler(toggleFlagHandler)
+T7 other,routes/featureFlagRoutes.js,78,POST,/api/feature-flags,/batch/evaluate,yes,yes,none,none,none,global(/api),asyncHandler(batchEvaluateFlagsHandler)
+T7 other,routes/featuredCampaignRoutes.js,36,POST,(not mounted in server.js),/,yes,yes,none,none,none,global(/api),"handle(async (req, res) => {   const p = body.safeParse(req."
+T7 other,routes/featuredCampaignRoutes.js,44,PUT,(not mounted in server.js),/:id,yes,yes,none,none,none,global(/api),"handle(async (req, res) => {   const p = patch.safeParse(req"
+T7 other,routes/featuredCampaignRoutes.js,50,POST,(not mounted in server.js),/:id/pause,yes,yes,none,none,none,global(/api),"handle(async (req, res) => {   const c = await svc.setPaused"
+T7 other,routes/featuredCampaignRoutes.js,55,POST,(not mounted in server.js),/:id/resume,yes,yes,none,none,none,global(/api),"handle(async (req, res) => {   const c = await svc.setPaused"
+T7 other,routes/featuredCampaignRoutes.js,60,POST,(not mounted in server.js),/:id/end,yes,yes,none,none,none,global(/api),"handle(async (req, res) => {   if (!needConfirm(req, res)) r"
+T7 other,routes/featuredCampaignRoutes.js,66,DELETE,(not mounted in server.js),/:id,yes,yes,none,none,none,global(/api),"handle(async (req, res) => {   if (!needConfirm(req, res)) r"
+T7 other,routes/feedbackRoutes.js,24,POST,/api/feedback,/submit,NONE,none,none,none,none,global(/api),"(req, res, next) => {     // Attempt to authenticate but don"
+T7 other,routes/feedbackRoutes.js,52,PATCH,/api/feedback,/admin/:id/status,yes,yes,yes,none,none,global(/api),asyncHandler(updateFeedbackStatus)
+T7 other,routes/financeRoutes.js,46,POST,/api/finance,/reports/:reportId/issues/:issueIndex/resolve,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/financeRoutes.js,60,POST,/api/finance,/reconcile,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/fraudRoutes.js,36,POST,/api/fraud,/check,yes,yes,none,none,none,global(/api),asyncHandler(runFraudCheckOnTarget)
+T7 other,routes/fraudRoutes.js,64,PUT,/api/fraud,/:fraudId/status,yes,yes,yes,none,none,global(/api),asyncHandler(updateFraudStatus)
+T6 admin/dealer,routes/governanceRoutes.js,72,POST,/api/governance,/policies,yes,yes,none,none,none,global(/api),asyncHandler(createPolicy)
+T6 admin/dealer,routes/governanceRoutes.js,73,PUT,/api/governance,/policies/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updatePolicy)
+T6 admin/dealer,routes/governanceRoutes.js,78,POST,/api/governance,/changes,yes,yes,none,none,none,global(/api),asyncHandler(createChangeRequest)
+T6 admin/dealer,routes/governanceRoutes.js,79,POST,/api/governance,/changes/:id/submit,yes,yes,yes,none,none,global(/api),asyncHandler(submitForApproval)
+T6 admin/dealer,routes/governanceRoutes.js,80,POST,/api/governance,/changes/:id/approve,yes,yes,yes,none,none,global(/api),asyncHandler(approveChangeRequest)
+T6 admin/dealer,routes/governanceRoutes.js,81,POST,/api/governance,/changes/:id/reject,yes,yes,yes,none,none,global(/api),asyncHandler(rejectChangeRequest)
+T6 admin/dealer,routes/governanceRoutes.js,85,POST,/api/governance,/approvals,yes,yes,none,none,none,global(/api),asyncHandler(createApprovalRule)
+T6 admin/dealer,routes/governanceRoutes.js,86,PUT,/api/governance,/approvals/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateApprovalRule)
+T6 admin/dealer,routes/governanceRoutes.js,90,POST,/api/governance,/features,yes,yes,none,none,none,global(/api),asyncHandler(createFeatureLifecycle)
+T6 admin/dealer,routes/governanceRoutes.js,91,PUT,/api/governance,/features/:id/stage,yes,yes,yes,none,none,global(/api),asyncHandler(updateFeatureStage)
+T6 admin/dealer,routes/governanceRoutes.js,95,POST,/api/governance,/risks,yes,yes,none,none,none,global(/api),asyncHandler(createRisk)
+T6 admin/dealer,routes/governanceRoutes.js,96,PUT,/api/governance,/risks/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateRiskStatus)
+T6 admin/dealer,routes/governanceRoutes.js,100,POST,/api/governance,/standards,yes,yes,none,none,none,global(/api),asyncHandler(createStandard)
+T6 admin/dealer,routes/governanceRoutes.js,104,POST,/api/governance,/countries,yes,yes,none,none,none,global(/api),asyncHandler(createCountryRule)
+T6 admin/dealer,routes/governanceRoutes.js,108,POST,/api/governance,/partners,yes,yes,none,none,none,global(/api),asyncHandler(createPartnerRequirement)
+T6 admin/dealer,routes/governanceRoutes.js,112,POST,/api/governance,/releases,yes,yes,none,none,none,global(/api),asyncHandler(createRelease)
+T6 admin/dealer,routes/governanceRoutes.js,113,PUT,/api/governance,/releases/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateReleaseStatus)
+T6 admin/dealer,routes/governanceRoutes.js,117,POST,/api/governance,/decisions,yes,yes,none,none,none,global(/api),asyncHandler(createDecision)
+T6 admin/dealer,routes/governanceRoutes.js,126,POST,/api/governance,/help,yes,yes,none,none,none,global(/api),asyncHandler(getGovernanceHelp)
+T7 other,routes/healthRoutes.js,207,POST,/health,/cache/flush,yes,yes,none,none,none,global(/api),"async (req, res) => {   await cacheService.flushAll();   cac"
+T7 other,routes/heroPlacementRoutes.js,10,POST,(not mounted in server.js),/,yes,none,none,none,none,global(/api),asyncHandler(createHeroPlacement)
+T7 other,routes/heroPlacementRoutes.js,12,PUT,(not mounted in server.js),/admin/:id/schedule,yes,yes,none,none,none,global(/api),asyncHandler(scheduleHeroPlacement)
+T7 other,routes/heroSlideRoutes.js,20,POST,/api/hero,/,yes,yes,none,none,none,global(/api),asyncHandler(createHeroSlide)
+T7 other,routes/heroSlideRoutes.js,21,PUT,/api/hero,/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateHeroSlide)
+T7 other,routes/heroSlideRoutes.js,22,DELETE,/api/hero,/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteHeroSlide)
+T7 other,routes/improvementRoutes.js,60,POST,/api/improvement,/improvements,yes,yes,yes,yes,none,global(/api),asyncHandler(createImprovement)
+T7 other,routes/improvementRoutes.js,61,PUT,/api/improvement,/improvements/:improvementId,yes,yes,yes,none,none,global(/api),asyncHandler(updateImprovement)
+T7 other,routes/improvementRoutes.js,77,POST,/api/improvement,/experiments,yes,yes,yes,yes,none,global(/api),asyncHandler(createExperiment)
+T7 other,routes/improvementRoutes.js,78,PUT,/api/improvement,/experiments/:experimentId,yes,yes,yes,none,none,global(/api),asyncHandler(updateExperiment)
+T7 other,routes/improvementRoutes.js,79,POST,/api/improvement,/experiments/:experimentId/start,yes,yes,yes,none,none,global(/api),asyncHandler(startExperiment)
+T7 other,routes/improvementRoutes.js,80,POST,/api/improvement,/experiments/:experimentId/stop,yes,yes,yes,none,none,global(/api),asyncHandler(stopExperiment)
+T7 other,routes/improvementRoutes.js,87,POST,/api/improvement,/ideas,yes,yes,yes,yes,none,global(/api),asyncHandler(createInnovationIdea)
+T7 other,routes/improvementRoutes.js,88,POST,/api/improvement,/ideas/:ideaId/vote,yes,yes,yes,yes,none,global(/api),asyncHandler(voteIdea)
+T7 other,routes/improvementRoutes.js,89,PUT,/api/improvement,/ideas/:ideaId/status,yes,yes,yes,none,none,global(/api),asyncHandler(updateIdeaStatus)
+T7 other,routes/improvementRoutes.js,106,POST,/api/improvement,/assistant,yes,yes,yes,none,none,global(/api),asyncHandler(askAssistant)
+T7 other,routes/inspectorApplicationRoutes.js,38,POST,/api/inspector-applications;/api/v1/inspector-applications,/apply,NONE,none,yes,yes,none,global(/api),asyncHandler(submitApplication)
+T7 other,routes/inspectorApplicationRoutes.js,51,POST,/api/inspector-applications;/api/v1/inspector-applications,/:id/approve,yes,none,yes,none,none,global(/api),asyncHandler(approveApplication)
+T7 other,routes/inspectorApplicationRoutes.js,52,POST,/api/inspector-applications;/api/v1/inspector-applications,/:id/reject,yes,none,yes,none,none,global(/api),asyncHandler(rejectApplication)
+T7 other,routes/intelligenceRoutes.js,68,POST,/api/intelligence,/reports/generate,yes,yes,yes,none,none,global(/api),asyncHandler(generateReport)
+T7 other,routes/intelligenceRoutes.js,72,POST,/api/intelligence,/query,yes,yes,yes,none,none,global(/api),asyncHandler(queryIntelligence)
+T7 other,routes/intelligenceRoutes.js,75,POST,/api/intelligence,/exports,yes,yes,yes,none,none,global(/api),asyncHandler(exportData)
+T7 other,routes/intelligenceRoutes.js,79,POST,/api/intelligence,/scheduled,yes,yes,yes,none,none,global(/api),asyncHandler(createScheduledReport)
+T3 offers/negotiation,routes/leadRoutes.js,47,POST,/api/leads,/:leadId/offers,yes,none,yes,none,none,global(/api),asyncHandler(submitOffer)
+T3 offers/negotiation,routes/leadRoutes.js,48,POST,/api/leads,/:leadId/offers/:offerId/actions,yes,none,yes,none,none,global(/api),asyncHandler(respondToOffer)
+T3 offers/negotiation,routes/leadRoutes.js,50,POST,/api/leads,/:leadId/offers/:offerId/pay,yes,none,yes,yes,none,global(/api),asyncHandler(payOffer)
+T3 offers/negotiation,routes/leadRoutes.js,51,POST,/api/leads,/:leadId/offers/:offerId/settlement/cancel,yes,none,yes,none,none,global(/api),asyncHandler(cancelOfferSettlement)
+T3 offers/negotiation,routes/leadRoutes.js,58,POST,/api/leads,/,yes,yes,yes,none,none,global(/api),asyncHandler(createLeadManual)
+T3 offers/negotiation,routes/leadRoutes.js,61,PUT,/api/leads,/:leadId/stage,yes,none,none,none,none,global(/api),asyncHandler(updateStage)
+T3 offers/negotiation,routes/leadRoutes.js,64,PUT,/api/leads,/:leadId/archive,yes,none,none,none,none,global(/api),asyncHandler(archiveLeadHandler)
+T3 offers/negotiation,routes/leadRoutes.js,67,PUT,/api/leads,/:leadId/hot,yes,none,none,none,none,global(/api),asyncHandler(markAsHot)
+T3 offers/negotiation,routes/leadRoutes.js,70,POST,/api/leads,/:leadId/notes,yes,none,yes,none,none,global(/api),asyncHandler(addNote)
+T5 escrow/reconciliation,routes/ledgerRoutes.js,20,POST,/api/ledger,/,yes,yes,yes,none,none,global(/api),ledgerController.createLedgerEntry
+T5 escrow/reconciliation,routes/ledgerRoutes.js,25,POST,/api/ledger,/seed,yes,yes,none,none,none,global(/api),ledgerController.seedAccounts
+T5 escrow/reconciliation,routes/ledgerRoutes.js,31,POST,/api/ledger,/:id/reverse,yes,yes,yes,none,none,global(/api),ledgerController.reverseLedgerEntry
+T2 listings/moderation,routes/listingAssistantRoutes.js,17,POST,/api/listing-assistant,/batch-analyze,yes,yes,none,none,none,global(/api),asyncHandler(batchAnalyze)
+T2 listings/moderation,routes/listingQualityRoutes.js,44,POST,/api/listing-quality,/dealer/:dealerId/bulk-recalculate,yes,yes,yes,none,none,global(/api),asyncHandler(bulkRecalculateDealerQualityHandler)
+T2 listings/moderation,routes/listingQualityRoutes.js,58,POST,/api/listing-quality,/car/:carId/recalculate,yes,yes,yes,none,none,global(/api),asyncHandler(recalculateListingQualityHandler)
+T7 other,routes/loanApplicationRoutes.js,14,POST,/api/loans,/,yes,none,none,none,none,global(/api),asyncHandler(createLoanApplication)
+T7 other,routes/loanApplicationRoutes.js,17,PUT,/api/loans,/:id/status,yes,yes,yes,none,none,global(/api),asyncHandler(updateLoanApplicationStatus)
+T7 other,routes/localizationRoutes.js,51,POST,/api/v1/localization,/,yes,yes,yes,none,none,global(/api),asyncHandler(createTranslation)
+T7 other,routes/localizationRoutes.js,54,PATCH,/api/v1/localization,/:translationId,yes,yes,yes,none,none,global(/api),asyncHandler(updateTranslation)
+T7 other,routes/localizationRoutes.js,57,DELETE,/api/v1/localization,/:translationId,yes,yes,yes,none,none,global(/api),asyncHandler(deleteTranslation)
+T7 other,routes/localizationRoutes.js,60,POST,/api/v1/localization,/import,yes,yes,yes,none,none,global(/api),asyncHandler(importTranslations)
+T7 other,routes/lowCodeRoutes.js,73,POST,/api/lowcode,/objects,yes,yes,none,none,none,global(/api),asyncHandler(createBusinessObject)
+T7 other,routes/lowCodeRoutes.js,74,PUT,/api/lowcode,/objects/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateBusinessObject)
+T7 other,routes/lowCodeRoutes.js,75,DELETE,/api/lowcode,/objects/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteBusinessObject)
+T7 other,routes/lowCodeRoutes.js,76,POST,/api/lowcode,/objects/:id/publish,yes,yes,yes,none,none,global(/api),asyncHandler(publishBusinessObject)
+T7 other,routes/lowCodeRoutes.js,77,POST,/api/lowcode,/objects/:id/clone,yes,yes,yes,none,none,global(/api),asyncHandler(cloneBusinessObject)
+T7 other,routes/lowCodeRoutes.js,85,POST,/api/lowcode,/objects/:objectId/fields,yes,yes,yes,none,none,global(/api),asyncHandler(createObjectField)
+T7 other,routes/lowCodeRoutes.js,86,PUT,/api/lowcode,/fields/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateObjectField)
+T7 other,routes/lowCodeRoutes.js,87,DELETE,/api/lowcode,/fields/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteObjectField)
+T7 other,routes/lowCodeRoutes.js,88,POST,/api/lowcode,/objects/:objectId/fields/reorder,yes,yes,none,none,none,global(/api),asyncHandler(reorderObjectFields)
+T7 other,routes/lowCodeRoutes.js,95,POST,/api/lowcode,/relationships,yes,yes,none,none,none,global(/api),asyncHandler(createObjectRelationship)
+T7 other,routes/lowCodeRoutes.js,96,PUT,/api/lowcode,/relationships/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateObjectRelationship)
+T7 other,routes/lowCodeRoutes.js,97,DELETE,/api/lowcode,/relationships/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteObjectRelationship)
+T7 other,routes/lowCodeRoutes.js,104,POST,/api/lowcode,/forms,yes,yes,none,none,none,global(/api),asyncHandler(createFormDefinition)
+T7 other,routes/lowCodeRoutes.js,105,PUT,/api/lowcode,/forms/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateFormDefinition)
+T7 other,routes/lowCodeRoutes.js,106,DELETE,/api/lowcode,/forms/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteFormDefinition)
+T7 other,routes/lowCodeRoutes.js,113,POST,/api/lowcode,/views,yes,yes,none,none,none,global(/api),asyncHandler(createViewDefinition)
+T7 other,routes/lowCodeRoutes.js,114,PUT,/api/lowcode,/views/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateViewDefinition)
+T7 other,routes/lowCodeRoutes.js,115,DELETE,/api/lowcode,/views/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteViewDefinition)
+T7 other,routes/lowCodeRoutes.js,122,PUT,/api/lowcode,/objects/:objectId/permissions,yes,yes,yes,none,none,global(/api),asyncHandler(updateObjectPermissions)
+T7 other,routes/lowCodeRoutes.js,129,POST,/api/lowcode,/dashboards,yes,yes,none,none,none,global(/api),asyncHandler(createCustomDashboard)
+T7 other,routes/lowCodeRoutes.js,130,PUT,/api/lowcode,/dashboards/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateCustomDashboard)
+T7 other,routes/lowCodeRoutes.js,131,DELETE,/api/lowcode,/dashboards/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteCustomDashboard)
+T7 other,routes/lowCodeRoutes.js,138,POST,/api/lowcode,/versions/:versionId/rollback,yes,yes,none,none,none,global(/api),asyncHandler(rollbackObjectVersion)
+T7 other,routes/lowCodeRoutes.js,144,POST,/api/lowcode,/ai/suggest,yes,yes,none,none,none,global(/api),asyncHandler(suggestBusinessObject)
+T7 other,routes/maintenanceControlRoutes.js,82,POST,/api/admin/system/maintenance,/activate,yes,yes,none,yes,none,global(/api),"wrap(async (req, res) => {   noStore(res);   const b = req.b"
+T7 other,routes/maintenanceControlRoutes.js,95,POST,/api/admin/system/maintenance,/recover,yes,yes,none,yes,none,global(/api),"wrap(async (req, res) => {   noStore(res);   const b = req.b"
+T4 payments/settlement,routes/marketplaceFulfilmentRoutes.js,12,POST,/api/marketplace/purchases;/api/v1/marketplace/purchases,/:id/collection,yes,none,yes,none,yes,global(/api),"asyncHandler(async(req,res)=>res.json({success:true,data:awa"
+T4 payments/settlement,routes/marketplaceFulfilmentRoutes.js,13,POST,/api/marketplace/purchases;/api/v1/marketplace/purchases,/:id/transfer,yes,none,yes,none,yes,global(/api),"asyncHandler(async(req,res)=>res.json({success:true,data:awa"
+T4 payments/settlement,routes/marketplaceFulfilmentRoutes.js,14,POST,/api/marketplace/purchases;/api/v1/marketplace/purchases,/:id/dispute,yes,none,yes,none,yes,global(/api),"asyncHandler(async(req,res)=>res.json({success:true,data:awa"
+T7 other,routes/marketplaceHealthRoutes.js,46,POST,/api/marketplace-health,/alerts/:alertId/resolve,yes,yes,yes,none,none,global(/api),asyncHandler(resolveAlert)
+T7 other,routes/marketplaceHealthRoutes.js,52,POST,/api/marketplace-health,/regenerate,yes,yes,none,none,none,global(/api),asyncHandler(regenerateHealth)
+T7 other,routes/mediaEventRoutes.js,31,POST,(not mounted in server.js),/publish,yes,yes,none,none,none,global(/api),controller.publishEvent
+T7 other,routes/mediaEventRoutes.js,34,POST,(not mounted in server.js),/commentary,yes,yes,none,none,none,global(/api),controller.sendCommentary
+T7 other,routes/metricsRoutes.js,289,POST,/metrics,/reset,yes,yes,none,none,none,global(/api),"async (req, res) => {   try {     const { resetMetrics } = a"
+T7 other,routes/notificationAnalyticsRoutes.js,61,POST,/api/notification-analytics,/retry/:auditId,yes,yes,none,none,none,global(/api),asyncHandler(retryNotificationHandler)
+T7 other,routes/notificationAnalyticsRoutes.js,64,POST,/api/notification-analytics,/bulk-retry,yes,yes,none,none,none,global(/api),asyncHandler(bulkRetryNotificationsHandler)
+T7 other,routes/notificationAnalyticsRoutes.js,70,POST,/api/notification-analytics,/process-retry-queue,yes,yes,none,none,none,global(/api),asyncHandler(processRetryQueueHandler)
+T7 other,routes/notificationRoutes.js,19,POST,/api/notifications;/api/v1/notifications,/reminders,yes,none,none,none,yes,global(/api),asyncHandler(createReminder)
+T7 other,routes/notificationRoutes.js,20,POST,/api/notifications;/api/v1/notifications,/read-all,yes,none,none,none,yes,global(/api),asyncHandler(markAllAsRead)
+T7 other,routes/notificationRoutes.js,21,POST,/api/notifications;/api/v1/notifications,/:id/read,yes,none,yes,none,yes,global(/api),asyncHandler(markAsRead)
+T7 other,routes/notificationRoutes.js,22,DELETE,/api/notifications;/api/v1/notifications,/:id,yes,none,yes,none,yes,global(/api),asyncHandler(deleteNotification)
+T7 other,routes/ntsaVerificationRoutes.js,54,POST,/api/ntsa-verification;/api/v1/ntsa-verification,/,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const { carId } = req"
+T7 other,routes/ntsaVerificationRoutes.js,85,POST,/api/ntsa-verification;/api/v1/ntsa-verification,/:id/process,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const { status, admin"
+T7 other,routes/ntsaVerificationRoutes.js,149,POST,/api/ntsa-verification;/api/v1/ntsa-verification,/:id/documents,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const { url, label } "
+T7 other,routes/organizationRoutes.js,35,POST,/api/organizations,/,yes,yes,none,none,none,global(/api),asyncHandler(createOrganizationHandler)
+T7 other,routes/organizationRoutes.js,57,PUT,/api/organizations,/:id,yes,none,yes,none,none,global(/api),asyncHandler(updateOrganizationHandler)
+T7 other,routes/organizationRoutes.js,60,DELETE,/api/organizations,/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteOrganizationHandler)
+T7 other,routes/organizationRoutes.js,66,POST,/api/organizations,/:id/admins,yes,none,yes,none,none,global(/api),asyncHandler(addOrganizationAdminHandler)
+T7 other,routes/organizationRoutes.js,69,DELETE,/api/organizations,/:id/admins/:userId,yes,none,yes,none,none,global(/api),asyncHandler(removeOrganizationAdminHandler)
+T7 other,routes/organizationRoutes.js,72,POST,/api/organizations,/:id/branches,yes,none,yes,none,none,global(/api),asyncHandler(createBranchHandler)
+T6 admin/dealer,routes/ownershipRoutes.js,24,POST,/api/ownership,/vehicles,yes,none,yes,none,none,global(/api),addVehicle
+T6 admin/dealer,routes/ownershipRoutes.js,26,POST,/api/ownership,/vehicles/:vehicleId/services,yes,none,yes,none,none,global(/api),addService
+T6 admin/dealer,routes/ownershipRoutes.js,27,POST,/api/ownership,/vehicles/:vehicleId/expenses,yes,none,yes,none,none,global(/api),addExpense
+T6 admin/dealer,routes/ownershipRoutes.js,28,POST,/api/ownership,/vehicles/:vehicleId/documents,yes,none,yes,none,none,global(/api),addDocument
+T6 admin/dealer,routes/ownershipRoutes.js,29,POST,/api/ownership,/vehicles/:vehicleId/trips,yes,none,yes,none,none,global(/api),addTrip
+T6 admin/dealer,routes/ownershipRoutes.js,30,PATCH,/api/ownership,/reminders/:reminderId/complete,yes,none,yes,none,none,global(/api),completeReminder
+T6 admin/dealer,routes/ownershipRoutes.js,31,PATCH,/api/ownership,/vehicles/:vehicleId/sold,yes,none,yes,none,none,global(/api),markSold
+T6 admin/dealer,routes/ownershipRoutes.js,33,POST,/api/ownership,/passports,yes,yes,yes,none,none,global(/api),createPassport
+T4 payments/settlement,routes/paymentRoutes.js,85,POST,/api/payments;/api/v1/payments,/initiate,yes,none,yes,yes,yes,global(/api),asyncHandler(initiatePayment)
+T4 payments/settlement,routes/paymentRoutes.js,224,POST,/api/payments;/api/v1/payments,/callback,signature/apikey,none,yes,none,yes,global(/api),asyncHandler(mpesaCallback)
+T4 payments/settlement,routes/paymentRoutes.js,336,POST,/api/payments;/api/v1/payments,/b2c/callback,NONE,none,none,none,yes,global(/api),asyncHandler(b2cCallback)
+T4 payments/settlement,routes/paymentRoutes.js,379,POST,/api/payments;/api/v1/payments,/b2c/timeout,NONE,none,none,none,yes,global(/api),asyncHandler(b2cTimeout)
+T7 other,routes/platformFactoryRoutes.js,63,POST,/api/platform-factory,/generate,yes,yes,yes,none,none,global(/api),asyncHandler(generateProduct)
+T7 other,routes/platformFactoryRoutes.js,69,PUT,/api/platform-factory,/products/:productId,yes,yes,yes,none,none,global(/api),asyncHandler(updateProduct)
+T7 other,routes/platformFactoryRoutes.js,70,DELETE,/api/platform-factory,/products/:productId,yes,yes,yes,none,none,global(/api),asyncHandler(deleteProduct)
+T7 other,routes/platformFactoryRoutes.js,84,PUT,/api/platform-factory,/brands/:brandId,yes,yes,yes,none,none,global(/api),asyncHandler(updateBrand)
+T7 other,routes/platformFactoryRoutes.js,88,POST,/api/platform-factory,/deploy,yes,yes,yes,none,none,global(/api),asyncHandler(deployProduct)
+T7 other,routes/platformFactoryRoutes.js,89,POST,/api/platform-factory,/deployments/:deploymentId/rollback,yes,yes,yes,none,none,global(/api),asyncHandler(rollbackDeployment)
+T7 other,routes/platformFactoryRoutes.js,93,POST,/api/platform-factory,/store/install,yes,yes,yes,none,none,global(/api),asyncHandler(installApp)
+T7 other,routes/platformFactoryRoutes.js,96,POST,/api/platform-factory,/design,yes,yes,yes,none,none,global(/api),asyncHandler(designProduct)
+T7 other,routes/platformFactoryRoutes.js,101,POST,/api/platform-factory,/monetization/configure,yes,yes,yes,none,none,global(/api),asyncHandler(configureMonetization)
+T3 offers/negotiation,routes/privateSellerAuctionRoutes.js,27,POST,/api/private-seller-auctions,/seller/proposals,yes,none,none,none,none,global(/api),"asyncHandler(async (req, res) => {   const idem = requireIde"
+T3 offers/negotiation,routes/privateSellerAuctionRoutes.js,39,POST,/api/private-seller-auctions,/seller/proposals/:id/events/:event,yes,none,none,none,none,global(/api),"run(""seller"")"
+T3 offers/negotiation,routes/privateSellerAuctionRoutes.js,43,POST,/api/private-seller-auctions,/provider/proposals/:id/events/:event,yes,none,none,none,none,global(/api),"run(""provider"")"
+T3 offers/negotiation,routes/privateSellerAuctionRoutes.js,44,POST,/api/private-seller-auctions,/provider/capabilities/:providerId/request,yes,none,none,none,none,global(/api),"asyncHandler(async (req, res) => {   const result = await ap"
+T3 offers/negotiation,routes/privateSellerAuctionRoutes.js,57,POST,/api/private-seller-auctions,/admin/proposals/:id/events/:event,yes,yes,none,none,none,global(/api),"run(""admin"")"
+T3 offers/negotiation,routes/privateSellerAuctionRoutes.js,58,POST,/api/private-seller-auctions,/admin/capabilities/:providerId/:action,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => {   const result = await ap"
+T1 auth/account,routes/privateSellerCapabilityRoutes.js,22,POST,/api/private-seller-capability,/apply,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   try {     const applica"
+T1 auth/account,routes/privateSellerCapabilityRoutes.js,36,PATCH,/api/private-seller-capability,/admin/:userId/decision,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   if (!UUID_RE.test(req.p"
+T7 other,routes/queueRoutes.js,62,POST,/api/admin/queue,/dlq/retry/:jobId,yes,yes,yes,yes,none,global(/api),asyncHandler(retryDLQJobHandler)
+T7 other,routes/queueRoutes.js,65,DELETE,/api/admin/queue,/dlq/delete/:jobId,yes,yes,yes,yes,none,global(/api),asyncHandler(deleteDLQJobHandler)
+T7 other,routes/queueRoutes.js,78,POST,/api/admin/queue,/failures/:failureId/resolve,yes,yes,yes,yes,none,global(/api),asyncHandler(resolveJobFailureHandler)
+T7 other,routes/realtimeRoutes.js,12,POST,/api/realtime,/socket-ticket,yes,none,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     const { ticket, expir"
+T5 escrow/reconciliation,routes/reconciliationRoutes.js,79,POST,/api/reconciliation,/run,yes,yes,none,none,none,global(/api),asyncHandler(runReconciliationReport)
+T5 escrow/reconciliation,routes/reconciliationRoutes.js,132,POST,/api/reconciliation,/reports/:reportId/resolve,yes,yes,none,none,none,global(/api),asyncHandler(resolveReconciliationIssue)
+T5 escrow/reconciliation,routes/reconciliationRoutes.js,202,POST,/api/reconciliation,/alerts/:id/read,yes,yes,none,none,none,global(/api),asyncHandler(markAlertRead)
+T5 escrow/reconciliation,routes/reconciliationRoutes.js,230,POST,/api/reconciliation,/alerts/read-all,yes,yes,none,none,none,global(/api),asyncHandler(markAllAlertsRead)
+T6 admin/dealer,routes/regionalConfigurationRoutes.js,10,POST,/api/countries;/api/v1/countries,/currency-convert,yes,none,yes,none,none,global(/api),asyncHandler(convertCurrency)
+T6 admin/dealer,routes/regionalConfigurationRoutes.js,12,PUT,/api/countries;/api/v1/countries,/currency-rates,yes,yes,yes,none,none,global(/api),asyncHandler(upsertCurrencyRate)
+T6 admin/dealer,routes/regionalConfigurationRoutes.js,14,PATCH,/api/countries;/api/v1/countries,/:countryCode/status,yes,yes,yes,none,none,global(/api),asyncHandler(updateCountryStatus)
+T7 other,routes/reliabilityRoutes.js,81,POST,/api/reliability,/error-budgets/refresh,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const sliValues = compu"
+T7 other,routes/reliabilityRoutes.js,88,POST,/api/reliability,/alerts/evaluate,yes,yes,yes,none,none,global(/api),"asyncHandler(async (req, res) => {   const results = await e"
+T7 other,routes/reportRoutes.js,33,POST,/api/reports,/submit,yes,none,none,none,yes,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/reportRoutes.js,69,PATCH,/api/reports,/admin/:id/status,yes,yes,yes,none,yes,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/reviewRoutes.js,10,POST,/api/reviews;/api/v1/reviews,/,yes,none,yes,yes,none,global(/api),asyncHandler(createReview)
+T7 other,routes/reviewRoutes.js,13,DELETE,/api/reviews;/api/v1/reviews,/:id,yes,none,none,none,none,global(/api),asyncHandler(deleteOwnReview)
+T3 offers/negotiation,routes/savedSearchRoutes.js,24,POST,/api/saved-searches;/api/v1/saved-searches,/,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const { name, filters"
+T3 offers/negotiation,routes/savedSearchRoutes.js,39,PUT,/api/saved-searches;/api/v1/saved-searches,/:id,yes,none,yes,none,none,global(/api),"asyncHandler(async (req, res) => {     const { name, filters"
+T3 offers/negotiation,routes/savedSearchRoutes.js,60,DELETE,/api/saved-searches;/api/v1/saved-searches,/:id,yes,none,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const search = await "
+T7 other,routes/siteDesignRoutes.js,32,POST,/api/admin/site-designs,/assets/logo,yes,yes,none,yes,none,global(/api),"handle(async (req, res) => {   // Stores the image and retur"
+T7 other,routes/siteDesignRoutes.js,44,POST,/api/admin/site-designs,/rollback/:publicationId,yes,yes,none,yes,none,global(/api),"handle(async (req, res) => {   if (!needConfirm(req, res)) r"
+T7 other,routes/siteDesignRoutes.js,52,POST,/api/admin/site-designs,/,yes,yes,none,yes,none,global(/api),"handle(async (req, res) => {   const p = createSchema.safePa"
+T7 other,routes/siteDesignRoutes.js,62,PUT,/api/admin/site-designs,/:id,yes,yes,none,yes,none,global(/api),"handle(async (req, res) => {   const p = saveSchema.safePars"
+T7 other,routes/siteDesignRoutes.js,69,POST,/api/admin/site-designs,/:id/duplicate,yes,yes,none,yes,none,global(/api),"handle(async (req, res) => {   const d = await svc.duplicate"
+T7 other,routes/siteDesignRoutes.js,75,DELETE,/api/admin/site-designs,/:id,yes,yes,none,yes,none,global(/api),"handle(async (req, res) => {   if (!needConfirm(req, res)) r"
+T7 other,routes/siteDesignRoutes.js,82,POST,/api/admin/site-designs,/:id/publish,yes,yes,none,yes,none,global(/api),"handle(async (req, res) => {   if (!needConfirm(req, res)) r"
+T7 other,routes/smsBiddingRoutes.js,35,POST,/api/sms-bidding;/api/v1/sms-bidding,/webhook/inbound,NONE,yes,none,yes,none,global(/api),asyncHandler(handleInboundSms)
+T7 other,routes/smsBiddingRoutes.js,38,POST,/api/sms-bidding;/api/v1/sms-bidding,/register,yes,none,none,yes,none,global(/api),asyncHandler(registerSmsBidder)
+T7 other,routes/smsBiddingRoutes.js,40,POST,/api/sms-bidding;/api/v1/sms-bidding,/subscribe,yes,none,none,yes,none,global(/api),asyncHandler(subscribeToCar)
+T7 other,routes/smsBiddingRoutes.js,41,DELETE,/api/sms-bidding;/api/v1/sms-bidding,/unsubscribe/:carId,yes,none,yes,none,none,global(/api),asyncHandler(unsubscribeFromCar)
+T7 other,routes/subscriptionRoutes.js,35,POST,/api/subscriptions,/upgrade,yes,none,none,yes,yes,global(/api),asyncHandler(upgradeSubscription)
+T7 other,routes/subscriptionRoutes.js,38,POST,/api/subscriptions,/cancel,yes,none,none,yes,yes,global(/api),asyncHandler(cancelSubscription)
+T7 other,routes/subscriptionRoutes.js,41,POST,/api/subscriptions,/reactivate,yes,none,none,yes,yes,global(/api),asyncHandler(reactivateSubscription)
+T7 other,routes/supportRoutes.js,17,POST,/api/support,/,yes,none,none,yes,none,global(/api),asyncHandler(createTicket)
+T7 other,routes/supportRoutes.js,25,POST,/api/support,/staff/:id/messages,yes,yes,yes,yes,none,global(/api),asyncHandler(staffReply)
+T7 other,routes/supportRoutes.js,26,PATCH,/api/support,/staff/:id,yes,yes,yes,none,none,global(/api),asyncHandler(staffUpdate)
+T7 other,routes/supportRoutes.js,33,POST,/api/support,/:id/messages,yes,none,yes,yes,none,global(/api),asyncHandler(addMessage)
+T7 other,routes/supportRoutes.js,34,POST,/api/support,/:id/rate,yes,none,yes,none,none,global(/api),asyncHandler(rateTicket)
+T7 other,routes/supportRoutes.js,35,PUT,/api/support,/:id/status,yes,yes,yes,none,none,global(/api),asyncHandler(updateTicketStatus)
+T6 admin/dealer,routes/supportTicketAdminRoutes.js,16,PATCH,/api/admin/support-tickets,/:id/status,yes,yes,yes,none,none,global(/api),asyncHandler(staffUpdate)
+T6 admin/dealer,routes/supportTicketAdminRoutes.js,17,PATCH,/api/admin/support-tickets,/:id/assign,yes,yes,yes,none,none,global(/api),asyncHandler(staffUpdate)
+T6 admin/dealer,routes/supportTicketAdminRoutes.js,18,POST,/api/admin/support-tickets,/:id/messages,yes,yes,yes,none,none,global(/api),asyncHandler(staffReply)
+T2 listings/moderation,routes/uploadRoutes.js,32,POST,/api/upload,/,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     if (!req.file) return"
+T2 listings/moderation,routes/uploadRoutes.js,73,POST,/api/upload,/multiple,yes,yes,none,yes,none,global(/api),"asyncHandler(async (req, res) => {     if (!req.files || req"
+T2 listings/moderation,routes/uploadRoutes.js,150,DELETE,/api/upload,/:publicId,yes,none,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const { publicId } = "
+T7 other,routes/userPreferenceRoutes.js,29,PATCH,/api/v1/preferences,/,yes,none,yes,none,none,global(/api),asyncHandler(updateUserPreferences)
+T7 other,routes/userPreferenceRoutes.js,32,POST,/api/v1/preferences,/theme,yes,none,yes,none,none,global(/api),asyncHandler(setTheme)
+T7 other,routes/userPreferenceRoutes.js,35,POST,/api/v1/preferences,/theme/toggle,yes,none,yes,none,none,global(/api),asyncHandler(toggleDarkMode)
+T7 other,routes/userPreferenceRoutes.js,38,POST,/api/v1/preferences,/language,yes,none,yes,none,none,global(/api),asyncHandler(setLanguage)
+T7 other,routes/userPreferenceRoutes.js,41,POST,/api/v1/preferences,/notifications,yes,none,yes,none,none,global(/api),asyncHandler(updateNotificationSettings)
+T7 other,routes/userPreferenceRoutes.js,44,POST,/api/v1/preferences,/search/recent,yes,none,yes,none,none,global(/api),asyncHandler(addRecentSearch)
+T7 other,routes/userPreferenceRoutes.js,47,DELETE,/api/v1/preferences,/search/recent,yes,none,yes,none,none,global(/api),asyncHandler(clearRecentSearches)
+T7 other,routes/userPreferenceRoutes.js,50,POST,/api/v1/preferences,/accessibility,yes,none,yes,none,none,global(/api),asyncHandler(updateAccessibility)
+T7 other,routes/userPreferenceRoutes.js,53,POST,/api/v1/preferences,/last-seen,yes,none,yes,none,none,global(/api),asyncHandler(updateLastSeen)
+T1 auth/account,routes/userRoutes.js,100,PUT,/api/users;/api/v1/users,/settings,yes,none,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const allowed = [""not"
+T1 auth/account,routes/userRoutes.js,148,POST,/api/users;/api/v1/users,/bank-pre-approval,yes,none,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const { documentUrl, "
+T1 auth/account,routes/userRoutes.js,177,DELETE,/api/users;/api/v1/users,/bank-pre-approval,yes,none,none,none,none,global(/api),"asyncHandler(async (req, res) => {     const user = await Us"
+T7 other,routes/vehicleAnalyticsRoutes.js,75,POST,/api/analytics,/market/regenerate,yes,yes,none,none,none,global(/api),asyncHandler(regenerateAnalytics)
+T7 other,routes/verificationRoutes.js,40,POST,/api/verification,/submit,yes,none,none,none,yes,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/verificationRoutes.js,56,POST,/api/verification,/phone/request,yes,none,none,none,yes,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/verificationRoutes.js,68,POST,/api/verification,/phone/verify,yes,none,none,none,yes,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/verificationRoutes.js,90,POST,/api/verification,/admin/:id/approve,yes,yes,yes,none,yes,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/verificationRoutes.js,107,POST,/api/verification,/admin/:id/reject,yes,yes,yes,none,yes,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/verificationRoutes.js,124,POST,/api/verification,/admin/:id/suspend,yes,yes,yes,none,yes,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/verificationRoutes.js,140,POST,/api/verification,/admin/:id/reinstate,yes,yes,yes,none,yes,global(/api),"asyncHandler(async (req, res) => {     const result = await "
+T7 other,routes/vxpRoutes.js,69,POST,/api/vxp,/pages,yes,yes,none,none,none,global(/api),asyncHandler(createPage)
+T7 other,routes/vxpRoutes.js,70,PUT,/api/vxp,/pages/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updatePage)
+T7 other,routes/vxpRoutes.js,71,DELETE,/api/vxp,/pages/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deletePage)
+T7 other,routes/vxpRoutes.js,72,POST,/api/vxp,/pages/:id/publish,yes,yes,yes,none,none,global(/api),asyncHandler(publishPage)
+T7 other,routes/vxpRoutes.js,73,POST,/api/vxp,/pages/:id/duplicate,yes,yes,yes,none,none,global(/api),asyncHandler(duplicatePage)
+T7 other,routes/vxpRoutes.js,81,POST,/api/vxp,/sections,yes,yes,none,none,none,global(/api),asyncHandler(createSection)
+T7 other,routes/vxpRoutes.js,82,PUT,/api/vxp,/sections/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateSection)
+T7 other,routes/vxpRoutes.js,83,DELETE,/api/vxp,/sections/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteSection)
+T7 other,routes/vxpRoutes.js,84,POST,/api/vxp,/sections/reorder,yes,yes,none,none,none,global(/api),asyncHandler(reorderSections)
+T7 other,routes/vxpRoutes.js,92,POST,/api/vxp,/components,yes,yes,none,none,none,global(/api),asyncHandler(createComponent)
+T7 other,routes/vxpRoutes.js,93,PUT,/api/vxp,/components/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateComponent)
+T7 other,routes/vxpRoutes.js,94,DELETE,/api/vxp,/components/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteComponent)
+T7 other,routes/vxpRoutes.js,103,POST,/api/vxp,/themes,yes,yes,none,none,none,global(/api),asyncHandler(createTheme)
+T7 other,routes/vxpRoutes.js,104,PUT,/api/vxp,/themes/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateTheme)
+T7 other,routes/vxpRoutes.js,105,DELETE,/api/vxp,/themes/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteTheme)
+T7 other,routes/vxpRoutes.js,113,POST,/api/vxp,/cards,yes,yes,none,none,none,global(/api),asyncHandler(createCard)
+T7 other,routes/vxpRoutes.js,114,PUT,/api/vxp,/cards/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateCard)
+T7 other,routes/vxpRoutes.js,115,DELETE,/api/vxp,/cards/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteCard)
+T7 other,routes/vxpRoutes.js,123,POST,/api/vxp,/advertisements,yes,yes,none,none,none,global(/api),asyncHandler(createAdvertisement)
+T7 other,routes/vxpRoutes.js,124,PUT,/api/vxp,/advertisements/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateAdvertisement)
+T7 other,routes/vxpRoutes.js,125,DELETE,/api/vxp,/advertisements/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteAdvertisement)
+T7 other,routes/vxpRoutes.js,132,POST,/api/vxp,/versions/:id/rollback,yes,yes,none,none,none,global(/api),asyncHandler(rollbackVersion)
+T7 other,routes/vxpRoutes.js,138,POST,/api/vxp,/ai/design,yes,none,none,none,none,global(/api),asyncHandler(aiDesignAssist)
+T4 payments/settlement,routes/walletRoutes.js,12,POST,/api/v1/wallet;/api/wallet,/refunds/:holdId,yes,none,none,none,none,global(/api),"asyncHandler(async (req, res) => {   const result = await re"
+T4 payments/settlement,routes/walletRoutes.js,17,POST,/api/v1/wallet;/api/wallet,/withdraw,yes,none,none,none,none,global(/api),"asyncHandler(async (req, res) => {   const amount = Number(r"
+T4 payments/settlement,routes/walletRoutes.js,28,PUT,/api/v1/wallet;/api/wallet,/dealer-account,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) => res.json({ success: true, a"
+T4 payments/settlement,routes/walletRoutes.js,30,POST,/api/v1/wallet;/api/wallet,/dealer-account/:id/review,yes,yes,none,none,none,global(/api),"asyncHandler(async (req, res) =>   res.json({ success: true,"
+T7 other,routes/webhookRoutes.js,41,POST,/api/webhooks,/inventory,NONE,none,yes,yes,none,global(/api),"async (req, res) => {   try {     const apiKey = req.headers"
+T7 other,routes/xosRoutes.js,80,POST,/api/xos,/experiences,yes,yes,none,none,none,global(/api),asyncHandler(createExperience)
+T7 other,routes/xosRoutes.js,81,PUT,/api/xos,/experiences/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateExperience)
+T7 other,routes/xosRoutes.js,82,DELETE,/api/xos,/experiences/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteExperience)
+T7 other,routes/xosRoutes.js,83,POST,/api/xos,/experiences/:id/activate,yes,yes,yes,none,none,global(/api),asyncHandler(activateExperience)
+T7 other,routes/xosRoutes.js,84,POST,/api/xos,/experiences/:id/deactivate,yes,yes,yes,none,none,global(/api),asyncHandler(deactivateExperience)
+T7 other,routes/xosRoutes.js,92,POST,/api/xos,/campaigns,yes,yes,none,none,none,global(/api),asyncHandler(createCampaign)
+T7 other,routes/xosRoutes.js,93,PUT,/api/xos,/campaigns/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateCampaign)
+T7 other,routes/xosRoutes.js,94,DELETE,/api/xos,/campaigns/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteCampaign)
+T7 other,routes/xosRoutes.js,95,POST,/api/xos,/campaigns/:id/launch,yes,yes,yes,none,none,global(/api),asyncHandler(launchCampaign)
+T7 other,routes/xosRoutes.js,96,POST,/api/xos,/campaigns/:id/pause,yes,yes,yes,none,none,global(/api),asyncHandler(pauseCampaign)
+T7 other,routes/xosRoutes.js,97,POST,/api/xos,/campaigns/:id/end,yes,yes,yes,none,none,global(/api),asyncHandler(endCampaign)
+T7 other,routes/xosRoutes.js,105,POST,/api/xos,/audiences,yes,yes,none,none,none,global(/api),asyncHandler(createAudience)
+T7 other,routes/xosRoutes.js,106,PUT,/api/xos,/audiences/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateAudience)
+T7 other,routes/xosRoutes.js,107,DELETE,/api/xos,/audiences/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteAudience)
+T7 other,routes/xosRoutes.js,115,POST,/api/xos,/journeys,yes,yes,none,none,none,global(/api),asyncHandler(createJourney)
+T7 other,routes/xosRoutes.js,116,PUT,/api/xos,/journeys/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateJourney)
+T7 other,routes/xosRoutes.js,117,DELETE,/api/xos,/journeys/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteJourney)
+T7 other,routes/xosRoutes.js,118,POST,/api/xos,/journeys/:id/activate,yes,yes,yes,none,none,global(/api),asyncHandler(activateJourney)
+T7 other,routes/xosRoutes.js,126,POST,/api/xos,/themes,yes,yes,none,none,none,global(/api),asyncHandler(createSeasonalTheme)
+T7 other,routes/xosRoutes.js,127,PUT,/api/xos,/themes/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateSeasonalTheme)
+T7 other,routes/xosRoutes.js,128,DELETE,/api/xos,/themes/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteSeasonalTheme)
+T7 other,routes/xosRoutes.js,136,POST,/api/xos,/variants,yes,yes,none,none,none,global(/api),asyncHandler(createHomepageVariant)
+T7 other,routes/xosRoutes.js,137,PUT,/api/xos,/variants/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateHomepageVariant)
+T7 other,routes/xosRoutes.js,138,DELETE,/api/xos,/variants/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteHomepageVariant)
+T7 other,routes/xosRoutes.js,145,POST,/api/xos,/navigation-rules,yes,yes,none,none,none,global(/api),asyncHandler(createNavigationRule)
+T7 other,routes/xosRoutes.js,146,PUT,/api/xos,/navigation-rules/:id,yes,yes,yes,none,none,global(/api),asyncHandler(updateNavigationRule)
+T7 other,routes/xosRoutes.js,147,DELETE,/api/xos,/navigation-rules/:id,yes,yes,yes,none,none,global(/api),asyncHandler(deleteNavigationRule)
+T7 other,routes/xosRoutes.js,154,POST,/api/xos,/analytics/track,yes,none,none,none,none,global(/api),asyncHandler(trackExperienceEvent)

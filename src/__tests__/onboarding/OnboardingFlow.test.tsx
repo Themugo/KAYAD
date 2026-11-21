@@ -1,0 +1,226 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+
+const m = vi.hoisted(() => ({ register: vi.fn(), apply: vi.fn(), resend: vi.fn(), keySeq: 0 }));
+vi.mock('../../context/AuthContext', () => ({ useAuth: () => ({ register: m.register }) }));
+vi.mock('../../api/api', () => ({ inspectorAPI: { apply: m.apply } }));
+vi.mock('../../services/authApi', () => ({
+  AuthApiError: class AuthApiError extends Error { kind: string; status?: number; code?: string; constructor(message: string, kind = 'unknown', status?: number, code?: string) { super(message); this.kind = kind; this.status = status; this.code = code; } },
+  resendVerification: m.resend,
+  newRegistrationIdempotencyKey: () => `key-${++m.keySeq}-0123456789abcdef`,
+}));
+
+import OnboardingFlow from '../../components/OnboardingFlow';
+import { AuthApiError } from '../../services/authApi';
+
+const mount = (entry = '/register') => render(<MemoryRouter initialEntries={[entry]}><OnboardingFlow /></MemoryRouter>);
+const pick = (name: RegExp) => fireEvent.click(screen.getByRole('radio', { name }));
+const type = (label: RegExp | string, value: string) => fireEvent.change(screen.getByLabelText(label), { target: { value } });
+const STRONG = 'Str0ng!Passw0rd';
+
+beforeEach(() => { cleanup(); vi.clearAllMocks(); window.localStorage.clear(); });
+
+describe('OnboardingFlow', () => {
+  it('lists only the public roles - no staff, no broker', () => {
+    mount();
+    const names = screen.getAllByRole('radio').map((r) => r.textContent || '');
+    expect(names.length).toBe(5);
+    expect(names.join(' ')).not.toMatch(/admin|staff member|broker|moderator/i);
+  });
+
+  it('buyer: registers role "user", creates NO session and tells them to verify email', async () => {
+    m.register.mockResolvedValue({ user: { id: 'u' } });
+    mount();
+    pick(/^personal account/i);
+    type('Full name', 'Jane Wanjiru'); type(/^Email/, 'jane@example.com'); type('Password', STRONG);
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await waitFor(() => expect(m.register).toHaveBeenCalledTimes(1));
+    expect(m.register.mock.calls[0][0]).toMatchObject({ role: 'user', email: 'jane@example.com' });
+    expect(await screen.findByText(/We sent a verification link to jane@example.com/)).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /sign in/i }).every((a) => /^\/login/.test(a.getAttribute('href') || ''))).toBe(true);
+  });
+
+  it('dealer: requires business fields and sends role "dealer"', async () => {
+    m.register.mockResolvedValue({});
+    mount('/register?intent=dealer');
+    type('Full name', 'Dan Dealer'); type(/^Email/, 'd@example.com'); type(/^Phone/, '0712345678'); type('Password', STRONG);
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    expect((await screen.findAllByText(/business name/i)).length).toBeGreaterThan(0);
+    expect(m.register).not.toHaveBeenCalled();
+    type(/Dealership business name/, 'Dan Motors'); type(/City or location/, 'Nairobi');
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await waitFor(() => expect(m.register).toHaveBeenCalled());
+    expect(m.register.mock.calls[0][0]).toMatchObject({ role: 'dealer', businessName: 'Dan Motors' });
+    expect(await screen.findByText(/complete business verification/i)).toBeInTheDocument();
+    expect(screen.getAllByRole('link').some((a) => (a.getAttribute('href') || '').includes('next=%2Fdealer%2Fonboarding'))).toBe(true);
+  });
+
+  it('a role cannot be escalated through the URL', async () => {
+    m.register.mockResolvedValue({});
+    mount('/register?intent=admin&role=admin');
+    expect(screen.getAllByRole('radio').length).toBe(5); // unknown intent is ignored: picker shown
+    pick(/^personal account/i);
+    type('Full name', 'Jane W'); type(/^Email/, 'j@example.com'); type('Password', STRONG);
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await waitFor(() => expect(m.register).toHaveBeenCalled());
+    expect(m.register.mock.calls[0][0].role).toBe('user');
+  });
+
+  it('duplicate email (409) shows an account-exists screen, not a created account', async () => {
+    m.register.mockRejectedValue(new AuthApiError('exists', 'conflict', 409));
+    mount('/register?intent=buyer');
+    type('Full name', 'Jane W'); type(/^Email/, 'j@example.com'); type('Password', STRONG);
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    expect(await screen.findByText(/already/i)).toBeInTheDocument();
+  });
+
+  it('an unknown outcome (network) is never blindly retried', async () => {
+    m.register.mockRejectedValue(new AuthApiError('offline', 'network'));
+    mount('/register?intent=buyer');
+    type('Full name', 'Jane W'); type(/^Email/, 'j@example.com'); type('Password', STRONG);
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await waitFor(() => expect(m.register).toHaveBeenCalledTimes(1));
+    await screen.findByText(/couldn’t confirm that went through/i);
+    expect(m.register).toHaveBeenCalledTimes(1);
+  });
+
+  const fillBuyer = () => {
+    type('Full name', 'Jane W'); type(/^Email/, 'j@example.com'); type('Password', STRONG);
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+  };
+
+  it('a 503 carrying a backend code is a KNOWN refusal (nothing created), not a lost connection', async () => {
+    m.register.mockRejectedValue(new AuthApiError('unavailable', 'server', 503, 'DATABASE_MIGRATION_REQUIRED'));
+    mount('/register?intent=buyer');
+    fillBuyer();
+    expect(await screen.findByText(/couldn’t create your account right now/i)).toBeInTheDocument();
+    expect(screen.queryByText(/couldn’t confirm that went through/i)).toBeNull();
+    expect(screen.getByText(/Nothing was created/i)).toBeInTheDocument();
+  });
+
+  it('a bare gateway 503/502/504 (no backend code) stays an UNKNOWN outcome', async () => {
+    for (const status of [502, 503, 504]) {
+      cleanup(); vi.clearAllMocks();
+      m.register.mockRejectedValue(new AuthApiError('gateway', 'server', status));
+      mount('/register?intent=buyer');
+      fillBuyer();
+      expect(await screen.findByText(/couldn’t confirm that went through/i)).toBeInTheDocument();
+    }
+  });
+
+  it('"Go back and try again" restores the form with details kept and sends nothing by itself', async () => {
+    m.register.mockRejectedValue(new AuthApiError('offline', 'network'));
+    mount('/register?intent=buyer');
+    fillBuyer();
+    await screen.findByText(/couldn’t confirm that went through/i);
+    fireEvent.click(screen.getByRole('button', { name: /go back and try again/i }));
+    expect((screen.getByLabelText(/^Email/) as HTMLInputElement).value).toBe('j@example.com');
+    expect((screen.getByLabelText('Password') as HTMLInputElement).value).toBe(STRONG);
+    expect(screen.getByRole('button', { name: /create account/i })).toBeEnabled();
+    expect(m.register).toHaveBeenCalledTimes(1);
+  });
+
+  it('"I may already have an account" goes to /login with the email and the role intent carried over', async () => {
+    m.register.mockRejectedValue(new AuthApiError('offline', 'network'));
+    mount('/register?intent=seller');
+    type('Full name', 'Sam Seller'); type(/^Email/, 's@example.com'); type(/^Phone/, '0712345678'); type('Password', STRONG);
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await screen.findByText(/couldn’t confirm that went through/i);
+    expect(m.register.mock.calls[0][0]).toMatchObject({ role: 'user', email: 's@example.com' });
+    const link = screen.getByRole('link', { name: /i may already have an account/i });
+    expect(link.getAttribute('href')).toMatch(/^\/login/);
+    // 'seller' resolves to the unified personal account, whose intent is 'buyer'.
+    expect(link.getAttribute('href')).toMatch(/intent=buyer/);
+  });
+
+  it('lost response, then retry: the SAME idempotency key is re-sent and the server replay shows the account screen', async () => {
+    m.register.mockRejectedValueOnce(new AuthApiError('offline', 'network'));
+    m.register.mockResolvedValueOnce({ user: { id: 'u' } });
+    mount('/register?intent=buyer');
+    fillBuyer();
+    await screen.findByText(/couldn’t confirm that went through/i);
+    fireEvent.click(screen.getByRole('button', { name: /go back and try again/i }));
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    expect(await screen.findByText(/We sent a verification link to/)).toBeInTheDocument();
+    expect(m.register).toHaveBeenCalledTimes(2);
+    const [first, second] = [m.register.mock.calls[0][1], m.register.mock.calls[1][1]];
+    expect(first.idempotencyKey).toMatch(/^key-\d+-/);
+    expect(second.idempotencyKey).toBe(first.idempotencyKey);
+  });
+
+  it('lost response, then a 409: never claims the first request reached the server (it may be someone else\'s account)', async () => {
+    m.register.mockRejectedValueOnce(new AuthApiError('offline', 'network'));
+    m.register.mockRejectedValueOnce(new AuthApiError('exists', 'conflict', 409));
+    mount('/register?intent=buyer');
+    fillBuyer();
+    await screen.findByText(/couldn’t confirm that went through/i);
+    fireEvent.click(screen.getByRole('button', { name: /go back and try again/i }));
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    expect(await screen.findByText(/This email already has an account/i)).toBeInTheDocument();
+    expect(screen.queryByText(/earlier attempt went through/i)).toBeNull();
+    expect(screen.queryByText(/first request reached/i)).toBeNull();
+    expect(screen.getByText(/cannot tell whether this account is one you just created/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /resend verification email/i })).toBeInTheDocument();
+  });
+
+  it('a definitive failure drops the key: the next attempt is a NEW attempt', async () => {
+    m.register.mockRejectedValueOnce(new AuthApiError('offline', 'network'));
+    m.register.mockRejectedValueOnce(new AuthApiError('bad', 'validation', 400));
+    m.register.mockResolvedValueOnce({ user: { id: 'u' } });
+    mount('/register?intent=buyer');
+    fillBuyer();
+    await screen.findByText(/couldn’t confirm that went through/i);
+    fireEvent.click(screen.getByRole('button', { name: /go back and try again/i }));
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await waitFor(() => expect(m.register).toHaveBeenCalledTimes(2));
+    await waitFor(() => expect(screen.getByRole('button', { name: /create account/i })).not.toBeDisabled());
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await waitFor(() => expect(m.register).toHaveBeenCalledTimes(3));
+    const keys = m.register.mock.calls.map((c) => c[1].idempotencyKey);
+    expect(keys[1]).toBe(keys[0]);
+    expect(keys[2]).not.toBe(keys[0]);
+  });
+
+  it('a plain 409 with no earlier uncertainty keeps the ordinary existing-account wording', async () => {
+    m.register.mockRejectedValue(new AuthApiError('exists', 'conflict', 409));
+    mount('/register?intent=buyer');
+    fillBuyer();
+    expect(await screen.findByText(/This email already has an account/i)).toBeInTheDocument();
+    expect(screen.queryByText(/earlier attempt/i)).toBeNull();
+  });
+
+  it('double-submit sends one request', async () => {
+    let release: (v: unknown) => void = () => {};
+    m.register.mockReturnValue(new Promise((r) => { release = r; }));
+    mount('/register?intent=buyer');
+    type('Full name', 'Jane W'); type(/^Email/, 'j@example.com'); type('Password', STRONG);
+    const btn = screen.getByRole('button', { name: /create account/i });
+    fireEvent.click(btn); fireEvent.click(btn);
+    expect(m.register).toHaveBeenCalledTimes(1);
+    release({});
+  });
+
+  it('independent professionals create one personal account before applying for credentials', async () => {
+    m.register.mockResolvedValue({ user: { id: 'professional-user' } });
+    mount('/register?intent=professional');
+    fireEvent.click(screen.getByLabelText(/on my own/i));
+    type('Full name', 'Ian Inspector'); type(/^Email/, 'i@example.com'); type('Password', STRONG);
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await waitFor(() => expect(m.register).toHaveBeenCalledTimes(1));
+    expect(m.register.mock.calls[0][0]).toMatchObject({ role: 'user', email: 'i@example.com' });
+    expect(m.apply).not.toHaveBeenCalled();
+    expect(await screen.findByText(/professional application/i)).toBeInTheDocument();
+  });
+
+  it('keeps passwords and ID numbers out of browser storage', async () => {
+    m.register.mockResolvedValue({});
+    mount('/register?intent=buyer');
+    type('Full name', 'Jane W'); type(/^Email/, 'j@example.com'); type('Password', STRONG);
+    fireEvent.click(screen.getByRole('button', { name: /create account/i }));
+    await waitFor(() => expect(m.register).toHaveBeenCalled());
+    const dump = JSON.stringify({ ...window.localStorage }) + JSON.stringify({ ...window.sessionStorage });
+    expect(dump).not.toContain(STRONG);
+    expect(dump).not.toContain('j@example.com');
+  });
+});

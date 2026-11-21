@@ -1,0 +1,331 @@
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import { formatKES } from '../../api/api';
+import { fetchAdminBids, fetchSuspiciousBids, setBidWinner } from '../../services/bidApi';
+import { useToast } from '../../context/ToastContext';
+import { classifyAdminFailure } from '../../utils/adminLoadFailure';
+import { timeAgo } from '../../utils/helpers';
+
+import { Trophy, Zap, CheckCircle2, Clock, AlertTriangle, X } from 'lucide-react';
+const FRAUD_META = {
+  low:    { label: 'Low',    color: 'var(--green)',  bg: 'rgba(34,197,94,0.1)' },
+  medium: { label: 'Medium', color: 'var(--orange)', bg: 'rgba(19, 184, 166, 0.1)' },
+  high:   { label: 'High',   color: 'var(--red)',    bg: 'rgba(239,68,68,0.1)' },
+};
+
+export default function AdminBids() {
+  const { toast } = useToast();
+  const [bids, setBids]             = useState([]);
+  const [suspicious, setSuspicious] = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [loadError, setLoadError]   = useState('');
+  const [suspiciousError, setSuspiciousError] = useState('');
+  const [lastLoadedAt, setLastLoadedAt] = useState(null);
+  const loadedKeyRef = useRef(null);
+  const requestSequence = useRef(0);
+  const [tab, setTab]               = useState('all');
+  const [page, setPage]             = useState(1);
+  const [total, setTotal]           = useState(0);
+  const [search, setSearch]         = useState('');
+  const [paidFilter, setPaidFilter] = useState('all');
+  const [actionId, setActionId]     = useState(null);
+  const [selected, setSelected]     = useState(null);
+
+  const load = useCallback(async () => {
+    const sequence = ++requestSequence.current;
+    setLoading(true);
+    setLoadError('');
+    setSuspiciousError('');
+    const params = { page, limit: 20 };
+    if (search.trim()) params.search = search.trim();
+    if (paidFilter !== 'all') params.status = paidFilter === 'paid' ? 'paid' : 'pending';
+
+    const readList = (response, label) => {
+      if (Array.isArray(response)) return response;
+      if (!response || typeof response !== 'object') throw new Error(`${label} returned an unexpected response.`);
+      if (response.success === false) throw new Error(response.message || `${label} request was rejected.`);
+      const rows = response.bids ?? response.data;
+      if (Array.isArray(rows)) return rows;
+      if (rows && typeof rows === 'object' && Array.isArray(rows.bids)) return rows.bids;
+      throw new Error(`${label} returned an unexpected response.`);
+    };
+
+    try {
+      const allRes = await fetchAdminBids(params);
+      const rows = readList(allRes, 'Bid list');
+      const reportedTotal = Number(allRes?.pagination?.total ?? allRes?.total ?? rows.length);
+      if (!Number.isFinite(reportedTotal) || reportedTotal < 0) throw new Error('Bid list returned an invalid total count.');
+      if (sequence !== requestSequence.current) return;
+      setBids(rows);
+      setTotal(reportedTotal);
+      setLastLoadedAt(new Date());
+      loadedKeyRef.current = JSON.stringify([page, search.trim(), paidFilter]);
+    } catch (err) {
+      if (sequence !== requestSequence.current) return;
+      const failure = classifyAdminFailure(err);
+      // Another query's rows are never kept under new filters/pages.
+      if (loadedKeyRef.current !== JSON.stringify([page, search.trim(), paidFilter])) { setBids([]); setTotal(0); setLastLoadedAt(null); }
+      setLoadError(err?.response ? failure.reason : (err?.message && failure.kind === 'invalid' ? err.message : failure.reason));
+      toast('Failed to load bids', 'error');
+    } finally {
+      if (sequence === requestSequence.current) setLoading(false);
+    }
+
+    try {
+      const suspRes = await fetchSuspiciousBids();
+      const rows = readList(suspRes, 'Suspicious-bid queue');
+      if (sequence !== requestSequence.current) return;
+      setSuspicious(rows);
+    } catch (err) {
+      if (sequence !== requestSequence.current) return;
+      setSuspiciousError(classifyAdminFailure(err).reason);
+    }
+  }, [page, search, paidFilter, toast]);
+
+  useEffect(() => { load(); return () => { requestSequence.current += 1; }; }, [load]);
+
+  const handleSetWinner = async (bid) => {
+    if (!window.confirm(`Set ${bid.user?.name || 'this bidder'} (${formatKES(bid.amount)}) as winner?`)) return;
+    if (actionId) return;
+    setActionId(bid._id);
+    try {
+      await setBidWinner(bid._id);
+      toast('Winner recorded. Settlement follows the published auction mode.', 'success');
+      setSelected(null);
+      await load();
+    } catch (err) {
+      toast(err.response?.data?.message || 'Failed', 'error');
+    } finally { setActionId(null); }
+  };
+
+  const display    = tab === 'suspicious' ? suspicious : bids;
+  const totalPages = Math.ceil(total / 20);
+
+  // Summary stats
+  const paidTotal   = bids.filter(b => String(b.status || '').toLowerCase() === 'paid').reduce((sum, bid) => sum + (Number.isFinite(Number(bid.amount)) ? Number(bid.amount) : 0), 0);
+  const unpaidCount = bids.filter(b => String(b.status || '').toLowerCase() !== 'paid').length;
+
+  return (
+    <div className="page">
+      <div className="container" style={{ paddingTop: 32, paddingBottom: 32 }}>
+
+        <div style={{ marginBottom: 24 }}>
+          <div className="section-eyebrow">Admin</div>
+          <h2>Bid Management</h2>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', marginTop: 8 }}>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)' }} aria-live="polite">
+              {lastLoadedAt ? `Last successful bid-list refresh: ${lastLoadedAt.toLocaleTimeString()}` : 'Bid data has not yet loaded successfully.'}
+            </div>
+            <button className="btn btn-outline btn-sm" type="button" onClick={load} disabled={loading}>
+              {loading ? 'Refreshing…' : 'Refresh bids'}
+            </button>
+          </div>
+        </div>
+        {loadError && <div role="alert" style={{ border: '1px solid rgba(239,68,68,0.35)', background: 'rgba(239,68,68,0.06)', borderRadius: 'var(--radius)', padding: '12px 16px', marginBottom: 20 }}>
+          <strong style={{ color: 'var(--red)' }}>Bid list unavailable.</strong> {loadError} {bids.length > 0 ? 'Showing the last successfully loaded results.' : 'The empty state is not being treated as a successful response.'}
+          <button className="btn btn-outline btn-sm" style={{ marginLeft: 12 }} type="button" onClick={load} disabled={loading}>Retry</button>
+        </div>}
+
+        {/* Stats row */}
+        <div className="grid-4" style={{ marginBottom: 24 }}>
+          {[
+            { label: 'Total Bids',    val: !lastLoadedAt ? '—' : total.toLocaleString(),   icon: Zap, color: 'var(--brand)' },
+            { label: 'Paid bid value · this page', val: !lastLoadedAt ? '—' : formatKES(paidTotal), icon: CheckCircle2, color: 'var(--green)' },
+            { label: 'Unpaid · this page', val: !lastLoadedAt ? '—' : unpaidCount, icon: Clock, color: 'var(--orange)' },
+            { label: 'Suspicious', val: suspiciousError ? '—' : suspicious.length, icon: AlertTriangle, color: 'var(--red)' },
+          ].map(s => (
+            <div key={s.label} className="stat-box">
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <div>
+                  <div className="stat-label">{s.label}</div>
+                  <div className="stat-value" style={{ color: s.color, fontSize: '1.4rem' }}>{s.val}</div>
+                </div>
+                <s.icon size={22} aria-hidden="true" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Suspicious alert */}
+        {suspicious.length > 0 && (
+          <div style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 'var(--radius)', padding: '14px 18px', marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <div style={{ color: 'var(--red)', fontWeight: 700 }}>{suspicious.length} bid{suspicious.length > 1 ? 's' : ''} flagged by fraud engine</div>
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', marginTop: 3 }}>
+                Flagged bids need review before any settlement decision.
+              </div>
+            </div>
+            <button className="btn btn-danger btn-sm" onClick={() => setTab('suspicious')}>Review Now</button>
+          </div>
+        )}
+
+        {suspiciousError && <div role="alert" style={{ border: '1px solid rgba(239,68,68,0.3)', borderRadius: 'var(--radius)', padding: '10px 14px', marginBottom: 16, color: 'var(--text-muted)', fontSize: 13 }}>
+          Suspicious-bid queue could not be verified: {suspiciousError}. Its count is unavailable, not zero.
+          <button className="btn btn-outline btn-sm" style={{ marginLeft: 12 }} type="button" onClick={load} disabled={loading}>Retry</button>
+        </div>}
+
+        {/* Tabs + Filters */}
+        <div className="tabs">
+          <button className={`tab-btn ${tab === 'all' ? 'active' : ''}`} onClick={() => setTab('all')}>
+            All Bids ({total})
+          </button>
+          <button className={`tab-btn ${tab === 'suspicious' ? 'active' : ''}`} onClick={() => setTab('suspicious')}>
+            Suspicious ({suspiciousError ? '—' : suspicious.length})
+          </button>
+        </div>
+
+        {tab === 'all' && (
+          <div style={{ display: 'flex', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+            <input className="input" placeholder="Search bidder, car..." value={search}
+              onChange={e => { setSearch(e.target.value); setPage(1); }}
+              style={{ maxWidth: 260 }} />
+            {['all', 'paid', 'unpaid'].map(f => (
+              <button key={f} className={`btn btn-sm ${paidFilter === f ? 'btn-gold' : 'btn-outline'}`}
+                onClick={() => { setPaidFilter(f); setPage(1); }}>
+                {f === 'paid' ? 'Paid' : f === 'unpaid' ? 'Unpaid' : 'All'}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Table */}
+        <div className="card">
+          <div className="table-wrap">
+            {loading ? (
+              <div className="loading-center" style={{ padding: 48 }}><div className="spinner" /></div>
+            ) : display.length === 0 ? (
+              <div className="empty-state" style={{ padding: 48 }}>
+                <div className="empty-icon"><Zap size={32} aria-hidden="true" /></div>
+                <h3>{loadError && bids.length === 0 && tab === 'all' ? 'Bid data unavailable' : tab === 'suspicious' && suspiciousError ? 'Suspicious queue unavailable' : tab === 'suspicious' ? 'No suspicious bids reported' : 'No bids match these filters'}</h3>
+                <p style={{ color: 'var(--text-muted)', fontSize: 13, marginTop: 8 }}>{loadError && bids.length === 0 && tab === 'all' ? 'Retry the request before concluding that no bids exist.' : tab === 'suspicious' && suspiciousError ? 'Retry to verify the current fraud-review queue.' : 'Try changing the search or payment filter, or refresh the list.'}</p>
+              </div>
+            ) : (
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>Bidder</th><th>Car</th><th>Amount</th>
+                    <th>M-Pesa</th><th>Commitment</th><th>Fraud</th><th>Time</th><th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {display.map(bid => {
+                    const fraudLevel = bid.fraudScore >= 70 ? 'high' : bid.fraudScore >= 40 ? 'medium' : 'low';
+                    const fm = FRAUD_META[fraudLevel];
+                    return (
+                      <tr key={bid._id}
+                        style={{ background: bid.suspicious ? 'rgba(239,68,68,0.02)' : '', cursor: 'pointer' }}
+                        onClick={() => setSelected(bid)}
+                        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(bid); } }}
+                        tabIndex={0}
+                        aria-label={`View bid details for ${bid.user?.name || 'bidder'}`}
+                      >
+                        <td>
+                          <div style={{ fontWeight: 500, fontSize: 13 }}>{bid.user?.name || '—'}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>{bid.phone || bid.user?.phone}</div>
+                        </td>
+                        <td>
+                          <Link to={`/cars/${bid.car?._id || bid.car}`}
+                            style={{ color: 'var(--brand)', fontSize: 13, fontWeight: 500 }}
+                            onClick={e => e.stopPropagation()}>
+                            {bid.car?.title || `#${String(bid.car || '').slice(-6)}`}
+                          </Link>
+                        </td>
+                        <td style={{ fontWeight: 700, color: 'var(--brand-light)' }}>{formatKES(bid.amount)}</td>
+                        <td>
+                          <span className={`badge ${bid.status === 'paid' ? 'badge-green' : 'badge-orange'}`}>
+                            {bid.status === 'paid' ? 'Paid' : 'Pending'}
+                          </span>
+                        </td>
+                        <td style={{ fontSize: 12, color: 'var(--text-muted)' }}>
+                          {bid.commitmentAmount ? formatKES(bid.commitmentAmount) : '—'}
+                        </td>
+                        <td>
+                          {bid.fraudScore !== undefined ? (
+                            <span style={{
+                              fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 100,
+                              background: fm.bg, color: fm.color,
+                            }}>
+                              {fm.label} ({bid.fraudScore}%)
+                            </span>
+                          ) : (
+                            <span style={{ color: 'var(--text-dim)', fontSize: 12 }}>—</span>
+                          )}
+                        </td>
+                        <td style={{ fontSize: 11, color: 'var(--text-dim)', whiteSpace: 'nowrap' }}>
+                          {bid.createdAt ? timeAgo(bid.createdAt) : '—'}
+                        </td>
+                        <td onClick={e => e.stopPropagation()}>
+                          <button className="btn btn-gold btn-sm" disabled={Boolean(actionId)}
+                            aria-label="Declare as auction winner" title="Declare as auction winner"
+                            onClick={() => handleSetWinner(bid)}>
+                            {actionId === bid._id ? '...' : <Trophy size={14} aria-hidden="true" />}
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
+        </div>
+
+        {tab === 'all' && totalPages > 1 && (
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginTop: 20 }}>
+            <button className="btn btn-outline btn-sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>← Prev</button>
+            <span style={{ display: 'flex', alignItems: 'center', fontSize: 13, color: 'var(--text-muted)' }}>Page {page} of {totalPages}</span>
+            <button className="btn btn-outline btn-sm" disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Next →</button>
+          </div>
+        )}
+      </div>
+
+      {/* Bid detail modal */}
+      {selected && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setSelected(null)}>
+          <div className="modal-box" style={{ maxWidth: 500 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 24 }}>
+              <div>
+                <div style={{ fontSize: 11, color: 'var(--brand)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Bid Detail</div>
+                <h3 style={{ marginTop: 4 }}>{selected.car?.title || 'Bid Record'}</h3>
+              </div>
+              <button onClick={() => setSelected(null)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 6, width: 32, height: 32, cursor: 'pointer', color: 'var(--text-muted)' }} aria-label="Close" title="Close"><X size={16} aria-hidden="true" /></button>
+            </div>
+
+            <div style={{ background: 'var(--brand-glow)', border: '1px solid rgba(23, 107, 135, 0.15)', borderRadius: 'var(--radius)', padding: 16, textAlign: 'center', marginBottom: 20 }}>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Bid Amount</div>
+              <div className="price-tag" style={{ fontSize: '2rem' }}>{formatKES(selected.amount)}</div>
+              {selected.commitmentAmount && (
+                <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
+                  M-Pesa Commitment: {formatKES(selected.commitmentAmount)}
+                </div>
+              )}
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
+              {[
+                { label: 'Bidder',      val: selected.user?.name || '—' },
+                { label: 'Phone',       val: selected.phone || selected.user?.phone || '—', mono: true },
+                { label: 'M-Pesa Paid', val: selected.status === 'paid' ? 'Yes' : 'Pending' },
+                { label: 'Receipt',     val: selected.mpesaReceipt || '—', mono: true },
+                { label: 'Fraud Score', val: selected.fraudScore !== undefined ? `${selected.fraudScore}%` : '—' },
+                { label: 'Time',        val: selected.createdAt ? new Date(selected.createdAt).toLocaleString('en-KE') : '—' },
+                { label: 'Bid ID',      val: `#${selected._id?.slice(-10)}`, mono: true },
+                { label: 'Suspicious',  val: selected.suspicious ? 'Yes' : 'Clean' },
+              ].map(r => (
+                <div key={r.label}>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{r.label}</div>
+                  <div style={{ fontWeight: 600, marginTop: 4, fontSize: 13, fontFamily: r.mono ? 'monospace' : undefined, wordBreak: 'break-all' }}>{r.val}</div>
+                </div>
+              ))}
+            </div>
+
+            <button className="btn btn-gold btn-full" disabled={Boolean(actionId)}
+              onClick={() => handleSetWinner(selected)}>
+              {actionId === selected._id ? 'Setting winner...' : 'Declare as Auction Winner'}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

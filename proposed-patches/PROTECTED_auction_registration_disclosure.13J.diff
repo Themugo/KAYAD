@@ -1,0 +1,33 @@
+--- a/backend/routes/auctionRegistrationRoutes.js
++++ b/backend/routes/auctionRegistrationRoutes.js
+@@ -16,10 +16,27 @@
+   res.json({ success: true, room });
+ }));
+ 
++// SECURITY (Phase 13J): the registration read answers only for a publicly listed vehicle (available/sold, not soft-deleted) whose auction setup is
++// published, and serializes explicit allow-lists. It never returns the raw `cars` row or the raw `auction_setups` row (reserve price, dealer phone,
++// chassis number, highest bidder, seller/organizer ids, payout destination, fulfilment details, readiness snapshot ...).
++const REGISTRATION_PUBLIC_CAR_STATUSES = new Set(["available", "sold"]);
++const REGISTRATION_CAR_FIELDS = ["id", "title", "brand", "model", "year", "price", "mileage", "coverImage", "images", "auctionStatus", "auctionStartTime", "auctionEnd", "startingBid", "currentBid", "bidsCount", "allowBid", "status"];
++const pickFields = (src, fields) => Object.fromEntries(fields.filter((k) => src[k] !== undefined).map((k) => [k, src[k]]));
++const registrationSetupView = (setup) => {
++  const c = setup.config || {};
++  return {
++    car_id: setup.car_id,
++    publication_status: setup.publication_status,
++    config: { termsVersion: c.termsVersion, bidIncrement: c.bidIncrement, settlement: { mode: c.settlement?.mode }, commitment: { recipient: c.commitment?.recipient, refundable: c.commitment?.refundable } },
++  };
++};
++
+ router.get("/:id/registration", protect, validateObjectId, asyncHandler(async (req, res) => {
+-  const result = await getRegistration({ auctionId: req.params.id, userId: req.user.id });
+-  if (!result.car) return res.status(404).json({ success: false, message: "Auction not found" });
+-  res.json({ success: true, ...result });
++  const { car, setup, registration } = await getRegistration({ auctionId: req.params.id, userId: req.user.id });
++  if (!car || !setup || car.deletedAt || car.deleted_at || !REGISTRATION_PUBLIC_CAR_STATUSES.has(String(car.status)) || setup.publication_status !== "published") {
++    return res.status(404).json({ success: false, message: "Auction not found" });
++  }
++  res.json({ success: true, car: pickFields(car, REGISTRATION_CAR_FIELDS), setup: registrationSetupView(setup), registration });
+ }));
+ 
+ router.post("/:id/registration", protect, validateObjectId, asyncHandler(async (req, res) => {

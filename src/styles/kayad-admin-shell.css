@@ -1,0 +1,970 @@
+/* Canonical KAYAD admin design tokens. Scoped to authenticated admin surfaces so
+   the public marketplace keeps its established theme and information architecture. */
+.kayad-admin-shell {
+  /* Brand and shell */
+  --admin-shell-bg: #0A3340;
+  --admin-sidebar-bg: #092F3B;
+  --admin-header-bg: #0E4655;
+  --admin-sidebar-border: rgba(156, 207, 216, 0.16);
+  --admin-text: #E8F3F5;
+  --admin-muted: #A9C0C6;
+  --admin-accent: #13B8A6;
+  --admin-accent-strong: #0B756E;
+  --admin-accent-text: #0B756E;
+  --admin-accent-muted: #347E78;
+  --admin-muted-on-dark: #94A3B8;
+  --admin-accent-on-dark: #2DD4BF;
+  --admin-accent-bright: #72E2D4;
+  --admin-accent-soft: rgba(19, 184, 166, 0.14);
+  --admin-accent-border: rgba(19, 184, 166, 0.30);
+  --admin-shell-hover: rgba(222, 246, 248, 0.06);
+  --admin-shell-focus: #5EEAD4;
+  --admin-shell-danger: #F2A2A2;
+  --admin-shell-danger-hover: #FFC4C4;
+  --admin-shell-danger-bg: rgba(239, 68, 68, 0.09);
+  /* Content surfaces and typography */
+  --admin-canvas: #F6FAF9;
+  --admin-surface: #FFFFFF;
+  --admin-surface-soft: #EEF7F5;
+  --admin-surface-muted: #F3FAF9;
+  --admin-surface-hover: #E6F6F3;
+  --admin-ink: #0A3340;
+  --admin-body: #334155;
+  --admin-muted-content: #586579;
+  --admin-brand: #176B87;
+  --admin-brand-dark: #12576D;
+  --admin-brand-deep: #0A3340;
+  --admin-brand-soft: #DDF4F0;
+  --admin-border: #D7E7E4;
+  --admin-border-soft: #E3EFEC;
+  --admin-divider: #E7EFED;
+  --admin-focus-ring: rgba(19, 184, 166, 0.72);
+  --admin-font-sans: var(--font-sans, 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif);
+  --admin-font-display: var(--font-display, 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif);
+  --admin-type-xs: 10px;
+  --admin-type-sm: 12px;
+  --admin-type-base: 14px;
+  --admin-type-title: 18px;
+  --admin-radius-sm: 6px;
+  --admin-radius-md: 9px;
+  --admin-radius-lg: 12px;
+  --admin-shadow-card: 0 2px 8px rgba(10, 51, 64, 0.06), 0 1px 3px rgba(10, 51, 64, 0.04);
+  --admin-shadow-hover: 0 8px 20px rgba(10, 51, 64, 0.10);
+  /* Semantic status tokens; never repurpose these for brand decoration. */
+  --admin-status-success: #15803D;
+  --admin-status-success-bright: #16A34A;
+  --admin-status-success-bg: #DCFCE7;
+  --admin-status-warning: rgb(146, 64, 14);
+  --admin-status-warning-bright: rgb(217, 119, 6);
+  --admin-status-warning-bg: #FEF3C7;
+  --admin-status-warning-border: #FCD34D;
+  --admin-status-danger: #B91C1C;
+  --admin-status-danger-bg: #FEE2E2;
+  --admin-status-danger-border: #FECACA;
+  --admin-status-info: #0E7490;
+  --admin-status-info-bright: #0891B2;
+  --admin-status-info-bg: #E0F2FE;
+  --admin-status-info-border: #BAE6FD;
+  --admin-status-neutral: #475569;
+  --admin-status-neutral-bg: #F1F5F9;
+  --admin-status-neutral-border: #CBD5E1;
+  /*
+   * Scoped compatibility aliases for established admin pages. Many older
+   * admin components use these names in inline styles. Keep them local to the
+   * authenticated shell and map them to the canonical Phase 9 tokens so the
+   * public marketplace theme is not affected.
+   */
+  --text-muted: var(--admin-muted-content);
+  --text-dim: var(--admin-muted-content);
+  --text-secondary: var(--admin-body);
+  --text-primary: var(--admin-ink);
+  --text: var(--admin-ink);
+  --border: var(--admin-border);
+  --border-soft: var(--admin-border-soft);
+  --card: var(--admin-surface);
+  --surface: var(--admin-surface);
+  --bg-card: var(--admin-surface);
+  --bg-secondary: var(--admin-surface-soft);
+  --bg-base: var(--admin-canvas);
+  --bg: var(--admin-canvas);
+  --red: var(--admin-status-danger);
+  --red-500: var(--admin-status-danger);
+  --red-400: var(--admin-status-danger);
+  --green: var(--admin-status-success);
+  --green-400: var(--admin-status-success-bright);
+  --orange: var(--admin-status-warning);
+  --orange-400: var(--admin-status-warning);
+  --brand-light: var(--admin-accent-text);
+  --danger: var(--admin-status-danger);
+  --purple: var(--admin-brand);
+  --purple-500: var(--admin-brand);
+  --teal: var(--admin-accent);
+  --gray: var(--admin-status-neutral);
+  --radius: var(--admin-radius-md);
+  --radius-lg: var(--admin-radius-lg);
+  --shadow-md: var(--admin-shadow-hover);
+  display: flex;
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--admin-shell-bg);
+  color: var(--admin-text);
+}
+.kayad-admin-shell__main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-width: 0;
+  overflow-x: clip;
+}
+.kayad-admin-shell__content {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.kayad-admin-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 0 24px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--admin-sidebar-border);
+  background: var(--admin-header-bg);
+  box-shadow: 0 5px 18px rgba(0, 14, 20, 0.08);
+}
+.kayad-admin-header__breadcrumb,
+.kayad-admin-header__crumb,
+.kayad-admin-header__identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+.kayad-admin-header__breadcrumb { gap: 8px; color: var(--admin-muted); font-size: 12px; }
+.kayad-admin-header__brand {
+  color: var(--admin-accent-on-dark);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+}
+.kayad-admin-header__crumb { gap: 7px; text-transform: capitalize; }
+.kayad-admin-header__crumb > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kayad-admin-header__crumb .is-current { color: var(--admin-text); font-weight: 650; }
+.kayad-admin-header__identity { gap: 11px; flex-shrink: 0; }
+.kayad-admin-header__identity-copy { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.kayad-admin-header__identity-name { max-width: 220px; overflow: hidden; color: var(--admin-text); font-size: 12px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
+.kayad-admin-header__identity-role { color: var(--admin-muted); font-size: 11px; }
+.kayad-admin-header__avatar {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  place-items: center;
+  border: 1px solid rgba(19, 184, 166, 0.28);
+  border-radius: 50%;
+  background: rgba(19, 184, 166, 0.13);
+  color: var(--admin-accent-bright);
+  font-size: 11px;
+  font-weight: 800;
+}
+/* Account menu (header). Reuses shell tokens; no new palette. */
+.kayad-admin-account { position: relative; display: flex; align-items: center; }
+.kayad-admin-account__trigger {
+  display: flex; min-height: 44px; align-items: center; gap: 11px; padding: 4px 8px;
+  border: 1px solid transparent; border-radius: 10px; background: transparent; color: inherit; cursor: pointer; font: inherit;
+}
+.kayad-admin-account__trigger:hover, .kayad-admin-account__trigger[aria-expanded="true"] { border-color: var(--admin-sidebar-border); background: var(--admin-shell-hover); }
+.kayad-admin-account__trigger:focus-visible, .kayad-admin-account__item:focus-visible { outline: 2px solid var(--admin-shell-focus); outline-offset: 2px; }
+.kayad-admin-account__chevron { color: var(--admin-muted); transition: transform 160ms ease; }
+.kayad-admin-account__trigger[aria-expanded="true"] .kayad-admin-account__chevron { transform: rotate(180deg); }
+.kayad-admin-account__menu {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 40; display: flex; min-width: 230px; max-width: min(300px, calc(100vw - 24px)); flex-direction: column; gap: 2px; padding: 6px;
+  border: 1px solid var(--admin-sidebar-border); border-radius: 12px; background: var(--admin-sidebar-bg); box-shadow: 0 14px 34px rgba(0, 14, 20, 0.38);
+}
+.kayad-admin-account__summary { display: flex; flex-direction: column; gap: 2px; padding: 8px 10px 10px; border-bottom: 1px solid var(--admin-sidebar-border); margin-bottom: 4px; }
+.kayad-admin-account__summary strong { overflow: hidden; color: var(--admin-text); font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.kayad-admin-account__summary small { color: var(--admin-muted); font-size: 11px; }
+.kayad-admin-account__item {
+  display: flex; min-height: 40px; width: 100%; align-items: center; gap: 10px; padding: 0 10px; border: 0; border-radius: 8px;
+  background: transparent; color: var(--admin-text); cursor: pointer; font: inherit; font-size: 13px; text-align: left; text-decoration: none;
+}
+.kayad-admin-account__item:hover { background: var(--admin-shell-hover); }
+.kayad-admin-account__item.is-danger { color: var(--admin-shell-danger); }
+.kayad-admin-account__item.is-danger:hover { background: var(--admin-shell-danger-bg); color: var(--admin-shell-danger-hover); }
+.kayad-admin-account__item:disabled { cursor: progress; opacity: 0.7; }
+.kayad-admin-account__error { margin: 4px 0 0; padding: 8px 10px; border-radius: 8px; background: var(--admin-shell-danger-bg); color: var(--admin-shell-danger-hover); font-size: 12px; line-height: 1.4; }
+@media (max-width: 480px) {
+  .kayad-admin-account__chevron { display: none; }
+  /* Keep the account menu attached to its trigger instead of stretching across the screen. */
+  .kayad-admin-account__menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    left: auto;
+    width: min(320px, calc(100vw - 24px));
+    min-width: 0;
+    max-width: calc(100vw - 24px);
+    max-height: min(62dvh, 400px);
+    padding: 6px;
+    border-radius: 14px;
+  }
+  .kayad-admin-account__summary { padding: 7px 9px 9px; }
+  .kayad-admin-account__item { min-height: 42px; gap: 9px; padding-inline: 9px; font-size: 12px; }
+}
+
+.kayad-admin-shell .sidebar-toggle-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #d9ebee;
+  cursor: pointer;
+}
+.kayad-admin-shell button:focus-visible,
+.kayad-admin-shell a:focus-visible,
+.kayad-admin-shell input:focus-visible,
+.kayad-admin-shell select:focus-visible,
+.kayad-admin-shell textarea:focus-visible,
+.kayad-admin-shell [tabindex]:focus-visible {
+  outline: 2px solid var(--admin-shell-focus);
+  outline-offset: 2px;
+}
+.kayad-admin-shell input:focus-visible,
+.kayad-admin-shell select:focus-visible,
+.kayad-admin-shell textarea:focus-visible {
+  outline: 2px solid var(--admin-shell-focus) !important; /* some legacy pages set outline:none inline */
+  outline-offset: 2px;
+}
+
+/* Sidebar and grouped navigation */
+.kayad-admin-shell .admin-sidebar {
+  position: relative;
+  z-index: 30;
+  display: flex;
+  width: 248px;
+  min-width: 0;
+  height: 100vh;
+  height: 100dvh;
+  flex: 0 0 auto;
+  flex-direction: column;
+  overflow: hidden;
+  border-right: 1px solid var(--admin-sidebar-border);
+  background: var(--admin-sidebar-bg);
+  transition: width 220ms ease, transform 220ms ease;
+}
+.kayad-admin-shell .admin-sidebar.is-collapsed { width: 60px; }
+@media (min-width: 768px) {
+  .kayad-admin-shell .admin-sidebar { position: sticky; top: 0; align-self: flex-start; }
+}
+.admin-sidebar__brand {
+  display: flex;
+  min-height: 66px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--admin-sidebar-border);
+}
+.admin-sidebar__brand-copy { display: flex; min-width: 0; flex-direction: column; gap: 3px; }
+.admin-sidebar__eyebrow { color: var(--admin-accent-bright); font-size: 10px; font-weight: 800; letter-spacing: 0.16em; }
+.admin-sidebar__brand-title { color: var(--admin-text); font-size: 13px; font-weight: 700; letter-spacing: -0.01em; white-space: nowrap; }
+.admin-sidebar__controls { display: flex; flex-shrink: 0; align-items: center; gap: 4px; }
+.admin-sidebar__icon-button {
+  display: inline-flex;
+  width: 30px;
+  height: 30px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--admin-muted);
+  cursor: pointer;
+}
+.admin-sidebar__icon-button:hover { border-color: rgba(148, 205, 213, 0.15); background: rgba(222, 246, 248, 0.06); color: var(--admin-text); }
+.admin-sidebar__navigation { flex: 1 1 auto; overflow-x: hidden; overflow-y: auto; padding: 10px 8px 14px; scrollbar-color: rgba(137, 184, 193, 0.25) transparent; scrollbar-width: thin; }
+.admin-sidebar__group { margin: 0 0 7px; }
+.admin-sidebar__group-toggle {
+  display: flex;
+  width: 100%;
+  min-height: 31px;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--admin-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.075em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.admin-sidebar__group-toggle > span { flex: 1; }
+.admin-sidebar__group-toggle:hover { background: rgba(221, 246, 248, 0.045); color: var(--admin-text); }
+.admin-sidebar__group-chevron { flex-shrink: 0; transition: transform 160ms ease; }
+.admin-sidebar__group-toggle[aria-expanded="false"] .admin-sidebar__group-chevron { transform: rotate(-90deg); }
+.admin-sidebar__links[hidden] { display: none; }
+.admin-sidebar__group.has-active-route > .admin-sidebar__group-toggle { color: var(--admin-accent-bright); }
+.admin-sidebar__group-toggle:focus-visible { outline: 2px solid var(--admin-shell-focus); outline-offset: 2px; }
+.admin-sidebar__links { display: grid; gap: 2px; padding: 2px 0 5px; }
+.admin-sidebar__link {
+  position: relative;
+  display: flex;
+  min-height: 36px;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: var(--admin-muted);
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 1.3;
+  text-decoration: none;
+  transition: color 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+.admin-sidebar__link > svg { flex-shrink: 0; opacity: 0.88; }
+.admin-sidebar__link > span { overflow: hidden; text-overflow: ellipsis; }
+.admin-sidebar__link:hover { background: rgba(222, 246, 248, 0.055); color: var(--admin-text); }
+.admin-sidebar__link.is-active {
+  border-color: rgba(45, 212, 191, 0.14);
+  background: linear-gradient(90deg, rgba(19, 184, 166, 0.17), rgba(19, 184, 166, 0.055));
+  color: var(--admin-accent-bright);
+  font-weight: 700;
+}
+.admin-sidebar__link.is-active::before { position: absolute; inset: 7px auto 7px -1px; width: 3px; border-radius: 0 4px 4px 0; background: var(--admin-accent); content: ''; }
+.admin-sidebar__link.is-danger { color: var(--admin-shell-danger); }
+.admin-sidebar__link.is-danger:hover { background: rgba(239, 68, 68, 0.09); color: var(--admin-shell-danger-hover); }
+.admin-sidebar__collapsed-group-label { display: flex; height: 24px; align-items: center; justify-content: center; color: var(--admin-accent-bright); }
+.kayad-admin-shell .admin-sidebar.is-collapsed .admin-sidebar__brand { justify-content: center; padding-right: 5px; padding-left: 5px; }
+.kayad-admin-shell .admin-sidebar.is-collapsed .admin-sidebar__controls { flex-direction: column; }
+.kayad-admin-shell .admin-sidebar.is-collapsed .admin-sidebar__navigation { padding-right: 5px; padding-left: 5px; }
+.kayad-admin-shell .admin-sidebar.is-collapsed .admin-sidebar__links { padding-top: 3px; }
+.kayad-admin-shell .admin-sidebar.is-collapsed .admin-sidebar__link { justify-content: center; padding: 9px 0; }
+.kayad-admin-shell .admin-sidebar__footer { flex: 0 0 auto; padding: 8px; border-top: 1px solid var(--admin-sidebar-border); }
+.admin-sidebar__alerts { display: flex; min-height: 42px; align-items: center; gap: 9px; padding: 10px 17px; border-top: 1px solid var(--admin-sidebar-border); color: var(--admin-shell-danger); font-size: 11px; font-weight: 650; }
+.admin-sidebar__alert-dot { width: 5px; height: 5px; margin-left: -6px; align-self: flex-start; border-radius: 50%; background: var(--admin-status-danger); }
+.admin-sidebar-backdrop { display: none; }
+
+@media (max-width: 1024px) {
+  .kayad-admin-header { padding-right: 16px; padding-left: 16px; }
+  .kayad-admin-shell .admin-sidebar { width: 232px; }
+}
+@media (max-width: 767px) {
+  .kayad-admin-shell { min-height: 100dvh; }
+  .kayad-admin-shell .admin-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: min(292px, 88vw);
+    height: 100dvh;
+    max-height: 100dvh;
+    transform: translateX(-105%);
+    visibility: hidden; /* closed off-canvas drawer must not be keyboard-focusable */
+    z-index: 80;
+    box-shadow: 14px 0 36px rgba(0, 14, 20, 0.32);
+  }
+  .kayad-admin-shell .admin-sidebar.is-collapsed { width: min(292px, 88vw); }
+  .kayad-admin-shell .admin-sidebar.open { transform: translateX(0); visibility: visible; }
+  .kayad-admin-shell .admin-sidebar.open.is-collapsed { width: min(292px, 88vw); }
+  .kayad-admin-shell .admin-sidebar.open.is-collapsed .admin-sidebar__brand-copy { display: flex; }
+  .kayad-admin-shell .admin-sidebar.open.is-collapsed .admin-sidebar__controls { flex-direction: row; }
+  .kayad-admin-shell .admin-sidebar.open.is-collapsed .admin-sidebar__navigation { padding-right: 8px; padding-left: 8px; }
+  .kayad-admin-shell .admin-sidebar.open.is-collapsed .admin-sidebar__link { justify-content: flex-start; padding: 8px 10px; }
+  .kayad-admin-shell .admin-sidebar.open.is-collapsed .admin-sidebar__link > span { display: inline; }
+  .kayad-admin-shell .admin-sidebar.open.is-collapsed .admin-sidebar__group-toggle { display: flex; }
+  .kayad-admin-shell .admin-sidebar.open.is-collapsed .admin-sidebar__collapsed-group-label { display: none; }
+  .kayad-admin-shell .admin-sidebar__collapse { display: none; }
+  .kayad-admin-shell .admin-sidebar__mobile-close { display: inline-flex; }
+  .kayad-admin-shell .sidebar-toggle-btn { display: inline-flex; flex-shrink: 0; }
+  .admin-sidebar-backdrop { position: fixed; inset: 0; z-index: 70; display: block; width: 100%; height: 100dvh; padding: 0; border: 0; background: rgba(3, 23, 31, 0.62); cursor: pointer; }
+  .kayad-admin-header { min-height: 56px; gap: 10px; padding: 0 12px; }
+  .kayad-admin-header__breadcrumb { gap: 5px; font-size: 11px; }
+  .kayad-admin-header__crumb { gap: 4px; max-width: min(30vw, 130px); }
+  .kayad-admin-header__identity { gap: 7px; }
+  .kayad-admin-header__identity-copy { max-width: 112px; }
+  .kayad-admin-header__identity-name { max-width: 112px; font-size: 11px; }
+  .kayad-admin-header__identity-role { font-size: 10px; }
+  .kayad-admin-header__avatar { width: 30px; height: 30px; }
+}
+@media (max-width: 420px) {
+  .kayad-admin-header__identity-copy { display: none; }
+  .kayad-admin-header__crumb:not(:last-child) { display: none; }
+  .kayad-admin-header__brand { letter-spacing: 0.07em; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kayad-admin-shell *, .kayad-admin-shell *::before, .kayad-admin-shell *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}
+
+
+/* Phase 9 — scoped utility convergence across existing admin routes.
+   This reuses the current Tailwind classes and central admin tokens; no duplicate components or paths. */
+.kayad-admin-shell [class~="text-[#64748B]"],
+.kayad-admin-shell [class~="text-[#64748b]"] { color: var(--admin-muted-content) !important; }
+.kayad-admin-shell [class~="text-[#0A3340]"] { color: var(--admin-ink) !important; }
+.kayad-admin-shell [class~="text-[#12576D]"],
+.kayad-admin-shell [class~="text-[#12576d]"] { color: var(--admin-brand-dark) !important; }
+.kayad-admin-shell [class~="text-[#176B87]"],
+.kayad-admin-shell [class~="text-[#176b87]"] { color: var(--admin-brand) !important; }
+.kayad-admin-shell [class~="text-[#13B8A6]"],
+.kayad-admin-shell [class~="text-[#13b8a6]"] { color: var(--admin-accent-text) !important; }
+.kayad-admin-shell [class~="text-[#5AAFA4]"],
+.kayad-admin-shell [class~="text-[#5aafa4]"] { color: var(--admin-accent-muted, #5AAFA4) !important; }
+/* Slate-400 helper text is only legible on dark panels; on the light canvas it falls to 2.5:1, so it uses the muted content token there. */
+.kayad-admin-shell [class~="text-[#94A3B8]"] { color: var(--admin-muted-content) !important; }
+.kayad-admin-shell :is([class~="bg-[#0A3340]"], [class~="bg-[#12576D]"], [class~="bg-[#176B87]"], [class*="bg-gradient"]) [class~="text-[#94A3B8]"] { color: var(--admin-muted-on-dark) !important; }
+.kayad-admin-shell [class~="text-[#BDE5DE]"] { color: var(--admin-brand-soft) !important; }
+.kayad-admin-shell [class~="text-[#2ECC71]"] { color: var(--admin-status-success-bright) !important; }
+.kayad-admin-shell [class~="text-[#DC3545]"] { color: var(--admin-status-danger) !important; }
+
+.kayad-admin-shell [class~="bg-[#F6FAF9]"] { background-color: var(--admin-canvas) !important; }
+.kayad-admin-shell [class~="bg-[#F3FAF9]"] { background-color: var(--admin-surface-muted) !important; }
+.kayad-admin-shell [class~="bg-[#EEF7F5]"] { background-color: var(--admin-surface-soft) !important; }
+.kayad-admin-shell [class~="bg-[#DDF4F0]"] { background-color: var(--admin-brand-soft) !important; }
+.kayad-admin-shell [class~="bg-[#BDE5DE]"] { background-color: var(--admin-brand-soft) !important; }
+.kayad-admin-shell [class~="bg-[#0A3340]"] { background-color: var(--admin-brand-deep) !important; }
+.kayad-admin-shell [class~="bg-[#12576D]"] { background-color: var(--admin-brand-dark) !important; }
+.kayad-admin-shell [class~="bg-[#176B87]"] { background-color: var(--admin-brand) !important; }
+.kayad-admin-shell [class~="bg-[#13B8A6]"] { background-color: var(--admin-accent) !important; }
+.kayad-admin-shell [class~="bg-[#5AAFA4]"],
+.kayad-admin-shell [class~="bg-[#5aafa4]"] { background-color: var(--admin-brand-soft) !important; }
+.kayad-admin-shell [class~="bg-[#2ECC71]"] { background-color: var(--admin-status-success-bright) !important; }
+
+.kayad-admin-shell [class~="border-[#D7E7E4]"] { border-color: var(--admin-border) !important; }
+.kayad-admin-shell [class~="border-[#BDE5DE]"] { border-color: var(--admin-border-soft) !important; }
+.kayad-admin-shell [class~="border-[#5AAFA4]"],
+.kayad-admin-shell [class~="border-[#5aafa4]"] { border-color: var(--admin-accent-muted) !important; }
+.kayad-admin-shell [class~="border-[#176B87]"] { border-color: var(--admin-brand) !important; }
+.kayad-admin-shell [class~="border-[#13B8A6]"] { border-color: var(--admin-accent) !important; }
+.kayad-admin-shell [class~="ring-[#0A3340]"],
+.kayad-admin-shell [class~="ring-[#5aafa4]"],
+.kayad-admin-shell [class~="ring-[#13B8A6]"] { --tw-ring-color: var(--admin-focus-ring) !important; }
+
+/* Status utility colors keep consistent meaning across the admin route tree. */
+.kayad-admin-shell [class~="text-emerald-700"],
+.kayad-admin-shell [class~="text-emerald-800"],
+.kayad-admin-shell [class~="text-emerald-600"],
+.kayad-admin-shell [class~="text-emerald-500"],
+.kayad-admin-shell [class~="text-green-700"],
+.kayad-admin-shell [class~="text-green-600"],
+.kayad-admin-shell [class~="text-green-400"] { color: var(--admin-status-success) !important; }
+.kayad-admin-shell [class~="bg-emerald-100"],
+.kayad-admin-shell [class~="bg-emerald-50"],
+.kayad-admin-shell [class~="bg-green-100"],
+.kayad-admin-shell [class~="bg-green-50"] { background-color: var(--admin-status-success-bg) !important; }
+.kayad-admin-shell [class~="bg-emerald-500"],
+.kayad-admin-shell [class~="bg-emerald-600"],
+.kayad-admin-shell [class~="bg-emerald-700"],
+.kayad-admin-shell [class~="bg-emerald-400"],
+.kayad-admin-shell [class~="bg-green-500"] { background-color: var(--admin-status-success-bright) !important; }
+.kayad-admin-shell [class~="border-emerald-200"],
+.kayad-admin-shell [class~="border-green-500"] { border-color: #86EFAC !important; }
+.kayad-admin-shell [class~="text-red-800"],
+.kayad-admin-shell [class~="text-red-700"],
+.kayad-admin-shell [class~="text-red-600"],
+.kayad-admin-shell [class~="text-red-500"],
+.kayad-admin-shell [class~="text-red-400"] { color: var(--admin-status-danger) !important; }
+.kayad-admin-shell [class~="bg-red-100"],
+.kayad-admin-shell [class~="bg-red-50"] { background-color: var(--admin-status-danger-bg) !important; }
+.kayad-admin-shell [class~="bg-red-500"],
+.kayad-admin-shell [class~="bg-red-600"],
+.kayad-admin-shell [class~="bg-red-700"] { background-color: var(--admin-status-danger) !important; }
+.kayad-admin-shell [class~="border-red-100"],
+.kayad-admin-shell [class~="border-red-200"] { border-color: #FECACA !important; }
+
+/* Unify common admin typography, cards and elevations without changing behavior. */
+.kayad-admin-shell [class~="font-serif"] { font-family: var(--admin-font-display) !important; }
+.kayad-admin-shell [class~="rounded-3xl"],
+.kayad-admin-shell [class~="rounded-2xl"] { border-radius: var(--admin-radius-lg) !important; }
+.kayad-admin-shell [class~="rounded-xl"],
+.kayad-admin-shell [class~="rounded-lg"] { border-radius: var(--admin-radius-md) !important; }
+.kayad-admin-shell [class~="shadow-xs"],
+.kayad-admin-shell [class~="shadow-sm"],
+.kayad-admin-shell [class~="shadow-md"] { box-shadow: var(--admin-shadow-card) !important; }
+.kayad-admin-shell [class~="shadow-lg"] { box-shadow: var(--admin-shadow-hover) !important; }
+
+/* KAYAD admin sidebar polish — preserves the existing navigation and route map. */
+.kayad-admin-shell .admin-sidebar {
+  background: linear-gradient(180deg, #0A3541 0%, var(--admin-sidebar-bg) 42%, #082B36 100%);
+  border-right-color: rgba(156, 207, 216, 0.2);
+  box-shadow: 5px 0 22px rgba(4, 24, 31, 0.08);
+}
+.kayad-admin-shell .admin-sidebar__brand {
+  min-height: 70px;
+  padding: 13px 14px 12px 16px;
+  background: rgba(3, 22, 29, 0.16);
+  border-bottom-color: rgba(156, 207, 216, 0.2);
+}
+.kayad-admin-shell .admin-sidebar__eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.19em;
+  line-height: 1.25;
+}
+.kayad-admin-shell .admin-sidebar__brand-title {
+  font-size: 13px;
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+.kayad-admin-shell .admin-sidebar__icon-button {
+  width: 31px;
+  height: 31px;
+  border-color: rgba(156, 207, 216, 0.08);
+  border-radius: 8px;
+}
+.kayad-admin-shell .admin-sidebar__navigation {
+  padding: 12px 8px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(114, 226, 212, 0.28) transparent;
+}
+.kayad-admin-shell .admin-sidebar__navigation::-webkit-scrollbar { width: 5px; }
+.kayad-admin-shell .admin-sidebar__navigation::-webkit-scrollbar-thumb {
+  border-radius: 99px;
+  background: rgba(114, 226, 212, 0.25);
+}
+.kayad-admin-shell .admin-sidebar__group {
+  margin: 0 0 8px;
+}
+.kayad-admin-shell .admin-sidebar__group + .admin-sidebar__group {
+  padding-top: 5px;
+  border-top: 1px solid rgba(156, 207, 216, 0.075);
+}
+.kayad-admin-shell .admin-sidebar__group-toggle {
+  min-height: 34px;
+  gap: 9px;
+  padding: 6px 9px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 10px;
+  letter-spacing: 0.085em;
+}
+.kayad-admin-shell .admin-sidebar__group-toggle > svg:first-child {
+  color: #8CAFB7;
+  flex-shrink: 0;
+}
+.kayad-admin-shell .admin-sidebar__group.has-active-route > .admin-sidebar__group-toggle {
+  border-color: rgba(45, 212, 191, 0.12);
+  background: rgba(19, 184, 166, 0.07);
+}
+.kayad-admin-shell .admin-sidebar__links {
+  gap: 3px;
+  padding: 4px 0 7px;
+}
+.kayad-admin-shell .admin-sidebar__link {
+  min-height: 37px;
+  gap: 11px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 560;
+  line-height: 1.35;
+}
+.kayad-admin-shell .admin-sidebar__link > svg {
+  width: 16px;
+  height: 16px;
+  color: #9BB9C0;
+  opacity: 1;
+}
+.kayad-admin-shell .admin-sidebar__link:hover {
+  border-color: rgba(156, 207, 216, 0.08);
+  background: rgba(222, 246, 248, 0.065);
+}
+.kayad-admin-shell .admin-sidebar__link.is-active {
+  border-color: rgba(45, 212, 191, 0.2);
+  background: linear-gradient(100deg, rgba(19, 184, 166, 0.19), rgba(19, 184, 166, 0.075));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  color: #9AF0E4;
+}
+.kayad-admin-shell .admin-sidebar__link.is-active > svg {
+  color: #72E2D4;
+}
+.kayad-admin-shell .admin-sidebar__link.is-active::before {
+  inset: 7px auto 7px 0;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+}
+.kayad-admin-shell .admin-sidebar__link:focus-visible,
+.kayad-admin-shell .admin-sidebar__icon-button:focus-visible {
+  outline: 2px solid var(--admin-shell-focus);
+  outline-offset: 2px;
+}
+.kayad-admin-shell .admin-sidebar__footer {
+  padding: 9px 8px 10px;
+  border-top-color: rgba(156, 207, 216, 0.2);
+  background: rgba(3, 22, 29, 0.2);
+}
+.kayad-admin-shell .admin-sidebar__footer .admin-sidebar__link {
+  min-height: 39px;
+  border-color: rgba(156, 207, 216, 0.1);
+  background: rgba(222, 246, 248, 0.035);
+  color: #C8DDE1;
+  font-weight: 650;
+}
+.kayad-admin-shell .admin-sidebar__footer .admin-sidebar__link > svg {
+  color: #72E2D4;
+}
+.kayad-admin-shell .admin-sidebar__alerts {
+  min-height: 40px;
+  padding: 9px 16px;
+  background: rgba(239, 68, 68, 0.035);
+}
+.kayad-admin-shell .admin-sidebar.is-collapsed .admin-sidebar__group + .admin-sidebar__group {
+  padding-top: 7px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .kayad-admin-shell .admin-sidebar,
+  .kayad-admin-shell .admin-sidebar__link,
+  .kayad-admin-shell .admin-sidebar__group-chevron {
+    transition: none !important;
+  }
+}
+
+
+/* Security Log — compact, responsive operations surface */
+.kayad-admin-shell .admin-security-log {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+.kayad-admin-shell .admin-security-log__container {
+  box-sizing: border-box;
+  width: min(100% - 32px, 1200px);
+  min-width: 0;
+}
+.kayad-admin-shell .admin-security-log h2 {
+  color: var(--admin-ink, #0A3340);
+  font-family: var(--admin-font-display, inherit);
+  font-size: clamp(22px, 2.4vw, 30px);
+  font-weight: 750;
+  letter-spacing: -0.035em;
+  line-height: 1.15;
+}
+.kayad-admin-shell .admin-security-log__header {
+  gap: 18px;
+  align-items: flex-start !important;
+}
+.kayad-admin-shell .admin-security-log__actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.kayad-admin-shell .admin-security-log__actions .btn,
+.kayad-admin-shell .admin-security-log__search-button {
+  min-height: 40px;
+  border-radius: 10px;
+  font-weight: 650;
+}
+.kayad-admin-shell .admin-security-log__filters {
+  border: 1px solid var(--admin-border, #D7E7E4);
+  border-radius: 16px;
+  background: var(--admin-surface, #fff);
+  box-shadow: 0 5px 18px rgba(10, 51, 64, 0.035);
+}
+.kayad-admin-shell .admin-security-log__filter-grid {
+  display: grid !important;
+  grid-template-columns: minmax(140px, 0.8fr) minmax(140px, 0.8fr) minmax(200px, 1.4fr) auto;
+  align-items: center;
+}
+.kayad-admin-shell .admin-security-log__filter-grid .input {
+  box-sizing: border-box;
+  min-width: 0;
+  width: 100% !important;
+  min-height: 44px;
+  border-radius: 10px;
+  font-size: 13px !important;
+}
+.kayad-admin-shell .admin-security-log__search-button {
+  padding-inline: 20px;
+  white-space: nowrap;
+}
+.kayad-admin-shell .admin-security-log__empty {
+  display: grid;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 120px;
+  padding: 24px !important;
+  place-items: center;
+  border: 1px solid var(--admin-border, #D7E7E4);
+  border-radius: 14px;
+  background: linear-gradient(180deg, #fff 0%, #FAFCFB 100%);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.kayad-admin-shell .admin-security-log .loading-center {
+  min-height: 150px;
+  border-radius: 14px;
+  background: var(--admin-surface, #fff);
+}
+.kayad-admin-shell .admin-security-log .card {
+  border-radius: 14px;
+}
+.kayad-admin-shell .admin-security-log__filter-grid select {
+  color: var(--admin-ink, #0A3340);
+}
+.kayad-admin-shell .kayad-admin-account__menu {
+  max-height: min(62dvh, 400px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.kayad-admin-shell .kayad-admin-account__item {
+  min-height: 44px;
+  line-height: 1.35;
+}
+@media (max-width: 700px) {
+  .kayad-admin-shell .admin-security-log__container {
+    width: min(100% - 24px, 1200px);
+    padding-top: 22px !important;
+    padding-bottom: 24px !important;
+  }
+  .kayad-admin-shell .admin-security-log__header {
+    display: flex !important;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 18px !important;
+  }
+  .kayad-admin-shell .admin-security-log__header > div:first-child {
+    width: 100%;
+  }
+  .kayad-admin-shell .admin-security-log__actions {
+    display: grid !important;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px !important;
+  }
+  .kayad-admin-shell .admin-security-log__actions .btn {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 10px;
+    font-size: 12px;
+    white-space: normal;
+  }
+  .kayad-admin-shell .admin-security-log__filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px !important;
+  }
+  .kayad-admin-shell .admin-security-log__filter-grid .admin-security-log__search-input {
+    grid-column: 1 / -1;
+  }
+  .kayad-admin-shell .admin-security-log__search-button {
+    width: 100%;
+    min-height: 44px;
+  }
+  .kayad-admin-shell .admin-security-log__empty {
+    min-height: 118px;
+    padding: 24px 16px !important;
+    text-align: center;
+  }
+  .kayad-admin-shell .admin-security-log .card {
+    overflow-wrap: anywhere;
+  }
+}
+@media (max-width: 380px) {
+  .kayad-admin-shell .admin-security-log__actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .kayad-admin-shell .admin-security-log__filter-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .kayad-admin-shell .admin-security-log__filter-grid .admin-security-log__search-input {
+    grid-column: auto;
+  }
+  .kayad-admin-shell .kayad-admin-account__menu {
+    right: 0;
+    left: auto;
+    width: min(300px, calc(100vw - 16px));
+    max-width: calc(100vw - 16px);
+    padding: 6px;
+  }
+}
+
+/* Pinned footer (View marketplace + Settings): never scrolls away with the groups; Settings is the last item. */
+.kayad-admin-shell .admin-sidebar__pinned { display: grid; gap: 6px; }
+.kayad-admin-shell .admin-sidebar__pinned .admin-sidebar__settings.is-active { color: #ffffff; }
+
+
+/* Mobile navigation and document-scroll convergence.
+   The document owns vertical page scrolling; only the fixed drawer's link region scrolls independently. */
+.kayad-admin-shell__main {
+  min-width: 0;
+  overflow-x: clip;
+}
+.kayad-admin-shell__content {
+  min-width: 0;
+  overflow: visible;
+  overscroll-behavior: auto;
+}
+.kayad-admin-shell .admin-sidebar {
+  min-height: 0;
+}
+.kayad-admin-shell .admin-sidebar__brand,
+.kayad-admin-shell .admin-sidebar__alerts,
+.kayad-admin-shell .admin-sidebar__footer {
+  flex: 0 0 auto;
+}
+.kayad-admin-shell .admin-sidebar__navigation {
+  flex: 1 1 0%;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  scrollbar-gutter: stable;
+}
+.kayad-admin-shell .admin-sidebar__footer {
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+@media (max-width: 767px) {
+  .kayad-admin-shell {
+    display: flex;
+    min-height: 100vh;
+    min-height: 100dvh;
+    height: auto;
+    align-items: stretch;
+  }
+  .kayad-admin-shell__main {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+  .kayad-admin-shell__content {
+    flex: 0 0 auto;
+    min-height: 0;
+    overflow: visible;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+  .kayad-admin-shell .admin-sidebar {
+    inset-block: 0;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    min-height: 0;
+    overscroll-behavior: contain;
+  }
+  .kayad-admin-shell .admin-sidebar__navigation {
+    min-height: 0;
+    max-height: none;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .kayad-admin-shell .admin-sidebar__footer .admin-sidebar__link {
+    min-height: 44px;
+  }
+  .kayad-admin-shell .admin-sidebar__mobile-close {
+    min-width: 40px;
+    min-height: 40px;
+  }
+  .admin-sidebar-backdrop {
+    height: 100vh;
+    height: 100dvh;
+    touch-action: manipulation;
+  }
+}
+@media (min-width: 768px) {
+  .kayad-admin-shell {
+    align-items: stretch;
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+  .kayad-admin-shell .admin-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    align-self: flex-start;
+  }
+  .kayad-admin-shell__main {
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+  .kayad-admin-header {
+    position: sticky;
+    top: 0;
+  }
+}
+
+
+/* Drawer information architecture: compact mobile entry state and a genuinely
+   bounded navigation viewport above the always-visible utility footer. */
+.kayad-admin-shell .admin-sidebar__navigation {
+  flex: 1 1 0%;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+.kayad-admin-shell .admin-sidebar__group {
+  scroll-margin-block: 12px;
+}
+.kayad-admin-shell .admin-sidebar__group-toggle {
+  min-height: 42px;
+  padding: 8px 10px;
+}
+.kayad-admin-shell .admin-sidebar__link {
+  min-height: 42px;
+  padding-block: 10px;
+}
+.kayad-admin-shell .admin-sidebar__pinned {
+  gap: 5px;
+  padding: 8px 10px max(10px, env(safe-area-inset-bottom));
+  background: var(--admin-sidebar-bg);
+}
+.kayad-admin-shell .admin-sidebar__pinned .admin-sidebar__link {
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid rgba(156, 207, 216, .12);
+  border-radius: 11px;
+  background: rgba(221, 246, 248, .045);
+}
+.kayad-admin-shell .admin-sidebar__pinned .admin-sidebar__link:hover,
+.kayad-admin-shell .admin-sidebar__pinned .admin-sidebar__link:focus-visible {
+  border-color: var(--admin-accent-border);
+  background: rgba(19, 184, 166, .12);
+}
+@media (max-width: 767px) {
+  .kayad-admin-shell .admin-sidebar {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .kayad-admin-shell .admin-sidebar__brand {
+    flex: 0 0 auto;
+  }
+  .kayad-admin-shell .admin-sidebar__navigation {
+    flex: 1 1 0%;
+    min-height: 0;
+    max-height: none;
+    padding-bottom: 16px;
+  }
+  .kayad-admin-shell .admin-sidebar__alerts {
+    flex: 0 0 auto;
+  }
+  .kayad-admin-shell .admin-sidebar__footer {
+    flex: 0 0 auto;
+    max-height: 124px;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+  .kayad-admin-shell .admin-sidebar__pinned .admin-sidebar__link {
+    min-height: 48px;
+  }
+}

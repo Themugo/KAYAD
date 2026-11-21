@@ -1,0 +1,413 @@
+import { findById, findOne, findAll, create, update, updateMany } from "../db/index.js";
+import { sendNotification } from "../services/notification.service.js";
+import { sendDigitalReceipt } from "../services/receiptService.js";
+import { getIO } from "../utils/io.js";
+import { logInfo, logWarn, logError } from "../utils/logger.js";
+import { emitBidUpdate, emitListingUpdate } from "../socket/socket.js";
+import { atomicSettleBidPayment, atomicSettlePurchasePayment } from "../utils/atomicTransactions.js";
+import { recordPaymentEvent, recordWebhookReceipt, markWebhookProcessed, markAttemptByCheckout } from "./paymentFinancialLifecycle.service.js";
+import { assertPaymentTransition } from "./paymentStateMachine.js";
+import { activateDealerSubscriptionFromPayment } from "./dealerSubscription.service.js";
+import { getSupabase } from "../utils/supabase.js";
+import { recordPurchasePayment } from "./ledgerService.js";
+import { emitCommunication, COMMUNICATION_EVENTS } from "./communicationEvents.service.js";
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 2000;
+
+const retry = async (fn, retries = MAX_RETRIES, delay = RETRY_DELAY_MS) => {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (err) {
+      if (attempt === retries) throw err;
+      logWarn("Callback retry", { attempt, retries, error: err.message });
+      await new Promise((r) => setTimeout(r, delay * attempt));
+    }
+  }
+};
+
+const markPaymentEventSafe = async (paymentId, eventType, payload) =>
+  recordPaymentEvent({ paymentId, eventType, payload }).catch(() => null);
+
+export const handleMpesaCallback = async (callbackData) => {
+  // Tracks a claimed-but-unfinished payment so the outer catch can
+  // release the claim and let a provider retry reprocess it.
+  let claimedPaymentId = null;
+  let webhookEventId = null;
+  let finalized = false;
+  try {
+    const stk = callbackData.Body?.stkCallback;
+
+    if (!stk) throw new Error("Invalid callback format");
+
+    const webhook = await recordWebhookReceipt(callbackData);
+    if (webhook.duplicate) {
+      logInfo("M-Pesa webhook replay ignored", { checkoutId: stk.CheckoutRequestID });
+      return;
+    }
+    webhookEventId = webhook.event.id;
+
+    const checkoutId = stk.CheckoutRequestID;
+    const success = stk.ResultCode === 0;
+    const callbackMetadata = stk.CallbackMetadata?.Item || [];
+    const callbackAmount = callbackMetadata.find((i) => i.Name === "Amount")?.Value;
+    const callbackReceipt = callbackMetadata.find((i) => i.Name === "MpesaReceiptNumber")?.Value;
+
+    // Auction bidder commitments/high-value security use the existing
+    // transaction + bid-security rail rather than creating a second payment
+    // engine. Route those provider callbacks through their canonical atomic
+    // hold settlement before the generic payments claim path.
+    // Security payments live in `payments` (FK contract); legacy rows in an optional `transactions` table are still found
+    // during the transition (securityPaymentStore.js). A missing legacy table no longer aborts every callback.
+    const { findSecurityPaymentByCheckout } = await import("./securityPaymentStore.js");
+    const securityTransaction = (await findSecurityPaymentByCheckout(checkoutId))?.row;
+    if (securityTransaction && ["bid_commitment", "bid_security"].includes(securityTransaction.type)) {
+      const { handleBidSecurityCallback } = await import("./bidSecurityService.js");
+      const securityResult = await handleBidSecurityCallback({
+        checkoutRequestID: checkoutId,
+        resultCode: stk.ResultCode,
+        mpesaReceipt: callbackReceipt,
+        providerAmount: callbackAmount,
+      });
+      // NB: pass undefined (not null) on success: markWebhookProcessed destructures its 2nd argument, and `null` threw a
+      // TypeError AFTER the hold had settled -> 500 to the provider, webhook never marked processed (defect FIN-CB-1).
+      await markWebhookProcessed(webhookEventId, securityResult.success ? undefined : { error: securityResult.message || "Auction security payment failed" });
+      return securityResult;
+    }
+
+    // ── Claim payment atomically ──
+    // Single conditional UPDATE: only the first callback to flip
+    // processed=false → true claims the payment. Concurrent duplicate
+    // callbacks update 0 rows and exit, so side effects (escrow
+    // creation, bid settlement, notifications) can never run twice.
+    const claimed = await updateMany(
+      "payments",
+      { checkoutRequestId: checkoutId, processed: false },
+      { processed: true },
+    );
+
+    if (!claimed || claimed.length === 0) {
+      const existing = await findOne("payments", { checkoutRequestId: checkoutId });
+      if (existing && existing.status === "success") {
+        await markWebhookProcessed(webhookEventId);
+        logInfo("Callback idempotent: payment already succeeded", { checkoutId });
+        return existing;
+      }
+      logWarn("Payment not found or already claimed", { checkoutId });
+      return;
+    }
+
+    const payment = claimed[0];
+    claimedPaymentId = payment.id;
+    await recordPaymentEvent({
+      paymentId: payment.id,
+      eventType: "callback_received",
+      payload: { checkoutRequestId: checkoutId, resultCode: stk.ResultCode },
+    }).catch((e) => logWarn("Payment callback event audit failed", { error: e.message }));
+
+    // If processing fails after the claim (provider sent incomplete
+    // data, a downstream write failed, etc.), release the claim so a
+    // later provider retry can reprocess instead of leaving the
+    // payment stuck in "pending" forever.
+    const releaseClaim = () =>
+      update("payments", payment.id, { processed: false }).catch((e) =>
+        logError("Failed to release payment claim", e, { paymentId: payment.id }),
+      );
+
+    if (!success) {
+      assertPaymentTransition(payment.status, "failed");
+      await update("payments", payment.id, {
+        status: "failed",
+        resultDesc: stk.ResultDesc || "M-Pesa transaction failed",
+      });
+      finalized = true;
+
+      await sendNotification({
+        userId: payment.user,
+        title: "Payment Failed",
+        message: `KES ${payment.amount} — ${stk.ResultDesc || "M-Pesa transaction failed"}`,
+      }).catch((e) => logWarn("Payment callback notification failed", { error: e.message }));
+
+      const io = getIO();
+      if (io) {
+        io.to(`user_${payment.user}`).emit("paymentFailed", {
+          checkoutID: checkoutId,
+          reason: stk.ResultDesc || "M-Pesa transaction failed",
+        });
+        if (payment.car)
+          io.to(String(payment.car)).emit("paymentFailed", {
+            checkoutID: checkoutId,
+            reason: stk.ResultDesc || "M-Pesa transaction failed",
+          });
+      }
+      await markPaymentEventSafe(payment.id, "marked_failed", { reason: stk.ResultDesc || "M-Pesa transaction failed" });
+      await markAttemptByCheckout(checkoutId, "failed", { failureReason: stk.ResultDesc || "M-Pesa transaction failed" }).catch(() => {});
+      await markWebhookProcessed(webhookEventId);
+      return;
+    }
+
+    const metadata = callbackMetadata;
+
+    const receipt = callbackReceipt;
+
+    const amount = callbackAmount;
+
+    if (!receipt || amount === undefined || amount === null) {
+      await releaseClaim();
+      throw new Error("Incomplete M-Pesa metadata");
+    }
+
+    if (Number(amount) !== Number(payment.amount)) {
+      // Amount integrity violation — definitive, not retryable. The
+      // settled amount must always equal the server-recorded amount.
+      assertPaymentTransition(payment.status, "failed");
+      await update("payments", payment.id, {
+        status: "failed",
+        resultDesc: `Amount mismatch: expected ${payment.amount}, provider reported ${amount}`,
+      });
+      logError("M-Pesa callback amount mismatch — payment failed", null, {
+        paymentId: payment.id,
+        expected: payment.amount,
+        reported: amount,
+        receipt,
+      });
+      await markPaymentEventSafe(payment.id, "amount_mismatch", {
+        expected: Number(payment.amount),
+        reported: Number(amount),
+        receipt,
+      });
+      await markAttemptByCheckout(checkoutId, "failed", {
+        failureReason: `Amount mismatch: expected ${payment.amount}, provider reported ${amount}`,
+      }).catch(() => {});
+      await markWebhookProcessed(webhookEventId);
+      finalized = true;
+      return payment;
+    }
+
+    await markPaymentEventSafe(payment.id, "amount_verified", { expected: Number(payment.amount), reported: Number(amount), receipt });
+
+    if (!['bid', 'purchase', 'escrow', 'inspection', 'auction_win'].includes(payment.type)) {
+      assertPaymentTransition(payment.status, "success");
+      await update("payments", payment.id, {
+        status: "success",
+        mpesaReceipt: receipt,
+        paidAt: new Date(),
+      });
+    }
+    let userDoc = null;
+    try {
+      userDoc = await findById("users", payment.user, "email name phone");
+    } catch (e) { logWarn("Payment callback user lookup failed", { error: e.message }); }
+    // Phase 14.9: the user lookup selects only contact fields, so the row has no id; receiptService derives the recipient from
+    // user.id and fell back to the whole object, so every receipt and in-app payment notification failed with "invalid uuid".
+    // The receipt also named the vehicle by its UUID; use the listing title when it can be read (best effort).
+    let receiptCarTitle = "Vehicle";
+    if (payment.car) {
+      try { receiptCarTitle = (await findById("cars", payment.car, "title"))?.title || "Vehicle"; } catch { /* receipt wording only */ }
+    }
+    sendDigitalReceipt({
+      amount: payment.amount,
+      carTitle: receiptCarTitle,
+      mpesaReceipt: receipt || String(payment.id).slice(-8),
+      user: { ...(userDoc || { email: null, phone: null }), id: payment.user },
+    }).catch((e) => logWarn("Digital receipt failed", { error: e.message }));
+
+    if (payment.type === "bid") {
+      // STAGE 3 MARKETPLACE/VEHICLE/AUCTION CONVERGENCE FIX: this is the
+      // ONLY place a human-placed bid becomes market-authoritative (the bid
+      // is written "pending" at placement time, per the KES-1-confirmation
+      // design - see bidController.js::placeBid) - but until now nothing
+      // here ever told the live auction page about it. emitBidUpdate/
+      // emitListingUpdate are only ever called from the auto-bid paths
+      // (bidController.js::runAutoBidding, autoBid.service.js); a confirmed
+      // MANUAL bid never emitted either, so AuctionLivePage's own
+      // joinAuction/onBid socket handler - which IS correctly wired on the
+      // frontend - never fired for the normal human-bidding path. The only
+      // thing that kept this from being user-visible was the page's own
+      // 10-30s polling fallback. Mirror the exact payload shape
+      // runAutoBidding already emits so the frontend's existing handler
+      // needs no changes.
+      const settled = await retry(() => atomicSettleBidPayment(payment.id, receipt));
+      if (settled?.car_id) {
+        try {
+          const [settledBid, settledCar] = await Promise.all([
+            findById("bids", settled.bid_id).catch(() => null),
+            findById("cars", settled.car_id).catch(() => null),
+          ]);
+          await emitBidUpdate(String(settled.car_id), {
+            amount: Number(settled.amount || 0),
+            bidderTag: settledBid?.bidderTag || settledBid?.bidder_tag || "Bidder",
+            time: new Date().toISOString(),
+            auto: false,
+          });
+          emitListingUpdate(String(settled.car_id), {
+            currentBid: Number(settled.amount || 0),
+            bidsCount: Number(settledCar?.bidsCount || settledCar?.bids_count || 0),
+          });
+
+          // These are existing transactional event contracts. Emit only after
+          // the canonical payment/market settlement succeeds; never on a
+          // pending bid or a failed M-Pesa callback. Communication delivery
+          // remains the gateway's responsibility and is not claimed here.
+          if (settledBid?.user || settled?.user_id) {
+            const bidderId = settledBid?.user || settled?.user_id;
+            await emitCommunication({
+              userId: bidderId,
+              eventType: COMMUNICATION_EVENTS.BID_CONFIRMED,
+              title: "Bid confirmed",
+              message: `Your bid of KES ${Number(settled.amount || 0).toLocaleString("en-KE")} has been confirmed.`,
+              channels: ["in_app", "email"],
+              metadata: { carId: String(settled.car_id), bidId: String(settled.bid_id) },
+            }).catch((e) => logWarn("Bid confirmation communication failed", { error: e.message, paymentId: payment.id }));
+          }
+
+          // Notify bidders whose confirmed bids are now below the accepted
+          // market-leading bid. This is informational only; auction state and
+          // bid validity remain owned by the atomic settlement function.
+          if (settled.applied_to_market) {
+            const confirmedBids = await findAll("bids", {
+              filters: { carId: settled.car_id, status: "paid" },
+              limit: 500,
+            }).catch((e) => {
+              logWarn("Outbid recipient lookup failed", { error: e.message, carId: settled.car_id });
+              return [];
+            });
+            const recipients = new Map();
+            for (const priorBid of confirmedBids || []) {
+              const priorBidId = String(priorBid.id || priorBid._id || "");
+              const priorUserId = priorBid.user || priorBid.userId || priorBid.user_id;
+              if (!priorUserId || priorBidId === String(settled.bid_id) || String(priorUserId) === String(settled.user_id || settledBid?.user)) continue;
+              if (Number(priorBid.amount || 0) >= Number(settled.amount || 0)) continue;
+              recipients.set(String(priorUserId), priorBid);
+            }
+            await Promise.all([...recipients.keys()].map((userId) => emitCommunication({
+              userId,
+              eventType: COMMUNICATION_EVENTS.OUTBID,
+              title: "You have been outbid",
+              message: `A higher confirmed bid has been placed on ${settledCar?.title || "this vehicle"}.`,
+              channels: ["in_app", "email"],
+              metadata: { carId: String(settled.car_id), currentBid: Number(settled.amount || 0) },
+            }).catch((e) => logWarn("Outbid communication failed", { error: e.message, carId: settled.car_id }))));
+          }
+        } catch (emitErr) {
+          // A missed realtime/communication emit must never reverse payment
+          // confirmation. The authoritative-state poll remains the backstop.
+          logWarn("Bid settlement follow-up failed", { error: emitErr.message, paymentId: payment.id });
+        }
+      }
+    }
+
+    if (payment.type === "auction_win") {
+      const outcomeId = payment.metadata?.auctionOutcomeId || payment.metadata?.auction_outcome_id;
+      if (!outcomeId) {
+        await releaseClaim();
+        throw new Error("Auction winner payment is missing its outcome reference");
+      }
+      const { markAuctionPaymentReceived } = await import("./auctionSettlement.service.js");
+      await markAuctionPaymentReceived({ outcomeId, paymentId: payment.id, receipt });
+    }
+
+    if (payment.type === "purchase") {
+      const settlement = await atomicSettlePurchasePayment(payment.id, receipt);
+      await recordPurchasePayment({
+        payment_id: payment.id,
+        user_id: payment.user,
+        amount: Number(payment.amount),
+        refundRequired: Boolean(settlement?.refund_required),
+      });
+      if (settlement?.refund_required) {
+        await sendNotification({
+          userId: payment.user,
+          title: "Payment received — refund required",
+          message: "Your payment was received, but the seller could not be verified. A refund has been queued for processing.",
+          type: "payment",
+        }).catch((e) => logWarn("Refund-required notification failed", { error: e.message }));
+        await recordPaymentEvent({ paymentId: payment.id, eventType: "refund_required", payload: settlement }).catch(() => {});
+        await markWebhookProcessed(webhookEventId);
+        finalized = true;
+        return payment;
+      }
+    }
+
+    if (payment.type === "escrow") {
+      // Defensive guard: vehicle escrow must never be funded from an M-Pesa
+      // STK callback. Funding is verified separately against the admin-
+      // configured custody bank account.
+      assertPaymentTransition(payment.status, "failed");
+      await update("payments", payment.id, {
+        status: "failed",
+        resultDesc: "Vehicle escrow cannot be funded through M-Pesa STK",
+      });
+      await markPaymentEventSafe(payment.id, "escrow_mpesa_rejected", { checkoutRequestId: checkoutId });
+      await markAttemptByCheckout(checkoutId, "failed", { failureReason: "Vehicle escrow requires custody bank transfer" }).catch(() => {});
+      await markWebhookProcessed(webhookEventId);
+      finalized = true;
+      return payment;
+    }
+
+    if (payment.type === "inspection") {
+      const bookingId = payment.metadata?.bookingId || payment.metadata?.booking_id;
+      if (!bookingId) {
+        await releaseClaim();
+        throw new Error('Inspection payment is missing its booking reference');
+      }
+      const { data: inspectionPayment, error: inspectionPaymentError } = await getSupabase().rpc(
+        'kayad_process_inspection_payment_atomic',
+        {
+          p_booking_id: bookingId,
+          p_payment_method: 'mpesa',
+          p_payment_reference: receipt,
+          p_user_id: payment.user,
+        },
+      );
+      if (inspectionPaymentError) {
+        await releaseClaim();
+        throw inspectionPaymentError;
+      }
+      await update('payments', payment.id, {
+        status: 'success',
+        mpesaReceipt: receipt,
+        paidAt: new Date(),
+      });
+      await markPaymentEventSafe(payment.id, 'inspection_payment_settled', { bookingId, receipt, inspectionPayment });
+    }
+
+    if (payment.type === "package_upgrade") {
+      const activation = await activateDealerSubscriptionFromPayment(payment);
+      logInfo("Dealer subscription activated via verified payment", {
+        userId: payment.user,
+        paymentId: payment.id,
+        planId: activation?.planId,
+      });
+    }
+
+    const io = getIO();
+    if (io) {
+      const payload = { checkoutID: checkoutId, receipt, paymentId: payment.id };
+      io.to(`user_${payment.user}`).emit("paymentSuccess", payload);
+      if (payment.car) io.to(String(payment.car)).emit("paymentSuccess", payload);
+    }
+
+    // All authoritative settlement paths have completed successfully. Only
+    // now is the callback considered finalized; duplicates remain harmless.
+    await markPaymentEventSafe(payment.id, "marked_paid", { receipt });
+    await markAttemptByCheckout(checkoutId, "success", { providerReference: receipt }).catch(() => {});
+    await markWebhookProcessed(webhookEventId);
+    finalized = true;
+    return payment;
+  } catch (err) {
+    // Unexpected failure before a definitive status was written —
+    // release the claim so provider retries can reprocess.
+    if (claimedPaymentId && !finalized) {
+      await update("payments", claimedPaymentId, { processed: false }).catch((e) =>
+        logError("Failed to release payment claim", e, { paymentId: claimedPaymentId }),
+      );
+    }
+    if (webhookEventId) {
+      await markWebhookProcessed(webhookEventId, { error: err.message }).catch(() => {});
+    }
+    logError("CALLBACK ERROR", err);
+    throw err;
+  }
+};

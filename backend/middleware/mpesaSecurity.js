@@ -1,0 +1,232 @@
+// backend/middleware/mpesaSecurity.js - Production Hardened v2.0
+// ─────────────────────────────────────────────────────────────
+// Protects the M-Pesa callback endpoint from spoofed requests.
+// Safaricom only sends callbacks from their documented IP ranges.
+//
+// ENV VARS:
+//   MPESA_ENV=production   → strict IP whitelist enforced
+//   MPESA_ENV=sandbox      → sandbox IPs allowed
+//   MPESA_SKIP_IP_CHECK=true → bypass (dev only, never in prod)
+//   MPESA_WEBHOOK_SECRET   → optional secret for HMAC validation
+// ─────────────────────────────────────────────────────────────
+
+import crypto from "crypto";
+import proxyaddr from "proxy-addr";
+import { logInfo, logWarn, logError } from "../utils/logger.js";
+
+// Official Safaricom IP ranges (documented in Daraja portal)
+const SAFARICOM_PRODUCTION_IPS = [
+  "196.201.214.200",
+  "196.201.214.206",
+  "196.201.213.114",
+  "196.201.214.207",
+  "196.201.214.208",
+  "175.41.238.68",
+  "196.201.213.44",
+  "196.201.212.127",
+  "196.201.212.128",
+  "196.201.212.129",
+  "196.201.212.132",
+  "196.201.212.136",
+  "196.201.212.138",
+];
+
+const SAFARICOM_SANDBOX_IPS = [
+  "196.201.214.200",
+  "196.201.214.206",
+  "196.201.213.114",
+  "::1", // localhost for local dev
+  "127.0.0.1",
+];
+
+// CIDR helper — delegate parsing and address-family handling to proxy-addr.
+// The previous hand-rolled IPv4 mask parser treated a malformed prefix such
+// as `203.0.113.0/not-a-number` as a zero mask (bitwise NaN becomes 0), which
+// matched EVERY IPv4 address. Invalid operator configuration must never widen
+// the M-Pesa callback allowlist.
+const normalizeIp = (value) => String(value || "").trim().replace(/^::ffff:/i, "");
+
+export const ipInCidr = (ip, cidr) => {
+  const address = normalizeIp(ip);
+  const range = String(cidr || "").trim();
+  if (!address || !range) return false;
+  try {
+    const matcher = proxyaddr.compile([range]);
+    return matcher(address, 0);
+  } catch {
+    return false;
+  }
+};
+
+// R25 hardening (Phase 39): req.ip is only trustworthy when the immediate
+// socket peer is an explicitly configured trusted proxy. Express's global
+// `trust proxy: 1` setting alone is not sufficient: direct callers (including
+// other pods allowed by a NetworkPolicy) can supply X-Forwarded-For themselves
+// and be treated as if a proxy had appended the real source address.
+//
+// MPESA_TRUSTED_PROXY_CIDRS must contain the actual ingress/proxy peer CIDRs
+// for this deployment (comma-separated). If it is missing, malformed, or the
+// socket peer is outside those CIDRs, use the socket peer address itself. This
+// fails closed for proxied callbacks until the operator configures the correct
+// trusted range; it never falls back to an untrusted forwarded header.
+const trustedProxyMatcherCache = new Map();
+const isTrustedProxyPeer = (remoteAddress) => {
+  const cidrs = (process.env.MPESA_TRUSTED_PROXY_CIDRS || "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+  if (!cidrs.length || !remoteAddress) return false;
+
+  const cacheKey = cidrs.join(",");
+  let matcher = trustedProxyMatcherCache.get(cacheKey);
+  if (!matcher) {
+    try {
+      matcher = proxyaddr.compile(cidrs);
+      trustedProxyMatcherCache.set(cacheKey, matcher);
+    } catch {
+      // Invalid operator configuration must not turn forwarded headers into
+      // trusted identity. Return false and let the callback fail closed.
+      return false;
+    }
+  }
+
+  try {
+    return matcher(remoteAddress, 0);
+  } catch {
+    return false;
+  }
+};
+
+const getClientIp = (req) => {
+  const remoteAddress = req.socket?.remoteAddress || "";
+  if (!isTrustedProxyPeer(remoteAddress)) return normalizeIp(remoteAddress);
+  // Only honor Express's resolved client IP after verifying the immediate
+  // peer belongs to the explicitly configured trusted-proxy CIDRs.
+  return normalizeIp(req.ip || "");
+};
+
+export const mpesaIpWhitelist = (req, res, next) => {
+  // Skip in dev/test mode only. In production the bypass flag is
+  // ignored — the whitelist is always enforced (fail closed).
+  if (process.env.MPESA_SKIP_IP_CHECK === "true") {
+    if (process.env.NODE_ENV !== "production") return next();
+    logError("MPESA_SKIP_IP_CHECK=true ignored in production — enforcing IP whitelist");
+  }
+
+  const allowedIps = process.env.MPESA_ENV === "production" ? SAFARICOM_PRODUCTION_IPS : SAFARICOM_SANDBOX_IPS;
+
+  // Add any custom IPs from env (comma-separated)
+  const extraIps = (process.env.MPESA_EXTRA_IPS || "").split(",").map((value) => value.trim()).filter(Boolean);
+  const allAllowed = [...allowedIps, ...extraIps];
+
+  const clientIp = getClientIp(req);
+
+  const allowed = allAllowed.some((allowed) =>
+    allowed.includes("/") ? ipInCidr(clientIp, allowed) : clientIp === allowed,
+  );
+
+  if (!allowed) {
+    logError("M-Pesa callback blocked from IP", null, { ip: clientIp });
+    // Return 200 to Safaricom so they don't retry — log the block
+    return res.status(200).json({
+      ResultCode: 1,
+      ResultDesc: "Rejected",
+    });
+  }
+
+  next();
+};
+
+// ── MPESA CALLBACK SIGNATURE VALIDATOR ───────────────────────
+// Validates that callback body has required Safaricom structure
+// Includes timestamp validation and optional HMAC signature verification
+export const validateMpesaCallback = (req, res, next) => {
+  // Content-Type must be JSON — reject form data, XML, etc.
+  const ct = (req.headers["content-type"] || "").toLowerCase();
+  if (!ct.includes("application/json")) {
+    logError("M-Pesa callback wrong Content-Type", null, { contentType: ct });
+    return res.status(200).json({ ResultCode: 1, ResultDesc: "Invalid content type" });
+  }
+
+  const body = req.body;
+
+  // Must have Body.stkCallback
+  if (!body?.Body?.stkCallback) {
+    logError("Invalid M-Pesa callback structure", null, { body: JSON.stringify(body).slice(0, 200) });
+    return res.status(200).json({ ResultCode: 1, ResultDesc: "Invalid structure" });
+  }
+
+  const cb = body.Body.stkCallback;
+
+  // Must have CheckoutRequestID
+  if (!cb.CheckoutRequestID) {
+    logError("Missing CheckoutRequestID in M-Pesa callback");
+    return res.status(200).json({ ResultCode: 1, ResultDesc: "Missing CheckoutRequestID" });
+  }
+
+  // Log all callbacks for audit trail
+  logInfo("M-Pesa callback received", {
+    CheckoutRequestID: cb.CheckoutRequestID,
+    ResultCode: cb.ResultCode,
+    ip: getClientIp(req),
+    origin: req.headers["origin"] || req.headers["referer"] || "none",
+  });
+
+  // Additional verification: check that the request is POST (matches Safaricom's contract)
+  if (req.method !== "POST") {
+    logError("M-Pesa callback wrong HTTP method", null, { method: req.method });
+    return res.status(200).json({ ResultCode: 1, ResultDesc: "Invalid method" });
+  }
+
+  // ── TIMESTAMP VALIDATION (Replay Attack Prevention) ───────
+  // Reject callbacks older than 5 minutes to prevent replay attacks
+  const callbackTimestamp = cb.TransactTime || cb.TransactionTime;
+  if (callbackTimestamp) {
+    const callbackTime = new Date(callbackTimestamp);
+    const now = new Date();
+    const timeDiff = Math.abs(now - callbackTime) / 1000; // seconds
+    const MAX_TIME_DIFF = 300; // 5 minutes
+
+    if (timeDiff > MAX_TIME_DIFF) {
+      logError("M-Pesa callback timestamp too old", null, {
+        callbackTimestamp,
+        timeDiff: `${timeDiff}s`,
+        maxAllowed: `${MAX_TIME_DIFF}s`,
+      });
+      return res.status(200).json({ ResultCode: 1, ResultDesc: "Timestamp expired" });
+    }
+  }
+
+  // ── OPTIONAL HMAC SIGNATURE VALIDATION ───────────────────────
+  // If MPESA_WEBHOOK_SECRET is set, validate HMAC signature
+  const webhookSecret = process.env.MPESA_WEBHOOK_SECRET;
+  if (webhookSecret) {
+    const signature = req.headers["x-mpesa-signature"] || req.headers["signature"];
+    if (!signature) {
+      logError("M-Pesa callback missing signature header");
+      return res.status(200).json({ ResultCode: 1, ResultDesc: "Missing signature" });
+    }
+
+    const bodyString = JSON.stringify(req.body);
+    const expectedSignature = crypto.createHmac("sha256", webhookSecret).update(bodyString).digest("hex");
+
+    const sigBuf = Buffer.from(String(signature));
+    const expBuf = Buffer.from(expectedSignature);
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
+      logError("M-Pesa callback signature mismatch", null, {
+        received: String(signature).slice(0, 20),
+      });
+      return res.status(200).json({ ResultCode: 1, ResultDesc: "Invalid signature" });
+    }
+  }
+
+  // ── REQUEST ID TRACKING (Idempotency) ───────────────────────
+  // Add unique request ID for tracking and idempotency
+  req.mpesaRequestId = crypto.randomUUID();
+  logInfo("M-Pesa callback validated", {
+    requestId: req.mpesaRequestId,
+    CheckoutRequestID: cb.CheckoutRequestID,
+  });
+
+  next();
+};

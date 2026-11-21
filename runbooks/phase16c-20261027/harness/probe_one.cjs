@@ -1,0 +1,4 @@
+const fs=require('fs'); const L=require(process.cwd()+'/runbooks/phase16-20261026/e2e_lib.cjs'); const {call,sql}=L;
+(async()=>{ const u=await L.register('user',{}); await L.verifyEmailViaToken(u.email); const id=sql(`select id from users where email='${u.email}'`); sql(`update users set role='admin',status='approved',email_verified=true where id='${id}'`); const jar=(await L.login(u.email)).jar;
+ for (const spec of process.argv.slice(2)) { const [m,p]=spec.split(' '); const sz=fs.statSync('/home/claude/p16c/backend.log').size; const r=await call(m,p,{jar,body:m==='GET'?undefined:{}}); await new Promise(r=>setTimeout(r,600)); const log=fs.readFileSync('/home/claude/p16c/backend.log','utf8').slice(sz).replace(/\x1b\[[0-9;]*m/g,''); const lines=log.split('\n').filter(l=>/error|ERROR|message|code|hint|details/i.test(l)&&!/Request Completed/.test(l)).slice(0,6); console.log('###',spec,r.status,JSON.stringify(r.body).slice(0,160)); console.log(lines.join('\n')); }
+})();

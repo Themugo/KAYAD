@@ -1,0 +1,10 @@
+cleanup 2026-11-21T10:16:44Z
+pid 5922 stopped
+pid 5923 stopped
+pid 5924 stopped
+pid 5949 stopped
+database kayad_ci dropped
+port 54340 closed
+port 54341 closed
+port 6391 closed
+port 5065 closed

@@ -1,0 +1,389 @@
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ArrowRight, BriefcaseBusiness, ClipboardCheck, FileCheck, Loader2, MapPin, RefreshCw, ShieldCheck, UserCheck, Wrench,
+} from 'lucide-react';
+import type { UserProfile, Vehicle } from '../types';
+import { getMyInspections } from '../services/inspectionApi';
+import { inspectionApi } from './InspectionMarketplace/services/api';
+import { useSocket } from '../context/SocketContext';
+import { Button } from '../components/ui';
+import {
+  INSPECTION_STAGES, InspectionRecord, kayadOrderToRecord, providerBookingToRecord, sortRecords,
+} from './InspectionsView/inspectionJourney';
+import { RequestInspectionModal } from './InspectionsView/RequestInspectionModal';
+import { InspectionReportModal } from './InspectionsView/InspectionReportModal';
+import { CancelBookingModal, PayBookingModal } from './InspectionsView/BookingActions';
+import { ProviderApplicationModal } from './InspectionsView/ProviderApplicationModal';
+import { ProviderServicesModal } from './InspectionsView/ProviderServicesModal';
+import { Modal } from '../components/ui/Modal';
+import { OrganizationWorkspace } from './InspectionMarketplace/organization/OrganizationWorkspace';
+
+export type InspectionsTab = 'service' | 'mine' | 'reports';
+export type InspectionsViewMode = 'public' | 'account';
+export type InspectionLaunchAction = 'request' | 'apply-provider' | 'manage-business' | null;
+
+interface InspectionsViewProps {
+  vehicles: Vehicle[];
+  user?: UserProfile | null;
+  onOpenAuth?: () => void;
+  /** Opens the canonical /register page with a validated return path and intent. */
+  onOpenRegister?: (intent: string, next: string) => void;
+  /** Vehicle the customer came from (vehicle details). Preselects the request form. */
+  initialSelectedVehicle?: Vehicle | null;
+  /** Opens a tab on arrival (e.g. "mine" after a booking). */
+  initialTab?: InspectionsTab;
+  /** Opens a flow on arrival. Re-applied whenever the parent remounts this view with a new key. */
+  launchAction?: InspectionLaunchAction;
+  onViewVehicleDetails?: (vehicleId: string) => void;
+  /** Opens the provider finder, optionally on a canonical service category. */
+  onOpenInspectionMarketplace?: (category?: string) => void;
+  /** Public pages send private inspection history to the authenticated account workspace. */
+  onOpenMyInspections?: (tab: 'mine' | 'reports') => void;
+  /** Render public service discovery or the private account-only inspection workspace. */
+  viewMode?: InspectionsViewMode;
+}
+
+const TONE: Record<string, string> = {
+  neutral: 'bg-[#EEF7F5] text-[#12576D] border-[#D7E7E4]',
+  active: 'bg-[#E8F5F3] text-[#12576d] border-[#CDE9E5]',
+  success: 'bg-emerald-50 text-emerald-800 border-emerald-200',
+  danger: 'bg-rose-50 text-rose-700 border-rose-200',
+};
+
+const PUBLIC_TABS: Array<{ id: InspectionsTab; label: string }> = [{ id: 'service', label: 'Services' }];
+const ACCOUNT_TABS: Array<{ id: InspectionsTab; label: string }> = [
+  { id: 'mine', label: 'My inspections' },
+  { id: 'reports', label: 'Reports' },
+];
+
+interface Loaded {
+  ownerKey: string | null;
+  records: InspectionRecord[];
+  kayadError: string | null;
+  providerError: string | null;
+}
+
+/** Loads both canonical sources independently: one failing must not hide the other. */
+function useInspectionRecords(ownerKey: string | null) {
+  const signedIn = Boolean(ownerKey);
+  const [state, setState] = useState<Loaded>({ ownerKey: null, records: [], kayadError: null, providerError: null });
+  const [loading, setLoading] = useState(signedIn);
+  const alive = useRef(true);
+  const seq = useRef(0);
+
+  const load = useCallback(async (quiet = false) => {
+    if (!ownerKey) {
+      seq.current += 1;
+      setState({ ownerKey: null, records: [], kayadError: null, providerError: null });
+      setLoading(false);
+      return;
+    }
+    const mine = ++seq.current;
+    // Immediately bind the visible state to this account; records from a prior account must never linger.
+    setState((previous) => previous.ownerKey === ownerKey ? previous : { ownerKey, records: [], kayadError: null, providerError: null });
+    if (!quiet) setLoading(true);
+    const [kayad, provider] = await Promise.allSettled([getMyInspections(), inspectionApi.getCustomerBookings()]);
+    if (!alive.current || mine !== seq.current) return;
+    const records: InspectionRecord[] = [];
+    let kayadError: string | null = null;
+    let providerError: string | null = null;
+    if (kayad.status === 'fulfilled') records.push(...(kayad.value?.orders || []).map(kayadOrderToRecord));
+    else kayadError = 'Your KAYARD KE inspection requests could not be loaded.';
+    if (provider.status === 'fulfilled') records.push(...(provider.value?.bookings || []).map(providerBookingToRecord));
+    else providerError = 'Your provider bookings could not be loaded.';
+    setState({ ownerKey, records: sortRecords(records), kayadError, providerError });
+    setLoading(false);
+  }, [ownerKey]);
+
+  useEffect(() => {
+    alive.current = true;
+    void load();
+    return () => { alive.current = false; };
+  }, [load]);
+
+  const visible = state.ownerKey === ownerKey ? state : { ownerKey, records: [] as InspectionRecord[], kayadError: null, providerError: null };
+  return { ...visible, loading: ownerKey && state.ownerKey !== ownerKey ? true : loading, reload: () => load(false), refresh: () => load(true) };
+}
+
+const StageTrack: React.FC<{ record: InspectionRecord }> = ({ record }) => {
+  const stage = record.status.stage;
+  if (stage < 0) return null;
+  return (
+    <ol className="grid grid-cols-4 gap-1.5" aria-label="Inspection progress">
+      {INSPECTION_STAGES.map((name, i) => (
+        <li key={name} className="min-w-0" aria-current={i === stage ? 'step' : undefined}>
+          <span className={`block h-1.5 rounded-full ${i <= stage ? 'bg-[#13B8A6]' : 'bg-[#DDF4F0]'}`} />
+          <span className={`block mt-1 text-[10px] sm:text-[11px] truncate ${i === stage ? 'font-bold text-[#12576d]' : 'text-[#64748B]'}`}>
+            {name}<span className="sr-only">{i < stage ? ' (done)' : i === stage ? ' (current)' : ' (upcoming)'}</span>
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+};
+
+export const InspectionsView: React.FC<InspectionsViewProps> = ({
+  vehicles,
+  user,
+  onOpenAuth,
+  onOpenRegister,
+  initialSelectedVehicle,
+  initialTab,
+  launchAction,
+  onViewVehicleDetails,
+  onOpenInspectionMarketplace,
+  onOpenMyInspections,
+  viewMode = 'public',
+}) => {
+  const socket = useSocket();
+  const signedIn = Boolean(user?.id);
+  const ownerKey = user?.id ? String(user.id) : null;
+  const tabs = viewMode === 'account' ? ACCOUNT_TABS : PUBLIC_TABS;
+  const [tab, setTab] = useState<InspectionsTab>(viewMode === 'account' ? (initialTab === 'reports' ? 'reports' : 'mine') : 'service');
+  const [requestOpen, setRequestOpen] = useState(launchAction === 'request');
+  const [providerOpen, setProviderOpen] = useState(launchAction === 'apply-provider');
+  const [manageOpen, setManageOpen] = useState(launchAction === 'manage-business' && signedIn);
+  const [workspaceOrg, setWorkspaceOrg] = useState<string | null>(null);
+  const [reportRecord, setReportRecord] = useState<InspectionRecord | null>(null);
+  const [payRecord, setPayRecord] = useState<InspectionRecord | null>(null);
+  const [cancelRecord, setCancelRecord] = useState<InspectionRecord | null>(null);
+  const { records, kayadError, providerError, loading, reload, refresh } = useInspectionRecords(ownerKey);
+
+  const reportRecords = useMemo(() => records.filter((r) => r.hasReport), [records]);
+  const shown = tab === 'reports' ? reportRecords : records;
+
+  // Realtime is only a reconcile signal: the API stays the source of truth.
+  const kayadIds = records.filter((r) => r.product === 'kayad').map((r) => r.reference).join(',');
+  useEffect(() => {
+    if (!signedIn || !kayadIds) return;
+    const channels = kayadIds.split(',').map((id) => socket.joinInspection(id, { onUpdate: () => { void refresh(); } })).filter(Boolean);
+    return () => channels.forEach((c) => c && socket.leaveChannel(c));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signedIn, kayadIds]);
+
+  // Legacy cross-page event used by older entry points.
+  useEffect(() => {
+    const open = () => setProviderOpen(true);
+    window.addEventListener('kayad:open-inspection-provider-application', open);
+    return () => window.removeEventListener('kayad:open-inspection-provider-application', open);
+  }, []);
+
+  const startRequest = () => {
+    if (!signedIn) { onOpenAuth?.(); return; }
+    setRequestOpen(true);
+  };
+
+  const onTabKey = (e: React.KeyboardEvent, index: number) => {
+    const move = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+    if (e.key === 'Home' || e.key === 'End' || move) {
+      e.preventDefault();
+      const next = e.key === 'Home' ? 0 : e.key === 'End' ? tabs.length - 1 : (index + move + tabs.length) % tabs.length;
+      setTab(tabs[next].id);
+      document.getElementById(`insp-tab-${tabs[next].id}`)?.focus();
+    }
+  };
+
+  const openMyInspections = (nextTab: 'mine' | 'reports') => {
+    if (onOpenMyInspections) onOpenMyInspections(nextTab);
+  };
+
+  return (
+    <div className={`space-y-8 pb-16 ${viewMode === 'public' ? 'kayad-auto-services-view' : 'kayad-inspection-account-view'}`} data-kayad-surface="auto-services">
+      {viewMode === 'public' ? <section className="kayad-brand-hero kayad-auto-services-hero rounded-3xl text-white p-6 sm:p-10" aria-labelledby="insp-title">
+        <div className="kayad-services-hero-copy">
+          <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[.16em] text-[#B8EEE7]">
+            <Wrench className="h-4 w-4" aria-hidden="true" /> Automotive services · Kenya
+          </p>
+          <h1 id="insp-title" className="mt-3 text-2xl sm:text-4xl font-black font-display max-w-2xl">Find the right independent expert for your car</h1>
+          <p className="mt-4 text-sm sm:text-base text-[#EEF7F5] max-w-2xl">KAYARD KE is the platform connecting you with independent inspection businesses, garages and specialists. They carry out the work, not KAYARD KE. Review each business and its service verification before you decide.</p>
+          <div className="kayad-services-trust-row mt-5 flex flex-wrap gap-2" aria-label="How automotive services work">
+            <span><ShieldCheck className="h-4 w-4" aria-hidden="true" /> Evidence reviewed</span>
+            <span><UserCheck className="h-4 w-4" aria-hidden="true" /> Independent providers</span>
+            <span><ClipboardCheck className="h-4 w-4" aria-hidden="true" /> Clear booking steps</span>
+          </div>
+          <div className="mt-6 flex flex-col sm:flex-row gap-3">
+            <Button variant="accent" size="lg" className="font-bold" onClick={startRequest}>Inspect a car before you buy <ArrowRight className="h-4 w-4" aria-hidden="true" /></Button>
+            <Button variant="outline" size="lg" className="!text-white !border-white/60" onClick={() => onOpenInspectionMarketplace?.()}>Find a mechanic or garage</Button>
+          </div>
+        </div>
+      </section> : null}
+
+      {viewMode === 'account' && signedIn && <div role="tablist" aria-label="Your inspection records" className="flex gap-1 border-b border-[#D7E7E4] overflow-x-auto">
+        {tabs.map((t, i) => (
+          <button
+            key={t.id}
+            id={`insp-tab-${t.id}`}
+            role="tab"
+            type="button"
+            aria-selected={tab === t.id}
+            aria-controls="insp-panel"
+            tabIndex={tab === t.id ? 0 : -1}
+            onClick={() => setTab(t.id)}
+            onKeyDown={(e) => onTabKey(e, i)}
+            className={`px-4 py-3 min-h-[44px] text-sm font-bold whitespace-nowrap border-b-2 -mb-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87] ${tab === t.id ? 'border-[#13B8A6] text-[#12576d]' : 'border-transparent text-[#64748B] hover:text-[#0A3340]'}`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>}
+
+      <div id="insp-panel" role="tabpanel" aria-labelledby={viewMode === 'public' ? 'insp-title' : `insp-tab-${tab}`} tabIndex={-1}>
+        {viewMode === 'public' ? (
+          <div className="space-y-8">
+            <div className="grid md:grid-cols-2 gap-5">
+              <article className="kayad-service-lane rounded-2xl border border-[#D7E7E4] bg-white p-6 sm:p-7 flex flex-col" aria-labelledby="lane-inspect">
+                <ShieldCheck className="w-6 h-6 text-[#176B87]" aria-hidden="true" />
+                <h2 id="lane-inspect" className="mt-3 text-lg font-black text-[#12576d]">Inspect a car before you buy</h2>
+                <p className="mt-1.5 text-sm text-[#64748B]">An independent inspector checks the vehicle for you. Two ways to arrange it:</p>
+                <ul className="mt-3 space-y-3 text-sm text-[#64748B] flex-1">
+                  <li><strong className="text-[#0A3340]">Get matched.</strong> For a car listed on KAYARD KE: send a request and KAYARD KE assigns one of its verified independent inspectors. Their business name appears once assigned. Submitting takes no payment.</li>
+                  <li><strong className="text-[#0A3340]">Choose yourself.</strong> Compare independent inspection businesses, pick a package and a time slot, and pay by M-Pesa to confirm the booking.</li>
+                </ul>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Button variant="primary" className="min-h-[44px]" onClick={startRequest}>{signedIn ? 'Get matched with an inspector' : 'Sign in to get matched'}</Button>
+                  <Button variant="secondary" className="min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.('pre_purchase_inspection')}>Choose a provider <ArrowRight className="w-4 h-4" aria-hidden="true" /></Button>
+                </div>
+              </article>
+              <article className="kayad-service-lane rounded-2xl border border-[#D7E7E4] bg-white p-6 sm:p-7 flex flex-col" aria-labelledby="lane-fix">
+                <Wrench className="w-6 h-6 text-[#176B87]" aria-hidden="true" />
+                <h2 id="lane-fix" className="mt-3 text-lg font-black text-[#12576d]">Repairs, diagnostics and roadside help</h2>
+                <p className="mt-1.5 text-sm text-[#64748B] flex-1">Find verified independent garages, mechanics and specialists by service, vehicle make and location. Not sure what is wrong? Describe the symptom and see which kind of specialist to look for. KAYARD KE lists providers; it does not take repair bookings, take payments for them or dispatch roadside help yet, so you contact the provider yourself.</p>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Button variant="primary" className="min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.()}>Find a provider <ArrowRight className="w-4 h-4" aria-hidden="true" /></Button>
+                  <Button variant="secondary" className="min-h-[44px]" onClick={() => onOpenInspectionMarketplace?.('roadside_recovery')}>Roadside and recovery</Button>
+                </div>
+              </article>
+            </div>
+
+            <section aria-labelledby="insp-trust" className="kayad-service-info rounded-2xl border border-[#D7E7E4] bg-white p-6">
+              <h2 id="insp-trust" className="text-base font-black text-[#12576d]">What verified means here</h2>
+              <ul className="mt-3 grid md:grid-cols-3 gap-4 text-sm text-[#64748B]">
+                <li><strong className="block text-[#0A3340]">The business is reviewed</strong>KAYARD KE reviews a business’s identity and evidence before it is listed. It is not verified just by registering.</li>
+                <li><strong className="block text-[#0A3340]">Services are checked separately</strong>Each service a business offers is labelled declared or verified. Specialist work such as hybrid and electric vehicles is shown only once verified.</li>
+                <li><strong className="block text-[#0A3340]">People are linked, not assumed</strong>A mechanic is shown as part of a business only when both sides have confirmed it. Verification is not a guarantee of quality.</li>
+              </ul>
+            </section>
+
+            <section aria-labelledby="insp-next" className="kayad-service-info rounded-2xl border border-[#D7E7E4] bg-white p-6">
+              <h2 id="insp-next" className="text-base font-black text-[#12576d]">After you request or book an inspection</h2>
+              <ol className="mt-4 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                {[
+                  [ClipboardCheck, 'Request or book', 'Your request or booking is saved against the vehicle with a reference.'],
+                  [UserCheck, 'Inspector assigned', 'An inspector is assigned and the status updates here.'],
+                  [MapPin, 'Vehicle inspected', 'The inspector records findings and photos.'],
+                  [FileCheck, 'Report in your account', 'The report appears under Reports. Only you can open it.'],
+                ].map(([Icon, title, copy], i) => {
+                  const I = Icon as typeof ClipboardCheck;
+                  return (
+                    <li key={title as string} className="flex gap-3">
+                      <span className="w-8 h-8 shrink-0 rounded-full bg-[#E8F5F3] text-[#12576d] flex items-center justify-center"><I className="w-4 h-4" aria-hidden="true" /></span>
+                      <span><strong className="block text-[#0A3340]">{i + 1}. {title as string}</strong><span className="text-[#64748B]">{copy as string}</span></span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </section>
+
+            <section aria-labelledby="insp-providers" className="kayad-provider-cta rounded-2xl border border-dashed border-[#BDE5DE] bg-[#F6FAF9] p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 id="insp-providers" className="text-sm font-black text-[#12576d] flex items-center gap-2"><BriefcaseBusiness className="w-4 h-4" aria-hidden="true" />Run an inspection, garage or specialist business?</h2>
+                <p className="text-xs text-[#64748B] mt-1">Apply to be listed with the services you offer. Applications are reviewed by KAYARD KE and do not grant access automatically.</p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="secondary" size="sm" className="min-h-[44px]" onClick={() => setProviderOpen(true)}>Apply as a provider</Button>
+              </div>
+            </section>
+            {signedIn && <section className="rounded-2xl border border-[#D7E7E4] bg-white p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3" aria-label="Private inspection records">
+              <div><h2 className="text-sm font-black text-[#12576d]">Already requested or booked an inspection?</h2><p className="text-xs text-[#64748B] mt-1">Your references, booking status and private reports are available in your account workspace.</p></div>
+              <Button variant="primary" className="min-h-[44px]" onClick={() => openMyInspections('mine')}>View my inspections and reports</Button>
+            </section>}
+          </div>
+        ) : !signedIn ? (
+          <div className="rounded-2xl border border-[#D7E7E4] bg-white p-8 text-center space-y-3">
+            <p className="text-sm text-[#12576D]">Sign in to see your inspection requests, bookings and reports.</p>
+            <div className="flex flex-wrap justify-center gap-2">
+              <Button variant="primary" className="min-h-[44px]" onClick={onOpenAuth}>Sign in</Button>
+              {onOpenRegister && <Button variant="outline" className="min-h-[44px]" onClick={() => onOpenRegister('buyer', '/?nav=dashboard&section=buying')}>Create an account</Button>}
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {(kayadError || providerError) && (
+              <div role="alert" className="rounded-xl border border-[#BDE5DE] bg-[#F3FAF9] p-4 text-sm text-[#0A3340] space-y-1">
+                {kayadError && <p>{kayadError}</p>}
+                {providerError && <p>{providerError}</p>}
+                {records.length > 0 && <p className="text-xs">Showing what could be loaded. The list above may be incomplete.</p>}
+                <Button size="sm" className="min-h-[44px]" variant="secondary" onClick={() => void reload()}><RefreshCw className="w-3.5 h-3.5" aria-hidden="true" /> Try again</Button>
+              </div>
+            )}
+            {loading ? (
+              <p role="status" className="flex items-center justify-center gap-2 py-12 text-sm text-[#64748B]"><Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> Loading your inspections…</p>
+            ) : shown.length === 0 ? (
+              !kayadError && !providerError && (
+                <div className="rounded-2xl border border-[#D7E7E4] bg-white p-10 text-center space-y-3">
+                  <p className="text-base font-bold text-[#0A3340]">{tab === 'reports' ? 'No reports yet' : 'No inspections yet'}</p>
+                  <p className="text-sm text-[#64748B]">{tab === 'reports' ? 'A report appears here once an inspection you requested or booked is complete.' : 'Requests and bookings you make appear here with their progress.'}</p>
+                  <Button variant="primary" onClick={() => viewMode === 'account' ? onOpenInspectionMarketplace?.() : setTab('service')}>Browse automotive services</Button>
+                </div>
+              )
+            ) : (
+              <ul className="space-y-4">
+                {shown.map((r) => (
+                  <li key={r.key} className="rounded-2xl border border-[#D7E7E4] bg-white p-5 space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="text-base font-black text-[#12576d] break-words">{r.vehicleTitle}</h3>
+                        <p className="text-xs text-[#64748B] mt-0.5">{r.product === 'kayad' ? `Matched inspection${r.providerName ? ` · carried out by ${r.providerName}` : ' · KAYARD KE is matching a provider'}` : `Provider booking${r.providerName ? ` · ${r.providerName}` : ''}`} · Ref <span className="font-mono break-all">{r.reference}</span></p>
+                      </div>
+                      <span className={`self-start text-xs font-bold px-3 py-1 rounded-full border ${TONE[r.status.tone]}`}>{r.status.label}</span>
+                    </div>
+                    <StageTrack record={r} />
+                    <p className="text-sm text-[#64748B]">{r.status.detail}</p>
+                    <dl className="grid sm:grid-cols-2 gap-x-6 gap-y-1 text-xs text-[#64748B]">
+                      {r.location && <div className="flex gap-2"><dt className="text-[#94A3B8]">Location</dt><dd>{r.location}</dd></div>}
+                      {r.inspectorName && <div className="flex gap-2"><dt className="text-[#94A3B8]">Inspector</dt><dd>{r.inspectorName}</dd></div>}
+                      {r.packageName && <div className="flex gap-2"><dt className="text-[#94A3B8]">Package</dt><dd>{r.packageName}</dd></div>}
+                      {r.schedule && <div className="flex gap-2"><dt className="text-[#94A3B8]">Slot</dt><dd>{r.schedule}</dd></div>}
+                      {r.priceText && <div className="flex gap-2"><dt className="text-[#94A3B8]">{r.product === 'provider' ? 'Price' : 'Quoted fee'}</dt><dd>{r.priceText}</dd></div>}
+                      {r.paymentText && <div className="flex gap-2"><dt className="text-[#94A3B8]">Payment</dt><dd>{r.paymentText}</dd></div>}
+                    </dl>
+                    <div className="flex flex-wrap gap-2">
+                      {r.hasReport && <Button size="sm" className="min-h-[44px]" variant="primary" onClick={() => setReportRecord(r)}><FileCheck className="w-4 h-4" aria-hidden="true" /> View report</Button>}
+                      {r.canPay && <Button size="sm" className="min-h-[44px]" variant="accent" onClick={() => setPayRecord(r)}>Pay now</Button>}
+                      {r.canPay && <Button size="sm" className="min-h-[44px]" variant="secondary" onClick={() => setCancelRecord(r)}>Cancel booking</Button>}
+                      {r.vehicleId && onViewVehicleDetails && <Button size="sm" className="min-h-[44px]" variant="ghost" onClick={() => onViewVehicleDetails(r.vehicleId!)}>View vehicle</Button>}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )}
+      </div>
+
+      {requestOpen && (
+        <RequestInspectionModal
+          isOpen
+          onClose={() => setRequestOpen(false)}
+          vehicles={vehicles}
+          initialVehicle={initialSelectedVehicle}
+          onSubmitted={() => { void refresh(); }}
+          onViewMyInspections={() => { setRequestOpen(false); openMyInspections('mine'); }}
+          onSessionExpired={() => { setRequestOpen(false); onOpenAuth?.(); }}
+        />
+      )}
+      <InspectionReportModal record={reportRecord} onClose={() => setReportRecord(null)} />
+      <PayBookingModal record={payRecord} onClose={() => setPayRecord(null)} onPaid={() => { void refresh(); }} />
+      <CancelBookingModal record={cancelRecord} onClose={() => setCancelRecord(null)} onCancelled={() => { void refresh(); }} />
+      {viewMode === 'public' && signedIn && <ProviderServicesModal isOpen={manageOpen} onClose={() => setManageOpen(false)} onOpenWorkspace={(id) => setWorkspaceOrg(id)} />}
+      {viewMode === 'public' && signedIn && workspaceOrg && (
+        <Modal isOpen onClose={() => { setWorkspaceOrg(null); setManageOpen(true); }} title="Organization workspace" size="xl">
+          <OrganizationWorkspace organizationId={workspaceOrg} />
+        </Modal>
+      )}
+      {viewMode === 'public' && <ProviderApplicationModal isOpen={providerOpen} signedIn={signedIn} onClose={() => setProviderOpen(false)} onOpenAuth={onOpenAuth} onOpenRegister={onOpenRegister} />}
+    </div>
+  );
+};
+
+export default InspectionsView;

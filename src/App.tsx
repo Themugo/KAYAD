@@ -1,0 +1,1025 @@
+import React, { useState, useCallback, useMemo, useEffect, Suspense } from 'react';
+import { buildAuthPath, loginPathFor } from './utils/authIntent';
+import Navbar from './components/Navbar';
+import AdminRouteSurface from './components/admin/AdminRouteSurface';
+import VehicleMarketplace from './features/VehicleMarketplace';
+import TopNoticeStrip from './components/TopNoticeStrip';
+import { titleForRoute } from './utils/pageTitle';
+import { isKnownPath } from './utils/knownRoutes';
+import NotFoundPage from './pages/NotFoundPage';
+import LegalPage from './pages/LegalPage';
+import VehicleDetailModal from './components/VehicleDetailModal';
+import CompareModal from './components/CompareModal';
+import PriceAlertsModal from './components/PriceAlertsModal';
+import DashboardHub from './components/DashboardHub';
+import VerifyEmailPage from './pages/VerifyEmailPage';
+import OwnerInviteAccept from './pages/OwnerInviteAccept';
+import LoginPage from './pages/LoginPage';
+import OnboardingFlow from './components/OnboardingFlow';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import ForcePasswordChange from './pages/ForcePasswordChange';
+import NotificationsPage from './pages/NotificationsPage';
+import DealerOnboarding from './pages/dealer/DealerOnboarding';
+import DealerTeamInvite from './pages/dealer/DealerTeamInvite';
+import DealerAuctionSetupWizard from './pages/dealer/DealerAuctionSetupWizard';
+import DealerAuctionOperations from './pages/dealer/DealerAuctionOperations';
+import DealerAuctionOperationCase from './pages/dealer/DealerAuctionOperationCase';
+import Profile from './pages/Profile';
+import { AuctionMobileDock, AuctionSurfaceReveal } from './components/auction/AuctionInteractionLayer';
+import MobileBottomNav from './components/MobileBottomNav';
+// STAGE 12 PHASE D: SkipLink already existed in src/components/ui/SkipLink.tsx
+// (default targetId="main-content", default label="Skip to main content")
+// but was never imported or rendered anywhere in the app -- confirmed by
+// grep before touching anything. The <main> this top-level route tree
+// renders below had no id for it to target either. This is the one real,
+// well-scoped "skip-to-content" gap for the primary auction/marketplace
+// surfaces audited across this engagement (a different, unrelated
+// CustomerLayout used elsewhere in the app already has its own inline
+// skip link to its own <main id="main-content">, which was not touched).
+import SkipLink from './components/ui/SkipLink';
+import PageJourneyNavigation from './components/navigation/PageJourneyNavigation';
+
+import { getCars, getCarById, mapBackendCarToVehicle, VehicleApiError } from './services/vehicleApi';
+import { useVehicleCollections } from './hooks/useVehicleCollections';
+import AnalyticsBeacon from './components/AnalyticsBeacon';
+import DesignPreviewBanner from './components/DesignPreviewBanner';
+import { AuthProvider, useAuth, RequireAuth, RequireDealer, RequireDealerApplicant, RequireAdmin, SessionRecovery } from './context/AuthContext';
+import { NotificationProvider, useNotifications } from './context/NotificationContext';
+import { SocketProvider } from './context/SocketContext';
+import { CompareProvider, useCompare } from './context/CompareContext';
+import { Vehicle, UserProfile } from './types';
+import { getVehicleIdFromUrl, setVehicleDetailUrl } from './utils/navigation';
+import { navLocationFor } from './utils/navLocation';
+import { isStaffRole as isEscrowStaffRole } from './features/escrow/escrowModel';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
+import { useBranding } from './context/BrandingContext';
+
+// Views
+// Heavy authenticated/admin surfaces are loaded on demand. This keeps the
+// public marketplace shell small while preserving existing navigation and
+// component contracts.
+const AuctionsView = React.lazy(() => import('./features/AuctionsView'));
+const EscrowView = React.lazy(() => import('./features/EscrowView'));
+const EscrowOperationsDesk = React.lazy(() => import('./features/escrow/EscrowOperationsDesk'));
+const InspectionsView = React.lazy(() => import('./features/InspectionsView'));
+const DealersView = React.lazy(() => import('./features/DealersView'));
+const ChatView = React.lazy(() => import('./features/ChatView'));
+const AdminView = React.lazy(() => import('./features/AdminView'));
+const SupportView = React.lazy(() => import('./features/SupportView'));
+const PaymentHistoryView = React.lazy(() => import('./features/PaymentHistoryView'));
+const WalletPanel = React.lazy(() => import('./components/WalletPanel'));
+const AuctionLivePage = React.lazy(() => import('./pages/AuctionLivePage'));
+const KAYADLive = React.lazy(() => import('./pages/KAYADLive'));
+const DealerDashboard = React.lazy(() => import('./pages/dealer/dashboard/DealerDashboard'));
+const DealershipWorkspace = React.lazy(() => import('./features/DealershipWorkspace/DealershipWorkspace'));
+const FinanceMarketplace = React.lazy(() => import('./features/FinancePlatform').then((m) => ({ default: m.FinanceMarketplace })));
+const InspectionMarketplacePage = React.lazy(() => import('./features/InspectionMarketplace/pages/InspectionMarketplacePage'));
+
+// Fixed (Final Integration - real data integration): App() previously
+// held its own, disconnected local user state directly - re-applying
+// this project's own earlier hardening fix (Phase 2), confirmed lost
+// on this branch: useAuth() requires an AuthProvider ancestor, so
+// App() is now a thin wrapper providing that, with the real logic in
+// AppInner().
+// Workspaces that require a verified session (backend authorization stays authoritative).
+// Personal account workspaces are separate from verified dealer organization workspaces.
+const DEALER_REDIRECTED_NAVS = new Set(['dashboard', 'buyer-platform', 'seller-dashboard', 'seller-platform', 'seller', 'sell', 'payments', 'profile', 'saved']);
+const protectedNavs = new Set(['admin', 'dashboard', 'payments', 'profile', 'saved', 'chat', 'dealer-dashboard', 'dealership-workspace', 'escrow-operations']);
+// Of the workspaces above, these render their own "Sign in to ..." prompt
+// (with a button into the real auth flow) when `user` is null, instead of
+// an empty screen - ChatView/UnifiedCommunicationHub and DealerDashboard already handle a signed-out visitor inline. Bouncing
+// those straight to the /login portal before that prompt ever gets to
+// render skips it entirely: that was the reported bug - clicking the
+// Messages icon while signed out landed on the login portal instead of
+// the Messages panel's own "Sign in to see your conversations" message.
+// Redirect only the navs with no such fallback, which would otherwise
+// render blank for a signed-out visitor.
+const navsWithOwnSignedOutPrompt = new Set(['chat', 'dealer-dashboard', 'dealership-workspace']);
+
+function AppInner() {
+  const [activeNav, setActiveNavState] = useState<string>('marketplace');
+  const location = useLocation();
+  const { user: authUser, logout: authLogout, isAdmin, isDealer, isAuth, loading: authLoading, sessionStatus } = useAuth();
+  const { unreadCount: unreadNotificationCount } = useNotifications();
+  const currentAuthUserId = authUser?.id ? String(authUser.id) : null;
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  const [unreadMessageOwnerId, setUnreadMessageOwnerId] = useState<string | null>(null);
+  const visibleUnreadMessageCount = isAuth && currentAuthUserId && unreadMessageOwnerId === currentAuthUserId ? unreadMessageCount : 0;
+  const navigate = useNavigate();
+
+  // The Messages badge comes from the canonical participant-scoped endpoint.
+  // Mask it synchronously on account changes and keep it fresh if realtime
+  // bootstrap misses an event; a failed request never fabricates a new zero.
+  useEffect(() => {
+    if (!isAuth || !currentAuthUserId) {
+      setUnreadMessageCount(0);
+      setUnreadMessageOwnerId(null);
+      return;
+    }
+    let cancelled = false;
+    const refreshUnread = async () => {
+      try {
+        const { getUnreadChatCount } = await import('./services/chatApi');
+        const count = await getUnreadChatCount();
+        if (cancelled) return;
+        setUnreadMessageCount(count);
+        setUnreadMessageOwnerId(currentAuthUserId);
+      } catch {
+        // Keep this account's last confirmed count. Never convert an API failure
+        // into a false zero unread count.
+      }
+    };
+    void refreshUnread();
+    const timer = window.setInterval(() => { void refreshUnread(); }, 30000);
+    return () => { cancelled = true; window.clearInterval(timer); };
+  }, [isAuth, currentAuthUserId]);
+  const normalizeNav = useCallback((requested: string | null): string => {
+    return navLocationFor(requested || '', window.location.href).nav;
+  }, []);
+
+  // Keep the query-backed single-shell navigation canonical. AuctionsView
+  // writes its active tab into the URL for shareable deep links; without
+  // syncing subsequent navigation, leaving Auctions could leave `?nav=auctions`
+  // behind and make a later refresh reopen Auctions instead of Marketplace.
+  // User-initiated navigation PUSHES one history entry (so browser Back/Forward work between shell destinations);
+  // URL normalisation and access redirects pass { replace: true } so they never add a stray entry.
+  const setActiveNav = useCallback((requested: string, opts: { replace?: boolean } = {}) => {
+    const role = String(authUser?.role || '').toLowerCase();
+    const isPersonalAccount = ['user', 'buyer', 'individual_seller'].includes(role);
+    const personalDestinations: Record<string, string> = {
+      chat: 'dashboard:messages',
+      profile: 'dashboard:account',
+      settings: 'dashboard:account',
+      saved: 'dashboard:buying',
+      payments: 'dashboard:deals',
+    };
+    const target = isPersonalAccount ? (personalDestinations[requested] || requested) : requested;
+    const next = navLocationFor(target, window.location.href);
+    setActiveNavState(next.nav);
+    const current = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    if (next.href === current) return;
+    if (opts.replace) {
+      window.history.replaceState(window.history.state, '', next.href);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+    } else {
+      navigate(next.href);
+    }
+  }, [navigate, authUser?.role]);
+
+  useEffect(() => {
+    const requested = new URLSearchParams(location.search).get('nav');
+    setActiveNav(normalizeNav(requested), { replace: true });
+    // Deep link used as a sign-in return destination: /?nav=inspections&action=apply-provider.
+    // The action only opens a form; the backend still decides what the account may do.
+    const action = new URLSearchParams(location.search).get('action');
+    if (requested === 'inspections' && (action === 'apply-provider' || action === 'manage-business')) {
+      setInspectionLaunch((prev) => ({ vehicle: null, tab: 'service', action, nonce: prev.nonce + 1 }));
+    }
+  }, [location.search, normalizeNav, setActiveNav]);
+
+  // Client-side navigation state is convenience only, but it must never
+  // expose a private workspace to the wrong account. Backend authorization
+  // remains authoritative; this gate prevents accidental cross-surface
+  // rendering and stale deep links from landing on the wrong workspace.
+  // Opens one section of the dealer workspace (?nav=dealer-dashboard&section=...). Used by the dealer menu and by the redirect below.
+  const openDealerSection = useCallback((section: string, mode?: string, push = false) => {
+    const params = new URLSearchParams({ nav: 'dealer-dashboard' });
+    if (section && section !== 'overview') params.set('section', section);
+    if (mode === 'new' && section === 'inventory') params.set('mode', 'new');
+    if (push) {
+      navigate(`/?${params.toString()}`);
+      setActiveNavState('dealer-dashboard');
+      return;
+    }
+    window.history.replaceState({}, '', `/?${params.toString()}`);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+    setActiveNav('dealer-dashboard', { replace: true });
+  }, [navigate, setActiveNav]);
+
+  // A dealer account works only in the independent Dealer workspace. Legacy personal-account links are redirected there instead of exposing personal controls to the business identity.
+  useEffect(() => {
+    if (authLoading || !isAuth || authUser?.role !== 'dealer') return;
+    if (DEALER_REDIRECTED_NAVS.has(activeNav)) openDealerSection(activeNav === 'profile' ? 'settings' : 'overview');
+  }, [activeNav, authLoading, isAuth, authUser?.role, openDealerSection]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!protectedNavs.has(activeNav)) return;
+    // The session could not be VERIFIED (network/timeout/5xx): that is not
+    // "signed out". Do not redirect; the recovery UI is rendered instead.
+    if (!isAuth && sessionStatus === 'error') return;
+    if (!isAuth) {
+      if (navsWithOwnSignedOutPrompt.has(activeNav)) return;
+      navigate(loginPathFor(location), { replace: true });
+      return;
+    }
+    if (activeNav === 'escrow-operations' && !isEscrowStaffRole(authUser?.role)) {
+      setActiveNav('marketplace', { replace: true });
+      return;
+    }
+    if (activeNav === 'admin' && !isAdmin) {
+      setActiveNav('marketplace', { replace: true });
+      return;
+    }
+    if (activeNav === 'dealer-dashboard' && !isDealer && !isAdmin) {
+      setActiveNav('marketplace', { replace: true });
+    }
+  }, [activeNav, authLoading, sessionStatus, isAuth, isAdmin, isDealer, authUser?.role, location, navigate, setActiveNav]);
+  const [selectedCounty, setSelectedCounty] = useState<string>('All Kenya');
+  // Where the services finder opens from the global navigation / hub (a canonical taxonomy category, or none).
+  const [finderLaunch, setFinderLaunch] = useState<{ category?: string; nonce: number }>({ nonce: 0 });
+  const [inspectionLaunch, setInspectionLaunch] = useState<{ vehicle: Vehicle | null; tab: 'service' | 'mine' | 'reports'; action: 'request' | 'apply-provider' | 'manage-business' | null; nonce: number }>({ vehicle: null, tab: 'service', action: null, nonce: 0 });
+  const [personalInspectionTab, setPersonalInspectionTab] = useState<'mine' | 'reports'>('mine');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Fixed (Final Integration - real data integration): this was
+  // useState<UserProfile | null>(null) - a second, disconnected
+  // source of truth for "who is logged in," never wired to the real,
+  // HttpOnly-cookie-based session at all. Confirmed reverted from
+  // this project's own earlier hardening work. Now consumes the one,
+  // real, authoritative user directly from AuthProvider via
+  // useAuth().
+  //
+  // authUser (from AuthContext) and the UserProfile shape the rest of
+  // this app's component tree expects are two different types -
+  // AuthContext's User has broader, all-optional fields matching
+  // exactly what the real backend returns; UserProfile is this app's
+  // own, stricter, required-fields shape. This adapter bridges the
+  // two honestly: no field is invented that the backend doesn't
+  // provide, except isVerified (backend has no such field - mapped
+  // from the real, existing emailVerified boolean).
+  const handleOpenAuth = useCallback(() => {
+    navigate(loginPathFor(window.location));
+  }, [navigate]);
+  const handleOpenRegister = useCallback((intent: string, next: string) => {
+    navigate(buildAuthPath('register', { next, intent }));
+  }, [navigate]);
+  const user: UserProfile | null = useMemo(() => {
+    if (!authUser) return null;
+    const id = authUser.id || authUser._id;
+    if (!id) return null;
+    return {
+      id,
+      email: authUser.email || '',
+      name: authUser.name || '',
+      // This narrow role union is UserProfile's own, pre-existing
+      // contract in src/types.ts - not something this fix changes or
+      // widens.
+      role: (authUser.role || 'user') as UserProfile['role'],
+      phone: authUser.phone || '',
+      avatar: authUser.avatar || '',
+      isVerified: Boolean(authUser.emailVerified),
+    };
+  }, [authUser]);
+
+  // Interactive States
+  // Fixed (Final Integration - production mock-data dependencies):
+  // - the exact same mock-on-every-load defect originally found and
+  // fixed in this project's own earlier hardening work (Phase 3),
+  // confirmed to have been lost when this file was rebuilt on a
+  // diverged branch. Re-applying the same, already-proven fix: starts
+  // empty + loading, fetches real data from the already-existing,
+  // already-correct services/vehicleApi.ts (getCars/
+  // mapBackendCarToVehicle - neither needed any changes, both were
+  // still intact). A failed fetch produces an explicit error state,
+  // never a silent fallback to mock data.
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [vehiclesLoading, setVehiclesLoading] = useState<boolean>(true);
+  const [vehiclesError, setVehiclesError] = useState<string | null>(null);
+
+  const fetchVehicles = useCallback(async () => {
+    setVehiclesLoading(true);
+    setVehiclesError(null);
+    try {
+      const res = await getCars({ limit: 50 });
+      const real = (res.data || res.cars || []).map(mapBackendCarToVehicle);
+      setVehicles(real);
+    } catch (err) {
+      setVehiclesError(
+        err instanceof VehicleApiError
+          ? err.message
+          : 'Something went wrong loading vehicles. Please try again.'
+      );
+    } finally {
+      setVehiclesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchVehicles();
+  }, [fetchVehicles]);
+
+  // Modal Trigger States
+  const [quickViewVehicle, setQuickViewVehicle] = useState<Vehicle | null>(null);
+  const [invalidVehicleId, setInvalidVehicleId] = useState<string | null>(null);
+  const resolvedVehicleIds = React.useRef(new Set<string>());
+  const [showCompareModal, setShowCompareModal] = useState<boolean>(false);
+  const [showAlertsModal, setShowAlertsModal] = useState<boolean>(false);
+  const [selectedChatVehicle, setSelectedChatVehicle] = useState<Vehicle | null>(null);
+  /** A dealer's showroom view of the marketplace (set from the vehicle page's View Showroom button). */
+  const [dealerScope, setDealerScope] = useState<{ id: string; name: string } | null>(null);
+  // Browser-tab title follows the screen (and the open vehicle) so tabs and history are distinguishable.
+  useEffect(() => {
+    document.title = titleForRoute(location.pathname, activeNav && activeNav !== 'marketplace' ? (activeNav === 'dashboard' ? location.search : `?nav=${encodeURIComponent(activeNav)}`) : '', quickViewVehicle?.title);
+  }, [location.pathname, activeNav, quickViewVehicle?.title]);
+
+  // Central Navigation Handler: Opens Vehicle Details & Updates URL
+  const handleOpenVehicleDetails = useCallback((vehicleOrId: Vehicle | string) => {
+    if (typeof vehicleOrId !== 'string') {
+      setQuickViewVehicle(vehicleOrId);
+      setInvalidVehicleId(null);
+      setVehicleDetailUrl(vehicleOrId.id);
+      return;
+    }
+
+    const found = vehicles.find((v) => v.id === vehicleOrId);
+    if (found) {
+      setQuickViewVehicle(found);
+      setInvalidVehicleId(null);
+      setVehicleDetailUrl(found.id);
+      return;
+    }
+
+    // A valid vehicle can be outside the currently loaded inventory slice.
+    // Resolve the ID from the authoritative backend before declaring it missing.
+    setVehicleDetailUrl(vehicleOrId);
+    setQuickViewVehicle(null);
+    setInvalidVehicleId(null);
+    void getCarById(vehicleOrId).then((car) => {
+      resolvedVehicleIds.current.add(vehicleOrId);
+      if (car) {
+        setQuickViewVehicle(mapBackendCarToVehicle(car));
+        setInvalidVehicleId(null);
+      } else {
+        setInvalidVehicleId(vehicleOrId);
+      }
+    }).catch(() => {
+      resolvedVehicleIds.current.add(vehicleOrId);
+      setInvalidVehicleId(vehicleOrId);
+    });
+  }, [vehicles]);
+
+  // Central Close Handler: Clears Vehicle Details & Removes URL Param
+  const handleCloseVehicleDetails = useCallback(() => {
+    setQuickViewVehicle(null);
+    setInvalidVehicleId(null);
+    setVehicleDetailUrl(null);
+  }, []);
+
+  // Listen for initial URL vehicle parameter and popstate (browser back/forward)
+  useEffect(() => {
+    let cancelled = false;
+
+    const handleUrlSync = () => {
+      const urlVehicleId = getVehicleIdFromUrl();
+      if (!urlVehicleId) {
+        setQuickViewVehicle(null);
+        setInvalidVehicleId(null);
+        return;
+      }
+
+      const found = vehicles.find((v) => v.id === urlVehicleId);
+      if (found) {
+        setQuickViewVehicle(found);
+        setInvalidVehicleId(null);
+        return;
+      }
+
+      // Browser refreshes and shared URLs must resolve against the backend,
+      // not only the first inventory page currently held in memory.
+      setQuickViewVehicle(null);
+      setInvalidVehicleId(null);
+      if (resolvedVehicleIds.current.has(urlVehicleId)) return;
+
+      resolvedVehicleIds.current.add(urlVehicleId);
+      void getCarById(urlVehicleId).then((car) => {
+        if (cancelled) return;
+        if (car) {
+          setQuickViewVehicle(mapBackendCarToVehicle(car));
+          setInvalidVehicleId(null);
+        } else {
+          setInvalidVehicleId(urlVehicleId);
+        }
+      }).catch(() => {
+        if (!cancelled) setInvalidVehicleId(urlVehicleId);
+      });
+    };
+
+    handleUrlSync();
+    window.addEventListener('popstate', handleUrlSync);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('popstate', handleUrlSync);
+    };
+  }, [vehicles]);
+
+  // Saved vehicles are server-authoritative for authenticated users.
+  const {
+    savedVehicles,
+    savedVehiclesList,
+    handleToggleSave,
+    isFetchingFavorites,
+    favoritesError,
+    favoritesErrorUserId,
+    savedVehiclesSessionUserId,
+    refreshSavedVehicles,
+  } = useVehicleCollections(vehicles, user?.id ?? null);
+
+  // Phase 47: comparison is client-owned state, but it must still have one
+  // authoritative client source. CompareContext already persists IDs to
+  // localStorage, so App consumes that instead of maintaining a second,
+  // non-persisted comparedVehicles array inside useVehicleCollections.
+  const { compareIds: comparedVehicles, toggleCar: handleToggleCompare, removeCar: removeComparedVehicle } = useCompare();
+  const [resolvedComparedVehicles, setResolvedComparedVehicles] = useState<Record<string, Vehicle>>({});
+
+  // A persisted comparison can contain a vehicle outside the current inventory
+  // page/slice. Resolve those IDs through the real single-vehicle API so the
+  // compare modal survives refreshes and marketplace pagination honestly.
+  useEffect(() => {
+    let cancelled = false;
+    const availableIds = new Set(vehicles.map((vehicle) => vehicle.id));
+    const missingIds = comparedVehicles.filter(
+      (id) => !availableIds.has(id) && !resolvedComparedVehicles[id]
+    );
+
+    if (missingIds.length === 0) return () => { cancelled = true; };
+
+    void Promise.all(missingIds.map(async (id) => {
+      try {
+        const car = await getCarById(id);
+        return car ? [id, mapBackendCarToVehicle(car)] as const : [id, null] as const;
+      } catch {
+        return [id, null] as const;
+      }
+    })).then((results) => {
+      if (cancelled) return;
+      setResolvedComparedVehicles((prev) => {
+        const next = { ...prev };
+        for (const [id, vehicle] of results) {
+          if (vehicle) next[id] = vehicle;
+        }
+        return next;
+      });
+      for (const [id, vehicle] of results) {
+        if (!vehicle) removeComparedVehicle(id);
+      }
+    });
+
+    return () => { cancelled = true; };
+  }, [comparedVehicles, vehicles, resolvedComparedVehicles, removeComparedVehicle]);
+
+  const comparedVehiclesList = useMemo(() => {
+    const currentById = new Map(vehicles.map((vehicle) => [vehicle.id, vehicle]));
+    return comparedVehicles
+      .map((id) => currentById.get(id) || resolvedComparedVehicles[id])
+      .filter((vehicle): vehicle is Vehicle => Boolean(vehicle));
+  }, [comparedVehicles, vehicles, resolvedComparedVehicles]);
+
+  // Add Vehicle Handler
+  const handleAddVehicle = useCallback((_newVehicle: Vehicle) => {
+    // Vehicle creation is backend-authoritative. Refresh the real inventory
+    // after a successful create instead of inserting a locally synthesized row.
+    void fetchVehicles();
+  }, [fetchVehicles]);
+
+  // Escrow CTA Handler
+  const handleStartEscrow = useCallback((vehicle: Vehicle) => {
+    handleCloseVehicleDetails();
+    setSelectedChatVehicle(vehicle);
+    setActiveNav('escrow');
+  }, [handleCloseVehicleDetails, setActiveNav]);
+
+  // Inspection launch: keep the vehicle the customer was looking at (it used to be discarded).
+  const launchInspections = useCallback((next: { vehicle?: Vehicle | null; tab?: 'service' | 'mine' | 'reports'; action?: 'request' | 'apply-provider' | 'manage-business' | null }) => {
+    if (next.tab === 'mine' || next.tab === 'reports') {
+      setPersonalInspectionTab(next.tab);
+      setActiveNav('dashboard:buying');
+      return;
+    }
+    setInspectionLaunch((prev) => ({ vehicle: next.vehicle ?? null, tab: next.tab ?? 'service', action: next.action ?? null, nonce: prev.nonce + 1 }));
+    setActiveNav('inspections');
+  }, [setActiveNav]);
+  const handleRequestInspection = useCallback((vehicle: Vehicle) => {
+    handleCloseVehicleDetails();
+    launchInspections({ vehicle, action: 'request' });
+  }, [handleCloseVehicleDetails, launchInspections]);
+
+  // Contact Seller Handler
+  const handleContactSeller = useCallback((vehicle: Vehicle) => {
+    handleCloseVehicleDetails();
+    setSelectedChatVehicle(vehicle);
+    setActiveNav('chat');
+  }, [handleCloseVehicleDetails, setActiveNav]);
+
+  // Select Dealer Vehicles Shortcut
+  const handleSelectDealerVehicles = useCallback((dealerName: string, dealerId?: string) => {
+    if (dealerId) setDealerScope({ id: dealerId, name: dealerName });
+    else setSearchQuery(dealerName);
+    setActiveNav('marketplace');
+  }, [setActiveNav]);
+
+  const handleNavClick = useCallback((nav: string) => {
+    if (nav.startsWith('dashboard:')) {
+      const section = nav.slice('dashboard:'.length);
+      const allowed = new Set(['overview','my-vehicles','create-listing','buying','messages','auctions','deals','performance','account','trust','settings','help']);
+      const nextSection = allowed.has(section) ? section : 'overview';
+      navigate(`/?nav=dashboard&section=${encodeURIComponent(nextSection)}`);
+      setActiveNavState('dashboard');
+      return;
+    }
+    // `scope:value` ids from global navigation select existing sections of a
+    // destination. Auction filters remain in-page; escrow sublinks resolve to
+    // the public information page because private deals belong in user portals.
+    // `dealer:<section>[:new]` opens a section of the dealer workspace (inventory, leads, analytics, settings...).
+    if (nav.startsWith('dealer:')) {
+      const [, section = 'overview', mode] = nav.split(':');
+      openDealerSection(section, mode, true);
+      return;
+    }
+    if (nav.startsWith('auctions:')) {
+      const tab = nav.slice('auctions:'.length);
+      const params = new URLSearchParams({ nav: 'auctions' });
+      if (tab && tab !== 'live') params.set('auctionTab', tab);
+      navigate(`/?${params.toString()}`);
+      setActiveNavState('auctions');
+      return;
+    }
+    // `services:*` ids open an existing destination of the automotive services hub. They create no route.
+    if (nav.startsWith('services:')) {
+      const where = nav.slice('services:'.length);
+      if (where === 'find') { setFinderLaunch((p) => ({ nonce: p.nonce + 1 })); setActiveNav('inspection-marketplace'); return; }
+      if (where === 'roadside') { setFinderLaunch((p) => ({ category: 'roadside_recovery', nonce: p.nonce + 1 })); setActiveNav('inspection-marketplace'); return; }
+      if (where === 'mine') { launchInspections({ tab: 'mine' }); return; }
+      launchInspections({});
+      return;
+    }
+    if (nav.startsWith('escrow:')) {
+      const destination = nav.slice('escrow:'.length);
+      // Public journey/create entries stay on the explainer; participant deal
+      // records always open the existing authenticated buyer workspace.
+      setActiveNav(destination === 'deals' ? 'dashboard:deals' : 'escrow');
+      return;
+    }
+    setActiveNav(nav);
+  }, [launchInspections, openDealerSection, navigate]);
+
+  const isMarketplaceSurface = activeNav === 'marketplace' || activeNav === 'saved';
+  const privateWorkspaceNavs = new Set([
+    'admin',
+    'dashboard',
+    'dealer-dashboard',
+    'dealership-workspace',
+    'escrow-operations',
+  ]);
+  const showPublicMobileDock = (!privateWorkspaceNavs.has(activeNav) || activeNav === 'dashboard') && !['auctions', 'payments', 'profile'].includes(activeNav) && !quickViewVehicle && !invalidVehicleId; // the vehicle sheet has its own sticky action bar
+  const publicShellClass = privateWorkspaceNavs.has(activeNav) ? '' : 'kayad-public-shell ';
+
+  return (
+    <div className="min-h-screen bg-[#F6FAF9] text-[#0A3340] flex flex-col font-sans">
+      {/* 0. Top notice/advertisement strip - real, backend-driven,
+          admin-managed entirely through the Ad Manager panel, no code
+          changes needed to add/edit/recolor/remove an entry. */}
+      {!privateWorkspaceNavs.has(activeNav) && <TopNoticeStrip />}
+
+      {/* 1. Header Navigation */}
+      <SkipLink />
+
+      {!privateWorkspaceNavs.has(activeNav) && <Navbar
+        user={user}
+        unreadCount={visibleUnreadMessageCount}
+        notificationUnreadCount={unreadNotificationCount}
+        authLoading={authLoading}
+        savedCount={savedVehicles.length}
+        activeNav={activeNav}
+        onNavClick={handleNavClick}
+        selectedCounty={selectedCounty}
+        onCountyChange={(c) => setSelectedCounty(c)}
+        onOpenAuth={handleOpenAuth}
+        onOpenAlerts={() => setShowAlertsModal(true)}
+        onOpenCompare={() => setShowCompareModal(true)}
+        onLogout={() => { void authLogout(); }}
+      />}
+
+      {/* 2. Main Container (Inventory Priority & Clear Hierarchy) */}
+      <main
+        id="main-content"
+        tabIndex={-1}
+        data-kayad-surface={activeNav}
+        className={
+          isMarketplaceSurface
+            ? `${publicShellClass}flex-1 w-full min-w-0 max-w-none mx-0 px-0 py-0 ${showPublicMobileDock ? 'pb-[calc(7rem+env(safe-area-inset-bottom)+12px)]' : ''} lg:pb-0 space-y-0 overflow-x-clip`
+            : `${publicShellClass}flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 ${showPublicMobileDock ? 'pb-[calc(7rem+env(safe-area-inset-bottom)+12px)]' : 'pb-6'} lg:pb-6 space-y-6`
+        }
+      >
+        {/* The public marketplace home starts directly beneath the global navbar.
+            Keep page-history controls on internal routes, but do not insert a
+            second navigation band above the homepage hero. */}
+        {activeNav !== 'marketplace' && <PageJourneyNavigation />}
+        <Suspense fallback={
+          <div className="min-h-[420px] flex items-center justify-center px-6" role="status" aria-live="polite">
+            <div className="text-center">
+              <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-[#BDE5DE] border-t-[#13B8A6]" aria-hidden="true" />
+              <p className="text-sm font-medium text-[#64748B]">Loading KAYARD KE workspace…</p>
+            </div>
+          </div>
+        }>
+
+        {/* Module Switcher Rendering */}
+        {!isAuth && sessionStatus === 'error' && protectedNavs.has(activeNav) ? (
+          <SessionRecovery />
+        ) : (
+        <AuctionSurfaceReveal surface={activeNav}>
+        {activeNav === 'marketplace' && (
+            <VehicleMarketplace
+              vehicles={vehicles}
+              savedVehicles={savedVehicles}
+              comparedVehicles={comparedVehicles}
+              onToggleSave={handleToggleSave}
+              onToggleCompare={handleToggleCompare}
+              onQuickView={handleOpenVehicleDetails}
+              onStartEscrow={handleStartEscrow}
+              selectedCounty={selectedCounty}
+              onCountyChange={(c) => setSelectedCounty(c)}
+              searchQuery={searchQuery}
+              onSearchChange={(q) => setSearchQuery(q)}
+              onOpenCompareModal={() => setShowCompareModal(true)}
+              onNavigate={(nav) => setActiveNav(nav)}
+              onOpenAuth={handleOpenAuth}
+              user={user}
+              isHomePage
+              isLoadingReal={vehiclesLoading}
+              loadError={vehiclesError}
+              onRetryLoad={fetchVehicles}
+              dealerScope={dealerScope}
+              onClearDealerScope={() => setDealerScope(null)}
+            />
+          )}
+
+          {activeNav === 'auctions' && (
+            <AuctionsView
+              vehicles={vehicles}
+              user={user}
+              onOpenAuth={handleOpenAuth}
+              onStartEscrow={handleStartEscrow}
+              onQuickViewVehicle={handleOpenVehicleDetails}
+            />
+          )}
+
+          {activeNav === 'payments' && user && (<><div className="mx-auto max-w-5xl p-4 md:px-6"><WalletPanel /></div><PaymentHistoryView /></>)}
+
+          {activeNav === 'profile' && user && (
+            <Profile setPage={(page) => setActiveNav(page)} authUser={authUser} />
+          )}
+
+          {activeNav === 'escrow-operations' && isEscrowStaffRole(authUser?.role) && (
+            <section className="mx-auto max-w-7xl space-y-4 p-4 md:p-6">
+              <header><h1 className="text-2xl font-semibold text-[#0A3340]">Escrow Operations</h1><p className="mt-1 text-sm text-[#64748B]">Restricted staff workspace. Actions and record access remain enforced by the backend.</p></header>
+              <EscrowOperationsDesk />
+            </section>
+          )}
+
+          {activeNav === 'escrow' && (
+            <EscrowView
+              user={user}
+              onOpenAuth={handleOpenAuth}
+              onNavigate={handleNavClick}
+            />
+          )}
+
+          {activeNav === 'inspections' && (
+            <InspectionsView
+              key={inspectionLaunch.nonce}
+              initialSelectedVehicle={inspectionLaunch.vehicle}
+              initialTab={inspectionLaunch.tab}
+              launchAction={inspectionLaunch.action}
+              vehicles={vehicles}
+              user={user}
+              onOpenAuth={handleOpenAuth}
+              onOpenRegister={handleOpenRegister}
+              onViewVehicleDetails={handleOpenVehicleDetails}
+              onOpenInspectionMarketplace={(category) => { setFinderLaunch((p) => ({ category, nonce: p.nonce + 1 })); setActiveNav('inspection-marketplace'); }}
+              onOpenMyInspections={(tab) => launchInspections({ tab })}
+            />
+          )}
+
+          {activeNav === 'inspection-marketplace' && (
+            <InspectionMarketplacePage
+              key={finderLaunch.nonce}
+              initialFilters={finderLaunch.category ? { category: finderLaunch.category } : undefined}
+              onViewMyInspections={() => launchInspections({ tab: 'mine' })}
+              onApplyAsProvider={() => launchInspections({ action: 'apply-provider' })}
+            />
+          )}
+
+          {(activeNav === 'financing' || activeNav === 'finance') && (
+            <FinanceMarketplace user={user} onOpenAuth={handleOpenAuth} onNavigate={(nav) => setActiveNav(nav)} mode="public" />
+          )}
+
+          {activeNav === 'dealers' && (
+            <DealersView
+              onSelectDealerVehicles={handleSelectDealerVehicles}
+            />
+          )}
+
+          {activeNav === 'dashboard' && user && String(authUser?.role || '').toLowerCase() !== 'dealer' && (
+            <DashboardHub user={authUser} onSignOut={authLogout} vehicles={vehicles} savedVehicleCount={savedVehicles.length} savedVehiclesList={savedVehiclesList} savedVehiclesSessionUserId={savedVehiclesSessionUserId} savedVehiclesLoading={isFetchingFavorites} savedVehiclesError={favoritesError || ''} savedVehiclesErrorUserId={favoritesErrorUserId} onRefreshSavedVehicles={refreshSavedVehicles} initialSection={new URLSearchParams(location.search).get('section') || 'overview'} initialInspectionTab={personalInspectionTab} onNavigate={(nav) => setActiveNav(nav)} messagesContent={(initialThreadId) => <ChatView embedded initialThreadId={initialThreadId} messages={[]} selectedVehicle={selectedChatVehicle} user={user} onQuickViewVehicle={handleOpenVehicleDetails} onNavigateToEscrow={() => setActiveNav('dashboard:deals')} onNavigateToInspections={() => setActiveNav('dashboard:buying')} onNavigateToFinancing={() => setActiveNav('dashboard:deals')} />} profileContent={<Profile setPage={(page) => setActiveNav(['profile', 'settings'].includes(page) ? 'dashboard:account' : page)} authUser={authUser} showSignOut={false} />} />
+          )}
+
+          {activeNav === 'chat' && (
+            <ChatView
+              messages={[]}
+              selectedVehicle={selectedChatVehicle}
+              user={user}
+              onQuickViewVehicle={handleOpenVehicleDetails}
+              onNavigateToEscrow={() => setActiveNav('escrow')}
+              onNavigateToInspections={() => setActiveNav('inspections')}
+              onNavigateToFinancing={() => setActiveNav('financing')}
+            />
+          )}
+
+          {/* Fixed (Final Integration): this rendered purely on
+              activeNav === 'admin', with no check on the real user's
+              role - any visitor, including an anonymous, logged-out
+              one, could reach this by manipulating client-side
+              navigation state alone. Confirmed reverted from this
+              project's own earlier hardening work (Phase 2). This
+              frontend gate is a UX improvement, not the sole security
+              boundary - real backend authorization on this view's own
+              data calls remains the authoritative check. */}
+          {activeNav === 'admin' && isAdmin && (
+            <AdminView
+              vehicles={vehicles}
+              onQuickViewVehicle={handleOpenVehicleDetails}
+            />
+          )}
+
+          {activeNav === 'support' && (
+            <SupportView user={user} onOpenAuth={handleOpenAuth} onNavigate={(nav) => setActiveNav(nav)} />
+          )}
+
+          {/* Fixed: 'broadcast' (LiveAuctionBroadcastPage) removed
+              entirely - confirmed zero real navigation ever reached
+              it (no nav link, no button anywhere in the real app), it
+              was driven entirely by 2 hardcoded mock constants with
+              no real backend connection, and the real, working "watch
+              a live auction, see the real current bid, place a real
+              bid" experience already exists and is genuinely
+              connected (AuctionDiscoveryNetwork's own WatchLiveModal,
+              'discovery'). Rebuilding this as a real, separate page
+              would have duplicated that already-real functionality
+              rather than adding anything genuinely new. */}
+          {activeNav === 'discovery' && (
+            <AuctionsView user={user} onOpenAuth={handleOpenAuth} />
+          )}
+
+          {activeNav === 'kayadlive' && (
+            <KAYADLive onNavigate={(nav) => setActiveNav(nav)} onOpenVehicleDetails={handleOpenVehicleDetails} />
+          )}
+
+
+
+          {activeNav === 'dealership-workspace' && (
+            <DealershipWorkspace user={user} onOpenAuth={handleOpenAuth} onNavigate={(nav) => setActiveNav(nav)} />
+          )}
+
+          {activeNav === 'dealer-dashboard' && (
+            <DealerDashboard user={user} onOpenAuth={handleOpenAuth} onNavigate={(nav) => setActiveNav(nav)} />
+          )}
+
+
+          {activeNav === 'saved' && (
+            <VehicleMarketplace
+              vehicles={savedVehiclesList}
+              savedVehicles={savedVehicles}
+              comparedVehicles={comparedVehicles}
+              onToggleSave={handleToggleSave}
+              onToggleCompare={handleToggleCompare}
+              onQuickView={handleOpenVehicleDetails}
+              onStartEscrow={handleStartEscrow}
+              selectedCounty={selectedCounty}
+              onCountyChange={(c) => setSelectedCounty(c)}
+              searchQuery=""
+              onSearchChange={() => {}}
+              onOpenCompareModal={() => setShowCompareModal(true)}
+              isLoadingReal={false}
+              loadError={null}
+              onRetryLoad={() => undefined}
+              savedOnly
+            />
+          )}
+
+        </AuctionSurfaceReveal>
+        )}
+        </Suspense>
+        </main>
+
+      {user && ['auctions', 'payments', 'profile'].includes(activeNav) && (
+        <AuctionMobileDock active={activeNav === 'auctions' ? (new URLSearchParams(location.search).get('auctionTab') === 'saved' ? 'saved' : 'auctions') : activeNav} savedCount={savedVehicles.length} onNavigate={(nav) => setActiveNav(nav)} onSaved={() => { setActiveNav('auctions'); window.history.replaceState({}, '', '/?nav=auctions&auctionTab=saved'); window.dispatchEvent(new PopStateEvent('popstate')); }} />
+      )}
+
+      {showPublicMobileDock && (
+        <MobileBottomNav
+          authUser={authUser}
+          activeNav={activeNav}
+          activeSection={new URLSearchParams(location.search).get('section') || 'overview'}
+          onNavigate={(nav) => handleNavClick(nav)}
+          onOpenCompare={() => setShowCompareModal(true)}
+          onOpenAuth={handleOpenAuth}
+        />
+      )}
+
+      {/* 3. Public-site footer is intentionally excluded from account workspaces. */}
+      {!privateWorkspaceNavs.has(activeNav) && <footer className="bg-[#0A3340] text-[#BDE5DE] text-xs py-8 border-t border-navy-600/40 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-3">
+            <FooterLogo />
+            <div>
+              <p className="font-bold text-white">KAYARD KE</p>
+              <p className="text-[11px] text-[#94A3B8]">Vehicle marketplace · Kenya</p>
+            </div>
+          </div>
+
+          <nav aria-label="Explore KAYARD KE" className="flex flex-wrap items-center justify-center gap-x-5 gap-y-3 text-[#BDE5DE]">
+            <button type="button" onClick={() => setActiveNav('marketplace')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Browse vehicles</button>
+            <button type="button" onClick={() => setActiveNav('dealers')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Dealers & showrooms</button>
+            <button type="button" onClick={() => setActiveNav('auctions')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Auctions</button>
+            <button type="button" onClick={() => setActiveNav('inspection-marketplace')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Auto services</button>
+            <button type="button" onClick={() => setActiveNav('kayadlive')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">KAYARD Live</button>
+            <button type="button" onClick={() => setActiveNav('escrow')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Escrow Services</button>
+            <button type="button" onClick={() => setActiveNav('escrow')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Escrow Services</button>
+            <button type="button" onClick={() => setActiveNav('financing')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Financing</button>
+            <button type="button" onClick={() => setActiveNav('support')} className="min-h-10 hover:text-[#5AAFA4] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#5AAFA4]">Support & disputes</button>
+          </nav>
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6 pt-5 border-t border-[#12576D]/40 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] text-[#94A3B8]">
+          <p className="m-0">&copy; {new Date().getFullYear()} KAYARD KE. All rights reserved.</p>
+          <nav aria-label="Legal" className="flex items-center gap-5">
+            <Link to="/terms" className="hover:text-[#5AAFA4]">Terms of Service</Link>
+            <Link to="/privacy" className="hover:text-[#5AAFA4]">Privacy Policy</Link>
+            <button type="button" onClick={() => setActiveNav('support')} className="hover:text-[#5AAFA4]">Contact support</button>
+          </nav>
+        </div>
+      </footer>}
+
+      {/* 4. Modals */}
+      <VehicleDetailModal
+        vehicle={quickViewVehicle}
+        notFoundId={invalidVehicleId}
+        allVehicles={vehicles}
+        onClose={handleCloseVehicleDetails}
+        onStartEscrow={handleStartEscrow}
+        onContactSeller={handleContactSeller}
+        onRequestInspection={handleRequestInspection}
+        isSaved={quickViewVehicle ? savedVehicles.includes(quickViewVehicle.id) : false}
+        onToggleSave={handleToggleSave}
+        onSelectVehicle={handleOpenVehicleDetails}
+        viewer={authUser ? { id: authUser.id ? String(authUser.id) : undefined, role: authUser.role, isStaff: Boolean(isAdmin) || isEscrowStaffRole(authUser.role) } : null}
+        onViewAuctionLot={(v) => { handleCloseVehicleDetails(); navigate(`/auction/${encodeURIComponent(v.id)}`); }}
+        onViewShowroom={(dealerName, v) => { handleCloseVehicleDetails(); if (v?.sellerId) { setDealerScope({ id: v.sellerId, name: dealerName }); setActiveNav('marketplace'); } else { handleSelectDealerVehicles(dealerName); } }}
+        onManageListing={() => { handleCloseVehicleDetails(); navigate('/admin/cars'); }}
+        onEditListing={(v) => {
+          handleCloseVehicleDetails();
+          if (authUser?.role === 'dealer') {
+            window.history.replaceState({}, '', `/?nav=dealer-dashboard&section=inventory&mode=edit&id=${encodeURIComponent(v.id)}`);
+            window.dispatchEvent(new PopStateEvent('popstate'));
+            setActiveNav('dealer-dashboard');
+          } else {
+            setActiveNav('dashboard:my-vehicles');
+          }
+        }}
+      />
+
+      {showCompareModal && (
+        <CompareModal
+          vehicles={comparedVehiclesList}
+          onClose={() => setShowCompareModal(false)}
+          onRemove={handleToggleCompare}
+          onStartEscrow={handleStartEscrow}
+          onQuickViewVehicle={handleOpenVehicleDetails}
+        />
+      )}
+
+      <PriceAlertsModal
+        isOpen={showAlertsModal}
+        onClose={() => setShowAlertsModal(false)}
+      />
+    </div>
+  );
+}
+
+/** Footer logo: the admin-managed logo when one is set, otherwise the built-in KAYAD vehicle mark (symbol only). */
+function FooterLogo() {
+  const { branding } = useBranding();
+  const custom = branding?.logoType === 'image' && branding?.logoUrl;
+  return <img src={custom ? branding.logoUrl : '/branding/kayard-k-mark.png'} alt="" aria-hidden="true" width={44} height={32} className="h-8 w-auto max-w-[96px] object-contain shrink-0" decoding="async" />;
+}
+
+function DealerJourneySurface({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="min-h-screen min-w-0 bg-[#F6FAF9]">
+      <PageJourneyNavigation fallbackHref="/?nav=dealer-dashboard" />
+      {children}
+    </div>
+  );
+}
+
+function AuthRouteSurface() {
+  const location = useLocation();
+  const path = location.pathname;
+  useEffect(() => { document.title = titleForRoute(location.pathname, location.search); }, [location.pathname, location.search]);
+  if (path === '/login' || path === '/admin/login') return <LoginPage />;
+  if (path === '/register') return <OnboardingFlow onClose={() => { window.location.href = '/'; }} />;
+  if (path === '/forgot-password') return <ForgotPasswordPage />;
+  if (path === '/reset-password') return <ResetPasswordPage />;
+
+  // Canonical vehicle deep-link boundary. Marketplace cards, shared links,
+  // dealer previews and auction completion historically used /cars/:id,
+  // while the current marketplace detail state is URL-query based. Resolve
+  // the legacy/public path into the existing single detail mechanism instead
+  // of letting it fall through to the homepage without opening the vehicle.
+  const vehiclePathMatch = path.match(/^\/cars\/([^/]+)\/?$/);
+  if (vehiclePathMatch) {
+    return <Navigate replace to={`/?nav=marketplace&vehicleId=${encodeURIComponent(vehiclePathMatch[1])}`} />;
+  }
+
+  // STAGE 3 MARKETPLACE/VEHICLE/AUCTION CONVERGENCE FIX: AuctionLivePage is
+  // rendered directly from this path switch, not from a <Route>, so React
+  // has no identity-driven unmount/remount signal of its own when `path`
+  // changes between two different auctions (e.g. navigating from
+  // /auction/A to /auction/B via AuctionsView's in-app navigate() call).
+  // Without a `key`, the existing component instance is reused and its
+  // `registration`/`car` state can transiently show the previous auction's
+  // data for the brief window before the new auction's fetches resolve.
+  // Keying on `path` forces a clean remount per auction, matching how a
+  // real <Route path="/auction/:id"> would behave.
+  if (path.startsWith('/auction/')) return <AuctionLivePage key={path} />;
+  if (path === '/force-password-change') return <ForcePasswordChange />;
+  // All notification entry points use this canonical authenticated destination.
+  // Previously /notifications had no route, while the panel's 'View All' sent
+  // users to /dashboard; that protected dashboard route redirected to /login.
+  if (path === '/notifications') return <RequireAuth><NotificationsPage /></RequireAuth>;
+
+  // Canonical admin shell: /admin is the Business Command Centre home, and
+  // existing /admin/* destinations render inside the same sidebar/layout.
+  // Legacy query-backed entry points are redirected without discarding any
+  // non-admin query parameters from specialist admin URLs.
+  if (path === '/admin' || path.startsWith('/admin/')) return <AdminRouteSurface />;
+  if (path === '/' && new URLSearchParams(location.search).get('nav') === 'admin') {
+    const remaining = new URLSearchParams(location.search);
+    remaining.delete('nav');
+    const suffix = remaining.toString();
+    return <RequireAdmin><Navigate to={`/admin${suffix ? `?${suffix}` : ''}${location.hash}`} replace /></RequireAdmin>;
+  }
+
+  // Canonicalize legacy/direct routes into the single AppInner navigation
+  // surface. This prevents stale links such as /gallery, /auction, /escrow,
+  // /chat, /admin and /dealer from silently rendering the wrong public page.
+  if (path === '/gallery' || path === '/marketplace') return <Navigate to="/?nav=marketplace" replace />;
+  if (path === '/auction' || path === '/auctions') return <Navigate to="/?nav=discovery" replace />;
+  if (path === '/escrow') return <Navigate to="/?nav=escrow" replace />;
+  if (path === '/support') return <Navigate to="/?nav=support" replace />;
+  if (path === '/inspections') return <Navigate to="/?nav=inspections" replace />;
+  if (path === '/financing') return <Navigate to="/?nav=financing" replace />;
+  if (path === '/sell' || path === '/sell-car' || path === '/sell-vehicle') return <Navigate to="/?nav=dashboard&section=create-listing" replace />;
+  if (path === '/saved') return <RequireAuth><Navigate to="/?nav=saved" replace /></RequireAuth>;
+  if (path === '/profile') return <RequireAuth><Navigate to="/?nav=profile" replace /></RequireAuth>;
+  if (path === '/payments') return <RequireAuth><Navigate to="/?nav=payments" replace /></RequireAuth>;
+  if (path === '/chat') return <RequireAuth><Navigate to="/?nav=chat" replace /></RequireAuth>;
+  if (path === '/dashboard') return <RequireAuth><Navigate to="/?nav=dashboard" replace /></RequireAuth>;
+  if (path === '/buyer-platform') return <RequireAuth><Navigate to="/?nav=dashboard&section=buying" replace /></RequireAuth>;
+  if (path === '/seller-platform' || path === '/seller-dashboard') return <RequireAuth><Navigate to="/?nav=dashboard&section=my-vehicles" replace /></RequireAuth>;
+  if (path === '/dealer') return <RequireAuth><RequireDealer><Navigate to="/?nav=dealer-dashboard" replace /></RequireDealer></RequireAuth>;
+  if (path === '/inspector/dashboard') return <RequireAuth><Navigate to="/?nav=inspections" replace /></RequireAuth>;
+
+  if (path === '/dealer/setup') return <RequireAuth><DealerJourneySurface><DealerTeamInvite /></DealerJourneySurface></RequireAuth>;
+  if (path === '/dealer/onboarding') return <RequireAuth><RequireDealerApplicant><DealerJourneySurface><DealerOnboarding /></DealerJourneySurface></RequireDealerApplicant></RequireAuth>;
+  if (path === '/dealer/auction-setup') return <RequireAuth><RequireDealer><DealerJourneySurface><DealerAuctionSetupWizard /></DealerJourneySurface></RequireDealer></RequireAuth>;
+  if (path === '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerJourneySurface><DealerAuctionOperations /></DealerJourneySurface></RequireDealer></RequireAuth>;
+  if (path.startsWith('/dealer/auction-operations/') && path !== '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerJourneySurface><DealerAuctionOperationCase /></DealerJourneySurface></RequireDealer></RequireAuth>;
+  if (path === '/terms') return <LegalPage kind="terms" />;
+  if (path === '/privacy') return <LegalPage kind="privacy" />;
+  if (!isKnownPath(path)) return <NotFoundPage />;
+  return <AppInner />;
+}
+
+export function App() {
+  const location = useLocation();
+  if (location.pathname === '/verify-email') return <VerifyEmailPage />;
+  if (location.pathname === '/owner-invite') return <OwnerInviteAccept />;
+  return (
+    <AuthProvider>
+      <AnalyticsBeacon />
+      <DesignPreviewBanner />
+      <SocketProvider>
+        <NotificationProvider>
+          <CompareProvider>
+            <AuthRouteSurface />
+          </CompareProvider>
+        </NotificationProvider>
+      </SocketProvider>
+    </AuthProvider>
+  );
+}
+
+export default App;

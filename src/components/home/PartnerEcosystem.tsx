@@ -1,0 +1,44 @@
+import { ShieldCheck, CreditCard, Workflow } from 'lucide-react';
+import type { FC } from 'react';
+
+export const PartnerEcosystem: FC = () => {
+  const services = [
+    { name: 'M-Pesa', role: 'Payment Integration', icon: <CreditCard className="w-5 h-5 text-[#94A3B8]" /> },
+    { name: 'KAYARD KE Escrow', role: 'Transaction Workflow', icon: <Workflow className="w-5 h-5 text-[#94A3B8]" /> },
+    { name: 'KAYARD KE Inspections', role: 'Inspection Workflow', icon: <ShieldCheck className="w-5 h-5 text-[#94A3B8]" /> },
+  ];
+  return (
+    <section className="py-10 bg-[#EEF7F5] dark:bg-[#0a3340] border-b border-[#D7E7E4] dark:border-white/10 transition-colors">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+
+        {/* Header Label */}
+        <div className="text-center">
+          <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-[#64748b] dark:text-[#94A3B8]">
+            Verified Integrations & Services
+          </span>
+        </div>
+
+        {/* Partners Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {services.map((partner, idx) => (
+            <div
+              key={idx}
+              className="p-3.5 rounded-2xl bg-white dark:bg-[#12576D] border border-[#D7E7E4] dark:border-white/10 flex flex-col items-center justify-center text-center space-y-1 hover:border-[#176B87] dark:hover:border-[#13B8A6] transition-all grayscale hover:grayscale-0 group shadow-2xs"
+            >
+              <div className="w-8 h-8 rounded-xl bg-[#176B87]/10 dark:bg-white/10 flex items-center justify-center group-hover:scale-105 transition-transform">
+                {partner.icon}
+              </div>
+              <span className="text-xs font-serif font-black text-[#176B87] dark:text-[#DDF4F0] line-clamp-1">
+                {partner.name}
+              </span>
+              <span className="text-[9px] font-mono text-[#64748b] dark:text-[#94A3B8] uppercase tracking-wider">
+                {partner.role}
+              </span>
+            </div>
+          ))}
+        </div>
+
+      </div>
+    </section>
+  );
+};

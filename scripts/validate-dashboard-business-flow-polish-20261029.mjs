@@ -1,0 +1,18 @@
+import fs from 'node:fs';
+const checks = [];
+const admin = fs.readFileSync('src/features/AdminView.tsx', 'utf8');
+const css = fs.readFileSync('src/features/admin-command-centre.css', 'utf8');
+const tests = fs.readFileSync('src/__tests__/features/adminCommandCentre.test.tsx', 'utf8');
+const check = (name, ok) => checks.push({ name, ok: Boolean(ok) });
+check('dashboard contains lifecycle section with accessible heading', admin.includes('data-testid="business-flow-map"') && admin.includes('aria-labelledby="business-flow-heading"'));
+check('dealer onboarding links to existing verification route', admin.includes("to: '/admin/dealer-verifications'"));
+check('vehicle listing hand-off links to existing moderation route', admin.includes("to: '/admin/moderation'"));
+check('inspection and NTSA hand-off links to existing queue', admin.includes("to: '/admin/ntsa-queue'"));
+check('auction, escrow and transaction hand-offs use existing routes', admin.includes("to: '/admin/auctions'") && admin.includes("to: '/admin/escrows'") && admin.includes("to: '/admin/transactions'"));
+check('role-appropriate visibility uses existing canOpen permission helper', admin.includes(".filter((step) => canOpen(step.to))"));
+check('business flow is explicitly identified as navigation, not new business status', admin.includes('These are navigation shortcuts, not a new workflow or source of business status.'));
+check('responsive layouts and reduced-motion support are present', css.includes('.kayad-command-flow-steps') && css.includes('@media(max-width:640px)') && css.includes('prefers-reduced-motion:reduce'));
+check('regression test covers all six canonical route destinations', tests.includes("describe('Command centre — business lifecycle hand-offs'") && tests.includes("['Transactions', '/admin/transactions']"));
+for (const item of checks) console.log(`${item.ok ? 'PASS' : 'FAIL'} ${item.name}`);
+console.log(`\n${checks.filter(x => x.ok).length}/${checks.length} checks passed`);
+if (checks.some(x => !x.ok)) process.exitCode = 1;

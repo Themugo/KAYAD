@@ -1,0 +1,213 @@
+import { describe, it, expect, vi, afterEach } from 'vitest';
+import { render, screen, cleanup, waitFor, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { HelmetProvider } from 'react-helmet-async';
+import AuctionLivePage from '../../pages/AuctionLivePage';
+import { fetchAuction } from '../../services/auctionService';
+import { auctionRegistrationAPI } from '../../api/api';
+
+vi.mock('../../hooks/usePageMeta', () => ({ default: () => {} }));
+// AuctionLivePage reads auction/bid state through the canonical services
+// (services/auctionService, services/bidApi), not the legacy carsAPI/bidsAPI
+// surface. These mocks previously targeted the wrong module entirely, so the
+// component's real network calls always rejected in jsdom and "Auction not
+// found" rendered regardless of what was being tested.
+vi.mock('../../api/api', () => ({
+  auctionRegistrationAPI: {
+    room: vi.fn().mockResolvedValue({ room: null }),
+    get: vi.fn().mockResolvedValue({ registration: null, setup: null }),
+    register: vi.fn().mockResolvedValue({ registration: { status: 'active' } }),
+    initiateCommitment: vi.fn().mockResolvedValue({ registration: { status: 'pending' } }),
+    securityPolicy: vi.fn().mockResolvedValue({ policy: null }),
+    refreshEligibility: vi.fn().mockResolvedValue({ registration: null }),
+    initiateHighValueDeposit: vi.fn().mockResolvedValue({}),
+  },
+  auctionEngagementAPI: {
+    get: vi.fn().mockResolvedValue({ engagement: { watchers: 0, visits: 0, follows: 0, likes: 0, comments: 0, enabled: false, viewer: {} } }),
+    visit: vi.fn().mockResolvedValue({}),
+    comments: vi.fn().mockResolvedValue({ comments: [], enabled: false }),
+  },
+  formatKES: vi.fn(v => `KES ${(v / 1000).toFixed(0)}K`),
+}));
+vi.mock('../../services/auctionService', () => ({
+  fetchAuction: vi.fn().mockResolvedValue({
+    auction: {
+      id: 'mock1',
+      carId: 'mock1',
+      status: 'active',
+      startingBid: 2000000,
+      highestBid: 0,
+      bidIncrement: 1000,
+      bidCount: 0,
+      startTime: null,
+      endTime: null,
+      car: { _id: 'mock1', title: 'Test Car', brand: 'Toyota', model: 'Hilux', year: 2021, fuel: 'Diesel', transmission: 'Manual', price: 2000000, images: [], auctionEnd: null, dealer: { _id: 'd1', name: 'Test Dealer' } },
+    },
+    bids: [],
+  }),
+  fetchAuctionBids: vi.fn().mockResolvedValue({ bids: [] }),
+  fetchAuctionOutcome: vi.fn().mockResolvedValue({ outcome: null }),
+  initiateAuctionWinnerPayment: vi.fn().mockResolvedValue({}),
+}));
+vi.mock('../../services/bidApi', () => ({
+  placeBid: vi.fn().mockResolvedValue({}),
+  BidApiError: class BidApiError extends Error {},
+}));
+// STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE: isAuth and the toast spy are
+// made mutable/hoisted (rather than fixed inline return values, as every
+// other mock in this file still is) specifically so the new
+// "registration-fetch error surfacing" tests below can render with
+// isAuth: true and assert on a shared toast() spy, without disturbing any
+// of this file's existing isAuth:false tests, which continue to get
+// exactly their original fixed behavior by default.
+const authState = vi.hoisted(() => ({ isAuth: false }));
+const toastSpy = vi.hoisted(() => vi.fn());
+vi.mock('../../context/AuthContext', () => ({
+  useAuth: () => ({ user: null, isAuth: authState.isAuth }),
+}));
+vi.mock('../../context/SocketContext', () => ({
+  useSocket: () => ({ joinAuction: vi.fn(), leaveChannel: vi.fn(), connected: false, on: () => () => {} }),
+}));
+vi.mock('../../context/ToastContext', () => ({
+  useToast: () => ({ toast: toastSpy }),
+}));
+vi.mock('../../components/CountdownDisplay', () => ({ CountdownDisplay: () => null }));
+vi.mock('../../components/MarketValuationMatrix', () => ({ default: () => null }));
+vi.mock('../../components/features/car/GalleryModal', () => ({ default: () => null }));
+vi.mock('../../pages/auction/components/AuctionEffects', () => ({
+  AVATAR_COLORS: [],
+  hashColor: () => '#000',
+  getAvatarInitials: () => 'XX',
+  ConfettiOverlay: () => null,
+  ViewersCounter: () => null,
+  OutbidBell: () => null,
+  PriceParticles: () => null,
+}));
+
+const renderAuctionPage = () => render(
+  <HelmetProvider>
+    <MemoryRouter initialEntries={['/auction/mock1']}>
+      <AuctionLivePage />
+    </MemoryRouter>
+  </HelmetProvider>,
+);
+
+describe('AuctionLivePage', () => {
+  afterEach(() => { cleanup(); });
+
+  it('renders auction page with mock car', async () => {
+    renderAuctionPage();
+    // The premium layout shows the vehicle title in several places (hero, gallery, rail).
+    expect((await screen.findAllByText('Test Car')).length).toBeGreaterThan(0);
+  });
+
+  it('shows connection status', async () => {
+    renderAuctionPage();
+    // DomainPremiumStats renders the live value verbatim (no ellipsis) for the
+    // "Connection" stat; see AuctionLivePage.jsx's connected ? 'Live' : 'Reconnecting'.
+    // The premium layout renders this stat strip in more than one place
+    // (desktop + mobile), same as the "Test Car" title assertion above.
+    expect((await screen.findAllByText('Reconnecting')).length).toBeGreaterThan(0);
+  });
+
+  it('shows starting price label', async () => {
+    renderAuctionPage();
+    expect(await screen.findByText('Starting Price')).toBeInTheDocument();
+  });
+});
+
+// STAGE 4 ACCOUNT/SESSION/IDENTITY CONVERGENCE REGRESSION TESTS: the
+// registration-status fetch previously discarded any error from
+// auctionRegistrationAPI.get() silently, treating a 403 "Account
+// suspended"/"Account deactivated" rejection identically to "not yet
+// registered" - the signed-in-but-banned user saw a normal "Register to
+// bid" CTA with no indication why. This proves the specific backend
+// message is now surfaced via toast for a 403, and that an ordinary
+// "no registration yet" rejection (no response/any other status) still
+// does NOT spam a toast.
+describe('AuctionLivePage initial-load failure handling', () => {
+  afterEach(() => { cleanup(); });
+
+  it('does not label a server failure as an auction that does not exist', async () => {
+    fetchAuction.mockRejectedValueOnce({ status: 503 });
+    renderAuctionPage();
+    expect(await screen.findByText('We could not load this auction')).toBeInTheDocument();
+    expect(screen.queryByText('Auction not found')).toBeNull();
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument();
+  });
+
+  it('offers a retry that recovers when the detail endpoint becomes available', async () => {
+    fetchAuction.mockRejectedValueOnce({ status: 503 });
+    renderAuctionPage();
+    fireEvent.click(await screen.findByRole('button', { name: 'Try again' }));
+    expect((await screen.findAllByText('Test Car')).length).toBeGreaterThan(0);
+  });
+
+  it('uses a distinct unavailable state for a real 404', async () => {
+    fetchAuction.mockRejectedValueOnce({ status: 404 });
+    renderAuctionPage();
+    expect(await screen.findByText('This auction is unavailable')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Try again' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Back to auctions' })).toBeInTheDocument();
+  });
+});
+
+describe('AuctionLivePage registration-status error surfacing', () => {
+  afterEach(() => { cleanup(); authState.isAuth = false; toastSpy.mockClear(); auctionRegistrationAPI.get.mockReset(); });
+
+  it('surfaces the backend message via toast when the registration-status fetch is rejected with 403', async () => {
+    authState.isAuth = true;
+    auctionRegistrationAPI.get.mockRejectedValueOnce({
+      response: { status: 403, data: { message: 'Account suspended' } },
+    });
+
+    renderAuctionPage();
+
+    await waitFor(() => {
+      expect(toastSpy).toHaveBeenCalledWith('Account suspended', 'error');
+    });
+  });
+
+  it('does not toast for an ordinary "not yet registered" rejection with no response', async () => {
+    authState.isAuth = true;
+    auctionRegistrationAPI.get.mockRejectedValueOnce(new Error('network error'));
+
+    renderAuctionPage();
+    await screen.findAllByText('Test Car');
+
+    expect(toastSpy).not.toHaveBeenCalled();
+  });
+});
+
+// Bidding identity: bids show the anonymous K-ID (never a real name/phone), the viewer's own entries are marked,
+// and the viewer sees whether they are leading or outbid.
+describe('AuctionLivePage bidder identity and standing', () => {
+  afterEach(() => { cleanup(); authState.isAuth = false; });
+
+  const liveWith = (bids) => {
+    fetchAuction.mockResolvedValueOnce({
+      auction: { id: 'mock1', carId: 'mock1', status: 'active', startingBid: 2000000, bidIncrement: 1000,
+        car: { _id: 'mock1', id: 'mock1', title: 'Test Car', brand: 'Toyota', model: 'Hilux', year: 2021, images: [], auctionStatus: 'live', auctionEnd: new Date(Date.now() + 3600000).toISOString(), currentBid: 2100000, bidsCount: bids.length, dealer: {} } },
+      bids,
+    });
+    auctionRegistrationAPI.get.mockResolvedValueOnce({ registration: { status: 'active', bidder_number: 'K-AAAA1111' }, setup: null });
+  };
+
+  it('marks own bid as YOU and shows leading', async () => {
+    authState.isAuth = true;
+    liveWith([{ id: 'b2', amount: 2100000, bidderTag: 'K-AAAA1111', createdAt: new Date().toISOString() }, { id: 'b1', amount: 2050000, bidderTag: 'K-BBBB2222', createdAt: new Date().toISOString() }]);
+    renderAuctionPage();
+    const standing = await screen.findByTestId('my-standing');
+    expect(standing.textContent).toMatch(/K-AAAA1111/);
+    expect(standing.textContent).toMatch(/leading/i);
+    expect(screen.getByText('K-BBBB2222')).toBeInTheDocument();
+    expect(screen.getAllByText('YOU').length).toBe(1);
+  });
+
+  it('shows outbid when another bidder leads', async () => {
+    authState.isAuth = true;
+    liveWith([{ id: 'b2', amount: 2100000, bidderTag: 'K-BBBB2222', createdAt: new Date().toISOString() }, { id: 'b1', amount: 2050000, bidderTag: 'K-AAAA1111', createdAt: new Date().toISOString() }]);
+    renderAuctionPage();
+    expect((await screen.findByTestId('my-standing')).textContent).toMatch(/outbid/i);
+  });
+});

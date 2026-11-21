@@ -1,0 +1,228 @@
+PASS A1 dealer-owned vehicle is exempt (existing dealer lifecycle preserved)
+PASS A2 broker-owned vehicle is exempt
+PASS A3 vehicle with NO owner fails closed (cannot be classified)
+PASS A4 staff-owned vehicle is gated, not exempt
+PASS A5 plain 'user'-owned vehicle is gated
+PASS A6 private seller WITHOUT a proposal is blocked (5F.9 hole closed)
+PASS A7 unknown vehicle id is blocked
+PASS B1 kayad_start_auction_atomic rejects
+PASS B2 kayad_start_scheduled_auction_atomic rejects (re-evaluated at activation)
+PASS B3 kayad_start_auction_atomic rejects a NULL-owner vehicle
+PASS B4 kayad_place_bid_atomic rejects
+PASS B5 kayad_auto_bid_atomic creates nothing
+PASS B6 BACKSTOP: direct UPDATE cars SET auction_status='live' is refused
+PASS B7 BACKSTOP: publishing an auction setup is refused
+PASS B8 a DRAFT setup (not published) is still allowed
+PASS B9 BACKSTOP: ownership cannot be re-pointed to a dealer to dodge the gate while a proposal is open
+PASS B10 dealer auction still starts
+PASS B11 dealer auction still accepts a bid
+PASS B12 dealer bid recorded
+PASS C1 fully verified vehicle is eligible
+PASS C2 auction can now start
+PASS C3 buyer bid accepted
+PASS C4 bid applied to the live market
+PASS C5 auto-bid on an eligible auction behaves as before (insufficient bidders, not 'not eligible')
+PASS C6 audit trail recorded every step (>= 9 events)
+PASS D payment reverted/pending: gate closes
+PASS D payment reverted/pending: manual bid rejected
+PASS D payment reverted/pending: no bid was recorded
+PASS D inspection for a different vehicle: gate closes
+PASS D inspection for a different vehicle: manual bid rejected
+PASS D inspection for a different vehicle: no bid was recorded
+PASS D booking paid by someone else: gate closes
+PASS D booking paid by someone else: manual bid rejected
+PASS D booking paid by someone else: no bid was recorded
+PASS D booking cancelled: gate closes
+PASS D booking cancelled: manual bid rejected
+PASS D booking cancelled: no bid was recorded
+PASS D custody capability suspended: gate closes
+PASS D custody capability suspended: manual bid rejected
+PASS D custody capability suspended: no bid was recorded
+PASS D custody capability revoked: gate closes
+PASS D custody capability revoked: manual bid rejected
+PASS D custody capability revoked: no bid was recorded
+PASS D partner insurance expired: gate closes
+PASS D partner insurance expired: manual bid rejected
+PASS D partner insurance expired: no bid was recorded
+PASS D partner organisation suspended: gate closes
+PASS D partner organisation suspended: manual bid rejected
+PASS D partner organisation suspended: no bid was recorded
+PASS D seller banned: gate closes
+PASS D seller banned: manual bid rejected
+PASS D seller banned: no bid was recorded
+PASS D custody incident hold: gate closes
+PASS D custody incident hold: manual bid rejected
+PASS D custody incident hold: no bid was recorded
+PASS D custody refused after approval is not possible; hold by admin instead: gate closes
+PASS D custody refused after approval is not possible; hold by admin instead: manual bid rejected
+PASS D custody refused after approval is not possible; hold by admin instead: no bid was recorded
+PASS D release: cannot authorise release while the auction is LIVE
+PASS D release: authorised after the auction ended
+PASS D release: gate closed (custody ending)
+PASS D release: sellers cannot release a vehicle
+PASS D release: a non-assigned provider cannot release
+PASS D release: assigned partner releases to a named recipient
+PASS D release: custody ended
+PASS D appeal submitted: gate closes
+PASS D appeal submitted: manual bid rejected
+PASS D appeal submitted: no bid was recorded
+PASS E1 another seller cannot act on this proposal
+PASS E2 a seller cannot claim the admin capacity
+PASS E3 a plain user cannot claim the admin capacity
+PASS E4 an unknown capacity is refused
+PASS E5 evidence needs at least one document
+PASS E6 cannot submit a proposal with no evidence
+PASS E7 payment pending blocks inspection booking
+PASS E8 a booking for a different vehicle is refused
+PASS E9 a booking paid by someone else is refused
+PASS E10 a client-supplied unknown booking id is refused
+PASS E11 a fully-paid booking for this vehicle links
+PASS E12 retry with the same idempotency key is a no-op success
+PASS E13 exactly one payment_confirmed + one inspection link recorded
+PASS E14 the same booking cannot be reused by another proposal
+PASS E15 the seller cannot record their own inspection result
+PASS E16 a different garage cannot record the result
+PASS E17 a report from another booking is refused
+PASS E18 an invalid outcome is refused
+PASS E19 the assigned garage's confirmed inspector records the result
+PASS E20 an UNAPPROVED partner (no capability) cannot be assigned custody
+PASS E21 a pending (not yet approved) capability cannot be assigned
+PASS E22 a location outside the approved premises is refused
+PASS E23 the seller cannot assign custody
+PASS E24 admin assigns the approved partner at an approved premises
+PASS E25 an INSPECTOR of an uncleared garage cannot confirm custody
+PASS E26 the seller cannot assert physical receipt
+PASS E27 receipt without condition evidence is refused
+PASS E28 receipt without VIN/registration is refused
+PASS E29 a wrong VIN is NOT accepted: recorded as a discrepancy hold
+PASS E30 custody is on incident hold after the discrepancy
+PASS E31 the discrepancy is in the audit trail
+PASS E32 the seller cannot lift the hold
+PASS E33 releasing a hold needs a reason
+PASS E34 admin lifts the hold with a reason
+PASS E35 lifting a hold returns to handover, not to custody
+PASS E36 correct intake accepted
+PASS E37 admin cannot approve before seller authority is verified
+PASS E38 admin verifies authority
+PASS E39 reject needs a reason
+PASS E40 the seller cannot approve their own vehicle
+PASS E41 admin approves
+PASS E42 vehicle is now eligible
+PASS E43 an admin who is the seller cannot review their own proposal
+PASS E44 an admin cannot decide on their own proposal
+PASS E45 a different admin can
+PASS F1 approved and live
+PASS F2 a LIVE auction's evidence is locked (changes require admin suspension first)
+PASS F3 new evidence while NOT live
+PASS F4 evidence version incremented
+PASS F5 the case returned to review (approval no longer current)
+PASS F6 gate closed: approval tied to an older evidence version
+PASS F7 auction cannot start on a stale approval
+PASS F8 re-review restores eligibility only after an explicit admin decision
+PASS F9 eligible again
+PASS F10 evidence is locked while the auction is live
+PASS F11 failed inspection recorded
+PASS F12 failed verification blocks the auction
+PASS F13 admin cannot approve a failed inspection
+PASS F14 an inspector cannot flip a failed result in place
+PASS F15 the seller may appeal a failed inspection
+PASS F16 unresolved appeal keeps the gate closed
+PASS F17 reinspection cannot be requested while an appeal is pending
+PASS F18 the seller cannot decide their own appeal
+PASS F19 admin overturns the appeal with a reason
+PASS F20 overturning an appeal does NOT make the vehicle eligible
+PASS F21 seller requests reinspection (new paid booking required)
+PASS F22 back to awaiting payment
+PASS F23 the old (consumed) booking cannot be reused
+PASS F24 a NEW paid booking is accepted
+PASS F25 reinspection passes
+PASS F26 inconclusive result recorded
+PASS F27 inconclusive verification blocks the auction
+PASS F28 a withdrawn-by-admin style bypass: admin_decision on inconclusive is refused
+PASS F29 custody refusal path: assign then refuse
+PASS F30 refused custody
+PASS F31 refused custody blocks the auction
+PASS F32 admin can reassign after a refusal
+PASS F33 an approved DEALER custodian completes the lifecycle
+PASS F34 eligible with a dealer custodian
+PASS F35 a banned dealer custodian closes the gate
+PASS F36 a seller may withdraw a draft
+PASS F37 a withdrawn proposal accepts no further events
+PASS F38 a seller cannot withdraw a vehicle that is in custody
+PASS F39 only private sellers may open a proposal (dealer)
+PASS F40 a non-owner cannot open a proposal for someone else's vehicle
+PASS F41 a suspended seller cannot open a proposal
+PASS F42 opening a proposal twice returns the same open proposal
+PASS G1 a stranger cannot request custody capability for a provider
+PASS G2 the provider's owner requests capability (pending only)
+PASS G3 a request never creates an active capability
+PASS G4 a provider cannot approve itself
+PASS G5 approval needs approved premises
+PASS G6 approval needs a current insurance date
+PASS G7 admin approves with premises + agreement + insurance
+PASS G8 capability audit trail has request + approval
+PASS G9 a suspended/dormant provider organisation cannot request
+PASS G10 a DB-level active capability without approval metadata is impossible (CHECK)
+PASS G11 audit rows cannot be UPDATED (even by the table owner)
+PASS G12 audit rows cannot be DELETED
+PASS G13 audit table cannot be TRUNCATED
+PASS G14 capability audit is append-only
+PASS G15 service key cannot write proposals directly
+PASS G16 service key cannot forge the guard marker
+PASS G17 service key cannot forge audit rows
+PASS G18 table owner direct UPDATE of approval state is refused without the marker
+PASS G19 anonymous role is denied
+PASS G20 the seller sees their own proposal
+PASS G21 another seller sees none (cross-seller isolation)
+PASS G22 a random user sees none
+PASS G23 the assigned custody partner sees it
+PASS G24 the assigned inspector (confirmed staff) sees it
+PASS G25 an UNASSIGNED garage sees none
+PASS G26 seller reads own audit events
+PASS G27 another seller reads no audit events
+PASS G28 unassigned garage reads no audit events
+PASS G29 authenticated cannot INSERT a proposal
+PASS G30 authenticated cannot UPDATE a proposal
+PASS G31 authenticated cannot DELETE a proposal
+PASS G32 authenticated cannot self-grant custody capability
+PASS G33 authenticated cannot call the transition function
+PASS G34 authenticated cannot call the gate function
+PASS G35 authenticated cannot place bids via the RPC directly
+PASS G36 a provider sees only its own capability row
+PASS G37 a seller sees no capability rows
+PASS H1 eligible auction: confirmed bid is applied
+PASS H2 ineligible auction: payment recorded but bid NOT applied
+PASS H3 not-applied reason is explicit
+PASS H4 the real KES-1 confirmation payment is still settled (financial integrity)
+PASS H5 the car's market state was not touched
+PASS H6 retry does not apply the bid
+PASS H7 retry does not duplicate the ledger posting
+PASS H8 projection: dealer visible, ineligible private hidden, verified (before hold) logic consistent
+PASS I1 bid first, hold second: the hold WAITS for the in-flight bid (row lock)
+PASS I2 the in-flight bid was legitimately accepted before the hold
+PASS I3 every later bid is refused
+PASS I4 hold first, bid second: the bid WAITS, then is REJECTED (cannot slip through the check-then-act window)
+PASS I5 no bid recorded
+PASS I6 no bid row exists
+PASS I7 capability suspension first, bid second: bid waits then is rejected
+PASS I8 no bid recorded after concurrent suspension
+PASS I9 bid first, suspension second: suspension waits for the bid
+PASS I10 that bid stands (it was eligible when made)
+PASS I11 the next bid is refused
+PASS I12 verification invalidated first, bid second: bid rejected
+PASS I13 no bid recorded after concurrent invalidation
+PASS I14 two simultaneous equal bids: exactly one wins, the other hits the increment rule
+PASS I15 one bid recorded
+PASS I16 concurrent duplicate submissions with the same idempotency key both succeed
+PASS I17 exactly one evidence event and one version bump
+PASS I18 evidence_version incremented once
+PASS J1 migration is idempotent (applied a second time)
+PASS J2 rollback script runs
+PASS J3 rollback preserved every proposal row
+PASS J4 rollback preserved every audit row
+PASS J5 rollback removed the gate function
+PASS J6 rollback removed the cars backstop trigger
+PASS J7 (documented consequence) without the migration an ungated private vehicle can start
+PASS J8 migration re-applies cleanly after rollback
+PASS J9 gate is enforced again after re-apply
+pass=227 fail=0

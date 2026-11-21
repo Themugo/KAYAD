@@ -1,0 +1,14 @@
+apiVersion: v2
+name: kayad-frontend
+description: A Helm chart for KAYAD frontend application
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - kayad
+  - frontend
+  - web
+  - car-marketplace
+maintainers:
+  - name: KAYAD Team
+    email: dev@kayad.space

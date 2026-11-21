@@ -1,0 +1,26 @@
+import fs from "node:fs";
+const rows = JSON.parse(fs.readFileSync("/home/claude/s7/out/route_effective.json","utf8"));
+const admin = rows.filter(r => r.file === "routes/adminRoutes.js" && !(r.path||"").startsWith("/public/"));
+// exact replica of the router-level guard in routes/adminRoutes.js (lines ~150-181)
+const regexPerm = (p0) => { const path = String(p0||"").toLowerCase();
+  if (/\bescrow\b/.test(path)) return "MANAGE_ESCROWS(manage_escrow)";
+  if (/\b(payments?|transactions?|ledger|reconciliation|refund|payout)/.test(path)) return "MANAGE_PAYMENTS(manage_finance)";
+  if (/\b(cars?|listings?|auctions?|bids?)/.test(path)) return (path.includes("auction")||path.includes("bid")) ? "MANAGE_AUCTIONS" : "MANAGE_CARS";
+  if (/\b(staff|users?|dealer-verifications?)/.test(path)) return path.includes("staff") ? "MANAGE_STAFF" : "MANAGE_USERS";
+  if (/\b(ads?|campaigns?)/.test(path)) return "MANAGE_ADS";
+  if (/\b(inspection|ntsa|inspector)/.test(path)) return "MANAGE_INSPECTIONS";
+  if (/\b(support|chat)/.test(path)) return "MANAGE_SUPPORT";
+  if (/\b(security|audit|logs?)/.test(path)) return "VIEW_LOGS";
+  if (/\b(analytics|reports?|market-data)/.test(path)) return "VIEW_ANALYTICS";
+  if (/\b(settings?|config|cms|theme|branding|platform)/.test(path)) return "MANAGE_SETTINGS(manage_platform)";
+  return null; };
+const local = (g) => { const keep = []; for (const m of g.matchAll(/(requirePermission\([^)]*\)|authorize\([^)]*\)|systemOwnerOnly|adminOrSuper\w*|superAdminOnly|requireOwner\w*|allowRoles\([^)]*\)|requireRole\([^)]*\))/g)) keep.push(m[1]); return [...new Set(keep)].join(","); };
+const out = admin.map(r => ({ method: r.method, path: r.path, line: r.line, regexPerm: regexPerm(r.path), local: local(r.guards) }));
+fs.writeFileSync("/home/claude/s7/out/admin_matrix.json", JSON.stringify(out, null, 1));
+const mut = out.filter(r => r.method !== "GET");
+console.log("adminRoutes rows:", out.length, "| mutating:", mut.length);
+const noPerm = out.filter(r => !r.regexPerm && !r.local);
+console.log("\nrows with NO regex permission and NO local guard (only adminOnly = ANY staff role incl. ghost_checker/marketing):", noPerm.length);
+noPerm.forEach(r => console.log("  ", r.method.padEnd(6), r.path, "(line", r.line + ")"));
+const byPerm = {}; out.forEach(r => { const k = r.regexPerm || "(none)"; byPerm[k] = (byPerm[k] || 0) + 1; });
+console.log("\nrouter-regex permission distribution:", JSON.stringify(byPerm));

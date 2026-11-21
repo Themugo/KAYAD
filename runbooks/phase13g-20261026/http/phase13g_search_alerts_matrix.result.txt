@@ -1,0 +1,84 @@
+PASS cars-S1 anonymous full-title keyword matches the listing
+PASS cars-S2 partial keyword matches
+PASS cars-S3 case-insensitive
+PASS cars-S4 description text is searched (3+ chars)
+PASS cars-S5 no match -> 200 with empty list (not 500)
+PASS cars-S6 only public inventory: hidden, sold, pending and soft-deleted listings are never returned
+PASS cars-S7 keyword + brand filter combine
+PASS cars-S8 keyword + price range combine
+PASS cars-S9 pagination + sort: page1 has 2, page2 the remaining 1, no overlap, price ascending
+PASS cars-S10 hostile/malformed keyword (apostrophe) -> no 5xx and no rows leaked
+PASS cars-S10 hostile/malformed keyword (parenthesis) -> no 5xx and no rows leaked
+PASS cars-S10 hostile/malformed keyword (filter-injection) -> no 5xx and no rows leaked
+PASS cars-S10 hostile/malformed keyword (sql-injection) -> no 5xx and no rows leaked
+PASS cars-S10 hostile/malformed keyword (wildcards) -> no 5xx and no rows leaked
+PASS cars-S10 hostile/malformed keyword (percent+underscore) -> no 5xx and no rows leaked
+PASS cars-S10 hostile/malformed keyword (backslash) -> no 5xx and no rows leaked
+PASS cars-S10 hostile/malformed keyword (quotes) -> no 5xx and no rows leaked
+PASS cars-S10 hostile/malformed keyword (unicode) -> no 5xx and no rows leaked
+PASS cars-S10 hostile/malformed keyword (very long) -> no 5xx and no rows leaked
+PASS cars-S10 hostile/malformed keyword (nul byte) -> no 5xx and no rows leaked
+PASS cars-S11 database unharmed after injection attempts
+PASS cars-S12 authenticated roles get the same public result set (no extra private rows)
+PASS search-S1 anonymous full-title keyword matches the listing
+PASS search-S2 partial keyword matches
+PASS search-S3 case-insensitive
+PASS search-S4 description text is searched (3+ chars)
+PASS search-S5 no match -> 200 with empty list (not 500)
+PASS search-S6 only public inventory: hidden, sold, pending and soft-deleted listings are never returned
+PASS search-S7 keyword + brand filter combine
+PASS search-S8 keyword + price range combine
+PASS search-S9 pagination + sort: page1 has 2, page2 the remaining 1, no overlap, price ascending
+PASS search-S9b pagination metadata total=3
+PASS search-S10 hostile/malformed keyword (apostrophe) -> no 5xx and no rows leaked
+PASS search-S10 hostile/malformed keyword (parenthesis) -> no 5xx and no rows leaked
+PASS search-S10 hostile/malformed keyword (filter-injection) -> no 5xx and no rows leaked
+PASS search-S10 hostile/malformed keyword (sql-injection) -> no 5xx and no rows leaked
+PASS search-S10 hostile/malformed keyword (wildcards) -> no 5xx and no rows leaked
+PASS search-S10 hostile/malformed keyword (percent+underscore) -> no 5xx and no rows leaked
+PASS search-S10 hostile/malformed keyword (backslash) -> no 5xx and no rows leaked
+PASS search-S10 hostile/malformed keyword (quotes) -> no 5xx and no rows leaked
+PASS search-S10 hostile/malformed keyword (unicode) -> no 5xx and no rows leaked
+PASS search-S10 hostile/malformed keyword (very long) -> no 5xx and no rows leaked
+PASS search-S10 hostile/malformed keyword (nul byte) -> no 5xx and no rows leaked
+PASS search-S11 database unharmed after injection attempts
+PASS search-S12 authenticated roles get the same public result set (no extra private rows)
+PASS V0 approved private seller's 3 public listings are searchable
+PASS V1 admin suspends the seller (real endpoint)
+PASS V2 cars: suspended seller's listings absent from keyword search (fresh + after cache warm)
+PASS V2b cars: still absent on a repeat (cached) request
+PASS V2 search: suspended seller's listings absent from keyword search (fresh + after cache warm)
+PASS V2b search: still absent on a repeat (cached) request
+PASS V3 admin restores approval
+PASS V4 cars: restored listings searchable again; the originally hidden/sold/pending/deleted ones are NOT
+PASS V4 search: restored listings searchable again; the originally hidden/sold/pending/deleted ones are NOT
+PASS V5 ownership unchanged through suspend/restore
+PASS AL1 anonymous cannot read admin alerts
+PASS AL1 buyer cannot read admin alerts
+PASS AL1 dealer cannot read admin alerts
+PASS AL1 legacy cannot read admin alerts
+PASS AL1b KNOWN/DOCUMENTED: every staff role (here marketing) can read the alert feed - the route sits behind adminOnly with no per-permission mapping (see defect register D-A5)
+PASS AL2 admin reads alerts (was HTTP 500 before 20261026100000)
+PASS AL3 unreadCount counts unread rows
+PASS AL4 read=false filter
+PASS AL5 severity filter
+PASS AL6 admin marks one alert read
+PASS AL6b updated_at trigger advanced on update
+PASS AL7 buyer cannot mark alerts read
+PASS AL8 unknown alert id -> 404
+PASS AL9 malformed id -> 4xx, not 500
+PASS AL10 read-all marks every alert read
+PASS AL11 system health (reads admin_alerts) -> 200
+PASS RLS1 direct PostgREST SELECT as anon returns no alert data
+PASS RLS2 direct PostgREST INSERT as anon is refused
+PASS RLS3 direct PostgREST UPDATE as anon is refused and the row is unchanged
+PASS RLS1 direct PostgREST SELECT as authenticated returns no alert data
+PASS RLS2 direct PostgREST INSERT as authenticated is refused
+PASS RLS3 direct PostgREST UPDATE as authenticated is refused and the row is unchanged
+PASS RLS4 database-level: anon/authenticated hold no privilege on admin_alerts
+PASS CH1 admin chat list works (was HTTP 500: column chats.updated_at does not exist)
+PASS CH2 isBlocked filter excludes the unblocked chat
+PASS CH3 anonymous cannot list admin chats
+PASS CH3 buyer cannot list admin chats
+PASS CH3 dealer cannot list admin chats
+phase13g_search_alerts_matrix: pass=83 fail=0

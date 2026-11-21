@@ -1,0 +1,29 @@
+import fs from "node:fs";
+import path from "node:path";
+import assert from "node:assert/strict";
+import { fileURLToPath } from "node:url";
+
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const read = (file) => fs.readFileSync(path.join(root, file), "utf8");
+const exists = (file) => fs.existsSync(path.join(root, file));
+
+assert.ok(exists("public/branding/kayard-k-mark.png"), "Approved KAYARD K mark asset exists");
+assert.ok(exists("public/icons/icon-192.png"), "192px PWA icon exists");
+assert.ok(exists("public/icons/icon-512.png"), "512px PWA icon exists");
+const branding = read("src/context/BrandingContext.tsx");
+assert.match(branding, /logoText:\s*'KAYARD KE'/);
+assert.match(branding, /logoUrl:\s*'\/branding\/kayard-k-mark\.png'/);
+assert.match(branding, /DEFAULT_LOGO_URL\s*=\s*'\/branding\/kayard-k-mark\.png'/);
+assert.match(branding, /KAYAD'\)\s*merged\.logoText\s*=\s*'KAYARD KE'/);
+assert.match(read("src/components/Navbar.tsx"), /aria-label="KAYARD KE marketplace home"/);
+assert.match(read("src/components/Navbar.tsx"), /DEFAULT_LOGO_URL/);
+assert.match(read("src/components/BrandMark.tsx"), /DEFAULT_LOGO_URL/);
+assert.match(read("src/components/admin/LogoUploader.jsx"), /DEFAULT_LOGO_URL = '\/branding\/kayard-k-mark\.png'/);
+assert.match(read("backend/utils/siteDesign.js"), /logoUrl: "\/branding\/kayard-k-mark\.png", logoText: "KAYARD KE"/);
+assert.match(read("index.html"), /<title>KAYARD KE \| Vehicle Marketplace in Kenya<\/title>/);
+const manifest = JSON.parse(read("public/manifest.webmanifest"));
+assert.equal(manifest.name, "KAYARD KE – Kenya's Vehicle Marketplace");
+assert.equal(manifest.short_name, "KAYARD KE");
+assert.equal(manifest.icons.find((x) => x.sizes === "192x192")?.src, "/icons/icon-192.png");
+assert.equal(manifest.icons.find((x) => x.sizes === "512x512")?.src, "/icons/icon-512.png");
+console.log("PASS: KAYARD brand identity assets, defaults, migration, favicon/PWA references and header fallbacks are aligned.");

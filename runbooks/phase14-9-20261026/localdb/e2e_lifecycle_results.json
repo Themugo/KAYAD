@@ -1,0 +1,260 @@
+{
+ "ctx": {
+  "seedPending": "3225dfa5-64eb-446d-acd7-4397bb87e624",
+  "carId2": "4fa88b24-6869-48e0-8b9c-87d7a06758d3",
+  "d1": "1fa372b9-693b-4dae-a48a-419668e6fe11",
+  "d1email": "dealer_1793033965264_1@example.test"
+ },
+ "results": [
+  {
+   "name": "1 dealer registration returns 201 with status pending, unverified email",
+   "ok": true,
+   "detail": "201"
+  },
+  {
+   "name": "1 response never contains password or tokens",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "2 weak password rejected (400)",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "2 dealer without businessName/location rejected",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "2 self-registration as admin/superadmin is refused",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "3 duplicate email (case-insensitive) -> 409",
+   "ok": true,
+   "detail": "409"
+  },
+  {
+   "name": "3 concurrent duplicate registrations create exactly one account",
+   "ok": true,
+   "detail": "201,409,409,409,409,409,409,409"
+  },
+  {
+   "name": "3 database holds exactly one user and one user_auth row for the race email",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "4 password stored as a hash, not plaintext",
+   "ok": true,
+   "detail": "$2b$"
+  },
+  {
+   "name": "5 login before email verification: 200",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "5 invalid verification token rejected",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "5 verification token verifies the email once",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "5 consumed/unknown token cannot be replayed",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "5 resend for unknown email gives a non-enumerating response",
+   "ok": true,
+   "detail": "202"
+  },
+  {
+   "name": "6 login succeeds and sets session cookies",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "6 session persists across requests",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "6 cookie session without a valid CSRF token is refused (403)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "6 no session -> 401",
+   "ok": true,
+   "detail": "401"
+  },
+  {
+   "name": "6 wrong password -> 401",
+   "ok": true,
+   "detail": "401"
+  },
+  {
+   "name": "7 registered (unapproved, no verification) dealer cannot create a listing (403)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "7 dealer inventory-write routes refuse an unapproved dealer (403; the dashboard itself stays readable so onboarding state can be shown)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "8 invalid onboarding data -> 400 and nothing persisted",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "8 onboarding completes and submits verification (pending)",
+   "ok": true,
+   "detail": "200{\"success\":true,\"message\":\"Dealer onboarding completed and verification submitted.\",\"dealer\":{\"id\":\"f4f40775-81bb-4f3c-a"
+  },
+  {
+   "name": "8 dealers row has business details, onboarding flags and payment details",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "8 resubmission while pending is allowed and idempotent (one verification row)",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "8 onboarding is resumable: saved details are returned to the owner",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "9 pending dealer cannot create a listing under the default approval_required policy (403 DEALER_APPROVAL_PENDING)",
+   "ok": true,
+   "detail": "403{\"success\":false,\"message\":\"Your verification is pending review\",\"code\":\"DEALER_APPROVAL_PENDING\",\"verificationStatus\":\"pending\",\"requiresAction\":\"wai"
+  },
+  {
+   "name": "9 public search responds",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "9 a dealer cannot approve a verification (403)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "9 under the default owner_only policy a non-owner superadmin cannot approve a dealer (403 DECISION_AUTHORITY_REQUIRED)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "9 admin approves the dealer",
+   "ok": true,
+   "detail": "200{\"success\":true,\"message\":\"Verification approved successfully\",\"verification\":{\"id\":\"e287289a-0ecb-4680-a60b-598d4eaea14"
+  },
+  {
+   "name": "9 APPROVAL DOES NOT PUBLISH INVENTORY: pending listing still pending after approval",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "9 listing still absent from public search after approval",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "9 approved dealer cannot rewrite onboarding/payment details (409, nothing written)",
+   "ok": true,
+   "detail": "409"
+  },
+  {
+   "name": "10 approved dealer reaches dashboard data",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "10 approved dealer listing creation is validated server-side: a photo is mandatory (400, nothing written); real photo upload needs Cloudinary and is an UNEXECUTED staging test",
+   "ok": true,
+   "detail": "400"
+  },
+  {
+   "name": "10 owner edits own listing",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "10 another dealer cannot edit it (403/404)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "11 rejection recorded with reason",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "11 rejected dealer cannot create listings (403 DEALER_VERIFICATION_REJECTED)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "11 rejected dealer may resubmit -> pending",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "11 admin suspends an approved dealer",
+   "ok": true,
+   "detail": "200{\"success\":true,\"message\":\"Dealer suspended successfully\",\"verification\":{\"id\":\"e287289a-0ecb-4680-a"
+  },
+  {
+   "name": "11 suspended dealer cannot create listings (403 DEALER_ACCOUNT_SUSPENDED)",
+   "ok": true,
+   "detail": "403{\"success\":false,\"code\":\"DEALER_ACCOUNT_SUSPENDED\",\"message\":\"Dealer account is suspended and requir"
+  },
+  {
+   "name": "11 suspended dealer cannot rewrite onboarding data (409)",
+   "ok": true,
+   "detail": "409"
+  },
+  {
+   "name": "11 reinstatement is an explicit admin decision",
+   "ok": true,
+   "detail": "200"
+  },
+  {
+   "name": "11 reinstatement does not change listing publication state",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "name": "11 illegal transition approved->rejected refused (409)",
+   "ok": true,
+   "detail": "409"
+  },
+  {
+   "name": "12 approved private seller cannot use dealer team routes (403)",
+   "ok": true,
+   "detail": "403"
+  },
+  {
+   "name": "12 private seller approval creates no dealer identity",
+   "ok": true,
+   "detail": "0"
+  },
+  {
+   "name": "12 private seller cannot enter the dealer verification workflow",
+   "ok": true,
+   "detail": "400"
+  }
+ ]
+}

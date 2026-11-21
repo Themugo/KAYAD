@@ -1,0 +1,230 @@
+import { request, HttpRequestError } from '../api/httpRequest';
+/**
+ * Real backend authentication API client. Built for KAYAD Fusion Phase 3
+ * Authentication uses the backend as the single source of truth.
+ * authentication system backed by the existing backend").
+ *
+ * Every function here calls the actual, already-built backend endpoints
+ * documented in docs/fusion/05-auth-map.md - it does not invent a second
+ * auth system. The backend sets the access token as an httpOnly cookie
+ * (confirmed directly in backend/controllers/authController.js's own
+ * comment: "Do NOT include the access token in the JSON response body...
+ * makes it readable by any JavaScript on the page, defeating httpOnly
+ * protection") - so every request here uses `credentials: 'include'`
+ * to send/receive that cookie, and this client never reads, stores, or
+ * exposes a token itself. That is deliberate, not an oversight: doing
+ * otherwise would defeat the backend's own security design.
+ *
+ * IMPORTANT, STATED HONESTLY: this client has not been exercised against
+ * a live backend. No Supabase project is currently provisioned for this
+ * backend (confirmed in docs/fusion/01 and 04), so there is nothing
+ * running at VITE_API_URL to test this against in this environment. The
+ * request/response shapes below were read directly from the backend's
+ * own controller code (backend/controllers/authController.js), not
+ * guessed - but "matches the code" and "verified working end-to-end
+ * against a live server" are different claims, and only the first one
+ * can be made here.
+ */
+
+
+export interface BackendUser {
+  id: string;
+  _id?: string;
+  name: string;
+  email: string;
+  role: string;
+  phone?: string;
+  avatar?: string;
+  status?: string;
+  isBanned?: boolean;
+  approved?: boolean;
+  location?: string;
+  dealerRating?: number;
+  bio?: string;
+  businessName?: string;
+  businessType?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  emailVerified?: boolean;
+  phoneVerified?: boolean;
+  verificationStatus?: string;
+  isOwner?: boolean;
+  mustChangePassword?: boolean;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  user?: BackendUser;
+  message?: string;
+}
+
+/** Every known distinct failure mode a caller needs to distinguish
+ * between, rather than a single generic "it failed" - a login attempt
+ * needs to tell "wrong password" apart from "server unreachable" to
+ * show the right message. */
+export type AuthErrorKind = 'invalid_credentials' | 'email_verification_required' | 'owner_identity_unverified' | 'mfa_required' | 'forbidden' | 'rate_limited' | 'csrf' | 'validation' | 'conflict' | 'network' | 'server' | 'unknown';
+
+export class AuthApiError extends Error {
+  kind: AuthErrorKind;
+  status?: number;
+  /** Machine code from the backend's JSON body, when the API itself answered.
+   * Its presence proves the request reached KAYAD's application (not a proxy,
+   * gateway or dropped connection), so the outcome is known. */
+  code?: string;
+  constructor(message: string, kind: AuthErrorKind, status?: number, code?: string) {
+    super(message);
+    this.kind = kind;
+    this.status = status;
+    this.code = code;
+  }
+}
+
+async function authFetch(path: string, options: RequestInit & { timeout?: number } = {}): Promise<AuthResponse> {
+  try {
+    return await request<AuthResponse>(path, { method: options.method, body: options.body, headers: options.headers as Record<string, string>, timeout: options.timeout });
+  } catch (err) {
+    const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');
+    // STAGE 5E: the backend's owner-identity gate answers 403 with code OWNER_IDENTITY_UNVERIFIED. Its message points the owner at
+    // "Resend verification email", so the caller must be able to recognise it and offer that action (matched on the machine code,
+    // never on wording).
+    const responseCode = (error.responseData as { code?: unknown } | undefined)?.code;
+    const kind: AuthErrorKind = error.status === 403 && responseCode === 'OWNER_IDENTITY_UNVERIFIED'
+      ? 'owner_identity_unverified'
+      : error.status === 401 && responseCode === 'MFA_REQUIRED'
+      ? 'mfa_required'
+      : error.status === 403 && /csrf/i.test(error.message)
+      ? 'csrf'
+      : error.status === 403 && /verify your email/i.test(error.message)
+        ? 'email_verification_required'
+        : error.status === 403
+          ? 'forbidden'
+          : error.status === 429
+            ? 'rate_limited'
+            : error.status === 400
+              ? 'validation'
+              : error.status === 409
+                ? 'conflict'
+                : error.status === 401
+                  ? 'invalid_credentials'
+                  : error.status
+                    ? 'server'
+                    : 'network';
+    throw new AuthApiError(error.message, kind, error.status, typeof responseCode === 'string' ? responseCode : undefined);
+  }
+}
+
+/** Session restoration - called on app mount. Relies entirely on the
+ * httpOnly refresh/access token cookies already being present in the
+ * browser from a prior login; there is nothing else for the frontend
+ * to check.
+ *
+ * Returns the user (signed in) or null (the server answered 401: confirmed
+ * signed out). ANYTHING ELSE - network failure, timeout, 5xx, 429, CSRF, a
+ * 403, or a malformed 200 - is thrown as an AuthApiError: the caller must
+ * treat that as "session state unknown", never as "logged out". */
+export async function getMe(opts: { timeoutMs?: number } = {}): Promise<BackendUser | null> {
+  let res: AuthResponse;
+  try {
+    res = await authFetch('/api/v1/auth/me', { method: 'GET', timeout: opts.timeoutMs });
+  } catch (err) {
+    // ONLY an explicit 401 means "there is no valid session". Network errors,
+    // timeouts, 5xx, 429, CSRF and 403 are rethrown as typed AuthApiErrors so
+    // the caller can tell "confirmed signed out" from "could not find out".
+    if (err instanceof AuthApiError && (err.kind === 'invalid_credentials' || err.status === 401)) {
+      return null;
+    }
+    throw err;
+  }
+  // Response contract: { success: true, user: { id|_id, ... } }. A 200 that
+  // does not match (an HTML SPA fallback from a wrong API host, a proxy error
+  // page, a truncated body) is neither "signed in" nor "signed out" - fail
+  // safely as an unknown, retryable error rather than guessing.
+  const user = (res as { user?: unknown } | null | undefined)?.user;
+  if (res && typeof res === 'object' && user && typeof user === 'object' && ((user as BackendUser).id || (user as BackendUser)._id)) {
+    return user as BackendUser;
+  }
+  throw new AuthApiError('Unexpected response while checking your session.', 'unknown', 200);
+}
+
+export async function logout(): Promise<void> {
+  await authFetch('/api/v1/auth/logout', { method: 'POST' });
+}
+
+export async function login(email: string, password: string, mfaCode?: string): Promise<BackendUser> {
+  const res = await authFetch('/api/v1/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(mfaCode ? { email, password, mfaCode } : { email, password }),
+  });
+  if (!res.user) throw new AuthApiError(res.message || 'Login failed.', 'unknown', 500);
+  return res.user;
+}
+
+/** A fresh key per registration attempt. The caller re-sends the SAME key when the outcome of an attempt is unknown. */
+export function newRegistrationIdempotencyKey(): string {
+  const c = typeof globalThis !== 'undefined' ? (globalThis as { crypto?: Crypto }).crypto : undefined;
+  if (c?.randomUUID) return c.randomUUID();
+  const bytes = new Uint8Array(24);
+  if (c?.getRandomValues) c.getRandomValues(bytes); else for (let i = 0; i < bytes.length; i += 1) bytes[i] = Math.floor(Math.random() * 256);
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+export async function register(body: Record<string, unknown>, options: { idempotencyKey?: string } = {}): Promise<BackendUser> {
+  const res = await authFetch('/api/v1/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(body),
+    ...(options.idempotencyKey ? { headers: { 'Idempotency-Key': options.idempotencyKey } } : {}),
+  });
+  if (!res.user) throw new AuthApiError(res.message || 'Registration failed.', 'unknown', 500);
+  return res.user;
+}
+
+export async function updateProfile(body: Record<string, unknown>): Promise<BackendUser> {
+  const res = await authFetch('/api/v1/auth/profile', {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+  if (!res.user) throw new AuthApiError(res.message || 'Profile update failed.', 'unknown', 500);
+  return res.user;
+}
+
+
+
+/** Generic authenticated auth request for the remaining v1 auth endpoints. */
+async function authMessageRequest(path: string, method: string, body?: Record<string, unknown>) {
+  return authFetch(path, {
+    method,
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  });
+}
+
+export async function changePassword(body: { currentPassword: string; newPassword: string }): Promise<AuthResponse> {
+  return authMessageRequest('/api/v1/auth/change-password', 'PUT', body);
+}
+
+export async function forgotPassword(body: { email: string }): Promise<AuthResponse> {
+  return authMessageRequest('/api/v1/auth/forgot-password', 'POST', body);
+}
+
+export async function resetPassword(body: { token: string; password: string }): Promise<AuthResponse> {
+  return authMessageRequest('/api/v1/auth/reset-password', 'POST', body);
+}
+
+export async function verifyEmail(token: string): Promise<AuthResponse> {
+  return authMessageRequest(`/api/v1/auth/verify-email/${encodeURIComponent(token)}`, 'GET');
+}
+
+export async function resendVerification(body: { email: string }): Promise<AuthResponse> {
+  return authMessageRequest('/api/v1/auth/resend-verification', 'POST', body);
+}
+
+export async function sendOTP(): Promise<AuthResponse> {
+  return authMessageRequest('/api/v1/auth/send-otp', 'POST');
+}
+
+export async function verifyPhone(otp: string): Promise<AuthResponse> {
+  return authMessageRequest('/api/v1/auth/verify-phone', 'POST', { otp });
+}
+
+export async function phoneStatus(): Promise<AuthResponse> {
+  return authMessageRequest('/api/v1/auth/phone-status', 'GET');
+}

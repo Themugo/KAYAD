@@ -1,0 +1,222 @@
+import SecurityLog from "../models/SecurityLog.js";
+import AuditLog from "../models/AuditLog.js";
+import { toAuditLogRow } from "./auditLogRow.js";
+import { logError, logWarn, logInfo } from "./logger.js";
+import { deliver } from "../services/communicationGateway.service.js";
+
+// Security event types
+export const SECURITY_EVENTS = {
+  // Authentication events
+  AUTH_SUCCESS: "AUTH_SUCCESS",
+  AUTH_FAILED: "AUTH_FAILED",
+  AUTH_LOCKOUT: "AUTH_LOCKOUT",
+  AUTH_LOGOUT: "AUTH_LOGOUT",
+  PASSWORD_CHANGE: "PASSWORD_CHANGE",
+  PASSWORD_RESET: "PASSWORD_RESET",
+
+  // Authorization events
+  AUTHORIZATION_SUCCESS: "AUTHORIZATION_SUCCESS",
+  AUTHORIZATION_FAILED: "AUTHORIZATION_FAILED",
+  IDOR_ATTEMPT: "IDOR_ATTEMPT",
+  PRIVILEGE_ESCALATION: "PRIVILEGE_ESCALATION",
+
+  // CSRF events
+  CSRF_FAILED: "CSRF_FAILED",
+
+  // Injection events
+  INJECTION_ATTEMPT: "INJECTION_ATTEMPT",
+  XSS_ATTEMPT: "XSS_ATTEMPT",
+
+  // Rate limiting events
+  RATE_LIMIT_EXCEEDED: "RATE_LIMIT_EXCEEDED",
+
+  // Data events
+  DATA_ACCESS: "DATA_ACCESS",
+  DATA_MODIFICATION: "DATA_MODIFICATION",
+  DATA_DELETION: "DATA_DELETION",
+  DATA_EXPORT: "DATA_EXPORT",
+
+  // System events
+  SYSTEM_CONFIG_CHANGE: "SYSTEM_CONFIG_CHANGE",
+  ADMIN_ACTION: "ADMIN_ACTION",
+  CACHE_FLUSH: "CACHE_FLUSH",
+  METRICS_RESET: "METRICS_RESET",
+};
+
+// Severity levels
+export const SEVERITY = {
+  INFO: "info",
+  WARN: "warn",
+  ERROR: "error",
+  CRITICAL: "critical",
+};
+
+// Critical security events that require immediate alerting
+const CRITICAL_EVENTS = [
+  SECURITY_EVENTS.AUTH_LOCKOUT,
+  SECURITY_EVENTS.IDOR_ATTEMPT,
+  SECURITY_EVENTS.PRIVILEGE_ESCALATION,
+  SECURITY_EVENTS.CSRF_FAILED,
+  SECURITY_EVENTS.INJECTION_ATTEMPT,
+  SECURITY_EVENTS.XSS_ATTEMPT,
+];
+
+export const logSecurityAction = async ({
+  action,
+  actor = null,
+  actorRole = null,
+  target = null,
+  targetModel = null,
+  resourceId = null,
+  details = {},
+  ip = null,
+  userAgent = null,
+  severity = "info",
+}) => {
+  try {
+    try {
+      await SecurityLog.create({
+        action,
+        actor,
+        actorRole,
+        target,
+        targetModel,
+        resourceId,
+        details,
+        ip,
+        userAgent,
+        severity,
+      });
+    } catch (primaryError) {
+      // STAGE 5C: public.security_logs has no DDL in the repository (docs/audits/08, 21), so on a database built from the migrations
+      // every action audit (dealer onboarding, verification decisions, inspection transitions, ...) was silently lost. Only when the
+      // relation is MISSING, fall back to the canonical audit_logs table (same fields, mapped by auditLogRow). Any other failure -
+      // and a failure of the fallback itself - still surfaces through the outer handler below; nothing is swallowed.
+      const detail = `${primaryError?.code || ""} ${primaryError?.message || ""}`.trim();
+      // An opaque error (no code, no message) is what a bare 404 from the REST layer produces for an unknown relation.
+      const missing = !detail || /42P01|PGRST205|schema cache|does not exist|Could not find the table/i.test(detail);
+      if (!missing) throw primaryError;
+      await AuditLog.create(toAuditLogRow({ action, actor, actorRole, target, targetModel, ip, details: { ...(details && typeof details === "object" ? details : {}), severity, resourceId, userAgent, store: "audit_logs_fallback" } }));
+    }
+
+    // Log to application logger for immediate visibility
+    if (severity === SEVERITY.CRITICAL) {
+      logError(`SECURITY CRITICAL: ${action}`, new Error(action), { actor, target, ip });
+    } else if (severity === SEVERITY.ERROR) {
+      logError(`SECURITY ERROR: ${action}`, new Error(action), { actor, target, ip });
+    } else if (severity === SEVERITY.WARN) {
+      logWarn(`SECURITY WARN: ${action}`, { actor, target, ip });
+    } else {
+      logInfo(`SECURITY INFO: ${action}`, { actor, target, ip });
+    }
+
+    // Send alert for critical events
+    if (CRITICAL_EVENTS.includes(action)) {
+      await sendSecurityAlert({ action, actor, target, ip, severity });
+    }
+  } catch (err) {
+    logError("Security log failed", err, { action, actor, target });
+  }
+};
+
+export const logActionFromReq = async (req, action, { target, targetModel, resourceId, details, severity } = {}) => {
+  return logSecurityAction({
+    action,
+    actor: req.user?.id || req.user?._id,
+    actorRole: req.user?.role,
+    target,
+    targetModel,
+    resourceId,
+    details,
+    ip: req.ip,
+    userAgent: req.headers?.["user-agent"],
+    severity,
+  });
+};
+
+// Send security alert (can be integrated with SIEM, email, Slack, etc.)
+const sendSecurityAlert = async ({ action, actor, target, ip, severity }) => {
+  try {
+    // SIEM integration (if configured)
+    if (process.env.SIEM_ENABLED === "true") {
+      await sendToSIEM({ action, actor, target, ip, severity, timestamp: new Date().toISOString() });
+    }
+
+    // Email alert for critical events (if configured)
+    if (severity === SEVERITY.CRITICAL && process.env.SECURITY_ALERT_EMAIL) {
+      await sendEmailAlert({ action, actor, target, ip });
+    }
+
+    // Slack alert (if configured)
+    if (process.env.SECURITY_SLACK_WEBHOOK) {
+      await sendSlackAlert({ action, actor, target, ip, severity });
+    }
+  } catch (err) {
+    logError("Security alert failed", err);
+  }
+};
+
+// SIEM integration (logs to structured log for collection by log shippers)
+const sendToSIEM = async (data) => {
+  logInfo("SIEM_ALERT", { source: "security_logger", ...data });
+};
+
+// Email alert for critical security events
+const sendEmailAlert = async ({ action, actor, target, ip }) => {
+  if (!process.env.SECURITY_ALERT_EMAIL) return;
+  try {
+    const recipients = process.env.SECURITY_ALERT_EMAIL.split(",").map((v) => v.trim()).filter(Boolean);
+    await Promise.all(recipients.map((recipient) => deliver({
+      channel: "email",
+      eventType: "security.alert",
+      category: "system",
+      recipient,
+      subject: `[KAYARD KE Security] ${action}`,
+      html: `<h2>Security Alert</h2><p>Action: ${action}</p><p>Actor: ${actor || "unknown"}</p><p>Target: ${target || "N/A"}</p><p>IP: ${ip || "N/A"}</p><p>Time: ${new Date().toISOString()}</p>`,
+      text: `Security Alert: ${action}. Actor: ${actor || "unknown"}. Target: ${target || "N/A"}. IP: ${ip || "N/A"}.`,
+      metadata: { action, actor, target, ip },
+    })));
+  } catch {
+    logWarn("Security alert email failed");
+  }
+};
+
+// Slack webhook alert
+const sendSlackAlert = async ({ action, actor, target, ip, severity }) => {
+  const webhook = process.env.SECURITY_SLACK_WEBHOOK;
+  if (!webhook) return;
+  try {
+    await fetch(webhook, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        text: `*[${severity.toUpperCase()}] Security Alert*\n• Action: ${action}\n• Actor: ${actor || "unknown"}\n• Target: ${target || "N/A"}\n• IP: ${ip || "N/A"}\n• Time: ${new Date().toISOString()}`,
+      }),
+    });
+  } catch {
+    logWarn("Slack security alert failed");
+  }
+};
+
+// Log retention - clean up old security logs
+export const cleanupOldSecurityLogs = async () => {
+  try {
+    const retentionDays = parseInt(process.env.SECURITY_LOG_RETENTION_DAYS || "90");
+    const cutoffDate = new Date(Date.now() - retentionDays * 24 * 60 * 60 * 1000);
+
+    const result = await SecurityLog.deleteMany({
+      timestamp: { $lt: cutoffDate }
+    });
+
+    if (result.deletedCount > 0) {
+      logInfo(`Cleaned up ${result.deletedCount} old security logs`);
+    }
+  } catch (err) {
+    logError("Security log cleanup failed", err);
+  }
+};
+
+// Schedule cleanup to run daily
+if (process.env.NODE_ENV === "production") {
+  setInterval(cleanupOldSecurityLogs, 24 * 60 * 60 * 1000);
+}
