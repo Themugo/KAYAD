@@ -1,0 +1,5 @@
+# 04 — Catalogue grid and list report
+Files: `src/index.css` (container query 520→320px; phone grid forced to 2 cols when the result area ≥320px), `homepage-redesign.css` (final scoped block), `inventoryPresentation.ts` (`<320 → 1` column) + its test table (deliberate change per the new design). JSX/data/handlers unchanged; single data source.
+Measured columns (evidence/after/metrics.json): 320 & 340 → 1 (result area <320, "insufficient"), 360–600 → 2, 768/1024 → 2, ≥1280 → 4 (unchanged vs before). List view: single column; horizontal image(40%)+details from 360px, stacked below.
+Grid card order: image → Marketplace-listing label → title → price → mileage → fuel → transmission → location → View Vehicle Details; favourite, photo counter kept. Thumbnail strip, expand button and Contact Seller are hidden **only in the compact 2-col phone grid** (to match the reference); they remain in list view and in vehicle details. Long Prado title and KES 98.5M price wrap/clamp without overflow (no horizontal overflow in any run).
+Known: list-view image is `cover` on a tall card so portrait crops are heavy on some artwork; 2-col grid card text is 12px.

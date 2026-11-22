@@ -253,7 +253,7 @@ class PushNotificationAdapter extends OutputAdapter {
     io.to(`user:${userId}:push`).emit('pushNotification', {
       title,
       body,
-      icon: icon || '/icons/icon-192x192.png',
+      icon: icon || '/icons/icon-192.png',
       clickAction: clickAction || '/',
       timestamp: Date.now(),
     });

@@ -18,7 +18,8 @@ vi.mock('../../context/NotificationContext', () => ({
   useNotifications: () => ({ unreadCount: 3 }),
 }));
 vi.mock('../../context/BrandingContext', () => ({
-  DEFAULT_LOGO_URL: '/branding/kayard-k-mark.png',
+  DEFAULT_LOGO_URL: '/branding/kayard-ke-logo.png',
+  DEFAULT_LOGO_DARK_URL: '/branding/kayard-ke-logo-dark.png',
   onBrandLogoError: () => {},
   useBranding: () => ({
     branding: { logoType: 'icon', logoText: 'KAYAD' },

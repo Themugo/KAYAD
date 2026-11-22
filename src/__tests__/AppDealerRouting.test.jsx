@@ -8,7 +8,8 @@ vi.mock('../api/api', async () => {
 });
 vi.mock('socket.io-client', () => ({ io: () => ({ on() {}, off() {}, emit() {}, close() {}, disconnect() {}, connected: false }) }));
 vi.mock('../context/BrandingContext', () => ({
-  DEFAULT_LOGO_URL: '/branding/kayard-k-mark.png',
+  DEFAULT_LOGO_URL: '/branding/kayard-ke-logo.png',
+  DEFAULT_LOGO_DARK_URL: '/branding/kayard-ke-logo-dark.png',
   BrandingProvider: ({ children }) => children,
   useBranding: () => ({ branding: {}, loading: false }),
   useBrandingSafe: () => ({}),

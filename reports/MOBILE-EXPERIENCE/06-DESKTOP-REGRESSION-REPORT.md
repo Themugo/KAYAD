@@ -1,0 +1,2 @@
+# 06 — Desktop regression report
+Method: same harness, before vs after at 768/1024/1280/1440/1920 (grid+list), pixel diff of viewport screenshots. Column counts and card widths identical. 768 and 1440 identical; differences: footer logo region (1280 y≈2192; intended), and small regions at 1024-list (25,721–251,831), 1920 (carousel area) attributable to carousel rotation timing / the new footer logo — not layout. All new CSS is inside ≤639.98/767.98px queries. Status: no desktop layout regression found (VERIFIED by diff; manual 1920 hero review not performed).

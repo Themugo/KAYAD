@@ -26,7 +26,8 @@ vi.mock('socket.io-client', () => ({
 
 // Mock BrandingContext to avoid async state updates after test teardown
 vi.mock('../context/BrandingContext', () => ({
-  DEFAULT_LOGO_URL: '/branding/kayard-k-mark.png',
+  DEFAULT_LOGO_URL: '/branding/kayard-ke-logo.png',
+  DEFAULT_LOGO_DARK_URL: '/branding/kayard-ke-logo-dark.png',
   onBrandLogoError: () => {},
   BrandingProvider: ({ children }) => children,
   useBranding: () => ({ branding: {}, loading: false }),

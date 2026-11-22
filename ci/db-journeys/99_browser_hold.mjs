@@ -10,7 +10,11 @@ const mkDealer = async (tag) => { const d = await makeUser({ tag, role: 'dealer'
 const dealer = await mkDealer('bdealer');
 const personal = await makeUser({ tag: 'bpersonal' });
 const buyer = await makeUser({ tag: 'bbuyer' });
-for (let i = 1; i <= 4; i++) q(`insert into cars(title,brand,model,year,price,status,dealer_id,sold,images) values ('Browser car ${i}','Toyota','Prado',201${i},${3000000 + i * 100000},'available','${dealer.id}',false,'[]'::jsonb)`);
+const IMG = ['/hero/kayad-prado.png', '/hero/kayad-mercedes-gle-clean.png', '/hero/kayad-land-cruiser-clean.png', '/hero/kayad-mercedes-gle.png', '/hero/kayad-land-cruiser.png', '/hero/kayad-prado.png', '/hero/kayad-mercedes-gle-clean.png', '/hero/kayad-land-cruiser-clean.png'];
+const CARS = [['2020 Mazda CX-5', 'Mazda', 'CX-5', 2020, 1900000, 124000, 'Diesel', 'Automatic', 'Kiambu Rd'], ['2016 Land Cruiser V8', 'Toyota', 'Land Cruiser', 2016, 3500000, 165000, 'Petrol', 'Automatic', 'Nairobi'],
+  ['2019 Toyota Prado TX-L Executive Edition With Sunroof And Full Leather Package Extended Name For Testing', 'Toyota', 'Prado', 2019, 98500000, 88000, 'Diesel', 'Automatic', 'Westlands, Nairobi'], ['2018 Mercedes GLE', 'Mercedes', 'GLE', 2018, 6200000, 54000, 'Petrol', 'Automatic', 'Karen'],
+  ['2015 Toyota Fielder', 'Toyota', 'Fielder', 2015, 890000, 142000, 'Petrol', 'Automatic', 'Mombasa'], ['2021 Land Cruiser 300', 'Toyota', 'Land Cruiser', 2021, 21000000, 12000, 'Diesel', 'Automatic', 'Nairobi'], ['2017 Subaru Forester', 'Subaru', 'Forester', 2017, 2100000, 98000, 'Petrol', 'CVT', 'Nakuru'], ['2014 Nissan X-Trail', 'Nissan', 'X-Trail', 2014, 1250000, 160000, 'Petrol', 'Automatic', 'Eldoret']];
+CARS.forEach(([t, b, m, y, price, km, fuel, tr, city], i) => q(`insert into cars(title,brand,model,year,price,mileage,fuel,transmission,location_city,status,approved,dealer_id,sold,images) values ('${t.replace(/'/g, "''")}','${b}','${m}',${y},${price},${km},'${fuel}','${tr}','${city}','available',true,'${dealer.id}',false,'[{"url":"${IMG[i]}","publicId":"p${i}"},{"url":"${IMG[(i + 1) % 8]}","publicId":"q${i}"}]'::jsonb)`));
 const roles = {};
 for (const r of ['viewer', 'sales_agent', 'finance_officer', 'manager']) {
   const u = await makeUser({ tag: 'b' + r.slice(0, 5) });
