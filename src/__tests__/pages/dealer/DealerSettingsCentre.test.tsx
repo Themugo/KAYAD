@@ -16,6 +16,15 @@ beforeEach(() => {
 });
 
 describe('Dealer settings centre', () => {
+  it('Verification card: a failed read offers Try again, makes a real second request and recovers', async () => {
+    m.verif.mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce({ onboardingStage: 'approved' });
+    render(<DealerSettingsPanel userId="d1" />);
+    expect(await screen.findByText(/Verification status is unavailable/)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    await waitFor(() => expect(m.verif).toHaveBeenCalledTimes(2));
+    expect(await screen.findByTestId('verification-stage')).toBeInTheDocument();
+    expect(screen.queryByText(/Verification status is unavailable/)).not.toBeInTheDocument();
+  });
   it('opens on Profile and offers the five sections', async () => {
     render(<DealerSettingsPanel userId="d1" />);
     expect(await screen.findByLabelText(/Business name/)).toHaveValue('Amani');

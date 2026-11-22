@@ -1,0 +1,15 @@
+batch-00 rc=0 Tests:       131 passed, 131 total | Test Suites: 18 passed, 18 total
+batch-01 rc=0 Tests:       393 passed, 393 total | Test Suites: 17 passed, 17 total
+batch-02 rc=0 Tests:       187 passed, 187 total | Test Suites: 15 passed, 15 total
+batch-03 rc=0 Tests:       198 passed, 198 total | Test Suites: 20 passed, 20 total
+batch-04 rc=0 Tests:       242 passed, 242 total | Test Suites: 20 passed, 20 total
+batch-05 rc=0 Tests:       390 passed, 390 total | Test Suites: 19 passed, 19 total
+batch-06 rc=0 Tests:       234 passed, 234 total | Test Suites: 20 passed, 20 total
+batch-07 rc=0 Tests:       397 passed, 397 total | Test Suites: 20 passed, 20 total
+batch-08 rc=0 Tests:       256 passed, 256 total | Test Suites: 20 passed, 20 total
+batch-09 rc=0 Tests:       406 passed, 406 total | Test Suites: 20 passed, 20 total
+batch-10 rc=0 Tests:       1 failed, 811 passed, 812 total | Test Suites: 1 failed, 19 passed, 20 total
+batch-11 rc=0 Tests:       21 skipped, 167 passed, 188 total | Test Suites: 1 skipped, 15 passed, 15 of 16 total
+batch-12 rc=0 Tests:       228 passed, 228 total | Test Suites: 20 passed, 20 total
+batch-13 rc=0 Tests:       124 passed, 124 total | Test Suites: 7 passed, 7 total
+ALLDONE

@@ -230,7 +230,7 @@
 .kayad-command-flow-copy small{font-size:9px;line-height:1.4;color:var(--admin-muted-content);overflow-wrap:anywhere}
 .kayad-command-flow-chevron{flex:0 0 auto;margin-left:auto;color:var(--admin-muted-content)}
 .kayad-command-flow-connector{align-self:center;flex:0 0 10px;height:1px;margin:0 3px;background:var(--admin-border-strong,var(--admin-border))}
-@media(max-width:1180px){.kayad-command-flow-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.kayad-command-flow-connector{display:none}.kayad-command-flow-step{min-height:64px}}
+@media(max-width:1560px){.kayad-command-flow-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.kayad-command-flow-connector{display:none}.kayad-command-flow-step{min-height:64px}}
 @media(max-width:640px){.kayad-command-business-flow{padding:14px}.kayad-command-business-flow-heading{display:grid;gap:10px}.kayad-command-flow-note{justify-self:start}.kayad-command-flow-steps{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.kayad-command-flow-step{padding:10px 8px;gap:7px}.kayad-command-flow-icon{flex-basis:30px;width:30px;height:30px}.kayad-command-flow-copy strong{font-size:10px}.kayad-command-flow-copy small{font-size:9px}.kayad-command-flow-chevron{width:12px}}
 @media(max-width:360px){.kayad-command-flow-steps{grid-template-columns:minmax(0,1fr)}.kayad-command-flow-step{min-height:54px}}
 @media(prefers-reduced-motion:reduce){.kayad-command-flow-step{transition:none}.kayad-command-flow-step:hover{transform:none}}
@@ -462,3 +462,16 @@
 .kayad-command-sync-copy>small{font-size:10px;color:var(--admin-muted-content);line-height:1.4}
 .kayad-command-sync-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 @media(max-width:520px){.kayad-command-toolbar{align-items:flex-start}.kayad-command-sync-actions{width:100%;justify-content:flex-start}.kayad-command-sync-actions button{flex:1 1 auto}}
+
+/* Brand/Admin consolidation: no mid-word breaks in dashboard shortcut tiles. Tiles size to their content, and a word only
+   wraps at spaces (overflow-wrap:break-word does not shrink the min-content width the way `anywhere` does). */
+.kayad-command-actions{width:min(340px,36%)}
+.kayad-command-actions .kayad-command-actions-grid{grid-template-columns:repeat(auto-fit,minmax(132px,1fr))}
+.kayad-command-actions .kayad-command-actions-grid a,
+.kayad-command-flow-copy,.kayad-command-flow-copy strong,.kayad-command-flow-copy small{overflow-wrap:break-word;word-break:normal;hyphens:manual}
+
+/* Admin dashboard layout defect: the business-flow block is a direct child of the two-column overview grid. Without a
+   full-width span it occupied column 1, pushing the main panels into the 238px rail column (a ~10,000px-tall squeezed
+   column with words broken per letter) and the rail below everything. Span both columns so the panels and rail keep
+   their intended two-column layout. */
+.kayad-command-overview>.kayad-command-business-flow{grid-column:1/-1}

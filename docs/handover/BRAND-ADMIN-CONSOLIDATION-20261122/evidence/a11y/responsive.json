@@ -1,0 +1,523 @@
+[
+ {
+  "role": "anon",
+  "route": "/",
+  "w": 1440,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 7
+ },
+ {
+  "role": "anon",
+  "route": "/",
+  "w": 1280,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 11
+ },
+ {
+  "role": "anon",
+  "route": "/",
+  "w": 1024,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 11
+ },
+ {
+  "role": "anon",
+  "route": "/",
+  "w": 820,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 5
+ },
+ {
+  "role": "anon",
+  "route": "/",
+  "w": 768,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 5
+ },
+ {
+  "role": "anon",
+  "route": "/",
+  "w": 430,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.h-1.5 w-1.5 rounded-full bg-[#13B8A6]"
+  ],
+  "small": 5
+ },
+ {
+  "role": "anon",
+  "route": "/",
+  "w": 390,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 5
+ },
+ {
+  "role": "anon",
+  "route": "/",
+  "w": 375,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 5
+ },
+ {
+  "role": "anon",
+  "route": "/",
+  "w": 360,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 5
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "w": 1440,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 7
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "w": 1280,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 11
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "w": 1024,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 11
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "w": 820,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 5
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "w": 768,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 5
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "w": 430,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.h-1.5 w-1.5 rounded-full bg-[#13B8A6]"
+  ],
+  "small": 5
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "w": 390,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 5
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "w": 375,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 5
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "w": 360,
+  "over": 0,
+  "offenders": [
+   "DIV.flex min-w-max h-full animate-marquee wh",
+   "SPAN.flex items-center gap-6 px-8 py-2 text-[",
+   "SPAN.text-white/25"
+  ],
+  "small": 5
+ },
+ {
+  "role": "anon",
+  "route": "/login",
+  "w": 1440,
+  "over": 0,
+  "offenders": [],
+  "small": 3
+ },
+ {
+  "role": "anon",
+  "route": "/login",
+  "w": 1280,
+  "over": 0,
+  "offenders": [],
+  "small": 3
+ },
+ {
+  "role": "anon",
+  "route": "/login",
+  "w": 1024,
+  "over": 0,
+  "offenders": [],
+  "small": 3
+ },
+ {
+  "role": "anon",
+  "route": "/login",
+  "w": 820,
+  "over": 0,
+  "offenders": [],
+  "small": 3
+ },
+ {
+  "role": "anon",
+  "route": "/login",
+  "w": 768,
+  "over": 0,
+  "offenders": [],
+  "small": 3
+ },
+ {
+  "role": "anon",
+  "route": "/login",
+  "w": 430,
+  "over": 0,
+  "offenders": [],
+  "small": 0
+ },
+ {
+  "role": "anon",
+  "route": "/login",
+  "w": 390,
+  "over": 0,
+  "offenders": [],
+  "small": 0
+ },
+ {
+  "role": "anon",
+  "route": "/login",
+  "w": 375,
+  "over": 0,
+  "offenders": [],
+  "small": 0
+ },
+ {
+  "role": "anon",
+  "route": "/login",
+  "w": 360,
+  "over": 0,
+  "offenders": [
+   "path.[object SVGAnimatedString]",
+   "path.[object SVGAnimatedString]"
+  ],
+  "small": 0
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "w": 1440,
+  "over": 0,
+  "offenders": [],
+  "small": 2
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "w": 1280,
+  "over": 0,
+  "offenders": [],
+  "small": 2
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "w": 1024,
+  "over": 0,
+  "offenders": [],
+  "small": 2
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "w": 820,
+  "over": 0,
+  "offenders": [],
+  "small": 2
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "w": 768,
+  "over": 0,
+  "offenders": [],
+  "small": 2
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "w": 430,
+  "over": 0,
+  "offenders": [],
+  "small": 2
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "w": 390,
+  "over": 0,
+  "offenders": [],
+  "small": 2
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "w": 375,
+  "over": 0,
+  "offenders": [],
+  "small": 2
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "w": 360,
+  "over": 0,
+  "offenders": [],
+  "small": 2
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "w": 1440,
+  "over": 0,
+  "offenders": [],
+  "small": 0
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "w": 1280,
+  "over": 0,
+  "offenders": [],
+  "small": 0
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "w": 1024,
+  "over": 0,
+  "offenders": [],
+  "small": 0
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "w": 820,
+  "over": 0,
+  "offenders": [],
+  "small": 0
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "w": 768,
+  "over": 0,
+  "offenders": [],
+  "small": 0
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "w": 430,
+  "over": 0,
+  "offenders": [],
+  "small": 0
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "w": 390,
+  "over": 0,
+  "offenders": [],
+  "small": 0
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "w": 375,
+  "over": 0,
+  "offenders": [],
+  "small": 0
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "w": 360,
+  "over": 0,
+  "offenders": [],
+  "small": 0
+ },
+ {
+  "role": "superadmin",
+  "route": "/admin",
+  "w": 1440,
+  "over": 0,
+  "offenders": [],
+  "small": 13
+ },
+ {
+  "role": "superadmin",
+  "route": "/admin",
+  "w": 1280,
+  "over": 0,
+  "offenders": [],
+  "small": 13
+ },
+ {
+  "role": "superadmin",
+  "route": "/admin",
+  "w": 1024,
+  "over": 0,
+  "offenders": [],
+  "small": 11
+ },
+ {
+  "role": "superadmin",
+  "route": "/admin",
+  "w": 820,
+  "over": 0,
+  "offenders": [],
+  "small": 15
+ },
+ {
+  "role": "superadmin",
+  "route": "/admin",
+  "w": 768,
+  "over": 0,
+  "offenders": [
+   "A."
+  ],
+  "small": 15
+ },
+ {
+  "role": "superadmin",
+  "route": "/admin",
+  "w": 430,
+  "over": 0,
+  "offenders": [
+   "A.",
+   "A."
+  ],
+  "small": 15
+ },
+ {
+  "role": "superadmin",
+  "route": "/admin",
+  "w": 390,
+  "over": 0,
+  "offenders": [
+   "A.",
+   "A."
+  ],
+  "small": 15
+ },
+ {
+  "role": "superadmin",
+  "route": "/admin",
+  "w": 375,
+  "over": 0,
+  "offenders": [
+   "A.",
+   "A."
+  ],
+  "small": 15
+ },
+ {
+  "role": "superadmin",
+  "route": "/admin",
+  "w": 360,
+  "over": 0,
+  "offenders": [
+   "A.",
+   "A."
+  ],
+  "small": 15
+ }
+]

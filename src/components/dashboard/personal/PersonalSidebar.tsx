@@ -16,7 +16,7 @@ export default function PersonalSidebar({ name, active, onSelect, onSignOut }: P
       <nav className="mt-3 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain pr-1" aria-label="Personal dashboard sections">
         {personalNavGroups.map((group) => (
           <div key={group.id} role="group" aria-label={group.label}>
-            <p className="px-3 pb-1 text-[10px] font-black uppercase tracking-[.16em] text-white/40">{group.label}</p>
+            <p className="px-3 pb-1 text-[10px] font-black uppercase tracking-[.16em] text-white/65">{group.label}</p>
             <div className="space-y-0.5">
               {group.items.map((item) => {
                 const Icon = item.icon; const current = active === item.id;

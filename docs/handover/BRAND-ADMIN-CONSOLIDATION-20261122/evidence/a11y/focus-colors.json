@@ -1,0 +1,306 @@
+[
+ {
+  "role": "anon",
+  "route": "/login",
+  "name": "Home",
+  "indicator": "rgb(15, 118, 110) 3px",
+  "bg": "rgb(246, 250, 249)",
+  "ratio": 5.2
+ },
+ {
+  "role": "anon",
+  "route": "/login",
+  "name": "",
+  "indicator": "rgb(15, 118, 110) 3px",
+  "bg": "rgb(251, 253, 253)",
+  "ratio": 5.36
+ },
+ {
+  "role": "anon",
+  "route": "/login",
+  "name": "Forgot password?",
+  "indicator": "rgb(15, 118, 110) 3px",
+  "bg": "rgba(255, 255, 255, 0.94)",
+  "ratio": 5.47
+ },
+ {
+  "role": "anon",
+  "route": "/login",
+  "name": "Show\npassword",
+  "indicator": "rgb(15, 118, 110) 3px",
+  "bg": "rgb(238, 247, 245)",
+  "ratio": 5.02
+ },
+ {
+  "role": "anon",
+  "route": "/login",
+  "name": "Create your KAYARD KE account",
+  "indicator": "rgb(15, 118, 110) 3px",
+  "bg": "rgb(255, 255, 255)",
+  "ratio": 5.47
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "name": "Pause KAYARD KE notices",
+  "indicator": "rgb(255, 255, 255) 2px",
+  "bg": "rgb(10, 51, 64)",
+  "ratio": 13.46
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "name": "Skip to main content",
+  "indicator": "rgb(10, 51, 64) 3px",
+  "bg": "rgb(19, 184, 166)",
+  "ratio": 5.41
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "name": "KAYARD KE marketplace home",
+  "indicator": "rgb(15, 118, 110) 2px",
+  "bg": "rgba(255, 255, 255, 0.97)",
+  "ratio": 5.47
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "name": "Marketplace",
+  "indicator": "rgb(15, 118, 110) 2px",
+  "bg": "rgba(255, 255, 255, 0.12)",
+  "ratio": 5.47
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "name": "Sell Vehicle",
+  "indicator": "rgb(15, 118, 110) 2px",
+  "bg": "rgb(23, 107, 135)",
+  "ratio": 1.1
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "name": "Sign In / Sign Up",
+  "indicator": "rgb(15, 118, 110) 2px",
+  "bg": "rgb(255, 255, 255)",
+  "ratio": 5.47
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "name": "Find a car — browse vehicle in",
+  "indicator": "rgb(15, 118, 110) 3px",
+  "bg": "rgba(2, 35, 46, 0.58)",
+  "ratio": 2.99
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "name": "Browse vehicles. Toyota Land C",
+  "indicator": "rgb(15, 118, 110) 3px",
+  "bg": "rgb(8, 43, 64)",
+  "ratio": 2.68
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "name": "Previous featured vehicle",
+  "indicator": "rgb(15, 118, 110) 3px",
+  "bg": "rgba(255, 255, 255, 0.1)",
+  "ratio": 5.47
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "name": "Show featured vehicle 1 of 2",
+  "indicator": "rgb(15, 118, 110) 3px",
+  "bg": "rgba(6, 32, 44, 0.55)",
+  "ratio": 3.07
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "name": "All vehicle categories (does n",
+  "indicator": "rgb(17, 184, 166) 3px",
+  "bg": "rgb(8, 43, 64)",
+  "ratio": 5.9
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "name": "SUV category",
+  "indicator": "rgb(17, 184, 166) 3px",
+  "bg": "rgb(244, 249, 248)",
+  "ratio": 2.34
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "name": "Skip to main content",
+  "indicator": "rgb(10, 51, 64) 3px",
+  "bg": "rgb(19, 184, 166)",
+  "ratio": 5.41
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "name": "Go to previous page",
+  "indicator": "rgb(15, 118, 110) 3px",
+  "bg": "rgb(255, 255, 255)",
+  "ratio": 5.47
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "name": "Buying",
+  "indicator": "rgba(255, 255, 255, 0.75) 3px",
+  "bg": "rgb(10, 53, 69)",
+  "ratio": 13.06
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "name": "Sign out",
+  "indicator": "rgba(255, 255, 255, 0.85) 3px",
+  "bg": "rgb(10, 53, 69)",
+  "ratio": 13.06
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "name": "Sell a vehicle",
+  "indicator": "rgb(15, 118, 110) 3px",
+  "bg": "rgb(17, 184, 166)",
+  "ratio": 2.2
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "name": "MY LISTINGS\n\n0",
+  "indicator": "rgb(10, 51, 64) 3px",
+  "bg": "rgb(255, 255, 255)",
+  "ratio": 13.46
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "name": "Create listing",
+  "indicator": "rgb(15, 118, 110) 3px",
+  "bg": "rgb(8, 43, 64)",
+  "ratio": 2.68
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "name": "Saved vehicles\n\n0",
+  "indicator": "rgb(15, 118, 110) 3px",
+  "bg": "rgb(244, 249, 248)",
+  "ratio": 5.15
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "name": "Skip to main content",
+  "indicator": "rgb(10, 51, 64) 3px",
+  "bg": "rgb(19, 184, 166)",
+  "ratio": 5.41
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "name": "Go to previous page",
+  "indicator": "rgb(15, 118, 110) 3px",
+  "bg": "rgb(255, 255, 255)",
+  "ratio": 5.47
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "name": "Dealer workspace",
+  "indicator": "rgb(10, 51, 64) 3px",
+  "bg": "rgb(234, 245, 243)",
+  "ratio": 12.08
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "name": "Overview",
+  "indicator": "rgb(18, 87, 109) 2px",
+  "bg": "rgb(221, 244, 240)",
+  "ratio": 7
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "name": "Inventory",
+  "indicator": "rgb(100, 116, 139) 2px",
+  "bg": "rgb(255, 255, 255)",
+  "ratio": 4.76
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "name": "Account status\n▾",
+  "indicator": "rgb(23, 107, 135) 2px",
+  "bg": "rgb(244, 250, 249)",
+  "ratio": 5.7
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "name": "Help & support",
+  "indicator": "rgb(10, 51, 64) 2px",
+  "bg": "rgb(255, 255, 255)",
+  "ratio": 13.46
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "name": "Go to previous page",
+  "indicator": "rgb(23, 107, 135) 2px",
+  "bg": "rgb(255, 255, 255)",
+  "ratio": 6.02
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "name": "Manage Inventory",
+  "indicator": "rgb(10, 51, 64) 2px",
+  "bg": "rgb(23, 107, 135)",
+  "ratio": 2.24
+ },
+ {
+  "role": "superadmin",
+  "route": "/admin",
+  "name": "Skip to main content",
+  "indicator": "rgb(10, 51, 64) 3px",
+  "bg": "rgb(19, 184, 166)",
+  "ratio": 5.41
+ },
+ {
+  "role": "superadmin",
+  "route": "/admin",
+  "name": "Collapse admin sidebar",
+  "indicator": "rgb(94, 234, 212) 2px",
+  "bg": "rgba(3, 22, 29, 0.16)",
+  "ratio": 12.49
+ },
+ {
+  "role": "superadmin",
+  "route": "/admin",
+  "name": "Command Centre navigation",
+  "indicator": "rgb(94, 234, 212) 2px",
+  "bg": "rgba(19, 184, 166, 0.07)",
+  "ratio": 1.68
+ },
+ {
+  "role": "superadmin",
+  "route": "/admin",
+  "name": "Dashboard",
+  "indicator": "rgb(94, 234, 212) 2px",
+  "bg": "rgb(10, 51, 64)",
+  "ratio": 9.1
+ }
+]

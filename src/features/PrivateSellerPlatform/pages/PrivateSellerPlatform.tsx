@@ -401,7 +401,7 @@ function LegacyPrivateSellerPlatform({ user, onOpenAuth, onNavigate, onLogout }:
       <div className="lg:hidden fixed top-0 left-0 right-0 z-50" style={{ backgroundColor: KAYAD_THEME.navy }}>
         <div className="flex min-h-16 items-center justify-between gap-3 px-4 py-3">
           <div className="flex min-w-0 items-center gap-3">
-            <BrandMark size={36} nameClassName="text-white font-bold text-base" />
+            <BrandMark tone="dark" size={36} nameClassName="text-white font-bold text-base" />
             <span className="truncate text-white font-semibold text-sm">My KAYARD KE Account</span>
           </div>
           <button
@@ -528,7 +528,7 @@ function SidebarContent({
       <div className="p-4 border-b" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
         <div className="flex items-center gap-3">
           <div className="text-white">
-            <BrandMark size={36} nameClassName="text-white font-bold text-lg" />
+            <BrandMark tone="dark" size={36} nameClassName="text-white font-bold text-lg" />
           </div>
           <div>
             <p className="text-white/60 text-xs">Personal account</p>
@@ -877,7 +877,7 @@ function ListingWizardSection({ draft, setDraft, draftStorageKey, onNavigate, on
       <section className="min-w-0 rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm sm:p-5">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2"><span className="font-semibold text-[#0A3340]">Step {currentStep} of {totalSteps}: {sectionTitle}</span><span className="text-sm text-slate-500">{Math.round(currentStep / totalSteps * 100)}%</span></div>
         <div className="h-2 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-[#13B8A6] transition-all" style={{ width: `${currentStep / totalSteps * 100}%` }} /></div>
-        <div className="mt-4 flex min-w-0 gap-2 overflow-x-auto pb-2" aria-label="Listing steps">{steps.map(step => <button type="button" key={step.id} onClick={() => { if (step.id < currentStep) { setCurrentStep(step.id); update('step', step.id); } }} disabled={step.id >= currentStep} aria-current={step.id === currentStep ? 'step' : undefined} className={`shrink-0 rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap ${step.id === currentStep ? 'bg-[#13B8A6] text-white' : step.id < currentStep ? 'bg-teal-50 text-teal-800' : 'bg-slate-100 text-slate-500'}`}>{step.id < currentStep ? '✓ ' : ''}{step.label}</button>)}</div>
+        <div className="mt-4 flex min-w-0 gap-2 overflow-x-auto pb-2" role="group" aria-label="Listing steps" tabIndex={0}>{steps.map(step => <button type="button" key={step.id} onClick={() => { if (step.id < currentStep) { setCurrentStep(step.id); update('step', step.id); } }} disabled={step.id >= currentStep} aria-current={step.id === currentStep ? 'step' : undefined} className={`shrink-0 rounded-full px-3 py-2 text-xs font-semibold whitespace-nowrap ${step.id === currentStep ? 'bg-[#13B8A6] text-[#0A3340]' : step.id < currentStep ? 'bg-teal-50 text-teal-800' : 'bg-slate-100 text-slate-500'}`}>{step.id < currentStep ? '✓ ' : ''}{step.label}</button>)}</div>
       </section>
       <section className="min-w-0 w-full overflow-hidden rounded-2xl border border-[#D7E7E4] bg-white p-4 shadow-sm sm:p-6">
         {publishedCarId ? <div className="mx-auto max-w-xl py-8 text-center"><CheckCircle className="mx-auto mb-4 text-teal-600" size={48}/><h2 className="text-2xl font-bold text-[#0A3340]">Listing submitted</h2><p className="mt-2 text-slate-600">KAYARD KE received your vehicle listing. Seller access is free and approval-free; listing visibility follows the separate moderation policy.</p><p className="mt-2 break-all text-xs text-slate-400">Reference: {publishedCarId}</p><button type="button" onClick={() => onNavigate('home')} className="mt-6 rounded-xl bg-[#0A3340] px-5 py-3 font-bold text-white">Return to seller dashboard</button></div> : <>

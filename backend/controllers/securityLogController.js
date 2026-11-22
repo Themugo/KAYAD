@@ -4,8 +4,10 @@ import { logError } from '../infrastructure/logging/index.js';
 import { escapeRegex } from '../utils/escapeRegex.js';
 
 export const getSecurityLogs = async (req, res) => {
+  // Declared outside `try` so the audit_logs fallback in `catch` can read them
+  // (block-scoped consts inside `try` are not visible there).
+  const { action, severity, actor, targetModel, page = 1, limit = 50 } = req.query;
   try {
-    const { action, severity, actor, targetModel, page = 1, limit = 50 } = req.query;
     const filter = {};
     // H-9 FIX: Escape user input to prevent ReDoS.
     if (action) filter.action = { $regex: escapeRegex(action), $options: "i" };

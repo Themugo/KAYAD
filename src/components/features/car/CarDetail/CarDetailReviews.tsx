@@ -132,7 +132,7 @@ export default function CarDetailReviews({ reviews = [], dealerId, onAddReview }
               className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all ${
                 submitting || !comment.trim()
                   ? 'bg-[#DDF4F0] text-warm-400 cursor-not-allowed'
-                  : 'bg-[#13B8A6] text-white hover:bg-[#176B87]'
+                  : 'bg-[#13B8A6] text-[#0A3340] hover:bg-[#176B87] hover:text-white'
               }`}
             >
               {submitting ? 'Submitting...' : 'Submit Review'}

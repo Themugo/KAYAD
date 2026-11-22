@@ -10,6 +10,7 @@ import { ADMIN_ROLE_LABELS as ROLE_LABELS } from './adminRoleLabels';
 import '../../styles/kayad-admin-shell.css';
 import '../../styles/kayad-admin-legacy-surface.css';
 import PageJourneyNavigation from '../navigation/PageJourneyNavigation';
+import SkipLink from '../ui/SkipLink';
 
 
 const ACRONYMS = new Set(['ntsa', 'ai', 'cms', 'seo', 'vxp', 'xos', 'kyc', 'rbac', 'api']);
@@ -138,6 +139,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
   return (
     <div className="kayad-admin-shell">
+      <SkipLink />
       <AdminSidebar mobileOpen={sidebarOpen} onToggle={closeSidebar} />
       <div ref={mainRef} className="kayad-admin-shell__main">
         <header className="kayad-admin-header">
@@ -153,7 +155,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             >
               <Menu size={19} aria-hidden="true" />
             </button>
-            <span className="kayad-admin-header__brand"><BrandMark size={22} nameClassName="kayad-admin-header__brand-name" /></span>
+            <span className="kayad-admin-header__brand"><BrandMark tone="dark" size={22} nameClassName="kayad-admin-header__brand-name" /></span>
             {segments.map((segment, index) => (
               <span className="kayad-admin-header__crumb" key={`${segment}-${index}`}>
                 <ChevronRight size={13} aria-hidden="true" />
@@ -167,7 +169,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             <AdminAccountMenu displayName={displayName} roleLabel={roleLabel} initials={initials} />
           </div>
         </header>
-        <main className="kayad-admin-shell__content">
+        <main id="main-content" className="kayad-admin-shell__content">
           <PageJourneyNavigation fallbackHref="/admin" />
           {children}
         </main>

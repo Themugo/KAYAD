@@ -117,7 +117,7 @@ export default function InlineBidding({ car, onBidPlaced }: InlineBiddingProps) 
             onClick={() => handleQuickBid(amount)}
             className={`flex-1 py-2 px-2 rounded-lg font-sans text-xs font-semibold transition-all ${
               parseInt(bidAmount) === amount
-                ? 'bg-[#13B8A6] text-white'
+                ? 'bg-[#13B8A6] text-[#0A3340]'
                 : 'bg-[#EEF7F5] text-[#0A3340] hover:bg-[#DDF4F0]'
             }`}
           >
@@ -172,7 +172,7 @@ export default function InlineBidding({ car, onBidPlaced }: InlineBiddingProps) 
         className={`w-full py-3 px-4 rounded-xl font-sans text-sm font-bold flex items-center justify-center gap-2 transition-all ${
           submitting || !bidAmount
             ? 'bg-[#DDF4F0] text-warm-400 cursor-not-allowed'
-            : 'bg-[#13B8A6] text-white hover:bg-[#176B87]'
+            : 'bg-[#13B8A6] text-[#0A3340] hover:bg-[#176B87] hover:text-white'
         }`}
       >
         {submitting ? (

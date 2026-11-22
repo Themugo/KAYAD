@@ -1,3 +1,10 @@
+/**
+ * @deprecated LEGACY (owner decision D-16) — do not import from production code.
+ * Not rendered by the app. Retained only because validator(s) still read this file: validate-dealer-workspace-navigation; test DealerAuctionSetup.test.jsx.
+ * Canonical implementation: src/pages/dealer/DealerAuctionSetupWizard.jsx (routed).
+ * See docs/handover/DEALER-COMPLETION-20261121/D16-LEGACY-FILES-REGISTER.md.
+ * A guard test (src/__tests__/legacy/legacyDealerFilesGuard.test.ts) fails if app code imports it.
+ */
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Gavel, Play, Clock, RefreshCw } from 'lucide-react';

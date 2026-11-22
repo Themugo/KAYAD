@@ -1,0 +1,1362 @@
+[
+ {
+  "ws": "user",
+  "section": "Overview",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 927,
+   "text": "Personal account menu · OverviewOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Overview",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 1038,
+   "text": "Personal account menu · OverviewOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Overview",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 1038,
+   "text": "Personal account menu · OverviewOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Overview",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 820,
+   "text": "Personal account menu · OverviewOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 927,
+   "text": "Personal account menu · OverviewOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Overview",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 1038,
+   "text": "Personal account menu · OverviewOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 927,
+   "text": "Personal account menu · OverviewOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "user",
+  "section": "Buying",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 691,
+   "text": "Personal account menu · BuyingOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & trust",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Buying",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 638,
+   "text": "Personal account menu · BuyingOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & trust",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Buying",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 624,
+   "text": "Personal account menu · BuyingOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & trust",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": true,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Buying",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 540,
+   "text": "Personal account menu · BuyingOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & trust",
+   "alert": false,
+   "retry": true,
+   "spinner": true,
+   "loadingText": true,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": {
+   "len": 691,
+   "text": "Personal account menu · BuyingOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & trust",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Buying",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 638,
+   "text": "Personal account menu · BuyingOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & trust",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 691,
+   "text": "Personal account menu · BuyingOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & trust",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "user",
+  "section": "Deals & escrow",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 1322,
+   "text": "Personal account menu · Deals & escrowOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Deals & escrow",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 1134,
+   "text": "Personal account menu · Deals & escrowOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Deals & escrow",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 1127,
+   "text": "Personal account menu · Deals & escrowOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": true,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Deals & escrow",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 1328,
+   "text": "Personal account menu · Deals & escrowOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification",
+   "alert": false,
+   "retry": true,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": {
+   "len": 1322,
+   "text": "Personal account menu · Deals & escrowOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Deals & escrow",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 1134,
+   "text": "Personal account menu · Deals & escrowOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 1344,
+   "text": "Personal account menu · Deals & escrowOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "user",
+  "section": "Create listing",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 707,
+   "text": "Personal account menu · Create listingOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Create listing",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 707,
+   "text": "Personal account menu · Create listingOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Create listing",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 707,
+   "text": "Personal account menu · Create listingOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Create listing",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 707,
+   "text": "Personal account menu · Create listingOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 707,
+   "text": "Personal account menu · Create listingOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Create listing",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 707,
+   "text": "Personal account menu · Create listingOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "My vehicles",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 445,
+   "text": "Personal account menu · My vehiclesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & ",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "My vehicles",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 322,
+   "text": "Personal account menu · My vehiclesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & ",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "My vehicles",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 322,
+   "text": "Personal account menu · My vehiclesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & ",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "My vehicles",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 445,
+   "text": "Personal account menu · My vehiclesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & ",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": {
+   "len": 445,
+   "text": "Personal account menu · My vehiclesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & ",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "My vehicles",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 322,
+   "text": "Personal account menu · My vehiclesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & ",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": {
+   "len": 445,
+   "text": "Personal account menu · My vehiclesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & ",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "user",
+  "section": "Seller enquiries",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 499,
+   "text": "Personal account menu · Seller enquiriesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerificati",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Seller enquiries",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 428,
+   "text": "Personal account menu · Seller enquiriesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerificati",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Seller enquiries",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 421,
+   "text": "Personal account menu · Seller enquiriesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerificati",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": true,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Seller enquiries",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 499,
+   "text": "Personal account menu · Seller enquiriesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerificati",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": {
+   "len": 499,
+   "text": "Personal account menu · Seller enquiriesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerificati",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Seller enquiries",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 428,
+   "text": "Personal account menu · Seller enquiriesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerificati",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 499,
+   "text": "Personal account menu · Seller enquiriesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerificati",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "user",
+  "section": "Performance",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 846,
+   "text": "Personal account menu · PerformanceOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & ",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Performance",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 381,
+   "text": "Personal account menu · PerformanceOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & ",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Performance",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 374,
+   "text": "Personal account menu · PerformanceOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & ",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": true,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Performance",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 394,
+   "text": "Personal account menu · PerformanceOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & ",
+   "alert": false,
+   "retry": true,
+   "spinner": true,
+   "loadingText": true,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 846,
+   "text": "Personal account menu · PerformanceOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & ",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Performance",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 381,
+   "text": "Personal account menu · PerformanceOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & ",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 846,
+   "text": "Personal account menu · PerformanceOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & ",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "user",
+  "section": "Messages",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 551,
+   "text": "Personal account menu · MessagesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Messages",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 601,
+   "text": "Personal account menu · MessagesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Messages",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 601,
+   "text": "Personal account menu · MessagesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Messages",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 557,
+   "text": "Personal account menu · MessagesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": true,
+   "loadingText": true,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 551,
+   "text": "Personal account menu · MessagesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Messages",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 601,
+   "text": "Personal account menu · MessagesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 551,
+   "text": "Personal account menu · MessagesOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "user",
+  "section": "Auctions",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 604,
+   "text": "Personal account menu · AuctionsOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Auctions",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 536,
+   "text": "Personal account menu · AuctionsOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Auctions",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 529,
+   "text": "Personal account menu · AuctionsOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": true,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Auctions",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 432,
+   "text": "Personal account menu · AuctionsOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": true,
+   "loadingText": true,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 604,
+   "text": "Personal account menu · AuctionsOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Auctions",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 536,
+   "text": "Personal account menu · AuctionsOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 626,
+   "text": "Personal account menu · AuctionsOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "user",
+  "section": "Activity",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 740,
+   "text": "Personal account menu · ActivityOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Activity",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 1164,
+   "text": "Personal account menu · ActivityOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Activity",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 1164,
+   "text": "Personal account menu · ActivityOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Activity",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 632,
+   "text": "Personal account menu · ActivityOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 740,
+   "text": "Personal account menu · ActivityOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Activity",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 1164,
+   "text": "Personal account menu · ActivityOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": {
+   "len": 1004,
+   "text": "Personal account menu · ActivityOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & tru",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "user",
+  "section": "My Account",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 1635,
+   "text": "Personal account menu · My AccountOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & t",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "My Account",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 1176,
+   "text": "Personal account menu · My AccountOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & t",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "My Account",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 1176,
+   "text": "Personal account menu · My AccountOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & t",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "My Account",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 1145,
+   "text": "Personal account menu · My AccountOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & t",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 1635,
+   "text": "Personal account menu · My AccountOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & t",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "My Account",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 1176,
+   "text": "Personal account menu · My AccountOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & t",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 1635,
+   "text": "Personal account menu · My AccountOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerification & t",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  }
+ },
+ {
+  "ws": "user",
+  "section": "Verification & trust",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 662,
+   "text": "Personal account menu · Verification & trustOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerifi",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Verification & trust",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 662,
+   "text": "Personal account menu · Verification & trustOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerifi",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Verification & trust",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 662,
+   "text": "Personal account menu · Verification & trustOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerifi",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Verification & trust",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 662,
+   "text": "Personal account menu · Verification & trustOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerifi",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 662,
+   "text": "Personal account menu · Verification & trustOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerifi",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "recovered": null
+ },
+ {
+  "ws": "user",
+  "section": "Verification & trust",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 662,
+   "text": "Personal account menu · Verification & trustOverviewOverviewBuyingBuyingDeals & escrowSellingCreate listingMy vehiclesSeller enquiriesPerformanceActivityMessagesAuctionsActivityAccountMy AccountVerifi",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ }
+]

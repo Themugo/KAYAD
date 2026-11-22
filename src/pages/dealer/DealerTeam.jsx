@@ -1,3 +1,10 @@
+/**
+ * @deprecated LEGACY (owner decision D-16) — do not import from production code.
+ * Not rendered by the app. Retained only because validator(s) still read this file: validate-dealer-workspace-navigation, validate-dealer-workforce-access.
+ * Canonical implementation: src/pages/dealer/dashboard/DealerTeamPanel.tsx (service: dealerPlatformApi).
+ * See docs/handover/DEALER-COMPLETION-20261121/D16-LEGACY-FILES-REGISTER.md.
+ * A guard test (src/__tests__/legacy/legacyDealerFilesGuard.test.ts) fails if app code imports it.
+ */
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { getTeamMembers, inviteTeamMember, updateTeamMember, removeTeamMember } from '../../services/dealerPlatformApi';

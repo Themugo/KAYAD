@@ -1,0 +1,1727 @@
+[
+ {
+  "ws": "dealer",
+  "section": "Overview",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 805,
+   "text": "Dealer menuOverviewDashboardWelcome back, Journey dealerManage InventoryTotal Listings31 live · 1 draftOpen inventory Total Leads0No new enquiries waitingOpen leads Total Views0All time, across your l",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Overview",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 624,
+   "text": "Dealer menuOverviewDashboardWelcome back, Journey dealerManage InventoryCould not load your dashboard. Please try again. The other sections of your Dealer Hub still work.Try AgainTotal Listings—Open i",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Overview",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 624,
+   "text": "Dealer menuOverviewDashboardWelcome back, Journey dealerManage InventoryCould not load your dashboard. Please try again. The other sections of your Dealer Hub still work.Try AgainTotal Listings—Open i",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Overview",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 384,
+   "text": "Dealer menuOverviewDashboardWelcome back, Journey dealerManage InventoryTotal ListingsOpen inventory Total LeadsOpen leads Total ViewsRevenue (released escrow, all time)Lead pipelineOpen pipelineNewCo",
+   "alert": false,
+   "retry": false,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 805,
+   "text": "Dealer menuOverviewDashboardWelcome back, Journey dealerManage InventoryTotal Listings31 live · 1 draftOpen inventory Total Leads0No new enquiries waitingOpen leads Total Views0All time, across your l",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Overview",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 624,
+   "text": "Dealer menuOverviewDashboardWelcome back, Journey dealerManage InventoryCould not load your dashboard. Please try again. The other sections of your Dealer Hub still work.Try AgainTotal Listings—Open i",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 805,
+   "text": "Dealer menuOverviewDashboardWelcome back, Journey dealerManage InventoryTotal Listings31 live · 1 draftOpen inventory Total Leads0No new enquiries waitingOpen leads Total Views0All time, across your l",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "dealer",
+  "section": "Inventory",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 617,
+   "text": "Dealer menuInventoryInventoryVehicles you have listed and their current status.Inventory Management Add vehicle1Active0Under review1Draft1Paused0Reserved0SoldAll statusesActivePausedUnder reviewDraftR",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Inventory",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 168,
+   "text": "Dealer menuInventoryInventoryVehicles you have listed and their current status.Inventory Management Add vehicleCould not load your inventory. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Inventory",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 168,
+   "text": "Dealer menuInventoryInventoryVehicles you have listed and their current status.Inventory Management Add vehicleCould not load your inventory. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Inventory",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 111,
+   "text": "Dealer menuInventoryInventoryVehicles you have listed and their current status.Inventory Management Add vehicle",
+   "alert": false,
+   "retry": false,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 617,
+   "text": "Dealer menuInventoryInventoryVehicles you have listed and their current status.Inventory Management Add vehicle1Active0Under review1Draft1Paused0Reserved0SoldAll statusesActivePausedUnder reviewDraftR",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Inventory",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 168,
+   "text": "Dealer menuInventoryInventoryVehicles you have listed and their current status.Inventory Management Add vehicleCould not load your inventory. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 617,
+   "text": "Dealer menuInventoryInventoryVehicles you have listed and their current status.Inventory Management Add vehicle1Active0Under review1Draft1Paused0Reserved0SoldAll statusesActivePausedUnder reviewDraftR",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  }
+ },
+ {
+  "ws": "dealer",
+  "section": "Leads",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 104,
+   "text": "Dealer menuLeadsLeadsBuyer enquiries on your vehicles.Manage InventoryLead Management (CRM)No leads yet.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Leads",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 144,
+   "text": "Dealer menuLeadsLeadsBuyer enquiries on your vehicles.Manage InventoryLead Management (CRM)Could not load your leads. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Leads",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 144,
+   "text": "Dealer menuLeadsLeadsBuyer enquiries on your vehicles.Manage InventoryLead Management (CRM)Could not load your leads. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Leads",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 91,
+   "text": "Dealer menuLeadsLeadsBuyer enquiries on your vehicles.Manage InventoryLead Management (CRM)",
+   "alert": false,
+   "retry": false,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 104,
+   "text": "Dealer menuLeadsLeadsBuyer enquiries on your vehicles.Manage InventoryLead Management (CRM)No leads yet.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Leads",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 144,
+   "text": "Dealer menuLeadsLeadsBuyer enquiries on your vehicles.Manage InventoryLead Management (CRM)Could not load your leads. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 104,
+   "text": "Dealer menuLeadsLeadsBuyer enquiries on your vehicles.Manage InventoryLead Management (CRM)No leads yet.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "dealer",
+  "section": "Pipeline",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 146,
+   "text": "Dealer menuPipelineLead pipelineEnquiries grouped by sales stage.Manage InventorySales Pipelinenew0Emptycontacted0Emptynegotiating0Emptysold0Empty",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Pipeline",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 148,
+   "text": "Dealer menuPipelineLead pipelineEnquiries grouped by sales stage.Manage InventorySales PipelineCould not load your leads. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Pipeline",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 148,
+   "text": "Dealer menuPipelineLead pipelineEnquiries grouped by sales stage.Manage InventorySales PipelineCould not load your leads. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Pipeline",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 95,
+   "text": "Dealer menuPipelineLead pipelineEnquiries grouped by sales stage.Manage InventorySales Pipeline",
+   "alert": false,
+   "retry": false,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 146,
+   "text": "Dealer menuPipelineLead pipelineEnquiries grouped by sales stage.Manage InventorySales Pipelinenew0Emptycontacted0Emptynegotiating0Emptysold0Empty",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Pipeline",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 148,
+   "text": "Dealer menuPipelineLead pipelineEnquiries grouped by sales stage.Manage InventorySales PipelineCould not load your leads. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 146,
+   "text": "Dealer menuPipelineLead pipelineEnquiries grouped by sales stage.Manage InventorySales Pipelinenew0Emptycontacted0Emptynegotiating0Emptysold0Empty",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "dealer",
+  "section": "Customers",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 165,
+   "text": "Dealer menuCustomersCustomersBuyers who have dealt with your dealership.Manage InventoryCustomersNo customers yet - customers appear here once a real deal completes.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Customers",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 154,
+   "text": "Dealer menuCustomersCustomersBuyers who have dealt with your dealership.Manage InventoryCustomersCould not load your customers. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Customers",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 154,
+   "text": "Dealer menuCustomersCustomersBuyers who have dealt with your dealership.Manage InventoryCustomersCould not load your customers. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Customers",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 97,
+   "text": "Dealer menuCustomersCustomersBuyers who have dealt with your dealership.Manage InventoryCustomers",
+   "alert": false,
+   "retry": false,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 165,
+   "text": "Dealer menuCustomersCustomersBuyers who have dealt with your dealership.Manage InventoryCustomersNo customers yet - customers appear here once a real deal completes.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Customers",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 154,
+   "text": "Dealer menuCustomersCustomersBuyers who have dealt with your dealership.Manage InventoryCustomersCould not load your customers. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 165,
+   "text": "Dealer menuCustomersCustomersBuyers who have dealt with your dealership.Manage InventoryCustomersNo customers yet - customers appear here once a real deal completes.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "dealer",
+  "section": "Auctions",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 156,
+   "text": "Dealer menuAuctionsAuctionsAuctions run by your dealership.Manage InventoryAuctionsAuction operationsSet up an auctionNo auctions found for this dealership.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Auctions",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 134,
+   "text": "Dealer menuAuctionsAuctionsAuctions run by your dealership.Manage InventoryAuctionsCould not load auctions. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Auctions",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 134,
+   "text": "Dealer menuAuctionsAuctionsAuctions run by your dealership.Manage InventoryAuctionsCould not load auctions. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Auctions",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 83,
+   "text": "Dealer menuAuctionsAuctionsAuctions run by your dealership.Manage InventoryAuctions",
+   "alert": false,
+   "retry": false,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 156,
+   "text": "Dealer menuAuctionsAuctionsAuctions run by your dealership.Manage InventoryAuctionsAuction operationsSet up an auctionNo auctions found for this dealership.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Auctions",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 134,
+   "text": "Dealer menuAuctionsAuctionsAuctions run by your dealership.Manage InventoryAuctionsCould not load auctions. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 156,
+   "text": "Dealer menuAuctionsAuctionsAuctions run by your dealership.Manage InventoryAuctionsAuction operationsSet up an auctionNo auctions found for this dealership.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "dealer",
+  "section": "Inspections",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 355,
+   "text": "Dealer menuInspectionsInspectionsInspection orders on your vehicles.Manage InventoryInspectionsInspections of your vehicles, requested by buyers and carried out by independent providers. You see that ",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Inspections",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 149,
+   "text": "Dealer menuInspectionsInspectionsInspection orders on your vehicles.Manage InventoryInspectionsCould not load inspections. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Inspections",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 149,
+   "text": "Dealer menuInspectionsInspectionsInspection orders on your vehicles.Manage InventoryInspectionsCould not load inspections. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Inspections",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 95,
+   "text": "Dealer menuInspectionsInspectionsInspection orders on your vehicles.Manage InventoryInspections",
+   "alert": false,
+   "retry": false,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 355,
+   "text": "Dealer menuInspectionsInspectionsInspection orders on your vehicles.Manage InventoryInspectionsInspections of your vehicles, requested by buyers and carried out by independent providers. You see that ",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Inspections",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 149,
+   "text": "Dealer menuInspectionsInspectionsInspection orders on your vehicles.Manage InventoryInspectionsCould not load inspections. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 355,
+   "text": "Dealer menuInspectionsInspectionsInspection orders on your vehicles.Manage InventoryInspectionsInspections of your vehicles, requested by buyers and carried out by independent providers. You see that ",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  }
+ },
+ {
+  "ws": "dealer",
+  "section": "Escrow",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 584,
+   "text": "Dealer menuEscrowEscrowProtected transactions on your sales.Manage InventoryEscrow transactionsView and manage only the deals associated with your authenticated account. Available actions are supplied",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Escrow",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 301,
+   "text": "Dealer menuEscrowEscrowProtected transactions on your sales.Manage InventoryEscrow transactionsView and manage only the deals associated with your authenticated account. Available actions are supplied",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Escrow",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 316,
+   "text": "Dealer menuEscrowEscrowProtected transactions on your sales.Manage InventoryEscrow transactionsView and manage only the deals associated with your authenticated account. Available actions are supplied",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Escrow",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 247,
+   "text": "Dealer menuEscrowEscrowProtected transactions on your sales.Manage InventoryEscrow transactionsView and manage only the deals associated with your authenticated account. Available actions are supplied",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 584,
+   "text": "Dealer menuEscrowEscrowProtected transactions on your sales.Manage InventoryEscrow transactionsView and manage only the deals associated with your authenticated account. Available actions are supplied",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Escrow",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 301,
+   "text": "Dealer menuEscrowEscrowProtected transactions on your sales.Manage InventoryEscrow transactionsView and manage only the deals associated with your authenticated account. Available actions are supplied",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 584,
+   "text": "Dealer menuEscrowEscrowProtected transactions on your sales.Manage InventoryEscrow transactionsView and manage only the deals associated with your authenticated account. Available actions are supplied",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "dealer",
+  "section": "Finance",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 160,
+   "text": "Dealer menuFinanceFinance applicationsFinancing applications attached to your vehicles.Manage InventoryFinanceNo finance applications found for this dealership.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Finance",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 160,
+   "text": "Dealer menuFinanceFinance applicationsFinancing applications attached to your vehicles.Manage InventoryFinanceCould not load finance. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Finance",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 160,
+   "text": "Dealer menuFinanceFinance applicationsFinancing applications attached to your vehicles.Manage InventoryFinanceCould not load finance. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Finance",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 110,
+   "text": "Dealer menuFinanceFinance applicationsFinancing applications attached to your vehicles.Manage InventoryFinance",
+   "alert": false,
+   "retry": false,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 160,
+   "text": "Dealer menuFinanceFinance applicationsFinancing applications attached to your vehicles.Manage InventoryFinanceNo finance applications found for this dealership.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Finance",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 160,
+   "text": "Dealer menuFinanceFinance applicationsFinancing applications attached to your vehicles.Manage InventoryFinanceCould not load finance. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 160,
+   "text": "Dealer menuFinanceFinance applicationsFinancing applications attached to your vehicles.Manage InventoryFinanceNo finance applications found for this dealership.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  }
+ },
+ {
+  "ws": "dealer",
+  "section": "Analytics",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 231,
+   "text": "Dealer menuAnalyticsAnalyticsRevenue, sales and viewing performance.Manage InventoryTotal RevenueKsh 0Total Sales0Avg Deal SizeKsh 0Total Views0Top Vehicles by Views2019 Mazda CX-50 views2017 Honda Fi",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Analytics",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 136,
+   "text": "Dealer menuAnalyticsAnalyticsRevenue, sales and viewing performance.Manage InventoryCould not load analytics. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Analytics",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 136,
+   "text": "Dealer menuAnalyticsAnalyticsRevenue, sales and viewing performance.Manage InventoryCould not load analytics. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Analytics",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 84,
+   "text": "Dealer menuAnalyticsAnalyticsRevenue, sales and viewing performance.Manage Inventory",
+   "alert": false,
+   "retry": false,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 231,
+   "text": "Dealer menuAnalyticsAnalyticsRevenue, sales and viewing performance.Manage InventoryTotal RevenueKsh 0Total Sales0Avg Deal SizeKsh 0Total Views0Top Vehicles by Views2019 Mazda CX-50 views2017 Honda Fi",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Analytics",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 136,
+   "text": "Dealer menuAnalyticsAnalyticsRevenue, sales and viewing performance.Manage InventoryCould not load analytics. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 231,
+   "text": "Dealer menuAnalyticsAnalyticsRevenue, sales and viewing performance.Manage InventoryTotal RevenueKsh 0Total Sales0Avg Deal SizeKsh 0Total Views0Top Vehicles by Views2019 Mazda CX-50 views2017 Honda Fi",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  }
+ },
+ {
+  "ws": "dealer",
+  "section": "Reputation",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 114,
+   "text": "Dealer menuReputationReputationRatings and reviews from buyers.Manage InventoryReputation—0 reviewsNo reviews yet.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Reputation",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 147,
+   "text": "Dealer menuReputationReputationRatings and reviews from buyers.Manage InventoryReputationCould not load your reputation. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Reputation",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 147,
+   "text": "Dealer menuReputationReputationRatings and reviews from buyers.Manage InventoryReputationCould not load your reputation. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Reputation",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 89,
+   "text": "Dealer menuReputationReputationRatings and reviews from buyers.Manage InventoryReputation",
+   "alert": false,
+   "retry": false,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 114,
+   "text": "Dealer menuReputationReputationRatings and reviews from buyers.Manage InventoryReputation—0 reviewsNo reviews yet.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Reputation",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 147,
+   "text": "Dealer menuReputationReputationRatings and reviews from buyers.Manage InventoryReputationCould not load your reputation. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 114,
+   "text": "Dealer menuReputationReputationRatings and reviews from buyers.Manage InventoryReputation—0 reviewsNo reviews yet.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "dealer",
+  "section": "Marketing",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 120,
+   "text": "Dealer menuMarketingMarketingCampaigns promoting your vehicles.Manage InventoryMarketingCreate CampaignNo campaigns yet.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Marketing",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 160,
+   "text": "Dealer menuMarketingMarketingCampaigns promoting your vehicles.Manage InventoryMarketingCreate CampaignCould not load your campaigns. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Marketing",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 160,
+   "text": "Dealer menuMarketingMarketingCampaigns promoting your vehicles.Manage InventoryMarketingCreate CampaignCould not load your campaigns. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Marketing",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 103,
+   "text": "Dealer menuMarketingMarketingCampaigns promoting your vehicles.Manage InventoryMarketingCreate Campaign",
+   "alert": false,
+   "retry": false,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 120,
+   "text": "Dealer menuMarketingMarketingCampaigns promoting your vehicles.Manage InventoryMarketingCreate CampaignNo campaigns yet.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Marketing",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 160,
+   "text": "Dealer menuMarketingMarketingCampaigns promoting your vehicles.Manage InventoryMarketingCreate CampaignCould not load your campaigns. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 120,
+   "text": "Dealer menuMarketingMarketingCampaigns promoting your vehicles.Manage InventoryMarketingCreate CampaignNo campaigns yet.",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "dealer",
+  "section": "Team",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 341,
+   "text": "Dealer menuTeamTeamPeople who work with your dealership account.Manage InventoryTeamMembersRolesInvite a team memberEmailRoleManagerSales agentLot agentFinance officerViewerSend invitationAdd new vehi",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Team",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 136,
+   "text": "Dealer menuTeamTeamPeople who work with your dealership account.Manage InventoryTeamCould not load your team. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Team",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 136,
+   "text": "Dealer menuTeamTeamPeople who work with your dealership account.Manage InventoryTeamCould not load your team. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Team",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 84,
+   "text": "Dealer menuTeamTeamPeople who work with your dealership account.Manage InventoryTeam",
+   "alert": false,
+   "retry": false,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 341,
+   "text": "Dealer menuTeamTeamPeople who work with your dealership account.Manage InventoryTeamMembersRolesInvite a team memberEmailRoleManagerSales agentLot agentFinance officerViewerSend invitationAdd new vehi",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Team",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 136,
+   "text": "Dealer menuTeamTeamPeople who work with your dealership account.Manage InventoryTeamCould not load your team. Please try again.Try Again",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 341,
+   "text": "Dealer menuTeamTeamPeople who work with your dealership account.Manage InventoryTeamMembersRolesInvite a team memberEmailRoleManagerSales agentLot agentFinance officerViewerSend invitationAdd new vehi",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  }
+ },
+ {
+  "ws": "dealer",
+  "section": "Banking",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 656,
+   "text": "Dealer menuBankingBankingWhere your payouts are sent: bank account and M-Pesa.Manage InventoryBankingWhere KAYARD KE sends your payouts. All fields are optional and you can change them at any time.Sav",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Banking",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 462,
+   "text": "Dealer menuBankingBankingWhere your payouts are sent: bank account and M-Pesa.Manage InventoryBankingCould not load your banking details. Please try again.Try AgainAuction commitment accountBidders’ c",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Banking",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 462,
+   "text": "Dealer menuBankingBankingWhere your payouts are sent: bank account and M-Pesa.Manage InventoryBankingCould not load your banking details. Please try again.Try AgainAuction commitment accountBidders’ c",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Banking",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 399,
+   "text": "Dealer menuBankingBankingWhere your payouts are sent: bank account and M-Pesa.Manage InventoryBankingAuction commitment accountBidders’ commitment fees go straight to this paybill or till once KAYARD ",
+   "alert": false,
+   "retry": false,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 656,
+   "text": "Dealer menuBankingBankingWhere your payouts are sent: bank account and M-Pesa.Manage InventoryBankingWhere KAYARD KE sends your payouts. All fields are optional and you can change them at any time.Sav",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Banking",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 462,
+   "text": "Dealer menuBankingBankingWhere your payouts are sent: bank account and M-Pesa.Manage InventoryBankingCould not load your banking details. Please try again.Try AgainAuction commitment accountBidders’ c",
+   "alert": true,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 656,
+   "text": "Dealer menuBankingBankingWhere your payouts are sent: bank account and M-Pesa.Manage InventoryBankingWhere KAYARD KE sends your payouts. All fields are optional and you can change them at any time.Sav",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": true
+  }
+ },
+ {
+  "ws": "dealer",
+  "section": "Settings",
+  "scenario": "natural",
+  "found": true,
+  "first": {
+   "len": 536,
+   "text": "Dealer menuSettingsSettingsProfile, notifications, plan, team and banking for your dealership.Manage InventorySettingsProfileNotificationsPlan & limitsTeam & rolesBankingVerification statusApplication",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Settings",
+  "scenario": "error500",
+  "found": true,
+  "first": {
+   "len": 381,
+   "text": "Dealer menuSettingsSettingsProfile, notifications, plan, team and banking for your dealership.Manage InventorySettingsProfileNotificationsPlan & limitsTeam & rolesBankingVerification statusVerificatio",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Settings",
+  "scenario": "forbidden403",
+  "found": true,
+  "first": {
+   "len": 381,
+   "text": "Dealer menuSettingsSettingsProfile, notifications, plan, team and banking for your dealership.Manage InventorySettingsProfileNotificationsPlan & limitsTeam & rolesBankingVerification statusVerificatio",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Settings",
+  "scenario": "slow",
+  "found": true,
+  "first": {
+   "len": 299,
+   "text": "Dealer menuSettingsSettingsProfile, notifications, plan, team and banking for your dealership.Manage InventorySettingsProfileNotificationsPlan & limitsTeam & rolesBankingVerification statusChecking ve",
+   "alert": false,
+   "retry": false,
+   "spinner": true,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": {
+   "len": 536,
+   "text": "Dealer menuSettingsSettingsProfile, notifications, plan, team and banking for your dealership.Manage InventorySettingsProfileNotificationsPlan & limitsTeam & rolesBankingVerification statusApplication",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": false,
+   "denied": false,
+   "emptyWords": false
+  },
+  "recovered": null
+ },
+ {
+  "ws": "dealer",
+  "section": "Settings",
+  "scenario": "retry",
+  "found": true,
+  "first": {
+   "len": 381,
+   "text": "Dealer menuSettingsSettingsProfile, notifications, plan, team and banking for your dealership.Manage InventorySettingsProfileNotificationsPlan & limitsTeam & rolesBankingVerification statusVerificatio",
+   "alert": false,
+   "retry": true,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  },
+  "after": null,
+  "recovered": {
+   "len": 556,
+   "text": "Dealer menuSettingsSettingsProfile, notifications, plan, team and banking for your dealership.Manage InventorySettingsProfileNotificationsPlan & limitsTeam & rolesBankingVerification statusVerificatio",
+   "alert": false,
+   "retry": false,
+   "spinner": false,
+   "loadingText": false,
+   "errWords": true,
+   "denied": false,
+   "emptyWords": false
+  }
+ }
+]

@@ -46,7 +46,7 @@
 }
 .kayad-home-quick-action__title { font-size: 12px; font-weight: 850; line-height: 1.15; }
 .kayad-home-quick-action__desc { color: #647985; font-size: 9px; font-weight: 550; line-height: 1.2; }
-.kayad-home-quick-action:focus-visible { outline: 2px solid #13B8A6; outline-offset: -2px; border-radius: 12px; }
+.kayad-home-quick-action:focus-visible { outline: 2px solid #0F766E; outline-offset: -2px; border-radius: 12px; }
 .kayad-home-quick-action:active { background: #EFFAF7; }
 .kayad-home-category-strip > div { scrollbar-width: none; }
 .kayad-home-category-strip > div::-webkit-scrollbar { display: none; }

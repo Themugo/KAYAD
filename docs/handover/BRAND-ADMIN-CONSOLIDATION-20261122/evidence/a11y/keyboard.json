@@ -1,0 +1,70 @@
+[
+ {
+  "role": "anon",
+  "route": "/",
+  "tabbed": 45,
+  "firstStop": "Pause KAYARD KE notices",
+  "skipLinkFirst": false,
+  "noIndicator": [],
+  "hiddenFocus": [],
+  "trap": false
+ },
+ {
+  "role": "anon",
+  "route": "/marketplace",
+  "tabbed": 45,
+  "firstStop": "Pause KAYARD KE notices",
+  "skipLinkFirst": false,
+  "noIndicator": [],
+  "hiddenFocus": [],
+  "trap": false
+ },
+ {
+  "role": "anon",
+  "route": "/login",
+  "tabbed": 41,
+  "firstStop": "Home",
+  "skipLinkFirst": false,
+  "noIndicator": [],
+  "hiddenFocus": [],
+  "trap": false
+ },
+ {
+  "role": "user",
+  "route": "/dashboard",
+  "tabbed": 44,
+  "firstStop": "Skip to main content",
+  "skipLinkFirst": true,
+  "noIndicator": [],
+  "hiddenFocus": [],
+  "trap": false
+ },
+ {
+  "role": "dealer",
+  "route": "/dealer",
+  "tabbed": 44,
+  "firstStop": "Skip to main content",
+  "skipLinkFirst": true,
+  "noIndicator": [],
+  "hiddenFocus": [],
+  "trap": false
+ },
+ {
+  "role": "superadmin",
+  "route": "/admin",
+  "tabbed": 45,
+  "firstStop": "Collapse admin sidebar",
+  "skipLinkFirst": false,
+  "noIndicator": [],
+  "hiddenFocus": [],
+  "trap": false
+ },
+ {
+  "mobileMenu": {
+   "toggleFound": true,
+   "expandedAfterEnter": "false",
+   "expandedAfterEscape": "false",
+   "focusReturned": false
+  }
+ }
+]

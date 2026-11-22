@@ -111,7 +111,7 @@ export default function AdminReports() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 12, marginBottom: 24 }}>
-          {visibleStats.map(([label, value]) => <div key={label} className="card" style={{ padding: 16 }}><div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 6 }}>{label}</div><strong style={{ fontSize: 24 }}>{Number(value || 0).toLocaleString()}</strong></div>)}
+          {visibleStats.map(([label, value]) => <div key={label} className="card" style={{ padding: 16 }}><div style={{ color: 'var(--text-muted)', fontSize: 12, marginBottom: 6 }}>{label}</div><strong style={{ fontSize: 24 }} aria-label={error ? `${label}: unavailable` : undefined}>{error ? '—' : Number(value || 0).toLocaleString()}</strong></div>)}
         </div>
 
         <div className="card" style={{ padding: 16, marginBottom: 16 }}>

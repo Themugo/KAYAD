@@ -45,6 +45,7 @@ function ProfileSection({ userId }: { userId: string }) {
 
   const [verification, setVerification] = useState<{ stage: string; status?: string } | null>(null);
   const [verificationError, setVerificationError] = useState(false);
+  const [verificationRetry, setVerificationRetry] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -66,6 +67,7 @@ function ProfileSection({ userId }: { userId: string }) {
 
   useEffect(() => {
     let cancelled = false;
+    setVerificationError(false);
     dealerApi.getVerificationStatus()
       .then((body: any) => {
         if (cancelled) return;
@@ -74,7 +76,7 @@ function ProfileSection({ userId }: { userId: string }) {
       })
       .catch(() => { if (!cancelled) setVerificationError(true); });
     return () => { cancelled = true; };
-  }, []);
+  }, [verificationRetry]);
 
   useEffect(() => {
     if (!dirty) return undefined;
@@ -135,7 +137,11 @@ function ProfileSection({ userId }: { userId: string }) {
       <section aria-labelledby="verification-heading" className="p-4 rounded-xl bg-[#F3FAF9] border border-[#D7E7E4]">
         <h3 id="verification-heading" className="text-base font-bold text-[#0A3340] mb-1">Verification status</h3>
         {verificationError ? (
-          <p className="text-sm text-[#475569]">Verification status is unavailable right now.</p>
+          <div role="alert" className="flex flex-wrap items-center gap-3 text-sm text-[#475569]">
+            <span>Verification status is unavailable right now.</span>
+            <span className="w-full text-xs">Your application has not changed. Try again in a moment.</span>
+            <button type="button" onClick={() => setVerificationRetry((n) => n + 1)} className="rounded-lg border border-[#176B87] px-3 py-1.5 text-sm font-semibold text-[#0A3340]">Try again</button>
+          </div>
         ) : !verification ? (
           <p className="text-sm text-[#475569]">Checking verification status…</p>
         ) : (

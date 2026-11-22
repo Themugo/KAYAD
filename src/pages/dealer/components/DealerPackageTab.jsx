@@ -1,3 +1,10 @@
+/**
+ * @deprecated LEGACY (owner decision D-16) — do not import from production code.
+ * Not rendered by the app. Retained only because validator(s) still read this file: validate-dealer-commercial-controls, validate-subscription-domain-e2e.
+ * Canonical implementation: none found in the dashboard (subscription UI not rendered) — needs owner decision.
+ * See docs/handover/DEALER-COMPLETION-20261121/D16-LEGACY-FILES-REGISTER.md.
+ * A guard test (src/__tests__/legacy/legacyDealerFilesGuard.test.ts) fails if app code imports it.
+ */
 import { useEffect, useState } from 'react';
 import { useToast } from '../../../context/ToastContext';
 import { dealerAPI } from '../../../api/api';

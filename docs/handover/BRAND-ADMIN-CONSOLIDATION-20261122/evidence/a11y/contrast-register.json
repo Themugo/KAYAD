@@ -1,0 +1,234 @@
+[
+ {
+  "n": "Body text on white",
+  "f": "#0A3340",
+  "b": "#FFFFFF",
+  "r": 13.46,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Body text on page tint",
+  "f": "#0A3340",
+  "b": "#F6FAF9",
+  "r": 12.79,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Secondary text on white",
+  "f": "#475569",
+  "b": "#FFFFFF",
+  "r": 7.58,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Secondary text on tint panel",
+  "f": "#475569",
+  "b": "#F0F8F6",
+  "r": 7.02,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Muted text (was #64748B) on tint panel",
+  "f": "#64748B",
+  "b": "#F0F8F6",
+  "r": 4.41,
+  "req": 4.5,
+  "pass": false
+ },
+ {
+  "n": "Muted text (now #475569) on tint panel",
+  "f": "#475569",
+  "b": "#F0F8F6",
+  "r": 7.02,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Journey nav text (was #607780) on white",
+  "f": "#607780",
+  "b": "#FFFFFF",
+  "r": 4.72,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Journey nav text (now #4A616A) on white",
+  "f": "#4A616A",
+  "b": "#FFFFFF",
+  "r": 6.54,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Empty-state text (was #94A3B8) on white",
+  "f": "#94A3B8",
+  "b": "#FFFFFF",
+  "r": 2.56,
+  "req": 4.5,
+  "pass": false
+ },
+ {
+  "n": "Empty-state text (now #5B7079) on white",
+  "f": "#5B7079",
+  "b": "#FFFFFF",
+  "r": 5.2,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Primary button: white on navy",
+  "f": "#FFFFFF",
+  "b": "#0A3340",
+  "r": 13.46,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Teal action button: white on #13B8A6",
+  "f": "#FFFFFF",
+  "b": "#13B8A6",
+  "r": 2.49,
+  "req": 4.5,
+  "pass": false
+ },
+ {
+  "n": "Teal action button: navy on #13B8A6",
+  "f": "#0A3340",
+  "b": "#13B8A6",
+  "r": 5.41,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Active step pill: white on #13B8A6",
+  "f": "#FFFFFF",
+  "b": "#13B8A6",
+  "r": 2.49,
+  "req": 4.5,
+  "pass": false
+ },
+ {
+  "n": "Completed step: teal-800 on teal-50",
+  "f": "#115E59",
+  "b": "#F0FDFA",
+  "r": 7.27,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Link / accent teal #176B87 on white",
+  "f": "#176B87",
+  "b": "#FFFFFF",
+  "r": 6.02,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Sidebar group label white/65 on navy (approx #A6B8BF)",
+  "f": "#A6B8BF",
+  "b": "#0A3340",
+  "r": 6.56,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Sidebar group label old white/40 (approx #6C8590)",
+  "f": "#6C8590",
+  "b": "#0A3340",
+  "r": 3.46,
+  "req": 4.5,
+  "pass": false
+ },
+ {
+  "n": "Error text #B42318 on white",
+  "f": "#B42318",
+  "b": "#FFFFFF",
+  "r": 6.57,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Error banner rose-800 on rose-50",
+  "f": "#9F1239",
+  "b": "#FFF1F2",
+  "r": 7.3,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Success: emerald-700 on white",
+  "f": "#047857",
+  "b": "#FFFFFF",
+  "r": 5.48,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Success badge: white on emerald-700 (was 600)",
+  "f": "#FFFFFF",
+  "b": "#047857",
+  "r": 5.48,
+  "req": 4.5,
+  "pass": true
+ },
+ {
+  "n": "Success badge: white on emerald-600 (old)",
+  "f": "#FFFFFF",
+  "b": "#059669",
+  "r": 3.77,
+  "req": 4.5,
+  "pass": false
+ },
+ {
+  "n": "Disabled step text slate-500 on slate-100 (disabled: exempt)",
+  "f": "#64748B",
+  "b": "#F1F5F9",
+  "r": 4.34,
+  "req": 4.5,
+  "pass": false
+ },
+ {
+  "n": "Form border #CBD5E1 on white (UI component)",
+  "f": "#CBD5E1",
+  "b": "#FFFFFF",
+  "r": 1.48,
+  "req": 3,
+  "pass": false
+ },
+ {
+  "n": "Form border #94A3B8 on white (UI component)",
+  "f": "#94A3B8",
+  "b": "#FFFFFF",
+  "r": 2.56,
+  "req": 3,
+  "pass": false
+ },
+ {
+  "n": "Focus ring teal #13B8A6 on white",
+  "f": "#13B8A6",
+  "b": "#FFFFFF",
+  "r": 2.49,
+  "req": 3,
+  "pass": false
+ },
+ {
+  "n": "Focus ring teal #13B8A6 on navy",
+  "f": "#13B8A6",
+  "b": "#0A3340",
+  "r": 5.41,
+  "req": 3,
+  "pass": true
+ },
+ {
+  "n": "Dark-logo KE teal #2DD4BF on navy",
+  "f": "#2DD4BF",
+  "b": "#0A3340",
+  "r": 7.23,
+  "req": 3,
+  "pass": true
+ }
+]

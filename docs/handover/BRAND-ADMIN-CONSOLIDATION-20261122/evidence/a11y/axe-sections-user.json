@@ -1,0 +1,222 @@
+[
+ {
+  "ws": "user",
+  "width": 1440,
+  "section": "Overview",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 1440,
+  "section": "Buying",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 1440,
+  "section": "Deals & escrow",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 1440,
+  "section": "Create listing",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 1440,
+  "section": "My vehicles",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 1440,
+  "section": "Seller enquiries",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 1440,
+  "section": "Performance",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 1440,
+  "section": "Messages",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 1440,
+  "section": "Auctions",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 1440,
+  "section": "Activity",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 1440,
+  "section": "My Account",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 1440,
+  "section": "Verification & trust",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 1440,
+  "section": "Help & support",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 390,
+  "section": "Overview",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 390,
+  "section": "Buying",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 390,
+  "section": "Deals & escrow",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 390,
+  "section": "Create listing",
+  "found": true,
+  "overflow": false,
+  "axe": [
+   {
+    "id": "scrollable-region-focusable",
+    "impact": "serious",
+    "n": 1,
+    "sample": [
+     {
+      "html": "<div class=\"mt-4 flex min-w-0 gap-2 overflow-x-auto pb-2\" aria-label=\"Listing steps\">",
+      "msg": "Element should have focusable content"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "ws": "user",
+  "width": 390,
+  "section": "My vehicles",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 390,
+  "section": "Seller enquiries",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 390,
+  "section": "Performance",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 390,
+  "section": "Messages",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 390,
+  "section": "Auctions",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 390,
+  "section": "Activity",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 390,
+  "section": "My Account",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 390,
+  "section": "Verification & trust",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ },
+ {
+  "ws": "user",
+  "width": 390,
+  "section": "Help & support",
+  "found": true,
+  "overflow": false,
+  "axe": []
+ }
+]

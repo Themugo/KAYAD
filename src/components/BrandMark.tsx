@@ -1,4 +1,4 @@
-import { useBrandingSafe, onBrandLogoError, DEFAULT_LOGO_URL } from '../context/BrandingContext';
+import { useBrandingSafe, onBrandLogoError, DEFAULT_LOGO_URL, DEFAULT_LOGO_DARK_URL } from '../context/BrandingContext';
 
 interface BrandMarkProps {
   /** Pixel height of the logo image / icon tile. */
@@ -7,6 +7,8 @@ interface BrandMarkProps {
   showName?: boolean;
   /** Show the saved tagline under the name. */
   showTagline?: boolean;
+  /** Surface the mark sits on. 'dark' swaps the built-in default logo for its dark-background variant. */
+  tone?: 'light' | 'dark';
   className?: string;
   nameClassName?: string;
   tileClassName?: string;
@@ -17,17 +19,18 @@ interface BrandMarkProps {
  * (Admin > Settings > Branding), so a logo, name or tagline change reaches login, register, portals and dashboards.
  * Outside the provider (isolated renders) it shows the built-in branding.
  */
-export default function BrandMark({ size = 36, showName = true, showTagline = false, className, nameClassName, tileClassName }: BrandMarkProps) {
+export default function BrandMark({ size = 36, showName = true, showTagline = false, tone = 'light', className, nameClassName, tileClassName }: BrandMarkProps) {
   const b = useBrandingSafe();
   const name = b.logoText || 'KAYARD KE';
   const isImage = b.logoType === 'image' && !!b.logoUrl;
+  const logoSrc = tone === 'dark' && b.logoUrl === DEFAULT_LOGO_URL ? DEFAULT_LOGO_DARK_URL : b.logoUrl;
   return (
     <span className={className} data-testid="brand-mark" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
       {isImage ? (
-        <img src={b.logoUrl} onError={onBrandLogoError} alt={showName ? '' : name} aria-hidden={showName ? true : undefined} decoding="async"
+        <img src={logoSrc} onError={onBrandLogoError} alt={showName ? '' : name} aria-hidden={showName ? true : undefined} decoding="async"
           style={{ height: size, width: 'auto', maxWidth: size * 4, objectFit: 'contain', flexShrink: 0 }} />
       ) : b.logoType === 'text' ? null : (
-        <img src={DEFAULT_LOGO_URL} onError={onBrandLogoError} alt={showName ? '' : name} aria-hidden={showName ? true : undefined}
+        <img src={tone === 'dark' ? DEFAULT_LOGO_DARK_URL : DEFAULT_LOGO_URL} onError={onBrandLogoError} alt={showName ? '' : name} aria-hidden={showName ? true : undefined}
           style={{ height: size, width: size, objectFit: 'contain', flexShrink: 0 }} />
       )}
       {(showName || b.logoType === 'text') && (

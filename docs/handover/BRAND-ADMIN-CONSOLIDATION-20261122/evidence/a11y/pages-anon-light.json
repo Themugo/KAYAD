@@ -1,0 +1,170 @@
+[
+ {
+  "route": "/",
+  "url": "/",
+  "h1": "Drive Your Dream\nToday",
+  "len": 2295,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "Pause notices KAYARD KE | Verified vehicles across Kenya | Live auctions | Transparent bidding | Protected transactions | KAYARD KE | Verified vehicles across K",
+  "axe": [
+   {
+    "id": "target-size",
+    "impact": "serious",
+    "n": 1,
+    "sample": [
+     {
+      "html": "<button type=\"button\" aria-label=\"Show featured vehicle 2 of 2\" class=\"kk-hero__dot\"><span></span></button>",
+      "msg": "Target has insufficient size (20px by 36px, should be at least 24px by 24px)"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "route": "/marketplace",
+  "url": "/",
+  "h1": "Drive Your Dream\nToday",
+  "len": 2295,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "Pause notices KAYARD KE | Verified vehicles across Kenya | Live auctions | Transparent bidding | Protected transactions | KAYARD KE | Verified vehicles across K",
+  "axe": [
+   {
+    "id": "target-size",
+    "impact": "serious",
+    "n": 1,
+    "sample": [
+     {
+      "html": "<button type=\"button\" aria-label=\"Show featured vehicle 2 of 2\" class=\"kk-hero__dot\"><span></span></button>",
+      "msg": "Target has insufficient size (20px by 36px, should be at least 24px by 24px)"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "route": "/auctions",
+  "url": "/",
+  "h1": "The auction floor is quiet right now",
+  "len": 1316,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "Pause notices KAYARD KE | Verified vehicles across Kenya | Live auctions | Transparent bidding | Protected transactions | KAYARD KE | Verified vehicles across K",
+  "axe": []
+ },
+ {
+  "route": "/inspections",
+  "url": "/",
+  "h1": "Find the right independent expert for your car",
+  "len": 2980,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "Pause notices KAYARD KE | Verified vehicles across Kenya | Live auctions | Transparent bidding | Protected transactions | KAYARD KE | Verified vehicles across K",
+  "axe": []
+ },
+ {
+  "route": "/gallery",
+  "url": "/",
+  "h1": "Drive Your Dream\nToday",
+  "len": 2295,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "Pause notices KAYARD KE | Verified vehicles across Kenya | Live auctions | Transparent bidding | Protected transactions | KAYARD KE | Verified vehicles across K",
+  "axe": [
+   {
+    "id": "target-size",
+    "impact": "serious",
+    "n": 1,
+    "sample": [
+     {
+      "html": "<button type=\"button\" aria-label=\"Show featured vehicle 2 of 2\" class=\"kk-hero__dot\"><span></span></button>",
+      "msg": "Target has insufficient size (20px by 36px, should be at least 24px by 24px)"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "route": "/support",
+  "url": "/",
+  "h1": "One case number, the whole transaction.",
+  "len": 3543,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "Pause notices KAYARD KE | Verified vehicles across Kenya | Live auctions | Transparent bidding | Protected transactions | KAYARD KE | Verified vehicles across K",
+  "axe": []
+ },
+ {
+  "route": "/login",
+  "url": "/login",
+  "h1": "Welcome back.",
+  "len": 412,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "KAYARD KE PREMIUM VEHICLE MARKETPLACE New to KAYARD KE? Create account SECURE MARKETPLACE ACCESS Welcome back. Sign in to your KAYARD KE account and continue bu",
+  "axe": []
+ },
+ {
+  "route": "/register",
+  "url": "/register",
+  "h1": "Choose your KAYARD KE account",
+  "len": 1592,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "KAYARD KE PREMIUM VEHICLE MARKETPLACE Already have an account? Sign in CREATE YOUR ACCOUNT Choose your KAYARD KE account One personal account lets you buy and s",
+  "axe": []
+ },
+ {
+  "route": "/forgot-password",
+  "url": "/forgot-password",
+  "h1": "Reset your password",
+  "len": 272,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "KAYARD KE PREMIUM VEHICLE MARKETPLACE New to KAYARD KE? Create account ACCOUNT RECOVERY Reset your password Enter your KAYARD KE email and we’ll send a secure r",
+  "axe": []
+ },
+ {
+  "route": "/privacy",
+  "url": "/privacy",
+  "h1": "Privacy Policy",
+  "len": 4588,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "KAYARD KE Back to KAYARD KE Privacy Policy Last updated 10 November 2026 1. What this covers 2. Information we collect 3. How we use it 4. Sharing 5. Keeping an",
+  "axe": []
+ },
+ {
+  "route": "/terms",
+  "url": "/terms",
+  "h1": "Terms of Service",
+  "len": 4714,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "KAYARD KE Back to KAYARD KE Terms of Service Last updated 10 November 2026 1. About these terms 2. Accounts 3. Listings 4. Auctions and bid commitments 5. Refun",
+  "axe": []
+ }
+]

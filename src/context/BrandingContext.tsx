@@ -247,6 +247,8 @@ export const SUPPORTED_FONTS: Record<string, string> = {
 };
 
 export const DEFAULT_LOGO_URL = '/branding/kayard-ke-logo.png';
+/** The approved logo recoloured for dark surfaces (navy lettering becomes white). Used only when the saved logo is the built-in default. */
+export const DEFAULT_LOGO_DARK_URL = '/branding/kayard-ke-logo-dark.png';
 /** A stored logo can go missing (deleted asset, provider outage). Fall back ONCE to the bundled mark instead of showing a broken image. */
 export function onBrandLogoError(e: { currentTarget: HTMLImageElement }) {
   const img = e.currentTarget;

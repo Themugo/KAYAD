@@ -102,7 +102,7 @@ const button = {
   tab: { padding: '12px 13px', background: 'transparent', border: 0, color: '#0a3340', fontSize: 11, fontWeight: 850, cursor: 'pointer', whiteSpace: 'nowrap' },
 };
 const card = { background: '#fff', border: '1px solid rgba(10, 51, 64, .07)', borderRadius: 12, overflow: 'hidden', boxShadow: '0 12px 35px rgba(10, 51, 64, .05)' };
-const empty = { padding: 70, textAlign: 'center', background: '#fff', border: '1px solid rgba(10, 51, 64, .07)', borderRadius: 12, color: 'rgba(10, 51, 64, .5)' };
+const empty = { padding: 70, textAlign: 'center', background: '#fff', border: '1px solid rgba(10, 51, 64, .07)', borderRadius: 12, color: 'rgba(10, 51, 64, .72)' };
 const pill = { padding: '4px 8px', borderRadius: 999, background: 'rgba(23, 107, 135, .08)', color: '#176B87', fontSize: 10, fontWeight: 900 };
 const smallPill = { padding: '4px 8px', borderRadius: 999, background: 'rgba(10, 51, 64, .05)', color: '#0a3340', fontSize: 10, fontWeight: 800 };
 const labelStyle = { fontSize: 9, textTransform: 'uppercase', letterSpacing: '.1em', fontWeight: 800, color: 'rgba(10, 51, 64, .38)', marginBottom: 4 };

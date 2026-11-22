@@ -1,0 +1,74 @@
+[
+ {
+  "route": "/dealer",
+  "url": "/",
+  "h1": "KAYARD KE",
+  "len": 1140,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "Skip to main content Dealer workspace Dealer workspace KAYARD KE Journey dealer OVERVIEW Overview OPERATIONS Inventory Leads Pipeline Customers Auctions Inspect",
+  "axe": []
+ },
+ {
+  "route": "/dealer/auction-setup",
+  "url": "/dealer/auction-setup",
+  "h1": "Build an auction people want to enter.",
+  "len": 426,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "Set up an auction Set up an auction KAYARD KE AUCTION STUDIO Build an auction people want to enter. Shape the economics, timing, bidder requirements, fulfilment",
+  "axe": []
+ },
+ {
+  "route": "/dealer/auction-operations",
+  "url": "/dealer/auction-operations",
+  "h1": "A premium command centre for every auction outcome.",
+  "len": 428,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "Auction operations Auction operations DEALER OPERATIONS · AUCTION FULFILMENT A premium command centre for every auction outcome. Move winners from payment throu",
+  "axe": []
+ },
+ {
+  "route": "/chat",
+  "url": "/",
+  "h1": "Your conversations",
+  "len": 962,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "Pause notices KAYARD KE | Verified vehicles across Kenya | Live auctions | Transparent bidding | Protected transactions | KAYARD KE | Verified vehicles across K",
+  "axe": []
+ },
+ {
+  "route": "/notifications",
+  "url": "/notifications",
+  "h1": "Notifications",
+  "len": 129,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "Notifications Your account alerts and activity updates. You’re all caught up New account and transaction alerts will appear here.",
+  "axe": []
+ },
+ {
+  "route": "/profile",
+  "url": "/",
+  "h1": "KAYARD KE",
+  "len": 882,
+  "bg": "rgb(246, 250, 249)",
+  "fg": "oklch(0.279 0.041 260.031)",
+  "htmlClass": "",
+  "theme": null,
+  "text": "Skip to main content My Account Dealer workspace Dealer workspace KAYARD KE Journey dealer OVERVIEW Overview OPERATIONS Inventory Leads Pipeline Customers Aucti",
+  "axe": []
+ }
+]

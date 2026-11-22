@@ -126,7 +126,7 @@
   .kayad-market-toolbar button[aria-label="Filters"], .kayad-market-toolbar button:has(svg.lucide-sliders-horizontal) { min-height: 46px; }
   .kayad-market-toolbar h2 { row-gap: 8px; }
   .kayad-market-toolbar p { font-size: 13px; line-height: 1.6; }
-  .kayad-market-toolbar select:focus-visible, .kayad-market-toolbar button:focus-visible { outline: 3px solid rgba(19,184,166,.6); outline-offset: 2px; }
+  .kayad-market-toolbar select:focus-visible, .kayad-market-toolbar button:focus-visible { outline: 3px solid #0F766E; outline-offset: 2px; }
   .kayad-market-toolbar + * { min-width: 0; }
 }
 

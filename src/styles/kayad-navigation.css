@@ -10,7 +10,7 @@
 
 /* Brand field — its own visual authority, never a menu item. */
 .kayad-brand{display:flex;align-items:center;gap:10px;flex-shrink:0;min-width:0;border-radius:14px;padding:4px 6px 4px 0;text-decoration:none}
-.kayad-brand:focus-visible,.kayad-nav__link:focus-visible,.kayad-nav__toggle:focus-visible,.kayad-menu__item:focus-visible,.kayad-util:focus-visible{outline:2px solid var(--kn-teal);outline-offset:2px}
+.kayad-brand:focus-visible,.kayad-nav__link:focus-visible,.kayad-nav__toggle:focus-visible,.kayad-menu__item:focus-visible,.kayad-util:focus-visible{outline:2px solid #0F766E;box-shadow:0 0 0 4px #fff;outline-offset:2px}
 .kayad-brand__mark{display:grid;place-items:center;width:40px;height:40px;flex-shrink:0;border-radius:13px;background:linear-gradient(135deg,var(--kn-ink),var(--kn-mid));color:#fff;box-shadow:0 6px 16px rgba(10,51,64,.22),inset 0 1px 0 rgba(255,255,255,.14);transition:transform .2s ease}
 .kayad-brand:hover .kayad-brand__mark{transform:translateY(-1px)}
 .kayad-brand__text{display:flex;flex-direction:column;min-width:0;text-align:left;line-height:1}
@@ -30,7 +30,7 @@
 .kayad-nav__link:hover{background:rgba(255,255,255,.09);color:#fff}
 .kayad-nav__link svg{opacity:.8;flex-shrink:0}
 .kayad-nav__group.has-children .kayad-nav__link{padding-right:4px;border-top-right-radius:0;border-bottom-right-radius:0}
-.kayad-nav__toggle{display:inline-grid;place-items:center;width:24px;height:38px;margin-left:-1px;border:0;background:transparent;color:rgba(255,255,255,.7);border-radius:0 11px 11px 0;cursor:pointer;transition:background .18s ease,color .18s ease}
+.kayad-nav__toggle{display:inline-grid;place-items:center;width:28px;height:38px;margin-left:0;border:0;background:transparent;color:rgba(255,255,255,.7);border-radius:0 11px 11px 0;cursor:pointer;transition:background .18s ease,color .18s ease}
 .kayad-nav__toggle:hover,.kayad-nav__group.is-open .kayad-nav__toggle{background:rgba(255,255,255,.09);color:#fff}
 .kayad-nav__toggle svg{transition:transform .2s ease}
 .kayad-nav__group.is-open .kayad-nav__toggle svg{transform:rotate(180deg)}
@@ -70,10 +70,10 @@
 .kayad-util__divider{display:block}}
 .kayad-cta{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 13px;border:0;border-radius:12px;background:#176B87;color:#fff;font-size:12px;font-weight:800;cursor:pointer;box-shadow:0 8px 18px rgba(23,107,135,.22);transition:background .18s ease,transform .18s ease}
 .kayad-cta:hover{background:#12576D}.kayad-cta:active{transform:scale(.98)}
-.kayad-cta:focus-visible{outline:2px solid var(--kn-teal);outline-offset:2px}
+.kayad-cta:focus-visible{outline:2px solid #0F766E;box-shadow:0 0 0 4px #fff;outline-offset:2px}
 .kayad-signin{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 13px;border:1px solid var(--kn-ink);border-radius:12px;background:#fff;color:var(--kn-ink);font-size:11.5px;font-weight:800;white-space:nowrap;cursor:pointer;transition:background .18s ease,color .18s ease}
 .kayad-signin:hover{background:var(--kn-ink);color:#fff}
-.kayad-signin:focus-visible{outline:2px solid var(--kn-teal);outline-offset:2px}
+.kayad-signin:focus-visible{outline:2px solid #0F766E;box-shadow:0 0 0 4px #fff;outline-offset:2px}
 @media(min-width:1280px){.kayad-signin{font-size:12px;padding:0 15px}.kayad-cta{padding:0 16px}}
 
 /* Mobile drawer — grouped destinations from the same canonical config. */

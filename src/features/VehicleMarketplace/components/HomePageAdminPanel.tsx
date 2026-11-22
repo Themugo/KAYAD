@@ -539,7 +539,7 @@ export const HomePageAdminPanel: React.FC<HomePageAdminPanelProps> = ({
                   </span>
                 </span>
                 <span className={`text-[10px] font-black px-2 py-0.5 rounded-full shrink-0 ml-2 ${
-                  escrowConfig.liveMode ? 'bg-emerald-500 text-white' : 'bg-[#13B8A6] text-white'
+                  escrowConfig.liveMode ? 'bg-emerald-500 text-white' : 'bg-[#13B8A6] text-[#0A3340]'
                 }`}>
                   {escrowConfig.liveMode ? 'ON' : 'OFF'}
                 </span>

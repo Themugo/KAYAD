@@ -108,7 +108,7 @@ export default function CarCard({
               onClick={(e) => { e.stopPropagation(); onToggleCompare(); }}
               className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-all hover:scale-110 border ${
                 isComparing
-                  ? 'bg-[#13B8A6] text-white border-[#5AAFA4] opacity-100'
+                  ? 'bg-[#13B8A6] text-[#0A3340] border-[#5AAFA4] opacity-100'
                   : 'bg-[#0A3340]/60 text-white border-white/20 hover:border-[#5AAFA4] opacity-0 group-hover:opacity-100'
               }`}
               title={isComparing ? 'Remove from compare' : 'Add to compare'}
@@ -257,7 +257,7 @@ export default function CarCard({
             onClick={(e) => { e.stopPropagation(); onToggleCompare(); }}
             className={`absolute top-3 right-14 p-2 rounded-full backdrop-blur-md transition-all hover:scale-110 border ${
               isComparing
-                ? 'bg-[#13B8A6] text-white border-[#5AAFA4]'
+                ? 'bg-[#13B8A6] text-[#0A3340] border-[#5AAFA4]'
                 : 'bg-[#0A3340]/60 text-white border-white/20 hover:border-[#5AAFA4] opacity-0 group-hover:opacity-100'
             }`}
             title={isComparing ? 'Remove from compare' : 'Add to compare'}

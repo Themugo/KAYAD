@@ -228,7 +228,7 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
         <div className="admin-sidebar__brand">
           {!collapsed && (
             <div className="admin-sidebar__brand-copy">
-              <span className="admin-sidebar__eyebrow"><BrandMark size={26} nameClassName="admin-sidebar__brand-name" /></span>
+              <span className="admin-sidebar__eyebrow"><BrandMark tone="dark" size={26} nameClassName="admin-sidebar__brand-name" /></span>
               <span className="admin-sidebar__brand-title" id="admin-sidebar-title">Admin Console</span>
             </div>
           )}

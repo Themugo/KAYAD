@@ -1,0 +1,1509 @@
+[
+ {
+  "route": "/admin",
+  "url": "/admin",
+  "h1": "Welcome back, Journey staff-marketing",
+  "len": 2448,
+  "text": "KAYARD KE BUSINESS COMMAND CENTRE Welcome back, Journey staff-marketing Oversee your marketplace, team, operations and systems — all from one portal. JS Journey staff-marketing Marketing NAIROBI TIME Sunday, 22 November ",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 2072,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200",
+   "/api/ecp/health|403",
+   "/api/admin/stats|200",
+   "/api/admin/alerts?limit=4|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/users",
+  "url": "/admin/users",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1520,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/sellers",
+  "url": "/admin/sellers",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1350,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/private-seller-applications",
+  "url": "/admin/private-seller-applications",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1467,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/alerts?limit=1&read=false|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/cars",
+  "url": "/admin/cars",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1412,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/moderation",
+  "url": "/admin/moderation",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1377,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/alerts?limit=1&read=false|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/auctions",
+  "url": "/admin/auctions",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1384,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/alerts?limit=1&read=false|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/bids",
+  "url": "/admin/bids",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1446,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/escrows",
+  "url": "/admin/escrows",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1470,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/reviews",
+  "url": "/admin/reviews",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1502,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/referrals",
+  "url": "/admin/referrals",
+  "h1": "",
+  "len": 223,
+  "text": "Admin Admin Referral Management Referral analytics, payout oversight, and user tree lookup All Referrals Stats User Tree All pending credited expired 0 referral records · Page 1 Manual credit amount (KES) No referrals fo",
+  "denied": false,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1770,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/referrals?page=1&limit=20|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/chats",
+  "url": "/admin/chats",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1670,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/reports",
+  "url": "/admin/reports",
+  "h1": "Reports",
+  "len": 352,
+  "text": "Admin Admin Reports Review user-submitted reports and moderate reported marketplace content. Refresh reports Total — Pending — Under review — Reviewed — Dismissed — Action taken — Status All reports Pending Under review ",
+  "denied": true,
+  "err": false,
+  "loading": true,
+  "login": false,
+  "ms": 1748,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200",
+   "/api/reports/admin/all?page=1&limit=20|403"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/support-tickets",
+  "url": "/admin/support-tickets",
+  "h1": "",
+  "len": 63,
+  "text": "Admin Admin Your role does not include customer support access.",
+  "denied": false,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1878,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200",
+   "/api/support/staff/queue?status=active&limit=50&offset=0|403",
+   "/api/support/staff/metrics?days=30|403",
+   "/api/support/staff/team|403"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/feedback",
+  "url": "/admin/feedback",
+  "h1": "",
+  "len": 277,
+  "text": "Admin Admin ADMIN User Feedback Review user submissions and record their moderation status. All submissions — New submissions — Read submissions — Addressed submissions — All New Read Addressed Refresh Feedback could not",
+  "denied": false,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1820,
+  "api": [
+   "/src/api/httpRequest.ts|304",
+   "/src/api/api.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/feedback/admin/all?page=1&limit=20|403"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/market-data",
+  "url": "/admin/market-data",
+  "h1": "",
+  "len": 188,
+  "text": "Admin Admin Market Data Pricing guide CRUD management Refresh Bulk Import + New Entry Market data could not be loaded relation \"public.market_data\" does not exist Retry loading market data",
+  "denied": false,
+  "err": false,
+  "loading": true,
+  "login": false,
+  "ms": 1874,
+  "api": [
+   "/src/api/httpRequest.ts|200",
+   "/src/api/api.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/market-data?page=1&limit=20|500"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+   "Failed to load resource: the server responded with a status of 500 (Internal Server Error)"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/transactions",
+  "url": "/admin/transactions",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1481,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/alerts?limit=1&read=false|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/ntsa-queue",
+  "url": "/admin/ntsa-queue",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1429,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/cars?page=1&limit=24&sort=newest|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/inspections",
+  "url": "/admin/inspections",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1502,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/dealer-verifications",
+  "url": "/admin/dealer-verifications",
+  "h1": "Dealer Verifications",
+  "len": 563,
+  "text": "Admin Admin Dealer Verifications Review and manage dealer verification applications ↻ Refresh Dealer verification records could not be loaded Your account is not permitted to read this data (HTTP 403). No records are sho",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1784,
+  "api": [
+   "/src/api/httpRequest.ts|304",
+   "/src/api/api.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200",
+   "/api/verification/admin/all?page=1&limit=20|403"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/inspector-applications",
+  "url": "/admin/inspector-applications",
+  "h1": "",
+  "len": 448,
+  "text": "Admin Admin Inspector Applications Review mechanic inspector applicants, validate their details and record the decision. Refresh applications Pending — Approved — Rejected — Total — All Pending Approved Rejected Applicat",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1790,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200",
+   "/api/inspector-applications?page=1&limit=20|403"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/security-log",
+  "url": "/admin/security-log",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1514,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/ads",
+  "url": "/admin/ads",
+  "h1": "",
+  "len": 353,
+  "text": "Admin Admin Ad Traffic Control Manage persisted ad placements, campaign visibility, scheduling, destination links, presentation and delivery metrics. IMPRESSIONS 0 CLICKS 0 CLICK-THROUGH RATE 0.00% Configured ad placemen",
+  "denied": false,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1726,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/ads/stats|200",
+   "/api/ads/all|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/broadcast",
+  "url": "/admin/broadcast",
+  "h1": "Broadcast Message",
+  "len": 566,
+  "text": "Admin Admin BUSINESS MANAGEMENT Broadcast Message Send an administrative announcement to all users, dealers and individual sellers, or buyers. Confirm the audience before sending. Compose broadcast Title 0/120 Message 0/",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1753,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/announcements?page=1&limit=10|403"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/settings",
+  "url": "/admin/settings",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1469,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/control-room",
+  "url": "/admin/control-room",
+  "h1": "Superadmin Only",
+  "len": 79,
+  "text": "Admin Admin Superadmin Only This area is restricted to the platform superadmin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1560,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/staff",
+  "url": "/admin/staff",
+  "h1": "Superadmin Only",
+  "len": 79,
+  "text": "Admin Admin Superadmin Only This area is restricted to the platform superadmin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1478,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/staff-permissions",
+  "url": "/admin/staff-permissions",
+  "h1": "Superadmin Only",
+  "len": 79,
+  "text": "Admin Admin Superadmin Only This area is restricted to the platform superadmin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1537,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/alerts?limit=1&read=false|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/traffic-analytics",
+  "url": "/admin/traffic-analytics",
+  "h1": "Superadmin Only",
+  "len": 79,
+  "text": "Admin Admin Superadmin Only This area is restricted to the platform superadmin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1499,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/alerts?limit=1&read=false|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/site-designs",
+  "url": "/admin/site-designs",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1633,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/featured-vehicles",
+  "url": "/admin/featured-vehicles",
+  "h1": "Featured vehicles",
+  "len": 868,
+  "text": "Featured vehicles Featured vehicles Featured vehicles Choose which vehicles the homepage features, and when. All times are Nairobi time (Africa/Nairobi, UTC+3). With no running campaign the homepage keeps using its curre",
+  "denied": false,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1755,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/featured-campaigns|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/panic-room",
+  "url": "/admin/panic-room",
+  "h1": "Superadmin Only",
+  "len": 79,
+  "text": "Admin Admin Superadmin Only This area is restricted to the platform superadmin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1411,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/platform-recovery",
+  "url": "/admin/platform-recovery",
+  "h1": "Insufficient Permissions",
+  "len": 143,
+  "text": "Admin Admin Insufficient Permissions Your role (marketing) does not have access to this page. Ask a superadmin to assign you the relevant duty.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1528,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/webhoist",
+  "url": "/admin/webhoist",
+  "h1": "Superadmin Only",
+  "len": 79,
+  "text": "Admin Admin Superadmin Only This area is restricted to the platform superadmin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1527,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/alerts?limit=1&read=false|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/cms",
+  "url": "/admin/cms",
+  "h1": "Content Studio",
+  "len": 566,
+  "text": "Admin Admin Content Studio KAYARD KE Enterprise CMS Dashboard Pages Landing Pages Blog News Knowledge Base Help Center FAQ Announcements Campaigns Promotions Banners Media Library SEO Calendar A/B Tests Analytics Widgets",
+  "denied": false,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1972,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200",
+   "/api/cms/pages?limit=100|200",
+   "/api/cms/dashboard/stats|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/automation",
+  "url": "/admin/automation",
+  "h1": "Automation Studio",
+  "len": 688,
+  "text": "Admin Admin Automation Studio Workflow & Business Rules Dashboard Workflows Business Rules Approvals Tasks Notifications Scheduler Logs Templates AI Suggestions Settings Automation Overview Create Workflow Active Workflo",
+  "denied": false,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1802,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200",
+   "/api/automation/stats|500",
+   "/api/automation/workflows|500"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+   "Failed to load stats: AxiosError: Request failed with status code 500\n    at settle (http://127.0.0.1:4302/node_modules/.vite/deps/axios.js?",
+   "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+   "Failed to load stats: AxiosError: Request failed with status code 500\n    at settle (http://127.0.0.1:4302/node_modules/.vite/deps/axios.js?",
+   "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+   "Failed to load workflows: AxiosError: Request failed with status code 500\n    at settle (http://127.0.0.1:4302/node_modules/.vite/deps/axios",
+   "Failed to load resource: the server responded with a status of 500 (Internal Server Error)",
+   "Failed to load workflows: AxiosError: Request failed with status code 500\n    at settle (http://127.0.0.1:4302/node_modules/.vite/deps/axios"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/config",
+  "url": "/admin/config",
+  "h1": "Configuration Center",
+  "len": 800,
+  "text": "Admin Admin Configuration Center Master Data Management Dashboard General Settings Vehicle Master Data Location Data Reference Data Feature Flags Dealer Settings Auction Settings Inspection Settings Finance Settings Paym",
+  "denied": false,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1861,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/cars?page=1&limit=24&sort=newest|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200",
+   "/api/config/stats|403"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load stats: AxiosError: Request failed with status code 403\n    at settle (http://127.0.0.1:4302/node_modules/.vite/deps/axios.js?",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load stats: AxiosError: Request failed with status code 403\n    at settle (http://127.0.0.1:4302/node_modules/.vite/deps/axios.js?"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/lowcode",
+  "url": "/admin/lowcode",
+  "h1": "",
+  "len": 66,
+  "text": "Admin Admin This administration page is restricted to Super Admin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1499,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/vxp",
+  "url": "/admin/vxp",
+  "h1": "",
+  "len": 66,
+  "text": "Admin Admin This administration page is restricted to Super Admin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1537,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/xos",
+  "url": "/admin/xos",
+  "h1": "",
+  "len": 66,
+  "text": "Admin Admin This administration page is restricted to Super Admin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1459,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/ai",
+  "url": "/admin/ai",
+  "h1": "",
+  "len": 66,
+  "text": "Admin Admin This administration page is restricted to Super Admin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1537,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/alerts?limit=1&read=false|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/digital-twin",
+  "url": "/admin/digital-twin",
+  "h1": "",
+  "len": 66,
+  "text": "Admin Admin This administration page is restricted to Super Admin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1445,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/control-center",
+  "url": "/admin/control-center",
+  "h1": "",
+  "len": 66,
+  "text": "Admin Admin This administration page is restricted to Super Admin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1495,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/public/config|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/integration",
+  "url": "/admin/integration",
+  "h1": "",
+  "len": 66,
+  "text": "Admin Admin This administration page is restricted to Super Admin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1473,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/governance",
+  "url": "/admin/governance",
+  "h1": "",
+  "len": 66,
+  "text": "Admin Admin This administration page is restricted to Super Admin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1637,
+  "api": [
+   "/src/api/httpRequest.ts|200",
+   "/src/api/api.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/intelligence",
+  "url": "/admin/intelligence",
+  "h1": "",
+  "len": 66,
+  "text": "Admin Admin This administration page is restricted to Super Admin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1440,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/command-center",
+  "url": "/admin/command-center",
+  "h1": "",
+  "len": 66,
+  "text": "Admin Admin This administration page is restricted to Super Admin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1403,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/improvement",
+  "url": "/admin/improvement",
+  "h1": "",
+  "len": 66,
+  "text": "Admin Admin This administration page is restricted to Super Admin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1648,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/alerts?limit=1&read=false|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/platform-factory",
+  "url": "/admin/platform-factory",
+  "h1": "",
+  "len": 66,
+  "text": "Admin Admin This administration page is restricted to Super Admin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1573,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/owners",
+  "url": "/admin/owners",
+  "h1": "",
+  "len": 66,
+  "text": "Admin Admin This administration page is restricted to Super Admin.",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1405,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/alerts?limit=1&read=false|200"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/communications",
+  "url": "/admin/communications",
+  "h1": "Messaging Operations",
+  "len": 989,
+  "text": "Admin Admin COMMUNICATIONS CONTROL PLANE Messaging Operations Templates, consent, delivery health, retries and the authoritative communication ledger. Refresh Missing permission: manage_platform or manage_support LAUNCH ",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1991,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200",
+   "/api/communications/admin/templates|403",
+   "/api/communications/admin/history?limit=50|403",
+   "/api/communications/admin/analytics?hours=24|403",
+   "/api/communications/admin/rollout|403",
+   "/api/communications/admin/provider-health|403"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/provider-governance",
+  "url": "/admin/provider-governance",
+  "h1": "",
+  "len": 653,
+  "text": "Admin Admin Provider network governance Review businesses, their credentials and the services they claim. A business is approved on one of two routes — workshop premises, or an evidence-based alternative for legitimate b",
+  "denied": true,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1709,
+  "api": [
+   "/src/api/api.ts|304",
+   "/src/api/httpRequest.ts|304",
+   "/src/api/httpClient.ts|304",
+   "/src/api/api.exports.ts|304",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200",
+   "/api/admin/inspection-governance/providers?stage=UNDER_REVIEW&limit=50|403"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "axe": []
+ },
+ {
+  "route": "/admin/support",
+  "url": "/admin/support",
+  "h1": "",
+  "len": 63,
+  "text": "Admin Admin Your role does not include customer support access.",
+  "denied": false,
+  "err": false,
+  "loading": false,
+  "login": false,
+  "ms": 1770,
+  "api": [
+   "/src/api/api.ts|200",
+   "/src/api/httpRequest.ts|200",
+   "/src/api/httpClient.ts|200",
+   "/src/api/api.exports.ts|200",
+   "/api/admin/public/config|200",
+   "/api/v1/auth/me|200",
+   "/api/admin/alerts?limit=1&read=false|200",
+   "/api/notifications?limit=50|200",
+   "/api/support/staff/queue?status=active&limit=50&offset=0|403",
+   "/api/support/staff/metrics?days=30|403",
+   "/api/support/staff/team|403"
+  ],
+  "console": [
+   "Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+   "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)",
+   "Failed to load resource: the server responded with a status of 403 (Forbidden)"
+  ],
+  "axe": []
+ }
+]

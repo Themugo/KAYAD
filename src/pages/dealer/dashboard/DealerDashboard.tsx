@@ -179,7 +179,7 @@ const TopVehicle = ({ vehicle, rank, onOpen }: { vehicle: any; rank: number; onO
     <div className="col-span-2 flex flex-wrap items-center justify-between gap-2 sm:col-span-1 sm:flex-col sm:items-end">
       <p className="break-words text-sm font-bold text-[#0A3340]">{vehicle.price == null || !Number.isFinite(Number(vehicle.price)) ? 'Price unavailable' : `Ksh ${Number(vehicle.price).toLocaleString('en-KE')}`}</p>
       <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1">
-        {vehicle.status && <ListingStatusBadge status={vehicle.status} label={String(vehicle.status).replace(/_/g, ' ')} />}
+        {vehicle.status && <ListingStatusBadge status={vehicle.status} label={dealerStatusLabel(vehicle.status)} />}
         {onOpen && <button type="button" onClick={onOpen} className="min-h-[36px] rounded-lg px-2 text-xs font-semibold text-[#176B87] hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]">Manage</button>}
       </div>
     </div>

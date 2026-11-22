@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import AdminReports from '../../../pages/admin/AdminReports';
 import { reportAPI } from '../../../api/api';
 
@@ -21,6 +21,24 @@ describe('AdminReports', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Reports could not be loaded');
     expect(screen.queryByText('No reports have been submitted yet.')).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Retry loading reports' })).toBeInTheDocument();
+  });
+
+  it('does not present zero counts as real data while the load has failed', async () => {
+    reportAPI.adminAll.mockRejectedValueOnce(new Error('Service unavailable'));
+    render(<AdminReports />);
+    await screen.findByRole('alert');
+    expect(screen.getByLabelText('Total: unavailable')).toHaveTextContent('—');
+    expect(screen.getByLabelText('Pending: unavailable')).toHaveTextContent('—');
+  });
+
+  it('retry performs a real second request and restores real counts', async () => {
+    reportAPI.adminAll.mockRejectedValueOnce(new Error('Service unavailable'));
+    reportAPI.adminAll.mockResolvedValueOnce({ success: true, reports: [], stats: { total: 7, pending: 3 }, pagination: { page: 1, limit: 20, total: 0, pages: 1 } });
+    render(<AdminReports />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Retry loading reports' }));
+    await waitFor(() => expect(reportAPI.adminAll).toHaveBeenCalledTimes(2));
+    expect(await screen.findByText('7')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 
   it('shows a genuine empty state only after a successful empty response', async () => {

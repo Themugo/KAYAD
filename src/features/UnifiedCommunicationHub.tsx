@@ -837,7 +837,7 @@ export const UnifiedCommunicationHub: React.FC<UnifiedCommunicationHubProps> = (
               </div>
             </>
           ) : (
-            <div className="p-12 text-center text-[#94A3B8] flex flex-col items-center justify-center h-full space-y-3">
+            <div className="p-12 text-center text-[#5B7079] flex flex-col items-center justify-center h-full space-y-3">
               <MessageSquare className="w-12 h-12 text-[#BDE5DE]" />
               <p className="font-bold text-sm">{requestedThreadUnavailable ? 'The conversation linked to this enquiry is not available in your inbox. Select another conversation from the list.' : 'Select a conversation to read and reply.'}</p>
             </div>

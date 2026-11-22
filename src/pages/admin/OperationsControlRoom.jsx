@@ -287,7 +287,7 @@ export default function OperationsControlRoom() {
             <h3 className="card-title"><AlertTriangle size={18} />Recent Alerts</h3>
             <span className="badge">{alertsError ? '—' : alerts.length}</span>
           </div>
-          <div className="card-body" style={{ maxHeight: 400, overflowY: 'auto' }}>
+          <div className="card-body" role="region" aria-label="Recent alerts" tabIndex={0} style={{ maxHeight: 400, overflowY: 'auto' }}>
             {alertsError ? (
               <p role="alert" style={{ color: 'var(--admin-status-danger)' }}>{alertsError}{alertsStale ? ' Showing the last successful alert result.' : ''}</p>
             ) : alerts.length === 0 ? (
@@ -319,7 +319,7 @@ export default function OperationsControlRoom() {
             <h3 className="card-title"><Clock size={18} />Recent Audit Activity</h3>
             <span className="badge">{activityError ? '—' : activity.length}</span>
           </div>
-          <div className="card-body" style={{ maxHeight: 400, overflowY: 'auto' }}>
+          <div className="card-body" role="region" aria-label="Recent audit activity" tabIndex={0} style={{ maxHeight: 400, overflowY: 'auto' }}>
             {activityError ? (
               <p role="alert" style={{ color: 'var(--admin-status-danger)' }}>{activityError}{activityStale ? ' Showing the last successful activity result.' : ''}</p>
             ) : activity.length === 0 ? (
