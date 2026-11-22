@@ -1,0 +1,3 @@
+# 02 — Design system and colour consistency
+Status: **NOT IMPLEMENTED as a redesign.** I inspected the dealer panels: they already use the brand teal/navy for actions and active states, emerald for active/approved, amber (`#FFF4D6`/`#7A4B00`) for pending, red (`#FEF3F2`/`#7A271A`) for suspended/failed — the semantic scheme the brief suggests. A cross-dashboard colour/typography pass needs the supplied screenshots and an owner decision on what "up to the personal/admin standard" should change; no arbitrary recolouring was done. No new competing design system was created.
+Layout facts (390px): sidebar becomes a drawer ("Dealer menu"), breadcrumbs wrap, page headers wrap, Team and Settings cards fit, no horizontal overflow at any tested width.

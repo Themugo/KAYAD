@@ -1,0 +1,2997 @@
+diff --git a/backend/controllers/carController.js b/backend/controllers/carController.js
+index 5bfc0a3..dff55d8 100644
+--- a/backend/controllers/carController.js
++++ b/backend/controllers/carController.js
+@@ -368,9 +368,14 @@ export async function personalListingNumbers(ownerId) {
+   const numbers = new Map();
+   if (!ownerId) return numbers;
+   try {
+-    const { data, error } = await getSupabase().from("cars").select("id,created_at").eq("dealer_id", ownerId).order("created_at", { ascending: true }).order("id", { ascending: true }).limit(10000);
++    // DA-07: the permanent counter (cars.listing_number) is authoritative once the migration is applied. Where the column does not exist
++    // yet (older schema) the previous derived creation-order number is used so the screen keeps working.
++    let { data, error } = await getSupabase().from("cars").select("id,created_at,listing_number").eq("dealer_id", ownerId).order("created_at", { ascending: true }).order("id", { ascending: true }).limit(10000);
++    if (error && /listing_number/i.test(String(error.message || ""))) {
++      ({ data, error } = await getSupabase().from("cars").select("id,created_at").eq("dealer_id", ownerId).order("created_at", { ascending: true }).order("id", { ascending: true }).limit(10000));
++    }
+     if (error) throw error;
+-    (data || []).forEach((row, index) => numbers.set(String(row.id), index + 1));
++    (data || []).forEach((row, index) => numbers.set(String(row.id), Number.isInteger(row.listing_number) ? row.listing_number : index + 1));
+   } catch (error) {
+     logWarn("Listing numbers unavailable", { error: error?.message });
+   }
+@@ -383,7 +388,15 @@ async function addPersonalListingPermissions(cars, owner) {
+   // Dealer inventory uses its established dealer dashboard and capability model. Only personal
+   // account roles receive this additive read-only projection, avoiding extra work or contract
+   // changes for dealer inventory consumers of the same owner-scoped endpoint.
+-  if (!["user", "individual_seller", "buyer"].includes(role)) return rows;
++  if (!["user", "individual_seller", "buyer"].includes(role)) {
++    // Dealers keep their own capability model, plus the permanent listing number (read-only, additive).
++    if (!rows.length || !owner?.id) return rows;
++    const dealerNumbers = await personalListingNumbers(owner.id);
++    return rows.map((row) => {
++      const plain = typeof row?.toObject === "function" ? row.toObject() : { ...row };
++      return { ...plain, listingNumber: dealerNumbers.get(String(plain.id ?? plain._id ?? "")) ?? null };
++    });
++  }
+   const maxListingImages = await effectiveMaxListingImages();
+   const maxImagesPerRequest = MAX_LISTING_IMAGES_PER_REQUEST;
+   let eligibility;
+diff --git a/backend/controllers/dealerPlatformController.js b/backend/controllers/dealerPlatformController.js
+index fef41cc..2ead253 100644
+--- a/backend/controllers/dealerPlatformController.js
++++ b/backend/controllers/dealerPlatformController.js
+@@ -26,6 +26,7 @@ import { sellerMayPublishDirectly } from "../services/onboardingPolicy.service.j
+ import { sendTeamInviteEmail } from "../services/email.service.js";
+ import { listRoles, resolveRole, createCustomRole, updateCustomRole, deleteCustomRole, RoleError, newInviteToken } from "../services/dealerTeamRoles.service.js";
+ import { formatPhone } from "../utils/format.js";
++import { bulkChangeDealerListingStatus } from "../services/dealerListingSale.service.js";
+ import { DEALER_TEAM_PERMISSIONS } from "../middleware/dealerOrgAccess.js";
+ 
+ import { validateCompanyName, dealerPublicName } from '../utils/companyName.js';
+@@ -291,7 +292,7 @@ export async function bulkUpdateListings(req, res) {
+   try {
+     const ids = Array.isArray(req.body?.ids) ? req.body.ids : [];
+     const action = req.body?.action;
+-    const allowedStatuses = new Set(["available", "active", "draft", "pending", "reserved", "sold", "archived"]);
++    const allowedStatuses = new Set(["available", "active", "draft", "pending", "hidden", "paused", "sold"]);
+     if (!ids.length || !action) return res.status(400).json({ success: false, message: "ids and action are required" });
+     if (action !== "status") return res.status(400).json({ success: false, message: "Only status bulk updates are supported" });
+     const status = req.body?.data?.status;
+@@ -304,18 +305,14 @@ export async function bulkUpdateListings(req, res) {
+     }))) {
+       return res.status(403).json({ success: false, code: "SELLER_ACCOUNT_NOT_ELIGIBLE", message: "This account is not currently eligible to publish listings." });
+     }
+-    const owned = await Car.find({ id: { $in: ids }, dealer: req.user.id, deletedAt: { $exists: false } });
+-    if (owned.length !== ids.length) return res.status(403).json({ success: false, message: "One or more listings are not owned by this dealer" });
+-    // STAGE 5A (Gate E): sold listings are governed by the sale/escrow workflow, never by a seller bulk status edit.
+-    if (owned.some((c) => c.status === "sold" || c.sold === true)) {
+-      return res.status(409).json({ success: false, code: "LISTING_MODERATION_BLOCKED", message: "Sold listings cannot be changed in bulk." });
+-    }
+-    for (const car of owned) {
+-      car.status = status;
+-      await car.save();
+-    }
+-    res.json({ success: true, data: { updated: owned.length, status } });
++    // Same canonical lifecycle as /api/dealer/cars/bulk-status: itemised, atomic per listing, sold/escrow/settlement locks enforced.
++    const normalized = status === "active" ? "available" : status;
++    const result = await bulkChangeDealerListingStatus({ dealerId: req.user.id, actorId: req.actingMember?.id || req.user.id, ids, status: normalized, sale: req.body?.data?.sale || {} });
++    const allBlocked = result.updated.length === 0 && result.skipped.length > 0;
++    if (allBlocked) return res.status(409).json({ success: false, code: result.skipped[0].code, message: result.skipped[0].message, data: { updated: 0, status: normalized, skipped: result.skipped } });
++    res.json({ success: true, data: { updated: result.updated.length, status: normalized, updatedIds: result.updated, skipped: result.skipped } });
+   } catch (err) {
++    if (err?.expose) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
+     logError("Error bulk updating dealer inventory:", err);
+     res.status(500).json({ success: false, message: "Failed to update dealer inventory" });
+   }
+diff --git a/backend/middleware/apiCache.js b/backend/middleware/apiCache.js
+index f4c7725..a1f1c15 100644
+--- a/backend/middleware/apiCache.js
++++ b/backend/middleware/apiCache.js
+@@ -60,10 +60,15 @@ export const cacheResponse = (ttl, keyPrefix = "") => {
+ // 📊 CACHE INVALIDATION MIDDLEWARE
+ // =============================
+ 
++// Keys are `${prefix}:${userId}:${path}:${query}`. A bare prefix ("dealer", "user") used to be passed to Redis SCAN MATCH as a literal,
++// which matches no key, so a successful write never invalidated the cached GET (DA-04: saved banking details read back blank for 5
++// minutes). A pattern without a glob character now means "everything under that prefix".
++export const normalizeInvalidationPattern = (pattern) => (/[*?[\]]/.test(pattern) ? pattern : `${pattern}:*`);
++
+ export const invalidateCache = (pattern) => {
+   return async (req, res, next) => {
+     onJsonResponse(res, () => {
+-      if (pattern) cacheDelPattern(pattern);
++      if (pattern) cacheDelPattern(normalizeInvalidationPattern(pattern));
+     });
+ 
+     next();
+diff --git a/backend/package.json b/backend/package.json
+index cce539e..db00403 100644
+--- a/backend/package.json
++++ b/backend/package.json
+@@ -22,7 +22,7 @@
+     "test:jest": "node --max-old-space-size=6144 --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit --passWithNoTests",
+     "test:dealer-schema-regression": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --runInBand tests/regression/dealerOnboardingSuspendSchemaReconciliation.test.js",
+     "test:vitest": "vitest run --config vitest.config.js",
+-    "test:node": "node --test --test-force-exit tests/response-lifecycle.test.js tests/node/personalListingEligibilityProjection.test.js",
++    "test:node": "node --test --test-force-exit tests/response-lifecycle.test.js tests/node/personalListingEligibilityProjection.test.js tests/node/dealerLifecycleUnits.test.js",
+     "test:chat-integrity": "node --test tests/integration/chat-message-integrity.integration.test.js",
+     "test:soft-delete-integrity": "node --test --test-force-exit tests/integration/soft-delete-integrity.integration.test.js",
+     "test:cache-invalidation": "node --test --test-force-exit tests/integration/cache-invalidation.integration.test.js",
+diff --git a/backend/routes/dealerRoutes.js b/backend/routes/dealerRoutes.js
+index 3d54a03..305a9fb 100644
+--- a/backend/routes/dealerRoutes.js
++++ b/backend/routes/dealerRoutes.js
+@@ -1,4 +1,4 @@
+-import { markDealerListingSold } from "../services/dealerListingSale.service.js";
++import { markDealerListingSold, bulkChangeDealerListingStatus } from "../services/dealerListingSale.service.js";
+ import express from "express";
+ import { protect, dealerOnly, requireApproved, allowRoles } from "../middleware/auth.js";
+ import { dealerBusinessOnly } from "../middleware/dealerIsolation.js"; // PHASE 13D
+@@ -672,14 +672,19 @@ const settlementView = (pd = {}) => ({
+   bankName: pd.bankName || "",
+   bankAccount: pd.accountNumber || "",
+ });
++// Presentation helper: the full account/paybill number is only ever returned to the business owner (this router is owner-only);
++// the *Masked fields are what the UI shows by default.
++const maskTail = (v) => { const s = String(v || ""); return s.length > 4 ? `${"•".repeat(Math.min(s.length - 4, 8))}${s.slice(-4)}` : (s ? "••••" : ""); };
++const settlementViewMasked = (pd = {}) => ({ ...settlementView(pd), bankAccountMasked: maskTail(pd.accountNumber), mpesaBusinessMasked: maskTail(pd.paybillNumber), configured: Boolean(pd.bankName || pd.accountNumber || pd.paybillNumber || pd.mpesaPhone) });
+ const cleanSettlementString = (v) => (typeof v === "string" ? v.trim().slice(0, 200) : null);
+ 
++// Banking details are private financial data: never cached (a cached copy served stale blanks after a save) and never shared.
+ router.get(
+   "/settlement",
+-  cacheDealerData,
+   asyncHandler(async (req, res) => {
++    res.set("Cache-Control", "private, no-store");
+     const dealer = await findOne("dealers", { user: req.user.id });
+-    res.json({ success: true, settlement: settlementView(dealer?.paymentDetails || {}) });
++    res.json({ success: true, settlement: settlementViewMasked(dealer?.paymentDetails || {}) });
+   }),
+ );
+ 
+@@ -733,7 +738,10 @@ router.put(
+     const merged = { ...(dealer.paymentDetails || {}), ...incoming };
+     const saved = await update("dealers", dealer.id, { paymentDetails: merged });
+     await logActionFromReq(req, "update_settlement", { details: { fields: Object.keys(incoming) } });
+-    res.json({ success: true, settlement: settlementView(saved?.paymentDetails || merged) });
++    res.set("Cache-Control", "private, no-store");
++    // Read back what is actually stored (not an echo of the request) so the caller sees exactly what persisted.
++    const stored = await findOne("dealers", { user: req.user.id });
++    res.json({ success: true, settlement: settlementViewMasked(stored?.paymentDetails || saved?.paymentDetails || merged) });
+   }),
+ );
+ 
+@@ -1010,7 +1018,7 @@ router.patch(
+   asyncHandler(async (req, res) => {
+     let result;
+     try {
+-      result = await markDealerListingSold(req.user.id, req.params.id, req.body || {});
++      result = await markDealerListingSold(req.user.id, req.params.id, req.body || {}, req.actingMember?.id || req.user.id);
+     } catch (err) {
+       if (err?.expose) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
+       throw err;
+@@ -1028,18 +1036,11 @@ router.patch(
+   invalidateCache("dealer"),
+   asyncHandler(async (req, res) => {
+     const { ids } = req.body;
+-    // Seller-settable listing states. "rejected" is admin-moderation-only (it
+-    // freezes bidding — same rule as carController.updateCar), "reserved" belongs
+-    // to the sale/escrow flow, and anything else is outside the cars.status CHECK.
+-    // "active" is the dashboard's label for a live listing → canonical "available".
+-    const SELLER_SETTABLE_STATUSES = new Set(["available", "sold", "pending", "hidden", "draft"]);
++    // "rejected" is admin-moderation-only, "reserved" belongs to the sale/escrow flow, "active" is the dashboard label for "available".
+     const status = req.body.status === "active" ? "available" : req.body.status;
+     if (!Array.isArray(ids) || !status) {
+       return res.status(400).json({ success: false, message: "ids (array) and status required" });
+     }
+-    if (!SELLER_SETTABLE_STATUSES.has(status)) {
+-      return res.status(400).json({ success: false, code: "INVALID_LISTING_STATUS", message: "Unsupported listing status" });
+-    }
+     // Per-listing admin approval is retired; the owner can publish their own eligible inventory.
+     if (status === "available" && !(await sellerMayPublishDirectly({
+       ...req.user,
+@@ -1048,30 +1049,18 @@ router.patch(
+     }))) {
+       return res.status(403).json({ success: false, code: "SELLER_ACCOUNT_NOT_ELIGIBLE", message: "This account is not currently eligible to publish listings." });
+     }
+-    const sb = getSupabase();
+-    // Own listings only; a listing rejected by moderation cannot be re-published here.
+-    const { data: toUpdate, error: selErr } = await sb
+-      .from("cars")
+-      .select("id,status")
+-      .in("id", ids)
+-      .eq("dealer_id", req.user.id); // STAGE 5A: physical column is dealer_id (cars.dealer does not exist)
+-    if (selErr) throw new Error(`Bulk status lookup failed: ${selErr.message}`);
+-    // STAGE 5A (Gate E): a sold listing's state belongs to the sale/escrow workflow; a seller bulk edit must not hide, re-open
+-    // or re-publish it (same invariant as utils/carModerationGuard.js for admin paths).
+-    const updateIds = (toUpdate || []).filter((r) => r.status !== "rejected" && r.status !== "sold").map((r) => r.id);
+-    let modified = 0;
+-    if (updateIds.length > 0) {
+-      const { error: updErr } = await sb.from("cars").update({ status }).in("id", updateIds);
+-      // Do not report success for a write that did not persist.
+-      if (updErr) throw new Error(`Bulk status update failed: ${updErr.message}`);
+-      modified = updateIds.length;
++    // One canonical lifecycle (services/dealerListingSale.service.js): each listing is an atomic, itemised transaction that refuses
++    // sold, escrow-locked, settlement-locked and auction listings with a reason code.
++    let result;
++    try {
++      result = await bulkChangeDealerListingStatus({ dealerId: req.user.id, actorId: req.actingMember?.id || req.user.id, ids, status, sale: req.body.sale || {} });
++    } catch (err) {
++      if (err?.expose) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
++      throw err;
+     }
+-
+-    await logActionFromReq(req, "bulk_status_update", {
+-      details: { ids, status, modified },
+-    });
+-
+-    res.json({ success: true, modified });
++    await logActionFromReq(req, "bulk_status_update", { details: { ids: result.updated, skipped: result.skipped, status, modified: result.updated.length } });
++    const allBlocked = result.updated.length === 0 && result.skipped.length > 0;
++    res.status(allBlocked ? 409 : 200).json({ success: !allBlocked, modified: result.updated.length, updated: result.updated, skipped: result.skipped, ...(allBlocked ? { code: result.skipped[0].code, message: result.skipped[0].message } : {}) });
+   }),
+ );
+ 
+diff --git a/backend/services/dealerListingSale.service.js b/backend/services/dealerListingSale.service.js
+index ebd2a59..52d3917 100644
+--- a/backend/services/dealerListingSale.service.js
++++ b/backend/services/dealerListingSale.service.js
+@@ -1,28 +1,96 @@
+-import { findOne, update } from "../db/index.js";
+-
+-const fail = (status, code, message) => Object.assign(new Error(message), { status, code, expose: true });
++import { getSupabase } from "../utils/supabase.js";
+ 
+ /**
+- * Marks one of the dealer's OWN listings as sold.
+- * Only columns that exist on `cars` are written (sold, status); sale details go to the audit log
+- * (the previous version wrote a non-existent sale-details column and could not succeed).
++ * Canonical dealer listing lifecycle (Draft -> Active -> Paused -> Sold). Every status change that matters to a transaction goes
++ * through kayad_dealer_listing_lifecycle_atomic, which locks the listing row, refuses while a funded escrow / purchase outcome /
++ * accepted-offer settlement / auction or bids exist, writes status + sold flag + sold_at and the audit/sale row in ONE transaction.
++ * Individual mark-sold, bulk sold and the dealer-platform bulk endpoint all use this module, so there is no second implementation.
+  */
+-export async function markDealerListingSold(dealerId, carId, body = {}) {
+-  const existing = await findOne("cars", { id: carId, dealer: dealerId });
+-  if (!existing) throw fail(404, "CAR_NOT_FOUND", "Car not found");
+-  if (existing.status === "sold") throw fail(409, "ALREADY_SOLD", "This vehicle is already marked as sold.");
+-  const auctionStatus = String(existing.auctionStatus ?? existing.auction_status ?? "none");
+-  if (auctionStatus === "live") {
+-    throw fail(409, "AUCTION_IN_PROGRESS", "This vehicle has a live auction. Finish or cancel the auction first.");
++const ERROR_MAP = {
++  DEALER_ACCOUNT_REQUIRED: [403, "DEALER_ACCOUNT_REQUIRED", "Only a dealer business can change dealer listings."],
++  LISTING_NOT_FOUND: [404, "CAR_NOT_FOUND", "Car not found"],
++  LISTING_REMOVED: [404, "LISTING_REMOVED", "This listing has been removed."],
++  INVALID_LISTING_ACTION: [400, "INVALID_LISTING_ACTION", "Unsupported listing action."],
++  ALREADY_SOLD: [409, "ALREADY_SOLD", "This vehicle is already marked as sold."],
++  LISTING_STATE_LOCKED: [409, "LISTING_STATE_LOCKED", "Reserved or moderated listings cannot be changed here."],
++  AUCTION_OR_BID_LOCK: [409, "AUCTION_OR_BID_LOCK", "This vehicle has auction activity or bids. Finish or cancel the auction first."],
++  TRANSACTION_LOCK: [409, "TRANSACTION_LOCK", "A funded escrow or active purchase protects this vehicle. Complete or resolve it before changing the listing."],
++  OFFER_SETTLEMENT_LOCK: [409, "OFFER_SETTLEMENT_LOCK", "An accepted offer is awaiting payment or has been paid for this vehicle, so it cannot be changed here."],
++  LISTING_NOT_PUBLISHED: [409, "LISTING_NOT_PUBLISHED", "Only a published listing can be paused."],
++  LISTING_NOT_ELIGIBLE_TO_PUBLISH: [409, "LISTING_NOT_ELIGIBLE_TO_PUBLISH", "Only a paused or draft listing can be published."],
++  LISTING_NOT_ELIGIBLE_TO_MARK_SOLD: [409, "LISTING_NOT_ELIGIBLE_TO_MARK_SOLD", "This listing cannot be marked sold from its current state."],
++  LISTING_SOLD_READ_ONLY: [409, "LISTING_SOLD_READ_ONLY", "Sold listings are read-only."],
++};
++
++const fail = (status, code, message) => Object.assign(new Error(message), { status, code, expose: true });
++
++export function mapLifecycleError(error) {
++  const message = String(error?.message || "");
++  const key = Object.keys(ERROR_MAP).find((k) => message.includes(k));
++  if (key) { const [status, code, text] = ERROR_MAP[key]; return fail(status, code, text); }
++  if (["PGRST202", "42883", "42P01", "PGRST205"].includes(String(error?.code || "")) || /could not find the function|does not exist/i.test(message)) {
++    return fail(503, "LISTING_STATUS_SERVICE_UNAVAILABLE", "Listing status changes are not enabled on this platform yet. Your listing is unchanged.");
+   }
+-  const car = await update("cars", carId, { sold: true, status: "sold" });
+-  const salePrice = Number(body.salePrice);
++  return error;
++}
++
++export async function transitionDealerListing({ dealerId, carId, action, actorId = null, sale = {} }) {
++  const { data, error } = await getSupabase().rpc("kayad_dealer_listing_lifecycle_atomic", {
++    p_car_id: carId, p_dealer_id: dealerId, p_action: action, p_actor_id: actorId || dealerId, p_sale: sale || {},
++  });
++  if (error) throw mapLifecycleError(error);
++  return data;
++}
++
++/** Marks one of the dealer business's OWN listings as sold (individual path). */
++export async function markDealerListingSold(dealerId, carId, body = {}, actorId = null) {
++  const sale = {
++    salePrice: Number.isFinite(Number(body.salePrice)) && Number(body.salePrice) > 0 ? Number(body.salePrice) : null,
++    buyerName: body.buyerName ? String(body.buyerName).slice(0, 200) : null,
++    notes: (body.notes || body.saleNotes) ? String(body.notes || body.saleNotes).slice(0, 500) : null,
++  };
++  const result = await transitionDealerListing({ dealerId, carId, action: "mark_sold", actorId, sale });
++  const { data: car } = await getSupabase().from("cars").select("*").eq("id", carId).maybeSingle();
+   return {
+-    car,
+-    audit: {
+-      buyerName: body.buyerName ? String(body.buyerName).slice(0, 200) : null,
+-      salePrice: Number.isFinite(salePrice) && salePrice > 0 ? salePrice : existing.price,
+-      notes: (body.notes || body.saleNotes) ? String(body.notes || body.saleNotes).slice(0, 500) : null,
+-    },
++    car: car || { id: carId, status: "sold", sold: true },
++    audit: { buyerName: result.buyerName ?? null, salePrice: result.salePrice ?? null, notes: result.notes ?? null },
+   };
+ }
++
++const STATUS_TO_ACTION = { sold: "mark_sold", hidden: "hide", paused: "hide", available: "publish", active: "publish" };
++export const BULK_STATUSES = new Set(["available", "active", "sold", "hidden", "paused", "draft", "pending"]);
++export const BULK_MAX = 100;
++
++/**
++ * Bulk status change, itemised: every listing is processed in its own atomic transaction and the response lists exactly which
++ * changed and which were skipped with a reason code. Duplicate ids are collapsed. A refusal on one listing never blocks the others.
++ */
++export async function bulkChangeDealerListingStatus({ dealerId, actorId = null, ids, status, sale = {} }) {
++  if (!BULK_STATUSES.has(status)) throw fail(400, "INVALID_LISTING_STATUS", "Unsupported listing status");
++  const unique = [...new Set((Array.isArray(ids) ? ids : []).map(String))];
++  if (!unique.length) throw fail(400, "IDS_REQUIRED", "ids (array) and status required");
++  if (unique.length > BULK_MAX) throw fail(400, "TOO_MANY_IDS", `At most ${BULK_MAX} listings can be changed at once.`);
++  const updated = []; const skipped = [];
++  const action = STATUS_TO_ACTION[status];
++  for (const id of unique) {
++    try {
++      if (action) {
++        await transitionDealerListing({ dealerId, carId: id, action, actorId, sale });
++      } else {
++        // draft / pending: not transaction-relevant states; sold, rejected and non-owned rows are refused, the DB trigger backstops.
++        const sb = getSupabase();
++        const { data: row } = await sb.from("cars").select("id,status,sold,deleted_at").eq("id", id).eq("dealer_id", dealerId).maybeSingle();
++        if (!row || row.deleted_at) throw fail(404, "CAR_NOT_FOUND", "Car not found");
++        if (row.status === "sold" || row.sold) throw fail(409, "ALREADY_SOLD", "Sold listings are read-only.");
++        if (["rejected", "reserved"].includes(row.status)) throw fail(409, "LISTING_STATE_LOCKED", "Reserved or moderated listings cannot be changed here.");
++        const { error } = await sb.from("cars").update({ status }).eq("id", id).eq("dealer_id", dealerId);
++        if (error) throw mapLifecycleError(error);
++      }
++      updated.push(id);
++    } catch (err) {
++      if (!err?.expose) throw err;
++      skipped.push({ id, code: err.code, message: err.message });
++    }
++  }
++  return { updated, skipped, requested: unique.length };
++}
+diff --git a/backend/services/personalListingMutationGuard.service.js b/backend/services/personalListingMutationGuard.service.js
+index 0a70f39..50cf570 100644
+--- a/backend/services/personalListingMutationGuard.service.js
++++ b/backend/services/personalListingMutationGuard.service.js
+@@ -108,7 +108,18 @@ export async function getPersonalListingActionEligibility(cars, owner) {
+ /** Fail-closed backend guard for owner mutations outside the atomic lifecycle RPC. */
+ export async function assertPersonalListingMutationAllowed({ car, owner, action }) {
+   const role = String(owner?.role || "").toLowerCase();
+-  if (!PERSONAL_ROLES.has(role)) return { allowed: true, skipped: true };
++  if (!PERSONAL_ROLES.has(role)) {
++    // Business (dealer) owners: a sold listing is read-only for edits, price, photos and removal (DA-03). Corrections go through the
++    // audited admin function kayad_admin_correct_sold_listing; the database trigger trg_cars_sold_read_only is the final backstop.
++    // Removal keeps its established contract (409 LISTING_DELETE_BLOCKED / reason LISTING_SOLD from listingDeletionBlock), so only edit and
++    // photo changes are refused here.
++    if (action !== "remove" && car && (car.status === "sold" || car.sold === true)) {
++      const error = new Error("Sold listings are read-only.");
++      error.status = 409; error.code = "LISTING_SOLD_READ_ONLY"; error.expose = true;
++      throw error;
++    }
++    return { allowed: true, skipped: true };
++  }
+   if (!PERSONAL_MUTATION_ACTIONS.has(action)) {
+     const error = new Error("Unsupported listing mutation.");
+     error.status = 400; error.code = "INVALID_LISTING_MUTATION"; error.expose = true;
+diff --git a/backend/tests/node/dealerLifecycleUnits.test.js b/backend/tests/node/dealerLifecycleUnits.test.js
+new file mode 100644
+index 0000000..607a3ef
+--- /dev/null
++++ b/backend/tests/node/dealerLifecycleUnits.test.js
+@@ -0,0 +1,31 @@
++import test from "node:test";
++import assert from "node:assert/strict";
++import { mapLifecycleError, bulkChangeDealerListingStatus, BULK_MAX } from "../../services/dealerListingSale.service.js";
++import { normalizeInvalidationPattern } from "../../middleware/apiCache.js";
++
++test("every lock raised by the database maps to a 409 with a stable code", () => {
++  for (const code of ["TRANSACTION_LOCK", "OFFER_SETTLEMENT_LOCK", "AUCTION_OR_BID_LOCK", "ALREADY_SOLD", "LISTING_SOLD_READ_ONLY", "LISTING_STATE_LOCKED"]) {
++    const e = mapLifecycleError({ message: `${code}` });
++    assert.equal(e.status, 409); assert.equal(e.code, code); assert.equal(e.expose, true);
++  }
++  assert.equal(mapLifecycleError({ message: "LISTING_NOT_FOUND" }).status, 404);
++});
++test("a missing function is reported as service unavailable and never leaks its name", () => {
++  const e = mapLifecycleError({ code: "PGRST202", message: "Could not find the function public.kayad_dealer_listing_lifecycle_atomic" });
++  assert.equal(e.status, 503); assert.ok(!/kayad_dealer/.test(e.message));
++});
++test("unknown errors pass through untouched", () => {
++  const raw = new Error("boom"); assert.equal(mapLifecycleError(raw), raw);
++});
++test("bulk validation happens before any write", async () => {
++  await assert.rejects(bulkChangeDealerListingStatus({ dealerId: "d", ids: ["a"], status: "reserved" }), { code: "INVALID_LISTING_STATUS" });
++  await assert.rejects(bulkChangeDealerListingStatus({ dealerId: "d", ids: [], status: "sold" }), { code: "IDS_REQUIRED" });
++  await assert.rejects(bulkChangeDealerListingStatus({ dealerId: "d", ids: Array.from({ length: BULK_MAX + 1 }, (_, i) => `id${i}`), status: "sold" }), { code: "TOO_MANY_IDS" });
++});
++test("a bare cache prefix invalidates every key under it (DA-04 stale banking)", () => {
++  assert.equal(normalizeInvalidationPattern("dealer"), "dealer:*");
++  assert.equal(normalizeInvalidationPattern("cache:*"), "cache:*");
++  assert.equal(normalizeInvalidationPattern("dealer:42:*"), "dealer:42:*");
++  const re = new RegExp(normalizeInvalidationPattern("dealer").replace("*", ".*"));
++  assert.ok(re.test("dealer:user-1:/settlement:{}"));
++});
+diff --git a/backend/tests/regression/dealerMarkSold.test.js b/backend/tests/regression/dealerMarkSold.test.js
+index 2fed6db..15f9c89 100644
+--- a/backend/tests/regression/dealerMarkSold.test.js
++++ b/backend/tests/regression/dealerMarkSold.test.js
+@@ -1,37 +1,56 @@
+ import { describe, test, expect, beforeEach, jest } from "@jest/globals";
+ process.env.NODE_ENV = "test";
+ 
+-const rows = {};
+-const findOne = jest.fn(async (_t, q) => (rows[q.id] && rows[q.id].dealerId === q.dealer ? rows[q.id] : null));
+-const update = jest.fn(async (_t, id, patch) => ({ ...rows[id], ...patch }));
+-jest.unstable_mockModule("../../db/index.js", () => ({ findOne, update }));
++// The sale is performed by the atomic database function (kayad_dealer_listing_lifecycle_atomic); this suite pins the service contract:
++// what it sends, how the database refusals are reported, and that nothing is written outside that single transaction.
++const rpc = jest.fn();
++const directWrites = jest.fn();
++const carRow = { id: "c1", status: "sold", sold: true };
++const from = jest.fn(() => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: carRow }) }) }), update: directWrites, insert: directWrites }));
++jest.unstable_mockModule("../../utils/supabase.js", () => ({ getSupabase: () => ({ rpc, from }) }));
+ const { markDealerListingSold } = await import("../../services/dealerListingSale.service.js");
+ 
+-beforeEach(() => {
+-  jest.clearAllMocks();
+-  rows.c1 = { id: "c1", dealerId: "d1", status: "available", price: 3500000 };
+-  rows.c2 = { id: "c2", dealerId: "d1", status: "sold", price: 1 };
+-  rows.c3 = { id: "c3", dealerId: "d1", status: "available", auctionStatus: "live", price: 1 };
+-});
++const refuse = (message) => rpc.mockResolvedValueOnce({ data: null, error: { message } });
++beforeEach(() => { jest.clearAllMocks(); });
+ 
+ describe("dealer mark as sold", () => {
+-  test("writes only existing columns (sold, status) - no non-existent sale-details column", async () => {
+-    const r = await markDealerListingSold("d1", "c1", { buyerName: "Wanjiru", salePrice: 3400000 });
+-    expect(update).toHaveBeenCalledWith("cars", "c1", { sold: true, status: "sold" });
++  test("goes through the single atomic lifecycle function with the sale details and the real actor", async () => {
++    rpc.mockResolvedValueOnce({ data: { salePrice: 3400000, buyerName: "Wanjiru", notes: null }, error: null });
++    const r = await markDealerListingSold("d1", "c1", { buyerName: "Wanjiru", salePrice: 3400000 }, "staff-9");
++    expect(rpc).toHaveBeenCalledWith("kayad_dealer_listing_lifecycle_atomic", { p_car_id: "c1", p_dealer_id: "d1", p_action: "mark_sold", p_actor_id: "staff-9", p_sale: { salePrice: 3400000, buyerName: "Wanjiru", notes: null } });
+     expect(r.audit).toEqual({ buyerName: "Wanjiru", salePrice: 3400000, notes: null });
++    expect(directWrites).not.toHaveBeenCalled(); // no second, non-atomic writer
+   });
+-  test("defaults the audited sale price to the listing price", async () => {
++  test("the audited sale price defaults to the listing price (decided in the database transaction)", async () => {
++    rpc.mockResolvedValueOnce({ data: { salePrice: 3500000, buyerName: null, notes: null }, error: null });
+     expect((await markDealerListingSold("d1", "c1", {})).audit.salePrice).toBe(3500000);
++    expect(rpc.mock.calls[0][1].p_sale.salePrice).toBeNull();
+   });
+   test("another dealer's listing is not found", async () => {
+-    await expect(markDealerListingSold("d2", "c1", {})).rejects.toMatchObject({ status: 404 });
+-    expect(update).not.toHaveBeenCalled();
++    refuse("LISTING_NOT_FOUND");
++    await expect(markDealerListingSold("d2", "c1", {})).rejects.toMatchObject({ status: 404, code: "CAR_NOT_FOUND" });
++    expect(directWrites).not.toHaveBeenCalled();
+   });
+   test("an already sold listing is a 409", async () => {
++    refuse("ALREADY_SOLD");
+     await expect(markDealerListingSold("d1", "c2", {})).rejects.toMatchObject({ status: 409, code: "ALREADY_SOLD" });
+   });
+-  test("a live auction must be settled through the auction flow", async () => {
+-    await expect(markDealerListingSold("d1", "c3", {})).rejects.toMatchObject({ status: 409, code: "AUCTION_IN_PROGRESS" });
+-    expect(update).not.toHaveBeenCalled();
++  test("a live auction or bids must be settled through the auction flow", async () => {
++    refuse("AUCTION_OR_BID_LOCK");
++    await expect(markDealerListingSold("d1", "c3", {})).rejects.toMatchObject({ status: 409, code: "AUCTION_OR_BID_LOCK" });
++    expect(directWrites).not.toHaveBeenCalled();
++  });
++  test("a funded escrow / purchase blocks the sale (DA-01)", async () => {
++    refuse("TRANSACTION_LOCK");
++    await expect(markDealerListingSold("d1", "c4", {})).rejects.toMatchObject({ status: 409, code: "TRANSACTION_LOCK" });
++  });
++  test("an accepted offer awaiting payment blocks the sale (DA-01)", async () => {
++    refuse("OFFER_SETTLEMENT_LOCK");
++    await expect(markDealerListingSold("d1", "c5", {})).rejects.toMatchObject({ status: 409, code: "OFFER_SETTLEMENT_LOCK" });
++  });
++  test("a missing database function is reported as unavailable, never as success and never by falling back to a plain update", async () => {
++    rpc.mockResolvedValueOnce({ data: null, error: { code: "PGRST202", message: "Could not find the function" } });
++    await expect(markDealerListingSold("d1", "c1", {})).rejects.toMatchObject({ status: 503, code: "LISTING_STATUS_SERVICE_UNAVAILABLE" });
++    expect(directWrites).not.toHaveBeenCalled();
+   });
+ });
+diff --git a/backend/tests/regression/stage1ListingWriteBoundaries.test.js b/backend/tests/regression/stage1ListingWriteBoundaries.test.js
+index 856d76e..277d8ec 100644
+--- a/backend/tests/regression/stage1ListingWriteBoundaries.test.js
++++ b/backend/tests/regression/stage1ListingWriteBoundaries.test.js
+@@ -67,7 +67,19 @@ jest.unstable_mockModule("../../services/escrowCapability.service.js", () => ({
+ let dealerCars = [];
+ let updateError = null;
+ let lastUpdate = null;
++let rpcCalls = [];
+ const sb = {
++  // Bulk status now runs through the atomic lifecycle function, one call per listing. This fake database enforces the same ownership
++  // and moderation refusals the real function does.
++  rpc: async (name, args) => {
++    rpcCalls.push({ name, ...args });
++    if (updateError) return { data: null, error: updateError };
++    const car = dealerCars.find((c) => c.id === args.p_car_id && c.dealer === args.p_dealer_id);
++    if (!car) return { data: null, error: { message: "LISTING_NOT_FOUND" } };
++    if (car.status === "rejected") return { data: null, error: { message: "LISTING_STATE_LOCKED" } };
++    lastUpdate = { action: args.p_action, ids: [...(lastUpdate?.ids || []), args.p_car_id] };
++    return { data: { id: car.id, action: args.p_action }, error: null };
++  },
+   from: () => {
+     const q = {
+       _ids: null, _dealer: null, _patch: null,
+@@ -202,7 +214,7 @@ describe("S1-LIST-04 dealer bulk-status", () => {
+       { id: "c2", dealer: "seller-1", status: "rejected" },
+       { id: "c3", dealer: "seller-2", status: "pending" },
+     ];
+-    updateError = null; lastUpdate = null; currentUser = SELLER;
++    updateError = null; lastUpdate = null; rpcCalls = []; currentUser = SELLER;
+     if (!server) {
+       const app = express();
+       app.use(express.json());
+@@ -231,19 +243,22 @@ describe("S1-LIST-04 dealer bulk-status", () => {
+     currentUser = { ...SELLER, status: "approved" };
+     const r = await patch({ ids: ["c1"], status: "active" });
+     expect(r.code).toBe(200);
+-    expect(lastUpdate.patch).toEqual({ status: "available" });
++    expect(lastUpdate.action).toBe("publish"); // canonical 'available' = the publish transition
++    expect(rpcCalls[0].p_car_id).toBe("c1");
+   });
+   test("legacy hold_for_review cannot refuse seller self-publication", async () => {
+     __setOnboardingPolicyForTests({ listingModeration: "hold_for_review" });
+     currentUser = { ...SELLER, status: "approved" };
+     const r = await patch({ ids: ["c1"], status: "available" });
+     expect(r.code).toBe(200);
+-    expect(lastUpdate.patch).toEqual({ status: "available" });
++    expect(lastUpdate.action).toBe("publish");
+   });
+   test("only own, non-rejected listings are touched", async () => {
+     const r = await patch({ ids: ["c1", "c2", "c3"], status: "sold" });
+     expect(r.body.modified).toBe(1);
+     expect(lastUpdate.ids).toEqual(["c1"]);
++    // the others are reported, not silently dropped
++    expect(Object.fromEntries(r.body.skipped.map((x) => [x.id, x.code]))).toEqual({ c2: "LISTING_STATE_LOCKED", c3: "CAR_NOT_FOUND" });
+   });
+   test("a failed write is not reported as success", async () => {
+     updateError = { message: "violates check constraint" };
+diff --git a/backend/tests/regression/stage5aRealSchemaPins.test.js b/backend/tests/regression/stage5aRealSchemaPins.test.js
+index 97ee73c..166c39b 100644
+--- a/backend/tests/regression/stage5aRealSchemaPins.test.js
++++ b/backend/tests/regression/stage5aRealSchemaPins.test.js
+@@ -27,10 +27,13 @@ describe("real-schema pins (STAGE 5A)", () => {
+     expect(seg).toMatch(/Car\.findByIdAndUpdate\(req\.params\.id, \{ status: newStatus \}\)/);
+     expect(seg).not.toMatch(/await car\.save\(\)/);
+   });
+-  test("seller bulk endpoints query the physical column cars.dealer_id", () => {
+-    const s = src("backend/routes/dealerRoutes.js");
+-    const seg = s.slice(s.indexOf('"/cars/bulk-status"'));
+-    expect(seg.slice(0, 3000)).toMatch(/\.eq\("dealer_id", req\.user\.id\)/);
++  test("seller bulk endpoints scope every write to the physical column cars.dealer_id (through the dealer lifecycle service)", () => {
++    const route = src("backend/routes/dealerRoutes.js");
++    const seg = route.slice(route.indexOf('"/cars/bulk-status"'));
++    expect(seg.slice(0, 3000)).toMatch(/bulkChangeDealerListingStatus\(\{ dealerId: req\.user\.id/);
++    const svc = src("backend/services/dealerListingSale.service.js");
++    expect(svc).toMatch(/p_dealer_id: dealerId/);
++    expect(svc).toMatch(/\.eq\("dealer_id", dealerId\)/);
+   });
+   test("the owner onboarding settings page is mounted in the live admin console", () => {
+     const s = src("src/features/AdminView.tsx");
+diff --git a/backend/tests/regression/stage5aSellerSelfPublication.test.js b/backend/tests/regression/stage5aSellerSelfPublication.test.js
+index ab3292f..3271e0c 100644
+--- a/backend/tests/regression/stage5aSellerSelfPublication.test.js
++++ b/backend/tests/regression/stage5aSellerSelfPublication.test.js
+@@ -56,13 +56,26 @@ jest.unstable_mockModule("../../services/escrowCapability.service.js", () => ({
+ let dealerCars = [];
+ let updateError = null;
+ let lastUpdate = null;
++let rpcCalls = [];
++// Fake of kayad_dealer_listing_lifecycle_atomic: enforces ownership and the sold / moderation refusals the real function enforces.
++const NEXT = { publish: "available", hide: "hidden", mark_sold: "sold" };
+ const sb = {
++  rpc: async (name, a) => {
++    rpcCalls.push({ name, ...a });
++    const car = [...platformOwned, ...dealerCars].find((c) => (c.id === a.p_car_id) && (c.dealer === a.p_dealer_id));
++    if (!car) return { data: null, error: { message: "LISTING_NOT_FOUND" } };
++    if (car.status === "sold" || car.sold === true) return { data: null, error: { message: "ALREADY_SOLD" } };
++    car.status = NEXT[a.p_action]; if (a.p_action === "mark_sold") car.sold = true;
++    lastUpdate = { action: a.p_action, ids: [...(lastUpdate?.ids || []), car.id] };
++    return { data: { id: car.id, action: a.p_action }, error: null };
++  },
+   from: () => {
+     const q = {
+       _ids: null, _dealer: null, _patch: null,
+       select() { return q; },
+       in(_c, ids) { q._ids = ids; return q; },
+-      eq(_c, v) { q._dealer = v; return q; },
++      eq(c, v) { q._dealer = v; (q._eqs = q._eqs || {})[c] = v; return q; },
++      maybeSingle() { const car = [...platformOwned, ...dealerCars].find((x) => x.id === q._eqs?.id && x.dealer === q._eqs?.dealer_id); return Promise.resolve({ data: car || null, error: null }); },
+       update(p) { q._patch = p; return q; },
+       then(res, rej) {
+         if (q._patch) {
+@@ -127,7 +140,7 @@ afterAll(() => server && server.close());
+ const post = (path, body) => fetch(`${base}/api/dealer${path}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body || {}) }).then(async (r) => ({ code: r.status, body: await r.json().catch(() => ({})) }));
+ const patch = (path, body) => fetch(`${base}/api/dealer${path}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then(async (r) => ({ code: r.status, body: await r.json().catch(() => ({})) }));
+ 
+-beforeEach(() => { dealerCars = []; updateError = null; lastUpdate = null; currentUser = APPROVED; platformOwned = []; dbCreate.mockClear(); dbFindOne.mockReset(); __setOnboardingPolicyForTests({}); });
++beforeEach(() => { rpcCalls = []; dealerCars = []; updateError = null; lastUpdate = null; currentUser = APPROVED; platformOwned = []; dbCreate.mockClear(); dbFindOne.mockReset(); __setOnboardingPolicyForTests({}); });
+ 
+ describe("POST /dealer-platform/inventory/bulk (bulkUpdateListings)", () => {
+   test.each(["available", "active"])("legacy hold_for_review cannot block seller publication: %j is saved", async (status) => {
+@@ -135,15 +148,15 @@ describe("POST /dealer-platform/inventory/bulk (bulkUpdateListings)", () => {
+     __setOnboardingPolicyForTests({ listingModeration: "hold_for_review" });
+     const r = await bulkCall(APPROVED, { ids: ["c1"], action: "status", data: { status } });
+     expect(r.code).toBe(200);
+-    expect(platformOwned[0].status).toBe(status === "active" ? "active" : "available");
+-    expect(platformOwned[0].save).toHaveBeenCalledTimes(1);
++    expect(platformOwned[0].status).toBe("available"); // the dashboard label 'active' is the canonical 'available'
++    expect(rpcCalls).toHaveLength(1);
+   });
+   test.each(["unavailable", "invalid"])("policy source %s does not reintroduce listing approval", async (source) => {
+     platformOwned = [mkOwned()];
+     __setOnboardingPolicyForTests({ listingModeration: "auto_publish" }, source);
+     const r = await bulkCall(APPROVED, { ids: ["c1"], action: "status", data: { status: "available" } });
+     expect(r.code).toBe(200);
+-    expect(platformOwned[0].save).toHaveBeenCalledTimes(1);
++    expect(rpcCalls).toHaveLength(1);
+   });
+   test("auto_publish + approved seller ⇒ allowed", async () => {
+     platformOwned = [mkOwned()];
+@@ -157,7 +170,7 @@ describe("POST /dealer-platform/inventory/bulk (bulkUpdateListings)", () => {
+     __setOnboardingPolicyForTests({ listingModeration: "auto_publish" });
+     const r = await bulkCall(PENDING, { ids: ["c1"], action: "status", data: { status: "available" } });
+     expect(r.code).toBe(403);
+-    expect(platformOwned[0].save).not.toHaveBeenCalled();
++    expect(rpcCalls).toHaveLength(0);
+   });
+   test("pending dealer with submitted verification can self-publish without admin approval", async () => {
+     platformOwned = [mkOwned()];
+@@ -165,7 +178,7 @@ describe("POST /dealer-platform/inventory/bulk (bulkUpdateListings)", () => {
+     const r = await bulkCall(PENDING, { ids: ["c1"], action: "status", data: { status: "available" } }, { progressiveAccess: true, verification: { verificationStatus: "pending" } });
+     expect(r.code).toBe(200);
+     expect(platformOwned[0].status).toBe("available");
+-    expect(platformOwned[0].save).toHaveBeenCalledTimes(1);
++    expect(rpcCalls).toHaveLength(1);
+   });
+   test("non-publishing statuses are unaffected by hold_for_review (a seller may still draft/hide their own)", async () => {
+     platformOwned = [mkOwned()];
+@@ -173,13 +186,21 @@ describe("POST /dealer-platform/inventory/bulk (bulkUpdateListings)", () => {
+     const r = await bulkCall(APPROVED, { ids: ["c1"], action: "status", data: { status: "draft" } });
+     expect(r.code).toBe(200);
+   });
+-  test("a SOLD listing cannot be changed by a seller bulk edit (409), and no listing in the batch is touched", async () => {
++  test("a SOLD listing is never changed by a seller bulk edit: it is reported as skipped (ALREADY_SOLD) while the others proceed", async () => {
+     const a = mkOwned({ id: "c1" }); const sold = mkOwned({ id: "c2", status: "sold", sold: true });
+     platformOwned = [a, sold];
+     __setOnboardingPolicyForTests({ listingModeration: "auto_publish" });
+     const r = await bulkCall(APPROVED, { ids: ["c1", "c2"], action: "status", data: { status: "available" } });
+-    expect([r.code, r.body.code]).toEqual([409, "LISTING_MODERATION_BLOCKED"]);
+-    expect(a.save).not.toHaveBeenCalled(); expect(sold.save).not.toHaveBeenCalled();
++    expect(r.code).toBe(200);
++    expect(r.body.data.updated).toBe(1);
++    expect(r.body.data.skipped).toEqual([{ id: "c2", code: "ALREADY_SOLD", message: expect.any(String) }]);
++    expect(sold.status).toBe("sold");
++  });
++  test("a batch made only of sold listings is a 409 with the reason code", async () => {
++    platformOwned = [mkOwned({ id: "c2", status: "sold", sold: true })];
++    __setOnboardingPolicyForTests({ listingModeration: "auto_publish" });
++    const r = await bulkCall(APPROVED, { ids: ["c2"], action: "status", data: { status: "available" } });
++    expect([r.code, r.body.code]).toEqual([409, "ALREADY_SOLD"]);
+   });
+ });
+ 
+diff --git a/ci/db-journeys/09_dealer_listing_lifecycle.mjs b/ci/db-journeys/09_dealer_listing_lifecycle.mjs
+new file mode 100644
+index 0000000..a8cbf3d
+--- /dev/null
++++ b/ci/db-journeys/09_dealer_listing_lifecycle.mjs
+@@ -0,0 +1,154 @@
++// Dealer listing lifecycle against a REAL (disposable) schema: DA-01 sale vs escrow/settlement locks (individual + bulk), DA-02 one
++// canonical sold lifecycle, DA-03 sold read-only (API + DB), DA-07 permanent listing numbers incl. concurrency, and the
++// sale-vs-funding race. Photo FILE upload needs an image provider; photo rows are seeded directly.
++import { makeUser, q, qAsync, check, finish, Client, listingForm, uid } from './lib.mjs';
++
++const mkDealer = async (tag) => {
++  const d = await makeUser({ tag, role: 'dealer', extra: { businessName: `Journey ${tag} Motors ${uid()}`, phone: '254711000' + Math.floor(100 + Math.random() * 899), location: 'Nairobi', city: 'Nairobi' } });
++  q(`update users set status='approved' where id='${d.id}'`);
++  q(`update dealers set approved=true, verified_at=now(), onboarding_complete=true where "user"='${d.id}'`);
++  await d.raw('/api/v1/auth/login', { method: 'POST', body: { email: d.email, password: 'Str0ng!Passw0rd' } }); d.csrf = null;
++  return d;
++};
++const A = await mkDealer('dealera'); const B = await mkDealer('dealerb'); const buyer = await makeUser({ tag: 'buyer' });
++const car = (owner, title, extra = '') => q(`insert into cars(title,brand,model,year,price,status,dealer_id,sold${extra ? ',' + extra.split('=')[0] : ''}) values ('${title}','Mazda','CX-5',2019,3000000,'available','${owner.id}',false${extra ? ',' + extra.split('=')[1] : ''}) returning id`).split('\n')[0];
++const row = (id) => q(`select status||'|'||sold||'|'||(sold_at is not null) from cars where id='${id}'`);
++const sold = (c, id, body = {}) => c.raw(`/api/dealer/cars/${id}/mark-sold`, { method: 'PATCH', body });
++const bulk = (c, ids, status) => c.raw('/api/dealer/cars/bulk-status', { method: 'PATCH', body: { ids, status } });
++const escrow = (carId, status) => q(`insert into escrows(buyer,seller,car,amount,status) values('${buyer.id}','${A.id}','${carId}',1000000,'${status}') returning id`).split('\n')[0];
++
++// ---- DA-07 permanent listing numbers ----------------------------------------------------------------------------------------
++const n1 = car(A, 'N1'), n2 = car(A, 'N2'), n3 = car(A, 'N3');
++const nums = () => q(`select string_agg(listing_number::text, ',' order by listing_number) from cars where dealer_id='${A.id}'`);
++check('numbers are sequential from 1 per dealer, in creation order', nums() === '1,2,3', nums());
++check('another dealer starts at 1 independently', (() => { car(B, 'B1'); return q(`select listing_number from cars where dealer_id='${B.id}'`) === '1'; })());
++q(`update cars set deleted_at=now() where id='${n2}'`);
++check('removal does not renumber', nums() === '1,2,3');
++const n4 = car(A, 'N4');
++check('a new listing never reuses a removed number', q(`select listing_number from cars where id='${n4}'`) === '4');
++q(`delete from cars where id='${n4}'`);
++check('even after a hard delete the number is not reused', (() => q(`select listing_number from cars where id='${car(A, 'N5')}'`) === '5')());
++const imm = await qAsync(`update cars set listing_number=99 where id='${n1}'`);
++check('listing number is immutable', !imm.ok && /LISTING_NUMBER_IMMUTABLE/.test(imm.err || imm.out || JSON.stringify(imm)), imm);
++const conc = await Promise.all(Array.from({ length: 20 }, (_, i) => qAsync(`insert into cars(title,brand,model,year,price,status,dealer_id,sold) values ('C${i}','Mazda','CX-5',2019,1,'available','${B.id}',false)`)));
++check('20 concurrent inserts all succeed', conc.every((r) => r.ok), conc.filter((r) => !r.ok).slice(0, 1));
++check('concurrent allocation gives unique contiguous numbers', q(`select count(distinct listing_number)||'/'||max(listing_number)||'/'||min(listing_number) from cars where dealer_id='${B.id}'`) === '21/21/1');
++const api = await A.raw('/api/cars', { method: 'POST', form: listingForm('API numbered') });
++const apiId = api.j?.data?.id || api.j?.car?.id;
++check('listing created through the API receives the next number and keeps its UUID', api.status === 201 && q(`select listing_number from cars where id='${apiId}'`) === '6', api.j);
++
++const mine = (await A.raw('/api/cars/my-listings?limit=100')).j?.data || [];
++check('my-listings exposes the permanent listingNumber to the dealer (never the UUID as a number)', mine.length >= 4 && mine.every((x) => Number.isInteger(x.listingNumber)) && mine.find((x) => x.id === apiId)?.listingNumber === 6, mine.map((x) => x.listingNumber));
++const inv = (await A.raw('/api/dealer-platform/inventory?limit=100')).j?.data;
++const invRows = inv?.items || inv?.listings || inv?.cars || (Array.isArray(inv) ? inv : []);
++check('dealer-platform inventory exposes listingNumber too', invRows.length > 0 && invRows.every((x) => Number.isInteger(x.listingNumber ?? x.listing_number)), Object.keys(inv || {}));
++
++// ---- DA-01 escrow / settlement locks (individual) ---------------------------------------------------------------------------
++const e1 = car(A, 'EscrowLock'); const eid = escrow(e1, 'funded');
++let r = await sold(A, e1);
++check('mark sold is refused (409 TRANSACTION_LOCK) while a funded escrow is open', r.status === 409 && r.j?.code === 'TRANSACTION_LOCK', r.j);
++check('the refusal changed nothing', row(e1) === 'available|false|false');
++q(`update escrows set status='released' where id='${eid}'`);
++r = await sold(A, e1, { buyerName: 'Jane Buyer', salePrice: 2900000, notes: 'cash' });
++check('after the escrow is released the legitimate sale completes', r.status === 200, r.j);
++check('status, sold flag and sold_at agree', row(e1) === 'sold|true|true', row(e1));
++check('sale record stores buyer, price and notes', q(`select buyer_name||'|'||sale_price||'|'||notes||'|'||actor_type from dealer_listing_lifecycle_events where car_id='${e1}' and action='dealer_mark_sold'`) === 'Jane Buyer|2900000|cash|dealer_owner');
++r = await sold(A, e1);
++check('second sale of the same listing is 409 ALREADY_SOLD', r.status === 409 && r.j?.code === 'ALREADY_SOLD', r.j);
++check('exactly one sale record exists', q(`select count(*) from dealer_listing_lifecycle_events where car_id='${e1}' and action='dealer_mark_sold'`) === '1');
++
++const s1 = car(A, 'SettleLock');
++const lead = q(`insert into leads(buyer,dealer,vehicle,source) values('${buyer.id}','${A.id}','${s1}','chat') returning id`).split('\n')[0];
++const offer = q(`insert into marketplace_offers(lead_id,vehicle_id,buyer_id,seller_id,sender_id,recipient_id,amount,idempotency_key,status) values('${lead}','${s1}','${buyer.id}','${A.id}','${buyer.id}','${A.id}',2500000,'k-'||gen_random_uuid(),'accepted') returning id`).split('\n')[0];
++q(`insert into marketplace_offer_settlements(offer_id,lead_id,vehicle_id,buyer_id,seller_id,agreed_amount,expires_at) values('${offer}','${lead}','${s1}','${buyer.id}','${A.id}',2500000,now()+interval '48 hours')`);
++r = await sold(A, s1);
++check('mark sold is refused (409 OFFER_SETTLEMENT_LOCK) while an accepted offer awaits payment', r.status === 409 && r.j?.code === 'OFFER_SETTLEMENT_LOCK', r.j);
++check('settlement refusal changed nothing', row(s1) === 'available|false|false');
++
++// ---- DA-02 bulk: one canonical lifecycle, itemised, mixed and duplicate selections ---------------------------------------------
++const b1 = car(A, 'Bulk1'), b2 = car(A, 'Bulk2'), b3 = car(A, 'Bulk3');
++escrow(b2, 'funded');
++r = await bulk(A, [b1, b1, b2, s1, e1, b3, crypto.randomUUID(), car(B, 'ForeignCar')], 'sold');
++const skippedBy = Object.fromEntries((r.j?.skipped || []).map((x) => [x.id, x.code]));
++check('bulk sold is itemised: 2 sold, rest skipped with codes', r.status === 200 && r.j.modified === 2 && skippedBy[b2] === 'TRANSACTION_LOCK' && skippedBy[s1] === 'OFFER_SETTLEMENT_LOCK' && skippedBy[e1] === 'ALREADY_SOLD', r.j);
++check('bulk sold used the canonical writer (status, flag, sold_at, record)', row(b1) === 'sold|true|true' && row(b3) === 'sold|true|true' && q(`select count(*) from dealer_listing_lifecycle_events where car_id in ('${b1}','${b3}') and action='dealer_mark_sold'`) === '2');
++check('duplicate id in a bulk selection produces one sale record', q(`select count(*) from dealer_listing_lifecycle_events where car_id='${b1}'`) === '1');
++check('locked and foreign listings were untouched', row(b2) === 'available|false|false' && Object.keys(skippedBy).length === 5);
++r = await bulk(A, [b2, s1], 'sold');
++check('bulk where every item is blocked returns 409 with codes', r.status === 409 && r.j.skipped.length === 2, r.j);
++r = await B.raw('/api/dealer-platform/inventory/bulk', { method: 'POST', body: { ids: [b2], action: 'status', data: { status: 'sold' } } });
++check("another dealer cannot bulk-sell someone else's listing", r.status === 409 || r.status === 403 || r.status === 404, r.status);
++check('the dealer-platform bulk endpoint uses the same lifecycle', (await A.raw('/api/dealer-platform/inventory/bulk', { method: 'POST', body: { ids: [b2], action: 'status', data: { status: 'sold' } } })).status === 409);
++
++// ---- DA-03 sold is read-only -------------------------------------------------------------------------------------------------
++const put = await A.raw(`/api/cars/${e1}`, { method: 'PUT', body: { price: 1 } });
++check('edit/price change of a sold listing is 409 LISTING_SOLD_READ_ONLY', put.status === 409 && put.j?.code === 'LISTING_SOLD_READ_ONLY', put.j);
++check('photo cover/reorder/remove/delete are refused on a sold listing', (await Promise.all([
++  A.raw(`/api/cars/${e1}/images/cover`, { method: 'PATCH', body: { index: 0 } }), A.raw(`/api/cars/${e1}/images/order`, { method: 'PATCH', body: { order: [0] } }),
++  A.raw(`/api/cars/${e1}/images/0`, { method: 'DELETE' }), A.raw(`/api/cars/${e1}`, { method: 'DELETE' }),
++])).every((x) => x.status === 409));
++check('pause and republish of a sold listing are refused', (await bulk(A, [e1], 'hidden')).status === 409 && (await bulk(A, [e1], 'available')).status === 409);
++check('bulk delete does not erase a sold listing', (await A.raw('/api/dealer/cars/bulk-delete', { method: 'POST', body: { ids: [e1] } })).status === 409 && q(`select deleted_at is null from cars where id='${e1}'`) === 't');
++for (const col of ["price=1", "title='x'", "status='available'", "sold=false", "deleted_at=now()"]) {
++  const x = await qAsync(`update cars set ${col} where id='${e1}'`);
++  check(`database refuses "${col}" on a sold listing`, !x.ok && /LISTING_SOLD_READ_ONLY/.test(JSON.stringify(x)), x);
++}
++check('counters (views) may still change on a sold listing', (await qAsync(`update cars set views=coalesce(views,0)+1 where id='${e1}'`)).ok);
++const nonAdmin = await qAsync(`select kayad_admin_correct_sold_listing('${e1}','${A.id}','trying to reopen my sale')`);
++check('only an admin can correct a sold listing', !nonAdmin.ok && /ADMIN_REQUIRED/.test(JSON.stringify(nonAdmin)));
++const adm = await makeUser({ tag: 'adm', dbRole: 'admin' });
++const noReason = await qAsync(`select kayad_admin_correct_sold_listing('${e1}','${adm.id}','short')`);
++check('an admin correction needs a reason', !noReason.ok && /REASON_REQUIRED/.test(JSON.stringify(noReason)));
++const fix = await qAsync(`select kayad_admin_correct_sold_listing('${e1}','${adm.id}','Sale recorded in error, customer confirmed')`);
++check('authorised admin correction succeeds, reopens and is audited', fix.ok && row(e1) === 'hidden|false|false' && q(`select count(*) from dealer_listing_lifecycle_events where car_id='${e1}' and action='admin_sold_correction' and reason like 'Sale recorded%'`) === '1', fix);
++check('after the correction the listing is an ordinary reopened listing again', row(e1) === 'hidden|false|false');
++
++// a manually sold listing cannot be pulled into a new escrow or offer settlement
++const ms = car(A, 'ManualSold'); await sold(A, ms);
++const lm = q(`insert into leads(buyer,dealer,vehicle,source) values('${buyer.id}','${A.id}','${ms}','chat') returning id`).split('\n')[0];
++const om = q(`insert into marketplace_offers(lead_id,vehicle_id,buyer_id,seller_id,sender_id,recipient_id,amount,idempotency_key,status) values('${lm}','${ms}','${buyer.id}','${A.id}','${buyer.id}','${A.id}',2500000,'k-'||gen_random_uuid(),'accepted') returning id`).split('\n')[0];
++const ns = await qAsync(`insert into marketplace_offer_settlements(offer_id,lead_id,vehicle_id,buyer_id,seller_id,agreed_amount,expires_at) values('${om}','${lm}','${ms}','${buyer.id}','${A.id}',2500000,now()+interval '48 hours')`);
++check('an offer settlement cannot be opened on a listing the dealer already sold', !ns.ok && /LISTING_ALREADY_SOLD/.test(JSON.stringify(ns)), ns);
++const ne = await qAsync(`insert into escrows(buyer,seller,car,amount,status) values('${buyer.id}','${A.id}','${ms}',1000000,'funded')`);
++check('an escrow cannot be funded on a listing the dealer already sold', !ne.ok && /LISTING_ALREADY_SOLD/.test(JSON.stringify(ne)), ne);
++
++// ---- pause / publish -----------------------------------------------------------------------------------------------------------
++const p1 = car(A, 'Pausable');
++check('pause then publish round-trip', (await bulk(A, [p1], 'hidden')).status === 200 && row(p1).startsWith('hidden') && (await bulk(A, [p1], 'available')).status === 200 && row(p1).startsWith('available'));
++check('pause/publish are audited', q(`select count(*) from dealer_listing_lifecycle_events where car_id='${p1}'`) === '2');
++
++// ---- race: mark sold vs funding an escrow (truly concurrent, 12 rounds) -----------------------------------------------------------
++let bad = 0, wonSale = 0, wonEscrow = 0;
++for (let i = 0; i < 12; i++) {
++  const rc = car(A, 'Race' + i);
++  const [s, e] = await Promise.all([
++    qAsync(`select kayad_dealer_listing_lifecycle_atomic('${rc}','${A.id}','mark_sold','${A.id}','{}')`),
++    qAsync(`insert into escrows(buyer,seller,car,amount,status) values('${buyer.id}','${A.id}','${rc}',1000000,'funded')`),
++  ]);
++  const soldNow = q(`select status='sold' from cars where id='${rc}'`) === 't';
++  const activeEscrow = Number(q(`select count(*) from escrows where car='${rc}' and status in ('funded','pending')`)) > 0;
++  if (soldNow && activeEscrow) bad++;
++  if (s.ok) wonSale++; if (e.ok) wonEscrow++;
++}
++check('race: a listing is never both sold and under a live escrow', bad === 0, { bad, wonSale, wonEscrow });
++check('race: exactly one side wins each round', wonSale + wonEscrow === 12, { wonSale, wonEscrow }); console.log('  race tally', { wonSale, wonEscrow });
++let bad2 = 0;
++for (let i = 0; i < 8; i++) {
++  const rc = car(A, 'RaceS' + i);
++  const l2 = q(`insert into leads(buyer,dealer,vehicle,source) values('${buyer.id}','${A.id}','${rc}','chat') returning id`).split('\n')[0];
++  const o2 = q(`insert into marketplace_offers(lead_id,vehicle_id,buyer_id,seller_id,sender_id,recipient_id,amount,idempotency_key,status) values('${l2}','${rc}','${buyer.id}','${A.id}','${buyer.id}','${A.id}',2500000,'k-'||gen_random_uuid(),'accepted') returning id`).split('\n')[0];
++  await Promise.all([
++    qAsync(`select kayad_dealer_listing_lifecycle_atomic('${rc}','${A.id}','mark_sold','${A.id}','{}')`),
++    qAsync(`insert into marketplace_offer_settlements(offer_id,lead_id,vehicle_id,buyer_id,seller_id,agreed_amount,expires_at) values('${o2}','${l2}','${rc}','${buyer.id}','${A.id}',2500000,now()+interval '48 hours')`),
++  ]);
++  if (q(`select status='sold' from cars where id='${rc}'`) === 't' && Number(q(`select count(*) from marketplace_offer_settlements where vehicle_id='${rc}' and status in ('awaiting_payment','paid')`)) > 0) bad2++;
++}
++check('race: a listing is never both sold and under an open offer settlement', bad2 === 0, { bad2 });
++
++// ---- tenant isolation / auth ---------------------------------------------------------------------------------------------------
++const iso = car(A, 'Iso');
++check("another dealer cannot mark this dealer's listing sold", (await sold(B, iso)).status === 404 && row(iso) === 'available|false|false');
++check('anonymous cannot mark sold', (await sold(new Client(), iso)).status === 401);
++check('a personal account cannot use the dealer sold endpoint', [401, 403, 404].includes((await sold(buyer, iso)).status));
++
++finish('09_dealer_listing_lifecycle');
+diff --git a/ci/db-journeys/10_dealer_banking.mjs b/ci/db-journeys/10_dealer_banking.mjs
+new file mode 100644
+index 0000000..1179582
+--- /dev/null
++++ b/ci/db-journeys/10_dealer_banking.mjs
+@@ -0,0 +1,45 @@
++// DA-04: dealer banking save -> read-back -> refresh -> re-login, owner-only access, masking, no stale cache, tenant isolation.
++import crypto from 'node:crypto';
++import { makeUser, q, check, finish, Client, uid } from './lib.mjs';
++
++const mkDealer = async (tag) => {
++  const d = await makeUser({ tag, role: 'dealer', extra: { businessName: `Bank ${tag} Motors ${uid()}`, phone: '254711000' + Math.floor(100 + Math.random() * 899), location: 'Nairobi', city: 'Nairobi' } });
++  q(`update users set status='approved' where id='${d.id}'`); q(`update dealers set approved=true, verified_at=now(), onboarding_complete=true where "user"='${d.id}'`);
++  await d.raw('/api/v1/auth/login', { method: 'POST', body: { email: d.email, password: 'Str0ng!Passw0rd' } }); d.csrf = null; return d;
++};
++const A = await mkDealer('banka'); const B = await mkDealer('bankb');
++const get = (c) => c.raw('/api/dealer/settlement');
++
++const before = await get(A);
++check('a new dealer has no payout details and configured=false', before.status === 200 && before.j.settlement.configured === false && before.j.settlement.bankName === '', before.j);
++check('banking GET is never cached by browsers or proxies', /no-store/.test(before.headers.get('cache-control') || ''));
++const put = await A.raw('/api/dealer/settlement', { method: 'PUT', body: { paymentDetails: { bankName: 'Journey Bank', accountName: 'Journey Motors Ltd', accountNumber: '0123456789012', paybillNumber: '123456', mpesaPhone: '0712345678' } } });
++check('owner saves banking details', put.status === 200 && put.j.success, put.j);
++const after = await get(A);
++check('read-back immediately after save shows the saved values (no stale cached blank)', after.j.settlement.bankName === 'Journey Bank' && after.j.settlement.paymentDetails.accountNumber === '0123456789012' && after.j.settlement.configured === true, after.j);
++check('masked presentation fields never contain the full account number', after.j.settlement.bankAccountMasked.endsWith('9012') && !after.j.settlement.bankAccountMasked.includes('012345') && after.j.settlement.mpesaBusinessMasked.endsWith('3456'));
++check('persisted in dealers.payment_details', JSON.parse(q(`select payment_details from dealers where "user"='${A.id}'`)).bankName === 'Journey Bank');
++await A.raw('/api/v1/auth/logout', { method: 'POST' }); A.csrf = null;
++const A2 = new Client(); await A2.raw('/api/v1/auth/login', { method: 'POST', body: { email: A.email, password: 'Str0ng!Passw0rd' } });
++const relog = await get(A2);
++check('after logout and re-login the details are still there', relog.j?.settlement?.bankName === 'Journey Bank' && relog.j.settlement.paymentDetails.mpesaPhone === '0712345678', relog.j);
++const upd = await A2.raw('/api/dealer/settlement', { method: 'PUT', body: { bankName: 'Second Bank' } });
++check('update merges (does not erase other fields) and read-back reflects it at once', upd.status === 200 && (await get(A2)).j.settlement.bankName === 'Second Bank' && (await get(A2)).j.settlement.paymentDetails.accountName === 'Journey Motors Ltd');
++check('invalid paybill is rejected with a field error and nothing changes', (await A2.raw('/api/dealer/settlement', { method: 'PUT', body: { paymentDetails: { paybillNumber: '12' } } })).j?.errors?.paybillNumber && (await get(A2)).j.settlement.paymentDetails.paybillNumber === '123456');
++check('clearing a field persists', (await A2.raw('/api/dealer/settlement', { method: 'PUT', body: { paymentDetails: { mpesaPhone: '' } } })).status === 200 && (await get(A2)).j.settlement.paymentDetails.mpesaPhone === '');
++check("another dealer sees only their own (empty) details", (await get(B)).j.settlement.configured === false);
++check('anonymous is refused', (await get(new Client())).status === 401);
++
++// staff (every built-in role) can never read or change banking
++for (const role of ['manager', 'finance_officer', 'sales_agent', 'lot_agent', 'viewer']) {
++  const u = await makeUser({ tag: 'st' + role.slice(0, 3) });
++  const inv = await A2.raw('/api/dealer-platform/team/invite', { method: 'POST', body: { email: u.email, role } });
++  const tok = crypto.randomBytes(32).toString('hex');
++  q(`update dealer_teams set invite_token_hash='${crypto.createHash('sha256').update(tok).digest('hex')}' where invite_email='${u.email}'`);
++  const acc = await u.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tok } });
++  const g = await get(u); const p = await u.raw('/api/dealer/settlement', { method: 'PUT', body: { bankName: 'Hacked' } });
++  check(`staff role ${role}: cannot read or change banking (invite ${inv.status}, accept ${acc.status})`, inv.status === 201 && acc.status === 200 && [401, 403, 404].includes(g.status) && [401, 403, 404].includes(p.status) && !JSON.stringify(g.j).includes('Journey'), [g.status, p.status]);
++}
++check('banking unchanged after every staff attempt', (await get(A2)).j.settlement.bankName === 'Second Bank');
++check('banking changes are audited without the values', Number(q(`select count(*) from audit_logs where action='update_settlement'`)) >= 3 && !q(`select string_agg(details::text,' ') from audit_logs where action='update_settlement'`).includes('0123456789012'));
++finish('10_dealer_banking');
+diff --git a/ci/db-journeys/run.sh b/ci/db-journeys/run.sh
+index 084ce48..972b2a1 100755
+--- a/ci/db-journeys/run.sh
++++ b/ci/db-journeys/run.sh
+@@ -69,7 +69,7 @@ run_j() { local name="$1"; shift; ( cd "$1" && shift && timeout 280 node "$@" )
+ # Legacy chain (state passes through state.json in the working dir): registration, personal listing + moderation, enquiry, offers, payments gate, inspection, dealer, capabilities.
+ WORK="$(mktemp -d)"; cp "$LEG"/*.mjs "$WORK"/
+ for j in j1_registration_idempotency j1_personal_register_login j2 j3 j4_offers j5 j6 j7 j8 j9_capabilities j10_legacy_and_dealer; do run_j "legacy-$j" "$WORK" "$j.mjs"; done
+-for j in 03_reconciliation_issues 05_offer_payment 07_personal_listing_management; do run_j "$j" "$HERE" "$j.mjs"; done
++for j in 03_reconciliation_issues 05_offer_payment 07_personal_listing_management 09_dealer_listing_lifecycle 10_dealer_banking; do run_j "$j" "$HERE" "$j.mjs"; done
+ # model-layer journey: talks to the disposable PostgREST directly (loopback key generated above)
+ SUPABASE_URL="http://127.0.0.1:$PROXY_PORT" SUPABASE_SERVICE_ROLE_KEY="$SR_JWT" run_j 06_aggregate_shim "$HERE" 06_aggregate_shim.mjs
+ # MUST run last: it drops the objects that are absent on the hosted project (a hosted-shaped schema) and then drives the whole owner lifecycle.
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-AUDIT-RECONCILIATION.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-AUDIT-RECONCILIATION.md
+new file mode 100644
+index 0000000..e6474f8
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-AUDIT-RECONCILIATION.md
+@@ -0,0 +1,16 @@
++# Dealer audit reconciliation (DA-01 … DA-07)
++
++Each finding from `docs/handover/DEALER-ACCOUNT-20261121/DEALER-ACCOUNT-DEFECT-AND-RISK-REGISTER.md` was re-checked against the current source (`origin/main` 1eb1489) and a freshly built disposable database before it was changed. Status labels: VERIFIED (executed, evidence), BLOCKED, NOT TESTED.
++
++| ID | Original finding | Current reproduction | Root cause | Fix | Regression test | Final status |
++|---|---|---|---|---|---|---|
++| DA-01 | Mark sold while a funded escrow / accepted-offer settlement is open | Reproduced on the pre-change code: plain two-field update, no lock check | `dealerListingSale.service.js` only checked "already sold" and live auction | Atomic SQL function `kayad_dealer_listing_lifecycle_atomic` (row lock, escrow / purchase-outcome / settlement / bids checks, one transaction). 409 codes `TRANSACTION_LOCK`, `OFFER_SETTLEMENT_LOCK`, `AUCTION_OR_BID_LOCK`. Triggers on `escrows` and `marketplace_offer_settlements` take a shared lock on the car row and refuse to open a new transaction on a listing the owner already sold | Journey 09 (individual, bulk, funded escrow, accepted offer, release then legitimate sale, 12 + 8 concurrent race rounds); Jest `dealerMarkSold`, `dealerLifecycleUnits` | VERIFIED |
++| DA-02 | Bulk "sold" inconsistent (status sold, sold flag false, no sale record) | Reproduced: bulk endpoints wrote `status` only | Two independent writers (`bulkUpdateListings`, `/cars/bulk-status`) | Both endpoints call `bulkChangeDealerListingStatus`, which uses the same atomic function per listing (itemised result with per-id reason codes; duplicates collapsed; max 100). `sold_at` and a sale record are written in the same transaction | Journey 09 (mixed selection, duplicates, foreign ids, all-blocked 409, concurrency); Jest `stage5aSellerSelfPublication`, `stage1ListingWriteBoundaries` | VERIFIED |
++| DA-03 | Sold listing still editable (price changed to 1) | Reproduced | Dealer roles skipped the mutation guard | `assertPersonalListingMutationAllowed` now refuses edit / photos / remove on sold listings for business roles (409 `LISTING_SOLD_READ_ONLY`); DB trigger `trg_cars_sold_read_only` is the final backstop (status, sold flag, title, price, photos, description, owner, `deleted_at`). Admin correction only through `kayad_admin_correct_sold_listing` (admin role, reason ≥ 10 chars, audited) | Journey 09 (PUT, cover, reorder, delete, bulk delete, pause / republish, 5 direct SQL updates, admin function incl. non-admin and missing reason) | VERIFIED |
++| DA-04 | Banking saved but read back blank | Reproduced: GET returned cached blank for 5 minutes; `?x=1` bypassed it | `invalidateCache("dealer")` passed a bare string to Redis `SCAN MATCH`, which matches no key (`dealer:<id>:<path>:<query>`), so no write ever invalidated any dealer cache | `normalizeInvalidationPattern` (bare prefix → `prefix:*`); `GET /settlement` is no longer cached and sends `Cache-Control: private, no-store`; PUT reads back the stored row; masked fields added; UI re-reads after save and shows a masked summary | Journey 10 (19 checks: save → read-back → re-login → update merge → invalid input → clear → tenant isolation → five staff roles denied → audit without values); node:test `dealerLifecycleUnits` | VERIFIED |
++| DA-05 | Brand "KAYAD" / "KAYARD " in hosted config | Hosted read-only SELECT: `branding.logoText="KAYAD"`, `platform_name="KAYARD "` | Earlier migration matched only the exact string `KAYAD`; client normaliser only the exact string | Migration `20261121170000` (trim / case / whitespace aware, exact-variant only); `normalizeBrandName` in `BrandingContext` | Disposable-DB script `evidence/brand-migration-result.txt` (variants fixed, dealer name / domain / longer text untouched, second run no change); Vitest `normalizeBrandName` (14) | VERIFIED on disposable DB. NOT applied to hosted |
++| DA-06 | Sidebar overflows, Sign out below the fold, mobile drawer cut off | Reproduced and measured | Desktop aside used `h-screen` while sitting 110 px below the top; Account status card consumed ~40 % of the sidebar | Measured offset (ResizeObserver + scroll/resize) → `calc(100dvh - offset)`; Account status collapsible; drawer: focus moves in, Tab trap, Escape closes, focus returns to the menu button | `evidence/dealer-responsive-after.json` at 9 viewports; Vitest `DealerSoldReadOnly` | VERIFIED (see responsive report) |
++| DA-07 | No dealer listing numbers | Reproduced: `listingNumber` null for dealers | Numbers were derived only for personal roles | `cars.listing_number`, `dealer_listing_counters`, BEFORE INSERT trigger (single-statement upsert allocation), immutable trigger, idempotent backfill by `(created_at, id)`, unique index. API exposes `listingNumber`; UI shows `#n`; UUIDs unchanged | Journey 09 (sequential, per-dealer, removal, hard delete, immutability, 20 concurrent inserts, API exposure); Vitest `DealerInventoryList`, `DealerSoldReadOnly` | VERIFIED |
++
++## Findings not changed in this pass (owner decisions, see OPEN-ISSUES)
++DA-08 (pause control in the dealer UI), DA-09, DA-10 (legacy removal), DA-11 … DA-14 (role permissions), DA-15, DA-16, DA-17, DA-19.
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-BANKING-REPAIR.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-BANKING-REPAIR.md
+new file mode 100644
+index 0000000..f5a5fe5
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-BANKING-REPAIR.md
+@@ -0,0 +1,7 @@
++# Banking repair (DA-04)
++
++Trace: UI `DealerBankingPanel` → `PUT /api/dealer/settlement` → `dealers.payment_details` (jsonb, keyed by the dealer's user id) → `GET /api/dealer/settlement` (owner-only router: `protect` + `dealerOnly` + workspace status; staff roles are refused).
++Persistence was always correct (the DB row held the new value). The defect was the read: `cacheDealerData` stored the first GET for 5 minutes under `dealer:<userId>:/settlement:{}` and `invalidateCache("dealer")` never removed it because Redis `SCAN MATCH dealer` matches only the literal key `dealer`.
++Fix: (1) bare cache prefixes now mean `prefix:*` (this also repairs `user` and the other 13 dealer routes that used the same call); (2) banking GET is not cached and returns `Cache-Control: private, no-store`; (3) PUT returns the stored row; (4) response adds `bankAccountMasked`, `mpesaBusinessMasked`, `configured`; (5) the panel re-reads after saving and shows a masked "Saved payout details" summary; (6) audit logs record field names only.
++No fake balances were added; the panel shows only what is stored.
++Not changed: the account number is still returned unmasked to the authenticated owner for editing (owner-only, no-store). Masking at rest is a separate owner decision.
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-BRANDING-RECONCILIATION.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-BRANDING-RECONCILIATION.md
+new file mode 100644
+index 0000000..4713a00
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-BRANDING-RECONCILIATION.md
+@@ -0,0 +1,7 @@
++# Branding reconciliation (DA-05)
++
++Approved name: **KAYARD KE**. Sources audited: client default (`DEFAULT_BRANDING`, already KAYARD KE), `BrandingContext.normalizeBrandingConfig` (now `normalizeBrandName`: exact variants KAYAD / KAYARD / KAYAD KE / KAYARD KE in any case or spacing), localStorage cache `kayad_branding_cache_v1` (passes through the same normaliser on read), server default `backend/utils/siteDesign.js` (KAYARD KE), seeded migration `20261121150000` (exact `KAYAD` only), hosted config (read-only SELECT: `branding.logoText="KAYAD"`, `platform_name="KAYARD "`).
++New migration `20261121170000_brand_kayard_ke_normalize_platform_config.sql` rewrites a value only if, after trimming and collapsing whitespace and ignoring case, it is exactly one of the four variants. Tables: `platform_config.platform_name`, `platform_config.branding` keys logoText / platformName / siteName / brandName, `system_settings.platform_name`, `website_settings.website_name`. Everything else is untouched: dealer business names, `kayad.space`, `KAYAD-` reference prefixes, the M-Pesa AccountReference, longer text containing the word.
++Test on a disposable DB (`evidence/brand-migration-result.txt`): `"KAYARD "`, `"  kayad  ke"`, `"KAYAD"`, `"Kayard  Ke"` → `KAYARD KE`; `"Eric Kamau Motors"`, `"kayad.space"`, a tagline containing "KAYAD Motors", and an unrelated `system_settings` row stay; second run changes nothing.
++Light / dark logo: the dealer sidebar renders the configured logo (`/branding/kayard-ke-logo.png`) with the text "KAYARD KE"; screenshots in `screenshots/after/`. A separate dark-logo asset was not audited (NOT TESTED).
++**Not applied to hosted.** Owner decision to apply with the other pending migrations.
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-DATABASE-MIGRATION-REVIEW.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-DATABASE-MIGRATION-REVIEW.md
+new file mode 100644
+index 0000000..63a3cc7
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-DATABASE-MIGRATION-REVIEW.md
+@@ -0,0 +1,17 @@
++# Database and migration review
++
++New forward-only migrations (both sort after `20261121150000_brand_kayard_ke_seeded_customer_content.sql`):
++
++1. `20261121160000_dealer_listing_lifecycle_and_numbers.sql`
++   * Adds `cars.listing_number`, `cars.sold_at`; tables `dealer_listing_lifecycle_events`, `dealer_listing_counters` (RLS on, no policies, `service_role` only).
++   * Functions: `kayad_dealer_listing_lifecycle_atomic`, `kayad_admin_correct_sold_listing`, `kayad_cars_assign_listing_number`, `kayad_cars_listing_number_immutable`, `kayad_cars_sold_read_only`, `kayad_listing_manually_sold`, `kayad_escrow_listing_sale_guard`, `kayad_settlement_listing_sale_guard`. Execute rights: `service_role` only.
++   * Triggers: `cars` (BEFORE INSERT numbering, BEFORE UPDATE immutability and sold read-only), `escrows` (BEFORE INSERT / UPDATE OF status), `marketplace_offer_settlements` (created only if the table exists).
++   * Idempotent: applied twice on the disposable DB; the backfill only fills missing numbers. Backfill takes `SHARE ROW EXCLUSIVE` on `cars` for its duration (short on current volumes; schedule outside peak).
++2. `20261121170000_brand_kayard_ke_normalize_platform_config.sql` — exact-variant brand normalisation (see branding report).
++
++Verified on disposable PostgreSQL 16: the whole chain applies cleanly (209/209 files), journeys 03, 05, 06, 07, 08, 09, 10 and the ten legacy journeys pass (`evidence/run-sh-full.log`, `evidence/journeys/`). The first full run caught a regression in my first draft (the settlement guard blocked the normal payment-driven `paid` transition, journey 05); the guards were narrowed to owner-completed sales only and the run repeated.
++
++**Prerequisites on hosted (read-only reconciliation from the earlier audit):** hosted lacks `marketplace_offer_settlements`, `purchase_outcomes`, `personal_listing_lifecycle_events` and the earlier lifecycle migrations (`20261116…`, `20261117…`, `20261121110000`, `…140000`). Migration 1 creates the settlement trigger only when the table exists, but the lifecycle function reads `purchase_outcomes` and `marketplace_offer_settlements` at run time, so **apply the pending chain in order**; do not apply migration 1 alone to a schema that lacks them (a mark-sold call would fail closed with 503 `LISTING_STATUS_SERVICE_UNAVAILABLE`, never silently succeed).
++Rollback: drop the triggers and functions listed above and the two tables, then drop the two columns; no existing column is altered or dropped.
++Tenant isolation: every function takes the dealer id from the server-resolved business (staff are rewritten to the business id by `dealerWorkspaceAccess`); journey 09 verifies another dealer receives 404 and nothing changes.
++Hosted: **no migration applied, no production row read for writing, no branding change.**
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-IMPLEMENTATION-SUMMARY.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-IMPLEMENTATION-SUMMARY.md
+new file mode 100644
+index 0000000..f0b593a
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-IMPLEMENTATION-SUMMARY.md
+@@ -0,0 +1,17 @@
++# Dealer account implementation — summary
++
++**Scope done:** DA-01 … DA-07 implemented and verified on a disposable database over real HTTP; no commit, push, deploy or hosted migration was made.
++
++| | Result |
++|---|---|
++| DA-01 sale vs escrow / settlement | Fixed: atomic lifecycle function, 409 codes, race-safe triggers (journey 09) |
++| DA-02 one canonical sold lifecycle | Fixed: single service for individual and both bulk endpoints, itemised, audited |
++| DA-03 sold is read-only | Fixed in API and database; admin correction function audited |
++| DA-04 banking read-back | Fixed (cache invalidation root cause), masked, uncached, journey 10 |
++| DA-05 branding | Migration + client normaliser, tested on a scratch DB; **hosted not touched** |
++| DA-06 sidebar / drawer | Fixed and measured at 9 viewports (see responsive report) |
++| DA-07 listing numbers | Permanent, concurrency-safe, backfilled, shown as `#n` |
++
++Reports: reconciliation, workflow, role matrix (unchanged roles), lifecycle, numbering, banking, branding, responsive / accessibility, legacy register (nothing deleted), migration review, test results, open issues, files changed, release readiness.
++
++**Not done (decisions or limits, see OPEN-ISSUES):** Pause / Publish buttons in the dealer UI, the brief's renamed sidebar groups, role-permission contradictions DA-11 … DA-14, legacy deletions, real Cloudinary test, individually scripted 30 journeys, dark-mode capture.
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-LEGACY-DUPLICATION-REGISTER.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-LEGACY-DUPLICATION-REGISTER.md
+new file mode 100644
+index 0000000..7f13199
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-LEGACY-DUPLICATION-REGISTER.md
+@@ -0,0 +1,14 @@
++# Legacy and duplicate register
++
++Nothing was deleted in this pass. The dependency evidence is in `docs/handover/DEALER-ACCOUNT-20261121/DEALER-ACCOUNT-DEPENDENCY-MAP.md` and `…DUPLICATE-LEGACY-REGISTER.md`; deletion is proposed only after the owner confirms.
++
++| Item | Proof of use | Decision |
++|---|---|---|
++| `src/pages/dealer/DealerAnalytics.jsx`, `DealerSettings.jsx`, `DealerTeam.jsx` | no importers, no tests | Candidate for removal (owner approval) |
++| `src/pages/dealer/DealerDashboard.jsx` | imported only by its own test | Candidate; remove with that test after approval |
++| `DealerAuctionSetup.jsx` | superseded by `DealerAuctionSetupWizard`; 1 test | Candidate |
++| `src/pages/dealer/components/*` (6 files) | orphaned | Candidate |
++| `features/DealershipWorkspace` | lazily mounted; `useMyDealership` used by Navbar and DashboardHub | **Keep** (it is the staff workspace) |
++| `/api/dealer/team*` (legacy) vs `/api/dealer-platform/team*` (live) | legacy invite returns 410, GET still 200 | Keep until clients are confirmed migrated |
++| `src/components/layout/DealerSidebar.tsx` | references `/dealer/settlement` | Not audited for imports; do not remove without a dependency check |
++Why nothing was removed: the standing rule is "delete only after proof, never on grep alone", and removing screens is a product decision.
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-LISTING-LIFECYCLE.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-LISTING-LIFECYCLE.md
+new file mode 100644
+index 0000000..bd9d830
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-LISTING-LIFECYCLE.md
+@@ -0,0 +1,15 @@
++# Dealer listing lifecycle
++
++Canonical states use the existing `cars.status` values: **Draft** `draft` → **Active** `available` → **Paused** `hidden` → **Sold** `sold` (terminal, read-only). `pending`, `reserved` and `rejected` stay owned by their own workflows (verification, sale / escrow, moderation).
++
++| Action | From | To | Writer | Refused when |
++|---|---|---|---|---|
++| Publish | draft, hidden | available | `kayad_dealer_listing_lifecycle_atomic(..,'publish')` | sold, reserved, rejected, removed, auction / bids, escrow, purchase outcome, accepted-offer settlement |
++| Pause | available | hidden | same, `'hide'` | not published, plus the same locks |
++| Mark sold | available, hidden, draft, pending | sold (`sold=true`, `sold_at=now()`) | same, `'mark_sold'` | already sold (`ALREADY_SOLD`), funded escrow or active purchase (`TRANSACTION_LOCK`), accepted offer awaiting payment or paid (`OFFER_SETTLEMENT_LOCK`), auction / bids (`AUCTION_OR_BID_LOCK`), reserved / rejected |
++
++All checks and the write happen under `SELECT … FOR UPDATE` on the car row in one transaction; the audit and sale record (`dealer_listing_lifecycle_events`: actor, actor type owner / staff, previous and next status, sale price, buyer name, notes) is part of it.
++Race protection: the other side (a new escrow, a new offer settlement) takes `FOR SHARE` on the same car row in a trigger and refuses when the owner has already sold the listing. Payment-driven sales (purchase flow) are not blocked.
++Sold is read-only: API (409 `LISTING_SOLD_READ_ONLY`) and database (`trg_cars_sold_read_only`). Only `kayad_admin_correct_sold_listing` (admin, reason required, audited) can reopen.
++Draft / pending are set by the bulk endpoint with direct, guarded updates (never on sold, reserved, rejected or foreign rows).
++**Not done:** a Pause / Publish button in the dealer dashboard UI (the backend and bulk API support it; see OPEN-ISSUES D-3).
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-NUMERICAL-LISTING-ID.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-NUMERICAL-LISTING-ID.md
+new file mode 100644
+index 0000000..fdd90f3
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-NUMERICAL-LISTING-ID.md
+@@ -0,0 +1,10 @@
++# Permanent per-dealer listing numbers (DA-07)
++
++* Storage: `cars.listing_number integer`, `dealer_listing_counters(dealer_id, last_number)`, unique partial index `(dealer_id, listing_number)`.
++* Allocation: BEFORE INSERT trigger runs `INSERT … ON CONFLICT DO UPDATE SET last_number = last_number + 1 RETURNING` — the upsert row lock serialises concurrent inserts for one dealer. Verified with 20 concurrent inserts: 21 distinct contiguous numbers.
++* Never reused: the counter only moves forward; soft-deleted and hard-deleted listings do not give numbers back (verified).
++* Stable: an immutable trigger refuses any change of number or owner once set. Edit, pause, publish and sell never touch it.
++* Backfill: idempotent, continues after the owner's existing maximum, orders by `(created_at, id)`, includes soft-deleted rows so their numbers stay reserved. Applied twice on the disposable DB with no change on the second run.
++* API: `/api/cars/my-listings` and `/api/dealer-platform/inventory` return `listingNumber`; personal accounts use the same column (falls back to the previous derived number where the column is absent).
++* UI: `#n` chip on every row (desktop and mobile) and in the Sold list; rows without a number show "—" (no invented numbers); numbers do not change with search, filter, sort or paging.
++* Security: the number is display-only. UUIDs, slugs and public references are unchanged and no endpoint accepts the number as an identifier.
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-OPEN-ISSUES-AND-DECISIONS.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-OPEN-ISSUES-AND-DECISIONS.md
+new file mode 100644
+index 0000000..e89c3c4
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-OPEN-ISSUES-AND-DECISIONS.md
+@@ -0,0 +1,16 @@
++# Open issues and decisions
++
++Format: decision · current behaviour · recommendation · consequences.
++
++**D-1 Apply the migrations to hosted.** Current: not applied. Recommend: apply the pending chain in order on a staging copy first (backfill locks `cars` briefly), then production, then reload PostgREST. Consequence: until applied, hosted dealer mark-sold stays on the old behaviour only if the old code is deployed; the new code returns 503 on status changes (fail closed).
++**D-2 Brand rows on hosted.** Current: `KAYAD` / `KAYARD ` still stored; the client normaliser hides it on screen. Recommend: apply migration 170000. Consequence: names in e-mails or server-rendered pages that read the raw value change to KAYARD KE.
++**D-3 Pause / Publish control in the dealer UI.** Current: backend and bulk API ready; the inventory row offers Mark sold / Edit / Remove only. Recommend: add Pause / Publish buttons using the bulk endpoint. Consequence: dealers can take a listing off the public site without deleting it.
++**D-4 Manager and finance officer powers (DA-13, DA-14).** Current: only the owner can mark sold; finance officers cannot see earnings. Recommend: keep until the owner decides; no widening was done.
++**D-5 Viewer and sales / lot dashboard access (DA-11, DA-12).** Current: viewer has no read access; sales and lot agents get 403 on the Overview they land on. Recommend: pick a read-only landing section per role. Consequence: touches the permission model, so not done unprompted.
++**D-6 Sidebar grouping.** The brief's groups (Leads & enquiries, Customers & deals, Offers & escrow, Banking & payouts …) were not re-labelled; the existing groups (Overview, Business, Operations, System Management) remain, with every section reachable. Recommend a copy-only relabel after approval.
++**D-7 Legacy removal.** See legacy register; nothing deleted.
++**D-8 Banking at rest.** Account numbers are stored and returned unmasked to the owner (masked fields added for display). Masking / encryption at rest is a separate decision.
++**D-9 Photo upload provider.** BLOCKED: real Cloudinary credentials are not available in the sandbox; only a loopback stub was exercised.
++**D-10 Journeys.** 18 database-backed suites (10 legacy, 03, 05, 06, 07, 08, 09, 10) plus the earlier 32 × 9 permission matrix were run. The 30 named journeys in the brief were not each scripted individually (NOT TESTED as named).
++**D-11 Staff dashboard permissions UI** (DealershipWorkspace) was not changed or re-screenshotted.
++**D-12 Dark-mode / dark-logo screenshots** were not captured (NOT TESTED).
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-RESPONSIVE-ACCESSIBILITY-AUDIT.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-RESPONSIVE-ACCESSIBILITY-AUDIT.md
+new file mode 100644
+index 0000000..2842ab9
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-RESPONSIVE-ACCESSIBILITY-AUDIT.md
+@@ -0,0 +1,25 @@
++# Responsive and accessibility audit (DA-06) — dealer workspace
++
++Method: real Chromium (Playwright) against the dealer workspace served by Vite and the backend on the disposable database; script `evidence/dealer-responsive-after.cjs`, raw data `evidence/dealer-responsive-after.json`, screenshots `screenshots/after/` (overview, inventory, banking at every viewport, plus the open drawer on every viewport below 1024). Before images: `screenshots/before/` and the earlier audit pack (`DEALER-ACCOUNT-20261121/screenshots/responsive/`).
++
++## Result (final run)
++| Viewport | Surface | Sidebar box (y) | Sign out | Horizontal overflow |
++|---|---|---|---|---|
++| 1920×1080 | desktop sidebar | 110–1080 | bottom 1064 ≤ 1080 — in view | none |
++| 1440×900 | desktop sidebar | 110–900 | 884 ≤ 900 — in view | none |
++| 1280×800 | desktop sidebar | 110–800 | 784 ≤ 800 — in view | none |
++| 1024×768 | desktop sidebar | 110–768 | 752 ≤ 768 — in view | none |
++| 768×1024, 430×932, 390×844, 375×812, 360×800 | drawer | – | Sign out in viewport; focus moves inside on open; Escape closes; focus returns to the menu button | none |
++
++Before (earlier audit): at 1440×900 the sidebar ended at y=1010 (110 px below the fold, Sign out unreachable without scrolling the page) and the 390-px drawer showed no item after "Operations".
++
++## What changed
++* Sidebar height = viewport minus the measured offset of the workspace (layout observer, scroll / resize, and a 400 ms check because the site header can mount late); written as a CSS variable.
++* The Account status card is collapsed by default (still one tap away); only the menu list scrolls, the footer with Sign out is fixed.
++* Drawer: focus into the drawer, Tab / Shift+Tab trap, Escape, focus back to the trigger, body scroll lock (pre-existing), labelled landmark.
++* Touch targets: Sign out and the Account status summary are ≥ 38–44 px high; menu button 44 px.
++
++## Honest limits
++* The first and second implementations of the height fix were measured and **failed** at some viewports (the offset was read once, before the header mounted); the final measurement above is the third and is the one that passes. The cause is documented in the code comment.
++* At 1024×768 the nav list shows fewer items before scrolling (the remaining items are reachable by scrolling that one list).
++* Keyboard operation was verified for the drawer (open, trap, Escape, focus return). A full tab-order and screen-reader pass of every dealer section was not performed (NOT TESTED). Dark mode and the dark logo were not captured (NOT TESTED). Only overview, inventory and banking were captured at all nine viewports.
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-ROLE-PERMISSION-MATRIX.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-ROLE-PERMISSION-MATRIX.md
+new file mode 100644
+index 0000000..8a51dd2
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-ROLE-PERMISSION-MATRIX.md
+@@ -0,0 +1,62 @@
++# Dealer role × action permission matrix
++
++**No role was added and no permission was widened in this implementation.** The matrix below is the verified result of the earlier audit (real HTTP, 32 operations × 9 actors, run against the pre-change build). The changes made since then affect it only as follows, each re-verified in journeys 09 and 10:
++
++* `PATCH /api/dealer/cars/:id/mark-sold` and `/cars/bulk-status` remain **owner-only** (staff are refused); the new lifecycle function records the real actor (`dealer_owner` / `dealer_staff`) so that a future decision to let managers mark sold needs no schema change.
++* `GET/PUT /api/dealer/settlement` (banking): owner only. Journey 10 re-verified that manager, finance_officer, sales_agent, lot_agent and viewer are all refused (read and write) and that nothing changes.
++* Editing, photo changes and removal of a **sold** listing are refused for everyone below administrator level.
++
++Contradictions found by the audit that are **not** resolved here because they need an owner policy decision (details and consequences in OPEN-ISSUES): DA-11 sales / lot agents get 403 on the dashboard they land on; DA-12 viewer has no read access; DA-13 manager cannot mark sold; DA-14 finance officer cannot see earnings or escrows.
++
++---
++
++
++Method: every cell is a real HTTP call to the running backend on a disposable loopback database, run as that actor. Staff joined through the real invite and accept endpoints (the invitation e-mail is not delivered in this environment, so a known token hash was installed on the row; a disposable-DB shortcut). Mutation probes use a non-existent id so a **404** (or **403n** = "not owned by this dealer") means the permission layer let the caller through and the record was simply absent, whereas **403** means denied by permission and **401** means unauthenticated. `*` = first run hit the deliberate per-user write limiter (429, a control, not weakened); the cell was re-run after the window (`evidence/dealer-matrix-429-recheck.mjs`).
++
++Role definitions come from `backend/services/dealerTeamRoles.service.js` and are not modified. **There is no "administrator" or "inspection/operations staff" role in the product; none was invented.** Platform admin accounts were not part of this matrix.
++
++| Operation | Owner | Manager | Sales agent | Lot agent | Finance officer | Viewer | Outsider (personal) | Other dealer | Anonymous |
++|---|---|---|---|---|---|---|---|---|---|
++| GET dashboard | 200 | 200 | 403 | 403 | 200 | 403 | 403 | 200 | 401 |
++| GET inventory | 200 | 200 | 200 | 200 | 403 | 403 | 403 | 200 | 401 |
++| POST inventory (create) | 201 | 201 | 201 | 201 | 403 | 403 | 403 | 201 | 401 |
++| PUT inventory/:id | 404 | 404 | 404 | 404* | 403 | 403 | 403 | 404 | 401 |
++| DELETE inventory/:id | 404* | 404* | 403 | 403 | 403 | 403 | 403 | 404 | 401 |
++| POST inventory/bulk | 403n* | 403n* | 403n* | 403n* | 403 | 403 | 403 | 403 | 401 |
++| GET leads | 200 | 200 | 200 | 403 | 403 | 403 | 403 | 200 | 401 |
++| PUT leads/:id | 404 | 404 | 404 | 403 | 403 | 403 | 403 | 404 | 401 |
++| GET customers | 200 | 200 | 200 | 403 | 403 | 403 | 403 | 200 | 401 |
++| GET pipeline | 200 | 200 | 200 | 403 | 403 | 403 | 403 | 200 | 401 |
++| GET analytics | 200 | 200 | 403 | 403 | 200 | 403 | 403 | 200 | 401 |
++| GET marketing | 200 | 403 | 403 | 403 | 403 | 403 | 403 | 200 | 401 |
++| GET team | 200 | 403 | 403 | 403 | 403 | 403 | 403 | 200 | 401 |
++| POST team/invite | 201 | 403 | 403 | 403 | 403 | 403 | 403 | 201 | 401 |
++| PUT team/:id | 404* | 403 | 403 | 403 | 403 | 403 | 403 | 404 | 401 |
++| DELETE team/:id | 404 | 403 | 403 | 403 | 403 | 403 | 403 | 404 | 401 |
++| GET team/roles | 200 | 403 | 403 | 403 | 403 | 403 | 403 | 200 | 401 |
++| GET subscription | 200 | 403 | 403 | 403 | 403 | 403 | 403 | 200 | 401 |
++| GET auctions | 200 | 200 | 200 | 200 | 403 | 403 | 403 | 200 | 401 |
++| GET inspections | 200 | 200 | 200 | 200 | 403 | 403 | 403 | 200 | 401 |
++| GET finance | 200 | 403 | 403 | 403 | 403 | 403 | 403 | 200 | 401 |
++| GET reputation | 200 | 403 | 403 | 403 | 403 | 403 | 403 | 200 | 401 |
++| GET dealer/settlement (banking) | 200 | 403 | 403 | 403 | 403 | 403 | 403 | 200 | 401 |
++| PUT dealer/settlement (banking) | 200 | 403 | 403 | 403 | 403 | 403 | 403 | 200 | 401 |
++| GET dealer/earnings | 200 | 403 | 403 | 403 | 403 | 403 | 403 | 200 | 401 |
++| GET dealer/escrows | 200 | 403 | 403 | 403 | 403 | 403 | 403 | 200 | 401 |
++| POST dealer/payouts/:id/initiate | 404 | 403 | 403 | 403 | 403 | 403 | 403 | 404 | 401 |
++| PATCH dealer/cars/:id/mark-sold | 404 | 403 | 403 | 403 | 403 | 403 | 403 | 404 | 401 |
++| POST dealer/cars/:id/auction/start | 404 | 403 | 403 | 403 | 403 | 403 | 403 | 404 | 401 |
++| PUT dealer/profile | 200 | 403 | 403 | 403 | 403 | 403 | 403 | 200 | 401 |
++| GET dealer/team (legacy route set) | 200 | 403 | 403 | 403 | 403 | 403 | 403 | 200 | 401 |
++| POST dealer/team/invite (legacy route set) | 410 | 403 | 403 | 403 | 403 | 403 | 403 | 410 | 401 |
++
++## Observations (all VERIFIED by the calls above)
++1. **Business scoping holds.** The other dealer and the outsider cannot reach another business's data. On a real listing, the other dealer got 403 on edit, delete, photo upload and `/api/cars` PUT, and 404 on mark-sold; the price was unchanged. Sales staff edited their own business's listing (200); viewer and outsider got 403.
++2. **Server enforces permissions independently of the UI.** Every denial above is a server response, not a hidden button.
++3. **Viewer is effectively a no-access role.** Described as "Read-only; no actions", it receives 403 on every read (dashboard, inventory, leads, customers). Description and behaviour disagree. (Defect DA-12.)
++4. **Sales and lot agents cannot open the dashboard** (403: it requires the earnings permission), though they can list inventory. The UI's default landing section is Overview. (DA-11.)
++5. **Manager cannot mark a vehicle sold or use `/api/dealer/*` endpoints** (403), although the role holds edit permission. Only the owner can mark sold. May be intentional; needs an owner decision. (DA-13.)
++6. **Finance officer** sees dashboard and analytics but not earnings, escrows, finance or settlement (403). Role text says "sees earnings". (DA-14.)
++7. **Banking (`/api/dealer/settlement`) is owner-only**; all staff roles got 403. Good.
++8. **Legacy route set:** `POST /api/dealer/team/invite` returns 410 (deprecated) while `GET /api/dealer/team` still returns 200 for the owner; the live team API is `/api/dealer-platform/team*`. (Duplicate register.)
++9. Anonymous = 401 on every route.
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-TEST-RESULTS.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-TEST-RESULTS.md
+new file mode 100644
+index 0000000..2e4548f
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-TEST-RESULTS.md
+@@ -0,0 +1,25 @@
++# Test results (final, after the last code change)
++
++All runs on the sandbox against a **disposable** PostgreSQL 16 / PostgREST / Redis stack built from this worktree's migrations. No hosted database was written to.
++
++| Suite | Command | Result |
++|---|---|---|
++| Typecheck | `npx tsc --noEmit` | pass (rc 0) |
++| Frontend Vitest (full) | `npx vitest run` | 214 files, **1825 passed**, 1 skipped (pre-existing) |
++| Frontend (re-run of touched areas after the final brand edit) | `npx vitest run src/__tests__/context src/__tests__/pages/dealer` | 29 files, 201 passed, 1 skipped |
++| Build | `npm run build` | pass |
++| Backend Jest (266 files, 14 batches of ≤20, `--maxWorkers=1`) | `node --max-old-space-size=3072 --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit --maxWorkers=1 <20 files>` | all batches pass; `evidence/backend-jest-batches.txt`. Batch 06 first showed 1 failure (`listingDeletionGuard`: my guard changed the delete error code); fixed, the file re-run = 20/20. One suite (21 tests) is skipped by its own design, as before |
++| Backend Vitest | `npx vitest run --config vitest.config.js` (in `backend/`) | 11 files, 61 passed |
++| Backend node:test | `node --test --test-force-exit tests/response-lifecycle.test.js tests/node/personalListingEligibilityProjection.test.js tests/node/dealerLifecycleUnits.test.js` | 32 passed |
++| Database journeys (fresh DB, real HTTP) | `ci/db-journeys/run.sh` (with `POSTGREST_BIN`) | 209/209 migrations; **18/18 suites pass**, overall PASS (`evidence/run-sh-full.log`, `evidence/journeys/`). New: 09 (51 checks), 10 (19). Race tests: 12 sale-vs-escrow and 8 sale-vs-settlement concurrent rounds, zero violations |
++| Brand migration on a scratch DB | see `evidence/brand-migration-result.txt` | variants fixed, others untouched, 2nd run no change |
++| Validators | `for f in scripts/validate-*.mjs; do node $f; done` | 352 of 358 pass. 6 fail identically on untouched `origin/main` 1eb1489 (so not caused by this work): `communications-provider-certification`, `kayad-navbar-branding`, `live-runtime` (needs `SUPABASE_URL` / key), `local-supabase`, `release` (aggregates the others), `stage27-brand-identity-admin-editability-20261012`. One brand validator (`kayard-brand-identity-phase2`) failed because of my first edit of `BrandingContext`; the source was corrected (the pinned statement is kept) and the validator passes. |
++
++## Bugs found by this testing in my own work (fixed)
++1. Settlement guard blocked the normal payment-driven `paid` transition → journey 05 failed → guards narrowed to owner-completed sales.
++2. Sold-listing delete returned the wrong error code → `listingDeletionGuard` failed → removal keeps its established contract.
++3. Sidebar height was measured once and was wrong at some viewports (twice) → observer + polling; final measurement passes.
++4. A brand validator pins the source text → kept the pinned statement and added the broader normaliser next to it.
++
++## Not tested / blocked
++Real Cloudinary upload (BLOCKED, no credentials); the 30 named journeys individually (see OPEN-ISSUES D-10); dark mode; full screen-reader pass; staff workspace UI (DealershipWorkspace); hosted environment behaviour.
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-WORKFLOW-MATRIX.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-WORKFLOW-MATRIX.md
+new file mode 100644
+index 0000000..bbe621f
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-WORKFLOW-MATRIX.md
+@@ -0,0 +1,17 @@
++# Dealer workflow matrix (after implementation)
++
++| Workflow | State | Evidence |
++|---|---|---|
++| Register dealer → pending → approved | Unchanged | journey legacy-j10, 09 setup |
++| Create listing (image required) | Unchanged; now receives a permanent listing number | journey 09 |
++| Edit listing / photos (cover, reorder, remove) | Works for non-sold; sold refused (409) | journeys 09; photo **upload** against real Cloudinary BLOCKED (local stub only) |
++| Pause / publish | Backend + bulk API: atomic, audited. Dealer UI button: NOT added | journey 09; OPEN-ISSUES D-3 |
++| Mark sold (single) | Atomic, locks enforced, sale record, `sold_at` | journey 09 |
++| Mark sold (bulk) | Itemised, per-id reason codes, duplicates collapsed | journey 09 |
++| Accept bid / auction close | Unchanged (auction flow owns that sale) | not re-tested here |
++| Offers → settlement → pay | Unchanged; guarded against owner-sold listings | journey 05 (passes after guard narrowing) |
++| Escrow fund / release | Unchanged; cannot be opened on an owner-sold listing | journey 09 |
++| Customers (= released-escrow deals) | Definition retained, no change | audit D |
++| Banking save / read / re-login | Fixed | journey 10 |
++| Team invite / accept / roles | Unchanged | journey 10 (invite + accept for all five roles) |
++| Inspections, auctions, marketing, finance applications | Not changed; audited earlier | DEALER-ACCOUNT-WORKFLOW-MATRIX.md |
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/FINAL-RELEASE-READINESS.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/FINAL-RELEASE-READINESS.md
+new file mode 100644
+index 0000000..d89cbc6
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/FINAL-RELEASE-READINESS.md
+@@ -0,0 +1,18 @@
++# Final release readiness
++
++Verdict: **READY FOR OWNER REVIEW — NOT RELEASE-READY.** Code and tests for DA-01 … DA-07 are complete and green on disposable infrastructure, but release needs owner actions and has open items.
++
++Blockers before release
++1. The two migrations have not been applied anywhere except disposable databases. Hosted is missing earlier migrations the lifecycle function depends on (see migration review); apply the pending chain in order on staging first.
++2. Real image-provider upload is untested (BLOCKED).
++3. Owner decisions D-3 … D-8 (Pause / Publish UI, role contradictions, sidebar naming, legacy removal, banking-at-rest).
++
++Safe next steps (cmd.exe, from the project folder, after reviewing the patch):
++```
++git checkout -b feat/dealer-account-lifecycle
++git apply --check dealer-implementation.patch
++git apply dealer-implementation.patch
++npm test && npm run typecheck && npm run build
++```
++Then commit only after you approve (use `git add` with explicit paths from `IMPLEMENTED-FILES-AND-CHANGES.md`, not `-A`), open a PR, run `ci/db-journeys/run.sh`, apply migrations to staging, then production in order, and reload PostgREST (`NOTIFY pgrst, 'reload schema'`).
++Rollback: see migration review; code rollback is a revert of the PR.
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/IMPLEMENTED-FILES-AND-CHANGES.md b/docs/handover/DEALER-IMPLEMENTATION-20261121/IMPLEMENTED-FILES-AND-CHANGES.md
+new file mode 100644
+index 0000000..3d622e8
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/IMPLEMENTED-FILES-AND-CHANGES.md
+@@ -0,0 +1,29 @@
++# Implemented files and changes
++
++Base: `origin/main` 1eb1489 (includes the personal listing repair). Nothing committed, pushed, deployed or applied to hosted.
++
++## Database (forward-only)
++* `supabase/migrations/20261121160000_dealer_listing_lifecycle_and_numbers.sql` — lifecycle function, sale record table, sold read-only trigger, admin correction function, listing numbers (+ counter, immutability, backfill), escrow / settlement race guards.
++* `supabase/migrations/20261121170000_brand_kayard_ke_normalize_platform_config.sql` — exact-variant brand normalisation.
++
++## Backend
++* `services/dealerListingSale.service.js` — rewritten: `transitionDealerListing`, `markDealerListingSold`, `bulkChangeDealerListingStatus`, `mapLifecycleError` (single canonical writer).
++* `routes/dealerRoutes.js` — mark-sold passes the real actor; `bulk-status` uses the service; `/settlement` uncached, `no-store`, masked fields, read-back after save.
++* `controllers/dealerPlatformController.js` — `bulkUpdateListings` uses the service (statuses: available, active, draft, pending, hidden, paused, sold; `reserved` / `archived` removed because they are not seller-settable).
++* `services/personalListingMutationGuard.service.js` — business roles: edit / photo changes on sold listings refused (409 `LISTING_SOLD_READ_ONLY`); removal keeps its existing `LISTING_DELETE_BLOCKED` contract.
++* `controllers/carController.js` — `listingNumber` from the permanent column (derived fallback), also returned to dealers.
++* `middleware/apiCache.js` — `normalizeInvalidationPattern` (bare prefix → `prefix:*`).
++* `package.json` — `test:node` includes the new unit test.
++
++## Frontend
++* `pages/dealer/dashboard/DealerDashboard.tsx` — sidebar height / footer / collapsible Account status, drawer focus handling, `#n` listing numbers, sold rows read-only, corrected notice text.
++* `pages/dealer/dashboard/DealerBankingPanel.tsx` — read-back after save, masked summary.
++* `context/BrandingContext.tsx` — `normalizeBrandName`.
++
++## Tests
++* New: journeys `09_dealer_listing_lifecycle.mjs` (51 checks), `10_dealer_banking.mjs` (19), node:test `dealerLifecycleUnits.test.js` (5), Vitest `DealerSoldReadOnly.test.tsx` (2), `normalizeBrandName.test.ts` (14).
++* Updated (assertions kept, implementation target changed): `dealerMarkSold`, `stage1ListingWriteBoundaries`, `stage5aRealSchemaPins`, `stage5aSellerSelfPublication` (mocked the old direct writes; now mock the atomic function and keep every behavioural assertion; a SOLD item in a bulk batch is now reported as skipped instead of rejecting the whole batch — an intentional contract change to "itemised"), `DealerInventoryList` (rows show permanent numbers instead of positional ones).
++* `ci/db-journeys/run.sh` runs the two new journeys.
++
++## Docs
++`docs/handover/DEALER-ACCOUNT-20261121/` (audit pack, copied unchanged) and this directory.
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/backend-jest-batches.txt b/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/backend-jest-batches.txt
+new file mode 100644
+index 0000000..2f62a70
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/backend-jest-batches.txt
+@@ -0,0 +1,15 @@
++jest-batch-00 rc=0 Tests:       131 passed, 131 total | Test Suites: 18 passed, 18 total
++jest-batch-01 rc=0 Tests:       393 passed, 393 total | Test Suites: 17 passed, 17 total
++jest-batch-02 rc=0 Tests:       187 passed, 187 total | Test Suites: 15 passed, 15 total
++jest-batch-03 rc=0 Tests:       198 passed, 198 total | Test Suites: 20 passed, 20 total
++jest-batch-04 rc=0 Tests:       242 passed, 242 total | Test Suites: 20 passed, 20 total
++jest-batch-05 rc=0 Tests:       390 passed, 390 total | Test Suites: 19 passed, 19 total
++jest-batch-06 rc=0 Tests:       1 failed, 233 passed, 234 total | Test Suites: 1 failed, 19 passed, 20 total
++jest-batch-07 rc=0 Tests:       397 passed, 397 total | Test Suites: 20 passed, 20 total
++jest-batch-08 rc=0 Tests:       291 passed, 291 total | Test Suites: 20 passed, 20 total
++jest-batch-09 rc=0 Tests:       380 passed, 380 total | Test Suites: 20 passed, 20 total
++jest-batch-10 rc=0 Tests:       807 passed, 807 total | Test Suites: 20 passed, 20 total
++jest-batch-11 rc=0 Tests:       21 skipped, 172 passed, 193 total | Test Suites: 1 skipped, 15 passed, 15 of 16 total
++jest-batch-12 rc=0 Tests:       232 passed, 232 total | Test Suites: 20 passed, 20 total
++jest-batch-13 rc=0 Tests:       108 passed, 108 total | Test Suites: 6 passed, 6 total
++ALLDONE
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/brand-migration-result.txt b/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/brand-migration-result.txt
+new file mode 100644
+index 0000000..fcd54b0
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/brand-migration-result.txt
+@@ -0,0 +1,8 @@
++KAYARD KE | {"tagline": "KAYAD Motors keeps this", "logoText": "KAYARD KE"}
++KAYARD KE | {"logoText": "KAYARD KE"}
++Eric Kamau Motors | {"logoText": "kayad.space"}
++KAYARD KE | {"logoText": "KAYARD KE"}
++other "KAYAD"
++platform_name "KAYARD KE"
++KAYARD KE
++idempotent: second run changed nothing
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/dealer-responsive-after.cjs b/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/dealer-responsive-after.cjs
+new file mode 100644
+index 0000000..50328e2
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/dealer-responsive-after.cjs
+@@ -0,0 +1,43 @@
++// Real-browser responsive/accessibility measurement of the dealer workspace (run against the disposable stack).
++const { chromium } = require('/opt/npm-tools/node_modules/playwright');
++const { execSync } = require('child_process');
++const OUT = process.argv[2], PW = 'Str0ng!Passw0rd', BASE = 'http://127.0.0.1:4302';
++const email = execSync(`psql -h 127.0.0.1 -U postgres -d kayad_ci -tAc "select email from users where email like 'dealera-%' order by created_at desc limit 1"`).toString().trim();
++const VPS = [[1920,1080],[1440,900],[1280,800],[1024,768],[768,1024],[430,932],[390,844],[375,812],[360,800]];
++const SECTIONS = ['overview','inventory','banking'];
++(async () => {
++  const b = await chromium.launch(); const rep = [];
++  for (const [w, h] of VPS) {
++    const c = await b.newContext({ viewport: { width: w, height: h } }); const p = await c.newPage();
++    const errs = []; p.on('pageerror', (e) => errs.push(String(e.message).slice(0, 120)));
++    await p.goto(BASE + '/login', { waitUntil: 'networkidle' });
++    await p.getByLabel(/email/i).first().fill(email); await p.getByLabel(/password/i).first().fill(PW);
++    await p.getByRole('button', { name: /continue to kayard ke/i }).click(); await p.waitForTimeout(2500);
++    for (const s of SECTIONS) {
++      await p.goto(`${BASE}/?nav=dealer-dashboard&section=${s}`, { waitUntil: 'networkidle' }); await p.waitForTimeout(1200);
++      const m = await p.evaluate(() => {
++        const aside = document.getElementById('dealer-workspace-sidebar'); const nav = aside && aside.querySelector('nav');
++        const footer = document.querySelector('[data-testid="dealer-sidebar-footer"]');
++        const signout = footer && [...footer.querySelectorAll('button')].find((e) => /Sign out/i.test(e.textContent));
++        const rr = (e) => { if (!e) return null; const r = e.getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom), h: Math.round(r.height) }; };
++        const asideVisible = aside && getComputedStyle(aside).display !== 'none';
++        const numbers = [...document.querySelectorAll('[data-testid="inventory-row-number"],[data-testid="inventory-row-number-mobile"]')].map((e) => e.textContent).slice(0, 6);
++        return { asideVisible, asideRect: rr(aside), footerRect: rr(footer), signoutRect: rr(signout), navScrollH: nav && nav.scrollHeight, navClientH: nav && nav.clientHeight, vh: innerHeight, hOverflow: document.documentElement.scrollWidth > innerWidth + 1, numbers };
++      });
++      rep.push({ w, h, s, ...m });
++      await p.screenshot({ path: `${OUT}/${s}-${w}x${h}.png`, fullPage: false });
++    }
++    if (w < 1024) {
++      await p.goto(`${BASE}/?nav=dealer-dashboard&section=overview`, { waitUntil: 'networkidle' }); await p.waitForTimeout(800);
++      const btn = p.getByRole('button', { name: /dealer menu/i }).first(); await btn.click(); await p.waitForTimeout(400);
++      const d = await p.evaluate(() => { const a = document.getElementById('dealer-workspace-sidebar'); const so = [...a.querySelectorAll('button')].find((e) => /Sign out/i.test(e.textContent)); const r = so.getBoundingClientRect(); const ae = document.activeElement; return { signoutInViewport: r.top >= 0 && r.bottom <= innerHeight, signoutH: Math.round(r.height), focusInside: a.contains(ae), focusLabel: (ae && (ae.getAttribute('aria-label') || ae.textContent || '')).trim().slice(0, 40), bodyOverflow: getComputedStyle(document.body).overflow }; });
++      await p.screenshot({ path: `${OUT}/drawer-open-${w}x${h}.png` });
++      await p.keyboard.press('Escape'); await p.waitForTimeout(300);
++      const back = await p.evaluate(() => ({ closed: getComputedStyle(document.getElementById('dealer-workspace-sidebar')).display === 'none', focusOnMenu: /dealer menu/i.test(document.activeElement && document.activeElement.textContent || '') }));
++      rep.push({ w, h, s: 'drawer', ...d, ...back });
++    }
++    rep.push({ w, consoleErrors: [...new Set(errs)].slice(0, 4) });
++    await c.close();
++  }
++  require('fs').writeFileSync(`${OUT}/../../evidence/dealer-responsive-after.json`, JSON.stringify(rep, null, 1)); console.log('rows', rep.length); await b.close();
++})().catch((e) => { console.error(e.message); process.exit(1); });
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/dealer-responsive-after.json b/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/dealer-responsive-after.json
+new file mode 100644
+index 0000000..7f19004
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/dealer-responsive-after.json
+@@ -0,0 +1,863 @@
++[
++ {
++  "w": 1920,
++  "h": 1080,
++  "s": "overview",
++  "asideVisible": true,
++  "asideRect": {
++   "top": 110,
++   "bottom": 1080,
++   "h": 970
++  },
++  "footerRect": {
++   "top": 951,
++   "bottom": 1080,
++   "h": 129
++  },
++  "signoutRect": {
++   "top": 1026,
++   "bottom": 1064,
++   "h": 38
++  },
++  "navScrollH": 909,
++  "navClientH": 764,
++  "vh": 1080,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 1920,
++  "h": 1080,
++  "s": "inventory",
++  "asideVisible": true,
++  "asideRect": {
++   "top": 110,
++   "bottom": 1080,
++   "h": 970
++  },
++  "footerRect": {
++   "top": 951,
++   "bottom": 1080,
++   "h": 129
++  },
++  "signoutRect": {
++   "top": 1026,
++   "bottom": 1064,
++   "h": 38
++  },
++  "navScrollH": 909,
++  "navClientH": 764,
++  "vh": 1080,
++  "hOverflow": false,
++  "numbers": [
++   "#34",
++   "#34",
++   "#27",
++   "#27",
++   "#25",
++   "#25"
++  ]
++ },
++ {
++  "w": 1920,
++  "h": 1080,
++  "s": "banking",
++  "asideVisible": true,
++  "asideRect": {
++   "top": 110,
++   "bottom": 1080,
++   "h": 970
++  },
++  "footerRect": {
++   "top": 951,
++   "bottom": 1080,
++   "h": 129
++  },
++  "signoutRect": {
++   "top": 1026,
++   "bottom": 1064,
++   "h": 38
++  },
++  "navScrollH": 909,
++  "navClientH": 764,
++  "vh": 1080,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 1920,
++  "consoleErrors": []
++ },
++ {
++  "w": 1440,
++  "h": 900,
++  "s": "overview",
++  "asideVisible": true,
++  "asideRect": {
++   "top": 110,
++   "bottom": 900,
++   "h": 790
++  },
++  "footerRect": {
++   "top": 771,
++   "bottom": 900,
++   "h": 129
++  },
++  "signoutRect": {
++   "top": 846,
++   "bottom": 884,
++   "h": 38
++  },
++  "navScrollH": 909,
++  "navClientH": 584,
++  "vh": 900,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 1440,
++  "h": 900,
++  "s": "inventory",
++  "asideVisible": true,
++  "asideRect": {
++   "top": 110,
++   "bottom": 1010,
++   "h": 900
++  },
++  "footerRect": {
++   "top": 881,
++   "bottom": 1010,
++   "h": 129
++  },
++  "signoutRect": {
++   "top": 956,
++   "bottom": 994,
++   "h": 38
++  },
++  "navScrollH": 909,
++  "navClientH": 694,
++  "vh": 900,
++  "hOverflow": false,
++  "numbers": [
++   "#34",
++   "#34",
++   "#27",
++   "#27",
++   "#25",
++   "#25"
++  ]
++ },
++ {
++  "w": 1440,
++  "h": 900,
++  "s": "banking",
++  "asideVisible": true,
++  "asideRect": {
++   "top": 110,
++   "bottom": 900,
++   "h": 790
++  },
++  "footerRect": {
++   "top": 771,
++   "bottom": 900,
++   "h": 129
++  },
++  "signoutRect": {
++   "top": 846,
++   "bottom": 884,
++   "h": 38
++  },
++  "navScrollH": 909,
++  "navClientH": 584,
++  "vh": 900,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 1440,
++  "consoleErrors": []
++ },
++ {
++  "w": 1280,
++  "h": 800,
++  "s": "overview",
++  "asideVisible": true,
++  "asideRect": {
++   "top": 110,
++   "bottom": 800,
++   "h": 690
++  },
++  "footerRect": {
++   "top": 671,
++   "bottom": 800,
++   "h": 129
++  },
++  "signoutRect": {
++   "top": 746,
++   "bottom": 784,
++   "h": 38
++  },
++  "navScrollH": 909,
++  "navClientH": 484,
++  "vh": 800,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 1280,
++  "h": 800,
++  "s": "inventory",
++  "asideVisible": true,
++  "asideRect": {
++   "top": 110,
++   "bottom": 800,
++   "h": 690
++  },
++  "footerRect": {
++   "top": 671,
++   "bottom": 800,
++   "h": 129
++  },
++  "signoutRect": {
++   "top": 746,
++   "bottom": 784,
++   "h": 38
++  },
++  "navScrollH": 909,
++  "navClientH": 484,
++  "vh": 800,
++  "hOverflow": false,
++  "numbers": [
++   "#34",
++   "#34",
++   "#27",
++   "#27",
++   "#25",
++   "#25"
++  ]
++ },
++ {
++  "w": 1280,
++  "h": 800,
++  "s": "banking",
++  "asideVisible": true,
++  "asideRect": {
++   "top": 110,
++   "bottom": 800,
++   "h": 690
++  },
++  "footerRect": {
++   "top": 671,
++   "bottom": 800,
++   "h": 129
++  },
++  "signoutRect": {
++   "top": 746,
++   "bottom": 784,
++   "h": 38
++  },
++  "navScrollH": 909,
++  "navClientH": 484,
++  "vh": 800,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 1280,
++  "consoleErrors": []
++ },
++ {
++  "w": 1024,
++  "h": 768,
++  "s": "overview",
++  "asideVisible": true,
++  "asideRect": {
++   "top": 110,
++   "bottom": 768,
++   "h": 658
++  },
++  "footerRect": {
++   "top": 639,
++   "bottom": 768,
++   "h": 129
++  },
++  "signoutRect": {
++   "top": 714,
++   "bottom": 752,
++   "h": 38
++  },
++  "navScrollH": 909,
++  "navClientH": 452,
++  "vh": 768,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 1024,
++  "h": 768,
++  "s": "inventory",
++  "asideVisible": true,
++  "asideRect": {
++   "top": 110,
++   "bottom": 768,
++   "h": 658
++  },
++  "footerRect": {
++   "top": 639,
++   "bottom": 768,
++   "h": 129
++  },
++  "signoutRect": {
++   "top": 714,
++   "bottom": 752,
++   "h": 38
++  },
++  "navScrollH": 909,
++  "navClientH": 452,
++  "vh": 768,
++  "hOverflow": false,
++  "numbers": [
++   "#34",
++   "#34",
++   "#27",
++   "#27",
++   "#25",
++   "#25"
++  ]
++ },
++ {
++  "w": 1024,
++  "h": 768,
++  "s": "banking",
++  "asideVisible": true,
++  "asideRect": {
++   "top": 110,
++   "bottom": 768,
++   "h": 658
++  },
++  "footerRect": {
++   "top": 639,
++   "bottom": 768,
++   "h": 129
++  },
++  "signoutRect": {
++   "top": 714,
++   "bottom": 752,
++   "h": 38
++  },
++  "navScrollH": 909,
++  "navClientH": 452,
++  "vh": 768,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 1024,
++  "consoleErrors": []
++ },
++ {
++  "w": 768,
++  "h": 1024,
++  "s": "overview",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 1024,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 768,
++  "h": 1024,
++  "s": "inventory",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 1024,
++  "hOverflow": false,
++  "numbers": [
++   "#34",
++   "#34",
++   "#27",
++   "#27",
++   "#25",
++   "#25"
++  ]
++ },
++ {
++  "w": 768,
++  "h": 1024,
++  "s": "banking",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 1024,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 768,
++  "h": 1024,
++  "s": "drawer",
++  "signoutInViewport": true,
++  "signoutH": 38,
++  "focusInside": true,
++  "focusLabel": "Overview",
++  "bodyOverflow": "hidden",
++  "closed": true,
++  "focusOnMenu": true
++ },
++ {
++  "w": 768,
++  "consoleErrors": []
++ },
++ {
++  "w": 430,
++  "h": 932,
++  "s": "overview",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 932,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 430,
++  "h": 932,
++  "s": "inventory",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 932,
++  "hOverflow": false,
++  "numbers": [
++   "#34",
++   "#34",
++   "#27",
++   "#27",
++   "#25",
++   "#25"
++  ]
++ },
++ {
++  "w": 430,
++  "h": 932,
++  "s": "banking",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 932,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 430,
++  "h": 932,
++  "s": "drawer",
++  "signoutInViewport": true,
++  "signoutH": 38,
++  "focusInside": true,
++  "focusLabel": "Overview",
++  "bodyOverflow": "hidden",
++  "closed": true,
++  "focusOnMenu": true
++ },
++ {
++  "w": 430,
++  "consoleErrors": []
++ },
++ {
++  "w": 390,
++  "h": 844,
++  "s": "overview",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 844,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 390,
++  "h": 844,
++  "s": "inventory",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 844,
++  "hOverflow": false,
++  "numbers": [
++   "#34",
++   "#34",
++   "#27",
++   "#27",
++   "#25",
++   "#25"
++  ]
++ },
++ {
++  "w": 390,
++  "h": 844,
++  "s": "banking",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 844,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 390,
++  "h": 844,
++  "s": "drawer",
++  "signoutInViewport": true,
++  "signoutH": 38,
++  "focusInside": true,
++  "focusLabel": "Overview",
++  "bodyOverflow": "hidden",
++  "closed": true,
++  "focusOnMenu": true
++ },
++ {
++  "w": 390,
++  "consoleErrors": []
++ },
++ {
++  "w": 375,
++  "h": 812,
++  "s": "overview",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 812,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 375,
++  "h": 812,
++  "s": "inventory",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 812,
++  "hOverflow": false,
++  "numbers": [
++   "#34",
++   "#34",
++   "#27",
++   "#27",
++   "#25",
++   "#25"
++  ]
++ },
++ {
++  "w": 375,
++  "h": 812,
++  "s": "banking",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 812,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 375,
++  "h": 812,
++  "s": "drawer",
++  "signoutInViewport": true,
++  "signoutH": 38,
++  "focusInside": true,
++  "focusLabel": "Overview",
++  "bodyOverflow": "hidden",
++  "closed": true,
++  "focusOnMenu": true
++ },
++ {
++  "w": 375,
++  "consoleErrors": []
++ },
++ {
++  "w": 360,
++  "h": 800,
++  "s": "overview",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 800,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 360,
++  "h": 800,
++  "s": "inventory",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 800,
++  "hOverflow": false,
++  "numbers": [
++   "#34",
++   "#34",
++   "#27",
++   "#27",
++   "#25",
++   "#25"
++  ]
++ },
++ {
++  "w": 360,
++  "h": 800,
++  "s": "banking",
++  "asideVisible": false,
++  "asideRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "footerRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "signoutRect": {
++   "top": 0,
++   "bottom": 0,
++   "h": 0
++  },
++  "navScrollH": 0,
++  "navClientH": 0,
++  "vh": 800,
++  "hOverflow": false,
++  "numbers": []
++ },
++ {
++  "w": 360,
++  "h": 800,
++  "s": "drawer",
++  "signoutInViewport": true,
++  "signoutH": 38,
++  "focusInside": true,
++  "focusLabel": "Overview",
++  "bodyOverflow": "hidden",
++  "closed": true,
++  "focusOnMenu": true
++ },
++ {
++  "w": 360,
++  "consoleErrors": []
++ }
++]
+\ No newline at end of file
+diff --git a/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/journeys/summary.txt b/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/journeys/summary.txt
+new file mode 100644
+index 0000000..2c3058c
+--- /dev/null
++++ b/docs/handover/DEALER-IMPLEMENTATION-20261121/evidence/journeys/summary.txt
+@@ -0,0 +1,20 @@
++migrations applied: 209/209
++legacy-j1_registration_idempotency exit=0 fails=0
++legacy-j1_personal_register_login exit=0 fails=0
++legacy-j2 exit=0 fails=0
++legacy-j3 exit=0 fails=0
++legacy-j4_offers exit=0 fails=0
++legacy-j5 exit=0 fails=0
++legacy-j6 exit=0 fails=0
++legacy-j7 exit=0 fails=0
++legacy-j8 exit=0 fails=0
++legacy-j9_capabilities exit=0 fails=0
++legacy-j10_legacy_and_dealer exit=0 fails=0
++03_reconciliation_issues exit=0 fails=0
++05_offer_payment exit=0 fails=0
++07_personal_listing_management exit=0 fails=0
++09_dealer_listing_lifecycle exit=0 fails=0
++10_dealer_banking exit=0 fails=0
++06_aggregate_shim exit=0 fails=0
++08_personal_listing_hosted_schema exit=0 fails=0
++overall=PASS
+diff --git a/src/__tests__/context/normalizeBrandName.test.ts b/src/__tests__/context/normalizeBrandName.test.ts
+new file mode 100644
+index 0000000..fe269fe
+--- /dev/null
++++ b/src/__tests__/context/normalizeBrandName.test.ts
+@@ -0,0 +1,15 @@
++import { describe, it, expect } from 'vitest';
++import { normalizeBrandName } from '../../context/BrandingContext';
++
++describe('normalizeBrandName (DA-05)', () => {
++  it.each(['KAYAD', 'KAYARD', 'KAYAD KE', 'KAYARD KE', 'KAYARD ', ' kayad ', 'Kayard  Ke', 'kayard ke'])('maps %j to the approved name', (v) => {
++    expect(normalizeBrandName(v)).toBe('KAYARD KE');
++  });
++  it.each(['Kayad Motors Ltd', 'KAYAD-IR-1234', 'kayad.space', 'Eric Kamau Motors', ''])('leaves %j untouched', (v) => {
++    expect(normalizeBrandName(v)).toBe(v);
++  });
++  it('passes null and undefined through', () => {
++    expect(normalizeBrandName(null)).toBeNull();
++    expect(normalizeBrandName(undefined)).toBeUndefined();
++  });
++});
+diff --git a/src/__tests__/pages/dealer/DealerInventoryList.test.tsx b/src/__tests__/pages/dealer/DealerInventoryList.test.tsx
+index 1cc419d..b585e5b 100644
+--- a/src/__tests__/pages/dealer/DealerInventoryList.test.tsx
++++ b/src/__tests__/pages/dealer/DealerInventoryList.test.tsx
+@@ -17,8 +17,8 @@ vi.mock('../../../services/dealerPlatformApi', () => ({
+   createCampaign: vi.fn(),
+ }));
+ const cars = vi.hoisted(() => [
+-  { id: 'a', title: '2016 Landcruiser V8', brand: 'Toyota', model: 'Land Cruiser', year: 2016, price: 3500000, mileage: 165000, city: 'Nairobi', status: 'available', views: 3, createdAt: '2026-11-01T10:00:00Z', images: [{ url: 'https://x.test/1.jpg' }, { url: 'https://x.test/2.jpg' }] },
+-  { id: 'b', title: '2018 Mazda Demio', brand: 'Mazda', model: 'Demio', year: 2018, price: 900000, status: 'pending', views: 10, createdAt: '2026-11-02T10:00:00Z', images: [] },
++  { id: 'a', title: '2016 Landcruiser V8', brand: 'Toyota', model: 'Land Cruiser', year: 2016, price: 3500000, mileage: 165000, city: 'Nairobi', status: 'available', listingNumber: 1, views: 3, createdAt: '2026-11-01T10:00:00Z', images: [{ url: 'https://x.test/1.jpg' }, { url: 'https://x.test/2.jpg' }] },
++  { id: 'b', title: '2018 Mazda Demio', brand: 'Mazda', model: 'Demio', year: 2018, price: 900000, status: 'pending', listingNumber: 2, views: 10, createdAt: '2026-11-02T10:00:00Z', images: [] },
+ ]);
+ const markCarSold = vi.hoisted(() => vi.fn());
+ vi.mock('../../../services/vehicleApi', () => ({ getMyListings: vi.fn().mockResolvedValue(cars), deleteCar: vi.fn(), markCarSold }));
+@@ -35,7 +35,7 @@ describe('Dealer inventory list', () => {
+   it('numbers rows, shows thumbnail photo count and the seller-entered details only', async () => {
+     renderIt();
+     await screen.findByText('2016 Landcruiser V8');
+-    expect(screen.getAllByTestId('inventory-row-number').map((n) => n.textContent)).toEqual(['1', '2']);
++    expect(screen.getAllByTestId('inventory-row-number').map((n) => n.textContent)).toEqual(['#2', '#1']); // newest first; each row keeps its permanent number
+     expect(screen.getByText('2 photos')).toBeTruthy();
+     const details = screen.getAllByTestId('inventory-details').map((n) => n.textContent);
+     expect(details.some((d) => d === '2016 · 165,000 km · Nairobi')).toBe(true);
+@@ -43,12 +43,13 @@ describe('Dealer inventory list', () => {
+     expect(screen.getByTestId('inventory-count').textContent).toContain('Showing 2 of 2');
+   });
+ 
+-  it('searches, filters by status and sorts, renumbering the visible rows', async () => {
++  it('searches, filters by status and sorts; listing numbers never change with the view', async () => {
+     renderIt();
+     await screen.findByText('2016 Landcruiser V8');
+     fireEvent.change(screen.getByLabelText('Search your inventory'), { target: { value: 'demio' } });
+     expect(screen.queryByText('2016 Landcruiser V8')).toBeNull();
+-    expect(screen.getAllByTestId('inventory-row-number').map((n) => n.textContent)).toEqual(['1']);
++    // permanent number: the Demio is still #2 when it is the only visible row
++    expect(screen.getAllByTestId('inventory-row-number').map((n) => n.textContent)).toEqual(['#2']);
+     fireEvent.change(screen.getByLabelText('Search your inventory'), { target: { value: '' } });
+     fireEvent.change(screen.getByLabelText('Filter by status'), { target: { value: 'published' } });
+     expect(screen.queryByText('2018 Mazda Demio')).toBeNull();
+@@ -60,7 +61,7 @@ describe('Dealer inventory list', () => {
+     expect(within(first).getByText('2016 Landcruiser V8')).toBeTruthy();
+   });
+ 
+-  it('Mark sold asks to confirm, then the sold vehicle leaves the numbered list and renumbers', async () => {
++  it('Mark sold asks to confirm, then the sold vehicle leaves the active list and the others keep their numbers', async () => {
+     markCarSold.mockResolvedValue({ success: true });
+     renderIt();
+     await screen.findByText('2016 Landcruiser V8');
+@@ -71,7 +72,7 @@ describe('Dealer inventory list', () => {
+     fireEvent.click(within(dialog).getByRole('button', { name: 'Yes, mark as sold' }));
+     await waitFor(() => expect(markCarSold).toHaveBeenCalledWith('a', { buyerName: 'Wanjiru', salePrice: 3400000 }));
+     await waitFor(() => expect(screen.queryByText('2016 Landcruiser V8', { selector: 'p.font-medium' })).toBeNull());
+-    expect(screen.getAllByTestId('inventory-row-number').map((n) => n.textContent)).toEqual(['1']);
++    expect(screen.getAllByTestId('inventory-row-number').map((n) => n.textContent)).toEqual(['#2']);
+     expect(screen.getByTestId('inventory-count').textContent).toContain('Showing 1 of 1 active');
+     // collapsed Sold section holds it
+     const sold = screen.getByTestId('sold-section');
+diff --git a/src/__tests__/pages/dealer/DealerSoldReadOnly.test.tsx b/src/__tests__/pages/dealer/DealerSoldReadOnly.test.tsx
+new file mode 100644
+index 0000000..82fe49a
+--- /dev/null
++++ b/src/__tests__/pages/dealer/DealerSoldReadOnly.test.tsx
+@@ -0,0 +1,57 @@
++import React from 'react';
++import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
++import { render, screen, cleanup, fireEvent, within } from '@testing-library/react';
++
++
++vi.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ signOut: vi.fn() }) }));
++vi.mock('../../../services/dealerPlatformApi', () => ({
++  getDealerDashboard: vi.fn().mockResolvedValue({ success: true, data: { overview: {} } }),
++  getLeads: vi.fn().mockResolvedValue({ success: true, data: { items: [] } }),
++  getCustomers: vi.fn().mockResolvedValue({ success: true, data: { items: [] } }),
++  getAuctionInventory: vi.fn().mockResolvedValue({ data: { items: [] } }),
++  getInspectionOrders: vi.fn().mockResolvedValue({ data: { items: [] } }),
++  getFinanceApplications: vi.fn().mockResolvedValue({ data: { items: [] } }),
++  getTeamMembers: vi.fn().mockResolvedValue({ data: [] }),
++  getReputation: vi.fn().mockResolvedValue({ data: {} }),
++  getMarketingCampaigns: vi.fn().mockResolvedValue({ success: true, data: { items: [] } }),
++  getDealerAnalytics: vi.fn().mockResolvedValue({ data: {} }),
++  updateLead: vi.fn(),
++  createCampaign: vi.fn(),
++}));
++const cars = vi.hoisted(() => [
++  { id: 's1', title: '2015 Prado', brand: 'Toyota', model: 'Prado', year: 2015, price: 4000000, status: 'sold', sold: true, listingNumber: 7, views: 1, createdAt: '2026-10-01T10:00:00Z', images: [] },
++  { id: 'a1', title: '2019 CX-5', brand: 'Mazda', model: 'CX-5', year: 2019, price: 3000000, status: 'available', listingNumber: 8, views: 1, createdAt: '2026-10-02T10:00:00Z', images: [] },
++]);
++vi.mock('../../../services/vehicleApi', () => ({ getMyListings: vi.fn().mockResolvedValue(cars), deleteCar: vi.fn(), markCarSold: vi.fn() }));
++vi.mock('../../../features/escrow/ParticipantEscrowDesk', () => ({ ParticipantEscrowDesk: () => <div /> }));
++import DealerDashboard from '../../../pages/dealer/dashboard/DealerDashboard';
++
++describe('Dealer inventory: sold is read-only and numbers are permanent (DA-03, DA-07)', () => {
++  beforeEach(() => { window.history.replaceState({}, '', '/?nav=dealer-dashboard&section=inventory'); });
++  afterEach(() => cleanup());
++
++  it('a sold listing offers no edit, remove or mark-sold action and keeps its number', async () => {
++    render(<DealerDashboard user={{ id: 'd1', name: 'Amani', role: 'dealer' }} onOpenAuth={vi.fn()} onNavigate={vi.fn()} />);
++    await screen.findByText('2019 CX-5');
++    fireEvent.change(screen.getByLabelText('Filter by status'), { target: { value: 'sold' } });
++    const row = screen.getAllByTestId('inventory-row')[0];
++    expect(within(row).getByTestId('inventory-row-number').textContent).toBe('#7');
++    expect(within(row).getByTestId('sold-read-only')).toBeTruthy();
++    expect(within(row).queryByRole('button', { name: /Edit/ })).toBeNull();
++    expect(within(row).queryByRole('button', { name: /Remove/ })).toBeNull();
++    expect(within(row).queryByRole('button', { name: /as sold/ })).toBeNull();
++  });
++
++  it('the account status / sign out footer is part of the sidebar and the menu button is labelled', async () => {
++    render(<DealerDashboard user={{ id: 'd1', name: 'Amani', role: 'dealer' }} onOpenAuth={vi.fn()} onNavigate={vi.fn()} />);
++    await screen.findByText('2019 CX-5');
++    const footer = screen.getByTestId('dealer-sidebar-footer');
++    expect(within(footer).getByRole('button', { name: /Sign out/ })).toBeTruthy();
++    const menu = screen.getByRole('button', { name: /Dealer menu/ });
++    expect(menu.getAttribute('aria-controls')).toBe('dealer-workspace-sidebar');
++    fireEvent.click(menu);
++    expect(menu.getAttribute('aria-expanded')).toBe('true');
++    fireEvent.keyDown(window, { key: 'Escape' });
++    expect(menu.getAttribute('aria-expanded')).toBe('false');
++  });
++});
+diff --git a/src/context/BrandingContext.tsx b/src/context/BrandingContext.tsx
+index 3b58a97..9177756 100644
+--- a/src/context/BrandingContext.tsx
++++ b/src/context/BrandingContext.tsx
+@@ -205,6 +205,13 @@ export function sanitizeCountryBadgeText(value: unknown): string {
+   return t || 'KE';
+ }
+ 
++/** Exact brand-name variants (any case, stray or doubled spaces) map to the approved name. Longer text that merely contains the word is untouched. */
++export function normalizeBrandName(value: string | null | undefined): string | null | undefined {
++  if (typeof value !== 'string') return value;
++  // Matches only the whole value: the two historical spellings of the name, with or without "KE", any case or spacing.
++  return /^KAYA(?:R)?D(?: KE)?$/.test(value.replace(/\s+/g, ' ').trim().toUpperCase()) ? 'KAYARD KE' : value;
++}
++
+ function normalizeBrandingConfig(config: Partial<Branding> | null | undefined): Branding {
+   const merged = { ...DEFAULT_BRANDING, ...(config && typeof config === 'object' ? config : {}) } as Branding;
+   const colorFields: Array<keyof Branding> = [
+@@ -219,6 +226,8 @@ function normalizeBrandingConfig(config: Partial<Branding> | null | undefined):
+   // Migrate only built-in legacy KAYAD marks and defaults; explicitly uploaded admin logos remain untouched.
+   if (['/branding/kayad-road-mark.svg', '/branding/kayad-road-mark-light.svg', '/branding/kayad-symbol.svg', '/branding/kayad-mark.png', '/branding/kayard-k-mark.png'].includes(merged.logoUrl)) merged.logoUrl = DEFAULT_LOGO_URL;
+   if (merged.logoText?.trim().toUpperCase() === 'KAYAD') merged.logoText = 'KAYARD KE';
++  // Also repairs the other stored spellings ("KAYARD ", "kayad ke", doubled spaces) that the exact check above misses (DA-05).
++  merged.logoText = normalizeBrandName(merged.logoText) as typeof merged.logoText;
+   if (merged.footerCopyright?.includes('KAYAD Motors Kenya Ltd.')) merged.footerCopyright = 'KAYARD MOTOR HUB. All rights reserved.';
+   if (merged.brandTagline?.trim().toLowerCase() === "kenya's trusted vehicle marketplace") merged.brandTagline = 'Premium Vehicle Marketplace';
+   // The previous built-in descriptor is replaced by the approved one; any other custom tagline is untouched.
+diff --git a/src/pages/dealer/dashboard/DealerBankingPanel.tsx b/src/pages/dealer/dashboard/DealerBankingPanel.tsx
+index 7280997..68c40a8 100644
+--- a/src/pages/dealer/dashboard/DealerBankingPanel.tsx
++++ b/src/pages/dealer/dashboard/DealerBankingPanel.tsx
+@@ -22,8 +22,16 @@ export default function DealerBankingPanel() {
+   const [saved, setSaved] = useState(false);
+   const [saveError, setSaveError] = useState<string | null>(null);
+   const [fieldErrors, setFieldErrors] = useState<Partial<Record<keyof BankingForm, string>>>({});
++  const [summary, setSummary] = useState<{ bankName: string; bankAccountMasked: string; mpesaBusinessMasked: string; configured: boolean } | null>(null);
+   const savingRef = useRef(false);
+ 
++  const applyStored = (body: any) => {
++    const st = body?.settlement || {};
++    const pd = st.paymentDetails || {};
++    setForm({ ...EMPTY, ...Object.fromEntries(KEYS.map((k) => [k, typeof pd[k] === 'string' ? pd[k] : ''])) } as BankingForm);
++    setSummary({ bankName: st.bankName || '', bankAccountMasked: st.bankAccountMasked || '', mpesaBusinessMasked: st.mpesaBusinessMasked || '', configured: Boolean(st.configured) });
++  };
++
+   useEffect(() => {
+     let cancelled = false;
+     setLoading(true);
+@@ -31,8 +39,7 @@ export default function DealerBankingPanel() {
+     dealerAPI.getSettlement()
+       .then((body: any) => {
+         if (cancelled) return;
+-        const pd = body?.settlement?.paymentDetails || {};
+-        setForm({ ...EMPTY, ...Object.fromEntries(KEYS.map((k) => [k, typeof pd[k] === 'string' ? pd[k] : ''])) } as BankingForm);
++        applyStored(body);
+       })
+       .catch(() => { if (!cancelled) setLoadError('Could not load your banking details. Please try again.'); })
+       .finally(() => { if (!cancelled) setLoading(false); });
+@@ -65,6 +72,8 @@ export default function DealerBankingPanel() {
+     try {
+       const paymentDetails = Object.fromEntries(KEYS.map((k) => [k, form[k].trim()]));
+       await dealerAPI.updateSettlement({ paymentDetails });
++      // Read back from the server so the screen shows what actually persisted, not what was typed.
++      applyStored(await dealerAPI.getSettlement());
+       setSaved(true);
+     } catch (err: any) {
+       const data = err?.response?.data;
+@@ -97,6 +106,15 @@ export default function DealerBankingPanel() {
+   return (
+     <form onSubmit={save} className="space-y-6" noValidate>
+       <p className="text-sm text-[#64748B]">Where KAYARD KE sends your payouts. All fields are optional and you can change them at any time.</p>
++      <div className="rounded-xl border border-[#B9D3CF] bg-[#F4FAF9] p-4 text-sm text-[#0A3340]" data-testid="banking-summary" aria-live="polite">
++        <p className="text-xs font-bold uppercase tracking-wide text-[#176B87] mb-1">Saved payout details</p>
++        {summary?.configured ? (
++          <ul className="space-y-0.5">
++            {summary.bankName && <li>Bank: {summary.bankName}{summary.bankAccountMasked ? ` · ${summary.bankAccountMasked}` : ''}</li>}
++            {summary.mpesaBusinessMasked && <li>Paybill / Till: {summary.mpesaBusinessMasked}</li>}
++          </ul>
++        ) : <p className="text-[#64748B]">No payout details saved yet.</p>}
++      </div>
+       <fieldset className="space-y-3">
+         <legend className="text-xs font-bold uppercase tracking-wide text-[#176B87] mb-2">Bank account</legend>
+         {field('bankName', 'Bank name', { placeholder: 'e.g. Equity Bank', autoComplete: 'off' })}
+diff --git a/src/pages/dealer/dashboard/DealerDashboard.tsx b/src/pages/dealer/dashboard/DealerDashboard.tsx
+index 8c7583b..9199a11 100644
+--- a/src/pages/dealer/dashboard/DealerDashboard.tsx
++++ b/src/pages/dealer/dashboard/DealerDashboard.tsx
+@@ -1,4 +1,4 @@
+-import React, { useState, useEffect } from 'react';
++import React, { useState, useEffect, useRef } from 'react';
+ import {
+   LayoutDashboard, Car, Users, TrendingUp, TrendingDown, DollarSign,
+   Eye, MessageSquare, Phone, Calendar, ShoppingCart, Target, Clock,
+@@ -311,6 +311,35 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
+   const { signOut } = useAuth();
+   const branding = useBrandingSafe();
+   const [mobileNavOpen, setMobileNavOpen] = useState(false);
++  const rootRef = useRef<HTMLDivElement | null>(null);
++  const menuButtonRef = useRef<HTMLButtonElement | null>(null);
++  const asideRef = useRef<HTMLElement | null>(null);
++  // Desktop sidebar height = the part of the viewport that is below whatever sits above the workspace (site header, banners), so the
++  // account status and Sign out block is always inside the viewport instead of 110px below the fold (DA-06).
++  useEffect(() => {
++    const root = rootRef.current;
++    if (!root || typeof window === 'undefined') return;
++    let raf = 0;
++    const update = () => {
++      raf = 0;
++      const top = Math.max(0, Math.round(root.getBoundingClientRect().top));
++      if (root.style.getPropertyValue('--dealer-aside-top') !== `${top}px`) root.style.setProperty('--dealer-aside-top', `${top}px`);
++    };
++    const schedule = () => { if (!raf) raf = window.requestAnimationFrame(update); };
++    update();
++    // The position of the workspace changes when the site header, banners or fonts settle after mount, without any scroll or resize event:
++    // observe layout changes too, and re-measure shortly after mount (measured at 1280x800 / 1024x768 before this: Sign out was below the fold).
++    const timers = [60, 300, 1000].map((ms) => window.setTimeout(schedule, ms));
++    // The header above the workspace can mount late (lazy chunks) or sit inside an inner scroll container, so no single event is guaranteed
++    // to fire when it appears. A cheap low-frequency check (one layout read, style written only when the value changed) closes that gap.
++    const poll = window.setInterval(update, 400);
++    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(schedule) : null;
++    ro?.observe(document.body); ro?.observe(root);
++    window.addEventListener('scroll', schedule, { passive: true, capture: true });
++    window.addEventListener('resize', schedule);
++    window.addEventListener('load', schedule);
++    return () => { window.removeEventListener('scroll', schedule, true); window.removeEventListener('resize', schedule); window.removeEventListener('load', schedule); ro?.disconnect(); timers.forEach((t) => window.clearTimeout(t)); window.clearInterval(poll); if (raf) window.cancelAnimationFrame(raf); };
++  }, []);
+   const [logoutError, setLogoutError] = useState<string | null>(null);
+   const handleDealerLogout = async () => {
+     setLogoutError(null);
+@@ -344,11 +373,24 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
+   // Phone drawer: Escape closes it and the page behind it does not scroll while it is open.
+   useEffect(() => {
+     if (!mobileNavOpen) return;
+-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMobileNavOpen(false); };
++    const aside = asideRef.current;
++    const focusables = () => Array.from(aside?.querySelectorAll<HTMLElement>('a[href],button:not([disabled]),[tabindex]:not([tabindex="-1"])') || []).filter((el) => el.offsetParent !== null);
++    focusables()[0]?.focus();
++    const onKey = (e: KeyboardEvent) => {
++      if (e.key === 'Escape') { setMobileNavOpen(false); return; }
++      if (e.key !== 'Tab') return;
++      // Keep keyboard focus inside the open drawer.
++      const items = focusables();
++      if (!items.length) return;
++      const first = items[0]; const last = items[items.length - 1];
++      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
++      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
++    };
+     window.addEventListener('keydown', onKey);
+     const prev = document.body.style.overflow;
+     document.body.style.overflow = 'hidden';
+-    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; };
++    const trigger = menuButtonRef.current;
++    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = prev; trigger?.focus?.(); };
+   }, [mobileNavOpen]);
+ 
+   // Browser Back/Forward and refreshes resolve to the section named in the URL.
+@@ -412,7 +454,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
+       if (res && res.success === false) throw new Error(res.message || 'Could not mark this vehicle as sold.');
+       setMyListings((prev) => prev.map((c) => (String(c.id || c._id) === id ? { ...c, status: 'sold', sold: true } : c)));
+       setSoldTargetId(null); setSoldBuyer(''); setSoldPrice('');
+-      setListingNotice('Marked as sold. It moved to your Sold list and the active inventory renumbered.');
++      setListingNotice('Marked as sold. It moved to your Sold list. Its listing number stays the same.');
+     } catch (err) {
+       setSoldError((err as Error)?.message || 'Could not mark this vehicle as sold. Nothing was changed — please try again.');
+     } finally { setSoldBusy(false); }
+@@ -659,7 +701,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
+   const leadBadge = dashboard?.overview?.leads?.new;
+ 
+   return (
+-    <div className="min-h-screen bg-[#F6FAF9] flex flex-col lg:flex-row">
++    <div ref={rootRef} className="min-h-screen bg-[#F6FAF9] flex flex-col lg:flex-row">
+       {user?.role === 'dealer' && user?.status === 'pending' && (
+         <div role="status" className="mx-3 mt-3 rounded-xl border border-[#D7E7E4] bg-[#EAF7F4] px-4 py-3 text-sm text-[#0A3340] lg:mx-6 lg:mt-5">
+           <strong>Business verification is in progress.</strong>
+@@ -671,11 +713,11 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
+       {/* Sidebar Navigation */}
+       {/* Phone app bar: menu, where you are, notifications. Always reachable while scrolling. */}
+       <div className="sticky top-0 z-40 flex items-center gap-2 border-b border-[#D7E7E4] bg-white/95 px-3 py-2 backdrop-blur lg:hidden" data-testid="dealer-mobile-bar">
+-        <button type="button" aria-expanded={mobileNavOpen} aria-controls="dealer-workspace-sidebar" onClick={() => setMobileNavOpen(v => !v)} className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl border border-[#D7E7E4] bg-white px-3 text-sm font-semibold text-[#0A3340] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><Menu className="h-4 w-4" aria-hidden="true" /><span>{mobileNavOpen ? "Close dealer menu" : "Dealer menu"}</span></button>
++        <button ref={menuButtonRef} type="button" aria-expanded={mobileNavOpen} aria-controls="dealer-workspace-sidebar" onClick={() => setMobileNavOpen(v => !v)} className="inline-flex h-11 shrink-0 items-center gap-2 rounded-xl border border-[#D7E7E4] bg-white px-3 text-sm font-semibold text-[#0A3340] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><Menu className="h-4 w-4" aria-hidden="true" /><span>{mobileNavOpen ? "Close dealer menu" : "Dealer menu"}</span></button>
+         <p className="min-w-0 flex-1 truncate text-center text-sm font-bold text-[#0A3340]" aria-hidden="true">{currentItem.label}</p>
+       </div>
+       {mobileNavOpen && <button type="button" aria-label="Close dealer menu overlay" tabIndex={-1} onClick={() => setMobileNavOpen(false)} className="fixed inset-0 z-[1090] bg-[#071F2A]/55 lg:hidden" />}
+-      <aside id="dealer-workspace-sidebar" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex fixed inset-y-0 left-0 z-[1100] w-[88%] max-w-sm overflow-hidden shadow-2xl lg:static lg:z-auto lg:w-64 lg:min-w-64 lg:max-w-none lg:shadow-none bg-white lg:border-r border-[#D7E7E4] flex-col lg:sticky lg:top-0 lg:h-screen`}>
++      <aside ref={asideRef} id="dealer-workspace-sidebar" aria-label="Dealer workspace menu" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex fixed inset-y-0 left-0 z-[1100] w-[88%] max-w-sm overflow-hidden shadow-2xl lg:static lg:z-auto lg:w-64 lg:min-w-64 lg:max-w-none lg:shadow-none bg-white lg:border-r border-[#D7E7E4] flex-col lg:sticky lg:top-0 lg:h-[calc(100dvh-var(--dealer-aside-top,0px))]`}>
+         <div className="p-4 border-b border-[#D7E7E4]">
+           <div className="flex items-center gap-3 min-w-0">
+             <div className="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-[#176B87] to-[#13B8A6] flex items-center justify-center overflow-hidden">
+@@ -713,8 +755,15 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
+           ))}
+         </nav>
+ 
+-        <div className="p-4 border-t border-[#D7E7E4] space-y-3">
+-          <DealerAccountStatus />
++        <div className="shrink-0 p-3 lg:p-4 border-t border-[#D7E7E4] space-y-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" data-testid="dealer-sidebar-footer">
++          {/* Collapsed by default so the menu keeps its room (DA-06); the status stays one tap away and Sign out is always visible. */}
++          <details className="group rounded-xl border border-[#D7E7E4] bg-[#F4FAF9]" data-testid="dealer-account-status-toggle">
++            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-xl px-3 text-sm font-semibold text-[#0A3340] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87] [&::-webkit-details-marker]:hidden">
++              <span>Account status</span>
++              <span aria-hidden="true" className="text-xs text-[#475569] transition group-open:rotate-180">▾</span>
++            </summary>
++            <div className="max-h-[40vh] overflow-y-auto p-1"><DealerAccountStatus /></div>
++          </details>
+           {logoutError && <p role="alert" className="text-sm text-red-700">{logoutError}</p>}
+           <button type="button" onClick={handleDealerLogout} className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-[#D7E7E4] px-4 py-2 text-sm font-semibold text-[#0A3340] hover:bg-[#EEF7F5]"><LogOut className="w-4 h-4" />Sign out</button>
+         </div>
+@@ -1003,10 +1052,10 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
+                       return (
+                         <div key={car.id} data-testid="inventory-row" className="rounded-2xl border border-[#D7E7E4] bg-white p-3 shadow-[0_2px_10px_rgba(11,29,58,0.04)] transition hover:border-[#176B87]/40 hover:shadow-[0_8px_22px_rgba(11,29,58,0.08)] sm:p-4">
+                           <div className="grid grid-cols-[104px_minmax(0,1fr)] items-start gap-x-3 gap-y-2 sm:flex sm:items-center sm:gap-4">
+-                            <span className="hidden sm:inline w-7 text-center text-sm font-bold text-[#475569] shrink-0" aria-label={`Listing number ${rowIdx + 1}`} data-testid="inventory-row-number">{rowIdx + 1}</span>
++                            <span className="hidden sm:inline min-w-9 text-center text-sm font-bold text-[#475569] shrink-0" aria-label={car.listingNumber != null ? `Listing number ${car.listingNumber}` : 'Listing number not assigned'} data-testid="inventory-row-number">{car.listingNumber != null ? `#${car.listingNumber}` : '—'}</span>
+                             <ListingThumb src={image} fallback={car.images?.[0]?.url} alt={label} count={photoCount} priority={rowIdx < 3} className="h-20 w-full sm:h-24 sm:w-36" />
+                             <div className="flex-1 min-w-0">
+-                              <p className="truncate text-[15px] font-bold text-[#0A3340]">{label}</p>
++                              <p className="truncate text-[15px] font-bold text-[#0A3340]"><span className="sm:hidden mr-1.5 rounded-md bg-[#EEF7F5] px-1.5 py-0.5 text-xs font-bold text-[#475569]" data-testid="inventory-row-number-mobile">{car.listingNumber != null ? `#${car.listingNumber}` : '—'}</span>{label}</p>
+                               <p className="text-sm font-semibold text-[#176B87]">{car.price == null ? 'Price unavailable' : `Ksh ${Number(car.price).toLocaleString('en-KE')}`} • {car.views == null ? 'Views unavailable' : `${Number(car.views).toLocaleString('en-KE')} views`}</p>
+                               {detailLine && <p className="text-xs text-[#475569]" data-testid="inventory-details">{detailLine}</p>}
+                               {updated && <p className="text-xs text-[#475569]">Updated {updated}</p>}
+@@ -1016,7 +1065,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
+                               {!isSoldListing && !(aStatus === 'live') && (
+                                 <button type="button" onClick={() => { setSoldError(null); setSoldBuyer(''); setSoldPrice(''); setSoldTargetId(carId); }} className="px-3 py-1 text-xs font-bold text-emerald-800 border border-emerald-300 rounded-lg hover:bg-emerald-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Mark ${car.title || 'vehicle'} as sold`}>Mark sold</button>
+                               )}
+-                              <button type="button" onClick={() => openListingForm({ mode: 'edit', id: carId })} className="px-3 py-1 text-xs font-bold text-[#176B87] border border-[#B9D3CF] rounded-lg hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Edit ${car.title || 'vehicle'}`}>Edit</button>
++                              {isSoldListing && <span className="col-span-3 inline-flex min-h-10 items-center justify-center rounded-lg bg-[#EEF7F5] px-3 text-xs font-semibold text-[#475569]" data-testid="sold-read-only">Sold · read-only</span>}
++                              {!isSoldListing && <button type="button" onClick={() => openListingForm({ mode: 'edit', id: carId })} className="px-3 py-1 text-xs font-bold text-[#176B87] border border-[#B9D3CF] rounded-lg hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Edit ${car.title || 'vehicle'}`}>Edit</button>}
+                               {!isAuctionListing && !isSoldListing && (
+                                 <button type="button" disabled={Boolean(deletingId)} onClick={() => { setDeleteError(null); setDeleteTargetId(carId); }} className="px-3 py-1 text-xs font-bold text-[#B42318] border border-[#B9D3CF] rounded-lg hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Remove ${car.title || 'vehicle'}`}>Remove</button>
+                               )}
+@@ -1071,7 +1121,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
+                             return (
+                               <li key={String(car.id || car._id)} className="flex items-center gap-3 p-2 rounded-lg bg-[#EEF7F5]">
+                                 <div className="w-14 h-10 rounded-md bg-[#DDF4F0] overflow-hidden shrink-0 flex items-center justify-center">{img ? <img src={img} alt="" loading="lazy" className="w-full h-full object-cover grayscale" /> : <Car className="w-5 h-5 text-[#64748B]" aria-hidden="true" />}</div>
+-                                <div className="min-w-0 flex-1"><p className="text-sm font-medium text-[#0A3340] truncate">{name}</p><p className="text-xs text-[#475569]">{car.price == null ? '' : `Listed at Ksh ${Number(car.price).toLocaleString('en-KE')}`}</p></div>
++                                <div className="min-w-0 flex-1"><p className="text-sm font-medium text-[#0A3340] truncate">{car.listingNumber != null && <span className="mr-1.5 text-xs font-bold text-[#475569]" data-testid="sold-row-number">#{car.listingNumber}</span>}{name}</p><p className="text-xs text-[#475569]">{car.price == null ? '' : `Listed at Ksh ${Number(car.price).toLocaleString('en-KE')}`}</p></div>
+                                 <span className="px-2 py-0.5 text-[11px] font-semibold rounded-full bg-[#DDE7E5] text-[#475569]">Sold</span>
+                               </li>
+                             );
+diff --git a/supabase/migrations/20261121160000_dealer_listing_lifecycle_and_numbers.sql b/supabase/migrations/20261121160000_dealer_listing_lifecycle_and_numbers.sql
+new file mode 100644
+index 0000000..6c8ac04
+--- /dev/null
++++ b/supabase/migrations/20261121160000_dealer_listing_lifecycle_and_numbers.sql
+@@ -0,0 +1,297 @@
++-- Dealer listing lifecycle (DA-01/02/03) and permanent per-dealer listing numbers (DA-07).
++-- Forward-only and additive. Idempotent (IF NOT EXISTS / CREATE OR REPLACE / guarded backfill).
++-- NOT applied to any hosted database by this change; the owner applies migrations through the normal release process.
++-- Rollback notes are in docs/handover/DEALER-IMPLEMENTATION-20261121/DEALER-DATABASE-MIGRATION-REVIEW.md.
++
++-- ---------------------------------------------------------------------------------------------------------------------------
++-- 1. Columns
++-- ---------------------------------------------------------------------------------------------------------------------------
++ALTER TABLE public.cars ADD COLUMN IF NOT EXISTS listing_number integer;
++ALTER TABLE public.cars ADD COLUMN IF NOT EXISTS sold_at timestamptz;
++
++-- ---------------------------------------------------------------------------------------------------------------------------
++-- 2. Dealer lifecycle audit / sale record (append-only)
++-- ---------------------------------------------------------------------------------------------------------------------------
++CREATE TABLE IF NOT EXISTS public.dealer_listing_lifecycle_events (
++  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
++  car_id uuid NOT NULL REFERENCES public.cars(id) ON DELETE CASCADE,
++  dealer_id uuid NOT NULL,
++  actor_user_id uuid REFERENCES public.users(id) ON DELETE SET NULL,
++  actor_type text NOT NULL CHECK (actor_type IN ('dealer_owner','dealer_staff','admin','system')),
++  action text NOT NULL CHECK (action IN ('dealer_hide','dealer_publish','dealer_mark_sold','admin_sold_correction')),
++  previous_status text NOT NULL,
++  next_status text NOT NULL,
++  sale_price numeric,
++  buyer_name text,
++  notes text,
++  reason text,
++  created_at timestamptz NOT NULL DEFAULT now()
++);
++CREATE INDEX IF NOT EXISTS idx_dealer_listing_lifecycle_dealer ON public.dealer_listing_lifecycle_events (dealer_id, created_at DESC);
++CREATE INDEX IF NOT EXISTS idx_dealer_listing_lifecycle_car ON public.dealer_listing_lifecycle_events (car_id, created_at DESC);
++ALTER TABLE public.dealer_listing_lifecycle_events ENABLE ROW LEVEL SECURITY;
++REVOKE ALL ON public.dealer_listing_lifecycle_events FROM PUBLIC, anon, authenticated;
++GRANT SELECT, INSERT ON public.dealer_listing_lifecycle_events TO service_role;
++
++-- ---------------------------------------------------------------------------------------------------------------------------
++-- 3. Permanent per-owner listing numbers (never reused: the counter only moves forward and survives removal of a listing)
++-- ---------------------------------------------------------------------------------------------------------------------------
++CREATE TABLE IF NOT EXISTS public.dealer_listing_counters (
++  dealer_id uuid PRIMARY KEY,
++  last_number integer NOT NULL DEFAULT 0 CHECK (last_number >= 0),
++  updated_at timestamptz NOT NULL DEFAULT now()
++);
++ALTER TABLE public.dealer_listing_counters ENABLE ROW LEVEL SECURITY;
++REVOKE ALL ON public.dealer_listing_counters FROM PUBLIC, anon, authenticated;
++GRANT SELECT ON public.dealer_listing_counters TO service_role;
++
++-- Allocation is a single-statement upsert: the row lock taken by ON CONFLICT DO UPDATE serialises concurrent inserts per owner.
++CREATE OR REPLACE FUNCTION public.kayad_cars_assign_listing_number() RETURNS trigger
++LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
++DECLARE v_next integer;
++BEGIN
++  IF NEW.listing_number IS NULL AND NEW.dealer_id IS NOT NULL THEN
++    INSERT INTO public.dealer_listing_counters AS c (dealer_id, last_number) VALUES (NEW.dealer_id, 1)
++    ON CONFLICT (dealer_id) DO UPDATE SET last_number = c.last_number + 1, updated_at = now()
++    RETURNING last_number INTO v_next;
++    NEW.listing_number := v_next;
++  END IF;
++  RETURN NEW;
++END; $$;
++
++DROP TRIGGER IF EXISTS trg_cars_assign_listing_number ON public.cars;
++CREATE TRIGGER trg_cars_assign_listing_number BEFORE INSERT ON public.cars
++  FOR EACH ROW EXECUTE FUNCTION public.kayad_cars_assign_listing_number();
++
++-- The number is permanent: it can be set once (backfill) and never changed or cleared afterwards.
++CREATE OR REPLACE FUNCTION public.kayad_cars_listing_number_immutable() RETURNS trigger
++LANGUAGE plpgsql AS $$
++BEGIN
++  IF OLD.listing_number IS NOT NULL AND NEW.listing_number IS DISTINCT FROM OLD.listing_number THEN
++    RAISE EXCEPTION 'LISTING_NUMBER_IMMUTABLE' USING ERRCODE = 'P0001';
++  END IF;
++  IF OLD.listing_number IS NOT NULL AND NEW.dealer_id IS DISTINCT FROM OLD.dealer_id THEN
++    -- A number belongs to the owner that was issued it; moving a listing to another owner would collide or reuse numbers.
++    RAISE EXCEPTION 'LISTING_NUMBER_IMMUTABLE' USING ERRCODE = 'P0001';
++  END IF;
++  RETURN NEW;
++END; $$;
++DROP TRIGGER IF EXISTS trg_cars_listing_number_immutable ON public.cars;
++CREATE TRIGGER trg_cars_listing_number_immutable BEFORE UPDATE ON public.cars
++  FOR EACH ROW EXECUTE FUNCTION public.kayad_cars_listing_number_immutable();
++
++-- Backfill (idempotent): only listings without a number, oldest first (created_at, id), continuing after the owner's counter.
++-- Removed (soft-deleted) listings are numbered too so that their numbers are never handed out again.
++DO $$
++BEGIN
++  LOCK TABLE public.cars IN SHARE ROW EXCLUSIVE MODE;
++  WITH base AS (
++    SELECT dealer_id, COALESCE(max(listing_number), 0) AS mx FROM public.cars WHERE dealer_id IS NOT NULL GROUP BY dealer_id
++  ), ranked AS (
++    SELECT c.id, c.dealer_id,
++           b.mx + row_number() OVER (PARTITION BY c.dealer_id ORDER BY c.created_at, c.id) AS n
++    FROM public.cars c JOIN base b ON b.dealer_id = c.dealer_id
++    WHERE c.listing_number IS NULL AND c.dealer_id IS NOT NULL
++  )
++  UPDATE public.cars c SET listing_number = r.n FROM ranked r WHERE c.id = r.id;
++
++  INSERT INTO public.dealer_listing_counters AS k (dealer_id, last_number)
++  SELECT dealer_id, max(listing_number) FROM public.cars WHERE dealer_id IS NOT NULL AND listing_number IS NOT NULL GROUP BY dealer_id
++  ON CONFLICT (dealer_id) DO UPDATE SET last_number = GREATEST(k.last_number, EXCLUDED.last_number), updated_at = now();
++END $$;
++
++CREATE UNIQUE INDEX IF NOT EXISTS uq_cars_owner_listing_number ON public.cars (dealer_id, listing_number) WHERE listing_number IS NOT NULL;
++
++-- ---------------------------------------------------------------------------------------------------------------------------
++-- 4. Sold listings are read-only at the database level (backstop under the service layer). Admin corrections go through
++--    kayad_admin_correct_sold_listing(), which audits and sets a transaction-local bypass.
++-- ---------------------------------------------------------------------------------------------------------------------------
++CREATE OR REPLACE FUNCTION public.kayad_cars_sold_read_only() RETURNS trigger
++LANGUAGE plpgsql SET search_path = public AS $$
++BEGIN
++  IF (OLD.status = 'sold' OR COALESCE(OLD.sold, false)) AND COALESCE(current_setting('kayad.sold_correction', true), '') <> 'on' THEN
++    IF NEW.status IS DISTINCT FROM OLD.status OR NEW.sold IS DISTINCT FROM OLD.sold
++       OR NEW.title IS DISTINCT FROM OLD.title OR NEW.price IS DISTINCT FROM OLD.price
++       OR NEW.description IS DISTINCT FROM OLD.description OR NEW.images IS DISTINCT FROM OLD.images
++       OR NEW.cover_image IS DISTINCT FROM OLD.cover_image OR NEW.features IS DISTINCT FROM OLD.features
++       OR NEW.brand IS DISTINCT FROM OLD.brand OR NEW.model IS DISTINCT FROM OLD.model OR NEW.year IS DISTINCT FROM OLD.year
++       OR NEW.mileage IS DISTINCT FROM OLD.mileage OR NEW.vin IS DISTINCT FROM OLD.vin
++       OR NEW.dealer_id IS DISTINCT FROM OLD.dealer_id OR NEW.deleted_at IS DISTINCT FROM OLD.deleted_at
++       OR NEW.sold_at IS DISTINCT FROM OLD.sold_at THEN
++      RAISE EXCEPTION 'LISTING_SOLD_READ_ONLY' USING ERRCODE = 'P0001';
++    END IF;
++  END IF;
++  RETURN NEW;
++END; $$;
++DROP TRIGGER IF EXISTS trg_cars_sold_read_only ON public.cars;
++CREATE TRIGGER trg_cars_sold_read_only BEFORE UPDATE ON public.cars
++  FOR EACH ROW EXECUTE FUNCTION public.kayad_cars_sold_read_only();
++
++-- ---------------------------------------------------------------------------------------------------------------------------
++-- 5. Atomic dealer lifecycle: same invariants as the personal lifecycle, scoped to the dealer business (staff act on the
++--    business id; p_actor_id is the real person for the audit row).
++-- ---------------------------------------------------------------------------------------------------------------------------
++CREATE OR REPLACE FUNCTION public.kayad_dealer_listing_lifecycle_atomic(
++  p_car_id uuid,
++  p_dealer_id uuid,
++  p_action text,
++  p_actor_id uuid DEFAULT NULL,
++  p_sale jsonb DEFAULT '{}'::jsonb
++) RETURNS jsonb
++LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
++DECLARE
++  v_car public.cars%ROWTYPE;
++  v_owner_role text;
++  v_next text;
++  v_price numeric;
++  v_buyer text;
++  v_notes text;
++  v_actor uuid := COALESCE(p_actor_id, p_dealer_id);
++BEGIN
++  IF p_action NOT IN ('hide','publish','mark_sold') THEN
++    RAISE EXCEPTION 'INVALID_LISTING_ACTION' USING ERRCODE = '22023';
++  END IF;
++  SELECT role INTO v_owner_role FROM public.users WHERE id = p_dealer_id;
++  IF v_owner_role IS NULL OR v_owner_role <> 'dealer' THEN
++    RAISE EXCEPTION 'DEALER_ACCOUNT_REQUIRED' USING ERRCODE = '42501';
++  END IF;
++
++  SELECT * INTO v_car FROM public.cars WHERE id = p_car_id FOR UPDATE;
++  IF NOT FOUND OR v_car.dealer_id IS DISTINCT FROM p_dealer_id THEN
++    RAISE EXCEPTION 'LISTING_NOT_FOUND' USING ERRCODE = 'P0002';
++  END IF;
++  IF v_car.deleted_at IS NOT NULL THEN RAISE EXCEPTION 'LISTING_REMOVED' USING ERRCODE = 'P0001'; END IF;
++  IF v_car.status = 'sold' OR COALESCE(v_car.sold, false) THEN RAISE EXCEPTION 'ALREADY_SOLD' USING ERRCODE = 'P0001'; END IF;
++  IF v_car.status IN ('reserved','rejected') THEN RAISE EXCEPTION 'LISTING_STATE_LOCKED' USING ERRCODE = 'P0001'; END IF;
++
++  IF COALESCE(v_car.bids_count,0) > 0 OR v_car.highest_bidder_id IS NOT NULL
++     OR EXISTS (SELECT 1 FROM public.bids b WHERE b.car_id = p_car_id)
++     OR COALESCE(v_car.auction_status,'none') IN ('live','ended') THEN
++    RAISE EXCEPTION 'AUCTION_OR_BID_LOCK' USING ERRCODE = 'P0001';
++  END IF;
++  IF EXISTS (SELECT 1 FROM public.escrows e WHERE e.car = p_car_id AND e.status IN ('pending','funded','vehicle_confirmed','delivered','disputed'))
++     OR EXISTS (SELECT 1 FROM public.purchase_outcomes o WHERE o.car_id = p_car_id AND o.status IN ('payment_received','refund_pending','ready_for_collection','collected','transfer_pending','disputed')) THEN
++    RAISE EXCEPTION 'TRANSACTION_LOCK' USING ERRCODE = 'P0001';
++  END IF;
++  IF EXISTS (SELECT 1 FROM public.marketplace_offer_settlements s WHERE s.vehicle_id = p_car_id AND s.status IN ('awaiting_payment','paid')) THEN
++    RAISE EXCEPTION 'OFFER_SETTLEMENT_LOCK' USING ERRCODE = 'P0001';
++  END IF;
++
++  IF p_action = 'hide' THEN
++    IF v_car.status <> 'available' THEN RAISE EXCEPTION 'LISTING_NOT_PUBLISHED' USING ERRCODE = 'P0001'; END IF;
++    v_next := 'hidden';
++  ELSIF p_action = 'publish' THEN
++    IF v_car.status NOT IN ('hidden','draft') THEN RAISE EXCEPTION 'LISTING_NOT_ELIGIBLE_TO_PUBLISH' USING ERRCODE = 'P0001'; END IF;
++    v_next := 'available';
++  ELSE
++    IF v_car.status NOT IN ('available','hidden','draft','pending') THEN RAISE EXCEPTION 'LISTING_NOT_ELIGIBLE_TO_MARK_SOLD' USING ERRCODE = 'P0001'; END IF;
++    v_next := 'sold';
++    v_price := NULLIF(p_sale->>'salePrice','')::numeric;
++    IF v_price IS NULL OR v_price <= 0 THEN v_price := v_car.price; END IF;
++    v_buyer := NULLIF(left(p_sale->>'buyerName', 200), '');
++    v_notes := NULLIF(left(p_sale->>'notes', 500), '');
++  END IF;
++
++  UPDATE public.cars
++     SET status = v_next, sold = (p_action = 'mark_sold'),
++         sold_at = CASE WHEN p_action = 'mark_sold' THEN now() ELSE sold_at END,
++         updated_at = now()
++   WHERE id = p_car_id;
++
++  INSERT INTO public.dealer_listing_lifecycle_events
++    (car_id, dealer_id, actor_user_id, actor_type, action, previous_status, next_status, sale_price, buyer_name, notes)
++  VALUES (p_car_id, p_dealer_id, v_actor,
++          CASE WHEN v_actor = p_dealer_id THEN 'dealer_owner' ELSE 'dealer_staff' END,
++          CASE p_action WHEN 'hide' THEN 'dealer_hide' WHEN 'publish' THEN 'dealer_publish' ELSE 'dealer_mark_sold' END,
++          v_car.status, v_next, v_price, v_buyer, v_notes);
++
++  RETURN jsonb_build_object('id', p_car_id, 'previousStatus', v_car.status, 'status', v_next, 'action', p_action,
++                            'salePrice', v_price, 'buyerName', v_buyer, 'notes', v_notes, 'listingNumber', v_car.listing_number);
++END; $$;
++REVOKE ALL ON FUNCTION public.kayad_dealer_listing_lifecycle_atomic(uuid,uuid,text,uuid,jsonb) FROM PUBLIC, anon, authenticated;
++GRANT EXECUTE ON FUNCTION public.kayad_dealer_listing_lifecycle_atomic(uuid,uuid,text,uuid,jsonb) TO service_role;
++
++-- ---------------------------------------------------------------------------------------------------------------------------
++-- 6. Authorised, audited correction of a sold listing (admin only; the reason is mandatory).
++-- ---------------------------------------------------------------------------------------------------------------------------
++CREATE OR REPLACE FUNCTION public.kayad_admin_correct_sold_listing(p_car_id uuid, p_admin_id uuid, p_reason text, p_target_status text DEFAULT 'hidden')
++RETURNS jsonb LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
++DECLARE v_car public.cars%ROWTYPE; v_role text;
++BEGIN
++  SELECT role INTO v_role FROM public.users WHERE id = p_admin_id;
++  IF v_role IS NULL OR v_role NOT IN ('admin','superadmin') THEN RAISE EXCEPTION 'ADMIN_REQUIRED' USING ERRCODE = '42501'; END IF;
++  IF p_reason IS NULL OR length(btrim(p_reason)) < 10 THEN RAISE EXCEPTION 'REASON_REQUIRED' USING ERRCODE = '22023'; END IF;
++  IF p_target_status NOT IN ('hidden','available') THEN RAISE EXCEPTION 'INVALID_TARGET_STATUS' USING ERRCODE = '22023'; END IF;
++  SELECT * INTO v_car FROM public.cars WHERE id = p_car_id FOR UPDATE;
++  IF NOT FOUND THEN RAISE EXCEPTION 'LISTING_NOT_FOUND' USING ERRCODE = 'P0002'; END IF;
++  IF NOT (v_car.status = 'sold' OR COALESCE(v_car.sold,false)) THEN RAISE EXCEPTION 'LISTING_NOT_SOLD' USING ERRCODE = 'P0001'; END IF;
++  PERFORM set_config('kayad.sold_correction', 'on', true);
++  UPDATE public.cars SET status = p_target_status, sold = false, sold_at = NULL, updated_at = now() WHERE id = p_car_id;
++  PERFORM set_config('kayad.sold_correction', 'off', true);
++  INSERT INTO public.dealer_listing_lifecycle_events (car_id, dealer_id, actor_user_id, actor_type, action, previous_status, next_status, reason)
++  VALUES (p_car_id, v_car.dealer_id, p_admin_id, 'admin', 'admin_sold_correction', v_car.status, p_target_status, btrim(p_reason));
++  RETURN jsonb_build_object('id', p_car_id, 'previousStatus', v_car.status, 'status', p_target_status);
++END; $$;
++REVOKE ALL ON FUNCTION public.kayad_admin_correct_sold_listing(uuid,uuid,text,text) FROM PUBLIC, anon, authenticated;
++GRANT EXECUTE ON FUNCTION public.kayad_admin_correct_sold_listing(uuid,uuid,text,text) TO service_role;
++
++-- ---------------------------------------------------------------------------------------------------------------------------
++-- 7. Race guard: funding an escrow or opening an offer settlement takes a shared lock on the listing row, so it serialises with
++--    the lifecycle function's FOR UPDATE, and it refuses to open a transaction on an already-sold listing.
++-- ---------------------------------------------------------------------------------------------------------------------------
++CREATE OR REPLACE FUNCTION public.kayad_listing_manually_sold(p_car_id uuid) RETURNS boolean
++LANGUAGE plpgsql STABLE SET search_path = public AS $$
++DECLARE v_personal boolean := false;
++BEGIN
++  IF EXISTS (SELECT 1 FROM public.cars c WHERE c.id = p_car_id AND c.sold_at IS NOT NULL) THEN RETURN true; END IF;
++  -- The personal lifecycle table may not exist in every environment (older schemas): treat that as "not manually sold".
++  IF to_regclass('public.personal_listing_lifecycle_events') IS NOT NULL THEN
++    EXECUTE $q$SELECT EXISTS (SELECT 1 FROM public.personal_listing_lifecycle_events e
++                  WHERE e.car_id = $1 AND e.action = 'seller_mark_sold'
++                    AND e.created_at >= COALESCE((SELECT max(x.created_at) FROM public.personal_listing_lifecycle_events x
++                                                   WHERE x.car_id = $1 AND x.action IN ('seller_publish','seller_hide')), '-infinity'::timestamptz))$q$
++      INTO v_personal USING p_car_id;
++  END IF;
++  RETURN v_personal;
++END; $$;
++
++CREATE OR REPLACE FUNCTION public.kayad_escrow_listing_sale_guard() RETURNS trigger
++LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
++DECLARE v_status text;
++BEGIN
++  IF NEW.car IS NULL THEN RETURN NEW; END IF;
++  IF NEW.status IN ('pending','funded','vehicle_confirmed','delivered','disputed')
++     AND (TG_OP = 'INSERT' OR OLD.status IS DISTINCT FROM NEW.status AND OLD.status NOT IN ('pending','funded','vehicle_confirmed','delivered','disputed')) THEN
++    SELECT status INTO v_status FROM public.cars WHERE id = NEW.car FOR SHARE;
++    -- Only a sale COMPLETED BY THE OWNER through a lifecycle action blocks a new transaction. A payment-driven sale (the purchase flow marks
++    -- the car sold and then records escrow / settlement state) is not a manual sale and must keep working.
++    IF v_status = 'sold' AND public.kayad_listing_manually_sold(NEW.car) THEN RAISE EXCEPTION 'LISTING_ALREADY_SOLD' USING ERRCODE = 'P0001'; END IF;
++  END IF;
++  RETURN NEW;
++END; $$;
++DROP TRIGGER IF EXISTS trg_escrow_listing_sale_guard ON public.escrows;
++CREATE TRIGGER trg_escrow_listing_sale_guard BEFORE INSERT OR UPDATE OF status ON public.escrows
++  FOR EACH ROW EXECUTE FUNCTION public.kayad_escrow_listing_sale_guard();
++
++CREATE OR REPLACE FUNCTION public.kayad_settlement_listing_sale_guard() RETURNS trigger
++LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
++DECLARE v_status text;
++BEGIN
++  -- Opening a settlement is the guarded event; moving an existing one to paid/cancelled/expired is the normal payment lifecycle.
++  IF NEW.status = 'awaiting_payment' AND (TG_OP = 'INSERT' OR OLD.status IS DISTINCT FROM NEW.status) THEN
++    SELECT status INTO v_status FROM public.cars WHERE id = NEW.vehicle_id FOR SHARE;
++    IF v_status = 'sold' AND public.kayad_listing_manually_sold(NEW.vehicle_id) THEN RAISE EXCEPTION 'LISTING_ALREADY_SOLD' USING ERRCODE = 'P0001'; END IF;
++  END IF;
++  RETURN NEW;
++END; $$;
++DO $$
++BEGIN
++  -- marketplace_offer_settlements arrives with the offer-settlement migrations; where it is not deployed yet there is nothing to guard.
++  IF to_regclass('public.marketplace_offer_settlements') IS NOT NULL THEN
++    DROP TRIGGER IF EXISTS trg_settlement_listing_sale_guard ON public.marketplace_offer_settlements;
++    CREATE TRIGGER trg_settlement_listing_sale_guard BEFORE INSERT OR UPDATE OF status ON public.marketplace_offer_settlements
++      FOR EACH ROW EXECUTE FUNCTION public.kayad_settlement_listing_sale_guard();
++  END IF;
++END $$;
++
++NOTIFY pgrst, 'reload schema';
+diff --git a/supabase/migrations/20261121170000_brand_kayard_ke_normalize_platform_config.sql b/supabase/migrations/20261121170000_brand_kayard_ke_normalize_platform_config.sql
+new file mode 100644
+index 0000000..2ac62c4
+--- /dev/null
++++ b/supabase/migrations/20261121170000_brand_kayard_ke_normalize_platform_config.sql
+@@ -0,0 +1,39 @@
++-- Brand normalisation (DA-05). Hosted platform_config was observed (read-only) with branding.logoText = 'KAYAD' and
++-- platform_name = 'KAYARD ' (trailing space): the previous brand migration only matched the exact string 'KAYAD'.
++-- This migration rewrites a brand-name value ONLY when, after trimming and collapsing whitespace and ignoring case, it is exactly one of
++-- KAYAD / KAYARD / KAYAD KE / KAYARD KE. Everything else is left alone: dealer business names, domains (kayad.space), 'KAYAD-' reference
++-- prefixes, the M-Pesa account reference, and any longer text that merely contains the word.
++-- Forward-only, idempotent (a second run changes nothing). NOT applied to any hosted database by the author; owner decision required.
++CREATE OR REPLACE FUNCTION pg_temp.kayard_is_brand_variant(v text) RETURNS boolean LANGUAGE sql IMMUTABLE AS $$
++  SELECT upper(regexp_replace(btrim(coalesce(v,'')), '\s+', ' ', 'g')) IN ('KAYAD','KAYARD','KAYAD KE','KAYARD KE')
++$$;
++
++DO $$
++DECLARE k text;
++BEGIN
++  IF to_regclass('public.platform_config') IS NOT NULL THEN
++    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='platform_config' AND column_name='platform_name') THEN
++      UPDATE public.platform_config SET platform_name = 'KAYARD KE'
++       WHERE platform_name IS NOT NULL AND pg_temp.kayard_is_brand_variant(platform_name) AND platform_name IS DISTINCT FROM 'KAYARD KE';
++    END IF;
++    IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='platform_config' AND column_name='branding' AND data_type='jsonb') THEN
++      FOREACH k IN ARRAY ARRAY['logoText','platformName','siteName','brandName'] LOOP
++        UPDATE public.platform_config
++           SET branding = jsonb_set(branding, ARRAY[k], to_jsonb('KAYARD KE'::text))
++         WHERE jsonb_typeof(branding) = 'object' AND jsonb_typeof(branding->k) = 'string'
++           AND pg_temp.kayard_is_brand_variant(branding->>k) AND (branding->>k) IS DISTINCT FROM 'KAYARD KE';
++      END LOOP;
++    END IF;
++  END IF;
++
++  IF to_regclass('public.system_settings') IS NOT NULL THEN
++    UPDATE public.system_settings SET value = to_jsonb('KAYARD KE'::text)
++     WHERE key = 'platform_name' AND jsonb_typeof(value) = 'string' AND pg_temp.kayard_is_brand_variant(value #>> '{}') AND (value #>> '{}') IS DISTINCT FROM 'KAYARD KE';
++  END IF;
++
++  IF to_regclass('public.website_settings') IS NOT NULL
++     AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema='public' AND table_name='website_settings' AND column_name='website_name') THEN
++    UPDATE public.website_settings SET website_name = 'KAYARD KE'
++     WHERE website_name IS NOT NULL AND pg_temp.kayard_is_brand_variant(website_name) AND website_name IS DISTINCT FROM 'KAYARD KE';
++  END IF;
++END $$;

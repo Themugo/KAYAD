@@ -642,7 +642,8 @@ export async function inviteTeamMember(req, res) {
   const hash = crypto.createHash("sha256").update(token).digest("hex");
   const fields = { member: null, role: role.key, permissions: { ...role.permissions }, status: "invited", inviteEmail: email, inviteTokenHash: hash, inviteExpiresAt: new Date(Date.now() + INVITE_TTL_MS).toISOString(), invitedBy: req.user.id };
   const row = existing ? await update("dealer_teams", existing.id, fields) : await create("dealer_teams", { dealer: dealerId, ...fields });
-  const email_ = await deliverInvite(email, req.user.name, role.label, token);
+  // The e-mail must name the DEALERSHIP the person is joining (not the inviting person, who may be a delegated team member).
+  const email_ = await deliverInvite(email, dealerPublicName(await User.findById(dealerId)), role.label, token);
   await logAuditEvent({ action: "dealer_team_invitation_created", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", newValue: { ...publicTeamRow(row), emailSent: email_.sent }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
   return res.status(201).json({ success: true, data: publicTeamRow(row), email: email_ });
 }
@@ -658,7 +659,7 @@ export async function resendTeamInvite(req, res) {
   const role = (await resolveRole(dealerId, existing.role)) || { label: String(existing.role || "member") };
   const token = newInviteToken();
   const row = await update("dealer_teams", existing.id, { inviteTokenHash: crypto.createHash("sha256").update(token).digest("hex"), inviteExpiresAt: new Date(Date.now() + INVITE_TTL_MS).toISOString() });
-  const email_ = await deliverInvite(existing.inviteEmail, req.user.name, role.label, token);
+  const email_ = await deliverInvite(existing.inviteEmail, dealerPublicName(await User.findById(dealerId)), role.label, token);
   await logAuditEvent({ action: "dealer_team_invitation_resent", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", newValue: { emailSent: email_.sent }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
   return res.json({ success: true, data: publicTeamRow(row), email: email_ });
 }

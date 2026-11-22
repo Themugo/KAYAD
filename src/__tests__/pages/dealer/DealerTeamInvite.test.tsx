@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 
 const m = vi.hoisted(() => ({ accept: vi.fn() }));
 vi.mock('../../../services/dealerPlatformApi', () => ({ acceptTeamInvite: m.accept }));
+vi.mock('../../../features/DealershipWorkspace/useMyDealership', () => ({ resetMyDealershipCache: vi.fn() }));
 import DealerTeamInvite from '../../../pages/dealer/DealerTeamInvite';
 
 const TOKEN = 'a'.repeat(64);

@@ -1,0 +1,5 @@
+# 07 — Mobile / tablet / desktop regression
+Dealer workspace (overview, team, banking, settings) at 320, 340, 360, 375, 390, 414, 430, 600, 768, 1024, 1280, 1440, 1920: 52 runs, **0 horizontal overflow, 0 page errors** (`evidence/after/metrics.json`; screenshots at 320/390/768/1280). Landscape phone sizes were not run for the dealer workspace (NOT TESTED).
+Marketplace regression (`evidence/marketplace-regression/`, 34 runs incl. 4 landscape): 0 overflow, 0 errors; columns unchanged vs the mobile-experience result (320→1, 360–600→2, 768/1024→2, ≥1280→4). Hero/Land Cruiser order and list view were not re-inspected visually in this pass beyond identical CSS (no marketplace file was edited in this phase: only dealer settings/invite files).
+Interaction depth: navigation and page load only; form-fill, drawer open/close, dialog-fit and table-to-card behaviour were NOT exercised by script.
+No "before" screenshots were captured for the dealer workspace before editing (the audit started with code); the change is small (two removed tabs, text). 

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { acceptTeamInvite } from '../../services/dealerPlatformApi';
+import { resetMyDealershipCache } from '../../features/DealershipWorkspace/useMyDealership';
 
 /**
  * Landing page of the e-mailed team invitation (/dealer/setup?invite=<token>). The visitor must be signed in with the invited e-mail
@@ -30,6 +31,8 @@ export default function DealerTeamInvite() {
     try {
       const res = await acceptTeamInvite(token);
       if (res?.success === false) throw Object.assign(new Error(res.message), { response: { data: res } });
+      // The membership is now real on the server: drop any cached "no dealership" answer so the menu and workspace show it at once.
+      resetMyDealershipCache();
       setState({ phase: 'done', message: '' });
     } catch (err) {
       setState({ phase: 'error', message: messageFor(err) });
@@ -53,7 +56,7 @@ export default function DealerTeamInvite() {
         {state.phase === 'done' && (
           <div role="status">
             <p style={{ marginBottom: 12 }}><strong>You have joined the team.</strong> Your access follows the role the dealership gave you.</p>
-            <a className="btn btn-outline" href="/">Go to KAYARD KE</a>
+            <a className="btn btn-primary" href="/?nav=dealership-workspace">Open the dealership workspace</a>
           </div>
         )}
       </div>

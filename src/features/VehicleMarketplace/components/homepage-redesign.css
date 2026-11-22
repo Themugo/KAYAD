@@ -1395,29 +1395,66 @@
     .kayad-homepage .kayad-vehicle-card[data-layout="grid"] .kayad-vc-actions { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; margin-top: auto; padding-top: 9px; }
     .kayad-homepage .kayad-vehicle-card[data-layout="grid"] .kayad-vc-cta { min-height: 40px !important; font-size: 12px !important; line-height: 1.15; border-radius: 999px; padding: 6px 8px; border-color: #0F7F73; color: #0A5C54; white-space: normal; width: 100% !important; max-width: none !important; justify-self: stretch !important; }
   }
-  /* Phone LIST view: image and details side by side from 360px; stacked below that. */
+  /* Phone LIST view (>=360px): landscape thumbnail showing the WHOLE car (4:3, contain-friendly) beside the details, then the two actions side by side
+     across the full card. Same DOM: the body wrapper is flattened with display:contents so media / main / actions can sit on one grid. */
   @media (min-width: 360px) {
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] { flex-direction: row !important; align-items: stretch; border-radius: 16px; }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-media { flex: 0 0 40%; width: 40%; aspect-ratio: auto; min-height: 168px; align-self: stretch; }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-media > img { object-fit: cover; padding: 0; }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] [data-testid="card-thumbnails"],
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-media > button[aria-label^="Open "],
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-loc { display: none !important; }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] [data-testid="card-photo-counter"] { left: 6px; bottom: 6px; padding: 2px 7px; font-size: 11px; }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-media > div:first-of-type { padding: 6px; }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-media > div:first-of-type button { width: 32px; height: 32px; }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-body { flex: 1 1 0; min-width: 0; padding: 10px 11px; }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-main { display: flex !important; flex-direction: column; align-items: stretch !important; }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-main h3 { font-size: 15px !important; line-height: 1.25; text-transform: none !important; overflow-wrap: anywhere; }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-price { margin-top: 3px; font-size: 20px !important; line-height: 1.1; color: #0F7F73 !important; overflow-wrap: anywhere; }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-specs {
-      display: grid !important; grid-template-columns: minmax(0, 1fr) !important; grid-column: auto !important; grid-row: auto !important;
-      margin: 6px 0 0 !important; padding: 0 !important; border: 0 !important; gap: 3px !important; font-size: 12px; color: #475569;
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] {
+      display: grid !important; flex-direction: initial !important; grid-template-columns: 42% minmax(0, 1fr); grid-template-rows: auto auto; column-gap: 10px; row-gap: 10px;
+      align-items: start; padding: 10px; border-radius: 16px; min-height: 0;
     }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-specs > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-actions { display: grid !important; grid-template-columns: minmax(0, 1fr) !important; gap: 6px; padding-top: 9px; margin-top: auto; }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-cta,
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-contact { min-height: 40px !important; font-size: 12.5px !important; border-radius: 999px; padding: 6px 8px; white-space: nowrap; }
-    .kayad-homepage .kayad-vehicle-card[data-layout="list"] .kayad-vc-contact { display: inline-flex !important; }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] > .kayad-vc-media {
+      grid-column: 1; grid-row: 1; width: 100% !important; min-width: 0; max-width: none; height: auto !important; min-height: 0; aspect-ratio: 4 / 3;
+      align-self: start; border-radius: 12px; overflow: hidden;
+    }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] > .kayad-vc-media > img { object-fit: contain; padding: 0; background: #EEF5F4; }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] > [data-testid="card-thumbnails"],
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-media > button[aria-label^="Open "],
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-loc { display: none !important; }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] [data-testid="card-photo-counter"] { left: 5px; bottom: 5px; padding: 2px 7px; font-size: 11px; }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-media > div:first-of-type { padding: 5px; }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-media > div:first-of-type button { width: 30px; height: 30px; }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-body { display: contents !important; }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-main {
+      grid-column: 2; grid-row: 1; display: flex !important; flex-direction: column; align-items: stretch !important; min-width: 0; padding: 0; margin: 0;
+    }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-kicker { font-size: 11px; margin-bottom: 1px; }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-main h3 { font-size: 15px !important; line-height: 1.2; text-transform: none !important; overflow-wrap: anywhere; }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-price { margin-top: 2px; font-size: 19px !important; line-height: 1.1; color: #0F7F73 !important; text-align: left !important; overflow-wrap: anywhere; }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-specs {
+      display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; grid-column: auto !important; grid-row: auto !important; justify-items: start !important;
+      margin: 5px 0 0 !important; padding: 0 !important; border: 0 !important; gap: 3px 6px !important; font-size: 11.5px !important; color: #475569;
+    }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-specs > span { min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-inspection { grid-column: 2; }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-actions {
+      grid-column: 1 / -1; grid-row: 2; display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important; gap: 8px; padding: 0; margin: 0;
+    }
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-cta,
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-contact {
+      min-height: 40px !important; font-size: 12.5px !important; line-height: 1.1; border-radius: 999px; padding: 6px 8px; width: 100% !important; max-width: none !important; white-space: normal; display: inline-flex !important; justify-content: center;
+    }
   }
+}
+
+/* Phone LIST view (<360px): stacked card, whole-car 4:3 thumbnail on top */
+@media (max-width: 359.98px) {
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] {
+    display: grid !important; flex-direction: initial !important; grid-template-columns: minmax(0, 1fr); row-gap: 8px; padding: 10px;
+  }
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-media {
+    width: 100% !important; max-width: none !important; aspect-ratio: 4 / 3 !important; height: auto !important; min-height: 0 !important;
+  }
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-media img {
+    object-fit: contain !important; width: 100%; height: 100%;
+  }
+}
+@media (max-width: 359.98px) {
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-body {
+    display: flex !important; flex-direction: column; width: 100% !important; min-width: 0; max-width: none !important; gap: 8px;
+  }
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-main,
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-actions {
+    width: 100% !important; min-width: 0;
+  }
+  .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-main { flex-direction: column; }
 }

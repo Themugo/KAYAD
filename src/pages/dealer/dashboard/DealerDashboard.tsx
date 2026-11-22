@@ -256,7 +256,7 @@ const DEALER_NAV_GROUPS: NavGroup[] = [
     { id: 'marketing', label: 'Marketing', icon: Megaphone, title: 'Marketing', description: 'Campaigns promoting your vehicles.' },
     { id: 'team', label: 'Team', icon: UserCog, title: 'Team', description: 'People who work with your dealership account.' },
     { id: 'banking', label: 'Banking', icon: Landmark, title: 'Banking', description: 'Where your payouts are sent: bank account and M-Pesa.' },
-    { id: 'settings', label: 'Settings', icon: Settings, title: 'Settings', description: 'Profile, notifications, plan, team and banking for your dealership.' },
+    { id: 'settings', label: 'Settings', icon: Settings, title: 'Settings', description: 'Business profile, notifications and your plan and limits. Team and Banking have their own pages in the menu.' },
   ] },
 ];
 
