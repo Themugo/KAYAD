@@ -1,0 +1,213 @@
+[
+  {
+    "n": 1,
+    "name": "Dealer registration",
+    "role": "dealer (new)",
+    "status": "PASS",
+    "evidence": "user row dealer|pending|1 (role|status|dealer rows)"
+  },
+  {
+    "n": 2,
+    "name": "Email verification",
+    "role": "dealer (new)",
+    "status": "BLOCKED",
+    "evidence": "The verification link is sent by the mail provider; the harness marks email_verified directly in the disposable DB. No provider is available, so the mail round trip is not verified here."
+  },
+  {
+    "n": 3,
+    "name": "Business information submission",
+    "role": "dealer (pending)",
+    "status": "PASS",
+    "evidence": "PUT 200 {\"success\":true,\"message\":\"Dealer onboarding completed and verification submitted.\",\"dealer\":{\"id\":\"68c03496-a7b5-4f2d-8 / GET 200"
+  },
+  {
+    "n": 4,
+    "name": "Document upload",
+    "role": "dealer (pending)",
+    "status": "NOT TESTED",
+    "evidence": "No paperwork requirements are configured in the disposable DB (checklist is empty), and the document store is an external provider. The upload path was not exercised."
+  },
+  {
+    "n": 5,
+    "name": "Pending approval",
+    "role": "dealer (pending)",
+    "status": "PASS",
+    "evidence": "dealers.approved=f; create-listing as pending dealer -> 201 "
+  },
+  {
+    "n": 6,
+    "name": "Approval, rejection and resubmission",
+    "role": "admin + dealer",
+    "status": "NOT TESTED",
+    "evidence": "Admin dealer-review endpoints were not scripted in this suite; approval is set directly in the disposable DB for the other journeys."
+  },
+  {
+    "n": 7,
+    "name": "Create vehicle listing",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "POST /api/cars -> 201"
+  },
+  {
+    "n": 8,
+    "name": "Save draft",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "draft stored; inventory read 200; visible to owner: true; hidden from public: 404"
+  },
+  {
+    "n": 9,
+    "name": "Edit eligible listing",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "PUT /api/cars/:id -> 200 "
+  },
+  {
+    "n": 10,
+    "name": "Upload and manage vehicle photographs",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "upload 200 (images now 2); reorder 200; cover 200; delete 200. Provider is the loopback Cloudinary stub, NOT real Cloudinary."
+  },
+  {
+    "n": 11,
+    "name": "Publish listing",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "publish -> 200; detail for the public 200"
+  },
+  {
+    "n": 12,
+    "name": "Pause listing",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "pause -> 200; public detail now 404"
+  },
+  {
+    "n": 13,
+    "name": "Republish listing",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "republish -> 200; public detail 200"
+  },
+  {
+    "n": 14,
+    "name": "Mark sold",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "mark-sold -> 200; exactly one sale record"
+  },
+  {
+    "n": 15,
+    "name": "Bulk status changes",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "bulk pause (duplicate id collapsed) -> 200 updated=2"
+  },
+  {
+    "n": 16,
+    "name": "Prevent editing or deleting sold listings",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "edit sold -> 409 LISTING_SOLD_READ_ONLY; delete sold -> 409 LISTING_DELETE_BLOCKED; price unchanged"
+  },
+  {
+    "n": 17,
+    "name": "Receive buyer enquiry",
+    "role": "buyer -> dealer",
+    "status": "PASS",
+    "evidence": "lead row seeded in the DB (the buyer-side enquiry endpoint was not scripted) and returned by GET /dealer-platform/leads -> 200"
+  },
+  {
+    "n": 18,
+    "name": "Respond to enquiry",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "note 201; stage update 200; stored activity actor|type = 044b1885-c6c7-4bd2-8a4c-6d5322601bb4|dealer"
+  },
+  {
+    "n": 19,
+    "name": "Convert an enquiry into an eligible transaction",
+    "role": "buyer + dealer",
+    "status": "PASS-BY-REFERENCE",
+    "evidence": "Accepted offer -> settlement -> payment is exercised end to end by journey 05_offer_payment (simulated provider callback). Not repeated here."
+  },
+  {
+    "n": 20,
+    "name": "Customer appears after a released deal",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "released escrow e65ba273 seeded in the DB; GET /customers -> 200; buyer listed: true"
+  },
+  {
+    "n": 21,
+    "name": "Invite team member",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "invite -> 201"
+  },
+  {
+    "n": 22,
+    "name": "Assign role",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "accept -> 200; stored role sales_agent"
+  },
+  {
+    "n": 23,
+    "name": "Change and revoke role",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "change -> 200 (viewer); revoke -> 200; revoked member can read inventory -> 403"
+  },
+  {
+    "n": 24,
+    "name": "Role restrictions and cross-business isolation",
+    "role": "staff + other dealer",
+    "status": "PASS",
+    "evidence": "lot_agent mark-sold -> 403; self-elevation -> 403; dealer B sees A's car: false; dealer B pauses A's car -> 404"
+  },
+  {
+    "n": 25,
+    "name": "Save and retrieve banking information",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "save 200; read-back bank=Named Bank. Full cases in journey 10."
+  },
+  {
+    "n": 26,
+    "name": "Payout masking and access restrictions",
+    "role": "owner / staff / anonymous",
+    "status": "PASS",
+    "evidence": "finance_officer -> 403; anonymous -> 401; owner response carries masked fields: true"
+  },
+  {
+    "n": 27,
+    "name": "Complete an eligible escrow lifecycle",
+    "role": "buyer + dealer",
+    "status": "PASS-BY-REFERENCE",
+    "evidence": "Escrow funding is driven by a payment-provider callback. Journey 05 and the legacy journeys exercise it against the simulated callback; real M-Pesa is BLOCKED (no credentials)."
+  },
+  {
+    "n": 28,
+    "name": "Auction and settlement restrictions",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "pause with bids -> 409 AUCTION_OR_BID_LOCK; mark-sold with bids -> 409 AUCTION_OR_BID_LOCK. Escrow / settlement locks: journeys 09 and 11."
+  },
+  {
+    "n": 29,
+    "name": "Inspection workflow",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "GET /dealer-platform/inspections -> 200 (list only)",
+    "note": "Only the read path was exercised; ordering, completing and reading a report were NOT TESTED."
+  },
+  {
+    "n": 30,
+    "name": "Marketing, notifications and support access",
+    "role": "dealer owner",
+    "status": "PASS",
+    "evidence": "marketing 200; notifications 200; support tickets 200; viewer marketing -> 403"
+  }
+]

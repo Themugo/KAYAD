@@ -91,7 +91,7 @@ export const addLeadActivity = async (leadId, type, actorId, details) => {
       throw Object.assign(new Error("Lead not found"), { statusCode: 404 });
     }
 
-    const activity = await create("lead_activities", { lead: leadId, type, actor: actorId ? "dealer" : "system", actorId, description: details.description, metadata: details.metadata || {} });
+    const activity = await create("lead_activities", { lead: leadId, type, actor: actorId || null, actorType: actorId ? "dealer" : "system", description: details.description, metadata: details.metadata || {} });
     const updates = { lastActivityAt: new Date() };
     if (details.totalMessages !== undefined) updates.totalMessages = details.totalMessages;
     const updated = await update("leads", leadId, updates);

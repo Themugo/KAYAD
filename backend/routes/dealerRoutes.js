@@ -1,4 +1,4 @@
-import { markDealerListingSold, bulkChangeDealerListingStatus } from "../services/dealerListingSale.service.js";
+import { markDealerListingSold, bulkChangeDealerListingStatus, setDealerListingVisibility } from "../services/dealerListingSale.service.js";
 import express from "express";
 import { protect, dealerOnly, requireApproved, allowRoles } from "../middleware/auth.js";
 import { dealerBusinessOnly } from "../middleware/dealerIsolation.js"; // PHASE 13D
@@ -1023,10 +1023,36 @@ router.patch(
       if (err?.expose) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
       throw err;
     }
+    await invalidatePublicListingCaches();
     await logActionFromReq(req, "mark_sold", { target: req.params.id, targetModel: "Car", details: result.audit });
     res.json({ success: true, car: result.car });
   }),
 );
+
+// =============================
+// ⏸ PAUSE / ▶ PUBLISH (republish) ONE LISTING — same atomic lifecycle as mark-sold
+// =============================
+const dealerVisibilityHandler = (action) => asyncHandler(async (req, res) => {
+  if (action === "publish" && !(await sellerMayPublishDirectly({
+    ...req.user,
+    progressiveAccess: req.progressiveAccess === true,
+    dealerVerificationStatus: req.verification?.verificationStatus,
+  }))) {
+    return res.status(403).json({ success: false, code: "SELLER_ACCOUNT_NOT_ELIGIBLE", message: "This account is not currently eligible to publish listings." });
+  }
+  let result;
+  try {
+    result = await setDealerListingVisibility({ dealerId: req.user.id, carId: req.params.id, action, actorId: req.actingMember?.id || req.user.id });
+  } catch (err) {
+    if (err?.expose) return res.status(err.status).json({ success: false, code: err.code, message: err.message, ...(err.missing ? { missing: err.missing } : {}) });
+    throw err;
+  }
+  await invalidatePublicListingCaches();
+  await logActionFromReq(req, action === "pause" ? "listing_pause" : "listing_publish", { target: req.params.id, targetModel: "Car", details: { previousStatus: result.previousStatus, status: result.status } });
+  res.json({ success: true, status: result.status, label: result.label, previousStatus: result.previousStatus, listingNumber: result.listingNumber ?? null });
+});
+router.patch("/cars/:id/pause", invalidateCache("dealer"), dealerVisibilityHandler("pause"));
+router.patch("/cars/:id/publish", invalidateCache("dealer"), dealerVisibilityHandler("publish"));
 
 // =============================
 // 📋 BULK STATUS UPDATE
@@ -1058,6 +1084,7 @@ router.patch(
       if (err?.expose) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
       throw err;
     }
+    if (result.updated.length) await invalidatePublicListingCaches();
     await logActionFromReq(req, "bulk_status_update", { details: { ids: result.updated, skipped: result.skipped, status, modified: result.updated.length } });
     const allBlocked = result.updated.length === 0 && result.skipped.length > 0;
     res.status(allBlocked ? 409 : 200).json({ success: !allBlocked, modified: result.updated.length, updated: result.updated, skipped: result.skipped, ...(allBlocked ? { code: result.skipped[0].code, message: result.skipped[0].message } : {}) });

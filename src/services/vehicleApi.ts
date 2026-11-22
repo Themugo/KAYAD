@@ -709,6 +709,16 @@ export async function markCarSold(id: string, body: { buyerName?: string; salePr
   } catch (err) { throw toVehicleError(err); } finally { clearCarsCache(); }
 }
 
+export type ListingVisibilityResult = { success: boolean; status?: string; label?: string; message?: string; code?: string; missing?: string[] };
+
+/** Dealer pauses (Active -> Paused) or publishes / republishes (Draft or Paused -> Active) one of their own listings. */
+export async function setCarVisibility(id: string, action: 'pause' | 'publish'): Promise<ListingVisibilityResult> {
+  try {
+    clearCarsCache();
+    return await request<ListingVisibilityResult>(`/api/dealer/cars/${encodeURIComponent(id)}/${action}`, { method: 'PATCH' });
+  } catch (err) { throw toVehicleError(err); } finally { clearCarsCache(); }
+}
+
 export async function deleteCar(id: string): Promise<{ success: boolean; message?: string }> {
   try {
     clearCarsCache();
