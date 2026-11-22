@@ -739,3 +739,28 @@
 @media (prefers-reduced-motion: reduce) {
   .kk-hero__shortcut { transition: none; }
 }
+
+/* 2026-11-22 approved mobile design — hero stage as a flowing stack on phones/small tablets.
+   Layout only: the vehicle artwork, illustrative caption and carousel controls keep their content, handlers and
+   desktop (>=768px) composition. Order: artwork, then the "Illustrative" caption, then the carousel controls,
+   each in its own region so nothing sits on top of the vehicle. */
+@media (max-width: 767.98px) {
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__stage {
+    display: flex; flex-direction: column; align-items: stretch; gap: 8px; height: auto; margin-top: 8px;
+  }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__vehicle {
+    position: relative; inset: auto; width: 100%; height: auto; aspect-ratio: 16 / 9; max-height: 300px;
+  }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__caption {
+    position: static; display: flex; width: 100%; max-width: none; left: auto; bottom: auto; padding: 9px 12px;
+  }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__controls {
+    position: static; align-self: center; right: auto; bottom: auto; margin: 0 0 2px;
+    transform: none; gap: 6px; padding: 3px 8px;
+  }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__ctl { width: 36px; height: 36px; }
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__dot { width: 18px; height: 36px; }
+}
+@media (min-width: 480px) and (max-width: 767.98px) {
+  .kk-hero:has(.kk-hero__shortcuts) .kk-hero__vehicle { max-width: 480px; margin-inline: auto; }
+}

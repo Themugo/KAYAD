@@ -6,7 +6,7 @@ import Navbar from '../../components/Navbar';
 vi.mock('../../context/AuthContext', () => ({ useAuth: () => ({ user: null, isAuth: true, isAdmin: false, logout: vi.fn() }) }));
 vi.mock('../../context/SocketContext', () => ({ useSocket: () => ({ connected: true }) }));
 vi.mock('../../context/NotificationContext', () => ({ useNotifications: () => ({ unreadCount: 0 }) }));
-vi.mock('../../context/BrandingContext', () => ({ DEFAULT_LOGO_URL: '/branding/kayard-k-mark.png', onBrandLogoError: () => {}, useBranding: () => ({ branding: { logoType: 'icon', logoText: 'KAYAD' }, loading: false, hydrated: true }) }));
+vi.mock('../../context/BrandingContext', () => ({ DEFAULT_LOGO_URL: '/branding/kayard-ke-logo.png', DEFAULT_LOGO_DARK_URL: '/branding/kayard-ke-logo-dark.png', onBrandLogoError: () => {}, useBranding: () => ({ branding: { logoType: 'icon', logoText: 'KAYAD' }, loading: false, hydrated: true }) }));
 vi.mock('../../api/api', () => ({ carsAPI: { list: vi.fn().mockResolvedValue({ data: [] }) }, notifAPI: { list: vi.fn().mockResolvedValue({ notifications: [] }) } }));
 vi.mock('../../utils/helpers', () => ({ initials: () => 'JM' }));
 vi.mock('../../utils/authRoutes', async (orig) => ({ ...(await orig()), isSellerRole: () => false }));

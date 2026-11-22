@@ -3,8 +3,10 @@ import { getAvailableGridColumns, getEffectiveGridColumns, validateInventoryFilt
 
 describe('inventory presentation contracts', () => {
   it.each([
-    [3, 400, 1],
-    [5, 519, 1],
+    [3, 319, 1],
+    [3, 320, 2],
+    [3, 400, 2],
+    [5, 519, 2],
     [5, 520, 2],
     [4, 759, 2],
     [3, 760, 3],

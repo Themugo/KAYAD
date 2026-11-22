@@ -1,0 +1,3 @@
+# 05 — Vehicle details report
+Audited (390px, seeded vehicle, direct URL `/?vehicleId=…`): gallery with arrows, counter, fullscreen button, thumbnails; status "Available"; price; dealer card with verification; spec accordion; similar vehicles; share, favourite, back-to-results and 1-of-N paging; sticky bar (price + Contact seller). Scrolled to the end: sticky bar does not cover content. No overflow, no console errors.
+No code change made. Observations: ~160px blank area below the sticky bar at the end of scroll (reserved space; cosmetic, left untouched); Make-an-Offer not exercised in browser (workflow unchanged; covered by existing backend/DB journeys).

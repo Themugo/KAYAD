@@ -284,10 +284,10 @@
   align-items: stretch;
 }
 
-/* Phones: one readable card; small tablets: two when there is enough room.
+/* Phones: two compact cards once the result area is >= 320px (approved mobile design), one below that.
  * Thresholds mirror getEffectiveGridColumns() in inventoryPresentation.ts:
- * <520 -> 1, <760 -> 2, <940 -> 3, <1280 -> max 4, >=1280 -> requested. */
-@container kayad-inventory-results (min-width: 520px) {
+ * <320 -> 1, <760 -> 2, <940 -> 3, <1280 -> max 4, >=1280 -> requested. */
+@container kayad-inventory-results (min-width: 320px) {
   .kayad-inventory-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1371,6 +1371,13 @@ body.kayad-mobile-menu-is-open .kayad-mobile-bottom-nav { opacity: 0; pointer-ev
     grid-template-columns: minmax(0, 1fr) !important;
     align-items: stretch;
     gap: .75rem;
+  }
+  /* Approved mobile design: two compact cards when the result area is >= 320px. */
+  @container kayad-inventory-results (min-width: 320px) {
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="grid"] {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+      gap: 10px;
+    }
   }
 
   .kayad-homepage [data-testid="inventory-grid"][data-view-mode="grid"] .kayad-vehicle-card {
