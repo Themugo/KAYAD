@@ -213,14 +213,14 @@ const NavTab = ({ icon: Icon, label, active, onClick, badge }) => (
     type="button"
     aria-current={active ? 'page' : undefined}
     onClick={onClick}
-    className={`flex w-full items-center gap-3 px-4 py-3 min-h-11 rounded-xl text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87] ${
-      active ? 'bg-[#DDF4F0] text-[#12576D]' : 'text-[#64748B] hover:bg-[#F6FAF9]'
+    className={`flex w-full items-center gap-3 px-3 py-2 min-h-10 rounded-lg text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12D6CB] ${
+      active ? 'bg-[#11B8A6]/20 text-white shadow-[inset_3px_0_0_#12D6CB]' : 'text-white/75 hover:bg-white/10 hover:text-white'
     }`}
   >
-    <Icon className="w-5 h-5 shrink-0" strokeWidth={2} aria-hidden="true" />
+    <Icon className="w-[18px] h-[18px] shrink-0" strokeWidth={2} aria-hidden="true" />
     <span className="font-medium text-sm truncate">{label}</span>
     {badge ? (
-      <span className="ml-auto px-2 py-0.5 bg-[#176B87] text-white text-xs rounded-full">
+      <span className="ml-auto px-2 py-0.5 bg-[#12D6CB] text-[#062A33] text-xs font-black rounded-full">
         <span aria-hidden="true">{badge}</span>
         <span className="sr-only">{badge} new</span>
       </span>
@@ -759,18 +759,20 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
         <p className="min-w-0 flex-1 truncate text-center text-sm font-bold text-[#0A3340]" aria-hidden="true">{currentItem.label}</p>
       </div>
       {mobileNavOpen && <button type="button" aria-label="Close dealer menu overlay" tabIndex={-1} onClick={() => setMobileNavOpen(false)} className="fixed inset-0 z-[1090] bg-[#071F2A]/55 lg:hidden" />}
-      <aside ref={asideRef} id="dealer-workspace-sidebar" aria-label="Dealer workspace menu" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex fixed inset-y-0 left-0 z-[1100] w-[88%] max-w-sm overflow-hidden shadow-2xl lg:static lg:z-auto lg:w-64 lg:min-w-64 lg:max-w-none lg:shadow-none bg-white lg:border-r border-[#D7E7E4] flex-col lg:sticky lg:top-0 lg:h-[calc(100dvh-var(--dealer-aside-top,0px))]`}>
-        <div className="p-4 border-b border-[#D7E7E4]">
+      <aside ref={asideRef} id="dealer-workspace-sidebar" aria-label="Dealer workspace menu" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex fixed inset-y-0 left-0 z-[1100] w-[88%] max-w-sm overflow-hidden shadow-2xl lg:static lg:z-auto lg:w-64 lg:min-w-64 lg:max-w-none lg:shadow-none bg-[#0A3545] text-white lg:border-r border-[#0A3545] flex-col lg:sticky lg:top-0 lg:h-[calc(100dvh-var(--dealer-aside-top,0px))]`}>
+        <div className="p-4 border-b border-white/10">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-[#176B87] to-[#13B8A6] flex items-center justify-center overflow-hidden">
+            <div className="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-[#11B8A6] to-[#12D6CB] flex items-center justify-center overflow-hidden ring-1 ring-white/20">
               {branding.logoType === 'image' && branding.logoUrl ? <img src={branding.logoUrl} alt={branding.logoText || 'KAYARD KE'} className="w-full h-full object-contain bg-white" /> : branding.logoType === 'text' ? <span className="text-xs font-black text-white">{branding.logoText || 'KAYARD KE'}</span> : <img src={branding.logoUrl || '/branding/kayad-symbol.svg'} alt={branding.logoText || 'KAYARD KE'} className="w-full h-full object-contain" onError={(event) => { event.currentTarget.style.display = 'none'; }} />}
             </div>
             <div className="min-w-0">
-              <h1 className="font-bold text-[#0A3340] truncate">{branding.logoText || 'KAYARD KE'}</h1>
-              <p className="text-xs text-[#64748B] truncate">{user?.businessName || user?.name || 'Dealer account'}</p>
+              <h1 className="font-black text-white truncate">{branding.logoText || 'KAYARD KE'}</h1>
+              <p className="text-xs text-white/65 truncate">{user?.businessName || user?.name || 'Dealer account'}</p><p className="mt-0.5 text-[10px] font-black uppercase tracking-[.14em] text-[#12D6CB]">Dealer account</p>
             </div>
           </div>
         </div>
+
+        <div className="shrink-0 px-3 pt-3 lg:px-4"><button type="button" data-testid="dealer-sidebar-add-vehicle" onClick={() => { setMobileNavOpen(false); setActiveSection('inventory'); openListingForm({ mode: 'create' }); }} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#11B8A6] px-4 text-sm font-black text-[#062A33] shadow-sm hover:bg-[#12D6CB] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><Plus className="h-4 w-4" aria-hidden="true" />Add a vehicle</button></div>
 
         <nav aria-label="Dealer workspace" className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 lg:p-4">
           {DEALER_NAV_GROUPS.map((group, index) => (
@@ -778,9 +780,9 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
               key={group.id}
               role="group"
               aria-labelledby={`dealer-nav-${group.id}`}
-              className={`space-y-1 ${index > 0 ? 'mt-3 border-t border-[#D7E7E4] pt-3' : ''}`}
+              className={`space-y-1 ${index > 0 ? 'mt-3 border-t border-white/10 pt-3' : ''}`}
             >
-              <p id={`dealer-nav-${group.id}`} className="px-4 pb-1 text-[11px] font-semibold uppercase tracking-wider text-[#64748B]">
+              <p id={`dealer-nav-${group.id}`} className="px-3 pb-1 text-[10px] font-black uppercase tracking-[.16em] text-white/65">
                 {group.label}
               </p>
               {group.items.map((item) => (
@@ -797,18 +799,18 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           ))}
         </nav>
 
-        <div className="shrink-0 p-3 lg:p-4 border-t border-[#D7E7E4] space-y-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]" data-testid="dealer-sidebar-footer">
+        <div className="shrink-0 p-3 lg:p-4 border-t border-white/10 space-y-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]" data-testid="dealer-sidebar-footer">
           {/* Collapsed by default so the menu keeps its room (DA-06); the status stays one tap away and Sign out is always visible. */}
-          <details className="group rounded-xl border border-[#D7E7E4] bg-[#F4FAF9]" data-testid="dealer-account-status-toggle">
-            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-xl px-3 text-sm font-semibold text-[#0A3340] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87] [&::-webkit-details-marker]:hidden">
+          <details className="group rounded-xl border border-white/15 bg-white/10" data-testid="dealer-account-status-toggle">
+            <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-xl px-3 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#12D6CB] [&::-webkit-details-marker]:hidden">
               <span>Account status</span>
-              <span aria-hidden="true" className="text-xs text-[#475569] transition group-open:rotate-180">▾</span>
+              <span aria-hidden="true" className="text-xs text-white/70 transition group-open:rotate-180">▾</span>
             </summary>
-            <div className="max-h-[40vh] overflow-y-auto p-1"><DealerAccountStatus /></div>
+            <div className="max-h-[40vh] overflow-y-auto rounded-b-xl bg-white p-1 text-[#0A3340]"><DealerAccountStatus /></div>
           </details>
-          <button type="button" onClick={() => onNavigate?.('support')} className="w-full inline-flex min-h-11 items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" data-testid="dealer-help-support">Help &amp; support</button>
-          {logoutError && <p role="alert" className="text-sm text-red-700">{logoutError}</p>}
-          <button type="button" onClick={handleDealerLogout} className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-[#D7E7E4] px-4 py-2 text-sm font-semibold text-[#0A3340] hover:bg-[#EEF7F5]"><LogOut className="w-4 h-4" />Sign out</button>
+          <button type="button" onClick={() => onNavigate?.('support')} className="w-full inline-flex min-h-11 items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-[#12D6CB] hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" data-testid="dealer-help-support">Help &amp; support</button>
+          {logoutError && <p role="alert" className="text-sm text-red-200">{logoutError}</p>}
+          <button type="button" onClick={handleDealerLogout} className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"><LogOut className="w-4 h-4" />Sign out</button>
         </div>
       </aside>
 
@@ -881,6 +883,25 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
             const performers = Array.isArray(dashboard?.topPerformers?.vehicles) ? dashboard.topPerformers.vehicles : [];
             return (
             <div data-testid="dealer-overview">
+              {/* Command-centre banner: same dark treatment as the personal dashboard; only real counts, never invented. */}
+              <section aria-label="Dealership command centre" data-testid="dealer-command-banner" className="mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-[#0A3545] to-[#0E7C74] p-4 text-white shadow-sm sm:mb-6 sm:p-6">
+                <p className="text-[11px] font-black uppercase tracking-[.16em] text-[#12D6CB]">KAYARD KE · Dealer account</p>
+                <h2 className="mt-1 text-2xl font-black sm:text-3xl">Run your dealership from one place</h2>
+                <p className="mt-1 max-w-2xl text-sm text-white/80">Your command centre for enquiries, stock, auctions and payouts. Respond fast, keep listings fresh and close more sales.</p>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <button type="button" onClick={() => openListingForm({ mode: 'create' })} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#11B8A6] px-4 text-sm font-black text-[#062A33] hover:bg-[#12D6CB]"><Plus className="h-4 w-4" aria-hidden="true" />Add a vehicle</button>
+                  <button type="button" onClick={() => setActiveSection('leads')} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 text-sm font-bold hover:bg-white/20"><MessageSquare className="h-4 w-4" aria-hidden="true" />Leads{newLeads ? ` (${newLeads} new)` : ''}</button>
+                  <button type="button" onClick={() => setActiveSection('auctions')} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 text-sm font-bold hover:bg-white/20"><Gavel className="h-4 w-4" aria-hidden="true" />Auctions</button>
+                  <button type="button" onClick={() => setActiveSection('banking')} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 text-sm font-bold hover:bg-white/20"><Landmark className="h-4 w-4" aria-hidden="true" />Payouts</button>
+                </div>
+                {dataReady && ((newLeads ?? 0) > 0 || (st?.pending ?? 0) > 0 || (st?.draft ?? 0) > 0) && (
+                  <ul className="mt-4 grid gap-2 sm:grid-cols-3" data-testid="dealer-attention" aria-label="Needs your attention">
+                    {(newLeads ?? 0) > 0 && <li><button type="button" onClick={() => setActiveSection('leads')} className="w-full rounded-xl bg-white/10 px-3 py-2 text-left text-sm hover:bg-white/20"><strong className="block text-lg font-black">{newLeads}</strong>new {newLeads === 1 ? 'enquiry' : 'enquiries'} awaiting reply</button></li>}
+                    {(st?.pending ?? 0) > 0 && <li><button type="button" onClick={() => setActiveSection('inventory')} className="w-full rounded-xl bg-white/10 px-3 py-2 text-left text-sm hover:bg-white/20"><strong className="block text-lg font-black">{st?.pending}</strong>listing{st?.pending === 1 ? '' : 's'} pending review</button></li>}
+                    {(st?.draft ?? 0) > 0 && <li><button type="button" onClick={() => setActiveSection('inventory')} className="w-full rounded-xl bg-white/10 px-3 py-2 text-left text-sm hover:bg-white/20"><strong className="block text-lg font-black">{st?.draft}</strong>draft{st?.draft === 1 ? '' : 's'} to finish and publish</button></li>}
+                  </ul>
+                )}
+              </section>
               {/* Business summary: real figures only. "—" = unavailable, 0 = a genuine zero, skeleton = still loading. */}
               <div className="mb-5 grid grid-cols-1 gap-3 min-[460px]:grid-cols-2 sm:mb-6 sm:gap-4 xl:grid-cols-4">
                 <StatCard title="Total Listings" loading={loading} onOpen={() => setActiveSection('inventory')} openLabel="Open inventory" value={ov?.totalListings ?? '—'} caption={listingCaption} icon={Car} />

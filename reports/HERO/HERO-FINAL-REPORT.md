@@ -41,3 +41,8 @@ Typecheck PASS; Vitest home/features/VehicleMarketplace suites 43 files / 448 te
 - Hero at 390px is now 413px tall (was 607 original, 514 after first pass); 320→451, 430→416, 600→459. Vehicle fully inside, no overlap, no overflow.
 - Phone LIST view reworked to the approved reference: 4:3 whole-car thumbnail (object-fit: contain), title/price at right, two-column specs, View Details + Contact Seller side by side (>=360px); stacked card below 360px.
 - Verified 320/360/375/390/430/600: no horizontal overflow. Full Vitest 224 files / 1,879 passed; typecheck clean; vite build OK.
+
+## Addendum 2026-11-22 (2) — favourite button, grid fit, dealer command centre
+- Phone cards: favourite button is now a 28px circle (14px icon) with a 44px invisible touch target; grid cards show the whole car (object-fit: contain).
+- Dealer dashboard: dark navy sidebar matching the personal dashboard, "Add a vehicle" primary action, command-centre banner with real counts (new enquiries, pending, drafts), shortcuts to Leads, Auctions, Payouts.
+- Verified: dealer harness 52 runs / responsive harness 34 runs, 0 overflow, 0 errors; dealer Vitest 142 passed; full Vitest 1,878-1,879 passed (one transient failure on one run, clean on re-run); typecheck clean.

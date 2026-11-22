@@ -1458,3 +1458,19 @@
   }
   .kayad-homepage [data-testid="inventory-grid"][data-view-mode="list"] .kayad-vehicle-card[data-layout="list"] .kayad-vc-main { flex-direction: column; }
 }
+
+/* 2026-11-22 Phone cards: compact favourite button so the car stays visible */
+@media (max-width: 639.98px) {
+  .kayad-homepage [data-testid="inventory-grid"] .kayad-vehicle-card .kayad-vc-media > div.absolute.inset-x-0.top-0 { padding: 6px !important; align-items: flex-start !important; }
+  .kayad-homepage [data-testid="inventory-grid"] .kayad-vehicle-card .kayad-vc-media button[aria-pressed] {
+    width: 28px !important; height: 28px !important; min-width: 0 !important; min-height: 0 !important; padding: 0 !important; flex: none !important; align-self: flex-start; position: relative;
+  }
+  .kayad-homepage [data-testid="inventory-grid"] .kayad-vehicle-card .kayad-vc-media button[aria-pressed] svg { width: 14px !important; height: 14px !important; }
+  /* keep a 44px touch target without enlarging the visible circle */
+  .kayad-homepage [data-testid="inventory-grid"] .kayad-vehicle-card .kayad-vc-media button[aria-pressed]::after { content: ""; position: absolute; inset: -8px; }
+}
+@media (max-width: 639.98px) {
+  @container kayad-inventory-results (min-width: 320px) {
+    .kayad-homepage [data-testid="inventory-grid"][data-view-mode="grid"] .kayad-vehicle-card .kayad-vc-media img { object-fit: contain !important; background: #EEF5F4; }
+  }
+}
