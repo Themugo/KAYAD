@@ -1,0 +1,21 @@
+{
+ "emailNamesDealership": true,
+ "myWorkspace": {
+  "success": true,
+  "data": {
+   "membership": {
+    "dealershipName": "tia Motors ou54m4pfc5",
+    "teamRole": "sales_agent",
+    "permissions": [
+     "canEditCars",
+     "canListCars",
+     "canChatBuyers"
+    ]
+   },
+   "ambiguous": false
+  }
+ },
+ "sample": {
+  "link": "[redacted-token-link]"
+ }
+}

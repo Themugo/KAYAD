@@ -1,0 +1,4 @@
+# 03 — Navigation consolidation
+Before: sidebar had Team and Banking; Settings ALSO showed tabs Profile · Notifications · Plan & limits · **Team & roles** · **Banking**, the last two only buttons ("Open Team"/"Open Banking") that navigated to the sidebar pages.
+After: Settings tabs = Profile · Notifications · Plan & limits. Team keeps one sidebar entry with page-local tabs Members / Roles (distinct functions). Banking one entry. Old deep links `?section=settings&tab=team|banking` are forwarded to the real section (test added). Settings description updated. No route or API removed; permissions untouched (owner-only banking/team stays enforced by the backend).
+Callers checked: only `DealerSettingsCentre.test.tsx` referenced the removed tabs (updated deliberately, with a replacement test for the forwarding).

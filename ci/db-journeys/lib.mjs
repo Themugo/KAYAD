@@ -40,9 +40,9 @@ export class Client {
 }
 
 /** Create a verified user (registration via the real endpoint; verification and staff role set directly in the DISPOSABLE db). */
-export async function makeUser({ role = 'user', tag = 'u', extra = {}, dbRole = null } = {}) {
+export async function makeUser({ role = 'user', tag = 'u', extra = {}, dbRole = null, email: fixedEmail = null } = {}) {
   const c = new Client();
-  const email = `${tag}-${uid()}@example.test`;
+  const email = fixedEmail || `${tag}-${uid()}@example.test`;
   const reg = await c.raw('/api/v1/auth/register', { method: 'POST', body: { name: `Journey ${tag}`, email, password: PW, role, ...extra }, headers: { 'idempotency-key': 'k' + crypto.randomUUID() } });
   if (reg.status >= 300) throw new Error(`register ${role} failed: ${reg.status} ${JSON.stringify(reg.j)}`);
   q(`update users set email_verified=true${dbRole ? `, role='${dbRole}'` : ''} where email='${email}'`);

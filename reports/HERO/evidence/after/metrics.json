@@ -1,0 +1,615 @@
+[
+ {
+  "w": 320,
+  "hero": {
+   "x": 0,
+   "y": 93,
+   "w": 320,
+   "h": 520.90625,
+   "r": 320,
+   "b": 613.90625
+  },
+  "img": {
+   "x": 24,
+   "y": 306.15625,
+   "w": 272,
+   "h": 160,
+   "r": 296,
+   "b": 466.15625
+  },
+  "natural": [
+   1021,
+   634
+  ],
+  "fit": "contain",
+  "imgInsideHero": true,
+  "overlapImgCaption": false,
+  "overlapImgControls": false,
+  "overlapCaptionControls": false,
+  "overlapShortcutsImg": false,
+  "pageOverflow": false,
+  "heroOverflowX": true,
+  "chipsTop": 620.90625,
+  "text": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "errs": 1,
+  "broken": 0
+ },
+ {
+  "w": 340,
+  "hero": {
+   "x": 0,
+   "y": 93,
+   "w": 340,
+   "h": 520.90625,
+   "r": 340,
+   "b": 613.90625
+  },
+  "img": {
+   "x": 34,
+   "y": 306.15625,
+   "w": 272,
+   "h": 160,
+   "r": 306,
+   "b": 466.15625
+  },
+  "natural": [
+   1021,
+   634
+  ],
+  "fit": "contain",
+  "imgInsideHero": true,
+  "overlapImgCaption": false,
+  "overlapImgControls": false,
+  "overlapCaptionControls": false,
+  "overlapShortcutsImg": false,
+  "pageOverflow": false,
+  "heroOverflowX": true,
+  "chipsTop": 620.90625,
+  "text": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "errs": 1,
+  "broken": 0
+ },
+ {
+  "w": 360,
+  "hero": {
+   "x": 0,
+   "y": 93,
+   "w": 360,
+   "h": 508.5625,
+   "r": 360,
+   "b": 601.5625
+  },
+  "img": {
+   "x": 44,
+   "y": 306.9375,
+   "w": 272,
+   "h": 160,
+   "r": 316,
+   "b": 466.9375
+  },
+  "natural": [
+   1021,
+   634
+  ],
+  "fit": "contain",
+  "imgInsideHero": true,
+  "overlapImgCaption": false,
+  "overlapImgControls": false,
+  "overlapCaptionControls": false,
+  "overlapShortcutsImg": false,
+  "pageOverflow": false,
+  "heroOverflowX": true,
+  "chipsTop": 608.5625,
+  "text": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "errs": 1,
+  "broken": 0
+ },
+ {
+  "w": 375,
+  "hero": {
+   "x": 0,
+   "y": 93,
+   "w": 375,
+   "h": 511.1875,
+   "r": 375,
+   "b": 604.1875
+  },
+  "img": {
+   "x": 51.5,
+   "y": 309.5625,
+   "w": 272,
+   "h": 160,
+   "r": 323.5,
+   "b": 469.5625
+  },
+  "natural": [
+   1021,
+   634
+  ],
+  "fit": "contain",
+  "imgInsideHero": true,
+  "overlapImgCaption": false,
+  "overlapImgControls": false,
+  "overlapCaptionControls": false,
+  "overlapShortcutsImg": false,
+  "pageOverflow": false,
+  "heroOverflowX": true,
+  "chipsTop": 611.1875,
+  "text": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "errs": 1,
+  "broken": 0
+ },
+ {
+  "w": 390,
+  "hero": {
+   "x": 0,
+   "y": 93,
+   "w": 390,
+   "h": 513.84375,
+   "r": 390,
+   "b": 606.84375
+  },
+  "img": {
+   "x": 59,
+   "y": 312.21875,
+   "w": 272,
+   "h": 160,
+   "r": 331,
+   "b": 472.21875
+  },
+  "natural": [
+   1021,
+   634
+  ],
+  "fit": "contain",
+  "imgInsideHero": true,
+  "overlapImgCaption": false,
+  "overlapImgControls": false,
+  "overlapCaptionControls": false,
+  "overlapShortcutsImg": false,
+  "pageOverflow": false,
+  "heroOverflowX": true,
+  "chipsTop": 613.84375,
+  "text": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "errs": 1,
+  "broken": 0,
+  "interact": {
+   "t0": "2026 Toyota Land Cruiser 300",
+   "t1": "2026 Mercedes-Benz GLE",
+   "t2": "2026 Toyota Land Cruiser 300",
+   "t3": "2026 Mercedes-Benz GLE",
+   "pause": [
+    "Pause automatic vehicle rotation",
+    "Resume automatic vehicle rotation"
+   ],
+   "shortcuts": [
+    [
+     "Find a car",
+     "/"
+    ],
+    [
+     "Sell a car",
+     "/login"
+    ],
+    [
+     "Auctions",
+     "/?nav=discovery"
+    ],
+    [
+     "Verified vehicles",
+     "/?nav=inspections"
+    ]
+   ]
+  }
+ },
+ {
+  "w": 412,
+  "hero": {
+   "x": 0,
+   "y": 93,
+   "w": 412,
+   "h": 517.71875,
+   "r": 412,
+   "b": 610.71875
+  },
+  "img": {
+   "x": 70,
+   "y": 316.09375,
+   "w": 272,
+   "h": 160,
+   "r": 342,
+   "b": 476.09375
+  },
+  "natural": [
+   1021,
+   634
+  ],
+  "fit": "contain",
+  "imgInsideHero": true,
+  "overlapImgCaption": false,
+  "overlapImgControls": false,
+  "overlapCaptionControls": false,
+  "overlapShortcutsImg": false,
+  "pageOverflow": false,
+  "heroOverflowX": true,
+  "chipsTop": 617.71875,
+  "text": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "errs": 1,
+  "broken": 0
+ },
+ {
+  "w": 430,
+  "hero": {
+   "x": 0,
+   "y": 93,
+   "w": 430,
+   "h": 520.90625,
+   "r": 430,
+   "b": 613.90625
+  },
+  "img": {
+   "x": 79,
+   "y": 319.28125,
+   "w": 272,
+   "h": 160,
+   "r": 351,
+   "b": 479.28125
+  },
+  "natural": [
+   1021,
+   634
+  ],
+  "fit": "contain",
+  "imgInsideHero": true,
+  "overlapImgCaption": false,
+  "overlapImgControls": false,
+  "overlapCaptionControls": false,
+  "overlapShortcutsImg": false,
+  "pageOverflow": false,
+  "heroOverflowX": true,
+  "chipsTop": 620.90625,
+  "text": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "errs": 1,
+  "broken": 0
+ },
+ {
+  "w": 600,
+  "hero": {
+   "x": 0,
+   "y": 93,
+   "w": 600,
+   "h": 501.59375,
+   "r": 600,
+   "b": 594.59375
+  },
+  "img": {
+   "x": 140,
+   "y": 279.96875,
+   "w": 320,
+   "h": 180,
+   "r": 460,
+   "b": 459.96875
+  },
+  "natural": [
+   1021,
+   634
+  ],
+  "fit": "contain",
+  "imgInsideHero": true,
+  "overlapImgCaption": false,
+  "overlapImgControls": false,
+  "overlapCaptionControls": false,
+  "overlapShortcutsImg": false,
+  "pageOverflow": false,
+  "heroOverflowX": true,
+  "chipsTop": 601.59375,
+  "text": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "errs": 1,
+  "broken": 0
+ },
+ {
+  "w": 768,
+  "hero": {
+   "x": 0,
+   "y": 119,
+   "w": 768,
+   "h": 456.4375,
+   "r": 768,
+   "b": 575.4375
+  },
+  "img": {
+   "x": 22,
+   "y": 300.328125,
+   "w": 724,
+   "h": 233.109375,
+   "r": 746,
+   "b": 533.4375
+  },
+  "natural": [
+   1021,
+   634
+  ],
+  "fit": "contain",
+  "imgInsideHero": true,
+  "overlapImgCaption": true,
+  "overlapImgControls": true,
+  "overlapCaptionControls": false,
+  "overlapShortcutsImg": false,
+  "pageOverflow": false,
+  "heroOverflowX": true,
+  "chipsTop": 588.4375,
+  "text": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "errs": 1,
+  "broken": 0
+ },
+ {
+  "w": 1024,
+  "hero": {
+   "x": 0,
+   "y": 127,
+   "w": 1024,
+   "h": 336,
+   "r": 1024,
+   "b": 463
+  },
+  "img": {
+   "x": 474.234375,
+   "y": 149,
+   "w": 509.75,
+   "h": 272,
+   "r": 983.984375,
+   "b": 421
+  },
+  "natural": [
+   1021,
+   634
+  ],
+  "fit": "contain",
+  "imgInsideHero": true,
+  "overlapImgCaption": true,
+  "overlapImgControls": true,
+  "overlapCaptionControls": false,
+  "overlapShortcutsImg": false,
+  "pageOverflow": false,
+  "heroOverflowX": true,
+  "chipsTop": 476,
+  "text": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "errs": 1,
+  "broken": 0
+ },
+ {
+  "w": 1280,
+  "hero": {
+   "x": 0,
+   "y": 127,
+   "w": 1280,
+   "h": 336,
+   "r": 1280,
+   "b": 463
+  },
+  "img": {
+   "x": 592,
+   "y": 149,
+   "w": 648,
+   "h": 272,
+   "r": 1240,
+   "b": 421
+  },
+  "natural": [
+   1021,
+   634
+  ],
+  "fit": "contain",
+  "imgInsideHero": true,
+  "overlapImgCaption": true,
+  "overlapImgControls": true,
+  "overlapCaptionControls": false,
+  "overlapShortcutsImg": false,
+  "pageOverflow": false,
+  "heroOverflowX": true,
+  "chipsTop": 476,
+  "text": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "errs": 1,
+  "broken": 0
+ },
+ {
+  "w": 1440,
+  "hero": {
+   "x": 0,
+   "y": 127,
+   "w": 1440,
+   "h": 350,
+   "r": 1440,
+   "b": 477
+  },
+  "img": {
+   "x": 665.59375,
+   "y": 149,
+   "w": 734.390625,
+   "h": 292,
+   "r": 1399.984375,
+   "b": 441
+  },
+  "natural": [
+   1021,
+   634
+  ],
+  "fit": "contain",
+  "imgInsideHero": true,
+  "overlapImgCaption": true,
+  "overlapImgControls": true,
+  "overlapCaptionControls": false,
+  "overlapShortcutsImg": false,
+  "pageOverflow": false,
+  "heroOverflowX": true,
+  "chipsTop": 490,
+  "text": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "errs": 1,
+  "broken": 0
+ },
+ {
+  "w": 1920,
+  "hero": {
+   "x": 0,
+   "y": 127,
+   "w": 1920,
+   "h": 350,
+   "r": 1920,
+   "b": 477
+  },
+  "img": {
+   "x": 905.59375,
+   "y": 149,
+   "w": 734.390625,
+   "h": 292,
+   "r": 1639.984375,
+   "b": 441
+  },
+  "natural": [
+   1021,
+   634
+  ],
+  "fit": "contain",
+  "imgInsideHero": true,
+  "overlapImgCaption": true,
+  "overlapImgControls": true,
+  "overlapCaptionControls": false,
+  "overlapShortcutsImg": false,
+  "pageOverflow": false,
+  "heroOverflowX": true,
+  "chipsTop": 490,
+  "text": [
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true,
+   true
+  ],
+  "errs": 1,
+  "broken": 0
+ }
+]

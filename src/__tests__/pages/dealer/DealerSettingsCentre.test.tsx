@@ -25,10 +25,10 @@ describe('Dealer settings centre', () => {
     expect(await screen.findByTestId('verification-stage')).toBeInTheDocument();
     expect(screen.queryByText(/Verification status is unavailable/)).not.toBeInTheDocument();
   });
-  it('opens on Profile and offers the five sections', async () => {
+  it('opens on Profile and offers only the three settings sections (Team and Banking live in the main menu)', async () => {
     render(<DealerSettingsPanel userId="d1" />);
     expect(await screen.findByLabelText(/Business name/)).toHaveValue('Amani');
-    expect(screen.getAllByRole('tab').map((t) => t.textContent)).toEqual(['Profile', 'Notifications', 'Plan & limits', 'Team & roles', 'Banking']);
+    expect(screen.getAllByRole('tab').map((t) => t.textContent)).toEqual(['Profile', 'Notifications', 'Plan & limits']);
   });
   it('Notifications: loads real preferences, saves only what changed, and confirms after the server answers', async () => {
     m.updatePrefs.mockResolvedValue({ data: { smsMarketing: true } });
@@ -63,13 +63,12 @@ describe('Dealer settings centre', () => {
     await userEvent.click(screen.getByRole('tab', { name: 'Plan & limits' }));
     expect(await screen.findByText('No active listing plan')).toBeInTheDocument();
   });
-  it('Team & roles and Banking tabs hand over to those sections', async () => {
+  it('does not repeat Team or Banking as tabs, and forwards an old deep link to the real section', async () => {
     const open = vi.fn();
+    window.history.replaceState({}, '', '/?nav=dealer-dashboard&section=settings&tab=banking');
     render(<DealerSettingsPanel userId="d1" onOpenSection={open} />);
-    await userEvent.click(screen.getByRole('tab', { name: 'Team & roles' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Open Team' }));
-    await userEvent.click(screen.getByRole('tab', { name: 'Banking' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Open Banking' }));
-    expect(open.mock.calls.map((c) => c[0])).toEqual(['team', 'banking']);
+    expect(screen.queryByRole('tab', { name: /Team|Banking/ })).not.toBeInTheDocument();
+    expect(open).toHaveBeenCalledWith('banking');
+    window.history.replaceState({}, '', '/');
   });
 });

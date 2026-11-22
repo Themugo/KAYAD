@@ -205,13 +205,14 @@ function ProfileSection({ userId }: { userId: string }) {
 // ---------------------------------------------------------------------------------------------------------------------------------
 // Settings centre: one place for everything that configures the dealership. Each tab uses an existing, real contract.
 // ---------------------------------------------------------------------------------------------------------------------------------
-type Tab = 'profile' | 'notifications' | 'plan' | 'team' | 'banking';
+type Tab = 'profile' | 'notifications' | 'plan';
+// Team and Banking are primary sidebar destinations with their own pages. They are NOT repeated here as tabs; an old deep link
+// (?section=settings&tab=team|banking) is forwarded to the real section below so bookmarks keep working.
+const FORWARDED_TABS = new Set(['team', 'banking']);
 const TABS: { id: Tab; label: string; icon: React.ElementType }[] = [
   { id: 'profile', label: 'Profile', icon: Building2 },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'plan', label: 'Plan & limits', icon: CreditCard },
-  { id: 'team', label: 'Team & roles', icon: Users },
-  { id: 'banking', label: 'Banking', icon: Landmark },
 ];
 const readTab = (): Tab => {
   try { const v = new URLSearchParams(window.location.search).get('tab'); return TABS.some((t) => t.id === v) ? (v as Tab) : 'profile'; } catch { return 'profile'; }
@@ -367,6 +368,13 @@ export default function DealerSettingsPanel({ userId, onOpenSection }: { userId:
   const [tab, setTabState] = useState<Tab>(readTab);
   const setTab = (t: Tab) => { setTabState(t); writeTab(t); };
   useEffect(() => {
+    try {
+      const legacy = new URLSearchParams(window.location.search).get('tab');
+      if (legacy && FORWARDED_TABS.has(legacy) && onOpenSection) onOpenSection(legacy);
+    } catch { /* no URL access: stay on Profile */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
     const onPop = () => setTabState(readTab());
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
@@ -397,8 +405,6 @@ export default function DealerSettingsPanel({ userId, onOpenSection }: { userId:
         {tab === 'profile' && <ProfileSection userId={userId} />}
         {tab === 'notifications' && <NotificationsSection />}
         {tab === 'plan' && <PlanSection />}
-        {tab === 'team' && link('team', 'Team & roles', 'Invite people by email, choose what each role can do, and suspend or remove members.', 'Open Team')}
-        {tab === 'banking' && link('banking', 'Banking & payouts', 'Where your payouts are sent: bank account and M-Pesa details.', 'Open Banking')}
       </div>
     </div>
   );

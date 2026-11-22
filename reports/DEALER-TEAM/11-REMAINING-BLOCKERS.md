@@ -1,0 +1,6 @@
+# 11 — Remaining blockers and open items
+**Blocked (credentials/infra):** real e-mail provider delivery (only a loopback stub exercised); hosted Supabase schema mismatch (staging reconciliation + rollback test still required — release blocker); M-Pesa/Cloudinary real providers.
+**Requires owner decision:** how far the dealer colour/typography redesign should go (no screenshots were available to this session; reference pages unspecified); whether to delete the orphaned legacy `DealerDashboard.jsx`/`DealerTeam.jsx`/`DealerSettings.jsx` (test-only); approved square icon and dark-logo approval (from the previous phase).
+**Not implemented:** dealer colour/design-system pass (02); dealer-workspace accessibility audit (08); landscape and interaction-level dealer browser tests; upgrade-path migration test; recipient-side browser journey (sign up → verify e-mail → return to the invite link).
+**Known risks:** a new invitee who registers may lose the `?invite=` return path across e-mail verification and need to re-open the link; concurrent double-accept would 500 instead of 409 (DB unique index still prevents duplicates).
+**Release:** NOT production-ready while the hosted-DB blocker and the above untested items remain.
