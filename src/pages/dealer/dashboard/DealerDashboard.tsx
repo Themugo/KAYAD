@@ -19,7 +19,7 @@ import DealerCollectionAccountPanel from './DealerCollectionAccountPanel';
 import AuctionInsightsPanel from './AuctionInsightsPanel';
 import DealerAccountStatus from './DealerAccountStatus';
 import DealerTeamPanel from './DealerTeamPanel';
-import { getMyListings, deleteCar, markCarSold } from '../../../services/vehicleApi';
+import { getMyListings, deleteCar, markCarSold, setCarVisibility } from '../../../services/vehicleApi';
 import { ListingStatusBadge, ListingThumb } from '../../../components/listing/ListingPresentation';
 import type { BackendCar } from '../../../services/vehicleApi';
 import { ParticipantEscrowDesk } from '../../../features/escrow/ParticipantEscrowDesk';
@@ -118,6 +118,20 @@ const QuickAction = ({ icon: Icon, label, onClick }: { icon: React.ElementType; 
 );
 
 /** "3 hours ago" style label from a real ISO timestamp; returns null when the time is missing or invalid. */
+/** One status vocabulary for the dealer workspace (stored value -> label shown). */
+export const dealerStatusLabel = (status?: string | null): string => {
+  switch (status) {
+    case 'available': case 'active': return 'Active';
+    case 'hidden': case 'paused': return 'Paused';
+    case 'draft': return 'Draft';
+    case 'pending': return 'Under review';
+    case 'sold': return 'Sold';
+    case 'rejected': return 'Rejected';
+    case 'reserved': return 'Reserved';
+    default: return status ? String(status).replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()) : 'Status unavailable';
+  }
+};
+
 const relativeTime = (iso?: string | null): string | null => {
   if (!iso) return null;
   const t = new Date(iso).getTime();
@@ -210,7 +224,7 @@ const NavTab = ({ icon: Icon, label, active, onClick, badge }) => (
 
 // ============================================================
 // NAVIGATION MODEL (Phase 14.2)
-// Groups only organise sections that already exist; no section is added or removed.
+// Groups only organise sections that already exist; no section is added or removed. Account status, Help & support and Sign out live in the sidebar footer.
 // ============================================================
 
 type NavItem = { id: string; label: string; icon: React.ElementType; title: string; description: string };
@@ -220,26 +234,23 @@ const DEALER_NAV_GROUPS: NavGroup[] = [
   { id: 'overview', label: 'Overview', items: [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard, title: 'Dashboard', description: 'Your dealership at a glance: activity, listings and what needs attention.' },
   ] },
-  { id: 'business', label: 'Business', items: [
+  { id: 'operations', label: 'Operations', items: [
     { id: 'inventory', label: 'Inventory', icon: Car, title: 'Inventory', description: 'Vehicles you have listed and their current status.' },
     { id: 'leads', label: 'Leads', icon: MessageSquare, title: 'Leads', description: 'Buyer enquiries on your vehicles.' },
     { id: 'pipeline', label: 'Pipeline', icon: Target, title: 'Lead pipeline', description: 'Enquiries grouped by sales stage.' },
     { id: 'customers', label: 'Customers', icon: Users, title: 'Customers', description: 'Buyers who have dealt with your dealership.' },
-    { id: 'finance', label: 'Finance', icon: CreditCard, title: 'Finance applications', description: 'Financing applications attached to your vehicles.' },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, title: 'Analytics', description: 'Revenue, sales and viewing performance.' },
-    { id: 'reputation', label: 'Reputation', icon: Star, title: 'Reputation', description: 'Ratings and reviews from buyers.' },
-  ] },
-  { id: 'operations', label: 'Operations', items: [
     { id: 'auctions', label: 'Auctions', icon: Gavel, title: 'Auctions', description: 'Auctions run by your dealership.' },
     { id: 'inspections', label: 'Inspections', icon: ClipboardCheck, title: 'Inspections', description: 'Inspection orders on your vehicles.' },
     { id: 'escrow', label: 'Escrow', icon: Shield, title: 'Escrow', description: 'Protected transactions on your sales.' },
-    { id: 'marketing', label: 'Marketing', icon: Megaphone, title: 'Marketing', description: 'Campaigns promoting your vehicles.' },
+    { id: 'finance', label: 'Finance', icon: CreditCard, title: 'Finance applications', description: 'Financing applications attached to your vehicles.' },
   ] },
-  { id: 'system', label: 'System Management', items: [
+  { id: 'business', label: 'Business management', items: [
+    { id: 'analytics', label: 'Analytics', icon: BarChart3, title: 'Analytics', description: 'Revenue, sales and viewing performance.' },
+    { id: 'reputation', label: 'Reputation', icon: Star, title: 'Reputation', description: 'Ratings and reviews from buyers.' },
+    { id: 'marketing', label: 'Marketing', icon: Megaphone, title: 'Marketing', description: 'Campaigns promoting your vehicles.' },
     { id: 'team', label: 'Team', icon: UserCog, title: 'Team', description: 'People who work with your dealership account.' },
-    { id: 'settings', label: 'Settings', icon: Settings, title: 'Settings', description: 'Profile, notifications, plan, team and banking for your dealership.' },
-    // Banking sits at the bottom of the list: payout details are no longer asked for during onboarding.
     { id: 'banking', label: 'Banking', icon: Landmark, title: 'Banking', description: 'Where your payouts are sent: bank account and M-Pesa.' },
+    { id: 'settings', label: 'Settings', icon: Settings, title: 'Settings', description: 'Profile, notifications, plan, team and banking for your dealership.' },
   ] },
 ];
 
@@ -317,11 +328,14 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   // Desktop sidebar height = the part of the viewport that is below whatever sits above the workspace (site header, banners), so the
   // account status and Sign out block is always inside the viewport instead of 110px below the fold (DA-06).
   useEffect(() => {
-    const root = rootRef.current;
-    if (!root || typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return;
     let raf = 0;
+    // Always read the CURRENT root: the element can be replaced after mount (loading state -> workspace), and a captured reference
+    // would measure a detached node (top 0) and leave Sign out below the fold on some loads.
     const update = () => {
       raf = 0;
+      const root = rootRef.current;
+      if (!root) return;
       const top = Math.max(0, Math.round(root.getBoundingClientRect().top));
       if (root.style.getPropertyValue('--dealer-aside-top') !== `${top}px`) root.style.setProperty('--dealer-aside-top', `${top}px`);
     };
@@ -334,7 +348,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     // to fire when it appears. A cheap low-frequency check (one layout read, style written only when the value changed) closes that gap.
     const poll = window.setInterval(update, 400);
     const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(schedule) : null;
-    ro?.observe(document.body); ro?.observe(root);
+    ro?.observe(document.body); if (rootRef.current) ro?.observe(rootRef.current);
     window.addEventListener('scroll', schedule, { passive: true, capture: true });
     window.addEventListener('resize', schedule);
     window.addEventListener('load', schedule);
@@ -458,6 +472,23 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     } catch (err) {
       setSoldError((err as Error)?.message || 'Could not mark this vehicle as sold. Nothing was changed — please try again.');
     } finally { setSoldBusy(false); }
+  };
+
+  const [visibilityBusyId, setVisibilityBusyId] = useState<string | null>(null);
+  const [visibilityError, setVisibilityError] = useState<{ id: string; message: string } | null>(null);
+  const changeVisibility = async (car: BackendCar, action: 'pause' | 'publish') => {
+    const id = String(car.id || car._id);
+    if (visibilityBusyId) return;
+    setVisibilityBusyId(id); setVisibilityError(null);
+    try {
+      const res = await setCarVisibility(id, action);
+      if (res && res.success === false) throw Object.assign(new Error(res.message || 'The listing could not be updated.'), { missing: res.missing });
+      const next = action === 'pause' ? 'hidden' : 'available';
+      setMyListings((prev) => prev.map((c) => (String(c.id || c._id) === id ? { ...c, status: next } : c)));
+      setListingNotice(action === 'pause' ? 'Listing paused. It is hidden from buyers; photos, listing number and enquiries are kept.' : 'Listing is active again on the marketplace.');
+    } catch (err) {
+      setVisibilityError({ id, message: (err as Error)?.message || 'The listing could not be updated. Nothing was changed.' });
+    } finally { setVisibilityBusyId(null); }
   };
 
   const confirmDeleteListing = async (car: BackendCar) => {
@@ -764,6 +795,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
             </summary>
             <div className="max-h-[40vh] overflow-y-auto p-1"><DealerAccountStatus /></div>
           </details>
+          <button type="button" onClick={() => onNavigate?.('support')} className="w-full inline-flex min-h-11 items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" data-testid="dealer-help-support">Help &amp; support</button>
           {logoutError && <p role="alert" className="text-sm text-red-700">{logoutError}</p>}
           <button type="button" onClick={handleDealerLogout} className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-[#D7E7E4] px-4 py-2 text-sm font-semibold text-[#0A3340] hover:bg-[#EEF7F5]"><LogOut className="w-4 h-4" />Sign out</button>
         </div>
@@ -780,7 +812,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   <span aria-current="page">Dealer Hub</span>
                 ) : (
                   <>
-                    <button type="button" onClick={() => setActiveSection('overview')} className="inline-flex items-center gap-1 font-medium text-[#176B87] hover:text-[#12576D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]">
+                    <button type="button" onClick={() => setActiveSection('overview')} className="inline-flex min-h-6 items-center gap-1 font-medium text-[#176B87] hover:text-[#12576D] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]">
                       <ChevronLeft className="w-3 h-3" aria-hidden="true" />Dealer Hub
                     </button>
                     <ChevronRight className="w-3 h-3" aria-hidden="true" />
@@ -795,8 +827,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="hidden items-center rounded-xl border border-[#D7E7E4] bg-white p-1 sm:inline-flex" aria-label="Page history">
-                <button type="button" aria-label="Go to previous page" title="Previous page" onClick={() => window.history.back()} className="rounded-lg p-2 text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><ChevronLeft className="h-4 w-4" /></button>
-                <button type="button" aria-label="Go to next page" title="Next page" onClick={() => window.history.forward()} className="rounded-lg p-2 text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><ChevronRight className="h-4 w-4" /></button>
+                <button type="button" aria-label="Go to previous page" title="Previous page" onClick={() => window.history.back()} className="inline-flex min-h-8 min-w-8 shrink-0 items-center justify-center rounded-lg p-2 text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><ChevronLeft className="h-4 w-4" /></button>
+                <button type="button" aria-label="Go to next page" title="Next page" onClick={() => window.history.forward()} className="inline-flex min-h-8 min-w-8 shrink-0 items-center justify-center rounded-lg p-2 text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#176B87]"><ChevronRight className="h-4 w-4" /></button>
               </div>
               <button type="button" aria-label="Notifications" className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center sm:static sm:h-auto sm:w-auto p-2 bg-white border border-[#D7E7E4] rounded-xl hover:bg-[#F6FAF9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]" onClick={() => { window.location.assign('/notifications'); }}>
                 <Bell className="w-5 h-5 text-[#64748B]" aria-hidden="true" />
@@ -980,18 +1012,22 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                 </div>
               ) : (
                 <>
-                  <div className="mb-5 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-5">
+                  <div className="mb-5 grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-6">
                     <div className="p-3 bg-emerald-50 rounded-xl text-center">
                       <p className="text-2xl font-bold text-emerald-700">{myListings.filter((l) => l.status === 'available' || l.status === 'active').length}</p>
-                      <p className="text-xs text-emerald-800">Published</p>
+                      <p className="text-xs text-emerald-800">Active</p>
                     </div>
                     <div className="p-3 bg-teal-50 rounded-xl text-center">
                       <p className="text-2xl font-bold text-teal-700">{myListings.filter((l) => l.status === 'pending').length}</p>
-                      <p className="text-xs text-teal-800">Pending review</p>
+                      <p className="text-xs text-teal-800">Under review</p>
                     </div>
                     <div className="p-3 bg-[#F3FAF9] rounded-xl text-center">
                       <p className="text-2xl font-bold text-[#176B87]">{myListings.filter((l) => l.status === 'draft').length}</p>
                       <p className="text-xs text-[#176B87]">Draft</p>
+                    </div>
+                    <div className="p-3 bg-[#F3FAF9] rounded-xl text-center" data-testid="tile-paused">
+                      <p className="text-2xl font-bold text-[#176B87]">{myListings.filter((l) => l.status === 'hidden' || l.status === 'paused').length}</p>
+                      <p className="text-xs text-[#176B87]">Paused</p>
                     </div>
                     <div className="p-3 bg-[#F3FAF9] rounded-xl text-center">
                       <p className="text-2xl font-bold text-[#176B87]">{myListings.filter((l) => l.status === 'reserved').length}</p>
@@ -1007,8 +1043,9 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                       <input type="search" value={invQuery} onChange={(e) => setInvQuery(e.target.value)} placeholder="Search make, model, title…" aria-label="Search your inventory" className="col-span-2 min-h-11 flex-1 sm:min-w-[180px] px-3 py-2 text-base sm:text-sm border border-[#B9D3CF] rounded-lg" />
                       <select value={invStatus} onChange={(e) => setInvStatus(e.target.value)} aria-label="Filter by status" className="min-h-11 px-3 py-2 text-sm border border-[#B9D3CF] rounded-lg bg-white">
                         <option value="all">All statuses</option>
-                        <option value="published">Published</option>
-                        <option value="pending">Pending review</option>
+                        <option value="published">Active</option>
+                        <option value="hidden">Paused</option>
+                        <option value="pending">Under review</option>
                         <option value="draft">Draft</option>
                         <option value="reserved">Reserved</option>
                         <option value="sold">Sold</option>
@@ -1040,7 +1077,10 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                       const aStatus = String(car.auctionStatus ?? car.auction_status ?? '');
                       const isAuctionListing = Boolean(car.isAuction || car.hasAuction || car.has_auction || (aStatus && aStatus !== 'none' && aStatus !== 'draft') || bids > 0);
                       const isSoldListing = car.status === 'sold';
-                      const statusText = car.status ? String(car.status).replace(/_/g, ' ').replace(/^./, (c) => c.toUpperCase()) : 'Status unavailable';
+                      const statusText = dealerStatusLabel(car.status);
+                      const canPause = car.status === 'available' && aStatus !== 'live' && !(bids > 0);
+                      const canPublish = (car.status === 'hidden' || car.status === 'draft') && !(bids > 0);
+                      const visBusy = visibilityBusyId === carId;
                       const confirming = deleteTargetId === carId;
                       const photoCount = Array.isArray(car.images) ? car.images.length : 0;
                       const mileageNum = Number(car.mileage);
@@ -1065,6 +1105,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                               {!isSoldListing && !(aStatus === 'live') && (
                                 <button type="button" onClick={() => { setSoldError(null); setSoldBuyer(''); setSoldPrice(''); setSoldTargetId(carId); }} className="px-3 py-1 text-xs font-bold text-emerald-800 border border-emerald-300 rounded-lg hover:bg-emerald-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Mark ${car.title || 'vehicle'} as sold`}>Mark sold</button>
                               )}
+                              {canPause && <button type="button" disabled={Boolean(visibilityBusyId)} onClick={() => changeVisibility(car, 'pause')} className="px-3 py-1 text-xs font-bold text-[#0A3340] border border-[#B9D3CF] rounded-lg hover:bg-[#EEF7F5] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Pause ${car.title || 'vehicle'}`} data-testid="listing-pause">{visBusy ? 'Pausing…' : 'Pause'}</button>}
+                              {canPublish && <button type="button" disabled={Boolean(visibilityBusyId)} onClick={() => changeVisibility(car, 'publish')} className="px-3 py-1 text-xs font-bold text-white bg-[#176B87] rounded-lg hover:bg-[#12576D] disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`${car.status === 'hidden' ? 'Republish' : 'Publish'} ${car.title || 'vehicle'}`} data-testid="listing-publish">{visBusy ? 'Publishing…' : car.status === 'hidden' ? 'Republish' : 'Publish'}</button>}
                               {isSoldListing && <span className="col-span-3 inline-flex min-h-10 items-center justify-center rounded-lg bg-[#EEF7F5] px-3 text-xs font-semibold text-[#475569]" data-testid="sold-read-only">Sold · read-only</span>}
                               {!isSoldListing && <button type="button" onClick={() => openListingForm({ mode: 'edit', id: carId })} className="px-3 py-1 text-xs font-bold text-[#176B87] border border-[#B9D3CF] rounded-lg hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340]" aria-label={`Edit ${car.title || 'vehicle'}`}>Edit</button>}
                               {!isAuctionListing && !isSoldListing && (
@@ -1072,6 +1114,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                               )}
                             </div>
                           </div>
+                          {visibilityError?.id === carId && <p role="alert" className="mt-2 text-xs font-medium text-[#7A271A]" data-testid="visibility-error">{visibilityError.message}</p>}
                           {isAuctionListing && <p className="mt-2 text-xs text-[#475569]">Listings with an auction cannot be removed from this screen.</p>}
                           {isSoldListing && !isAuctionListing && <p className="mt-2 text-xs text-[#475569]">Sold listings cannot be removed; completed sales are handled through escrow.</p>}
                           {soldTargetId === carId && (
@@ -1109,7 +1152,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   </div>
                   {soldListings.length > 0 && invStatus !== 'sold' && (
                     <div className="mt-6 border-t border-[#D7E7E4] pt-4" data-testid="sold-section">
-                      <button type="button" onClick={() => setShowSold((v) => !v)} aria-expanded={showSold} className="w-full flex items-center justify-between text-left text-sm font-bold text-[#0A3340] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340] rounded-lg">
+                      <button type="button" onClick={() => setShowSold((v) => !v)} aria-expanded={showSold} className="w-full min-h-10 flex items-center justify-between text-left text-sm font-bold text-[#0A3340] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3340] rounded-lg">
                         <span>Sold vehicles ({soldListings.length})</span>
                         <ChevronDown className={`w-4 h-4 transition-transform ${showSold ? 'rotate-180' : ''}`} aria-hidden="true" />
                       </button>

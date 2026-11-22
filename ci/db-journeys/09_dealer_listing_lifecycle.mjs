@@ -11,7 +11,7 @@ const mkDealer = async (tag) => {
   return d;
 };
 const A = await mkDealer('dealera'); const B = await mkDealer('dealerb'); const buyer = await makeUser({ tag: 'buyer' });
-const car = (owner, title, extra = '') => q(`insert into cars(title,brand,model,year,price,status,dealer_id,sold${extra ? ',' + extra.split('=')[0] : ''}) values ('${title}','Mazda','CX-5',2019,3000000,'available','${owner.id}',false${extra ? ',' + extra.split('=')[1] : ''}) returning id`).split('\n')[0];
+const car = (owner, title, extra = '') => q(`insert into cars(title,brand,model,year,price,status,dealer_id,sold,images${extra ? ',' + extra.split('=')[0] : ''}) values ('${title}','Mazda','CX-5',2019,3000000,'available','${owner.id}',false,'[{"url":"https://res.example.test/a.jpg"}]'::jsonb${extra ? ',' + extra.split('=')[1] : ''}) returning id`).split('\n')[0];
 const row = (id) => q(`select status||'|'||sold||'|'||(sold_at is not null) from cars where id='${id}'`);
 const sold = (c, id, body = {}) => c.raw(`/api/dealer/cars/${id}/mark-sold`, { method: 'PATCH', body });
 const bulk = (c, ids, status) => c.raw('/api/dealer/cars/bulk-status', { method: 'PATCH', body: { ids, status } });

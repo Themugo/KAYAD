@@ -85,7 +85,8 @@ const sb = {
       _ids: null, _dealer: null, _patch: null,
       select() { return q; },
       in(_c, ids) { q._ids = ids; return q; },
-      eq(_c, v) { q._dealer = v; return q; },
+      eq(c, v) { q._dealer = v; (q._eqs = q._eqs || {})[c] = v; return q; },
+      maybeSingle() { const car = dealerCars.find((x) => x.id === q._eqs?.id && x.dealer === q._eqs?.dealer_id); return Promise.resolve({ data: car || null, error: null }); },
       update(p) { q._patch = p; return q; },
       then(res, rej) {
         if (q._patch) {
@@ -209,10 +210,12 @@ describe("S1-LIST-03 cross-owner edit/delete requires listing-management authori
 describe("S1-LIST-04 dealer bulk-status", () => {
   let server; let base;
   beforeEach(async () => {
+    // c1 / c3 are publishable drafts (brand, model, year, price and a photo present: the publish rule validates them).
+    const FULL = { brand: "Toyota", model: "Prado", year: 2018, price: 4000000, images: [{ url: "https://res.example.test/a.jpg" }] };
     dealerCars = [
-      { id: "c1", dealer: "seller-1", status: "pending" },
-      { id: "c2", dealer: "seller-1", status: "rejected" },
-      { id: "c3", dealer: "seller-2", status: "pending" },
+      { id: "c1", dealer: "seller-1", status: "draft", ...FULL },
+      { id: "c2", dealer: "seller-1", status: "rejected", ...FULL },
+      { id: "c3", dealer: "seller-2", status: "draft", ...FULL },
     ];
     updateError = null; lastUpdate = null; rpcCalls = []; currentUser = SELLER;
     if (!server) {

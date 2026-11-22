@@ -1,0 +1,2429 @@
+[
+ {
+  "w": 1920,
+  "h": 1080,
+  "s": "overview",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 1080,
+   "h": 970
+  },
+  "footerRect": {
+   "top": 895,
+   "bottom": 1080,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 1026,
+   "bottom": 1064,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 708,
+  "vh": 1080,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1920,
+  "h": 1080,
+  "s": "inventory",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 1080,
+   "h": 970
+  },
+  "footerRect": {
+   "top": 895,
+   "bottom": 1080,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 1026,
+   "bottom": 1064,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 708,
+  "vh": 1080,
+  "hOverflow": false,
+  "numbers": [
+   "#4",
+   "#4",
+   "#3",
+   "#3",
+   "#2",
+   "#2"
+  ],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1920,
+  "h": 1080,
+  "s": "leads",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 1080,
+   "h": 970
+  },
+  "footerRect": {
+   "top": 895,
+   "bottom": 1080,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 1026,
+   "bottom": 1064,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 708,
+  "vh": 1080,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1920,
+  "h": 1080,
+  "s": "customers",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 1080,
+   "h": 970
+  },
+  "footerRect": {
+   "top": 895,
+   "bottom": 1080,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 1026,
+   "bottom": 1064,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 708,
+  "vh": 1080,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1920,
+  "h": 1080,
+  "s": "team",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 1080,
+   "h": 970
+  },
+  "footerRect": {
+   "top": 895,
+   "bottom": 1080,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 1026,
+   "bottom": 1064,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 708,
+  "vh": 1080,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1920,
+  "h": 1080,
+  "s": "banking",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 1080,
+   "h": 970
+  },
+  "footerRect": {
+   "top": 895,
+   "bottom": 1080,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 1026,
+   "bottom": 1064,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 708,
+  "vh": 1080,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1920,
+  "h": 1080,
+  "s": "settings",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 1080,
+   "h": 970
+  },
+  "footerRect": {
+   "top": 895,
+   "bottom": 1080,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 1026,
+   "bottom": 1064,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 708,
+  "vh": 1080,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1920,
+  "consoleErrors": []
+ },
+ {
+  "w": 1440,
+  "h": 900,
+  "s": "overview",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 900,
+   "h": 790
+  },
+  "footerRect": {
+   "top": 715,
+   "bottom": 900,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 846,
+   "bottom": 884,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 528,
+  "vh": 900,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1440,
+  "h": 900,
+  "s": "inventory",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 900,
+   "h": 790
+  },
+  "footerRect": {
+   "top": 715,
+   "bottom": 900,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 846,
+   "bottom": 884,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 528,
+  "vh": 900,
+  "hOverflow": false,
+  "numbers": [
+   "#4",
+   "#4",
+   "#3",
+   "#3",
+   "#2",
+   "#2"
+  ],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1440,
+  "h": 900,
+  "s": "leads",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 900,
+   "h": 790
+  },
+  "footerRect": {
+   "top": 715,
+   "bottom": 900,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 846,
+   "bottom": 884,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 528,
+  "vh": 900,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1440,
+  "h": 900,
+  "s": "customers",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 900,
+   "h": 790
+  },
+  "footerRect": {
+   "top": 715,
+   "bottom": 900,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 846,
+   "bottom": 884,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 528,
+  "vh": 900,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1440,
+  "h": 900,
+  "s": "team",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 900,
+   "h": 790
+  },
+  "footerRect": {
+   "top": 715,
+   "bottom": 900,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 846,
+   "bottom": 884,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 528,
+  "vh": 900,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1440,
+  "h": 900,
+  "s": "banking",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 900,
+   "h": 790
+  },
+  "footerRect": {
+   "top": 715,
+   "bottom": 900,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 846,
+   "bottom": 884,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 528,
+  "vh": 900,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1440,
+  "h": 900,
+  "s": "settings",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 900,
+   "h": 790
+  },
+  "footerRect": {
+   "top": 715,
+   "bottom": 900,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 846,
+   "bottom": 884,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 528,
+  "vh": 900,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1440,
+  "consoleErrors": []
+ },
+ {
+  "w": 1280,
+  "h": 800,
+  "s": "overview",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 800,
+   "h": 690
+  },
+  "footerRect": {
+   "top": 615,
+   "bottom": 800,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 746,
+   "bottom": 784,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 428,
+  "vh": 800,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1280,
+  "h": 800,
+  "s": "inventory",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 800,
+   "h": 690
+  },
+  "footerRect": {
+   "top": 615,
+   "bottom": 800,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 746,
+   "bottom": 784,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 428,
+  "vh": 800,
+  "hOverflow": false,
+  "numbers": [
+   "#4",
+   "#4",
+   "#3",
+   "#3",
+   "#2",
+   "#2"
+  ],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1280,
+  "h": 800,
+  "s": "leads",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 800,
+   "h": 690
+  },
+  "footerRect": {
+   "top": 615,
+   "bottom": 800,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 746,
+   "bottom": 784,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 428,
+  "vh": 800,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1280,
+  "h": 800,
+  "s": "customers",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 800,
+   "h": 690
+  },
+  "footerRect": {
+   "top": 615,
+   "bottom": 800,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 746,
+   "bottom": 784,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 428,
+  "vh": 800,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1280,
+  "h": 800,
+  "s": "team",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 800,
+   "h": 690
+  },
+  "footerRect": {
+   "top": 615,
+   "bottom": 800,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 746,
+   "bottom": 784,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 428,
+  "vh": 800,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1280,
+  "h": 800,
+  "s": "banking",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 800,
+   "h": 690
+  },
+  "footerRect": {
+   "top": 615,
+   "bottom": 800,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 746,
+   "bottom": 784,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 428,
+  "vh": 800,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1280,
+  "h": 800,
+  "s": "settings",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 800,
+   "h": 690
+  },
+  "footerRect": {
+   "top": 615,
+   "bottom": 800,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 746,
+   "bottom": 784,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 428,
+  "vh": 800,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1280,
+  "consoleErrors": []
+ },
+ {
+  "w": 1024,
+  "h": 768,
+  "s": "overview",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 768,
+   "h": 658
+  },
+  "footerRect": {
+   "top": 583,
+   "bottom": 768,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 714,
+   "bottom": 752,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 396,
+  "vh": 768,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1024,
+  "h": 768,
+  "s": "inventory",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 768,
+   "h": 658
+  },
+  "footerRect": {
+   "top": 583,
+   "bottom": 768,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 714,
+   "bottom": 752,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 396,
+  "vh": 768,
+  "hOverflow": false,
+  "numbers": [
+   "#4",
+   "#4",
+   "#3",
+   "#3",
+   "#2",
+   "#2"
+  ],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1024,
+  "h": 768,
+  "s": "leads",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 768,
+   "h": 658
+  },
+  "footerRect": {
+   "top": 583,
+   "bottom": 768,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 714,
+   "bottom": 752,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 396,
+  "vh": 768,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1024,
+  "h": 768,
+  "s": "customers",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 768,
+   "h": 658
+  },
+  "footerRect": {
+   "top": 583,
+   "bottom": 768,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 714,
+   "bottom": 752,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 396,
+  "vh": 768,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1024,
+  "h": 768,
+  "s": "team",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 768,
+   "h": 658
+  },
+  "footerRect": {
+   "top": 583,
+   "bottom": 768,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 714,
+   "bottom": 752,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 396,
+  "vh": 768,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1024,
+  "h": 768,
+  "s": "banking",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 768,
+   "h": 658
+  },
+  "footerRect": {
+   "top": 583,
+   "bottom": 768,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 714,
+   "bottom": 752,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 396,
+  "vh": 768,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1024,
+  "h": 768,
+  "s": "settings",
+  "asideVisible": true,
+  "asideRect": {
+   "top": 110,
+   "bottom": 768,
+   "h": 658
+  },
+  "footerRect": {
+   "top": 583,
+   "bottom": 768,
+   "h": 185
+  },
+  "signoutRect": {
+   "top": 714,
+   "bottom": 752,
+   "h": 38
+  },
+  "navScrollH": 864,
+  "navClientH": 396,
+  "vh": 768,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 1024,
+  "consoleErrors": []
+ },
+ {
+  "w": 768,
+  "h": 1024,
+  "s": "overview",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 1024,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 768,
+  "h": 1024,
+  "s": "inventory",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 1024,
+  "hOverflow": false,
+  "numbers": [
+   "#4",
+   "#4",
+   "#3",
+   "#3",
+   "#2",
+   "#2"
+  ],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 768,
+  "h": 1024,
+  "s": "leads",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 1024,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 768,
+  "h": 1024,
+  "s": "customers",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 1024,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 768,
+  "h": 1024,
+  "s": "team",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 1024,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 768,
+  "h": 1024,
+  "s": "banking",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 1024,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 768,
+  "h": 1024,
+  "s": "settings",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 1024,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 768,
+  "h": 1024,
+  "s": "drawer",
+  "signoutInViewport": true,
+  "signoutH": 38,
+  "focusInside": true,
+  "focusLabel": "Overview",
+  "bodyOverflow": "hidden",
+  "closed": true,
+  "focusOnMenu": true
+ },
+ {
+  "w": 768,
+  "consoleErrors": []
+ },
+ {
+  "w": 430,
+  "h": 932,
+  "s": "overview",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 932,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 430,
+  "h": 932,
+  "s": "inventory",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 932,
+  "hOverflow": false,
+  "numbers": [
+   "#4",
+   "#4",
+   "#3",
+   "#3",
+   "#2",
+   "#2"
+  ],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 430,
+  "h": 932,
+  "s": "leads",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 932,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 430,
+  "h": 932,
+  "s": "customers",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 932,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 430,
+  "h": 932,
+  "s": "team",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 932,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 430,
+  "h": 932,
+  "s": "banking",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 932,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 430,
+  "h": 932,
+  "s": "settings",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 932,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 430,
+  "h": 932,
+  "s": "drawer",
+  "signoutInViewport": true,
+  "signoutH": 38,
+  "focusInside": true,
+  "focusLabel": "Overview",
+  "bodyOverflow": "hidden",
+  "closed": true,
+  "focusOnMenu": true
+ },
+ {
+  "w": 430,
+  "consoleErrors": []
+ },
+ {
+  "w": 390,
+  "h": 844,
+  "s": "overview",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 844,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 390,
+  "h": 844,
+  "s": "inventory",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 844,
+  "hOverflow": false,
+  "numbers": [
+   "#4",
+   "#4",
+   "#3",
+   "#3",
+   "#2",
+   "#2"
+  ],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 390,
+  "h": 844,
+  "s": "leads",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 844,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 390,
+  "h": 844,
+  "s": "customers",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 844,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 390,
+  "h": 844,
+  "s": "team",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 844,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 390,
+  "h": 844,
+  "s": "banking",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 844,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 390,
+  "h": 844,
+  "s": "settings",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 844,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 390,
+  "h": 844,
+  "s": "drawer",
+  "signoutInViewport": true,
+  "signoutH": 38,
+  "focusInside": true,
+  "focusLabel": "Overview",
+  "bodyOverflow": "hidden",
+  "closed": true,
+  "focusOnMenu": true
+ },
+ {
+  "w": 390,
+  "consoleErrors": []
+ },
+ {
+  "w": 375,
+  "h": 812,
+  "s": "overview",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 812,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 375,
+  "h": 812,
+  "s": "inventory",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 812,
+  "hOverflow": false,
+  "numbers": [
+   "#4",
+   "#4",
+   "#3",
+   "#3",
+   "#2",
+   "#2"
+  ],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 375,
+  "h": 812,
+  "s": "leads",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 812,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 375,
+  "h": 812,
+  "s": "customers",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 812,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 375,
+  "h": 812,
+  "s": "team",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 812,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 375,
+  "h": 812,
+  "s": "banking",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 812,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 375,
+  "h": 812,
+  "s": "settings",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 812,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 375,
+  "h": 812,
+  "s": "drawer",
+  "signoutInViewport": true,
+  "signoutH": 38,
+  "focusInside": true,
+  "focusLabel": "Overview",
+  "bodyOverflow": "hidden",
+  "closed": true,
+  "focusOnMenu": true
+ },
+ {
+  "w": 375,
+  "consoleErrors": []
+ },
+ {
+  "w": 360,
+  "h": 800,
+  "s": "overview",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 800,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 360,
+  "h": 800,
+  "s": "inventory",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 800,
+  "hOverflow": false,
+  "numbers": [
+   "#4",
+   "#4",
+   "#3",
+   "#3",
+   "#2",
+   "#2"
+  ],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 360,
+  "h": 800,
+  "s": "leads",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 800,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 360,
+  "h": 800,
+  "s": "customers",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 800,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 360,
+  "h": 800,
+  "s": "team",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 800,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 360,
+  "h": 800,
+  "s": "banking",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 800,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 360,
+  "h": 800,
+  "s": "settings",
+  "asideVisible": false,
+  "asideRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "footerRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "signoutRect": {
+   "top": 0,
+   "bottom": 0,
+   "h": 0
+  },
+  "navScrollH": 0,
+  "navClientH": 0,
+  "vh": 800,
+  "hOverflow": false,
+  "numbers": [],
+  "a11y": {
+   "unnamedControls": 0,
+   "unlabelledInputs": 0,
+   "duplicateIds": 0,
+   "targetsUnder24px": 0,
+   "imgNoAlt": 0,
+   "h1": 1,
+   "lang": "en",
+   "horizontalOverflow": false
+  }
+ },
+ {
+  "w": 360,
+  "h": 800,
+  "s": "drawer",
+  "signoutInViewport": true,
+  "signoutH": 38,
+  "focusInside": true,
+  "focusLabel": "Overview",
+  "bodyOverflow": "hidden",
+  "closed": true,
+  "focusOnMenu": true
+ },
+ {
+  "w": 360,
+  "consoleErrors": []
+ }
+]

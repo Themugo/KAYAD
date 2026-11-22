@@ -126,7 +126,9 @@ const { __setOnboardingPolicyForTests } = await import("../../services/onboardin
 const mkRes = () => { const r = { code: 200 }; r.status = (c) => { r.code = c; return r; }; r.json = (b) => { r.body = b; return r; }; return r; };
 const APPROVED = { id: "seller-1", role: "dealer", effectiveRole: "dealer", status: "approved", emailVerified: true };
 const PENDING = { ...APPROVED, status: "pending" };
-const mkOwned = (over = {}) => { const d = { id: "c1", _id: "c1", dealer: "seller-1", status: "pending", sold: false, save: jest.fn(async () => {}), ...over }; return d; };
+// A listing a dealer is allowed to publish: draft status with the minimum details (brand, model, year, price, a photo).
+const PUBLISHABLE = { brand: "Toyota", model: "Prado", year: 2018, price: 4000000, images: [{ url: "https://res.example.test/a.jpg" }] };
+const mkOwned = (over = {}) => { const d = { id: "c1", _id: "c1", dealer: "seller-1", status: "draft", ...PUBLISHABLE, sold: false, save: jest.fn(async () => {}), ...over }; return d; };
 const bulkCall = async (user, body, extraReq = {}) => { const res = mkRes(); await bulkUpdateListings({ user, body, ...extraReq }, res); return res; };
 
 let server; let base;
@@ -208,7 +210,7 @@ describe("PATCH /dealer/cars/bulk-status — sold listings", () => {
   test("a SOLD listing in the batch is skipped, the rest proceed", async () => {
     await startServer();
     __setOnboardingPolicyForTests({ listingModeration: "auto_publish" });
-    dealerCars = [{ id: "c1", dealer: "seller-1", status: "pending" }, { id: "c2", dealer: "seller-1", status: "sold" }];
+    dealerCars = [{ id: "c1", dealer: "seller-1", status: "draft", ...PUBLISHABLE }, { id: "c2", dealer: "seller-1", status: "sold", ...PUBLISHABLE }];
     const r = await patch("/cars/bulk-status", { ids: ["c1", "c2"], status: "available" });
     expect(r.code).toBe(200);
     expect(lastUpdate.ids).toEqual(["c1"]);

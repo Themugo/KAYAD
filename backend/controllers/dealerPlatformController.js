@@ -3,6 +3,7 @@
 // Digital Operating System for KAYAD Dealers
 // ============================================================
 
+import { invalidatePublicListingCaches } from "../utils/publicListingCache.js";
 import { checkPasswordStepUp } from "../utils/stepUp.js"; // Phase 14.9
 import User from "../models/User.js";
 import Dealer from "../models/Dealer.js";
@@ -308,6 +309,7 @@ export async function bulkUpdateListings(req, res) {
     // Same canonical lifecycle as /api/dealer/cars/bulk-status: itemised, atomic per listing, sold/escrow/settlement locks enforced.
     const normalized = status === "active" ? "available" : status;
     const result = await bulkChangeDealerListingStatus({ dealerId: req.user.id, actorId: req.actingMember?.id || req.user.id, ids, status: normalized, sale: req.body?.data?.sale || {} });
+    if (result.updated.length) await invalidatePublicListingCaches();
     const allBlocked = result.updated.length === 0 && result.skipped.length > 0;
     if (allBlocked) return res.status(409).json({ success: false, code: result.skipped[0].code, message: result.skipped[0].message, data: { updated: 0, status: normalized, skipped: result.skipped } });
     res.json({ success: true, data: { updated: result.updated.length, status: normalized, updatedIds: result.updated, skipped: result.skipped } });

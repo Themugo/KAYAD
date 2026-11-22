@@ -29,15 +29,14 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
   beforeEach(() => { window.history.replaceState({}, '', '/?nav=dealer-dashboard'); });
   afterEach(() => { cleanup(); });
 
-  it('groups the existing sections under Overview, Business, Operations and System Management', async () => {
+  it('groups the existing sections under Overview, Operations and Business management', async () => {
     renderIt();
     const n = await nav();
     const groups = within(n).getAllByRole('group').map((g) => g.getAttribute('aria-labelledby'));
-    expect(groups).toEqual(['dealer-nav-overview', 'dealer-nav-business', 'dealer-nav-operations', 'dealer-nav-system']);
+    expect(groups).toEqual(['dealer-nav-overview', 'dealer-nav-operations', 'dealer-nav-business']);
     const names = (id: string) => within(within(n).getByRole('group', { name: id })).getAllByRole('button').map((b) => b.querySelector('span.font-medium')?.textContent);
-    expect(names('Business')).toEqual(['Inventory', 'Leads', 'Pipeline', 'Customers', 'Finance', 'Analytics', 'Reputation']);
-    expect(names('Operations')).toEqual(['Auctions', 'Inspections', 'Escrow', 'Marketing']);
-    expect(names('System Management')).toEqual(['Team', 'Settings', 'Banking']);
+    expect(names('Operations')).toEqual(['Inventory', 'Leads', 'Pipeline', 'Customers', 'Auctions', 'Inspections', 'Escrow', 'Finance']);
+    expect(names('Business management')).toEqual(['Analytics', 'Reputation', 'Marketing', 'Team', 'Banking', 'Settings']);
   });
 
   it('keeps all 14 original sections reachable plus the new Banking item (none removed)', async () => {
@@ -61,7 +60,7 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
     expect(window.location.search).toContain('section=team');
     expect(window.location.search).toContain('nav=dealer-dashboard');
     const crumbs = screen.getByRole('navigation', { name: 'Breadcrumb' });
-    expect(within(crumbs).getByText('System Management')).toBeTruthy();
+    expect(within(crumbs).getByText('Business management')).toBeTruthy();
     expect(crumbs.querySelector('[aria-current="page"]')?.textContent).toBe('Team');
     expect(within(n).getByRole('button', { name: 'Team' }).getAttribute('aria-current')).toBe('page');
   });

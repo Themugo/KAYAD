@@ -57,6 +57,46 @@ export async function markDealerListingSold(dealerId, carId, body = {}, actorId 
   };
 }
 
+const hasText = (v) => typeof v === "string" ? v.trim().length > 0 : v !== null && v !== undefined && v !== "";
+const imageCount = (images) => {
+  if (Array.isArray(images)) return images.length;
+  if (typeof images === "string") { try { const p = JSON.parse(images); return Array.isArray(p) ? p.length : 0; } catch { return 0; } }
+  return 0;
+};
+
+/** Minimum a dealer listing must carry to go on the public marketplace. Pure; returns the list of missing items. */
+export function missingForPublication(car) {
+  const missing = [];
+  if (!hasText(car?.brand)) missing.push("brand");
+  if (!hasText(car?.model)) missing.push("model");
+  if (!(Number(car?.year) >= 1950)) missing.push("year");
+  if (!(Number(car?.price) > 0)) missing.push("price");
+  if (imageCount(car?.images) < 1) missing.push("photos");
+  return missing;
+}
+
+/**
+ * Publish (draft or paused -> Active) or Pause (Active -> Paused) one of the dealer business's own listings. Same atomic RPC as
+ * mark-sold, so the sold / escrow / settlement / auction locks and the audit row are shared. A repeat request is a clean 409.
+ */
+export async function setDealerListingVisibility({ dealerId, carId, action, actorId = null }) {
+  if (!["publish", "pause"].includes(action)) throw fail(400, "INVALID_LISTING_ACTION", "Unsupported listing action.");
+  const sb = getSupabase();
+  const { data: car } = await sb.from("cars").select("id,status,sold,deleted_at,brand,model,year,price,images,dealer_id").eq("id", carId).eq("dealer_id", dealerId).maybeSingle();
+  if (!car) throw fail(404, "CAR_NOT_FOUND", "Car not found");
+  if (!car.deleted_at && action === "publish") {
+    if (car.status === "available") throw fail(409, "ALREADY_PUBLISHED", "This listing is already active.");
+    if (car.status === "pending") throw fail(409, "LISTING_UNDER_REVIEW", "This listing is under review and cannot be published yet.");
+    if (["hidden", "draft"].includes(car.status)) {
+      const missing = missingForPublication(car);
+      if (missing.length) throw Object.assign(fail(422, "LISTING_INCOMPLETE", `Add the missing details before publishing: ${missing.join(", ")}.`), { missing });
+    }
+  }
+  if (!car.deleted_at && action === "pause" && car.status === "hidden") throw fail(409, "ALREADY_PAUSED", "This listing is already paused.");
+  const result = await transitionDealerListing({ dealerId, carId, action: action === "pause" ? "hide" : "publish", actorId });
+  return { ...result, label: result.status === "available" ? "Active" : "Paused" };
+}
+
 const STATUS_TO_ACTION = { sold: "mark_sold", hidden: "hide", paused: "hide", available: "publish", active: "publish" };
 export const BULK_STATUSES = new Set(["available", "active", "sold", "hidden", "paused", "draft", "pending"]);
 export const BULK_MAX = 100;
@@ -74,7 +114,9 @@ export async function bulkChangeDealerListingStatus({ dealerId, actorId = null, 
   const action = STATUS_TO_ACTION[status];
   for (const id of unique) {
     try {
-      if (action) {
+      if (action === "publish" || action === "hide") {
+        await setDealerListingVisibility({ dealerId, carId: id, action: action === "hide" ? "pause" : "publish", actorId });
+      } else if (action) {
         await transitionDealerListing({ dealerId, carId: id, action, actorId, sale });
       } else {
         // draft / pending: not transaction-relevant states; sold, rejected and non-owned rows are refused, the DB trigger backstops.

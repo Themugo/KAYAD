@@ -7686,6 +7686,62 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+  /api/dealer/cars/{id}/pause:
+    patch:
+      tags:
+      - Api
+      summary: PATCH /api/dealer/cars/{id}/pause
+      description: 'Route contract: PATCH /api/dealer/cars/{id}/pause'
+      operationId: patchApiDealerCarsIdPause
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Unauthorized
+        '403':
+          description: Account not eligible to publish
+        '404':
+          description: Listing not found or not owned by this dealer
+        '409':
+          description: Refused by the lifecycle (already paused/published, sold, funded escrow, accepted offer, auction or bids, under review)
+        '422':
+          description: Listing incomplete (publish only; the response lists the missing items)
+        '500':
+          description: Internal server error
+  /api/dealer/cars/{id}/publish:
+    patch:
+      tags:
+      - Api
+      summary: PATCH /api/dealer/cars/{id}/publish
+      description: 'Route contract: PATCH /api/dealer/cars/{id}/publish. Publishes a draft or republishes a paused listing.'
+      operationId: patchApiDealerCarsIdPublish
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Success
+        '401':
+          description: Unauthorized
+        '403':
+          description: Account not eligible to publish
+        '404':
+          description: Listing not found or not owned by this dealer
+        '409':
+          description: Refused by the lifecycle (already paused/published, sold, funded escrow, accepted offer, auction or bids, under review)
+        '422':
+          description: Listing incomplete (publish only; the response lists the missing items)
+        '500':
+          description: Internal server error
   /api/dealer/cars/{id}/reject-bid:
     post:
       tags:
