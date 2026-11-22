@@ -1,0 +1,25 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`admin route inventory > no route outside the sidebar is registered by accident: the unlinked set is the documented D-21 list 1`] = `
+[
+  "/admin/ai",
+  "/admin/automation",
+  "/admin/cms",
+  "/admin/command-center",
+  "/admin/communications",
+  "/admin/config",
+  "/admin/control-center",
+  "/admin/digital-twin",
+  "/admin/governance",
+  "/admin/improvement",
+  "/admin/integration",
+  "/admin/intelligence",
+  "/admin/lowcode",
+  "/admin/owners",
+  "/admin/platform-factory",
+  "/admin/provider-governance",
+  "/admin/support",
+  "/admin/vxp",
+  "/admin/xos",
+]
+`;

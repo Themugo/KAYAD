@@ -69,7 +69,7 @@ run_j() { local name="$1"; shift; ( cd "$1" && shift && timeout 280 node "$@" ) 
 # Legacy chain (state passes through state.json in the working dir): registration, personal listing + moderation, enquiry, offers, payments gate, inspection, dealer, capabilities.
 WORK="$(mktemp -d)"; cp "$LEG"/*.mjs "$WORK"/
 for j in j1_registration_idempotency j1_personal_register_login j2 j3 j4_offers j5 j6 j7 j8 j9_capabilities j10_legacy_and_dealer; do run_j "legacy-$j" "$WORK" "$j.mjs"; done
-for j in 03_reconciliation_issues 05_offer_payment 07_personal_listing_management 09_dealer_listing_lifecycle 10_dealer_banking 11_dealer_publish_pause 12_dealer_named_journeys; do run_j "$j" "$HERE" "$j.mjs"; done
+for j in 03_reconciliation_issues 05_offer_payment 07_personal_listing_management 09_dealer_listing_lifecycle 10_dealer_banking 11_dealer_publish_pause 12_dealer_named_journeys 13_listing_number_stress 14_staff_role_write_matrix; do run_j "$j" "$HERE" "$j.mjs"; done
 # model-layer journey: talks to the disposable PostgREST directly (loopback key generated above)
 SUPABASE_URL="http://127.0.0.1:$PROXY_PORT" SUPABASE_SERVICE_ROLE_KEY="$SR_JWT" run_j 06_aggregate_shim "$HERE" 06_aggregate_shim.mjs
 # MUST run last: it drops the objects that are absent on the hosted project (a hosted-shaped schema) and then drives the whole owner lifecycle.

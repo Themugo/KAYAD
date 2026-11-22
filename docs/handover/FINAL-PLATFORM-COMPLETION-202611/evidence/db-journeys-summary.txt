@@ -1,0 +1,24 @@
+migrations applied: 209/209
+legacy-j1_registration_idempotency exit=0 fails=0
+legacy-j1_personal_register_login exit=0 fails=0
+legacy-j2 exit=0 fails=0
+legacy-j3 exit=0 fails=0
+legacy-j4_offers exit=0 fails=0
+legacy-j5 exit=0 fails=0
+legacy-j6 exit=0 fails=0
+legacy-j7 exit=0 fails=0
+legacy-j8 exit=0 fails=0
+legacy-j9_capabilities exit=0 fails=0
+legacy-j10_legacy_and_dealer exit=0 fails=0
+03_reconciliation_issues exit=0 fails=0
+05_offer_payment exit=0 fails=0
+07_personal_listing_management exit=0 fails=0
+09_dealer_listing_lifecycle exit=0 fails=0
+10_dealer_banking exit=0 fails=0
+11_dealer_publish_pause exit=0 fails=0
+12_dealer_named_journeys exit=0 fails=0
+13_listing_number_stress exit=0 fails=0
+14_staff_role_write_matrix exit=0 fails=0
+06_aggregate_shim exit=0 fails=0
+08_personal_listing_hosted_schema exit=0 fails=0
+overall=PASS

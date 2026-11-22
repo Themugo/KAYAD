@@ -24,6 +24,12 @@ import { ListingStatusBadge, ListingThumb } from '../../../components/listing/Li
 import type { BackendCar } from '../../../services/vehicleApi';
 import { ParticipantEscrowDesk } from '../../../features/escrow/ParticipantEscrowDesk';
 
+// A refusal (403) is not a transient failure: say so instead of the generic load-failure copy (existing wording kept for every other failure).
+const sectionLoadMessage = (err: unknown, noun: string) => (err as { status?: number })?.status === 403
+  ? `You do not have permission to view your ${noun}. Ask the dealership owner for access.`
+  : `Could not load your ${noun}. Please try again.`;
+
+
 // ============================================================
 // DESIGN TOKENS
 // ============================================================
@@ -416,6 +422,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const [dashboard, setDashboard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
+  const [loadErrorStatus, setLoadErrorStatus] = useState<number | null>(null);
 
   // Fixed: the Inventory section previously never fetched anything at
   // all - every stat (38 published, 5 draft, etc.) and all 4 listed
@@ -519,7 +526,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
       setListingsError(null);
       getMyListings()
         .then((data) => { setMyListings(Array.isArray(data) ? data : []); setListingsLoaded(true); })
-        .catch(() => setListingsError('Could not load your inventory. Please try again.'))
+        .catch((err) => setListingsError(sectionLoadMessage(err, 'inventory')))
         .finally(() => setListingsLoading(false));
     }
   }, [activeSection, user, listingsLoaded, listingsRetry]);
@@ -543,7 +550,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     setLeadsError(null);
     dealerApi.getLeads({ limit: 100 })
       .then((body) => { setLeads(body?.data?.items ?? []); setLeadsLoaded(true); })
-      .catch(() => setLeadsError('Could not load your leads. Please try again.'))
+      .catch((err) => setLeadsError(sectionLoadMessage(err, 'leads')))
       .finally(() => setLeadsLoading(false));
   };
 
@@ -582,7 +589,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
       setCustomersError(null);
       dealerApi.getCustomers()
         .then((body) => { setCustomers(body?.data?.items ?? []); setCustomersLoaded(true); })
-        .catch(() => setCustomersError('Could not load your customers. Please try again.'))
+        .catch((err) => setCustomersError(sectionLoadMessage(err, 'customers')))
         .finally(() => setCustomersLoading(false));
     }
   }, [activeSection, user, customersLoaded, customersRetry]);
@@ -638,7 +645,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
       setTeamError(null);
       dealerApi.getTeamMembers()
         .then((response) => { setTeam(response.members || []); setTeamLoaded(true); })
-        .catch(() => setTeamError('Could not load your team. Please try again.'))
+        .catch((err) => setTeamError(sectionLoadMessage(err, 'team')))
         .finally(() => setTeamLoading(false));
     }
   }, [activeSection, user, teamLoaded, teamRetry]);
@@ -655,7 +662,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
       setReputationError(null);
       dealerApi.getReputation()
         .then((response) => { setReputation(response.data); setReputationLoaded(true); })
-        .catch(() => setReputationError('Could not load your reputation. Please try again.'))
+        .catch((err) => setReputationError(sectionLoadMessage(err, 'reputation')))
         .finally(() => setReputationLoading(false));
     }
   }, [activeSection, user, reputationLoaded, reputationRetry]);
@@ -672,7 +679,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     setCampaignsError(null);
     dealerApi.getMarketingCampaigns()
       .then((body) => { setCampaigns(body?.data?.items ?? []); setCampaignsLoaded(true); })
-      .catch(() => setCampaignsError('Could not load your campaigns. Please try again.'))
+      .catch((err) => setCampaignsError(sectionLoadMessage(err, 'campaigns')))
       .finally(() => setCampaignsLoading(false));
   };
 
@@ -700,15 +707,19 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const loadDashboard = async () => {
     setLoading(true);
     setLoadError(null);
+    setLoadErrorStatus(null);
     try {
       // dealerPlatformApi resolves the response body: { success, data: <dashboard> }.
       const body = await dealerApi.getDealerDashboard();
       if (!body?.data) throw new Error('Dashboard response had no data');
       setDashboard(body.data);
-    } catch {
+    } catch (err) {
       // Keep the failure visible instead of replacing unavailable data
-      // with invented or stale business figures.
-      setLoadError('Could not load your dashboard. Please try again.');
+      // with invented or stale business figures. A refusal (403) or an expired
+      // session (401) is not a transient failure, so it gets its own message.
+      const status = (err as { status?: number })?.status;
+      setLoadErrorStatus(status === 403 || status === 401 ? status : null);
+      setLoadError(status === 403 ? 'You do not have permission to view this dealership dashboard.' : status === 401 ? 'Your session has expired. Please sign in again.' : 'Could not load your dashboard. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -845,8 +856,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
           {loadError && activeSection === 'overview' && (
             <div role="alert" className="mb-6 flex flex-wrap items-center gap-3 rounded-xl border border-[#FDA29B] bg-[#FEF3F2] p-4 text-sm text-[#7A271A]">
               <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
-              <span className="flex-1"><span>{loadError}</span> The other sections of your Dealer Hub still work.</span>
-              <button type="button" onClick={loadDashboard} className="bg-[#0A3340] text-white text-xs font-bold rounded-lg px-4 py-2">Try Again</button>
+              <span className="flex-1"><span>{loadError}</span>{loadErrorStatus === null ? ' The other sections of your Dealer Hub still work.' : loadErrorStatus === 403 ? ' Ask the dealership owner to grant you access; trying again will not change this.' : ''}</span>
+              {loadErrorStatus !== 403 && loadErrorStatus !== 401 && <button type="button" onClick={loadDashboard} className="bg-[#0A3340] text-white text-xs font-bold rounded-lg px-4 py-2">Try Again</button>}
             </div>
           )}
 

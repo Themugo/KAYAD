@@ -53,10 +53,30 @@ describe('Dealer section response contracts (Phase 14.3)', () => {
     expect(await screen.findByRole('navigation', { name: 'Dealer workspace' })).toBeTruthy();
   });
 
+  it('a 403 on the dashboard says permission is missing, offers no useless retry; 401 says the session expired', async () => {
+    api.getDealerDashboard.mockRejectedValueOnce(Object.assign(new Error('Forbidden'), { status: 403 }));
+    mount('overview');
+    expect(await screen.findByText('You do not have permission to view this dealership dashboard.')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Try Again' })).toBeNull();
+    expect(screen.queryByText('Could not load your dashboard. Please try again.')).toBeNull();
+    cleanup();
+    api.getDealerDashboard.mockRejectedValueOnce(Object.assign(new Error('Unauthorized'), { status: 401 }));
+    mount('overview');
+    expect(await screen.findByText('Your session has expired. Please sign in again.')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Try Again' })).toBeNull();
+  });
+
   it('a 200 response with no data is treated as a failure, not as an empty dashboard', async () => {
     api.getDealerDashboard.mockResolvedValue({ success: true });
     mount('overview');
     expect(await screen.findByText('Could not load your dashboard. Please try again.')).toBeTruthy();
+  });
+
+  it('Leads: a 403 is reported as missing permission, not as a generic load failure', async () => {
+    api.getLeads.mockRejectedValueOnce(Object.assign(new Error('Forbidden'), { status: 403 }));
+    await open('leads');
+    expect(await screen.findByText(/You do not have permission to view your leads/)).toBeTruthy();
+    expect(screen.queryByText('Could not load your leads. Please try again.')).toBeNull();
   });
 
   it('Leads: empty list is an empty state; rejected request is an error with working retry', async () => {

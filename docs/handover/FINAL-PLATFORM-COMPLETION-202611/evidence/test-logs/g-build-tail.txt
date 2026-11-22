@@ -1,0 +1,40 @@
+dist/assets/AdminAuctions-BtUk3tr6.js                    18.81 kB │ gzip:   5.34 kB
+dist/assets/AdminNtsaQueue-GUd8nFbA.js                   19.05 kB │ gzip:   5.60 kB
+dist/assets/AdminEscrows-6eD7ednk.js                     19.88 kB │ gzip:   5.73 kB
+dist/assets/ParticipantEscrowDesk-Cda-Y34e.js            19.94 kB │ gzip:   6.34 kB
+dist/assets/AuthContext-C-ZTMV23.js                      19.98 kB │ gzip:   6.86 kB
+dist/assets/AuctionsView-DcMJ1z9_.js                     20.37 kB │ gzip:   6.19 kB
+dist/assets/ConfigurationCenter-Cd4Wm0wM.js              23.73 kB │ gzip:   4.86 kB
+dist/assets/BusinessObjectStudio-Bw8is2xj.js             23.74 kB │ gzip:   5.47 kB
+dist/assets/PlatformFactory-S7xZKYwQ.js                  24.60 kB │ gzip:   5.09 kB
+dist/assets/api.exports-Cyfef1dr.js                      25.33 kB │ gzip:   6.28 kB
+dist/assets/DigitalTwinCenter-C-0OoGfo.js                25.44 kB │ gzip:   5.58 kB
+dist/assets/EnterpriseControlCenter-CgABuWbC.js          25.44 kB │ gzip:   5.41 kB
+dist/assets/AutomationStudio-BeNr6jfN.js                 25.83 kB │ gzip:   4.78 kB
+dist/assets/AdminSiteDesigns-BQcNFa8w.js                 25.86 kB │ gzip:   7.38 kB
+dist/assets/GovernanceStudio-BbOI17Eh.js                 26.03 kB │ gzip:   4.99 kB
+dist/assets/ChatView-COHaQeC_.js                         27.33 kB │ gzip:   7.27 kB
+dist/assets/AIPlatformBuilder-eJ89orHO.js                31.11 kB │ gzip:   7.22 kB
+dist/assets/ExperienceStudio-DISJFrgB.js                 32.57 kB │ gzip:   5.81 kB
+dist/assets/VisualExperienceStudio-Ivyr-4Dz.js           36.73 kB │ gzip:   7.25 kB
+dist/assets/chunk-62JRHF6Z-CTXCXr27.js                   37.79 kB │ gzip:  13.72 kB
+dist/assets/AdminStaff-01NQ6nf7.js                       39.52 kB │ gzip:  10.59 kB
+dist/assets/AdminSettings-CKyC-6Zw.js                    43.87 kB │ gzip:  11.71 kB
+dist/assets/SupportView-BkZzmnVT.js                      44.92 kB │ gzip:  12.22 kB
+dist/assets/httpClient-DUfQrcOs.js                       53.40 kB │ gzip:  19.96 kB
+dist/assets/AuctionLivePage-BF_L4kl0.js                  55.98 kB │ gzip:  15.67 kB
+dist/assets/InspectionMarketplacePage-Rvb5Q-do.js        57.54 kB │ gzip:  14.86 kB
+dist/assets/PersonalSellingModule-IuVAR6bL.js            75.85 kB │ gzip:  19.02 kB
+dist/assets/AdminView-DwkOXIuN.js                        76.15 kB │ gzip:  19.28 kB
+dist/assets/ContentStudio--Py2XimW.js                    80.01 kB │ gzip:  17.62 kB
+dist/assets/InspectionsView-OBKvgW9Z.js                 121.57 kB │ gzip:  29.03 kB
+dist/assets/DealerDashboard-BIwfDnC2.js                 141.39 kB │ gzip:  32.82 kB
+dist/assets/index-Cm7dhXF6.js                           900.68 kB │ gzip: 252.84 kB
+
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.55s
+build=0

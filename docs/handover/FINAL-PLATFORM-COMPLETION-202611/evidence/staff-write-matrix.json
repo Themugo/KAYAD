@@ -1,0 +1,613 @@
+{
+ "roles": [
+  "marketing",
+  "technical_support",
+  "hr",
+  "accounts",
+  "escrow_officer",
+  "ad_manager",
+  "moderator",
+  "ghost_checker",
+  "user",
+  "dealer"
+ ],
+ "routes": {
+  "POST /users/:id/toggle-ban": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /users/:id/approve-dealer": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "PUT /users/:id/seller-settings": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "DELETE /cars/:id": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /cars/:id/verify": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /cars/:id/moderate": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "PUT /config": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "PUT /config/packages": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /audit-log": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "PUT /settings/onboarding": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "PUT /settings/dealer-paperwork": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "PUT /settings/dealer-listing-policy": {
+   "guardAllows": [
+    "admin",
+    "superadmin",
+    "accounts"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "PUT /dealers/:id/subdomain": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /users/:id/verify-dealer": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /ads": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "PUT /ads/:id": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "DELETE /ads/:id": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "PATCH /dealers/:id/package": {
+   "guardAllows": [
+    "admin",
+    "superadmin",
+    "accounts"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 400,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /zero-cost-onboarding": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /upload-logo": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "PATCH /reviews/:id/status": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "DELETE /reviews/:id": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /referrals/:id/credit": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /referrals/:id/expire": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "DELETE /chats/:chatId/messages/:messageId": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /chats/:chatId/block": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /chats/:chatId/unblock": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /market-data": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "PUT /market-data/:id": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "DELETE /market-data/:id": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /market-data/bulk": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "POST /escrow/accounts": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "PATCH /escrow/accounts/:id": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "DELETE /escrow/accounts/:id": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  },
+  "PATCH /escrow/sellers/:userId/capability": {
+   "guardAllows": [
+    "admin",
+    "superadmin"
+   ],
+   "marketing": 403,
+   "technical_support": 403,
+   "hr": 403,
+   "accounts": 403,
+   "escrow_officer": 403,
+   "ad_manager": 403,
+   "moderator": 403,
+   "ghost_checker": 403,
+   "user": 403,
+   "dealer": 403,
+   "anonymous": 403
+  }
+ }
+}
