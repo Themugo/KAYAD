@@ -19,6 +19,8 @@ const veh = vi.hoisted(() => {
     getMyListings: vi.fn(), createCar: vi.fn(), updateCar: vi.fn(), addCarImages: vi.fn(), deleteCarImage: vi.fn(), deleteCar: vi.fn(), VehicleApiError,
     LISTING_IMAGE_TYPES: ['image/jpeg', 'image/png', 'image/webp'], LISTING_IMAGE_MAX_BYTES: 5 * 1024 * 1024,
     LISTING_IMAGE_MAX_PER_REQUEST: 10, LISTING_IMAGE_MAX_PER_LISTING: 20,
+    // Idempotency helpers (mirror the real module's exports; the mocked createCar ignores the key)
+    newSubmissionNonce: () => 'test-nonce', listingSubmissionKey: () => 'lst-test-key',
   };
 });
 vi.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ signOut: vi.fn() }) }));

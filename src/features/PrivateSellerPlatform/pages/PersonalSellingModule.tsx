@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { countByLifecycle, getListingLifecycle, type ListingLifecycleState } from '../../../utils/listingLifecycle';
 import { ListingStatusBadge, ListingThumb, ListingFacts, ListingScoreRing } from '../../../components/listing/ListingPresentation';
-import { createCar, updateCar, deleteCar, addCarImages, reorderCarImages, deleteCarImage, setCoverImage, LISTING_IMAGE_TYPES, LISTING_IMAGE_MAX_BYTES, LISTING_IMAGE_MAX_PER_REQUEST, transitionMyListing, VehicleApiError, BackendCar } from '../../../services/vehicleApi';
+import { newSubmissionNonce, listingSubmissionKey, createCar, updateCar, deleteCar, addCarImages, reorderCarImages, deleteCarImage, setCoverImage, LISTING_IMAGE_TYPES, LISTING_IMAGE_MAX_BYTES, LISTING_IMAGE_MAX_PER_REQUEST, transitionMyListing, VehicleApiError, BackendCar } from '../../../services/vehicleApi';
 import { calculateListingCompleteness, getListingCompletenessFactors } from '../../../utils/listingQualityScore';
 import PhoneVerification from '../../../components/PhoneVerification';
 import { AuctionVerificationSection } from '../components/AuctionVerificationSection';
@@ -394,19 +394,21 @@ function ListingWizardSection({ draft, setDraft, draftStorageKey, onNavigate, on
     if (currentStep === 10 && (!form.pricing.askingPrice || form.pricing.askingPrice <= 0)) return setValidationError('Enter an asking price greater than zero.');
     setValidationError(null); const nextStep = Math.min(totalSteps, currentStep + 1); setCurrentStep(nextStep); update('step', nextStep);
   };
+  const submissionNonce = useRef(newSubmissionNonce());
   const handlePublish = async () => {
     setIsPublishing(true); setPublishError(null); setValidationError(null);
     try {
       const v = form.vehicleInfo; const d = form.details; const c = form.condition;
       const description = [d.description, c.exterior && `Exterior: ${c.exterior}`, c.interior && `Interior: ${c.interior}`, c.engine && `Engine: ${c.engine}`, c.tyres && `Tyres: ${c.tyres}`, c.knownIssues && `Known issues: ${c.knownIssues}`, c.serviceHistory && `Service history: ${c.serviceHistory}`].filter(Boolean).join('\n\n');
-      const result = await createCar({
+      const listingPayload = {
         title: `${v.year} ${v.make} ${v.model}`.trim(), brand: v.make.trim(), model: v.model.trim(), year: Number(v.year),
         vin: v.vin.trim() || undefined, registrationNumber: v.registration.trim() || undefined,
         bodyType: v.bodyType || undefined, mileage: Number(d.mileage) || 0, fuel: d.fuelType, transmission: d.transmission,
-        color: d.color || undefined, condition: d.condition, description, city: d.city.trim(), price: Number(form.pricing.askingPrice), images: form.photos,
-      });
+        color: d.color || undefined, condition: d.condition, description, city: d.city.trim(), price: Number(form.pricing.askingPrice),
+      };
+      const result = await createCar({ ...listingPayload, images: form.photos }, { idempotencyKey: listingSubmissionKey(submissionNonce.current, listingPayload, form.photos) });
       if (!result.success || !result.data?.id) throw new Error(result.message || 'The server did not confirm listing creation.');
-      setPublishedCarId(result.data.id); setDraft(null); if (draftStorageKey) window.localStorage.removeItem(draftStorageKey); onPublished();
+      submissionNonce.current = newSubmissionNonce(); setPublishedCarId(result.data.id); setDraft(null); if (draftStorageKey) window.localStorage.removeItem(draftStorageKey); onPublished();
     } catch (err) {
       setPublishError(err instanceof VehicleApiError ? err.message : err instanceof Error ? err.message : 'Unable to submit your listing. Please try again.');
     } finally { setIsPublishing(false); }

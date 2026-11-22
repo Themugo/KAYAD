@@ -14,6 +14,7 @@ export async function effectiveMaxListingImages() {
   }
 }
 import { invalidatePublicListingCaches } from "../utils/publicListingCache.js";
+import { readListingIdempotency, classifyReplay, isCreationKeyUniqueViolation, isKeyReusedError } from "../utils/listingIdempotency.js";
 import { uploadMultiple, deleteImage } from "../config/cloudinary.js";
 import { cleanupFiles } from "../middleware/upload.js";
 import { logWarn, logError } from "../utils/logger.js";
@@ -487,8 +488,31 @@ export function describeListingDbError(err) {
 // =============================
 // ➕ CREATE CAR
 // =============================
+// Exactly-once listing creation (Phase 1). Replays and refusals never create a listing, never charge, and discard this request's temp uploads.
+const discardUploads = (req) => { try { cleanupFiles(Array.isArray(req.files) ? req.files : []); } catch { /* best effort: temp files only */ } };
+const respondListingReplay = (req, res, car) => {
+  discardUploads(req);
+  res.set("Idempotent-Replay", "true");
+  return res.status(200).json({ success: true, data: car, idempotentReplay: true });
+};
+const respondListingKeyConflict = (req, res, verdict) => {
+  discardUploads(req);
+  return verdict === "gone"
+    ? res.status(409).json({ success: false, code: "IDEMPOTENCY_KEY_USED", message: "This Idempotency-Key belongs to a listing that no longer exists. Use a new key for a new listing." })
+    : res.status(409).json({ success: false, code: "IDEMPOTENCY_KEY_REUSED", message: "This Idempotency-Key was already used for a different listing request. Use a new key for a different listing." });
+};
+
 export const createCar = async (req, res) => {
   try {
+    const idem = readListingIdempotency(req);
+    if (idem?.error) { discardUploads(req); return res.status(400).json({ success: false, code: "INVALID_IDEMPOTENCY_KEY", message: idem.error }); }
+    if (idem) {
+      // Fast path only: the database unique index (below) is what makes concurrent duplicates safe.
+      const prior = await Car.findOne({ dealer: req.user.id, creationIdempotencyKey: idem.key });
+      const verdict = classifyReplay(prior, idem);
+      if (verdict === "replay") return respondListingReplay(req, res, prior);
+      if (verdict !== "new") return respondListingKeyConflict(req, res, verdict);
+    }
     const seller = await User.findById(req.user.id).select(
       "+trialStartedAt +trialListingsUsed +firstVehicleUsed dealerPackage packageListingMax packageExpiresAt listingCount role status",
     );
@@ -674,12 +698,25 @@ export const createCar = async (req, res) => {
       const result = await atomicCreateDealerListing({
         dealerId: req.dealerId || req.user.id,
         listing: listingPayload,
-        idempotencyKey: req.get("Idempotency-Key") || `listing:${req.user.id}:${randomUUID()}`,
-      });
+        idempotencyKey: idem?.key || `listing:${req.user.id}:${randomUUID()}`,
+        requestHash: idem?.hash || null,
+      }).catch((err) => { if (isKeyReusedError(err)) return { keyReused: true }; throw err; });
+      if (result?.keyReused) return respondListingKeyConflict(req, res, "conflict");
       car = await Car.findById(result?.listing?.id);
       if (!car) throw new Error("Atomic listing creation returned no persisted listing");
+      if (result?.idempotent) return respondListingReplay(req, res, car);
     } else {
-      car = await Car.create(body);
+      if (idem) { body.creationIdempotencyKey = idem.key; body.creationRequestHash = idem.hash; }
+      try {
+        car = await Car.create(body);
+      } catch (err) {
+        if (!idem || !isCreationKeyUniqueViolation(err)) throw err;
+        // A concurrent duplicate won the race: the unique index refused this insert atomically. Replay the winner (or refuse a different payload).
+        const winner = await Car.findOne({ dealer: req.user.id, creationIdempotencyKey: idem.key });
+        const verdict = classifyReplay(winner, idem);
+        if (verdict === "replay") return respondListingReplay(req, res, winner);
+        return respondListingKeyConflict(req, res, verdict === "new" ? "conflict" : verdict);
+      }
       if (shouldIncrementListingCount) {
         const updateOps = { $inc: { listingCount: 1 } };
         if (isSeller && !seller.firstVehicleUsed) updateOps.firstVehicleUsed = true;

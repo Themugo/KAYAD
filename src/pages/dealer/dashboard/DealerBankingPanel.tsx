@@ -1,3 +1,4 @@
+import { classifyLoadFailure, type LoadFailure } from '../../../utils/loadFailure';
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { dealerAPI } from '../../../api/api';
@@ -16,7 +17,7 @@ const inputCls = 'w-full px-3 py-2 border border-[#B9D3CF] rounded-lg text-sm te
 export default function DealerBankingPanel() {
   const [form, setForm] = useState<BankingForm>(EMPTY);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<LoadFailure | null>(null);
   const [retry, setRetry] = useState(0);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -41,7 +42,7 @@ export default function DealerBankingPanel() {
         if (cancelled) return;
         applyStored(body);
       })
-      .catch(() => { if (!cancelled) setLoadError('Could not load your banking details. Please try again.'); })
+      .catch((err) => { if (!cancelled) setLoadError(classifyLoadFailure(err, 'banking details')); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [retry]);
@@ -89,8 +90,8 @@ export default function DealerBankingPanel() {
   if (loadError) {
     return (
       <div className="py-12 text-center">
-        <p className="text-sm text-[#64748B] mb-3" role="alert">{loadError}</p>
-        <button type="button" onClick={() => setRetry((n) => n + 1)} className="text-xs font-bold text-[#176B87]">Try Again</button>
+        <p className="text-sm text-[#64748B] mb-3" role="alert" data-load-state={loadError.kind}>{loadError.message}</p>
+        {loadError.retryable && <button type="button" onClick={() => setRetry((n) => n + 1)} className="text-xs font-bold text-[#176B87]">Try Again</button>}
       </div>
     );
   }

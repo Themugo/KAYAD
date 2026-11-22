@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Loader2, ArrowLeft, AlertCircle } from 'lucide-react';
-import { createCar, updateCar, VehicleApiError } from '../../../services/vehicleApi';
+import { createCar, updateCar, VehicleApiError, newSubmissionNonce, listingSubmissionKey } from '../../../services/vehicleApi';
 import type { BackendCar, CreateCarPayload } from '../../../services/vehicleApi';
 import DealerListingPhotos from './DealerListingPhotos';
 import DealerListingPhotoPicker from './DealerListingPhotoPicker';
@@ -153,6 +153,7 @@ const DealerListingForm: React.FC<DealerListingFormProps> = ({ mode, car, onSave
   const [serverError, setServerError] = useState<string | null>(null);
   const [dirty, setDirty] = useState(false);
   const submittingRef = useRef(false);
+  const submissionNonce = useRef(newSubmissionNonce());
   const errorRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { setForm(initial); setDirty(false); setErrors({}); setServerError(null); }, [initial]);
@@ -186,7 +187,7 @@ const DealerListingForm: React.FC<DealerListingFormProps> = ({ mode, car, onSave
     try {
       const payload = toPayload(form);
       const res = mode === 'create'
-        ? await createCar({ ...payload, images })
+        ? await createCar({ ...payload, images }, { idempotencyKey: listingSubmissionKey(submissionNonce.current, payload, images) })
         : await updateCar(String(car?.id || car?._id || ''), payload);
       if (res && res.success === false) {
         setServerError(res.message || 'The listing could not be saved. Please try again.');

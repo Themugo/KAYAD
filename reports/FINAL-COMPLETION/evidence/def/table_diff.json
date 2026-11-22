@@ -1,0 +1,419 @@
+{
+ "missing": [
+  "admin_alerts",
+  "auction_comment_reports",
+  "auction_comments",
+  "auction_daily_visits",
+  "auction_follows",
+  "auction_fulfilment_events",
+  "auction_likes",
+  "auction_outcomes",
+  "auction_platform_policies",
+  "auction_registration_events",
+  "auction_registrations",
+  "auction_security_holds",
+  "auction_setup_amendments",
+  "auction_setups",
+  "auction_watch_peaks",
+  "chat_message_idempotency",
+  "chat_message_outbox",
+  "dealer_listing_counters",
+  "dealer_listing_lifecycle_events",
+  "dealer_payment_accounts",
+  "featured_vehicle_campaign_history",
+  "featured_vehicle_campaigns",
+  "hero_placements",
+  "hero_slides",
+  "marketplace_offer_events",
+  "marketplace_offer_settlement_events",
+  "marketplace_offer_settlements",
+  "marketplace_offers",
+  "personal_listing_lifecycle_events",
+  "private_seller_auction_evidence_events",
+  "private_seller_auction_proposals",
+  "private_seller_capabilities",
+  "private_seller_listing_visibility_events",
+  "provider_service_capabilities",
+  "purchase_outcomes",
+  "report_corrections",
+  "report_versions",
+  "site_design_publications",
+  "site_designs",
+  "vehicle_custody_capabilities",
+  "vehicle_custody_capability_events",
+  "wallet_transactions",
+  "wallet_withdrawals",
+  "wallets"
+ ],
+ "hosted_only": [
+  "admin_action_requests",
+  "admin_control_registry",
+  "admin_control_state",
+  "auction_integrity_flags",
+  "auction_risk_profiles",
+  "bid_logs",
+  "contacts",
+  "conversion_funnels",
+  "dealer_analytics",
+  "dealer_health_scores",
+  "escrow_anomalies",
+  "escrow_provider_integrations",
+  "escrow_risk_scores",
+  "inspection_commercial_config",
+  "inspection_provider_availability",
+  "inspection_provider_scorecards",
+  "inspection_report_downloads",
+  "job_failures",
+  "market_data",
+  "marketplace_health",
+  "notification_audit",
+  "ntsa_verification_requests",
+  "sms_bidders",
+  "transactions"
+ ],
+ "identical": [
+  "accident_history",
+  "activity_logs",
+  "ai_decision_runs",
+  "alerts",
+  "analytics_events",
+  "analytics_sessions",
+  "analytics_visitors",
+  "api_credentials",
+  "api_endpoints",
+  "api_usage_logs",
+  "auction_history",
+  "business_rules",
+  "car_views",
+  "chats",
+  "cms_ab_tests",
+  "cms_analytics",
+  "cms_announcements",
+  "cms_banners",
+  "cms_campaigns",
+  "cms_car_card_configs",
+  "cms_content_blocks",
+  "cms_content_versions",
+  "cms_contents",
+  "cms_footer_configs",
+  "cms_forms",
+  "cms_hero_sections",
+  "cms_media",
+  "cms_nav_items",
+  "cms_navigation",
+  "cms_page_sections",
+  "cms_pages",
+  "cms_popups",
+  "cms_revisions",
+  "cms_seo_configs",
+  "cms_taxonomies",
+  "cms_theme_configs",
+  "cms_website_settings",
+  "command_center_widget_layouts",
+  "communication_channel_controls",
+  "communication_deliveries",
+  "communication_event_controls",
+  "communication_preferences",
+  "communication_templates",
+  "conversations",
+  "countries",
+  "country_configurations",
+  "country_payment_providers",
+  "country_tax_configurations",
+  "cross_border_configurations",
+  "currency_exchange_rates",
+  "dealer_subscriptions",
+  "dealer_team_roles",
+  "dealer_teams",
+  "dealer_verifications",
+  "distributed_locks",
+  "escrow_accounts",
+  "escrow_transactions",
+  "events",
+  "favorites",
+  "finance_history",
+  "financial_workflow_events",
+  "health_checks",
+  "idempotency_keys",
+  "improvement_events",
+  "incidents",
+  "innovation_idea_votes",
+  "inspection_checklist_items",
+  "inspection_dispute_evidence",
+  "inspection_history",
+  "inspection_quality_audits",
+  "inspection_report_amendments",
+  "inspection_reviews",
+  "inspection_risk_flags",
+  "inspection_status_history",
+  "integration_certifications",
+  "integration_events",
+  "integration_plugins",
+  "integration_sdks",
+  "integration_templates",
+  "intelligence_reports",
+  "intelligence_scheduled_reports",
+  "lead_activities",
+  "leads",
+  "ledger_accounts",
+  "ledger_entries",
+  "listing_entitlement_reservations",
+  "loan_applications",
+  "localization_strings",
+  "marketing_campaigns",
+  "marketplace_history",
+  "media_upload_jobs",
+  "messages",
+  "mpesa_transactions",
+  "oauth_clients",
+  "owner_profiles",
+  "ownership_alerts",
+  "ownership_documents",
+  "ownership_expenses",
+  "ownership_history",
+  "ownership_reminders",
+  "ownership_service_records",
+  "partner_analytics",
+  "partner_applications",
+  "partner_documents",
+  "partner_organizations",
+  "partner_permissions",
+  "partner_tickets",
+  "passport_audit_log",
+  "payment_attempts",
+  "payment_events",
+  "payment_providers",
+  "reconciliation_records",
+  "reconciliation_reports",
+  "referrals",
+  "refresh_tokens",
+  "reviews",
+  "sandbox_environments",
+  "saved_searches",
+  "search_analytics",
+  "self_healing_actions",
+  "service_history",
+  "service_job_dispute_evidence",
+  "service_job_disputes",
+  "service_job_events",
+  "service_jobs",
+  "system_settings",
+  "travel_logs",
+  "user_preferences",
+  "value_tracking",
+  "vehicle_documents",
+  "vehicle_identities",
+  "vehicle_inspections",
+  "vehicle_market_analytics",
+  "vehicle_passports",
+  "vehicle_timeline",
+  "vehicle_valuations",
+  "verification_badges",
+  "webhook_configs",
+  "webhook_deliveries"
+ ],
+ "differ": {
+  "ad_slots": [
+   "columns",
+   "constraints",
+   "policies"
+  ],
+  "approval_rules": [
+   "constraints",
+   "policies"
+  ],
+  "audit_logs": [
+   "triggers"
+  ],
+  "bids": [
+   "indexes"
+  ],
+  "cars": [
+   "columns",
+   "constraints",
+   "indexes",
+   "triggers"
+  ],
+  "change_requests": [
+   "constraints",
+   "policies"
+  ],
+  "cms_faqs": [
+   "columns"
+  ],
+  "command_center_war_rooms": [
+   "policies"
+  ],
+  "country_rules": [
+   "policies"
+  ],
+  "dealer_payouts": [
+   "indexes"
+  ],
+  "dealers": [
+   "indexes"
+  ],
+  "decision_registers": [
+   "constraints",
+   "policies"
+  ],
+  "enterprise_standards": [
+   "constraints",
+   "policies"
+  ],
+  "escrow_audits": [
+   "columns",
+   "constraints",
+   "indexes",
+   "policies",
+   "triggers"
+  ],
+  "escrows": [
+   "indexes",
+   "triggers"
+  ],
+  "experiments": [
+   "policies"
+  ],
+  "feature_lifecycles": [
+   "constraints",
+   "policies"
+  ],
+  "governance_policies": [
+   "constraints",
+   "policies"
+  ],
+  "idempotency_audit_logs": [
+   "columns",
+   "indexes"
+  ],
+  "improvements": [
+   "policies"
+  ],
+  "innovation_ideas": [
+   "policies"
+  ],
+  "inspection_bookings": [
+   "columns",
+   "constraints",
+   "indexes",
+   "policies",
+   "triggers"
+  ],
+  "inspection_branches": [
+   "columns",
+   "constraints",
+   "indexes",
+   "policies",
+   "triggers"
+  ],
+  "inspection_disputes": [
+   "indexes"
+  ],
+  "inspection_packages": [
+   "columns",
+   "constraints"
+  ],
+  "inspection_providers": [
+   "columns",
+   "constraints",
+   "indexes"
+  ],
+  "inspection_refunds": [
+   "indexes"
+  ],
+  "inspection_reports": [
+   "columns",
+   "constraints",
+   "policies"
+  ],
+  "inspection_settlements": [
+   "policies"
+  ],
+  "inspection_staff": [
+   "columns",
+   "constraints",
+   "indexes",
+   "policies"
+  ],
+  "inspection_transactions": [
+   "indexes",
+   "policies"
+  ],
+  "inspector_applications": [
+   "columns",
+   "constraints",
+   "indexes",
+   "triggers"
+  ],
+  "notifications": [
+   "indexes"
+  ],
+  "otp_challenges": [
+   "constraints"
+  ],
+  "owner_vehicles": [
+   "triggers"
+  ],
+  "partner_requirements": [
+   "policies"
+  ],
+  "payments": [
+   "indexes",
+   "triggers"
+  ],
+  "platform_config": [
+   "columns",
+   "constraints"
+  ],
+  "profiles": [
+   "columns"
+  ],
+  "provider_credentials": [
+   "columns",
+   "constraints"
+  ],
+  "refunds": [
+   "indexes"
+  ],
+  "releases": [
+   "constraints",
+   "policies"
+  ],
+  "risk_assessments": [
+   "constraints",
+   "policies"
+  ],
+  "roadside_service_requests": [
+   "columns",
+   "constraints",
+   "indexes"
+  ],
+  "support_tickets": [
+   "columns",
+   "constraints",
+   "indexes",
+   "policies",
+   "triggers"
+  ],
+  "user_auth": [
+   "indexes"
+  ],
+  "users": [
+   "constraints",
+   "indexes",
+   "triggers"
+  ],
+  "vehicle_service_offerings": [
+   "columns",
+   "constraints",
+   "indexes"
+  ],
+  "webhook_events": [
+   "indexes"
+  ],
+  "website_settings": [
+   "columns"
+  ]
+ }
+}

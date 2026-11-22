@@ -65,14 +65,14 @@ $P -d "$DB" -c "notify pgrst, 'reload schema'"; sleep 2
 export KAYAD_JOURNEY_BASE="http://127.0.0.1:$API_PORT" KAYAD_JOURNEY_DB="$DB"
 RC=0
 LEG="$ROOT/docs/handover/ALIGNMENT-VERIFICATION-20261121/evidence/journeys"
-run_j() { local name="$1"; shift; ( cd "$1" && shift && timeout 280 node "$@" ) >"$OUT/$name.log" 2>&1; local rc=$?; local fails; fails=$(grep -c '^FAIL' "$OUT/$name.log"); echo "$name exit=$rc fails=$fails" | tee -a "$OUT/summary.txt"; [ "$rc" = 0 ] && [ "$fails" = 0 ] || RC=1; }
+run_j() { local name="$1"; shift; ( cd "$1" && shift && timeout "${JOURNEY_TIMEOUT:-280}" node "$@" ) >"$OUT/$name.log" 2>&1; local rc=$?; local fails; fails=$(grep -c '^FAIL' "$OUT/$name.log"); echo "$name exit=$rc fails=$fails" | tee -a "$OUT/summary.txt"; [ "$rc" = 0 ] && [ "$fails" = 0 ] || RC=1; }
 # Legacy chain (state passes through state.json in the working dir): registration, personal listing + moderation, enquiry, offers, payments gate, inspection, dealer, capabilities.
 WORK="$(mktemp -d)"; cp "$LEG"/*.mjs "$WORK"/
-for j in j1_registration_idempotency j1_personal_register_login j2 j3 j4_offers j5 j6 j7 j8 j9_capabilities j10_legacy_and_dealer; do run_j "legacy-$j" "$WORK" "$j.mjs"; done
-for j in 03_reconciliation_issues 05_offer_payment 07_personal_listing_management 09_dealer_listing_lifecycle 10_dealer_banking 11_dealer_publish_pause 12_dealer_named_journeys 13_listing_number_stress 14_staff_role_write_matrix; do run_j "$j" "$HERE" "$j.mjs"; done
+for j in j1_registration_idempotency j1_personal_register_login j2 j3 j4_offers j5 j6 j7 j8 j9_capabilities j10_legacy_and_dealer; do [ -n "${ONLY_JOURNEYS:-}" ] && continue; run_j "legacy-$j" "$WORK" "$j.mjs"; done
+for j in 03_reconciliation_issues 05_offer_payment 07_personal_listing_management 09_dealer_listing_lifecycle 10_dealer_banking 11_dealer_publish_pause 12_dealer_named_journeys 13_listing_number_stress 15_listing_creation_idempotency 14_staff_role_write_matrix 16_isolation_and_sessions 99_browser_hold; do if [ -n "${ONLY_JOURNEYS:-}" ]; then case " $ONLY_JOURNEYS " in *" $j "*) ;; *) continue;; esac; fi; run_j "$j" "$HERE" "$j.mjs"; done
 # model-layer journey: talks to the disposable PostgREST directly (loopback key generated above)
-SUPABASE_URL="http://127.0.0.1:$PROXY_PORT" SUPABASE_SERVICE_ROLE_KEY="$SR_JWT" run_j 06_aggregate_shim "$HERE" 06_aggregate_shim.mjs
+[ -n "${ONLY_JOURNEYS:-}" ] || SUPABASE_URL="http://127.0.0.1:$PROXY_PORT" SUPABASE_SERVICE_ROLE_KEY="$SR_JWT" run_j 06_aggregate_shim "$HERE" 06_aggregate_shim.mjs
 # MUST run last: it drops the objects that are absent on the hosted project (a hosted-shaped schema) and then drives the whole owner lifecycle.
-run_j 08_personal_listing_hosted_schema "$HERE" 08_personal_listing_hosted_schema.mjs
+[ -n "${ONLY_JOURNEYS:-}" ] || run_j 08_personal_listing_hosted_schema "$HERE" 08_personal_listing_hosted_schema.mjs
 echo "overall=$([ $RC = 0 ] && [ $FAILED_MIG = 0 ] && echo PASS || echo FAIL)" | tee -a "$OUT/summary.txt"
 [ $RC = 0 ] && [ $FAILED_MIG = 0 ]

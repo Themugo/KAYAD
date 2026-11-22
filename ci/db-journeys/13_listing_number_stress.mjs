@@ -80,11 +80,8 @@ const dups = await Promise.all([0, 1].map(() => D.raw('/api/cars', { method: 'PO
 const dupRows = Number(q(`select count(*) from cars where dealer_id='${D.id}'`));
 console.log(`INFO duplicate submission with one Idempotency-Key: statuses ${dups.map((d) => d.status).join(',')}, listings created ${dupRows}`);
 check('S5 duplicate submission: numbering stays unique and contiguous whatever the outcome', dupRows >= 1 && shape(D.id) === `${dupRows}/${dupRows}/1/${dupRows}`, [dups.map((d) => d.status), dupRows, shape(D.id)]);
-// KNOWN DEFECT (docs/handover/FINAL-PLATFORM-COMPLETION-202611/18-DEFECT-AND-RISK-REGISTER.md, DEF-01): a dealer on the free-listing path
-// (carController.createCar, freeDealerListing) takes Car.create, which ignores Idempotency-Key, so a simultaneous double submit creates two
-// listings. The paid path (kayad_create_dealer_listing_atomic) IS idempotent. Reported, not hidden: set KAYAD_REQUIRE_EXACTLY_ONCE=1 to make it a hard failure.
-if (process.env.KAYAD_REQUIRE_EXACTLY_ONCE === '1') check('S5 duplicate submission (same Idempotency-Key) creates exactly one listing', dupRows === 1, dupRows);
-else console.log(`INFO KNOWN-DEFECT DEF-01: duplicate submission created ${dupRows} listing(s) from one Idempotency-Key (free-listing path does not honour the key)`);
+// DEF-01 is fixed (reports/FINAL-COMPLETION/01-IDEMPOTENCY-REPAIR.md): a simultaneous duplicate submission with one Idempotency-Key creates exactly one listing.
+check('S5 duplicate submission (same Idempotency-Key) creates exactly one listing', dupRows === 1 && dups.filter((d) => d.status === 201).length === 1, [dups.map((d) => d.status), dupRows]);
 
 // ---- S6 different owners are independent -----------------------------------------------------------------------------------------
 check('S6 different owners: every owner has its own sequence starting at 1', [S, R, A, D, ...dealers].every((o) => shape(o.id).split('/')[2] === '1'));

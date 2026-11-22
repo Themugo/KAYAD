@@ -1,0 +1,96 @@
+update_updated_at_snake(),030018
+update_updated_at_camel(),1f5cc1
+kayad_try_acquire_lock(p_resource_id text, p_holder text, p_ttl_seconds integer),4d1620
+sync_provider_status_from_lifecycle(),1ea37e
+kayad_release_lock(p_resource_id text, p_holder text),5209a7
+kayad_reverse_ledger_entry_atomic(p_entry_id uuid, p_user_id uuid, p_reason text),4590a5
+kayad_ledger_entries_immutable(),3b2806
+update_updated_at(),ff0f6e
+sync_profile_from_user(),1a0e5d
+update_car_bid_stats(car_id uuid),84107b
+kayad_confirm_bid_payment_atomic(p_checkout_request_id text, p_receipt text),350791
+normalize_vehicle_identity(value text),422835
+kayad_complete_media_upload_atomic(p_job_id uuid, p_public_id text, p_remote_url text, p_metadata jsonb),86b40a
+kayad_transition_escrow_atomic(p_escrow_id uuid, p_next_status text, p_actor_id uuid, p_role text, p_idempotency_key text, p_reason text),1bec96
+kayad_post_ledger_entry_atomic(p_external_reference text, p_user_id uuid, p_amount numeric, p_currency text, p_source text, p_destination text, p_description text, p_metadata jsonb, p_debit_account_code text, p_credit_account_code text),fa5178
+kayad_rebuild_ledger_balances(),834bfc
+kayad_create_private_listing_atomic(p_seller_id uuid, p_listing jsonb, p_idempotency_key text),34ca3f
+kayad_settle_purchase_payment_atomic(p_payment_id uuid, p_receipt text),b9d0ae
+kayad_settle_bid_payment_atomic(p_payment_id uuid, p_receipt text),c30590
+kayad_auto_bid_atomic(p_car_id uuid),c34c66
+refresh_inspection_provider_starting_price(p_provider_id uuid),42689c
+trg_refresh_inspection_provider_starting_price(),328378
+rls_auto_enable(),6998ea
+kayad_start_auction_atomic(p_car_id uuid, p_duration_ms bigint, p_starting_bid numeric, p_reserve_price numeric, p_reserve_mode text),e1523d
+kayad_extend_auction_atomic(p_car_id uuid, p_extra_ms bigint),ced826
+kayad_close_auction_atomic(p_car_id uuid, p_winner_bid_id uuid),1cfcf7
+kayad_append_chat_message(p_chat_id uuid, p_sender_id uuid, p_text text, p_attachments jsonb),6729fc
+kayad_mark_chat_seen(p_chat_id uuid, p_user_id uuid),1ec937
+kayad_create_lead_atomic(p_buyer uuid, p_dealer uuid, p_vehicle uuid, p_source text, p_source_reference text, p_estimated_value numeric),9f3197
+kayad_transition_lead_atomic(p_lead_id uuid, p_new_stage text, p_actor_id uuid),d26554
+kayad_sync_cms_page_name(),032b29
+kayad_touch_dealer_team_updated_at(),50bdcb
+kayad_activate_dealer_subscription_atomic(p_payment_id uuid, p_dealer uuid, p_plan_id text, p_plan_name text, p_amount numeric, p_currency text, p_listing_max integer, p_features jsonb, p_duration_days integer, p_snapshot_hash text),aebc44
+kayad_cancel_dealer_subscription_atomic(p_dealer uuid),087f2d
+kayad_reactivate_dealer_subscription_atomic(p_dealer uuid),4550de
+kayad_touch_reconciliation_report(),3c490b
+is_admin(),06f12c
+kayad_vote_innovation_idea_atomic(p_idea uuid, p_user uuid),441d52
+kayad_change_improvement_status_atomic(p_id uuid, p_actor uuid, p_to_status text, p_owner uuid, p_due_at timestamp with time zone),e73587
+kayad_grant_dealer_subscription_atomic(p_dealer uuid, p_plan_id text, p_duration_days integer, p_reason text),62a927
+kayad_revoke_dealer_subscription_atomic(p_dealer uuid, p_reason text),4d7a82
+increment_car_views(car_id uuid, increment_by integer),0f0c78
+register_vehicle_identity(),fa28a0
+kayad_verify_escrow_funding_atomic(p_escrow_id uuid, p_actor_id uuid, p_reference text),63169a
+kayad_bridge_inspection_execution(p_vehicle_inspection_id uuid, p_car_id uuid, p_buyer_id uuid, p_provider_id uuid),a6bce3
+kayad_get_or_create_inspection_chat(p_vehicle_inspection_id uuid, p_car_id uuid, p_buyer_id uuid, p_seller_id uuid, p_inspector_id uuid),a838cd
+kayad_prepare_dealer_payout_atomic(p_escrow uuid, p_dealer uuid, p_phone text),2e705d
+kayad_transition_dispute_atomic(p_escrow_id uuid, p_actor_id uuid, p_role text, p_next_status text, p_reason text),742166
+kayad_append_dispute_evidence_atomic(p_escrow_id uuid, p_actor_id uuid, p_role text, p_item jsonb),8d86be
+kayad_open_dispute_atomic(p_escrow_id uuid, p_actor_id uuid, p_role text, p_title text, p_description text, p_category text, p_priority text, p_idempotency_key text),3858c4
+kayad_expire_dealer_subscriptions_atomic(),a1d392
+kayad_register_media_upload_job_atomic(p_listing_id uuid, p_owner_id uuid, p_source_path text, p_metadata jsonb),a8e2fa
+kayad_create_dealer_listing_atomic(p_dealer_id uuid, p_listing jsonb, p_idempotency_key text),59cbfe
+kayad_apply_dealer_verification_atomic(p_user uuid, p_action text, p_admin uuid, p_reason text),bd33cd
+kayad_register_media_upload_failure_atomic(p_listing_id uuid, p_owner_id uuid, p_source_path text, p_error text, p_metadata jsonb),5bf0bc
+kayad_record_financial_workflow_event_atomic(p_workflow text, p_aggregate_id uuid, p_event_key text, p_event_type text, p_amount numeric, p_currency text, p_ledger_reference text, p_metadata jsonb),3c2725
+kayad_validate_wave2_invariants(),afe2f2
+kayad_resolve_dispute_atomic(p_escrow_id uuid, p_actor_id uuid, p_decision text, p_amount numeric, p_seller_amount numeric, p_buyer_amount numeric, p_reason text, p_idempotency_key text),04ce9e
+kayad_generate_inspection_settlement_atomic(p_provider_id uuid, p_period_start date, p_period_end date, p_user_id uuid),91f081
+kayad_mark_dealer_payout_atomic(p_payout uuid, p_status text, p_conversation_id text, p_transaction_id text, p_failure_reason text),0e2b10
+kayad_create_support_ticket_atomic(p_user_id uuid, p_category text, p_priority text, p_subject text, p_description text, p_related_escrow uuid, p_related_car uuid, p_related_payment text),13e872
+kayad_place_bid_atomic(p_car_id uuid, p_user_id uuid, p_amount numeric, p_bidder_tag text, p_phone text, p_max_bid numeric, p_status text, p_checkout_request_id text),a4b75e
+kayad_audit_logs_append_only(),267be5
+kayad_transition_service_job_atomic(p_job_id uuid, p_actor_id uuid, p_next_status text, p_reason text),dea52a
+kayad_inspection_report_immutability_guard(),601ade
+kayad_admin_authorize_capability(p_actor_id uuid, p_capability text, p_reason text),c8fdae
+kayad_admin_request_action(p_actor_id uuid, p_capability text, p_target_type text, p_target_id uuid, p_reason text, p_payload jsonb),131c17
+kayad_admin_approve_action(p_approver_id uuid, p_request_id uuid, p_reason text),8ca87b
+kayad_admin_set_provider_status(p_actor_id uuid, p_provider_id uuid, p_request_id uuid, p_status text, p_reason text),667ddc
+kayad_admin_set_control_state(p_actor_id uuid, p_reason text, p_maintenance_mode boolean, p_read_only_mode boolean, p_marketplace_paused boolean, p_auctions_paused boolean, p_payments_paused boolean, p_payouts_paused boolean, p_listings_paused boolean, p_registrations_paused boolean, p_communications_paused boolean, p_inspections_paused boolean, p_changes_locked boolean, p_emergency_message text),a44f19
+kayad_admin_get_control_plane(p_actor_id uuid),86a528
+kayad_admin_execute_listing_action(p_actor_id uuid, p_request_id uuid),bbf615
+kayad_admin_execute_identity_action(p_actor_id uuid, p_request_id uuid),754743
+kayad_admin_execute_auction_action(p_actor_id uuid, p_request_id uuid),131c1a
+kayad_admin_execute_payment_action(p_actor_id uuid, p_request_id uuid),7f80c8
+kayad_escrow_eligibility(p_seller_id uuid),e66ba4
+kayad_admin_execute_escrow_action(p_actor_id uuid, p_request_id uuid),98f34f
+kayad_get_inspection_quote(p_provider_id uuid, p_package_id uuid),4fb3bf
+kayad_find_nearby_inspection_providers(p_lat numeric, p_lon numeric, p_service_type text, p_radius_km numeric),fe84f7
+kayad_process_inspection_payment_atomic(p_booking_id uuid, p_payment_method text, p_payment_reference text, p_user_id uuid),e13d78
+kayad_purchase_inspection_report_download(p_report_id uuid, p_buyer_id uuid, p_payment_reference text),efe7c1
+kayad_get_inspection_report_access(p_report_id uuid, p_buyer_id uuid),b6d57e
+kayad_create_inspection_provider_application(p_user_id uuid, p_profile jsonb),823604
+kayad_submit_inspection_review_atomic(p_booking_id uuid, p_reviewer_id uuid, p_rating integer, p_comment text),003313
+kayad_open_inspection_dispute_atomic(p_booking_id uuid, p_actor_id uuid, p_type text, p_description text),4467ec
+kayad_add_inspection_dispute_evidence_atomic(p_dispute_id uuid, p_actor_id uuid, p_type text, p_evidence jsonb),d61cb2
+kayad_process_inspection_refund_atomic(p_booking_id uuid, p_amount numeric, p_reason text, p_user_id uuid),0babb2
+kayad_admin_resolve_inspection_dispute_atomic(p_actor_id uuid, p_request_id uuid, p_decision text, p_refund_amount numeric, p_reason text),85f5b1
+kayad_admin_resolve_service_job_dispute_atomic(p_actor_id uuid, p_request_id uuid, p_decision text, p_reason text),ec5fda
+kayad_open_service_job_dispute_atomic(p_job_id uuid, p_actor_id uuid, p_type text, p_description text),eb7f50
+kayad_add_service_job_dispute_evidence_atomic(p_dispute_id uuid, p_actor_id uuid, p_type text, p_evidence jsonb),3e9ec7
+governance_touch_updated_at(),935605
+kayad_mark_inspection_settlement_paid_atomic(p_settlement_id uuid, p_payment_method text, p_payment_reference text, p_user_id uuid),495184
+kayad_rotate_refresh_token(p_old_token_hash text, p_new_token_hash text, p_user_id uuid, p_token_version integer, p_family_id uuid, p_device_id text, p_user_agent text, p_ip_address text, p_expires_at timestamp with time zone, p_new_session_id uuid),fe3d65
+sync_dealer_profile_from_user(),ccd4a3
+kayad_register_identity_atomic(p_name text, p_email text, p_role text, p_phone text, p_business_name text, p_location text, p_referred_by uuid, p_password_hash text, p_email_verify_token text, p_email_verify_expire timestamp with time zone),f414d9

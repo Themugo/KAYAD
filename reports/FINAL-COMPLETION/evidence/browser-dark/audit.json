@@ -1,0 +1,1053 @@
+[
+ {
+  "surface": "home",
+  "theme": "dark",
+  "width": 320,
+  "overflow": false,
+  "scrollWidth": 320,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/",
+  "shot": "shots/home-dark-320.png"
+ },
+ {
+  "surface": "home",
+  "theme": "dark",
+  "width": 360,
+  "overflow": false,
+  "scrollWidth": 360,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/"
+ },
+ {
+  "surface": "home",
+  "theme": "dark",
+  "width": 390,
+  "overflow": false,
+  "scrollWidth": 390,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/",
+  "shot": "shots/home-dark-390.png",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 26,
+    "sample": "h2"
+   },
+   {
+    "id": "target-size",
+    "impact": "serious",
+    "nodes": 5,
+    "sample": "button[aria-label=\"Previous featured vehicle\"]"
+   }
+  ]
+ },
+ {
+  "surface": "home",
+  "theme": "dark",
+  "width": 430,
+  "overflow": false,
+  "scrollWidth": 430,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/"
+ },
+ {
+  "surface": "home",
+  "theme": "dark",
+  "width": 768,
+  "overflow": false,
+  "scrollWidth": 768,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/"
+ },
+ {
+  "surface": "home",
+  "theme": "dark",
+  "width": 1024,
+  "overflow": false,
+  "scrollWidth": 1024,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/"
+ },
+ {
+  "surface": "home",
+  "theme": "dark",
+  "width": 1280,
+  "overflow": false,
+  "scrollWidth": 1280,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/",
+  "shot": "shots/home-dark-1280.png",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 28,
+    "sample": ".tracking-\\[0\\.14em\\]"
+   },
+   {
+    "id": "target-size",
+    "impact": "serious",
+    "nodes": 5,
+    "sample": "button[data-nav-toggle=\"marketplace\"]"
+   }
+  ]
+ },
+ {
+  "surface": "home",
+  "theme": "dark",
+  "width": 1440,
+  "overflow": false,
+  "scrollWidth": 1440,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/"
+ },
+ {
+  "surface": "home",
+  "theme": "dark",
+  "width": 1920,
+  "overflow": false,
+  "scrollWidth": 1920,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/"
+ },
+ {
+  "surface": "login",
+  "theme": "dark",
+  "width": 320,
+  "overflow": false,
+  "scrollWidth": 320,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Welcome back.",
+  "finalUrl": "/login",
+  "shot": "shots/login-dark-320.png"
+ },
+ {
+  "surface": "login",
+  "theme": "dark",
+  "width": 360,
+  "overflow": false,
+  "scrollWidth": 360,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Welcome back.",
+  "finalUrl": "/login"
+ },
+ {
+  "surface": "login",
+  "theme": "dark",
+  "width": 390,
+  "overflow": false,
+  "scrollWidth": 390,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Welcome back.",
+  "finalUrl": "/login",
+  "shot": "shots/login-dark-390.png",
+  "axe": []
+ },
+ {
+  "surface": "login",
+  "theme": "dark",
+  "width": 430,
+  "overflow": false,
+  "scrollWidth": 430,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Welcome back.",
+  "finalUrl": "/login"
+ },
+ {
+  "surface": "login",
+  "theme": "dark",
+  "width": 768,
+  "overflow": false,
+  "scrollWidth": 768,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Welcome back.",
+  "finalUrl": "/login"
+ },
+ {
+  "surface": "login",
+  "theme": "dark",
+  "width": 1024,
+  "overflow": false,
+  "scrollWidth": 1024,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Welcome back.",
+  "finalUrl": "/login"
+ },
+ {
+  "surface": "login",
+  "theme": "dark",
+  "width": 1280,
+  "overflow": false,
+  "scrollWidth": 1280,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Welcome back.",
+  "finalUrl": "/login",
+  "shot": "shots/login-dark-1280.png",
+  "axe": []
+ },
+ {
+  "surface": "login",
+  "theme": "dark",
+  "width": 1440,
+  "overflow": false,
+  "scrollWidth": 1440,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Welcome back.",
+  "finalUrl": "/login"
+ },
+ {
+  "surface": "login",
+  "theme": "dark",
+  "width": 1920,
+  "overflow": false,
+  "scrollWidth": 1920,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Welcome back.",
+  "finalUrl": "/login"
+ },
+ {
+  "surface": "marketplace",
+  "theme": "dark",
+  "width": 320,
+  "overflow": false,
+  "scrollWidth": 320,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/",
+  "shot": "shots/marketplace-dark-320.png"
+ },
+ {
+  "surface": "marketplace",
+  "theme": "dark",
+  "width": 360,
+  "overflow": false,
+  "scrollWidth": 360,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/"
+ },
+ {
+  "surface": "marketplace",
+  "theme": "dark",
+  "width": 390,
+  "overflow": false,
+  "scrollWidth": 390,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/",
+  "shot": "shots/marketplace-dark-390.png",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 26,
+    "sample": "h2"
+   },
+   {
+    "id": "target-size",
+    "impact": "serious",
+    "nodes": 5,
+    "sample": "button[aria-label=\"Previous featured vehicle\"]"
+   }
+  ]
+ },
+ {
+  "surface": "marketplace",
+  "theme": "dark",
+  "width": 430,
+  "overflow": false,
+  "scrollWidth": 430,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/"
+ },
+ {
+  "surface": "marketplace",
+  "theme": "dark",
+  "width": 768,
+  "overflow": false,
+  "scrollWidth": 768,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/"
+ },
+ {
+  "surface": "marketplace",
+  "theme": "dark",
+  "width": 1024,
+  "overflow": false,
+  "scrollWidth": 1024,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/"
+ },
+ {
+  "surface": "marketplace",
+  "theme": "dark",
+  "width": 1280,
+  "overflow": false,
+  "scrollWidth": 1280,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/",
+  "shot": "shots/marketplace-dark-1280.png",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 28,
+    "sample": ".tracking-\\[0\\.14em\\]"
+   },
+   {
+    "id": "target-size",
+    "impact": "serious",
+    "nodes": 5,
+    "sample": "button[data-nav-toggle=\"marketplace\"]"
+   }
+  ]
+ },
+ {
+  "surface": "marketplace",
+  "theme": "dark",
+  "width": 1440,
+  "overflow": false,
+  "scrollWidth": 1440,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/"
+ },
+ {
+  "surface": "marketplace",
+  "theme": "dark",
+  "width": 1920,
+  "overflow": false,
+  "scrollWidth": 1920,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Drive Your Dream Today",
+  "finalUrl": "/"
+ },
+ {
+  "surface": "dealer-overview",
+  "theme": "dark",
+  "width": 320,
+  "overflow": false,
+  "scrollWidth": 320,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard",
+  "shot": "shots/dealer-overview-dark-320.png"
+ },
+ {
+  "surface": "dealer-overview",
+  "theme": "dark",
+  "width": 360,
+  "overflow": false,
+  "scrollWidth": 360,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard"
+ },
+ {
+  "surface": "dealer-overview",
+  "theme": "dark",
+  "width": 390,
+  "overflow": false,
+  "scrollWidth": 390,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard",
+  "shot": "shots/dealer-overview-dark-390.png",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 1,
+    "sample": ".flex-1.text-center.min-w-0"
+   }
+  ]
+ },
+ {
+  "surface": "dealer-overview",
+  "theme": "dark",
+  "width": 430,
+  "overflow": false,
+  "scrollWidth": 430,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard"
+ },
+ {
+  "surface": "dealer-overview",
+  "theme": "dark",
+  "width": 768,
+  "overflow": false,
+  "scrollWidth": 768,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard"
+ },
+ {
+  "surface": "dealer-overview",
+  "theme": "dark",
+  "width": 1024,
+  "overflow": false,
+  "scrollWidth": 1024,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard"
+ },
+ {
+  "surface": "dealer-overview",
+  "theme": "dark",
+  "width": 1280,
+  "overflow": false,
+  "scrollWidth": 1280,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard",
+  "shot": "shots/dealer-overview-dark-1280.png",
+  "axe": []
+ },
+ {
+  "surface": "dealer-overview",
+  "theme": "dark",
+  "width": 1440,
+  "overflow": false,
+  "scrollWidth": 1440,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard"
+ },
+ {
+  "surface": "dealer-overview",
+  "theme": "dark",
+  "width": 1920,
+  "overflow": false,
+  "scrollWidth": 1920,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard"
+ },
+ {
+  "surface": "dealer-inventory",
+  "theme": "dark",
+  "width": 320,
+  "overflow": false,
+  "scrollWidth": 320,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=inventory",
+  "shot": "shots/dealer-inventory-dark-320.png"
+ },
+ {
+  "surface": "dealer-inventory",
+  "theme": "dark",
+  "width": 360,
+  "overflow": false,
+  "scrollWidth": 360,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=inventory"
+ },
+ {
+  "surface": "dealer-inventory",
+  "theme": "dark",
+  "width": 390,
+  "overflow": false,
+  "scrollWidth": 390,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=inventory",
+  "shot": "shots/dealer-inventory-dark-390.png",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 5,
+    "sample": ".flex-1.min-w-0.text-center"
+   }
+  ]
+ },
+ {
+  "surface": "dealer-inventory",
+  "theme": "dark",
+  "width": 430,
+  "overflow": false,
+  "scrollWidth": 430,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=inventory"
+ },
+ {
+  "surface": "dealer-inventory",
+  "theme": "dark",
+  "width": 768,
+  "overflow": false,
+  "scrollWidth": 768,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=inventory"
+ },
+ {
+  "surface": "dealer-inventory",
+  "theme": "dark",
+  "width": 1024,
+  "overflow": false,
+  "scrollWidth": 1024,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=inventory"
+ },
+ {
+  "surface": "dealer-inventory",
+  "theme": "dark",
+  "width": 1280,
+  "overflow": false,
+  "scrollWidth": 1280,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=inventory",
+  "shot": "shots/dealer-inventory-dark-1280.png",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 4,
+    "sample": "button[aria-label=\"Mark Browser car 4 as sold\"]"
+   }
+  ]
+ },
+ {
+  "surface": "dealer-inventory",
+  "theme": "dark",
+  "width": 1440,
+  "overflow": false,
+  "scrollWidth": 1440,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=inventory"
+ },
+ {
+  "surface": "dealer-inventory",
+  "theme": "dark",
+  "width": 1920,
+  "overflow": false,
+  "scrollWidth": 1920,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=inventory"
+ },
+ {
+  "surface": "dealer-banking",
+  "theme": "dark",
+  "width": 320,
+  "overflow": false,
+  "scrollWidth": 320,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=banking",
+  "shot": "shots/dealer-banking-dark-320.png"
+ },
+ {
+  "surface": "dealer-banking",
+  "theme": "dark",
+  "width": 360,
+  "overflow": false,
+  "scrollWidth": 360,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=banking"
+ },
+ {
+  "surface": "dealer-banking",
+  "theme": "dark",
+  "width": 390,
+  "overflow": false,
+  "scrollWidth": 390,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=banking",
+  "shot": "shots/dealer-banking-dark-390.png",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 1,
+    "sample": ".text-center"
+   }
+  ]
+ },
+ {
+  "surface": "dealer-banking",
+  "theme": "dark",
+  "width": 430,
+  "overflow": false,
+  "scrollWidth": 430,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=banking"
+ },
+ {
+  "surface": "dealer-banking",
+  "theme": "dark",
+  "width": 768,
+  "overflow": false,
+  "scrollWidth": 768,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=banking"
+ },
+ {
+  "surface": "dealer-banking",
+  "theme": "dark",
+  "width": 1024,
+  "overflow": false,
+  "scrollWidth": 1024,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=banking"
+ },
+ {
+  "surface": "dealer-banking",
+  "theme": "dark",
+  "width": 1280,
+  "overflow": false,
+  "scrollWidth": 1280,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=banking",
+  "shot": "shots/dealer-banking-dark-1280.png",
+  "axe": []
+ },
+ {
+  "surface": "dealer-banking",
+  "theme": "dark",
+  "width": 1440,
+  "overflow": false,
+  "scrollWidth": 1440,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=banking"
+ },
+ {
+  "surface": "dealer-banking",
+  "theme": "dark",
+  "width": 1920,
+  "overflow": false,
+  "scrollWidth": 1920,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=banking"
+ },
+ {
+  "surface": "dealer-settings",
+  "theme": "dark",
+  "width": 320,
+  "overflow": false,
+  "scrollWidth": 320,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=settings",
+  "shot": "shots/dealer-settings-dark-320.png"
+ },
+ {
+  "surface": "dealer-settings",
+  "theme": "dark",
+  "width": 360,
+  "overflow": false,
+  "scrollWidth": 360,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=settings"
+ },
+ {
+  "surface": "dealer-settings",
+  "theme": "dark",
+  "width": 390,
+  "overflow": false,
+  "scrollWidth": 390,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=settings",
+  "shot": "shots/dealer-settings-dark-390.png",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 1,
+    "sample": ".text-center"
+   }
+  ]
+ },
+ {
+  "surface": "dealer-settings",
+  "theme": "dark",
+  "width": 430,
+  "overflow": false,
+  "scrollWidth": 430,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=settings"
+ },
+ {
+  "surface": "dealer-settings",
+  "theme": "dark",
+  "width": 768,
+  "overflow": false,
+  "scrollWidth": 768,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=settings"
+ },
+ {
+  "surface": "dealer-settings",
+  "theme": "dark",
+  "width": 1024,
+  "overflow": false,
+  "scrollWidth": 1024,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=settings"
+ },
+ {
+  "surface": "dealer-settings",
+  "theme": "dark",
+  "width": 1280,
+  "overflow": false,
+  "scrollWidth": 1280,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=settings",
+  "shot": "shots/dealer-settings-dark-1280.png",
+  "axe": []
+ },
+ {
+  "surface": "dealer-settings",
+  "theme": "dark",
+  "width": 1440,
+  "overflow": false,
+  "scrollWidth": 1440,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=settings"
+ },
+ {
+  "surface": "dealer-settings",
+  "theme": "dark",
+  "width": 1920,
+  "overflow": false,
+  "scrollWidth": 1920,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "KAYARD KE",
+  "finalUrl": "/?nav=dealer-dashboard&section=settings"
+ },
+ {
+  "surface": "personal-dashboard",
+  "theme": "dark",
+  "width": 320,
+  "overflow": false,
+  "scrollWidth": 320,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Good morning, Journey",
+  "finalUrl": "/?nav=dashboard",
+  "shot": "shots/personal-dashboard-dark-320.png"
+ },
+ {
+  "surface": "personal-dashboard",
+  "theme": "dark",
+  "width": 360,
+  "overflow": false,
+  "scrollWidth": 360,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Good morning, Journey",
+  "finalUrl": "/?nav=dashboard"
+ },
+ {
+  "surface": "personal-dashboard",
+  "theme": "dark",
+  "width": 390,
+  "overflow": false,
+  "scrollWidth": 390,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Good morning, Journey",
+  "finalUrl": "/?nav=dashboard",
+  "shot": "shots/personal-dashboard-dark-390.png",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 1,
+    "sample": ".hover\\:bg-\\[\\#12D6CB\\]"
+   }
+  ]
+ },
+ {
+  "surface": "personal-dashboard",
+  "theme": "dark",
+  "width": 430,
+  "overflow": false,
+  "scrollWidth": 430,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Good morning, Journey",
+  "finalUrl": "/?nav=dashboard"
+ },
+ {
+  "surface": "personal-dashboard",
+  "theme": "dark",
+  "width": 768,
+  "overflow": false,
+  "scrollWidth": 768,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Good morning, Journey",
+  "finalUrl": "/?nav=dashboard"
+ },
+ {
+  "surface": "personal-dashboard",
+  "theme": "dark",
+  "width": 1024,
+  "overflow": false,
+  "scrollWidth": 1024,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Good morning, Journey",
+  "finalUrl": "/?nav=dashboard"
+ },
+ {
+  "surface": "personal-dashboard",
+  "theme": "dark",
+  "width": 1280,
+  "overflow": false,
+  "scrollWidth": 1280,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Good morning, Journey",
+  "finalUrl": "/?nav=dashboard",
+  "shot": "shots/personal-dashboard-dark-1280.png",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 7,
+    "sample": ".text-white\\/60"
+   }
+  ]
+ },
+ {
+  "surface": "personal-dashboard",
+  "theme": "dark",
+  "width": 1440,
+  "overflow": false,
+  "scrollWidth": 1440,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Good morning, Journey",
+  "finalUrl": "/?nav=dashboard"
+ },
+ {
+  "surface": "personal-dashboard",
+  "theme": "dark",
+  "width": 1920,
+  "overflow": false,
+  "scrollWidth": 1920,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "Good morning, Journey",
+  "finalUrl": "/?nav=dashboard"
+ },
+ {
+  "surface": "personal-profile",
+  "theme": "dark",
+  "width": 320,
+  "overflow": false,
+  "scrollWidth": 320,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "My Account",
+  "finalUrl": "/?nav=dashboard&section=account",
+  "shot": "shots/personal-profile-dark-320.png"
+ },
+ {
+  "surface": "personal-profile",
+  "theme": "dark",
+  "width": 360,
+  "overflow": false,
+  "scrollWidth": 360,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "My Account",
+  "finalUrl": "/?nav=dashboard&section=account"
+ },
+ {
+  "surface": "personal-profile",
+  "theme": "dark",
+  "width": 390,
+  "overflow": false,
+  "scrollWidth": 390,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "My Account",
+  "finalUrl": "/?nav=dashboard&section=account",
+  "shot": "shots/personal-profile-dark-390.png",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 2,
+    "sample": ".hover\\:bg-\\[\\#12D6CB\\]"
+   }
+  ]
+ },
+ {
+  "surface": "personal-profile",
+  "theme": "dark",
+  "width": 430,
+  "overflow": false,
+  "scrollWidth": 430,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "My Account",
+  "finalUrl": "/?nav=dashboard&section=account"
+ },
+ {
+  "surface": "personal-profile",
+  "theme": "dark",
+  "width": 768,
+  "overflow": false,
+  "scrollWidth": 768,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "My Account",
+  "finalUrl": "/?nav=dashboard&section=account"
+ },
+ {
+  "surface": "personal-profile",
+  "theme": "dark",
+  "width": 1024,
+  "overflow": false,
+  "scrollWidth": 1024,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "My Account",
+  "finalUrl": "/?nav=dashboard&section=account"
+ },
+ {
+  "surface": "personal-profile",
+  "theme": "dark",
+  "width": 1280,
+  "overflow": false,
+  "scrollWidth": 1280,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "My Account",
+  "finalUrl": "/?nav=dashboard&section=account",
+  "shot": "shots/personal-profile-dark-1280.png",
+  "axe": [
+   {
+    "id": "color-contrast",
+    "impact": "serious",
+    "nodes": 8,
+    "sample": ".text-white\\/60"
+   }
+  ]
+ },
+ {
+  "surface": "personal-profile",
+  "theme": "dark",
+  "width": 1440,
+  "overflow": false,
+  "scrollWidth": 1440,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "My Account",
+  "finalUrl": "/?nav=dashboard&section=account"
+ },
+ {
+  "surface": "personal-profile",
+  "theme": "dark",
+  "width": 1920,
+  "overflow": false,
+  "scrollWidth": 1920,
+  "dataTheme": "dark",
+  "bodyBg": "rgb(19, 27, 25)",
+  "h1": "My Account",
+  "finalUrl": "/?nav=dashboard&section=account"
+ }
+]

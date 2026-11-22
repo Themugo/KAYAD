@@ -10,11 +10,12 @@ const throwMapped = (error) => { throw isGateRefusal(error) ? toGateConflict(err
  * be replaced with application-side read/validate/write sequences.
  */
 
-export async function atomicCreateDealerListing({ dealerId, listing, idempotencyKey }) {
+export async function atomicCreateDealerListing({ dealerId, listing, idempotencyKey, requestHash = null }) {
   const { data, error } = await getSupabase().rpc("kayad_create_dealer_listing_atomic", {
     p_dealer_id: dealerId,
     p_listing: listing,
     p_idempotency_key: idempotencyKey,
+    p_request_hash: requestHash,
   });
   if (error) throw error;
   return data;

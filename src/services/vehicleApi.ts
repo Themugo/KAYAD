@@ -597,7 +597,18 @@ export interface CreateCarResponse {
  * - this function does not duplicate or pre-empt it, it simply
  * surfaces exactly what the real backend decides, success or
  * rejection, to the caller. */
-export async function createCar(payload: CreateCarPayload): Promise<CreateCarResponse> {
+/** One key per submission ATTEMPT GROUP: stable while the same form content is retried (double click, timeout, network retry), different as soon as the
+ *  content or the photos change, and different for every newly opened form (the nonce). The server scopes it to the signed-in owner and refuses
+ *  the same key with different content, so a collision can never merge two different listings. */
+export const newSubmissionNonce = (): string => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 12)}`);
+export function listingSubmissionKey(nonce: string, payload: object, files: ReadonlyArray<{ name?: string; size?: number; type?: string }> = []): string {
+  const text = JSON.stringify([payload, files.map((f) => [f.name || '', f.size || 0, f.type || ''])]);
+  let h1 = 5381; let h2 = 52711;
+  for (let i = 0; i < text.length; i += 1) { const c = text.charCodeAt(i); h1 = ((h1 << 5) + h1) ^ c; h2 = ((h2 << 5) + h2) ^ (c * 31); }
+  return `lst-${nonce}-${(h1 >>> 0).toString(36)}${(h2 >>> 0).toString(36)}`.slice(0, 200);
+}
+
+export async function createCar(payload: CreateCarPayload, options: { idempotencyKey?: string } = {}): Promise<CreateCarResponse> {
   const formData = new FormData();
   const { images, ...scalarFields } = payload;
   Object.entries(scalarFields).forEach(([key, value]) => {
@@ -617,7 +628,7 @@ export async function createCar(payload: CreateCarPayload): Promise<CreateCarRes
     return await request<CreateCarResponse>('/api/cars', {
       method: 'POST',
       body: formData,
-      headers: { 'Content-Type': 'multipart/form-data' },
+      headers: { 'Content-Type': 'multipart/form-data', ...(options.idempotencyKey ? { 'Idempotency-Key': options.idempotencyKey } : {}) },
     });
   } catch (err) {
     const error = err instanceof HttpRequestError ? err : new HttpRequestError('Request failed.');

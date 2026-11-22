@@ -1,3 +1,4 @@
+import { classifyLoadFailure, type LoadFailure } from '../../../utils/loadFailure';
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import * as dealerApi from '../../../services/dealerPlatformApi';
@@ -31,7 +32,7 @@ const inputCls = 'w-full px-3 py-2 border border-[#B9D3CF] rounded-lg text-sm te
 function ProfileSection({ userId }: { userId: string }) {
   const [form, setForm] = useState<ProfileForm>(EMPTY);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<LoadFailure | null>(null);
   const [retry, setRetry] = useState(0);
   const [errors, setErrors] = useState<Partial<Record<keyof ProfileForm, string>>>({});
   const [saving, setSaving] = useState(false);
@@ -55,12 +56,12 @@ function ProfileSection({ userId }: { userId: string }) {
       .then((body: any) => {
         if (cancelled) return;
         const d = body?.data;
-        if (!d) { setLoadError('Could not load your dealership profile. Please try again.'); return; }
+        if (!d) { setLoadError(classifyLoadFailure({ status: 500 }, 'dealership profile')); return; }
         setForm({ businessName: d.businessName || '', location: d.location || '', bio: d.bio || '', phone: d.phone || '' });
         setSavedPhone(d.phone || '');
         setDirty(false);
       })
-      .catch(() => { if (!cancelled) setLoadError('Could not load your dealership profile. Please try again.'); })
+      .catch((err) => { if (!cancelled) setLoadError(classifyLoadFailure(err, 'dealership profile')); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, [userId, retry]);
@@ -155,7 +156,7 @@ function ProfileSection({ userId }: { userId: string }) {
         {loading ? (
           <div className="flex items-center justify-center py-12"><Loader2 className="w-6 h-6 text-[#176B87] animate-spin" aria-label="Loading profile" /></div>
         ) : loadError ? (
-          <div className="py-8 text-center"><p className="text-sm text-[#475569] mb-3">{loadError}</p><button type="button" onClick={() => setRetry((n) => n + 1)} className="text-xs font-bold text-[#176B87]">Try Again</button></div>
+          <div className="py-8 text-center"><p className="text-sm text-[#475569] mb-3" role="alert" data-load-state={loadError.kind}>{loadError.message}</p>{loadError.retryable && <button type="button" onClick={() => setRetry((n) => n + 1)} className="text-xs font-bold text-[#176B87]">Try Again</button>}</div>
         ) : (
           <form onSubmit={submit} noValidate aria-label="Dealership profile" className="space-y-4 max-w-xl">
             {saveError && <div role="alert" className="flex items-start gap-2 p-3 rounded-lg bg-[#FEF3F2] border border-[#FDA29B] text-sm text-[#7A271A]"><AlertCircle className="w-4 h-4 mt-0.5 shrink-0" aria-hidden="true" /><span>{saveError}</span></div>}

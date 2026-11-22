@@ -1,0 +1,1 @@
+select p.proname||'('||pg_get_function_identity_arguments(p.oid)||'),'||left(md5(pg_get_functiondef(p.oid)),6) as r from pg_proc p join pg_namespace n on n.oid=p.pronamespace where n.nspname='public' and p.prokind in ('f','p') order by 1

@@ -1,0 +1,151 @@
+{
+ "crossBusiness": [
+  {
+   "m": "PUT",
+   "p": "/api/dealer-platform/inventory/:carB",
+   "status": 403
+  },
+  {
+   "m": "DELETE",
+   "p": "/api/dealer-platform/inventory/:carB",
+   "status": 403
+  },
+  {
+   "m": "POST",
+   "p": "/api/dealer-platform/inventory/bulk",
+   "status": 400
+  },
+  {
+   "m": "PUT",
+   "p": "/api/cars/:carB",
+   "status": 403
+  },
+  {
+   "m": "DELETE",
+   "p": "/api/cars/:carB",
+   "status": 403
+  },
+  {
+   "m": "PATCH",
+   "p": "/api/dealer/cars/:carB/pause",
+   "status": 404
+  },
+  {
+   "m": "PATCH",
+   "p": "/api/dealer/cars/:carB/publish",
+   "status": 404
+  },
+  {
+   "m": "PATCH",
+   "p": "/api/dealer/cars/:carB/mark-sold",
+   "status": 404
+  },
+  {
+   "m": "PATCH",
+   "p": "/api/dealer/cars/bulk-status",
+   "status": 409
+  },
+  {
+   "m": "PUT",
+   "p": "/api/dealer-platform/leads/:leadB",
+   "status": 403
+  },
+  {
+   "m": "GET",
+   "p": "/api/dealer-platform/leads/:leadB/activities",
+   "status": 403
+  },
+  {
+   "m": "POST",
+   "p": "/api/dealer-platform/leads/:leadB/notes",
+   "status": 403
+  }
+ ],
+ "builtinRoles": {
+  "manager": [
+   "canListCars",
+   "canEditCars",
+   "canDeleteCars",
+   "canViewEarnings",
+   "canApproveDeals",
+   "canChatBuyers",
+   "canEditSettings"
+  ],
+  "sales_agent": [
+   "canListCars",
+   "canEditCars",
+   "canChatBuyers"
+  ],
+  "lot_agent": [
+   "canListCars",
+   "canEditCars"
+  ],
+  "finance_officer": [
+   "canViewEarnings",
+   "canApproveDeals"
+  ],
+  "viewer": []
+ },
+ "teamMatrix": {
+  "GET /dealer-platform/inventory (canViewCars)": {
+   "manager": 200,
+   "sales_agent": 200,
+   "lot_agent": 200,
+   "finance_officer": 403,
+   "viewer": 403,
+   "owner": 200
+  },
+  "GET /dealer-platform/dashboard (earnings)": {
+   "manager": 200,
+   "sales_agent": 403,
+   "lot_agent": 403,
+   "finance_officer": 200,
+   "viewer": 403,
+   "owner": 200
+  },
+  "GET /dealer-platform/team (manage team)": {
+   "manager": 403,
+   "sales_agent": 403,
+   "lot_agent": 403,
+   "finance_officer": 403,
+   "viewer": 403,
+   "owner": 200
+  },
+  "POST /dealer-platform/team/invite": {
+   "manager": 403,
+   "sales_agent": 403,
+   "lot_agent": 403,
+   "finance_officer": 403,
+   "viewer": 403,
+   "owner": 201
+  },
+  "GET /dealer-platform/subscription (owner only)": {
+   "manager": 403,
+   "sales_agent": 403,
+   "lot_agent": 403,
+   "finance_officer": 403,
+   "viewer": 403,
+   "owner": 200
+  },
+  "GET /dealer-platform/finance (owner only)": {
+   "manager": 403,
+   "sales_agent": 403,
+   "lot_agent": 403,
+   "finance_officer": 403,
+   "viewer": 403,
+   "owner": 200
+  },
+  "DELETE /dealer-platform/inventory/:ownCar": {
+   "manager": 200,
+   "sales_agent": 403,
+   "lot_agent": 403,
+   "finance_officer": 403,
+   "viewer": 403,
+   "owner": 200
+  }
+ },
+ "sessions": {
+  "authed": 200,
+  "note": "Access-token natural expiry and refresh-token TTL are NOT exercised (would need clock control or waiting); covered by unit tests only. Concurrent multi-device and password-change revocation: see S3/S4 token-version mechanism; password-change/role-change/subscription-change paths NOT TESTED here."
+ }
+}

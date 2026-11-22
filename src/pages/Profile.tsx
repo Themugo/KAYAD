@@ -89,7 +89,8 @@ export default function Profile({ setPage, authUser, focus, showSignOut = true }
     } catch (err: any) {
       const status = err?.response?.status;
       const msg = err?.response?.data?.message;
-      toast(status === 429 ? 'Too many attempts. Please wait a few minutes and try again.' : ((status === 403 || status === 400) && msg) ? msg : 'Failed to update profile', 'error');
+      const offline = !status && ((typeof navigator !== 'undefined' && navigator.onLine === false) || err?.code === 'ERR_NETWORK' || /network error|failed to fetch/i.test(String(err?.message || '')));
+      toast(status === 429 ? 'Too many attempts. Please wait a few minutes and try again.' : status === 401 ? 'Your session has expired. Please sign in again.' : offline ? 'You appear to be offline. Your change was not saved; check your connection and try again.' : ((status === 403 || status === 400) && msg) ? msg : 'Failed to update profile', 'error');
     } finally {
       setLoading(false);
     }

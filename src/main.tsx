@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { BrandingProvider } from './context/BrandingContext';
 import './index.css';
+import './styles/dark-theme.generated.css';
 import { prefetchCars } from './services/vehicleApi';
 
 // Simple error boundary for the entire app

@@ -1,0 +1,13 @@
+typecheck rc=0
+frontend rc=0  Test Files  224 passed (224)       Tests  1877 passed | 1 skipped (1878) 
+build rc=0
+jest: see backend-jest-summary.txt
+backend-vitest rc=0  Test Files  11 passed (11)       Tests  61 passed (61) 
+node:test rc=0 # pass 34 # fail 0 # skipped 0 
+VALIDATOR FAIL scripts/validate-communications-provider-certification.mjs
+VALIDATOR FAIL scripts/validate-live-runtime.mjs
+VALIDATOR FAIL scripts/validate-local-supabase.mjs
+VALIDATOR FAIL scripts/validate-release.mjs
+validators run=358 failed=4
+journeys rc=0
+ALLDONE
