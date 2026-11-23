@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '../../components/ui/Button';
+import { useAuth } from '../../context/AuthContext';
+import { buildAuthPath, currentPathForNext } from '../../utils/authIntent';
 import { acceptTeamInvite, getMyWorkspace } from '../../services/dealerPlatformApi';
 import { resetMyDealershipCache } from '../../features/DealershipWorkspace/useMyDealership';
 
@@ -22,6 +24,8 @@ export default function DealerTeamInvite() {
   const token = (() => { try { return new URLSearchParams(window.location.search).get('invite') || ''; } catch { return ''; } })();
   const [state, setState] = useState({ phase: token.length === 64 ? 'ready' : 'invalid', message: '' });
   const busy = useRef(false);
+  const { user, logout } = useAuth();
+  const [switching, setSwitching] = useState(false);
 
   useEffect(() => { document.title = 'Accept team invitation - KAYARD KE'; }, []);
 
@@ -44,8 +48,22 @@ export default function DealerTeamInvite() {
           if (ws?.membership) { setState({ phase: 'already', message: ws.membership.dealershipName || '' }); return; }
         } catch { /* fall through to the generic explanation */ }
       }
+      if (err?.response?.status === 403 && err.response.data?.code === 'INVITATION_EMAIL_MISMATCH') {
+        setState({ phase: 'wrongAccount', message: '', hint: err.response.data.invitedEmailHint || '' });
+        return;
+      }
       setState({ phase: 'error', message: messageFor(err) });
     } finally { busy.current = false; }
+  };
+
+  // Sign out of the wrong account, then return to sign-in carrying THIS invitation (validated in-app path; the token never goes to logs).
+  const switchAccount = async () => {
+    if (switching) return;
+    setSwitching(true);
+    const next = currentPathForNext();
+    const res = await logout();
+    if (res && res.ok === false) { setSwitching(false); setState({ phase: 'error', message: res.message || 'Sign-out could not be confirmed. You are still signed in.' }); return; }
+    window.location.assign(buildAuthPath('login', { next }));
   };
 
   return (
@@ -62,6 +80,14 @@ export default function DealerTeamInvite() {
               {state.phase === 'working' ? 'Accepting…' : state.phase === 'error' ? 'Try again' : 'Accept invitation'}
             </Button>
           </>
+        )}
+        {state.phase === 'wrongAccount' && (
+          <div role="alert" data-testid="wrong-account">
+            <p style={{ marginBottom: 8, color: 'var(--danger, #b42318)' }}><strong>This invitation was sent to a different e-mail address.</strong></p>
+            <p style={{ marginBottom: 8 }}>You are signed in as <strong>{user?.email || 'another account'}</strong>{state.hint ? <>, but the invitation was sent to <strong>{state.hint}</strong></> : null}. Nothing has been changed and the invitation is still waiting for the right account.</p>
+            <p style={{ marginBottom: 16 }}>Sign out, then sign in (or create an account) with the invited e-mail address. You will come straight back to this invitation.</p>
+            <Button type="button" variant="primary" size="lg" fullWidth onClick={switchAccount} disabled={switching} data-testid="switch-account">{switching ? 'Signing out…' : 'Sign out and use the invited e-mail'}</Button>
+          </div>
         )}
         {state.phase === 'already' && (
           <div role="status">

@@ -13,12 +13,13 @@ Start with `REPORT.md` (revision 2). Earlier evidence is preserved (`evidence/`,
 | `FUNCTION-DRIFT-INVENTORY.md`, `MIGRATION-DEPENDENCY-GRAPH.md`, `PRODUCTION-RECONCILIATION-PLAN.md` | Drift, dependencies, plan (never executed) |
 | `FINANCIAL-SAFETY-REVIEW.md` | Money-path review (no changes) |
 | `DEPLOYMENT-AND-CI-STATUS.md` | Deployment topology, CI |
+| `MERGE-RECONCILIATION.md` | Why the PR could not merge; clean resolution |
 | `TEST-RESULTS.md`, `CHANGED-FILES.md` | Final results; changed files |
 | `OWNER-ACTIONS.md`, `OWNER-COMMANDS.md` | Owner steps and CMD commands |
 
 ## Changes made to project files in this revision
 1. `backend/db/index.js` — `$or` branches now translate `$gte/$gt/$lte/$lt/$ne/$in` (several operators on one field are AND-ed) and **fail closed** for unsupported operator objects instead of sending `[object Object]`. Fixes the hourly `dealerHealthScoreScheduler` 400 seen in the hosted logs.
 2. `backend/tests/regression/dbOrRangeOperators.test.js` — 6 regression tests.
-3. Invitation fix (rev 2): `backend/controllers/dealerPlatformController.js`, `src/pages/dealer/DealerTeamInvite.jsx`, `DealerTeamPanel.tsx`, new tests and a real-browser journey (`ci/browser/team-invitation.mjs`). See `INVITATION-ACCEPTANCE-AUDIT.md`.
+3. Invitation fix (rev 2): `backend/controllers/dealerPlatformController.js`, `src/pages/dealer/DealerTeamInvite.jsx`, `DealerTeamPanel.tsx`, new tests and a real-browser journey (`ci/browser/team-invitation.mjs`). Revision 3 (e-mail identity mismatch): `backend/utils/emailIdentity.js` and the wrong-account/switch-account page. See `INVITATION-ACCEPTANCE-AUDIT.md`.
 4. This documentation folder.
 **No migration, financial function, workflow, environment or production configuration was changed.** Nothing was committed, pushed, merged or deployed by Claude. Do not run `supabase db push`.

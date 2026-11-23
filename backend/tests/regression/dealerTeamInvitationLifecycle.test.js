@@ -206,4 +206,70 @@ describe("invitation lifecycle with the real emailed link", () => {
     const roster = await owner(ctrl.getTeamMembers);
     expect(JSON.stringify([c.body, rs.body, roster.body, audit])).not.toContain(token);
   });
+
+  describe("identity: which account may accept (reported failure: mugo.james27@gmail.com)", () => {
+    const invite = async (email = "mugo.james27@gmail.com") => { await owner(ctrl.inviteTeamMember, { body: { email, role: "viewer" } }); return latest(); };
+    const rowFor = (email) => Object.values(store.teams).find((r) => r.inviteEmail === email);
+    test("same address, different casing -> accepted", async () => {
+      const t = await invite();
+      expect((await accept({ id: "uJ", role: "user", email: "Mugo.James27@Gmail.com" }, t)).statusCode).toBe(200);
+    });
+    test("same address with surrounding whitespace -> accepted", async () => {
+      const t = await invite();
+      expect((await accept({ id: "uJ", role: "user", email: "  mugo.james27@gmail.com  " }, t)).statusCode).toBe(200);
+    });
+    test("the invitation is stored normalised even if the owner typed capitals and spaces", async () => {
+      await owner(ctrl.inviteTeamMember, { body: { email: "  Mugo.James27@GMAIL.com ", role: "viewer" } });
+      expect(rowFor("mugo.james27@gmail.com")).toBeTruthy();
+    });
+    test("a genuinely different account -> 403 INVITATION_EMAIL_MISMATCH with a masked hint, invitation untouched, correct account then succeeds", async () => {
+      const t = await invite();
+      const hashBefore = rowFor("mugo.james27@gmail.com").inviteTokenHash;
+      const w = await accept({ id: "uB", role: "user", email: "someone.else@example.com" }, t);
+      expect(w.statusCode).toBe(403);
+      expect(w.body.code).toBe("INVITATION_EMAIL_MISMATCH");
+      expect(w.body.invitedEmailHint).toBe("m***7@gmail.com");
+      expect(JSON.stringify(w.body)).not.toContain(t);
+      expect(JSON.stringify(w.body)).not.toContain("mugo.james27@gmail.com");
+      expect(rowFor("mugo.james27@gmail.com")).toMatchObject({ status: "invited", member: null, inviteTokenHash: hashBefore });
+      expect((await accept({ id: "uJ", role: "user", email: "mugo.james27@gmail.com" }, t)).statusCode).toBe(200);
+      expect(Object.values(store.teams).filter((r) => r.member === "uJ" && r.status === "active")).toHaveLength(1);
+    });
+    test("Gmail dots / plus-tags are NOT treated as the same person", async () => {
+      const t = await invite();
+      for (const email of ["mugojames27@gmail.com", "mugo.james27+x@gmail.com"]) expect((await accept({ id: "uX", role: "user", email }, t)).body.code).toBe("INVITATION_EMAIL_MISMATCH");
+      expect(rowFor("mugo.james27@gmail.com").status).toBe("invited");
+    });
+    test("an e-mail supplied by the browser in the request body is not proof of identity", async () => {
+      const t = await invite();
+      const r = await call(ctrl.acceptTeamInvite, { user: { id: "uB", role: "user", email: "someone.else@example.com" }, body: { token: t, email: "mugo.james27@gmail.com" } });
+      expect(r.statusCode).toBe(403);
+    });
+    test("a signed-in superadmin/dealer/legacy seller with a different e-mail is refused for the e-mail first; the right e-mail with a non-personal role is refused for the role", async () => {
+      const t = await invite();
+      expect((await accept({ id: "uS", role: "superadmin", email: "jimmy@example.com" }, t)).body.code).toBe("INVITATION_EMAIL_MISMATCH");
+      expect((await accept({ id: "uL", role: "individual_seller", email: "mugo.james27@gmail.com" }, t)).body.code).toBe("TEAM_MEMBER_MUST_BE_PERSONAL_ACCOUNT");
+      expect(rowFor("mugo.james27@gmail.com").status).toBe("invited");
+    });
+    test("independent errors stay independent: invalid 400, unknown 404, expired 410, cancelled 404, replaced 404", async () => {
+      const c = await owner(ctrl.inviteTeamMember, { body: { email: "mugo.james27@gmail.com", role: "viewer" } });
+      const t = latest(); const me = { id: "uJ", role: "user", email: "mugo.james27@gmail.com" };
+      expect((await accept(me, "short")).statusCode).toBe(400);
+      expect((await accept(me, "d".repeat(64))).statusCode).toBe(404);
+      await owner(ctrl.resendTeamInvite, { params: { memberId: c.body.data.id } });
+      expect((await accept(me, t)).statusCode).toBe(404);
+      const fresh = latest();
+      rowFor("mugo.james27@gmail.com").inviteExpiresAt = new Date(Date.now() - 1000).toISOString();
+      expect((await accept(me, fresh)).statusCode).toBe(410);
+      rowFor("mugo.james27@gmail.com").inviteExpiresAt = new Date(Date.now() + 86400000).toISOString();
+      await owner(ctrl.removeTeamMember, { params: { memberId: c.body.data.id } });
+      expect((await accept(me, fresh)).statusCode).toBe(404);
+    });
+    test("second acceptance after success creates no duplicate membership", async () => {
+      const t = await invite(); const me = { id: "uJ", role: "user", email: "mugo.james27@gmail.com" };
+      expect((await accept(me, t)).statusCode).toBe(200);
+      expect((await accept(me, t)).statusCode).toBe(404);
+      expect(Object.values(store.teams).filter((r) => r.member === "uJ")).toHaveLength(1);
+    });
+  });
 });

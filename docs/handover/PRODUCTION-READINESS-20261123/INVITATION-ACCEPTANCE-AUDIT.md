@@ -1,4 +1,4 @@
-# Dealer team invitation acceptance audit (revision 2, 2026-11-23)
+# Dealer team invitation acceptance audit (revision 3, 2026-11-23)
 Status: **Fixed and verified locally in a real browser against a disposable stack. Not verified in production** (nothing deployed; hosted database untouched, read-only SELECT only).
 
 ## 1. Reported failure (second screenshots)
@@ -38,3 +38,48 @@ Token: `crypto.randomBytes(32).toString("hex")` (64 hex). Hash: SHA-256 hex, sam
 - **Real browser** (`ci/browser/team-invitation.mjs`, Playwright/Chromium, disposable stack, evidence `evidence/browser-invitation/`): 22/22: owner invites in the Team page; logged-out visitor goes to sign-in with the same invitation preserved and returns to it; visible styled button; accept; DB shows one active membership, role kept, token cleared; refresh + accept again says already used, still one membership; resend, old link explained, newest accepted; wrong account gets a clear 403 and the invitation is untouched; dashboard "Invitations waiting" equals the DB count; mobile 390px layout; no page errors.
 ## 7. Remaining risk / owner actions
 Production still runs the old code until you deploy. Ask the dealer to open only the newest e-mail, or Resend once more after deploy. Confirm the production e-mail provider delivers (a failed provider now keeps the old link alive). Hosted logs after deploy will show the fingerprints.
+
+
+---
+# Revision 3: "Invitation email does not match the authenticated account"
+
+## A. Proven root cause (read-only evidence on the hosted project, no tokens or hashes read)
+| Fact | Evidence |
+|---|---|
+| The pending invitation is for `mugo.james27@gmail.com` (stored normalised, 22 chars, status `invited`, last updated 2026-11-23 10:24 UTC) | `dealer_teams`, 1 row |
+| **No user with that e-mail exists on production.** `users` holds exactly 3 accounts: a superadmin, the dealer (invitation owner) and a legacy `individual_seller` (pending), each with a different address | `users`, 3 rows, all e-mails already normalised |
+| The e-mail the backend compares is `users.email` of the user id in the verified session token, re-read on every request (`middleware/auth.js`); the token carries no e-mail claim and no browser-supplied e-mail is read | code + `authIdentitySource.test.js` |
+So the page was reached while the browser was signed in as **one of the three existing accounts**, none of which owns the invited address. The 403 is the correct, secure result. This is an account-existence / wrong-session problem, **not** a normalisation, casing, whitespace, stale-claim or profile-versus-auth defect: casing and whitespace variants of the invited address are accepted; dots/plus-tags are deliberately not folded.
+Not provable from the evidence: which of the three accounts the browser was signed in as, and whether the recipient tried to register (the hosted registration RPC is a placeholder that fails, see REGISTRATION-AUDIT.md, so creating `mugo.james27@gmail.com` on production **cannot currently succeed**). Both facts are listed in the checklist below.
+Even a signed-in superadmin or the legacy seller account could not accept: team members must be personal (`role=user`) accounts. Nothing in this fix weakens that.
+
+## B. Identity resolution, before and after
+| Stage | Source | Before | After |
+|---|---|---|---|
+| Owner enters e-mail | request body | trim + lower-case | shared `normalizeEmail` (NFKC, trim, lower-case: same rule as registration) |
+| Stored | `dealer_teams.invite_email` | as above | same helper |
+| Provider / link | provider call; link carries only the token | unchanged | unchanged (no e-mail in the link) |
+| Frontend session | auth context user | shown nowhere on the invite page | **shown on the wrong-account page** |
+| Token claim | JWT | id only; e-mail claim ignored | unchanged, now test-pinned |
+| Middleware | `users.email` re-read per request | same | same, test-pinned (change effective on next request) |
+| Acceptance check | `req.user.email` vs invite | ad-hoc trim/lower-case | shared `emailsMatch` (never matches empty) |
+| Mismatch response | 403 text only | 403 `INVITATION_EMAIL_MISMATCH` + masked hint (`m***7@gmail.com`); invitation untouched |
+
+## C. Changes
+`backend/utils/emailIdentity.js` (new); `dealerPlatformController.js` (shared rule, coded 403, masked hint, fingerprint log `dealer_team_accept_email_mismatch`); `DealerTeamInvite.jsx` (wrong-account panel: signed-in e-mail, masked invited address, "Sign out and use the invited e-mail", which signs out, verifies the sign-out, then goes to `/login?next=<same invitation>`; a failed sign-out is reported and nothing navigates). Authorization unchanged: the ownership check is not weakened, the invitation is never edited to fit the caller.
+Security implications: the hint reveals only first/last local character and the domain to someone who already holds the secret link; the token is never logged or shown; mismatch does not consume or modify the invitation.
+
+## D. Tests (local)
+Jest: `emailIdentity.test.js` (5), `authIdentitySource.test.js` (5: forged claim ignored, browser e-mail ignored, stale session after switching resolves per token, DB change effective next request, expired token then refresh), `dealerTeamInvitationLifecycle.test.js` (22: casing, whitespace, normalised storage, mismatch keeps invitation then correct account succeeds, dots/plus not folded, body e-mail not proof, non-personal roles, independent invalid/unknown/replaced/expired/cancelled errors, no duplicate membership, concurrency). Vitest: `DealerTeamInvite.test.tsx` (15, incl. wrong-account panel, switch-account sequence, failed sign-out).
+Real browser (disposable stack), 29/29: Account B signs in and is rejected (403) with a clear message; invitation unchanged; "Sign out and use the invited e-mail" leads to sign-in carrying the same invitation; Account A signs in, returns, accepts; exactly one active membership; dashboard pending count equals the database; desktop and 390px mobile; no uncaught errors. Screenshots: `evidence/browser-invitation/08-*.png`, `09-*.png`.
+
+## E. Production diagnostic checklist (owner-run, read-only; never paste tokens)
+1. Does the invited address have an account? `select id, role, status, email_verified from users where email = lower(btrim('mugo.james27@gmail.com'));` (expected today: 0 rows).
+2. What is the signed-in account on the failing browser? Open the invitation page in a private window, sign in, and read the e-mail shown on the new wrong-account panel after deploy (it names the signed-in e-mail). Before deploy: check the profile page of that browser.
+3. Pending invitation e-mail: `select invite_email, status, invite_expires_at from dealer_teams where status='invited';`
+4. Same user id on frontend and backend: after deploy, the backend log lines `dealer_team_accept_email_mismatch` carry user id and an 8-character hash fingerprint, no token.
+5. Auth e-mail vs profile e-mail: there is one canonical `users.email`; `select count(*) from users where email <> lower(btrim(email));` (expected 0).
+## F. Remaining production blockers
+- Production has no account for the invited address and cannot register one until the registration function restoration (`20261122200000_restore_register_identity_atomic`) is approved and applied; alternatively invite an existing **personal** account. Nothing here was applied.
+- Production runs old code until you deploy; revision 2 fixes (resend, messages) also await deploy.
+- The fix is verified locally only; it is not verified in production.
