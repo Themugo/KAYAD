@@ -18,7 +18,7 @@ import { loadCommandCentre } from "../services/dealerCommandCentre.service.js";
 import { listingStatusBreakdown, buildTopPerformers, buildRecentActivity } from "../services/dealerDashboardSummary.js";
 
 import { createCar, updateCar, deleteCar } from "./carController.js";
-import { logError } from "../utils/logger.js";
+import { logError, logInfo } from "../utils/logger.js";
 import { getDealerEntitlement } from "../services/dealerSubscription.service.js";
 import { getDealerLeads, getLeadById, updateLeadStage as serviceUpdateLeadStage, addLeadActivity as serviceAddLeadActivity } from "../services/leadService.js";
 import { create, findAll, findOne, update } from "../db/index.js";
@@ -666,6 +666,7 @@ export async function inviteTeamMember(req, res) {
   const row = existing ? await update("dealer_teams", existing.id, fields) : await create("dealer_teams", { dealer: dealerId, ...fields });
   // The e-mail must name the DEALERSHIP the person is joining (not the inviting person, who may be a delegated team member).
   const email_ = await deliverInvite(email, dealerPublicName(await User.findById(dealerId)), role.label, token);
+  logInfo("dealer_team_invitation_created", { invitation: row.id, fingerprint: hash.slice(0, 8), emailSent: email_.sent });
   await logAuditEvent({ action: "dealer_team_invitation_created", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", newValue: { ...publicTeamRow(row), emailSent: email_.sent }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
   return res.status(201).json({ success: true, data: publicTeamRow(row), email: email_ });
 }
@@ -680,10 +681,21 @@ export async function resendTeamInvite(req, res) {
   if (protectedTarget) return TEAM_PROTECTED(res, protectedTarget.code, protectedTarget.message);
   const role = (await resolveRole(dealerId, existing.role)) || { label: String(existing.role || "member") };
   const token = newInviteToken();
-  const row = await update("dealer_teams", existing.id, { inviteTokenHash: crypto.createHash("sha256").update(token).digest("hex"), inviteExpiresAt: new Date(Date.now() + INVITE_TTL_MS).toISOString() });
+  const newHash = crypto.createHash("sha256").update(token).digest("hex");
+  const previous = { inviteTokenHash: existing.inviteTokenHash ?? null, inviteExpiresAt: existing.inviteExpiresAt ?? null };
+  let row = await update("dealer_teams", existing.id, { inviteTokenHash: newHash, inviteExpiresAt: new Date(Date.now() + INVITE_TTL_MS).toISOString() });
   const email_ = await deliverInvite(existing.inviteEmail, dealerPublicName(await User.findById(dealerId)), role.label, token);
-  await logAuditEvent({ action: "dealer_team_invitation_resent", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", newValue: { emailSent: email_.sent }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
-  return res.json({ success: true, data: publicTeamRow(row), email: email_ });
+  // Policy: a successful resend replaces the previous link (only the newest e-mail works). If the e-mail was NOT delivered nobody holds the new
+  // link, so the previous link must keep working: restore it (only while the row still carries the hash we just wrote).
+  let previousLinkRestored = false;
+  if (!email_.sent && previous.inviteTokenHash) {
+    const restored = await dbApi.updateMany("dealer_teams", { id: existing.id, status: "invited", inviteTokenHash: newHash }, previous);
+    if (Array.isArray(restored) && restored[0]) { row = restored[0]; previousLinkRestored = true; }
+  }
+  // Safe fingerprints (first 8 hex of the SHA-256, never the token) let support compare "emailed link" and "stored link".
+  logInfo("dealer_team_invitation_resent", { invitation: existing.id, newFingerprint: newHash.slice(0, 8), emailSent: email_.sent, previousLinkRestored });
+  await logAuditEvent({ action: "dealer_team_invitation_resent", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", newValue: { emailSent: email_.sent, previousLinkRestored }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
+  return res.json({ success: true, data: publicTeamRow(row), email: { ...email_, previousLinkStillValid: previousLinkRestored } });
 }
 
 // ---- Roles (named permission sets) ----
@@ -808,7 +820,10 @@ export async function acceptTeamInvite(req, res) {
   if (token.length !== 64) return res.status(400).json({ success: false, message: "Invalid invitation token" });
   const hash = crypto.createHash("sha256").update(token).digest("hex");
   const row = await findOne("dealer_teams", { inviteTokenHash: hash, status: "invited" });
-  if (!row) return res.status(404).json({ success: false, message: "Invitation not found or already used" });
+  if (!row) {
+    logInfo("dealer_team_accept_no_pending_invitation", { fingerprint: hash.slice(0, 8), user: req.user.id });
+    return res.status(404).json({ success: false, code: "INVITATION_LINK_NOT_VALID", message: "This invitation link is no longer valid. It may have been replaced by a newer e-mail from the dealership, already used, or cancelled." });
+  }
   if (row.inviteExpiresAt && new Date(row.inviteExpiresAt) <= new Date()) return res.status(410).json({ success: false, message: "Invitation has expired" });
   if (String(req.user.email || "").trim().toLowerCase() !== String(row.inviteEmail || "").trim().toLowerCase()) return res.status(403).json({ success: false, message: "Invitation email does not match the authenticated account" });
   // Team members are personal accounts. A dealer (business) or staff account never becomes a member, and a membership never changes the member's role.
@@ -820,7 +835,7 @@ export async function acceptTeamInvite(req, res) {
   // accepts (double click, two tabs, replay) therefore cannot both succeed; the loser gets the same 404 as a replayed token.
   const claimed = await dbApi.updateMany("dealer_teams", { id: row.id, status: "invited", inviteTokenHash: hash }, { member: req.user.id, status: "active", inviteTokenHash: null, inviteExpiresAt: null });
   const updated = Array.isArray(claimed) ? claimed[0] : null;
-  if (!updated) return res.status(404).json({ success: false, message: "Invitation not found or already used" });
+  if (!updated) return res.status(404).json({ success: false, code: "INVITATION_LINK_NOT_VALID", message: "This invitation link is no longer valid. It may have been replaced by a newer e-mail from the dealership, already used, or cancelled." });
   await logAuditEvent({ action: "dealer_team_invitation_accepted", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: updated.id, targetModel: "DealerTeam", details: { dealerId: row.dealer }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
   return res.json({ success: true, data: publicTeamRow(updated) });
 }

@@ -1,21 +1,40 @@
-# Dealer team invitation acceptance audit
-## Lifecycle traced (source-level, Verified by code reading + tests)
-1. Create: `POST /api/dealer-platform/team/invite` (`inviteTeamMember`): role resolved, owner-only for `manager`, no permission overreach, self-invite refused, duplicate refused (409), 64-char random token stored only as SHA-256 hash, 7-day expiry, status `invited`, audit event, e-mail via `sendTeamInviteEmail` (delivery result returned, not assumed).
-2. Link: `/dealer/setup?invite=<token>` → `RequireAuth`. A logged-out visitor is sent to `/login?next=<path+query>`; `safeNextPath` keeps the query so the invitation returns after sign-in (tested).
-3. Page `DealerTeamInvite.jsx`: token must be 64 chars; real `<button>` calls `POST /dealer-platform/team/accept`; success clears the my-dealership cache and shows a link to the workspace.
-4. Accept (`acceptTeamInvite`): hash lookup (status `invited`), expiry 410, recipient e-mail must equal invited e-mail (403), account role must be `user` (dealer/admin refused), dealer cannot join itself, already-active member 409, then membership claim, audit event. Membership never changes the member's role.
-5. Pending count: the dashboard "Team invitations waiting to be accepted" item is `outstandingInvitations` in `dealerCommandCentre.service.js`, computed from `dealer_teams` on each request, so it drops when the row becomes `active`.
+# Dealer team invitation acceptance audit (revision 2, 2026-11-23)
+Status: **Fixed and verified locally in a real browser against a disposable stack. Not verified in production** (nothing deployed; hosted database untouched, read-only SELECT only).
 
-## Findings
-| # | Severity | Finding | Status |
-|---|---|---|---|
-| I1 | High (UX blocker) | "Accept invitation" looked like plain text. It is a real button with a handler, but used `btn btn-primary`, which is styled only under `.kayad-admin-shell__content` (`src/styles/kayad-admin-legacy-surface.css`); elsewhere Tailwind preflight leaves it unstyled. | **Confirmed and fixed locally**: now the shared design-system `Button` (and a styled success link). Not yet observed in a real browser on production. |
-| I2 | Medium | Accept was read-then-update by id: two simultaneous accepts of one token could both succeed (replay window). | **Confirmed and fixed locally**: compare-and-set `updateMany` on `{id, status:'invited', inviteTokenHash}`; the loser gets 404. |
-| I3 | Info | 12 other uses of unstyled `btn btn-primary` outside admin exist. | Confirmed, **not fixed** (out of scope; listed for owner). |
-| I4 | Unknown | Whether the owner's actual click failed beyond styling (e.g. the logged-in e-mail differing from the invited one → 403 message shown). | Suspected; evidence incomplete: needs a browser/network capture. |
+## 1. Reported failure (second screenshots)
+Owner's Team page lists a *Pending invitation* and refuses a new invite ("An active or pending invitation already exists"); the recipient's link shows "This invitation was not found, or it has already been used".
 
-## Tests added/run
-- `backend/tests/regression/dealerTeamLeastPrivilege.test.js` (36 pass): concurrent accept yields exactly one 200 and one 404; claim is conditional on status and hash. Existing: replay, wrong recipient, expired, removed, dealer/admin refused, role unchanged, revoke.
-- `src/__tests__/pages/dealer/DealerTeamInvite.test.tsx` (10 pass): real styled button, double click = one request, success link, error states, login return path keeps invitation.
-- Not covered by an automated test: other-dealership token reuse beyond hash uniqueness, mobile viewport rendering, a full DB journey beyond existing journey 17 (see journeys-final.txt: 29/29 pass).
-Remaining risk: owner-view confirmation in a browser; the `btn` usages in I3.
+## 2. Trace of the same record (hosted, read-only, no token or hash value read)
+| Value | Hosted observation |
+|---|---|
+| Rows in `dealer_teams` | 1 (status `invited`, role `lot_agent`, no member) |
+| Token hash | present, 64 hex chars (SHA-256 length) |
+| Status / expiry | `invited`; not expired (expires 2026-11-30 09:11:23 UTC) |
+| Created / last updated | 2026-11-16 10:09 UTC / **2026-11-23 09:11:23 UTC** |
+| Expiry vs last update | exactly update + 7 days = the signature of **Resend** (resend re-issues token and expiry) |
+Columns and constraints match the code (`invite_email`, `invite_token_hash`, `invite_expires_at`, status check `invited/active/suspended/removed`).
+
+## 3. Lifecycle values, as implemented
+Token: `crypto.randomBytes(32).toString("hex")` (64 hex). Hash: SHA-256 hex, same function at create, resend and accept. Link: `/dealer/setup?invite=<encodeURIComponent(token)>` (hex is unchanged by encoding). Accept: trims, requires 64 chars, hashes, looks up `{inviteTokenHash, status:'invited'}`, checks expiry, recipient e-mail (case-insensitive), personal account, then claims with compare-and-set on `{id, status:'invited', inviteTokenHash}`. Team list and the dashboard count both use `status = invited`.
+
+## 4. Root cause
+- **Confirmed (code + DB journey + browser): resend replaces the token.** A link from an earlier e-mail stops working the moment the dealer presses *Resend*, and the old 404 text ("not found, or already used") did not say so. The hosted row was re-sent 3 minutes before the report, so an older e-mail link is the most likely trigger.
+- **Confirmed defect: a resend whose e-mail failed destroyed the working link.** Token was rotated first, delivery second; on failure nobody held the new link and the UI said "Invitation refreshed". Now fixed.
+- **Not confirmed:** which e-mail the recipient clicked, and whether the production provider delivered the 09:11 e-mail (production e-mail configuration is unverified). The hosted backend's logs would show it now: the new `dealer_team_accept_no_pending_invitation` / `dealer_team_invitation_resent` log lines carry an 8-character hash fingerprint (never the token).
+- Ruled out: hashing/encoding mismatch, query-parameter name, truncation, whitespace/URL-encoding, status filter mismatch between list/count/accept, the concurrency guard (it requires the same values the lookup already matched; tests prove a legitimate accept succeeds), the login redirect (token preserved, browser-verified).
+
+## 5. Changes (local)
+1. `resendTeamInvite`: if the e-mail is not delivered, the previous hash and expiry are restored (compare-and-set), response says `email.previousLinkStillValid: true`; fingerprint logging.
+2. Accept 404 is explicit (`INVITATION_LINK_NOT_VALID`): "no longer valid... replaced by a newer e-mail, already used, or cancelled". Expired stays 410; wrong recipient 403 without consuming the invitation.
+3. Invitation page: visible design-system button (earlier fix); a spent link opened by someone already on a team says "already been used" with a workspace link; resend UI reports "not re-sent" and that the old link still works.
+4. Earlier fix kept: concurrency guard (single winner).
+**Policy for old links (documented and tested): a successful resend invalidates earlier links; only the newest e-mail works.**
+
+## 6. Tests
+- Jest `dealerTeamInvitationLifecycle.test.js` (13): create to emailed link to accept; hash equals SHA-256 of emailed token and raw token never stored; whitespace/URL encoding; resend then newest link works; old link refused with explanation; failed-email resend keeps the previous link; wrong token; expired/revoked/already accepted; wrong recipient not consuming; concurrent accepts (one 200, two 404); roster stats; duplicates; no token in responses/audit.
+- Jest `dealerTeamLeastPrivilege.test.js` (36).
+- DB journey 17 (real backend + Postgres + provider stub), new B5-B7.
+- Vitest `DealerTeamInvite.test.tsx` (12).
+- **Real browser** (`ci/browser/team-invitation.mjs`, Playwright/Chromium, disposable stack, evidence `evidence/browser-invitation/`): 22/22: owner invites in the Team page; logged-out visitor goes to sign-in with the same invitation preserved and returns to it; visible styled button; accept; DB shows one active membership, role kept, token cleared; refresh + accept again says already used, still one membership; resend, old link explained, newest accepted; wrong account gets a clear 403 and the invitation is untouched; dashboard "Invitations waiting" equals the DB count; mobile 390px layout; no page errors.
+## 7. Remaining risk / owner actions
+Production still runs the old code until you deploy. Ask the dealer to open only the newest e-mail, or Resend once more after deploy. Confirm the production e-mail provider delivers (a failed provider now keeps the old link alive). Hosted logs after deploy will show the fingerprints.

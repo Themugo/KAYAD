@@ -60,6 +60,22 @@ const tokR2 = tokenFrom(mailTo(failEmail).at(-1));
 const failUser = await makeUser({ tag: 'failinv', email: failEmail });
 check('B4 resending again invalidates the previous token', tokR !== tokR2 && (await failUser.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tokR } })).status === 404);
 
+// B5-B7 (invitation recovery): a resend whose e-mail fails must not strand the invitation, and a replaced link explains itself.
+const rfEmail = `rsfail-${uid()}@example.test`;
+await inv(A, rfEmail); const tokRf = tokenFrom(mailTo(rfEmail).at(-1));
+const rfId = q(`select id from dealer_teams where invite_email='${rfEmail}'`);
+const hashBeforeRf = q(`select invite_token_hash from dealer_teams where id='${rfId}'`);
+fs.writeFileSync(FAIL, '1');
+const rsf = await A.raw(`/api/dealer-platform/team/${rfId}/resend`, { method: 'POST' });
+fs.rmSync(FAIL);
+check('B5 resend while the provider is down: email.sent=false, previousLinkStillValid=true, stored hash unchanged', rsf.status === 200 && rsf.j?.email?.sent === false && rsf.j?.email?.previousLinkStillValid === true && q(`select invite_token_hash from dealer_teams where id='${rfId}'`) === hashBeforeRf, rsf.j);
+const rfUser = await makeUser({ tag: 'rsfail', email: rfEmail });
+const rsOk = await A.raw(`/api/dealer-platform/team/${rfId}/resend`, { method: 'POST' });
+const tokRf2 = tokenFrom(mailTo(rfEmail).at(-1));
+const oldLink = await rfUser.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tokRf } });
+check('B6 after a SUCCESSFUL resend the old link is refused with the explanatory code and the invitation stays pending', rsOk.status === 200 && oldLink.status === 404 && oldLink.j?.code === 'INVITATION_LINK_NOT_VALID' && /newer e-mail/.test(oldLink.j?.message || '') && row(rfEmail, A.id).startsWith('invited|'), oldLink.j);
+check('B7 the newest e-mailed link is accepted; membership active exactly once', (await rfUser.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tokRf2 } })).status === 200 && row(rfEmail, A.id) === `active|${rfUser.id}|sales_agent|false`);
+
 // ---- C. acceptance
 const anon = new Client();
 check('C1 accepting while signed out -> 401', (await anon.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tok1 } })).status === 401);

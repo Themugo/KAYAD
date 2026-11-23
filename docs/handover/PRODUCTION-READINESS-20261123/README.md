@@ -19,6 +19,6 @@ Start with `REPORT.md` (revision 2). Earlier evidence is preserved (`evidence/`,
 ## Changes made to project files in this revision
 1. `backend/db/index.js` — `$or` branches now translate `$gte/$gt/$lte/$lt/$ne/$in` (several operators on one field are AND-ed) and **fail closed** for unsupported operator objects instead of sending `[object Object]`. Fixes the hourly `dealerHealthScoreScheduler` 400 seen in the hosted logs.
 2. `backend/tests/regression/dbOrRangeOperators.test.js` — 6 regression tests.
-3. `backend/controllers/dealerPlatformController.js` (atomic invitation claim), `src/pages/dealer/DealerTeamInvite.jsx` (visible button), related tests.
+3. Invitation fix (rev 2): `backend/controllers/dealerPlatformController.js`, `src/pages/dealer/DealerTeamInvite.jsx`, `DealerTeamPanel.tsx`, new tests and a real-browser journey (`ci/browser/team-invitation.mjs`). See `INVITATION-ACCEPTANCE-AUDIT.md`.
 4. This documentation folder.
 **No migration, financial function, workflow, environment or production configuration was changed.** Nothing was committed, pushed, merged or deployed by Claude. Do not run `supabase db push`.
