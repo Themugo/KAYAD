@@ -60,6 +60,23 @@ const applyFilters = (query, filters, table) => {
             const term = (fv.$regex.source || fv.$regex).toString().replace(/[,%^$]/g, '');
             return `${col}.ilike.*${escapeLike(term)}*`;
           }
+          // Range / set operators inside an $or branch (e.g. dealerHealthScoreScheduler: { updatedAt: { $gte: oneDayAgo } }). Previously any
+          // operator object fell through to `.eq.[object Object]`, PostgREST answered 400 and the hourly job failed every run (seen in the hosted
+          // edge logs: dealers?or=(updated_at.eq.[object Object],created_at.eq.[object Object])). Several operators on one field are AND-ed.
+          if (fv && typeof fv === 'object' && !(fv instanceof Date) && !Array.isArray(fv)) {
+            const lit = (val) => {
+              const out = String(normalizeFilterValue(val));
+              return /[,()"]/.test(out) ? pgrstQuote(out) : out;
+            };
+            const ops = [];
+            for (const [op, pg] of Object.entries({ $gte: 'gte', $lte: 'lte', $gt: 'gt', $lt: 'lt', $ne: 'neq' })) {
+              if (fv[op] !== undefined) ops.push(`${col}.${pg}.${lit(fv[op])}`);
+            }
+            if (Array.isArray(fv.$in)) ops.push(`${col}.in.(${fv.$in.map(lit).join(',')})`);
+            if (ops.length) return ops.length > 1 ? `and(${ops.join(',')})` : ops[0];
+            // Fail closed: an unsupported operator object must never be serialised as "[object Object]".
+            throw new Error(`Unsupported $or operator on "${fk}"`);
+          }
           return fv === null ? `${col}.is.null` : `${col}.eq.${normalizeFilterValue(fv)}`;
         }).join(',')
       ).join(',');

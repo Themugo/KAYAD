@@ -29,9 +29,50 @@ Source: hosted = dump supplied by owner (replica `kayad_test_replica`); repo = D
 
 ## How to read this inventory
 - **Static comparison only (Inferred).** Nothing here was executed against money data, and no function was changed.
-- **Drift is bidirectional.** Hosted is *longer* (more logic) than the repo for apply_dealer_verification, auto_bid, confirm_bid_payment, mark_dealer_payout, place_bid, start_auction, transition_dispute, transition_escrow (146 vs 42 lines), rls_auto_enable. The repo is longer for generate_inspection_settlement, mark_inspection_settlement_paid (7 vs 70), post_ledger_entry, process_inspection_payment (40 vs 138), resolve_dispute, settle_bid/purchase_payment, verify_escrow_funding, register_identity (placeholder). A blanket "make hosted match repo" would therefore **remove** hosted logic in some functions and add repo logic in others. Which side is intended is NOT ESTABLISHED for any of them.
+- **Direction of drift (corrected in revision 2):** the earlier note that hosted is "longer" for some functions was a **formatting artefact** (the repo bodies are dense one-liners; the hosted bodies are expanded). Line counts must not be used to judge completeness. See "Revision 2 — lineage" below, which compares normalised bodies against every repo migration.
 - **Dependency signal:** the repo versions of auto_bid, place_bid, extend_auction, settle_bid_payment reference `auction_setups` / `auction_platform_policies`; settle_purchase_payment references `purchase_outcomes`. None of these tables exist on hosted, so those repo bodies cannot run on hosted as-is.
 - **Counting note:** this classification finds 15 functions that move or record money (auto_bid, confirm_bid_payment, generate_inspection_settlement, mark_dealer_payout, mark_inspection_settlement_paid, place_bid, post_ledger_entry, process_inspection_payment, process_inspection_refund, rebuild_ledger_balances, resolve_dispute, settle_bid_payment, settle_purchase_payment, transition_escrow, verify_escrow_funding), plus 4 money-adjacent (transition_dispute, start_auction, extend_auction, inspection_report_immutability_guard). The earlier audit's "12 financial functions" is not reproduced exactly; the financial owner should review the whole list, not a subset.
 - Not financial: register_identity (fixed by the rehearsed restore migration), apply_dealer_verification, rls_auto_enable.
 - Triggers: `kayad_inspection_report_immutability_guard` is a trigger function. Hosted has 38 triggers vs repo 79; trigger-level differences were not enumerated per function (NOT ESTABLISHED).
 - Full definitions and unified diffs: `evidence/function-bodies/hosted|repo|*.diff`.
+
+
+---
+# Revision 2 (2026-11-23, after the full read of the hosted and repo definitions)
+Method (Confirmed, reproducible with `evidence/`): every `CREATE [OR REPLACE] FUNCTION` body in all 211 repo migrations was whitespace-normalised and compared with the hosted body. Raw output: `evidence/function-lineage-exact-match.txt` and `evidence/function-lineage-nearest.txt`.
+
+## Lineage: hosted is mostly an OLDER point in the repo's own history
+| Group | Functions | Evidence | Reading |
+|---|---|---|---|
+| **A. Hosted body == an older repo migration, byte-for-byte after normalisation (10)** | auto_bid (=20260905060000), confirm_bid_payment (=20260901210000), extend_auction (=20260907140000), inspection_report_immutability_guard (=20260920220000), mark_inspection_settlement_paid (=20260920220000), post_ledger_entry (=20260902090000), rebuild_ledger_balances (=20260902090000), settle_bid_payment (=20260918100000), settle_purchase_payment (=20260902090000), start_auction (=20260907140000) | similarity 1.00 to an older version; 0.07–0.95 to the latest | The repo contains **later versions** of these; hosted never received them (migration history stops at 20260922060457). Confirmed lineage; "repo is better" is Inferred until tested. |
+| **B. Hosted is a near-variant of an older repo version (8)** | generate_inspection_settlement (0.89 to 20260918144230), process_inspection_payment (0.73 to 20261110130000), process_inspection_refund (0.95 to 20260907190200), resolve_dispute (0.60 to 20261002150000), transition_dispute (0.60 to 20260909084443), transition_escrow (0.85 to 20260905050000; latest repo 0.64), verify_escrow_funding (0.91 to 20260909080841; latest 0.26), place_bid (0.67 to 20260901210000; latest 0.36) | no exact match | Either edited by hand on hosted or produced by a migration not in the repo. Origin **NOT ESTABLISHED**. Needs line-level review. |
+| **C. Hosted logic that the repo does not have (2)** | apply_dealer_verification (0.11: hosted writes `audit_logs` and `admin_control_state`; repo version is 23 lines), mark_dealer_payout (0.35: hosted references the ledger, the repo version does not) | very low similarity to every repo version | Hosted-only behaviour. **Do not overwrite.** Business decision required. |
+| D. Identity | register_identity | hosted is the placeholder; restore migration rehearsed | Fix path exists (Stage 1). |
+| E. Platform | rls_auto_enable (event trigger `ensure_rls`) | no repo definition | Supabase platform object. Keep; never replace. |
+
+## Money-function review (E2) — static findings (Inferred; not executed against money data)
+| Function | Hosted | Repo (latest) | Safeguard comparison |
+|---|---|---|---|
+| `transition_escrow` | state machine + role matrix + FOR UPDATE + idempotency key; release sets `commission = ROUND(amount*rate)` (integer), **no ledger posting**, swallows `undefined_column` on `platform_config` | same machine/roles; release/refund **post ledger entries** via `kayad_post_ledger_entry_atomic` with idempotent keys (`escrow-release:<id>`, `escrow-commission:<id>`, `escrow-refund:<id>`); 2-dp rounding; "amounts do not balance" guard; no silent fallback | Repo has the stronger ledger/rounding/idempotency safeguards. Hosted escrow releases would not appear in the ledger. |
+| `post_ledger_entry` | 3 row locks (`FOR UPDATE`) | 5 row locks | Repo takes more locks; whether that is stronger needs a concurrency test (Unverified). |
+| `rebuild_ledger_balances` | older version | later version (different body, 29 vs 30 lines) | needs test |
+| `settle_purchase_payment` | no `purchase_outcomes` | writes `purchase_outcomes` and checks effective escrow | Repo version needs table missing on hosted → **dependency-blocked** |
+| `place_bid`, `auto_bid`, `extend_auction`, `settle_bid_payment`, `start_auction` | pre-auction-setup logic | use `auction_setups` / `auction_platform_policies` | **dependency-blocked** (tables missing) |
+| `process_inspection_payment` | 40 lines; references ledger and idempotency | 138 lines; also references ledger and idempotency, more branches | Large behavioural change; direction of safeguards not established without a line-level review |
+| `process_inspection_refund` | single-version near match | same family | review diff |
+| `resolve_dispute`, `transition_dispute` | near-variants | later hardening (locks, ledger) | review diff |
+| `mark_dealer_payout` | references the ledger | different shape | **hosted has behaviour the repo lacks → block** |
+| `verify_escrow_funding` | older | adds ledger posting + second lock | repo stronger (Inferred) |
+Not assessed for lack of runnable harness on the hosted-shaped database: concurrency under real traffic, replay of provider callbacks, refund limits end-to-end. These need the E4 tests on the replica (see `TEST-RESULTS.md` for what actually ran).
+
+## Decision matrix for the financial owner (nothing selected; nothing applied)
+| Option | Applies to | Precondition |
+|---|---|---|
+| Preserve hosted | C (apply_dealer_verification, mark_dealer_payout), E | none |
+| Adopt repository version | Group A (10) | dependency tables present (auction_setups, auction_platform_policies, purchase_outcomes) + E4 regression evidence + financial-owner sign-off |
+| Merge specific behaviours | Group B (8) | line-level diff review (`evidence/function-bodies/*.diff`) |
+| Require additional tests | all 15 money-moving | synthetic replica tests |
+| Block pending business decision | C | owner clarifies intended payout/verification rules |
+
+## Material context for risk
+Hosted holds **0 bids, 0 escrows, 0 payments, 0 refunds, 0 ledger entries and 0 leads** (read-only counts, 2026-11-23). No existing financial record can be altered by a function change today; the risk is to *future* money flows and to the integrity of the design, not to historical data. This does not remove the need for owner sign-off.

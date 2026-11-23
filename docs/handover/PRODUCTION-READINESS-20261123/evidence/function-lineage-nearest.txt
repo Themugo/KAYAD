@@ -1,0 +1,23 @@
+function | closest repo version (migration, similarity) | latest repo version similarity
+kayad_apply_dealer_verification_atomic | 20260909091703 0.11 | 20260909091703 0.11 | versions in repo: 1
+kayad_auto_bid_atomic | 20260905060000 1.00 | 20261020170000 0.65 | versions in repo: 3
+kayad_confirm_bid_payment_atomic | 20260901210000 1.00 | 20261007180000 0.13 | versions in repo: 3
+kayad_extend_auction_atomic | 20260907140000 1.00 | 20261007120000 0.83 | versions in repo: 2
+kayad_generate_inspection_settlement_atomic | 20260918144230 0.89 | 20260918144230 0.89 | versions in repo: 1
+kayad_inspection_report_immutability_guard | 20260920220000 1.00 | 20260921061403 0.97 | versions in repo: 2
+kayad_mark_dealer_payout_atomic | 20261002150000 0.35 | 20261002150000 0.35 | versions in repo: 2
+kayad_mark_inspection_settlement_paid_atomic | 20260920220000 1.00 | 20260921134954 0.77 | versions in repo: 5
+kayad_place_bid_atomic | 20260901210000 0.67 | 20261020170000 0.36 | versions in repo: 3
+kayad_post_ledger_entry_atomic | 20260902090000 1.00 | 20261002130000 0.40 | versions in repo: 3
+kayad_process_inspection_payment_atomic | 20261110130000 0.73 | 20261110130000 0.73 | versions in repo: 3
+kayad_process_inspection_refund_atomic | 20260907190200 0.95 | 20260907190200 0.95 | versions in repo: 1
+kayad_rebuild_ledger_balances | 20260902090000 1.00 | 20261011220000 0.07 | versions in repo: 2
+kayad_register_identity_atomic | 20261001090000 0.30 | 20261122200000 0.23 | versions in repo: 3
+kayad_resolve_dispute_atomic | 20261002150000 0.60 | 20261002180000 0.42 | versions in repo: 5
+kayad_settle_bid_payment_atomic | 20260918100000 1.00 | 20261020170000 0.20 | versions in repo: 4
+kayad_settle_purchase_payment_atomic | 20260902090000 1.00 | 20261009130000 0.41 | versions in repo: 4
+kayad_start_auction_atomic | 20260907140000 1.00 | 20261020170000 0.95 | versions in repo: 2
+kayad_transition_dispute_atomic | 20260909084443 0.60 | 20260909084443 0.60 | versions in repo: 1
+kayad_transition_escrow_atomic | 20260905050000 0.85 | 20261002180000 0.64 | versions in repo: 4
+kayad_verify_escrow_funding_atomic | 20260909080841 0.91 | 20261009130000 0.26 | versions in repo: 4
+rls_auto_enable | none | -
