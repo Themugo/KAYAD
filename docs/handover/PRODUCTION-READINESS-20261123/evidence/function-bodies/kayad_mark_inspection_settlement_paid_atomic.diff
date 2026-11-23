@@ -1,0 +1,62 @@
+--- hosted
++++ repo
+@@ -5,2 +5,58 @@
+ SET search_path TO 'public', 'pg_temp'
+-AS $function$ declare s public.inspection_settlements%rowtype;missing integer;cnt integer; begin if nullif(trim(coalesce(p_payment_reference,'')),'') is null then raise exception 'Settlement payment reference is required'; end if; select * into s from public.inspection_settlements where id=p_settlement_id for update; if not found then raise exception 'Settlement not found'; end if; if s.status='paid' then if s.payment_reference=p_payment_reference then return jsonb_build_object('settlementId',s.id,'status','paid','idempotent',true,'paidAt',s.paid_at); end if; raise exception 'Settlement already paid with a different payment reference'; end if; if s.status<>'pending' then raise exception 'Settlement cannot be paid from %',s.status; end if; select count(*) into cnt from public.inspection_transactions where settlement_id=s.id and transaction_type='inspection_payment'; if cnt=0 then raise exception 'Settlement has no linked inspection payments'; end if; select count(*) into missing from public.inspection_transactions t left join public.inspection_bookings b on b.id=t.booking_id left join public.inspection_reports r on r.booking_id=t.booking_id where t.settlement_id=s.id and t.transaction_type='inspection_payment' and (b.id is null or b.status<>'closed' or b.payment_status<>'fully_paid' or r.id is null); if missing>0 then raise exception 'Settlement contains % inspection(s) that are not closed and reported',missing; end if; perform public.kayad_post_ledger_entry_atomic('inspection-payout:'||s.id::text,p_user_id,s.net_amount,coalesce(s.currency,'KES'),'inspection_payout','inspection_provider','Inspection provider payout',jsonb_build_object('settlement_id',s.id,'provider_id',s.provider_id),'5100','1000'); update public.inspection_settlements set status='paid',payment_method=p_payment_method,payment_reference=p_payment_reference,paid_at=now(),processed_at=now(),updated_at=now() where id=s.id; update public.inspection_transactions set status='completed' where settlement_id=s.id; insert into public.inspection_transactions(provider_id,settlement_id,transaction_type,amount,currency,status,description,reference,created_at) values(s.provider_id,s.id,'payout',s.net_amount,coalesce(s.currency,'KES'),'completed','Inspection provider payout',p_payment_reference,now()); return jsonb_build_object('settlementId',s.id,'status','paid','idempotent',false,'paidAt',now()); end; $function$
++AS $function$
++DECLARE
++s public.inspection_settlements%ROWTYPE;
++missing INTEGER;
++cnt INTEGER;
++BEGIN
++IF NULLIF(trim(COALESCE(p_payment_reference,'')), '') IS NULL THEN
++RAISE EXCEPTION 'Settlement payment reference is required';
++END IF;
++SELECT * INTO s FROM public.inspection_settlements WHERE id=p_settlement_id FOR UPDATE;
++IF NOT FOUND THEN RAISE EXCEPTION 'Settlement not found'; END IF;
++IF s.status='paid' THEN
++IF s.payment_reference=p_payment_reference THEN
++RETURN jsonb_build_object('settlementId',s.id,'status','paid','idempotent',true,'paidAt',s.paid_at);
++END IF;
++RAISE EXCEPTION 'Settlement already paid with a different payment reference';
++END IF;
++IF s.status<>'pending' THEN RAISE EXCEPTION 'Settlement cannot be paid from %',s.status; END IF;
++SELECT COUNT(*) INTO cnt
++FROM public.inspection_transactions
++WHERE settlement_id=s.id AND transaction_type='inspection_payment';
++IF cnt=0 THEN RAISE EXCEPTION 'Settlement has no linked inspection payments'; END IF;
++SELECT COUNT(*) INTO missing
++FROM public.inspection_transactions t
++LEFT JOIN public.inspection_bookings b ON b.id=t.booking_id
++LEFT JOIN public.inspection_reports r ON r.booking_id=t.booking_id
++WHERE t.settlement_id=s.id
++AND t.transaction_type='inspection_payment'
++AND (b.id IS NULL OR b.status<>'closed' OR b.payment_status<>'fully_paid' OR r.id IS NULL);
++IF missing>0 THEN
++RAISE EXCEPTION 'Settlement contains % inspection(s) that are not closed and reported',missing;
++END IF;
++PERFORM public.kayad_post_ledger_entry_atomic(
++'inspection-payout:'||s.id::TEXT,
++p_user_id,
++s.net_amount,
++COALESCE(s.currency,'KES'),
++'inspection_payout',
++'inspection_provider',
++'Inspection provider payout',
++jsonb_build_object('settlement_id',s.id,'provider_id',s.provider_id),
++'5100','1000'
++);
++UPDATE public.inspection_settlements
++SET status='paid', payment_method=p_payment_method, payment_reference=p_payment_reference,
++paid_at=now(), processed_at=now()
++WHERE id=s.id;
++UPDATE public.inspection_transactions SET status='completed' WHERE settlement_id=s.id;
++INSERT INTO public.inspection_transactions(
++provider_id,settlement_id,transaction_type,amount,currency,status,description,reference,created_at
++) VALUES (
++s.provider_id,s.id,'payout',s.net_amount,COALESCE(s.currency,'KES'),'completed',
++'Inspection provider payout',p_payment_reference,now()
++);
++RETURN jsonb_build_object('settlementId',s.id,'status','paid','idempotent',false,'paidAt',now());
++END;
++$function$

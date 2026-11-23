@@ -1,0 +1,36 @@
+--- hosted
++++ repo
+@@ -8,4 +8,6 @@
+ v_car cars%ROWTYPE;
++v_setup JSONB := '{}'::jsonb;
+ v_new_end TIMESTAMPTZ;
+ v_count INTEGER;
++v_max_extensions INTEGER := 3;
+ BEGIN
+@@ -14,19 +16,10 @@
+ IF v_car.auction_status <> 'live' THEN RAISE EXCEPTION 'Auction is not live'; END IF;
+-IF p_extra_ms IS NULL OR p_extra_ms < 3600000 OR p_extra_ms > 259200000 THEN
+-RAISE EXCEPTION 'Extension must be between 1 and 72 hours';
+-END IF;
++SELECT COALESCE(config, '{}'::jsonb) INTO v_setup FROM auction_setups WHERE car_id = p_car_id AND publication_status = 'published' LIMIT 1;
++v_max_extensions := GREATEST(0, LEAST(10, COALESCE(NULLIF(v_setup->>'maxExtensions','')::integer, 3)));
++IF p_extra_ms IS NULL OR p_extra_ms < 3600000 OR p_extra_ms > 259200000 THEN RAISE EXCEPTION 'Extension must be between 1 and 72 hours'; END IF;
+ v_count := COALESCE(v_car.extension_count, 0);
+-IF v_count >= 3 THEN RAISE EXCEPTION 'Maximum 3 extensions per auction reached'; END IF;
+-v_new_end := GREATEST(COALESCE(v_car.auction_end, now()), now())
+-+ (p_extra_ms::double precision * interval '1 millisecond');
+-UPDATE cars
+-SET auction_end = v_new_end,
+-extension_count = v_count + 1,
+-updated_at = now()
+-WHERE id = p_car_id;
+-RETURN jsonb_build_object(
+-'car_id', p_car_id,
+-'auction_end', v_new_end,
+-'extension_count', v_count + 1
+-);
++IF v_count >= v_max_extensions THEN RAISE EXCEPTION 'Maximum % extensions per auction reached', v_max_extensions; END IF;
++v_new_end := GREATEST(COALESCE(v_car.auction_end, now()), now()) + (p_extra_ms::double precision * interval '1 millisecond');
++UPDATE cars SET auction_end = v_new_end, extension_count = v_count + 1, updated_at = now() WHERE id = p_car_id;
++RETURN jsonb_build_object('car_id', p_car_id, 'auction_end', v_new_end, 'extension_count', v_count + 1, 'max_extensions', v_max_extensions);
+ END;
