@@ -131,7 +131,7 @@ const QuickAction = ({ icon: Icon, label, onClick }: { icon: React.ElementType; 
 export const dealerStatusHint = (status?: string | null): string => {
   switch (status) {
     case 'available': case 'active': return 'Visible to buyers.';
-    case 'pending': return 'Under review by KAYARD KE. Buyers cannot see it until it is published.';
+    case 'pending': return 'On hold until your dealership account is approved, then it goes live automatically. KAYARD KE does not review listings one by one.';
     case 'hidden': case 'paused': return 'Buyers cannot see this. Republish it when you are ready; if you did not pause it, contact KAYARD KE support.';
     case 'draft': return 'Not published yet. Finish the details, then publish.';
     case 'reserved': return 'Reserved for a buyer.';

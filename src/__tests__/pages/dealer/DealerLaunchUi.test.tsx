@@ -83,7 +83,7 @@ describe('Dealer launch UI', () => {
     const hints = screen.getAllByTestId('inventory-status-hint').map((h) => h.textContent);
     expect(hints).toEqual(expect.arrayContaining([
       'Visible to buyers.',
-      expect.stringContaining('Under review by KAYARD KE'),
+      expect.stringContaining('does not review listings one by one'),
       expect.stringContaining('Republish it when you are ready'),
       expect.stringContaining('Not published yet'),
     ]));
