@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({ accept: vi.fn() }));
 vi.mock('../../../services/dealerPlatformApi', () => ({ acceptTeamInvite: m.accept }));
 vi.mock('../../../features/DealershipWorkspace/useMyDealership', () => ({ resetMyDealershipCache: vi.fn() }));
 import DealerTeamInvite from '../../../pages/dealer/DealerTeamInvite';
+import { buildAuthPath, safeNextPath } from '../../../utils/authIntent';
 
 const TOKEN = 'a'.repeat(64);
 const at = (q: string) => window.history.pushState({}, '', `/dealer/setup${q}`);
@@ -32,5 +33,35 @@ describe('Team invitation landing page', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Accept invitation' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(re);
     expect(screen.getByRole('button', { name: 'Try again' })).toBeEnabled();
+  });
+  it('the accept control is a real, visibly styled button that does not depend on the admin-only .btn classes', () => {
+    at(`?invite=${TOKEN}`); render(<DealerTeamInvite />);
+    const b = screen.getByRole('button', { name: 'Accept invitation' });
+    expect(b.tagName).toBe('BUTTON');
+    expect(b).toHaveAttribute('type', 'button');
+    expect(b.className).not.toMatch(/\bbtn\b/);
+    expect(b.style.display).toBe('inline-flex');
+    expect(b.style.cursor).toBe('pointer');
+  });
+  it('a double click sends exactly one request', async () => {
+    at(`?invite=${TOKEN}`); m.accept.mockImplementation(() => new Promise((r) => setTimeout(() => r({ success: true }), 20)));
+    render(<DealerTeamInvite />);
+    const b = screen.getByRole('button', { name: 'Accept invitation' });
+    await userEvent.dblClick(b);
+    expect(m.accept).toHaveBeenCalledTimes(1);
+  });
+  it('after success the next step is a visible link to the workspace', async () => {
+    at(`?invite=${TOKEN}`); m.accept.mockResolvedValue({ success: true });
+    render(<DealerTeamInvite />);
+    await userEvent.click(screen.getByRole('button', { name: 'Accept invitation' }));
+    const link = await screen.findByTestId('open-workspace');
+    expect(link).toHaveAttribute('href', '/?nav=dealership-workspace');
+    expect(link.className).not.toMatch(/\bbtn\b/);
+  });
+  it('a logged-out visitor is sent to sign in and returned to the same invitation link', () => {
+    const next = `/dealer/setup?invite=${TOKEN}`;
+    expect(safeNextPath(next)).toBe(next);
+    expect(buildAuthPath('login', { next })).toBe(`/login?next=${encodeURIComponent(next)}`);
+    expect(buildAuthPath('register', { next })).toContain(encodeURIComponent(next));
   });
 });

@@ -22,6 +22,7 @@ import { logError } from "../utils/logger.js";
 import { getDealerEntitlement } from "../services/dealerSubscription.service.js";
 import { getDealerLeads, getLeadById, updateLeadStage as serviceUpdateLeadStage, addLeadActivity as serviceAddLeadActivity } from "../services/leadService.js";
 import { create, findAll, findOne, update } from "../db/index.js";
+import * as dbApi from "../db/index.js"; // updateMany: compare-and-set for single-use invitation acceptance
 import { logAuditEvent } from "../services/auditService.js";
 import crypto from "crypto";
 import { sellerMayPublishDirectly } from "../services/onboardingPolicy.service.js"; // listing self-publication
@@ -815,7 +816,11 @@ export async function acceptTeamInvite(req, res) {
   if (String(row.dealer) === String(req.user.id)) return res.status(403).json({ success: false, code: "TEAM_SELF_MEMBERSHIP", message: "A dealer account cannot be a member of its own team." });
   const activeMembership = await findOne("dealer_teams", { dealer: row.dealer, member: req.user.id, status: "active" });
   if (activeMembership) return res.status(409).json({ success: false, message: "You are already an active member of this dealer team" });
-  const updated = await update("dealer_teams", row.id, { member: req.user.id, status: "active", inviteTokenHash: null, inviteExpiresAt: null });
+  // Compare-and-set: the row is claimed only while it is still the same pending invitation (id + status + token hash). Two simultaneous
+  // accepts (double click, two tabs, replay) therefore cannot both succeed; the loser gets the same 404 as a replayed token.
+  const claimed = await dbApi.updateMany("dealer_teams", { id: row.id, status: "invited", inviteTokenHash: hash }, { member: req.user.id, status: "active", inviteTokenHash: null, inviteExpiresAt: null });
+  const updated = Array.isArray(claimed) ? claimed[0] : null;
+  if (!updated) return res.status(404).json({ success: false, message: "Invitation not found or already used" });
   await logAuditEvent({ action: "dealer_team_invitation_accepted", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: updated.id, targetModel: "DealerTeam", details: { dealerId: row.dealer }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
   return res.json({ success: true, data: publicTeamRow(updated) });
 }
