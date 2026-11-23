@@ -86,6 +86,11 @@ export const startFakePostgrest = async (options = {}) => {
         if (!schema.__functions.has(fn) || options.missingFunctions?.includes(fn)) {
           return err(res, 404, "PGRST202", `Could not find the function public.${fn} in the schema cache`);
         }
+        // Simulates a function whose body is a placeholder (found on the hosted project): reaches END without RETURN (2F005),
+        // or returns nothing at all. `options.brokenFunctions` is a live object so a test can "repair" it mid-run.
+        const broken = options.brokenFunctions?.[fn];
+        if (broken === "no_return") return err(res, 400, "2F005", "control reached end of function without RETURN");
+        if (broken === "empty") return send(res, 200, null);
         if (fn === "kayad_register_identity_atomic") {
           const users = (db.users ||= []);
           const auth = (db.user_auth ||= []);

@@ -69,9 +69,13 @@ run_j() { local name="$1"; shift; ( cd "$1" && shift && timeout "${JOURNEY_TIMEO
 # Legacy chain (state passes through state.json in the working dir): registration, personal listing + moderation, enquiry, offers, payments gate, inspection, dealer, capabilities.
 WORK="$(mktemp -d)"; cp "$LEG"/*.mjs "$WORK"/
 for j in j1_registration_idempotency j1_personal_register_login j2 j3 j4_offers j5 j6 j7 j8 j9_capabilities j10_legacy_and_dealer; do [ -n "${ONLY_JOURNEYS:-}" ] && continue; run_j "legacy-$j" "$WORK" "$j.mjs"; done
-for j in 03_reconciliation_issues 05_offer_payment 07_personal_listing_management 09_dealer_listing_lifecycle 10_dealer_banking 11_dealer_publish_pause 12_dealer_named_journeys 13_listing_number_stress 15_listing_creation_idempotency 14_staff_role_write_matrix 16_isolation_and_sessions 17_team_invitation_lifecycle 99_browser_hold; do if [ -n "${ONLY_JOURNEYS:-}" ]; then case " $ONLY_JOURNEYS " in *" $j "*) ;; *) continue;; esac; fi; run_j "$j" "$HERE" "$j.mjs"; done
+# financial reconciliation journey: drives the real payment callback + escrow API, and reads the backend model layer (loopback key generated above)
+if [ -z "${ONLY_JOURNEYS:-}" ] || case " $ONLY_JOURNEYS " in *" 19_dealer_ledger_reconciliation "*) true;; *) false;; esac; then SUPABASE_URL="http://127.0.0.1:$PROXY_PORT" SUPABASE_SERVICE_ROLE_KEY="$SR_JWT" run_j 19_dealer_ledger_reconciliation "$HERE" 19_dealer_ledger_reconciliation.mjs; fi
+for j in 03_reconciliation_issues 05_offer_payment 07_personal_listing_management 09_dealer_listing_lifecycle 10_dealer_banking 11_dealer_publish_pause 12_dealer_named_journeys 13_listing_number_stress 15_listing_creation_idempotency 14_staff_role_write_matrix 16_isolation_and_sessions 17_team_invitation_lifecycle 18_dealer_command_centre 99_browser_hold; do if [ -n "${ONLY_JOURNEYS:-}" ]; then case " $ONLY_JOURNEYS " in *" $j "*) ;; *) continue;; esac; fi; run_j "$j" "$HERE" "$j.mjs"; done
 # model-layer journey: talks to the disposable PostgREST directly (loopback key generated above)
 [ -n "${ONLY_JOURNEYS:-}" ] || SUPABASE_URL="http://127.0.0.1:$PROXY_PORT" SUPABASE_SERVICE_ROLE_KEY="$SR_JWT" run_j 06_aggregate_shim "$HERE" 06_aggregate_shim.mjs
+# Registration + e-mail verification + password recovery lifecycle (own line so it does not collide with the shared journey list above).
+{ [ -z "${ONLY_JOURNEYS:-}" ] || case " $ONLY_JOURNEYS " in *" 20_registration_email_lifecycle "*) true;; *) false;; esac; } && run_j 20_registration_email_lifecycle "$HERE" 20_registration_email_lifecycle.mjs
 # MUST run last: it drops the objects that are absent on the hosted project (a hosted-shaped schema) and then drives the whole owner lifecycle.
 [ -n "${ONLY_JOURNEYS:-}" ] || run_j 08_personal_listing_hosted_schema "$HERE" 08_personal_listing_hosted_schema.mjs
 echo "overall=$([ $RC = 0 ] && [ $FAILED_MIG = 0 ] && echo PASS || echo FAIL)" | tee -a "$OUT/summary.txt"

@@ -1,0 +1,3311 @@
+{
+ "variant": "forward-legacy-to-current-gap800",
+ "sw": "register",
+ "A": "aaaaaaaaaaaa-mwrwlkr6",
+ "B": "bbbbbbbbbbbb-mwrwlraj",
+ "runs": [
+  {
+   "run": 1,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 520,
+     "out": "ok",
+     "startedAt": 1795359157313
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 54,
+     "out": "ok",
+     "startedAt": 1795359159110
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 496,
+     "out": "ok",
+     "startedAt": 1795359159164
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 379,
+     "out": "ok",
+     "startedAt": 1795359160915
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 790,
+     "out": "ok",
+     "startedAt": 1795359162159
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 288,
+     "out": "ok",
+     "startedAt": 1795359163767
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 214,
+     "out": "ok",
+     "startedAt": 1795359164904
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 331,
+     "out": "ok",
+     "startedAt": 1795359165932
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 304,
+     "out": "ok",
+     "startedAt": 1795359167070
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 341,
+     "out": "ok",
+     "startedAt": 1795359168226
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359169377
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 2,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 394,
+     "out": "ok",
+     "startedAt": 1795359169464
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 30,
+     "out": "ok",
+     "startedAt": 1795359171114
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 501,
+     "out": "ok",
+     "startedAt": 1795359171144
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 487,
+     "out": "ok",
+     "startedAt": 1795359172940
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 787,
+     "out": "ok",
+     "startedAt": 1795359174328
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 304,
+     "out": "ok",
+     "startedAt": 1795359175923
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 244,
+     "out": "ok",
+     "startedAt": 1795359177090
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 261,
+     "out": "ok",
+     "startedAt": 1795359178143
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 252,
+     "out": "ok",
+     "startedAt": 1795359179230
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 285,
+     "out": "ok",
+     "startedAt": 1795359180368
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359181463
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 3,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 444,
+     "out": "ok",
+     "startedAt": 1795359181543
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 38,
+     "out": "ok",
+     "startedAt": 1795359183236
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 468,
+     "out": "ok",
+     "startedAt": 1795359183274
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 446,
+     "out": "ok",
+     "startedAt": 1795359184997
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 895,
+     "out": "ok",
+     "startedAt": 1795359186347
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 325,
+     "out": "ok",
+     "startedAt": 1795359188062
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 212,
+     "out": "ok",
+     "startedAt": 1795359189277
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 291,
+     "out": "ok",
+     "startedAt": 1795359190304
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 302,
+     "out": "ok",
+     "startedAt": 1795359191413
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 283,
+     "out": "ok",
+     "startedAt": 1795359192551
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359193643
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 4,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 364,
+     "out": "ok",
+     "startedAt": 1795359193741
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 37,
+     "out": "ok",
+     "startedAt": 1795359195356
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 501,
+     "out": "ok",
+     "startedAt": 1795359195393
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 372,
+     "out": "ok",
+     "startedAt": 1795359197161
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 892,
+     "out": "ok",
+     "startedAt": 1795359198389
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 347,
+     "out": "ok",
+     "startedAt": 1795359200094
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 204,
+     "out": "ok",
+     "startedAt": 1795359201289
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 241,
+     "out": "ok",
+     "startedAt": 1795359202298
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 265,
+     "out": "ok",
+     "startedAt": 1795359203354
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 281,
+     "out": "ok",
+     "startedAt": 1795359204481
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359205588
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 5,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 368,
+     "out": "ok",
+     "startedAt": 1795359205670
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok",
+     "startedAt": 1795359207295
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 407,
+     "out": "ok",
+     "startedAt": 1795359207329
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 367,
+     "out": "ok",
+     "startedAt": 1795359208972
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 953,
+     "out": "ok",
+     "startedAt": 1795359210189
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 351,
+     "out": "ok",
+     "startedAt": 1795359211954
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 212,
+     "out": "ok",
+     "startedAt": 1795359213163
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 247,
+     "out": "ok",
+     "startedAt": 1795359214192
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 309,
+     "out": "ok",
+     "startedAt": 1795359215258
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 265,
+     "out": "ok",
+     "startedAt": 1795359216448
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359217529
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 6,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 472,
+     "out": "ok",
+     "startedAt": 1795359217620
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 28,
+     "out": "ok",
+     "startedAt": 1795359219416
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 357,
+     "out": "ok",
+     "startedAt": 1795359219444
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 397,
+     "out": "ok",
+     "startedAt": 1795359221057
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 839,
+     "out": "ok",
+     "startedAt": 1795359222340
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 303,
+     "out": "ok",
+     "startedAt": 1795359223988
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 212,
+     "out": "ok",
+     "startedAt": 1795359225138
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 254,
+     "out": "ok",
+     "startedAt": 1795359226159
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 337,
+     "out": "ok",
+     "startedAt": 1795359227234
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 281,
+     "out": "ok",
+     "startedAt": 1795359228439
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359229537
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 7,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 382,
+     "out": "ok",
+     "startedAt": 1795359229626
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 26,
+     "out": "ok",
+     "startedAt": 1795359231284
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 398,
+     "out": "ok",
+     "startedAt": 1795359231310
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 431,
+     "out": "ok",
+     "startedAt": 1795359232970
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 785,
+     "out": "ok",
+     "startedAt": 1795359234288
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 269,
+     "out": "ok",
+     "startedAt": 1795359235887
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 234,
+     "out": "ok",
+     "startedAt": 1795359237006
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 279,
+     "out": "ok",
+     "startedAt": 1795359238045
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 278,
+     "out": "ok",
+     "startedAt": 1795359239133
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 236,
+     "out": "ok",
+     "startedAt": 1795359240272
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359241328
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 8,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 377,
+     "out": "ok",
+     "startedAt": 1795359241398
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 30,
+     "out": "ok",
+     "startedAt": 1795359243033
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 477,
+     "out": "ok",
+     "startedAt": 1795359243063
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 404,
+     "out": "ok",
+     "startedAt": 1795359244800
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 878,
+     "out": "ok",
+     "startedAt": 1795359246053
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 389,
+     "out": "ok",
+     "startedAt": 1795359247742
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 211,
+     "out": "ok",
+     "startedAt": 1795359248985
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 424,
+     "out": "ok",
+     "startedAt": 1795359250003
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 307,
+     "out": "ok",
+     "startedAt": 1795359251235
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 376,
+     "out": "ok",
+     "startedAt": 1795359252422
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359253609
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 9,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 416,
+     "out": "ok",
+     "startedAt": 1795359253686
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 31,
+     "out": "ok",
+     "startedAt": 1795359255361
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 480,
+     "out": "ok",
+     "startedAt": 1795359255392
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 407,
+     "out": "ok",
+     "startedAt": 1795359257162
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 821,
+     "out": "ok",
+     "startedAt": 1795359258446
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 303,
+     "out": "ok",
+     "startedAt": 1795359260079
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 233,
+     "out": "ok",
+     "startedAt": 1795359261246
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 363,
+     "out": "ok",
+     "startedAt": 1795359262292
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 313,
+     "out": "ok",
+     "startedAt": 1795359263474
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 305,
+     "out": "ok",
+     "startedAt": 1795359264733
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359265852
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 10,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 385,
+     "out": "ok",
+     "startedAt": 1795359265938
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 27,
+     "out": "ok",
+     "startedAt": 1795359267614
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 487,
+     "out": "ok",
+     "startedAt": 1795359267641
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 448,
+     "out": "ok",
+     "startedAt": 1795359269426
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12000,
+     "out": "STALL",
+     "startedAt": 1795359270777
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 408,
+     "out": "ok",
+     "startedAt": 1795359283578
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 279,
+     "out": "ok",
+     "startedAt": 1795359284845
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 239,
+     "out": "ok",
+     "startedAt": 1795359285931
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 461,
+     "out": "ok",
+     "startedAt": 1795359286989
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 229,
+     "out": "ok",
+     "startedAt": 1795359288327
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359289373
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [],
+    "controller": {
+     "controller": "http://127.0.0.1:5441/sw.js",
+     "state": "activated",
+     "regs": [
+      [
+       "activated",
+       null,
+       null
+      ]
+     ]
+    },
+    "caches": {
+     "kayad-images-v3": [
+      "/branding/kayard-ke-logo.png",
+      "/branding/kayard-ke-logo-dark.png",
+      "/hero/kayad-land-cruiser-mobile.webp",
+      "/hero/kayad-mercedes-gle-mobile.webp"
+     ],
+     "kayad-shell-v3": [
+      "/index.html"
+     ],
+     "kayad-assets-v3": [
+      "/assets/index-CeI5InjX.js",
+      "/assets/httpClient-DUfQrcOs.js",
+      "/assets/jsx-runtime--qySwOLX.js",
+      "/assets/chunk-62JRHF6Z-CTXCXr27.js",
+      "/assets/createLucideIcon-DTlqIiI3.js",
+      "/assets/lock-CJZ-QdUB.js",
+      "/assets/shield-alert-DgQTDiTU.js",
+      "/assets/httpRequest-DiLtrneX.js",
+      "/assets/authApi-Jk2uv3uR.js",
+      "/assets/AuthContext-C-ZTMV23.js",
+      "/assets/dealerPlatformApi-YqcaG7ar.js",
+      "/assets/arrow-right-Dy81hIrI.js"
+     ]
+    },
+    "release": "bbbbbbbbbbbb-mwrwlraj",
+    "timing": {
+     "type": "navigate",
+     "start": 0,
+     "responseEnd": 10,
+     "domContentLoaded": 145,
+     "workerStart": 1
+    },
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -3156,
+      "kind": "registration",
+      "n": 1
+     },
+     {
+      "msFromStalledNavStart": -3156,
+      "kind": "version",
+      "v": "0:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -3152,
+      "kind": "version",
+      "v": "0:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -3152,
+      "kind": "version",
+      "v": "0:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3152,
+      "kind": "version",
+      "v": "0:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3146,
+      "kind": "version",
+      "v": "0:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -3146,
+      "kind": "registration",
+      "n": 1
+     },
+     {
+      "msFromStalledNavStart": -3146,
+      "kind": "version",
+      "v": "0:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -3139,
+      "kind": "version",
+      "v": "0:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -3139,
+      "kind": "version",
+      "v": "0:running/activating"
+     },
+     {
+      "msFromStalledNavStart": -3135,
+      "kind": "version",
+      "v": "0:running/activating"
+     },
+     {
+      "msFromStalledNavStart": -3127,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -3127,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -3119,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1344,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1334,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -824,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -823,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -823,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -807,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -803,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -803,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -800,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -628,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -592,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -592,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -592,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -584,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -542,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 9,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 9,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 11,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 11,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 11,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 11,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 11,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1013,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12808,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12808,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12836,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 14083,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 14092,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 15159,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 15167,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 16218,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 16232,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 17559,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 17570,
+      "kind": "version",
+      "v": "1:running/activated"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -4839
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -3163
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -3136
+     },
+     {
+      "name": "reload (host now B) <- triggers the one-time worker swap",
+      "rel": "B",
+      "msFromStalledNavStart": -1351
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     },
+     {
+      "name": "goto / (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 12801
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 14068
+     },
+     {
+      "name": "goto /login (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 15154
+     },
+     {
+      "name": "goto / (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 16212
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 17550
+     },
+     {
+      "name": "final release",
+      "rel": "B",
+      "msFromStalledNavStart": 18596
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4427,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -4424,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -4423,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -4420,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -4420,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -4420,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -4420,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -4420,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -4406,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -4402,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -4402,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -4401,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -4401,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -4401,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -4400,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -4355,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3742,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3155,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3144,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -3127,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -2769,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2752,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -2752,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -2636,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -2628,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2628,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2622,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2621,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2618,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -2612,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2611,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2610,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -2608,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -2607,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2606,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2597,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2596,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2595,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -2564,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2559,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1935,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1342,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -1323,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -1074,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1008,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -981,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -903,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -878,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -843,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -843,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -843,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -843,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -828,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -813,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -810,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -779,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -778,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -774,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -772,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -771,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -769,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -749,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -748,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -707,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -69,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 1751,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+     "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "87331 B GET /api/v1/auth/csrf",
+     "87352 B GET /api/admin/public/config",
+     "87537 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "87576 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "87793 B GET /sw.js",
+     "88092 B GET /api/v1/auth/me",
+     "88338 B GET /dealer [nav]",
+     "88483 B GET /api/cars",
+     "88539 B GET /release.json",
+     "88542 B GET /api/v1/auth/me",
+     "88542 B GET /api/v1/auth/csrf",
+     "88547 B GET /api/admin/public/config",
+     "88560 B GET /sw.js",
+     "89161 B GET /api/v1/auth/me"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/forward-legacy-to-current-gap800-run10-stall.png"
+   }
+  },
+  {
+   "run": 11,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 464,
+     "out": "ok",
+     "startedAt": 1795359290319
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 31,
+     "out": "ok",
+     "startedAt": 1795359292044
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 392,
+     "out": "ok",
+     "startedAt": 1795359292075
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 365,
+     "out": "ok",
+     "startedAt": 1795359293726
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 834,
+     "out": "ok",
+     "startedAt": 1795359294951
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 314,
+     "out": "ok",
+     "startedAt": 1795359296595
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 245,
+     "out": "ok",
+     "startedAt": 1795359297755
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 270,
+     "out": "ok",
+     "startedAt": 1795359298807
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 270,
+     "out": "ok",
+     "startedAt": 1795359299900
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 295,
+     "out": "ok",
+     "startedAt": 1795359301045
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359302154
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 12,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 550,
+     "out": "ok",
+     "startedAt": 1795359302228
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 40,
+     "out": "ok",
+     "startedAt": 1795359304091
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 506,
+     "out": "ok",
+     "startedAt": 1795359304131
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 400,
+     "out": "ok",
+     "startedAt": 1795359305904
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 882,
+     "out": "ok",
+     "startedAt": 1795359307179
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 399,
+     "out": "ok",
+     "startedAt": 1795359308871
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 234,
+     "out": "ok",
+     "startedAt": 1795359310171
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 285,
+     "out": "ok",
+     "startedAt": 1795359311211
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 229,
+     "out": "ok",
+     "startedAt": 1795359312313
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 294,
+     "out": "ok",
+     "startedAt": 1795359313403
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359314510
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 13,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 366,
+     "out": "ok",
+     "startedAt": 1795359314583
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 33,
+     "out": "ok",
+     "startedAt": 1795359316264
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 422,
+     "out": "ok",
+     "startedAt": 1795359316297
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 387,
+     "out": "ok",
+     "startedAt": 1795359318020
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 873,
+     "out": "ok",
+     "startedAt": 1795359319291
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 344,
+     "out": "ok",
+     "startedAt": 1795359320974
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 206,
+     "out": "ok",
+     "startedAt": 1795359322185
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 274,
+     "out": "ok",
+     "startedAt": 1795359323199
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 255,
+     "out": "ok",
+     "startedAt": 1795359324293
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 278,
+     "out": "ok",
+     "startedAt": 1795359325426
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359326517
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 14,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 356,
+     "out": "ok",
+     "startedAt": 1795359326597
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 33,
+     "out": "ok",
+     "startedAt": 1795359328205
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 380,
+     "out": "ok",
+     "startedAt": 1795359328238
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 371,
+     "out": "ok",
+     "startedAt": 1795359329881
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 721,
+     "out": "ok",
+     "startedAt": 1795359331168
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 308,
+     "out": "ok",
+     "startedAt": 1795359332698
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 254,
+     "out": "ok",
+     "startedAt": 1795359333852
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 312,
+     "out": "ok",
+     "startedAt": 1795359334913
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 319,
+     "out": "ok",
+     "startedAt": 1795359336061
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 254,
+     "out": "ok",
+     "startedAt": 1795359337222
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359338297
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 15,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 466,
+     "out": "ok",
+     "startedAt": 1795359338387
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 28,
+     "out": "ok",
+     "startedAt": 1795359340122
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 593,
+     "out": "ok",
+     "startedAt": 1795359340150
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 339,
+     "out": "ok",
+     "startedAt": 1795359342034
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 782,
+     "out": "ok",
+     "startedAt": 1795359343271
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 390,
+     "out": "ok",
+     "startedAt": 1795359344860
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 243,
+     "out": "ok",
+     "startedAt": 1795359346100
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 249,
+     "out": "ok",
+     "startedAt": 1795359347153
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 226,
+     "out": "ok",
+     "startedAt": 1795359348223
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 279,
+     "out": "ok",
+     "startedAt": 1795359349301
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359350395
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 16,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 351,
+     "out": "ok",
+     "startedAt": 1795359350466
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok",
+     "startedAt": 1795359352091
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 506,
+     "out": "ok",
+     "startedAt": 1795359352125
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 474,
+     "out": "ok",
+     "startedAt": 1795359353922
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 498,
+     "out": "ok",
+     "startedAt": 1795359355265
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 300,
+     "out": "ok",
+     "startedAt": 1795359356569
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 206,
+     "out": "ok",
+     "startedAt": 1795359357711
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 248,
+     "out": "ok",
+     "startedAt": 1795359358727
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 243,
+     "out": "ok",
+     "startedAt": 1795359359806
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 282,
+     "out": "ok",
+     "startedAt": 1795359360906
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359362000
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 17,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 402,
+     "out": "ok",
+     "startedAt": 1795359362082
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok",
+     "startedAt": 1795359363776
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 438,
+     "out": "ok",
+     "startedAt": 1795359363810
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 451,
+     "out": "ok",
+     "startedAt": 1795359365546
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 985,
+     "out": "ok",
+     "startedAt": 1795359366836
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 308,
+     "out": "ok",
+     "startedAt": 1795359368625
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 249,
+     "out": "ok",
+     "startedAt": 1795359369790
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 394,
+     "out": "ok",
+     "startedAt": 1795359370846
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 202,
+     "out": "ok",
+     "startedAt": 1795359372061
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 319,
+     "out": "ok",
+     "startedAt": 1795359373121
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359374255
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 18,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 376,
+     "out": "ok",
+     "startedAt": 1795359374339
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok",
+     "startedAt": 1795359375991
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 445,
+     "out": "ok",
+     "startedAt": 1795359376025
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 381,
+     "out": "ok",
+     "startedAt": 1795359377752
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 799,
+     "out": "ok",
+     "startedAt": 1795359378996
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 360,
+     "out": "ok",
+     "startedAt": 1795359380601
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 256,
+     "out": "ok",
+     "startedAt": 1795359381811
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 267,
+     "out": "ok",
+     "startedAt": 1795359382876
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 244,
+     "out": "ok",
+     "startedAt": 1795359383962
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 239,
+     "out": "ok",
+     "startedAt": 1795359385044
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359386093
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 19,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 368,
+     "out": "ok",
+     "startedAt": 1795359386175
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 26,
+     "out": "ok",
+     "startedAt": 1795359387822
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 417,
+     "out": "ok",
+     "startedAt": 1795359387848
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 391,
+     "out": "ok",
+     "startedAt": 1795359389525
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 841,
+     "out": "ok",
+     "startedAt": 1795359390829
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 334,
+     "out": "ok",
+     "startedAt": 1795359392478
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 235,
+     "out": "ok",
+     "startedAt": 1795359393671
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 290,
+     "out": "ok",
+     "startedAt": 1795359394715
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 233,
+     "out": "ok",
+     "startedAt": 1795359395837
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 222,
+     "out": "ok",
+     "startedAt": 1795359396960
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359397992
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 20,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 360,
+     "out": "ok",
+     "startedAt": 1795359398078
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 27,
+     "out": "ok",
+     "startedAt": 1795359399719
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 435,
+     "out": "ok",
+     "startedAt": 1795359399746
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 374,
+     "out": "ok",
+     "startedAt": 1795359401475
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 875,
+     "out": "ok",
+     "startedAt": 1795359402707
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 271,
+     "out": "ok",
+     "startedAt": 1795359404387
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 201,
+     "out": "ok",
+     "startedAt": 1795359405501
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 267,
+     "out": "ok",
+     "startedAt": 1795359406509
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 208,
+     "out": "ok",
+     "startedAt": 1795359407592
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 250,
+     "out": "ok",
+     "startedAt": 1795359408657
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359409720
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 21,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 339,
+     "out": "ok",
+     "startedAt": 1795359409797
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok",
+     "startedAt": 1795359411411
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 417,
+     "out": "ok",
+     "startedAt": 1795359411445
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 421,
+     "out": "ok",
+     "startedAt": 1795359413142
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 486,
+     "out": "ok",
+     "startedAt": 1795359414435
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 282,
+     "out": "ok",
+     "startedAt": 1795359415732
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 199,
+     "out": "ok",
+     "startedAt": 1795359416851
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 223,
+     "out": "ok",
+     "startedAt": 1795359417858
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 222,
+     "out": "ok",
+     "startedAt": 1795359418903
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 238,
+     "out": "ok",
+     "startedAt": 1795359420023
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359421075
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 22,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 368,
+     "out": "ok",
+     "startedAt": 1795359421151
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 31,
+     "out": "ok",
+     "startedAt": 1795359422776
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 404,
+     "out": "ok",
+     "startedAt": 1795359422807
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 400,
+     "out": "ok",
+     "startedAt": 1795359424457
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 533,
+     "out": "ok",
+     "startedAt": 1795359425710
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 248,
+     "out": "ok",
+     "startedAt": 1795359427052
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 219,
+     "out": "ok",
+     "startedAt": 1795359428166
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 275,
+     "out": "ok",
+     "startedAt": 1795359429193
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 255,
+     "out": "ok",
+     "startedAt": 1795359430278
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 244,
+     "out": "ok",
+     "startedAt": 1795359431386
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359432443
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 23,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 398,
+     "out": "ok",
+     "startedAt": 1795359432540
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok",
+     "startedAt": 1795359434192
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 418,
+     "out": "ok",
+     "startedAt": 1795359434221
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 549,
+     "out": "ok",
+     "startedAt": 1795359435925
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 489,
+     "out": "ok",
+     "startedAt": 1795359437338
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 316,
+     "out": "ok",
+     "startedAt": 1795359438633
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 252,
+     "out": "ok",
+     "startedAt": 1795359439797
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 283,
+     "out": "ok",
+     "startedAt": 1795359440860
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 267,
+     "out": "ok",
+     "startedAt": 1795359441962
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 226,
+     "out": "ok",
+     "startedAt": 1795359443118
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359444161
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 24,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 368,
+     "out": "ok",
+     "startedAt": 1795359444245
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 28,
+     "out": "ok",
+     "startedAt": 1795359445874
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 428,
+     "out": "ok",
+     "startedAt": 1795359445902
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 369,
+     "out": "ok",
+     "startedAt": 1795359447601
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 732,
+     "out": "ok",
+     "startedAt": 1795359448854
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 331,
+     "out": "ok",
+     "startedAt": 1795359450393
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 220,
+     "out": "ok",
+     "startedAt": 1795359451587
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 319,
+     "out": "ok",
+     "startedAt": 1795359452617
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 246,
+     "out": "ok",
+     "startedAt": 1795359453743
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 273,
+     "out": "ok",
+     "startedAt": 1795359454850
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359455940
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 25,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 398,
+     "out": "ok",
+     "startedAt": 1795359456029
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok",
+     "startedAt": 1795359457694
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 449,
+     "out": "ok",
+     "startedAt": 1795359457726
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 391,
+     "out": "ok",
+     "startedAt": 1795359459435
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 858,
+     "out": "ok",
+     "startedAt": 1795359460678
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 267,
+     "out": "ok",
+     "startedAt": 1795359462345
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 219,
+     "out": "ok",
+     "startedAt": 1795359463458
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 273,
+     "out": "ok",
+     "startedAt": 1795359464483
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 213,
+     "out": "ok",
+     "startedAt": 1795359465578
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 286,
+     "out": "ok",
+     "startedAt": 1795359466649
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359467748
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 26,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 358,
+     "out": "ok",
+     "startedAt": 1795359467839
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 46,
+     "out": "ok",
+     "startedAt": 1795359469452
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 430,
+     "out": "ok",
+     "startedAt": 1795359469498
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 351,
+     "out": "ok",
+     "startedAt": 1795359471201
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 724,
+     "out": "ok",
+     "startedAt": 1795359472462
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 271,
+     "out": "ok",
+     "startedAt": 1795359474000
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 229,
+     "out": "ok",
+     "startedAt": 1795359475138
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 297,
+     "out": "ok",
+     "startedAt": 1795359476179
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 210,
+     "out": "ok",
+     "startedAt": 1795359477298
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 265,
+     "out": "ok",
+     "startedAt": 1795359478357
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359479438
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 27,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 481,
+     "out": "ok",
+     "startedAt": 1795359479534
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok",
+     "startedAt": 1795359481284
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 379,
+     "out": "ok",
+     "startedAt": 1795359481313
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 333,
+     "out": "ok",
+     "startedAt": 1795359482934
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 853,
+     "out": "ok",
+     "startedAt": 1795359484130
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 348,
+     "out": "ok",
+     "startedAt": 1795359485792
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 244,
+     "out": "ok",
+     "startedAt": 1795359487001
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 270,
+     "out": "ok",
+     "startedAt": 1795359488055
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 256,
+     "out": "ok",
+     "startedAt": 1795359489144
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 288,
+     "out": "ok",
+     "startedAt": 1795359490277
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359491380
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 28,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 316,
+     "out": "ok",
+     "startedAt": 1795359491457
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 35,
+     "out": "ok",
+     "startedAt": 1795359493025
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 428,
+     "out": "ok",
+     "startedAt": 1795359493060
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 460,
+     "out": "ok",
+     "startedAt": 1795359494765
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 885,
+     "out": "ok",
+     "startedAt": 1795359496077
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 390,
+     "out": "ok",
+     "startedAt": 1795359497769
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 283,
+     "out": "ok",
+     "startedAt": 1795359499086
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 239,
+     "out": "ok",
+     "startedAt": 1795359500176
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 295,
+     "out": "ok",
+     "startedAt": 1795359501234
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 277,
+     "out": "ok",
+     "startedAt": 1795359502380
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359503467
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 29,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 421,
+     "out": "ok",
+     "startedAt": 1795359503548
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 36,
+     "out": "ok",
+     "startedAt": 1795359505246
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 478,
+     "out": "ok",
+     "startedAt": 1795359505282
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 384,
+     "out": "ok",
+     "startedAt": 1795359507041
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 851,
+     "out": "ok",
+     "startedAt": 1795359508280
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 321,
+     "out": "ok",
+     "startedAt": 1795359509940
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 205,
+     "out": "ok",
+     "startedAt": 1795359511116
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 311,
+     "out": "ok",
+     "startedAt": 1795359512126
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 269,
+     "out": "ok",
+     "startedAt": 1795359513255
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 246,
+     "out": "ok",
+     "startedAt": 1795359514409
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359515468
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 30,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 384,
+     "out": "ok",
+     "startedAt": 1795359515557
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok",
+     "startedAt": 1795359517208
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 354,
+     "out": "ok",
+     "startedAt": 1795359517237
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 357,
+     "out": "ok",
+     "startedAt": 1795359518834
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 855,
+     "out": "ok",
+     "startedAt": 1795359520049
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 325,
+     "out": "ok",
+     "startedAt": 1795359521710
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 184,
+     "out": "ok",
+     "startedAt": 1795359522923
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 289,
+     "out": "ok",
+     "startedAt": 1795359523918
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 273,
+     "out": "ok",
+     "startedAt": 1795359525017
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 289,
+     "out": "ok",
+     "startedAt": 1795359526175
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795359527275
+    }
+   ],
+   "diag": null
+  }
+ ],
+ "total": 30,
+ "stalls": 1
+}

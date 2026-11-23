@@ -1,23 +1,33 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
+import fs from 'fs';
 import path from 'path';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   const releaseCommit = process.env.VERCEL_GIT_COMMIT_SHA || process.env.GITHUB_SHA || process.env.KAYAD_RELEASE_COMMIT || 'unknown';
   const releaseSource = process.env.VERCEL_ENV || process.env.NODE_ENV || 'production';
+  const builtAt = new Date().toISOString();
+  // One id per build: commit (12) + build time. Stamped into release.json, <meta name="kayad-release">, the bundle (__KAYAD_RELEASE_ID__).
+  const releaseId = `${String(releaseCommit).slice(0, 12)}-${Date.now().toString(36)}`;
   const releasePlugin = {
     name: 'kayad-release-identity',
-    generateBundle() {
+    transformIndexHtml(html: string) {
+      return html.replace('</head>', `    <meta name="kayad-release" content="${releaseId}" />\n  </head>`);
+    },
+    generateBundle(_options: unknown, bundle: Record<string, { type: string; fileName: string; isEntry?: boolean }>) {
+      const entries = Object.values(bundle).filter((o) => o.type === 'chunk' && o.isEntry).map((o) => o.fileName);
       this.emitFile({
         type: 'asset',
         fileName: 'release.json',
-        source: JSON.stringify({ application: 'KAYAD', commit: releaseCommit, source: releaseSource, generatedAt: new Date().toISOString() }, null, 2),
+        // No secrets: only public build identity.
+        source: JSON.stringify({ application: 'KAYAD', releaseId, commit: releaseCommit, source: releaseSource, generatedAt: builtAt, entryAssets: entries }, null, 2),
       });
     },
   };
 
   return {
+    define: { __KAYAD_RELEASE_ID__: JSON.stringify(releaseId) },
     plugins: [react(), tailwindcss(), releasePlugin],
     resolve: {
       alias: {

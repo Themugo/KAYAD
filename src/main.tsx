@@ -6,6 +6,7 @@ import { BrandingProvider } from './context/BrandingContext';
 import './index.css';
 import './styles/dark-theme.generated.css';
 import { prefetchCars } from './services/vehicleApi';
+import ReleaseUpdateBanner from './components/ReleaseUpdateBanner';
 
 // Simple error boundary for the entire app
 class ErrorBoundary extends Component<
@@ -74,6 +75,7 @@ if (root) {
         <BrowserRouter>
           <BrandingProvider>
             <App />
+            <ReleaseUpdateBanner />
           </BrandingProvider>
         </BrowserRouter>
       </ErrorBoundary>

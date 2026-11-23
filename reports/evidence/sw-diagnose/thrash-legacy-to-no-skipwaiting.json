@@ -1,0 +1,7356 @@
+{
+ "variant": "thrash-legacy-to-no-skipwaiting",
+ "sw": "register",
+ "A": "aaaaaaaaaaaa-mwrwlkr6",
+ "B": "bbbbbbbbbbbb-mwrwlraj",
+ "runs": [
+  {
+   "run": 1,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 407,
+     "out": "ok",
+     "startedAt": 1795358237416
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok",
+     "startedAt": 1795358239095
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 425,
+     "out": "ok",
+     "startedAt": 1795358239127
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 387,
+     "out": "ok",
+     "startedAt": 1795358240831
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 312,
+     "out": "ok",
+     "startedAt": 1795358242797
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 287,
+     "out": "ok",
+     "startedAt": 1795358243919
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 661,
+     "out": "ok",
+     "startedAt": 1795358245078
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 2,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 383,
+     "out": "ok",
+     "startedAt": 1795358246616
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 38,
+     "out": "ok",
+     "startedAt": 1795358248257
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 466,
+     "out": "ok",
+     "startedAt": 1795358248296
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 350,
+     "out": "ok",
+     "startedAt": 1795358250039
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 261,
+     "out": "ok",
+     "startedAt": 1795358251957
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 260,
+     "out": "ok",
+     "startedAt": 1795358253029
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 731,
+     "out": "ok",
+     "startedAt": 1795358254129
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 3,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 381,
+     "out": "ok",
+     "startedAt": 1795358255735
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 39,
+     "out": "ok",
+     "startedAt": 1795358257427
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 410,
+     "out": "ok",
+     "startedAt": 1795358257466
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 361,
+     "out": "ok",
+     "startedAt": 1795358259137
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 254,
+     "out": "ok",
+     "startedAt": 1795358261077
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 422,
+     "out": "ok",
+     "startedAt": 1795358262145
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 586,
+     "out": "ok",
+     "startedAt": 1795358263525
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 4,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 397,
+     "out": "ok",
+     "startedAt": 1795358265008
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok",
+     "startedAt": 1795358266648
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 337,
+     "out": "ok",
+     "startedAt": 1795358266680
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 385,
+     "out": "ok",
+     "startedAt": 1795358268290
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 240,
+     "out": "ok",
+     "startedAt": 1795358270224
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 500,
+     "out": "ok",
+     "startedAt": 1795358271271
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12000,
+     "out": "STALL",
+     "startedAt": 1795358272643
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12789
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -4344,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -4327,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -3934,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -3934,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3934,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3920,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3900,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -3900,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -3887,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -2410,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2401,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1367,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1359,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -885,
+      "kind": "version",
+      "v": "2:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -885,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -885,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -869,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -867,
+      "kind": "version",
+      "v": "2:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -867,
+      "kind": "version",
+      "v": "2:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -845,
+      "kind": "version",
+      "v": "1:stopping/installed"
+     },
+     {
+      "msFromStalledNavStart": -845,
+      "kind": "version",
+      "v": "1:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": -845,
+      "kind": "version",
+      "v": "2:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -842,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": -805,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -781,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -781,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -781,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -781,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -769,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 13,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 13,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 15,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 15,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 15,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 15,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 15,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1016,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -7635
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -5995
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -5963
+     },
+     {
+      "name": "reload (host now B)",
+      "rel": "B",
+      "msFromStalledNavStart": -4353
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": -2419
+     },
+     {
+      "name": "goto / (host back to A)",
+      "rel": "A",
+      "msFromStalledNavStart": -1372
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4344,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -4319,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -4104,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -4035,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -4007,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -3957,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -3937,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3926,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3922,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3919,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3917,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3915,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -3908,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3897,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -3896,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -3896,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3896,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3896,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3891,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3891,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3891,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3797,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3225,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2410,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     },
+     {
+      "ms": -2263,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2227,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2209,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2199,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -2196,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -2196,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2179,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -1566,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1366,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -1145,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1145,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -1134,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -953,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -953,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -952,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -952,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -933,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -932,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -932,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -924,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -924,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -924,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -924,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -924,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -924,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -915,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -915,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -915,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -898,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -860,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -564,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -218,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 1591,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "71719 A GET /api/v1/auth/me",
+     "71728 A GET /api/v1/auth/csrf",
+     "71728 A GET /api/admin/public/config",
+     "71728 A GET /sw.js",
+     "71745 A GET /api/admin/public/config",
+     "71783 A GET /manifest.webmanifest",
+     "71878 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "71893 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "72079 A GET /sw.js",
+     "72425 A GET /api/v1/auth/me",
+     "74234 B GET /api/v1/auth/me",
+     "78384 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "84893 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "97914 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/thrash-legacy-to-no-skipwaiting-run4-stall.png"
+   }
+  },
+  {
+   "run": 5,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 408,
+     "out": "ok",
+     "startedAt": 1795358299242
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 35,
+     "out": "ok",
+     "startedAt": 1795358300920
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 439,
+     "out": "ok",
+     "startedAt": 1795358300955
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 392,
+     "out": "ok",
+     "startedAt": 1795358302692
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 239,
+     "out": "ok",
+     "startedAt": 1795358304684
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 300,
+     "out": "ok",
+     "startedAt": 1795358305735
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 542,
+     "out": "ok",
+     "startedAt": 1795358306924
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 6,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 363,
+     "out": "ok",
+     "startedAt": 1795358308341
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 28,
+     "out": "ok",
+     "startedAt": 1795358309951
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 417,
+     "out": "ok",
+     "startedAt": 1795358309979
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 386,
+     "out": "ok",
+     "startedAt": 1795358311652
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 244,
+     "out": "ok",
+     "startedAt": 1795358313601
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 327,
+     "out": "ok",
+     "startedAt": 1795358314657
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 642,
+     "out": "ok",
+     "startedAt": 1795358315827
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 7,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 324,
+     "out": "ok",
+     "startedAt": 1795358317340
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 38,
+     "out": "ok",
+     "startedAt": 1795358318943
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 456,
+     "out": "ok",
+     "startedAt": 1795358318981
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 383,
+     "out": "ok",
+     "startedAt": 1795358320697
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 257,
+     "out": "ok",
+     "startedAt": 1795358322643
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 307,
+     "out": "ok",
+     "startedAt": 1795358323712
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 704,
+     "out": "ok",
+     "startedAt": 1795358324898
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 8,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 404,
+     "out": "ok",
+     "startedAt": 1795358326480
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 33,
+     "out": "ok",
+     "startedAt": 1795358328169
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 433,
+     "out": "ok",
+     "startedAt": 1795358328202
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 468,
+     "out": "ok",
+     "startedAt": 1795358329897
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 326,
+     "out": "ok",
+     "startedAt": 1795358332121
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 399,
+     "out": "ok",
+     "startedAt": 1795358333254
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12003,
+     "out": "STALL",
+     "startedAt": 1795358334568
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [],
+    "controller": {
+     "controller": "http://127.0.0.1:5432/sw.js",
+     "state": "activated",
+     "regs": [
+      [
+       "activated",
+       null,
+       null
+      ]
+     ]
+    },
+    "caches": {
+     "kayad-static-v2": [
+      "/assets/httpClient-DUfQrcOs.js",
+      "/assets/jsx-runtime--qySwOLX.js",
+      "/assets/chunk-62JRHF6Z-CTXCXr27.js",
+      "/assets/createLucideIcon-DTlqIiI3.js",
+      "/assets/lock-CJZ-QdUB.js",
+      "/assets/shield-alert-DgQTDiTU.js",
+      "/assets/httpRequest-DiLtrneX.js",
+      "/assets/authApi-Jk2uv3uR.js",
+      "/assets/AuthContext-C-ZTMV23.js",
+      "/assets/dealerPlatformApi-YqcaG7ar.js",
+      "/assets/arrow-right-Dy81hIrI.js",
+      "/assets/car-CXBpyvDA.js"
+     ],
+     "kayad-images-v2": [
+      "/branding/kayard-ke-logo-dark.png",
+      "/branding/kayard-ke-logo.png",
+      "/hero/kayad-land-cruiser-mobile.webp",
+      "/hero/kayad-mercedes-gle-mobile.webp"
+     ],
+     "kayad-mobile-v2": [
+      "/dealer"
+     ]
+    },
+    "timing": {
+     "type": "navigate",
+     "start": 0,
+     "responseEnd": 0,
+     "domContentLoaded": 0,
+     "workerStart": 2
+    },
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -4227,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -4227,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -4227,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -4221,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -4195,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -4195,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -4195,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -2421,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2388,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1309,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1299,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -891,
+      "kind": "version",
+      "v": "2:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -887,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -887,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -822,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -822,
+      "kind": "version",
+      "v": "2:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -822,
+      "kind": "version",
+      "v": "2:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -772,
+      "kind": "version",
+      "v": "1:stopping/installed"
+     },
+     {
+      "msFromStalledNavStart": -772,
+      "kind": "version",
+      "v": "1:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": -772,
+      "kind": "version",
+      "v": "2:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -769,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": -758,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -707,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -707,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -707,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -699,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -681,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 8,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 9,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 19,
+      "kind": "version",
+      "v": "0:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": 19,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 19,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 19,
+      "kind": "version",
+      "v": "0:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": 19,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 19,
+      "kind": "version",
+      "v": "0:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": 19,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 27,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1018,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -8088
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -6399
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -6366
+     },
+     {
+      "name": "reload (host now B)",
+      "rel": "B",
+      "msFromStalledNavStart": -4671
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": -2447
+     },
+     {
+      "name": "goto / (host back to A)",
+      "rel": "A",
+      "msFromStalledNavStart": -1314
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4347,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -4295,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -4270,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -4232,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -4171,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -4169,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -4166,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -4166,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -4083,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -4075,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -4045,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -4039,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -4025,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -4009,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -4001,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3998,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3996,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3985,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3966,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3961,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3961,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3382,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2421,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     },
+     {
+      "ms": -2259,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2223,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2198,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -2197,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2197,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -2133,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2129,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -1535,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1308,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -1104,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1061,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -1061,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -1023,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1023,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1023,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1023,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1018,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -1018,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1018,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -1018,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -1011,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1007,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1005,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1004,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1003,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -998,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -987,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -898,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -884,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -845,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -534,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -257,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 10,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     }
+    ],
+    "failedRequests": [
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "/dealer net::ERR_ABORTED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "33561 A GET /api/ads",
+     "33563 A GET /api/cars",
+     "33564 A GET /api/v1/auth/me",
+     "33565 A GET /api/v1/auth/csrf",
+     "33570 A GET /release.json",
+     "33581 A GET /api/admin/public/config",
+     "33670 A GET /sw.js",
+     "33684 A GET /api/admin/public/config",
+     "33723 A GET /manifest.webmanifest",
+     "33767 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "33899 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "34034 A GET /sw.js",
+     "34311 A GET /api/v1/auth/me",
+     "34578 B GET /dealer [nav]"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/thrash-legacy-to-no-skipwaiting-run8-stall.png"
+   }
+  },
+  {
+   "run": 9,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 357,
+     "out": "ok",
+     "startedAt": 1795358350976
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 37,
+     "out": "ok",
+     "startedAt": 1795358352644
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 408,
+     "out": "ok",
+     "startedAt": 1795358352681
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 446,
+     "out": "ok",
+     "startedAt": 1795358354380
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 273,
+     "out": "ok",
+     "startedAt": 1795358356420
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 324,
+     "out": "ok",
+     "startedAt": 1795358357502
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 520,
+     "out": "ok",
+     "startedAt": 1795358358692
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 10,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 407,
+     "out": "ok",
+     "startedAt": 1795358360088
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok",
+     "startedAt": 1795358361773
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 433,
+     "out": "ok",
+     "startedAt": 1795358361807
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 414,
+     "out": "ok",
+     "startedAt": 1795358363504
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 238,
+     "out": "ok",
+     "startedAt": 1795358365495
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 271,
+     "out": "ok",
+     "startedAt": 1795358366540
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 642,
+     "out": "ok",
+     "startedAt": 1795358367695
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 11,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 418,
+     "out": "ok",
+     "startedAt": 1795358369222
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok",
+     "startedAt": 1795358370929
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 363,
+     "out": "ok",
+     "startedAt": 1795358370958
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 355,
+     "out": "ok",
+     "startedAt": 1795358372574
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 275,
+     "out": "ok",
+     "startedAt": 1795358374532
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 328,
+     "out": "ok",
+     "startedAt": 1795358375617
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 662,
+     "out": "ok",
+     "startedAt": 1795358376809
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 12,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 344,
+     "out": "ok",
+     "startedAt": 1795358378349
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 26,
+     "out": "ok",
+     "startedAt": 1795358379943
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 373,
+     "out": "ok",
+     "startedAt": 1795358379969
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 450,
+     "out": "ok",
+     "startedAt": 1795358381592
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 266,
+     "out": "ok",
+     "startedAt": 1795358383637
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 492,
+     "out": "ok",
+     "startedAt": 1795358384721
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 484,
+     "out": "ok",
+     "startedAt": 1795358386120
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 13,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 368,
+     "out": "ok",
+     "startedAt": 1795358387494
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 35,
+     "out": "ok",
+     "startedAt": 1795358389125
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 362,
+     "out": "ok",
+     "startedAt": 1795358389160
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 348,
+     "out": "ok",
+     "startedAt": 1795358390794
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 240,
+     "out": "ok",
+     "startedAt": 1795358392699
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 338,
+     "out": "ok",
+     "startedAt": 1795358393749
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 739,
+     "out": "ok",
+     "startedAt": 1795358394946
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 14,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 385,
+     "out": "ok",
+     "startedAt": 1795358396577
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok",
+     "startedAt": 1795358398225
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 366,
+     "out": "ok",
+     "startedAt": 1795358398254
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 469,
+     "out": "ok",
+     "startedAt": 1795358399915
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 304,
+     "out": "ok",
+     "startedAt": 1795358401950
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 383,
+     "out": "ok",
+     "startedAt": 1795358403073
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 753,
+     "out": "ok",
+     "startedAt": 1795358404308
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 15,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 389,
+     "out": "ok",
+     "startedAt": 1795358405934
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 35,
+     "out": "ok",
+     "startedAt": 1795358407579
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 462,
+     "out": "ok",
+     "startedAt": 1795358407614
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 461,
+     "out": "ok",
+     "startedAt": 1795358409376
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 271,
+     "out": "ok",
+     "startedAt": 1795358411400
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 465,
+     "out": "ok",
+     "startedAt": 1795358412484
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 569,
+     "out": "ok",
+     "startedAt": 1795358413807
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 16,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 388,
+     "out": "ok",
+     "startedAt": 1795358415259
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 39,
+     "out": "ok",
+     "startedAt": 1795358416904
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 375,
+     "out": "ok",
+     "startedAt": 1795358416943
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 329,
+     "out": "ok",
+     "startedAt": 1795358418564
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 305,
+     "out": "ok",
+     "startedAt": 1795358420482
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 301,
+     "out": "ok",
+     "startedAt": 1795358421596
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12001,
+     "out": "STALL",
+     "startedAt": 1795358422834
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12796
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -4260,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -4252,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -3791,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -3791,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3791,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3764,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3760,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -3760,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -3745,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -2334,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2280,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1233,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1221,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -817,
+      "kind": "version",
+      "v": "2:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -817,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -817,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -786,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -782,
+      "kind": "version",
+      "v": "2:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -782,
+      "kind": "version",
+      "v": "2:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -735,
+      "kind": "version",
+      "v": "1:stopping/installed"
+     },
+     {
+      "msFromStalledNavStart": -735,
+      "kind": "version",
+      "v": "1:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": -735,
+      "kind": "version",
+      "v": "2:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -735,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -735,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": -719,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -719,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -719,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -718,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -698,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 8,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 8,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 13,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 13,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1014,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -7575
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -5930
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -5891
+     },
+     {
+      "name": "reload (host now B)",
+      "rel": "B",
+      "msFromStalledNavStart": -4270
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": -2352
+     },
+     {
+      "name": "goto / (host back to A)",
+      "rel": "A",
+      "msFromStalledNavStart": -1238
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4262,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -4243,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -4048,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3991,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -3971,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -3915,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3915,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3915,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3915,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3909,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -3905,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -3905,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3902,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -3897,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3896,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -3896,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3894,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3891,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3889,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3884,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3819,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3818,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3237,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2335,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     },
+     {
+      "ms": -2192,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2137,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2076,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -2075,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2073,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2073,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -2051,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -1454,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1232,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -1061,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1036,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -1023,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -934,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -920,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -920,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -920,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -920,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -920,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -892,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -892,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -892,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -892,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -892,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -869,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -869,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -869,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -869,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -869,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -839,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -772,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -453,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -176,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 1630,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "21965 A GET /api/v1/auth/me",
+     "21965 A GET /api/v1/auth/csrf",
+     "21965 A GET /api/admin/public/config",
+     "21965 A GET /sw.js",
+     "21995 A GET /api/admin/public/config",
+     "22062 A GET /manifest.webmanifest",
+     "22095 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "22138 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "22381 A GET /sw.js",
+     "22658 A GET /api/v1/auth/me",
+     "24464 B GET /api/v1/auth/me",
+     "28601 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "35112 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "48130 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/thrash-legacy-to-no-skipwaiting-run16-stall.png"
+   }
+  },
+  {
+   "run": 17,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 360,
+     "out": "ok",
+     "startedAt": 1795358449466
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 30,
+     "out": "ok",
+     "startedAt": 1795358451096
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 397,
+     "out": "ok",
+     "startedAt": 1795358451126
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 337,
+     "out": "ok",
+     "startedAt": 1795358452793
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 263,
+     "out": "ok",
+     "startedAt": 1795358454698
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 450,
+     "out": "ok",
+     "startedAt": 1795358455774
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12002,
+     "out": "STALL",
+     "startedAt": 1795358457110
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [],
+    "controller": {
+     "controller": "http://127.0.0.1:5432/sw.js",
+     "state": "activated",
+     "regs": [
+      [
+       "activated",
+       null,
+       null
+      ]
+     ]
+    },
+    "caches": {
+     "kayad-static-v2": [
+      "/assets/httpClient-DUfQrcOs.js",
+      "/assets/jsx-runtime--qySwOLX.js",
+      "/assets/chunk-62JRHF6Z-CTXCXr27.js",
+      "/assets/createLucideIcon-DTlqIiI3.js",
+      "/assets/lock-CJZ-QdUB.js",
+      "/assets/shield-alert-DgQTDiTU.js",
+      "/assets/httpRequest-DiLtrneX.js",
+      "/assets/authApi-Jk2uv3uR.js",
+      "/assets/AuthContext-C-ZTMV23.js",
+      "/assets/dealerPlatformApi-YqcaG7ar.js",
+      "/assets/arrow-right-Dy81hIrI.js",
+      "/assets/car-CXBpyvDA.js"
+     ],
+     "kayad-images-v2": [
+      "/branding/kayard-ke-logo-dark.png",
+      "/branding/kayard-ke-logo.png",
+      "/hero/kayad-mercedes-gle-mobile.webp",
+      "/hero/kayad-land-cruiser-mobile.webp"
+     ],
+     "kayad-mobile-v2": [
+      "/dealer"
+     ]
+    },
+    "timing": {
+     "type": "navigate",
+     "start": 0,
+     "responseEnd": 0,
+     "domContentLoaded": 0,
+     "workerStart": 2
+    },
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -4309,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -4296,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -3902,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -3902,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3902,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3872,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3868,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -3868,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -3861,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -2406,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2387,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1330,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1317,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -944,
+      "kind": "version",
+      "v": "2:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -944,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -944,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -865,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -820,
+      "kind": "version",
+      "v": "2:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -820,
+      "kind": "version",
+      "v": "2:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -775,
+      "kind": "version",
+      "v": "1:stopping/installed"
+     },
+     {
+      "msFromStalledNavStart": -775,
+      "kind": "version",
+      "v": "1:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": -775,
+      "kind": "version",
+      "v": "2:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -765,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": -755,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -721,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -721,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -720,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -720,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -713,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 10,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 35,
+      "kind": "version",
+      "v": "0:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": 35,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 35,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 35,
+      "kind": "version",
+      "v": "0:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": 35,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 35,
+      "kind": "version",
+      "v": "0:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": 35,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 35,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1020,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -7644
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -6014
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -5984
+     },
+     {
+      "name": "reload (host now B)",
+      "rel": "B",
+      "msFromStalledNavStart": -4317
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": -2412
+     },
+     {
+      "name": "goto / (host back to A)",
+      "rel": "A",
+      "msFromStalledNavStart": -1336
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4308,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -4289,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -4080,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -4032,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -4010,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -3950,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3948,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -3936,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3936,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3935,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3935,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -3934,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3933,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -3929,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -3928,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3928,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3928,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3928,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3922,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3921,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3908,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3887,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3831,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3252,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2404,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     },
+     {
+      "ms": -2243,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2238,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2151,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2151,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -2145,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2145,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -2141,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -1533,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1328,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -1093,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1091,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -1090,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -1016,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -1014,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1014,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1014,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -945,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -944,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -944,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -944,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -928,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -877,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -876,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -862,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -861,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -852,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -850,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -823,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -821,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -813,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -524,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -187,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 13,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     }
+    ],
+    "failedRequests": [
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "/dealer net::ERR_ABORTED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "56233 A GET /api/hero",
+     "56234 A GET /api/ads",
+     "56248 A GET /api/ads",
+     "56249 A GET /api/cars",
+     "56258 A GET /api/v1/auth/me",
+     "56260 A GET /api/v1/auth/csrf",
+     "56287 A GET /api/admin/public/config",
+     "56289 A GET /api/admin/public/config",
+     "56297 A GET /manifest.webmanifest",
+     "56404 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "56404 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "56586 A GET /sw.js",
+     "56923 A GET /api/v1/auth/me",
+     "57123 B GET /dealer [nav]"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/thrash-legacy-to-no-skipwaiting-run17-stall.png"
+   }
+  },
+  {
+   "run": 18,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 471,
+     "out": "ok",
+     "startedAt": 1795358473905
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 30,
+     "out": "ok",
+     "startedAt": 1795358475675
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 350,
+     "out": "ok",
+     "startedAt": 1795358475705
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 382,
+     "out": "ok",
+     "startedAt": 1795358477336
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 335,
+     "out": "ok",
+     "startedAt": 1795358479267
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 340,
+     "out": "ok",
+     "startedAt": 1795358480411
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12000,
+     "out": "STALL",
+     "startedAt": 1795358481611
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12794
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -4267,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -4250,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -3821,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -3821,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3821,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3809,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3804,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -3804,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -3796,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -2336,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2320,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1195,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1184,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -808,
+      "kind": "version",
+      "v": "2:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -808,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -808,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -798,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -793,
+      "kind": "version",
+      "v": "2:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -793,
+      "kind": "version",
+      "v": "2:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -761,
+      "kind": "version",
+      "v": "1:stopping/installed"
+     },
+     {
+      "msFromStalledNavStart": -761,
+      "kind": "version",
+      "v": "1:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": -761,
+      "kind": "version",
+      "v": "2:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -752,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": -743,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -640,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -640,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -640,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -640,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -560,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 9,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 9,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 13,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 13,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 13,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 14,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 14,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1015,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -7706
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -5936
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -5906
+     },
+     {
+      "name": "reload (host now B)",
+      "rel": "B",
+      "msFromStalledNavStart": -4275
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": -2344
+     },
+     {
+      "name": "goto / (host back to A)",
+      "rel": "A",
+      "msFromStalledNavStart": -1200
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4266,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -4239,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -3997,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3952,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -3931,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -3871,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -3863,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3863,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3863,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3850,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3848,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3846,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -3845,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3845,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -3845,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -3843,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3843,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3843,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3843,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3843,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3825,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3797,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3137,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2337,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     },
+     {
+      "ms": -2173,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2125,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2013,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -2013,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2013,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -2013,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2013,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1405,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1194,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -1020,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -990,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -970,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -865,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -865,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -864,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -864,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -864,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -848,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -845,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -842,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -840,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -836,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -836,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -836,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -836,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -836,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -836,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -821,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -782,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -759,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -404,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -124,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 1682,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "warning: The resource http://127.0.0.1:5432/assets/jsx-runtime--qySwOLX.js was preloaded using link preload but not used within a few seconds from the window's load even",
+     "warning: The resource http://127.0.0.1:5432/assets/jsx-runtime--qySwOLX.js was preloaded using link preload but not used within a few seconds from the window's load even",
+     "warning: The resource http://127.0.0.1:5432/assets/jsx-runtime--qySwOLX.js was preloaded using link preload but not used within a few seconds from the window's load even",
+     "warning: The resource http://127.0.0.1:5432/assets/jsx-runtime--qySwOLX.js was preloaded using link preload but not used within a few seconds from the window's load even"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "80775 A GET /api/cars",
+     "80775 A GET /api/v1/auth/me",
+     "80775 A GET /api/v1/auth/csrf",
+     "80790 A GET /sw.js",
+     "80829 A GET /manifest.webmanifest",
+     "80852 A GET /api/admin/public/config",
+     "81050 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "81050 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "81207 A GET /sw.js",
+     "81487 A GET /api/v1/auth/me",
+     "83293 B GET /api/v1/auth/me",
+     "87402 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "93906 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "6918 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/thrash-legacy-to-no-skipwaiting-run18-stall.png"
+   }
+  },
+  {
+   "run": 19,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 392,
+     "out": "ok",
+     "startedAt": 1795358508344
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok",
+     "startedAt": 1795358510002
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 394,
+     "out": "ok",
+     "startedAt": 1795358510034
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 413,
+     "out": "ok",
+     "startedAt": 1795358511680
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 273,
+     "out": "ok",
+     "startedAt": 1795358513678
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 468,
+     "out": "ok",
+     "startedAt": 1795358514768
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12001,
+     "out": "STALL",
+     "startedAt": 1795358516078
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12793
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -4391,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -4376,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -3956,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -3956,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3956,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3939,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3936,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -3936,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -3935,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -2390,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2366,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1303,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1287,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -767,
+      "kind": "version",
+      "v": "2:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -767,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -767,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -731,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -725,
+      "kind": "version",
+      "v": "2:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -725,
+      "kind": "version",
+      "v": "2:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -701,
+      "kind": "version",
+      "v": "1:stopping/installed"
+     },
+     {
+      "msFromStalledNavStart": -701,
+      "kind": "version",
+      "v": "1:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": -701,
+      "kind": "version",
+      "v": "2:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -700,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": -696,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -662,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -662,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -662,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -658,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -657,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 11,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 14,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 14,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 14,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 14,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 16,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1017,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -7734
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -6076
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -6044
+     },
+     {
+      "name": "reload (host now B)",
+      "rel": "B",
+      "msFromStalledNavStart": -4398
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": -2400
+     },
+     {
+      "name": "goto / (host back to A)",
+      "rel": "A",
+      "msFromStalledNavStart": -1310
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4389,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -4365,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -4151,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -4079,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -4047,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -3985,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -3981,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3977,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3973,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3973,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3972,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3972,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -3972,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3971,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -3966,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -3965,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3964,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3964,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3964,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3964,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3964,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3924,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3291,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2388,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     },
+     {
+      "ms": -2224,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2203,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2107,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2106,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -2105,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -2104,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2098,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -1499,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1299,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -1059,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -961,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -937,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -829,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -829,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -817,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -817,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -817,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -816,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -784,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -784,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -784,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -784,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -784,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -783,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -764,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -764,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -762,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -760,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -759,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -716,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -499,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -114,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 1692,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "warning: The resource http://127.0.0.1:5432/assets/httpClient-DUfQrcOs.js was preloaded using link preload but not used within a few seconds from the window's load event",
+     "warning: The resource http://127.0.0.1:5432/assets/httpClient-DUfQrcOs.js was preloaded using link preload but not used within a few seconds from the window's load event",
+     "warning: The resource http://127.0.0.1:5432/assets/httpClient-DUfQrcOs.js was preloaded using link preload but not used within a few seconds from the window's load event",
+     "warning: The resource http://127.0.0.1:5432/assets/httpClient-DUfQrcOs.js was preloaded using link preload but not used within a few seconds from the window's load event"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "15314 A GET /api/ads",
+     "15314 A GET /api/cars",
+     "15316 A GET /api/v1/auth/me",
+     "15318 A GET /api/v1/auth/csrf",
+     "15319 A GET /api/admin/public/config",
+     "15362 A GET /manifest.webmanifest",
+     "15380 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "15424 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "15579 A GET /sw.js",
+     "15964 A GET /api/v1/auth/me",
+     "17770 B GET /api/v1/auth/me",
+     "21894 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "28408 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "41414 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/thrash-legacy-to-no-skipwaiting-run19-stall.png"
+   }
+  },
+  {
+   "run": 20,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 342,
+     "out": "ok",
+     "startedAt": 1795358542646
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 33,
+     "out": "ok",
+     "startedAt": 1795358544265
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 422,
+     "out": "ok",
+     "startedAt": 1795358544298
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 383,
+     "out": "ok",
+     "startedAt": 1795358545963
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 298,
+     "out": "ok",
+     "startedAt": 1795358547931
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 326,
+     "out": "ok",
+     "startedAt": 1795358549035
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 508,
+     "out": "ok",
+     "startedAt": 1795358550242
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 21,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 324,
+     "out": "ok",
+     "startedAt": 1795358551614
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 27,
+     "out": "ok",
+     "startedAt": 1795358553246
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 433,
+     "out": "ok",
+     "startedAt": 1795358553273
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 402,
+     "out": "ok",
+     "startedAt": 1795358554959
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 267,
+     "out": "ok",
+     "startedAt": 1795358556926
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 293,
+     "out": "ok",
+     "startedAt": 1795358558001
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 608,
+     "out": "ok",
+     "startedAt": 1795358559258
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 22,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 333,
+     "out": "ok",
+     "startedAt": 1795358560741
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 28,
+     "out": "ok",
+     "startedAt": 1795358562346
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 418,
+     "out": "ok",
+     "startedAt": 1795358562374
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 429,
+     "out": "ok",
+     "startedAt": 1795358564033
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 247,
+     "out": "ok",
+     "startedAt": 1795358566049
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 354,
+     "out": "ok",
+     "startedAt": 1795358567111
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 692,
+     "out": "ok",
+     "startedAt": 1795358568384
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 23,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 414,
+     "out": "ok",
+     "startedAt": 1795358569970
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 36,
+     "out": "ok",
+     "startedAt": 1795358571663
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 503,
+     "out": "ok",
+     "startedAt": 1795358571699
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 389,
+     "out": "ok",
+     "startedAt": 1795358573485
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 255,
+     "out": "ok",
+     "startedAt": 1795358575412
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 340,
+     "out": "ok",
+     "startedAt": 1795358576479
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 766,
+     "out": "ok",
+     "startedAt": 1795358577665
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 24,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 417,
+     "out": "ok",
+     "startedAt": 1795358579314
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 33,
+     "out": "ok",
+     "startedAt": 1795358580991
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 360,
+     "out": "ok",
+     "startedAt": 1795358581024
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 432,
+     "out": "ok",
+     "startedAt": 1795358582661
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 243,
+     "out": "ok",
+     "startedAt": 1795358584663
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 317,
+     "out": "ok",
+     "startedAt": 1795358585715
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 656,
+     "out": "ok",
+     "startedAt": 1795358586885
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 25,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 483,
+     "out": "ok",
+     "startedAt": 1795358588433
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 30,
+     "out": "ok",
+     "startedAt": 1795358590200
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 387,
+     "out": "ok",
+     "startedAt": 1795358590230
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 398,
+     "out": "ok",
+     "startedAt": 1795358591887
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 218,
+     "out": "ok",
+     "startedAt": 1795358593848
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 357,
+     "out": "ok",
+     "startedAt": 1795358594880
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 674,
+     "out": "ok",
+     "startedAt": 1795358596110
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 26,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 428,
+     "out": "ok",
+     "startedAt": 1795358597656
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 31,
+     "out": "ok",
+     "startedAt": 1795358599362
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 463,
+     "out": "ok",
+     "startedAt": 1795358599393
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 442,
+     "out": "ok",
+     "startedAt": 1795358601281
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 264,
+     "out": "ok",
+     "startedAt": 1795358603271
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 304,
+     "out": "ok",
+     "startedAt": 1795358604364
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 679,
+     "out": "ok",
+     "startedAt": 1795358605536
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 27,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 399,
+     "out": "ok",
+     "startedAt": 1795358607100
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 37,
+     "out": "ok",
+     "startedAt": 1795358608769
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 441,
+     "out": "ok",
+     "startedAt": 1795358608806
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 366,
+     "out": "ok",
+     "startedAt": 1795358610494
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 246,
+     "out": "ok",
+     "startedAt": 1795358612410
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 365,
+     "out": "ok",
+     "startedAt": 1795358613477
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12000,
+     "out": "STALL",
+     "startedAt": 1795358614686
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12785
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -4182,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -4164,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -3749,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -3748,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3748,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3737,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3735,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -3735,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -3732,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -2268,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2258,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1202,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1191,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -798,
+      "kind": "version",
+      "v": "2:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -798,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -798,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -797,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -787,
+      "kind": "version",
+      "v": "2:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -787,
+      "kind": "version",
+      "v": "2:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -738,
+      "kind": "version",
+      "v": "1:stopping/installed"
+     },
+     {
+      "msFromStalledNavStart": -738,
+      "kind": "version",
+      "v": "1:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": -738,
+      "kind": "version",
+      "v": "2:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -738,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -736,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": -704,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -704,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -704,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -700,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -666,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 18,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 18,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 18,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 18,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 18,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 18,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 18,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1020,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -7586
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -5917
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -5880
+     },
+     {
+      "name": "reload (host now B)",
+      "rel": "B",
+      "msFromStalledNavStart": -4192
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": -2276
+     },
+     {
+      "name": "goto / (host back to A)",
+      "rel": "A",
+      "msFromStalledNavStart": -1209
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4180,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -4151,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -3928,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3880,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -3863,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -3788,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3788,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3787,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3787,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3783,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -3777,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3771,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -3771,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -3771,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -3771,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3771,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3770,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3769,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3769,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3769,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3756,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3756,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3722,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3108,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2266,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     },
+     {
+      "ms": -2128,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2097,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2021,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -2020,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2020,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -2011,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2001,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1404,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1202,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -1024,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -951,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -940,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -843,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -843,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -843,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -843,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -842,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -842,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -794,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -793,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -792,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -789,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -783,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -783,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -783,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -783,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -783,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -783,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -757,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -752,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -404,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -112,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 1693,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "13903 A GET /api/cars",
+     "13903 A GET /api/v1/auth/me",
+     "13903 A GET /api/v1/auth/csrf",
+     "13903 A GET /api/admin/public/config",
+     "13929 A GET /api/admin/public/config",
+     "13934 A GET /manifest.webmanifest",
+     "14036 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "14041 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "14282 A GET /sw.js",
+     "14574 A GET /api/v1/auth/me",
+     "16379 B GET /api/v1/auth/me",
+     "20510 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "27022 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "40037 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/thrash-legacy-to-no-skipwaiting-run27-stall.png"
+   }
+  },
+  {
+   "run": 28,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 443,
+     "out": "ok",
+     "startedAt": 1795358641285
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok",
+     "startedAt": 1795358642984
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 450,
+     "out": "ok",
+     "startedAt": 1795358643018
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 500,
+     "out": "ok",
+     "startedAt": 1795358644784
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 251,
+     "out": "ok",
+     "startedAt": 1795358646850
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 282,
+     "out": "ok",
+     "startedAt": 1795358647916
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12001,
+     "out": "STALL",
+     "startedAt": 1795358649119
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12788
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -4328,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -4319,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -3935,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -3935,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3935,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3925,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3918,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -3918,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -3910,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -2259,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2245,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1199,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1188,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -749,
+      "kind": "version",
+      "v": "2:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -749,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -749,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -724,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -716,
+      "kind": "version",
+      "v": "2:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -716,
+      "kind": "version",
+      "v": "2:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -670,
+      "kind": "version",
+      "v": "1:stopping/installed"
+     },
+     {
+      "msFromStalledNavStart": -670,
+      "kind": "version",
+      "v": "1:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": -670,
+      "kind": "version",
+      "v": "2:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -670,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -657,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": -631,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -631,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -631,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -626,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -613,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 15,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 15,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 15,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 15,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 15,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 15,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 15,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1013,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -7834
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -6135
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -6101
+     },
+     {
+      "name": "reload (host now B)",
+      "rel": "B",
+      "msFromStalledNavStart": -4335
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": -2269
+     },
+     {
+      "name": "goto / (host back to A)",
+      "rel": "A",
+      "msFromStalledNavStart": -1203
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4327,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -4313,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -4006,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3945,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3931,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -3903,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -3830,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -3827,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3827,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3816,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3816,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3816,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3816,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -3816,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3816,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -3799,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3777,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3769,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -3768,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3760,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3759,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3748,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3742,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3116,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2256,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     },
+     {
+      "ms": -2107,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2048,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2007,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -2007,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2007,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -2002,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2002,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1400,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1197,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -1038,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -971,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -971,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -888,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -883,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -881,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -879,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -878,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -877,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -871,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -864,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -826,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -824,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -822,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -818,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -815,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -812,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -808,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -807,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -764,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -691,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -398,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -78,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 1730,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "48304 A GET /api/cars",
+     "48307 A GET /api/v1/auth/me",
+     "48311 A GET /api/v1/auth/csrf",
+     "48312 A GET /sw.js",
+     "48355 A GET /api/admin/public/config",
+     "48428 A GET /manifest.webmanifest",
+     "48514 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "48514 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "48721 A GET /sw.js",
+     "49041 A GET /api/v1/auth/me",
+     "50849 B GET /api/v1/auth/me",
+     "55003 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "61521 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "74528 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/thrash-legacy-to-no-skipwaiting-run28-stall.png"
+   }
+  },
+  {
+   "run": 29,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 408,
+     "out": "ok",
+     "startedAt": 1795358675521
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 80,
+     "out": "ok",
+     "startedAt": 1795358677177
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 516,
+     "out": "ok",
+     "startedAt": 1795358677257
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 446,
+     "out": "ok",
+     "startedAt": 1795358679020
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 246,
+     "out": "ok",
+     "startedAt": 1795358681043
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 265,
+     "out": "ok",
+     "startedAt": 1795358682103
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12001,
+     "out": "STALL",
+     "startedAt": 1795358683236
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12797
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -4209,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -4185,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -3818,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -3818,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3818,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3815,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3810,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -3810,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -3808,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -2186,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2177,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1128,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1118,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -792,
+      "kind": "version",
+      "v": "2:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -792,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -792,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -786,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -783,
+      "kind": "version",
+      "v": "2:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -783,
+      "kind": "version",
+      "v": "2:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -767,
+      "kind": "version",
+      "v": "1:stopping/installed"
+     },
+     {
+      "msFromStalledNavStart": -767,
+      "kind": "version",
+      "v": "1:stopping/redundant"
+     },
+     {
+      "msFromStalledNavStart": -767,
+      "kind": "version",
+      "v": "2:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -766,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -765,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": -731,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -731,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -731,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -731,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -716,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 6,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 7,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1013,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -7715
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -6059
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -5979
+     },
+     {
+      "name": "reload (host now B)",
+      "rel": "B",
+      "msFromStalledNavStart": -4216
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": -2193
+     },
+     {
+      "name": "goto / (host back to A)",
+      "rel": "A",
+      "msFromStalledNavStart": -1133
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4207,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -4178,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -3929,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3854,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -3833,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -3829,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3750,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3747,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3747,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -3747,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3747,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3747,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -3747,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3732,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3728,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3728,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -3727,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -3726,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3722,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3719,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3718,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3691,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3662,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2979,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2185,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     },
+     {
+      "ms": -2020,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1976,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -1947,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -1946,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1945,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -1927,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -1927,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1329,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1128,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -967,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -946,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -933,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -849,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -847,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -844,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -843,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -840,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -837,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -835,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -828,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -828,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -827,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -825,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -824,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -820,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -817,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -809,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -797,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -772,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -715,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -328,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -110,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 1694,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "82416 A GET /api/cars",
+     "82419 A GET /api/v1/auth/me",
+     "82427 A GET /api/v1/auth/csrf",
+     "82439 A GET /sw.js",
+     "82464 A GET /manifest.webmanifest",
+     "82521 A GET /api/admin/public/config",
+     "82546 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "82575 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "82908 A GET /sw.js",
+     "83126 A GET /api/v1/auth/me",
+     "84930 B GET /api/v1/auth/me",
+     "89065 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "95577 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "8607 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/thrash-legacy-to-no-skipwaiting-run29-stall.png"
+   }
+  },
+  {
+   "run": 30,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 365,
+     "out": "ok",
+     "startedAt": 1795358709908
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok",
+     "startedAt": 1795358711540
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 417,
+     "out": "ok",
+     "startedAt": 1795358711572
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 376,
+     "out": "ok",
+     "startedAt": 1795358713288
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 217,
+     "out": "ok",
+     "startedAt": 1795358715237
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 326,
+     "out": "ok",
+     "startedAt": 1795358716269
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 576,
+     "out": "ok",
+     "startedAt": 1795358717451
+    }
+   ],
+   "diag": null
+  }
+ ],
+ "total": 30,
+ "stalls": 9
+}

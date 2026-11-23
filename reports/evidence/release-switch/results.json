@@ -1,0 +1,53 @@
+{
+ "A": "aaaaaaaaaaaa-mwrv7gh1",
+ "B": "bbbbbbbbbbbb-mwrv7je7",
+ "results": [
+  {
+   "name": "A: first visit runs release A",
+   "pass": true,
+   "detail": "aaaaaaaaaaaa-mwrv7gh1"
+  },
+  {
+   "name": "A: worker controls the page",
+   "pass": true
+  },
+  {
+   "name": "B: returning visitor gets release B HTML on plain reload (SW is network-first)",
+   "pass": true,
+   "detail": "bbbbbbbbbbbb-mwrv7je7"
+  },
+  {
+   "name": "B: deep link /dealer is not served stale from cache",
+   "pass": true,
+   "detail": "bbbbbbbbbbbb-mwrv7je7"
+  },
+  {
+   "name": "A->B: open tab shows a non-disruptive update banner",
+   "pass": true
+  },
+  {
+   "name": "A->B: nothing reloaded by itself (typed input kept)",
+   "pass": true
+  },
+  {
+   "name": "Refresh button loads release B",
+   "pass": true,
+   "detail": "bbbbbbbbbbbb-mwrv7je7"
+  },
+  {
+   "name": "stale chunk: exactly one recovery reload, lands on B",
+   "pass": true,
+   "detail": "reloads=1 meta=bbbbbbbbbbbb-mwrv7je7"
+  },
+  {
+   "name": "stale chunk: a second failure inside 60s does not loop",
+   "pass": true,
+   "detail": "reloads=1"
+  },
+  {
+   "name": "no page errors",
+   "pass": true,
+   "detail": ""
+  }
+ ]
+}

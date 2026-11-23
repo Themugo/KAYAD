@@ -1,6 +1,8 @@
 import { api } from '../api/httpClient';
 
 export const getDealerDashboard = () => api.get('/dealer-platform/dashboard').then(r => r.data);
+/** Role-aware command centre (read-only). The dealership is resolved on the server from the signed-in membership. */
+export const getCommandCentre = () => api.get('/dealer-platform/command-centre').then(r => r.data);
 export const getLeads = (params = {}) => api.get('/dealer-platform/leads', { params }).then(r => r.data);
 export const updateLead = (leadId, body) => api.put(`/dealer-platform/leads/${leadId}`, body).then(r => r.data);
 export const getCustomers = () => api.get('/dealer-platform/customers').then(r => r.data);

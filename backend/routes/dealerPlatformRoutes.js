@@ -11,6 +11,7 @@ import { requireDealerVerification } from "../middleware/dealerVerification.js";
 import {
   // Dashboard
   getDealerDashboard,
+  getCommandCentre,
   // Profile
   getDealerProfile,
   updateDealerProfile,
@@ -77,6 +78,9 @@ const verifyPendingDealerWorkspace = (req, res, next) => {
 
 // Entry screen data: does this signed-in account work for a dealership?
 router.get("/my-workspace", protect, asyncHandler(myWorkspaceHandler));
+
+// Command centre: any member holding at least one permission that unlocks a section; each section is filtered server-side.
+router.get("/command-centre", protect, dealerWorkspaceAccess(["canListCars", "canEditCars", "canChatBuyers", "canViewEarnings", "canManageTeam"]), asyncHandler(getCommandCentre));
 
 // Dashboard
 router.get("/dashboard", protect, dealerWorkspaceAccess(["canViewEarnings"]), asyncHandler(getDealerDashboard));

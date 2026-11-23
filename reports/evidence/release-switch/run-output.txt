@@ -1,0 +1,10 @@
+PASS A: first visit runs release A aaaaaaaaaaaa-mwrv7gh1
+PASS A: worker controls the page 
+PASS B: returning visitor gets release B HTML on plain reload (SW is network-first) bbbbbbbbbbbb-mwrv7je7
+PASS B: deep link /dealer is not served stale from cache bbbbbbbbbbbb-mwrv7je7
+PASS A->B: open tab shows a non-disruptive update banner 
+PASS A->B: nothing reloaded by itself (typed input kept) 
+PASS Refresh button loads release B bbbbbbbbbbbb-mwrv7je7
+PASS stale chunk: exactly one recovery reload, lands on B reloads=1 meta=bbbbbbbbbbbb-mwrv7je7
+PASS stale chunk: a second failure inside 60s does not loop reloads=1
+PASS no page errors 

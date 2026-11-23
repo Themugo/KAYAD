@@ -1,0 +1,12 @@
+MATCH   -> [
+  'PASS Release identity: deployed commit cccccccccccccccccccccccccccccccccccccccc',
+  'PASS Release parity: public domain and deployment both serve cccccccccccc (x-1)'
+]
+STALE   -> [
+  'PASS Release identity: deployed commit cccccccccccccccccccccccccccccccccccccccc',
+  'FAIL Release parity: public domain serves bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb (x-1) but the deployment is cccccccccccccccccccccccccccccccccccccccc (x-2). The custom domain is not serving the deployment that was just created (alias, DNS or CDN issue).'
+]
+SPA-HTML-> [
+  'PASS Release identity: deployed commit cccccccccccccccccccccccccccccccccccccccc',
+  'FAIL Release parity: public release.json unreadable (not JSON (text/html); an SPA fallback was served instead of release.json). The custom domain is not serving the deployment that was just created (alias, DNS or CDN issue).'
+]

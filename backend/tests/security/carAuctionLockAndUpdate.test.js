@@ -62,7 +62,7 @@ jest.unstable_mockModule("../../services/dealerSubscription.service.js", () => (
 jest.unstable_mockModule("../../utils/atomicTransactions.js", () => ({ atomicCreateDealerListing: jest.fn() }));
 jest.unstable_mockModule("../../services/mediaRecovery.service.js", () => ({
   registerMediaUploadJob: jest.fn(),
-  registerMediaUploadFailure: jest.fn(),
+  registerMediaUploadFailure: jest.fn(async () => ({})),
   completeMediaUpload: jest.fn(),
 }));
 // STAGE 9: updateCar's escrow-enforcement block now derives

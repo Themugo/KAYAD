@@ -1,0 +1,301 @@
+{
+  "A": "aaaaaaaaaaaa-mwrwlkr6",
+  "B": "bbbbbbbbbbbb-mwrwlraj",
+  "at": "2026-11-22T15:49:21.344Z",
+  "results": [
+    {
+      "scenario": "5",
+      "name": "direct vehicle-detail URL loads release B (not stale A)",
+      "pass": true,
+      "detail": "ms=115 meta=bbbbbbbbbbbb-mwrwlraj"
+    },
+    {
+      "scenario": "5",
+      "name": "no page errors on vehicle deep link",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "scenario": "9",
+      "name": "tab 1 navigation after deploy lands on B",
+      "pass": true,
+      "detail": "ms=213"
+    },
+    {
+      "scenario": "9",
+      "name": "tab 2 not reloaded behind the user (typed input kept, still A)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "scenario": "9",
+      "name": "tab 2 shows update banner",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "scenario": "10",
+      "name": "offline: cached shell renders (no browser error page)",
+      "pass": true,
+      "detail": "ms=109"
+    },
+    {
+      "scenario": "10",
+      "name": "back online: navigation returns live release B",
+      "pass": true,
+      "detail": "ms=191"
+    },
+    {
+      "scenario": "11",
+      "name": "aborted asset was not stored in any cache",
+      "pass": true,
+      "detail": "aborted=index-Cer5u99I.js cachedIn=null"
+    },
+    {
+      "scenario": "11",
+      "name": "retry after interruption loads the app",
+      "pass": true,
+      "detail": "ms=126"
+    },
+    {
+      "scenario": "13",
+      "name": "after browser restart the first visit shows release B",
+      "pass": true,
+      "detail": "ms=173"
+    },
+    {
+      "scenario": "15",
+      "name": "slow 3G-like: navigation after deploy completes on B",
+      "pass": true,
+      "detail": "ms=1554"
+    },
+    {
+      "scenario": "14",
+      "name": "manifest valid: standalone, start_url, scope, icons reachable",
+      "pass": true,
+      "detail": "{\"d\":\"standalone\",\"s\":\"/?source=pwa\",\"sc\":\"/\",\"icons\":2}"
+    },
+    {
+      "scenario": "14",
+      "name": "standalone-style launch URL loads (display-mode emulation not possible headless)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "scenario": "18",
+      "name": "half-emptied asset cache: page still loads and refills",
+      "pass": true,
+      "detail": "removed=19,37"
+    },
+    {
+      "scenario": "17",
+      "name": "old cached shell/assets from A do not prevent B from loading",
+      "pass": true,
+      "detail": "ms=166"
+    }
+  ],
+  "state": {
+    "s5": {
+      "controller": true,
+      "regs": [
+        [
+          "activated",
+          null,
+          null
+        ]
+      ],
+      "caches": [
+        [
+          "kayad-shell-v3",
+          1
+        ],
+        [
+          "kayad-assets-v3",
+          38
+        ],
+        [
+          "kayad-images-v3",
+          4
+        ]
+      ]
+    },
+    "s9": {
+      "t1": {
+        "controller": true,
+        "regs": [
+          [
+            "activated",
+            null,
+            null
+          ]
+        ],
+        "caches": [
+          [
+            "kayad-shell-v3",
+            1
+          ],
+          [
+            "kayad-assets-v3",
+            38
+          ],
+          [
+            "kayad-images-v3",
+            4
+          ]
+        ]
+      },
+      "t2": {
+        "controller": true,
+        "regs": [
+          [
+            "activated",
+            null,
+            null
+          ]
+        ],
+        "caches": [
+          [
+            "kayad-shell-v3",
+            1
+          ],
+          [
+            "kayad-assets-v3",
+            38
+          ],
+          [
+            "kayad-images-v3",
+            4
+          ]
+        ]
+      }
+    },
+    "s10": {
+      "controller": true,
+      "regs": [
+        [
+          "activated",
+          null,
+          null
+        ]
+      ],
+      "caches": [
+        [
+          "kayad-shell-v3",
+          1
+        ],
+        [
+          "kayad-assets-v3",
+          38
+        ],
+        [
+          "kayad-images-v3",
+          4
+        ]
+      ]
+    },
+    "s13": {
+      "controller": true,
+      "regs": [
+        [
+          "activated",
+          null,
+          null
+        ]
+      ],
+      "caches": [
+        [
+          "kayad-shell-v3",
+          1
+        ],
+        [
+          "kayad-assets-v3",
+          38
+        ],
+        [
+          "kayad-images-v3",
+          4
+        ]
+      ]
+    },
+    "s15": {
+      "controller": true,
+      "regs": [
+        [
+          "activated",
+          null,
+          null
+        ]
+      ],
+      "caches": [
+        [
+          "kayad-shell-v3",
+          1
+        ],
+        [
+          "kayad-assets-v3",
+          38
+        ],
+        [
+          "kayad-images-v3",
+          4
+        ]
+      ]
+    },
+    "s17": {
+      "controller": true,
+      "regs": [
+        [
+          "activated",
+          null,
+          null
+        ]
+      ],
+      "caches": [
+        [
+          "kayad-shell-v3",
+          1
+        ],
+        [
+          "kayad-assets-v3",
+          37
+        ],
+        [
+          "kayad-images-v3",
+          4
+        ]
+      ]
+    }
+  },
+  "lastHits": [
+    "A GET /api/v1/auth/me",
+    "A GET /dealer",
+    "A GET /api/cars",
+    "A GET /release.json",
+    "A GET /api/v1/auth/me",
+    "A GET /api/v1/auth/csrf",
+    "A GET /sw.js",
+    "A GET /api/admin/public/config",
+    "A GET /sw.js",
+    "A GET /api/v1/auth/me",
+    "A GET /login",
+    "A GET /sw.js",
+    "A GET /api/cars",
+    "A GET /branding/kayard-ke-logo.png",
+    "A GET /release.json",
+    "A GET /api/v1/auth/me",
+    "A GET /api/v1/auth/csrf",
+    "A GET /sw.js",
+    "A GET /api/admin/public/config",
+    "A GET /api/v1/auth/me",
+    "B GET /dealer",
+    "B GET /assets/index-CeI5InjX.js",
+    "B GET /sw.js",
+    "B GET /api/cars",
+    "B GET /release.json",
+    "B GET /sw.js",
+    "B GET /api/v1/auth/me",
+    "B GET /api/v1/auth/csrf",
+    "B GET /api/admin/public/config",
+    "B GET /api/v1/auth/me"
+  ]
+}

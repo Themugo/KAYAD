@@ -23,7 +23,7 @@ jest.unstable_mockModule("../../services/duplicateVehicleService.js", () => ({ d
 jest.unstable_mockModule("../../services/auditService.js", () => ({ logVehicleCreated: jest.fn(), logVehicleEdited: jest.fn(), logVehicleDeleted: jest.fn() }));
 jest.unstable_mockModule("../../services/dealerSubscription.service.js", () => ({ getDealerEntitlement: jest.fn(), assertDealerCanCreateListing: jest.fn(async () => gate) }));
 jest.unstable_mockModule("../../utils/atomicTransactions.js", () => ({ atomicCreateDealerListing: jest.fn(async (a) => rpcImpl(a)) }));
-jest.unstable_mockModule("../../services/mediaRecovery.service.js", () => ({ registerMediaUploadJob: jest.fn(async () => ({})), registerMediaUploadFailure: jest.fn(), completeMediaUpload: jest.fn() }));
+jest.unstable_mockModule("../../services/mediaRecovery.service.js", () => ({ registerMediaUploadJob: jest.fn(async () => ({})), registerMediaUploadFailure: jest.fn(async () => ({})), completeMediaUpload: jest.fn() }));
 jest.unstable_mockModule("../../services/escrowCapability.service.js", () => ({ getEscrowEnabledForNewOrEditedCar: jest.fn(async () => false), getEffectiveEscrowForCar: jest.fn() }));
 jest.unstable_mockModule("../../utils/publicListingCache.js", () => ({ invalidatePublicListingCaches: jest.fn(async () => {}) }));
 jest.unstable_mockModule("../../services/privateSellerAuctionEligibility.service.js", () => ({ evaluateEligibilityBatch: jest.fn() }));

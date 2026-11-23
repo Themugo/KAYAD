@@ -449,6 +449,8 @@ describe("single-use token storage", () => {
   test("verifyEmail looks up the hashed token and filters expiry with a Date", async () => {
     const rawToken = "raw-verify-token-abc";
     userAuthModelMock.findOneAndUpdate.mockResolvedValue(null);
+    // verifyEmail first reads the still-valid row so a failed verification can restore the exact expiry (no match here).
+    userAuthModelMock.findOne.mockReturnValue({ select: jest.fn().mockResolvedValue(null) });
     const res = mockRes();
     await verifyEmail({ params: { token: rawToken } }, res);
     const filter = userAuthModelMock.findOneAndUpdate.mock.calls.at(-1)[0];
