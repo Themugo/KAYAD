@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from '../../components/ui/Button';
-import { acceptTeamInvite } from '../../services/dealerPlatformApi';
+import { acceptTeamInvite, getMyWorkspace } from '../../services/dealerPlatformApi';
 import { resetMyDealershipCache } from '../../features/DealershipWorkspace/useMyDealership';
 
 /**
@@ -10,7 +10,7 @@ import { resetMyDealershipCache } from '../../features/DealershipWorkspace/useMy
 const messageFor = (err) => {
   const status = err?.response?.status;
   const msg = err?.response?.data?.message;
-  if (status === 404) return 'This invitation was not found, or it has already been used. Ask the dealership to send a new one.';
+  if (status === 404) return msg || 'This invitation link is no longer valid. It may have been replaced by a newer e-mail from the dealership, already used, or cancelled. Open the most recent invitation e-mail, or ask the dealership to resend it.';
   if (status === 410) return 'This invitation has expired. Ask the dealership to resend it.';
   if (status === 403) return msg || 'This invitation was sent to a different e-mail address. Sign in with the address that received it.';
   if (status === 409) return msg || 'You are already an active member of this dealership.';
@@ -36,6 +36,14 @@ export default function DealerTeamInvite() {
       resetMyDealershipCache();
       setState({ phase: 'done', message: '' });
     } catch (err) {
+      // A refresh or a second tab after a successful acceptance lands here with the (now spent) link. If this person is already on a dealership
+      // team, say so instead of showing a bare error (the server still refuses the spent link: nothing is claimed twice).
+      if (err?.response?.status === 404) {
+        try {
+          const ws = await getMyWorkspace();
+          if (ws?.membership) { setState({ phase: 'already', message: ws.membership.dealershipName || '' }); return; }
+        } catch { /* fall through to the generic explanation */ }
+      }
       setState({ phase: 'error', message: messageFor(err) });
     } finally { busy.current = false; }
   };
@@ -54,6 +62,12 @@ export default function DealerTeamInvite() {
               {state.phase === 'working' ? 'Accepting…' : state.phase === 'error' ? 'Try again' : 'Accept invitation'}
             </Button>
           </>
+        )}
+        {state.phase === 'already' && (
+          <div role="status">
+            <p style={{ marginBottom: 12 }}><strong>This invitation has already been used.</strong> You are already on {state.message ? `${state.message}’s` : 'a dealership'} team.</p>
+            <a href="/?nav=dealership-workspace" data-testid="open-workspace" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '0 20px', borderRadius: 'var(--radius-md, 8px)', background: 'var(--color-primary, #0B2A4A)', color: '#fff', fontWeight: 600, textDecoration: 'none' }}>Open the dealership workspace</a>
+          </div>
         )}
         {state.phase === 'done' && (
           <div role="status">

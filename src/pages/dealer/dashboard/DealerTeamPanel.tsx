@@ -94,7 +94,7 @@ export default function DealerTeamPanel({ team, onChanged }: Props) {
       const res = await fn();
       if (res?.success === false) { setError(res.message || 'That action could not be completed.'); return false; }
       setNotice(typeof ok === 'function' ? ok(res) : ok);
-      if (res?.email && res.email.sent === false) setWarning(`The e-mail could not be sent${res.email.reason ? `: ${res.email.reason}` : ''} The invitation is saved. Use “Resend invitation” once e-mail is working.`);
+      if (res?.email && res.email.sent === false) setWarning(`The e-mail could not be sent${res.email.reason ? `: ${res.email.reason}` : ''} ${res.email.previousLinkStillValid ? 'The link in the previous e-mail still works.' : 'The invitation is saved.'} Use “Resend invitation” once e-mail is working.`);
       onChanged();
       return true;
     } catch (err) {
@@ -214,7 +214,7 @@ export default function DealerTeamPanel({ team, onChanged }: Props) {
                         {roles.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
                       </select>
                       {member.status === 'invited' && (
-                        <button type="button" className={btnCls} disabled={busy} onClick={() => run(member.id, () => dealerApi.resendTeamInvite(member.id), (res) => (res?.email?.sent === false ? `Invitation refreshed for ${name}.` : `Invitation re-sent to ${name}.`))}>Resend invitation</button>
+                        <button type="button" className={btnCls} disabled={busy} onClick={() => run(member.id, () => dealerApi.resendTeamInvite(member.id), (res) => (res?.email?.sent === false ? `Invitation for ${name} was not re-sent.` : `Invitation re-sent to ${name}.`))}>Resend invitation</button>
                       )}
                       {member.status === 'active' && (
                         <button type="button" className={btnCls} disabled={busy} onClick={() => run(member.id, () => dealerApi.updateTeamMember(member.id, { status: 'suspended' }), `${name} suspended.`)}>Suspend</button>

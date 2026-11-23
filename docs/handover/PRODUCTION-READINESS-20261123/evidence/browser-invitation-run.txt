@@ -1,0 +1,24 @@
+PASS owner sees the pending invitation in Team
+PASS the e-mail provider received a link with a 64-hex token
+PASS logged-out visitor is sent to sign in
+PASS the sign-in URL carries the same invitation (token preserved, not printed)
+PASS after sign-in the visitor is back on the invitation page
+PASS Accept invitation is a visible, enabled button
+PASS button has a real touch-sized box (>= 40px high, >= 120px wide)
+PASS button has a filled background (colour or gradient; not plain text)
+PASS acceptance shows "You have joined the team"
+PASS database: membership active exactly once, role kept, token cleared
+PASS exactly one membership row
+PASS refreshing and accepting again does not undo or duplicate: the spent link says it was already used
+PASS ...still exactly one active membership
+PASS owner Team page no longer shows a pending invitation for them and lists them as active
+PASS resend e-mails a NEW token
+PASS the OLD link explains that it was replaced by a newer e-mail
+PASS the NEWEST link is accepted
+PASS a different signed-in e-mail gets a clear 403 explanation
+PASS ...and the invitation is not consumed
+PASS dashboard "Invitations waiting" equals the database pending count
+PASS mobile 390px: button visible, within the viewport, no horizontal overflow
+PASS no uncaught page errors during the whole journey
+browser journey: 22/22 passed
+exit=0
