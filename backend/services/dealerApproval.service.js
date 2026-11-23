@@ -43,6 +43,13 @@ const defaultDeps = async () => {
     updateVerification: (id, patch) => db.update("dealer_verifications", id, patch),
     getPolicy: () => paperwork.getDealerPaperworkPolicy(),
     rpc: (name, args) => getSupabase().rpc(name, args),
+    // Listings held as `pending` while the dealer was not yet cleared to publish (per-listing review is retired, so nothing else releases them).
+    releaseHeldListings: async (dealerId) => {
+      const { data, error } = await getSupabase().from("cars").update({ status: "available" }).eq("dealer_id", dealerId).eq("status", "pending").is("deleted_at", null).select("id");
+      if (error) throw error;
+      if ((data || []).length) { try { (await import("../utils/publicListingCache.js")).invalidatePublicListingCaches?.(); } catch { /* cache refresh is best effort */ } }
+      return (data || []).length;
+    },
   };
 };
 
@@ -154,7 +161,13 @@ export async function approveDealer({ user, actorId, reason }, deps) {
       if (mapped) throw mapped;
       throw error;
     }
-    return { changed: true, alreadyApproved: false, warnings: assessed.warnings, result: data, reason: why };
+    // Approval clears the dealer to publish: release listings held while it was pending. Best effort and reported; the approval itself stands.
+    let releasedListings = 0;
+    let releaseError = null;
+    if (typeof d.releaseHeldListings === "function") {
+      try { releasedListings = Number(await d.releaseHeldListings(id)) || 0; } catch (e) { releaseError = e?.message || "release failed"; }
+    }
+    return { changed: true, alreadyApproved: false, warnings: assessed.warnings, result: data, reason: why, releasedListings, releaseError };
   });
 }
 

@@ -198,7 +198,7 @@ describe("route inventory guard: every money / bid / registration / message POST
     "supportTicketAdminRoutes.js POST /:id/messages": "support ticket thread, not chat",
     "heroPlacementRoutes.js POST /": "route file is not mounted anywhere in server.js / v1.js",
   };
-  const FROZEN_FILES = new Set(["bidRoutes.js POST /:id/bid", "paymentRoutes.js POST /initiate", "leadRoutes.js POST /:leadId/offers/:offerId/pay", "auctionSettlementRoutes.js POST /:id/outcome/payment", "authRoutes.js POST /register", "chatRoutes.js POST /:chatId/message", "dealerRoutes.js POST /upgrade", "subscriptionRoutes.js POST /upgrade", "subscriptionRoutes.js POST /reactivate", "auctionRegistrationRoutes.js POST /:id/registration/commitment", "auctionRegistrationRoutes.js POST /:id/registration/high-value-deposit"]);
+  const FROZEN_FILES = new Set(["bidRoutes.js POST /:id/bid", "paymentRoutes.js POST /initiate", "leadRoutes.js POST /:leadId/offers/:offerId/pay", "auctionSettlementRoutes.js POST /:id/outcome/payment", "authRoutes.js POST /register", "chatRoutes.js POST /:chatId/message", "dealerPlatformRoutes.js POST /leads/:leadId/messages", "dealerRoutes.js POST /upgrade", "subscriptionRoutes.js POST /upgrade", "subscriptionRoutes.js POST /reactivate", "auctionRegistrationRoutes.js POST /:id/registration/commitment", "auctionRegistrationRoutes.js POST /:id/registration/high-value-deposit"]);
   test("no unclassified candidate route exists", async () => {
     const fs = await import("node:fs"); const path = await import("node:path");
     const { fileURLToPath } = await import("node:url");
@@ -216,6 +216,8 @@ describe("route inventory guard: every money / bid / registration / message POST
   });
   test("chat start (POST /) and the sms inbound webhook are covered even though their path words differ", () => {
     expect(policy.classifyFreezeRoute("POST", "/chat")?.feature).toBe("messaging");
+    expect(policy.classifyFreezeRoute("POST", "/v1/dealer-platform/leads/abc/messages")?.feature).toBe("messaging");
+    expect(policy.classifyFreezeRoute("GET", "/dealer-platform/leads/abc/messages")).toBeNull();
     expect(policy.classifyFreezeRoute("POST", "/sms-bidding/webhook/inbound")?.feature).toBe("auctions");
   });
 });

@@ -7,7 +7,7 @@ import {
   PieChart, Activity, Bell,
   Settings, FileText, Send, RefreshCw, ArrowUpRight, ArrowDownRight,
   UserPlus, Shield, Award, CreditCard, CalendarCheck, ClipboardCheck,
-  Gavel, X, Loader2, UserCog, ExternalLink, Megaphone, ChevronLeft, Plus, Landmark, LogOut, Menu,
+  Gavel, X, Loader2, HelpCircle, Search, BadgeCheck, MapPin, UserCog, ExternalLink, Megaphone, ChevronLeft, Plus, Landmark, LogOut, Menu,
 } from 'lucide-react';
 import * as dealerApi from '../../../services/dealerPlatformApi';
 import { useAuth } from '../../../context/AuthContext';
@@ -19,6 +19,8 @@ import DealerCollectionAccountPanel from './DealerCollectionAccountPanel';
 import AuctionInsightsPanel from './AuctionInsightsPanel';
 import DealerAccountStatus from './DealerAccountStatus';
 import DealerTeamPanel from './DealerTeamPanel';
+import LeadConversation from './LeadConversation';
+import VehicleRequestsPanel from './VehicleRequestsPanel';
 import CommandCentrePanel, { type CommandCentreData } from './CommandCentrePanel';
 import { getMyListings, deleteCar, markCarSold, setCarVisibility } from '../../../services/vehicleApi';
 import { ListingStatusBadge, ListingThumb } from '../../../components/listing/ListingPresentation';
@@ -125,6 +127,19 @@ const QuickAction = ({ icon: Icon, label, onClick }: { icon: React.ElementType; 
 );
 
 /** "3 hours ago" style label from a real ISO timestamp; returns null when the time is missing or invalid. */
+/** What the status means for buyers and what the dealer can do next (only statuses the platform really stores). */
+export const dealerStatusHint = (status?: string | null): string => {
+  switch (status) {
+    case 'available': case 'active': return 'Visible to buyers.';
+    case 'pending': return 'Under review by KAYARD KE. Buyers cannot see it until it is published.';
+    case 'hidden': case 'paused': return 'Buyers cannot see this. Republish it when you are ready; if you did not pause it, contact KAYARD KE support.';
+    case 'draft': return 'Not published yet. Finish the details, then publish.';
+    case 'reserved': return 'Reserved for a buyer.';
+    case 'sold': return 'Sold. This listing is read-only.';
+    default: return '';
+  }
+};
+
 /** One status vocabulary for the dealer workspace (stored value -> label shown). */
 export const dealerStatusLabel = (status?: string | null): string => {
   switch (status) {
@@ -209,19 +224,20 @@ const AICopilot = () => (
 );
 
 /** Navigation Tab */
-const NavTab = ({ icon: Icon, label, active, onClick, badge }) => (
+const NavTab = ({ icon: Icon, label, active, onClick, badge, collapsed = false }: { icon: React.ElementType; label: string; active: boolean; onClick: () => void; badge?: number | string; collapsed?: boolean }) => (
   <button
     type="button"
+    title={collapsed ? label : undefined}
     aria-current={active ? 'page' : undefined}
     onClick={onClick}
-    className={`flex w-full items-center gap-3 px-3 py-2 min-h-10 rounded-lg text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12D6CB] ${
+    className={`relative flex w-full items-center ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'} py-2 min-h-10 rounded-lg text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12D6CB] ${
       active ? 'bg-[#11B8A6]/20 text-white shadow-[inset_3px_0_0_#12D6CB]' : 'text-white/75 hover:bg-white/10 hover:text-white'
     }`}
   >
     <Icon className="w-[18px] h-[18px] shrink-0" strokeWidth={2} aria-hidden="true" />
-    <span className="font-medium text-sm truncate">{label}</span>
+    <span className={collapsed ? 'sr-only' : 'font-medium text-sm truncate'}>{label}</span>
     {badge ? (
-      <span className="ml-auto px-2 py-0.5 bg-[#12D6CB] text-[#062A33] text-xs font-black rounded-full">
+      <span className={`${collapsed ? 'absolute right-1 top-0.5 px-1.5 ' : 'ml-auto px-2 '} py-0.5 bg-[#12D6CB] text-[#062A33] text-xs font-black rounded-full`}>
         <span aria-hidden="true">{badge}</span>
         <span className="sr-only">{badge} new</span>
       </span>
@@ -239,23 +255,27 @@ type NavGroup = { id: string; label: string; items: NavItem[] };
 
 const DEALER_NAV_GROUPS: NavGroup[] = [
   { id: 'overview', label: 'Overview', items: [
-    { id: 'overview', label: 'Overview', icon: LayoutDashboard, title: 'Dashboard', description: 'Your dealership at a glance: activity, listings and what needs attention.' },
+    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard, title: 'Dealer Command Centre', description: 'Your dealership at a glance: activity, listings and what needs attention.' },
   ] },
-  { id: 'operations', label: 'Operations', items: [
+  { id: 'sales', label: 'Sales operations', items: [
     { id: 'inventory', label: 'Inventory', icon: Car, title: 'Inventory', description: 'Vehicles you have listed and their current status.' },
     { id: 'leads', label: 'Leads', icon: MessageSquare, title: 'Leads', description: 'Buyer enquiries on your vehicles.' },
     { id: 'pipeline', label: 'Pipeline', icon: Target, title: 'Lead pipeline', description: 'Enquiries grouped by sales stage.' },
     { id: 'customers', label: 'Customers', icon: Users, title: 'Customers', description: 'Buyers who have dealt with your dealership.' },
     { id: 'auctions', label: 'Auctions', icon: Gavel, title: 'Auctions', description: 'Auctions run by your dealership.' },
     { id: 'inspections', label: 'Inspections', icon: ClipboardCheck, title: 'Inspections', description: 'Inspection orders on your vehicles.' },
+  ] },
+  { id: 'finance', label: 'Transactions & finance', items: [
     { id: 'escrow', label: 'Escrow', icon: Shield, title: 'Escrow', description: 'Protected transactions on your sales.' },
     { id: 'finance', label: 'Finance', icon: CreditCard, title: 'Finance applications', description: 'Financing applications attached to your vehicles.' },
   ] },
-  { id: 'business', label: 'Business management', items: [
+  { id: 'growth', label: 'Business growth', items: [
     { id: 'analytics', label: 'Analytics', icon: BarChart3, title: 'Analytics', description: 'Revenue, sales and viewing performance.' },
     { id: 'reputation', label: 'Reputation', icon: Star, title: 'Reputation', description: 'Ratings and reviews from buyers.' },
     { id: 'marketing', label: 'Marketing', icon: Megaphone, title: 'Marketing', description: 'Campaigns promoting your vehicles.' },
-    { id: 'team', label: 'Team', icon: UserCog, title: 'Team', description: 'People who work with your dealership account.' },
+  ] },
+  { id: 'people', label: 'People & business', items: [
+    { id: 'team', label: 'Team & Employment', icon: UserCog, title: 'Team & Employment', description: 'People who work with your dealership account, their staff numbers and employment records.' },
     { id: 'banking', label: 'Banking', icon: Landmark, title: 'Banking', description: 'Where your payouts are sent: bank account and M-Pesa.' },
     { id: 'settings', label: 'Settings', icon: Settings, title: 'Settings', description: 'Business profile, notifications and your plan and limits. Team and Banking have their own pages in the menu.' },
   ] },
@@ -329,6 +349,11 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const { signOut } = useAuth();
   const branding = useBrandingSafe();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  // Desktop sidebar can collapse to icons; remembered per browser as a convenience only (storage may be unavailable).
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => { try { return window.localStorage.getItem('kayad.dealer.sidebar') === 'collapsed'; } catch { return false; } });
+  const toggleSidebar = () => setSidebarCollapsed((v) => { const next = !v; try { window.localStorage.setItem('kayad.dealer.sidebar', next ? 'collapsed' : 'open'); } catch { /* storage unavailable */ } return next; });
+  const [searchText, setSearchText] = useState('');
+  const [openLeadChat, setOpenLeadChat] = useState<string | null>(null);
   const rootRef = useRef<HTMLDivElement | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement | null>(null);
   const asideRef = useRef<HTMLElement | null>(null);
@@ -776,6 +801,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const currentGroup = DEALER_NAV_GROUPS.find((g) => g.items.some((i) => i.id === activeSection)) || DEALER_NAV_GROUPS[0];
   const currentItem = currentGroup.items.find((i) => i.id === activeSection) || currentGroup.items[0];
   const leadBadge = dashboard?.overview?.leads?.new;
+  const compact = sidebarCollapsed && !mobileNavOpen;
 
   return (
     <div ref={rootRef} className="min-h-screen bg-[#F6FAF9] flex flex-col lg:flex-row">
@@ -794,22 +820,23 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
         <p className="min-w-0 flex-1 truncate text-center text-sm font-bold text-[#0A3340]" aria-hidden="true">{currentItem.label}</p>
       </div>
       {mobileNavOpen && <button type="button" aria-label="Close dealer menu overlay" tabIndex={-1} onClick={() => setMobileNavOpen(false)} className="fixed inset-0 z-[1090] bg-[#071F2A]/55 lg:hidden" />}
-      <aside ref={asideRef} id="dealer-workspace-sidebar" aria-label="Dealer workspace menu" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex fixed inset-y-0 left-0 z-[1100] w-[88%] max-w-sm overflow-hidden shadow-2xl lg:static lg:z-auto lg:w-64 lg:min-w-64 lg:max-w-none lg:shadow-none bg-[#0A3545] text-white lg:border-r border-[#0A3545] flex-col lg:sticky lg:top-0 lg:h-[calc(100dvh-var(--dealer-aside-top,0px))]`}>
-        <div className="p-4 border-b border-white/10">
-          <div className="flex items-center gap-3 min-w-0">
+      <aside ref={asideRef} id="dealer-workspace-sidebar" aria-label="Dealer workspace menu" className={`${mobileNavOpen ? "flex" : "hidden"} lg:flex fixed inset-y-0 left-0 z-[1100] w-[88%] max-w-sm overflow-hidden shadow-2xl lg:static lg:z-auto ${compact ? 'lg:w-[4.75rem] lg:min-w-[4.75rem]' : 'lg:w-64 lg:min-w-64'} lg:max-w-none lg:shadow-none bg-[#0A3545] text-white lg:border-r border-[#0A3545] flex-col lg:sticky lg:top-0 lg:h-[calc(100dvh-var(--dealer-aside-top,0px))]`}>
+        <div className={`border-b border-white/10 ${compact ? 'p-2' : 'p-4'}`}>
+          <div className={`flex items-center min-w-0 ${compact ? 'justify-center' : 'gap-3'}`}>
             <div className="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-[#11B8A6] to-[#12D6CB] flex items-center justify-center overflow-hidden ring-1 ring-white/20">
               {branding.logoType === 'image' && branding.logoUrl ? <img src={branding.logoUrl} alt={branding.logoText || 'KAYARD KE'} className="w-full h-full object-contain bg-white" /> : branding.logoType === 'text' ? <span className="text-xs font-black text-white">{branding.logoText || 'KAYARD KE'}</span> : <img src={branding.logoUrl || '/branding/kayad-symbol.svg'} alt={branding.logoText || 'KAYARD KE'} className="w-full h-full object-contain" onError={(event) => { event.currentTarget.style.display = 'none'; }} />}
             </div>
-            <div className="min-w-0">
+            <div className={`min-w-0 ${compact ? 'hidden' : ''}`}>
               <h1 className="font-black text-white truncate">{branding.logoText || 'KAYARD KE'}</h1>
               <p className="text-xs text-white/65 truncate">{user?.businessName || user?.name || 'Dealer account'}</p><p className="mt-0.5 text-[10px] font-black uppercase tracking-[.14em] text-[#12D6CB]">Dealer account</p>
             </div>
+            <button type="button" data-testid="dealer-sidebar-toggle" onClick={toggleSidebar} aria-pressed={sidebarCollapsed} aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'} className={`hidden lg:inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/20 text-white/80 hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#12D6CB] ${compact ? 'mt-2' : 'ml-auto'}`}>{sidebarCollapsed ? <ChevronRight className="h-4 w-4" aria-hidden="true" /> : <ChevronLeft className="h-4 w-4" aria-hidden="true" />}</button>
           </div>
         </div>
 
-        <div className="shrink-0 px-3 pt-3 lg:px-4"><button type="button" data-testid="dealer-sidebar-add-vehicle" onClick={() => { setMobileNavOpen(false); setActiveSection('inventory'); openListingForm({ mode: 'create' }); }} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#11B8A6] px-4 text-sm font-black text-[#062A33] shadow-sm hover:bg-[#12D6CB] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><Plus className="h-4 w-4" aria-hidden="true" />Add a vehicle</button></div>
+        <div className={`shrink-0 pt-3 ${compact ? 'px-2' : 'px-3 lg:px-4'}`}><button type="button" aria-label="Add a vehicle" title="Add a vehicle" data-testid="dealer-sidebar-add-vehicle" onClick={() => { setMobileNavOpen(false); setActiveSection('inventory'); openListingForm({ mode: 'create' }); }} className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#11B8A6] px-4 text-sm font-black text-[#062A33] shadow-sm hover:bg-[#12D6CB] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"><Plus className="h-4 w-4" aria-hidden="true" />{compact ? <span className="sr-only">Add a vehicle</span> : 'Add a vehicle'}</button></div>
 
-        <nav aria-label="Dealer workspace" className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain p-3 lg:p-4">
+        <nav aria-label="Dealer workspace" className={`relative flex-1 min-h-0 overflow-y-auto overscroll-contain ${compact ? 'p-2' : 'p-3 lg:p-4'}`}>
           {DEALER_NAV_GROUPS.map((group, index) => (
             <div
               key={group.id}
@@ -817,7 +844,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
               aria-labelledby={`dealer-nav-${group.id}`}
               className={`space-y-1 ${index > 0 ? 'mt-3 border-t border-white/10 pt-3' : ''}`}
             >
-              <p id={`dealer-nav-${group.id}`} className="px-3 pb-1 text-[10px] font-black uppercase tracking-[.16em] text-white/65">
+              <p id={`dealer-nav-${group.id}`} className={compact ? 'sr-only' : 'px-3 pb-1 text-[10px] font-black uppercase tracking-[.16em] text-white/65'}>
                 {group.label}
               </p>
               {group.items.map((item) => (
@@ -828,30 +855,43 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   active={activeSection === item.id}
                   onClick={() => setActiveSection(item.id)}
                   badge={item.id === 'leads' ? leadBadge : undefined}
+                  collapsed={compact}
                 />
               ))}
             </div>
           ))}
         </nav>
 
-        <div className="shrink-0 p-3 lg:p-4 border-t border-white/10 space-y-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]" data-testid="dealer-sidebar-footer">
+        <div className={`shrink-0 border-t border-white/10 space-y-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] ${compact ? 'p-2' : 'p-3 lg:p-4'}`} data-testid="dealer-sidebar-footer">
           {/* Collapsed by default so the menu keeps its room (DA-06); the status stays one tap away and Sign out is always visible. */}
-          <details className="group rounded-xl border border-white/15 bg-white/10" data-testid="dealer-account-status-toggle">
+          <details className={`group rounded-xl border border-white/15 bg-white/10 ${compact ? 'hidden' : ''}`} data-testid="dealer-account-status-toggle">
             <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded-xl px-3 text-sm font-semibold text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#12D6CB] [&::-webkit-details-marker]:hidden">
               <span>Account status</span>
               <span aria-hidden="true" className="text-xs text-white/70 transition group-open:rotate-180">▾</span>
             </summary>
             <div className="max-h-[40vh] overflow-y-auto rounded-b-xl bg-white p-1 text-[#0A3340]"><DealerAccountStatus /></div>
           </details>
-          <button type="button" onClick={() => onNavigate?.('support')} className="w-full inline-flex min-h-11 items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-[#12D6CB] hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" data-testid="dealer-help-support">Help &amp; support</button>
+          <button type="button" onClick={() => onNavigate?.('support')} className="w-full inline-flex min-h-11 items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold text-[#12D6CB] hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" data-testid="dealer-help-support" title="Help & support"><HelpCircle className={`h-4 w-4 ${compact ? '' : 'mr-2'}`} aria-hidden="true" />{compact ? <span className="sr-only">Help &amp; support</span> : 'Help & support'}</button>
           {logoutError && <p role="alert" className="text-sm text-red-200">{logoutError}</p>}
-          <button type="button" onClick={handleDealerLogout} className="w-full inline-flex items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"><LogOut className="w-4 h-4" />Sign out</button>
+          <button type="button" onClick={handleDealerLogout} title="Sign out" className="w-full inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-white/20 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"><LogOut className="w-4 h-4" aria-hidden="true" />{compact ? <span className="sr-only">Sign out</span> : 'Sign out'}</button>
         </div>
       </aside>
 
       {/* Main Content */}
       <div className="flex-1 min-w-0 overflow-y-auto">
         <div className="p-3 sm:p-6 lg:p-8">
+          {/* Top bar (desktop): brand, account type, search, notifications and who is signed in. Mirrors the phone app bar. */}
+          <div className="mb-4 hidden items-center gap-4 border-b border-[#D7E7E4] pb-3 lg:flex" data-testid="dealer-topbar">
+            <div className="flex shrink-0 items-center gap-2"><span className="text-lg font-black text-[#0A3340]">{branding.logoText || 'KAYARD KE'}</span><span className="rounded-full bg-[#DDF5F1] px-2.5 py-1 text-xs font-bold text-[#0E6F68]">Dealer Account</span></div>
+            <form role="search" aria-label="Search your vehicles" className="ml-auto flex min-w-0 max-w-md flex-1 items-center gap-2 rounded-xl border border-[#D7E7E4] bg-white px-3" onSubmit={(e) => { e.preventDefault(); setInvQuery(searchText); setInvStatus('all'); setActiveSection('inventory'); }}>
+              <Search className="h-4 w-4 shrink-0 text-[#64748B]" aria-hidden="true" />
+              <input type="search" value={searchText} onChange={(e) => setSearchText(e.target.value)} aria-label="Search your vehicles" placeholder="Search your vehicles by make, model, year or city" className="min-h-10 w-full min-w-0 bg-transparent text-sm text-[#0A3340] outline-none placeholder:text-[#64748B]" />
+            </form>
+            <div className="flex shrink-0 items-center gap-2 rounded-xl border border-[#D7E7E4] bg-white py-1 pl-1 pr-3" data-testid="dealer-identity">
+              <span aria-hidden="true" className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0A3545] text-sm font-black text-white">{String(user?.businessName || user?.name || 'D').trim().charAt(0).toUpperCase()}</span>
+              <span className="min-w-0 leading-tight"><span className="block max-w-[10rem] truncate text-sm font-bold text-[#0A3340]">{user?.businessName || user?.name || 'Dealer account'}</span>{user?.businessName && user?.name && <span className="block max-w-[10rem] truncate text-xs text-[#64748B]">{user.name}</span>}</span>
+            </div>
+          </div>
           {/* Header */}
           <div className="relative mb-5 flex flex-col gap-3 sm:mb-8 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
             <div className="min-w-0 pr-12 sm:pr-0">
@@ -871,7 +911,14 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                 )}
               </nav>
               <h2 className="text-xl font-bold text-[#0A3340] sm:text-2xl">{currentItem.title}</h2>
-              <p className="text-sm text-[#64748B] sm:text-base">{activeSection === 'overview' ? `Welcome back, ${user?.name || 'dealer'}` : currentItem.description}</p>
+              <p className="text-sm text-[#64748B] sm:text-base">{activeSection === 'overview' ? `Welcome back, ${user?.name || 'dealer'}${user?.businessName ? ` · ${user.businessName}` : ''}` : currentItem.description}</p>
+              {activeSection === 'overview' && (
+                <p className="mt-1.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#475569]" data-testid="dealer-header-meta">
+                  {user?.role === 'dealer' && user?.status === 'approved' && <span className="inline-flex items-center gap-1 rounded-full bg-[#DDF5F1] px-2.5 py-1 font-bold text-[#0E6F68]" data-testid="dealer-verified-chip"><BadgeCheck className="h-3.5 w-3.5" aria-hidden="true" />Verified Dealer</span>}
+                  <span className="inline-flex items-center gap-1"><Calendar className="h-3.5 w-3.5" aria-hidden="true" />{new Date().toLocaleDateString('en-KE', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                  {(user?.city || user?.location) && <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5" aria-hidden="true" />{user?.city || user?.location}</span>}
+                </p>
+              )}
             </div>
             <div className="flex items-center gap-2 sm:gap-3">
               <div className="hidden items-center rounded-xl border border-[#D7E7E4] bg-white p-1 sm:inline-flex" aria-label="Page history">
@@ -925,7 +972,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
               <section aria-label="Dealership command centre" data-testid="dealer-command-banner" className="mb-5 overflow-hidden rounded-2xl bg-gradient-to-br from-[#0A3545] to-[#0E7C74] p-4 text-white shadow-sm sm:mb-6 sm:p-6">
                 <p className="text-[11px] font-black uppercase tracking-[.16em] text-[#12D6CB]">KAYARD KE · Dealer account</p>
                 <h2 className="mt-1 text-2xl font-black sm:text-3xl">Run your dealership from one place</h2>
-                <p className="mt-1 max-w-2xl text-sm text-white/80">Your command centre for enquiries, stock, auctions and payouts. Respond fast, keep listings fresh and close more sales.</p>
+                <p className="mt-1 max-w-2xl text-sm text-white/80">Inventory, enquiries, sales and your team — all in one secure workspace.</p>
                 <div className="mt-4 flex flex-wrap gap-2">
                   <button type="button" onClick={() => openListingForm({ mode: 'create' })} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-[#11B8A6] px-4 text-sm font-black text-[#062A33] hover:bg-[#12D6CB]"><Plus className="h-4 w-4" aria-hidden="true" />Add a vehicle</button>
                   <button type="button" onClick={() => setActiveSection('leads')} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 text-sm font-bold hover:bg-white/20"><MessageSquare className="h-4 w-4" aria-hidden="true" />Leads{newLeads ? ` (${newLeads} new)` : ''}</button>
@@ -1174,6 +1221,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                               <p className="text-sm font-semibold text-[#176B87]">{car.price == null ? 'Price unavailable' : `Ksh ${Number(car.price).toLocaleString('en-KE')}`} • {car.views == null ? 'Views unavailable' : `${Number(car.views).toLocaleString('en-KE')} views`}</p>
                               {detailLine && <p className="text-xs text-[#475569]" data-testid="inventory-details">{detailLine}</p>}
                               {updated && <p className="text-xs text-[#475569]">Updated {updated}</p>}
+                              {dealerStatusHint(car.status) && <p className="text-xs text-[#475569]" data-testid="inventory-status-hint">{dealerStatusHint(car.status)}</p>}
                             </div>
                             <ListingStatusBadge status={car.status} label={statusText} className="col-start-2 justify-self-start" />
                             <div className="col-span-2 grid w-full grid-cols-3 gap-2 sm:flex sm:w-auto sm:flex-wrap [&>button]:min-h-10 [&>button]:justify-center">
@@ -1250,6 +1298,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   )}
                 </>
               )}
+              {!listingForm && <VehicleRequestsPanel vehicles={(myListings as any[]).filter((l) => l.status !== 'sold')} />}
             </div>
           )}
 
@@ -1289,11 +1338,13 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                         <th className="text-left py-3 px-4 text-sm font-semibold text-[#64748B]">Source</th>
                         <th className="text-left py-3 px-4 text-sm font-semibold text-[#64748B]">Stage</th>
                         <th className="text-left py-3 px-4 text-sm font-semibold text-[#64748B]">Last Activity</th>
+                        <th className="text-left py-3 px-4 text-sm font-semibold text-[#64748B]"><span className="sr-only">Reply</span></th>
                       </tr>
                     </thead>
                     <tbody>
                       {leads.map((lead) => (
-                        <tr key={lead.id} className="border-b border-[#D7E7E4] hover:bg-[#F6FAF9]">
+                        <React.Fragment key={lead.id}>
+                        <tr className="border-b border-[#D7E7E4] hover:bg-[#F6FAF9]">
                           <td className="py-3 px-4">
                             <p className="font-medium text-[#0A3340]">{lead.buyer?.name || 'Unknown'}</p>
                             <p className="text-xs text-[#64748B]">{lead.buyer?.email}</p>
@@ -1312,7 +1363,16 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                             </span>
                           </td>
                           <td className="py-3 px-4 text-[#64748B]">{lead.last_activity_at ? new Date(lead.last_activity_at).toLocaleDateString() : 'Never'}</td>
+                          <td className="py-3 px-4">
+                            {lead.source === 'chat' ? (
+                              <button type="button" aria-expanded={openLeadChat === lead.id} onClick={() => setOpenLeadChat(openLeadChat === lead.id ? null : lead.id)} className="min-h-11 whitespace-nowrap rounded-lg border border-[#176B87] px-3 text-sm font-semibold text-[#176B87] hover:bg-[#EEF7F5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#176B87]">{openLeadChat === lead.id ? 'Close' : 'Reply'}<span className="sr-only"> to {lead.buyer?.name || 'buyer'}</span></button>
+                            ) : <span className="text-xs text-[#64748B]">No chat</span>}
+                          </td>
                         </tr>
+                        {openLeadChat === lead.id && (
+                          <tr className="border-b border-[#D7E7E4] bg-white"><td colSpan={6} className="p-3"><LeadConversation leadId={lead.id} buyerId={lead.buyer?.id || (typeof lead.buyer === 'string' ? lead.buyer : undefined)} buyerName={lead.buyer?.name} onReplied={loadLeads} /></td></tr>
+                        )}
+                        </React.Fragment>
                       ))}
                     </tbody>
                   </table>

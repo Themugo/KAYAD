@@ -357,7 +357,8 @@ export const sendMessage = async (req, res) => {
       });
 
       if (lead.stage === "new") {
-        const dealerId = chat.participants.find((p) => p.toString() !== req.user.id.toString());
+        // The reply moves a new lead to "contacted" only when the SENDER is the dealership that owns the lead (not the buyer).
+        const dealerId = lead.dealer ?? lead.dealer_id ?? lead.dealerId;
         if (dealerId && req.user.id.toString() === dealerId.toString()) {
           await updateLeadStage(lead.id, "contacted", req.user.id);
         }

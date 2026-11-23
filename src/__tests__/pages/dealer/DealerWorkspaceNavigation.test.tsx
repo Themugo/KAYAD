@@ -29,14 +29,17 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
   beforeEach(() => { window.history.replaceState({}, '', '/?nav=dealer-dashboard'); });
   afterEach(() => { cleanup(); });
 
-  it('groups the existing sections under Overview, Operations and Business management', async () => {
+  it('groups the existing sections under the five Command Centre groups', async () => {
     renderIt();
     const n = await nav();
     const groups = within(n).getAllByRole('group').map((g) => g.getAttribute('aria-labelledby'));
-    expect(groups).toEqual(['dealer-nav-overview', 'dealer-nav-operations', 'dealer-nav-business']);
+    expect(groups).toEqual(['dealer-nav-overview', 'dealer-nav-sales', 'dealer-nav-finance', 'dealer-nav-growth', 'dealer-nav-people']);
     const names = (id: string) => within(within(n).getByRole('group', { name: id })).getAllByRole('button').map((b) => b.querySelector('span.font-medium')?.textContent);
-    expect(names('Operations')).toEqual(['Inventory', 'Leads', 'Pipeline', 'Customers', 'Auctions', 'Inspections', 'Escrow', 'Finance']);
-    expect(names('Business management')).toEqual(['Analytics', 'Reputation', 'Marketing', 'Team', 'Banking', 'Settings']);
+    expect(names('Overview')).toEqual(['Dashboard']);
+    expect(names('Sales operations')).toEqual(['Inventory', 'Leads', 'Pipeline', 'Customers', 'Auctions', 'Inspections']);
+    expect(names('Transactions & finance')).toEqual(['Escrow', 'Finance']);
+    expect(names('Business growth')).toEqual(['Analytics', 'Reputation', 'Marketing']);
+    expect(names('People & business')).toEqual(['Team & Employment', 'Banking', 'Settings']);
   });
 
   it('keeps all 14 original sections reachable plus the new Banking item (none removed)', async () => {
@@ -55,14 +58,14 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
   it('selecting a section updates header, breadcrumb, current page and URL', async () => {
     renderIt();
     const n = await nav();
-    fireEvent.click(within(n).getByRole('button', { name: 'Team' }));
-    expect(await screen.findByRole('heading', { level: 2, name: 'Team' })).toBeTruthy();
+    fireEvent.click(within(n).getByRole('button', { name: 'Team & Employment' }));
+    expect(await screen.findByRole('heading', { level: 2, name: 'Team & Employment' })).toBeTruthy();
     expect(window.location.search).toContain('section=team');
     expect(window.location.search).toContain('nav=dealer-dashboard');
     const crumbs = screen.getByRole('navigation', { name: 'Breadcrumb' });
-    expect(within(crumbs).getByText('Business management')).toBeTruthy();
-    expect(crumbs.querySelector('[aria-current="page"]')?.textContent).toBe('Team');
-    expect(within(n).getByRole('button', { name: 'Team' }).getAttribute('aria-current')).toBe('page');
+    expect(within(crumbs).getByText('People & business')).toBeTruthy();
+    expect(crumbs.querySelector('[aria-current="page"]')?.textContent).toBe('Team & Employment');
+    expect(within(n).getByRole('button', { name: 'Team & Employment' }).getAttribute('aria-current')).toBe('page');
   });
 
   it('opens the section named in the URL on load (refresh / direct link) and ignores unknown sections', async () => {
@@ -72,7 +75,7 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
     cleanup();
     window.history.replaceState({}, '', '/?nav=dealer-dashboard&section=not-a-section');
     renderIt();
-    expect(await screen.findByRole('heading', { level: 2, name: 'Dashboard' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 2, name: 'Dealer Command Centre' })).toBeTruthy();
   });
 
   it('browser Back and Forward move between sections', async () => {
@@ -84,14 +87,14 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
     act(() => { window.history.replaceState({}, '', '/?nav=dealer-dashboard&section=inventory'); window.dispatchEvent(new PopStateEvent('popstate')); });
     expect(await screen.findByRole('heading', { level: 2, name: 'Inventory' })).toBeTruthy();
     act(() => { window.history.replaceState({}, '', '/?nav=dealer-dashboard'); window.dispatchEvent(new PopStateEvent('popstate')); });
-    expect(await screen.findByRole('heading', { level: 2, name: 'Dashboard' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 2, name: 'Dealer Command Centre' })).toBeTruthy();
   });
 
   it('leaving the escrow section drops escrowId from the URL', async () => {
     window.history.replaceState({}, '', '/?nav=dealer-dashboard&section=escrow&escrowId=abc');
     renderIt();
     const n = await nav();
-    fireEvent.click(within(n).getByRole('button', { name: 'Team' }));
+    fireEvent.click(within(n).getByRole('button', { name: 'Team & Employment' }));
     expect(window.location.search).not.toContain('escrowId');
   });
 
@@ -100,7 +103,7 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
     const n = await nav();
     fireEvent.click(within(n).getByRole('button', { name: 'Finance' }));
     fireEvent.click(within(screen.getByRole('navigation', { name: 'Breadcrumb' })).getByRole('button', { name: /Dealer Hub/ }));
-    expect(await screen.findByRole('heading', { level: 2, name: 'Dashboard' })).toBeTruthy();
+    expect(await screen.findByRole('heading', { level: 2, name: 'Dealer Command Centre' })).toBeTruthy();
     expect(window.location.search).not.toContain('section=');
   });
 
@@ -167,7 +170,7 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
     expect(screen.queryByRole('button', { name: /Total Views/ })).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: /Total Leads/ }));
     expect(await screen.findByRole('heading', { level: 2, name: 'Leads' })).toBeTruthy();
-    fireEvent.click(within(await nav()).getByRole('button', { name: 'Overview' }));
+    fireEvent.click(within(await nav()).getByRole('button', { name: 'Dashboard' }));
     fireEvent.click(await screen.findByRole('button', { name: /Total Listings/ }));
     expect(await screen.findByRole('heading', { level: 2, name: 'Inventory' })).toBeTruthy();
   });

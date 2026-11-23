@@ -22,6 +22,10 @@ export const getReputation = () => api.get("/dealer-platform/reputation").then(r
 export const updateCampaign = (campaignId, body) => api.put(`/dealer-platform/marketing/${campaignId}`, body).then(r => r.data);
 export const getLeadActivities = (leadId) => api.get(`/dealer-platform/leads/${leadId}/activities`).then(r => r.data);
 export const addLeadNote = (leadId, note) => api.post(`/dealer-platform/leads/${leadId}/notes`, { note }).then(r => r.data);
+export const getLeadMessages = (leadId) => api.get(`/dealer-platform/leads/${leadId}/messages`).then(r => r.data);
+export const sendLeadMessage = (leadId, content, idempotencyKey) => api.post(`/dealer-platform/leads/${leadId}/messages`, { content }, { headers: { 'Idempotency-Key': idempotencyKey } }).then(r => r.data);
+export const getVehicleRequests = () => api.get('/dealer-platform/vehicle-requests').then(r => r.data);
+export const createVehicleRequest = (body) => api.post('/dealer-platform/vehicle-requests', body).then(r => r.data);
 export const createLeadTask = (leadId, body) => api.post(`/dealer-platform/leads/${leadId}/tasks`, body).then(r => r.data);
 export const inviteTeamMember = (body) => api.post('/dealer-platform/team/invite', body).then(r => r.data);
 export const updateTeamMember = (memberId, body) => api.put(`/dealer-platform/team/${memberId}`, body).then(r => r.data);

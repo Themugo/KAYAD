@@ -6,7 +6,7 @@ import { dealerOrgAccess } from "../middleware/dealerOrgAccess.js";
 import { dealerWorkspaceAccess, myWorkspaceHandler } from "../middleware/dealerWorkspace.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import upload, { handleUploadError, cleanupUploadsOnError } from "../middleware/upload.js"; // STAGE 5C.1
-import { uploadLimiter, createLimiter, stepUpLimiter, invitationLimiter } from "../middleware/rateLimiter.js";
+import { uploadLimiter, chatLimiter, createLimiter, stepUpLimiter, invitationLimiter } from "../middleware/rateLimiter.js";
 import { requireDealerVerification } from "../middleware/dealerVerification.js";
 import {
   // Dashboard
@@ -26,6 +26,10 @@ import {
   updateLead,
   addLeadNote,
   getLeadActivities,
+  getLeadMessages,
+  sendLeadMessage,
+  createVehicleRequest,
+  listVehicleRequests,
   createTask,
   // Pipeline
   getSalesPipeline,
@@ -110,6 +114,10 @@ router.get("/leads", protect, dealerWorkspaceAccess(["canChatBuyers"]), asyncHan
 router.put("/leads/:leadId", protect, dealerWorkspaceAccess(["canChatBuyers"]), asyncHandler(updateLead));
 router.get("/leads/:leadId/activities", protect, dealerWorkspaceAccess(["canChatBuyers"]), asyncHandler(getLeadActivities));
 router.post("/leads/:leadId/notes", protect, dealerWorkspaceAccess(["canChatBuyers"]), createLimiter, asyncHandler(addLeadNote));
+router.get("/leads/:leadId/messages", protect, dealerWorkspaceAccess(["canChatBuyers"]), asyncHandler(getLeadMessages));
+router.post("/leads/:leadId/messages", protect, dealerWorkspaceAccess(["canChatBuyers"]), chatLimiter, asyncHandler(sendLeadMessage));
+router.get("/vehicle-requests", protect, dealerWorkspaceAccess(["canListCars","canEditCars"]), asyncHandler(listVehicleRequests));
+router.post("/vehicle-requests", protect, dealerWorkspaceAccess(["canListCars","canEditCars"]), createLimiter, asyncHandler(createVehicleRequest));
 router.post("/leads/:leadId/tasks", protect, dealerWorkspaceAccess(["canChatBuyers"]), asyncHandler(createTask));
 
 // Sales Pipeline

@@ -355,6 +355,28 @@ export async function bulkUpdateListings(req, res) {
 // ever called it. Rebuilt around the real, already-fully-defined
 // `leads` table (found never actually queried by this controller at
 // all despite existing in the schema).
+/** Adds the buyer's name/e-mail and the vehicle title to leads (the table stores only ids). Best effort: on any failure the raw leads are returned. */
+async function withLeadPeople(leads) {
+  const list = Array.isArray(leads) ? leads : [];
+  if (!list.length) return list;
+  try {
+    const { getSupabase } = await import("../utils/supabase.js");
+    const sb = getSupabase();
+    const ids = (k) => [...new Set(list.map((l) => l[k]).filter((v) => typeof v === "string" && v))];
+    const [users, cars] = await Promise.all([
+      sb.from("users").select("id,name,email").in("id", ids("buyer")),
+      sb.from("cars").select("id,title,brand,model,year").in("id", ids("vehicle")),
+    ]);
+    const u = new Map((users.data || []).map((r) => [r.id, r]));
+    const c = new Map((cars.data || []).map((r) => [r.id, r]));
+    return list.map((l) => ({
+      ...l,
+      buyer: typeof l.buyer === "string" && u.has(l.buyer) ? { id: l.buyer, name: u.get(l.buyer).name, email: u.get(l.buyer).email } : l.buyer,
+      vehicle: typeof l.vehicle === "string" && c.has(l.vehicle) ? { id: l.vehicle, title: c.get(l.vehicle).title || [c.get(l.vehicle).year, c.get(l.vehicle).brand, c.get(l.vehicle).model].filter(Boolean).join(" ") } : l.vehicle,
+    }));
+  } catch { return list; }
+}
+
 export async function getLeads(req, res) {
   try {
     const { stage, page = 1, limit = 20 } = req.query;
@@ -362,7 +384,7 @@ export async function getLeads(req, res) {
     const all = await getDealerLeads(dealerId, stage ? { stage } : {});
     const pageNum = Math.max(1, Number(page) || 1);
     const limitNum = Math.min(100, Math.max(1, Number(limit) || 20));
-    const items = all.slice((pageNum - 1) * limitNum, pageNum * limitNum);
+    const items = await withLeadPeople(all.slice((pageNum - 1) * limitNum, pageNum * limitNum));
     const stats = { total: all.length, new: 0, contacted: 0, negotiating: 0, inspectionBooked: 0, reserved: 0, sold: 0, lost: 0 };
     for (const lead of all) if (Object.prototype.hasOwnProperty.call(stats, lead.stage)) stats[lead.stage]++;
     return res.json({ success: true, data: { items, pagination: { page: pageNum, limit: limitNum, total: all.length, pages: Math.ceil(all.length / limitNum) }, stats } });
@@ -379,7 +401,7 @@ export async function updateLead(req, res) {
     const updates = {};
     for (const field of ["isHot", "archived", "estimatedValue"]) if (req.body?.[field] !== undefined) updates[field] = req.body[field];
     if (Object.keys(updates).length) updated = await update("leads", lead.id, { ...updates, lastActivityAt: new Date().toISOString() });
-    return res.json({ success: true, data: updated });
+    return res.json({ success: true, data: (await withLeadPeople([updated]))[0] });
   } catch (err) { logError("Error updating lead:", err); return res.status(err.statusCode || 500).json({ success: false, message: err.statusCode ? err.message : "Failed to update lead" }); }
 }
 
@@ -399,6 +421,78 @@ export async function getLeadActivities(req, res) {
   if (String(lead.dealer) !== String(req.user.id)) return res.status(403).json({ success: false, message: "Not authorized to access this lead" });
   const rows = await findAll("lead_activities", { filters: { lead: lead.id }, orderBy: "createdAt", ascending: false, limit: 100 });
   return res.json({ success: true, data: { items: rows } });
+}
+
+// ---- Buyer conversation on a lead (dealer or delegated staff holding canChatBuyers) ----
+// The lead must belong to this dealership AND come from a chat; the chat id is taken from the lead, never from the request, so a
+// dealer can never read or write another dealership's conversation. Sending reuses the canonical chat logic (participant check,
+// idempotency, notification, lead activity).
+async function loadOwnChatLead(req, res) {
+  let lead = null;
+  try { lead = await getLeadById(req.params.leadId); } catch { lead = null; }
+  if (!lead) { res.status(404).json({ success: false, message: "Lead not found" }); return null; }
+  if (String(lead.dealer) !== String(req.user.id)) { res.status(404).json({ success: false, message: "Lead not found" }); return null; }
+  const chatId = lead.source === "chat" ? (lead.source_reference ?? lead.sourceReference ?? lead.referenceId ?? null) : null;
+  if (!chatId) { res.status(409).json({ success: false, code: "LEAD_HAS_NO_CONVERSATION", message: "This lead did not start as a chat, so there is no conversation to reply in." }); return null; }
+  return { lead, chatId };
+}
+
+export async function getLeadMessages(req, res) {
+  const ctx = await loadOwnChatLead(req, res);
+  if (!ctx) return undefined;
+  req.params.chatId = ctx.chatId;
+  const { getMessages: chatGetMessages } = await import("./chatController.js"); // loaded on use: keeps this module's import graph small
+  return chatGetMessages(req, res);
+}
+
+export async function sendLeadMessage(req, res) {
+  const ctx = await loadOwnChatLead(req, res);
+  if (!ctx) return undefined;
+  req.params.chatId = ctx.chatId;
+  if (req.actingMember) {
+    logAuditEvent({ action: "dealer_lead_reply_sent", actor: req.actingMember.id, actorRole: req.actingMember.role, actorName: req.actingMember.name, actorEmail: req.actingMember.email, target: ctx.lead.id, targetModel: "Lead", details: { onBehalfOf: req.user.id, membershipId: req.actingMember.membershipId || null }, ipAddress: req.ip, userAgent: req.get?.("user-agent"), requestId: req.id }).catch(() => {});
+  }
+  const { sendMessage: chatSendMessage } = await import("./chatController.js");
+  return chatSendMessage(req, res);
+}
+
+// ---- Vehicle-specific requests to KAYARD admin (feature / change requests), carried by the existing support-case system ----
+const VEHICLE_REQUEST_PREFIX = "[Vehicle request] ";
+const VEHICLE_REQUEST_TYPES = { feature: "Feature request", change: "Change request", correction: "Listing correction", other: "Other" };
+
+export async function createVehicleRequest(req, res) {
+  const vehicleId = String(req.body?.vehicleId || "").trim();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(vehicleId)) return res.status(400).json({ success: false, code: "VEHICLE_REQUIRED", message: "Choose one of your vehicles." });
+  const car = await findOne("cars", { id: vehicleId });
+  if (!car || String(car.dealer) !== String(req.user.id) || car.deleted_at || car.deletedAt) return res.status(404).json({ success: false, code: "VEHICLE_NOT_FOUND", message: "Vehicle not found in your inventory." });
+  const type = Object.prototype.hasOwnProperty.call(VEHICLE_REQUEST_TYPES, req.body?.type) ? req.body.type : "feature";
+  const title = String(req.body?.title || "").trim();
+  const details = String(req.body?.details || "").trim();
+  if (title.length < 3 || title.length > 120) return res.status(400).json({ success: false, code: "REQUEST_TITLE_INVALID", message: "Give the request a short title (3 to 120 characters)." });
+  if (details.length < 10) return res.status(400).json({ success: false, code: "REQUEST_DETAILS_REQUIRED", message: "Describe what you need in at least 10 characters." });
+  const by = req.actingMember ? `\n\nSubmitted by team member ${req.actingMember.name || req.actingMember.email} on behalf of the dealership.` : "";
+  const { createCase: createSupportCase } = await import("../services/support/supportCase.service.js");
+  const { SupportError } = await import("../services/support/supportPolicy.js");
+  try {
+    const out = await createSupportCase(req.user, {
+      category: "seller",
+      subject: `${VEHICLE_REQUEST_PREFIX}${VEHICLE_REQUEST_TYPES[type]}: ${title}`.slice(0, 160),
+      description: `Vehicle: ${car.title || [car.year, car.brand, car.model].filter(Boolean).join(" ")} (${vehicleId})\n\n${details}${by}`,
+      reference: { kind: "vehicle", id: vehicleId },
+      idempotencyKey: typeof req.body?.idempotencyKey === "string" ? req.body.idempotencyKey : null,
+    });
+    return res.status(201).json({ success: true, data: { request: out.case, vehicleLinked: out.referenceLinked, deduplicated: out.deduplicated, note: "KAYARD KE will review this. A request is not an approval, and nothing changes on your listing until you hear back." } });
+  } catch (e) {
+    if (e instanceof SupportError) return res.status(e.status || 400).json({ success: false, code: e.code, message: e.message });
+    throw e;
+  }
+}
+
+export async function listVehicleRequests(req, res) {
+  const { listOwnCases: listSupportCases } = await import("../services/support/supportCase.service.js");
+  const out = await listSupportCases(req.user, { limit: 100 });
+  const items = (out.cases || []).filter((c) => String(c.subject || "").startsWith(VEHICLE_REQUEST_PREFIX));
+  return res.json({ success: true, data: { items, total: items.length } });
 }
 
 export async function createTask(req, res) {

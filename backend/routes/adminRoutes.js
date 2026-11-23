@@ -593,7 +593,7 @@ router.post(
       action: "Dealer decision: approve-dealer",
       admin: req.user.name || req.user.email,
       adminId: req.user.id,
-      details: { outcome: "success", targetUserId: String(user._id), previousStatus: user.status, newStatus: "approved", ...(dealerOutcome?.reason ? { reason: dealerOutcome.reason } : {}) },
+      details: { outcome: "success", targetUserId: String(user._id), previousStatus: user.status, newStatus: "approved", ...(dealerOutcome?.reason ? { reason: dealerOutcome.reason } : {}), ...(dealerOutcome?.releasedListings ? { releasedListings: dealerOutcome.releasedListings } : {}) },
     });
 
     emitCommunication({
@@ -617,6 +617,7 @@ res.json({
       changed: true,
       message: "Seller approved",
       ...(dealerOutcome?.warnings?.length ? { warnings: dealerOutcome.warnings } : {}),
+      ...(dealerOutcome?.releasedListings ? { releasedListings: dealerOutcome.releasedListings } : {}),
       ...(legacySync ? { sellerCapabilityStatus: legacySync.status } : {}),
     });
   }),

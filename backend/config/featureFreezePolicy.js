@@ -27,7 +27,7 @@ export const FEATURE_FREEZES = Object.freeze({
   }),
   messaging: Object.freeze({
     field: "isMessagingActive", label: "Messaging System",
-    blocks: "Starting a chat and sending a chat message. Reading existing messages, marking seen and deleting a chat continue.",
+    blocks: "Starting a chat and sending a chat message (including a dealer or team member replying to a buyer from a lead). Reading existing messages, marking seen and deleting a chat continue.",
   }),
 });
 
@@ -58,6 +58,7 @@ const FREEZE_ROUTES = Object.freeze([
 
   ["POST", /^\/chat$/, "messaging", false],
   ["POST", new RegExp(`^/chat/${ID}/message$`), "messaging", false],
+  ["POST", new RegExp(`^/dealer-platform/leads/${ID}/messages$`), "messaging", false], // dealer / staff reply to a buyer enquiry: same messaging pause
 ]);
 
 /** -> { feature, providerCall } | null for requests that are not freezable. */

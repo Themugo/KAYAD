@@ -1,0 +1,129 @@
+{
+ "at": "2026-11-23T17:38:16.254Z",
+ "results": [
+  {
+   "name": "buyer enquiry started through the API",
+   "pass": true
+  },
+  {
+   "name": "buyer first message sent",
+   "pass": true
+  },
+  {
+   "name": "heading Dealer Command Centre",
+   "pass": true
+  },
+  {
+   "name": "hero text",
+   "pass": true
+  },
+  {
+   "name": "five sidebar groups in order",
+   "pass": true
+  },
+  {
+   "name": "top bar: brand, Dealer Account chip, search, identity",
+   "pass": true
+  },
+  {
+   "name": "Sign out and Help & support visible without scrolling",
+   "pass": true
+  },
+  {
+   "name": "Needs attention is honest (renders items or the empty message, no invented numbers)",
+   "pass": true
+  },
+  {
+   "name": "no horizontal overflow (desktop)",
+   "pass": true
+  },
+  {
+   "name": "sidebar collapses to icons, items still named for assistive tech",
+   "pass": true
+  },
+  {
+   "name": "Leads shows the buyer enquiry with a Reply action",
+   "pass": true
+  },
+  {
+   "name": "conversation shows the buyer message",
+   "pass": true
+  },
+  {
+   "name": "reply appears in the conversation",
+   "pass": true
+  },
+  {
+   "name": "database: reply stored as the dealership and lead moved to contacted",
+   "pass": true
+  },
+  {
+   "name": "database: exactly one lead for the conversation",
+   "pass": true
+  },
+  {
+   "name": "buyer sees the dealer reply",
+   "pass": true
+  },
+  {
+   "name": "every status row explains what it means",
+   "pass": true
+  },
+  {
+   "name": "request sent, listed as Received, and states it is not an approval",
+   "pass": true
+  },
+  {
+   "name": "database: support case linked to the vehicle and the dealership",
+   "pass": true
+  },
+  {
+   "name": "public marketplace shows the published vehicle",
+   "pass": true
+  },
+  {
+   "name": "public marketplace does NOT show the under-review or paused vehicles",
+   "pass": true
+  },
+  {
+   "name": "staff directory lists members with Staff ID",
+   "pass": true
+  },
+  {
+   "name": "invitation form states Basic Staff Access and has no role selector",
+   "pass": true
+  },
+  {
+   "name": "Add a vehicle form opens",
+   "pass": true
+  },
+  {
+   "name": "no horizontal overflow (tablet 820)",
+   "pass": true
+  },
+  {
+   "name": "no horizontal overflow (mobile 390)",
+   "pass": true
+  },
+  {
+   "name": "mobile drawer opens with all groups and Sign out reachable",
+   "pass": true
+  },
+  {
+   "name": "Escape closes the drawer",
+   "pass": true
+  },
+  {
+   "name": "sales agent reaches the dealership workspace",
+   "pass": true
+  },
+  {
+   "name": "viewer has no reply or request controls",
+   "pass": true
+  },
+  {
+   "name": "no uncaught page errors",
+   "pass": true
+  }
+ ]
+}
