@@ -1,5 +1,6 @@
-# Changed files versus origin baseline (not committed by Claude)
-Code: `backend/controllers/dealerPlatformController.js` (atomic claim, resend rollback, explicit 404, fingerprint logs) · `src/pages/dealer/DealerTeamInvite.jsx` (visible button, already-used state, clearer 404) · `src/pages/dealer/dashboard/DealerTeamPanel.tsx` (resend messages) · `backend/db/index.js` ($or operators, already on the release branch).
-Tests: `backend/tests/regression/dealerTeamInvitationLifecycle.test.js` (new, 13) · `dealerTeamLeastPrivilege.test.js` · `dbOrRangeOperators.test.js` · `src/__tests__/pages/dealer/DealerTeamInvite.test.tsx` (12) · `ci/db-journeys/17_team_invitation_lifecycle.mjs` (B5-B7) · `ci/browser/team-invitation.mjs` (new real-browser journey).
-Docs: everything under `docs/handover/PRODUCTION-READINESS-20261123/` (evidence includes browser screenshots).
-No migration, financial, or production file changed.
+# Changed files versus current origin/main (5bbf2843), not committed by Claude
+Modified (5): `backend/controllers/dealerPlatformController.js` (shared e-mail rule, coded 403 + masked hint, fingerprint log) · `src/pages/dealer/DealerTeamInvite.jsx` (wrong-account panel + sign-out-and-switch) · `backend/tests/regression/dealerTeamInvitationLifecycle.test.js` · `src/__tests__/pages/dealer/DealerTeamInvite.test.tsx` · `ci/browser/team-invitation.mjs`.
+New (3 code/test): `backend/utils/emailIdentity.js` · `backend/tests/regression/emailIdentity.test.js` · `backend/tests/regression/authIdentitySource.test.js`.
+Handover/evidence (13 modified or new): README, TEST-RESULTS, CHANGED-FILES, INVITATION-ACCEPTANCE-AUDIT, **MERGE-RECONCILIATION** (new), evidence logs and browser screenshots.
+Removed (4 duplicate documents whose content already lives in the renamed files): `CI-DB-JOURNEYS.md`, `DEPLOYMENT-TOPOLOGY.md`, `LISTING-RPC-COMPATIBILITY.md`, `LOGIN-ROOT-CAUSE.md`.
+No migration, workflow, financial, or production file changed.

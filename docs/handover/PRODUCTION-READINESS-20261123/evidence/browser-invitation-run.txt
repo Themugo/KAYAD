@@ -15,10 +15,17 @@ PASS owner Team page no longer shows a pending invitation for them and lists the
 PASS resend e-mails a NEW token
 PASS the OLD link explains that it was replaced by a newer e-mail
 PASS the NEWEST link is accepted
-PASS a different signed-in e-mail gets a clear 403 explanation
-PASS ...and the invitation is not consumed
+PASS Account B: clear wrong-account message naming the signed-in e-mail
+PASS ...with a masked hint of the invited address (not the full address, not the token)
+PASS ...server answered 403 and the invitation is still pending and unchanged
+PASS switch account: signed out and sent to sign-in carrying the same invitation (no loop)
+PASS Account A signs in and is returned to the same invitation
+PASS Account A accepts the same invitation
+PASS exactly one active membership, for Account A
+PASS no console errors on the wrong-account/switch flow (sanitised)
+PASS mobile 390px wrong-account page: switch button inside the viewport, no horizontal overflow
 PASS dashboard "Invitations waiting" equals the database pending count
 PASS mobile 390px: button visible, within the viewport, no horizontal overflow
 PASS no uncaught page errors during the whole journey
-browser journey: 22/22 passed
+browser journey: 29/29 passed
 exit=0

@@ -68,11 +68,39 @@
   "pass": true
  },
  {
-  "name": "a different signed-in e-mail gets a clear 403 explanation",
+  "name": "Account B: clear wrong-account message naming the signed-in e-mail",
   "pass": true
  },
  {
-  "name": "...and the invitation is not consumed",
+  "name": "...with a masked hint of the invited address (not the full address, not the token)",
+  "pass": true
+ },
+ {
+  "name": "...server answered 403 and the invitation is still pending and unchanged",
+  "pass": true
+ },
+ {
+  "name": "switch account: signed out and sent to sign-in carrying the same invitation (no loop)",
+  "pass": true
+ },
+ {
+  "name": "Account A signs in and is returned to the same invitation",
+  "pass": true
+ },
+ {
+  "name": "Account A accepts the same invitation",
+  "pass": true
+ },
+ {
+  "name": "exactly one active membership, for Account A",
+  "pass": true
+ },
+ {
+  "name": "no console errors on the wrong-account/switch flow (sanitised)",
+  "pass": true
+ },
+ {
+  "name": "mobile 390px wrong-account page: switch button inside the viewport, no horizontal overflow",
   "pass": true
  },
  {

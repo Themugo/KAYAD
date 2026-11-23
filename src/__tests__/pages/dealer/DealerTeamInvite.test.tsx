@@ -2,15 +2,16 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-const m = vi.hoisted(() => ({ accept: vi.fn(), ws: vi.fn() }));
+const m = vi.hoisted(() => ({ accept: vi.fn(), ws: vi.fn(), logout: vi.fn(), user: { email: 'someone.else@example.com' } as any }));
 vi.mock('../../../services/dealerPlatformApi', () => ({ acceptTeamInvite: m.accept, getMyWorkspace: m.ws }));
 vi.mock('../../../features/DealershipWorkspace/useMyDealership', () => ({ resetMyDealershipCache: vi.fn() }));
+vi.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: m.user, logout: m.logout }) }));
 import DealerTeamInvite from '../../../pages/dealer/DealerTeamInvite';
 import { buildAuthPath, safeNextPath } from '../../../utils/authIntent';
 
 const TOKEN = 'a'.repeat(64);
 const at = (q: string) => window.history.pushState({}, '', `/dealer/setup${q}`);
-beforeEach(() => { vi.clearAllMocks(); m.ws.mockResolvedValue({ membership: null }); });
+beforeEach(() => { vi.clearAllMocks(); m.ws.mockResolvedValue({ membership: null }); m.logout.mockResolvedValue({ ok: true }); m.user = { email: 'someone.else@example.com' }; });
 
 describe('Team invitation landing page', () => {
   it('an incomplete link is refused without calling the server', () => {
@@ -77,5 +78,38 @@ describe('Team invitation landing page', () => {
     render(<DealerTeamInvite />);
     await userEvent.click(screen.getByRole('button', { name: 'Accept invitation' }));
     expect(await screen.findByRole('alert')).toHaveTextContent(/replaced by a newer e-mail/i);
+  });
+  it('wrong account: explains whose e-mail is signed in, keeps the invitation untouched and offers a switch-account path', async () => {
+    at(`?invite=${TOKEN}`);
+    m.accept.mockRejectedValue({ response: { status: 403, data: { code: 'INVITATION_EMAIL_MISMATCH', invitedEmailHint: 'm***7@gmail.com' } } });
+    render(<DealerTeamInvite />);
+    await userEvent.click(screen.getByRole('button', { name: 'Accept invitation' }));
+    const box = await screen.findByTestId('wrong-account');
+    expect(box).toHaveTextContent('someone.else@example.com');
+    expect(box).toHaveTextContent('m***7@gmail.com');
+    expect(box.textContent).not.toContain(TOKEN);
+    expect(m.accept).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('switch-account')).toBeEnabled();
+  });
+  it('switch account signs out first and only then goes to sign-in carrying the same invitation', async () => {
+    at(`?invite=${TOKEN}`);
+    m.accept.mockRejectedValue({ response: { status: 403, data: { code: 'INVITATION_EMAIL_MISMATCH', invitedEmailHint: '' } } });
+    const assign = vi.fn(); const loc = window.location;
+    Object.defineProperty(window, 'location', { configurable: true, value: { ...loc, assign, pathname: '/dealer/setup', search: `?invite=${TOKEN}`, hash: '' } });
+    render(<DealerTeamInvite />);
+    await userEvent.click(screen.getByRole('button', { name: 'Accept invitation' }));
+    await userEvent.click(await screen.findByTestId('switch-account'));
+    expect(m.logout).toHaveBeenCalledTimes(1);
+    expect(assign).toHaveBeenCalledWith(`/login?next=${encodeURIComponent(`/dealer/setup?invite=${TOKEN}`)}`);
+    Object.defineProperty(window, 'location', { configurable: true, value: loc });
+  });
+  it('a failed sign-out is reported and does not navigate', async () => {
+    at(`?invite=${TOKEN}`);
+    m.accept.mockRejectedValue({ response: { status: 403, data: { code: 'INVITATION_EMAIL_MISMATCH' } } });
+    m.logout.mockResolvedValue({ ok: false, message: 'Sign-out could not be confirmed' });
+    render(<DealerTeamInvite />);
+    await userEvent.click(screen.getByRole('button', { name: 'Accept invitation' }));
+    await userEvent.click(await screen.findByTestId('switch-account'));
+    expect(await screen.findByRole('alert')).toHaveTextContent(/could not be confirmed/i);
   });
 });

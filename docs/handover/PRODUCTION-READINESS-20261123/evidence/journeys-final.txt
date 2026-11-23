@@ -1,8 +1,8 @@
 NOTICE:  database "kayad_ci" does not exist, skipping
-psql:/home/claude/p11/ci/db-journeys/bootstrap.sql:10: NOTICE:  role "authenticator" has already been granted membership in role "anon" by role "postgres"
-psql:/home/claude/p11/ci/db-journeys/bootstrap.sql:10: NOTICE:  role "authenticator" has already been granted membership in role "authenticated" by role "postgres"
-psql:/home/claude/p11/ci/db-journeys/bootstrap.sql:10: NOTICE:  role "authenticator" has already been granted membership in role "service_role" by role "postgres"
-psql:/home/claude/p11/ci/db-journeys/bootstrap.sql:23: WARNING:  wal_level is insufficient to publish logical changes
+psql:/home/claude/p12/ci/db-journeys/bootstrap.sql:10: NOTICE:  role "authenticator" has already been granted membership in role "anon" by role "postgres"
+psql:/home/claude/p12/ci/db-journeys/bootstrap.sql:10: NOTICE:  role "authenticator" has already been granted membership in role "authenticated" by role "postgres"
+psql:/home/claude/p12/ci/db-journeys/bootstrap.sql:10: NOTICE:  role "authenticator" has already been granted membership in role "service_role" by role "postgres"
+psql:/home/claude/p12/ci/db-journeys/bootstrap.sql:23: WARNING:  wal_level is insufficient to publish logical changes
 HINT:  Set wal_level to "logical" before creating subscriptions.
 migrations applied: 211/211
 legacy-j1_registration_idempotency exit=0 fails=0
