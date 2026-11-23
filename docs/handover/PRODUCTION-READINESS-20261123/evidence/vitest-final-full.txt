@@ -1,0 +1,11 @@
+
+ RUN  v4.1.11 /home/claude/p11
+
+Not implemented: navigation to another Document
+
+ Test Files  227 passed (227)
+      Tests  1926 passed | 1 skipped (1927)
+   Start at  11:33:22
+   Duration  395.38s (transform 10.38s, setup 25.31s, import 39.36s, tests 146.96s, environment 151.03s)
+
+exit=0

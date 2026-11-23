@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Button } from '../../components/ui/Button';
 import { acceptTeamInvite } from '../../services/dealerPlatformApi';
 import { resetMyDealershipCache } from '../../features/DealershipWorkspace/useMyDealership';
 
@@ -48,15 +49,16 @@ export default function DealerTeamInvite() {
           <>
             <p style={{ marginBottom: 16 }}>You have been invited to join a dealership team on KAYARD KE. Accepting adds you to their team with the role they chose for you.</p>
             {state.phase === 'error' && <p role="alert" style={{ color: 'var(--danger, #b42318)', marginBottom: 12 }}>{state.message}</p>}
-            <button type="button" className="btn btn-primary" onClick={accept} disabled={state.phase === 'working'}>
+            {/* Shared design-system Button: the legacy `.btn` classes are only styled inside the admin shell, which left this control looking like plain text. */}
+            <Button type="button" variant="primary" size="lg" fullWidth onClick={accept} disabled={state.phase === 'working'} data-testid="accept-invitation">
               {state.phase === 'working' ? 'Accepting…' : state.phase === 'error' ? 'Try again' : 'Accept invitation'}
-            </button>
+            </Button>
           </>
         )}
         {state.phase === 'done' && (
           <div role="status">
             <p style={{ marginBottom: 12 }}><strong>You have joined the team.</strong> Your access follows the role the dealership gave you.</p>
-            <a className="btn btn-primary" href="/?nav=dealership-workspace">Open the dealership workspace</a>
+            <a href="/?nav=dealership-workspace" data-testid="open-workspace" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: 48, padding: '0 20px', borderRadius: 'var(--radius-md, 8px)', background: 'var(--color-primary, #0B2A4A)', color: '#fff', fontWeight: 600, textDecoration: 'none' }}>Open the dealership workspace</a>
           </div>
         )}
       </div>

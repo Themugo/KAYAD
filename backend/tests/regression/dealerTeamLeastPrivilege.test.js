@@ -32,6 +32,8 @@ const dbMock = {
   findOne: jest.fn(async (t, f) => (t === "dealer_teams" ? Object.values(store.teams).find((r) => matches(r, f)) || null : null)),
   create: jest.fn(async (t, d) => { const row = { id: `t${Object.keys(store.teams).length + 1}`, ...d }; store.teams[row.id] = row; writes.push(["create", t, row.id]); return { ...row }; }),
   update: jest.fn(async (t, id, d) => { writes.push(["update", t, id, d]); Object.assign(store.teams[id], d); return { ...store.teams[id] }; }),
+  // compare-and-set like PostgREST: only rows still matching every filter are changed and returned
+  updateMany: jest.fn(async (t, f, d) => { const hit = Object.values(store.teams).filter((r) => matches(r, f)); hit.forEach((r) => { writes.push(["updateMany", t, r.id, d]); Object.assign(r, d); }); return hit.map((r) => ({ ...r })); }),
 };
 
 jest.unstable_mockModule("../../models/User.js", () => ({ default: userModel }));
@@ -175,6 +177,16 @@ describe("invitation lifecycle: scoped, expiring, single-use, replay-safe", () =
   test("replay of the same token fails (404), even by the same user", async () => {
     await accept(invitee);
     expect((await accept(invitee)).statusCode).toBe(404);
+  });
+  test("two simultaneous accepts of one token: exactly one wins, no duplicate membership", async () => {
+    const results = await Promise.all([accept(invitee), accept(invitee)]);
+    expect(results.map((r) => r.statusCode).sort()).toEqual([200, 404]);
+    expect(Object.values(store.teams).filter((r) => r.member === "uN" && r.dealer === D1 && r.status === "active")).toHaveLength(1);
+  });
+  test("the claim is conditional on the pending status and token hash (never a blind update by id)", async () => {
+    await accept(invitee);
+    const call_ = dbMock.updateMany.mock.calls.at(-1);
+    expect(call_[1]).toMatchObject({ id: "inv", status: "invited", inviteTokenHash: hash });
   });
   test("a different authenticated account cannot use someone else's token (403) and the invite stays pending", async () => {
     expect((await accept({ id: "uX", role: "user", email: "attacker@x.test" })).statusCode).toBe(403);
