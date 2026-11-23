@@ -110,7 +110,7 @@ export default function CommandCentrePanel({ data, loading, unavailable, onOpen,
         <Section id="cc-business" title="Business overview" icon={Car}>
           <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 xl:grid-cols-4">
             {listings && <><Tile testId="tile-active" label="Active listings" value={listings.active} onClick={() => onOpen('inventory')} />
-              <Tile testId="tile-pending" label="Under review" value={listings.pendingApproval} onClick={() => onOpen('inventory')} />
+              <Tile testId="tile-pending" label="On hold" value={listings.pendingApproval} onClick={() => onOpen('inventory')} />
               <Tile testId="tile-draft" label="Draft listings" value={listings.draft} onClick={() => onOpen('inventory')} />
               <Tile testId="tile-sold" label="Sold vehicles" value={listings.sold} onClick={() => onOpen('inventory')} /></>}
             {leads && <><Tile testId="tile-enquiries" label="New enquiries" value={leads.newEnquiries} onClick={() => onOpen('leads')} />

@@ -62,7 +62,7 @@ const bm = await buyer.raw(`/api/chat/${chatId}/messages`); ok('buyer sees the d
 // ---- inventory: hints + vehicle request
 await go(O.p, '&section=inventory');
 const hints = await O.p.getByTestId('inventory-status-hint').allInnerTexts();
-ok('every status row explains what it means', hints.length >= 3 && hints.some((h) => /Under review/.test(h)) && hints.some((h) => /Visible to buyers/.test(h)) && hints.some((h) => /Republish/.test(h)), hints);
+ok('every status row explains what it means', hints.length >= 3 && hints.some((h) => /On hold/.test(h)) && hints.some((h) => /Visible to buyers/.test(h)) && hints.some((h) => /Republish/.test(h)), hints);
 await O.p.screenshot({ path: `${OUT}/04-inventory-status.png`, fullPage: false });
 await O.p.getByText(/Request something for a vehicle/).first().click(); await O.p.waitForTimeout(600);
 const vr = O.p.getByTestId('vehicle-requests');
