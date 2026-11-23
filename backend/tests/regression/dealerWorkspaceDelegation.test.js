@@ -79,7 +79,7 @@ describe("my-workspace entry data", () => {
   test("a member sees the dealership's public name, role and granted permissions only", async () => {
     teams.push({ id: "t1", dealer: DEALER, member: M, status: "active", role: "sales_agent", permissions: { canListCars: true, canDeleteCars: false } });
     const b = await call({ ...member });
-    expect(b.data.membership).toEqual({ dealershipName: "Prime Motors Ltd", teamRole: "sales_agent", permissions: ["canListCars"] });
+    expect(b.data.membership).toEqual({ dealerId: DEALER, dealershipName: "Prime Motors Ltd", teamRole: "sales_agent", permissions: ["canListCars"] });
     expect(JSON.stringify(b)).not.toMatch(/d@x\.test|email/);
   });
   test("no membership, a fired member or the dealer owner get null", async () => {

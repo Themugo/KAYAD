@@ -1,0 +1,56 @@
+PASS A1 placeholder function: registration answers 503 DATABASE_MIGRATION_REQUIRED (not a retry-forever 500)
+PASS A2 the browser-visible message leaks no internals
+PASS A3 nothing was persisted (no users, no credential rows, no deliveries)
+PASS A4 after applying the restore migration (disposable DB only) registration succeeds
+PASS A5 migration is idempotent and registration works without private_seller_capabilities
+PASS A6 function privileges: service_role may call, anon and authenticated may not
+PASS B1 register -> 201 with a personal (role=user) account
+PASS B2 the response does not claim the e-mail was delivered
+PASS B3 account is unverified and credential row exists (no orphan)
+PASS B4 provider (stub) received the verification e-mail with a 64-hex link on FRONTEND_URL
+PASS B5 only a hash of the token is stored; the raw token is not in the database
+PASS B6 delivery ledger says "sent" (provider accepted) - never "delivered" without a provider webhook
+PASS B7 login BEFORE verification is refused (403) with an actionable message
+PASS B8 invalid verification link -> 400 generic message
+PASS B9 valid link verifies the account
+PASS B11 the same link cannot be replayed (single use)
+PASS B12 login AFTER verification succeeds
+PASS B13 registration stayed responsive (< 3 s) while delivery is asynchronous
+PASS C1 missing fields -> 400
+PASS C2 weak password -> 400
+PASS C3 duplicate of a VERIFIED account -> 409
+PASS C4 existing UNVERIFIED account, different attempt -> 409 (no second account, no hijack)
+PASS C5 retry of the SAME attempt (lost response) -> original success, one account
+PASS C6 retired individual_seller role -> personal account (unified architecture intact)
+PASS C7 dealer registration -> pending dealer identity, separate verification
+PASS C8 dealer without business name -> 400
+PASS D1 expired link -> 400 and the account stays unverified
+PASS D2 resend answers the same generic 202
+PASS D3 resend delivered a NEW link (provider accepted) and the old one is not reused
+PASS D4 the new link verifies
+PASS D5 resend for an unknown or already verified address: identical generic response, and no e-mail sent
+PASS D6 resend within the cooldown does not send duplicate verification e-mails
+PASS E1 provider failing: registration still succeeds quickly (account kept, no rollback)
+PASS E2 the failure is OBSERVABLE: delivery ledger records failed + last_error (never "sent")
+PASS E3 login is refused until verified (no false "verified" state)
+PASS E4 after the provider recovers, resend delivers a working link
+PASS E5 recovered link verifies and the person can log in
+PASS E6 failed resend leaves the stored token untouched, so the earlier link still works
+PASS F1 database failure while verifying -> 500, account still unverified
+PASS F2 the verification token was RESTORED (not burned by the failed attempt)
+PASS F3 retry with the SAME link succeeds once the database recovers
+PASS G1 forgot-password: identical 200 for known and unknown addresses (no enumeration)
+PASS G2 reset e-mail carries a 64-hex link on FRONTEND_URL; the raw token is not stored
+PASS G3 no reset e-mail for an unknown address
+PASS G4 weak new password -> 400 and the token stays usable
+PASS G5 invalid reset token -> 400
+PASS G6 valid token resets the password
+PASS G7 old password refused, new password accepted
+PASS G8 the reset link cannot be replayed
+PASS G9 expired reset link -> 400
+PASS G10 unverified accounts can still start recovery without becoming verified
+PASS H1 no raw verification/reset token and no password appears in the backend log
+PASS H2 the provider key never appears in the response bodies or ledger metadata
+PASS H3 verification/reset e-mail bodies are not persisted in the delivery ledger
+
+20_registration_email_lifecycle: 54/54 passed

@@ -47,7 +47,7 @@ jest.unstable_mockModule("../../services/leadService.js", () => ({ getDealerLead
 jest.unstable_mockModule("../../db/index.js", () => dbMock);
 jest.unstable_mockModule("../../services/auditService.js", () => ({ logAuditEvent: jest.fn(async (e) => { audit.push(e); }) }));
 jest.unstable_mockModule("../../services/onboardingPolicy.service.js", () => ({ sellerMayPublishDirectly: jest.fn(), PUBLICATION_REVIEW_REQUIRED: "review" }));
-jest.unstable_mockModule("../../services/email.service.js", () => ({ sendTeamInviteEmail: jest.fn(async () => {}) }));
+jest.unstable_mockModule("../../services/email.service.js", () => ({ sendTeamInviteEmail: jest.fn(async () => {}), sendTeamAcceptedEmail: jest.fn(async () => ({ success: true })) }));
 jest.unstable_mockModule("../../middleware/dealerOrgAccess.js", () => ({
   DEALER_TEAM_PERMISSIONS: ["canListCars", "canEditCars", "canDeleteCars", "canViewEarnings", "canManageTeam", "canApproveDeals", "canChatBuyers", "canEditSettings"],
 }));
@@ -154,10 +154,10 @@ describe("invitation lifecycle: scoped, expiring, single-use, replay-safe", () =
   beforeEach(() => { store.teams.inv = { id: "inv", dealer: D1, member: null, inviteEmail: "new@amani.test", role: "viewer", status: "invited", permissions: {}, inviteTokenHash: hash, inviteExpiresAt: new Date(Date.now() + 86400000).toISOString() }; });
   const accept = (user, t = token) => call(ctrl.acceptTeamInvite, { user, body: { token: t } });
 
-  test("the right invitee accepts once; the token is cleared and the row joins exactly that dealership", async () => {
+  test("the right invitee accepts once; the row joins exactly that dealership and the spent link keeps no power", async () => {
     const r = await accept(invitee);
     expect(r.statusCode).toBe(200);
-    expect(store.teams.inv).toMatchObject({ status: "active", member: "uN", dealer: D1, inviteTokenHash: null });
+    expect(store.teams.inv).toMatchObject({ status: "active", member: "uN", dealer: D1, inviteExpiresAt: null }); // the hash stays so the spent link can say "already accepted"; only status "invited" can ever be claimed
     expect(JSON.stringify(r.body)).not.toMatch(/inviteTokenHash|SECRET/);
   });
   test("a dealer (business) or staff account can never accept a membership; the invite stays pending", async () => {
@@ -174,13 +174,20 @@ describe("invitation lifecycle: scoped, expiring, single-use, replay-safe", () =
     expect(u.role).toBe("user");
     expect(writes.some((w) => w[0] === "User.update")).toBe(false);
   });
-  test("replay of the same token fails (404), even by the same user", async () => {
+  test("replay of the same token fails (409 already accepted), even by the same user", async () => {
     await accept(invitee);
-    expect((await accept(invitee)).statusCode).toBe(404);
+    const again = await accept(invitee);
+    expect([again.statusCode, again.body.code]).toEqual([409, "INVITATION_ALREADY_ACCEPTED"]);
+  });
+  test("a spent link can never re-claim: another account holding it is refused and the membership is untouched", async () => {
+    await accept(invitee);
+    const other = await accept({ id: "uZ", role: "user", email: "new@amani.test" });
+    expect(other.statusCode).toBe(409);
+    expect(store.teams.inv).toMatchObject({ status: "active", member: "uN" });
   });
   test("two simultaneous accepts of one token: exactly one wins, no duplicate membership", async () => {
     const results = await Promise.all([accept(invitee), accept(invitee)]);
-    expect(results.map((r) => r.statusCode).sort()).toEqual([200, 404]);
+    expect(results.map((r) => r.statusCode).sort()).toEqual([200, 409]);
     expect(Object.values(store.teams).filter((r) => r.member === "uN" && r.dealer === D1 && r.status === "active")).toHaveLength(1);
   });
   test("the claim is conditional on the pending status and token hash (never a blind update by id)", async () => {
@@ -200,12 +207,14 @@ describe("invitation lifecycle: scoped, expiring, single-use, replay-safe", () =
   test("malformed or unknown tokens are refused; a removed invitation cannot be accepted", async () => {
     expect((await accept(invitee, "short")).statusCode).toBe(400);
     expect((await accept(invitee, "b".repeat(64))).statusCode).toBe(404);
-    store.teams.inv.status = "removed"; store.teams.inv.inviteTokenHash = null;
+    store.teams.inv.status = "removed"; store.teams.inv.inviteTokenHash = null; // hash gone (older rows / removed active members): unknown link
     expect((await accept(invitee)).statusCode).toBe(404);
   });
-  test("removing a pending invitation revokes its token", async () => {
+  test("removing a pending invitation revokes its token: the link is refused as CANCELLED (410) and nothing is claimed", async () => {
     await as("owner", ctrl.removeTeamMember, { params: { memberId: "inv" } });
-    expect(store.teams.inv.inviteTokenHash).toBeNull();
-    expect((await accept(invitee)).statusCode).toBe(404);
+    expect(store.teams.inv.status).toBe("removed");
+    const r = await accept(invitee);
+    expect([r.statusCode, r.body.code]).toEqual([410, "INVITATION_CANCELLED"]);
+    expect(store.teams.inv).toMatchObject({ status: "removed", member: null });
   });
 });

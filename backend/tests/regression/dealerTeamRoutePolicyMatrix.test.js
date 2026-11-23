@@ -26,8 +26,8 @@ beforeEach(() => { rows = []; dbError = null; });
 describe("dealer team route -> policy matrix (source)", () => {
   const src = fs.readFileSync(new URL("../../routes/dealerPlatformRoutes.js", import.meta.url), "utf8");
   const teamLines = src.split("\n").filter((l) => /router\.(get|post|put|delete)\("\/team/.test(l));
-  test("exactly ten team routes (members, resend, roles), each with protect and the documented policy", () => {
-    expect(teamLines).toHaveLength(10);
+  test("exactly nineteen team routes (members, detail, employment, resend, roles, staff code, own profile, invitation preview, accept); every one is protected except the read-only invitation preview", () => {
+    expect(teamLines).toHaveLength(19);
     const policy = Object.fromEntries(teamLines.map((l) => [l.match(/router\.(\w+)\("([^"]+)"/).slice(1, 3).join(" "), l]));
     expect(policy["get /team"]).toMatch(/protect, dealerOrgAccess\("canManageTeam"\)/); // Phase 14.7: roster exposes member names/emails -> same permission as managing
     expect(policy["post /team/invite"]).toMatch(/dealerOrgAccess\("canManageTeam"\)/);
@@ -35,8 +35,20 @@ describe("dealer team route -> policy matrix (source)", () => {
     expect(policy["delete /team/:memberId"]).toMatch(/dealerOrgAccess\("canManageTeam"\)/);
     // team roles + resend (added with custom roles): same permission as managing the team; owner-only editing is enforced in the controller
     for (const k of ["post /team/:memberId/resend", "get /team/roles", "post /team/roles", "put /team/roles/:roleKey", "delete /team/roles/:roleKey"]) expect(policy[k]).toMatch(/protect, dealerOrgAccess\("canManageTeam"\)/);
-    expect(policy["post /team/accept"]).toMatch(/protect, asyncHandler\(acceptTeamInvite\)/); // invitee is not yet a member: identity-only by design
-    for (const l of teamLines) expect(l).toMatch(/protect/);
+    // Employment (v6): management routes need canManageTeam; the employee self-service routes need only an ACTIVE membership (no permission).
+    for (const k of ["get /team/employment-events", "get /team/staff-code", "put /team/staff-code", "get /team/:memberId", "post /team/:memberId/employment", "put /team/:memberId/business-email"]) expect(policy[k]).toMatch(/protect, dealerOrgAccess\("canManageTeam"\)/);
+    expect(policy["get /team/me"]).toMatch(/protect, dealerOrgAccess\(\), asyncHandler\(getMyStaffProfile\)/);
+    expect(policy["put /team/me"]).toMatch(/protect, dealerOrgAccess\(\), createLimiter, asyncHandler\(updateMyStaffProfile\)/);
+    // fixed paths must be registered before the :memberId routes, or "me" would be read as a member id
+    const order = teamLines.map((l) => l.match(/router\.(\w+)\("([^"]+)"/).slice(1, 3).join(" "));
+    expect(order.indexOf("get /team/me")).toBeLessThan(order.indexOf("get /team/:memberId"));
+    expect(order.indexOf("put /team/me")).toBeLessThan(order.indexOf("put /team/:memberId"));
+    expect(order.indexOf("put /team/staff-code")).toBeLessThan(order.indexOf("put /team/:memberId"));
+    expect(policy["post /team/accept"]).toMatch(/protect, invitationLimiter, asyncHandler\(acceptTeamInvite\)/); // invitee is not yet a member: identity-only by design
+    // The ONLY public team route: a read-only preview of an invitation link for its holder (POST so the token stays out of URLs/logs), IP rate limited.
+    expect(policy["post /team/invitation/preview"]).toMatch(/^router\.post\("\/team\/invitation\/preview", invitationLimiter, asyncHandler\(previewTeamInvitation\)\);$/);
+    expect(teamLines.filter((l) => !/protect/.test(l))).toHaveLength(1);
+    expect(policy["post /team/invite"]).toMatch(/createLimiter/); // invitation creation is rate limited per account
   });
   test("permission catalogue is the single existing list", () => {
     expect([...DEALER_TEAM_PERMISSIONS].sort()).toEqual(["canApproveDeals", "canChatBuyers", "canDeleteCars", "canEditCars", "canEditSettings", "canListCars", "canManageTeam", "canViewEarnings"]);

@@ -100,7 +100,7 @@ jest.unstable_mockModule("../../services/onboardingPolicy.service.js", () => ({
   sellerMayPublishDirectly: jest.fn(() => false), PUBLICATION_REVIEW_REQUIRED: "review", getOnboardingPolicy: jest.fn(async () => ({ source: "default", policy: { dealerOnboardingMode: "self_onboarding" } })),
 }));
 
-const PLATFORM_FNS = ["getDealerDashboard", "getCommandCentre", "getDealerProfile", "updateDealerProfile", "getInventory", "createListing", "updateListing", "deleteListing", "bulkUpdateListings", "getLeads", "updateLead", "addLeadNote", "getLeadActivities", "createTask", "getSalesPipeline", "getMarketingCampaigns", "createCampaign", "updateCampaign", "getDealerAnalytics", "getAIRecommendations", "getTeamMembers", "inviteTeamMember", "resendTeamInvite", "getTeamRoles", "createTeamRole", "updateTeamRole", "deleteTeamRole", "updateTeamMember", "removeTeamMember", "acceptTeamInvite", "getSubscription", "askDealerCopilot", "getCustomers", "getCustomerTimeline", "getAuctionInventory", "getFinanceApplications", "getInspectionOrders", "getReputation"];
+const PLATFORM_FNS = ["getDealerDashboard", "getCommandCentre", "getDealerProfile", "updateDealerProfile", "getInventory", "createListing", "updateListing", "deleteListing", "bulkUpdateListings", "getLeads", "updateLead", "addLeadNote", "getLeadActivities", "createTask", "getSalesPipeline", "getMarketingCampaigns", "createCampaign", "updateCampaign", "getDealerAnalytics", "getAIRecommendations", "getTeamMembers", "inviteTeamMember", "resendTeamInvite", "getTeamRoles", "createTeamRole", "updateTeamRole", "deleteTeamRole", "updateTeamMember", "removeTeamMember", "acceptTeamInvite", "previewTeamInvitation", "getTeamMemberDetail", "getEmploymentRecords", "applyEmploymentAction", "setMemberBusinessEmail", "getMyStaffProfile", "updateMyStaffProfile", "getStaffCodeSettings", "putStaffCodeSettings", "getSubscription", "askDealerCopilot", "getCustomers", "getCustomerTimeline", "getAuctionInventory", "getFinanceApplications", "getInspectionOrders", "getReputation"];
 jest.unstable_mockModule("../../controllers/dealerPlatformController.js", () => Object.fromEntries(PLATFORM_FNS.map((n) => [n, stub(n)])));
 
 const qualityCalls = [];
@@ -194,6 +194,11 @@ describe("Workstream A — legacy /api/dealer/* admits no private seller or buye
     expect(passedGuard(await call("GET", "/api/dealer/cars", S_PENDING))).toBe(true);
   });
   test("anonymous → 401", async () => { expect((await call("GET", "/api/dealer/team", null)).status).toBe(401); });
+  // Invitation-first hardening: the legacy owner routes could activate a pending invitation (status) or set free-form roles without the invitee accepting.
+  test.each([["PATCH", { status: "active", role: "manager" }], ["DELETE", null]])("dealer owner: legacy %s /api/dealer/team/:id is retired (410), not a way to activate or alter members", async (m, b) => {
+    const r = await call(m, `/api/dealer/team/${NOBODY}`, D1, b);
+    expect(r.status).toBe(410);
+  });
   test.each(rows3([["GET", "/api/dealer/team"], ["GET", "/api/dealer/trade-listings"], ["GET", "/api/dealer/earnings"]]))("dealer owner keeps %s %s", async (m, p) => {
     expect(passedGuard(await call(m, p, D1))).toBe(true);
   });

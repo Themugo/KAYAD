@@ -1,0 +1,58 @@
+PASS       J1 Dealer registration :: user row dealer|pending|1 (role|status|dealer rows)
+PASS J1 Dealer registration
+BLOCKED    J2 Email verification :: The verification link is sent by the mail provider; the harness marks email_verified directly in the disposable DB. No provider is available, so the mail round trip is not verified here.
+PASS       J3 Business information submission :: PUT 200 {"success":true,"message":"Dealer onboarding completed and verification submitted.","dealer":{"id":"54e81e21-13b0-4716-b / GET 200
+PASS J3 Business information submission
+NOT TESTED J4 Document upload :: No paperwork requirements are configured in the disposable DB (checklist is empty), and the document store is an external provider. The upload path was not exercised.
+PASS       J5 Pending approval :: dealers.approved=f; create-listing as pending dealer -> 201 
+PASS J5 Pending approval
+NOT TESTED J6 Approval, rejection and resubmission :: Admin dealer-review endpoints were not scripted in this suite; approval is set directly in the disposable DB for the other journeys.
+PASS       J7 Create vehicle listing :: POST /api/cars -> 201
+PASS J7 Create vehicle listing
+PASS       J8 Save draft :: draft stored; inventory read 200; visible to owner: true; hidden from public: 404
+PASS J8 Save draft
+PASS       J9 Edit eligible listing :: PUT /api/cars/:id -> 200 
+PASS J9 Edit eligible listing
+PASS       J10 Upload and manage vehicle photographs :: upload 200 (images now 2); reorder 200; cover 200; delete 200. Provider is the loopback Cloudinary stub, NOT real Cloudinary.
+PASS J10 Upload and manage vehicle photographs
+PASS       J11 Publish listing :: publish -> 200; detail for the public 200
+PASS J11 Publish listing
+PASS       J12 Pause listing :: pause -> 200; public detail now 404
+PASS J12 Pause listing
+PASS       J13 Republish listing :: republish -> 200; public detail 200
+PASS J13 Republish listing
+PASS       J14 Mark sold :: mark-sold -> 200; exactly one sale record
+PASS J14 Mark sold
+PASS       J15 Bulk status changes :: bulk pause (duplicate id collapsed) -> 200 updated=2
+PASS J15 Bulk status changes
+PASS       J16 Prevent editing or deleting sold listings :: edit sold -> 409 LISTING_SOLD_READ_ONLY; delete sold -> 409 LISTING_DELETE_BLOCKED; price unchanged
+PASS J16 Prevent editing or deleting sold listings
+PASS       J17 Receive buyer enquiry :: lead row seeded in the DB (the buyer-side enquiry endpoint was not scripted) and returned by GET /dealer-platform/leads -> 200
+PASS J17 Receive buyer enquiry
+PASS       J18 Respond to enquiry :: note 201; stage update 200; stored activity actor|type = db1d3090-a4d3-4600-b6ad-d79bced7ae41|dealer
+PASS J18 Respond to enquiry
+PASS-BY-REFERENCE J19 Convert an enquiry into an eligible transaction :: Accepted offer -> settlement -> payment is exercised end to end by journey 05_offer_payment (simulated provider callback). Not repeated here.
+PASS       J20 Customer appears after a released deal :: released escrow 7115d230 seeded in the DB; GET /customers -> 200; buyer listed: true
+PASS J20 Customer appears after a released deal
+PASS       J21 Invite team member :: invite -> 201
+PASS J21 Invite team member
+PASS       J22 Assign role :: accept -> 200; stored role sales_agent
+PASS J22 Assign role
+PASS       J23 Change and revoke role :: change -> 200 (viewer); revoke -> 200; revoked member can read inventory -> 403
+PASS J23 Change and revoke role
+PASS       J24 Role restrictions and cross-business isolation :: lot_agent mark-sold -> 403; self-elevation -> 403; dealer B sees A's car: false; dealer B pauses A's car -> 404
+PASS J24 Role restrictions and cross-business isolation
+PASS       J25 Save and retrieve banking information :: save 200; read-back bank=Named Bank. Full cases in journey 10.
+PASS J25 Save and retrieve banking information
+PASS       J26 Payout masking and access restrictions :: finance_officer -> 403; anonymous -> 401; owner response carries masked fields: true
+PASS J26 Payout masking and access restrictions
+PASS-BY-REFERENCE J27 Complete an eligible escrow lifecycle :: Escrow funding is driven by a payment-provider callback. Journey 05 and the legacy journeys exercise it against the simulated callback; real M-Pesa is BLOCKED (no credentials).
+PASS       J28 Auction and settlement restrictions :: pause with bids -> 409 AUCTION_OR_BID_LOCK; mark-sold with bids -> 409 AUCTION_OR_BID_LOCK. Escrow / settlement locks: journeys 09 and 11.
+PASS J28 Auction and settlement restrictions
+PASS       J29 Inspection workflow :: GET /dealer-platform/inspections -> 200 (list only)
+PASS J29 Inspection workflow
+PASS       J30 Marketing, notifications and support access :: marketing 200; notifications 200; support tickets 200; viewer marketing -> 403
+PASS J30 Marketing, notifications and support access
+TALLY {"PASS":25,"BLOCKED":1,"NOT TESTED":2,"PASS-BY-REFERENCE":2}
+
+12_dealer_named_journeys: 25/25 passed

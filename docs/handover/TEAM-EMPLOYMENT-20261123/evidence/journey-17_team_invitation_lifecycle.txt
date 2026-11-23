@@ -1,0 +1,44 @@
+PASS A1 invite a NOT-YET-REGISTERED person -> 201 with email.sent=true
+PASS A2 the provider received a message addressed to the invitee
+PASS A3 the e-mail link points at the frontend acceptance route with a 64-hex token
+PASS A4 only the SHA-256 hash is stored (raw token is not in the database)
+PASS A5 the e-mail states the role
+PASS A6 the e-mail names the DEALERSHIP (business name), not only a person
+PASS A7 invitation expires in about 7 days
+PASS A8 duplicate pending invitation -> 409
+PASS A9 invalid role -> 400
+PASS A10 inviting yourself -> 400
+PASS A11 invitation audit event persisted
+PASS B1 provider failure: invite still created (201) but email.sent=false with a reason
+PASS B2 row is "invited" and the response never leaks token material
+PASS B3 resend after the outage -> email.sent=true and a NEW message is delivered
+PASS B4 resending again invalidates the previous token
+PASS B5 resend while the provider is down: email.sent=false, previousLinkStillValid=true, stored hash unchanged
+PASS B6 after a SUCCESSFUL resend the old link is refused with the explanatory code and the invitation stays pending
+PASS B7 the newest e-mailed link is accepted; membership active exactly once
+PASS C1 accepting while signed out -> 401
+PASS C2 a different signed-in email cannot accept (403) and the invitation stays pending
+PASS C3 another dealership's owner cannot accept it (403)
+PASS C4 NEW user registers with the invited email, signs in and accepts with the e-mailed token -> 200 active
+PASS C5 database: membership active, member = that user, dealer = A, role = sales_agent (hash kept so the spent link says "already accepted"; only status invited can be claimed)
+PASS C6 acceptance audit event persisted
+PASS C7 duplicate acceptance (same token again) -> 409 already accepted, no second row
+PASS C8 /my-workspace reports the membership (dealership name + role)
+PASS C9 member reaches the dealer leads surface (200) but NOT team/banking/subscription
+PASS C10 after logout/login the membership persists
+PASS C11 owner Team -> Members (server data) lists the member as active with name
+PASS C12 dealer B roster does not contain dealer A members
+PASS D1 expired invitation -> 410 and not activated
+PASS D2 revoked invitation: owner revoke 200, then acceptance -> 410 cancelled and no membership
+PASS D3 a revoked invitation can be re-issued (201) with a fresh working token
+PASS D4 re-issued token is accepted by the invited user
+PASS D5 inviting an existing active member -> 409
+PASS D6 role change takes effect on the next request (no stale cache): viewer cannot read leads
+PASS D7 dealer B cannot change/remove/resend dealer A's member (404)
+PASS D8 invitation created by B belongs to B only
+PASS D9 a team member cannot invite (403) - hiding the button is not authorisation
+PASS D10 removing a member: 200, workspace access gone on the very next request
+PASS D11 removed member re-accepting the old (cleared) token is impossible
+PASS D12 no duplicate membership rows per dealership+email
+
+team invitation lifecycle: 42/42 passed

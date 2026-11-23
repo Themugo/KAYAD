@@ -1,0 +1,15 @@
+{
+  "staffNumber": "ABC-STAFF-001",
+  "history": "invited,staff_number_assigned,accepted,profile_completed,role_changed,role_changed,role_changed,suspended,reinstated,terminated",
+  "denials": {
+    "/api/dealer-platform/leads": 403,
+    "/api/dealer-platform/customers": 403,
+    "/api/dealer-platform/inventory?limit=5": 403,
+    "/api/dealer-platform/command-centre": 403,
+    "/api/dealer-platform/team": 403,
+    "/api/dealer-platform/team/roles": 403,
+    "/api/dealer-platform/subscription": 403,
+    "/api/dealer-platform/marketing": 403
+  },
+  "abcCode": "ABC"
+}

@@ -24,14 +24,23 @@ export async function resolveDealerOrg(req) {
     .select("id,dealer,member,role,permissions,status")
     .eq("member", req.user.id)
     .eq("status", "active")
-    .limit(2);
+    .limit(50);
   if (error) throw error;
-  const membership = data?.[0];
+  const rows = data || [];
+  // The browser may NAME the dealership it is working in (X-Dealer-Org), but the name is only ever matched against this user's own ACTIVE
+  // memberships read from the database on this request. It can never add access: a name that is not one of them is refused, never ignored.
+  const requested = String(req.headers?.["x-dealer-org"] || "").trim().toLowerCase();
+  let membership;
+  if (requested) {
+    membership = rows.find((m) => String(m.dealer).toLowerCase() === requested);
+    if (!membership) return null;
+  } else {
+    // Phase 14.7: one user may hold active memberships in several dealerships. Without a selection, picking the first row would silently
+    // authorize against an arbitrary organization, so ambiguous membership FAILS CLOSED until the caller selects one.
+    if (new Set(rows.map((m) => String(m.dealer))).size > 1) return { ambiguous: true, choices: rows.map((m) => String(m.dealer)) };
+    membership = rows[0];
+  }
   if (!membership) return null;
-  // Phase 14.7: the schema allows one user to hold active memberships in several dealerships (unique per dealer+member) but
-  // there is no "current organization" selector in the product. Picking the first row would silently authorize against an
-  // arbitrary organization, so ambiguous membership FAILS CLOSED until the product owner defines a selector.
-  if (new Set((data || []).map((m) => String(m.dealer))).size > 1) return { ambiguous: true };
 
   return {
     dealerId: membership.dealer,

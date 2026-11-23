@@ -22,6 +22,9 @@ const none = () => Object.fromEntries(DEALER_TEAM_PERMISSIONS.map((k) => [k, fal
 const only = (...on) => ({ ...none(), ...Object.fromEntries(on.map((k) => [k, true])) });
 
 export const BUILTIN_ROLES = Object.freeze([
+  // Onboarding access level, NOT an operational job role. Every new invitation starts here; the dealer promotes the employee after they join.
+  // It holds no dealership permission at all: it can reach only the employee's own staff profile (which needs an active membership, nothing more).
+  { key: "basic_staff", label: "Basic Staff Access", description: "Starting access for every new employee: their own staff profile only. No leads, customers, listings, deals, finance or team access until the dealership assigns a role.", permissions: none(), builtin: true, onboarding: true },
   { key: "manager", label: "Manager", description: "Runs day-to-day sales and inventory. Cannot manage the team.", permissions: only("canListCars", "canEditCars", "canDeleteCars", "canViewEarnings", "canApproveDeals", "canChatBuyers", "canEditSettings"), builtin: true },
   { key: "sales_agent", label: "Sales agent", description: "Lists and edits vehicles and talks to buyers.", permissions: only("canListCars", "canEditCars", "canChatBuyers"), builtin: true },
   { key: "lot_agent", label: "Lot agent", description: "Adds and edits vehicles and photos.", permissions: only("canListCars", "canEditCars"), builtin: true },

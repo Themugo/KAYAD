@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Car, MessageSquare, Users, ArrowLeft, LayoutDashboard } from 'lucide-react';
-import { useMyDealership, resetMyDealershipCache } from './useMyDealership';
+import { useMyDealership, resetMyDealershipCache, selectDealership } from './useMyDealership';
+import StaffProfile from './StaffProfile';
 import { getInventory, getLeads, getCustomers, updateLead, getCommandCentre } from '../../services/dealerPlatformApi';
 import TeamOverview, { hasOverviewContent } from './TeamOverview';
 import type { CommandCentreData } from '../../pages/dealer/dashboard/CommandCentrePanel';
 
 type Props = { user: any; onNavigate: (nav: string) => void; onOpenAuth?: () => void };
-type Tab = 'overview' | 'inventory' | 'leads' | 'customers';
+type Tab = 'profile' | 'overview' | 'inventory' | 'leads' | 'customers';
 
 const has = (perms: string[], any: string[]) => any.some((p) => perms.includes(p));
 const STAGES = ['new', 'contacted', 'viewing', 'negotiating', 'sold', 'lost'];
@@ -26,7 +27,7 @@ function useList<T>(load: () => Promise<T[]>, enabled: boolean) {
 }
 
 export default function DealershipWorkspace({ user, onNavigate, onOpenAuth }: Props) {
-  const { loading, membership, ambiguous } = useMyDealership(user?.id, user?.role);
+  const { loading, membership, ambiguous, choices } = useMyDealership(user?.id, user?.role);
   const perms = membership?.permissions || [];
   const canInv = has(perms, ['canListCars', 'canEditCars', 'canDeleteCars']);
   const canLeads = has(perms, ['canChatBuyers']);
@@ -43,7 +44,10 @@ export default function DealershipWorkspace({ user, onNavigate, onOpenAuth }: Pr
     ...(showOverview ? [{ id: 'overview' as Tab, label: 'Overview', icon: LayoutDashboard }] : []),
     ...(canInv ? [{ id: 'inventory' as Tab, label: 'Inventory', icon: Car }] : []),
     ...(canLeads ? [{ id: 'leads' as Tab, label: 'Leads', icon: MessageSquare }, { id: 'customers' as Tab, label: 'Customers', icon: Users }] : []),
+    // Every ACTIVE member (Basic Staff Access included) has their own staff profile; it is the landing view until they are given working access.
+    { id: 'profile' as Tab, label: 'My staff profile', icon: Users },
   ];
+  const workTabs = tabs.filter((t) => t.id !== 'profile');
   const [tab, setTab] = useState<Tab | null>(null);
   const active = tab && tabs.some((t) => t.id === tab) ? tab : tabs[0]?.id ?? null;
 
@@ -58,8 +62,9 @@ export default function DealershipWorkspace({ user, onNavigate, onOpenAuth }: Pr
     <main className="mx-auto max-w-3xl p-6">
       <h1 className="text-xl font-black text-[#0A3340]">Dealership workspace</h1>
       <p role="status" className="mt-3 text-sm text-[#475569]">
-        {ambiguous ? 'Your account belongs to more than one dealership. Ask the dealership owner to contact KAYARD KE support so we can set which one you work for.' : 'You do not currently work for a dealership. If a dealership invited you, open the invitation link from your e-mail while signed in with the invited address. If your access was removed, the dealership owner can invite you again.'}
+        {ambiguous && choices.length === 0 ? 'Your account belongs to more than one dealership. Ask the dealership owner to contact KAYARD KE support so we can set which one you work for.' : ambiguous ? 'You work for more than one dealership. Choose the one you are working in now; you can switch at any time.' : 'You do not currently work for a dealership. If a dealership invited you, open the invitation link from your e-mail while signed in with the invited address. If your access was removed, the dealership owner can invite you again.'}
       </p>
+      {ambiguous && choices.length > 0 && (<ul className="mt-3 space-y-2" aria-label="Your dealerships">{choices.map((c) => <li key={c.dealerId}><button className="w-full rounded-lg border border-[#D7E7E4] bg-white px-4 py-3 text-left text-sm font-bold text-[#0A3340]" onClick={() => { selectDealership(c.dealerId); window.location.reload(); }}>{c.dealershipName}</button></li>)}</ul>)}
       <button className="mt-4 rounded-lg border border-[#D7E7E4] px-4 py-2 text-sm font-bold" onClick={() => { resetMyDealershipCache(); onNavigate('dashboard'); }}>Back to my dashboard</button>
     </main>
   );
@@ -81,12 +86,14 @@ export default function DealershipWorkspace({ user, onNavigate, onOpenAuth }: Pr
         <h1 className="text-xl font-black text-[#0A3340]">{membership.dealershipName}</h1>
         <p className="mt-1 text-xs text-[#64748B]">You are signed in with your personal account and working as <strong>{membership.teamRole.replace(/_/g, ' ')}</strong>. What you can do follows the permissions the dealership gave you. Payments, settings, banking and team management stay with the owner.</p>
       </header>
-      {tabs.length === 0 && overview.loading ? <p role="status" className="text-sm text-[#475569]">Loading your overview…</p> : tabs.length === 0 ? <p role="status" className="text-sm text-[#475569]">The dealership has not given you any workspace permissions yet. Ask the owner to update your role.</p> : (
+      {workTabs.length === 0 && overview.loading ? <p role="status" className="text-sm text-[#475569]">Loading your overview…</p> : (
         <>
+          {workTabs.length === 0 && <p role="status" className="mb-3 text-sm text-[#475569]">The dealership has not given you any workspace permissions yet. Ask the owner to update your role.</p>}
           <div role="tablist" aria-label="Dealership sections" className="mb-4 flex gap-2">
             {tabs.map((t) => { const I = t.icon; return <button key={t.id} role="tab" aria-selected={active === t.id} onClick={() => setTab(t.id)} className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-black ${active === t.id ? 'bg-[#0A3340] text-white' : 'border border-[#D7E7E4] text-[#12576D]'}`}><I size={14} />{t.label}</button>; })}
           </div>
-          {active === 'overview' && overview.data && <TeamOverview data={overview.data} tabs={tabs.map((t) => t.id).filter((t): t is 'inventory' | 'leads' | 'customers' => t !== 'overview')} onOpenTab={(t) => setTab(t)} />}
+          {active === 'profile' && <StaffProfile />}
+          {active === 'overview' && overview.data && <TeamOverview data={overview.data} tabs={tabs.map((t) => t.id).filter((t): t is 'inventory' | 'leads' | 'customers' => t !== 'overview' && t !== 'profile')} onOpenTab={(t) => setTab(t)} />}
           {active === 'inventory' && <List s={inv} empty="No vehicles listed yet." render={(c) => <div className="flex justify-between gap-3"><span className="font-bold">{c.title || [c.make, c.model, c.year].filter(Boolean).join(' ') || 'Vehicle'}</span><span className="text-[#64748B]">{c.status || ''}{c.price ? ` · KES ${Number(c.price).toLocaleString()}` : ''}</span></div>} />}
           {active === 'leads' && (<>{leadError && <p role="alert" className="mb-2 text-sm text-[#7A271A]">{leadError}</p>}<List s={leads} empty="No enquiries yet." render={(l) => <div className="flex flex-wrap items-center justify-between gap-2"><span className="font-bold">{l.buyerName || l.name || 'Buyer enquiry'}{l.carTitle ? ` — ${l.carTitle}` : ''}</span><label className="text-xs">Stage <select aria-label="Lead stage" className="ml-1 rounded border border-[#D7E7E4] p-1" value={l.stage || 'new'} onChange={(e) => changeStage(l.id || l._id, e.target.value)}>{STAGES.map((s) => <option key={s} value={s}>{s}</option>)}</select></label></div>} /></>)}
           {active === 'customers' && <List s={customers} empty="No customers yet." render={(c) => <span className="font-bold">{c.name || c.buyerName || 'Customer'}</span>} />}

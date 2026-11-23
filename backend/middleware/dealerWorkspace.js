@@ -27,7 +27,7 @@ export function dealerWorkspaceAccess(permissions) {
       if (req.user.role !== "user") return dealerBusinessOnly(req, res, next);
 
       const org = await resolveDealerOrg(req);
-      if (org?.ambiguous) return deny(res, 403, "DEALER_ORG_AMBIGUOUS", "Your account is an active member of more than one dealership; ask the owner to contact support.");
+      if (org?.ambiguous) return deny(res, 403, "DEALER_ORG_AMBIGUOUS", "Your account is an active member of more than one dealership. Choose which dealership you are working in (send X-Dealer-Org).");
       if (!org || org.isOwner || !org.membershipId) return deny(res, 403, "DEALER_ORG_ACCESS_REQUIRED", "Active dealer organization access required");
       if (!needed.some((p) => org.permissions?.[p] === true)) {
         return deny(res, 403, "DEALER_PERMISSION_REQUIRED", `Missing dealer permission: ${needed.join(" or ")}`, { requiredPermission: needed });
@@ -67,15 +67,23 @@ export async function myWorkspaceHandler(req, res) {
   try {
     if (!req.user) return deny(res, 401, "UNAUTHENTICATED", "Not authorized");
     if (req.user.role !== "user") return res.json({ success: true, data: { membership: null, ambiguous: false } });
-    const org = await resolveDealerOrg(req);
-    if (org?.ambiguous) return res.json({ success: true, data: { membership: null, ambiguous: true } });
+    // A stale remembered selection (membership ended since) must not hide the person's other memberships on the ENTRY screen: retry without it.
+    // Every other route keeps the strict behaviour (a name that is not an active membership is refused).
+    let org = await resolveDealerOrg(req);
+    if (!org && req.headers?.["x-dealer-org"]) org = await resolveDealerOrg({ ...req, headers: {} });
+    if (org?.ambiguous) {
+      // The person is an active member of each of these, so naming them to that person discloses nothing new.
+      const choices = [];
+      for (const id of org.choices || []) { const d = await User.findById(id); if (d && d.role === "dealer") choices.push({ dealerId: String(d._id ?? d.id), dealershipName: dealerPublicName(d) }); }
+      return res.json({ success: true, data: { membership: null, ambiguous: true, choices } });
+    }
     if (!org || org.isOwner || !org.membershipId) return res.json({ success: true, data: { membership: null, ambiguous: false } });
     const dealer = await User.findById(org.dealerId);
     if (!dealer || dealer.role !== "dealer" || ["suspended", "banned", "rejected", "deleted"].includes(String(dealer.status || ""))) {
       return res.json({ success: true, data: { membership: null, ambiguous: false } });
     }
     const granted = Object.entries(org.permissions || {}).filter(([, v]) => v === true).map(([k]) => k);
-    return res.json({ success: true, data: { membership: { dealershipName: dealerPublicName(dealer), teamRole: org.role, permissions: granted } , ambiguous: false } });
+    return res.json({ success: true, data: { membership: { dealerId: String(dealer._id ?? dealer.id), dealershipName: dealerPublicName(dealer), teamRole: org.role, permissions: granted } , ambiguous: false } });
   } catch (err) {
     console.error("MY WORKSPACE ERROR:", err);
     return deny(res, 500, "DEALER_WORKSPACE_FAILED", "Could not load your dealership access");

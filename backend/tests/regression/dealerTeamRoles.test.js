@@ -28,7 +28,7 @@ jest.unstable_mockModule("../../db/index.js", () => dbMock);
 jest.unstable_mockModule("../../services/auditService.js", () => ({ logAuditEvent: jest.fn(async (e) => { audit.push(e); }) }));
 jest.unstable_mockModule("../../services/onboardingPolicy.service.js", () => ({ sellerMayPublishDirectly: jest.fn(), PUBLICATION_REVIEW_REQUIRED: "review" }));
 const sendInvite = jest.fn(async () => emailResult);
-jest.unstable_mockModule("../../services/email.service.js", () => ({ sendTeamInviteEmail: sendInvite }));
+jest.unstable_mockModule("../../services/email.service.js", () => ({ sendTeamInviteEmail: sendInvite, sendTeamAcceptedEmail: jest.fn(async () => ({ success: true })) }));
 jest.unstable_mockModule("../../middleware/dealerOrgAccess.js", () => ({
   DEALER_TEAM_PERMISSIONS: ["canListCars", "canEditCars", "canDeleteCars", "canViewEarnings", "canManageTeam", "canApproveDeals", "canChatBuyers", "canEditSettings"],
 }));
@@ -44,9 +44,12 @@ const MGR = { user: { id: "m1", role: "user", email: "m@x.test", name: "Mgr" }, 
 beforeEach(() => { store.teams = {}; store.roles = {}; audit.length = 0; emailResult = { success: true }; rolesTableMissing = false; sendInvite.mockClear(); });
 
 describe("roles catalogue", () => {
-  test("lists the five built-in templates with real permissions, and the permission catalogue", async () => {
+  test("lists the six built-in templates (Basic Staff Access first) with real permissions, and the permission catalogue", async () => {
     const r = await call(ctrl.getTeamRoles, OWNER);
-    expect(r.body.data.roles.map((x) => x.key)).toEqual(["manager", "sales_agent", "lot_agent", "finance_officer", "viewer"]);
+    expect(r.body.data.roles.map((x) => x.key)).toEqual(["basic_staff", "manager", "sales_agent", "lot_agent", "finance_officer", "viewer"]);
+    // Basic Staff Access is the onboarding level: it grants NO dealership permission at all.
+    const basic = r.body.data.roles.find((x) => x.key === "basic_staff");
+    expect(basic.label).toBe("Basic Staff Access"); expect(Object.values(basic.permissions).filter(Boolean)).toHaveLength(0); expect(Object.keys(basic.permissions)).toHaveLength(8);
     expect(r.body.data.roles.find((x) => x.key === "sales_agent").permissions).toMatchObject({ canListCars: true, canChatBuyers: true, canDeleteCars: false, canManageTeam: false });
     expect(r.body.data.roles.find((x) => x.key === "viewer").permissions.canListCars).toBe(false);
     expect(r.body.data.customRolesAvailable).toBe(true);
@@ -55,7 +58,7 @@ describe("roles catalogue", () => {
   test("when the custom-roles table is not created yet, built-in roles still work and the API says so", async () => {
     rolesTableMissing = true;
     const r = await call(ctrl.getTeamRoles, OWNER);
-    expect(r.statusCode).toBe(200); expect(r.body.data.customRolesAvailable).toBe(false); expect(r.body.data.roles).toHaveLength(5);
+    expect(r.statusCode).toBe(200); expect(r.body.data.customRolesAvailable).toBe(false); expect(r.body.data.roles).toHaveLength(6);
     const c = await call(ctrl.createTeamRole, { ...OWNER, body: { label: "Photographer", permissions: { canEditCars: true } } });
     expect(c.statusCode).toBe(503); expect(c.body.code).toBe("CUSTOM_ROLES_UNAVAILABLE");
   });

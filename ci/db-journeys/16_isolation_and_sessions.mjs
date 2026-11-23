@@ -14,7 +14,8 @@ const mkDealer = async (tag) => {
 };
 const member = async (owner, role, tag) => {
   const u = await makeUser({ tag });
-  await owner.raw('/api/dealer-platform/team/invite', { method: 'POST', body: { email: u.email, role } });
+  // invitations are limited per account (10/min): wait out the window rather than weaken the limit
+  for (let i = 0; i < 6; i++) { const r = await owner.raw('/api/dealer-platform/team/invite', { method: 'POST', body: { email: u.email, role } }); if (r.status !== 429) break; await new Promise((res) => setTimeout(res, 12000)); }
   const tok = crypto.randomBytes(32).toString('hex');
   q(`update dealer_teams set invite_token_hash='${crypto.createHash('sha256').update(tok).digest('hex')}' where invite_email='${u.email}'`);
   const acc = await u.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tok } });
@@ -90,7 +91,7 @@ check('team members can never reach the OTHER dealership (B inventory item edit)
 // removal cuts access immediately
 const tid = q(`select id from dealer_teams where invite_email='${team.manager.email}'`);
 const pre = (await team.manager.raw('/api/dealer-platform/inventory')).status;
-const del = await A.raw(`/api/dealer-platform/team/${tid}`, { method: 'DELETE' });
+let del; for (let i = 0; i < 6; i++) { del = await A.raw(`/api/dealer-platform/team/${tid}`, { method: 'DELETE' }); if (del.status !== 429) break; await new Promise((res) => setTimeout(res, 12000)); }
 const post = (await team.manager.raw('/api/dealer-platform/inventory')).status;
 check('removing a member cuts access on the very next request (no re-login)', pre === 200 && del.status === 200 && post === 403, { pre, del: del.status, post });
 q(`update users set status='suspended' where id='${A.id}'`);

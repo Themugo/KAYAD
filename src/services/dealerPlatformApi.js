@@ -11,7 +11,7 @@ export const createCampaign = (body) => api.post('/dealer-platform/marketing', b
 export const getAuctionInventory = () => api.get('/dealer-platform/auctions').then(r => r.data);
 export const getFinanceApplications = () => api.get('/dealer-platform/finance').then(r => r.data);
 export const getInspectionOrders = () => api.get('/dealer-platform/inspections').then(r => r.data);
-export const getTeamMembers = () => api.get('/dealer-platform/team').then(r => ({ members: r.data?.data?.items || [], stats: r.data?.data?.stats || {}, success: r.data?.success !== false }));
+export const getTeamMembers = () => api.get('/dealer-platform/team').then(r => ({ members: r.data?.data?.items || [], stats: r.data?.data?.stats || {}, employmentAvailable: r.data?.employmentAvailable !== false, success: r.data?.success !== false }));
 export const getDealerAnalytics = () => api.get('/dealer-platform/analytics').then(r => r.data);
 
 
@@ -31,6 +31,18 @@ export const getTeamRoles = () => api.get('/dealer-platform/team/roles').then(r 
 export const createTeamRole = (body) => api.post('/dealer-platform/team/roles', body).then(r => r.data);
 export const updateTeamRole = (key, body) => api.put(`/dealer-platform/team/roles/${encodeURIComponent(key)}`, body).then(r => r.data);
 export const deleteTeamRole = (key) => api.delete(`/dealer-platform/team/roles/${encodeURIComponent(key)}`).then(r => r.data);
+// Public, read-only: what is this invitation link? (POST so the token never appears in a URL or access log.)
+export const previewTeamInvitation = (token) => api.post('/dealer-platform/team/invitation/preview', { token }).then(r => r.data);
 export const acceptTeamInvite = (token) => api.post('/dealer-platform/team/accept', { token }).then(r => r.data);
 export const getMyWorkspace = () => api.get('/dealer-platform/my-workspace').then(r => r.data?.data || { membership: null, ambiguous: false });
 export const getInventory = (params = {}) => api.get('/dealer-platform/inventory', { params }).then(r => r.data?.data || { items: [] });
+
+// ---- Employment (Team & Employment). Server-enforced; the browser never decides who may do what. ----
+export const getTeamMemberDetail = (memberId) => api.get(`/dealer-platform/team/${memberId}`).then(r => r.data);
+export const applyEmploymentAction = (memberId, body) => api.post(`/dealer-platform/team/${memberId}/employment`, body).then(r => r.data);
+export const setMemberBusinessEmail = (memberId, businessEmail) => api.put(`/dealer-platform/team/${memberId}/business-email`, { businessEmail }).then(r => r.data);
+export const getEmploymentRecords = () => api.get('/dealer-platform/team/employment-events').then(r => r.data);
+export const getStaffCode = () => api.get('/dealer-platform/team/staff-code').then(r => r.data);
+export const putStaffCode = (staffCode) => api.put('/dealer-platform/team/staff-code', { staffCode }).then(r => r.data);
+export const getMyStaffProfile = () => api.get('/dealer-platform/team/me').then(r => r.data);
+export const updateMyStaffProfile = (body) => api.put('/dealer-platform/team/me', body).then(r => r.data);

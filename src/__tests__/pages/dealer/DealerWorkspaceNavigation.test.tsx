@@ -9,7 +9,7 @@ vi.mock('../../../services/dealerPlatformApi', () => ({
   getAuctionInventory: vi.fn().mockResolvedValue({ data: { items: [] } }),
   getInspectionOrders: vi.fn().mockResolvedValue({ data: { items: [] } }),
   getFinanceApplications: vi.fn().mockResolvedValue({ data: { items: [] } }),
-  getTeamMembers: vi.fn().mockResolvedValue({ data: [] }),
+  getTeamMembers: vi.fn().mockResolvedValue({ data: [] }), getEmploymentRecords: vi.fn().mockResolvedValue({ data: { events: [] } }), getTeamRoles: vi.fn().mockRejectedValue(new Error('x')),
   getReputation: vi.fn().mockResolvedValue({ data: {} }),
   getMarketingCampaigns: vi.fn().mockResolvedValue({ success: true, data: { items: [{ id: 'm1', name: 'Spring promo', status: 'draft' }] } }),
   getDealerAnalytics: vi.fn().mockResolvedValue({ data: {} }),

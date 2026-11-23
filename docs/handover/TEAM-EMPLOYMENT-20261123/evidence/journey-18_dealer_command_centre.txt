@@ -1,0 +1,71 @@
+PASS setup: custom role created
+PASS owner: 200 with data
+PASS revenue = SQL (released+closed dealer net)
+PASS gross sales and fees = SQL, and gross = revenue + fees
+PASS escrow held = SQL and is not in revenue
+PASS completed payout = SQL paid
+PASS pending payout = SQL
+PASS pending payout split: not requested 1, in progress 1, failed 1
+PASS reconciliation: revenue = paid + pending + closed-without-payout
+PASS refunds = SQL; open refund counted
+PASS transaction volume = SQL funded escrows
+PASS pending settlement = SQL (offer settlement + payment-due auction)
+PASS receivables = held + pending payout
+PASS listings: active/pending/draft/sold = SQL (soft-deleted excluded)
+PASS leads: new/unanswered = SQL; offers awaiting decision = SQL
+PASS auctions: active/upcoming = SQL; valid bids count only paid; highest valid bid ignores failed/pending/cancelled
+PASS auction outcomes needing attention = payment_due + defaulted
+PASS team: outstanding invitations = SQL; activity names the real member
+PASS nothing in the overview is inferred from listing prices, offers or bids (listing price 9,999,999,999 absent)
+PASS attention queue: items name real section destinations, critical first
+PASS attention queue has payout, dispute, offers, drafts, invitations, auction items
+PASS manager: sections exactly as the permission matrix allows
+PASS manager: no escrow/payout/refund/fee/receivable figure and no outcomes in the payload
+PASS manager: never wider than the existing routes (every section shown is also reachable via its existing endpoint)
+PASS manager: existing owner-only escrow route still refuses (403)
+PASS manager: values equal the owner's for the sections shown
+PASS sales_agent: sections exactly as the permission matrix allows
+PASS sales_agent: no escrow/payout/refund/fee/receivable figure and no outcomes in the payload
+PASS sales_agent: never wider than the existing routes (every section shown is also reachable via its existing endpoint)
+PASS sales_agent: existing owner-only escrow route still refuses (403)
+PASS sales_agent: values equal the owner's for the sections shown
+PASS lot_agent: sections exactly as the permission matrix allows
+PASS lot_agent: no escrow/payout/refund/fee/receivable figure and no outcomes in the payload
+PASS lot_agent: never wider than the existing routes (every section shown is also reachable via its existing endpoint)
+PASS lot_agent: existing owner-only escrow route still refuses (403)
+PASS lot_agent: values equal the owner's for the sections shown
+PASS finance_officer: sections exactly as the permission matrix allows
+PASS finance_officer: no escrow/payout/refund/fee/receivable figure and no outcomes in the payload
+PASS finance_officer: never wider than the existing routes (every section shown is also reachable via its existing endpoint)
+PASS finance_officer: existing owner-only escrow route still refuses (403)
+PASS finance_officer: values equal the owner's for the sections shown
+PASS viewer -> 403 (no permission, as every other dealer route)
+PASS custom_team_lead_f6z571vowg: sections exactly as the permission matrix allows
+PASS custom_team_lead_f6z571vowg: no escrow/payout/refund/fee/receivable figure and no outcomes in the payload
+PASS custom_team_lead_f6z571vowg: never wider than the existing routes (every section shown is also reachable via its existing endpoint)
+PASS custom_team_lead_f6z571vowg: existing owner-only escrow route still refuses (403)
+PASS custom_team_lead_f6z571vowg: values equal the owner's for the sections shown
+PASS finance officer sees released revenue only
+PASS attention queue for a sales agent contains only enquiry/offer/draft items
+PASS dealership B sees only its own figures (revenue 94,050,000, 4 listings + 1 auction car), none of A
+PASS a member of A cannot address B by query or header (response unchanged, still A)
+PASS empty dealership: real zeros, no queue, no invented figures
+PASS anonymous -> 401
+PASS personal account that is not a member -> 403
+PASS buyer role account -> 403
+PASS manager sees exactly their own 3 activity rows (not the lot agent's or the owner's)
+PASS owner-authored event (same action name) is excluded from the manager's list
+PASS lot agent sees exactly their own 1 activity row
+PASS a member without listing permissions gets no activity key; a sales agent with none recorded gets an empty list; the owner uses the team feed instead
+PASS member responses never contain other members' ids or the owner id in activity
+PASS active membership in TWO dealerships fails closed (403), never picks one
+PASS a suspended member is refused on the very next request
+PASS before logout the finance officer session reads the endpoint
+PASS after logout, replaying the old cookies is refused (401)
+PASS after revoke-all the member's OLD session is refused immediately (401)
+PASS owner of A with a spoofed dealer id still receives A only
+PASS removing a member cuts access on the very next request
+PASS command centre is private and uncached
+PASS read-only: no table changed after all command-centre calls
+
+18_dealer_command_centre: 69/69 passed

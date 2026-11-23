@@ -334,22 +334,56 @@ export const sendVerificationEmail = (email, name, token) => {
   });
 };
 
-export const sendTeamInviteEmail = (inviteeEmail, dealerName, role, token) =>
-  sendEmail({
-    to: inviteeEmail,
-    subject: `🤝 You've been invited to join ${dealerName}'s team — ${APP_NAME}`,
-    html: layout(
-      `
-      ${heading(`Team Invitation from ${esc(dealerName)}`)}
-      ${para(`You've been invited to join <strong style="color:#F6FAF9">${esc(dealerName)}</strong>'s dealership team as a <strong style="color:#13B8A6">${esc(String(role).replace(/_/g, " "))}</strong>.`)}
-      ${para("Click below to accept the invitation and set up your account.")}
-      ${btn("Accept Invitation →", `${APP_URL}/dealer/setup?invite=${encodeURIComponent(token)}`)}
+// Dealership team invitation. The bearer link goes ONLY to the invitee (`to`). There is no cc/bcc and the dealership, not KAYARD KE, owns the
+// relationship: the dealer is told about delivery and acceptance separately (buildTeamAcceptedEmail) and never receives the invitee's link.
+// "Report an unexpected invitation" points at the platform support mailbox for ABUSE reports only; no token is ever put in that address.
+const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL || "support@kayad.space";
+const roleText = (role) => String(role || "team member").replace(/_/g, " ");
+export const buildTeamInviteEmail = ({ dealerName, role, token, invitedBy }) => {
+  const link = `${APP_URL}/dealer/setup?invite=${encodeURIComponent(token)}`;
+  const who = invitedBy && invitedBy !== dealerName ? ` Invited by ${invitedBy}.` : "";
+  return {
+    subject: `${dealerName} invited you to join their team — ${APP_NAME}`,
+    text: `${dealerName} has invited you to join their dealership team on ${APP_NAME} as ${roleText(role)}.${who}\n\n`
+      + `What happens when you accept: you are added to ${dealerName}'s team with the role they chose. Your personal ${APP_NAME} account stays yours; it does not become a dealer account, and the dealership can remove your team access at any time.\n\n`
+      + `How to accept: open ${link}\nIf you already have a ${APP_NAME} account, sign in with THIS e-mail address. If you do not, the link takes you to create a free personal account with this address, verify it, and then return you to the invitation to accept.\n\n`
+      + `The link works for 7 days and only for the e-mail address that received this message. If the dealership sends a newer e-mail, only the newest link works.\n\n`
+      + `Did not expect this? Do not open the link. You can ignore this message, or tell ${SUPPORT_EMAIL} (do not forward the link).`,
+    html: layout(`
+      ${heading(`${esc(dealerName)} invited you to join their team`)}
+      ${para(`<strong style="color:#F6FAF9">${esc(dealerName)}</strong> has invited you to join their dealership team on ${esc(APP_NAME)} as <strong style="color:#13B8A6">${esc(roleText(role))}</strong>.${invitedBy && invitedBy !== dealerName ? ` Invited by ${esc(invitedBy)}.` : ""}`)}
+      ${para("<strong style='color:#F6FAF9'>What happens when you accept:</strong> you are added to the dealership's team with the role they chose. Your personal account stays yours: it does not become a dealer account, and the dealership can remove your team access at any time.")}
+      ${para("<strong style='color:#F6FAF9'>How to accept:</strong> already have an account? Sign in with <em>this e-mail address</em>. New here? The button takes you to create a free personal account with this address, verify it, and then brings you straight back to this invitation.")}
+      ${btn("View invitation →", link)}
+      ${para(`If the button does not work, copy this link into your browser:<br/><span style="word-break:break-all;color:#13B8A6;">${esc(link)}</span>`)}
       ${divider()}
-      ${para("<em style='color:#94A3B8;font-size:13px;'>This invitation expires in 7 days. If you don't have a KAYARD KE account yet, you'll create one when accepting.</em>")}
-    `,
-      "Team Invitation",
-    ),
-  });
+      ${para(`<em style='color:#94A3B8;font-size:13px;'>The link works for 7 days and only for the e-mail address that received this message. If the dealership sends a newer e-mail, only the newest link works. Did not expect this? Do not open the link; ignore this message or tell ${esc(SUPPORT_EMAIL)} (never forward the link).</em>`)}
+    `, "Team Invitation"),
+  };
+};
+
+export const sendTeamInviteEmail = (inviteeEmail, dealerName, role, token, opts = {}) => {
+  const built = buildTeamInviteEmail({ dealerName, role, token, invitedBy: opts.invitedBy });
+  return sendEmail({ to: inviteeEmail, subject: built.subject, html: built.html, text: built.text });
+};
+
+// Sent to the INVITING dealership (never to KAYARD KE). Carries no token and no secret; the Team page is the place to manage the member.
+export const buildTeamAcceptedEmail = ({ dealerName, memberName, memberEmail, role }) => ({
+  subject: `${memberName || memberEmail} accepted your team invitation — ${APP_NAME}`,
+  text: `${memberName || memberEmail} (${memberEmail}) accepted your invitation and is now an active ${roleText(role)} on ${dealerName}'s team. You can change their role or remove their access at any time from Team in your dealership dashboard: ${APP_URL}/?nav=dealer-dashboard&section=team`,
+  html: layout(`
+    ${heading("Team invitation accepted")}
+    ${para(`<strong style="color:#F6FAF9">${esc(memberName || memberEmail)}</strong> (${esc(memberEmail)}) accepted your invitation and is now an active <strong style="color:#13B8A6">${esc(roleText(role))}</strong> on <strong style="color:#F6FAF9">${esc(dealerName)}</strong>'s team.`)}
+    ${para("You can change their role or remove their access at any time from Team in your dealership dashboard.")}
+    ${btn("Open your team →", `${APP_URL}/?nav=dealer-dashboard&section=team`)}
+    ${divider()}
+    ${para("<em style='color:#94A3B8;font-size:13px;'>This message contains no invitation link or secret.</em>")}
+  `, "Team invitation accepted"),
+});
+export const sendTeamAcceptedEmail = (dealerEmail, details) => {
+  const built = buildTeamAcceptedEmail(details);
+  return sendEmail({ to: dealerEmail, subject: built.subject, html: built.html, text: built.text });
+};
 
 export const sendVerificationReminderEmail = (email, name, token) => {
   const verifyUrl = `${APP_URL}/verify-email?token=${encodeURIComponent(token)}`;

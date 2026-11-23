@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 
 const api = vi.hoisted(() => ({
-  getMyWorkspace: vi.fn(), getInventory: vi.fn(), getLeads: vi.fn(), getCustomers: vi.fn(), updateLead: vi.fn(), getCommandCentre: vi.fn(),
+  getMyWorkspace: vi.fn(), getInventory: vi.fn(), getLeads: vi.fn(), getCustomers: vi.fn(), updateLead: vi.fn(), getCommandCentre: vi.fn(), getMyStaffProfile: vi.fn().mockResolvedValue({ data: null }), updateMyStaffProfile: vi.fn(),
 }));
 vi.mock('../../services/dealerPlatformApi', () => api);
 

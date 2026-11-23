@@ -45,7 +45,7 @@ jest.unstable_mockModule("../../services/leadService.js", () => ({ getDealerLead
 jest.unstable_mockModule("../../db/index.js", () => dbMock);
 jest.unstable_mockModule("../../services/auditService.js", () => ({ logAuditEvent: jest.fn(async (e) => { audit.push(e); }) }));
 jest.unstable_mockModule("../../services/onboardingPolicy.service.js", () => ({ sellerMayPublishDirectly: jest.fn(), PUBLICATION_REVIEW_REQUIRED: "review" }));
-jest.unstable_mockModule("../../services/email.service.js", () => ({ sendTeamInviteEmail: jest.fn(async () => {}) }));
+jest.unstable_mockModule("../../services/email.service.js", () => ({ sendTeamInviteEmail: jest.fn(async () => {}), sendTeamAcceptedEmail: jest.fn(async () => ({ success: true })) }));
 jest.unstable_mockModule("../../middleware/dealerOrgAccess.js", () => ({
   DEALER_TEAM_PERMISSIONS: ["canListCars", "canEditCars", "canDeleteCars", "canViewEarnings", "canManageTeam", "canApproveDeals", "canChatBuyers", "canEditSettings"],
 }));
@@ -255,10 +255,10 @@ describe("team lifecycle — server enforcement", () => {
     expect(r2.statusCode).toBe(403);
   });
 
-  test("remove: clears invite token, is idempotent-safe (second remove 409), response has no token hash", async () => {
+  test("remove: a cancelled pending invitation is unusable (status removed, no member), second remove 409, response has no token hash", async () => {
     const r = await rm("m2");
     expect(r.statusCode).toBe(200);
-    expect(store.teams.m2.inviteTokenHash).toBeNull();
+    expect(store.teams.m2).toMatchObject({ status: "removed", member: null }); // hash retained for "cancelled" messaging; only status "invited" can be claimed
     expect(JSON.stringify(r.body)).not.toMatch(/SECRETHASH/);
     expect((await rm("m2")).statusCode).toBe(409);
   });

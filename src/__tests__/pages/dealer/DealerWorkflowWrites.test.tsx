@@ -9,6 +9,8 @@ const api = vi.hoisted(() => ({
   getMarketingCampaigns: vi.fn(), getDealerAnalytics: vi.fn(), updateLead: vi.fn(), createCampaign: vi.fn(),
   getDealerProfile: vi.fn(), updateDealerProfile: vi.fn(), getVerificationStatus: vi.fn(),
   inviteTeamMember: vi.fn(), updateTeamMember: vi.fn(), removeTeamMember: vi.fn(),
+  getTeamRoles: vi.fn().mockRejectedValue(new Error('roles unavailable')), getEmploymentRecords: vi.fn().mockResolvedValue({ data: { events: [] } }),
+  getTeamMemberDetail: vi.fn().mockResolvedValue({ data: { identity: {}, effectivePermissions: [], events: [] } }), applyEmploymentAction: vi.fn(), setMemberBusinessEmail: vi.fn(),
 }));
 const veh = vi.hoisted(() => {
   class VehicleApiError extends Error {
@@ -199,20 +201,24 @@ describe('Dealer team write path (Phase 14.4, mocked)', () => {
   });
   afterEach(() => { cleanup(); vi.clearAllMocks(); });
 
-  it('lists non-removed members; never offers activation of a pending invite', async () => {
+  it('lists current staff on Team Members; pending invitations are separate and never offer activation', async () => {
     await open('section=team');
     expect(await screen.findByText('a@amani.test')).toBeTruthy();
     expect(screen.queryByText('c@amani.test')).toBeNull();
-    expect(screen.getAllByRole('button', { name: 'Suspend' })).toHaveLength(1);
+    expect(screen.queryByText('b@amani.test')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Reactivate' })).toBeNull();
+    fireEvent.click(screen.getByRole('tab', { name: /^Invitations/ }));
+    expect(await screen.findByText('b@amani.test')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Activate|Reactivate/ })).toBeNull();
   });
 
-  it('invites with validation and refreshes; surfaces a 403 permission denial and 409 duplicate', async () => {
+  it('invites at Basic Staff Access (no role sent) with validation; surfaces a 403 permission denial and refreshes', async () => {
     api.inviteTeamMember.mockRejectedValueOnce({ response: { status: 403, data: { message: 'DEALER_PERMISSION_REQUIRED' } } })
       .mockResolvedValueOnce({ success: true, data: { id: 'm9' } });
     await open('section=team');
     await screen.findByText('a@amani.test');
-    fireEvent.click(screen.getByRole('button', { name: 'Send invitation' }));
+    fireEvent.click(screen.getByRole('tab', { name: /^Invitations/ }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Send invitation' }));
     expect(await screen.findByText('Enter a valid email address.')).toBeTruthy();
     expect(api.inviteTeamMember).not.toHaveBeenCalled();
     fill(/^Email/, 'New@Amani.test');
@@ -220,23 +226,27 @@ describe('Dealer team write path (Phase 14.4, mocked)', () => {
     expect((await screen.findByRole('alert')).textContent).toContain('do not have permission');
     fireEvent.click(screen.getByRole('button', { name: 'Send invitation' }));
     expect(await screen.findByText('Invitation sent to new@amani.test.')).toBeTruthy();
-    expect(api.inviteTeamMember).toHaveBeenLastCalledWith({ email: 'new@amani.test', role: 'sales_agent' });
+    expect(api.inviteTeamMember).toHaveBeenLastCalledWith({ email: 'new@amani.test' });
     await waitFor(() => expect(api.getTeamMembers).toHaveBeenCalledTimes(2));
   });
 
-  it('changes role, suspends, and removes only after confirmation', async () => {
+  it('changes role, suspends and ends employment from the staff detail (end requires a reason)', async () => {
     api.updateTeamMember.mockResolvedValue({ success: true, data: {} });
-    api.removeTeamMember.mockResolvedValue({ success: true, data: {} });
+    api.applyEmploymentAction.mockResolvedValue({ success: true, data: {} });
     await open('section=team');
     await screen.findByText('a@amani.test');
-    fireEvent.change(screen.getByLabelText('Role for a@amani.test'), { target: { value: 'manager' } });
+    fireEvent.click(screen.getByRole('button', { name: /^View / }));
+    fireEvent.change(await screen.findByLabelText('Operational role'), { target: { value: 'manager' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Apply role' }));
     await waitFor(() => expect(api.updateTeamMember).toHaveBeenCalledWith('m1', { role: 'manager' }));
-    fireEvent.click(screen.getAllByRole('button', { name: 'Suspend' })[0]);
-    await waitFor(() => expect(api.updateTeamMember).toHaveBeenCalledWith('m1', { status: 'suspended' }));
-    fireEvent.click(screen.getAllByRole('button', { name: /^Remove / })[0]);
-    expect(api.removeTeamMember).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Confirm remove' }));
-    await waitFor(() => expect(api.removeTeamMember).toHaveBeenCalledWith('m1'));
+    fireEvent.click(screen.getByRole('button', { name: 'Suspend access' }));
+    await waitFor(() => expect(api.applyEmploymentAction).toHaveBeenCalledWith('m1', { action: 'suspend' }));
+    fireEvent.click(screen.getByRole('button', { name: 'End employment…' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm end of employment' }));
+    expect(api.applyEmploymentAction).toHaveBeenCalledTimes(1); // only the suspension so far: ending employment without a reason sends nothing
+    fireEvent.change(screen.getByLabelText(/^Reason/), { target: { value: 'Left' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm end of employment' }));
+    await waitFor(() => expect(api.applyEmploymentAction).toHaveBeenCalledWith('m1', { action: 'terminate', reason: 'Left' }));
   });
 });
 

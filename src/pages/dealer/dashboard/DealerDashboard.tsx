@@ -641,13 +641,14 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const [teamError, setTeamError] = useState(null);
   const [teamLoaded, setTeamLoaded] = useState(false);
   const [teamRetry, setTeamRetry] = useState(0);
+  const [employmentAvailable, setEmploymentAvailable] = useState(true);
 
   useEffect(() => {
     if (activeSection === 'team' && user && !teamLoaded) {
       setTeamLoading(true);
       setTeamError(null);
       dealerApi.getTeamMembers()
-        .then((response) => { setTeam(response.members || []); setTeamLoaded(true); })
+        .then((response) => { setTeam(response.members || []); setEmploymentAvailable(response.employmentAvailable !== false); setTeamLoaded(true); })
         .catch((err) => setTeamError(sectionLoadMessage(err, 'team')))
         .finally(() => setTeamLoading(false));
     }
@@ -1562,7 +1563,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
               ) : teamError ? (
                 <div className="py-12 text-center"><p className="text-sm text-[#64748B] mb-3">{teamError}</p><button onClick={() => setTeamRetry((attempt) => attempt + 1)} className="text-xs font-bold text-[#176B87]">Try Again</button></div>
               ) : (
-                <DealerTeamPanel team={team} onChanged={() => setTeamLoaded(false)} />
+                <DealerTeamPanel team={team} employmentAvailable={employmentAvailable} onChanged={() => setTeamLoaded(false)} />
               )}
             </div>
           )}

@@ -1,0 +1,6 @@
+INFO 35 admin write routes with a statically known guard (of 51 write routes in adminRoutes.js)
+INFO 385 direct API calls across 35 routes x 10 roles (+ anonymous)
+PASS write endpoints refuse every role the guard does not allow (35 routes, 385 calls, 0 violations)
+PASS at least 20 write routes were covered by the static guard analysis
+
+14_staff_role_write_matrix: 2/2 passed

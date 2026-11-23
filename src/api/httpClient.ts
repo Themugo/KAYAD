@@ -69,6 +69,12 @@ api.interceptors.request.use(async (config) => {
     await ensureCsrfToken();
   }
   Object.assign(config.headers, getCsrfHeaders(method));
+  // A person who works for several dealerships names the one they are working in. The server only ever matches this against the caller's own
+  // ACTIVE memberships (it can never add access), so a stale or forged value is refused, not trusted.
+  try {
+    const dealerOrg = typeof localStorage !== 'undefined' ? localStorage.getItem('kayad_dealer_org') : null;
+    if (dealerOrg && /^[0-9a-f-]{36}$/i.test(dealerOrg) && String(config.url || '').startsWith('/dealer-platform')) config.headers['X-Dealer-Org'] = dealerOrg;
+  } catch { /* storage unavailable: no selection is sent */ }
   // ROOT CAUSE of the platform-logo upload failure: this instance's default Content-Type is application/json, and axios 1.x
   // serialises FormData to JSON (a File becomes `{}`) whenever the effective Content-Type is JSON, so the server received
   // `{"logo":{}}` and no file. A multipart body must never be sent with the JSON default. Naming multipart here lets axios

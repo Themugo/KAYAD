@@ -1,0 +1,222 @@
+[
+ {
+  "name": "owner sees the pending invitation in Team",
+  "pass": true
+ },
+ {
+  "name": "the e-mail provider received a link with a 64-hex token",
+  "pass": true
+ },
+ {
+  "name": "logged-out visitor sees the invitation summary (dealership, role, invited e-mail) on a public page, not a bare login wall",
+  "pass": true
+ },
+ {
+  "name": "the sign-in URL carries the same invitation (token preserved, not printed)",
+  "pass": true
+ },
+ {
+  "name": "after sign-in the visitor is back on the invitation page",
+  "pass": true
+ },
+ {
+  "name": "Accept invitation is a visible, enabled button",
+  "pass": true
+ },
+ {
+  "name": "button has a real touch-sized box (>= 40px high, >= 120px wide)",
+  "pass": true
+ },
+ {
+  "name": "button has a filled background (colour or gradient; not plain text)",
+  "pass": true
+ },
+ {
+  "name": "acceptance shows \"You have joined the team\"",
+  "pass": true
+ },
+ {
+  "name": "database: membership active exactly once, role kept, hash kept so the spent link reports \"already used\" (status gates claims)",
+  "pass": true
+ },
+ {
+  "name": "exactly one membership row",
+  "pass": true
+ },
+ {
+  "name": "refreshing and accepting again does not undo or duplicate: the spent link says it was already used",
+  "pass": true
+ },
+ {
+  "name": "...still exactly one active membership",
+  "pass": true
+ },
+ {
+  "name": "owner Team page no longer shows a pending invitation for them and lists them as active",
+  "pass": true
+ },
+ {
+  "name": "resend e-mails a NEW token",
+  "pass": true
+ },
+ {
+  "name": "the OLD link says it is not recognised and may have been replaced by a newer e-mail (no accept button offered)",
+  "pass": true
+ },
+ {
+  "name": "the NEWEST link is accepted",
+  "pass": true
+ },
+ {
+  "name": "Account B: clear wrong-account message naming the signed-in e-mail",
+  "pass": true
+ },
+ {
+  "name": "...the wrong-account panel never shows the token and offers no Accept button",
+  "pass": true
+ },
+ {
+  "name": "...invitation is still pending and unchanged (server-side 403 for this case is proven in journey 21)",
+  "pass": true
+ },
+ {
+  "name": "switch account: signed out and sent to sign-in carrying the same invitation (no loop)",
+  "pass": true
+ },
+ {
+  "name": "Account A signs in and is returned to the same invitation",
+  "pass": true
+ },
+ {
+  "name": "Account A accepts the same invitation",
+  "pass": true
+ },
+ {
+  "name": "exactly one active membership, for Account A",
+  "pass": true
+ },
+ {
+  "name": "no console errors on the wrong-account/switch flow (sanitised)",
+  "pass": true
+ },
+ {
+  "name": "mobile 390px wrong-account page: switch button inside the viewport, no horizontal overflow",
+  "pass": true
+ },
+ {
+  "name": "dashboard \"Invitations waiting\" equals the database pending count",
+  "pass": true
+ },
+ {
+  "name": "mobile 390px: button visible, within the viewport, no horizontal overflow",
+  "pass": true
+ },
+ {
+  "name": "invitation e-mail sent to a person who has no account yet",
+  "pass": true
+ },
+ {
+  "name": "desktop: no-account visitor sees the invitation and a Create account button",
+  "pass": true
+ },
+ {
+  "name": "desktop: no horizontal overflow on the invitation page",
+  "pass": true
+ },
+ {
+  "name": "desktop: registration opens with the invited e-mail pre-filled and locked, personal account, no role chooser",
+  "pass": true
+ },
+ {
+  "name": "desktop: account created as a personal user (role user), unverified",
+  "pass": true
+ },
+ {
+  "name": "desktop: verification e-mail went only to the invited address",
+  "pass": true
+ },
+ {
+  "name": "desktop: e-mail verified in the database",
+  "pass": true
+ },
+ {
+  "name": "desktop: after verify + sign-in the person is back on the SAME invitation",
+  "pass": true
+ },
+ {
+  "name": "desktop: Accept invitation is offered (no wrong-account panel)",
+  "pass": true
+ },
+ {
+  "name": "desktop: acceptance succeeds",
+  "pass": true
+ },
+ {
+  "name": "desktop: exactly one active membership for the new user",
+  "pass": true
+ },
+ {
+  "name": "desktop: dealership owner got an in-app notification and the acceptance e-mail had no token",
+  "pass": true
+ },
+ {
+  "name": "mobile 390px: no-account visitor sees the invitation and a Create account button",
+  "pass": true
+ },
+ {
+  "name": "mobile 390px: no horizontal overflow on the invitation page",
+  "pass": true
+ },
+ {
+  "name": "mobile 390px: registration opens with the invited e-mail pre-filled and locked, personal account, no role chooser",
+  "pass": true
+ },
+ {
+  "name": "mobile 390px: account created as a personal user (role user), unverified",
+  "pass": true
+ },
+ {
+  "name": "mobile 390px: verification e-mail went only to the invited address",
+  "pass": true
+ },
+ {
+  "name": "mobile 390px: e-mail verified in the database",
+  "pass": true
+ },
+ {
+  "name": "mobile 390px: after verify + sign-in the person is back on the SAME invitation",
+  "pass": true
+ },
+ {
+  "name": "mobile 390px: Accept invitation is offered (no wrong-account panel)",
+  "pass": true
+ },
+ {
+  "name": "mobile 390px: acceptance succeeds",
+  "pass": true
+ },
+ {
+  "name": "mobile 390px: exactly one active membership for the new user",
+  "pass": true
+ },
+ {
+  "name": "mobile 390px: dealership owner got an in-app notification and the acceptance e-mail had no token",
+  "pass": true
+ },
+ {
+  "name": "a spent link says it has already been used (signed out, no accept button)",
+  "pass": true
+ },
+ {
+  "name": "an expired link says it expired and how to get a new one",
+  "pass": true
+ },
+ {
+  "name": "a cancelled link says the dealership withdrew it",
+  "pass": true
+ },
+ {
+  "name": "no uncaught page errors during the whole journey",
+  "pass": true
+ }
+]

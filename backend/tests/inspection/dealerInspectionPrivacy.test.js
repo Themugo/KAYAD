@@ -13,7 +13,7 @@ jest.unstable_mockModule('../../services/dealerSubscription.service.js', () => (
 jest.unstable_mockModule('../../services/leadService.js', () => ({ getDealerLeads: jest.fn(), getLeadById: jest.fn(), updateLeadStage: jest.fn(), addLeadActivity: jest.fn() }));
 jest.unstable_mockModule('../../db/index.js', () => ({ create: jest.fn(), findAll: jest.fn(), findOne: jest.fn(), update: jest.fn() }));
 jest.unstable_mockModule('../../services/auditService.js', () => ({ logAuditEvent: jest.fn() }));
-jest.unstable_mockModule('../../services/email.service.js', () => ({ sendTeamInviteEmail: jest.fn() }));
+jest.unstable_mockModule('../../services/email.service.js', () => ({ sendTeamInviteEmail: jest.fn(), sendTeamAcceptedEmail: jest.fn() }));
 
 const { getInspectionOrders } = await import('../../controllers/dealerPlatformController.js');
 

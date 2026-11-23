@@ -8,6 +8,8 @@ const api = vi.hoisted(() => ({
   getMarketingCampaigns: vi.fn(), getDealerAnalytics: vi.fn(), updateLead: vi.fn(), createCampaign: vi.fn(),
   getDealerProfile: vi.fn(), updateDealerProfile: vi.fn(), getVerificationStatus: vi.fn(),
   inviteTeamMember: vi.fn(), updateTeamMember: vi.fn(), removeTeamMember: vi.fn(),
+  getTeamRoles: vi.fn().mockRejectedValue(new Error('roles unavailable')), getEmploymentRecords: vi.fn().mockResolvedValue({ data: { events: [] } }),
+  getTeamMemberDetail: vi.fn().mockResolvedValue({ data: { identity: {}, effectivePermissions: [], events: [] } }), applyEmploymentAction: vi.fn(), setMemberBusinessEmail: vi.fn(),
 }));
 vi.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ signOut: vi.fn() }) }));
 vi.mock('../../../services/dealerPlatformApi', () => api);
@@ -136,6 +138,7 @@ describe('Dealer section response contracts (Phase 14.3)', () => {
   it('Team reads members from the normalised service result; failure shows error', async () => {
     api.getTeamMembers.mockResolvedValue({ members: [{ id: 'm1', inviteEmail: 'sales@amani.test', role: 'sales', status: 'invited' }], stats: {}, success: true });
     await open('team');
+    fireEvent.click(await screen.findByRole('tab', { name: /^Invitations/ }));
     expect(await screen.findByText('sales@amani.test')).toBeTruthy();
     cleanup();
     api.getTeamMembers.mockRejectedValue(new Error('x'));

@@ -30,7 +30,7 @@ const empty = { find: jest.fn(async () => []), findOne: jest.fn(async () => null
 const matches = (row, f) => Object.entries(f).every(([k, v]) => row[k] === v);
 const dbMock = {
   findAll: jest.fn(async (t, o = {}) => (t === "dealer_teams" ? Object.values(store.teams).filter((r) => matches(r, o.filters || {})) : [])),
-  findOne: jest.fn(async (t, f) => (t === "dealer_teams" ? Object.values(store.teams).find((r) => matches(r, f)) || null : null)),
+  findOne: jest.fn(async (t, f) => (t === "dealer_teams" ? Object.values(store.teams).find((r) => matches(r, f)) || null : t === "users" ? Object.values(store.users).find((r) => matches(r, f)) || null : null)),
   create: jest.fn(async (t, d) => { const row = { id: `t${Object.keys(store.teams).length + 1}`, ...d }; store.teams[row.id] = row; writes.push(["create", t, row.id]); return { ...row }; }),
   update: jest.fn(async (t, id, d) => { writes.push(["update", t, id, d]); Object.assign(store.teams[id], d); return { ...store.teams[id] }; }),
   // compare-and-set like PostgREST: only rows still matching every filter are changed and returned
@@ -49,20 +49,22 @@ jest.unstable_mockModule("../../db/index.js", () => dbMock);
 jest.unstable_mockModule("../../services/auditService.js", () => ({ logAuditEvent: jest.fn(async (e) => { audit.push(e); }) }));
 jest.unstable_mockModule("../../services/onboardingPolicy.service.js", () => ({ sellerMayPublishDirectly: jest.fn(), PUBLICATION_REVIEW_REQUIRED: "review" }));
 // The provider stub records the exact link the backend would e-mail (so tests use the REAL emailed token) and can be told to fail.
-const mail = { sent: [], fail: false };
+const mail = { sent: [], accepted: [], notices: [], fail: false };
 jest.unstable_mockModule("../../services/email.service.js", () => ({
   sendTeamInviteEmail: jest.fn(async (to, dealerName, role, token) => {
     if (mail.fail) return { success: false };
     mail.sent.push({ to, role, link: `https://app.test/dealer/setup?invite=${encodeURIComponent(token)}` });
     return { success: true };
   }),
+  sendTeamAcceptedEmail: jest.fn(async (to, details) => { mail.accepted.push({ to, ...details }); return { success: true }; }),
 }));
+jest.unstable_mockModule("../../controllers/notificationController.js", () => ({ createNotification: jest.fn(async (n) => { mail.notices.push(n); return n; }) }));
 jest.unstable_mockModule("../../middleware/dealerOrgAccess.js", () => ({
   DEALER_TEAM_PERMISSIONS: ["canListCars", "canEditCars", "canDeleteCars", "canViewEarnings", "canManageTeam", "canApproveDeals", "canChatBuyers", "canEditSettings"],
 }));
 
 const ctrl = await import("../../controllers/dealerPlatformController.js");
-const mkRes = () => { const r = { statusCode: 200, body: null }; r.status = (c) => { r.statusCode = c; return r; }; r.json = (b) => { r.body = b; return r; }; return r; };
+const mkRes = () => { const r = { statusCode: 200, body: null, headers: {} }; r.set = (k, v) => { r.headers[k] = v; return r; }; r.status = (c) => { r.statusCode = c; return r; }; r.json = (b) => { r.body = b; return r; }; return r; };
 const call = async (fn, req) => { const res = mkRes(); await fn({ ip: "127.0.0.1", get: () => "jest", id: "req1", params: {}, body: {}, ...req }, res); return res; };
 
 
@@ -76,7 +78,7 @@ const sha = (t) => crypto.createHash("sha256").update(t).digest("hex");
 const rowOf = () => Object.values(store.teams).find((r) => r.inviteEmail === "new@amani.test");
 
 beforeEach(() => {
-  mail.sent.length = 0; mail.fail = false; writes.length = 0; audit.length = 0;
+  mail.sent.length = 0; mail.accepted.length = 0; mail.notices.length = 0; mail.fail = false; writes.length = 0; audit.length = 0;
   store.users = { [D1]: { id: D1, role: "dealer", email: "owner@amani.test", name: "Amani Motors" } };
   store.dealers = {}; store.teams = {};
 });
@@ -90,7 +92,7 @@ describe("invitation lifecycle with the real emailed link", () => {
     expect(token).toMatch(/^[0-9a-f]{64}$/);
     const r = await accept(invitee, token);
     expect(r.statusCode).toBe(200);
-    expect(rowOf()).toMatchObject({ status: "active", member: "uN", dealer: D1, role: "viewer", inviteTokenHash: null });
+    expect(rowOf()).toMatchObject({ status: "active", member: "uN", dealer: D1, role: "viewer", inviteTokenHash: sha(token) }); // hash kept so the spent link can say "already accepted"
     expect(JSON.stringify(r.body)).not.toContain(token);
   });
 
@@ -149,18 +151,20 @@ describe("invitation lifecycle with the real emailed link", () => {
     expect(rowOf().status).toBe("invited");
   });
 
-  test("8. expired -> 410, revoked -> 404, already accepted -> 404", async () => {
+  test("8. expired -> 410 INVITATION_EXPIRED, cancelled -> 410 INVITATION_CANCELLED, already accepted -> 409 INVITATION_ALREADY_ACCEPTED", async () => {
     const c = await owner(ctrl.inviteTeamMember, { body: { email: "new@amani.test", role: "viewer" } });
     const token = latest();
     rowOf().inviteExpiresAt = new Date(Date.now() - 1000).toISOString();
     expect((await accept(invitee, token)).statusCode).toBe(410);
     rowOf().inviteExpiresAt = new Date(Date.now() + 86400000).toISOString();
     await owner(ctrl.removeTeamMember, { params: { memberId: c.body.data.id } });
-    expect((await accept(invitee, token)).statusCode).toBe(404);
+    const cancelled = await accept(invitee, token);
+    expect([cancelled.statusCode, cancelled.body.code]).toEqual([410, "INVITATION_CANCELLED"]);
     const d = await owner(ctrl.inviteTeamMember, { body: { email: "again@amani.test", role: "viewer" } });
     const t2 = latest();
     expect((await accept({ ...invitee, id: "uZ", email: "again@amani.test" }, t2)).statusCode).toBe(200);
-    expect((await accept({ ...invitee, id: "uZ", email: "again@amani.test" }, t2)).statusCode).toBe(404);
+    const spent = await accept({ ...invitee, id: "uZ", email: "again@amani.test" }, t2);
+    expect([spent.statusCode, spent.body.code, spent.body.alreadyMember]).toEqual([409, "INVITATION_ALREADY_ACCEPTED", true]);
     expect(d.statusCode).toBe(201);
   });
 
@@ -174,11 +178,11 @@ describe("invitation lifecycle with the real emailed link", () => {
     expect((await accept(invitee, token)).statusCode).toBe(200);
   });
 
-  test("10. concurrent acceptance: exactly one membership; a lost race is a safe 404", async () => {
+  test("10. concurrent acceptance: exactly one membership; a lost race is a safe 409 already-accepted", async () => {
     await owner(ctrl.inviteTeamMember, { body: { email: "new@amani.test", role: "viewer" } });
     const token = latest();
     const rs = await Promise.all([accept(invitee, token), accept(invitee, token), accept(invitee, token)]);
-    expect(rs.map((r) => r.statusCode).sort()).toEqual([200, 404, 404]);
+    expect(rs.map((r) => r.statusCode).sort()).toEqual([200, 409, 409]);
     expect(Object.values(store.teams).filter((r) => r.member === "uN" && r.status === "active")).toHaveLength(1);
   });
 
@@ -251,7 +255,7 @@ describe("invitation lifecycle with the real emailed link", () => {
       expect((await accept({ id: "uL", role: "individual_seller", email: "mugo.james27@gmail.com" }, t)).body.code).toBe("TEAM_MEMBER_MUST_BE_PERSONAL_ACCOUNT");
       expect(rowFor("mugo.james27@gmail.com").status).toBe("invited");
     });
-    test("independent errors stay independent: invalid 400, unknown 404, expired 410, cancelled 404, replaced 404", async () => {
+    test("independent errors stay independent: invalid 400, unknown 404, expired 410, cancelled 410, replaced 404", async () => {
       const c = await owner(ctrl.inviteTeamMember, { body: { email: "mugo.james27@gmail.com", role: "viewer" } });
       const t = latest(); const me = { id: "uJ", role: "user", email: "mugo.james27@gmail.com" };
       expect((await accept(me, "short")).statusCode).toBe(400);
@@ -263,13 +267,111 @@ describe("invitation lifecycle with the real emailed link", () => {
       expect((await accept(me, fresh)).statusCode).toBe(410);
       rowFor("mugo.james27@gmail.com").inviteExpiresAt = new Date(Date.now() + 86400000).toISOString();
       await owner(ctrl.removeTeamMember, { params: { memberId: c.body.data.id } });
-      expect((await accept(me, fresh)).statusCode).toBe(404);
+      expect((await accept(me, fresh)).statusCode).toBe(410);
     });
     test("second acceptance after success creates no duplicate membership", async () => {
       const t = await invite(); const me = { id: "uJ", role: "user", email: "mugo.james27@gmail.com" };
       expect((await accept(me, t)).statusCode).toBe(200);
-      expect((await accept(me, t)).statusCode).toBe(404);
+      expect((await accept(me, t)).statusCode).toBe(409);
       expect(Object.values(store.teams).filter((r) => r.member === "uJ")).toHaveLength(1);
     });
   });
 });
+
+describe("invitation-first onboarding: public preview, dealer-owned notifications, races", () => {
+  const preview = (token) => call(ctrl.previewTeamInvitation, { body: { token } });
+  const invite = async (email = "new@amani.test", role = "viewer") => { const c = await owner(ctrl.inviteTeamMember, { body: { email, role } }); return { id: c.body.data.id, token: latest() }; };
+  const rowByEmail = (email) => Object.values(store.teams).find((r) => r.inviteEmail === email);
+
+  test("P1. a brand-new person (no account): preview says valid + accountStatus none, with dealership, role and the invited e-mail, never a token or hash", async () => {
+    const { token } = await invite();
+    const r = await preview(token);
+    expect(r.statusCode).toBe(200);
+    expect(r.body.data).toMatchObject({ state: "valid", dealershipName: expect.any(String), accountStatus: "none", invitedEmail: "new@amani.test" });
+    expect(r.body.data.roleLabel).toBeTruthy();
+    expect(JSON.stringify(r.body)).not.toMatch(new RegExp(`${token}|${sha(token)}|inviteTokenHash`));
+    expect(r.headers["Cache-Control"]).toBe("no-store");
+  });
+  test("P2. an existing personal account is reported as personal; a dealer/staff address as other (it can never accept)", async () => {
+    store.users.uP = { id: "uP", role: "user", email: "new@amani.test" };
+    store.users.uD = { id: "uD", role: "dealer", email: "other@amani.test" };
+    const a = await invite("new@amani.test"); const b = await invite("other@amani.test");
+    expect((await preview(a.token)).body.data.accountStatus).toBe("personal");
+    expect((await preview(b.token)).body.data.accountStatus).toBe("other");
+  });
+  test("P3. each end state is distinct: expired, cancelled, accepted, replaced/unknown; the e-mail is shown only for a valid link", async () => {
+    const a = await invite("a@amani.test"); const b = await invite("b@amani.test"); const c = await invite("c@amani.test"); const d = await invite("d@amani.test");
+    rowByEmail("a@amani.test").inviteExpiresAt = new Date(Date.now() - 1000).toISOString();
+    await owner(ctrl.removeTeamMember, { params: { memberId: b.id } });
+    await accept({ id: "uC", role: "user", email: "c@amani.test" }, c.token);
+    await owner(ctrl.resendTeamInvite, { params: { memberId: d.id } });
+    const states = {};
+    for (const [k, t] of [["expired", a.token], ["cancelled", b.token], ["accepted", c.token], ["replaced", d.token], ["unknown", "e".repeat(64)]]) { const r = await preview(t); states[k] = r.body.data.state; expect(r.body.data.invitedEmail).toBeUndefined(); }
+    expect(states).toEqual({ expired: "expired", cancelled: "cancelled", accepted: "accepted", replaced: "not_recognised", unknown: "not_recognised" });
+    expect((await preview(latest())).body.data.state).toBe("valid");
+  });
+  test("P4. a malformed link is a 400 INVITATION_LINK_INCOMPLETE; the preview changes nothing", async () => {
+    const { token } = await invite(); const before = JSON.stringify(store.teams);
+    expect((await preview("short")).body.code).toBe("INVITATION_LINK_INCOMPLETE");
+    await preview(token); await preview("z".repeat(64));
+    expect(JSON.stringify(store.teams)).toBe(before);
+  });
+  test("P5. registration in between changes nothing: the same link works once the invitee has an account, and the account type is not altered", async () => {
+    const { token } = await invite("mugo.james27@gmail.com");
+    expect((await preview(token)).body.data.accountStatus).toBe("none");
+    store.users.uJ = { id: "uJ", role: "user", email: "mugo.james27@gmail.com", name: "James" };
+    expect((await preview(token)).body.data.accountStatus).toBe("personal");
+    expect((await accept(store.users.uJ, token)).statusCode).toBe(200);
+    expect(store.users.uJ.role).toBe("user");
+    expect(writes.some((w) => w[0] === "User.update")).toBe(false);
+  });
+  test("N1. accepting notifies ONLY the inviting dealership (in-app + e-mail), with no token, and never anyone else", async () => {
+    const { token } = await invite();
+    await accept(invitee, token);
+    expect(mail.accepted).toHaveLength(1);
+    expect(mail.accepted[0]).toMatchObject({ to: "owner@amani.test", memberEmail: "NEW@amani.test" });
+    expect(mail.notices).toHaveLength(1);
+    expect(mail.notices[0]).toMatchObject({ user: D1, data: { kind: "team_invitation_accepted" } });
+    expect(JSON.stringify([mail.accepted, mail.notices])).not.toContain(token);
+  });
+  test("N2. a failed attempt (wrong account) notifies nobody; a notification failure never fails the acceptance", async () => {
+    const { token } = await invite();
+    await accept({ id: "uX", role: "user", email: "x@x.test" }, token);
+    expect(mail.accepted).toHaveLength(0); expect(mail.notices).toHaveLength(0);
+    const email = await import("../../services/email.service.js");
+    email.sendTeamAcceptedEmail.mockRejectedValueOnce(new Error("provider down"));
+    expect((await accept(invitee, token)).statusCode).toBe(200);
+    expect(rowOf().status).toBe("active");
+  });
+  test("N3. a delivery failure on create or resend tells the dealership (in-app); the invitee is the only recipient of the link", async () => {
+    mail.fail = true;
+    const c = await owner(ctrl.inviteTeamMember, { body: { email: "new@amani.test", role: "viewer" } });
+    expect(c.body.email.sent).toBe(false);
+    expect(mail.notices.map((n) => n.data.kind)).toEqual(["team_invitation_delivery_failed"]);
+    expect(mail.notices[0].user).toBe(D1);
+    expect(mail.sent).toHaveLength(0);
+  });
+  test("N4. the invitation e-mail goes to exactly one recipient (the invitee) and none to the dealership or platform", async () => {
+    await invite("staff@amani.test");
+    expect(mail.sent.map((m) => m.to)).toEqual(["staff@amani.test"]);
+  });
+  test("R1. simultaneous RESEND and ACCEPT of the same link: never two memberships, never a half state", async () => {
+    const { id, token } = await invite();
+    const [rs, ac] = await Promise.all([owner(ctrl.resendTeamInvite, { params: { memberId: id } }), accept(invitee, token)]);
+    const rows = Object.values(store.teams).filter((r) => r.inviteEmail === "new@amani.test");
+    expect(rows).toHaveLength(1);
+    expect([200, 404, 409]).toContain(ac.statusCode);
+    if (ac.statusCode === 200) { expect(rows[0].status).toBe("active"); expect(rows[0].member).toBe("uN"); } else { expect(rows[0].status).toBe("invited"); expect(rows[0].member).toBeNull(); }
+    expect([200, 409]).toContain(rs.statusCode);
+  });
+  test("R2. a removed member's link and a removed active member are not reusable; the roster counts stay consistent", async () => {
+    const { id, token } = await invite();
+    await accept(invitee, token);
+    await owner(ctrl.removeTeamMember, { params: { memberId: id } });
+    const r = await accept(invitee, token);
+    expect([r.statusCode, r.body.code]).toEqual([404, "INVITATION_LINK_NOT_VALID"]); // active member removal clears the hash: unknown link
+    const roster = await owner(ctrl.getTeamMembers);
+    expect(roster.body.data.stats).toMatchObject({ invited: 0, active: 0 });
+  });
+});
+

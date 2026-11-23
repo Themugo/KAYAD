@@ -1,0 +1,64 @@
+PASS 1 invitation with NO role is created at Basic Staff Access (role basic_staff, zero permissions)
+PASS 2 no permission key is true on the new invitation
+PASS 3 before acceptance: invited/invited and NO staff number
+PASS 4 accept -> 200, staff number allocated as <CODE>-STAFF-001
+PASS 5 start date recorded at acceptance; staff number NOT derived from the personal e-mail
+PASS 6 Basic member is denied (403) on leads, customers, inventory, command-centre, team, roles, subscription, marketing
+PASS 7 Basic member cannot write listings, invite staff or change the staff code
+PASS 8 Basic member CAN read their own staff profile: number, role, Basic access, isBasicAccess
+PASS 9 self-profile accepts ONLY name/phone: role, permissions, staff number and business e-mail in the body are ignored
+PASS 10 completing the profile does NOT activate a Basic member: employment stays onboarding until a role is assigned
+PASS 11 /my-workspace reports the membership with role basic_staff
+PASS 12 owner promotes Jane to Sales Agent -> 200; onboarding becomes active
+PASS 13 Jane now reaches leads (200) but STILL not finance/team/subscription
+PASS 14 owner reduces Jane back to Basic -> 200 and access is lost on the very next request (no re-login)
+PASS 15 suspend -> suspended/suspended; Jane loses ALL dealership access incl. own profile and workspace
+PASS 16 reinstate -> active/active; access restored with the same role and staff number
+PASS 17 ending employment without a reason is refused (400) and nothing changes
+PASS 18 reinstating an already-active member is refused (409/400)
+kim invite 201 {"success":true,"data":{"id":"eb932fa7-a2ad-4aff-98ac-d8b18bf0ae10","dealer":"98403b38-6a67-4a11-a5d3-45f41486f2c4","member":null,"role":"basic_staff","permissions":{"canEditCars":false,"canListCars":false,"canChatBuyers":false,"canDeleteCars":false,"canManageTeam":false,"canApproveDeals":false,"can
+kim accept [200,{"success":true,"data":{"id":"eb932fa7-a2ad-4aff-98ac-d8b18bf0ae10","dealer":"98403b38-6a67-4a11-a5d3-45f41486f2c4","member":"d00da52e-bcdb-4aa7-b162-6fedf1a9a135","role":"basic_staff","permissions":{"canEditCars":false,"canListCars":false,"canChatBuyers":false,"canDeleteCars":false,"canManageTeam":false,"canApproveDeals":false,"canEditSettings":false,"canViewEarnings":false},"status":"active","invite_email":"kim-9u1vaxz9r8@example.test","invite_expires_at":null,"invited_by":"98403b38-6a67-4a11-a5d3-45f41486f2c4","created_at":"2026-11-23T15:22:04.217513+00:00","updated_at":"2026-11-23T15:22:05.194689+00:00","employment_status":"onboarding","employment_start_date":"2026-11-23","employment_end_date":null,"employment_end_reason":null,"staff_number":null,"business_email":null,"business_email_updated_at":null,"staff_display_name":null,"work_phone":null,"profile_completed_at":null,"inviteEmail":"kim-9u1vaxz9r8@example.test","inviteExpiresAt":null,"invitedBy":"98403b38-6a67-4a11-a5d3-45f41486f2c4","createdAt":"2026-11-23T15:22:04.217513+00:00","updatedAt":"2026-11-23T15:22:05.194689+00:00","employmentStatus":"onboarding","employmentStartDate":"2026-11-23","employmentEndDate":null,"employmentEndReason":null,"staffNumber":"ZET-STAFF-001","businessEmail":null,"businessEmailUpdatedAt":null,"staffDisplayName":null,"workPhone":null,"profileCompletedAt":null}}]
+PASS 19 terminate -> removed/terminated; staff number retained; end date + reason recorded
+PASS 20 terminated Jane has NO dealership access (leads 403, own staff profile refused, workspace not a member)
+PASS 21 terminated Jane cannot re-activate herself (PUT own row refused) and the row is unchanged
+PASS 22 Jane's PERSONAL account is intact: same role and e-mail, still signs in and can use /auth/me
+PASS 23 another dealership's membership is unaffected (Kim still active with a staff number of THEIR dealership)
+PASS 24 history retained and ordered: invited, staff_number_assigned/accepted, role_changed, suspended, reinstated, terminated
+PASS 25 owner staff detail still shows the terminated employee with the staff number and history
+ERROR:  dealer_employment_events is append-only
+CONTEXT:  PL/pgSQL function kayad_employment_events_immutable() line 2 at RAISE
+PASS 26 employment events are append-only (UPDATE refused by the database)
+PASS 27 re-hire invitation reuses the SAME record: starts at Basic, keeps the staff number, status invited
+PASS 28 a DIFFERENT account cannot accept the re-hire invitation (403/409)
+PASS 29 Jane accepts the re-hire -> active again at Basic with the ORIGINAL staff number
+PASS 30 six CONCURRENT acceptances all succeed
+PASS 31 concurrent acceptances got six DISTINCT, gap-free-or-monotonic staff numbers in one dealership
+PASS 32 numbers are unique per dealership (DB unique index) and never reused after termination
+PASS 33 allocation is idempotent: repeated calls for the same member return the same number
+PASS 34 another dealership's owner cannot read ABC's staff detail by ID (403/404)
+PASS 35 another dealership's owner cannot suspend ABC's employee by ID (403/404) and nothing changes
+PASS 36 another dealership's owner cannot change ABC's business e-mail (403/404)
+PASS 37 a dealer id in the body cannot move Kim's profile write to another dealership
+PASS 38 the X-Dealer-Org header cannot add access: naming a dealership the caller is not a member of is refused
+PASS 39 owner employment-events list contains only ABC events
+PASS 40 a Basic/non-team member cannot read the employment records (403)
+PASS 41 two memberships WITHOUT a selection fail closed (no guessing which dealership)
+PASS 42 selecting each dealership returns THAT dealership’s own staff number
+PASS 43 terminating ONE membership leaves the other dealership membership working
+PASS 44 owner reads the staff code settings (locked after the first number)
+PASS 45 changing the staff code after numbers were issued is refused (409/400)
+PASS 46 a new dealership may choose its own staff code before the first number (200)
+PASS 47 an invalid staff code is refused (400)
+PASS 48 a non-owner cannot set the staff code (403)
+PASS 49 business e-mail recorded (200) but is NOT a login identity and no mailbox/user is created
+bad50 400 {"success":false,"code":"BUSINESS_EMAIL_INVALID","message":"Enter a valid business e-mail address."}
+PASS 50 an invalid business e-mail is refused (400)
+PASS 51 the owner has no membership row to suspend (owner protected structurally)
+PASS 52 a Manager cannot promote someone to Manager (only the owner can)
+PASS 53 nobody changes their own role (403)
+PASS 54 a Manager (canManageTeam) cannot end employment of the owner-level or protected members; ending a regular member is governed by server rules (no 500)
+PASS 55 audit trail recorded invitation + acceptance events for ABC
+PASS 56 a status-only update (older backend / manual fix) stays consistent: suspended -> suspended/suspended, active -> active/active
+PASS 57 accepting an invitation that carries an operational role -> active/active (Basic -> onboarding only)
+
+22_employment_lifecycle: 57/57 passed

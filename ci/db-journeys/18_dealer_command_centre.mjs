@@ -163,7 +163,7 @@ check('lot agent sees exactly their own 1 activity row', lot.myActivity?.length 
 check('a member without listing permissions gets no activity key; a sales agent with none recorded gets an empty list; the owner uses the team feed instead', fin2.myActivity === undefined && Array.isArray(sales2.myActivity) && sales2.myActivity.length === 0 && own2.myActivity === undefined);
 check('member responses never contain other members\' ids or the owner id in activity', !JSON.stringify(lot.myActivity).includes(members.manager.id) && !JSON.stringify(mgr.myActivity).includes(members.lot_agent.id));
 // ambiguous membership (active in two dealerships) fails closed
-seed(`insert into dealer_teams(dealer,member,role,status,invite_email,invited_by) values ('${Bd.id}','${members.viewer.id}','viewer','active','ambiguity-${uid()}@example.test','${Bd.id}')`);
+seed(`insert into dealer_teams(dealer,member,role,status,employment_status,invite_email,invited_by) values ('${Bd.id}','${members.viewer.id}','viewer','active','active','ambiguity-${uid()}@example.test','${Bd.id}')`);
 check('active membership in TWO dealerships fails closed (403), never picks one', (await cc(members.viewer)).status === 403);
 q(`delete from dealer_teams where dealer='${Bd.id}' and member='${members.viewer.id}'`);
 // suspended membership

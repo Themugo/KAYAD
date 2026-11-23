@@ -18,7 +18,9 @@ const mkDealer = async (tag) => {
   await d.raw('/api/v1/auth/login', { method: 'POST', body: { email: d.email, password: PW } }); d.csrf = null;
   return d;
 };
-const inv = (o, email, role = 'sales_agent') => o.raw('/api/dealer-platform/team/invite', { method: 'POST', body: { email, role } });
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// Invitation creation is rate limited per account (10 per minute): wait out the window instead of weakening the limit.
+const inv = async (o, email, role = 'sales_agent') => { let r; for (let i = 0; i < 6; i++) { r = await o.raw('/api/dealer-platform/team/invite', { method: 'POST', body: { email, role } }); if (r.status !== 429) return r; await sleep(12000); } return r; };
 const row = (email, dealer) => q(`select status||'|'||coalesce(member::text,'')||'|'||role||'|'||(invite_token_hash is not null) from dealer_teams where invite_email='${email}' and dealer='${dealer}'`);
 
 if (fs.existsSync(FAIL)) fs.rmSync(FAIL);
@@ -74,7 +76,7 @@ const rsOk = await A.raw(`/api/dealer-platform/team/${rfId}/resend`, { method: '
 const tokRf2 = tokenFrom(mailTo(rfEmail).at(-1));
 const oldLink = await rfUser.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tokRf } });
 check('B6 after a SUCCESSFUL resend the old link is refused with the explanatory code and the invitation stays pending', rsOk.status === 200 && oldLink.status === 404 && oldLink.j?.code === 'INVITATION_LINK_NOT_VALID' && /newer e-mail/.test(oldLink.j?.message || '') && row(rfEmail, A.id).startsWith('invited|'), oldLink.j);
-check('B7 the newest e-mailed link is accepted; membership active exactly once', (await rfUser.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tokRf2 } })).status === 200 && row(rfEmail, A.id) === `active|${rfUser.id}|sales_agent|false`);
+check('B7 the newest e-mailed link is accepted; membership active exactly once', (await rfUser.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tokRf2 } })).status === 200 && row(rfEmail, A.id) === `active|${rfUser.id}|sales_agent|true`);
 
 // ---- C. acceptance
 const anon = new Client();
@@ -87,9 +89,9 @@ check("C3 another dealership's owner cannot accept it (403)", otherDealer.status
 const newUser = await makeUser({ tag: 'newinvitee', email: newEmail });
 const acc = await newUser.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tok1 } });
 check('C4 NEW user registers with the invited email, signs in and accepts with the e-mailed token -> 200 active', acc.status === 200 && acc.j?.data?.status === 'active', acc);
-check('C5 database: membership active, member = that user, dealer = A, role = sales_agent, token cleared', row(newEmail, A.id) === `active|${newUser.id}|sales_agent|false`, row(newEmail, A.id));
+check('C5 database: membership active, member = that user, dealer = A, role = sales_agent (hash kept so the spent link says "already accepted"; only status invited can be claimed)', row(newEmail, A.id) === `active|${newUser.id}|sales_agent|true`, row(newEmail, A.id));
 check('C6 acceptance audit event persisted', Number(q(`select count(*) from audit_logs where action='dealer_team_invitation_accepted' and actor_id='${newUser.id}'`)) === 1);
-check('C7 duplicate acceptance (same token again) -> 404, no second row', (await newUser.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tok1 } })).status === 404 && q(`select count(*) from dealer_teams where member='${newUser.id}'`) === '1');
+check('C7 duplicate acceptance (same token again) -> 409 already accepted, no second row', (await newUser.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tok1 } })).status === 409 && q(`select count(*) from dealer_teams where member='${newUser.id}'`) === '1');
 const mw = await newUser.raw('/api/dealer-platform/my-workspace');
 check('C8 /my-workspace reports the membership (dealership name + role)', !!mw.j?.data?.membership?.dealershipName && mw.j.data.membership.teamRole === 'sales_agent', mw.j);
 ev.myWorkspace = mw.j;
@@ -112,7 +114,7 @@ const revEmail = `rev-${uid()}@example.test`; await inv(A, revEmail); const tokV
 const revId = q(`select id from dealer_teams where invite_email='${revEmail}'`);
 const rv = await A.raw(`/api/dealer-platform/team/${revId}`, { method: 'DELETE' });
 const revUser = await makeUser({ tag: 'rev', email: revEmail });
-check('D2 revoked invitation: owner revoke 200, then acceptance -> 404 and no membership', rv.status === 200 && (await revUser.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tokV } })).status === 404 && q(`select count(*) from dealer_teams where member='${revUser.id}' and status='active'`) === '0', rv.status);
+check('D2 revoked invitation: owner revoke 200, then acceptance -> 410 cancelled and no membership', rv.status === 200 && (await revUser.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tokV } })).status === 410 && q(`select count(*) from dealer_teams where member='${revUser.id}' and status='active'`) === '0', rv.status);
 const reinv = await inv(A, revEmail);
 check('D3 a revoked invitation can be re-issued (201) with a fresh working token', reinv.status === 201 && !!tokenFrom(mailTo(revEmail).at(-1)) && tokenFrom(mailTo(revEmail).at(-1)) !== tokV);
 const tokV2 = tokenFrom(mailTo(revEmail).at(-1));

@@ -1,0 +1,21 @@
+PASS a new dealer has no payout details and configured=false
+PASS banking GET is never cached by browsers or proxies
+PASS owner saves banking details
+PASS read-back immediately after save shows the saved values (no stale cached blank)
+PASS masked presentation fields never contain the full account number
+PASS persisted in dealers.payment_details
+PASS after logout and re-login the details are still there
+PASS update merges (does not erase other fields) and read-back reflects it at once
+PASS invalid paybill is rejected with a field error and nothing changes
+PASS clearing a field persists
+PASS another dealer sees only their own (empty) details
+PASS anonymous is refused
+PASS staff role manager: cannot read or change banking (invite 201, accept 200)
+PASS staff role finance_officer: cannot read or change banking (invite 201, accept 200)
+PASS staff role sales_agent: cannot read or change banking (invite 201, accept 200)
+PASS staff role lot_agent: cannot read or change banking (invite 201, accept 200)
+PASS staff role viewer: cannot read or change banking (invite 201, accept 200)
+PASS banking unchanged after every staff attempt
+PASS banking changes are audited without the values
+
+10_dealer_banking: 19/19 passed

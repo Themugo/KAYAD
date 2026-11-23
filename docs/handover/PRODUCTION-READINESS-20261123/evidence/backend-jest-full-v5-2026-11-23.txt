@@ -1,0 +1,23 @@
+(node:7484) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+  ●  Cannot log after tests are done. Did you forget to wait for something async in your test?
+    Attempted to log "⚠️  Pending seller admin notification failed: TypeError: fetch failed".
+
+      207 |     );
+      208 |   } catch (err) {
+    > 209 |     console.warn("⚠️  Pending seller admin notification failed:", err.message);
+          |             ^
+      210 |   }
+      211 | };
+      212 |
+
+      at console.warn (../../p11/backend/node_modules/@jest/console/build/index.js:173:10)
+      at notifyAdminsOfPendingSeller (controllers/authController.js:209:13)
+
+
+Test Suites: 1 skipped, 259 passed, 259 of 260 total
+Tests:       21 skipped, 4275 passed, 4296 total
+Snapshots:   0 total
+Time:        294.366 s
+Ran all test suites.

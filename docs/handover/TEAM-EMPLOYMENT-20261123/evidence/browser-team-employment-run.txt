@@ -1,0 +1,27 @@
+PASS heading "Team & Employment" and the subtitle
+PASS section tab /^Team Members/
+PASS section tab /^Invitations/
+PASS section tab /^Roles & Permissions/
+PASS section tab /^Employment Records/
+PASS section tab /^Activity \(Dealer\)/
+PASS summary tiles show real counts
+PASS Team Members table lists seeded staff with Staff ID
+PASS staff detail shows staff number, login e-mail, effective permissions and history
+PASS invite form has NO role selector and states the Basic default
+PASS preview names Basic Staff Access
+PASS invitation appears as pending
+PASS database: invited at basic_staff
+PASS Jane accepts the e-mailed link
+PASS Basic employee sees "My staff profile" with staff number and the Basic note, and no leads/finance/team tabs
+PASS employee saves name/phone profile
+PASS role applied in the UI (database sales_agent)
+PASS ending employment without a reason is blocked with a message
+PASS database: removed/terminated, staff number kept
+PASS Employment Records lists the history
+PASS Roles & Permissions shows Basic Staff Access and the protected boundaries
+PASS Activity section renders (list or honest empty state)
+PASS 390px Team Members: no horizontal page overflow
+PASS 390px Invitations: no horizontal page overflow
+PASS no uncaught page errors
+
+team-employment browser: 25/25 passed

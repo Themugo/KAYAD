@@ -9,6 +9,7 @@ import {
 import { validateAccount, type FieldErrors } from './onboarding/validation';
 import { AuthApiError, newRegistrationIdempotencyKey, resendVerification } from '../services/authApi';
 import { useAuth } from '../context/AuthContext';
+import { previewTeamInvitation } from '../services/dealerPlatformApi';
 import { buildAuthPath, readAuthContext, rememberAuthIntent } from '../utils/authIntent';
 
 type Props = {
@@ -24,6 +25,13 @@ type Outcome =
   | { kind: 'unavailable' }
   | { kind: 'pending-application' }
   | { kind: 'unknown' };
+
+/** A dealership team invitation travels as the validated `next` path (/dealer/setup?invite=<64 hex>). Returns the token or null. */
+const inviteTokenFromNext = (next: string | null): string | null => {
+  const m = /^\/dealer\/setup\?(?:[^#]*&)?invite=([0-9a-fA-F]{64})(?:&|#|$)/.exec(next || '');
+  return m ? m[1] : null;
+};
+type InviteInfo = { status: 'loading' } | { status: 'unavailable' } | { status: 'ok'; state: string; dealershipName?: string; roleLabel?: string; invitedEmail?: string; accountStatus?: string };
 
 const emptyForm = {
   name: '', email: '', phone: '', password: '', businessName: '', location: '',
@@ -56,7 +64,10 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
   const location = useLocation();
   const navigate = useNavigate();
   const ctx = useMemo(() => readAuthContext(location), [location]);
-  const presetRole = roleForIntent(ctx.intent);
+  const inviteToken = useMemo(() => inviteTokenFromNext(ctx.next), [ctx.next]);
+  // An invitation always creates an ORDINARY PERSONAL account (role `user`): the chooser is skipped and the dealership/staff paths are not offered.
+  const presetRole = inviteToken ? 'buyer' : roleForIntent(ctx.intent);
+  const [invite, setInvite] = useState<InviteInfo | null>(inviteToken ? { status: 'loading' } : null);
 
   const [roleId, setRoleId] = useState<PublicRoleId | null>(presetRole);
   const [mode, setMode] = useState<Mode | null>(null);
@@ -84,6 +95,23 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
   };
 
   useEffect(() => { headingRef.current?.focus(); }, [roleId, mode, outcome]);
+
+  // Ask the server what the invitation is (read-only, public). The invited e-mail is then filled in and locked; the server still compares the
+  // signed-in account to the invitation on accept, so this is convenience, never authority.
+  useEffect(() => {
+    if (!inviteToken) return undefined;
+    let cancelled = false;
+    previewTeamInvitation(inviteToken)
+      .then((res: { data?: Record<string, unknown> }) => {
+        if (cancelled) return;
+        const d = (res?.data || {}) as Record<string, string>;
+        setInvite({ status: 'ok', state: d.state, dealershipName: d.dealershipName, roleLabel: d.roleLabel, invitedEmail: d.invitedEmail, accountStatus: d.accountStatus });
+        if (d.state === 'valid' && d.invitedEmail) setForm((p) => ({ ...p, email: d.invitedEmail }));
+      })
+      .catch(() => { if (!cancelled) setInvite({ status: 'unavailable' }); });
+    return () => { cancelled = true; };
+  }, [inviteToken]);
+  const inviteLocked = invite?.status === 'ok' && invite.state === 'valid' && !!invite.invitedEmail;
 
   // Where to send the person once they have verified and signed in.
   const destination = role?.id === 'professional' && mode === 'employed' ? AFFILIATION_PATH : (role?.id === 'professional' && mode === 'independent' ? providerApplicationPath('individual_inspector') : (role?.afterSignIn || ctx.next));
@@ -293,8 +321,22 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
       <h2 ref={headingRef} tabIndex={-1} className="sr-only">{role.title} details</h2>
       <div className="mb-5 flex items-center justify-between gap-3 rounded-xl bg-[#F6FAF9] px-4 py-3 text-xs text-[#64748B]">
         <span><strong className="text-[#0A3340]">{role.title}</strong> · {role.outcome}</span>
-        <button type="button" className="inline-flex min-h-[44px] items-center px-2 font-black text-[#176B87] underline" onClick={() => { setRoleId(null); setMode(null); setErrors({}); setServerError(''); }}>Change</button>
+        {!inviteToken && <button type="button" className="inline-flex min-h-[44px] items-center px-2 font-black text-[#176B87] underline" onClick={() => { setRoleId(null); setMode(null); setErrors({}); setServerError(''); }}>Change</button>}
       </div>
+      {inviteToken && invite?.status === 'loading' && <p className="mb-5 text-sm text-[#475569]" role="status" data-testid="register-invite-loading">Checking your invitation…</p>}
+      {inviteToken && invite?.status === 'ok' && invite.state === 'valid' && (
+        <div className="mb-5 rounded-xl border border-[#B8DDD8] bg-[#EEF8F6] p-4 text-sm text-[#0A3340]" role="status" data-testid="register-invite-banner">
+          <strong>{invite.dealershipName}</strong> invited you to join their team as <strong>{String(invite.roleLabel || 'team member').replace(/_/g, ' ')}</strong>.
+          <span className="mt-1 block text-xs text-[#475569]">Create your free personal account with the invited address. After you verify your e-mail and sign in, you will come back to the invitation to accept it.</span>
+          {invite.accountStatus === 'personal' && <span className="mt-2 block text-xs text-[#7A2E0E]">This address already has an account. <Link to={buildAuthPath('login', { next: ctx.next })} className="font-black underline">Sign in instead</Link>.</span>}
+        </div>
+      )}
+      {inviteToken && invite?.status === 'ok' && invite.state !== 'valid' && (
+        <div className="mb-5 rounded-xl border border-[#FEDF89] bg-[#FFFAEB] p-4 text-sm text-[#7A2E0E]" role="alert" data-testid="register-invite-unusable">
+          This invitation can no longer be used ({({ expired: 'it expired', cancelled: 'it was cancelled', accepted: 'it was already accepted', not_recognised: 'the link was replaced or is not recognised' } as Record<string, string>)[invite.state] || 'it is not valid'}). You can still create an account, then ask the dealership to send a new invitation.
+        </div>
+      )}
+      {inviteToken && invite?.status === 'unavailable' && <p className="mb-5 text-sm text-[#7A2E0E]" role="alert" data-testid="register-invite-unavailable">We could not check the invitation just now. You can still register; your invitation link will bring you back to it afterwards.</p>}
 
       {role.id === 'professional' && (
         <fieldset className="mb-5 grid gap-3">
@@ -322,7 +364,7 @@ export default function OnboardingFlow({ onComplete, onClose }: Props) {
           {serverError && <div className="kayad-auth-error" role="alert">{serverError}</div>}
 
           <TextField ref={(el) => { refs.current.name = el; }} label="Full name" value={form.name} onChange={set('name')} autoComplete="name" error={errors.name} disabled={submitting} />
-          <TextField ref={(el) => { refs.current.email = el; }} label="Email" type="email" inputMode="email" value={form.email} onChange={set('email')} autoComplete="email" error={errors.email} disabled={submitting} />
+          <TextField ref={(el) => { refs.current.email = el; }} label="Email" type="email" inputMode="email" value={form.email} onChange={set('email')} autoComplete="email" error={errors.email} disabled={submitting} readOnly={inviteLocked} aria-readonly={inviteLocked || undefined} hint={inviteLocked ? 'Locked to the address the invitation was sent to.' : undefined} data-testid="register-email" />
           <TextField ref={(el) => { refs.current.phone = el; }} label="Phone" type="tel" inputMode="tel" value={form.phone} onChange={set('phone')} autoComplete="tel" optional={!isDealer} hint={isDealer ? 'KAYARD KE uses this to reach you about your approval.' : undefined} error={errors.phone} disabled={submitting} />
 
           {isDealer && (

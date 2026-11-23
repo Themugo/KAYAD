@@ -6,7 +6,7 @@ import { dealerOrgAccess } from "../middleware/dealerOrgAccess.js";
 import { dealerWorkspaceAccess, myWorkspaceHandler } from "../middleware/dealerWorkspace.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import upload, { handleUploadError, cleanupUploadsOnError } from "../middleware/upload.js"; // STAGE 5C.1
-import { uploadLimiter, createLimiter, stepUpLimiter } from "../middleware/rateLimiter.js";
+import { uploadLimiter, createLimiter, stepUpLimiter, invitationLimiter } from "../middleware/rateLimiter.js";
 import { requireDealerVerification } from "../middleware/dealerVerification.js";
 import {
   // Dashboard
@@ -47,6 +47,15 @@ import {
   updateTeamMember,
   removeTeamMember,
   acceptTeamInvite,
+  previewTeamInvitation,
+  getTeamMemberDetail,
+  getEmploymentRecords,
+  applyEmploymentAction,
+  setMemberBusinessEmail,
+  getMyStaffProfile,
+  updateMyStaffProfile,
+  getStaffCodeSettings,
+  putStaffCodeSettings,
   // Subscription
   getSubscription,
   // AI Copilot
@@ -118,15 +127,27 @@ router.get("/analytics/recommendations", protect, dealerBusinessOnly, asyncHandl
 // Team
 // Phase 14.7: the roster exposes member names/emails, so listing needs the same permission as managing the team.
 router.get("/team", protect, dealerOrgAccess("canManageTeam"), asyncHandler(getTeamMembers));
-router.post("/team/invite", protect, dealerOrgAccess("canManageTeam"), asyncHandler(inviteTeamMember));
+// Employee self-service: needs only an ACTIVE membership (Basic Staff Access is enough) and exposes nothing but the caller's own membership.
+// These fixed paths are registered BEFORE the /team/:memberId routes so "me" is never read as a member id.
+router.get("/team/me", protect, dealerOrgAccess(), asyncHandler(getMyStaffProfile));
+router.put("/team/me", protect, dealerOrgAccess(), createLimiter, asyncHandler(updateMyStaffProfile));
+router.get("/team/employment-events", protect, dealerOrgAccess("canManageTeam"), asyncHandler(getEmploymentRecords));
+router.get("/team/staff-code", protect, dealerOrgAccess("canManageTeam"), asyncHandler(getStaffCodeSettings));
+router.put("/team/staff-code", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(putStaffCodeSettings));
+router.post("/team/invite", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(inviteTeamMember));
 router.post("/team/:memberId/resend", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(resendTeamInvite));
 router.get("/team/roles", protect, dealerOrgAccess("canManageTeam"), asyncHandler(getTeamRoles));
 router.post("/team/roles", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(createTeamRole));
 router.put("/team/roles/:roleKey", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(updateTeamRole));
 router.delete("/team/roles/:roleKey", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(deleteTeamRole));
+router.get("/team/:memberId", protect, dealerOrgAccess("canManageTeam"), asyncHandler(getTeamMemberDetail));
+router.post("/team/:memberId/employment", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(applyEmploymentAction));
+router.put("/team/:memberId/business-email", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(setMemberBusinessEmail));
 router.put("/team/:memberId", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(updateTeamMember));
 router.delete("/team/:memberId", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(removeTeamMember));
-router.post("/team/accept", protect, asyncHandler(acceptTeamInvite));
+// Public preview of an invitation link (POST so the token stays out of URLs and logs); acceptance still requires the matching signed-in account.
+router.post("/team/invitation/preview", invitationLimiter, asyncHandler(previewTeamInvitation));
+router.post("/team/accept", protect, invitationLimiter, asyncHandler(acceptTeamInvite));
 
 // Subscription
 router.get("/subscription", protect, dealerBusinessOnly, asyncHandler(getSubscription));

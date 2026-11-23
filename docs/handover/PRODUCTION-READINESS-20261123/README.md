@@ -23,3 +23,6 @@ Start with `REPORT.md` (revision 2). Earlier evidence is preserved (`evidence/`,
 3. Invitation fix (rev 2): `backend/controllers/dealerPlatformController.js`, `src/pages/dealer/DealerTeamInvite.jsx`, `DealerTeamPanel.tsx`, new tests and a real-browser journey (`ci/browser/team-invitation.mjs`). Revision 3 (e-mail identity mismatch): `backend/utils/emailIdentity.js` and the wrong-account/switch-account page. See `INVITATION-ACCEPTANCE-AUDIT.md`.
 4. This documentation folder.
 **No migration, financial function, workflow, environment or production configuration was changed.** Nothing was committed, pushed, merged or deployed by Claude. Do not run `supabase db push`.
+
+## Addendum v5 (2026-11-23): dealer team onboarding and staff privacy
+See `DEALER-TEAM-ONBOARDING-AND-PRIVACY-AUDIT.md`. Invitation-first registration, distinct invitation states, owner notification on acceptance, invitation rate limits, legacy team PATCH/DELETE retired (410). Local evidence only; production not verified.

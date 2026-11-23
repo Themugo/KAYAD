@@ -996,7 +996,8 @@ function AuthRouteSurface() {
   if (path === '/dealer') return <RequireAuth><RequireDealer><Navigate to="/?nav=dealer-dashboard" replace /></RequireDealer></RequireAuth>;
   if (path === '/inspector/dashboard') return <RequireAuth><Navigate to="/?nav=inspections" replace /></RequireAuth>;
 
-  if (path === '/dealer/setup') return <RequireAuth><DealerJourneySurface><DealerTeamInvite /></DealerJourneySurface></RequireAuth>;
+  // Public on purpose: a person with no account yet must see the invitation and be taken to create one (the page itself requires sign-in to ACCEPT).
+  if (path === '/dealer/setup') return <DealerJourneySurface><DealerTeamInvite /></DealerJourneySurface>;
   if (path === '/dealer/onboarding') return <RequireAuth><RequireDealerApplicant><DealerJourneySurface><DealerOnboarding /></DealerJourneySurface></RequireDealerApplicant></RequireAuth>;
   if (path === '/dealer/auction-setup') return <RequireAuth><RequireDealer><DealerJourneySurface><DealerAuctionSetupWizard /></DealerJourneySurface></RequireDealer></RequireAuth>;
   if (path === '/dealer/auction-operations') return <RequireAuth><RequireDealer><DealerJourneySurface><DealerAuctionOperations /></DealerJourneySurface></RequireDealer></RequireAuth>;

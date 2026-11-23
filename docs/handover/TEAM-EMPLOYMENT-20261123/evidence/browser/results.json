@@ -1,0 +1,102 @@
+[
+ {
+  "name": "heading \"Team & Employment\" and the subtitle",
+  "pass": true
+ },
+ {
+  "name": "section tab /^Team Members/",
+  "pass": true
+ },
+ {
+  "name": "section tab /^Invitations/",
+  "pass": true
+ },
+ {
+  "name": "section tab /^Roles & Permissions/",
+  "pass": true
+ },
+ {
+  "name": "section tab /^Employment Records/",
+  "pass": true
+ },
+ {
+  "name": "section tab /^Activity \\(Dealer\\)/",
+  "pass": true
+ },
+ {
+  "name": "summary tiles show real counts",
+  "pass": true
+ },
+ {
+  "name": "Team Members table lists seeded staff with Staff ID",
+  "pass": true
+ },
+ {
+  "name": "staff detail shows staff number, login e-mail, effective permissions and history",
+  "pass": true
+ },
+ {
+  "name": "invite form has NO role selector and states the Basic default",
+  "pass": true
+ },
+ {
+  "name": "preview names Basic Staff Access",
+  "pass": true
+ },
+ {
+  "name": "invitation appears as pending",
+  "pass": true
+ },
+ {
+  "name": "database: invited at basic_staff",
+  "pass": true
+ },
+ {
+  "name": "Jane accepts the e-mailed link",
+  "pass": true
+ },
+ {
+  "name": "Basic employee sees \"My staff profile\" with staff number and the Basic note, and no leads/finance/team tabs",
+  "pass": true
+ },
+ {
+  "name": "employee saves name/phone profile",
+  "pass": true
+ },
+ {
+  "name": "role applied in the UI (database sales_agent)",
+  "pass": true
+ },
+ {
+  "name": "ending employment without a reason is blocked with a message",
+  "pass": true
+ },
+ {
+  "name": "database: removed/terminated, staff number kept",
+  "pass": true
+ },
+ {
+  "name": "Employment Records lists the history",
+  "pass": true
+ },
+ {
+  "name": "Roles & Permissions shows Basic Staff Access and the protected boundaries",
+  "pass": true
+ },
+ {
+  "name": "Activity section renders (list or honest empty state)",
+  "pass": true
+ },
+ {
+  "name": "390px Team Members: no horizontal page overflow",
+  "pass": true
+ },
+ {
+  "name": "390px Invitations: no horizontal page overflow",
+  "pass": true
+ },
+ {
+  "name": "no uncaught page errors",
+  "pass": true
+ }
+]

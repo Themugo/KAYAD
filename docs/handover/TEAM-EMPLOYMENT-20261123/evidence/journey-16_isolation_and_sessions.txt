@@ -1,0 +1,33 @@
+PASS A cannot mutate B's objects: 12 direct attempts all refused (4xx, none 2xx)
+PASS B's listing is byte-for-byte unchanged after all attempts
+PASS A's inventory listing never contains B's listing id/title (query isolation)
+PASS A's my-listings never contains B's listing
+PASS bulk mixing own+foreign ids never changes the foreign one
+PASS anonymous inventory -> 401
+PASS personal buyer inventory -> 403
+PASS A cannot update B's dealer profile
+PASS B's business name unchanged
+PASS all built-in team roles accepted invitations (200)
+PASS every built-in team role x 7 probes matches the permission model exactly (42 cells; allowed AND denied)
+PASS owner-only surfaces (subscription, finance) denied for EVERY team role and allowed for the owner
+PASS team management is owner-only: manager included is denied (403)
+PASS viewer is denied every probe
+PASS team members can never reach the OTHER dealership (B inventory item edit)
+PASS removing a member cuts access on the very next request (no re-login)
+PASS suspending the dealership cuts every member (sales_agent -> 403/401)
+PASS S1 valid session reads own sessions (200)
+PASS S2 logout then replay of the OLD cookies -> 401
+PASS S3 revoke-all succeeds
+PASS S4 after revoke-all the OLD access token stops working immediately (token version bump)
+PASS S5 deactivated account is refused on its existing session (403)
+PASS S6 banned account is refused on its existing session
+PASS S7 refresh with a valid refresh cookie works (rotation)
+PASS S8 re-using an already-rotated refresh token is rejected (401/403)
+PASS S9 reuse of a rotated refresh token revokes the family (the legitimate newer token is also dead)
+PASS S10 malformed/garbage token -> 401
+PASS S11 member session works before demotion
+PASS S12 member access ends on membership suspension without logout
+PASS S13 privilege check is server-side (self-promotion in DB to dealer still cannot reach admin API)
+PASS S14 state-changing call without CSRF/session -> rejected
+
+16_isolation_and_sessions: 31/31 passed

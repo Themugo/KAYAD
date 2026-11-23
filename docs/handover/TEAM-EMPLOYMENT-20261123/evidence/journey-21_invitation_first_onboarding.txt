@@ -1,0 +1,39 @@
+PASS 1.1 invite an e-mail with no account -> 201, e-mail sent
+PASS 1.2 the invitee e-mail has a 64-hex link, names the dealership and role, explains what happens and how to report
+PASS 1.3 recipients: exactly one `to` (the invitee), no cc, no bcc
+PASS 1.4 public preview (no sign-in): valid, dealership + role + invited e-mail, accountStatus none
+PASS 1.5 preview never returns the token, its hash or other members
+PASS 1.6 preview changed nothing (row still invited, same hash)
+PASS 2.1 registration succeeds as role "user"; no session before verification
+PASS 2.2 sign-in is refused until the e-mail is verified (verification is NOT bypassed by an invitation)
+PASS 2.3 an unverified/unauthenticated visitor cannot accept (401) and the invitation is untouched
+PASS 2.4 the verification e-mail arrived (to the invitee only)
+PASS 2.5 preview now reports an existing PERSONAL account for the same link
+PASS 2.6 verification succeeds
+PASS 2.7 sign-in works after verification
+PASS 3.1 accept the ORIGINAL link -> 200 (no second invitation needed)
+PASS 3.2 one active membership for this dealership and role; personal role unchanged
+PASS 3.3 accepting again -> 409 INVITATION_ALREADY_ACCEPTED with alreadyMember
+PASS 3.4 the DEALERSHIP receives the acceptance e-mail (to the dealer only, no cc/bcc, no token or invitation link)
+PASS 3.5 the dealership has an in-app notification for the acceptance
+PASS 3.6 NO invitation e-mail with an acceptance link went to any non-test (e.g. platform/staff) address
+PASS 3.7 the roster shows 1 active, 0 pending for this invitee; dealer B sees nothing of it
+PASS 4.1 preview states: expired / cancelled / accepted / replaced+unknown (not recognised)
+PASS 4.2 accept: expired -> 410 INVITATION_EXPIRED; cancelled -> 410 INVITATION_CANCELLED; neither activates anything
+PASS 4.3 malformed link -> 400 INVITATION_LINK_INCOMPLETE from preview
+PASS 4.4 replaced link -> 404 INVITATION_LINK_NOT_VALID and the invitation stays pending
+PASS 5.1 wrong signed-in account -> 403 INVITATION_EMAIL_MISMATCH with a masked hint only
+PASS 5.2 ...invitation untouched; the right account then accepts it
+PASS 6.1 four simultaneous accepts: exactly one 200, the rest 409, one membership
+PASS 6.2 simultaneous resend + accept: a single consistent outcome (never two memberships, never half state)
+PASS 7.1 a viewer cannot invite, list or remove team members (owner-only controls)
+PASS 7.2 a viewer cannot raise their own permissions or role
+PASS 7.3 dealer B cannot resend, change or remove dealer A's members or invitations (404)
+PASS 7.4 before removal the staff member has a workspace membership for dealer A
+PASS 7.5 owner removes them: workspace access revoked at once, personal account still signs in
+PASS 7.6 a removed member's old link cannot bring them back
+PASS 8.1 provider outage: invite created, email.sent=false, response has no token
+PASS 8.2 the dealership gets an in-app "not delivered" notification
+PASS 9.1 preview/accept expose rate-limit headers
+
+invitation-first onboarding: 37/37 passed

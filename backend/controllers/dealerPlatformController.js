@@ -27,11 +27,12 @@ import * as dbApi from "../db/index.js"; // updateMany: compare-and-set for sing
 import { logAuditEvent } from "../services/auditService.js";
 import crypto from "crypto";
 import { sellerMayPublishDirectly } from "../services/onboardingPolicy.service.js"; // listing self-publication
-import { sendTeamInviteEmail } from "../services/email.service.js";
-import { listRoles, resolveRole, createCustomRole, updateCustomRole, deleteCustomRole, RoleError, newInviteToken } from "../services/dealerTeamRoles.service.js";
+import { sendTeamInviteEmail, sendTeamAcceptedEmail } from "../services/email.service.js";
+import { PERMISSION_LABELS, listRoles, resolveRole, createCustomRole, updateCustomRole, deleteCustomRole, RoleError, newInviteToken } from "../services/dealerTeamRoles.service.js";
 import { formatPhone } from "../utils/format.js";
 import { bulkChangeDealerListingStatus } from "../services/dealerListingSale.service.js";
 import { DEALER_TEAM_PERMISSIONS } from "../middleware/dealerOrgAccess.js";
+import { employmentAvailable, recordEmploymentEvent, listEmploymentEvents, allocateStaffNumber, setStaffCode, getStaffSettings, accessLevel, cleanBusinessEmail, cleanText, todayDate, ACTION_RESULT, BASIC_ROLE_KEY } from "../services/dealerEmployment.service.js";
 
 import { validateCompanyName, dealerPublicName } from '../utils/companyName.js';
 // ============================================================
@@ -623,13 +624,25 @@ const TEAM_TRANSITIONS = Object.freeze({
   removed: [],
 });
 
+// Employment columns that must change together with an ACCESS status change (DB constraint dealer_teams_access_employment_consistent).
+function employmentPatchForStatus(existing, nextStatus, reason) {
+  if (nextStatus === "suspended") return { employmentStatus: "suspended" };
+  if (nextStatus === "active") return { employmentStatus: "active" };
+  if (nextStatus === "removed" && existing.status !== "invited") return { employmentStatus: "terminated", employmentEndDate: todayDate(), employmentEndReason: reason ? String(reason).slice(0, 500) : null };
+  return {};
+}
+const eventForStatus = (existing, nextStatus) => (nextStatus === "suspended" ? "suspended" : nextStatus === "active" ? "reinstated" : existing.status === "invited" ? "invitation_cancelled" : "terminated");
+
 export async function getTeamMembers(req, res) {
   const dealerId = req.dealerId || req.user.id;
   const rows = await findAll("dealer_teams", { filters: { dealer: dealerId }, orderBy: "createdAt", ascending: false, limit: 200 });
   const memberIds = rows.map(r => r.member).filter(Boolean);
   const users = memberIds.length ? await User.find({ id: { $in: memberIds } }) : [];
   const byId = new Map(users.map(u => [u.id, u]));
-  return res.json({ success: true, data: { items: rows.map(r => ({ ...publicTeamRow(r), memberProfile: r.member ? { id: r.member, name: byId.get(r.member)?.name || null, email: byId.get(r.member)?.email || r.inviteEmail } : null })), stats: { total: rows.length, active: rows.filter(r => r.status === "active").length, invited: rows.filter(r => r.status === "invited").length, suspended: rows.filter(r => r.status === "suspended").length } } });
+  const employment = await employmentAvailable();
+  const roleList = await listRoles(dealerId);
+  const roleByKey = new Map(roleList.roles.map((x) => [x.key, x]));
+  return res.json({ success: true, employmentAvailable: employment, data: { items: rows.map(r => ({ ...publicTeamRow(r), roleLabel: roleByKey.get(r.role)?.label || String(r.role).replace(/_/g, " "), accessLevel: accessLevel(r.permissions), memberProfile: r.member ? { id: r.member, name: byId.get(r.member)?.name || null, email: byId.get(r.member)?.email || r.inviteEmail } : null })), stats: { total: rows.length, active: rows.filter(r => r.status === "active").length, invited: rows.filter(r => r.status === "invited").length, suspended: rows.filter(r => r.status === "suspended").length, onboarding: rows.filter(r => r.employmentStatus === "onboarding").length, basicAccess: rows.filter(r => r.status === "active" && r.role === BASIC_ROLE_KEY).length } } });
 }
 
 const roleError = (res, err) => (err instanceof RoleError ? res.status(err.status).json({ success: false, code: err.code, message: err.message }) : null);
@@ -638,9 +651,9 @@ const roleOverreach = (req, role) => (isUnrestrictedTeamActor(req) ? [] : grante
 const INVITE_TTL_MS = 7 * 86400000;
 
 // Sends the invitation e-mail and reports what really happened (the provider returns {success:false} rather than throwing).
-async function deliverInvite(email, inviterName, roleLabel, token) {
+async function deliverInvite(email, inviterName, roleLabel, token, invitedBy) {
   try {
-    const r = await sendTeamInviteEmail(email, inviterName || "KAYARD KE Dealer", roleLabel, token);
+    const r = await sendTeamInviteEmail(email, inviterName || "KAYARD KE Dealer", roleLabel, token, { invitedBy });
     if (r && r.success === true) return { sent: true };
     return { sent: false, reason: r?.disabled ? "Email sending is not configured on the server." : "The email provider did not accept the message." };
   } catch (err) {
@@ -648,9 +661,15 @@ async function deliverInvite(email, inviterName, roleLabel, token) {
   }
 }
 
+// In-app notice for the DEALERSHIP that owns the team (never KAYARD staff). Best-effort: a notification failure never fails the team action.
+async function notifyDealer(dealerId, { title, message, type = "info", data = {} }) {
+  try { const { createNotification } = await import("./notificationController.js"); await createNotification({ user: dealerId, title, message, type, data, link: "/?nav=dealer-dashboard&section=team" }); } catch { /* best-effort */ }
+}
+
 export async function inviteTeamMember(req, res) {
   const email = normalizeEmail(req.body?.email);
-  const roleKey = String(req.body?.role || "sales_agent");
+  // Product rule: every new invitation starts with Basic Staff Access (no operational permissions). The dealer assigns the job role AFTER the person joins.
+  const roleKey = String(req.body?.role || BASIC_ROLE_KEY);
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ success: false, message: "Valid email is required" });
   const dealerId = req.dealerId || req.user.id;
   const role = await resolveRole(dealerId, roleKey);
@@ -663,11 +682,25 @@ export async function inviteTeamMember(req, res) {
   if (existing && existing.status !== "removed") return res.status(409).json({ success: false, message: "An active or pending invitation already exists for this email" });
   const token = newInviteToken();
   const hash = crypto.createHash("sha256").update(token).digest("hex");
-  const fields = { member: null, role: role.key, permissions: { ...role.permissions }, status: "invited", inviteEmail: email, inviteTokenHash: hash, inviteExpiresAt: new Date(Date.now() + INVITE_TTL_MS).toISOString(), invitedBy: req.user.id };
+  // A removed row is a RE-HIRE of the same person: the row (and its staff number and history) is reused, never recreated, and the previous
+  // member id is kept so the staff identity cannot silently pass to a different account (acceptance refuses a different account).
+  const employment = await employmentAvailable();
+  let employeeName = null, businessEmail = null;
+  try { employeeName = cleanText(req.body?.employeeName, 80, "Employee name"); businessEmail = cleanBusinessEmail(req.body?.businessEmail); }
+  catch (err) { return res.status(400).json({ success: false, code: err.code || "INVALID_INPUT", message: err.message }); }
+  const rehire = Boolean(existing && existing.member);
+  const fields = { member: rehire ? existing.member : null, role: role.key, permissions: { ...role.permissions }, status: "invited", inviteEmail: email, inviteTokenHash: hash, inviteExpiresAt: new Date(Date.now() + INVITE_TTL_MS).toISOString(), invitedBy: req.user.id };
+  if (employment) {
+    Object.assign(fields, { employmentStatus: "invited", employmentEndDate: null, employmentEndReason: null });
+    if (employeeName) fields.staffDisplayName = employeeName;
+    if (businessEmail) { fields.businessEmail = businessEmail; fields.businessEmailUpdatedAt = new Date().toISOString(); }
+  }
   const row = existing ? await update("dealer_teams", existing.id, fields) : await create("dealer_teams", { dealer: dealerId, ...fields });
+  if (employment) await recordEmploymentEvent({ dealerId, teamId: row.id, type: rehire ? "rehire_invited" : "invited", actor: req.user.id, actorLabel: req.user.name, staffNumber: row.staffNumber ?? existing?.staffNumber ?? null, to: { role: role.key, roleLabel: role.label } });
   // The e-mail must name the DEALERSHIP the person is joining (not the inviting person, who may be a delegated team member).
-  const email_ = await deliverInvite(email, dealerPublicName(await User.findById(dealerId)), role.label, token);
-  logInfo("dealer_team_invitation_created", { invitation: row.id, fingerprint: hash.slice(0, 8), emailSent: email_.sent });
+  const email_ = await deliverInvite(email, dealerPublicName(await User.findById(dealerId)), role.label, token, req.user.name);
+  if (!email_.sent) await notifyDealer(dealerId, { title: "Invitation e-mail not delivered", message: `The invitation for ${email} could not be e-mailed. Use Resend on the Team page once e-mail is available; nobody else holds a link.`, type: "warning", data: { invitation: row.id, kind: "team_invitation_delivery_failed" } });
+  logInfo("dealer_team_invitation_created",{ invitation: row.id, fingerprint: hash.slice(0, 8), emailSent: email_.sent });
   await logAuditEvent({ action: "dealer_team_invitation_created", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", newValue: { ...publicTeamRow(row), emailSent: email_.sent }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
   return res.status(201).json({ success: true, data: publicTeamRow(row), email: email_ });
 }
@@ -685,7 +718,8 @@ export async function resendTeamInvite(req, res) {
   const newHash = crypto.createHash("sha256").update(token).digest("hex");
   const previous = { inviteTokenHash: existing.inviteTokenHash ?? null, inviteExpiresAt: existing.inviteExpiresAt ?? null };
   let row = await update("dealer_teams", existing.id, { inviteTokenHash: newHash, inviteExpiresAt: new Date(Date.now() + INVITE_TTL_MS).toISOString() });
-  const email_ = await deliverInvite(existing.inviteEmail, dealerPublicName(await User.findById(dealerId)), role.label, token);
+  const email_ = await deliverInvite(existing.inviteEmail, dealerPublicName(await User.findById(dealerId)), role.label, token, req.user.name);
+  if (!email_.sent) await notifyDealer(dealerId, { title: "Invitation e-mail not delivered", message: `The re-sent invitation for ${existing.inviteEmail} could not be e-mailed. The previous link keeps working until a new e-mail is delivered.`, type: "warning", data: { invitation: existing.id, kind: "team_invitation_delivery_failed" } });
   // Policy: a successful resend replaces the previous link (only the newest e-mail works). If the e-mail was NOT delivered nobody holds the new
   // link, so the previous link must keep working: restore it (only while the row still carries the hash we just wrote).
   let previousLinkRestored = false;
@@ -694,6 +728,7 @@ export async function resendTeamInvite(req, res) {
     if (Array.isArray(restored) && restored[0]) { row = restored[0]; previousLinkRestored = true; }
   }
   // Safe fingerprints (first 8 hex of the SHA-256, never the token) let support compare "emailed link" and "stored link".
+  if (await employmentAvailable()) await recordEmploymentEvent({ dealerId, teamId: existing.id, type: "invitation_resent", actor: req.user.id, actorLabel: req.user.name, staffNumber: existing.staffNumber ?? null });
   logInfo("dealer_team_invitation_resent", { invitation: existing.id, newFingerprint: newHash.slice(0, 8), emailSent: email_.sent, previousLinkRestored });
   await logAuditEvent({ action: "dealer_team_invitation_resent", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", newValue: { emailSent: email_.sent, previousLinkRestored }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
   return res.json({ success: true, data: publicTeamRow(row), email: { ...email_, previousLinkStillValid: previousLinkRestored } });
@@ -773,7 +808,7 @@ export async function updateTeamMember(req, res) {
       // reactivation requires an accepted membership
       if (body.status === "active" && !existing.member) return res.status(409).json({ success: false, code: "INVALID_TEAM_TRANSITION", message: "A pending invitation can only be activated by the invitee accepting it" });
       updates.status = body.status;
-      if (body.status === "removed") { updates.inviteTokenHash = null; updates.inviteExpiresAt = null; }
+      if (body.status === "removed" && existing.status !== "invited") { updates.inviteTokenHash = null; updates.inviteExpiresAt = null; } // pending invitation keeps its hash (see removeTeamMember)
     }
   }
   if (body.permissions !== undefined) {
@@ -791,7 +826,21 @@ export async function updateTeamMember(req, res) {
     updates.permissions = perms;
   }
   if (!Object.keys(updates).length) return res.status(400).json({ success: false, message: "No valid team changes supplied" });
+  const employment = await employmentAvailable();
+  let reason = null;
+  try { reason = body.reason === undefined ? null : cleanText(body.reason, 500, "Reason"); } catch (err) { return res.status(400).json({ success: false, code: err.code || "INVALID_INPUT", message: err.message }); }
+  if (employment) {
+    if (updates.status) Object.assign(updates, employmentPatchForStatus(existing, updates.status, reason));
+    // Assigning an operational role to someone still onboarding completes onboarding (access status is unchanged).
+    if (updates.role && updates.role !== BASIC_ROLE_KEY && existing.employmentStatus === "onboarding" && !updates.employmentStatus) updates.employmentStatus = "active";
+  }
   const row = await update("dealer_teams", existing.id, updates);
+  if (employment) {
+    const common = { dealerId, teamId: existing.id, actor: req.user.id, actorLabel: req.actingMember?.name || req.user.name, staffNumber: existing.staffNumber ?? null, reason };
+    if (updates.role && updates.role !== existing.role) await recordEmploymentEvent({ ...common, type: "role_changed", from: { role: existing.role, accessLevel: accessLevel(existing.permissions) }, to: { role: updates.role, accessLevel: accessLevel(updates.permissions ?? existing.permissions) } });
+    else if (updates.permissions) await recordEmploymentEvent({ ...common, type: "permissions_changed", from: { permissions: grantedKeys(existing.permissions) }, to: { permissions: grantedKeys(updates.permissions) } });
+    if (updates.status && updates.status !== existing.status) await recordEmploymentEvent({ ...common, type: eventForStatus(existing, updates.status), from: { status: existing.status }, to: { status: updates.status } });
+  }
   await logAuditEvent({ action: "dealer_team_member_updated", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", oldValue: publicTeamRow(existing), newValue: publicTeamRow(row), ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
   return res.json({ success: true, data: publicTeamRow(row) });
 }
@@ -806,7 +855,15 @@ export async function removeTeamMember(req, res) {
   const protectedTarget = teamActorMayManage(req, existing);
   if (protectedTarget) return TEAM_PROTECTED(res, protectedTarget.code, protectedTarget.message);
   if (existing.status === "removed") return res.status(409).json({ success: false, code: "INVALID_TEAM_TRANSITION", message: "This team member has already been removed" });
-  const row = await update("dealer_teams", existing.id, { status: "removed", inviteTokenHash: null, inviteExpiresAt: null });
+  // A cancelled PENDING invitation keeps its token hash (status "removed" makes it unusable: acceptance only claims status "invited") so the
+  // link can later say "cancelled" instead of "not found". An active member's hash is already cleared, so nothing else changes.
+  const employment = await employmentAvailable();
+  let endReason = null;
+  try { endReason = req.body && typeof req.body === "object" && req.body.reason ? cleanText(req.body.reason, 500, "Reason") : null; } catch (err) { return res.status(400).json({ success: false, code: err.code || "INVALID_INPUT", message: err.message }); }
+  const removal = existing.status === "invited" ? { status: "removed" } : { status: "removed", inviteTokenHash: null, inviteExpiresAt: null };
+  if (employment) Object.assign(removal, employmentPatchForStatus(existing, "removed", endReason));
+  const row = await update("dealer_teams", existing.id, removal);
+  if (employment) await recordEmploymentEvent({ dealerId, teamId: existing.id, type: eventForStatus(existing, "removed"), actor: req.user.id, actorLabel: req.actingMember?.name || req.user.name, staffNumber: existing.staffNumber ?? null, from: { status: existing.status }, to: { status: "removed" }, reason: endReason });
   await logAuditEvent({
     action: "dealer_team_member_removed",
     actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email,
@@ -816,16 +873,52 @@ export async function removeTeamMember(req, res) {
   return res.json({ success: true, data: publicTeamRow(row) });
 }
 
+const INVITATION_LINK_NOT_VALID = { success: false, code: "INVITATION_LINK_NOT_VALID", message: "This invitation link is not recognised. It may have been replaced by a newer e-mail from the dealership, or it is not a KAYARD KE invitation link. Open the most recent invitation e-mail, or ask the dealership to resend it." };
+
+// Lifecycle state of a stored invitation, from the row alone. A cancelled (removed) or accepted (active/suspended) row keeps its token hash, so those
+// links say what happened. A link that was REPLACED by a resend has no row any more (the hash is rotated), so it cannot be told apart from an
+// unknown link: both are "not recognised" (no schema change to keep old hashes; documented limitation).
+const invitationState = (row) => {
+  if (row.status === "removed") return "cancelled";
+  if (row.status === "active" || row.status === "suspended") return "accepted";
+  if (row.inviteExpiresAt && new Date(row.inviteExpiresAt) <= new Date()) return "expired";
+  return "valid";
+};
+const hashInviteToken = (token) => crypto.createHash("sha256").update(token).digest("hex");
+
+// Public, rate-limited, POST (so the bearer token never lands in an access log or query string). Answers "what is this link?" for the person
+// holding it: dealership, role, state and whether an account exists for the invited address. It never changes anything and never returns
+// tokens, hashes or other members. The invited e-mail is returned only for a still-valid link (the holder received it at that address).
+export async function previewTeamInvitation(req, res) {
+  res.set("Cache-Control", "no-store");
+  const token = String(req.body?.token || "").trim();
+  if (!/^[0-9a-f]{64}$/.test(token)) return res.status(400).json({ success: false, code: "INVITATION_LINK_INCOMPLETE", message: "This invitation link is incomplete. Open the link from the e-mail again, or ask the dealership to resend it." });
+  const row = await findOne("dealer_teams", { inviteTokenHash: hashInviteToken(token) });
+  if (!row) return res.json({ success: true, data: { state: "not_recognised" } });
+  const state = invitationState(row);
+  const dealer = await User.findById(row.dealer);
+  const data = { state, dealershipName: dealerPublicName(dealer) };
+  if (state === "valid") {
+    const role = (await resolveRole(row.dealer, row.role)) || { label: String(row.role || "member") };
+    const account = await findOne("users", { email: normalizeEmail(row.inviteEmail) });
+    Object.assign(data, { roleLabel: role.label, invitedEmail: row.inviteEmail, expiresAt: row.inviteExpiresAt || null, accountStatus: !account ? "none" : account.role === "user" ? "personal" : "other" });
+  }
+  return res.json({ success: true, data });
+}
+
 export async function acceptTeamInvite(req, res) {
   const token = String(req.body?.token || "").trim();
   if (token.length !== 64) return res.status(400).json({ success: false, message: "Invalid invitation token" });
-  const hash = crypto.createHash("sha256").update(token).digest("hex");
-  const row = await findOne("dealer_teams", { inviteTokenHash: hash, status: "invited" });
+  const hash = hashInviteToken(token);
+  const row = await findOne("dealer_teams", { inviteTokenHash: hash });
   if (!row) {
     logInfo("dealer_team_accept_no_pending_invitation", { fingerprint: hash.slice(0, 8), user: req.user.id });
-    return res.status(404).json({ success: false, code: "INVITATION_LINK_NOT_VALID", message: "This invitation link is no longer valid. It may have been replaced by a newer e-mail from the dealership, already used, or cancelled." });
+    return res.status(404).json(INVITATION_LINK_NOT_VALID);
   }
-  if (row.inviteExpiresAt && new Date(row.inviteExpiresAt) <= new Date()) return res.status(410).json({ success: false, message: "Invitation has expired" });
+  const state = invitationState(row);
+  if (state === "cancelled") return res.status(410).json({ success: false, code: "INVITATION_CANCELLED", message: "The dealership cancelled this invitation. Ask them to send you a new one." });
+  if (state === "accepted") return res.status(409).json({ success: false, code: "INVITATION_ALREADY_ACCEPTED", alreadyMember: String(row.member || "") === String(req.user.id), message: "This invitation has already been accepted." });
+  if (state === "expired") return res.status(410).json({ success: false, code: "INVITATION_EXPIRED", message: "This invitation has expired. Ask the dealership to resend it." });
   // Identity: req.user.email is the FRESH users.email of the user id inside the verified session token (middleware/auth.js re-reads it on every
   // request; the JWT carries no e-mail claim and a browser-supplied e-mail is never consulted). The invitation is never edited to fit the caller
   // and is NOT consumed by a mismatch, so the right person can still accept it.
@@ -837,14 +930,178 @@ export async function acceptTeamInvite(req, res) {
   if (req.user.role !== "user") return res.status(403).json({ success: false, code: "TEAM_MEMBER_MUST_BE_PERSONAL_ACCOUNT", message: "Dealership team members join with a personal account. A dealer owner who also has a personal account can invite it from that account's email." });
   if (String(row.dealer) === String(req.user.id)) return res.status(403).json({ success: false, code: "TEAM_SELF_MEMBERSHIP", message: "A dealer account cannot be a member of its own team." });
   const activeMembership = await findOne("dealer_teams", { dealer: row.dealer, member: req.user.id, status: "active" });
-  if (activeMembership) return res.status(409).json({ success: false, message: "You are already an active member of this dealer team" });
+  if (activeMembership) return res.status(409).json({ success: false, code: "INVITATION_ALREADY_ACCEPTED", alreadyMember: true, message: "You are already an active member of this dealer team" });
   // Compare-and-set: the row is claimed only while it is still the same pending invitation (id + status + token hash). Two simultaneous
-  // accepts (double click, two tabs, replay) therefore cannot both succeed; the loser gets the same 404 as a replayed token.
-  const claimed = await dbApi.updateMany("dealer_teams", { id: row.id, status: "invited", inviteTokenHash: hash }, { member: req.user.id, status: "active", inviteTokenHash: null, inviteExpiresAt: null });
+  // accepts (double click, two tabs, replay) therefore cannot both succeed; the loser is told the invitation was already accepted. The hash is
+  // kept on the active row (acceptance only ever claims status "invited") so the spent link can say "already accepted" rather than "not found".
+  // A re-hire keeps the previous member id on the row; a different account cannot inherit that person's staff identity.
+  if (row.member && String(row.member) !== String(req.user.id)) return res.status(409).json({ success: false, code: "INVITATION_ACCOUNT_MISMATCH", message: "This invitation belongs to a different KAYARD KE account than the one you are signed in with." });
+  const employment = await employmentAvailable();
+  const claimPatch = { member: req.user.id, status: "active", inviteExpiresAt: null };
+  if (employment) Object.assign(claimPatch, { employmentStatus: row.role === BASIC_ROLE_KEY ? "onboarding" : "active", employmentStartDate: todayDate(), employmentEndDate: null, employmentEndReason: null });
+  const claimed = await dbApi.updateMany("dealer_teams", { id: row.id, status: "invited", inviteTokenHash: hash }, claimPatch);
   const updated = Array.isArray(claimed) ? claimed[0] : null;
-  if (!updated) return res.status(404).json({ success: false, code: "INVITATION_LINK_NOT_VALID", message: "This invitation link is no longer valid. It may have been replaced by a newer e-mail from the dealership, already used, or cancelled." });
+  if (!updated) {
+    const now = await findOne("dealer_teams", { id: row.id });
+    if (now && now.status === "active") return res.status(409).json({ success: false, code: "INVITATION_ALREADY_ACCEPTED", alreadyMember: String(now.member || "") === String(req.user.id), message: "This invitation has already been accepted." });
+    return res.status(404).json(INVITATION_LINK_NOT_VALID);
+  }
+  // Staff identity: allocated ON ACCEPTANCE (never for abandoned invitations). Idempotent and race-safe in SQL; a failure leaves the member
+  // active with Basic access and tells the dealership so it can set its staff code (the number is then issued on the next attempt).
+  let staffNumber = updated.staffNumber ?? null;
+  if (employment) {
+    try { staffNumber = await allocateStaffNumber(updated.id); }
+    catch (err) {
+      logError("dealer_team_staff_number_failed", { invitation: updated.id, code: err?.code });
+      await notifyDealer(row.dealer, { title: "Staff number not assigned yet", message: `${req.user.name || req.user.email} joined, but no staff number could be issued. Set your dealership staff code on the Team & Employment page.`, type: "warning", data: { invitation: updated.id } });
+    }
+    await recordEmploymentEvent({ dealerId: row.dealer, teamId: updated.id, type: "accepted", actor: req.user.id, actorLabel: req.user.name, staffNumber, to: { role: row.role } });
+  }
   await logAuditEvent({ action: "dealer_team_invitation_accepted", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: updated.id, targetModel: "DealerTeam", details: { dealerId: row.dealer }, ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
-  return res.json({ success: true, data: publicTeamRow(updated) });
+  // Tell the INVITING DEALERSHIP (in-app and e-mail, no token or link secret). Never KAYARD staff. Best-effort: the membership is already real.
+  try {
+    const dealer = await User.findById(row.dealer);
+    const dealerName = dealerPublicName(dealer);
+    const roleLabel = ((await resolveRole(row.dealer, row.role)) || {}).label || row.role;
+    await notifyDealer(row.dealer, { title: "Team invitation accepted", message: `${req.user.name || req.user.email} accepted your invitation and is now ${String(roleLabel).replace(/_/g, " ")} on your team.`, type: "success", data: { invitation: updated.id, kind: "team_invitation_accepted" } });
+    if (dealer?.email) await sendTeamAcceptedEmail(dealer.email, { dealerName, memberName: req.user.name, memberEmail: req.user.email, role: roleLabel });
+  } catch (err) { logError("dealer_team_accept_notify_failed", { invitation: updated.id, error: err?.message }); }
+  return res.json({ success: true, data: publicTeamRow({ ...updated, staffNumber }) });
+}
+
+// ============================================================
+// EMPLOYMENT (built on dealer_teams): detail, history, lifecycle actions, business contact, own staff profile, staff code
+// ============================================================
+const employmentUnavailable = (res) => res.status(503).json({ success: false, code: "EMPLOYMENT_UNAVAILABLE", message: "Employment records need a database update that has not been applied yet.", employmentAvailable: false });
+const badInput = (res, err) => res.status(400).json({ success: false, code: err.code || "INVALID_INPUT", message: err.message });
+
+async function loadTargetForManager(req, res) {
+  const dealerId = req.dealerId || req.user.id;
+  const target = await findOne("dealer_teams", { id: req.params.memberId, dealer: dealerId });
+  if (!target) { res.status(404).json({ success: false, message: "Team member not found" }); return null; }
+  return { dealerId, target };
+}
+
+// Everything a dealership manager may see about ONE employee: business identity, employment, effective permissions, history. No tokens.
+export async function getTeamMemberDetail(req, res) {
+  const ctx = await loadTargetForManager(req, res); if (!ctx) return;
+  const { dealerId, target } = ctx;
+  const employment = await employmentAvailable();
+  const member = target.member ? await User.findById(target.member) : null;
+  const role = (await resolveRole(dealerId, target.role)) || { label: String(target.role).replace(/_/g, " ") };
+  const events = employment ? await listEmploymentEvents(dealerId, { teamId: target.id, limit: 100 }) : [];
+  return res.json({ success: true, employmentAvailable: employment, data: {
+    ...publicTeamRow(target), roleLabel: role.label, accessLevel: accessLevel(target.permissions),
+    effectivePermissions: DEALER_TEAM_PERMISSIONS.map((k) => ({ key: k, label: PERMISSION_LABELS[k] || k, granted: target.permissions?.[k] === true })),
+    identity: { loginEmail: member?.email || null, invitationEmail: target.inviteEmail, businessEmail: target.businessEmail || null, name: member?.name || null },
+    events,
+  } });
+}
+
+export async function getEmploymentRecords(req, res) {
+  const dealerId = req.dealerId || req.user.id;
+  if (!(await employmentAvailable())) return employmentUnavailable(res);
+  const events = await listEmploymentEvents(dealerId, { limit: 200 });
+  return res.json({ success: true, data: { events } });
+}
+
+// suspend | reinstate | terminate | resign | archive. Rehire is a new invitation to the same address (POST /team/invite) and keeps the old row.
+export async function applyEmploymentAction(req, res) {
+  if (!(await employmentAvailable())) return employmentUnavailable(res);
+  const ctx = await loadTargetForManager(req, res); if (!ctx) return;
+  const { dealerId, target } = ctx;
+  const action = String(req.body?.action || "");
+  if (String(target.member || "") === String(req.user.id)) return res.status(403).json({ success: false, message: "You cannot change your own employment" });
+  const protectedTarget = teamActorMayManage(req, target);
+  if (protectedTarget) return TEAM_PROTECTED(res, protectedTarget.code, protectedTarget.message);
+  let reason = null;
+  try { reason = cleanText(req.body?.reason, 500, "Reason"); } catch (err) { return badInput(res, err); }
+
+  if (action === "archive") {
+    // Archive = close the record of someone already gone; access is unaffected (already removed).
+    if (target.status !== "removed" || !["terminated", "resigned"].includes(target.employmentStatus)) return res.status(409).json({ success: false, code: "INVALID_EMPLOYMENT_TRANSITION", message: "Only a terminated or resigned record can be archived." });
+    const row = await update("dealer_teams", target.id, { employmentStatus: "archived" });
+    await recordEmploymentEvent({ dealerId, teamId: target.id, type: "archived", actor: req.user.id, actorLabel: req.actingMember?.name || req.user.name, staffNumber: target.staffNumber ?? null, from: { employmentStatus: target.employmentStatus }, to: { employmentStatus: "archived" }, reason });
+    return res.json({ success: true, data: publicTeamRow(row) });
+  }
+  const rule = ACTION_RESULT[action];
+  if (!rule) return res.status(400).json({ success: false, code: "UNKNOWN_EMPLOYMENT_ACTION", message: "Unknown employment action." });
+  if (!rule.from.includes(target.status)) return res.status(409).json({ success: false, code: "INVALID_EMPLOYMENT_TRANSITION", message: `A ${target.status} team member cannot be ${action === "resign" ? "recorded as resigned" : action + "d"}.` });
+  if (rule.ends && !reason) return res.status(400).json({ success: false, code: "REASON_REQUIRED", message: "Give a short reason for ending employment." });
+  const patch = { status: rule.status, employmentStatus: rule.employmentStatus };
+  if (rule.ends) Object.assign(patch, { employmentEndDate: todayDate(), employmentEndReason: reason, inviteTokenHash: null, inviteExpiresAt: null });
+  const row = await update("dealer_teams", target.id, patch);
+  await recordEmploymentEvent({ dealerId, teamId: target.id, type: rule.event, actor: req.user.id, actorLabel: req.actingMember?.name || req.user.name, staffNumber: target.staffNumber ?? null, from: { status: target.status, employmentStatus: target.employmentStatus }, to: { status: rule.status, employmentStatus: rule.employmentStatus }, reason });
+  await logAuditEvent({ action: `dealer_team_employment_${action}`, actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", oldValue: publicTeamRow(target), newValue: publicTeamRow(row), ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
+  return res.json({ success: true, data: publicTeamRow(row) });
+}
+
+// The business contact is a RECORD. It is not a login identity, is never used to authenticate or to deliver invitation links, and
+// changing it never changes who the employee is. It is not a provisioned mailbox.
+export async function setMemberBusinessEmail(req, res) {
+  if (!(await employmentAvailable())) return employmentUnavailable(res);
+  const ctx = await loadTargetForManager(req, res); if (!ctx) return;
+  const { dealerId, target } = ctx;
+  const protectedTarget = teamActorMayManage(req, target);
+  if (protectedTarget) return TEAM_PROTECTED(res, protectedTarget.code, protectedTarget.message);
+  let next = null;
+  try { next = cleanBusinessEmail(req.body?.businessEmail); } catch (err) { return badInput(res, err); }
+  const row = await update("dealer_teams", target.id, { businessEmail: next, businessEmailUpdatedAt: new Date().toISOString() });
+  await recordEmploymentEvent({ dealerId, teamId: target.id, type: "business_email_changed", actor: req.user.id, actorLabel: req.actingMember?.name || req.user.name, staffNumber: target.staffNumber ?? null, from: { businessEmail: target.businessEmail || null }, to: { businessEmail: next } });
+  return res.json({ success: true, data: publicTeamRow(row) });
+}
+
+// ---- The employee's OWN staff identity. Needs only an ACTIVE membership (Basic Staff Access is enough) and returns only that membership. ----
+export async function getMyStaffProfile(req, res) {
+  const org = req.dealerOrg;
+  if (!org?.membershipId) return res.status(403).json({ success: false, code: "DEALER_ORG_ACCESS_REQUIRED", message: "Active dealer organization access required" });
+  const row = await findOne("dealer_teams", { id: org.membershipId, member: req.user.id, status: "active" });
+  if (!row) return res.status(403).json({ success: false, code: "DEALER_ORG_ACCESS_REQUIRED", message: "Active dealer organization access required" });
+  const dealer = await User.findById(row.dealer);
+  const role = (await resolveRole(row.dealer, row.role)) || { label: String(row.role).replace(/_/g, " ") };
+  return res.json({ success: true, employmentAvailable: await employmentAvailable(), data: {
+    dealershipName: dealerPublicName(dealer), staffNumber: row.staffNumber ?? null, roleKey: row.role, roleLabel: role.label, accessLevel: accessLevel(row.permissions),
+    employmentStatus: row.employmentStatus ?? "active", employmentStartDate: row.employmentStartDate ?? null,
+    loginEmail: req.user.email, businessEmail: row.businessEmail ?? null, displayName: row.staffDisplayName ?? null, workPhone: row.workPhone ?? null,
+    profileCompleted: Boolean(row.profileCompletedAt), isBasicAccess: row.role === BASIC_ROLE_KEY,
+    permissions: DEALER_TEAM_PERMISSIONS.filter((k) => row.permissions?.[k] === true),
+  } });
+}
+
+export async function updateMyStaffProfile(req, res) {
+  if (!(await employmentAvailable())) return employmentUnavailable(res);
+  const org = req.dealerOrg;
+  const row = org?.membershipId ? await findOne("dealer_teams", { id: org.membershipId, member: req.user.id, status: "active" }) : null;
+  if (!row) return res.status(403).json({ success: false, code: "DEALER_ORG_ACCESS_REQUIRED", message: "Active dealer organization access required" });
+  let displayName, workPhone;
+  try {
+    displayName = cleanText(req.body?.displayName, 80, "Display name");
+    workPhone = req.body?.workPhone ? formatPhone(String(req.body.workPhone)) : null;
+    if (req.body?.workPhone && !workPhone) return res.status(400).json({ success: false, code: "PHONE_INVALID", message: "Enter a valid phone number." });
+  } catch (err) { return badInput(res, err); }
+  if (!displayName) return res.status(400).json({ success: false, code: "DISPLAY_NAME_REQUIRED", message: "Enter the name the dealership should use for you." });
+  // Only the profile fields are writable here: never role, permissions, status, staff number or business e-mail (those are dealer-managed).
+  const row2 = await update("dealer_teams", row.id, { staffDisplayName: displayName, workPhone: workPhone || null, profileCompletedAt: row.profileCompletedAt || new Date().toISOString() });
+  if (!row.profileCompletedAt) await recordEmploymentEvent({ dealerId: row.dealer, teamId: row.id, type: "profile_completed", actor: req.user.id, actorLabel: displayName, staffNumber: row.staffNumber ?? null });
+  return res.json({ success: true, data: { displayName: row2.staffDisplayName ?? displayName, workPhone: row2.workPhone ?? workPhone, profileCompleted: true } });
+}
+
+// ---- Dealership staff code (prefix of staff numbers) ----
+export async function getStaffCodeSettings(req, res) {
+  const dealerId = req.dealerId || req.user.id;
+  if (!(await employmentAvailable())) return employmentUnavailable(res);
+  return res.json({ success: true, data: await getStaffSettings(dealerId) });
+}
+export async function putStaffCodeSettings(req, res) {
+  if (!isUnrestrictedTeamActor(req)) return TEAM_PROTECTED(res, "TEAM_ROLE_OWNER_ONLY", "Only the dealership owner can set the staff code.");
+  if (!(await employmentAvailable())) return employmentUnavailable(res);
+  const dealerId = req.dealerId || req.user.id;
+  try { const code = await setStaffCode(dealerId, req.body?.staffCode); return res.json({ success: true, data: { staffCode: code, locked: false } }); }
+  catch (err) {
+    const status = { STAFF_CODE_INVALID: 400, STAFF_CODE_LOCKED: 409, STAFF_CODE_TAKEN: 409 }[err.code] || 500;
+    const msg = { STAFF_CODE_INVALID: "Use 2 to 8 letters or digits.", STAFF_CODE_LOCKED: "Staff numbers have already been issued, so the code can no longer change.", STAFF_CODE_TAKEN: "Another dealership already uses that code." }[err.code] || "Could not set the staff code.";
+    return res.status(status).json({ success: false, code: err.code || "STAFF_CODE_FAILED", message: msg });
+  }
 }
 
 // ============================================================

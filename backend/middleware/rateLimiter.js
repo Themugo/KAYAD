@@ -51,6 +51,17 @@ const authAbuseLimiter = (max, message) => rateLimit({
   },
 });
 
+// Team-invitation preview and acceptance: the 64-hex token is unguessable, but the public preview must still not be a free probe. Keyed by caller address.
+export const invitationLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, max: Number(process.env.INVITATION_RATE_LIMIT_MAX || 40), keyGenerator: (req) => clientIp(req),
+  standardHeaders: true, legacyHeaders: false,
+  handler: (req, res) => {
+    res.setHeader("Retry-After", "900");
+    logWarn("RATE LIMIT (TEAM INVITATION)", { ip: req.ip, endpoint: req.path });
+    res.status(429).json({ success: false, code: "INVITATION_RATE_LIMITED", message: "Too many attempts. Please wait a few minutes and try again." });
+  },
+});
+
 export const registrationLimiter = authAbuseLimiter(Number(process.env.REGISTRATION_RATE_LIMIT_MAX || 8), "Too many registration attempts. Try again later.");
 export const recoveryLimiter = authAbuseLimiter(Number(process.env.RECOVERY_RATE_LIMIT_MAX || 8), "Too many recovery attempts. Try again later.");
 export const verificationLimiter = authAbuseLimiter(Number(process.env.VERIFICATION_RATE_LIMIT_MAX || 8), "Too many verification attempts. Try again later.");

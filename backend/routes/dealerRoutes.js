@@ -893,6 +893,9 @@ router.post(
 router.patch(
   "/team/:memberId",
   dealerBusinessOnly, // PHASE 13D
+  // Retired: this legacy handler accepted any role/permissions/status, so an owner could flip a pending invitation to "active" without the
+  // invitee ever accepting. The canonical, validated route is PUT /api/dealer-platform/team/:memberId.
+  (req, res) => res.status(410).json({ success: false, code: "TEAM_ROUTE_MOVED", message: "Use PUT /api/dealer-platform/team/:memberId." }),
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const record = await findOne("dealer_teams", { id: req.params.memberId, dealer: req.user.id });
@@ -917,6 +920,8 @@ router.patch(
 router.delete(
   "/team/:memberId",
   dealerBusinessOnly, // PHASE 13D
+  // Retired: the canonical DELETE /api/dealer-platform/team/:memberId also keeps the spent-link history and revokes access consistently.
+  (req, res) => res.status(410).json({ success: false, code: "TEAM_ROUTE_MOVED", message: "Use DELETE /api/dealer-platform/team/:memberId." }),
   invalidateCache("dealer"),
   asyncHandler(async (req, res) => {
     const record = await findOne("dealer_teams", { id: req.params.memberId, dealer: req.user.id });
