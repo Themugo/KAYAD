@@ -4,8 +4,8 @@
 Not implemented: navigation to another Document
 
  Test Files  227 passed (227)
-      Tests  1928 passed | 1 skipped (1929)
-   Start at  12:43:55
-   Duration  398.31s (transform 11.09s, setup 24.93s, import 39.88s, tests 150.30s, environment 150.54s)
+      Tests  1931 passed | 1 skipped (1932)
+   Start at  13:37:28
+   Duration  393.60s (transform 10.60s, setup 25.13s, import 38.78s, tests 150.37s, environment 147.40s)
 
 exit=0

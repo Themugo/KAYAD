@@ -22,6 +22,7 @@ import { logError, logInfo } from "../utils/logger.js";
 import { getDealerEntitlement } from "../services/dealerSubscription.service.js";
 import { getDealerLeads, getLeadById, updateLeadStage as serviceUpdateLeadStage, addLeadActivity as serviceAddLeadActivity } from "../services/leadService.js";
 import { create, findAll, findOne, update } from "../db/index.js";
+import { normalizeEmail, emailsMatch, maskEmail } from "../utils/emailIdentity.js";
 import * as dbApi from "../db/index.js"; // updateMany: compare-and-set for single-use invitation acceptance
 import { logAuditEvent } from "../services/auditService.js";
 import crypto from "crypto";
@@ -648,7 +649,7 @@ async function deliverInvite(email, inviterName, roleLabel, token) {
 }
 
 export async function inviteTeamMember(req, res) {
-  const email = String(req.body?.email || "").trim().toLowerCase();
+  const email = normalizeEmail(req.body?.email);
   const roleKey = String(req.body?.role || "sales_agent");
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ success: false, message: "Valid email is required" });
   const dealerId = req.dealerId || req.user.id;
@@ -657,7 +658,7 @@ export async function inviteTeamMember(req, res) {
   if (role.key === "manager" && !isUnrestrictedTeamActor(req)) return TEAM_PROTECTED(res, "TEAM_ROLE_OWNER_ONLY", "Only the dealership owner can invite a manager.");
   const over = roleOverreach(req, role);
   if (over.length) return res.status(403).json({ success: false, code: "PERMISSION_GRANT_FORBIDDEN", message: "You cannot invite someone into a role that holds permissions you do not hold.", fields: over });
-  if (email === String(req.user.email || "").trim().toLowerCase()) return res.status(400).json({ success: false, message: "You cannot invite your own account" });
+  if (emailsMatch(email, req.user.email)) return res.status(400).json({ success: false, message: "You cannot invite your own account" });
   const existing = await findOne("dealer_teams", { dealer: dealerId, inviteEmail: email });
   if (existing && existing.status !== "removed") return res.status(409).json({ success: false, message: "An active or pending invitation already exists for this email" });
   const token = newInviteToken();
@@ -825,7 +826,13 @@ export async function acceptTeamInvite(req, res) {
     return res.status(404).json({ success: false, code: "INVITATION_LINK_NOT_VALID", message: "This invitation link is no longer valid. It may have been replaced by a newer e-mail from the dealership, already used, or cancelled." });
   }
   if (row.inviteExpiresAt && new Date(row.inviteExpiresAt) <= new Date()) return res.status(410).json({ success: false, message: "Invitation has expired" });
-  if (String(req.user.email || "").trim().toLowerCase() !== String(row.inviteEmail || "").trim().toLowerCase()) return res.status(403).json({ success: false, message: "Invitation email does not match the authenticated account" });
+  // Identity: req.user.email is the FRESH users.email of the user id inside the verified session token (middleware/auth.js re-reads it on every
+  // request; the JWT carries no e-mail claim and a browser-supplied e-mail is never consulted). The invitation is never edited to fit the caller
+  // and is NOT consumed by a mismatch, so the right person can still accept it.
+  if (!emailsMatch(req.user.email, row.inviteEmail)) {
+    logInfo("dealer_team_accept_email_mismatch", { invitation: row.id, user: req.user.id, fingerprint: hash.slice(0, 8) });
+    return res.status(403).json({ success: false, code: "INVITATION_EMAIL_MISMATCH", message: "The e-mail address this invitation was sent to does not match the account you are signed in with.", invitedEmailHint: maskEmail(row.inviteEmail) });
+  }
   // Team members are personal accounts. A dealer (business) or staff account never becomes a member, and a membership never changes the member's role.
   if (req.user.role !== "user") return res.status(403).json({ success: false, code: "TEAM_MEMBER_MUST_BE_PERSONAL_ACCOUNT", message: "Dealership team members join with a personal account. A dealer owner who also has a personal account can invite it from that account's email." });
   if (String(row.dealer) === String(req.user.id)) return res.status(403).json({ success: false, code: "TEAM_SELF_MEMBERSHIP", message: "A dealer account cannot be a member of its own team." });

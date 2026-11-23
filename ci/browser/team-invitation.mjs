@@ -74,15 +74,39 @@ await R2.p.goto(linkUrl(fresh), { waitUntil: 'domcontentloaded' }); await R2.p.w
 await R2.p.getByRole('button', { name: 'Accept invitation' }).click(); await R2.p.waitForTimeout(2500);
 ok('the NEWEST link is accepted', await R2.p.getByText(/You have joined the team/).isVisible());
 
-// ---- wrong account
+// ---- wrong account (Account B) vs the invited account (Account A): switch path, token preserved, then acceptance
 const inv3 = await makeUser({ tag: 'binv3', email: `binv3-${uid()}@example.test` }); const other = await makeUser({ tag: 'bother', email: `bother-${uid()}@example.test` });
 await O.p.locator('input[type="email"]').first().fill(inv3.email); await O.p.getByRole('button', { name: 'Send invitation', exact: true }).click(); await O.p.waitForTimeout(2500);
 const t3 = links(inv3.email).at(-1);
-const W = await ctx(); await W.p.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' }); await W.p.waitForTimeout(1200); await login(W.p, other.email); await W.p.waitForTimeout(3500);
+const W = await ctx(); const consoleErrs = []; W.p.on('console', (m) => { if (m.type() === 'error') consoleErrs.push(m.text().replace(/[0-9a-f]{64}/g, '<hex64>')); });
+const net = []; W.p.on('response', (r) => { if (r.url().includes('/dealer-platform/team/accept')) net.push(r.status()); });
+await W.p.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' }); await W.p.waitForTimeout(1200); await login(W.p, other.email); await W.p.waitForTimeout(3500);
 await W.p.goto(linkUrl(t3), { waitUntil: 'domcontentloaded' }); await W.p.waitForTimeout(2000);
 await W.p.getByRole('button', { name: 'Accept invitation' }).click(); await W.p.waitForTimeout(2500);
-ok('a different signed-in e-mail gets a clear 403 explanation', await W.p.getByRole('alert').isVisible());
-ok('...and the invitation is not consumed', q(`select status from dealer_teams where invite_email='${inv3.email}'`) === 'invited');
+const wbox = W.p.getByTestId('wrong-account');
+ok('Account B: clear wrong-account message naming the signed-in e-mail', await wbox.isVisible() && (await wbox.innerText()).includes(other.email));
+ok('...with a masked hint of the invited address (not the full address, not the token)', !(await wbox.innerText()).includes(inv3.email) && !(await wbox.innerText()).includes(t3) && /\*\*\*/.test(await wbox.innerText()));
+ok('...server answered 403 and the invitation is still pending and unchanged', net.at(-1) === 403 && q(`select status||'|'||(member is null)||'|'||(invite_token_hash is not null) from dealer_teams where invite_email='${inv3.email}'`) === 'invited|true|true');
+await W.p.screenshot({ path: `${OUT}/08-wrong-account-desktop.png` });
+await W.p.getByTestId('switch-account').click(); await W.p.waitForTimeout(3500);
+ok('switch account: signed out and sent to sign-in carrying the same invitation (no loop)', /\/login/.test(W.p.url()) && (new URL(W.p.url()).searchParams.get('next') || '').includes(`invite=${t3}`));
+await login(W.p, inv3.email); await W.p.waitForTimeout(4000);
+ok('Account A signs in and is returned to the same invitation', /\/dealer\/setup/.test(W.p.url()) && W.p.url().includes(`invite=${t3}`));
+await W.p.getByRole('button', { name: 'Accept invitation' }).click(); await W.p.waitForTimeout(3000);
+ok('Account A accepts the same invitation', await W.p.getByText(/You have joined the team/).isVisible());
+ok('exactly one active membership, for Account A', q(`select count(*) from dealer_teams where invite_email='${inv3.email}' and status='active' and member=(select id from users where email='${inv3.email}')`) === '1' && q(`select count(*) from dealer_teams where invite_email='${inv3.email}'`) === '1');
+ok('no console errors on the wrong-account/switch flow (sanitised)', consoleErrs.filter((e) => !/403|Failed to load resource/.test(e)).length === 0, consoleErrs.slice(0, 3));
+// wrong-account page on a phone
+const inv5 = await makeUser({ tag: 'binv5', email: `binv5-${uid()}@example.test` });
+await O.p.goto(`${BASE}/?nav=dealer-dashboard&section=team`, { waitUntil: 'domcontentloaded' }); await O.p.waitForTimeout(2500);
+await O.p.locator('input[type="email"]').first().fill(inv5.email); await O.p.getByRole('button', { name: 'Send invitation', exact: true }).click(); await O.p.waitForTimeout(2500);
+const t5 = links(inv5.email).at(-1);
+const MW = await ctx(390, 844); await MW.p.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' }); await MW.p.waitForTimeout(1200); await login(MW.p, other.email); await MW.p.waitForTimeout(3500);
+await MW.p.goto(linkUrl(t5), { waitUntil: 'domcontentloaded' }); await MW.p.waitForTimeout(2000);
+await MW.p.getByRole('button', { name: 'Accept invitation' }).click(); await MW.p.waitForTimeout(2500);
+const sb = await MW.p.getByTestId('switch-account').boundingBox();
+ok('mobile 390px wrong-account page: switch button inside the viewport, no horizontal overflow', sb && sb.x >= 0 && sb.x + sb.width <= 390 && !(await MW.p.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)), sb);
+await MW.p.screenshot({ path: `${OUT}/09-wrong-account-mobile.png` });
 
 // ---- dashboard pending count agrees with the database (and therefore with acceptance)
 await O.p.goto(`${BASE}/?nav=dealer-dashboard`, { waitUntil: 'domcontentloaded' }); await O.p.waitForTimeout(4000);
