@@ -44,7 +44,7 @@ jest.unstable_mockModule("../../services/dealerSubscription.service.js", () => (
 }));
 jest.unstable_mockModule("../../utils/atomicTransactions.js", () => ({ atomicCreateDealerListing: jest.fn() }));
 jest.unstable_mockModule("../../services/mediaRecovery.service.js", () => ({
-  registerMediaUploadJob: jest.fn(), registerMediaUploadFailure: jest.fn(), completeMediaUpload: jest.fn(),
+  registerMediaUploadJob: jest.fn(), registerMediaUploadFailure: jest.fn(async () => ({})), completeMediaUpload: jest.fn(),
 }));
 const SERVER_ESCROW = false;
 jest.unstable_mockModule("../../services/escrowCapability.service.js", () => ({

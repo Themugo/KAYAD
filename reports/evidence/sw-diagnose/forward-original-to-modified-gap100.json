@@ -1,0 +1,5349 @@
+{
+ "variant": "forward-original-to-modified-gap100",
+ "sw": "register",
+ "A": "aaaaaaaaaaaa-mwrwlkr6",
+ "B": "bbbbbbbbbbbb-mwrwlraj",
+ "runs": [
+  {
+   "run": 1,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 381,
+     "out": "ok",
+     "startedAt": 1795361800914
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 38,
+     "out": "ok",
+     "startedAt": 1795361802600
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 448,
+     "out": "ok",
+     "startedAt": 1795361802638
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 386,
+     "out": "ok",
+     "startedAt": 1795361804344
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 1111,
+     "out": "ok",
+     "startedAt": 1795361804940
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 278,
+     "out": "ok",
+     "startedAt": 1795361806167
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 223,
+     "out": "ok",
+     "startedAt": 1795361806621
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 297,
+     "out": "ok",
+     "startedAt": 1795361806958
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 256,
+     "out": "ok",
+     "startedAt": 1795361807380
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 314,
+     "out": "ok",
+     "startedAt": 1795361807860
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795361808291
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 2,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 355,
+     "out": "ok",
+     "startedAt": 1795361808349
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 26,
+     "out": "ok",
+     "startedAt": 1795361809954
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 378,
+     "out": "ok",
+     "startedAt": 1795361809980
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 366,
+     "out": "ok",
+     "startedAt": 1795361811626
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 1306,
+     "out": "ok",
+     "startedAt": 1795361812354
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 322,
+     "out": "ok",
+     "startedAt": 1795361813775
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 277,
+     "out": "ok",
+     "startedAt": 1795361814334
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 361,
+     "out": "ok",
+     "startedAt": 1795361814718
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 247,
+     "out": "ok",
+     "startedAt": 1795361815198
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 314,
+     "out": "ok",
+     "startedAt": 1795361815646
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795361816073
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 3,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 399,
+     "out": "ok",
+     "startedAt": 1795361816146
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok",
+     "startedAt": 1795361817825
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 405,
+     "out": "ok",
+     "startedAt": 1795361817854
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 368,
+     "out": "ok",
+     "startedAt": 1795361819535
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 348,
+     "out": "ok",
+     "startedAt": 1795361820129
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 896,
+     "out": "ok",
+     "startedAt": 1795361820603
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 258,
+     "out": "ok",
+     "startedAt": 1795361821810
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 206,
+     "out": "ok",
+     "startedAt": 1795361822179
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 336,
+     "out": "ok",
+     "startedAt": 1795361822530
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 221,
+     "out": "ok",
+     "startedAt": 1795361823093
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795361823432
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 4,
+   "stalled": "goto / (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 357,
+     "out": "ok",
+     "startedAt": 1795361823508
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 31,
+     "out": "ok",
+     "startedAt": 1795361825120
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 386,
+     "out": "ok",
+     "startedAt": 1795361825151
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 348,
+     "out": "ok",
+     "startedAt": 1795361826802
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 325,
+     "out": "ok",
+     "startedAt": 1795361827367
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 12001,
+     "out": "STALL",
+     "startedAt": 1795361827802
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 282,
+     "out": "ok",
+     "startedAt": 1795361839905
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 353,
+     "out": "ok",
+     "startedAt": 1795361840297
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 281,
+     "out": "ok",
+     "startedAt": 1795361840773
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 349,
+     "out": "ok",
+     "startedAt": 1795361841270
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795361841732
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "https://api.kayad.space/socket.io/socket.io.js",
+      "nav": false,
+      "ageMs": 14547
+     },
+     {
+      "url": "https://api.kayad.space/socket.io/socket.io.js",
+      "nav": false,
+      "ageMs": 1545
+     },
+     {
+      "url": "https://api.kayad.space/socket.io/socket.io.js",
+      "nav": false,
+      "ageMs": 645
+     }
+    ],
+    "controller": {
+     "controller": "http://127.0.0.1:5444/sw.js",
+     "state": "activated",
+     "regs": [
+      [
+       "activated",
+       null,
+       null
+      ]
+     ]
+    },
+    "caches": {
+     "kayad-static-v2": [
+      "/assets/httpClient-DUfQrcOs.js",
+      "/assets/jsx-runtime--qySwOLX.js",
+      "/assets/chunk-62JRHF6Z-CTXCXr27.js",
+      "/assets/createLucideIcon-DTlqIiI3.js",
+      "/assets/lock-CJZ-QdUB.js",
+      "/assets/shield-alert-DgQTDiTU.js",
+      "/assets/httpRequest-DiLtrneX.js",
+      "/assets/authApi-Jk2uv3uR.js",
+      "/assets/AuthContext-C-ZTMV23.js",
+      "/assets/dealerPlatformApi-YqcaG7ar.js",
+      "/assets/arrow-right-Dy81hIrI.js",
+      "/assets/car-CXBpyvDA.js"
+     ],
+     "kayad-images-v2": [
+      "/branding/kayard-ke-logo.png",
+      "/branding/kayard-ke-logo-dark.png",
+      "/hero/kayad-land-cruiser-mobile.webp",
+      "/hero/kayad-mercedes-gle-mobile.webp"
+     ],
+     "kayad-mobile-v2": [
+      "/login",
+      "/dealer"
+     ]
+    },
+    "release": "bbbbbbbbbbbb-mwrwlraj",
+    "timing": {
+     "type": "navigate",
+     "start": 0,
+     "responseEnd": 16,
+     "domContentLoaded": 210,
+     "workerStart": 1
+    },
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -4294,
+      "kind": "registration",
+      "n": 0
+     },
+     {
+      "msFromStalledNavStart": -4294,
+      "kind": "version",
+      "v": ""
+     },
+     {
+      "msFromStalledNavStart": -2673,
+      "kind": "registration",
+      "n": 1
+     },
+     {
+      "msFromStalledNavStart": -2673,
+      "kind": "version",
+      "v": "0:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -2669,
+      "kind": "version",
+      "v": "0:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -2669,
+      "kind": "version",
+      "v": "0:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -2669,
+      "kind": "version",
+      "v": "0:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -2662,
+      "kind": "version",
+      "v": "0:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -2662,
+      "kind": "registration",
+      "n": 1
+     },
+     {
+      "msFromStalledNavStart": -2662,
+      "kind": "version",
+      "v": "0:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -2656,
+      "kind": "version",
+      "v": "0:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -2656,
+      "kind": "version",
+      "v": "0:running/activating"
+     },
+     {
+      "msFromStalledNavStart": -2655,
+      "kind": "version",
+      "v": "0:running/activating"
+     },
+     {
+      "msFromStalledNavStart": -2655,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2645,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2629,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -994,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -976,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -560,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -560,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -560,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -541,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -534,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -534,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -524,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -408,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -361,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -360,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -330,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -330,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -330,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -258,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -258,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 7,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 7,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 10,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 10,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 10,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 10,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 10,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1013,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12115,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12115,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12131,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12500,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12512,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12978,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12991,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 13502,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 13525,
+      "kind": "version",
+      "v": "1:running/activated"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -4294
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -2682
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -2651
+     },
+     {
+      "name": "reload (host now B) <- triggers the one-time worker swap",
+      "rel": "B",
+      "msFromStalledNavStart": -1000
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": -435
+     },
+     {
+      "name": "goto / (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 12103
+     },
+     {
+      "name": "goto /login (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 12495
+     },
+     {
+      "name": "goto / (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 12971
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 13468
+     },
+     {
+      "name": "final release",
+      "rel": "B",
+      "msFromStalledNavStart": 13930
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4283,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -4260,
+      "rel": "A",
+      "p": "/assets/index-Cer5u99I.js",
+      "nav": false
+     },
+     {
+      "ms": -4243,
+      "rel": "A",
+      "p": "/assets/httpClient-DUfQrcOs.js",
+      "nav": false
+     },
+     {
+      "ms": -4243,
+      "rel": "A",
+      "p": "/assets/jsx-runtime--qySwOLX.js",
+      "nav": false
+     },
+     {
+      "ms": -4242,
+      "rel": "A",
+      "p": "/assets/chunk-62JRHF6Z-CTXCXr27.js",
+      "nav": false
+     },
+     {
+      "ms": -4242,
+      "rel": "A",
+      "p": "/assets/createLucideIcon-DTlqIiI3.js",
+      "nav": false
+     },
+     {
+      "ms": -4242,
+      "rel": "A",
+      "p": "/assets/lock-CJZ-QdUB.js",
+      "nav": false
+     },
+     {
+      "ms": -4242,
+      "rel": "A",
+      "p": "/assets/index-CrZerLeX.css",
+      "nav": false
+     },
+     {
+      "ms": -4232,
+      "rel": "A",
+      "p": "/assets/shield-alert-DgQTDiTU.js",
+      "nav": false
+     },
+     {
+      "ms": -4232,
+      "rel": "A",
+      "p": "/assets/httpRequest-DiLtrneX.js",
+      "nav": false
+     },
+     {
+      "ms": -4232,
+      "rel": "A",
+      "p": "/assets/authApi-Jk2uv3uR.js",
+      "nav": false
+     },
+     {
+      "ms": -4232,
+      "rel": "A",
+      "p": "/assets/AuthContext-C-ZTMV23.js",
+      "nav": false
+     },
+     {
+      "ms": -4232,
+      "rel": "A",
+      "p": "/assets/dealerPlatformApi-YqcaG7ar.js",
+      "nav": false
+     },
+     {
+      "ms": -4225,
+      "rel": "A",
+      "p": "/assets/arrow-right-Dy81hIrI.js",
+      "nav": false
+     },
+     {
+      "ms": -4224,
+      "rel": "A",
+      "p": "/assets/car-CXBpyvDA.js",
+      "nav": false
+     },
+     {
+      "ms": -4224,
+      "rel": "A",
+      "p": "/assets/check-BBZX3Fxe.js",
+      "nav": false
+     },
+     {
+      "ms": -4224,
+      "rel": "A",
+      "p": "/assets/circle-check-DBejpiUR.js",
+      "nav": false
+     },
+     {
+      "ms": -4224,
+      "rel": "A",
+      "p": "/assets/circle-question-mark-BgccVHX8.js",
+      "nav": false
+     },
+     {
+      "ms": -4215,
+      "rel": "A",
+      "p": "/assets/circle-CFtfXUfo.js",
+      "nav": false
+     },
+     {
+      "ms": -4215,
+      "rel": "A",
+      "p": "/assets/clipboard-check-D9WeNRUw.js",
+      "nav": false
+     },
+     {
+      "ms": -4215,
+      "rel": "A",
+      "p": "/assets/clock-3-Z3hrk0KK.js",
+      "nav": false
+     },
+     {
+      "ms": -4215,
+      "rel": "A",
+      "p": "/assets/credit-card-C1rT1epD.js",
+      "nav": false
+     },
+     {
+      "ms": -4215,
+      "rel": "A",
+      "p": "/assets/eye-off-DLBV0oCL.js",
+      "nav": false
+     },
+     {
+      "ms": -4214,
+      "rel": "A",
+      "p": "/assets/eye-DGJD621b.js",
+      "nav": false
+     },
+     {
+      "ms": -4207,
+      "rel": "A",
+      "p": "/assets/gavel-Cui_3uKB.js",
+      "nav": false
+     },
+     {
+      "ms": -4207,
+      "rel": "A",
+      "p": "/assets/loader-circle-BmLoqUAb.js",
+      "nav": false
+     },
+     {
+      "ms": -4207,
+      "rel": "A",
+      "p": "/assets/lock-keyhole-CKo8kJw3.js",
+      "nav": false
+     },
+     {
+      "ms": -4207,
+      "rel": "A",
+      "p": "/assets/megaphone-CIPvTgLi.js",
+      "nav": false
+     },
+     {
+      "ms": -4207,
+      "rel": "A",
+      "p": "/assets/plus-BiRss5A9.js",
+      "nav": false
+     },
+     {
+      "ms": -4207,
+      "rel": "A",
+      "p": "/assets/refresh-cw-DZZSR11s.js",
+      "nav": false
+     },
+     {
+      "ms": -4200,
+      "rel": "A",
+      "p": "/assets/rotate-ccw-clock-Tp6oh6RD.js",
+      "nav": false
+     },
+     {
+      "ms": -4200,
+      "rel": "A",
+      "p": "/assets/shield-check-B19bEo1M.js",
+      "nav": false
+     },
+     {
+      "ms": -4199,
+      "rel": "A",
+      "p": "/assets/sparkles-BJenj5wT.js",
+      "nav": false
+     },
+     {
+      "ms": -4199,
+      "rel": "A",
+      "p": "/assets/trash-2-CZl1hYtu.js",
+      "nav": false
+     },
+     {
+      "ms": -4199,
+      "rel": "A",
+      "p": "/assets/user-round-sUifeAY3.js",
+      "nav": false
+     },
+     {
+      "ms": -4192,
+      "rel": "A",
+      "p": "/assets/x-6lh7mfPu.js",
+      "nav": false
+     },
+     {
+      "ms": -4185,
+      "rel": "A",
+      "p": "/assets/api.exports-Cyfef1dr.js",
+      "nav": false
+     },
+     {
+      "ms": -4185,
+      "rel": "A",
+      "p": "/assets/api-DJOIaPyI.js",
+      "nav": false
+     },
+     {
+      "ms": -4067,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3992,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -3989,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -3911,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -3909,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3907,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3905,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3894,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3893,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -3892,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3890,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -3887,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -3884,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3882,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3881,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3880,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3876,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3875,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3845,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3211,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2672,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2661,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -2641,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -2374,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2359,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -2357,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -2258,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -2240,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2236,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2221,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2219,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2218,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -2210,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2209,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -2206,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2194,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -2191,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2190,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2189,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2188,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2187,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2184,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -2183,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -1553,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -992,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -963,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -767,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -708,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -687,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -627,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -623,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -618,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -608,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -597,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -588,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -586,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -581,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -580,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -578,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -575,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -574,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -573,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -572,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -570,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -569,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -545,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -536,
+      "rel": "B",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -392,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     },
+     {
+      "ms": -167,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -130,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -127,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -122,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -119,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -110,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": 6,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": 489,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 2295,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     }
+    ],
+    "failedRequests": [
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "/ net::ERR_ABORTED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: net::ERR_FAILED"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "41151 B GET /api/cars",
+     "41151 B GET /api/v1/auth/me",
+     "41151 B GET /api/v1/auth/csrf",
+     "41161 B GET /api/admin/public/config",
+     "41161 B GET /sw.js",
+     "41223 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "41225 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "41311 B GET /dealer [nav]",
+     "41513 B GET /api/cars",
+     "41532 B GET /release.json",
+     "41533 B GET /api/admin/public/config",
+     "41533 B GET /api/v1/auth/me",
+     "41533 B GET /api/v1/auth/csrf",
+     "41539 B GET /sw.js"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/forward-original-to-modified-gap100-run4-stall.png"
+   }
+  },
+  {
+   "run": 5,
+   "stalled": "goto / (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 417,
+     "out": "ok",
+     "startedAt": 1795361842232
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok",
+     "startedAt": 1795361843914
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 347,
+     "out": "ok",
+     "startedAt": 1795361843946
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 396,
+     "out": "ok",
+     "startedAt": 1795361845533
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 349,
+     "out": "ok",
+     "startedAt": 1795361846163
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 12000,
+     "out": "STALL",
+     "startedAt": 1795361846623
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 207,
+     "out": "ok",
+     "startedAt": 1795361858726
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 287,
+     "out": "ok",
+     "startedAt": 1795361859047
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 261,
+     "out": "ok",
+     "startedAt": 1795361859445
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 281,
+     "out": "ok",
+     "startedAt": 1795361859944
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795361860337
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "https://api.kayad.space/socket.io/socket.io.js",
+      "nav": false,
+      "ageMs": 14362
+     },
+     {
+      "url": "https://api.kayad.space/socket.io/socket.io.js",
+      "nav": false,
+      "ageMs": 1003
+     },
+     {
+      "url": "https://api.kayad.space/socket.io/socket.io.js",
+      "nav": false,
+      "ageMs": 611
+     },
+     {
+      "url": "https://api.kayad.space/socket.io/socket.io.js",
+      "nav": false,
+      "ageMs": 175
+     }
+    ],
+    "controller": {
+     "controller": "http://127.0.0.1:5444/sw.js",
+     "state": "activated",
+     "regs": [
+      [
+       "activated",
+       null,
+       null
+      ]
+     ]
+    },
+    "caches": {
+     "kayad-static-v2": [
+      "/assets/httpClient-DUfQrcOs.js",
+      "/assets/jsx-runtime--qySwOLX.js",
+      "/assets/chunk-62JRHF6Z-CTXCXr27.js",
+      "/assets/createLucideIcon-DTlqIiI3.js",
+      "/assets/lock-CJZ-QdUB.js",
+      "/assets/shield-alert-DgQTDiTU.js",
+      "/assets/httpRequest-DiLtrneX.js",
+      "/assets/authApi-Jk2uv3uR.js",
+      "/assets/AuthContext-C-ZTMV23.js",
+      "/assets/dealerPlatformApi-YqcaG7ar.js",
+      "/assets/arrow-right-Dy81hIrI.js",
+      "/assets/car-CXBpyvDA.js"
+     ],
+     "kayad-images-v2": [
+      "/branding/kayard-ke-logo-dark.png",
+      "/branding/kayard-ke-logo.png",
+      "/hero/kayad-mercedes-gle-mobile.webp",
+      "/hero/kayad-land-cruiser-mobile.webp"
+     ],
+     "kayad-mobile-v2": [
+      "/login",
+      "/dealer"
+     ]
+    },
+    "release": "bbbbbbbbbbbb-mwrwlraj",
+    "timing": {
+     "type": "navigate",
+     "start": 0,
+     "responseEnd": 18,
+     "domContentLoaded": 143,
+     "workerStart": 1
+    },
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -4390,
+      "kind": "registration",
+      "n": 0
+     },
+     {
+      "msFromStalledNavStart": -4390,
+      "kind": "version",
+      "v": ""
+     },
+     {
+      "msFromStalledNavStart": -2703,
+      "kind": "registration",
+      "n": 1
+     },
+     {
+      "msFromStalledNavStart": -2702,
+      "kind": "version",
+      "v": "0:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -2698,
+      "kind": "version",
+      "v": "0:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -2698,
+      "kind": "version",
+      "v": "0:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -2698,
+      "kind": "version",
+      "v": "0:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -2690,
+      "kind": "version",
+      "v": "0:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -2690,
+      "kind": "registration",
+      "n": 1
+     },
+     {
+      "msFromStalledNavStart": -2690,
+      "kind": "version",
+      "v": "0:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -2681,
+      "kind": "version",
+      "v": "0:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -2681,
+      "kind": "version",
+      "v": "0:running/activating"
+     },
+     {
+      "msFromStalledNavStart": -2673,
+      "kind": "version",
+      "v": "0:running/activating"
+     },
+     {
+      "msFromStalledNavStart": -2673,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2670,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2654,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1080,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1059,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -544,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -544,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -544,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -501,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -491,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -491,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -465,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -412,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -391,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -377,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -340,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -340,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -340,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -336,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -319,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 6,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 6,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 11,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 11,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 11,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 11,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 11,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1014,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12110,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12110,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12119,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12431,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12442,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12830,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12843,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 13350,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 13371,
+      "kind": "version",
+      "v": "1:running/activated"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -4391
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -2709
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -2677
+     },
+     {
+      "name": "reload (host now B) <- triggers the one-time worker swap",
+      "rel": "B",
+      "msFromStalledNavStart": -1090
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": -460
+     },
+     {
+      "name": "goto / (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 12103
+     },
+     {
+      "name": "goto /login (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 12424
+     },
+     {
+      "name": "goto / (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 12822
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 13321
+     },
+     {
+      "name": "final release",
+      "rel": "B",
+      "msFromStalledNavStart": 13714
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4384,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -4358,
+      "rel": "A",
+      "p": "/assets/index-Cer5u99I.js",
+      "nav": false
+     },
+     {
+      "ms": -4350,
+      "rel": "A",
+      "p": "/assets/httpClient-DUfQrcOs.js",
+      "nav": false
+     },
+     {
+      "ms": -4350,
+      "rel": "A",
+      "p": "/assets/jsx-runtime--qySwOLX.js",
+      "nav": false
+     },
+     {
+      "ms": -4350,
+      "rel": "A",
+      "p": "/assets/chunk-62JRHF6Z-CTXCXr27.js",
+      "nav": false
+     },
+     {
+      "ms": -4345,
+      "rel": "A",
+      "p": "/assets/createLucideIcon-DTlqIiI3.js",
+      "nav": false
+     },
+     {
+      "ms": -4345,
+      "rel": "A",
+      "p": "/assets/lock-CJZ-QdUB.js",
+      "nav": false
+     },
+     {
+      "ms": -4334,
+      "rel": "A",
+      "p": "/assets/index-CrZerLeX.css",
+      "nav": false
+     },
+     {
+      "ms": -4334,
+      "rel": "A",
+      "p": "/assets/shield-alert-DgQTDiTU.js",
+      "nav": false
+     },
+     {
+      "ms": -4305,
+      "rel": "A",
+      "p": "/assets/httpRequest-DiLtrneX.js",
+      "nav": false
+     },
+     {
+      "ms": -4305,
+      "rel": "A",
+      "p": "/assets/authApi-Jk2uv3uR.js",
+      "nav": false
+     },
+     {
+      "ms": -4301,
+      "rel": "A",
+      "p": "/assets/AuthContext-C-ZTMV23.js",
+      "nav": false
+     },
+     {
+      "ms": -4296,
+      "rel": "A",
+      "p": "/assets/dealerPlatformApi-YqcaG7ar.js",
+      "nav": false
+     },
+     {
+      "ms": -4281,
+      "rel": "A",
+      "p": "/assets/arrow-right-Dy81hIrI.js",
+      "nav": false
+     },
+     {
+      "ms": -4281,
+      "rel": "A",
+      "p": "/assets/car-CXBpyvDA.js",
+      "nav": false
+     },
+     {
+      "ms": -4281,
+      "rel": "A",
+      "p": "/assets/check-BBZX3Fxe.js",
+      "nav": false
+     },
+     {
+      "ms": -4281,
+      "rel": "A",
+      "p": "/assets/circle-check-DBejpiUR.js",
+      "nav": false
+     },
+     {
+      "ms": -4276,
+      "rel": "A",
+      "p": "/assets/circle-question-mark-BgccVHX8.js",
+      "nav": false
+     },
+     {
+      "ms": -4273,
+      "rel": "A",
+      "p": "/assets/circle-CFtfXUfo.js",
+      "nav": false
+     },
+     {
+      "ms": -4273,
+      "rel": "A",
+      "p": "/assets/clipboard-check-D9WeNRUw.js",
+      "nav": false
+     },
+     {
+      "ms": -4273,
+      "rel": "A",
+      "p": "/assets/clock-3-Z3hrk0KK.js",
+      "nav": false
+     },
+     {
+      "ms": -4273,
+      "rel": "A",
+      "p": "/assets/credit-card-C1rT1epD.js",
+      "nav": false
+     },
+     {
+      "ms": -4266,
+      "rel": "A",
+      "p": "/assets/eye-off-DLBV0oCL.js",
+      "nav": false
+     },
+     {
+      "ms": -4253,
+      "rel": "A",
+      "p": "/assets/eye-DGJD621b.js",
+      "nav": false
+     },
+     {
+      "ms": -4252,
+      "rel": "A",
+      "p": "/assets/gavel-Cui_3uKB.js",
+      "nav": false
+     },
+     {
+      "ms": -4252,
+      "rel": "A",
+      "p": "/assets/loader-circle-BmLoqUAb.js",
+      "nav": false
+     },
+     {
+      "ms": -4252,
+      "rel": "A",
+      "p": "/assets/lock-keyhole-CKo8kJw3.js",
+      "nav": false
+     },
+     {
+      "ms": -4252,
+      "rel": "A",
+      "p": "/assets/megaphone-CIPvTgLi.js",
+      "nav": false
+     },
+     {
+      "ms": -4242,
+      "rel": "A",
+      "p": "/assets/plus-BiRss5A9.js",
+      "nav": false
+     },
+     {
+      "ms": -4242,
+      "rel": "A",
+      "p": "/assets/refresh-cw-DZZSR11s.js",
+      "nav": false
+     },
+     {
+      "ms": -4242,
+      "rel": "A",
+      "p": "/assets/rotate-ccw-clock-Tp6oh6RD.js",
+      "nav": false
+     },
+     {
+      "ms": -4241,
+      "rel": "A",
+      "p": "/assets/shield-check-B19bEo1M.js",
+      "nav": false
+     },
+     {
+      "ms": -4241,
+      "rel": "A",
+      "p": "/assets/sparkles-BJenj5wT.js",
+      "nav": false
+     },
+     {
+      "ms": -4241,
+      "rel": "A",
+      "p": "/assets/trash-2-CZl1hYtu.js",
+      "nav": false
+     },
+     {
+      "ms": -4233,
+      "rel": "A",
+      "p": "/assets/user-round-sUifeAY3.js",
+      "nav": false
+     },
+     {
+      "ms": -4233,
+      "rel": "A",
+      "p": "/assets/x-6lh7mfPu.js",
+      "nav": false
+     },
+     {
+      "ms": -4233,
+      "rel": "A",
+      "p": "/assets/api.exports-Cyfef1dr.js",
+      "nav": false
+     },
+     {
+      "ms": -4233,
+      "rel": "A",
+      "p": "/assets/api-DJOIaPyI.js",
+      "nav": false
+     },
+     {
+      "ms": -4092,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -4036,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -4036,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -3949,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -3944,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3943,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3935,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3935,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3935,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -3935,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3929,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -3921,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -3920,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3920,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3919,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3919,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3919,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3909,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3863,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3230,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2701,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2687,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -2669,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -2423,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2376,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -2376,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -2314,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2308,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2302,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2291,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -2291,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2280,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -2280,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2279,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -2279,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2278,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -2278,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2278,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2278,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2258,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2258,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -2258,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2258,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -1618,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1080,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -1046,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -823,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -763,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -742,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -653,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -644,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -639,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -638,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -623,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -623,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -623,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -603,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -603,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -603,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -603,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -603,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -602,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -572,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -572,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -571,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -553,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -489,
+      "rel": "B",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -409,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     },
+     {
+      "ms": -194,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -186,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -182,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -174,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -126,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -105,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": 6,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": 474,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 2279,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "/ net::ERR_ABORTED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED"
+    ],
+    "consoleTail": [
+     "warning: A preload for 'http://127.0.0.1:5444/assets/jsx-runtime--qySwOLX.js' is found, but is not used because it is a cross-world service worker resource mismatch.",
+     "error: Failed to load resource: net::ERR_FAILED",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "59798 B GET /api/v1/auth/me",
+     "59798 B GET /api/v1/auth/csrf",
+     "59799 B GET /api/admin/public/config",
+     "59799 B GET /sw.js",
+     "59862 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "59862 B GET /api/admin/public/config",
+     "59874 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "59989 B GET /dealer [nav]",
+     "60116 B GET /api/cars",
+     "60157 B GET /release.json",
+     "60161 B GET /api/v1/auth/me",
+     "60162 B GET /api/v1/auth/csrf",
+     "60214 B GET /api/admin/public/config",
+     "60221 B GET /sw.js"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/forward-original-to-modified-gap100-run5-stall.png"
+   }
+  },
+  {
+   "run": 6,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 400,
+     "out": "ok",
+     "startedAt": 1795361860960
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 33,
+     "out": "ok",
+     "startedAt": 1795361862710
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 447,
+     "out": "ok",
+     "startedAt": 1795361862743
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 346,
+     "out": "ok",
+     "startedAt": 1795361864432
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 1147,
+     "out": "ok",
+     "startedAt": 1795361864973
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 271,
+     "out": "ok",
+     "startedAt": 1795361866228
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 226,
+     "out": "ok",
+     "startedAt": 1795361866680
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 233,
+     "out": "ok",
+     "startedAt": 1795361867019
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 251,
+     "out": "ok",
+     "startedAt": 1795361867375
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 309,
+     "out": "ok",
+     "startedAt": 1795361867812
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795361868232
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 7,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 346,
+     "out": "ok",
+     "startedAt": 1795361868348
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 26,
+     "out": "ok",
+     "startedAt": 1795361869961
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 418,
+     "out": "ok",
+     "startedAt": 1795361869987
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 353,
+     "out": "ok",
+     "startedAt": 1795361871650
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 267,
+     "out": "ok",
+     "startedAt": 1795361872212
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 267,
+     "out": "ok",
+     "startedAt": 1795361872596
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 1102,
+     "out": "ok",
+     "startedAt": 1795361873118
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 243,
+     "out": "ok",
+     "startedAt": 1795361874326
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 267,
+     "out": "ok",
+     "startedAt": 1795361874693
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 423,
+     "out": "ok",
+     "startedAt": 1795361875199
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795361875741
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 8,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 459,
+     "out": "ok",
+     "startedAt": 1795361875834
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok",
+     "startedAt": 1795361877559
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 356,
+     "out": "ok",
+     "startedAt": 1795361877593
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 420,
+     "out": "ok",
+     "startedAt": 1795361879235
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 315,
+     "out": "ok",
+     "startedAt": 1795361879908
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 273,
+     "out": "ok",
+     "startedAt": 1795361880332
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 207,
+     "out": "ok",
+     "startedAt": 1795361880818
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 233,
+     "out": "ok",
+     "startedAt": 1795361881136
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 235,
+     "out": "ok",
+     "startedAt": 1795361881498
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 322,
+     "out": "ok",
+     "startedAt": 1795361881892
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795361882331
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 9,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 466,
+     "out": "ok",
+     "startedAt": 1795361882401
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok",
+     "startedAt": 1795361884172
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 420,
+     "out": "ok",
+     "startedAt": 1795361884206
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 377,
+     "out": "ok",
+     "startedAt": 1795361885875
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 287,
+     "out": "ok",
+     "startedAt": 1795361886454
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 230,
+     "out": "ok",
+     "startedAt": 1795361886847
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 969,
+     "out": "ok",
+     "startedAt": 1795361887182
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 250,
+     "out": "ok",
+     "startedAt": 1795361888262
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 236,
+     "out": "ok",
+     "startedAt": 1795361888652
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 446,
+     "out": "ok",
+     "startedAt": 1795361889077
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795361889637
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 10,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 387,
+     "out": "ok",
+     "startedAt": 1795361889705
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 36,
+     "out": "ok",
+     "startedAt": 1795361891343
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 388,
+     "out": "ok",
+     "startedAt": 1795361891379
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 346,
+     "out": "ok",
+     "startedAt": 1795361893028
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12000,
+     "out": "STALL",
+     "startedAt": 1795361893597
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 290,
+     "out": "ok",
+     "startedAt": 1795361905699
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 260,
+     "out": "ok",
+     "startedAt": 1795361906185
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 254,
+     "out": "ok",
+     "startedAt": 1795361906556
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 311,
+     "out": "ok",
+     "startedAt": 1795361906949
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 280,
+     "out": "ok",
+     "startedAt": 1795361907556
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795361907955
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "https://api.kayad.space/socket.io/socket.io.js",
+      "nav": false,
+      "ageMs": 1507
+     },
+     {
+      "url": "https://api.kayad.space/socket.io/socket.io.js",
+      "nav": false,
+      "ageMs": 1132
+     }
+    ],
+    "controller": {
+     "controller": "http://127.0.0.1:5444/sw.js",
+     "state": "activated",
+     "regs": [
+      [
+       "activated",
+       null,
+       null
+      ]
+     ]
+    },
+    "caches": {
+     "kayad-static-v2": [
+      "/assets/index-Cer5u99I.js",
+      "/assets/httpClient-DUfQrcOs.js",
+      "/assets/jsx-runtime--qySwOLX.js",
+      "/assets/chunk-62JRHF6Z-CTXCXr27.js",
+      "/assets/createLucideIcon-DTlqIiI3.js",
+      "/assets/lock-CJZ-QdUB.js",
+      "/assets/shield-alert-DgQTDiTU.js",
+      "/assets/httpRequest-DiLtrneX.js",
+      "/assets/authApi-Jk2uv3uR.js",
+      "/assets/AuthContext-C-ZTMV23.js",
+      "/assets/dealerPlatformApi-YqcaG7ar.js",
+      "/assets/arrow-right-Dy81hIrI.js"
+     ],
+     "kayad-images-v2": [
+      "/branding/kayard-ke-logo.png",
+      "/branding/kayard-ke-logo-dark.png",
+      "/hero/kayad-land-cruiser-mobile.webp",
+      "/hero/kayad-mercedes-gle-mobile.webp"
+     ],
+     "kayad-mobile-v2": [
+      "/login",
+      "/dealer"
+     ]
+    },
+    "release": "bbbbbbbbbbbb-mwrwlraj",
+    "timing": {
+     "type": "navigate",
+     "start": 0,
+     "responseEnd": 35,
+     "domContentLoaded": 179,
+     "workerStart": 1
+    },
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -3892,
+      "kind": "registration",
+      "n": 0
+     },
+     {
+      "msFromStalledNavStart": -3892,
+      "kind": "version",
+      "v": ""
+     },
+     {
+      "msFromStalledNavStart": -2246,
+      "kind": "registration",
+      "n": 1
+     },
+     {
+      "msFromStalledNavStart": -2244,
+      "kind": "version",
+      "v": "0:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -2241,
+      "kind": "version",
+      "v": "0:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -2241,
+      "kind": "version",
+      "v": "0:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -2241,
+      "kind": "version",
+      "v": "0:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -2233,
+      "kind": "version",
+      "v": "0:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -2233,
+      "kind": "registration",
+      "n": 1
+     },
+     {
+      "msFromStalledNavStart": -2233,
+      "kind": "version",
+      "v": "0:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -2224,
+      "kind": "version",
+      "v": "0:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -2224,
+      "kind": "version",
+      "v": "0:running/activating"
+     },
+     {
+      "msFromStalledNavStart": -2219,
+      "kind": "version",
+      "v": "0:running/activating"
+     },
+     {
+      "msFromStalledNavStart": -2218,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2209,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2178,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -563,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -552,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -132,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -132,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -132,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -116,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -108,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -108,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -24,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": 74,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 77,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 113,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 113,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 113,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 113,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 113,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1110,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12112,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12112,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12120,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12601,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12633,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12966,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12975,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 13359,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 13374,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 13990,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 14000,
+      "kind": "version",
+      "v": "1:running/activated"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -3892
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -2254
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -2218
+     },
+     {
+      "name": "reload (host now B) <- triggers the one-time worker swap",
+      "rel": "B",
+      "msFromStalledNavStart": -569
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     },
+     {
+      "name": "goto / (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 12102
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 12588
+     },
+     {
+      "name": "goto /login (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 12959
+     },
+     {
+      "name": "goto / (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 13352
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 13959
+     },
+     {
+      "name": "final release",
+      "rel": "B",
+      "msFromStalledNavStart": 14358
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -3880,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -3843,
+      "rel": "A",
+      "p": "/assets/index-Cer5u99I.js",
+      "nav": false
+     },
+     {
+      "ms": -3843,
+      "rel": "A",
+      "p": "/assets/httpClient-DUfQrcOs.js",
+      "nav": false
+     },
+     {
+      "ms": -3843,
+      "rel": "A",
+      "p": "/assets/jsx-runtime--qySwOLX.js",
+      "nav": false
+     },
+     {
+      "ms": -3835,
+      "rel": "A",
+      "p": "/assets/chunk-62JRHF6Z-CTXCXr27.js",
+      "nav": false
+     },
+     {
+      "ms": -3835,
+      "rel": "A",
+      "p": "/assets/createLucideIcon-DTlqIiI3.js",
+      "nav": false
+     },
+     {
+      "ms": -3835,
+      "rel": "A",
+      "p": "/assets/lock-CJZ-QdUB.js",
+      "nav": false
+     },
+     {
+      "ms": -3808,
+      "rel": "A",
+      "p": "/assets/index-CrZerLeX.css",
+      "nav": false
+     },
+     {
+      "ms": -3804,
+      "rel": "A",
+      "p": "/assets/shield-alert-DgQTDiTU.js",
+      "nav": false
+     },
+     {
+      "ms": -3803,
+      "rel": "A",
+      "p": "/assets/httpRequest-DiLtrneX.js",
+      "nav": false
+     },
+     {
+      "ms": -3803,
+      "rel": "A",
+      "p": "/assets/authApi-Jk2uv3uR.js",
+      "nav": false
+     },
+     {
+      "ms": -3803,
+      "rel": "A",
+      "p": "/assets/AuthContext-C-ZTMV23.js",
+      "nav": false
+     },
+     {
+      "ms": -3792,
+      "rel": "A",
+      "p": "/assets/dealerPlatformApi-YqcaG7ar.js",
+      "nav": false
+     },
+     {
+      "ms": -3792,
+      "rel": "A",
+      "p": "/assets/arrow-right-Dy81hIrI.js",
+      "nav": false
+     },
+     {
+      "ms": -3792,
+      "rel": "A",
+      "p": "/assets/car-CXBpyvDA.js",
+      "nav": false
+     },
+     {
+      "ms": -3792,
+      "rel": "A",
+      "p": "/assets/check-BBZX3Fxe.js",
+      "nav": false
+     },
+     {
+      "ms": -3791,
+      "rel": "A",
+      "p": "/assets/circle-check-DBejpiUR.js",
+      "nav": false
+     },
+     {
+      "ms": -3778,
+      "rel": "A",
+      "p": "/assets/circle-question-mark-BgccVHX8.js",
+      "nav": false
+     },
+     {
+      "ms": -3772,
+      "rel": "A",
+      "p": "/assets/circle-CFtfXUfo.js",
+      "nav": false
+     },
+     {
+      "ms": -3771,
+      "rel": "A",
+      "p": "/assets/clipboard-check-D9WeNRUw.js",
+      "nav": false
+     },
+     {
+      "ms": -3768,
+      "rel": "A",
+      "p": "/assets/clock-3-Z3hrk0KK.js",
+      "nav": false
+     },
+     {
+      "ms": -3767,
+      "rel": "A",
+      "p": "/assets/credit-card-C1rT1epD.js",
+      "nav": false
+     },
+     {
+      "ms": -3762,
+      "rel": "A",
+      "p": "/assets/eye-off-DLBV0oCL.js",
+      "nav": false
+     },
+     {
+      "ms": -3762,
+      "rel": "A",
+      "p": "/assets/eye-DGJD621b.js",
+      "nav": false
+     },
+     {
+      "ms": -3761,
+      "rel": "A",
+      "p": "/assets/gavel-Cui_3uKB.js",
+      "nav": false
+     },
+     {
+      "ms": -3754,
+      "rel": "A",
+      "p": "/assets/loader-circle-BmLoqUAb.js",
+      "nav": false
+     },
+     {
+      "ms": -3753,
+      "rel": "A",
+      "p": "/assets/lock-keyhole-CKo8kJw3.js",
+      "nav": false
+     },
+     {
+      "ms": -3750,
+      "rel": "A",
+      "p": "/assets/megaphone-CIPvTgLi.js",
+      "nav": false
+     },
+     {
+      "ms": -3743,
+      "rel": "A",
+      "p": "/assets/plus-BiRss5A9.js",
+      "nav": false
+     },
+     {
+      "ms": -3743,
+      "rel": "A",
+      "p": "/assets/refresh-cw-DZZSR11s.js",
+      "nav": false
+     },
+     {
+      "ms": -3743,
+      "rel": "A",
+      "p": "/assets/rotate-ccw-clock-Tp6oh6RD.js",
+      "nav": false
+     },
+     {
+      "ms": -3743,
+      "rel": "A",
+      "p": "/assets/shield-check-B19bEo1M.js",
+      "nav": false
+     },
+     {
+      "ms": -3743,
+      "rel": "A",
+      "p": "/assets/sparkles-BJenj5wT.js",
+      "nav": false
+     },
+     {
+      "ms": -3743,
+      "rel": "A",
+      "p": "/assets/trash-2-CZl1hYtu.js",
+      "nav": false
+     },
+     {
+      "ms": -3740,
+      "rel": "A",
+      "p": "/assets/user-round-sUifeAY3.js",
+      "nav": false
+     },
+     {
+      "ms": -3740,
+      "rel": "A",
+      "p": "/assets/x-6lh7mfPu.js",
+      "nav": false
+     },
+     {
+      "ms": -3740,
+      "rel": "A",
+      "p": "/assets/api.exports-Cyfef1dr.js",
+      "nav": false
+     },
+     {
+      "ms": -3740,
+      "rel": "A",
+      "p": "/assets/api-DJOIaPyI.js",
+      "nav": false
+     },
+     {
+      "ms": -3646,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3573,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -3569,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -3486,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -3470,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3461,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3457,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3457,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3453,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -3452,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3449,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -3446,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -3441,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3440,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3435,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3433,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3428,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3424,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3422,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2780,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2243,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2230,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -2209,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -1927,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1870,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -1867,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -1808,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -1800,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1794,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1794,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1790,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1790,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -1790,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1789,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -1786,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1786,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -1786,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1785,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1784,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1783,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1781,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -1763,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -1749,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1148,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -562,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -542,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -338,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -285,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -260,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -197,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -197,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -196,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -185,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -183,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -183,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -182,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -179,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -176,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -174,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -174,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -172,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -171,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -170,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -169,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -139,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -102,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -72,
+      "rel": "B",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": 518,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 2322,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_FAILED",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: net::ERR_FAILED"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "7295 B GET /api/v1/auth/me",
+     "7296 B GET /api/v1/auth/csrf",
+     "7300 B GET /api/admin/public/config",
+     "7301 B GET /sw.js",
+     "7329 B GET /api/admin/public/config",
+     "7483 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "7484 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "7592 B GET /dealer [nav]",
+     "7760 B GET /api/cars",
+     "7815 B GET /release.json",
+     "7815 B GET /api/v1/auth/me",
+     "7821 B GET /api/v1/auth/csrf",
+     "7821 B GET /api/admin/public/config",
+     "7835 B GET /sw.js"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/forward-original-to-modified-gap100-run10-stall.png"
+   }
+  },
+  {
+   "run": 11,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 368,
+     "out": "ok",
+     "startedAt": 1795361908701
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok",
+     "startedAt": 1795361910388
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 395,
+     "out": "ok",
+     "startedAt": 1795361910417
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 455,
+     "out": "ok",
+     "startedAt": 1795361912110
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 381,
+     "out": "ok",
+     "startedAt": 1795361912795
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 850,
+     "out": "ok",
+     "startedAt": 1795361913286
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 335,
+     "out": "ok",
+     "startedAt": 1795361914311
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 224,
+     "out": "ok",
+     "startedAt": 1795361914757
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 333,
+     "out": "ok",
+     "startedAt": 1795361915127
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 254,
+     "out": "ok",
+     "startedAt": 1795361915647
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795361916013
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 12,
+   "stalled": "goto / (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 394,
+     "out": "ok",
+     "startedAt": 1795361916085
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 28,
+     "out": "ok",
+     "startedAt": 1795361917740
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 392,
+     "out": "ok",
+     "startedAt": 1795361917768
+    },
+    {
+     "name": "reload (host now B) <- triggers the one-time worker swap",
+     "rel": "B",
+     "ms": 386,
+     "out": "ok",
+     "startedAt": 1795361919426
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 295,
+     "out": "ok",
+     "startedAt": 1795361920053
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 12001,
+     "out": "STALL",
+     "startedAt": 1795361920453
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 182,
+     "out": "ok",
+     "startedAt": 1795361932555
+    },
+    {
+     "name": "goto /login (B)",
+     "rel": "B",
+     "ms": 280,
+     "out": "ok",
+     "startedAt": 1795361932850
+    },
+    {
+     "name": "goto / (B)",
+     "rel": "B",
+     "ms": 302,
+     "out": "ok",
+     "startedAt": 1795361933256
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 314,
+     "out": "ok",
+     "startedAt": 1795361933787
+    },
+    {
+     "name": "final release",
+     "rel": "B",
+     "ms": 0,
+     "out": "ok",
+     "startedAt": 1795361934213
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "https://api.kayad.space/socket.io/socket.io.js",
+      "nav": false,
+      "ageMs": 14337
+     },
+     {
+      "url": "https://api.kayad.space/socket.io/socket.io.js",
+      "nav": false,
+      "ageMs": 1468
+     }
+    ],
+    "controller": {
+     "controller": "http://127.0.0.1:5444/sw.js",
+     "state": "activated",
+     "regs": [
+      [
+       "activated",
+       null,
+       null
+      ]
+     ]
+    },
+    "caches": {
+     "kayad-static-v2": [
+      "/assets/httpClient-DUfQrcOs.js",
+      "/assets/jsx-runtime--qySwOLX.js",
+      "/assets/chunk-62JRHF6Z-CTXCXr27.js",
+      "/assets/createLucideIcon-DTlqIiI3.js",
+      "/assets/lock-CJZ-QdUB.js",
+      "/assets/shield-alert-DgQTDiTU.js",
+      "/assets/httpRequest-DiLtrneX.js",
+      "/assets/eye-off-DLBV0oCL.js",
+      "/assets/index-Cer5u99I.js",
+      "/assets/authApi-Jk2uv3uR.js",
+      "/assets/AuthContext-C-ZTMV23.js",
+      "/assets/dealerPlatformApi-YqcaG7ar.js"
+     ],
+     "kayad-images-v2": [
+      "/branding/kayard-ke-logo.png",
+      "/branding/kayard-ke-logo-dark.png",
+      "/hero/kayad-land-cruiser-mobile.webp",
+      "/hero/kayad-mercedes-gle-mobile.webp"
+     ],
+     "kayad-mobile-v2": [
+      "/login",
+      "/dealer"
+     ]
+    },
+    "release": "bbbbbbbbbbbb-mwrwlraj",
+    "timing": {
+     "type": "navigate",
+     "start": 0,
+     "responseEnd": 14,
+     "domContentLoaded": 199,
+     "workerStart": 1
+    },
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -4365,
+      "kind": "registration",
+      "n": 0
+     },
+     {
+      "msFromStalledNavStart": -4365,
+      "kind": "version",
+      "v": ""
+     },
+     {
+      "msFromStalledNavStart": -2706,
+      "kind": "registration",
+      "n": 1
+     },
+     {
+      "msFromStalledNavStart": -2706,
+      "kind": "version",
+      "v": "0:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -2701,
+      "kind": "version",
+      "v": "0:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -2701,
+      "kind": "version",
+      "v": "0:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -2701,
+      "kind": "version",
+      "v": "0:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -2697,
+      "kind": "version",
+      "v": "0:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -2696,
+      "kind": "registration",
+      "n": 1
+     },
+     {
+      "msFromStalledNavStart": -2695,
+      "kind": "version",
+      "v": "0:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -2690,
+      "kind": "version",
+      "v": "0:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -2690,
+      "kind": "version",
+      "v": "0:running/activating"
+     },
+     {
+      "msFromStalledNavStart": -2689,
+      "kind": "version",
+      "v": "0:running/activating"
+     },
+     {
+      "msFromStalledNavStart": -2686,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2679,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2670,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1018,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1009,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -603,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -603,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -603,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -598,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -594,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -594,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -534,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -364,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -333,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -324,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -306,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -306,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -306,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -305,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -288,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 10,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 10,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1013,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12107,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12107,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12118,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12401,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12410,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12807,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12820,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 13357,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 13390,
+      "kind": "version",
+      "v": "1:running/activated"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -4368
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -2713
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -2685
+     },
+     {
+      "name": "reload (host now B) <- triggers the one-time worker swap",
+      "rel": "B",
+      "msFromStalledNavStart": -1027
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": -400
+     },
+     {
+      "name": "goto / (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 12102
+     },
+     {
+      "name": "goto /login (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 12397
+     },
+     {
+      "name": "goto / (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 12803
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 13334
+     },
+     {
+      "name": "final release",
+      "rel": "B",
+      "msFromStalledNavStart": 13760
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4356,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -4338,
+      "rel": "A",
+      "p": "/assets/index-Cer5u99I.js",
+      "nav": false
+     },
+     {
+      "ms": -4326,
+      "rel": "A",
+      "p": "/assets/httpClient-DUfQrcOs.js",
+      "nav": false
+     },
+     {
+      "ms": -4326,
+      "rel": "A",
+      "p": "/assets/jsx-runtime--qySwOLX.js",
+      "nav": false
+     },
+     {
+      "ms": -4326,
+      "rel": "A",
+      "p": "/assets/chunk-62JRHF6Z-CTXCXr27.js",
+      "nav": false
+     },
+     {
+      "ms": -4325,
+      "rel": "A",
+      "p": "/assets/createLucideIcon-DTlqIiI3.js",
+      "nav": false
+     },
+     {
+      "ms": -4325,
+      "rel": "A",
+      "p": "/assets/lock-CJZ-QdUB.js",
+      "nav": false
+     },
+     {
+      "ms": -4314,
+      "rel": "A",
+      "p": "/assets/index-CrZerLeX.css",
+      "nav": false
+     },
+     {
+      "ms": -4311,
+      "rel": "A",
+      "p": "/assets/shield-alert-DgQTDiTU.js",
+      "nav": false
+     },
+     {
+      "ms": -4309,
+      "rel": "A",
+      "p": "/assets/httpRequest-DiLtrneX.js",
+      "nav": false
+     },
+     {
+      "ms": -4309,
+      "rel": "A",
+      "p": "/assets/authApi-Jk2uv3uR.js",
+      "nav": false
+     },
+     {
+      "ms": -4309,
+      "rel": "A",
+      "p": "/assets/AuthContext-C-ZTMV23.js",
+      "nav": false
+     },
+     {
+      "ms": -4307,
+      "rel": "A",
+      "p": "/assets/dealerPlatformApi-YqcaG7ar.js",
+      "nav": false
+     },
+     {
+      "ms": -4305,
+      "rel": "A",
+      "p": "/assets/arrow-right-Dy81hIrI.js",
+      "nav": false
+     },
+     {
+      "ms": -4304,
+      "rel": "A",
+      "p": "/assets/car-CXBpyvDA.js",
+      "nav": false
+     },
+     {
+      "ms": -4303,
+      "rel": "A",
+      "p": "/assets/check-BBZX3Fxe.js",
+      "nav": false
+     },
+     {
+      "ms": -4302,
+      "rel": "A",
+      "p": "/assets/circle-check-DBejpiUR.js",
+      "nav": false
+     },
+     {
+      "ms": -4301,
+      "rel": "A",
+      "p": "/assets/circle-question-mark-BgccVHX8.js",
+      "nav": false
+     },
+     {
+      "ms": -4299,
+      "rel": "A",
+      "p": "/assets/circle-CFtfXUfo.js",
+      "nav": false
+     },
+     {
+      "ms": -4299,
+      "rel": "A",
+      "p": "/assets/clipboard-check-D9WeNRUw.js",
+      "nav": false
+     },
+     {
+      "ms": -4298,
+      "rel": "A",
+      "p": "/assets/clock-3-Z3hrk0KK.js",
+      "nav": false
+     },
+     {
+      "ms": -4297,
+      "rel": "A",
+      "p": "/assets/credit-card-C1rT1epD.js",
+      "nav": false
+     },
+     {
+      "ms": -4296,
+      "rel": "A",
+      "p": "/assets/eye-off-DLBV0oCL.js",
+      "nav": false
+     },
+     {
+      "ms": -4294,
+      "rel": "A",
+      "p": "/assets/eye-DGJD621b.js",
+      "nav": false
+     },
+     {
+      "ms": -4293,
+      "rel": "A",
+      "p": "/assets/gavel-Cui_3uKB.js",
+      "nav": false
+     },
+     {
+      "ms": -4293,
+      "rel": "A",
+      "p": "/assets/loader-circle-BmLoqUAb.js",
+      "nav": false
+     },
+     {
+      "ms": -4292,
+      "rel": "A",
+      "p": "/assets/lock-keyhole-CKo8kJw3.js",
+      "nav": false
+     },
+     {
+      "ms": -4291,
+      "rel": "A",
+      "p": "/assets/megaphone-CIPvTgLi.js",
+      "nav": false
+     },
+     {
+      "ms": -4291,
+      "rel": "A",
+      "p": "/assets/plus-BiRss5A9.js",
+      "nav": false
+     },
+     {
+      "ms": -4289,
+      "rel": "A",
+      "p": "/assets/refresh-cw-DZZSR11s.js",
+      "nav": false
+     },
+     {
+      "ms": -4288,
+      "rel": "A",
+      "p": "/assets/rotate-ccw-clock-Tp6oh6RD.js",
+      "nav": false
+     },
+     {
+      "ms": -4287,
+      "rel": "A",
+      "p": "/assets/shield-check-B19bEo1M.js",
+      "nav": false
+     },
+     {
+      "ms": -4287,
+      "rel": "A",
+      "p": "/assets/sparkles-BJenj5wT.js",
+      "nav": false
+     },
+     {
+      "ms": -4286,
+      "rel": "A",
+      "p": "/assets/trash-2-CZl1hYtu.js",
+      "nav": false
+     },
+     {
+      "ms": -4285,
+      "rel": "A",
+      "p": "/assets/user-round-sUifeAY3.js",
+      "nav": false
+     },
+     {
+      "ms": -4282,
+      "rel": "A",
+      "p": "/assets/x-6lh7mfPu.js",
+      "nav": false
+     },
+     {
+      "ms": -4282,
+      "rel": "A",
+      "p": "/assets/api.exports-Cyfef1dr.js",
+      "nav": false
+     },
+     {
+      "ms": -4279,
+      "rel": "A",
+      "p": "/assets/api-DJOIaPyI.js",
+      "nav": false
+     },
+     {
+      "ms": -4131,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -4040,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -4039,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -3948,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -3948,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3947,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3947,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3932,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3932,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -3932,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3932,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -3930,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -3919,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3917,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3917,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3917,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3917,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3916,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3880,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3242,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2706,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2694,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -2677,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -2397,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2331,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -2330,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -2272,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -2272,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2265,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2256,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2253,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2247,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -2243,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2242,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -2242,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2242,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -2229,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2229,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -2229,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -2229,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2229,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -2217,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -2196,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1584,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1018,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -1000,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -781,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -721,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -687,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -610,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -586,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -585,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -578,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -577,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -576,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -576,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -576,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -576,
+      "rel": "B",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -552,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -551,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -551,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -551,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -551,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -551,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -547,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -546,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -543,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -496,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -355,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     },
+     {
+      "ms": -179,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -160,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -160,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -160,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -160,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -124,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": 7,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": 482,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 2289,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     }
+    ],
+    "failedRequests": [
+     "/ net::ERR_ABORTED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_FAILED"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "33492 B GET /api/v1/auth/me",
+     "33494 B GET /api/v1/auth/csrf",
+     "33495 B GET /api/admin/public/config",
+     "33563 B GET /sw.js",
+     "33576 B GET /api/admin/public/config",
+     "33664 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "33720 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "33815 B GET /dealer [nav]",
+     "34008 B GET /api/cars",
+     "34033 B GET /release.json",
+     "34033 B GET /api/v1/auth/me",
+     "34037 B GET /api/v1/auth/csrf",
+     "34086 B GET /api/admin/public/config",
+     "34103 B GET /sw.js"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/forward-original-to-modified-gap100-run12-stall.png"
+   }
+  }
+ ],
+ "total": 12,
+ "stalls": 4
+}

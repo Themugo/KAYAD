@@ -19,6 +19,7 @@ import DealerCollectionAccountPanel from './DealerCollectionAccountPanel';
 import AuctionInsightsPanel from './AuctionInsightsPanel';
 import DealerAccountStatus from './DealerAccountStatus';
 import DealerTeamPanel from './DealerTeamPanel';
+import CommandCentrePanel, { type CommandCentreData } from './CommandCentrePanel';
 import { getMyListings, deleteCar, markCarSold, setCarVisibility } from '../../../services/vehicleApi';
 import { ListingStatusBadge, ListingThumb } from '../../../components/listing/ListingPresentation';
 import type { BackendCar } from '../../../services/vehicleApi';
@@ -420,6 +421,8 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     return () => window.removeEventListener('popstate', onPop);
   }, []);
   const [dashboard, setDashboard] = useState(null);
+  const [commandCentre, setCommandCentre] = useState<CommandCentreData | null>(null);
+  const [commandCentreFailed, setCommandCentreFailed] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [loadErrorStatus, setLoadErrorStatus] = useState<number | null>(null);
@@ -704,15 +707,46 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     }
   };
 
+  // The command centre is role-aware on the server (each section only when the member's permissions already allow that data).
+  // The legacy /dashboard needs the earnings permission, so a sales or lot agent used to get an error here; both are requested
+  // and the overview works if EITHER succeeds. A failure of the command centre never blocks the rest of the overview.
+  const fetchCommandCentre = async (): Promise<{ data: CommandCentreData | null; failed: boolean }> => {
+    try {
+      const body = await dealerApi.getCommandCentre();
+      return body?.data ? { data: body.data as CommandCentreData, failed: false } : { data: null, failed: true };
+    } catch (err) {
+      return { data: null, failed: (err as { status?: number })?.status !== 403 };
+    }
+  };
+
+  /** Shape the legacy overview needs, built from the command centre when the legacy endpoint is refused for this role. */
+  const dashboardFromCommandCentre = (cc: CommandCentreData) => ({
+    overview: {
+      totalListings: cc.listings?.total,
+      listingStatus: cc.listings ? { available: cc.listings.active, pending: cc.listings.pendingApproval, draft: cc.listings.draft, reserved: cc.listings.reserved, sold: cc.listings.sold, hidden: cc.listings.hidden } : undefined,
+      totalViews: undefined,
+      leads: cc.leads ? { total: cc.leads.totalLeads, ...((cc as any).pipeline || {}), new: cc.leads.newEnquiries } : undefined,
+      revenue: { total: cc.financial?.releasedRevenue?.amount },
+    },
+    topPerformers: { vehicles: (cc as any).topPerformers || [] },
+    recentActivity: (cc as any).recentActivity || [],
+  });
+
   const loadDashboard = async () => {
     setLoading(true);
     setLoadError(null);
     setLoadErrorStatus(null);
     try {
+      const [legacy, cc] = await Promise.all([
+        dealerApi.getDealerDashboard().then((body: any) => ({ body, err: null as unknown }), (err: unknown) => ({ body: null, err })),
+        fetchCommandCentre(),
+      ]);
+      setCommandCentre(cc.data);
+      setCommandCentreFailed(cc.failed);
+      if (legacy.err && !cc.data) throw legacy.err;
       // dealerPlatformApi resolves the response body: { success, data: <dashboard> }.
-      const body = await dealerApi.getDealerDashboard();
-      if (!body?.data) throw new Error('Dashboard response had no data');
-      setDashboard(body.data);
+      if (!legacy.err && !legacy.body?.data && !cc.data) throw new Error('Dashboard response had no data');
+      setDashboard(!legacy.err && legacy.body?.data ? legacy.body.data : dashboardFromCommandCentre(cc.data as CommandCentreData));
     } catch (err) {
       // Keep the failure visible instead of replacing unavailable data
       // with invented or stale business figures. A refusal (403) or an expired
@@ -875,6 +909,9 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
             const listingCaption = st ? [st.available != null ? `${st.available} live` : null, st.pending ? `${st.pending} pending review` : null, st.draft ? `${st.draft} draft` : null].filter(Boolean).join(' · ') : undefined;
             // Conversion is shown only when it can be calculated from real counts (at least one lead, and a real "sold" count).
             const conversion = totalLeads && totalLeads > 0 && sold != null ? Math.round((sold / totalLeads) * 100) : null;
+            // A role that cannot read earnings/views is not shown a permanent "—" for them (the command centre already omits what that role may not see).
+            const showViews = !(commandCentre && !loading && ov?.totalViews == null);
+            const showRevenue = !commandCentre || !!commandCentre.financial || ov?.revenue?.total != null;
             const stages: Array<[string, string, string]> = [
               ['New', 'new', '#13B8A6'], ['Contacted', 'contacted', '#176B87'], ['Negotiating', 'negotiating', '#0A3340'],
               ['Inspection booked', 'inspectionBooked', '#5AAFA4'], ['Reserved', 'reserved', '#0E4655'],
@@ -894,7 +931,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   <button type="button" onClick={() => setActiveSection('auctions')} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 text-sm font-bold hover:bg-white/20"><Gavel className="h-4 w-4" aria-hidden="true" />Auctions</button>
                   <button type="button" onClick={() => setActiveSection('banking')} className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 text-sm font-bold hover:bg-white/20"><Landmark className="h-4 w-4" aria-hidden="true" />Payouts</button>
                 </div>
-                {dataReady && ((newLeads ?? 0) > 0 || (st?.pending ?? 0) > 0 || (st?.draft ?? 0) > 0) && (
+                {dataReady && !commandCentre && ((newLeads ?? 0) > 0 || (st?.pending ?? 0) > 0 || (st?.draft ?? 0) > 0) && (
                   <ul className="mt-4 grid gap-2 sm:grid-cols-3" data-testid="dealer-attention" aria-label="Needs your attention">
                     {(newLeads ?? 0) > 0 && <li><button type="button" onClick={() => setActiveSection('leads')} className="w-full rounded-xl bg-white/10 px-3 py-2 text-left text-sm hover:bg-white/20"><strong className="block text-lg font-black">{newLeads}</strong>new {newLeads === 1 ? 'enquiry' : 'enquiries'} awaiting reply</button></li>}
                     {(st?.pending ?? 0) > 0 && <li><button type="button" onClick={() => setActiveSection('inventory')} className="w-full rounded-xl bg-white/10 px-3 py-2 text-left text-sm hover:bg-white/20"><strong className="block text-lg font-black">{st?.pending}</strong>listing{st?.pending === 1 ? '' : 's'} pending review</button></li>}
@@ -902,12 +939,17 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   </ul>
                 )}
               </section>
+              <CommandCentrePanel data={commandCentre} loading={loading} unavailable={commandCentreFailed} onOpen={(section) => setActiveSection(section)} onRetry={loadDashboard} />
               {/* Business summary: real figures only. "—" = unavailable, 0 = a genuine zero, skeleton = still loading. */}
               <div className="mb-5 grid grid-cols-1 gap-3 min-[460px]:grid-cols-2 sm:mb-6 sm:gap-4 xl:grid-cols-4">
                 <StatCard title="Total Listings" loading={loading} onOpen={() => setActiveSection('inventory')} openLabel="Open inventory" value={ov?.totalListings ?? '—'} caption={listingCaption} icon={Car} />
                 <StatCard title="Total Leads" loading={loading} onOpen={() => setActiveSection('leads')} openLabel="Open leads" value={totalLeads ?? '—'} caption={newLeads != null ? (newLeads > 0 ? `${newLeads} new, awaiting your response` : 'No new enquiries waiting') : undefined} icon={Users} />
+                {showViews && (
                 <StatCard title="Total Views" loading={loading} value={ov?.totalViews == null ? '—' : Number(ov.totalViews).toLocaleString('en-KE')} caption="All time, across your listings" icon={Eye} />
-                <StatCard title="Revenue (released escrow, all time)" loading={loading} value={ov?.revenue?.total == null ? '—' : `Ksh ${Number(ov.revenue.total).toLocaleString('en-KE')}`} icon={DollarSign} />
+                )}
+                {showRevenue && (
+                <StatCard title="Revenue (released escrow, all time)" loading={loading} value={(commandCentre?.financial?.releasedRevenue?.amount ?? ov?.revenue?.total) == null ? '—' : `Ksh ${Number(commandCentre?.financial?.releasedRevenue?.amount ?? ov?.revenue?.total).toLocaleString('en-KE')}`} icon={DollarSign} />
+                )}
               </div>
 
               <div className="mb-5 grid grid-cols-1 gap-4 sm:mb-6 sm:gap-6 xl:grid-cols-3">

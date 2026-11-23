@@ -210,7 +210,8 @@
     "validate:phase3-my-account": "node scripts/validate-phase3-my-account-convergence.mjs",
     "validate:phase4-personal-activity": "node scripts/validate-phase4-personal-activity-lifecycle.mjs",
     "validate:homepage-compact-layout": "node scripts/validate-homepage-compact-layout.mjs",
-    "validate:dealer-workspace-navigation": "node scripts/validate-dealer-workspace-navigation.mjs"
+    "validate:dealer-workspace-navigation": "node scripts/validate-dealer-workspace-navigation.mjs",
+    "verify:dist": "node scripts/verify-dist-integrity.mjs dist"
   },
   "dependencies": {
     "@sentry/react": "10.69.0",

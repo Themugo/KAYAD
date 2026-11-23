@@ -50,6 +50,8 @@ jobs:
         run: npm run build
       - name: Validate dist output
         run: test -f dist/index.html && test -d dist/assets
+      - name: Verify dist integrity (release id, assets, chunks)
+        run: npm run verify:dist
       - name: Upload deployment artifact
         uses: actions/upload-artifact@v4
         with:
@@ -136,6 +138,7 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment_url }}
+          EXPECTED_COMMIT: ${{ github.sha }}
           EXPECTED_COMMIT: ${{ github.sha }}
           PUBLIC_URL: https://www.kayad.space
           API_URL: https://api.kayad.space

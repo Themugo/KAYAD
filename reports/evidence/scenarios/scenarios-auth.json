@@ -1,0 +1,95 @@
+{
+  "at": "2026-11-22T15:51:54.484Z",
+  "results": [
+    {
+      "scenario": "6",
+      "name": "login via UI under old release works",
+      "pass": true,
+      "detail": "me=200 url=/"
+    },
+    {
+      "scenario": "6",
+      "name": "after deploy: release B served and session still valid (no forced logout)",
+      "pass": true,
+      "detail": "meta=bbbbbbbbbbbb-test0002 me=200"
+    },
+    {
+      "scenario": "6",
+      "name": "authenticated deep link after deploy navigates",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "scenario": "6",
+      "name": "login via UI right after deploy (old worker controlling) succeeds",
+      "pass": true,
+      "detail": "me=200 meta=bbbbbbbbbbbb-test0002"
+    },
+    {
+      "scenario": "7",
+      "name": "registration through the app transport succeeds",
+      "pass": true,
+      "detail": "status=201 {\"success\":true,\"user\":{\"id\":\"8719796d-4e45-4d5a-b5c2-182208567ab8\",\"name\":\"SW Rehearsal\",\"email\":\"swreg-mws0lo1d@exampl"
+    },
+    {
+      "scenario": "7",
+      "name": "verification e-mail captured by the loopback stub",
+      "pass": true,
+      "detail": "/verify-email"
+    },
+    {
+      "scenario": "7",
+      "name": "verification link opened after deploy completes successfully on release B",
+      "pass": true,
+      "detail": "meta=bbbbbbbbbbbb-test0002 text=KAYARD KE PREMIUM VEHICLE MARKETPLACE New to KAYARD KE? Create account EMAIL VERIFICATION Email verified Email verified successfully. You ca"
+    },
+    {
+      "scenario": "6/7",
+      "name": "no uncaught page errors across auth scenarios",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "apiCalls": [
+    "GET /api/admin/public/config 200",
+    "GET /api/cars/my-listings 200",
+    "GET /api/chat/unread 200",
+    "GET /api/v1/auth/phone-status 200",
+    "GET /api/v1/auth/csrf 200",
+    "GET /api/v1/auth/me 200",
+    "GET /api/cars 200",
+    "POST /api/analytics/collect 202",
+    "GET /api/cars 200",
+    "GET /api/search/facets 200",
+    "GET /api/ads 200",
+    "GET /api/ads 200",
+    "GET /api/featured-campaigns/current 200",
+    "GET /api/ads 200",
+    "GET /api/hero 200",
+    "GET /api/admin/public/config 200",
+    "GET /api/v1/auth/me 401",
+    "GET /api/ads 200",
+    "GET /api/ads 200",
+    "GET /api/cars 200",
+    "GET /api/admin/public/config 200",
+    "GET /api/admin/public/config 200",
+    "POST /api/v1/auth/refresh 401",
+    "POST /api/analytics/collect 202",
+    "GET /api/ads 200",
+    "GET /api/ads 200",
+    "GET /api/ads 200",
+    "GET /api/admin/public/config 200",
+    "GET /api/search/facets 200",
+    "GET /api/v1/auth/me 401",
+    "GET /api/hero 200",
+    "GET /api/ads 200",
+    "GET /api/ads 200",
+    "GET /api/admin/public/config 200",
+    "GET /api/admin/public/config 200",
+    "POST /api/v1/auth/refresh 401",
+    "GET /api/v1/auth/csrf 200",
+    "POST /api/v1/auth/register 201",
+    "GET /api/admin/public/config 200",
+    "GET /api/v1/auth/verify-email/4c479574bab6f9490b14d6809656655a8e6e0d4766f0ea43df734b66b27301f0 200"
+  ]
+}

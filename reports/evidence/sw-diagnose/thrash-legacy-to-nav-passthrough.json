@@ -1,0 +1,3198 @@
+{
+ "variant": "thrash-legacy-to-nav-passthrough",
+ "sw": "register",
+ "A": "aaaaaaaaaaaa-mwrwlkr6",
+ "B": "bbbbbbbbbbbb-mwrwlraj",
+ "runs": [
+  {
+   "run": 1,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 410,
+     "out": "ok",
+     "startedAt": 1795357934546
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 37,
+     "out": "ok",
+     "startedAt": 1795357936315
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 420,
+     "out": "ok",
+     "startedAt": 1795357936352
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 468,
+     "out": "ok",
+     "startedAt": 1795357938041
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 439,
+     "out": "ok",
+     "startedAt": 1795357940087
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 409,
+     "out": "ok",
+     "startedAt": 1795357941337
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 692,
+     "out": "ok",
+     "startedAt": 1795357942596
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 2,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 344,
+     "out": "ok",
+     "startedAt": 1795357944151
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok",
+     "startedAt": 1795357945747
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 409,
+     "out": "ok",
+     "startedAt": 1795357945776
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 345,
+     "out": "ok",
+     "startedAt": 1795357947444
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 373,
+     "out": "ok",
+     "startedAt": 1795357949383
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 273,
+     "out": "ok",
+     "startedAt": 1795357950570
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 763,
+     "out": "ok",
+     "startedAt": 1795357951692
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 3,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 381,
+     "out": "ok",
+     "startedAt": 1795357953333
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok",
+     "startedAt": 1795357954998
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 443,
+     "out": "ok",
+     "startedAt": 1795357955030
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 400,
+     "out": "ok",
+     "startedAt": 1795357956794
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 407,
+     "out": "ok",
+     "startedAt": 1795357958837
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 324,
+     "out": "ok",
+     "startedAt": 1795357960055
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 241,
+     "out": "ok",
+     "startedAt": 1795357961215
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 4,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 462,
+     "out": "ok",
+     "startedAt": 1795357962357
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok",
+     "startedAt": 1795357964101
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 499,
+     "out": "ok",
+     "startedAt": 1795357964130
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 352,
+     "out": "ok",
+     "startedAt": 1795357965905
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 386,
+     "out": "ok",
+     "startedAt": 1795357967827
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 321,
+     "out": "ok",
+     "startedAt": 1795357969025
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 968,
+     "out": "ok",
+     "startedAt": 1795357970193
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 5,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 395,
+     "out": "ok",
+     "startedAt": 1795357972035
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok",
+     "startedAt": 1795357973808
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 384,
+     "out": "ok",
+     "startedAt": 1795357973837
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 385,
+     "out": "ok",
+     "startedAt": 1795357975470
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 378,
+     "out": "ok",
+     "startedAt": 1795357977429
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 276,
+     "out": "ok",
+     "startedAt": 1795357978615
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 713,
+     "out": "ok",
+     "startedAt": 1795357979748
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 6,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 357,
+     "out": "ok",
+     "startedAt": 1795357981326
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 31,
+     "out": "ok",
+     "startedAt": 1795357982970
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 468,
+     "out": "ok",
+     "startedAt": 1795357983001
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 358,
+     "out": "ok",
+     "startedAt": 1795357984739
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 376,
+     "out": "ok",
+     "startedAt": 1795357986673
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 280,
+     "out": "ok",
+     "startedAt": 1795357987867
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 253,
+     "out": "ok",
+     "startedAt": 1795357989010
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 7,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 494,
+     "out": "ok",
+     "startedAt": 1795357990140
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok",
+     "startedAt": 1795357991897
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 384,
+     "out": "ok",
+     "startedAt": 1795357991929
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 390,
+     "out": "ok",
+     "startedAt": 1795357993569
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 419,
+     "out": "ok",
+     "startedAt": 1795357995532
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 326,
+     "out": "ok",
+     "startedAt": 1795357996765
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 810,
+     "out": "ok",
+     "startedAt": 1795357997930
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 8,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 378,
+     "out": "ok",
+     "startedAt": 1795357999618
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok",
+     "startedAt": 1795358001244
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 436,
+     "out": "ok",
+     "startedAt": 1795358001273
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 324,
+     "out": "ok",
+     "startedAt": 1795358002975
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 397,
+     "out": "ok",
+     "startedAt": 1795358004854
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 264,
+     "out": "ok",
+     "startedAt": 1795358006054
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 745,
+     "out": "ok",
+     "startedAt": 1795358007172
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 9,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 431,
+     "out": "ok",
+     "startedAt": 1795358008804
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok",
+     "startedAt": 1795358010481
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 476,
+     "out": "ok",
+     "startedAt": 1795358010510
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 488,
+     "out": "ok",
+     "startedAt": 1795358012414
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 439,
+     "out": "ok",
+     "startedAt": 1795358014474
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 316,
+     "out": "ok",
+     "startedAt": 1795358015717
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 250,
+     "out": "ok",
+     "startedAt": 1795358016937
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 10,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 432,
+     "out": "ok",
+     "startedAt": 1795358018063
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 33,
+     "out": "ok",
+     "startedAt": 1795358019764
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 355,
+     "out": "ok",
+     "startedAt": 1795358019797
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 395,
+     "out": "ok",
+     "startedAt": 1795358021393
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 385,
+     "out": "ok",
+     "startedAt": 1795358023355
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 276,
+     "out": "ok",
+     "startedAt": 1795358024551
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 737,
+     "out": "ok",
+     "startedAt": 1795358025761
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 11,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 373,
+     "out": "ok",
+     "startedAt": 1795358027363
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok",
+     "startedAt": 1795358029008
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 346,
+     "out": "ok",
+     "startedAt": 1795358029042
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 392,
+     "out": "ok",
+     "startedAt": 1795358030629
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12001,
+     "out": "STALL",
+     "startedAt": 1795358032576
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 524,
+     "out": "ok",
+     "startedAt": 1795358045381
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 682,
+     "out": "ok",
+     "startedAt": 1795358046847
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [],
+    "controller": {
+     "controller": "http://127.0.0.1:5431/sw.js",
+     "state": "activating",
+     "regs": [
+      [
+       "activating",
+       null,
+       null
+      ]
+     ]
+    },
+    "caches": {
+     "kayad-static-v2": [
+      "/manifest.webmanifest",
+      "/assets/httpClient-DUfQrcOs.js",
+      "/assets/jsx-runtime--qySwOLX.js",
+      "/assets/chunk-62JRHF6Z-CTXCXr27.js",
+      "/assets/createLucideIcon-DTlqIiI3.js",
+      "/assets/lock-CJZ-QdUB.js",
+      "/assets/shield-alert-DgQTDiTU.js",
+      "/assets/httpRequest-DiLtrneX.js",
+      "/assets/authApi-Jk2uv3uR.js",
+      "/assets/AuthContext-C-ZTMV23.js",
+      "/assets/check-BBZX3Fxe.js",
+      "/assets/dealerPlatformApi-YqcaG7ar.js"
+     ],
+     "kayad-mobile-v2": [
+      "/dealer"
+     ]
+    },
+    "release": "bbbbbbbbbbbb-mwrwlraj",
+    "timing": {
+     "type": "navigate",
+     "start": 0,
+     "responseEnd": 293,
+     "domContentLoaded": 602,
+     "workerStart": 286
+    },
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -3559,
+      "kind": "registration",
+      "n": 1
+     },
+     {
+      "msFromStalledNavStart": -3559,
+      "kind": "version",
+      "v": "0:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -3555,
+      "kind": "version",
+      "v": "0:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -3555,
+      "kind": "version",
+      "v": "0:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3555,
+      "kind": "version",
+      "v": "0:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3547,
+      "kind": "version",
+      "v": "0:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -3547,
+      "kind": "registration",
+      "n": 1
+     },
+     {
+      "msFromStalledNavStart": -3547,
+      "kind": "version",
+      "v": "0:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -3538,
+      "kind": "version",
+      "v": "0:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -3538,
+      "kind": "version",
+      "v": "0:running/activating"
+     },
+     {
+      "msFromStalledNavStart": -3537,
+      "kind": "version",
+      "v": "0:running/activating"
+     },
+     {
+      "msFromStalledNavStart": -3537,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -3526,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -3520,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1940,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1919,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1466,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -1466,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -1466,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -1450,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -1448,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -1448,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -1447,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -1445,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -1434,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -1434,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -1434,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -1434,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -1426,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 7,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 8,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 12,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1013,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12814,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12814,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12832,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 13497,
+      "kind": "version",
+      "v": "2:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": 13497,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": 13509,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": 13522,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": 13525,
+      "kind": "version",
+      "v": "2:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": 13525,
+      "kind": "version",
+      "v": "2:running/installing"
+     },
+     {
+      "msFromStalledNavStart": 13538,
+      "kind": "version",
+      "v": "2:running/installed"
+     },
+     {
+      "msFromStalledNavStart": 13539,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 13563,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 13563,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 13563,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 13563,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 14566,
+      "kind": "version",
+      "v": "2:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 14566,
+      "kind": "version",
+      "v": "2:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 14576,
+      "kind": "version",
+      "v": "2:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 14962,
+      "kind": "version",
+      "v": "3:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": 14962,
+      "kind": "version",
+      "v": "3:starting/new"
+     },
+     {
+      "msFromStalledNavStart": 14962,
+      "kind": "version",
+      "v": "3:starting/new"
+     },
+     {
+      "msFromStalledNavStart": 14965,
+      "kind": "version",
+      "v": "3:starting/new"
+     },
+     {
+      "msFromStalledNavStart": 14968,
+      "kind": "version",
+      "v": "3:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": 14968,
+      "kind": "version",
+      "v": "3:running/installing"
+     },
+     {
+      "msFromStalledNavStart": 14970,
+      "kind": "version",
+      "v": "3:running/installed"
+     },
+     {
+      "msFromStalledNavStart": 15194,
+      "kind": "version",
+      "v": "2:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 15197,
+      "kind": "version",
+      "v": "2:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 15197,
+      "kind": "version",
+      "v": "2:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 15197,
+      "kind": "version",
+      "v": "3:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 15197,
+      "kind": "version",
+      "v": "3:running/activating"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -5213
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -3568
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -3534
+     },
+     {
+      "name": "reload (host now B)",
+      "rel": "B",
+      "msFromStalledNavStart": -1947
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     },
+     {
+      "name": "goto / (host back to A)",
+      "rel": "A",
+      "msFromStalledNavStart": 12805
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 14271
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4128,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3558,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3544,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -3526,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -3287,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3264,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -3263,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -3178,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3177,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3177,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3155,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -3155,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3155,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -3155,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3155,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -3155,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3142,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -3142,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3142,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3142,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3142,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3142,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3130,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3111,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2494,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1938,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -1908,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -1686,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1617,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -1591,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -1534,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1531,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -1522,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1521,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1514,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1513,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -1508,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1508,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -1508,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1508,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -1508,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1508,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1493,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1490,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1490,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -1490,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -1474,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -821,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 985,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     }
+    ],
+    "failedRequests": [
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "/dealer net::ERR_ABORTED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "45988 A GET /api/search/facets",
+     "45990 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "45990 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "46010 A GET /api/admin/public/config",
+     "46089 A GET /manifest.webmanifest",
+     "46574 A GET /api/v1/auth/me",
+     "47143 B GET /dealer [nav]",
+     "47460 B GET /api/cars",
+     "47508 B GET /release.json",
+     "47524 B GET /api/v1/auth/me",
+     "47524 B GET /api/v1/auth/csrf",
+     "47524 B GET /sw.js",
+     "47524 B GET /api/admin/public/config",
+     "48134 B GET /api/v1/auth/me"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/thrash-legacy-to-nav-passthrough-run11-stall.png"
+   }
+  },
+  {
+   "run": 12,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 391,
+     "out": "ok",
+     "startedAt": 1795358049320
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok",
+     "startedAt": 1795358050959
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 502,
+     "out": "ok",
+     "startedAt": 1795358050993
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 375,
+     "out": "ok",
+     "startedAt": 1795358052738
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 341,
+     "out": "ok",
+     "startedAt": 1795358054658
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 316,
+     "out": "ok",
+     "startedAt": 1795358055816
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 673,
+     "out": "ok",
+     "startedAt": 1795358057021
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 13,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 471,
+     "out": "ok",
+     "startedAt": 1795358058572
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 31,
+     "out": "ok",
+     "startedAt": 1795358060317
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 402,
+     "out": "ok",
+     "startedAt": 1795358060348
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 425,
+     "out": "ok",
+     "startedAt": 1795358061996
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 389,
+     "out": "ok",
+     "startedAt": 1795358064011
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 435,
+     "out": "ok",
+     "startedAt": 1795358065206
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 708,
+     "out": "ok",
+     "startedAt": 1795358066505
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 14,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 335,
+     "out": "ok",
+     "startedAt": 1795358068101
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok",
+     "startedAt": 1795358069697
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 390,
+     "out": "ok",
+     "startedAt": 1795358069726
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 362,
+     "out": "ok",
+     "startedAt": 1795358071373
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 359,
+     "out": "ok",
+     "startedAt": 1795358073287
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 329,
+     "out": "ok",
+     "startedAt": 1795358074452
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 282,
+     "out": "ok",
+     "startedAt": 1795358075684
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 15,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 347,
+     "out": "ok",
+     "startedAt": 1795358076845
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 27,
+     "out": "ok",
+     "startedAt": 1795358078446
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 391,
+     "out": "ok",
+     "startedAt": 1795358078473
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 300,
+     "out": "ok",
+     "startedAt": 1795358080097
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 313,
+     "out": "ok",
+     "startedAt": 1795358081993
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 354,
+     "out": "ok",
+     "startedAt": 1795358083120
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 541,
+     "out": "ok",
+     "startedAt": 1795358084378
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 16,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 420,
+     "out": "ok",
+     "startedAt": 1795358085815
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 38,
+     "out": "ok",
+     "startedAt": 1795358087507
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 394,
+     "out": "ok",
+     "startedAt": 1795358087545
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 345,
+     "out": "ok",
+     "startedAt": 1795358089189
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 366,
+     "out": "ok",
+     "startedAt": 1795358091089
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 360,
+     "out": "ok",
+     "startedAt": 1795358092265
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 239,
+     "out": "ok",
+     "startedAt": 1795358093487
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 17,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 391,
+     "out": "ok",
+     "startedAt": 1795358094603
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok",
+     "startedAt": 1795358096258
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 487,
+     "out": "ok",
+     "startedAt": 1795358096292
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 364,
+     "out": "ok",
+     "startedAt": 1795358098029
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 415,
+     "out": "ok",
+     "startedAt": 1795358099945
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 297,
+     "out": "ok",
+     "startedAt": 1795358101166
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 687,
+     "out": "ok",
+     "startedAt": 1795358102330
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 18,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 354,
+     "out": "ok",
+     "startedAt": 1795358103898
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok",
+     "startedAt": 1795358105526
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 412,
+     "out": "ok",
+     "startedAt": 1795358105560
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 461,
+     "out": "ok",
+     "startedAt": 1795358107217
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12001,
+     "out": "STALL",
+     "startedAt": 1795358109258
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 342,
+     "out": "ok",
+     "startedAt": 1795358122061
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 618,
+     "out": "ok",
+     "startedAt": 1795358123253
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [],
+    "controller": {
+     "controller": "http://127.0.0.1:5431/sw.js",
+     "state": "activating",
+     "regs": [
+      [
+       "activating",
+       null,
+       null
+      ]
+     ]
+    },
+    "caches": {
+     "kayad-static-v2": [
+      "/manifest.webmanifest",
+      "/assets/httpClient-DUfQrcOs.js",
+      "/assets/jsx-runtime--qySwOLX.js",
+      "/assets/chunk-62JRHF6Z-CTXCXr27.js",
+      "/assets/createLucideIcon-DTlqIiI3.js",
+      "/assets/lock-CJZ-QdUB.js",
+      "/assets/shield-alert-DgQTDiTU.js",
+      "/assets/httpRequest-DiLtrneX.js",
+      "/assets/authApi-Jk2uv3uR.js",
+      "/assets/AuthContext-C-ZTMV23.js",
+      "/assets/dealerPlatformApi-YqcaG7ar.js",
+      "/assets/arrow-right-Dy81hIrI.js"
+     ],
+     "kayad-mobile-v2": [
+      "/dealer"
+     ]
+    },
+    "release": "bbbbbbbbbbbb-mwrwlraj",
+    "timing": {
+     "type": "navigate",
+     "start": 0,
+     "responseEnd": 303,
+     "domContentLoaded": 556,
+     "workerStart": 295
+    },
+    "swTimeline": [
+     {
+      "msFromStalledNavStart": -3721,
+      "kind": "registration",
+      "n": 1
+     },
+     {
+      "msFromStalledNavStart": -3721,
+      "kind": "version",
+      "v": "0:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -3717,
+      "kind": "version",
+      "v": "0:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -3717,
+      "kind": "version",
+      "v": "0:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3717,
+      "kind": "version",
+      "v": "0:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -3712,
+      "kind": "version",
+      "v": "0:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -3712,
+      "kind": "registration",
+      "n": 1
+     },
+     {
+      "msFromStalledNavStart": -3712,
+      "kind": "version",
+      "v": "0:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -3703,
+      "kind": "version",
+      "v": "0:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -3703,
+      "kind": "version",
+      "v": "0:running/activating"
+     },
+     {
+      "msFromStalledNavStart": -3701,
+      "kind": "version",
+      "v": "0:running/activating"
+     },
+     {
+      "msFromStalledNavStart": -3701,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -3692,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -3674,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2030,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -2002,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": -1563,
+      "kind": "version",
+      "v": "1:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": -1563,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -1563,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -1556,
+      "kind": "version",
+      "v": "1:starting/new"
+     },
+     {
+      "msFromStalledNavStart": -1552,
+      "kind": "version",
+      "v": "1:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": -1551,
+      "kind": "version",
+      "v": "1:running/installing"
+     },
+     {
+      "msFromStalledNavStart": -1549,
+      "kind": "version",
+      "v": "1:running/installed"
+     },
+     {
+      "msFromStalledNavStart": -1549,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": -1537,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": -1537,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -1537,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -1537,
+      "kind": "version",
+      "v": "0:starting/activated"
+     },
+     {
+      "msFromStalledNavStart": -1513,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 11,
+      "kind": "version",
+      "v": "0:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 11,
+      "kind": "version",
+      "v": "0:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 13,
+      "kind": "version",
+      "v": "0:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 13,
+      "kind": "version",
+      "v": "0:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 13,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 13,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 13,
+      "kind": "version",
+      "v": "1:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 1016,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12807,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12807,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 12816,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 13210,
+      "kind": "version",
+      "v": "2:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": 13210,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": 13210,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": 13251,
+      "kind": "version",
+      "v": "2:starting/new"
+     },
+     {
+      "msFromStalledNavStart": 13255,
+      "kind": "version",
+      "v": "2:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": 13255,
+      "kind": "version",
+      "v": "2:running/installing"
+     },
+     {
+      "msFromStalledNavStart": 13274,
+      "kind": "version",
+      "v": "2:running/installed"
+     },
+     {
+      "msFromStalledNavStart": 13278,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 13297,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 13304,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 13304,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 13307,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 14299,
+      "kind": "version",
+      "v": "2:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 14300,
+      "kind": "version",
+      "v": "2:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 14320,
+      "kind": "version",
+      "v": "2:running/activated"
+     },
+     {
+      "msFromStalledNavStart": 14628,
+      "kind": "version",
+      "v": "3:stopped/new"
+     },
+     {
+      "msFromStalledNavStart": 14628,
+      "kind": "version",
+      "v": "3:starting/new"
+     },
+     {
+      "msFromStalledNavStart": 14628,
+      "kind": "version",
+      "v": "3:starting/new"
+     },
+     {
+      "msFromStalledNavStart": 14634,
+      "kind": "version",
+      "v": "3:starting/new"
+     },
+     {
+      "msFromStalledNavStart": 14637,
+      "kind": "version",
+      "v": "3:starting/installing"
+     },
+     {
+      "msFromStalledNavStart": 14637,
+      "kind": "version",
+      "v": "3:running/installing"
+     },
+     {
+      "msFromStalledNavStart": 14638,
+      "kind": "version",
+      "v": "3:running/installed"
+     },
+     {
+      "msFromStalledNavStart": 14864,
+      "kind": "version",
+      "v": "2:stopping/activated"
+     },
+     {
+      "msFromStalledNavStart": 14867,
+      "kind": "version",
+      "v": "2:stopped/activated"
+     },
+     {
+      "msFromStalledNavStart": 14867,
+      "kind": "version",
+      "v": "2:stopped/redundant"
+     },
+     {
+      "msFromStalledNavStart": 14867,
+      "kind": "version",
+      "v": "3:running/activating"
+     },
+     {
+      "msFromStalledNavStart": 14867,
+      "kind": "version",
+      "v": "3:running/activating"
+     }
+    ],
+    "stepStarts": [
+     {
+      "name": "goto /",
+      "rel": "A",
+      "msFromStalledNavStart": -5360
+     },
+     {
+      "name": "register sw",
+      "rel": "A",
+      "msFromStalledNavStart": -3732
+     },
+     {
+      "name": "reload (A)",
+      "rel": "A",
+      "msFromStalledNavStart": -3698
+     },
+     {
+      "name": "reload (host now B)",
+      "rel": "B",
+      "msFromStalledNavStart": -2041
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 0
+     },
+     {
+      "name": "goto / (host back to A)",
+      "rel": "A",
+      "msFromStalledNavStart": 12803
+     },
+     {
+      "name": "goto /dealer (B)",
+      "rel": "B",
+      "msFromStalledNavStart": 13995
+     }
+    ],
+    "serverTimeline": [
+     {
+      "ms": -4273,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3720,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3709,
+      "rel": "A",
+      "p": "/manifest.webmanifest",
+      "nav": false
+     },
+     {
+      "ms": -3692,
+      "rel": "A",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -3377,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3322,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -3322,
+      "rel": "A",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -3257,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3254,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3248,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3244,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3244,
+      "rel": "A",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -3244,
+      "rel": "A",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -3241,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3241,
+      "rel": "A",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -3241,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -3241,
+      "rel": "A",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -3241,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3238,
+      "rel": "A",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -3238,
+      "rel": "A",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -3238,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -3237,
+      "rel": "A",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -3217,
+      "rel": "A",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -3182,
+      "rel": "A",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -2577,
+      "rel": "A",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -2029,
+      "rel": "B",
+      "p": "/",
+      "nav": true
+     },
+     {
+      "ms": -1998,
+      "rel": "B",
+      "p": "/assets/index-CeI5InjX.js",
+      "nav": false
+     },
+     {
+      "ms": -1735,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1669,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo.png",
+      "nav": false
+     },
+     {
+      "ms": -1635,
+      "rel": "B",
+      "p": "/branding/kayard-ke-logo-dark.png",
+      "nav": false
+     },
+     {
+      "ms": -1578,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -1511,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1497,
+      "rel": "B",
+      "p": "/sw.js",
+      "nav": false
+     },
+     {
+      "ms": -1483,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1478,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1477,
+      "rel": "B",
+      "p": "/release.json",
+      "nav": false
+     },
+     {
+      "ms": -1477,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1471,
+      "rel": "B",
+      "p": "/api/search/facets",
+      "nav": false
+     },
+     {
+      "ms": -1466,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1448,
+      "rel": "B",
+      "p": "/api/featured-campaigns/current",
+      "nav": false
+     },
+     {
+      "ms": -1447,
+      "rel": "B",
+      "p": "/api/hero",
+      "nav": false
+     },
+     {
+      "ms": -1447,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1447,
+      "rel": "B",
+      "p": "/api/ads",
+      "nav": false
+     },
+     {
+      "ms": -1446,
+      "rel": "B",
+      "p": "/api/cars",
+      "nav": false
+     },
+     {
+      "ms": -1430,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": -1430,
+      "rel": "B",
+      "p": "/api/v1/auth/csrf",
+      "nav": false
+     },
+     {
+      "ms": -1420,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -1404,
+      "rel": "B",
+      "p": "/api/admin/public/config",
+      "nav": false
+     },
+     {
+      "ms": -779,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     },
+     {
+      "ms": 9,
+      "rel": "B",
+      "p": "/dealer",
+      "nav": true
+     },
+     {
+      "ms": 1031,
+      "rel": "B",
+      "p": "/api/v1/auth/me",
+      "nav": false
+     }
+    ],
+    "failedRequests": [
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "/dealer net::ERR_ABORTED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "22464 A GET /sw.js",
+     "22476 A GET /api/admin/public/config",
+     "22505 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "22515 A GET /manifest.webmanifest",
+     "22519 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "23088 A GET /api/v1/auth/me",
+     "23559 B GET /dealer [nav]",
+     "23820 B GET /api/cars",
+     "23862 B GET /release.json",
+     "23869 B GET /api/v1/auth/me",
+     "23869 B GET /api/v1/auth/csrf",
+     "23869 B GET /api/admin/public/config",
+     "23877 B GET /sw.js",
+     "24484 B GET /api/v1/auth/me"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/thrash-legacy-to-nav-passthrough-run18-stall.png"
+   }
+  },
+  {
+   "run": 19,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 414,
+     "out": "ok",
+     "startedAt": 1795358125457
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 37,
+     "out": "ok",
+     "startedAt": 1795358127126
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 452,
+     "out": "ok",
+     "startedAt": 1795358127163
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 397,
+     "out": "ok",
+     "startedAt": 1795358128860
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 381,
+     "out": "ok",
+     "startedAt": 1795358130833
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 313,
+     "out": "ok",
+     "startedAt": 1795358132021
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 542,
+     "out": "ok",
+     "startedAt": 1795358133218
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 20,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 376,
+     "out": "ok",
+     "startedAt": 1795358134626
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 35,
+     "out": "ok",
+     "startedAt": 1795358136259
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 396,
+     "out": "ok",
+     "startedAt": 1795358136294
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 366,
+     "out": "ok",
+     "startedAt": 1795358137954
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 445,
+     "out": "ok",
+     "startedAt": 1795358139866
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 344,
+     "out": "ok",
+     "startedAt": 1795358141126
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 241,
+     "out": "ok",
+     "startedAt": 1795358142356
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 21,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 410,
+     "out": "ok",
+     "startedAt": 1795358143485
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 30,
+     "out": "ok",
+     "startedAt": 1795358145152
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 346,
+     "out": "ok",
+     "startedAt": 1795358145182
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 356,
+     "out": "ok",
+     "startedAt": 1795358146782
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 312,
+     "out": "ok",
+     "startedAt": 1795358148696
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 278,
+     "out": "ok",
+     "startedAt": 1795358149814
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 761,
+     "out": "ok",
+     "startedAt": 1795358150924
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 22,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 371,
+     "out": "ok",
+     "startedAt": 1795358152549
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 30,
+     "out": "ok",
+     "startedAt": 1795358154279
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 382,
+     "out": "ok",
+     "startedAt": 1795358154309
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 380,
+     "out": "ok",
+     "startedAt": 1795358155953
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 395,
+     "out": "ok",
+     "startedAt": 1795358157880
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 288,
+     "out": "ok",
+     "startedAt": 1795358159081
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 240,
+     "out": "ok",
+     "startedAt": 1795358160220
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 23,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 448,
+     "out": "ok",
+     "startedAt": 1795358161348
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 30,
+     "out": "ok",
+     "startedAt": 1795358163059
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 427,
+     "out": "ok",
+     "startedAt": 1795358163089
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 507,
+     "out": "ok",
+     "startedAt": 1795358164792
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 408,
+     "out": "ok",
+     "startedAt": 1795358166868
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 282,
+     "out": "ok",
+     "startedAt": 1795358168091
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 253,
+     "out": "ok",
+     "startedAt": 1795358169226
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 24,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 438,
+     "out": "ok",
+     "startedAt": 1795358170364
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 33,
+     "out": "ok",
+     "startedAt": 1795358172077
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 437,
+     "out": "ok",
+     "startedAt": 1795358172110
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 409,
+     "out": "ok",
+     "startedAt": 1795358173808
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 409,
+     "out": "ok",
+     "startedAt": 1795358175762
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 287,
+     "out": "ok",
+     "startedAt": 1795358176975
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 714,
+     "out": "ok",
+     "startedAt": 1795358178129
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 25,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 379,
+     "out": "ok",
+     "startedAt": 1795358179706
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok",
+     "startedAt": 1795358181338
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 460,
+     "out": "ok",
+     "startedAt": 1795358181367
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 343,
+     "out": "ok",
+     "startedAt": 1795358183105
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 337,
+     "out": "ok",
+     "startedAt": 1795358185021
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 308,
+     "out": "ok",
+     "startedAt": 1795358186166
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 747,
+     "out": "ok",
+     "startedAt": 1795358187313
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 26,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 458,
+     "out": "ok",
+     "startedAt": 1795358188940
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 33,
+     "out": "ok",
+     "startedAt": 1795358190678
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 425,
+     "out": "ok",
+     "startedAt": 1795358190711
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 358,
+     "out": "ok",
+     "startedAt": 1795358192379
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 371,
+     "out": "ok",
+     "startedAt": 1795358194319
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 316,
+     "out": "ok",
+     "startedAt": 1795358195498
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 638,
+     "out": "ok",
+     "startedAt": 1795358196651
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 27,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 384,
+     "out": "ok",
+     "startedAt": 1795358198146
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok",
+     "startedAt": 1795358199813
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 436,
+     "out": "ok",
+     "startedAt": 1795358199845
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 365,
+     "out": "ok",
+     "startedAt": 1795358201550
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 450,
+     "out": "ok",
+     "startedAt": 1795358203481
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 350,
+     "out": "ok",
+     "startedAt": 1795358204738
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 754,
+     "out": "ok",
+     "startedAt": 1795358205970
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 28,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 521,
+     "out": "ok",
+     "startedAt": 1795358207608
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok",
+     "startedAt": 1795358209379
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 438,
+     "out": "ok",
+     "startedAt": 1795358209411
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 395,
+     "out": "ok",
+     "startedAt": 1795358211107
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 501,
+     "out": "ok",
+     "startedAt": 1795358213095
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 412,
+     "out": "ok",
+     "startedAt": 1795358214421
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 696,
+     "out": "ok",
+     "startedAt": 1795358215682
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 29,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 361,
+     "out": "ok",
+     "startedAt": 1795358217274
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok",
+     "startedAt": 1795358218891
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 398,
+     "out": "ok",
+     "startedAt": 1795358218925
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 477,
+     "out": "ok",
+     "startedAt": 1795358220538
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 423,
+     "out": "ok",
+     "startedAt": 1795358222582
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 336,
+     "out": "ok",
+     "startedAt": 1795358223814
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 825,
+     "out": "ok",
+     "startedAt": 1795358225021
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 30,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 486,
+     "out": "ok",
+     "startedAt": 1795358226726
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 31,
+     "out": "ok",
+     "startedAt": 1795358228536
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 410,
+     "out": "ok",
+     "startedAt": 1795358228567
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 395,
+     "out": "ok",
+     "startedAt": 1795358230236
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 374,
+     "out": "ok",
+     "startedAt": 1795358232217
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 316,
+     "out": "ok",
+     "startedAt": 1795358233399
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 684,
+     "out": "ok",
+     "startedAt": 1795358234579
+    }
+   ],
+   "diag": null
+  }
+ ],
+ "total": 30,
+ "stalls": 2
+}

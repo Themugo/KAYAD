@@ -1,192 +1,110 @@
 /**
- * KAYARD KE Mobile Service Worker
- * Provides offline support and caching for the mobile automotive marketplace
+ * KAYARD KE service worker (release-safe).
+ *
+ * Rules (see reports/11-SERVICE-WORKER-AND-PWA-RELEASE-STRATEGY.md):
+ *  - HTML navigations are ALWAYS network-first. A cached shell is used only when the network is unreachable (offline).
+ *  - Only content-hashed files under /assets/ are cached (cache-first). They are immutable, so sharing them across releases is safe.
+ *  - JSON (release.json, manifests), sw.js, /api/ and /uploads/ are never intercepted or cached.
+ *  - Caches that this worker does not own are deleted on activation (old versions and legacy cache names).
+ *  - The worker never reloads pages by itself; the app decides (ReleaseUpdateBanner).
  */
 
-const CACHE_NAME = 'kayad-mobile-v2';
-const STATIC_CACHE = 'kayad-static-v2';
-const IMAGE_CACHE = 'kayad-images-v2';
+// Deliberately NOT stamped per release: sw.js stays byte-identical between releases, so browsers do not reinstall the worker on every deploy.
+// The shell cache is overwritten by each successful navigation, so it can never outlive the release that wrote it by more than one visit.
+const SHELL_CACHE = 'kayad-shell-v3';
+const ASSET_CACHE = 'kayad-assets-v3';
+const IMAGE_CACHE = 'kayad-images-v3';
+const OWNED_CACHES = [SHELL_CACHE, ASSET_CACHE, IMAGE_CACHE];
+const MAX_ASSET_ENTRIES = 150;
+const MAX_IMAGE_ENTRIES = 120;
 
-// Static assets to cache on install (small, stable shell assets only)
-const STATIC_ASSETS = [
-  '/manifest.webmanifest',
-];
-
-// Install event - cache static assets
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(STATIC_CACHE)
-      .then((cache) => {
-        return cache.addAll(STATIC_ASSETS);
-      })
-      .then(() => self.skipWaiting())
-  );
+  // No precache: a failed precache must never block an update. The shell is stored after the first successful navigation.
+  event.waitUntil(self.skipWaiting());
 });
 
-// Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((cacheNames) => {
-        return Promise.all(
-          cacheNames
-            .filter((name) => name !== CACHE_NAME && name !== STATIC_CACHE && name !== IMAGE_CACHE)
-            .map((name) => {
-              return caches.delete(name);
-            })
-        );
-      })
-      .then(() => self.clients.claim())
+      .then((names) => Promise.all(names.filter((n) => !OWNED_CACHES.includes(n)).map((n) => caches.delete(n))))
+      // No clients.claim(): taking over an already-loaded page mid-navigation can stall it. The next navigation uses this worker.
   );
 });
 
-// Fetch event - serve from cache with network fallback
+function isHashedAsset(url) {
+  return url.origin === self.location.origin && /^\/assets\/.+\.(js|css|woff2?|ttf|png|jpe?g|webp|svg|avif)$/i.test(url.pathname);
+}
+
+function isImage(request, url) {
+  return request.destination === 'image' || /\.(jpg|jpeg|png|gif|webp|svg|ico|avif)$/i.test(url.pathname);
+}
+
+async function trim(cacheName, max) {
+  const cache = await caches.open(cacheName);
+  const keys = await cache.keys();
+  for (let i = 0; i < keys.length - max; i += 1) await cache.delete(keys[i]);
+}
+
+// The cache is an optimisation, never a dependency: reads are time-bounded and writes happen after the response has been returned.
+// (Diagnosed 2026-11-22: awaiting caches.open() before answering a navigation stalled pages when an older worker was being replaced
+// and its caches were being deleted; the request had reached the server but the page never received the response.)
+const CACHE_READ_TIMEOUT_MS = 1200;
+function bounded(promise) {
+  return Promise.race([promise.catch(() => undefined), new Promise((resolve) => setTimeout(() => resolve(undefined), CACHE_READ_TIMEOUT_MS))]);
+}
+function store(event, cacheName, key, response, max) {
+  event.waitUntil(caches.open(cacheName).then((cache) => cache.put(key, response)).then(() => (max ? trim(cacheName, max) : undefined)).catch(() => undefined));
+}
+
+async function networkFirstNavigation(event) {
+  try {
+    const response = await fetch(event.request);
+    const type = response.headers.get('content-type') || '';
+    if (response.ok && type.includes('text/html')) store(event, SHELL_CACHE, '/index.html', response.clone());
+    return response;
+  } catch (error) {
+    const cached = await bounded(caches.match('/index.html', { cacheName: SHELL_CACHE }));
+    if (cached) return cached;
+    throw error;
+  }
+}
+
+async function cacheFirstAsset(event) {
+  const request = event.request;
+  const hit = await bounded(caches.open(ASSET_CACHE).then((cache) => cache.match(request)));
+  if (hit) return hit;
+  const response = await fetch(request);
+  // Never cache an HTML fallback served for a deleted chunk (it would poison the cache with a non-JS response).
+  const type = response.headers.get('content-type') || '';
+  if (response.ok && !type.includes('text/html')) store(event, ASSET_CACHE, request, response.clone(), MAX_ASSET_ENTRIES);
+  return response;
+}
+
+async function staleWhileRevalidateImage(event) {
+  const request = event.request;
+  const hit = await bounded(caches.open(IMAGE_CACHE).then((cache) => cache.match(request)));
+  const refresh = fetch(request).then((response) => {
+    if (response.ok) store(event, IMAGE_CACHE, request, response.clone(), MAX_IMAGE_ENTRIES);
+    return response;
+  });
+  if (hit) { refresh.catch(() => {}); return hit; }
+  return refresh;
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  const url = new URL(request.url);
-
-  // Skip non-GET requests
   if (request.method !== 'GET') return;
-
-  // Never intercept or cache authentication/CSRF endpoints. A cached
-  // /api/v1/auth/csrf response would replay a stale token (and a cached 404
-  // would outlive the deploy that fixed it).
-  if (/^\/api\/(v\d+\/)?auth\//.test(url.pathname)) return;
-
-  // Skip chrome-extension and other non-http(s) requests
+  const url = new URL(request.url);
   if (!url.protocol.startsWith('http')) return;
-
-  // Handle different request types
-  if (isImageRequest(request)) {
-    event.respondWith(handleImageRequest(request));
-  } else if (isApiRequest(request)) {
-    // API responses are deliberately never cached: cookie-authenticated and
-    // rapidly changing marketplace data must not become a shared stale cache.
-    event.respondWith(fetch(request));
-  } else if (isStaticAsset(request)) {
-    event.respondWith(handleStaticRequest(request));
-  } else {
-    event.respondWith(handleDynamicRequest(request));
+  // Never intercept API, uploads, auth, the worker itself or release/manifest JSON: always the network, never a stale copy.
+  if (url.origin === self.location.origin) {
+    if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/uploads/') || url.pathname === '/sw.js' || /\.(json|webmanifest)$/i.test(url.pathname)) return;
   }
+  if (request.mode === 'navigate') { event.respondWith(networkFirstNavigation(event)); return; }
+  if (isHashedAsset(url)) { event.respondWith(cacheFirstAsset(event)); return; }
+  if (isImage(request, url)) { event.respondWith(staleWhileRevalidateImage(event)); return; }
+  // Everything else (fonts from other origins, unhashed scripts, etc.) goes straight to the network.
 });
-
-// Check request types
-function isImageRequest(request) {
-  const url = new URL(request.url);
-  return request.destination === 'image' ||
-         /\.(jpg|jpeg|png|gif|webp|svg|ico)$/i.test(url.pathname) ||
-         url.hostname.includes('pexels.com') ||
-         url.hostname.includes('images.unsplash.com');
-}
-
-function isApiRequest(request) {
-  const url = new URL(request.url);
-  return url.pathname.startsWith('/api/');
-}
-
-function isStaticAsset(request) {
-  const url = new URL(request.url);
-  return url.pathname.match(/\.(js|css|woff2?|ttf|eot|html)$/i) ||
-         url.pathname === '/' ||
-         url.pathname.endsWith('.json');
-}
-
-// Handle image requests with cache-first strategy
-async function handleImageRequest(request) {
-  const cachedResponse = await caches.match(request);
-
-  if (cachedResponse) {
-    // Return cached image and update cache in background
-    fetchAndCache(request, IMAGE_CACHE);
-    return cachedResponse;
-  }
-
-  try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      const cache = await caches.open(IMAGE_CACHE);
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  } catch (error) {
-    // Return a placeholder image if offline
-    return caches.match('/placeholder-car.svg');
-  }
-}
-
-// Handle static assets with network-first for HTML, cache-first for JS/CSS
-async function handleStaticRequest(request) {
-  const url = new URL(request.url);
-  const isHtml = url.pathname === '/' || url.pathname.endsWith('.html');
-
-  if (isHtml) {
-    // Network-first for HTML so new deploys take effect immediately
-    try {
-      const networkResponse = await fetch(request);
-      if (networkResponse.ok) {
-        const cache = await caches.open(STATIC_CACHE);
-        cache.put(request, networkResponse.clone());
-      }
-      return networkResponse;
-    } catch (error) {
-      const cachedResponse = await caches.match(request);
-      if (cachedResponse) return cachedResponse;
-      return caches.match('/index.html');
-    }
-  }
-
-  // Cache-first for content-hashed JS/CSS/fonts
-  const cachedResponse = await caches.match(request);
-  if (cachedResponse) return cachedResponse;
-
-  try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      const cache = await caches.open(STATIC_CACHE);
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  } catch (error) {
-    throw error;
-  }
-}
-
-// Handle dynamic content with stale-while-revalidate
-async function handleDynamicRequest(request) {
-  const cachedResponse = await caches.match(request);
-
-  const fetchPromise = fetchAndCache(request, CACHE_NAME);
-
-  // Return cached response immediately if available
-  if (cachedResponse) {
-    return cachedResponse;
-  }
-
-  // Otherwise wait for network
-  try {
-    return await fetchPromise;
-  } catch (error) {
-    // For navigation requests, return the cached index.html
-    if (request.mode === 'navigate') {
-      return caches.match('/index.html');
-    }
-    throw error;
-  }
-}
-
-// Helper to fetch and cache
-async function fetchAndCache(request, cacheName) {
-  try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      const cache = await caches.open(cacheName);
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  } catch (error) {
-    throw error;
-  }
-}
 
 // Handle push notifications
 self.addEventListener('push', (event) => {
@@ -252,17 +170,7 @@ async function syncFavorites() {
 
 // Message handler for cache management
 self.addEventListener('message', (event) => {
-  if (event.data === 'skipWaiting') {
-    self.skipWaiting();
-  }
-
-  if (event.data === 'clearImageCache') {
-    caches.delete(IMAGE_CACHE);
-  }
-
-  if (event.data === 'clearAllCaches') {
-    caches.keys().then((names) => {
-      return Promise.all(names.map((name) => caches.delete(name)));
-    });
-  }
+  if (event.data === 'skipWaiting') self.skipWaiting();
+  if (event.data === 'clearImageCache') caches.delete(IMAGE_CACHE);
+  if (event.data === 'clearAllCaches') caches.keys().then((names) => Promise.all(names.map((name) => caches.delete(name))));
 });

@@ -32,9 +32,11 @@ async function fetchWithTimeout(url, options = {}) {
 }
 
 async function checkReleaseIdentity() {
-  const expectedCommit = String(process.env.EXPECTED_COMMIT || '').trim();
+  const expectedCommit = String(process.env.EXPECTED_COMMIT || process.env.GITHUB_SHA || '').trim();
   if (!expectedCommit) {
-    warnings.push('Release identity: EXPECTED_COMMIT not supplied; commit match was not asserted');
+    // In CI (or when REQUIRE_RELEASE_IDENTITY=1) a skipped identity check is a failure, never a warning: success must not be reportable without it.
+    if (process.env.CI || process.env.GITHUB_ACTIONS || process.env.REQUIRE_RELEASE_IDENTITY === '1') failures.push('Release identity: no expected commit (EXPECTED_COMMIT/GITHUB_SHA) was supplied, so the deployed commit cannot be verified');
+    else warnings.push('Release identity: EXPECTED_COMMIT not supplied; commit match was not asserted');
     return;
   }
   try {
@@ -45,7 +47,7 @@ async function checkReleaseIdentity() {
       failures.push(`Release identity: HTTP ${response.status} for /release.json`);
       return;
     }
-    const payload = await response.json();
+    const payload = await response.json().catch(() => null);
     if (payload?.commit !== expectedCommit) {
       failures.push(`Release identity: expected ${expectedCommit}, deployed ${payload?.commit || 'unknown'}`);
       return;
@@ -54,6 +56,41 @@ async function checkReleaseIdentity() {
   } catch (error) {
     failures.push(`Release identity: ${error.name === 'AbortError' ? `timeout after ${timeoutMs}ms` : error.message}`);
   }
+}
+
+async function fetchRelease(baseUrl) {
+  const response = await fetchWithTimeout(`${baseUrl}/release.json?_=${Date.now()}`, {
+    headers: { accept: 'application/json', 'cache-control': 'no-cache', 'user-agent': 'KAYAD-production-verifier/1.0' },
+  });
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  const type = response.headers.get('content-type') || '';
+  if (!type.includes('json')) throw new Error(`not JSON (${type || 'no content-type'}); an SPA fallback was served instead of release.json`);
+  let payload;
+  try { payload = await response.json(); } catch { throw new Error('invalid JSON body'); }
+  // A release file without a usable commit must never be compared: two empty identities would look "equal".
+  if (!payload || typeof payload.commit !== 'string' || !payload.commit || payload.commit === 'unknown') throw new Error('release.json has no usable commit');
+  return payload;
+}
+
+// The custom domain must serve the SAME release as the deployment that was just created. A domain alias that still points at an older
+// deployment (or a CDN/DNS layer serving an older copy) is exactly how some visitors keep seeing an old site while the deploy "succeeds".
+async function checkPublicDomainMatchesDeployment() {
+  const attempts = Math.max(1, Number(process.env.RELEASE_PROPAGATION_ATTEMPTS || 6));
+  const delayMs = Math.max(0, Number(process.env.RELEASE_PROPAGATION_DELAY_MS || 10000));
+  let deployed;
+  try { deployed = await fetchRelease(deploymentUrl); } catch (error) { failures.push(`Release parity: deployment release.json unreadable (${error.message})`); return; }
+  let last = '';
+  for (let i = 1; i <= attempts; i += 1) {
+    try {
+      const pub = await fetchRelease(publicUrl);
+      const sameCommit = pub?.commit === deployed?.commit;
+      const sameBuild = !pub?.releaseId || !deployed?.releaseId || pub.releaseId === deployed.releaseId;
+      if (sameCommit && sameBuild) { console.log(`PASS Release parity: public domain and deployment both serve ${String(deployed.commit).slice(0, 12)} (${deployed.releaseId || 'no releaseId'})`); return; }
+      last = `public domain serves ${pub?.commit} (${pub?.releaseId || 'no releaseId'}) but the deployment is ${deployed?.commit} (${deployed?.releaseId || 'no releaseId'})`;
+    } catch (error) { last = `public release.json unreadable (${error.message})`; }
+    if (i < attempts) await new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+  failures.push(`Release parity: ${last}. The custom domain is not serving the deployment that was just created (alias, DNS or CDN issue).`);
 }
 
 async function checkFrontend(name, baseUrl) {
@@ -220,8 +257,11 @@ assertUrl('API URL', apiUrl);
 if (!deploymentUrl) failures.push('Deployment URL: deployment command returned no URL');
 
 if (!failures.length) {
-  await checkFrontend('Vercel deployment', deploymentUrl);
+  if (process.env.VERIFY_ONLY !== 'release') await checkFrontend('Vercel deployment', deploymentUrl);
   await checkReleaseIdentity();
+  await checkPublicDomainMatchesDeployment();
+  // VERIFY_ONLY=release runs just the release-identity checks (used by the mock-server tests and for ad-hoc domain parity checks).
+  if (process.env.VERIFY_ONLY !== 'release') {
   await checkFrontend('Public production domain', publicUrl);
   await checkApi();
 
@@ -234,6 +274,7 @@ if (!failures.length) {
   await checkApiRoute('Public production /api/cars', publicUrl, '/api/cars?limit=1', validateCarsPayload);
 
   await checkAuthCsrf();
+  }
 }
 
 for (const warning of warnings) console.log(`WARN ${warning}`);

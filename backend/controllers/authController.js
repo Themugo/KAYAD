@@ -395,6 +395,14 @@ export const register = async (req, res) => {
       p_email_verify_expire: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
     });
     if (identityError) throw identityError;
+    // A registration function that "succeeds" without returning the new user row is a broken/placeholder database
+    // function (it was found in that state on the hosted project). Never continue with an empty identity: nothing
+    // would have been persisted, yet the caller would be told the account exists and an email would be attempted.
+    if (!createdRow || typeof createdRow !== "object" || !createdRow.id) {
+      const broken = new Error("kayad_register_identity_atomic returned no user row");
+      broken.code = "REGISTER_FUNCTION_INVALID";
+      throw broken;
+    }
 
     const user = mapRowIn("users", createdRow);
     const userAuth = { tokenVersion: 0, mustChangePassword: false };
@@ -501,10 +509,14 @@ export const register = async (req, res) => {
     // PGRST202 / 42883: the kayad_register_identity_atomic function is not in
     // the database, i.e. supabase/migrations were not applied to this project.
     // Say so with a stable code instead of an opaque 500.
-    if (err?.code === "PGRST202" || err?.code === "42883") {
+    // 2F005: the function ran to its end without RETURN (placeholder body). Same operator action: restore the function
+    // from supabase/migrations/20261122200000_restore_register_identity_atomic.sql. The user gets the same honest 503
+    // rather than a generic 500 that invites endless retries.
+    if (err?.code === "PGRST202" || err?.code === "42883" || err?.code === "2F005" || err?.code === "REGISTER_FUNCTION_INVALID") {
       console.error(
         "❌ DATABASE MIGRATION REQUIRED: public.kayad_register_identity_atomic is missing. " +
-          "Apply supabase/migrations/20261001090000_registration_onboarding_integrity.sql (supabase db push).",
+          "Apply supabase/migrations/20261001090000_registration_onboarding_integrity.sql or, if the function exists but is a placeholder, " +
+          "supabase/migrations/20261122200000_restore_register_identity_atomic.sql (owner approval required for hosted databases).",
       );
       return R.errorCode(res, "Registration is temporarily unavailable. Please try again shortly.", 503, "DATABASE_MIGRATION_REQUIRED");
     }
@@ -989,6 +1001,8 @@ export const verifyEmail = async (req, res) => {
     const { token } = req.params;
     if (!token) return R.error(res, "Token required", 400);
 
+    const preRead = await UserAuth.findOne({ emailVerifyToken: hashToken(token), emailVerifyExpire: { $gt: new Date() } }).select("+emailVerifyExpire");
+    const previousExpire = preRead?.emailVerifyExpire || new Date(Date.now() + 24 * 60 * 60 * 1000);
     const userAuth = await UserAuth.findOneAndUpdate(
       { emailVerifyToken: hashToken(token), emailVerifyExpire: { $gt: new Date() } },
       { emailVerifyToken: null, emailVerifyExpire: null },
@@ -996,10 +1010,27 @@ export const verifyEmail = async (req, res) => {
     );
     if (!userAuth) return R.error(res, "Invalid or expired verification link. Request a new one.", 400);
 
-    const user = await User.findById(userAuth.user);
-    if (!user) return R.error(res, "Invalid or expired verification link. Request a new one.", 400);
-    user.emailVerified = true;
-    await user.save();
+    // The token was consumed atomically above (single use). If marking the user verified then fails, put the
+    // token back so the person is not stranded with a burned link and an unverified account.
+    const restoreToken = async () => {
+      try {
+        await UserAuth.findOneAndUpdate(
+          { user: userAuth.user, emailVerifyToken: null },
+          { emailVerifyToken: hashToken(token), emailVerifyExpire: previousExpire },
+        );
+      } catch (restoreErr) {
+        logError("Verification token could not be restored after a failed verification", restoreErr, { event: "account.email_verification" });
+      }
+    };
+    try {
+      const user = await User.findById(userAuth.user);
+      if (!user) { await restoreToken(); return R.error(res, "Invalid or expired verification link. Request a new one.", 400); }
+      user.emailVerified = true;
+      await user.save();
+    } catch (persistErr) {
+      await restoreToken();
+      throw persistErr;
+    }
 
     res.json({ success: true, message: "Email verified successfully. You can now log in." });
   } catch (err) {

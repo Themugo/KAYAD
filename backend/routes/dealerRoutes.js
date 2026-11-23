@@ -199,6 +199,17 @@ const requireDealerWorkspaceStatus = async (req, res, next) => {
 };
 router.use(protect, dealerOnly, requireDealerWorkspaceStatus);
 
+// Additive, non-breaking semantics notice for the two legacy revenue figures (reconciliation finding F5, reports/LEGACY-EARNINGS-ENDPOINT-AUDIT.md).
+// The numbers are unchanged. `dealer_amount` is written when an escrow is RELEASED, at which moment payments.status leaves "success", so a
+// status=success total is NOT released revenue (held-escrow and direct-mode payments sit in that status with no dealer_amount).
+const LEGACY_REVENUE_BASIS = Object.freeze({
+  definition: "Sum of payments.dealer_amount over payments with status=success (legacy basis)",
+  isReleasedRevenue: false,
+  includesHeldEscrow: false,
+  listIncludesUnreleasedPayments: true,
+  note: "Not released revenue and not reconcilable to the ledger. Use GET /api/dealer-platform/command-centre (financial.releasedRevenue) for released sales revenue.",
+});
+
 // =============================
 // 💰 EARNINGS (FILTERABLE + PAGINATED + CACHED)
 // =============================
@@ -255,6 +266,7 @@ router.get(
     res.json({
       success: true,
       total: totalAmount,
+      basis: LEGACY_REVENUE_BASIS,
       monthly,
       count: payments.length,
       payments,
@@ -471,6 +483,7 @@ router.get(
 
     res.json({
       success: true,
+      revenueBasis: LEGACY_REVENUE_BASIS,
       summary: {
         totalCars,
         soldCars,

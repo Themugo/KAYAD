@@ -1,0 +1,990 @@
+{
+ "variant": "original-to-modified-original",
+ "sw": "register",
+ "A": "aaaaaaaaaaaa-mwrwlkr6",
+ "B": "bbbbbbbbbbbb-mwrwlraj",
+ "runs": [
+  {
+   "run": 1,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 393,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 50,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 476,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 424,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 246,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 294,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 664,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 2,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 393,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 38,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 429,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 351,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 228,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 250,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 680,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 3,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 388,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 30,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 367,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 370,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 243,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 253,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 702,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 4,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 360,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 371,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 337,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 268,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 246,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 642,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 5,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 323,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 494,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 393,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 296,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 286,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 651,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 6,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 379,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 31,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 401,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 388,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 288,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 271,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 647,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 7,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 334,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 431,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 381,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 219,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 284,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 659,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 8,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 350,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 401,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 362,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 250,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 240,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 695,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 9,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 377,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 31,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 410,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 400,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 236,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 279,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 673,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 10,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 332,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 40,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 359,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 457,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 233,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 259,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 647,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 11,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 433,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 31,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 424,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 454,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 224,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 287,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 642,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 12,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 333,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 26,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 364,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 329,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 283,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 343,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 549,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 13,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 475,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 33,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 455,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 392,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 193,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 257,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 637,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 14,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 376,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 384,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 362,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 215,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 250,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 571,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 15,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 353,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 33,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 508,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 467,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 235,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 289,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 677,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 16,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 459,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 33,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 417,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 365,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 242,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 248,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 646,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 17,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 480,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 369,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 352,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 242,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 273,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 671,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 18,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 377,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 33,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 422,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 380,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 341,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 296,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 619,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 19,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 382,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 35,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 393,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 393,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 285,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 238,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 679,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 20,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 360,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 28,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 410,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 369,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 249,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 221,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 597,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  }
+ ],
+ "total": 20,
+ "stalls": 0
+}

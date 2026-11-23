@@ -1,0 +1,1314 @@
+{
+ "at": "2026-11-22T18:34:07.840Z",
+ "actors": {
+  "owner": "cca-…@example.test",
+  "manager": "ccmanage-…@example.test",
+  "sales_agent": "ccsales_-…@example.test",
+  "lot_agent": "cclot_ag-…@example.test",
+  "finance_officer": "ccfinanc-…@example.test",
+  "viewer": "ccviewer-…@example.test",
+  "custom_team_lead": "cccustom-…@example.test",
+  "empty_dealer": "ccempty-…@example.test"
+ },
+ "results": [
+  {
+   "group": "owner-layout",
+   "name": "320px: command centre rendered, no horizontal overflow",
+   "ok": true,
+   "detail": {
+    "present": 1,
+    "overflow": false
+   }
+  },
+  {
+   "group": "owner-health",
+   "name": "320px: no page errors, no failed API calls",
+   "ok": true,
+   "detail": {
+    "errs": [],
+    "failed": []
+   }
+  },
+  {
+   "group": "owner-layout",
+   "name": "360px: command centre rendered, no horizontal overflow",
+   "ok": true,
+   "detail": {
+    "present": 1,
+    "overflow": false
+   }
+  },
+  {
+   "group": "owner-health",
+   "name": "360px: no page errors, no failed API calls",
+   "ok": true,
+   "detail": {
+    "errs": [],
+    "failed": []
+   }
+  },
+  {
+   "group": "owner-layout",
+   "name": "390px: command centre rendered, no horizontal overflow",
+   "ok": true,
+   "detail": {
+    "present": 1,
+    "overflow": false
+   }
+  },
+  {
+   "group": "a11y",
+   "name": "axe on the owner command centre at 390px: no violations",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "touch",
+   "name": "command-centre buttons are at least 40px tall on a phone",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "owner-health",
+   "name": "390px: no page errors, no failed API calls",
+   "ok": true,
+   "detail": {
+    "errs": [],
+    "failed": []
+   }
+  },
+  {
+   "group": "owner-layout",
+   "name": "768px: command centre rendered, no horizontal overflow",
+   "ok": true,
+   "detail": {
+    "present": 1,
+    "overflow": false
+   }
+  },
+  {
+   "group": "owner-health",
+   "name": "768px: no page errors, no failed API calls",
+   "ok": true,
+   "detail": {
+    "errs": [],
+    "failed": []
+   }
+  },
+  {
+   "group": "owner-layout",
+   "name": "1024px: command centre rendered, no horizontal overflow",
+   "ok": true,
+   "detail": {
+    "present": 1,
+    "overflow": false
+   }
+  },
+  {
+   "group": "owner-health",
+   "name": "1024px: no page errors, no failed API calls",
+   "ok": true,
+   "detail": {
+    "errs": [],
+    "failed": []
+   }
+  },
+  {
+   "group": "owner-layout",
+   "name": "1280px: command centre rendered, no horizontal overflow",
+   "ok": true,
+   "detail": {
+    "present": 1,
+    "overflow": false
+   }
+  },
+  {
+   "group": "owner-figures",
+   "name": "UI released revenue equals API",
+   "ok": true,
+   "detail": [
+    "RELEASED SALES REVENUE Ksh 4,370,000 5 sales, after platform fees",
+    {
+     "amount": 4370000,
+     "count": 5
+    }
+   ]
+  },
+  {
+   "group": "owner-figures",
+   "name": "UI pending escrow equals API",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "owner-figures",
+   "name": "UI pending payouts equals API",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "owner-figures",
+   "name": "UI completed payouts equals API",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "owner-figures",
+   "name": "UI active listings / new enquiries / open offers equal API",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "a11y",
+   "name": "axe (WCAG 2.x A/AA) on the owner command centre at 1280px: no violations",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "keyboard",
+   "name": "Enter on attention-failed-payouts opens section \"banking\" (URL ?section=)",
+   "ok": true,
+   "detail": [
+    "?nav=dealer-dashboard&section=banking",
+    "banking"
+   ]
+  },
+  {
+   "group": "keyboard",
+   "name": "focused attention item shows a visible focus indicator",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "owner-health",
+   "name": "1280px: no page errors, no failed API calls",
+   "ok": true,
+   "detail": {
+    "errs": [],
+    "failed": []
+   }
+  },
+  {
+   "group": "owner-layout",
+   "name": "1920px: command centre rendered, no horizontal overflow",
+   "ok": true,
+   "detail": {
+    "present": 1,
+    "overflow": false
+   }
+  },
+  {
+   "group": "owner-health",
+   "name": "1920px: no page errors, no failed API calls",
+   "ok": true,
+   "detail": {
+    "errs": [],
+    "failed": []
+   }
+  },
+  {
+   "group": "team-layout",
+   "name": "manager@320: no horizontal overflow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@320: tabs = [\"Overview\",\"Inventory\",\"Leads\",\"Customers\"]",
+   "ok": true,
+   "detail": [
+    "Overview",
+    "Inventory",
+    "Leads",
+    "Customers"
+   ]
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@320: Overview rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@320: tile to-active present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@320: tile to-enquiries present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@320: tile to-revenue present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@320: no escrow/payout/refund/fee/settlement wording in the overview",
+   "ok": true,
+   "detail": "Needs your attention\n1 Enquiries unanswered for over 24 hours\n2 Offers waiting for your decision\nOpen the lead to accept, counter or decline.\n3 New enquiries\n2 Draft listings to finish\n\nActive listing"
+  },
+  {
+   "group": "team-health",
+   "name": "manager@320: no uncaught page errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-layout",
+   "name": "manager@390: no horizontal overflow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@390: tabs = [\"Overview\",\"Inventory\",\"Leads\",\"Customers\"]",
+   "ok": true,
+   "detail": [
+    "Overview",
+    "Inventory",
+    "Leads",
+    "Customers"
+   ]
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@390: Overview rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@390: tile to-active present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@390: tile to-enquiries present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@390: tile to-revenue present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@390: no escrow/payout/refund/fee/settlement wording in the overview",
+   "ok": true,
+   "detail": "Needs your attention\n1 Enquiries unanswered for over 24 hours\n2 Offers waiting for your decision\nOpen the lead to accept, counter or decline.\n3 New enquiries\n2 Draft listings to finish\n\nActive listing"
+  },
+  {
+   "group": "team-figures",
+   "name": "manager@390: UI active listings equals API (10)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-figures",
+   "name": "manager@390: UI new enquiries equals API (3)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-figures",
+   "name": "manager@390: UI released revenue equals API",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@390: API payload for this member has no escrow/payout/refund/fee keys",
+   "ok": true,
+   "detail": [
+    "releasedRevenue"
+   ]
+  },
+  {
+   "group": "a11y",
+   "name": "manager@390: axe (WCAG 2.x A/AA) on the team overview: no violations",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "touch",
+   "name": "manager@390: overview buttons are at least 40px tall",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "group": "keyboard",
+   "name": "manager@390: Enter on \"1 Enquiries unanswered for over 24 hours. Open leads\" selects the leads tab",
+   "ok": true,
+   "detail": [
+    "Leads",
+    "leads"
+   ]
+  },
+  {
+   "group": "keyboard",
+   "name": "manager@390: attention button has a visible focus indicator",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "a11y",
+   "name": "manager@390: workspace tabs are in a labelled tablist",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-health",
+   "name": "manager@390: no uncaught page errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-layout",
+   "name": "manager@1280: no horizontal overflow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@1280: tabs = [\"Overview\",\"Inventory\",\"Leads\",\"Customers\"]",
+   "ok": true,
+   "detail": [
+    "Overview",
+    "Inventory",
+    "Leads",
+    "Customers"
+   ]
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@1280: Overview rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@1280: tile to-active present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@1280: tile to-enquiries present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@1280: tile to-revenue present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@1280: no escrow/payout/refund/fee/settlement wording in the overview",
+   "ok": true,
+   "detail": "Needs your attention\n1 Enquiries unanswered for over 24 hours\n2 Offers waiting for your decision\nOpen the lead to accept, counter or decline.\n3 New enquiries\n2 Draft listings to finish\n\nActive listing"
+  },
+  {
+   "group": "team-figures",
+   "name": "manager@1280: UI active listings equals API (10)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-figures",
+   "name": "manager@1280: UI new enquiries equals API (3)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-figures",
+   "name": "manager@1280: UI released revenue equals API",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "manager@1280: API payload for this member has no escrow/payout/refund/fee keys",
+   "ok": true,
+   "detail": [
+    "releasedRevenue"
+   ]
+  },
+  {
+   "group": "a11y",
+   "name": "manager@1280: axe (WCAG 2.x A/AA) on the team overview: no violations",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "keyboard",
+   "name": "manager@1280: Enter on \"1 Enquiries unanswered for over 24 hours. Open leads\" selects the leads tab",
+   "ok": true,
+   "detail": [
+    "Leads",
+    "leads"
+   ]
+  },
+  {
+   "group": "keyboard",
+   "name": "manager@1280: attention button has a visible focus indicator",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "a11y",
+   "name": "manager@1280: workspace tabs are in a labelled tablist",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-health",
+   "name": "manager@1280: no uncaught page errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-roles",
+   "name": "manager: owner overview (?nav=dealer-dashboard) is not shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-layout",
+   "name": "lot_agent@320: no horizontal overflow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@320: tabs = [\"Overview\",\"Inventory\"]",
+   "ok": true,
+   "detail": [
+    "Overview",
+    "Inventory"
+   ]
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@320: Overview rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@320: tile to-active present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@320: tile to-live-auctions present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@320: tile to-enquiries absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@320: tile to-revenue absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@320: no escrow/payout/refund/fee/settlement wording in the overview",
+   "ok": true,
+   "detail": "Needs your attention\n2 Draft listings to finish\n\nActive listings\n\n10\n\nPending approval\n\n2\n\nDrafts\n\n2\n\nSold vehicles\n\n2\n\nLive auctions\n\n1\n\nUpcoming auctions\n\n1\n\nYour recent activity\nPaused a listing\n22"
+  },
+  {
+   "group": "team-health",
+   "name": "lot_agent@320: no uncaught page errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-layout",
+   "name": "lot_agent@390: no horizontal overflow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@390: tabs = [\"Overview\",\"Inventory\"]",
+   "ok": true,
+   "detail": [
+    "Overview",
+    "Inventory"
+   ]
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@390: Overview rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@390: tile to-active present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@390: tile to-live-auctions present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@390: tile to-enquiries absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@390: tile to-revenue absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@390: no escrow/payout/refund/fee/settlement wording in the overview",
+   "ok": true,
+   "detail": "Needs your attention\n2 Draft listings to finish\n\nActive listings\n\n10\n\nPending approval\n\n2\n\nDrafts\n\n2\n\nSold vehicles\n\n2\n\nLive auctions\n\n1\n\nUpcoming auctions\n\n1\n\nYour recent activity\nPaused a listing\n22"
+  },
+  {
+   "group": "team-figures",
+   "name": "lot_agent@390: UI active listings equals API (10)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@390: API payload for this member has no escrow/payout/refund/fee keys",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "a11y",
+   "name": "lot_agent@390: axe (WCAG 2.x A/AA) on the team overview: no violations",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "touch",
+   "name": "lot_agent@390: overview buttons are at least 40px tall",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "group": "keyboard",
+   "name": "lot_agent@390: Enter on \"2 Draft listings to finish. Open inventory\" selects the inventory tab",
+   "ok": true,
+   "detail": [
+    "Inventory",
+    "inventory"
+   ]
+  },
+  {
+   "group": "keyboard",
+   "name": "lot_agent@390: attention button has a visible focus indicator",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "a11y",
+   "name": "lot_agent@390: workspace tabs are in a labelled tablist",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-health",
+   "name": "lot_agent@390: no uncaught page errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-layout",
+   "name": "lot_agent@1280: no horizontal overflow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@1280: tabs = [\"Overview\",\"Inventory\"]",
+   "ok": true,
+   "detail": [
+    "Overview",
+    "Inventory"
+   ]
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@1280: Overview rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@1280: tile to-active present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@1280: tile to-live-auctions present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@1280: tile to-enquiries absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@1280: tile to-revenue absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@1280: no escrow/payout/refund/fee/settlement wording in the overview",
+   "ok": true,
+   "detail": "Needs your attention\n2 Draft listings to finish\n\nActive listings\n\n10\n\nPending approval\n\n2\n\nDrafts\n\n2\n\nSold vehicles\n\n2\n\nLive auctions\n\n1\n\nUpcoming auctions\n\n1\n\nYour recent activity\nPaused a listing\n22"
+  },
+  {
+   "group": "team-figures",
+   "name": "lot_agent@1280: UI active listings equals API (10)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent@1280: API payload for this member has no escrow/payout/refund/fee keys",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "a11y",
+   "name": "lot_agent@1280: axe (WCAG 2.x A/AA) on the team overview: no violations",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "keyboard",
+   "name": "lot_agent@1280: Enter on \"2 Draft listings to finish. Open inventory\" selects the inventory tab",
+   "ok": true,
+   "detail": [
+    "Inventory",
+    "inventory"
+   ]
+  },
+  {
+   "group": "keyboard",
+   "name": "lot_agent@1280: attention button has a visible focus indicator",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "a11y",
+   "name": "lot_agent@1280: workspace tabs are in a labelled tablist",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-health",
+   "name": "lot_agent@1280: no uncaught page errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-roles",
+   "name": "lot_agent: owner overview (?nav=dealer-dashboard) is not shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-layout",
+   "name": "finance_officer@320: no horizontal overflow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@320: tabs = [\"Overview\"]",
+   "ok": true,
+   "detail": [
+    "Overview"
+   ]
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@320: Overview rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@320: tile to-revenue present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@320: tile to-active absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@320: tile to-enquiries absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@320: no escrow/payout/refund/fee/settlement wording in the overview",
+   "ok": true,
+   "detail": "Needs your attention\n\nNothing needs your attention right now.\n\nReleased sales revenue\n\nKsh 4,370,000"
+  },
+  {
+   "group": "team-health",
+   "name": "finance_officer@320: no uncaught page errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-layout",
+   "name": "finance_officer@390: no horizontal overflow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@390: tabs = [\"Overview\"]",
+   "ok": true,
+   "detail": [
+    "Overview"
+   ]
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@390: Overview rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@390: tile to-revenue present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@390: tile to-active absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@390: tile to-enquiries absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@390: no escrow/payout/refund/fee/settlement wording in the overview",
+   "ok": true,
+   "detail": "Needs your attention\n\nNothing needs your attention right now.\n\nReleased sales revenue\n\nKsh 4,370,000"
+  },
+  {
+   "group": "team-figures",
+   "name": "finance_officer@390: UI released revenue equals API",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@390: API payload for this member has no escrow/payout/refund/fee keys",
+   "ok": true,
+   "detail": [
+    "releasedRevenue"
+   ]
+  },
+  {
+   "group": "a11y",
+   "name": "finance_officer@390: axe (WCAG 2.x A/AA) on the team overview: no violations",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "touch",
+   "name": "finance_officer@390: overview buttons are at least 40px tall",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "group": "a11y",
+   "name": "finance_officer@390: workspace tabs are in a labelled tablist",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-health",
+   "name": "finance_officer@390: no uncaught page errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-layout",
+   "name": "finance_officer@1280: no horizontal overflow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@1280: tabs = [\"Overview\"]",
+   "ok": true,
+   "detail": [
+    "Overview"
+   ]
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@1280: Overview rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@1280: tile to-revenue present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@1280: tile to-active absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@1280: tile to-enquiries absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@1280: no escrow/payout/refund/fee/settlement wording in the overview",
+   "ok": true,
+   "detail": "Needs your attention\n\nNothing needs your attention right now.\n\nReleased sales revenue\n\nKsh 4,370,000"
+  },
+  {
+   "group": "team-figures",
+   "name": "finance_officer@1280: UI released revenue equals API",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer@1280: API payload for this member has no escrow/payout/refund/fee keys",
+   "ok": true,
+   "detail": [
+    "releasedRevenue"
+   ]
+  },
+  {
+   "group": "a11y",
+   "name": "finance_officer@1280: axe (WCAG 2.x A/AA) on the team overview: no violations",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "a11y",
+   "name": "finance_officer@1280: workspace tabs are in a labelled tablist",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-health",
+   "name": "finance_officer@1280: no uncaught page errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-roles",
+   "name": "finance_officer: owner overview (?nav=dealer-dashboard) is not shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-layout",
+   "name": "custom_team_lead@320: no horizontal overflow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@320: tabs = [\"Overview\",\"Leads\",\"Customers\"]",
+   "ok": true,
+   "detail": [
+    "Overview",
+    "Leads",
+    "Customers"
+   ]
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@320: Overview rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@320: tile to-enquiries present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@320: tile to-active absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@320: tile to-revenue absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@320: no escrow/payout/refund/fee/settlement wording in the overview",
+   "ok": true,
+   "detail": "Needs your attention\n1 Enquiries unanswered for over 24 hours\n2 Offers waiting for your decision\nOpen the lead to accept, counter or decline.\n3 New enquiries\n1 Team invitations waiting to be accepted\n"
+  },
+  {
+   "group": "team-health",
+   "name": "custom_team_lead@320: no uncaught page errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-layout",
+   "name": "custom_team_lead@390: no horizontal overflow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@390: tabs = [\"Overview\",\"Leads\",\"Customers\"]",
+   "ok": true,
+   "detail": [
+    "Overview",
+    "Leads",
+    "Customers"
+   ]
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@390: Overview rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@390: tile to-enquiries present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@390: tile to-active absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@390: tile to-revenue absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@390: no escrow/payout/refund/fee/settlement wording in the overview",
+   "ok": true,
+   "detail": "Needs your attention\n1 Enquiries unanswered for over 24 hours\n2 Offers waiting for your decision\nOpen the lead to accept, counter or decline.\n3 New enquiries\n1 Team invitations waiting to be accepted\n"
+  },
+  {
+   "group": "team-figures",
+   "name": "custom_team_lead@390: UI new enquiries equals API (3)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@390: API payload for this member has no escrow/payout/refund/fee keys",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "a11y",
+   "name": "custom_team_lead@390: axe (WCAG 2.x A/AA) on the team overview: no violations",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "touch",
+   "name": "custom_team_lead@390: overview buttons are at least 40px tall",
+   "ok": true,
+   "detail": 0
+  },
+  {
+   "group": "keyboard",
+   "name": "custom_team_lead@390: Enter on \"1 Enquiries unanswered for over 24 hours. Open leads\" selects the leads tab",
+   "ok": true,
+   "detail": [
+    "Leads",
+    "leads"
+   ]
+  },
+  {
+   "group": "keyboard",
+   "name": "custom_team_lead@390: attention button has a visible focus indicator",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "a11y",
+   "name": "custom_team_lead@390: workspace tabs are in a labelled tablist",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-health",
+   "name": "custom_team_lead@390: no uncaught page errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-layout",
+   "name": "custom_team_lead@1280: no horizontal overflow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@1280: tabs = [\"Overview\",\"Leads\",\"Customers\"]",
+   "ok": true,
+   "detail": [
+    "Overview",
+    "Leads",
+    "Customers"
+   ]
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@1280: Overview rendered",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@1280: tile to-enquiries present",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@1280: tile to-active absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@1280: tile to-revenue absent",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@1280: no escrow/payout/refund/fee/settlement wording in the overview",
+   "ok": true,
+   "detail": "Needs your attention\n1 Enquiries unanswered for over 24 hours\n2 Offers waiting for your decision\nOpen the lead to accept, counter or decline.\n3 New enquiries\n1 Team invitations waiting to be accepted\n"
+  },
+  {
+   "group": "team-figures",
+   "name": "custom_team_lead@1280: UI new enquiries equals API (3)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead@1280: API payload for this member has no escrow/payout/refund/fee keys",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "a11y",
+   "name": "custom_team_lead@1280: axe (WCAG 2.x A/AA) on the team overview: no violations",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "keyboard",
+   "name": "custom_team_lead@1280: Enter on \"1 Enquiries unanswered for over 24 hours. Open leads\" selects the leads tab",
+   "ok": true,
+   "detail": [
+    "Leads",
+    "leads"
+   ]
+  },
+  {
+   "group": "keyboard",
+   "name": "custom_team_lead@1280: attention button has a visible focus indicator",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "a11y",
+   "name": "custom_team_lead@1280: workspace tabs are in a labelled tablist",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-health",
+   "name": "custom_team_lead@1280: no uncaught page errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-roles",
+   "name": "custom_team_lead: owner overview (?nav=dealer-dashboard) is not shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-layout",
+   "name": "viewer@390: no horizontal overflow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "viewer@390: tabs = []",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-roles",
+   "name": "viewer@390: no Overview, no command-centre data",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-health",
+   "name": "viewer@390: no uncaught page errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-roles",
+   "name": "viewer: owner overview (?nav=dealer-dashboard) is not shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-layout",
+   "name": "sales_agent@390: no horizontal overflow",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-roles",
+   "name": "sales_agent@390: tabs = []",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-roles",
+   "name": "sales_agent@390: no Overview, no command-centre data",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "team-health",
+   "name": "sales_agent@390: no uncaught page errors",
+   "ok": true,
+   "detail": []
+  },
+  {
+   "group": "team-roles",
+   "name": "sales_agent: owner overview (?nav=dealer-dashboard) is not shown",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "states",
+   "name": "team overview: slow API then data appears (no flash of the \"no permissions\" message)",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "states",
+   "name": "team overview: API failure keeps the existing Inventory/Leads/Customers tabs and shows no invented figures",
+   "ok": true,
+   "detail": [
+    "Inventory",
+    "Leads",
+    "Customers"
+   ]
+  },
+  {
+   "group": "states",
+   "name": "empty dealership: zeros and \"nothing needs attention\", no invented figures",
+   "ok": true,
+   "detail": "Skip to main content\nDealer workspace\nDealer workspace\nKAYARD KE\n\nJourney ccempty\n\nDEALER ACCOUNT\n\nAdd a vehicle\n\nOVERVIEW\n\nOverview\n\nOPERATIONS\n\nInventory\nLeads\nPipeline\nCustomers\nAuctions\nInspections\nEscrow\nFinance\n\nBUSINESS MANAGEMENT\n\nAnalytics\nReputation\nMarketing\nTeam\nBanking\nSettings\nAccount "
+  },
+  {
+   "group": "states",
+   "name": "command centre API failure: quiet unavailable message, rest of overview intact",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "states",
+   "name": "slow API: loading skeleton is shown, then the data",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "states",
+   "name": "slow API: data appears after loading",
+   "ok": true,
+   "detail": ""
+  },
+  {
+   "group": "nav",
+   "name": "sidebar: Team, Banking and Overview each appear exactly once",
+   "ok": true,
+   "detail": "OVERVIEW\n\nOverview\n\nOPERATIONS\n\nInventory\nLeads\n4\n4 new\nPipeline\nCustomers\nAuctions\nInspections\nEscrow\nFinance\n\nBUSINESS MANAGEMENT\n\nAnalytics\nReputation\nMarketing\nTeam\nBanking\nSettings"
+  }
+ ]
+}

@@ -1,0 +1,2871 @@
+{
+ "variant": "legacy-to-new-H1",
+ "sw": "register",
+ "A": "aaaaaaaaaaaa-mwrwlkr6",
+ "B": "bbbbbbbbbbbb-mwrwlraj",
+ "runs": [
+  {
+   "run": 1,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 461,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 46,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 419,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 397,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 436,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 403,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12001,
+     "out": "STALL"
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12795
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swEvents": [
+     {
+      "dt": 7318,
+      "t": 1795357141325,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7360,
+      "t": 1795357141367,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7360,
+      "t": 1795357141367,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7360,
+      "t": 1795357141367,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7360,
+      "t": 1795357141367,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7406,
+      "t": 1795357141413,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7976,
+      "t": 1795357141983,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7976,
+      "t": 1795357141983,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7977,
+      "t": 1795357141984,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7977,
+      "t": 1795357141984,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "dt": 7977,
+      "t": 1795357141984,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7977,
+      "t": 1795357141984,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7977,
+      "t": 1795357141984,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 8976,
+      "t": 1795357142983,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "41202 A GET /api/v1/auth/csrf",
+     "41211 A GET /api/admin/public/config",
+     "41212 A GET /sw.js",
+     "41215 A GET /api/admin/public/config",
+     "41256 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "41266 A GET /manifest.webmanifest",
+     "41426 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "41461 A GET /sw.js",
+     "41865 A GET /api/v1/auth/me",
+     "41977 B GET /dealer [nav]",
+     "43671 B GET /api/v1/auth/me",
+     "47816 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "54326 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "67336 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/legacy-to-new-H1-run1-stall.png"
+   }
+  },
+  {
+   "run": 2,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 388,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 37,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 491,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 379,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 399,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 338,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 851,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 3,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 448,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 478,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 374,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 464,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 278,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 810,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 4,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 356,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 28,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 346,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 421,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 348,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 334,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 766,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 5,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 378,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 34,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 439,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 342,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 420,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 272,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 655,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 6,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 395,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 26,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 482,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 431,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 352,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 304,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12001,
+     "out": "STALL"
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12796
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swEvents": [
+     {
+      "dt": 7142,
+      "t": 1795357213350,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7172,
+      "t": 1795357213380,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7172,
+      "t": 1795357213380,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7172,
+      "t": 1795357213380,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7173,
+      "t": 1795357213381,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7194,
+      "t": 1795357213402,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7874,
+      "t": 1795357214082,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7874,
+      "t": 1795357214082,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7876,
+      "t": 1795357214084,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7876,
+      "t": 1795357214084,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "dt": 7876,
+      "t": 1795357214084,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7876,
+      "t": 1795357214084,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7876,
+      "t": 1795357214084,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 8878,
+      "t": 1795357215086,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "13288 A GET /api/v1/auth/csrf",
+     "13288 A GET /api/admin/public/config",
+     "13288 A GET /sw.js",
+     "13300 A GET /api/admin/public/config",
+     "13322 A GET /manifest.webmanifest",
+     "13330 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "13404 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "13702 A GET /sw.js",
+     "13913 A GET /api/v1/auth/me",
+     "14082 B GET /dealer [nav]",
+     "15719 B GET /api/v1/auth/me",
+     "19872 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "26375 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "39402 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/legacy-to-new-H1-run6-stall.png"
+   }
+  },
+  {
+   "run": 7,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 384,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 39,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 362,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 393,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 497,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 283,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 837,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 8,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 408,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 28,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 442,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 362,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 395,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 377,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 717,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 9,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 388,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 31,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 390,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 344,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 447,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 312,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 674,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 10,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 375,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 37,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 386,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 396,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 429,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 265,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 758,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 11,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 372,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 28,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 423,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 344,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 464,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 373,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12000,
+     "out": "STALL"
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12794
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swEvents": [
+     {
+      "dt": 7050,
+      "t": 1795357285304,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7074,
+      "t": 1795357285328,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7074,
+      "t": 1795357285328,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7074,
+      "t": 1795357285328,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7075,
+      "t": 1795357285329,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7088,
+      "t": 1795357285342,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7754,
+      "t": 1795357286008,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7754,
+      "t": 1795357286008,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7761,
+      "t": 1795357286015,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7762,
+      "t": 1795357286016,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "dt": 7762,
+      "t": 1795357286016,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7762,
+      "t": 1795357286016,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7762,
+      "t": 1795357286016,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 8763,
+      "t": 1795357287017,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "85201 A GET /api/v1/auth/me",
+     "85202 A GET /api/v1/auth/csrf",
+     "85218 A GET /sw.js",
+     "85252 A GET /api/admin/public/config",
+     "85257 A GET /manifest.webmanifest",
+     "85285 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "85365 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "85534 A GET /sw.js",
+     "85878 A GET /api/v1/auth/me",
+     "86009 B GET /dealer [nav]",
+     "87684 B GET /api/v1/auth/me",
+     "91802 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "98315 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "11334 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/legacy-to-new-H1-run11-stall.png"
+   }
+  },
+  {
+   "run": 12,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 513,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 59,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 489,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 446,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 387,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 412,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 607,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 13,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 468,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 36,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 395,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 519,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12001,
+     "out": "STALL"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 399,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 651,
+     "out": "ok"
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [],
+    "controller": {
+     "controller": "http://127.0.0.1:5421/sw.js",
+     "state": "activating",
+     "regs": [
+      [
+       "activating",
+       null,
+       null
+      ]
+     ]
+    },
+    "caches": {
+     "kayad-static-v2": [
+      "/manifest.webmanifest",
+      "/assets/httpClient-DUfQrcOs.js",
+      "/assets/jsx-runtime--qySwOLX.js",
+      "/assets/chunk-62JRHF6Z-CTXCXr27.js",
+      "/assets/createLucideIcon-DTlqIiI3.js",
+      "/assets/lock-CJZ-QdUB.js",
+      "/assets/shield-alert-DgQTDiTU.js",
+      "/assets/httpRequest-DiLtrneX.js",
+      "/assets/authApi-Jk2uv3uR.js",
+      "/assets/AuthContext-C-ZTMV23.js",
+      "/assets/dealerPlatformApi-YqcaG7ar.js",
+      "/assets/arrow-right-Dy81hIrI.js"
+     ],
+     "kayad-images-v2": [
+      "/hero/kayad-mercedes-gle-mobile.webp"
+     ],
+     "kayad-mobile-v2": [
+      "/dealer"
+     ]
+    },
+    "release": "bbbbbbbbbbbb-mwrwlraj",
+    "timing": {
+     "type": "navigate",
+     "start": 0,
+     "responseEnd": 294,
+     "domContentLoaded": 559,
+     "workerStart": 285
+    },
+    "swEvents": [
+     {
+      "dt": 19890,
+      "t": 1795357342321,
+      "kind": "version",
+      "v": "2:running/activated"
+     },
+     {
+      "dt": 19899,
+      "t": 1795357342330,
+      "kind": "version",
+      "v": "2:running/activated"
+     },
+     {
+      "dt": 20195,
+      "t": 1795357342626,
+      "kind": "version",
+      "v": "3:stopped/new"
+     },
+     {
+      "dt": 20195,
+      "t": 1795357342626,
+      "kind": "version",
+      "v": "3:starting/new"
+     },
+     {
+      "dt": 20195,
+      "t": 1795357342626,
+      "kind": "version",
+      "v": "3:starting/new"
+     },
+     {
+      "dt": 20201,
+      "t": 1795357342632,
+      "kind": "version",
+      "v": "3:starting/new"
+     },
+     {
+      "dt": 20204,
+      "t": 1795357342635,
+      "kind": "version",
+      "v": "3:starting/installing"
+     },
+     {
+      "dt": 20204,
+      "t": 1795357342635,
+      "kind": "version",
+      "v": "3:running/installing"
+     },
+     {
+      "dt": 20206,
+      "t": 1795357342637,
+      "kind": "version",
+      "v": "3:running/installed"
+     },
+     {
+      "dt": 20440,
+      "t": 1795357342871,
+      "kind": "version",
+      "v": "2:stopping/activated"
+     },
+     {
+      "dt": 20441,
+      "t": 1795357342872,
+      "kind": "version",
+      "v": "2:stopped/activated"
+     },
+     {
+      "dt": 20441,
+      "t": 1795357342872,
+      "kind": "version",
+      "v": "2:stopped/redundant"
+     },
+     {
+      "dt": 20441,
+      "t": 1795357342872,
+      "kind": "version",
+      "v": "3:running/activating"
+     },
+     {
+      "dt": 20441,
+      "t": 1795357342872,
+      "kind": "version",
+      "v": "3:running/activating"
+     }
+    ],
+    "failedRequests": [
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "/dealer net::ERR_ABORTED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "41231 A GET /sw.js",
+     "41244 A GET /api/admin/public/config",
+     "41290 A GET /manifest.webmanifest",
+     "41300 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "41357 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "41875 A GET /api/v1/auth/me",
+     "42322 B GET /dealer [nav]",
+     "42595 B GET /api/cars",
+     "42612 B GET /release.json",
+     "42612 B GET /api/v1/auth/me",
+     "42612 B GET /api/v1/auth/csrf",
+     "42612 B GET /sw.js",
+     "42613 B GET /api/admin/public/config",
+     "43262 B GET /api/v1/auth/me"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/legacy-to-new-H1-run13-stall.png"
+   }
+  },
+  {
+   "run": 14,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 394,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 488,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 397,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 437,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 337,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12000,
+     "out": "STALL"
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12793
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swEvents": [
+     {
+      "dt": 7166,
+      "t": 1795357351348,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7195,
+      "t": 1795357351377,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7195,
+      "t": 1795357351377,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7195,
+      "t": 1795357351377,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7195,
+      "t": 1795357351377,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7210,
+      "t": 1795357351392,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7939,
+      "t": 1795357352121,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7939,
+      "t": 1795357352121,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7946,
+      "t": 1795357352128,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7946,
+      "t": 1795357352128,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "dt": 7946,
+      "t": 1795357352128,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7946,
+      "t": 1795357352128,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7946,
+      "t": 1795357352128,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 8948,
+      "t": 1795357353130,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "51273 A GET /api/v1/auth/me",
+     "51274 A GET /api/v1/auth/csrf",
+     "51305 A GET /sw.js",
+     "51308 A GET /api/admin/public/config",
+     "51327 A GET /manifest.webmanifest",
+     "51394 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "51400 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "51597 A GET /sw.js",
+     "51906 A GET /api/v1/auth/me",
+     "52124 B GET /dealer [nav]",
+     "53712 B GET /api/v1/auth/me",
+     "57885 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "64391 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "77405 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/legacy-to-new-H1-run14-stall.png"
+   }
+  },
+  {
+   "run": 15,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 415,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 35,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 481,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 445,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 440,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 284,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12002,
+     "out": "STALL"
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12796
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swEvents": [
+     {
+      "dt": 7154,
+      "t": 1795357385760,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7200,
+      "t": 1795357385806,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7200,
+      "t": 1795357385806,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7200,
+      "t": 1795357385806,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7200,
+      "t": 1795357385806,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7202,
+      "t": 1795357385808,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7861,
+      "t": 1795357386467,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7861,
+      "t": 1795357386467,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7867,
+      "t": 1795357386473,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7867,
+      "t": 1795357386473,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "dt": 7867,
+      "t": 1795357386473,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7867,
+      "t": 1795357386473,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7867,
+      "t": 1795357386473,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 8869,
+      "t": 1795357387475,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "85637 A GET /api/v1/auth/me",
+     "85637 A GET /api/v1/auth/csrf",
+     "85665 A GET /sw.js",
+     "85700 A GET /api/admin/public/config",
+     "85742 A GET /manifest.webmanifest",
+     "85747 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "85812 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "86106 A GET /sw.js",
+     "86313 A GET /api/v1/auth/me",
+     "86470 B GET /dealer [nav]",
+     "88118 B GET /api/v1/auth/me",
+     "92281 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "98797 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "11801 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/legacy-to-new-H1-run15-stall.png"
+   }
+  },
+  {
+   "run": 16,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 376,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 35,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 434,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 356,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 430,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 302,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 637,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 17,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 370,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 35,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 433,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 376,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 403,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 320,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12000,
+     "out": "STALL"
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12794
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swEvents": [
+     {
+      "dt": 6907,
+      "t": 1795357429170,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 6939,
+      "t": 1795357429202,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 6939,
+      "t": 1795357429202,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 6939,
+      "t": 1795357429202,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 6940,
+      "t": 1795357429203,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 6963,
+      "t": 1795357429226,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7643,
+      "t": 1795357429906,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7643,
+      "t": 1795357429906,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7648,
+      "t": 1795357429911,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7648,
+      "t": 1795357429911,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "dt": 7648,
+      "t": 1795357429911,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7648,
+      "t": 1795357429911,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7648,
+      "t": 1795357429911,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 8648,
+      "t": 1795357430911,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "29121 A GET /api/v1/auth/me",
+     "29122 A GET /api/v1/auth/csrf",
+     "29123 A GET /sw.js",
+     "29130 A GET /api/admin/public/config",
+     "29149 A GET /manifest.webmanifest",
+     "29231 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "29243 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "29507 A GET /sw.js",
+     "29806 A GET /api/v1/auth/me",
+     "29909 B GET /dealer [nav]",
+     "31615 B GET /api/v1/auth/me",
+     "35730 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "42232 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "55240 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/legacy-to-new-H1-run17-stall.png"
+   }
+  },
+  {
+   "run": 18,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 360,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 26,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 405,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 378,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 438,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 261,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 717,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 19,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 372,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 26,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 374,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 371,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 425,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 349,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 678,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 20,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 412,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 659,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 367,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 428,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 348,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 912,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 21,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 462,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 31,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 526,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 395,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 429,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 318,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12001,
+     "out": "STALL"
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12794
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swEvents": [
+     {
+      "dt": 7194,
+      "t": 1795357491840,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7227,
+      "t": 1795357491873,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7227,
+      "t": 1795357491873,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7227,
+      "t": 1795357491873,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7228,
+      "t": 1795357491874,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7256,
+      "t": 1795357491902,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7917,
+      "t": 1795357492563,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7917,
+      "t": 1795357492563,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7922,
+      "t": 1795357492568,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7922,
+      "t": 1795357492568,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "dt": 7922,
+      "t": 1795357492568,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7922,
+      "t": 1795357492568,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7922,
+      "t": 1795357492568,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 8923,
+      "t": 1795357493569,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "91818 A GET /api/cars",
+     "91819 A GET /api/v1/auth/me",
+     "91820 A GET /manifest.webmanifest",
+     "91820 A GET /api/v1/auth/csrf",
+     "91821 A GET /api/admin/public/config",
+     "91905 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "91923 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "92098 A GET /sw.js",
+     "92467 A GET /api/v1/auth/me",
+     "92567 B GET /dealer [nav]",
+     "94273 B GET /api/v1/auth/me",
+     "98396 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "4901 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "17927 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/legacy-to-new-H1-run21-stall.png"
+   }
+  },
+  {
+   "run": 22,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 443,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 37,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 487,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 367,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 380,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 308,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12000,
+     "out": "STALL"
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12796
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swEvents": [
+     {
+      "dt": 7099,
+      "t": 1795357526154,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7140,
+      "t": 1795357526195,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7140,
+      "t": 1795357526195,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7140,
+      "t": 1795357526195,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7140,
+      "t": 1795357526195,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7155,
+      "t": 1795357526210,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7844,
+      "t": 1795357526899,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7845,
+      "t": 1795357526900,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7848,
+      "t": 1795357526903,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7848,
+      "t": 1795357526903,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "dt": 7848,
+      "t": 1795357526903,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7848,
+      "t": 1795357526903,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7848,
+      "t": 1795357526903,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 8850,
+      "t": 1795357527905,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "26106 A GET /api/v1/auth/me",
+     "26107 A GET /api/v1/auth/csrf",
+     "26113 A GET /sw.js",
+     "26132 A GET /api/admin/public/config",
+     "26145 A GET /manifest.webmanifest",
+     "26223 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "26226 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "26464 A GET /sw.js",
+     "26766 A GET /api/v1/auth/me",
+     "26901 B GET /dealer [nav]",
+     "28576 B GET /api/v1/auth/me",
+     "32697 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "39204 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "52224 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/legacy-to-new-H1-run22-stall.png"
+   }
+  },
+  {
+   "run": 23,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 426,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 474,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 393,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 416,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 277,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 743,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 24,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 513,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 27,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 405,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 359,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 389,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 298,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 717,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 25,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 364,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 37,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 420,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 383,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 378,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 373,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 769,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 26,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 514,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 42,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 393,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 430,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 494,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 353,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 702,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 27,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 362,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 32,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 467,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 417,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 397,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 274,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 762,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 28,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 377,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 29,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 431,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 377,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 417,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 312,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 959,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  },
+  {
+   "run": 29,
+   "stalled": "goto /dealer (B)",
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 421,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 31,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 432,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 400,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 391,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 334,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 12000,
+     "out": "STALL"
+    }
+   ],
+   "diag": {
+    "tag": "stall",
+    "pending": [
+     {
+      "url": "/dealer",
+      "nav": true,
+      "ageMs": 12796
+     }
+    ],
+    "controller": "EVAL-TIMEOUT",
+    "caches": "EVAL-TIMEOUT",
+    "release": "EVAL-TIMEOUT",
+    "timing": "EVAL-TIMEOUT",
+    "swEvents": [
+     {
+      "dt": 7056,
+      "t": 1795357617170,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7105,
+      "t": 1795357617219,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7105,
+      "t": 1795357617219,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7105,
+      "t": 1795357617219,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7105,
+      "t": 1795357617219,
+      "kind": "version",
+      "v": "1:starting/activated"
+     },
+     {
+      "dt": 7116,
+      "t": 1795357617230,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7809,
+      "t": 1795357617923,
+      "kind": "version",
+      "v": "1:running/activated"
+     },
+     {
+      "dt": 7809,
+      "t": 1795357617923,
+      "kind": "version",
+      "v": "1:stopping/activated"
+     },
+     {
+      "dt": 7813,
+      "t": 1795357617927,
+      "kind": "version",
+      "v": "1:stopped/activated"
+     },
+     {
+      "dt": 7813,
+      "t": 1795357617927,
+      "kind": "version",
+      "v": "1:stopped/redundant"
+     },
+     {
+      "dt": 7813,
+      "t": 1795357617927,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7813,
+      "t": 1795357617927,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 7814,
+      "t": 1795357617928,
+      "kind": "version",
+      "v": "2:running/activating"
+     },
+     {
+      "dt": 8814,
+      "t": 1795357618928,
+      "kind": "version",
+      "v": "2:running/activated"
+     }
+    ],
+    "failedRequests": [
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800;900&display=swap net::ERR_TUNNEL_CONNECTION_FAILED",
+     "https://api.kayad.space/socket.io/socket.io.js net::ERR_TUNNEL_CONNECTION_FAILED"
+    ],
+    "consoleTail": [
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: net::ERR_TUNNEL_CONNECTION_FAILED",
+     "warning: [KAYARD KE] Realtime unavailable: Error: Unable to load Socket.IO client from https://api.kayad.space/socket.io/socket.io.js\n    at r.onerror (http://127.0.0.1:",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+     "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+    ],
+    "pageErrors": [],
+    "crashes": 0,
+    "serverTail": [
+     "17134 A GET /api/v1/auth/me",
+     "17141 A GET /sw.js",
+     "17142 A GET /api/v1/auth/csrf",
+     "17162 A GET /manifest.webmanifest",
+     "17231 A GET /api/admin/public/config",
+     "17238 A GET /hero/kayad-land-cruiser-mobile.webp",
+     "17243 A GET /hero/kayad-mercedes-gle-mobile.webp",
+     "17523 A GET /sw.js",
+     "17797 A GET /api/v1/auth/me",
+     "17925 B GET /dealer [nav]",
+     "19603 B GET /api/v1/auth/me",
+     "23718 B GET /hero/kayad-mercedes-gle-mobile.webp",
+     "30226 B GET /hero/kayad-land-cruiser-mobile.webp",
+     "43245 B GET /hero/kayad-land-cruiser-mobile.webp"
+    ],
+    "screenshot": "reports/evidence/sw-diagnose/legacy-to-new-H1-run29-stall.png"
+   }
+  },
+  {
+   "run": 30,
+   "stalled": null,
+   "steps": [
+    {
+     "name": "goto /",
+     "rel": "A",
+     "ms": 449,
+     "out": "ok"
+    },
+    {
+     "name": "register sw",
+     "rel": "A",
+     "ms": 28,
+     "out": "ok"
+    },
+    {
+     "name": "reload (A)",
+     "rel": "A",
+     "ms": 391,
+     "out": "ok"
+    },
+    {
+     "name": "reload (host now B)",
+     "rel": "B",
+     "ms": 402,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 320,
+     "out": "ok"
+    },
+    {
+     "name": "goto / (host back to A)",
+     "rel": "A",
+     "ms": 330,
+     "out": "ok"
+    },
+    {
+     "name": "goto /dealer (B)",
+     "rel": "B",
+     "ms": 604,
+     "out": "ok"
+    }
+   ],
+   "diag": null
+  }
+ ],
+ "total": 30,
+ "stalls": 10
+}

@@ -14,6 +14,7 @@ import { loadInventoryPage, parseInventoryPaging } from "../services/dealerInven
 import Escrow from "../models/Escrow.js";
 import MarketingCampaign from "../models/MarketingCampaign.js";
 import { listDealerReviews } from '../services/review.service.js';
+import { loadCommandCentre } from "../services/dealerCommandCentre.service.js";
 import { listingStatusBreakdown, buildTopPerformers, buildRecentActivity } from "../services/dealerDashboardSummary.js";
 
 import { createCar, updateCar, deleteCar } from "./carController.js";
@@ -87,6 +88,26 @@ export async function getDealerDashboard(req, res) {
   } catch (err) {
     logError("Error fetching dealer dashboard:", err);
     res.status(500).json({ success: false, message: "Failed to load dashboard" });
+  }
+}
+
+
+// ============================================================
+// DEALER COMMAND CENTRE (read-only, role-aware; see reports/DEALER-FINANCIAL-DEFINITIONS.md)
+// The dealership id comes from the authenticated membership (req.dealerId / req.user.id after delegation), never from the request.
+// ============================================================
+export async function getCommandCentre(req, res) {
+  try {
+    const dealerId = req.dealerId || req.user.id;
+    // Delegated members carry their membership (permissions); the owner and staff keep the existing full behaviour.
+    const org = req.actingMember && req.dealerOrg ? req.dealerOrg : { isOwner: true, permissions: {} };
+    // `actorId` is the authenticated member (never a request value): it only scopes the member's OWN recent activity.
+    const data = await loadCommandCentre({ dealerId, org, actorId: req.actingMember ? req.actingMember.id : null });
+    res.set("Cache-Control", "private, no-store");
+    res.json({ success: true, data });
+  } catch (err) {
+    logError("Error fetching dealer command centre:", err);
+    res.status(500).json({ success: false, message: "Failed to load command centre" });
   }
 }
 
