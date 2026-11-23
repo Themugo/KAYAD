@@ -1,0 +1,105 @@
+--- hosted
++++ repo
+@@ -4,12 +4,10 @@
+ SECURITY DEFINER
+-SET search_path TO 'public'
++SET search_path TO 'public', 'pg_temp'
+ AS $function$
+ DECLARE
+-v_existing ledger_entries%ROWTYPE;
+-v_debit ledger_accounts%ROWTYPE;
+-v_credit ledger_accounts%ROWTYPE;
+-v_entry ledger_entries%ROWTYPE;
++v_existing public.ledger_entries%ROWTYPE;
++v_debit public.ledger_accounts%ROWTYPE;
++v_credit public.ledger_accounts%ROWTYPE;
++v_entry public.ledger_entries%ROWTYPE;
+ v_amount NUMERIC := ROUND(p_amount, 2);
+-v_debit_delta NUMERIC;
+-v_credit_delta NUMERIC;
+ BEGIN
+@@ -18,19 +16,19 @@
+ END IF;
+-SELECT * INTO v_existing
+-FROM ledger_entries
+-WHERE external_reference = p_external_reference
+-AND source = p_source
+-LIMIT 1
+-FOR UPDATE;
+-IF FOUND THEN
+-RETURN to_jsonb(v_existing) || jsonb_build_object('idempotent', true);
++IF NULLIF(trim(p_external_reference), '') IS NULL THEN
++RAISE EXCEPTION 'Ledger external reference is required';
+ END IF;
+-SELECT * INTO v_debit FROM ledger_accounts WHERE code = p_debit_account_code FOR UPDATE;
+-IF NOT FOUND THEN RAISE EXCEPTION 'Debit ledger account not found: %', p_debit_account_code; END IF;
+-SELECT * INTO v_credit FROM ledger_accounts WHERE code = p_credit_account_code FOR UPDATE;
+-IF NOT FOUND THEN RAISE EXCEPTION 'Credit ledger account not found: %', p_credit_account_code; END IF;
+-INSERT INTO ledger_entries (
++IF NULLIF(trim(p_source), '') IS NULL THEN
++RAISE EXCEPTION 'Ledger source is required';
++END IF;
++IF p_debit_account_code = p_credit_account_code THEN
++RAISE EXCEPTION 'Ledger debit and credit accounts must differ';
++END IF;
++-- INSERT ... ON CONFLICT closes the check-then-insert race that a plain
++-- SELECT ... FOR UPDATE cannot prevent when the idempotency row does not
++-- exist yet. The unique (external_reference, source) index is authoritative.
++INSERT INTO public.ledger_entries (
+ transaction_id, external_reference, user_id, amount, currency,
+ source, destination, status, description, entries, metadata
+-) VALUES (
++)
++SELECT
+ concat('LGR-', extract(epoch from clock_timestamp())::BIGINT, '-', substr(gen_random_uuid()::TEXT, 1, 8)),
+@@ -39,12 +37,42 @@
+ jsonb_build_array(
+-jsonb_build_object('account', v_debit.id, 'debit', v_amount, 'credit', 0),
+-jsonb_build_object('account', v_credit.id, 'debit', 0, 'credit', v_amount)
++jsonb_build_object('account', debit.id, 'debit', v_amount, 'credit', 0),
++jsonb_build_object('account', credit.id, 'debit', 0, 'credit', v_amount)
+ ),
+ COALESCE(p_metadata, '{}'::jsonb)
+-) RETURNING * INTO v_entry;
+--- Assets/expenses increase on debit; liabilities/equity/revenue increase on credit.
+-v_debit_delta := CASE WHEN v_debit.type IN ('asset','expense') THEN v_amount ELSE -v_amount END;
+-v_credit_delta := CASE WHEN v_credit.type IN ('asset','expense') THEN -v_amount ELSE v_amount END;
+-UPDATE ledger_accounts SET balance = balance + v_debit_delta, updated_at = now() WHERE id = v_debit.id;
+-UPDATE ledger_accounts SET balance = balance + v_credit_delta, updated_at = now() WHERE id = v_credit.id;
++FROM public.ledger_accounts debit
++CROSS JOIN public.ledger_accounts credit
++WHERE debit.code = p_debit_account_code
++AND credit.code = p_credit_account_code
++ON CONFLICT (external_reference, source) DO NOTHING
++RETURNING * INTO v_entry;
++IF FOUND THEN
++-- Lock accounts in deterministic code order to prevent cross-account
++-- deadlocks when concurrent transactions post opposite directions.
++IF p_debit_account_code < p_credit_account_code THEN
++SELECT * INTO v_debit FROM public.ledger_accounts WHERE code = p_debit_account_code FOR UPDATE;
++SELECT * INTO v_credit FROM public.ledger_accounts WHERE code = p_credit_account_code FOR UPDATE;
++ELSE
++SELECT * INTO v_credit FROM public.ledger_accounts WHERE code = p_credit_account_code FOR UPDATE;
++SELECT * INTO v_debit FROM public.ledger_accounts WHERE code = p_debit_account_code FOR UPDATE;
++END IF;
++IF NOT FOUND OR v_debit.id IS NULL OR v_credit.id IS NULL THEN
++RAISE EXCEPTION 'Ledger account not found';
++END IF;
++UPDATE public.ledger_accounts
++SET balance = balance + v_amount, updated_at = now()
++WHERE id = v_debit.id;
++UPDATE public.ledger_accounts
++SET balance = balance - v_amount, updated_at = now()
++WHERE id = v_credit.id;
++ELSE
++SELECT * INTO v_existing
++FROM public.ledger_entries
++WHERE external_reference = p_external_reference
++AND source = p_source
++LIMIT 1;
++IF FOUND THEN
++RETURN to_jsonb(v_existing) || jsonb_build_object('idempotent', true);
++END IF;
++RAISE EXCEPTION 'Unable to create ledger entry: debit or credit account not found';
++END IF;
+ RETURN to_jsonb(v_entry) || jsonb_build_object('idempotent', false);

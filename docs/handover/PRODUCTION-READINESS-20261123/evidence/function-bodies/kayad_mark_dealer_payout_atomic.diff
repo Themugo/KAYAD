@@ -1,0 +1,79 @@
+--- hosted
++++ repo
+@@ -4,52 +4,27 @@
+ SECURITY DEFINER
+-SET search_path TO 'public'
++SET search_path TO 'public', 'pg_temp'
+ AS $function$
+-declare
+-v dealer_payouts%rowtype;
+-v_updated dealer_payouts%rowtype;
+-v_ledger jsonb;
+-begin
+-select * into v from dealer_payouts where id = p_payout for update;
+-if not found then raise exception 'Payout not found'; end if;
+-if p_status not in ('processing','paid','failed','cancelled') then raise exception 'Invalid payout status'; end if;
+-if v.status = 'paid' then
+-if p_status = 'paid' then
+-return jsonb_build_object('payout',to_jsonb(v),'idempotent',true);
+-end if;
+-raise exception 'Paid payout cannot transition to %', p_status;
+-end if;
+-if p_status = 'paid' and v.status <> 'processing' then
+-raise exception 'Only processing payouts can be marked paid';
+-end if;
+-if p_status = 'processing' and v.status not in ('pending','processing') then
+-raise exception 'Only pending payouts can enter processing';
+-end if;
+-if p_status in ('failed','cancelled') and v.status not in ('pending','processing') then
+-raise exception 'Only pending or processing payouts can be closed';
+-end if;
+-update dealer_payouts set
+-status = p_status,
+-conversation_id = coalesce(p_conversation_id, conversation_id),
+-transaction_id = coalesce(p_transaction_id, transaction_id),
+-failure_reason = case when p_status='failed' then coalesce(p_failure_reason, failure_reason) else failure_reason end,
+-initiated_at = case when p_status='processing' then coalesce(initiated_at,now()) else initiated_at end,
+-completed_at = case when p_status in ('paid','failed','cancelled') then coalesce(completed_at,now()) else completed_at end,
+-updated_at = now()
+-where id = p_payout
+-returning * into v_updated;
+-if p_status = 'paid' then
+-select public.kayad_post_ledger_entry_atomic(
+-'dealer-payout:' || v_updated.id::text,
+-v_updated.dealer,
+-v_updated.net_amount,
+-v_updated.currency,
+-'dealer_payout',
+-'dealer',
+-'Dealer payout settled for escrow ' || v_updated.escrow::text,
+-jsonb_build_object('dealer_payout_id',v_updated.id,'escrow_id',v_updated.escrow,'provider',v_updated.provider,'transaction_id',v_updated.transaction_id),
+-'5000','1000'
+-) into v_ledger;
+-end if;
+-return jsonb_build_object('payout',to_jsonb(v_updated),'idempotent',false,'ledger',coalesce(v_ledger,'null'::jsonb));
+-end;
++DECLARE v public.dealer_payouts%ROWTYPE;
++BEGIN
++SELECT * INTO v FROM public.dealer_payouts WHERE id=p_payout FOR UPDATE;
++IF NOT FOUND THEN RAISE EXCEPTION 'Payout not found'; END IF;
++IF p_status NOT IN ('processing','paid','failed','cancelled') THEN RAISE EXCEPTION 'Invalid payout status'; END IF;
++IF v.status='paid' AND p_status<>'paid' THEN RAISE EXCEPTION 'Paid payout is terminal'; END IF;
++IF v.status='processing' AND p_status='processing' THEN
++RETURN to_jsonb(v)||jsonb_build_object('idempotent',true);
++END IF;
++IF v.status='pending' AND p_status NOT IN ('processing','cancelled','failed') THEN RAISE EXCEPTION 'Invalid pending payout transition'; END IF;
++IF v.status IN ('failed','cancelled') AND p_status NOT IN ('processing','failed','cancelled') THEN RAISE EXCEPTION 'Invalid payout retry transition'; END IF;
++IF v.status='processing' AND p_status NOT IN ('paid','failed','cancelled') THEN RAISE EXCEPTION 'Invalid processing payout transition'; END IF;
++UPDATE public.dealer_payouts SET
++status=p_status,
++conversation_id=COALESCE(p_conversation_id,conversation_id),
++transaction_id=COALESCE(p_transaction_id,transaction_id),
++failure_reason=CASE WHEN p_failure_reason IS NOT NULL THEN p_failure_reason ELSE failure_reason END,
++initiated_at=CASE WHEN p_status='processing' THEN COALESCE(initiated_at,now()) ELSE initiated_at END,
++completed_at=CASE WHEN p_status IN ('paid','failed','cancelled') THEN COALESCE(completed_at,now()) ELSE completed_at END,
++updated_at=now()
++WHERE id=p_payout RETURNING * INTO v;
++RETURN to_jsonb(v)||jsonb_build_object('idempotent',false);
++END;
+ $function$

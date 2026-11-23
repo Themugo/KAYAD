@@ -1,0 +1,40 @@
+PASS | S0 register fn is the placeholder (no INSERT)
+PASS | S0 hosted-shaped replica reproduces the registration failure (2F005)
+applied 20261122200000_restore_register_identity_atomic.sql
+PASS | S1 user registration returns a row
+PASS | S1 user: role=user,status=approved,verified=false
+PASS | S1 user_auth row created with token
+PASS | S1 profile row created by trigger
+PASS | S1 dealer registration returns a row
+PASS | S1 dealer: role=dealer,status=pending
+PASS | S1 mixed-case duplicate email rejected (23505)
+PASS | S1 privileged role rejected (22023)
+PASS | S1 no row left by rejected calls
+PASS | S1 anon cannot execute
+PASS | S1 authenticated cannot execute
+PASS | S1 service_role can execute
+PASS | S1 dealers row created by trigger
+PASS | S1 catalog diff vs pre-state: 1 object(s) changed: [('FN', 'kayad_register_identity_atomic(p_name text, p_email text, p_role text, p_phone text, p_business_name text, p_location text, p_referred_by uuid, p_password_hash text, p_email_verify_token text, p_email_verify_expire timestamp with time zone)')]
+PASS | applied 20261122120000_listing_creation_idempotency.sql
+PASS | S2 3-arg overload gone, single 4-arg function (no ambiguity)
+PASS | S2 cars has creation_idempotency_key and creation_request_hash
+PASS | S2 unique index uq_cars_owner_creation_key present
+PASS | S2 anon/authenticated cannot execute listing fn
+PASS | S2 old-app 3-argument call still resolves and creates (compat)
+PASS | S2 old-app replay of same key returns idempotent=true, no second row
+PASS | S2 new key+hash creates a listing
+PASS | S2 same owner+key+payload replays, no duplicate
+PASS | S2 same key + different payload rejected (IDEMPOTENCY_KEY_REUSED), no row
+PASS | S2 different owner, same key: own new listing, no cross-owner reuse
+PASS | S2 failed transaction leaves no partial row or reservation
+PASS | S2 6 concurrent identical requests create exactly one listing
+PASS | S2 immutability trigger blocks changing the stored key
+INFO | S2 catalog diff vs stage1: 8 objects:
+    COL cars creation_idempotency_key
+    COL cars creation_request_hash
+    CON cars cars_creation_idempotency_key_chk
+    FN kayad_cars_creation_key_immutable() 
+    FN kayad_create_dealer_listing_atomic(p_dealer_id uuid, p_listi 
+    FN kayad_create_dealer_listing_atomic(p_dealer_id uuid, p_listi 
+    IDX cars uq_cars_owner_creation_key
+    TRG cars kayad_cars_creation_key_immutable
