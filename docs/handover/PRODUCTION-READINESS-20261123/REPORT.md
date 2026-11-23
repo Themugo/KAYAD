@@ -1,119 +1,56 @@
-# KAYARD KE — Production readiness, deployment identity & safe migration preparation (v1)
-Date 2026-11-23. Read-only investigation. **Nothing was changed in production, PR 266, any repo, any deployment or any environment variable. No commit, push, merge, deploy, db push, restore or backup change.**
-Classes: **Confirmed** (direct evidence) · **Reproduced locally** (isolated replica) · **Inferred** · **Unverified** · **Blocked**.
+# KAYARD KE — Production recovery, reconciliation & release readiness (REPORT, revision 2, 2026-11-23)
+Previous revision kept at `evidence/REPORT-v1-2026-11-23-1030.md`. Classes: **Confirmed · Reproduced locally · Implemented and tested locally · Inferred · Unverified · Blocked · Requires owner approval.**
+No production write, migration, restore, configuration or environment change was made. Claude did not commit, push, merge or deploy.
 
-## 0. Headline
-1. **Recovery gate FAILED → no production step may be approved.** No usable, tested recovery mechanism is evidenced (Confirmed: dashboard "No backups", Free plan). Per the brief, STOP applies to any production action. I continued only read-only/local analysis.
-2. The deployed backend **is** talking to this Supabase project and is **newer than `main`** (it runs command-centre code that is not on main). It sends the 4-argument listing RPC that hosted lacks.
-3. Login: the database side is healthy and existing sessions work; **no password-login attempt reached the database during your 09:47 EAT report window**, so the failure is upstream of the DB or in what was submitted. Exact stage **Unverified**. Registration is separately broken (Confirmed).
-4. Offers (core) can be isolated as a non-financial migration; settlements, auction outcomes and the team-activity (lifecycle) migration **cannot** without financial/auction dependencies.
-5. Drift in the 22 functions is **bidirectional**; a blanket replay would delete hosted logic in some money functions.
+## Executive summary
+1. **`main` is already merged and auto-deploys.** PR #266 was squash-merged at 07:01 (+03) and #267 at 10:47; `main` (`51f30b6d`) is byte-identical to branch `release/kayard-combined-20261123` (`0a3cc4ad…`, verified). `deploy.yml` deploys the frontend to Vercel on every push to `main`. The live app therefore runs code that expects database objects the hosted database does not have. *(Confirmed)*
+2. **Recovery gate NOT met.** No dump has been supplied; the Free-plan project has "No backups". Procedure and verification queries are ready (`BACKUP-AND-RESTORE.md`). The database is tiny (30 MB; 3 users, 2 dealers, 2 cars) and holds **no financial rows at all** (0 bids, escrows, payments, refunds, ledger entries, leads). *(Confirmed)* → Blocked on owner.
+3. **Registration is broken on production** (placeholder function). *(Confirmed + Reproduced locally)* Fix prepared and rehearsed: `20261122200000`.
+4. **Listing creation is very likely broken on production**, and more broadly than reported before: all three listing forms send `Idempotency-Key`; the backend then reads `cars.creation_idempotency_key`, which hosted lacks → PostgREST 400/42703. *(Reproduced locally; live failure Unverified – no attempt in the 24 h log window.)* Fix prepared and rehearsed: `20261122120000`, database-first, backward compatible. No code fallback was added, by design.
+5. **Login failure: stage NOT ESTABLISHED.** Server side is healthy for the 3 existing accounts; no login attempt reached the database during your 09:47 report; one browser capture is needed. No source defect found, no login code changed.
+6. **CI**: the DB Journeys workflow's GitHub failure is Blocked (log), but the **entire suite passes locally on the `main` tree** (211/211 migrations on a clean DB, 29 journeys, overall PASS). One earlier local failure was caused by my own interference and discarded.
+7. **A real, reproduced source defect was fixed and tested locally:** `backend/db/index.js` serialised range operators in `$or` as `[object Object]`, making the hourly dealer-health job fail with HTTP 400 against the live database. *(Implemented and tested locally; not deployed.)*
+8. **Financial drift (22 functions):** hosted is mostly an **older point of the repo's own history** (10 are byte-identical to an older migration; 8 are near-variants; 2 hold hosted-only logic). Direction is therefore mostly "repo newer", not "hosted newer" — but nothing is chosen or applied; the 15 money-moving functions have a decision matrix. *(Confirmed lineage / Inferred safeguards)*
+9. **Offers/settlement/auction/lifecycle:** offers core is isolable; settlements, auction outcomes and lifecycle are dependency-blocked (`purchase_outcomes`, `auction_setups`, `auction_platform_policies`). `20261121160000` alone would break the lifecycle RPC (reproduced). *(Reproduced locally)*
+10. **Next safe sequence:** Gate 0 → database-first Steps 1–2 → decisions on the rest (`PRODUCTION-RECONCILIATION-PLAN.md`).
 
-## 1. Baseline preserved (Phase 1) — Confirmed
-- Replica evidence ZIP re-verified: `KAYARD-KE-replica-validation-evidence-v1.zip` sha256 `b39e554e…8563` (OK). Combined project ZIP `640ed7db…4273` unchanged. No existing evidence regenerated.
-- PR 266 head `7de6f2a` ("release consistency, dealer command centre, registration repair"); the read-only `pr266` checkout has 0 local changes. `origin/main` = `bfe3735` (PR #265 merged 2026-11-22 15:51 +03). PR 266 working tree on your own clone (`chore/kayard-final-sync`, `a08bb74`) has **20 uncommitted modified files** — preserved, untouched.
-- No project source changed since the last report. Only runtime artefact newer than the ZIP: `backend/data/uploads.sqlite` (generated by test runs; not source; exclude from any commit).
-
-## 2. Production recovery readiness (Phase 2)
-| Item | Finding | Class |
-|---|---|---|
-| Backups enabled | Dashboard overview (your 09:47 paste) shows "No backups"; plan Free | Confirmed (owner-supplied) |
-| PITR | Not available on Free plan; no PITR evidence | Confirmed (plan) / Inferred (feature) |
-| WAL archiving | `archive_mode=on`, `wal_level=logical`, 6,167 segments archived, 0 failures, last archive 2026-11-23 07:25 UTC | Confirmed (read-only SQL). **This is platform plumbing, not a restorable recovery point you can use** |
-| Latest recovery timestamp | None obtainable | Blocked |
-| Retention | None evidenced | Blocked |
-| Restore ever tested | No evidence | Unverified |
-| Covers needed objects/data | Unknown; no restore artefact exists | Blocked |
-| Database size | 30 MB (trivial to dump) | Confirmed |
-| Isolated restore test | Schema-only restore of your dump into local PG16 done (replica); **no data restore test** | Reproduced locally (schema only) |
-**Gate: FAILED.** No acceptable recovery mechanism is evidenced.
-**Smallest acceptable remedy (owner action, no production change):** take a full logical dump of the 30 MB database and complete an isolated restore test locally (commands in `OWNER-COMMANDS.md`). Or upgrade to a plan with PITR/daily backups (a billing/config change that is yours to approve, not mine). Limitations of a logical dump: it does not capture roles, Supabase-managed schemas or storage objects, and the data is personal/financial — keep it encrypted and **do not send it to me**. Restore procedure and test steps are in `OWNER-COMMANDS.md`. I did not restore, change settings or enable anything.
-
-## 3. Deployment topology (Phase 3)
-| Link | Evidence | Class |
-|---|---|---|
-| GitHub repo | `github.com/Themugo/KAYAD`; PR 266 head `7de6f2a`; main `bfe3735` | Confirmed |
-| Vercel frontend | `vercel.json` rewrites `/api/*` and `/uploads/*` to `https://api.kayad.space`; `.env.example` `VITE_API_URL=/api`, socket `https://api.kayad.space` | Confirmed (repo files). Live Vercel project/commit: Unverified |
-| Frontend → Supabase | No `createClient` / `VITE_SUPABASE_*` in `src/`; the browser never talks to Supabase directly | Confirmed (source) |
-| Backend host | `render.yaml`: service `kayad-backend`, Docker, region oregon; `SUPABASE_URL`/service key are `sync:false` (values not in repo) | Confirmed (repo). That `api.kayad.space` is this Render service: Inferred (DNS not checkable from here; the allowlist blocked fetching the live host) |
-| Supabase project used by the live backend | Edge logs show a Node client (service role) calling `ubvgixwhfybbyjuvxboj.supabase.co` with app-shaped queries (users/user_auth/refresh_tokens, analytics, periodic `reconciliation_reports` jobs) | Confirmed that **a** Node backend uses this project; that it is the Render one: Likely |
-| Production or staging | Dashboard badge "Production"; no branches; sole project of the product | Confirmed (owner-supplied badge) |
-| Deployed commit | Not obtainable (Render dashboard / health endpoint blocked from here) | Blocked |
-| Includes PR 265 code? | Yes, by behaviour: it sends `kayad_dealer_listing_lifecycle_atomic` (404s since 2026-11-22 07:47 UTC) and `marketplace_offer_settlements` queries — code that is on main | Inferred |
-| Includes PR 266 / command-centre code? | Yes: at 2026-11-23 04:06:40 UTC the backend queried `marketplace_offers`, `marketplace_offer_settlements`, `auction_outcomes` and `dealer_listing_lifecycle_events` together (404 each). `dealer_listing_lifecycle_events` appears in **zero** backend files on main, so the deployed build is ahead of main. Whether it is exactly `7de6f2a`: Unverified | Confirmed (ahead of main) / Unverified (exact SHA) |
-| Frontend/backend env targets | Cannot be read without credentials; repo defaults point both to `kayad.space` hosts | Unverified |
-Environment variables were not read or changed. Owner steps to confirm the deployed SHA and the Supabase host (non-secret) are in `OWNER-COMMANDS.md`.
-
-## 4. Login root cause (Phase 4)
-**Source flow (Confirmed, `authController.js`):** email lookup → `user_auth` (lockout counters, hash) → password check → ban/deactivated/deleted → unverified-owner → maintenance → email-verification gate (`REQUIRE_EMAIL_VERIFICATION`, or enabled when `BREVO_API_KEY` is set) → owner MFA → `refresh_tokens` insert → cookie. The frontend never calls Supabase Auth.
-**Database state (Confirmed, aggregates only, read-only):** 3 users total; 0 locked, 0 with failed attempts, 0 unverified, 0 banned/deactivated/deleted; **no user created since 2026-11-09**; maintenance record present (system_status read returns normally).
-**Log evidence (Confirmed, 24 h retention):**
-- Successful logins (email lookup + `user_auth` password read + `refresh_tokens` insert 201): ~2026-11-22 07h and 11h UTC, and 2026-11-23 04h UTC.
-- 2026-11-22 13h UTC: two email lookups with **no** matching `user_auth` read, adjacent to the 400s on `kayad_register_identity_atomic` (13:11): consistent with attempts for accounts that do not exist.
-- **2026-11-23 06:20–07:30 UTC (09:20–10:30 EAT, includes your 09:47 report): zero email-keyed lookups and zero `refresh_tokens` inserts**, while an existing session was validated and refreshed normally (users, user_auth, refresh_tokens all 200; one `kayad_rotate_refresh_token` 200).
-**Conclusions**
-- Confirmed: registration is broken (placeholder RPC → 2F005 → HTTP 400; reproduced locally; matches live 400s). Since registration has failed since at least the last user creation (2026-11-09), **any account created via the UI after that never existed**.
-- Confirmed: the backend↔DB identity path works for the 3 existing accounts and existing sessions.
-- Confirmed: no lockout, unverified-email, ban, or maintenance condition applies to any existing account.
-- Not established: why *your* login failed. A login submission in that window did **not reach the database**. Hypotheses (Unverified, to be separated with one browser capture): (H1) the email you entered is not one of the 3 existing accounts and the request was rejected before DB (e.g. validation); (H2) the request failed between Vercel and `api.kayad.space` (rewrite, CORS, cookie/domain, Render cold start/health); (H3) a rate limiter in front of login (authLimiter) rejected it before any DB read; (H4) a stale/invalid cookie or client-side error prevented submission.
-- **The registration migration will not fix login for existing accounts, and I do not claim it resolves your login problem.**
-- Provider config (Brevo/email verification): not evidenced as a cause (0 unverified users). Not tested: password reset, verification callback, role resolution per account (no credentials used, by design).
-**What closes this:** the exact on-screen message plus the HTTP status/URL of the login request from the browser Network tab (no body, no password) — see `OWNER-COMMANDS.md` — and Render's request log for the same minute.
-
-## 5. Dealer listing creation readiness (Phase 5)
-- Confirmed (source): PR 265/266 backend always calls `kayad_create_dealer_listing_atomic` with 4 named parameters incl. `p_request_hash`; no 3-argument fallback exists in `atomicTransactions.js`.
-- Confirmed: hosted has only the 3-argument function (4-argument missing).
-- **Reproduced locally** (PostgREST on a loopback copy of the hosted-shaped replica): the 4-argument call → `PGRST202` "no matches found in the schema cache"; the 3-argument call → executes (business error "Dealer not found" for a null dealer). The old-app 3-argument call also remains compatible after the rehearsed idempotency migration (previous report).
-- Deployed backend ↔ DB compatibility: **incompatible now (Inferred, strongly)** if a dealer posts a listing; no listing-create RPC call appears in the 24 h log window, so no live failure was observed (Unverified).
-- Idempotency after the migration: Reproduced locally (replay, key reuse rejected, owner isolation, 6-way concurrency → 1 row).
-- No live write was run. If live verification is wanted, an explicitly approved procedure: after backup + migration, create one clearly labelled test listing for a designated test dealer, replay the same key once, verify one row, then remove only that row via an approved SQL — **requires your written approval**.
-
-## 6. GitHub Actions failure `45108826385` (Phase 6) — Blocked
-- The run page and logs could not be fetched (host not on the session allowlist; I did not work around it). **First failing step, exact error and whether `main` passes are Unverified.**
-- Static review of `.github/workflows/db-journeys.yml`: PR-triggered, Postgres 16 service, Node 22.22.2, `npm ci`, apt install, PostgREST v12.2.3 download, then `ci/db-journeys/run.sh`. The workflow header states it had never run on GitHub; "failing after 1m" is consistent with a **setup-stage** failure (any of: node version, `npm ci`, apt, the PostgREST download, or the first migration/bootstrap step) rather than a long journey failure — Hypothesis only.
-- Fidelity of my replica vs CI: not equivalent. CI builds a **clean** DB from all repo migrations; my replica starts from the **hosted** schema. The blanket-replay failure at `20261002180000` applies to the hosted shape, not necessarily to CI's clean build. Therefore the replica result does not explain the CI failure.
-- Not modified. Commands to fetch the failing log and compare with main are in `OWNER-COMMANDS.md`.
-
-## 7. Financial function drift ownership (Phase 7)
-See `FUNCTION-DRIFT-INVENTORY.md` and `evidence/function-bodies/`. 22 differing bodies: 15 money-moving, 4 money-adjacent, 3 non-financial (registration, dealer verification, rls_auto_enable). Drift is **bidirectional**; recommended owner for the money set: financial owner (with auction owner for bid/auction functions; security owner for the immutability guard and `rls_auto_enable`). **No function replaced, normalised or overwritten.** Per-function runtime behaviour differences are Inferred from static diffs only.
-
-## 8. Offers and lifecycle migration feasibility (Phase 8)
-| Group | Depends on | Hosted has deps? | Verdict |
-|---|---|---|---|
-| Offers core: `20261110120000` + `20261121090000` | `leads`, `cars`, `users` only; creates 2 tables + RPCs; no triggers on existing tables | Yes | **Isolable, non-financial** (structurally applied on replica; functional journey NOT TESTED) |
-| Settlements: `20261121110000` | `payments` (2 new triggers), `escrows`, `purchase_outcomes` (trigger) | `purchase_outcomes` **missing** | **Blocked / financial**; `purchase_outcomes` is created by `20261002240000` (fulfilment convergence) |
-| Auction outcomes: `20261002220000` | `auction_platform_policies`, `auction_setups` (created by `20261002190000`) | **missing** | **Blocked / financial/auction** |
-| Team activity: `20261121160000` | `cars` (3 columns/triggers + backfill UPDATE), RPC references `marketplace_offer_settlements` and `purchase_outcomes` | missing | **Not isolable as written** |
-- **Reproduced locally:** applying offers core then `20261121160000` to a hosted-shaped DB succeeds structurally, but `kayad_dealer_listing_lifecycle_atomic` then fails at runtime with `relation "public.purchase_outcomes" does not exist` (late-bound reference). Applying it alone to hosted would therefore make dealer hide/publish/mark-sold actions error instead of being merely unavailable.
-- Also missing on hosted: `personal_listing_lifecycle_events` (`20261116120000`), a prerequisite of `20261121140000`.
-- **Recommendation:** a reduced migration is justified only for **offers core** (functional boundary demonstrated: three existing tables, no financial triggers). It would make only the "offers" figure available; the dashboard banner would still list settlements, auction outcomes and team activity. I did **not** create a migration to hide the banner and did not write one for the others. Proposing it as a separate artefact requires your approval and a journey run on the replica first.
-
-## 9. Findings register
+## Findings register
 | # | Finding | Class |
 |---|---|---|
-| F1 | Hosted registration RPC is a placeholder; registration fails (HTTP 400) | Confirmed + Reproduced locally |
-| F2 | Hosted lacks 4-arg listing RPC; 4-arg call fails (PGRST202) | Confirmed + Reproduced locally |
-| F3 | Four command-centre tables absent (404s in live logs) | Confirmed |
-| F4 | Deployed backend is ahead of main; Supabase project = hosted "Production" | Confirmed (project), Inferred (Render link) |
-| F5 | No backup/PITR evidenced; recovery gate failed | Confirmed |
-| F6 | Live traffic hits missing objects: `error_budgets` (2,927 404s/24 h), `kayad_owner_snapshot` (489), `kayad_claim_chat_outbox`, `featured_vehicle_campaigns`, `hero_slides`, `dealer_payment_accounts`, `auction_setups`, `private_seller_capabilities`, `marketplace_healths`; plus 400s on `dealers?or=(updated_at.eq.[object Object]…)` (a **client bug: object serialised into a filter**, source not yet traced) and on `cars.listing_number` | Confirmed |
-| F7 | 3 users only; none since 2026-11-09; no lock/ban/unverified | Confirmed |
-| F8 | Login failure stage not established; no login reached DB in the report window | Confirmed (absence) / Unverified (cause) |
-| F9 | 22 function-body drift is bidirectional; direction unknown per function | Confirmed (diff) / Unverified (intent) |
-| F10 | `20261121160000` applied without settlements/purchase_outcomes breaks dealer lifecycle RPC | Reproduced locally |
-| F11 | CI failure cause | Blocked |
-| F12 | `BREVO_FROM_NAME` in render.yaml says "KAYAD" (brand) | Confirmed (repo); live value Unverified |
+| R1 | Baseline: remote branch HEAD = `0a3cc4ad11531968f5fd865fede4fab446581958`; `main` = `51f30b6d`, tree identical; #266 squash `2854f5ec` | Confirmed |
+| R2 | `deploy.yml` deploys on push to `main`; Render auto-deploy default | Confirmed / Inferred |
+| R3 | Deployed backend built from `main` at/after the 07:01 merge; exact SHA | Inferred / Unverified |
+| R4 | Hosted registration RPC is a placeholder | Confirmed + Reproduced |
+| R5 | Listing replay lookup fails on hosted (42703); 4-arg RPC PGRST202 | Reproduced locally |
+| R6 | `dealer_listing_policy` row absent → default free path (RPC not used by default) | Confirmed |
+| R7 | No backup/PITR; dump not supplied | Confirmed / Blocked |
+| R8 | 0 financial rows; 3 users; 2 dealers; 2 cars; 3,046 reconciliation reports | Confirmed |
+| R9 | Login attempt absent from DB in the report window; accounts healthy | Confirmed (absence) |
+| R10 | `db/index.js` `$or` operator defect | Reproduced + Implemented and tested locally |
+| R11 | Hosted lacks 11 repo tables and 4 `cars` columns; 3 objects used by code are defined in no migration | Confirmed |
+| R12 | 22 function bodies: lineage groups A–E | Confirmed (lineage) |
+| R13 | Blanket replay unsafe (stops at `20261002180000`; overwrites 14 money functions) | Reproduced locally (previous report) |
+| R14 | Command centre reports unavailable sources honestly; no zeros; missing-column also reported as unavailable | Confirmed (source + journey 18) |
+| R15 | CI GitHub failure cause | Blocked |
+| R16 | Local DB Journeys full pass | Reproduced locally |
 
-## 10. Recommended next development sequence (nothing executed)
-1. **Recovery point (blocking).** You take and locally test a full encrypted dump, or enable a paid recovery option.
-2. Send me: login Network capture (status/URL only), failed CI log, Render deployed SHA + Supabase host, which email you log in with (no password).
-3. I fix/trace repo-side items that need no production access: the `[object Object]` filter bug on `dealers`, the code paths hitting `error_budgets`/`kayad_owner_snapshot`/etc. (decide: add migrations vs guard code), and any CI cause.
-4. Financial-owner review of the 22-function inventory before any reconciliation design.
-5. Offers-core reduced migration: draft + replica journeys, then your approval.
-6. Production steps in this order, each a separate approval, each preceded by a fresh recovery point: (a) registration restore, (b) listing idempotency, (c) offers core. Settlements/auction/lifecycle only after the financial/auction decision.
+## Acceptance criteria status
+| Criterion | Status |
+|---|---|
+| Full dump exists and restore verified | **Blocked – exact owner action in `BACKUP-AND-RESTORE.md`** |
+| Deployment relationship | Partly established; SHA/env **Unverified**, owner steps given |
+| Listing RPC mismatch solution | Precise database-first dependency plan + tested migration; backend fallback deliberately not added |
+| Login root cause | Missing diagnostic identified (browser capture) |
+| CI root cause | Missing log identified; local suite passes |
+| 22 functions inventoried; decision path for 15 | Done (`FUNCTION-DRIFT-INVENTORY.md`, revision 2) |
+| Dependencies mapped | Done (`MIGRATION-DEPENDENCY-GRAPH.md`) |
+| Recorded local test results | `TEST-RESULTS.md` |
+| Controlled production plan | `PRODUCTION-RECONCILIATION-PLAN.md` (never executed) |
+| PR 266 unmerged | **Not possible – already merged by the owner before this command** |
+| No unauthorised production change | Met (read-only SELECT only) |
 
-## 11. Explicit production approvals required (none given yet)
-A1 recovery point exists and a restore test passed (you attest, with date). A2 named approval for registration migration `20261122200000`. A3 named approval for `20261122120000`. A4 approval to draft the reduced offers-core migration. A5 financial-owner sign-off on drift direction before any function work. A6 written approval of any live test procedure. **Never:** `supabase db push`, blanket replay of the 88 migrations, or replacing financial functions to match the repo.
+## Release gate (Phase I)
+Must be resolved **before the app is dependable** (merge already happened): Gate 0, then Steps 1–2. **Database-first:** `20261122200000`, `20261122120000`. **Deployable independently:** the `$or` fix. **Coordinated:** none if database-first. **Financial approval:** Steps 4–5. **PR #266/#267 are not "release-ready"**: mandatory gates (recovery, database steps, deployed-SHA confirmation, GitHub CI evidence) have no evidence yet.
 
-## 12. What was not done / not tested
-No production writes, restores or config reads of secrets. Not tested: password reset, verification callback, per-role login, real email delivery, Render/Vercel live state, financial workflows, CI log.
+## Not done / not tested
+Full E4 financial regression on synthetic data for the hosted-shaped schema (not built in this session; the full-chain journeys run the repo's own financial scenarios), password reset and verification-callback in a live browser, real email delivery, any production write. Local validation is not production verification.
