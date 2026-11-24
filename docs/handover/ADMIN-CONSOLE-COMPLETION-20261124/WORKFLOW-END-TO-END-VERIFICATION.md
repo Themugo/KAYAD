@@ -35,3 +35,29 @@ Legend: VERIFIED (executed with assertions) / PARTIAL / NOT VERIFIED / UNAVAILAB
 3. `/security-logs/my` and `/security-logs/summary` answered 500 when `security_logs` is absent.
 4. Tables for reports, feedback, announcements (and the two hosted-only tables) were missing from the migration chain.
 5. Security-log API did not enforce the `VIEW_LOGS` permission the UI requires; CMS Studio reads were open to every signed-in account.
+
+
+---
+## Addendum — finalisation phase (second pass)
+
+Status words: PASS / PARTIAL / NOT VERIFIED / NOT PROVISIONED / BLOCKED.
+
+| Workflow (required list) | Status | Evidence |
+|---|---|---|
+| Personal account registration, admin block and restore | PASS | journeys 20, 26 (registration lifecycle; block/restore with history kept) |
+| Dealer registration and approval; dealer verification | PASS (local) | journey 24 (approval flow and scope: dealer listings not KAYARD-reviewed); journey 26 (dealer counts); the existing verification process is unchanged |
+| Listing review and moderation (hide/restore, sold protected, unauthorised refused) | PASS | journey 28 M1–M7 |
+| Vehicle submission and update (personal and dealer) | PASS | journeys 07, 09, 11, 15 |
+| Auction and bid administration | PARTIAL | auction/bid DB lifecycle journeys exist; the admin pages' own actions were not exercised in a browser; suspicious-bid flagging NOT PROVISIONED |
+| Inspection and NTSA workflows | PARTIAL | NTSA queue PASS (journey 27); inspection admin actions NOT VERIFIED |
+| Support ticket lifecycle | PASS | journey 28 S1–S9 |
+| Report and feedback submission and handling | PASS (local; hosted tables not applied) | journey 27 |
+| Staff and permission management | PARTIAL | staff directory and role matrix PASS (journeys 14, 29); creating staff end to end NOT VERIFIED on hosted |
+| Security-log access | PASS | journey 29 |
+| Existing configuration save and reload | NOT VERIFIED | Settings pages open; save/reload not exercised for every category (recorded for the dedicated settings review) |
+| Navigation and denied-access handling | PASS | sweep (53/53 Super Admin; 27 routes denied for the moderator) + vitest mirror tests + journey 29 |
+| Escrow and transactions | NOT VERIFIED | read-only; money-moving actions deliberately not exercised |
+| Broadcast / announcements | PARTIAL | drafts only (journey 27); sending NOT EXERCISED by instruction |
+| Panic Room / Platform Recovery | NOT VERIFIED | deliberately not executed |
+
+Critical workflows still unverified (so this is **not** a full-completion claim): escrow/transaction actions, auction and inspection admin actions, panic/recovery, broadcast delivery, settings save/reload per category, hosted behaviour, live e-mail.

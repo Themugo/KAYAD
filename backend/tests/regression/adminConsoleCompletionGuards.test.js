@@ -152,6 +152,10 @@ describe("migration contract", () => {
     }
     expect(sql).not.toMatch(/escrow|payment|ledger|payout|commission/i);
   });
+  test("client roles get no table grant on the three tables this migration creates; the two pre-existing hosted tables are left alone", () => {
+    expect(sql).toMatch(/revoke all on table public\.reports, public\.feedback, public\.announcements from anon, authenticated;/);
+    expect(sql).not.toMatch(/revoke[^;]*(market_data|ntsa_verification_requests)/i);
+  });
   test("audience values match the API (no individual_seller)", () => {
     expect(sql).toMatch(/audience in \('all','dealers','buyers','specific_users'\)/);
     expect(sql).not.toMatch(/individual_seller|private_seller/i);

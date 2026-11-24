@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { adminAPI } from '../../api/api';
-import { getEffectivePermissions, PAGE_PERMISSIONS, SUPERADMIN_ONLY } from '../../utils/permissions';
+import { getEffectivePermissions, canOpenAdminPage } from '../../utils/permissions';
 import { useSocket } from '../../context/SocketContext';
 
 interface LinkItem {
@@ -130,10 +130,7 @@ const roleLinks = (user: { role?: string; permissions?: string[] }): LinkItem[] 
   const perms = getEffectivePermissions(user);
   return everyLink.filter(link => {
     if (link.danger || link.superadmin) return false;
-    if (SUPERADMIN_ONLY.has(link.to)) return false;
-    const required = PAGE_PERMISSIONS[link.to];
-    if (!required) return true;
-    return perms.includes(required);
+    return canOpenAdminPage(user, link.to, perms);
   });
 };
 

@@ -104,4 +104,9 @@ create table if not exists public.announcements (
 create index if not exists announcements_status_created_idx on public.announcements(status, created_at desc);
 alter table public.announcements enable row level security;
 
+-- Defence in depth: these tables are reached only by the API (service role). RLS already denies client roles (no policy), and the
+-- table-level grant is removed as well, matching support_tickets / site_designs. market_data and ntsa_verification_requests are NOT touched
+-- because they already exist on the hosted catalog and their existing privileges are not changed by this migration.
+revoke all on table public.reports, public.feedback, public.announcements from anon, authenticated;
+
 notify pgrst, 'reload schema';

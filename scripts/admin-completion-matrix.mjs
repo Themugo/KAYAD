@@ -10,6 +10,8 @@ const notes = JSON.parse(read('scripts/admin-completion-notes.json'));
 const pageMap = Object.fromEntries([...perms.matchAll(/"(\/admin\/[a-z-]+)":\s+PERM\.([A-Z_]+)/g)].map((m) => [m[1], m[2]]));
 const superOnly = new Set([...perms.matchAll(/SUPERADMIN_ONLY = new Set\(\[([\s\S]*?)\]\)/g)].flatMap((m) => [...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1])));
 const comp = Object.fromEntries([...surface.matchAll(/'((?:\/admin)[^']*)': \{ component: (\w+)(?:, superadminOnly: true)? \}/g)].map((m) => [m[1], m[2]]));
+const roleOnly = new Set([...perms.matchAll(/ADMIN_ROLE_ONLY = new Set\(\[([\s\S]*?)\]\)/g)].flatMap((m) => [...m[1].matchAll(/"([^"]+)"/g)].map((x) => x[1])));
+const anyOf = Object.fromEntries([...perms.matchAll(/"(\/admin\/[a-z-]+)":\s+\[(PERM\.[A-Z_, .]+)\]/g)].map((m) => [m[1], m[2].replace(/PERM\./g, '')]));
 const routeSuper = new Set([...surface.matchAll(/'((?:\/admin)[^']*)': \{ component: \w+, superadminOnly: true \}/g)].map((m) => m[1]));
 const row = (who, route, w = 1440) => sweep.find((r) => r.who === who && r.route === route && r.width === w);
 const routes = ['/admin', ...Object.keys(comp)];
@@ -22,7 +24,7 @@ const L = ['# 53-route audit matrix (2026-11-24, completion phase)', '',
 const tally = {}; let i = 0;
 for (const route of routes) {
   const sa = row('superadmin', route), mo = row('moderator', route), mob = row('superadmin', route, 390), n = notes[route];
-  const gate = superOnly.has(route) || routeSuper.has(route) ? 'Super Admin only' : pageMap[route] ? `permission ${pageMap[route]}` : route === '/admin' ? 'any platform staff' : 'any platform staff (page-level)';
+  const gate = superOnly.has(route) || routeSuper.has(route) ? 'Super Admin only' : roleOnly.has(route) ? 'role admin / superadmin' : anyOf[route] ? `any of ${anyOf[route]}` : pageMap[route] ? `permission ${pageMap[route]}` : route === '/admin' ? 'any platform staff' : 'any platform staff (page-level)';
   const opened = `${sa ? (sa.errorBoundary ? 'ERROR BOUNDARY' : sa.restricted ? 'denied' : 'yes') : 'n/a'} / ${mo ? (mo.restricted ? 'denied (correct)' : 'yes') : 'n/a'}`;
   const failed = sa?.failedApi || [];
   const loaded = !sa ? 'n/a' : failed.length ? `no: ${failed.map((f) => f.split(' ')[0]).join(',')} ${failed.map((f) => f.split(' ').slice(1).join(' ')).join('; ')}` : 'yes (no failed API call)';

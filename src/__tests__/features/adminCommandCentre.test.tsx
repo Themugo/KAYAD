@@ -375,7 +375,7 @@ describe('Command centre — destinations follow the role', () => {
     const quick = screen.getByLabelText('Quick Actions');
     expect(quick.querySelector('a[href="/admin/staff"]')).toBeNull();
     expect(quick.querySelector('a[href="/admin/cars"]')).toBeNull();
-    expect(quick.querySelector('a[href="/admin/dealer-verifications"]')).not.toBeNull();
+    expect(quick.querySelector('a[href="/admin/dealer-verifications"]')).toBeNull(); // server: /api/verification/admin/* is admin/superadmin only
     const staff = screen.getByText('Active Staff', { selector: 'small' }).closest('.kayad-command-kpi')!;
     expect(staff.tagName).toBe('DIV');
     expect(staff.textContent).not.toContain('View staff'); // restricted tile: not a link, no invented count

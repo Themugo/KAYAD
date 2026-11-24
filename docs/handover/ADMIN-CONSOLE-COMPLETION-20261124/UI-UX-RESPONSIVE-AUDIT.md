@@ -28,3 +28,12 @@ Navy/teal showroom hero with Quick Actions inside the hero, compact header, one 
 | 403 `/api/analytics/collect` at 390px (single run) | Nonessential/intermittent test-environment race | Fire-and-forget guest beacon (`analyticsTracker.ts` swallows failures); likely CSRF token not yet issued on first guest call. Not reproduced in two 7-width reruns (56/56). Not changed. |
 | ~1022 browser "Failed to load resource" console lines | Same responses as above | Browser echoes each non-2xx; no uncaught page errors. |
 | External e-mail/SMS/payment providers | Blocked by missing external dependency | Not contacted; no real messages sent. |
+
+
+---
+## Addendum — finalisation phase (second pass)
+- Re-run after the UI-mirror correction: `admin-console.mjs` at 7 widths **56/56 PASS** (twice). One earlier attempt failed 5 checks at the first width because the browser read login credentials before the freshly started stack finished seeding (401 on login); it was a test-start race, not an app defect, and passed on both reruns.
+- `admin-sweep.mjs`: **212 rows, 0 crashes, 0 page errors, 0 error boundaries, 0 overflow; Super Admin opened 53/53 at 1440px and 390px.** Moderator: 26 routes open, 27 denied (by URL). The sidebar no longer offers a moderator Moderation, Feedback, Broadcast, Dealer Verifications or Support Tickets.
+- Two sweep runs were discarded: one crashed ("browser closed", environment) and one flagged Super Admin as restricted because the detector matched audit rows titled "Access Denied" anywhere in the page. The detector now checks only guard headings (`ci/browser/admin-sweep.mjs`); the discard is documented, not hidden.
+- Console/network triage is unchanged from the earlier table (503 = intended not-provisioned; moderator 403 = correct denial; `analytics/collect` 403 = nonessential beacon, intermittent). New in this pass: `401 /api/v1/auth/login` during the discarded early-start run = test-environment race.
+- Accessibility and keyboard behaviour were not re-audited beyond the existing unit tests: NOT VERIFIED in a browser. Per-page UI polish of the 53 routes beyond the Command Centre was not changed (no demonstrated defect), recorded as PARTIAL.

@@ -1,16 +1,26 @@
-# Owner Commands (Windows CMD) — NOT executed by Claude
+# Owner commands (Windows CMD) — NOT executed by Claude
 
-Run from your repository folder. Review before each step. Nothing below has been run for you.
+Your earlier push (`74948eebc..9d377b1ac` on `main`) already contains Tasks A–E. This phase's changes are NEW local changes on top of it. Run in your repository folder (`C:\Users\hp\Desktop\KAYARD-KE`). Review before each step.
 
+## 1. Branch and working tree
 ```
-cd /d C:\path\to\your\kayad-repo
+cd /d C:\Users\hp\Desktop\KAYARD-KE
 git branch --show-current
+git fetch origin
+git status --short
+```
+
+## 2. Bring this phase's files in
+Apply the files from the ZIP `KAYARD-KE-full-project-admin-console-finalisation-20261124.zip` by copying ONLY the files listed in `docs\handover\ADMIN-CONSOLE-COMPLETION-20261124\CHANGED-FILES.md` (section A) over your working copy. Do not extract the whole archive over the repository.
+
+## 3. Review
+```
 git status --short
 git diff --stat
-git diff --name-only
+git diff -- supabase src ci backend scripts
 ```
 
-Validation (backend Jest alone; do not run frontend suites at the same time):
+## 4. Validate (run the backend Jest alone; do not run other heavy processes at the same time)
 ```
 npx tsc --noEmit -p .
 npx vitest run
@@ -20,17 +30,29 @@ node --max-old-space-size=3072 --experimental-vm-modules ./node_modules/jest/bin
 cd ..
 ```
 
-Stage, commit, push (only when you decide to):
+## 5. Stage only the intended files
 ```
-git add -A
+git add supabase\migrations\20261124100000_admin_customer_care_and_market_tables.sql
+git add backend\tests\regression\adminConsoleCompletionGuards.test.js
+git add src\utils\permissions.ts src\components\admin\AdminSidebar.tsx src\features\AdminView.tsx src\context\AuthContext.tsx
+git add src\__tests__\utils\adminPageAccessMirror.test.ts src\__tests__\features\adminCommandCentre.test.tsx
+git add ci\db-journeys\29_permission_matrix.mjs ci\db-journeys\run.sh ci\browser\admin-sweep.mjs
+git add scripts\admin-ownership-matrix.mjs scripts\admin-completion-matrix.mjs
+git add docs\handover\ADMIN-CONSOLE-COMPLETION-20261124 reports\ADMIN-CONSOLE
 git status --short
-git commit -m "Super Admin console: end-to-end completion, schema remediation, honest unavailable states" -m "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
-git push origin HEAD
+```
+Do not add `backend\data\uploads.sqlite` (gitignored runtime data).
+
+## 6. Commit (after your review)
+```
+git commit -m "Admin console finalisation: role-matrix journey, UI access mirror, migration rehearsal and runbook" -m "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 ```
 
-Hosted migrations (separate owner decision; never applied by Claude), in order:
-1. `supabase/migrations/20261123210000_lead_create_find_before_insert.sql`
-2. `supabase/migrations/20261123220000_dealer_temporary_duties.sql`
-3. `supabase/migrations/20261124100000_admin_customer_care_and_market_tables.sql`
+## 7. Push (only after you authorise it)
+```
+git push origin main
+```
+If rejected as non-fast-forward: `git pull --rebase origin main` is NOT recommended here; use `git fetch origin` then `git log --oneline main..origin/main` and paste the output for review. Never force-push.
 
-Use your normal reviewed migration process; reload PostgREST afterwards (`NOTIFY pgrst, 'reload schema'`).
+## 8. Hosted migrations (separate approval; not part of the push)
+Follow `MIGRATION-REHEARSAL-AND-PRODUCTION-RUNBOOK.md` exactly: order, preconditions, verification queries, recovery.

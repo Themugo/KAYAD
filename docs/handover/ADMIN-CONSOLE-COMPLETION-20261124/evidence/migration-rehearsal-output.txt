@@ -1,0 +1,35 @@
+NOTICE:  database "kayad_ci_rehearsal" does not exist, skipping
+psql:ci/db-journeys/bootstrap.sql:10: NOTICE:  role "authenticator" has already been granted membership in role "anon" by role "postgres"
+psql:ci/db-journeys/bootstrap.sql:10: NOTICE:  role "authenticator" has already been granted membership in role "authenticated" by role "postgres"
+psql:ci/db-journeys/bootstrap.sql:10: NOTICE:  role "authenticator" has already been granted membership in role "service_role" by role "postgres"
+psql:ci/db-journeys/bootstrap.sql:23: WARNING:  wal_level is insufficient to publish logical changes
+HINT:  Set wal_level to "logical" before creating subscriptions.
+pre-state migrations failed: 0
+pre tables: none
+pre lead fn present: 1
+pass1 OK 20261123210000
+psql:supabase/migrations/20261123220000_dealer_temporary_duties.sql:23: NOTICE:  policy "dealer_team_temporary_grants_owner_select" for relation "public.dealer_team_temporary_grants" does not exist, skipping
+pass1 OK 20261123220000
+pass1 OK 20261124100000
+pass2 OK 20261123210000
+psql:supabase/migrations/20261123220000_dealer_temporary_duties.sql:19: NOTICE:  relation "dealer_team_temporary_grants" already exists, skipping
+psql:supabase/migrations/20261123220000_dealer_temporary_duties.sql:20: NOTICE:  relation "dealer_team_temporary_grants_team_idx" already exists, skipping
+psql:supabase/migrations/20261123220000_dealer_temporary_duties.sql:21: NOTICE:  relation "dealer_team_temporary_grants_dealer_idx" already exists, skipping
+pass2 OK 20261123220000
+psql:supabase/migrations/20261124100000_admin_customer_care_and_market_tables.sql:27: NOTICE:  relation "market_data" already exists, skipping
+psql:supabase/migrations/20261124100000_admin_customer_care_and_market_tables.sql:45: NOTICE:  relation "ntsa_verification_requests" already exists, skipping
+psql:supabase/migrations/20261124100000_admin_customer_care_and_market_tables.sql:46: NOTICE:  relation "idx_ntsa_requests_car" already exists, skipping
+psql:supabase/migrations/20261124100000_admin_customer_care_and_market_tables.sql:66: NOTICE:  relation "reports" already exists, skipping
+psql:supabase/migrations/20261124100000_admin_customer_care_and_market_tables.sql:67: NOTICE:  relation "reports_status_created_idx" already exists, skipping
+psql:supabase/migrations/20261124100000_admin_customer_care_and_market_tables.sql:68: NOTICE:  relation "reports_reporter_idx" already exists, skipping
+psql:supabase/migrations/20261124100000_admin_customer_care_and_market_tables.sql:69: NOTICE:  relation "reports_target_idx" already exists, skipping
+psql:supabase/migrations/20261124100000_admin_customer_care_and_market_tables.sql:84: NOTICE:  relation "feedback" already exists, skipping
+psql:supabase/migrations/20261124100000_admin_customer_care_and_market_tables.sql:85: NOTICE:  relation "feedback_status_created_idx" already exists, skipping
+psql:supabase/migrations/20261124100000_admin_customer_care_and_market_tables.sql:103: NOTICE:  relation "announcements" already exists, skipping
+psql:supabase/migrations/20261124100000_admin_customer_care_and_market_tables.sql:104: NOTICE:  relation "announcements_status_created_idx" already exists, skipping
+pass2 OK 20261124100000
+post tables: announcements,dealer_team_temporary_grants,feedback,market_data,ntsa_verification_requests,reports
+rls on: announcements,dealer_team_temporary_grants,feedback,market_data,ntsa_verification_requests,reports
+client policies on 5 new tables: 0
+event_type constraint ok: true
+anon/auth select on reports: true/true

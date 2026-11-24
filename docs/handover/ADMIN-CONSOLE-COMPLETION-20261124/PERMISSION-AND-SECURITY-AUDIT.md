@@ -27,3 +27,37 @@ The new tables have RLS enabled with no client policy: no client (anon/authentic
 
 ## E. Not changed / not verified
 Hosted behaviour; per-endpoint review of every studio router (several use only `protect` at router level with route-level role checks, e.g. config answers 403 to moderator); rate limits unchanged.
+
+
+---
+## Addendum — finalisation phase (2026-11-24, second pass)
+
+### Full read-side role matrix (journey `29_permission_matrix`, 114/114 PASS, real HTTP, disposable DB)
+Actors: anonymous, personal account, legacy seller account, dealer owner, dealer staff (viewer, via the real invitation flow), admin, Super Admin (owner), moderator, hr, marketing, technical_support. Status per endpoint (anon / personal / legacy / dealer / dealer staff / admin / superadmin / moderator / hr / marketing / technical_support):
+
+| Endpoint | Statuses | Guard |
+|---|---|---|
+| `/api/security-logs`, `/summary` | 401 / 403 / 403 / 403 / 403 / 200 / 200 / 200 / 403 / 403 / 200 | VIEW_LOGS |
+| `/api/automation/stats` | 401 / 403 ×4 / 503 ×6 | any staff (intentional; 503 = not provisioned) |
+| `/api/cms/dashboard/stats` | 401 / 403 ×4 / 200 ×6 | any staff |
+| `/api/reports/admin/all` | 401 / 403 ×4 / 200 / 200 / 200 / 403 / 403 / 403 | admin, superadmin, moderator |
+| `/api/feedback/admin/all`, `/api/announcements` | 401 / 403 ×4 / 200 / 200 / 403 ×4 | admin, superadmin |
+| `/api/config/stats` | 401 / 403 ×4 / 503 / 503 / 403 ×4 | admin, superadmin |
+| `/api/admin/staff` | 401 / 403 ×4 / 403 / 200 / 403 ×4 | Super Admin + owner |
+| `/api/support/staff/queue` | 401 / 403 ×4 / 200 / 200 / 403 / 403 / 403 / 200 | support agent or oversight |
+Public CMS reads (`/api/cms/faqs`, `/api/cms/content`) remain 200 anonymously; `/api/cms/pages` is not anonymous. Raw matrix: `ci/db-journeys/out/permission-matrix-read.json`.
+
+### Concerns re-checked
+| Concern | Result | Status |
+|---|---|---|
+| Security-log reads | VIEW_LOGS enforced; hr/marketing 403, moderator 200 | Fixed and verified |
+| Automation `adminOnly` | any staff may read; non-staff 403; deliberate and unchanged | Existing and confirmed correct |
+| Authenticated CMS reads | staff only; public routes unchanged | Fixed and verified |
+| Moderator UI vs server | UI corrected for the 5 sidebar pages; server unchanged | Fixed and verified (vitest + sweep) |
+| Server authorisation of write endpoints | covered by journey 14 (admin write matrix) | Existing and confirmed correct |
+
+### Residual (UI-only, no data exposure)
+By direct URL a moderator can still open these 7 pages, whose data calls answer 403 and show an honest failure: `/admin/users`, `/admin/inspector-applications`, `/admin/featured-vehicles`, `/admin/config`, `/admin/communications`, `/admin/provider-governance`, plus `/admin` health tile (`/api/ecp/health`). Tightening the route guard further is a cosmetic follow-up; the server already refuses. Status: Not verified as a UI change; Requires separate owner decision whether to harden the route guard.
+
+### Dealer and personal accounts
+Personal accounts, legacy sellers, dealer owners and dealer staff received 403 on every platform-staff endpoint above. Dealer staff were never counted as KAYARD platform staff on the dashboard (journey 26). Personal registration remains approval-free; dealer onboarding verification unchanged.

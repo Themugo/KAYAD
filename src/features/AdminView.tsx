@@ -72,7 +72,7 @@ import './admin-command-centre.css';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { adminRoleLabel } from '../components/admin/adminRoleLabels';
-import { getEffectivePermissions, PAGE_PERMISSIONS, SUPERADMIN_ONLY } from '../utils/permissions';
+import { getEffectivePermissions, canOpenAdminPage } from '../utils/permissions';
 
 interface AdminViewProps {
   vehicles: Vehicle[];
@@ -133,9 +133,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
   // Display convenience only: destinations the role cannot open are not offered as links. The route guard and the server still enforce access.
   const canOpen = (to: string): boolean => {
     if (sessionUser?.role === 'superadmin') return true;
-    if (SUPERADMIN_ONLY.has(to)) return false;
-    const required = PAGE_PERMISSIONS[to];
-    return !required || getEffectivePermissions(sessionUser as any).includes(required);
+    return canOpenAdminPage(sessionUser as any, to, getEffectivePermissions(sessionUser as any));
   };
   const isOwner = (sessionUser as { isOwner?: boolean } | null)?.isOwner === true; // display only — the server enforces owner authority on every call
   const [stats, setStats] = useState<AdminStats>({});

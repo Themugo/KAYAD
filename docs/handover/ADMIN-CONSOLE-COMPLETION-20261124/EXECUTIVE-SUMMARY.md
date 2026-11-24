@@ -1,17 +1,24 @@
-# Executive Summary — Super Admin Console Completion (2026-11-24)
+# Executive summary — Super Admin Console finalisation (2026-11-24)
 
-Local-only verification; not production-ready; nothing committed, pushed, migrated or deployed.
+Local disposable stack only. Not production-ready. Nothing committed, pushed, migrated or deployed by Claude in this phase.
 
-## Outcome
-- Hero/shell design preserved; 53/53 routes open for Super Admin with no crashes, page errors, error boundaries or overflow (212-check sweep). Fully verified rows per the matrix: 16; the rest are rendered and data-loaded but not every action exercised (honestly labelled Not verified / Intentionally unavailable).
-- Schema gaps (13): 5 resolved by one additive, re-runnable migration (reports, feedback, announcements, market_data, ntsa_verification_requests); 8 reported as honest 503 "not provisioned" (automation, config, lowcode, vxp, xos, ai, digital-twin, suspicious bids). Hosted not changed.
-- Real defects found by new journeys and fixed: report `listing_removed` 500 (invalid status), NTSA approval 500 (nonexistent column), security-log `/my` and `/summary` 500 without table.
-- Permissions: security-log reads now require VIEW_LOGS (corrected); CMS authenticated reads now staff-only (corrected); automation `adminOnly` preserved as intentional. No new roles/permissions; allowed and denied tested.
-- Dashboard sample panels replaced by authoritative sources; "Actor not recorded" and honest health states kept; legacy Individual/Private Seller wording cleaned (one label left for owner).
-- No dealer listing approval introduced; personal accounts unchanged; financial logic untouched; no broadcasts/messages sent; no panic/recovery run.
+## Preserved (Existing and confirmed correct)
+Navy/teal showroom hero, Quick Actions in the hero, compact header, continuous collapsible sidebar, mobile drawer, 34 sidebar links with no duplicates. Personal accounts stay free and approval-free; dealer onboarding keeps verification; dealer listings are not KAYARD-reviewed; financial, escrow, payout and ledger logic untouched; no new roles, permissions, fees or approval gates.
+
+## What this phase added
+1. **Role-matrix permission test** (journey 29, 114 checks): 10 sensitive read endpoints × anonymous, personal, legacy seller, dealer owner, dealer staff, admin, Super Admin, moderator, hr, marketing, technical_support. Every result matches the server guard. Security-log (VIEW_LOGS) and CMS (staff-only) corrections confirmed; automation any-staff access confirmed as intentional.
+2. **UI access mirror corrected** (UI only, no server change): the sidebar and route guard no longer offer a moderator Moderation, Feedback, Broadcast, Dealer Verifications or Support Tickets, all of which the server refuses.
+3. **Migration rehearsal**: all three release migrations applied in order on a pre-state database and re-applied (no-ops); RLS proven with a real row; a defence-in-depth `revoke` was added for the three new tables. Production runbook written.
+4. **Schema decision matrix** for all 13 gaps, route and feature **ownership matrix**, and a defects-and-corrections register (D1–D12).
+
+## Routes and workflows
+- 53/53 routes open for Super Admin at 1440px and 390px; 212 sweep rows with 0 crashes, page errors, error boundaries or overflow.
+- 16 of 53 routes have their workflow verified by a journey or test; the rest are PARTIAL, NOT PROVISIONED (8 studios/suspicious bids) or NOT VERIFIED.
+- Verified workflows: personal account block/restore, support ticket lifecycle, moderation (hide/restore), reports, feedback, announcement drafts, market data, NTSA queue, role/permission matrix, dashboard counts vs database.
+- NOT verified: escrow/transaction actions, auction and inspection admin actions, panic/recovery (not executed), broadcast delivery, settings save/reload per category, hosted behaviour, live e-mail.
 
 ## Tests
-tsc clean; Vitest 1993 passed/1 skipped; Jest 4344 passed/21 skipped (265 suites); build ok; DB journeys 37/37; browser 56/56 (7 widths); sweep 212 checks. See TEST-RESULTS.md.
+tsc clean; Vitest 2004 passed / 1 skipped (231 files); Jest 4345 passed / 21 skipped (265 suites + 1 skipped); build ok; DB journeys 38/38; browser 56/56 at 7 widths; sweep 212 rows clean. Details, flakes and environment limits: `TEST-RESULTS.md`.
 
-## Open gates
-See UNRESOLVED-ISSUES-AND-RELEASE-GATES.md: apply 3 hosted migrations, push work, hosted verification, studio provisioning decision, moderator UI-mirror decision, e-mail delivery blocked.
+## Open
+Hosted migrations (separate approval), commit of this phase's local changes, hosted verification, owner decisions on the 8 unprovisioned features and the moderator route guard. See `UNRESOLVED-ISSUES-AND-RELEASE-GATES.md`.

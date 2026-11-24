@@ -147,7 +147,7 @@ export const PAGE_PERMISSIONS: Record<string, Permission> = {
   "/admin/private-seller-applications": PERM.MANAGE_USERS,
   "/admin/sellers":       PERM.MANAGE_STAFF,
   "/admin/cars":          PERM.MANAGE_CARS,
-  "/admin/moderation":    PERM.MANAGE_MODERATION,
+  "/admin/moderation":    PERM.MANAGE_CARS, // server: GET /api/admin/cars needs MANAGE_CARS and POST /cars/:id/moderate is admin/superadmin only
   "/admin/auctions":      PERM.MANAGE_AUCTIONS,
   "/admin/bids":          PERM.MANAGE_AUCTIONS,
   "/admin/escrows":       PERM.VIEW_ESCROW,
@@ -166,6 +166,32 @@ export const PAGE_PERMISSIONS: Record<string, Permission> = {
   "/admin/featured-vehicles": PERM.MANAGE_ADS,
   "/admin/platform-recovery": PERM.PLATFORM_RECOVERY,
 };
+
+// Pages whose SERVER routes are role-gated (allowRoles("admin","superadmin")) rather than permission-gated, so no permission can unlock
+// them. Proven by the 2026-11-24 role matrix (ci/db-journeys/29_permission_matrix.mjs) and the moderator sweep: the moderator was offered
+// these entries and every data call answered 403. This mirrors the server; the server remains the authority.
+export const ADMIN_ROLE_ONLY = new Set([
+  "/admin/feedback",
+  "/admin/broadcast",
+  "/admin/dealer-verifications",
+]);
+
+// Pages the server opens to more than one permission (any-of). Support: agent (technical_support) or read-only oversight (admin, superadmin).
+export const PAGE_ANY_PERMISSIONS: Record<string, Permission[]> = {
+  "/admin/support-tickets": [PERM.SUPPORT_AGENT, PERM.SUPPORT_OVERSIGHT],
+  "/admin/support":         [PERM.SUPPORT_AGENT, PERM.SUPPORT_OVERSIGHT],
+};
+
+/** Display/route-guard mirror of the server's page access. Superadmin always opens everything; the server still enforces every call. */
+export function canOpenAdminPage(user: { role?: string; permissions?: string[] } | null | undefined, path: string, perms: string[]): boolean {
+  if (user?.role === "superadmin") return true;
+  if (SUPERADMIN_ONLY.has(path)) return false;
+  if (ADMIN_ROLE_ONLY.has(path)) return user?.role === "admin";
+  const anyOf = PAGE_ANY_PERMISSIONS[path];
+  if (anyOf) return anyOf.some((p) => perms.includes(p));
+  const required = PAGE_PERMISSIONS[path];
+  return !required || perms.includes(required);
+}
 
 // Superadmin-only pages — never unlocked by a granted permission.
 export const SUPERADMIN_ONLY = new Set([

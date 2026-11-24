@@ -445,8 +445,8 @@ const ADMIN_PAGE_ROLES: Record<string, string[]> = {
   '/admin/transactions':   ['superadmin', 'admin', 'accounts', 'escrow_officer'],
   '/admin/escrows':        ['superadmin', 'admin', 'accounts', 'escrow_officer'],
   '/admin/ads':            ['superadmin', 'admin', 'marketing', 'ad_manager'],
-  '/admin/moderation':     ['superadmin', 'admin', 'moderator'],
-  '/admin/cars':           ['superadmin', 'admin', 'moderator', 'technical_support'],
+  '/admin/moderation':     ['superadmin', 'admin'], // server: listing read needs MANAGE_CARS, decisions are admin/superadmin only
+  '/admin/cars':           ['superadmin', 'admin'], // server: GET /api/admin/cars needs MANAGE_CARS (admin/superadmin)
   '/admin/sellers':        ['superadmin', 'admin', 'hr'],
   '/admin/auctions':       ['superadmin', 'admin'],
   '/admin/bids':           ['superadmin', 'admin'],
@@ -456,6 +456,11 @@ const ADMIN_PAGE_ROLES: Record<string, string[]> = {
   '/admin/reviews':        ['superadmin', 'admin', 'moderator'],
   '/admin/referrals':      ['superadmin', 'admin'],
   '/admin/chats':          ['superadmin', 'admin', 'moderator'],
+  '/admin/feedback':       ['superadmin', 'admin'],
+  '/admin/broadcast':      ['superadmin', 'admin'],
+  '/admin/dealer-verifications': ['superadmin', 'admin'],
+  '/admin/support-tickets': ['superadmin', 'admin', 'technical_support'],
+  '/admin/support':        ['superadmin', 'admin', 'technical_support'],
 };
 
 interface RequireAdminPageProps extends RequireAuthProps {

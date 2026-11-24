@@ -1,4 +1,4 @@
-NOTICE:  database "kayad_ci_final" does not exist, skipping
+NOTICE:  database "kayad_ci_fin2" does not exist, skipping
 psql:/home/claude/p12/ci/db-journeys/bootstrap.sql:10: NOTICE:  role "authenticator" has already been granted membership in role "anon" by role "postgres"
 psql:/home/claude/p12/ci/db-journeys/bootstrap.sql:10: NOTICE:  role "authenticator" has already been granted membership in role "authenticated" by role "postgres"
 psql:/home/claude/p12/ci/db-journeys/bootstrap.sql:10: NOTICE:  role "authenticator" has already been granted membership in role "service_role" by role "postgres"
@@ -38,6 +38,7 @@ legacy-j10_legacy_and_dealer exit=0 fails=0
 26_admin_console exit=0 fails=0
 27_customer_care exit=0 fails=0
 28_support_and_moderation exit=0 fails=0
+29_permission_matrix exit=0 fails=0
 99_browser_hold exit=0 fails=0
 06_aggregate_shim exit=0 fails=0
 20_registration_email_lifecycle exit=0 fails=0
