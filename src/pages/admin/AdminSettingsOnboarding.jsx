@@ -10,13 +10,13 @@ import AdminSettingsDealerPaperwork from './AdminSettingsDealerPaperwork';
 const FIELDS = [
   {
     key: 'privateSellerRegistration',
-    label: 'Private seller registration',
-    help: 'Whether individuals can create a private-seller account themselves. Seller features always require a verified email.',
-    options: { enabled: 'Open — sellers can register themselves', disabled: 'Closed — no new private-seller registrations' },
+    label: 'Personal account selling (legacy setting)',
+    help: 'Personal accounts are free, need no approval, and can both buy and sell on one account. This legacy switch is recorded for compatibility but registration does not currently enforce it; to restrict one account, use Personal Accounts. Seller features always require a verified email.',
+    options: { enabled: 'Open — personal accounts can sell', disabled: 'Closed — recorded only (not currently enforced)' },
   },
   {
     key: 'privateSellerPackageMode',
-    label: 'Private seller packages',
+    label: 'Personal account packages',
     help: 'Free is the active launch mode. Paid package modes are reserved for rollout after package catalogue, pricing and provider-confirmed checkout are implemented; selecting them safely blocks selling rather than accepting unpaid listings.',
     options: { free: 'Free — no package selection', optional: 'Paid packages optional (checkout integration required)', required: 'Paid package required (checkout integration required)' },
   },

@@ -422,6 +422,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
           <div className="kayad-command-eyebrow"><ShieldCheck size={15} aria-hidden="true" /> KAYARD KE BUSINESS COMMAND CENTRE</div>
           <h1 id="admin-command-centre-title">Welcome back, <span>{(typeof sessionUser?.name === 'string' ? sessionUser.name.trim() : '') || 'Administrator'}</span></h1>
           <p className="kayad-command-intro">Oversee your marketplace, team, operations and systems — all from one portal.</p>
+          <div className="kayad-command-statusrow">
           <div className="kayad-command-identity" aria-label="Authenticated administrator">
             <span className="kayad-command-identity-mark" aria-hidden="true">{(typeof sessionUser?.name === 'string' && sessionUser.name.trim() ? sessionUser.name.trim().split(/\s+/).slice(0, 2).map((part) => part.charAt(0)).join('').toUpperCase() : 'AD')}</span>
             <span className="kayad-command-identity-copy">
@@ -430,21 +431,27 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             </span>
           </div>
           <div className="kayad-command-meta">
-            <span className="kayad-command-meta-item"><span className="kayad-command-meta-label">Nairobi time</span><time dateTime={now.toISOString()}>{new Intl.DateTimeFormat('en-KE', { dateStyle: 'full', timeStyle: 'short', timeZone: 'Africa/Nairobi' }).format(now)}</time></span>
-            <span role="status" aria-live="polite" className={`kayad-command-data-state${error || restricted.length > 0 || statsStatus === 'error' ? ' is-limited' : loading ? ' is-loading' : ' is-ready'}`}><span aria-hidden="true" />{error || restricted.length > 0 || statsStatus === 'error' ? 'Some operational data unavailable or restricted' : loading ? 'Loading operational data' : 'Operational data loaded'}</span>
+            <span className="kayad-command-meta-item"><span className="kayad-command-meta-label">Nairobi time</span><time dateTime={now.toISOString()}>{new Intl.DateTimeFormat('en-KE', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Africa/Nairobi' }).format(now)} EAT</time></span>
+            <span role="status" aria-live="polite" className={`kayad-command-data-state${error || restricted.length > 0 || statsStatus === 'error' ? ' is-limited' : loading ? ' is-loading' : ' is-ready'}`}><span aria-hidden="true" /><span className="kayad-command-data-copy"><strong>{error || restricted.length > 0 || statsStatus === 'error' ? 'Some operational data unavailable or restricted' : loading ? 'Loading operational data' : 'Operational data loaded'}</strong><small>{statsStatus === 'stale' ? 'Showing last successful statistics' : statsStatus === 'ready' ? 'Connected to current admin data sources' : 'Live data pending'}</small></span></span>
           </div>
+          </div>
+        </div>
+        {/* Decorative showroom scene (brand imagery already shipped under /public/hero). No data, no controls, hidden from assistive tech. */}
+        <div className="kayad-command-hero-visual" aria-hidden="true" data-testid="hero-visual">
+          <img className="kayad-command-hero-car is-back" src="/hero/kayad-mercedes-gle-cutout.png" alt="" loading="eager" decoding="async" width="1028" height="610" />
+          <img className="kayad-command-hero-car is-front" src="/hero/kayad-land-cruiser-cutout.png" alt="" loading="eager" decoding="async" width="1021" height="634" />
         </div>
         <div className="kayad-command-actions" aria-label="Quick Actions">
           <div className="kayad-command-actions-heading"><strong>Quick Actions</strong><span>Common workspaces</span></div>
           <div className="kayad-command-actions-grid">
             {canOpen('/admin/staff') && <Link className="kayad-command-action-link is-staff" to="/admin/staff"><span className="kayad-command-action-icon"><Users size={16} aria-hidden="true" /></span><span className="kayad-command-action-label">Add Staff</span><ChevronRight className="kayad-command-action-chevron" size={14} aria-hidden="true" /></Link>}
-            {canOpen('/admin/dealer-verifications') && <Link className="kayad-command-action-link is-approval" to="/admin/dealer-verifications"><span className="kayad-command-action-icon"><CheckCircle2 size={16} aria-hidden="true" /></span><span className="kayad-command-action-label">Approve Dealer</span><ChevronRight className="kayad-command-action-chevron" size={14} aria-hidden="true" /></Link>}
+            {canOpen('/admin/dealer-verifications') && <Link className="kayad-command-action-link is-approval" to="/admin/dealer-verifications"><span className="kayad-command-action-icon"><CheckCircle2 size={16} aria-hidden="true" /></span><span className="kayad-command-action-label">Review Dealers</span><ChevronRight className="kayad-command-action-chevron" size={14} aria-hidden="true" /></Link>}
             {canOpen('/admin/cars') && <Link className="kayad-command-action-link is-vehicles" to="/admin/cars"><span className="kayad-command-action-icon"><Car size={16} aria-hidden="true" /></span><span className="kayad-command-action-label">View Vehicles</span><ChevronRight className="kayad-command-action-chevron" size={14} aria-hidden="true" /></Link>}
             {canOpen('/admin/reports') && <Link className="kayad-command-action-link is-reports" to="/admin/reports"><span className="kayad-command-action-icon"><Compass size={16} aria-hidden="true" /></span><span className="kayad-command-action-label">View Reports</span><ChevronRight className="kayad-command-action-chevron" size={14} aria-hidden="true" /></Link>}
           </div>
         </div>
       </section>
-      <div className="kayad-command-toolbar"><div className="kayad-command-sync-copy"><span>{statsStatus === 'stale' ? 'Showing last successful statistics' : statsStatus === 'ready' ? 'Connected to current admin data sources' : 'Live data pending'}</span><small>{lastCheckedAt ? `Last checked ${new Intl.DateTimeFormat('en-KE', { timeZone: 'Africa/Nairobi', hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' }).format(lastCheckedAt)} EAT` : 'Not yet synchronised'} · {autoSyncEnabled ? 'Auto-sync every 60 seconds' : 'Auto-sync paused'} · {['admin', 'superadmin'].includes(sessionUser?.role || '') ? (realtimeConnected ? 'Realtime transport connected' : 'Realtime reconnecting') : 'Role-scoped refresh'}</small></div><div className="kayad-command-sync-actions"><Button variant="outline" size="sm" onClick={() => setAutoSyncEnabled((value) => !value)} aria-pressed={autoSyncEnabled}>{autoSyncEnabled ? 'Pause auto-sync' : 'Resume auto-sync'}</Button><Button variant="outline" size="sm" onClick={() => void load()} disabled={loading} aria-label="Refresh administration data"><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh</Button></div></div>
+      <div className="kayad-command-toolbar"><div className="kayad-command-sync-copy"><span>{statsStatus === 'stale' ? 'Showing last successful statistics' : statsStatus === 'ready' ? 'Connected to current admin data sources' : 'Live data pending'}</span><small>{lastCheckedAt ? `Last checked ${new Intl.DateTimeFormat('en-KE', { timeZone: 'Africa/Nairobi', hour: '2-digit', minute: '2-digit', day: '2-digit', month: 'short' }).format(lastCheckedAt)} EAT` : 'Not yet synchronised'} · {autoSyncEnabled ? 'Auto-sync every 60 seconds' : 'Auto-sync paused'} · {['admin', 'superadmin'].includes(sessionUser?.role || '') ? (realtimeConnected ? 'Realtime transport connected' : 'Realtime reconnecting') : 'Role-scoped refresh'}</small></div><div className="kayad-command-sync-actions"><button type="button" className="kayad-command-specialists-toggle" onClick={() => setToolsOpen(!toolsOpen)} aria-expanded={toolsOpen} aria-controls="kayad-specialist-tools">{toolsOpen ? 'Hide' : 'Show'} specialist tools <ChevronRight className="inline h-4 w-4" aria-hidden="true" /></button><Button variant="outline" size="sm" onClick={() => setAutoSyncEnabled((value) => !value)} aria-pressed={autoSyncEnabled}>{autoSyncEnabled ? 'Pause auto-sync' : 'Resume auto-sync'}</Button><Button variant="outline" size="sm" onClick={() => void load()} disabled={loading} aria-label="Refresh administration data"><RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> Refresh</Button></div></div>
       {(error || actionError) && (
         <Card role="alert" className={`kayad-command-alert flex items-start gap-2 p-4 text-sm ${actionError ? 'is-error' : 'is-warning'}`}>
           <AlertTriangle className="w-5 h-5 shrink-0 mt-0.5" />
@@ -461,7 +468,6 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
       )}
 
       <div className="kayad-command-specialists">
-        <button type="button" onClick={() => setToolsOpen(!toolsOpen)} aria-expanded={toolsOpen} aria-controls="kayad-specialist-tools">{toolsOpen ? 'Hide' : 'Show'} specialist tools <ChevronRight className="inline h-4 w-4" /></button>
         {toolsOpen && <nav id="kayad-specialist-tools" className="kayad-command-tool-links" aria-label="Administration modules">
           {([['overview', 'Dashboard'], ['users', 'User review'], ['cars', 'Vehicle review'], ['audit', 'Audit records'], ['communications', 'Communications'], ['navigation', 'Navigation settings'], ['providers', 'Providers'], ['support', 'Support'], ['onboarding', 'Onboarding'], ['auctions', 'Auction verification'], ...(isOwner ? [['owners', 'Owner management'], ['departments', 'Departments']] : [])] as [typeof module, string][]).map(([key, label]) => <button type="button" key={key} className={module === key ? 'selected' : ''} aria-label={`${label} module`} aria-current={module === key ? 'page' : undefined} onClick={() => { setModule(key); setToolsOpen(false); }}>{label}</button>)}
           {module !== 'overview' && <form className="kayad-command-search" role="search" aria-label="Search administration records" onSubmit={(event) => { event.preventDefault(); if (module !== 'audit') void load(queue); }}>
@@ -476,7 +482,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
           <section aria-label="Marketplace metrics" className="kayad-command-kpis">
             {[
               { label: 'Total Users', value: stat('totalUsers'), icon: <Users size={22} />, tone: 'blue', to: '/admin/users' },
-              { label: 'Active Staff', value: canOpen('/admin/staff') ? 'View staff' : 'Super Admin only', icon: <ShieldCheck size={22} />, tone: 'teal', to: '/admin/staff' },
+              { label: 'Active Staff', value: stat('activeStaff'), icon: <ShieldCheck size={22} />, tone: 'teal', to: '/admin/staff' },
               { label: 'Verified Dealers', value: stat('verifiedDealers'), icon: <Building2 size={22} />, tone: 'violet', to: '/admin/dealer-verifications' },
               { label: 'Vehicles', value: stat('totalCars'), icon: <Car size={22} />, tone: 'cyan', to: '/admin/cars' },
               { label: 'Live Auctions', value: stat('activeAuctions'), icon: <FileCheck size={22} />, tone: 'green', to: '/admin/auctions' },
@@ -520,7 +526,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
               <div className="kayad-command-queue-tabs">
                 {[
                   { label: 'Dealers', href: '/admin/dealer-verifications', count: stat('pendingDealers') },
-                  { label: 'Sellers', href: '/admin/sellers' },
+                  { label: 'Dealer Accounts', href: '/admin/sellers' },
                   { label: 'Inspectors', href: '/admin/inspector-applications' },
                   { label: 'Vehicle Listings', href: '/admin/moderation', count: stat('pendingCars') },
                   { label: 'Document Verification', href: '/admin/ntsa-queue' },
@@ -554,6 +560,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             </section>
             <section className="kayad-command-panel" aria-labelledby="live-auctions-heading">
               <header><h2 id="live-auctions-heading">Live Auctions</h2>{canOpen('/admin/auctions') && <Link to="/admin/auctions">View All</Link>}</header>
+              <p className="kayad-command-data-note" data-testid="live-auctions-total">Platform total (server count): {stat('activeAuctions')}. Rows below come from the latest vehicle records loaded here and may not list every live auction.</p>
               {cars.filter(car => (car.auctionStatus || car.auction_status || '').toLowerCase() === 'live').slice(0, 4).map(car => <div className="kayad-command-auction-row" key={car._id}><div className="kayad-command-auction-thumb"><Car size={20}/></div><div className="kayad-command-auction-info"><strong>{car.title || 'Live vehicle auction'}</strong><small>{typeof (car.currentBid ?? car.current_bid) === 'number' ? `KES ${(car.currentBid ?? car.current_bid as number).toLocaleString()}` : typeof car.price === 'number' ? `Starting price KES ${car.price.toLocaleString()}` : 'Current bid unavailable'}</small></div><span className="kayad-command-live">Live</span></div>)}
               {!cars.some(car => (car.auctionStatus || car.auction_status || '').toLowerCase() === 'live') && <p className="kayad-command-empty">{loading ? 'Loading auction records…' : restricted.includes('vehicle records') ? 'Auction details are restricted with the vehicle records for this role.' : down('vehicle records') ? 'Auction records may be unavailable.' : 'No live auctions in the loaded vehicle records. Open the auction workspace for the authoritative list.'}</p>}
               <Link className="kayad-command-inline-link" to="/admin/auctions">Open live auction operations <ChevronRight size={14}/></Link>

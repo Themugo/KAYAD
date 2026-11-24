@@ -8,7 +8,7 @@ import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import protectAccount from "../middleware/protectAccount.js";
 import { authorize, requirePermission, hasPermission, PERMISSIONS } from "../middleware/role.js";
-import { ASSIGNABLE_PERMISSIONS, PERM_LABELS, ROLE_PERMISSIONS, getEffectivePermissions } from "../config/roles.js";
+import { ASSIGNABLE_PERMISSIONS, PERM_LABELS, ROLE_PERMISSIONS, STAFF_ROLES, getEffectivePermissions } from "../config/roles.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validate, validateObjectId, validateQuery, userListQuerySchema, carListQuerySchema, paymentListQuerySchema, reviewListQuerySchema, chatListQuerySchema, messageListQuerySchema } from "../middleware/validate.js";
 import { auditLog } from "../middleware/auditLog.js";
@@ -266,7 +266,7 @@ router.get(
     // STAGE 5F.5 (D-8): one unreadable source used to reject Promise.all and blank EVERY dashboard tile (the hosted-database
     // symptom). Each metric is now settled on its own: a source that cannot be read is `null` and named in `unavailable`;
     // a real zero stays 0. Nothing is defaulted to 0.
-    const metricNames = ["totalUsers", "totalCars", "activeAuctions", "totalEscrows", "totalDealers", "verifiedDealers", "bidsTodayCount", "totalPayments", "pendingDealers", "pendingCars", "openEscrows", "disputedEscrows", "revenueAgg", "totalBidsAll", "totalFavorites", "pendingReviews", "activeAlerts", "individualSellers", "carsSold", "pendingReports", "verificationQueue", "supportQueue", "fraudAlerts", "activeListings"];
+    const metricNames = ["totalUsers", "totalCars", "activeAuctions", "totalEscrows", "totalDealers", "verifiedDealers", "bidsTodayCount", "totalPayments", "pendingDealers", "pendingCars", "openEscrows", "disputedEscrows", "revenueAgg", "totalBidsAll", "totalFavorites", "pendingReviews", "activeAlerts", "individualSellers", "carsSold", "pendingReports", "verificationQueue", "supportQueue", "fraudAlerts", "activeListings", "activeStaff"];
     const settledMetrics = await Promise.allSettled([
       User.countDocuments(),                                                          // totalUsers
       Car.countDocuments(),                                                           // totalCars
@@ -299,9 +299,11 @@ router.get(
       SupportTicket.countDocuments({ status: { $in: ["open", "in_progress", "waiting_on_user", "waiting_on_internal", "escalated"] } }), // supportQueue
       FraudDetection.countDocuments({ severity: { $in: ["critical", "high"] }, status: { $nin: ["dismissed", "action_taken"] } }), // fraudAlerts
       Car.countDocuments({ status: "available" }),                                    // activeListings
+      // KAYARD platform staff only (never dealer-team members, who live in dealer_teams). Active = not banned.
+      User.countDocuments({ role: { $in: STAFF_ROLES }, isBanned: false }),            // activeStaff
     ]);
     const unavailable = metricNames.filter((_, i) => settledMetrics[i].status !== "fulfilled");
-    const [totalUsers, totalCars, activeAuctions, totalEscrows, totalDealers, verifiedDealers, bidsTodayCount, totalPayments, pendingDealers, pendingCars, openEscrows, disputedEscrows, revenueAgg, totalBidsAll, totalFavorites, pendingReviews, activeAlerts, individualSellers, carsSold, pendingReports, verificationQueue, supportQueue, fraudAlerts, activeListings] = settledMetrics.map((r) => (r.status === "fulfilled" ? r.value : null));
+    const [totalUsers, totalCars, activeAuctions, totalEscrows, totalDealers, verifiedDealers, bidsTodayCount, totalPayments, pendingDealers, pendingCars, openEscrows, disputedEscrows, revenueAgg, totalBidsAll, totalFavorites, pendingReviews, activeAlerts, individualSellers, carsSold, pendingReports, verificationQueue, supportQueue, fraudAlerts, activeListings, activeStaff] = settledMetrics.map((r) => (r.status === "fulfilled" ? r.value : null));
 
     const totalRevenue = revenueAgg === null ? null : (revenueAgg[0]?.total || 0);
     const totalFavs = totalFavorites === null ? null : (totalFavorites[0]?.total || 0);
@@ -336,6 +338,7 @@ router.get(
         supportQueue,
         fraudAlerts,
         activeListings,
+        activeStaff,
       },
       unavailable,
     });

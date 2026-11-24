@@ -31,6 +31,7 @@ import { sendTeamInviteEmail, sendTeamAcceptedEmail } from "../services/email.se
 import { PERMISSION_LABELS, listRoles, resolveRole, createCustomRole, updateCustomRole, deleteCustomRole, RoleError, newInviteToken } from "../services/dealerTeamRoles.service.js";
 import { formatPhone } from "../utils/format.js";
 import { bulkChangeDealerListingStatus } from "../services/dealerListingSale.service.js";
+import { TEMPORARY_DUTY_PERMISSIONS, MAX_DUTY_DAYS, DutyError, validateGrant, listGrants, createGrant, revokeGrant } from "../services/dealerTemporaryDuties.service.js";
 import { DEALER_TEAM_PERMISSIONS } from "../middleware/dealerOrgAccess.js";
 import { employmentAvailable, recordEmploymentEvent, listEmploymentEvents, allocateStaffNumber, setStaffCode, getStaffSettings, accessLevel, cleanBusinessEmail, cleanText, todayDate, ACTION_RESULT, BASIC_ROLE_KEY } from "../services/dealerEmployment.service.js";
 
@@ -320,6 +321,8 @@ export async function bulkUpdateListings(req, res) {
     const allowedStatuses = new Set(["available", "active", "draft", "pending", "hidden", "paused", "sold"]);
     if (!ids.length || !action) return res.status(400).json({ success: false, message: "ids and action are required" });
     if (action !== "status") return res.status(400).json({ success: false, message: "Only status bulk updates are supported" });
+    // The route admits canEditCars OR canDeleteCars; a status change is an edit, so delete-only staff are refused here (owners have no dealerOrg).
+    if (req.dealerOrg && req.dealerOrg.permissions?.canEditCars !== true) return res.status(403).json({ success: false, code: "DEALER_PERMISSION_REQUIRED", message: "Missing dealer permission: canEditCars", requiredPermission: ["canEditCars"] });
     const status = req.body?.data?.status;
     if (!allowedStatuses.has(status)) return res.status(400).json({ success: false, message: "Invalid listing status" });
     // Per-listing administrator approval is retired. Keep account/email/package eligibility checks.
@@ -341,6 +344,36 @@ export async function bulkUpdateListings(req, res) {
     if (err?.expose) return res.status(err.status).json({ success: false, code: err.code, message: err.message });
     logError("Error bulk updating dealer inventory:", err);
     res.status(500).json({ success: false, message: "Failed to update dealer inventory" });
+  }
+}
+
+/**
+ * Bulk delete: every id goes through the SAME canonical `deleteCar` (ownership, auction/settlement lock, idempotency, listing count,
+ * cache invalidation, audit) one at a time, so authorisation is verified per record and a partial failure is reported item by item.
+ * The route requires canDeleteCars; ids that are not this dealership's are reported as not_found and never touched.
+ */
+export async function bulkDeleteListings(req, res) {
+  try {
+    const raw = Array.isArray(req.body?.ids) ? req.body.ids : [];
+    const ids = [...new Set(raw.filter((v) => typeof v === "string" && /^[0-9a-fA-F-]{8,64}$/.test(v)))];
+    if (!ids.length) return res.status(400).json({ success: false, message: "ids are required" });
+    if (ids.length > 50) return res.status(400).json({ success: false, code: "BULK_LIMIT", message: "Select at most 50 listings at a time." });
+    const deleted = [];
+    const skipped = [];
+    for (const id of ids) {
+      const car = await Car.findById(id);
+      if (!car || String(car.dealer ?? car.dealer_id ?? "") !== String(req.user.id)) { skipped.push({ id, code: "NOT_FOUND", message: "Listing not found." }); continue; }
+      let status = 200; let body = {};
+      const stub = { status(c) { status = c; return this; }, json(b) { body = b || {}; return this; } };
+      await deleteCar(Object.create(req, { params: { value: { id } }, body: { value: {} }, query: { value: {} } }), stub); // inherits headers/ip/user from the real request
+      if (status < 300 && body.success) deleted.push(id);
+      else skipped.push({ id, code: body.code || "DELETE_FAILED", message: body.message || "This listing could not be deleted." });
+    }
+    const code = deleted.length === 0 ? 409 : 200;
+    return res.status(code).json({ success: deleted.length > 0, data: { deleted: deleted.length, deletedIds: deleted, skipped } });
+  } catch (err) {
+    logError("Error bulk deleting dealer inventory:", err);
+    return res.status(500).json({ success: false, message: "Failed to delete listings" });
   }
 }
 
@@ -937,6 +970,62 @@ export async function updateTeamMember(req, res) {
   }
   await logAuditEvent({ action: "dealer_team_member_updated", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: row.id, targetModel: "DealerTeam", oldValue: publicTeamRow(existing), newValue: publicTeamRow(row), ipAddress: req.ip, userAgent: req.get("user-agent"), requestId: req.id });
   return res.json({ success: true, data: publicTeamRow(row) });
+}
+
+// ---- Temporary duties (time-boxed extra permissions; the member's role is never changed) ----
+const dutyFail = (res, err) => {
+  if (err instanceof DutyError) return res.status(err.status).json({ success: false, code: err.code, message: err.message, ...err.extra });
+  throw err;
+};
+
+export async function getTemporaryDuties(req, res) {
+  const dealerId = req.dealerId || req.user.id;
+  const member = await findOne("dealer_teams", { id: req.params.memberId, dealer: dealerId });
+  if (!member) return res.status(404).json({ success: false, message: "Team member not found" });
+  const grants = await listGrants(dealerId, member.id).catch(() => []);
+  const active = grants.filter((g) => g.state === "active");
+  const lent = [...new Set(active.flatMap((g) => g.permissions))];
+  return res.json({ success: true, data: {
+    grants, catalogue: TEMPORARY_DUTY_PERMISSIONS, maxDays: MAX_DUTY_DAYS,
+    rolePermissions: grantedKeys(member.permissions), temporaryPermissions: lent,
+    effectivePermissions: [...new Set([...grantedKeys(member.permissions), ...lent])],
+  } });
+}
+
+export async function createTemporaryDuty(req, res) {
+  const dealerId = req.dealerId || req.user.id;
+  const member = await findOne("dealer_teams", { id: req.params.memberId, dealer: dealerId });
+  if (!member) return res.status(404).json({ success: false, message: "Team member not found" });
+  if (member.status !== "active" || !member.member) return res.status(409).json({ success: false, code: "DUTY_MEMBER_NOT_ACTIVE", message: "Temporary duties can only be given to an active member." });
+  const blocked = teamActorMayManage(req, member);
+  if (blocked) return TEAM_PROTECTED(res, blocked.code, blocked.message);
+  let grant;
+  try {
+    grant = validateGrant({
+      permissions: req.body?.permissions, startsAt: req.body?.startsAt, expiresAt: req.body?.expiresAt, reason: req.body?.reason,
+      actorId: req.user.id, targetMemberId: member.member, actorPermissions: req.dealerOrg?.permissions || {}, unrestricted: isUnrestrictedTeamActor(req),
+    });
+  } catch (err) { return dutyFail(res, err); }
+  const row = await createGrant({ dealerId, teamId: member.id, actor: req.user.id, actorLabel: req.actingMember?.name || req.user.name, grant });
+  await recordEmploymentEvent({ dealerId, teamId: member.id, type: "temporary_duty_granted", actor: req.user.id, actorLabel: req.user.name, staffNumber: member.staffNumber ?? null, to: { permissions: grant.permissions, expiresAt: grant.expiresAt }, reason: grant.reason });
+  await logAuditEvent({ action: "dealer_temporary_duty_granted", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: member.id, targetModel: "DealerTeam", newValue: { permissions: grant.permissions, expiresAt: grant.expiresAt } }).catch(() => {});
+  return res.status(201).json({ success: true, data: row });
+}
+
+export async function revokeTemporaryDuty(req, res) {
+  const dealerId = req.dealerId || req.user.id;
+  const member = await findOne("dealer_teams", { id: req.params.memberId, dealer: dealerId });
+  if (!member) return res.status(404).json({ success: false, message: "Team member not found" });
+  const blocked = teamActorMayManage(req, member);
+  if (blocked) return TEAM_PROTECTED(res, blocked.code, blocked.message);
+  try {
+    const out = await revokeGrant({ dealerId, teamId: member.id, grantId: req.params.grantId, actor: req.user.id });
+    if (out.changed) {
+      await recordEmploymentEvent({ dealerId, teamId: member.id, type: "temporary_duty_revoked", actor: req.user.id, actorLabel: req.user.name, staffNumber: member.staffNumber ?? null, from: { permissions: out.grant.permissions } });
+      await logAuditEvent({ action: "dealer_temporary_duty_revoked", actor: req.user.id, actorRole: req.user.role, actorName: req.user.name, actorEmail: req.user.email, target: member.id, targetModel: "DealerTeam", oldValue: { permissions: out.grant.permissions } }).catch(() => {});
+    }
+    return res.json({ success: true, changed: out.changed });
+  } catch (err) { return dutyFail(res, err); }
 }
 
 export async function removeTeamMember(req, res) {

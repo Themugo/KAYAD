@@ -39,10 +39,16 @@ export const deleteTeamRole = (key) => api.delete(`/dealer-platform/team/roles/$
 export const previewTeamInvitation = (token) => api.post('/dealer-platform/team/invitation/preview', { token }).then(r => r.data);
 export const acceptTeamInvite = (token) => api.post('/dealer-platform/team/accept', { token }).then(r => r.data);
 export const getMyWorkspace = () => api.get('/dealer-platform/my-workspace').then(r => r.data?.data || { membership: null, ambiguous: false });
+/** Bulk actions: the server checks every record against the dealership and the caller's permissions and itemises the outcome. */
+export const bulkInventoryStatus = (ids, status) => api.post('/dealer-platform/inventory/bulk', { ids, action: 'status', data: { status } }).then(r => r.data?.data || {});
+export const bulkInventoryDelete = (ids) => api.post('/dealer-platform/inventory/bulk-delete', { ids }).then(r => r.data?.data || {});
 export const getInventory = (params = {}) => api.get('/dealer-platform/inventory', { params }).then(r => r.data?.data || { items: [] });
 
 // ---- Employment (Team & Employment). Server-enforced; the browser never decides who may do what. ----
 export const getTeamMemberDetail = (memberId) => api.get(`/dealer-platform/team/${memberId}`).then(r => r.data);
+export const getTemporaryDuties = (memberId) => api.get(`/dealer-platform/team/${memberId}/temporary-duties`).then(r => r.data);
+export const createTemporaryDuty = (memberId, body) => api.post(`/dealer-platform/team/${memberId}/temporary-duties`, body).then(r => r.data);
+export const revokeTemporaryDuty = (memberId, grantId) => api.delete(`/dealer-platform/team/${memberId}/temporary-duties/${grantId}`).then(r => r.data);
 export const applyEmploymentAction = (memberId, body) => api.post(`/dealer-platform/team/${memberId}/employment`, body).then(r => r.data);
 export const setMemberBusinessEmail = (memberId, businessEmail) => api.put(`/dealer-platform/team/${memberId}/business-email`, { businessEmail }).then(r => r.data);
 export const getEmploymentRecords = () => api.get('/dealer-platform/team/employment-events').then(r => r.data);

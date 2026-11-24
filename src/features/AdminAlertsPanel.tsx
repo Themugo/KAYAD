@@ -44,7 +44,7 @@ export default function AdminAlertsPanel() {
   }, []);
 
   return (
-    <section className="kayad-command-panel kayad-command-rail-panel" aria-labelledby="right-rail-alerts-heading">
+    <section id="admin-alerts" className="kayad-command-panel kayad-command-rail-panel" aria-labelledby="right-rail-alerts-heading">
       <header><h2 id="right-rail-alerts-heading">System Alerts</h2><Link to="/admin/control-room">View All</Link></header>
       <div aria-live="polite">
         {state.status === 'loading' && <p className="kayad-command-empty">Loading alerts…</p>}

@@ -72,6 +72,19 @@ describe("D-8 /stats", () => {
     expect(body.stats.pendingReviews).toBeNull();
     expect(body.unavailable.sort()).toEqual(["activeAlerts", "fraudAlerts", "pendingReviews", "revenueAgg", "verificationQueue"]);
   });
+  test("activeStaff counts KAYARD platform staff only (not banned, never dealer roles) and is null when unreadable", async () => {
+    userCounts["User|*"] = 5;
+    const ok = await get("/api/admin/stats");
+    expect(ok.body.stats.activeStaff).toBe(5);
+    const staffCall = UserM.countDocuments.mock.calls.map((c) => c[0]).find((f) => f && f.isBanned === false && f.role?.$in);
+    expect(staffCall.role.$in).toEqual(expect.arrayContaining(["admin", "superadmin", "moderator"]));
+    expect(staffCall.role.$in).not.toContain("dealer");
+    expect(staffCall.role.$in).not.toContain("user");
+    broken.add("User");
+    const down = await get("/api/admin/stats");
+    expect(down.body.stats.activeStaff).toBeNull();
+    expect(down.body.unavailable).toContain("activeStaff");
+  });
   test("alerts mirrors disputed escrows and is null (not 0) when that source fails", async () => {
     broken.add("Escrow");
     const { body } = await get("/api/admin/stats");

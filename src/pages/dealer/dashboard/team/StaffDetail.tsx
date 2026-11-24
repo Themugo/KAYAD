@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Loader2, X } from 'lucide-react';
 import * as dealerApi from '../../../../services/dealerPlatformApi';
+import TemporaryDuties from './TemporaryDuties';
 import { TeamRole, actionError, btnCls, inputCls, primaryBtnCls, memberName, displayStatus, fmtDate, describeEvent } from './teamShared';
 
 interface Props { member: any; roles: TeamRole[]; employmentAvailable: boolean; onClose: () => void; onChanged: () => void }
@@ -99,6 +100,8 @@ export default function StaffDetail({ member, roles, employmentAvailable, onClos
         )}
         {perms.length > 0 && perms.every((p) => !p.granted) && <p className="mt-1 text-xs text-[#475569]">Basic access: this person can only see their own staff profile.</p>}
       </div>
+
+      {accepted && member.status === 'active' && <TemporaryDuties memberId={member.id} memberName={name} onChanged={onChanged} />}
 
       {accepted && member.status !== 'removed' && (
         <div className="grid gap-3 md:grid-cols-2">

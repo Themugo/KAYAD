@@ -11,9 +11,10 @@ fs.mkdirSync(OUT, { recursive: true });
 const results = []; const ok = (name, cond, extra) => { results.push({ name, pass: !!cond, extra: cond ? undefined : extra }); console.log(`${cond ? 'PASS' : 'FAIL'} ${name}${cond ? '' : ' :: ' + JSON.stringify(extra)}`); };
 const b = await chromium.launch(); const errs = [];
 const ctx = async (w = 1440, h = 900) => { const c = await b.newContext({ viewport: { width: w, height: h }, isMobile: w < 700, hasTouch: w < 700, deviceScaleFactor: 1 }); const p = await c.newPage(); p.on('pageerror', (e) => errs.push(e.message)); return { c, p }; };
-const login = async (p, email) => { await p.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' }); await p.waitForTimeout(1200); await p.locator('input[type="email"], input[name="email"]').first().fill(email); await p.locator('input[type="password"]').first().fill(PW); await p.locator('button[type="submit"]').first().click(); await p.waitForTimeout(3500); };
+const login = async (p, email) => { await p.goto(`${BASE}/login`, { waitUntil: 'domcontentloaded' }); await p.waitForTimeout(1200); await p.locator('input[type="email"], input[name="email"]').first().fill(email); await p.locator('input[type="password"]').first().fill(PW); await p.locator('button[type="submit"]').first().click(); await p.waitForFunction(() => !location.pathname.startsWith('/login'), null, { timeout: 25000 }).catch(() => {}); await p.waitForTimeout(2500); };
 const overflow = (p) => p.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth + 1);
-const go = async (p, qs) => { await p.goto(`${BASE}/?nav=dealer-dashboard${qs}`, { waitUntil: 'domcontentloaded' }); await p.waitForTimeout(3000); };
+// The Vite dev server can re-optimise dependencies on the first visits and reload the page; retry the navigation until the workspace shell is up.
+const go = async (p, qs) => { for (let i = 0; i < 4; i++) { await p.goto(`${BASE}/?nav=dealer-dashboard${qs}`, { waitUntil: 'domcontentloaded' }); if (await p.locator('nav[aria-label="Dealer workspace"]').first().waitFor({ state: 'attached', timeout: 15000 }).then(() => true).catch(() => false)) break; } await p.waitForTimeout(2500); };
 
 const RUN = Date.now().toString(36);
 const dealerId = q(`select id from users where email='${seed.dealer}'`);
@@ -33,7 +34,7 @@ ok('buyer first message sent', first.status === 201, first.status);
 const O = await ctx(1440, 900); await login(O.p, seed.dealer); await go(O.p, '');
 ok('heading Dealer Command Centre', await O.p.getByRole('heading', { name: 'Dealer Command Centre', level: 2 }).isVisible());
 ok('hero text', await O.p.getByText('Run your dealership from one place').isVisible() && await O.p.getByText('Inventory, enquiries, sales and your team — all in one secure workspace.').isVisible());
-const groups = await O.p.locator('nav[aria-label="Dealer workspace"] [role="group"] p').allInnerTexts();
+const groups = await O.p.locator('nav[aria-label="Dealer workspace"] [role="group"] > button[aria-expanded] > span').allInnerTexts();
 ok('five sidebar groups in order', JSON.stringify(groups.map((g) => g.toUpperCase())) === JSON.stringify(['OVERVIEW', 'SALES OPERATIONS', 'TRANSACTIONS & FINANCE', 'BUSINESS GROWTH', 'PEOPLE & BUSINESS']), groups);
 ok('top bar: brand, Dealer Account chip, search, identity', await O.p.getByTestId('dealer-topbar').isVisible() && /Dealer Account/.test(await O.p.getByTestId('dealer-topbar').innerText()) && await O.p.getByRole('searchbox').isVisible() && (await O.p.getByTestId('dealer-identity').innerText()).length > 2);
 ok('Sign out and Help & support visible without scrolling', await O.p.getByRole('button', { name: 'Sign out' }).isVisible() && await O.p.getByTestId('dealer-help-support').isVisible());
@@ -48,6 +49,7 @@ await O.p.getByTestId('dealer-sidebar-toggle').click(); await O.p.waitForTimeout
 // ---- leads: reply
 await go(O.p, '&section=leads');
 const replyBtn = O.p.getByRole('button', { name: /^Reply/ }).first();
+await replyBtn.waitFor({ timeout: 25000 }).catch(() => {}); // data loads asynchronously; wait for it instead of a fixed sleep
 ok('Leads shows the buyer enquiry with a Reply action', await replyBtn.isVisible());
 await replyBtn.click(); await O.p.waitForTimeout(1500);
 ok('conversation shows the buyer message', await O.p.getByText('Is this car still available?').first().isVisible());
@@ -79,8 +81,11 @@ await O.p.getByTestId('vehicle-requests').scrollIntoViewIfNeeded(); await O.p.sc
 const pendingTitle = q(`select title from cars where dealer_id='${dealerId}' and status='pending' limit 1`);
 const hiddenTitle = q(`select title from cars where dealer_id='${dealerId}' and status='hidden' limit 1`);
 const liveTitle = q(`select title from cars where id='${carId}'`);
-const P = await ctx(1440, 900); await P.p.goto(`${BASE}/?nav=marketplace`, { waitUntil: 'domcontentloaded' }); await P.p.waitForTimeout(4000);
-const pub = await P.p.locator('body').innerText();
+const P = await ctx(1440, 900);
+// The status changes above were made directly in the disposable DB (the product never does that), so the public listing cache can still hold the old
+// list. Re-read the page until the cache has expired on its own, instead of weakening the check.
+let pub = '';
+for (let i = 0; i < 30; i++) { await P.p.goto(`${BASE}/?nav=marketplace`, { waitUntil: 'domcontentloaded' }); await P.p.waitForTimeout(4000); pub = await P.p.locator('body').innerText(); if (pub.includes(liveTitle) && !pub.includes(pendingTitle) && !pub.includes(hiddenTitle)) break; await P.p.waitForTimeout(6000); }
 ok('public marketplace shows the published vehicle', pub.includes(liveTitle), liveTitle);
 ok('public marketplace does NOT show the under-review or paused vehicles', !pub.includes(pendingTitle) && !pub.includes(hiddenTitle), { pendingTitle, hiddenTitle });
 await P.p.screenshot({ path: `${OUT}/10-public-marketplace.png`, fullPage: false });
@@ -96,7 +101,7 @@ await O.p.screenshot({ path: `${OUT}/12-team-invitation-basic.png`, fullPage: fa
 
 // ---- add-a-vehicle workflow
 await go(O.p, '&section=inventory&mode=new');
-ok('Add a vehicle form opens', await O.p.getByRole('button', { name: /Save|Publish|Create/i }).first().isVisible().catch(() => false) || /Vehicle|Make|Model/i.test(await O.p.locator('body').innerText()));
+ok('Add a vehicle form opens', await O.p.getByRole('button', { name: /Save|Publish|Create/i }).first().isVisible().catch(() => false) || await O.p.waitForFunction(() => /Vehicle|Make|Model/i.test(document.body.innerText), null, { timeout: 20000 }).then(() => true).catch(() => false));
 await O.p.screenshot({ path: `${OUT}/13-vehicle-listing-form.png`, fullPage: false });
 
 // ---- tablet

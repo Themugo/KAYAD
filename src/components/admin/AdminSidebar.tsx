@@ -56,10 +56,12 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
     id: 'accounts-onboarding', label: 'Accounts & Onboarding', icon: UserCheck,
     links: [
       { to: '/admin/users', icon: Users, label: 'Users' },
-      { to: '/admin/sellers', icon: UserCheck, label: 'Sellers' },
+      // Route paths are unchanged (bookmarks, permissions and history keep working); only the labels follow the business rules:
+      // dealers are a business identity, and personal accounts are free/open with no approval (the page keeps restrictions + history).
+      { to: '/admin/sellers', icon: UserCheck, label: 'Dealers' },
       { to: '/admin/dealer-verifications', icon: BadgeCheck, label: 'Dealer Verifications' },
-      { to: '/admin/private-seller-applications', icon: IdCard, label: 'Private Seller Applications' },
-      { to: '/admin/inspector-applications', icon: UserSearch, label: 'Inspector Apps' },
+      { to: '/admin/private-seller-applications', icon: IdCard, label: 'Personal Accounts' },
+      { to: '/admin/inspector-applications', icon: UserSearch, label: 'Inspector Applications' },
     ],
   },
   {
@@ -106,6 +108,19 @@ const NAVIGATION_GROUPS: NavigationGroup[] = [
 // Standalone, never inside a collapsible group, rendered last in the sidebar. Same route and same permission rule as before.
 const SETTINGS_LINK: LinkItem = { to: '/admin/settings', icon: Settings, label: 'Settings' };
 
+// Badges render only for a verified count above zero (a verified zero needs no badge; an unavailable metric never becomes a zero).
+// Link counters come only from the authoritative /admin/stats response. A metric the server reports as unavailable (null) shows no
+// counter at all: unavailable is never rendered as zero. Group counters sum only the verified link counters inside the group.
+const LINK_COUNTERS: Record<string, string> = {
+  '/admin/dealer-verifications': 'verificationQueue',
+  '/admin/escrows': 'openEscrows',
+  '/admin/support-tickets': 'supportQueue',
+};
+const counterValue = (stats: Record<string, unknown> | null, key: string): number | null => {
+  const value = stats?.[key];
+  return typeof value === 'number' && Number.isSafeInteger(value) && value >= 0 ? value : null;
+};
+
 const ELIGIBLE_ROLES = ['superadmin', 'admin', 'moderator', 'escrow_officer', 'marketing', 'ad_manager', 'accounts', 'technical_support', 'hr', 'ghost_checker'];
 
 const roleLinks = (user: { role?: string; permissions?: string[] }): LinkItem[] => {
@@ -142,6 +157,7 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
     'platform-security': true,
   });
   const [alertCount, setAlertCount] = useState(0);
+  const [navStats, setNavStats] = useState<Record<string, unknown> | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -151,8 +167,15 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
         .then(data => { if (active && Number.isFinite(Number(data?.unreadCount))) setAlertCount(Math.max(0, Number(data.unreadCount))); })
         .catch(() => { /* Keep the last verified count; a failed request is not zero alerts. */ });
     };
+    const refreshCounters = () => {
+      if (document.visibilityState !== 'visible') return;
+      Promise.resolve(adminAPI.stats?.())
+        .then(data => { if (active && data?.stats && typeof data.stats === 'object') setNavStats(data.stats); })
+        .catch(() => { /* Keep the last verified counters; a failed request is not zero. */ });
+    };
     refreshAlerts();
-    const interval = window.setInterval(refreshAlerts, 60_000);
+    refreshCounters();
+    const interval = window.setInterval(() => { refreshAlerts(); refreshCounters(); }, 60_000);
     document.addEventListener('visibilitychange', refreshAlerts);
     const offAlert = realtimeConnected ? on('adminAlert', refreshAlerts) : undefined;
     const offControlPlane = realtimeConnected ? on('controlPlaneUpdated', refreshAlerts) : undefined;
@@ -209,6 +232,12 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
     });
     return () => window.cancelAnimationFrame(frame);
   }, [mobileOpen, activeGroup?.id, location.pathname, expandedGroups]);
+
+  const linkCount = (link: LinkItem): number | null => (LINK_COUNTERS[link.to] ? counterValue(navStats, LINK_COUNTERS[link.to]) : null);
+  const groupCount = (group: NavigationGroup): number | null => {
+    const known = group.links.map(linkCount).filter((n): n is number => n !== null);
+    return known.length ? known.reduce((a, b) => a + b, 0) : null;
+  };
 
   if (!user || !ELIGIBLE_ROLES.includes(user.role || '')) return null;
 
@@ -271,6 +300,7 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
                   >
                     <GroupIcon size={14} aria-hidden="true" />
                     <span>{group.label}</span>
+                    {(groupCount(group) ?? 0) > 0 && <b className="admin-sidebar__count" data-testid={`group-count-${group.id}`} aria-label={`${groupCount(group)} items need attention`}>{groupCount(group)}</b>}
                     <ChevronDown className="admin-sidebar__group-chevron" size={14} aria-hidden="true" />
                   </button>
                 ) : (
@@ -293,6 +323,7 @@ export default function AdminSidebar({ mobileOpen, onToggle }: AdminSidebarProps
                         >
                           <LinkIcon size={16} aria-hidden="true" />
                           {!collapsed && <span>{link.label}</span>}
+                          {!collapsed && (linkCount(link) ?? 0) > 0 && <b className="admin-sidebar__count" data-testid={`link-count-${link.to}`}>{linkCount(link)}</b>}
                         </NavLink>
                       );
                     })}

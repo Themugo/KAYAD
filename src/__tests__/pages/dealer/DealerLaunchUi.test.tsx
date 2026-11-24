@@ -17,6 +17,8 @@ const api = vi.hoisted(() => ({
   getMarketingCampaigns: vi.fn().mockResolvedValue({ success: true, data: { items: [] } }),
   getDealerAnalytics: vi.fn().mockResolvedValue({ data: {} }),
   updateLead: vi.fn(), createCampaign: vi.fn(),
+  bulkInventoryDelete: vi.fn().mockResolvedValue({ deleted: 1, deletedIds: ['c-live'], skipped: [{ id: 'c-hid', code: 'LISTING_DELETE_BLOCKED', message: 'Has an auction.' }] }),
+  bulkInventoryStatus: vi.fn().mockResolvedValue({ updated: 1, updatedIds: ['c-live'], skipped: [] }),
 }));
 vi.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ signOut: vi.fn() }) }));
 vi.mock('../../../services/dealerPlatformApi', () => api);
@@ -130,5 +132,43 @@ describe('Dealer launch UI', () => {
     fireEvent.click(within(panel).getByRole('button', { name: 'Send request' }));
     await waitFor(() => expect(api.createVehicleRequest).toHaveBeenCalledWith({ vehicleId: 'c-live', type: 'feature', title: '360 camera', details: 'Please add the 360 camera feature.' }));
     expect(await within(panel).findByText('Received')).toBeTruthy();
+  });
+
+  it('sidebar groups open and close on their own, and navigating re-opens the active group', async () => {
+    try { window.localStorage.removeItem('kayad.dealer.navClosed'); } catch { /* */ }
+    renderIt();
+    const nav = await screen.findByRole('navigation', { name: 'Dealer workspace' });
+    const sales = within(nav).getByTestId('nav-group-sales');
+    const people = within(nav).getByTestId('nav-group-people');
+    expect(sales.getAttribute('aria-expanded')).toBe('true');
+    fireEvent.click(sales);
+    expect(sales.getAttribute('aria-expanded')).toBe('false');
+    expect(people.getAttribute('aria-expanded')).toBe('true');
+    expect(within(nav).queryByRole('button', { name: /^Inventory/ })).toBeNull();
+    // Opening a page that lives in a closed group re-opens that group.
+    fireEvent.click(screen.getAllByRole('button', { name: /Manage inventory/i })[0]);
+    await waitFor(() => expect(within(nav).getByTestId('nav-group-sales').getAttribute('aria-expanded')).toBe('true'));
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeTruthy();
+  });
+
+  it('inventory multi-select: select all eligible, count, clear, confirm and report a partial result', async () => {
+    window.history.replaceState({}, '', '/?nav=dealer-dashboard&section=inventory');
+    renderIt();
+    const all = await screen.findByTestId('bulk-select-all');
+    expect(screen.getByTestId('bulk-count').textContent).toContain('0 selected');
+    fireEvent.click(all);
+    await waitFor(() => expect(screen.getByTestId('bulk-count').textContent).toContain('4 selected'));
+    fireEvent.click(screen.getByRole('button', { name: 'Clear selection' }));
+    expect(screen.getByTestId('bulk-count').textContent).toContain('0 selected');
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select Live Prado' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select Hidden Axio' }));
+    fireEvent.click(screen.getByTestId('bulk-delete'));
+    expect(screen.getByRole('alertdialog', { name: 'Confirm removing selected vehicles' })).toBeTruthy();
+    expect(api.bulkInventoryDelete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByTestId('bulk-delete-confirm'));
+    await waitFor(() => expect(api.bulkInventoryDelete).toHaveBeenCalledWith(['c-live', 'c-hid']));
+    const report = await screen.findByTestId('bulk-report');
+    expect(report.textContent).toContain('1 listing removed; 1 could not be changed');
+    expect(report.textContent).toContain('Hidden Axio');
   });
 });

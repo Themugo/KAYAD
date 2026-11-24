@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid slice" role="img" aria-label="">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0B3A4A"/><stop offset=".55" stop-color="#0E5560"/><stop offset="1" stop-color="#E08A4B" stop-opacity=".55"/></linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7FE3D6" stop-opacity=".30"/><stop offset="1" stop-color="#0A3340" stop-opacity=".15"/></linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12424F"/><stop offset="1" stop-color="#061F29"/></linearGradient>
+    <radialGradient id="glow" cx=".55" cy=".72" r=".5"><stop offset="0" stop-color="#13B8A6" stop-opacity=".45"/><stop offset="1" stop-color="#13B8A6" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="1200" height="420" fill="url(#sky)"/>
+  <!-- showroom building -->
+  <g transform="translate(120 36)">
+    <rect x="0" y="0" width="980" height="250" fill="#0A2F3B"/>
+    <rect x="0" y="0" width="980" height="26" fill="#071F29"/>
+    <rect x="0" y="26" width="980" height="6" fill="#13B8A6" opacity=".75"/>
+    <g fill="url(#glass)" stroke="#9FE9E0" stroke-opacity=".28" stroke-width="2">
+      <rect x="22" y="52" width="140" height="190"/><rect x="176" y="52" width="140" height="190"/><rect x="330" y="52" width="140" height="190"/>
+      <rect x="484" y="52" width="140" height="190"/><rect x="638" y="52" width="140" height="190"/><rect x="792" y="52" width="166" height="190"/>
+    </g>
+    <g fill="#FFD9A0" opacity=".16"><rect x="30" y="60" width="124" height="14"/><rect x="184" y="60" width="124" height="14"/><rect x="338" y="60" width="124" height="14"/><rect x="492" y="60" width="124" height="14"/><rect x="646" y="60" width="124" height="14"/><rect x="800" y="60" width="150" height="14"/></g>
+    <text x="40" y="19" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="800" letter-spacing="6" fill="#DDF6F8">KAYARD KE</text>
+  </g>
+  <!-- floor + reflection plane -->
+  <rect y="286" width="1200" height="134" fill="url(#floor)"/>
+  <rect y="286" width="1200" height="3" fill="#7FE3D6" opacity=".35"/>
+  <rect width="1200" height="420" fill="url(#glow)"/>
+  <g stroke="#7FE3D6" stroke-opacity=".08"><path d="M0 330H1200M0 372H1200M200 286L40 420M480 286L400 420M760 286L800 420M1040 286L1160 420"/></g>
+</svg>

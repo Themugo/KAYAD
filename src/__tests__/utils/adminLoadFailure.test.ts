@@ -37,3 +37,20 @@ describe('classifyAdminFailure', () => {
     expect(typeof formatLastRefresh(new Date())).toBe('string');
   });
 });
+
+describe('fetch-client errors (HttpRequestError shape: status/responseData, no `response`)', () => {
+  it('a 500 is a server failure, not a network failure', () => {
+    expect(classifyAdminFailure({ status: 500, message: 'x' }).kind).toBe('server');
+  });
+  it('maintenance 503 is recognised from responseData', () => {
+    expect(classifyAdminFailure({ status: 503, responseData: { code: 'SYSTEM_MAINTENANCE' } }).kind).toBe('maintenance');
+  });
+  it('403/401/404 map correctly', () => {
+    expect(classifyAdminFailure({ status: 403 }).kind).toBe('forbidden');
+    expect(classifyAdminFailure({ status: 401 }).kind).toBe('session');
+    expect(classifyAdminFailure({ status: 404 }).kind).toBe('missing');
+  });
+  it('an error with no status at all is still a network failure', () => {
+    expect(classifyAdminFailure(new TypeError('Failed to fetch')).kind).toBe('network');
+  });
+});

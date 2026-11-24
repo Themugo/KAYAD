@@ -72,8 +72,8 @@ export default function WebhoistOverview() {
   // Real platform composition from the stats payload; "Buyers & Others" is only derivable when all three counts exist.
   const composition = [
     { name: 'Dealers',            count: dealers, color: 'var(--admin-brand)' },
-    { name: 'Individual Sellers', count: sellers, color: 'var(--admin-accent)' },
-    { name: 'Buyers & Others',    count: users !== null && dealers !== null && sellers !== null ? Math.max(users - (dealers + sellers), 0) : null, color: 'var(--admin-status-success)' },
+    { name: 'Legacy seller accounts', count: sellers, color: 'var(--admin-accent)' },
+    { name: 'Personal accounts & others',    count: users !== null && dealers !== null && sellers !== null ? Math.max(users - (dealers + sellers), 0) : null, color: 'var(--admin-status-success)' },
   ];
 
   const glance = [

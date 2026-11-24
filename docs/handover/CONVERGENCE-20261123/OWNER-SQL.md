@@ -1,0 +1,4 @@
+# Owner SQL / migration (nothing here has been applied by Claude)
+New migration: `supabase/migrations/20261123220000_dealer_temporary_duties.sql` (also apply `20261123210000_lead_create_find_before_insert.sql` from the dealer-launch task if not done yet).
+Schema impact: one new table `dealer_team_temporary_grants` (RLS on, owner select policy), two indexes, and `dealer_employment_events.event_type` check constraint replaced by a superset (adds `temporary_duty_granted`, `temporary_duty_revoked`). No data is changed or removed; the script is re-runnable.
+Safety: until applied, the backend treats lent duties as none (fails closed) and the Temporary duties panel shows a load error. Apply with your normal migration process, then run `NOTIFY pgrst, 'reload schema';`. Roll-back if ever needed: drop table `dealer_team_temporary_grants` (events keep their rows; the two new event types would then need the constraint restored to the earlier list).

@@ -1,0 +1,90 @@
+[
+ {
+  "name": "inventory lists the dealership vehicles",
+  "pass": true
+ },
+ {
+  "name": "sales group is open and shows Inventory",
+  "pass": true
+ },
+ {
+  "name": "sales group closes on its own (other groups stay open)",
+  "pass": true
+ },
+ {
+  "name": "Sign out and Help stay reachable while a group is closed",
+  "pass": true
+ },
+ {
+  "name": "sales group re-opens",
+  "pass": true
+ },
+ {
+  "name": "select all picks every eligible vehicle on the page",
+  "pass": true
+ },
+ {
+  "name": "removal asks for confirmation first",
+  "pass": true
+ },
+ {
+  "name": "clear selection resets the count",
+  "pass": true
+ },
+ {
+  "name": "Add photos control is present and enabled",
+  "pass": true
+ },
+ {
+  "name": "previews appear before upload (two selected)",
+  "pass": true
+ },
+ {
+  "name": "two photos uploaded and stored on the vehicle",
+  "pass": true
+ },
+ {
+  "name": "poster change is stored (new first photo)",
+  "pass": true
+ },
+ {
+  "name": "removing a photo is stored",
+  "pass": true
+ },
+ {
+  "name": "photos persist after a page refresh",
+  "pass": true
+ },
+ {
+  "name": "Temporary duties panel is shown for an active member",
+  "pass": true
+ },
+ {
+  "name": "the effect is shown before saving",
+  "pass": true
+ },
+ {
+  "name": "duty is stored with an expiry and the role is unchanged",
+  "pass": true
+ },
+ {
+  "name": "duty can be revoked from the UI",
+  "pass": true
+ },
+ {
+  "name": "no horizontal overflow at 390px (inventory with bulk toolbar)",
+  "pass": true
+ },
+ {
+  "name": "bulk toolbar usable on mobile",
+  "pass": true
+ },
+ {
+  "name": "mobile drawer exposes Sign out",
+  "pass": true
+ },
+ {
+  "name": "no uncaught page errors",
+  "pass": true
+ }
+]

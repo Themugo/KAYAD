@@ -4,8 +4,9 @@ import { loginPathFor } from '../../utils/authIntent';
 import AdminAccountMenu from './AdminAccountMenu';
 import AdminSidebar from './AdminSidebar';
 import { useAuth, SessionRecovery } from '../../context/AuthContext';
-import { useLocation, useNavigationType, Navigate } from 'react-router-dom';
-import { ChevronRight, Menu } from 'lucide-react';
+import { Link, useLocation, useNavigationType, Navigate } from 'react-router-dom';
+import { Bell, ChevronRight, Menu } from 'lucide-react';
+import { adminAPI } from '../../api/api';
 import { ADMIN_ROLE_LABELS as ROLE_LABELS } from './adminRoleLabels';
 import '../../styles/kayad-admin-shell.css';
 import '../../styles/kayad-admin-legacy-surface.css';
@@ -31,6 +32,21 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const scrollPositions = useRef(new Map<string, number>());
   const activeKey = useRef(location.key);
   const closeSidebar = () => setSidebarOpen(false);
+  // Unread admin alerts for the bell. Only a verified number is shown; a failed request keeps the last verified value (never a fake zero).
+  const [unreadAlerts, setUnreadAlerts] = useState<number | null>(null);
+  useEffect(() => {
+    if (!isAuth) return undefined;
+    let active = true;
+    const refresh = () => {
+      if (document.visibilityState !== 'visible') return;
+      Promise.resolve(adminAPI.alerts?.({ limit: 1, read: 'false' }))
+        .then((data: any) => { if (active && Number.isFinite(Number(data?.unreadCount))) setUnreadAlerts(Math.max(0, Number(data.unreadCount))); })
+        .catch(() => { /* keep last verified value */ });
+    };
+    refresh();
+    const timer = window.setInterval(refresh, 60_000);
+    return () => { active = false; window.clearInterval(timer); };
+  }, [isAuth]);
 
   // The document is the single vertical scroll owner at every breakpoint.
   // While the mobile drawer is open, lock the body without losing a pre-existing inline value.
@@ -165,6 +181,16 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </span>
             ))}
           </nav>
+          <nav className="kayad-admin-header__context" aria-label="Workspaces">
+            <span className="kayad-admin-header__workspace" aria-current="true">Admin Console</span>
+            <Link to="/">Marketplace</Link>
+            <Link to="/?nav=auctions">Auctions</Link>
+            <Link to="/?nav=inspections">Vehicle inspections</Link>
+          </nav>
+          <Link to="/admin#admin-alerts" className="kayad-admin-header__bell" aria-label={unreadAlerts ? `Notifications, ${unreadAlerts} unread` : 'Notifications'}>
+            <Bell size={18} aria-hidden="true" />
+            {unreadAlerts ? <b className="kayad-admin-header__bell-count" data-testid="header-bell-count">{unreadAlerts > 99 ? '99+' : unreadAlerts}</b> : null}
+          </Link>
           <div className="kayad-admin-header__identity" role="group" aria-label={`Signed in as ${displayName}, ${roleLabel}`}>
             <AdminAccountMenu displayName={displayName} roleLabel={roleLabel} initials={initials} />
           </div>

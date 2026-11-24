@@ -8,7 +8,7 @@ import path from 'node:path';
 
 let authUser: any;
 vi.mock('../../../context/AuthContext', () => ({ useAuth: () => ({ user: authUser, isAuth: true, loading: false, sessionStatus: 'ready' }) }));
-vi.mock('../../../api/api', () => ({ adminAPI: { alerts: vi.fn().mockResolvedValue({ unreadCount: 0, alerts: [] }) } }));
+vi.mock('../../../api/api', () => ({ adminAPI: { alerts: vi.fn().mockResolvedValue({ unreadCount: 0, alerts: [] }), stats: vi.fn().mockResolvedValue({ stats: { verificationQueue: 3, openEscrows: null, supportQueue: 0 } }) } }));
 vi.mock('../../../context/SocketContext', () => ({ useSocket: () => ({ connected: false, on: vi.fn(() => () => {}) }) }));
 
 import AdminSidebar from '../../../components/admin/AdminSidebar';
@@ -16,10 +16,10 @@ import { getEffectivePermissions, PAGE_PERMISSIONS, SUPERADMIN_ONLY } from '../.
 
 // The complete inventory from the product brief (31 original destinations + Traffic Analytics, added with the visitor analytics requirement).
 const INVENTORY: Record<string, string> = {
-  '/admin': 'Dashboard', '/admin/users': 'Users', '/admin/sellers': 'Sellers', '/admin/private-seller-applications': 'Private Seller Applications',
+  '/admin': 'Dashboard', '/admin/users': 'Users', '/admin/sellers': 'Dealers', '/admin/private-seller-applications': 'Personal Accounts',
   '/admin/cars': 'Listings', '/admin/moderation': 'Moderation', '/admin/auctions': 'Auctions', '/admin/bids': 'Bids', '/admin/escrows': 'Escrows',
   '/admin/transactions': 'Transactions', '/admin/ntsa-queue': 'NTSA Queue', '/admin/inspections': 'Inspections', '/admin/dealer-verifications': 'Dealer Verifications',
-  '/admin/inspector-applications': 'Inspector Apps', '/admin/reviews': 'Reviews', '/admin/referrals': 'Referrals', '/admin/chats': 'Chats', '/admin/reports': 'Reports',
+  '/admin/inspector-applications': 'Inspector Applications', '/admin/reviews': 'Reviews', '/admin/referrals': 'Referrals', '/admin/chats': 'Chats', '/admin/reports': 'Reports',
   '/admin/support-tickets': 'Support Tickets', '/admin/feedback': 'Feedback', '/admin/market-data': 'Market Data', '/admin/ads': 'Ad Manager', '/admin/broadcast': 'Broadcast',
   '/admin/security-log': 'Security Log', '/admin/settings': 'Settings', '/admin/control-room': 'Control Room', '/admin/staff': 'Staff', '/admin/staff-permissions': 'Staff Permissions',
   '/admin/traffic-analytics': 'Traffic Analytics', '/admin/site-designs': 'Site Designs', '/admin/featured-vehicles': 'Featured Vehicles', '/admin/panic-room': 'Panic Room', '/admin/platform-recovery': 'Platform Recovery', '/admin/webhoist': 'System Overview',
@@ -55,9 +55,27 @@ describe('grouping', () => {
   it('related work sits together (seller onboarding, money, customer care)', () => {
     superadmin(); mount();
     const group = (name: string) => within(screen.getByRole('button', { name: new RegExp(`^${name}`) }).closest('section') as HTMLElement);
-    expect(group('Accounts & Onboarding').getAllByRole('link').map((a) => a.textContent)).toEqual(['Users', 'Sellers', 'Dealer Verifications', 'Private Seller Applications', 'Inspector Apps']);
+    expect(group('Accounts & Onboarding').getAllByRole('link').map((a) => a.textContent)).toEqual(['Users', 'Dealers', 'Dealer Verifications', 'Personal Accounts', 'Inspector Applications']);
     expect(group('Finance').getAllByRole('link').map((a) => a.textContent)).toEqual(['Escrows', 'Transactions']);
     expect(group('Customer Care').getAllByRole('link').map((a) => a.textContent)).toContain('Support Tickets');
+  });
+});
+
+describe('counters come only from verified stats', () => {
+  it('shows verified non-zero counters, omits zero and unavailable ones (null is not 0) and sums only verified counters per group', async () => {
+    superadmin(); mount();
+    expect((await screen.findByTestId('link-count-/admin/dealer-verifications')).textContent).toBe('3');
+    expect(screen.queryByTestId('link-count-/admin/support-tickets')).toBeNull(); // a verified zero needs no badge
+    expect(screen.queryByTestId('link-count-/admin/escrows')).toBeNull();
+    expect(screen.getByTestId('group-count-accounts-onboarding').textContent).toBe('3');
+    expect(screen.queryByTestId('group-count-finance')).toBeNull();
+  });
+  it('group collapse is independent: collapsing one group leaves the others expanded', () => {
+    superadmin(); mount();
+    const toggles = Array.from(document.querySelectorAll('.admin-sidebar__group-toggle')) as HTMLElement[];
+    fireEvent.click(toggles[3]);
+    expect(toggles[3].getAttribute('aria-expanded')).toBe('false');
+    expect(toggles.filter((t, i) => i !== 3).every((t) => t.getAttribute('aria-expanded') === 'true')).toBe(true);
   });
 });
 

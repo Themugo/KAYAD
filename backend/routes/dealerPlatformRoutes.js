@@ -21,6 +21,10 @@ import {
   updateListing,
   deleteListing,
   bulkUpdateListings,
+  bulkDeleteListings,
+  getTemporaryDuties,
+  createTemporaryDuty,
+  revokeTemporaryDuty,
   // Leads
   getLeads,
   updateLead,
@@ -107,6 +111,7 @@ router.get("/inventory", protect, dealerWorkspaceAccess(["canListCars","canEditC
 router.post("/inventory", protect, dealerWorkspaceAccess(["canListCars"]), requireDealerVerification, uploadLimiter, cleanupUploadsOnError, upload.array("images", 10), handleUploadError, validateCar, createLimiter, asyncHandler(createListing));
 router.put("/inventory/:listingId", protect, dealerWorkspaceAccess(["canEditCars"]), verifyPendingDealerWorkspace, validateCar, createLimiter, asyncHandler(updateListing));
 router.delete("/inventory/:listingId", protect, dealerWorkspaceAccess(["canDeleteCars"]), verifyPendingDealerWorkspace, createLimiter, asyncHandler(deleteListing));
+router.post("/inventory/bulk-delete", protect, dealerWorkspaceAccess(["canDeleteCars"]), verifyPendingDealerWorkspace, createLimiter, asyncHandler(bulkDeleteListings));
 router.post("/inventory/bulk", protect, dealerWorkspaceAccess(["canEditCars","canDeleteCars"]), verifyPendingDealerWorkspace, createLimiter, asyncHandler(bulkUpdateListings));
 
 // Leads (CRM)
@@ -148,6 +153,9 @@ router.get("/team/roles", protect, dealerOrgAccess("canManageTeam"), asyncHandle
 router.post("/team/roles", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(createTeamRole));
 router.put("/team/roles/:roleKey", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(updateTeamRole));
 router.delete("/team/roles/:roleKey", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(deleteTeamRole));
+router.get("/team/:memberId/temporary-duties", protect, dealerOrgAccess("canManageTeam"), asyncHandler(getTemporaryDuties));
+router.post("/team/:memberId/temporary-duties", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(createTemporaryDuty));
+router.delete("/team/:memberId/temporary-duties/:grantId", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(revokeTemporaryDuty));
 router.get("/team/:memberId", protect, dealerOrgAccess("canManageTeam"), asyncHandler(getTeamMemberDetail));
 router.post("/team/:memberId/employment", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(applyEmploymentAction));
 router.put("/team/:memberId/business-email", protect, dealerOrgAccess("canManageTeam"), createLimiter, asyncHandler(setMemberBusinessEmail));

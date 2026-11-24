@@ -21,7 +21,7 @@ describe('AdminSettingsOnboarding', () => {
   test('shows the current server values and that email verification cannot be disabled', async () => {
     getOnboardingSettings.mockResolvedValue({ policy: policy(), canChange: true });
     render(<AdminSettingsOnboarding />);
-    expect(await screen.findByLabelText(/Private seller packages/i)).toHaveValue('free');
+    expect(await screen.findByLabelText(/Personal account packages/i)).toHaveValue('free');
     expect(screen.queryByLabelText(/Private seller approval/i)).toBeNull();
     expect(screen.getByLabelText(/Dealer onboarding/i)).toHaveValue('self_onboarding');
     expect(screen.queryByLabelText(/Listing approval/i)).toBeNull();
@@ -53,7 +53,7 @@ describe('AdminSettingsOnboarding', () => {
   test('personal selling has no administrator approval control', async () => {
     getOnboardingSettings.mockResolvedValue({ policy: policy({ revision: 4, source: 'database' }), canChange: true });
     render(<AdminSettingsOnboarding />);
-    expect(await screen.findByLabelText(/Private seller packages/i)).toHaveValue('free');
+    expect(await screen.findByLabelText(/Personal account packages/i)).toHaveValue('free');
     expect(screen.queryByLabelText(/Private seller approval/i)).toBeNull();
   });
 

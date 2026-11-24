@@ -39,6 +39,7 @@ export const EVENT_LABELS: Record<string, string> = {
   profile_completed: 'Completed their staff profile', role_changed: 'Role changed', permissions_changed: 'Permissions changed', business_email_changed: 'Business e-mail recorded',
   suspended: 'Access suspended', reinstated: 'Access reinstated', terminated: 'Employment ended', resigned: 'Resignation recorded', archived: 'Record archived',
   rehire_invited: 'Re-hire invitation sent', staff_number_assigned: 'Staff number issued',
+  temporary_duty_granted: 'Temporary duties lent', temporary_duty_revoked: 'Temporary duties revoked',
 };
 export function describeEvent(e: any, roles: TeamRole[]): string {
   const rl = (k?: string) => roles.find((r) => r.key === k)?.label || String(k || '').replace(/_/g, ' ');

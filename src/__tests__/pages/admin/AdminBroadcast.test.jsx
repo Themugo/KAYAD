@@ -46,7 +46,7 @@ describe('Admin broadcast reliability', () => {
     fireEvent.change(screen.getByLabelText(/audience/i), { target: { value: 'dealers' } });
     fireEvent.click(screen.getByRole('button', { name: /send broadcast/i }));
     await waitFor(() => expect(h.create).toHaveBeenCalledWith(expect.objectContaining({ title: 'Maintenance notice', audience: 'dealers' })));
-    expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining('Dealers and Individual Sellers'));
+    expect(window.confirm).toHaveBeenCalledWith(expect.stringContaining('Dealer accounts'));
     await waitFor(() => expect(h.send).toHaveBeenCalledWith('announcement-1'));
   });
 

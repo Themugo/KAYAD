@@ -1,0 +1,485 @@
+[
+ {
+  "group": "layout",
+  "name": "390px: command centre rendered",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "layout",
+  "name": "390px: no horizontal overflow",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "hero",
+  "name": "390px: hero starts within 40px of the header (no dead space above)",
+  "ok": true,
+  "detail": {
+   "heroTop": 66,
+   "heroH": 399.265625,
+   "heroW": 366,
+   "headerBottom": 56,
+   "contentTop": 56,
+   "visual": false
+  }
+ },
+ {
+  "group": "hero",
+  "name": "390px: hero height is proportionate (<= 520px)",
+  "ok": true,
+  "detail": {
+   "heroTop": 66,
+   "heroH": 399.265625,
+   "heroW": 366,
+   "headerBottom": 56,
+   "contentTop": 56,
+   "visual": false
+  }
+ },
+ {
+  "group": "hero",
+  "name": "390px: showroom visual hidden when stacked",
+  "ok": true,
+  "detail": {
+   "heroTop": 66,
+   "heroH": 399.265625,
+   "heroW": 366,
+   "headerBottom": 56,
+   "contentTop": 56,
+   "visual": false
+  }
+ },
+ {
+  "group": "hero",
+  "name": "390px: Quick Actions present (4)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "health",
+  "name": "390px: no page errors",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "health",
+  "name": "390px: no failed API calls",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "layout",
+  "name": "768px: command centre rendered",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "layout",
+  "name": "768px: no horizontal overflow",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "hero",
+  "name": "768px: hero starts within 40px of the header (no dead space above)",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 409,
+   "heroW": 500,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": false
+  }
+ },
+ {
+  "group": "hero",
+  "name": "768px: hero height is proportionate (<= 440px)",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 409,
+   "heroW": 500,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": false
+  }
+ },
+ {
+  "group": "hero",
+  "name": "768px: showroom visual hidden when stacked",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 409,
+   "heroW": 500,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": false
+  }
+ },
+ {
+  "group": "hero",
+  "name": "768px: Quick Actions present (4)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "health",
+  "name": "768px: no page errors",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "health",
+  "name": "768px: no failed API calls",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "layout",
+  "name": "1024px: command centre rendered",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "layout",
+  "name": "1024px: no horizontal overflow",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "hero",
+  "name": "1024px: hero starts within 40px of the header (no dead space above)",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 367.796875,
+   "heroW": 756,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": false
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1024px: hero height is proportionate (<= 440px)",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 367.796875,
+   "heroW": 756,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": false
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1024px: showroom visual hidden when stacked",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 367.796875,
+   "heroW": 756,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": false
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1024px: Quick Actions present (4)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "health",
+  "name": "1024px: no page errors",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "health",
+  "name": "1024px: no failed API calls",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "layout",
+  "name": "1180px: command centre rendered",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "layout",
+  "name": "1180px: no horizontal overflow",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "hero",
+  "name": "1180px: hero starts within 40px of the header (no dead space above)",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 217.21875,
+   "heroW": 896,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": true
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1180px: hero height is proportionate (<= 440px)",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 217.21875,
+   "heroW": 896,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": true
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1180px: showroom visual shown",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 217.21875,
+   "heroW": 896,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": true
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1180px: Quick Actions present (4)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "health",
+  "name": "1180px: no page errors",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "health",
+  "name": "1180px: no failed API calls",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "layout",
+  "name": "1280px: command centre rendered",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "layout",
+  "name": "1280px: no horizontal overflow",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "hero",
+  "name": "1280px: hero starts within 40px of the header (no dead space above)",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 220.046875,
+   "heroW": 996,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": true
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1280px: hero height is proportionate (<= 300px)",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 220.046875,
+   "heroW": 996,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": true
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1280px: showroom visual shown",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 220.046875,
+   "heroW": 996,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": true
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1280px: Quick Actions present (4)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "health",
+  "name": "1280px: no page errors",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "health",
+  "name": "1280px: no failed API calls",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "layout",
+  "name": "1440px: command centre rendered",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "layout",
+  "name": "1440px: no horizontal overflow",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "hero",
+  "name": "1440px: hero starts within 40px of the header (no dead space above)",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 200.546875,
+   "heroW": 1156,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": true
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1440px: hero height is proportionate (<= 300px)",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 200.546875,
+   "heroW": 1156,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": true
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1440px: showroom visual shown",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 200.546875,
+   "heroW": 1156,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": true
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1440px: Quick Actions present (4)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "health",
+  "name": "1440px: no page errors",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "health",
+  "name": "1440px: no failed API calls",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "layout",
+  "name": "1920px: command centre rendered",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "layout",
+  "name": "1920px: no horizontal overflow",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "hero",
+  "name": "1920px: hero starts within 40px of the header (no dead space above)",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 200.546875,
+   "heroW": 1636,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": true
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1920px: hero height is proportionate (<= 300px)",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 200.546875,
+   "heroW": 1636,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": true
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1920px: showroom visual shown",
+  "ok": true,
+  "detail": {
+   "heroTop": 74,
+   "heroH": 200.546875,
+   "heroW": 1636,
+   "headerBottom": 58,
+   "contentTop": 58,
+   "visual": true
+  }
+ },
+ {
+  "group": "hero",
+  "name": "1920px: Quick Actions present (4)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "group": "health",
+  "name": "1920px: no page errors",
+  "ok": true,
+  "detail": []
+ },
+ {
+  "group": "health",
+  "name": "1920px: no failed API calls",
+  "ok": true,
+  "detail": []
+ }
+]

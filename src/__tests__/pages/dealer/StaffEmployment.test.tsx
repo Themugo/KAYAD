@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 const api = vi.hoisted(() => ({
-  getTeamMemberDetail: vi.fn(), applyEmploymentAction: vi.fn(), updateTeamMember: vi.fn(), setMemberBusinessEmail: vi.fn(), inviteTeamMember: vi.fn(),
+  getTeamMemberDetail: vi.fn(), getTemporaryDuties: vi.fn().mockResolvedValue({ data: { grants: [], catalogue: ['canChatBuyers'], maxDays: 90, rolePermissions: [], temporaryPermissions: [], effectivePermissions: [] } }), createTemporaryDuty: vi.fn(), revokeTemporaryDuty: vi.fn(), applyEmploymentAction: vi.fn(), updateTeamMember: vi.fn(), setMemberBusinessEmail: vi.fn(), inviteTeamMember: vi.fn(),
   getMyStaffProfile: vi.fn(), updateMyStaffProfile: vi.fn(),
 }));
 vi.mock('../../../services/dealerPlatformApi', () => api);

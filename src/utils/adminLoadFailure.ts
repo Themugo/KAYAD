@@ -29,6 +29,9 @@ export interface AdminFailure {
 
 type ErrLike = {
   response?: { status?: number; data?: { code?: unknown; message?: unknown; maintenance?: unknown } };
+  /** HttpRequestError (the fetch-based client) exposes the HTTP status and parsed body directly instead of under `response`. */
+  status?: unknown;
+  responseData?: { code?: unknown; message?: unknown; maintenance?: unknown };
   code?: unknown;
   message?: unknown;
   kayadInvalidResponse?: boolean;
@@ -52,8 +55,8 @@ const REASONS: Record<AdminFailureKind, string> = {
 
 export function classifyAdminFailure(error: unknown): AdminFailure {
   const e = error as ErrLike;
-  const status = typeof e?.response?.status === 'number' ? e.response.status : null;
-  const data = e?.response?.data;
+  const status = typeof e?.response?.status === 'number' ? e.response.status : typeof e?.status === 'number' ? e.status : null;
+  const data = e?.response?.data ?? (e?.responseData && typeof e.responseData === 'object' ? e.responseData : undefined);
   const code = typeof data?.code === 'string' ? data.code : null;
   const message = typeof data?.message === 'string' ? data.message : '';
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, within } from '@testing-library/react';
+import { render, screen, cleanup, within, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 
 let authUser: any;
@@ -8,7 +8,7 @@ vi.mock('../../../context/AuthContext', () => ({
   SessionRecovery: () => null,
 }));
 vi.mock('../../../context/SocketContext', () => ({ useSocket: () => ({ connected: false, on: vi.fn(() => () => {}) }) }));
-vi.mock('../../../api/api', () => ({ adminAPI: { alerts: vi.fn().mockResolvedValue({ unreadCount: 0, alerts: [] }) } }));
+vi.mock('../../../api/api', () => ({ adminAPI: { alerts: vi.fn().mockResolvedValue({ unreadCount: 4, alerts: [] }), stats: vi.fn().mockResolvedValue({ stats: {} }) } }));
 
 import AdminLayout from '../../../components/admin/AdminLayout';
 
@@ -61,5 +61,21 @@ describe('Super Admin shell', () => {
     expect(screen.queryByText('Staff Permissions')).toBeNull();
     expect(screen.queryByText('Panic Room')).toBeNull();
     expect(screen.queryByText('Webhoist')).toBeNull();
+  });
+});
+
+describe('Header workspace context and notifications', () => {
+  it('names the current workspace and offers only real destinations (no inert controls)', () => {
+    mount('/admin');
+    const nav = screen.getByRole('navigation', { name: 'Workspaces' });
+    expect(within(nav).getByText('Admin Console').getAttribute('aria-current')).toBe('true');
+    const hrefs = within(nav).getAllByRole('link').map((a) => a.getAttribute('href'));
+    expect(hrefs).toEqual(['/', '/?nav=auctions', '/?nav=inspections']);
+  });
+  it('the notification bell links to the real alerts panel and shows only the verified unread count', async () => {
+    mount('/admin');
+    const bell = await screen.findByRole('link', { name: /Notifications, 4 unread/ });
+    expect(bell.getAttribute('href')).toBe('/admin#admin-alerts');
+    await waitFor(() => expect(screen.getByTestId('header-bell-count').textContent).toBe('4'));
   });
 });

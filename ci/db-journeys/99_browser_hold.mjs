@@ -24,7 +24,13 @@ for (const r of ['viewer', 'sales_agent', 'finance_officer', 'manager']) {
   await u.raw('/api/dealer-platform/team/accept', { method: 'POST', body: { token: tok } });
   roles[r] = u.email;
 }
-fs.writeFileSync(new URL('./out/browser-seed.json', import.meta.url), JSON.stringify({ password: PW, dealer: dealer.email, personal: personal.email, buyer: buyer.email, team: roles }, null, 1));
+// Platform staff identities for admin-console browser checks (disposable, example.test only). The Super Admin is the configured owner identity.
+const sadm = await makeUser({ tag: 'badmin', dbRole: 'superadmin' });
+q(`update users set email='prev-owner-'||id||'@example.test' where email='ci-owner@example.test'`);
+q(`update users set email='ci-owner@example.test', name='James Mugo' where id='${sadm.id}'`);
+const moderator = await makeUser({ tag: 'bmod', dbRole: 'moderator' });
+const platform = { superadmin: 'ci-owner@example.test', moderator: moderator.email };
+fs.writeFileSync(new URL('./out/browser-seed.json', import.meta.url), JSON.stringify({ password: PW, dealer: dealer.email, personal: personal.email, buyer: buyer.email, team: roles, platform }, null, 1));
 console.log('seeded; holding for', hold, 's');
 await new Promise((r) => setTimeout(r, hold * 1000));
 process.exit(0);

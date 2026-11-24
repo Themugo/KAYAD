@@ -492,6 +492,40 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
   const [showSold, setShowSold] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  // Bulk selection (the server re-checks every record and the caller's permission; this is only the control surface).
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkConfirm, setBulkConfirm] = useState(false);
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const [bulkReport, setBulkReport] = useState<{ tone: 'ok' | 'warn' | 'error'; text: string; failed: { id: string; message: string }[] } | null>(null);
+  const isBulkEligible = (c: any) => {
+    const bids = Number(c.bidsCount ?? c.bids_count ?? 0); const a = String(c.auctionStatus ?? c.auction_status ?? '');
+    return c.status !== 'sold' && !(c.isAuction || c.hasAuction || c.has_auction || (a && a !== 'none' && a !== 'draft') || bids > 0);
+  };
+  // A selection never silently reaches vehicles the filter has hidden: drop ids that are no longer visible.
+  useEffect(() => {
+    const visible = new Set((visibleListings as any[]).map((c) => String(c.id || c._id)));
+    setSelectedIds((prev) => (prev.every((id) => visible.has(id)) ? prev : prev.filter((id) => visible.has(id))));
+  }, [visibleListings]);
+  const runBulk = async (kind: 'delete' | 'pause' | 'publish') => {
+    if (bulkBusy || selectedIds.length === 0) return;
+    setBulkBusy(true); setBulkReport(null);
+    const titleOf = (id: string) => { const c: any = (myListings as any[]).find((x) => String(x.id || x._id) === id); return c?.title || (c ? `${c.year} ${c.brand} ${c.model}` : id); };
+    try {
+      const data: any = kind === 'delete' ? await dealerApi.bulkInventoryDelete(selectedIds) : await dealerApi.bulkInventoryStatus(selectedIds, kind === 'pause' ? 'hidden' : 'available');
+      const done: string[] = (kind === 'delete' ? data.deletedIds : data.updatedIds) || [];
+      const skipped: { id: string; message?: string }[] = data.skipped || [];
+      if (kind === 'delete') setMyListings((prev) => prev.filter((c) => !done.includes(String(c.id || c._id))));
+      else setMyListings((prev) => prev.map((c) => (done.includes(String(c.id || c._id)) ? { ...c, status: kind === 'pause' ? 'hidden' : 'available' } : c)));
+      setSelectedIds(skipped.map((k) => k.id));
+      setBulkConfirm(false);
+      const verb = kind === 'delete' ? 'removed' : kind === 'pause' ? 'paused' : 'made active';
+      setBulkReport({ tone: skipped.length ? 'warn' : 'ok', text: `${done.length} listing${done.length === 1 ? '' : 's'} ${verb}${skipped.length ? `; ${skipped.length} could not be changed` : ''}.`, failed: skipped.map((k) => ({ id: k.id, message: `${titleOf(k.id)} — ${k.message || 'not changed'}` })) });
+    } catch (err: any) {
+      const body = err?.response?.data; const failed: { id: string; message: string }[] = (body?.data?.skipped || []).map((k: any) => ({ id: k.id, message: `${titleOf(k.id)} — ${k.message || 'not changed'}` }));
+      setBulkConfirm(false);
+      setBulkReport({ tone: 'error', text: err?.response?.status === 403 ? 'You do not have permission to do this. Nothing was changed.' : (body?.message || 'The bulk action failed. Nothing was changed.'), failed });
+    } finally { setBulkBusy(false); }
+  };
 
   const confirmMarkSold = async (car: BackendCar) => {
     const id = String(car.id || car._id);
@@ -798,6 +832,10 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
     );
   }
 
+  // Each group opens and closes on its own. The group holding the active page is always opened when you navigate to it.
+  const [closedGroups, setClosedGroups] = useState<string[]>(() => { try { const v = JSON.parse(window.localStorage.getItem('kayad.dealer.navClosed') || '[]'); return Array.isArray(v) ? v.filter((x) => typeof x === 'string') : []; } catch { return []; } });
+  const toggleNavGroup = (id: string) => setClosedGroups((prev) => { const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]; try { window.localStorage.setItem('kayad.dealer.navClosed', JSON.stringify(next)); } catch { /* optional convenience */ } return next; });
+  useEffect(() => { const g = DEALER_NAV_GROUPS.find((x) => x.items.some((i) => i.id === activeSection)); if (g) setClosedGroups((prev) => (prev.includes(g.id) ? prev.filter((x) => x !== g.id) : prev)); }, [activeSection]);
   const currentGroup = DEALER_NAV_GROUPS.find((g) => g.items.some((i) => i.id === activeSection)) || DEALER_NAV_GROUPS[0];
   const currentItem = currentGroup.items.find((i) => i.id === activeSection) || currentGroup.items[0];
   const leadBadge = dashboard?.overview?.leads?.new;
@@ -844,9 +882,23 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
               aria-labelledby={`dealer-nav-${group.id}`}
               className={`space-y-1 ${index > 0 ? 'mt-3 border-t border-white/10 pt-3' : ''}`}
             >
-              <p id={`dealer-nav-${group.id}`} className={compact ? 'sr-only' : 'px-3 pb-1 text-[10px] font-black uppercase tracking-[.16em] text-white/65'}>
-                {group.label}
-              </p>
+              {compact ? (
+                <p id={`dealer-nav-${group.id}`} className="sr-only">{group.label}</p>
+              ) : (
+                <button
+                  type="button"
+                  id={`dealer-nav-${group.id}`}
+                  aria-expanded={!closedGroups.includes(group.id)}
+                  aria-controls={`dealer-nav-items-${group.id}`}
+                  data-testid={`nav-group-${group.id}`}
+                  onClick={() => toggleNavGroup(group.id)}
+                  className="flex w-full min-h-9 items-center justify-between rounded-md px-3 pb-1 text-left text-[10px] font-black uppercase tracking-[.16em] text-white/65 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#12D6CB]"
+                >
+                  <span>{group.label}</span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${closedGroups.includes(group.id) ? '-rotate-90' : ''}`} aria-hidden="true" />
+                </button>
+              )}
+              <div id={`dealer-nav-items-${group.id}`} hidden={!compact && closedGroups.includes(group.id)} className="space-y-1">
               {group.items.map((item) => (
                 <NavTab
                   key={item.id}
@@ -858,6 +910,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                   collapsed={compact}
                 />
               ))}
+              </div>
             </div>
           ))}
         </nav>
@@ -1181,6 +1234,41 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                       <p className="col-span-2 text-xs text-[#475569] sm:ml-auto" data-testid="inventory-count">Showing {visibleListings.length} of {invStatus === 'sold' ? soldListings.length : activeListings.length} {invStatus === 'sold' ? 'sold' : 'active'}</p>
                     </div>
                   )}
+                  {bulkReport && (
+                    <div role="status" data-testid="bulk-report" className={`mb-3 rounded-lg border p-3 text-sm ${bulkReport.tone === 'ok' ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : bulkReport.tone === 'warn' ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-[#FDA29B] bg-[#FEF3F2] text-[#7A271A]'}`}>
+                      <p className="font-semibold">{bulkReport.text}</p>
+                      {bulkReport.failed.length > 0 && <ul className="mt-1 list-disc pl-5 text-xs">{bulkReport.failed.map((f) => <li key={f.id}>{f.message}</li>)}</ul>}
+                      <button type="button" onClick={() => setBulkReport(null)} className="mt-2 text-xs font-bold underline">Dismiss</button>
+                    </div>
+                  )}
+                  {visibleListings.some(isBulkEligible) && (
+                    <div className="mb-3 flex flex-wrap items-center gap-2 rounded-xl border border-[#D7E7E4] bg-[#F7FBFA] px-3 py-2" data-testid="bulk-toolbar">
+                      <label className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-[#0A3340]">
+                        <input type="checkbox" data-testid="bulk-select-all" aria-label="Select all eligible vehicles on this page"
+                          checked={visibleListings.filter(isBulkEligible).length > 0 && visibleListings.filter(isBulkEligible).every((c) => selectedIds.includes(String(c.id || c._id)))}
+                          onChange={(e) => setSelectedIds(e.target.checked ? visibleListings.filter(isBulkEligible).map((c) => String(c.id || c._id)) : [])} className="h-4 w-4" />
+                        Select all
+                      </label>
+                      <span className="text-xs text-[#475569]" aria-live="polite" data-testid="bulk-count">{selectedIds.length} selected</span>
+                      {selectedIds.length > 0 && (
+                        <>
+                          <button type="button" onClick={() => setSelectedIds([])} className="min-h-10 rounded-lg border border-[#B9D3CF] px-3 text-xs font-bold text-[#0A3340]">Clear selection</button>
+                          <button type="button" disabled={bulkBusy} onClick={() => runBulk('pause')} data-testid="bulk-pause" className="min-h-10 rounded-lg border border-[#B9D3CF] px-3 text-xs font-bold text-[#0A3340] disabled:opacity-60">Pause selected</button>
+                          <button type="button" disabled={bulkBusy} onClick={() => runBulk('publish')} data-testid="bulk-publish" className="min-h-10 rounded-lg bg-[#176B87] px-3 text-xs font-bold text-white disabled:opacity-60">Make active</button>
+                          <button type="button" disabled={bulkBusy} onClick={() => setBulkConfirm(true)} data-testid="bulk-delete" className="min-h-10 rounded-lg border border-[#B9D3CF] px-3 text-xs font-bold text-[#B42318] disabled:opacity-60">Remove selected</button>
+                        </>
+                      )}
+                      {bulkConfirm && (
+                        <div role="alertdialog" aria-label="Confirm removing selected vehicles" className="basis-full rounded-lg border border-[#FDA29B] bg-[#FEF3F2] p-3 text-sm text-[#7A271A]">
+                          <p>Remove {selectedIds.length} selected vehicle{selectedIds.length === 1 ? '' : 's'} from your inventory? They will no longer appear to buyers. Only vehicles you are allowed to remove will be changed.</p>
+                          <div className="mt-2 flex gap-2">
+                            <button type="button" autoFocus disabled={bulkBusy} onClick={() => runBulk('delete')} aria-busy={bulkBusy} data-testid="bulk-delete-confirm" className="min-h-10 rounded-lg bg-[#B42318] px-3 text-xs font-bold text-white disabled:opacity-60">{bulkBusy ? 'Removing…' : 'Yes, remove'}</button>
+                            <button type="button" disabled={bulkBusy} onClick={() => setBulkConfirm(false)} className="min-h-10 rounded-lg border border-[#B9D3CF] px-3 text-xs font-bold">Cancel</button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div className="space-y-3">
                     {myListings.length === 0 ? (
                       <div className="text-center py-10">
@@ -1214,6 +1302,7 @@ export default function DealerDashboard({ user, onOpenAuth, onNavigate }) {
                       return (
                         <div key={car.id} data-testid="inventory-row" className="rounded-2xl border border-[#D7E7E4] bg-white p-3 shadow-[0_2px_10px_rgba(11,29,58,0.04)] transition hover:border-[#176B87]/40 hover:shadow-[0_8px_22px_rgba(11,29,58,0.08)] sm:p-4">
                           <div className="grid grid-cols-[104px_minmax(0,1fr)] items-start gap-x-3 gap-y-2 sm:flex sm:items-center sm:gap-4">
+                            {isBulkEligible(car) && <input type="checkbox" data-testid="bulk-row-select" aria-label={`Select ${label}`} checked={selectedIds.includes(carId)} onChange={(e) => setSelectedIds((prev) => (e.target.checked ? [...prev, carId] : prev.filter((x) => x !== carId)))} className="h-4 w-4 shrink-0 self-start sm:self-center" />}
                             <span className="hidden sm:inline min-w-9 text-center text-sm font-bold text-[#475569] shrink-0" aria-label={car.listingNumber != null ? `Listing number ${car.listingNumber}` : 'Listing number not assigned'} data-testid="inventory-row-number">{car.listingNumber != null ? `#${car.listingNumber}` : '—'}</span>
                             <ListingThumb src={image} fallback={car.images?.[0]?.url} alt={label} count={photoCount} priority={rowIdx < 3} className="h-20 w-full sm:h-24 sm:w-36" />
                             <div className="flex-1 min-w-0">

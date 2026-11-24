@@ -137,8 +137,8 @@ export default function AdminPrivateSellerApplications() {
       <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#176B87]">Account governance</p>
-          <h1 id="private-seller-review-title" className="mt-1 text-2xl font-black text-[#0A3340]">Private-seller applications</h1>
-          <p className="mt-2 max-w-3xl text-sm text-[#64748B]">Review private-selling capability for existing personal accounts. Approval does not create a dealer account or remove buyer access.</p>
+          <h1 id="private-seller-review-title" className="mt-1 text-2xl font-black text-[#0A3340]">Personal accounts: selling status</h1>
+          <p className="mt-2 max-w-3xl text-sm text-[#64748B]">Personal accounts can buy and sell for free with no application or approval. This page keeps the restriction controls (suspend, revoke, restore) and the historical application records. New applications appear here only if the administrator has switched seller approval on in Settings. Approval does not create a dealer account or remove buyer access.</p>
         </div>
         <button type="button" onClick={() => void reload()} disabled={loading} aria-label={loading ? 'Refreshing applications' : 'Refresh applications'} className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#D7E7E4] bg-white px-4 py-2 text-sm font-bold text-[#0A3340] disabled:opacity-60">
           <RefreshCw size={16} aria-hidden="true" /> Refresh

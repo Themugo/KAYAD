@@ -193,9 +193,9 @@ describe('admin private-seller application review', () => {
     await screen.findByText(/Sell my own vehicle/);
     // AdminLayout owns the single <main> landmark; this page is a labelled region inside it (a nested <main> is an a11y defect).
     expect(screen.queryByRole('main')).toBeNull();
-    const region = screen.getByRole('region', { name: 'Private-seller applications' });
+    const region = screen.getByRole('region', { name: 'Personal accounts: selling status' });
     expect(region.getAttribute('aria-labelledby')).toBe('private-seller-review-title');
-    expect(screen.getByRole('heading', { level: 1, name: 'Private-seller applications' })).toBeTruthy();
+    expect(screen.getByRole('heading', { level: 1, name: 'Personal accounts: selling status' })).toBeTruthy();
     const textarea = screen.getByLabelText(/Decision reason/) as HTMLTextAreaElement;
     expect(textarea.tagName).toBe('TEXTAREA');
     expect(textarea.maxLength).toBe(500);

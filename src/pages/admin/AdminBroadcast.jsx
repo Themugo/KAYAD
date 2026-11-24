@@ -7,8 +7,8 @@ const MAX_MESSAGE_LENGTH = 5000;
 
 const audienceLabels = {
   all: 'All Users',
-  dealers: 'Dealers and Individual Sellers',
-  buyers: 'Buyers',
+  dealers: 'Dealer accounts',
+  buyers: 'Personal accounts',
   specific_users: 'Selected Users',
 };
 
@@ -116,12 +116,12 @@ export default function AdminBroadcast() {
 
   return (
     <div className="page">
-      <div className="container" style={{ paddingTop: 32, paddingBottom: 64, maxWidth: 900 }}>
+      <div className="container" style={{ paddingTop: 12, paddingBottom: 64, maxWidth: 900 }}>
         <div style={{ marginBottom: 24 }}>
           <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--color-muted, #64748b)', marginBottom: 6 }}>Business Management</p>
           <h1 style={{ marginBottom: 8 }}>Broadcast Message</h1>
           <p style={{ color: 'var(--color-muted, #64748b)', margin: 0, lineHeight: 1.6 }}>
-            Send an administrative announcement to all users, dealers and individual sellers, or buyers. Confirm the audience before sending.
+            Send an administrative announcement to all users, to dealer accounts, or to personal accounts (buyers and personal sellers share one account). Confirm the audience before sending.
           </p>
         </div>
 
@@ -162,8 +162,8 @@ export default function AdminBroadcast() {
               Audience
               <select aria-label="Audience" className="input" value={audience} onChange={(event) => setAudience(event.target.value)}>
                 <option value="all">All Users</option>
-                <option value="dealers">Dealers and Individual Sellers</option>
-                <option value="buyers">Buyers</option>
+                <option value="dealers">Dealer accounts</option>
+                <option value="buyers">Personal accounts</option>
               </select>
               <span style={{ color: '#64748b', fontWeight: 400, fontSize: 12, lineHeight: 1.5 }}>
                 The recipient group is resolved by the server when the broadcast is sent. All Users can include every account in the system.

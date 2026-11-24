@@ -1,5 +1,6 @@
 import { getSupabase } from "../utils/supabase.js";
 import { isOwnerUser } from "../config/owners.js";
+import { activeDutyPermissions } from "../services/dealerTemporaryDuties.service.js";
 
 const OWNER_ROLE = "dealer";
 const STAFF_BYPASS = new Set(["admin", "superadmin"]);
@@ -42,12 +43,17 @@ export async function resolveDealerOrg(req) {
   }
   if (!membership) return null;
 
+  // Effective permissions = the role's permissions plus any duty currently lent to this membership (never persisted into the role).
+  const base = membership.permissions || {};
+  const lent = await activeDutyPermissions(membership.id);
+  const permissions = lent.length ? { ...base, ...Object.fromEntries(lent.map((k) => [k, true])) } : base;
   return {
     dealerId: membership.dealer,
     membershipId: membership.id,
     isOwner: false,
     role: membership.role,
-    permissions: membership.permissions || {},
+    permissions,
+    ...(lent.length ? { temporaryPermissions: lent } : {}),
   };
 }
 

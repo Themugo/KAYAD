@@ -111,11 +111,21 @@ describe('Command centre — canonical destinations', () => {
     expect(screen.getByRole('link', { name: 'Open vehicle listings approval workflow' }).textContent).toContain('7');
     expect(workbench.contains(screen.getByRole('link', { name: 'Open dealers approval workflow' }))).toBe(true);
   });
-  it('the Active Staff card does not invent a staff count', async () => {
+  it('the Active Staff card shows the server-reported count and never a guess', async () => {
     authUser = { id: 'u1', role: 'superadmin', isOwner: false };
+    api.stats.mockResolvedValue({ stats: { ...GOOD_STATS, activeStaff: 9 } });
     mount();
     await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
-    expect(kpi('Active Staff').textContent).toContain('View staff');
+    expect(kpi('Active Staff').textContent).toContain('9');
+    expect(kpi('Active Staff').getAttribute('href')).toBe('/admin/staff');
+  });
+  it('Active Staff is Unavailable (not 0) when the server does not report it', async () => {
+    authUser = { id: 'u1', role: 'superadmin', isOwner: false };
+    api.stats.mockResolvedValue({ stats: { ...GOOD_STATS, activeStaff: null }, unavailable: ['activeStaff'] });
+    mount();
+    await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
+    expect(kpi('Active Staff').textContent).toContain('Unavailable');
+    expect(kpi('Active Staff').textContent).not.toMatch(/\b0\b/);
   });
   it('support is reached through its canonical route, not a fabricated tile', async () => {
     mount();
@@ -242,7 +252,7 @@ describe('Command centre — canonical approval workbench', () => {
     const workbench = screen.getByTestId('approval-workbench');
     const routes = [
       ['dealers', '/admin/dealer-verifications'],
-      ['sellers', '/admin/sellers'],
+      ['dealer accounts', '/admin/sellers'],
       ['inspectors', '/admin/inspector-applications'],
       ['vehicle listings', '/admin/moderation'],
       ['document verification', '/admin/ntsa-queue'],
@@ -367,7 +377,7 @@ describe('Command centre — destinations follow the role', () => {
     expect(quick.querySelector('a[href="/admin/dealer-verifications"]')).not.toBeNull();
     const staff = screen.getByText('Active Staff', { selector: 'small' }).closest('.kayad-command-kpi')!;
     expect(staff.tagName).toBe('DIV');
-    expect(staff.textContent).toContain('Super Admin only');
+    expect(staff.textContent).not.toContain('View staff'); // restricted tile: not a link, no invented count
     // the figure itself is still shown, only the link is withheld
     expect(screen.getByText('Total Users', { selector: 'small' }).closest('.kayad-command-kpi')!.textContent).toContain('120');
   });
@@ -450,5 +460,32 @@ describe('Command centre — live data synchronization', () => {
     expect(screen.getByRole('button', { name: 'Resume auto-sync' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Resume auto-sync' }));
     expect(screen.getByRole('button', { name: 'Pause auto-sync' })).toBeTruthy();
+  });
+});
+
+describe('Command centre hero (reference design)', () => {
+  it('has a decorative showroom visual that is hidden from assistive technology and carries no controls', async () => {
+    mount();
+    await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
+    const visual = screen.getByTestId('hero-visual');
+    expect(visual.getAttribute('aria-hidden')).toBe('true');
+    expect(visual.querySelectorAll('a,button,input').length).toBe(0);
+    for (const img of Array.from(visual.querySelectorAll('img'))) expect(img.getAttribute('alt')).toBe('');
+  });
+  it('keeps identity, Nairobi time and the honest status on one status row', async () => {
+    mount();
+    await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
+    const row = document.querySelector('.kayad-command-statusrow')!;
+    expect(row.querySelector('.kayad-command-identity')).not.toBeNull();
+    expect(row.textContent).toMatch(/Nairobi time/i);
+    expect(row.textContent).toMatch(/Operational data loaded|Loading operational data|unavailable or restricted/);
+  });
+  it('shows exactly the four existing Quick Actions for a super admin, each a real link', async () => {
+    authUser = { id: 'u1', role: 'superadmin', isOwner: false };
+    mount();
+    await waitFor(() => expect(screen.getByText('120')).toBeTruthy());
+    const links = Array.from(screen.getByLabelText('Quick Actions').querySelectorAll('a'));
+    expect(links.map((a) => a.textContent)).toEqual(['Add Staff', 'Review Dealers', 'View Vehicles', 'View Reports']);
+    expect(links.map((a) => a.getAttribute('href'))).toEqual(['/admin/staff', '/admin/dealer-verifications', '/admin/cars', '/admin/reports']);
   });
 });

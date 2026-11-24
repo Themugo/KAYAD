@@ -316,6 +316,8 @@
 .admin-sidebar__group-toggle:hover { background: rgba(221, 246, 248, 0.045); color: var(--admin-text); }
 .admin-sidebar__group-chevron { flex-shrink: 0; transition: transform 160ms ease; }
 .admin-sidebar__group-toggle[aria-expanded="false"] .admin-sidebar__group-chevron { transform: rotate(-90deg); }
+.admin-sidebar__count { margin-left: auto; min-width: 20px; padding: 1px 7px; border-radius: 999px; background: rgba(19,184,166,.18); color: #7FE3D6; font-size: 11px; font-weight: 800; line-height: 18px; text-align: center; }
+.admin-sidebar__group-toggle .admin-sidebar__count { margin-left: auto; margin-right: 6px; }
 .admin-sidebar__links[hidden] { display: none; }
 .admin-sidebar__group.has-active-route > .admin-sidebar__group-toggle { color: var(--admin-accent-bright); }
 .admin-sidebar__group-toggle:focus-visible { outline: 2px solid var(--admin-shell-focus); outline-offset: 2px; }
@@ -968,3 +970,31 @@
     min-height: 48px;
   }
 }
+
+/* ── Shell density and header context (reference design): compact, continuous sidebar; workspace context + bell in the header ── */
+.kayad-admin-shell .admin-sidebar .admin-sidebar__navigation { padding: 6px 8px; }
+.kayad-admin-shell .admin-sidebar .admin-sidebar__group { margin: 0; padding: 2px 0 4px; border-bottom: 1px solid var(--admin-sidebar-border); }
+.kayad-admin-shell .admin-sidebar .admin-sidebar__group:last-child { border-bottom: 0; }
+.kayad-admin-shell .admin-sidebar .admin-sidebar__group-toggle { min-height: 28px; padding: 4px 8px; font-size: 10.5px; letter-spacing: .08em; white-space: nowrap; }
+.kayad-admin-shell .admin-sidebar .admin-sidebar__group-toggle > span:not(.admin-sidebar__count) { overflow: hidden; text-overflow: ellipsis; }
+.kayad-admin-shell .admin-sidebar .admin-sidebar__links { gap: 0; padding: 1px 0 2px; }
+.kayad-admin-shell .admin-sidebar .admin-sidebar__link { min-height: 28px; padding: 4px 9px; gap: 9px; font-size: 12px; }
+.kayad-admin-shell .admin-sidebar .admin-sidebar__link svg { width: 15px; height: 15px; }
+.kayad-admin-shell .admin-sidebar .admin-sidebar__footer { padding: 6px 8px; display: grid; gap: 2px; }
+.kayad-admin-shell .admin-sidebar .admin-sidebar__footer .admin-sidebar__link { min-height: 32px; }
+.admin-sidebar__link .admin-sidebar__count { margin-left: auto; }
+
+.kayad-admin-header__context { display: flex; align-items: center; gap: 4px; margin-left: auto; min-width: 0; }
+.kayad-admin-header__context a, .kayad-admin-header__workspace {
+  display: inline-flex; align-items: center; min-height: 30px; padding: 0 11px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; text-decoration: none;
+}
+.kayad-admin-header__context a { color: var(--admin-muted); border: 1px solid transparent; }
+.kayad-admin-header__context a:hover { color: var(--admin-text); border-color: var(--admin-sidebar-border); }
+.kayad-admin-header__context a:focus-visible, .kayad-admin-header__bell:focus-visible { outline: 2px solid var(--admin-shell-focus); outline-offset: 2px; }
+.kayad-admin-header__workspace { background: var(--admin-accent, #13B8A6); color: #04222B; font-weight: 800; }
+.kayad-admin-header__bell { position: relative; display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; color: var(--admin-text); }
+.kayad-admin-header__bell:hover { background: rgba(127, 227, 214, .12); }
+.kayad-admin-header__bell-count { position: absolute; top: 1px; right: 0; min-width: 16px; padding: 0 4px; border-radius: 999px; background: var(--admin-status-danger, #DC2626); color: #fff; font-size: 10px; font-weight: 800; line-height: 16px; text-align: center; }
+@media (max-width: 1100px) { .kayad-admin-header__context a { display: none; } }
+@media (max-width: 520px) { .kayad-admin-header__workspace { display: none; } }
+.kayad-admin-shell .admin-sidebar .admin-sidebar__group-toggle { letter-spacing: .05em; font-size: 10px; gap: 7px; }

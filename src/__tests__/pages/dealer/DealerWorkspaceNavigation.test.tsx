@@ -34,7 +34,7 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
     const n = await nav();
     const groups = within(n).getAllByRole('group').map((g) => g.getAttribute('aria-labelledby'));
     expect(groups).toEqual(['dealer-nav-overview', 'dealer-nav-sales', 'dealer-nav-finance', 'dealer-nav-growth', 'dealer-nav-people']);
-    const names = (id: string) => within(within(n).getByRole('group', { name: id })).getAllByRole('button').map((b) => b.querySelector('span.font-medium')?.textContent);
+    const names = (id: string) => within(within(n).getByRole('group', { name: id })).getAllByRole('button').map((b) => b.querySelector('span.font-medium')?.textContent).filter(Boolean);
     expect(names('Overview')).toEqual(['Dashboard']);
     expect(names('Sales operations')).toEqual(['Inventory', 'Leads', 'Pipeline', 'Customers', 'Auctions', 'Inspections']);
     expect(names('Transactions & finance')).toEqual(['Escrow', 'Finance']);
@@ -45,7 +45,8 @@ describe('Dealer workspace navigation (Phase 14.2)', () => {
   it('keeps all 14 original sections reachable plus the new Banking item (none removed)', async () => {
     renderIt();
     const n = await nav();
-    expect(within(n).getAllByRole('button')).toHaveLength(15);
+    // 15 destinations + 5 collapsible group headings
+    expect(within(n).getAllByRole('button')).toHaveLength(20);
   });
 
   it('marks exactly one item as the current page and shows the real new-lead badge', async () => {
