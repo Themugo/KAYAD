@@ -2,6 +2,7 @@ import express from "express";
 import rateLimit from "express-rate-limit";
 import { submitContact, listContacts, markRead } from "../controllers/contactController.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import { validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
 const router = express.Router();
@@ -14,6 +15,6 @@ const contactLimiter = rateLimit({
 
 router.post("/", contactLimiter, submitContact);
 router.get("/", protect, adminOnly, validateQuery(analyticsQuerySchema), listContacts);
-router.patch("/:id/read", protect, adminOnly, validateObjectId, markRead);
+router.patch("/:id/read", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SUPPORT), validateObjectId, markRead);
 
 export default router;

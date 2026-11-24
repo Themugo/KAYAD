@@ -21,6 +21,7 @@ import {
   processRetryQueueHandler,
 } from "../controllers/notificationAnalyticsController.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 
@@ -58,15 +59,15 @@ router.get("/delivery-report", protect, adminOnly, asyncHandler(generateDelivery
 router.get("/trends", protect, adminOnly, asyncHandler(getNotificationTrendsHandler));
 
 // Retry specific notification
-router.post("/retry/:auditId", protect, adminOnly, asyncHandler(retryNotificationHandler));
+router.post("/retry/:auditId", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), asyncHandler(retryNotificationHandler));
 
 // Bulk retry notifications
-router.post("/bulk-retry", protect, adminOnly, asyncHandler(bulkRetryNotificationsHandler));
+router.post("/bulk-retry", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), asyncHandler(bulkRetryNotificationsHandler));
 
 // Get retry queue
 router.get("/retry-queue", protect, adminOnly, asyncHandler(getRetryQueueHandler));
 
 // Process retry queue
-router.post("/process-retry-queue", protect, adminOnly, asyncHandler(processRetryQueueHandler));
+router.post("/process-retry-queue", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), asyncHandler(processRetryQueueHandler));
 
 export default router;

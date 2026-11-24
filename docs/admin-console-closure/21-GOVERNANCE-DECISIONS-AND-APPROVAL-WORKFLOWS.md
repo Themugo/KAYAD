@@ -1,5 +1,7 @@
 # 21 — Governance decisions and approval workflows (OD-1 … OD-4)
 
+> **Superseded in part 2026-11-24 (final closure):** see docs 28 (write authorization register), 29 (security/governance closure), 30 (migration parity and restore) and 31 (gates and regression). Where this document disagrees, the newer document wins: System Health is now technical-only (OD-1 hardened), the any-staff write-route residual is closed except UD-1 and OD-5, and the earlier "transition_escrow absent" wording is corrected.
+
 Evidence level: **LOCAL + DISPOSABLE-DB** (journey `33_governance_decisions` 70/70, `32_route_api_authorization` green, backend Jest matrix green, vitest). Not production verified. Migration `20261124130000_dealer_reinstatement_requests.sql` is **not applied to any hosted database**.
 
 ## OD-1 System health access

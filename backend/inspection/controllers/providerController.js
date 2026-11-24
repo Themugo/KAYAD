@@ -315,7 +315,10 @@ export const getEarningsSummary = asyncHandler(async (req, res) => {
 
 // Submit review
 export const submitReview = asyncHandler(async (req, res) => {
-  const { bookingId, ratings, reviewText } = req.body;
+  const { bookingId, ratings, reviewText } = req.body || {};
+  if (!bookingId || !ratings || !Number.isFinite(Number(ratings.overall))) {
+    return response.error ? response.error(res, 'bookingId and ratings.overall are required', 400) : res.status(400).json({ success: false, message: 'bookingId and ratings.overall are required' });
+  }
 
   const result = await phase22Service.submitReview(bookingId, req.user.id, Number(ratings.overall), reviewText);
   response.created(res, result);

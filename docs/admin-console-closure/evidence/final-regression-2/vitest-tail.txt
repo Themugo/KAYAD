@@ -1,0 +1,33 @@
+
+ RUN  v4.1.11 /home/claude/p13
+
+Not implemented: navigation to another Document
+ ❯ src/__tests__/context/PublishedDesignRuntime.test.tsx (5 tests | 1 failed) 137ms
+     × branding provider applies colours, brand text and supported fonts site-wide 49ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/__tests__/context/PublishedDesignRuntime.test.tsx > the PUBLISHED design reaches the real public components > branding provider applies colours, brand text and supported fonts site-wide
+AssertionError: expected '' to be '#AA0000' // Object.is equality
+
+- Expected
++ Received
+
+- #AA0000
+
+ ❯ src/__tests__/context/PublishedDesignRuntime.test.tsx:31:46
+     29|     await waitFor(() => expect(screen.getByTestId('probe').textContent…
+     30|     const root = document.documentElement.style;
+     31|     expect(root.getPropertyValue('--brand')).toBe('#AA0000');
+       |                                              ^
+     32|     expect(root.getPropertyValue('--font-display')).toContain('Georgia…
+     33|     expect(root.getPropertyValue('--font-sans')).toContain('Arial');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 236 passed (237)
+      Tests  1 failed | 2075 passed | 1 skipped (2077)
+   Start at  20:57:39
+   Duration  460.03s (transform 11.50s, setup 28.82s, import 43.77s, tests 177.35s, environment 172.71s)
+

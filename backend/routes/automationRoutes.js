@@ -1,5 +1,6 @@
 import express from "express";
 import { protect, adminOnly, allowRoles } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 import {
@@ -99,7 +100,7 @@ router.get("/rules/:id", validateObjectId, asyncHandler(getBusinessRuleById));
 router.post("/rules", allowRoles("admin", "superadmin"), asyncHandler(createBusinessRule));
 router.put("/rules/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(updateBusinessRule));
 router.delete("/rules/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(deleteBusinessRule));
-router.post("/rules/evaluate", asyncHandler(evaluateRules));
+router.post("/rules/evaluate", allowRoles("admin", "superadmin"), asyncHandler(evaluateRules));
 
 // ============================================
 // APPROVAL CHAINS
@@ -110,7 +111,7 @@ router.get("/approvals/:id", validateObjectId, asyncHandler(getApprovalChainById
 router.post("/approvals", allowRoles("admin", "superadmin"), asyncHandler(createApprovalChain));
 router.put("/approvals/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(updateApprovalChain));
 router.delete("/approvals/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(deleteApprovalChain));
-router.post("/approvals/initiate", asyncHandler(initiateApproval));
+router.post("/approvals/initiate", allowRoles("admin", "superadmin"), asyncHandler(initiateApproval));
 
 // ============================================
 // TASKS
@@ -132,7 +133,7 @@ router.get("/templates/notifications/:id", validateObjectId, asyncHandler(getNot
 router.post("/templates/notifications", allowRoles("admin", "superadmin", "editor"), asyncHandler(createNotificationTemplate));
 router.put("/templates/notifications/:id", validateObjectId, allowRoles("admin", "superadmin", "editor"), asyncHandler(updateNotificationTemplate));
 router.delete("/templates/notifications/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(deleteNotificationTemplate));
-router.post("/templates/notifications/preview", asyncHandler(previewNotification));
+router.post("/templates/notifications/preview", allowRoles("admin", "superadmin"), asyncHandler(previewNotification));
 
 // ============================================
 // SCHEDULED JOBS

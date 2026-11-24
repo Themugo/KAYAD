@@ -1,0 +1,15 @@
+dist/assets/AuctionLivePage-BouTNI6u.js               55.97 kB │ gzip:  15.68 kB
+dist/assets/InspectionMarketplacePage-BEsYOJj2.js     57.54 kB │ gzip:  14.86 kB
+dist/assets/PersonalSellingModule-ClSsmfME.js         75.96 kB │ gzip:  19.09 kB
+dist/assets/ContentStudio-B-CV-jc0.js                 80.00 kB │ gzip:  17.62 kB
+dist/assets/AdminView-BD4XU3qK.js                     82.14 kB │ gzip:  20.80 kB
+dist/assets/InspectionsView-J73TsRbo.js              121.57 kB │ gzip:  29.03 kB
+dist/assets/DealerDashboard-DiFPdU9s.js              225.84 kB │ gzip:  51.02 kB
+dist/assets/index-DQiJpHAC.js                        919.33 kB │ gzip: 258.70 kB
+
+✓ built in 3.83s
+[plugin builtin:vite-reporter] 
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.

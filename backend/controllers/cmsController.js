@@ -858,7 +858,10 @@ export async function deleteABTest(req, res) {
 // ============================================
 
 export async function trackAnalytics(req, res) {
-  const { contentId, contentType, event, metadata } = req.body;
+  const { contentId, contentType, event, metadata } = req.body || {};
+  if (!contentId || !contentType || !event) {
+    return res.status(400).json({ success: false, message: "contentId, contentType and event are required" });
+  }
 
   const analytics = await CMSAnalytics.create({
     contentId,

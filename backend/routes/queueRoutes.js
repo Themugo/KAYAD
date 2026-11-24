@@ -6,6 +6,7 @@
 
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 import {
@@ -59,10 +60,10 @@ router.get("/dlq/statistics", protect, adminOnly, asyncHandler(getDLQStatisticsH
 router.get("/dlq/jobs", protect, adminOnly, asyncHandler(getDLQJobsHandler));
 
 // Retry a failed job from DLQ
-router.post("/dlq/retry/:jobId", protect, adminOnly, validateObjectId, asyncHandler(retryDLQJobHandler));
+router.post("/dlq/retry/:jobId", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), validateObjectId, asyncHandler(retryDLQJobHandler));
 
 // Delete a failed job from DLQ
-router.delete("/dlq/delete/:jobId", protect, adminOnly, validateObjectId, asyncHandler(deleteDLQJobHandler));
+router.delete("/dlq/delete/:jobId", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), validateObjectId, asyncHandler(deleteDLQJobHandler));
 
 // =============================
 // 📊 JOB FAILURE ENDPOINTS
@@ -75,6 +76,6 @@ router.get("/failures", protect, adminOnly, asyncHandler(getJobFailuresHandler))
 router.get("/failures/:failureId", protect, adminOnly, validateObjectId, asyncHandler(getJobFailureDetailsHandler));
 
 // Resolve a job failure
-router.post("/failures/:failureId/resolve", protect, adminOnly, validateObjectId, asyncHandler(resolveJobFailureHandler));
+router.post("/failures/:failureId/resolve", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), validateObjectId, asyncHandler(resolveJobFailureHandler));
 
 export default router;

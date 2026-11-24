@@ -9,6 +9,7 @@ import redis from "../config/redis.js";
 import cacheService from "../services/cacheService.js";
 import { getAllMetrics, getCounter, getGauge, getHistogram } from "../config/metrics.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 import { getSupabase } from "../utils/supabase.js";
 
@@ -286,7 +287,7 @@ router.get("/errors", async (req, res) => {
 });
 
 // Reset metrics (admin only - protected)
-router.post("/reset", protect, adminOnly, async (req, res) => {
+router.post("/reset", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), async (req, res) => {
   try {
     const { resetMetrics } = await import("../config/metrics.js");
     resetMetrics();

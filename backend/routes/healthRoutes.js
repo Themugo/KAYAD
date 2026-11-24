@@ -9,6 +9,7 @@ import redis from "../config/redis.js";
 import cacheService from "../services/cacheService.js";
 // import { checkReplicaSetHealth } from "../middleware/replicaSetHealth.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import { validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 import { getSupabase } from "../utils/supabase.js";
 
@@ -204,7 +205,7 @@ router.get("/cache", protect, adminOnly, validateQuery(analyticsQuerySchema), as
 });
 
 // Flush cache endpoint (admin only - protected)
-router.post("/cache/flush", protect, adminOnly, async (req, res) => {
+router.post("/cache/flush", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), async (req, res) => {
   await cacheService.flushAll();
   cacheService.resetStats();
   res.json({

@@ -18,6 +18,7 @@ import {
   getScoreAlerts,
 } from "../controllers/dealerHealthScoreController.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 
@@ -49,13 +50,13 @@ router.get("/:dealerId/trends", protect, adminOnly, asyncHandler(getDealerScoreT
 // =============================
 
 // Recalculate specific dealer score
-router.post("/admin/recalculate/:dealerId", protect, adminOnly, validateObjectId, asyncHandler(recalculateDealerScore));
+router.post("/admin/recalculate/:dealerId", protect, adminOnly, requirePermission(PERMISSIONS.VERIFY_DEALER), validateObjectId, asyncHandler(recalculateDealerScore));
 
 // Recalculate all scores
-router.post("/admin/recalculate-all", protect, adminOnly, asyncHandler(recalculateAllScoresAdmin));
+router.post("/admin/recalculate-all", protect, adminOnly, requirePermission(PERMISSIONS.VERIFY_DEALER), asyncHandler(recalculateAllScoresAdmin));
 
 // Override dealer score
-router.put("/admin/override/:dealerId", protect, adminOnly, validateObjectId, asyncHandler(overrideDealerScore));
+router.put("/admin/override/:dealerId", protect, adminOnly, requirePermission(PERMISSIONS.VERIFY_DEALER), validateObjectId, asyncHandler(overrideDealerScore));
 
 // Get score distribution
 router.get("/admin/distribution", protect, adminOnly, asyncHandler(getScoreDistribution));

@@ -29,6 +29,7 @@
   "routes/paymentRoutes.js POST /b2c/callback",
   "routes/paymentRoutes.js POST /b2c/timeout",
   "routes/smsBiddingRoutes.js POST /webhook/inbound",
-  "routes/webhookRoutes.js POST /inventory"
+  "routes/webhookRoutes.js POST /inventory",
+  "routes/dealerPlatformRoutes.js POST /team/invitation/preview"
  ]
 }

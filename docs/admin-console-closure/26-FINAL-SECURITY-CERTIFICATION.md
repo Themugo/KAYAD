@@ -1,5 +1,7 @@
 # 26 — Final security certification (local / disposable DB)
 
+> **Superseded in part 2026-11-24 (final closure):** see docs 28 (write authorization register), 29 (security/governance closure), 30 (migration parity and restore) and 31 (gates and regression). Where this document disagrees, the newer document wins: System Health is now technical-only (OD-1 hardened), the any-staff write-route residual is closed except UD-1 and OD-5, and the earlier "transition_escrow absent" wording is corrected.
+
 Scope: Admin Console and the governance decisions OD-1…OD-3. **This is not a penetration test and not a production certification.** Evidence is HTTP-level against a disposable database plus unit/component tests.
 
 ## 1. Role/permission matrix — expected vs actual (real HTTP, claims taken from the database, not role names)

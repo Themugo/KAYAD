@@ -2,6 +2,7 @@ import express from "express";
 import { validateWritePayload } from "../middleware/validateWritePayload.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
 
 import {
@@ -25,9 +26,9 @@ router.get("/risk-profiles", asyncHandler(listRiskProfiles));
 
 router.get("/:id", asyncHandler(getFlag));
 
-router.patch("/:id/status", idempotencyCheck, validateWritePayload, asyncHandler(updateFlagStatus));
+router.patch("/:id/status", requirePermission(PERMISSIONS.MANAGE_AUCTIONS), idempotencyCheck, validateWritePayload, asyncHandler(updateFlagStatus));
 
-router.post("/scan", idempotencyCheck, validateWritePayload, asyncHandler(triggerScan));
+router.post("/scan", requirePermission(PERMISSIONS.MANAGE_AUCTIONS), idempotencyCheck, validateWritePayload, asyncHandler(triggerScan));
 
 router.use((req, res) => {
   res.status(404).json({ success: false, message: "Auction integrity route not found" });

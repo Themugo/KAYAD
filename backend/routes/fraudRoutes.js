@@ -1,6 +1,7 @@
 import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import { validateObjectId } from "../middleware/validate.js";
 import {
   getFraudAnalytics,
@@ -33,7 +34,7 @@ router.get("/all", protect, adminOnly, asyncHandler(getAllFraudDetections));
 // =============================
 
 // Run comprehensive fraud check on target
-router.post("/check", protect, adminOnly, asyncHandler(runFraudCheckOnTarget));
+router.post("/check", protect, adminOnly, requireAnyPermission(PERMISSIONS.MANAGE_MODERATION, PERMISSIONS.MANAGE_USERS), asyncHandler(runFraudCheckOnTarget));
 
 // Check user for fraud
 router.get("/check/user/:userId", protect, adminOnly, validateObjectId, asyncHandler(checkUserFraud));
@@ -61,6 +62,6 @@ router.get("/check/duplicate-photos/:carId", protect, adminOnly, validateObjectI
 // =============================
 
 // Update fraud status and take action (admin only)
-router.put("/:fraudId/status", protect, adminOnly, validateObjectId, asyncHandler(updateFraudStatus));
+router.put("/:fraudId/status", protect, adminOnly, requireAnyPermission(PERMISSIONS.MANAGE_MODERATION, PERMISSIONS.MANAGE_USERS), validateObjectId, asyncHandler(updateFraudStatus));
 
 export default router;

@@ -1,0 +1,218 @@
+Migration,Repository,Hosted ledger,Schema evidence,Classification
+20260710043200_20260710005000_foundational_tables.sql,yes,yes (20260710005000_foundational_tables.sql),absent hosted: cars.statements,Recorded but schema missing
+20260710043210_20260710005500_sync_profiles_trigger.sql,yes,yes (20260710005500_sync_profiles_trigger.sql),1 object(s) named; none flagged absent,Matched and verified
+20260710043238_20260710010000_gari_motors_full_schema.sql,yes,yes (20260710010000_gari_motors_full_schema.sql),absent hosted: handle_new_user,Recorded but schema missing
+20260710043248_20260710020000_seed_system_settings.sql,yes,yes (20260710020000_seed_system_settings.sql),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260710043558_20260710030000_update_car_bid_stats.sql,yes,yes (20260710030000_update_car_bid_stats.sql),1 object(s) named; none flagged absent,Matched and verified
+20260710044329_20260710050000_seed_demo_vehicles.sql,yes,yes (20260710050000_seed_demo_vehicles.sql),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260710044400_20260710060000_missing_fk_indexes.sql,yes,yes (20260710060000_missing_fk_indexes.sql),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260710044600_20260710080000_chats_escrows_userauth_real_tables.sql,yes,yes (20260710080000_chats_escrows_userauth_real_tables.sql),5 object(s) named; none flagged absent,Matched and verified
+20260710044700_20260710090000_audited_missing_columns.sql,yes,yes (20260710090000_audited_missing_columns.sql),23 object(s) named; none flagged absent,Matched and verified
+20260710044800_20260710100000_platform_config.sql,yes,yes (20260710100000_platform_config.sql),1 object(s) named; none flagged absent,Matched and verified
+20260710044900_20260710110000_leads_and_escrow_columns.sql,yes,yes (20260710110000_leads_and_escrow_columns.sql),13 object(s) named; none flagged absent,Matched and verified
+20260710045000_20260710120000_refresh_tokens.sql,yes,yes (20260710120000_refresh_tokens.sql),1 object(s) named; none flagged absent,Matched and verified
+20260710045100_20260710130000_car_listing_flow.sql,yes,yes (20260710130000_car_listing_flow.sql),24 object(s) named; none flagged absent,Matched and verified
+20260710045200_20260710140000_dealer_verification_referrals.sql,yes,yes (20260710140000_dealer_verification_referrals.sql),3 object(s) named; none flagged absent,Matched and verified
+20260710045300_20260710150000_platform_config_admin_fields.sql,yes,yes (20260710150000_platform_config_admin_fields.sql),27 object(s) named; none flagged absent,Matched and verified
+20260710045400_20260710160000_idempotency_softdelete.sql,yes,yes (20260710160000_idempotency_softdelete.sql),3 object(s) named; none flagged absent,Matched and verified
+20260710045500_20260710170000_user_preferences.sql,yes,yes (20260710170000_user_preferences.sql),1 object(s) named; none flagged absent,Matched and verified
+20260815060000_payment_architecture_extension.sql,yes,yes (payment_architecture_extension.sql),absent hosted: webhooks,Recorded but schema missing
+20260815070000_duplicate_vin_prevention.sql,yes,yes (duplicate_vin_prevention.sql),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260815080000_vehicle_inspections_complete_columns.sql,yes,yes (vehicle_inspections_complete_columns.sql),8 object(s) named; none flagged absent,Matched and verified
+20260816180000_inspection_marketplace_activation.sql,yes,yes (inspection_marketplace_activation.sql),13 object(s) named; none flagged absent,Matched and verified
+20260816200000_inspection_domain_model_corrections.sql,yes,yes (inspection_domain_model_corrections.sql),10 object(s) named; none flagged absent,Matched and verified
+20260817050000_provider_lifecycle_state_machine.sql,yes,yes (provider_lifecycle_state_machine.sql),12 object(s) named; none flagged absent,Matched and verified
+20260817130000_support_tickets_table.sql,yes,yes (support_tickets_table.sql),1 object(s) named; none flagged absent,Matched and verified
+20260824070000_fix_profiles_role_check_constraint.sql,yes,yes (fix_profiles_role_check_constraint.sql),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260824100000_phase8_bids_status_alignment.sql,yes,yes (phase8_bids_status_alignment),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260827090000_add_payments_processed_column.sql,yes,yes (add_payments_processed_column.sql),2 object(s) named; none flagged absent,Matched and verified
+20260828030000_add_payments_metadata_column.sql,yes,yes (add_payments_metadata_column.sql),1 object(s) named; none flagged absent,Matched and verified
+20260901210000_phase8_transaction_atomicity.sql,yes,yes (phase8_transaction_atomicity),14 object(s) named; none flagged absent,Matched and verified
+20260901220000_remove_historical_demo_vehicles.sql,yes,yes (remove_historical_demo_vehicles),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260902090000_phase10_operational_data_contract.sql,yes,yes (phase10_operational_data_contract),11 object(s) named; none flagged absent,Matched and verified
+20260902110000_phase11_production_demo_cleanup.sql,yes,yes (phase11_production_demo_cleanup),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260902130000_phase29_auth_boundary_reconciliation.sql,yes,yes (phase29_auth_boundary_reconciliation),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260905050000_phase14_refund_reconciliation_integrity.sql,yes,yes (phase14_refund_reconciliation_integrity),1 object(s) named; none flagged absent,Matched and verified
+20260905060000_transaction_lifecycle_integrity.sql,yes,yes (transaction_lifecycle_integrity),2 object(s) named; none flagged absent,Matched and verified
+20260907070000_inspection_marketplace_integrity.sql,yes,yes (inspection_marketplace_integrity),5 object(s) named; none flagged absent,Matched and verified
+20260907120000_payment_escrow_domain_integrity.sql,yes,yes (payment_escrow_domain_integrity),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260907140000_auction_lifecycle_atomicity.sql,yes,yes (auction_lifecycle_atomicity),2 object(s) named; none flagged absent,Matched and verified
+20260907143000_auction_settlement_reserve_rules.sql,yes,yes (auction_settlement_reserve_rules),1 object(s) named; none flagged absent,Matched and verified
+20260907150000_escrow_custody_admin_configuration.sql,yes,yes (escrow_custody_admin_configuration),8 object(s) named; none flagged absent,Matched and verified
+20260907173000_chat_concurrency_integrity.sql,yes,yes (chat_concurrency_integrity),2 object(s) named; none flagged absent,Matched and verified
+20260907190000_dealer_verification_onboarding_integrity.sql,yes,yes (dealer_verification_onboarding_integrity),3 object(s) named; none flagged absent,Matched and verified
+20260907190100_dispute_escrow_consolidation.sql,yes,yes (dispute_escrow_consolidation),14 object(s) named; none flagged absent,Matched and verified
+20260907190200_inspection_settlement_ledger_integrity.sql,yes,yes (inspection_settlement_ledger_integrity),8 object(s) named; none flagged absent,Matched and verified
+20260907190300_ownership_passport_domain.sql,yes,yes (ownership_passport_domain),21 object(s) named; none flagged absent,Matched and verified
+20260907190400_payment_gateway_lifecycle_integrity.sql,yes,yes (payment_gateway_lifecycle_integrity),1 object(s) named; none flagged absent,Matched and verified
+20260907190500_vehicle_valuation_domain.sql,yes,yes (vehicle_valuation_domain),1 object(s) named; none flagged absent,Matched and verified
+20260907200000_cms_website_builder_domain.sql,yes,yes (cms_website_builder_domain),34 object(s) named; none flagged absent,Matched and verified
+20260907200100_lead_crm_domain_end_to_end.sql,yes,yes (lead_crm_domain_end_to_end),9 object(s) named; none flagged absent,Matched and verified
+20260907213000_support_case_management_domain.sql,yes,yes (support_case_management_domain),5 object(s) named; none flagged absent,Matched and verified
+20260907220000_dealer_workforce_access_control.sql,yes,yes (dealer_workforce_access_control),2 object(s) named; none flagged absent,Matched and verified
+20260907230000_dealer_subscription_commercial_controls.sql,yes,yes (dealer_subscription_commercial_controls),7 object(s) named; none flagged absent,Matched and verified
+20260907233000_financial_ledger_reconciliation_domain.sql,yes,yes (financial_ledger_reconciliation_domain),3 object(s) named; none flagged absent,Matched and verified
+20260907233100_subscription_entitlement_lifecycle.sql,yes,yes (subscription_entitlement_lifecycle),4 object(s) named; none flagged absent,Matched and verified
+20260907234500_review_domain_end_to_end.sql,yes,yes (review_domain_end_to_end),3 object(s) named; none flagged absent,Matched and verified
+20260907235000_ai_decision_governance.sql,yes,yes (ai_decision_governance),1 object(s) named; none flagged absent,Matched and verified
+20260907240000_governance_domain.sql,yes,yes (governance_domain),10 object(s) named; none flagged absent,Matched and verified
+20260907240100_integration_partner_webhook_domain.sql,yes,yes (integration_partner_webhook_domain),18 object(s) named; none flagged absent,Matched and verified
+20260907240500_canonical_authorization_helpers.sql,yes,yes (canonical_authorization_helpers),1 object(s) named; none flagged absent,Matched and verified
+20260908000000_advertising_domain_end_to_end.sql,yes,yes (advertising_domain_end_to_end),1 object(s) named; none flagged absent,Matched and verified
+20260908000100_search_discovery_domain.sql,yes,yes (search_discovery_domain),1 object(s) named; none flagged absent,Matched and verified
+20260908003000_continuous_improvement_domain.sql,yes,yes (continuous_improvement_domain),7 object(s) named; none flagged absent,Matched and verified
+20260908010000_enterprise_control_plane_domain.sql,yes,yes (enterprise_control_plane_domain),4 object(s) named; none flagged absent,Matched and verified
+20260908010100_regional_configuration_localization_domain.sql,yes,yes (regional_configuration_localization_domain),7 object(s) named; none flagged absent,Matched and verified
+20260908020000_executive_intelligence_domain.sql,yes,yes (executive_intelligence_domain),2 object(s) named; none flagged absent,Matched and verified
+20260908033000_command_center_domain_end_to_end.sql,yes,yes (command_center_domain_end_to_end),2 object(s) named; none flagged absent,Matched and verified
+20260908043000_dealer_platform_domain_end_to_end.sql,yes,yes (dealer_platform_domain_end_to_end),2 object(s) named; none flagged absent,Matched and verified
+20260908050000_integration_domain_hardening.sql,yes,yes (integration_domain_hardening),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260908060000_dealer_commercial_entitlement_hardening.sql,yes,yes (dealer_commercial_entitlement_hardening),2 object(s) named; none flagged absent,Matched and verified
+20260908070000_inspection_workforce_digital_lifecycle_hardening.sql,yes,no,"absent hosted: kayad_validate_inspection_booking_transition, inspection_staff.is_available",Missing from hosted
+20260908080000_governance_lifecycle_hardening.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20260908113000_communications_support_lifecycle_hardening.sql,yes,no,absent hosted: kayad_append_support_message,Missing from hosted
+20260909070742_runtime_integration_hardening.sql,yes,yes (runtime_integration_hardening_20260909),1 object(s) named; none flagged absent,Matched and verified
+20260909071751_security_function_search_path_hardening.sql,yes,yes (security_function_search_path_hardening_20260909),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909072046_security_function_execute_privilege_hardening.sql,yes,yes (security_function_execute_privilege_hardening_20260909),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909073141_production_advisor_hardening.sql,yes,yes (20260909080000_production_advisor_hardening),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909074048_vehicle_identity_registry.sql,yes,yes (20260909090001_vehicle_identity_registry),3 object(s) named; none flagged absent,Matched and verified
+20260909074124_vehicle_identity_trigger_correctness.sql,yes,yes (20260909090002_vehicle_identity_trigger_correctness),1 object(s) named; none flagged absent,Matched and verified
+20260909080000_production_advisor_hardening.sql,yes,yes (20260909073141),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909080841_auction_payment_escrow_e2e.sql,yes,yes (20260909091000_auction_payment_escrow_e2e),1 object(s) named; none flagged absent,Matched and verified
+20260909083431_inspection_chat_realtime_bridge.sql,yes,yes (20260909092000_inspection_chat_realtime_bridge),11 object(s) named; none flagged absent,Matched and verified
+20260909084443_dispute_canonical_escrow_lifecycle.sql,yes,yes (20260909100000_dispute_canonical_escrow_lifecycle),6 object(s) named; none flagged absent,Matched and verified
+20260909084559_dispute_chat_inspection_linkage.sql,yes,yes (20260909100500_dispute_chat_inspection_linkage),1 object(s) named; none flagged absent,Matched and verified
+20260909084842_dispute_link_column_naming.sql,yes,yes (20260909101000_dispute_link_column_naming),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909084850_dispute_link_function_case_fix.sql,yes,yes (20260909101100_dispute_link_function_case_fix),1 object(s) named; none flagged absent,Matched and verified
+20260909090001_vehicle_identity_registry.sql,yes,yes (20260909074048),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909090002_vehicle_identity_trigger_correctness.sql,yes,yes (20260909074124),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909091000_auction_payment_escrow_e2e.sql,yes,yes (20260909080841),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909091703_dealer_commercial_payout_lifecycle.sql,yes,yes (20260909102000_dealer_commercial_payout_lifecycle),5 object(s) named; none flagged absent,Matched and verified
+20260909092000_inspection_chat_realtime_bridge.sql,yes,yes (20260909083431),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909100000_dispute_canonical_escrow_lifecycle.sql,yes,yes (20260909084443),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909100500_dispute_chat_inspection_linkage.sql,yes,yes (20260909084559),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909101000_dispute_link_column_naming.sql,yes,yes (20260909084842),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909101100_dispute_link_function_case_fix.sql,yes,yes (20260909084850),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909102000_dealer_commercial_payout_lifecycle.sql,yes,yes (20260909091703),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909110809_communications_otp_delivery_control.sql,yes,yes (communications_otp_delivery_control),2 object(s) named; none flagged absent,Matched and verified
+20260909113015_communications_control_plane.sql,yes,yes (communications_control_plane),13 object(s) named; none flagged absent,Matched and verified
+20260909123918_communications_provider_rollout_controls.sql,yes,yes (communications_provider_rollout_controls),2 object(s) named; none flagged absent,Matched and verified
+20260909124238_communications_password_reset_control.sql,yes,yes (communications_password_reset_control),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909143000_communications_otp_delivery_control.sql,yes,yes (20260909110809),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909150000_communications_control_plane.sql,yes,yes (20260909113015),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909170000_communications_provider_rollout_controls.sql,yes,yes (20260909123918),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260909173000_communications_password_reset_control.sql,yes,yes (20260909124238),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260918100000_wave2_transaction_invariants.sql,yes,yes (20260918143944),12 object(s) named; none flagged absent,Matched and verified
+20260918120000_canonical_inspection_lifecycle_hardening.sql,yes,yes (20260918143950),4 object(s) named; none flagged absent,Matched and verified
+20260918130000_inspection_domain_rls_hardening.sql,yes,yes (20260918144000),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260918143944_wave2_transaction_invariants.sql,yes,yes (20260918100000_wave2_transaction_invariants),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260918143950_canonical_inspection_lifecycle_hardening.sql,yes,yes (20260918120000_canonical_inspection_lifecycle_hardening),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260918144000_inspection_domain_rls_hardening.sql,yes,yes (20260918130000_inspection_domain_rls_hardening),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260918144230_inspection_financial_workflow_completion.sql,yes,yes (20260918150000_inspection_financial_workflow_completion),3 object(s) named; none flagged absent,Matched and verified
+20260918150000_inspection_financial_workflow_completion.sql,yes,yes (20260918144230),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260920203000_canonical_system_status_control_plane.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20260920220000_phase22_reconciliation.sql,yes,no,12 object(s) named; none flagged absent,Schema present but ledger missing
+20260921061339_automation_business_rules_domain.sql,yes,yes (automation_business_rules_domain),1 object(s) named; none flagged absent,Matched and verified
+20260921061403_harden_inspection_report_immutability_guard.sql,yes,yes (harden_inspection_report_immutability_guard),1 object(s) named; none flagged absent,Matched and verified
+20260921093540_harden_loan_application_contract_v14.sql,yes,yes (harden_loan_application_contract_v14),9 object(s) named; none flagged absent,Matched and verified
+20260921134954_v14_holistic_financial_corrections.sql,yes,yes (v14_holistic_financial_corrections),1 object(s) named; none flagged absent,Matched and verified
+20260921230000_reconcile_system_status_control_plane.sql,yes,yes (20260922045554),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260921231000_reconcile_governance_lifecycle_hardening.sql,yes,yes (20260922045606),1 object(s) named; none flagged absent,Matched and verified
+20260921232000_canonical_inspection_booking_execution_link.sql,yes,yes (20260922045609),2 object(s) named; none flagged absent,Matched and verified
+20260922045554_reconcile_system_status_control_plane.sql,yes,yes (reconcile_system_status_control_plane),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260922045606_reconcile_governance_lifecycle_hardening.sql,yes,yes (reconcile_governance_lifecycle_hardening),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260922045609_canonical_inspection_booking_execution_link.sql,yes,yes (canonical_inspection_booking_execution_link),"no table/function/column DDL detected (data, policy, grant or index only)",Matched and verified
+20260926100000_top_notice_board_animation.sql,yes,no,"absent hosted: ad_slots.display_mode, ad_slots.fade_duration_ms, ad_slots.scroll_duration_seconds",Missing from hosted
+20260926110000_hero_premium_media_layout.sql,yes,no,absent hosted: hero_slides,Missing from hosted
+20260926123000_platform_config_hero_vehicle_selection.sql,yes,no,"absent hosted: platform_config.hero_car_ids, platform_config.hero_featured_mode",Missing from hosted
+20260928123600_live_communications_activation_alignment.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20260929100000_production_service_role_runtime_integrity.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20260930110000_advanced_identity_session_hardening.sql,yes,no,8 object(s) named; none flagged absent,Schema present but ledger missing
+20260930111500_advanced_communication_idempotency.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20260930112000_identity_email_normalization.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20260930113000_communication_state_machine_hardening.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261001090000_registration_onboarding_integrity.sql,yes,no,7 object(s) named; none flagged absent,Schema present but ledger missing
+20261001220000_database_contract_alignment.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261001223000_inspection_provider_identity_integrity.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261002090000_financial_audit_routing_rls_hardening.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261002120000_high_risk_boundary_hardening.sql,yes,no,absent hosted: kayad_validate_owner_vehicle_passport,Missing from hosted
+20261002130000_runtime_convergence_financial_locks.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20261002150000_escrow_business_integrity_sweep.sql,yes,no,absent hosted: kayad_complete_escrow_refund_atomic,Missing from hosted
+20261002180000_escrow_live_operations_hardening.sql,yes,no,absent hosted: kayad_escrow_audit_immutable,Missing from hosted
+20261002190000_auction_setup_publication_contract.sql,yes,no,4 object(s) named; none flagged absent,Schema present but ledger missing
+20261002193000_auction_bidder_registration_eligibility.sql,yes,no,"absent hosted: auction_registration_events, auction_registrations, update_auction_registration_updated_at",Missing from hosted
+20261002210000_auction_bidding_room_lock.sql,yes,no,absent hosted: prevent_late_auction_registration,Missing from hosted
+20261002220000_auction_settlement_platform_policy.sql,yes,no,3 object(s) named; none flagged absent,Schema present but ledger missing
+20261002230000_auction_post_fulfilment_exception_engine.sql,yes,no,"absent hosted: auction_fulfilment_events, auction_outcomes.cancellation_reason, auction_outcomes.cancelled_at, auction_outcomes.cancelled_by, auction_outcomes.collection_at, auction_outcomes.collection_notes …",Missing from hosted
+20261002240000_marketplace_purchase_fulfilment_convergence.sql,yes,no,3 object(s) named; none flagged absent,Schema present but ledger missing
+20261002240100_marketplace_purchase_settlement_mode_correction.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20261003090000_hero_commercial_placement.sql,yes,no,"absent hosted: hero_placements, platform_config.hero_commercial",Missing from hosted
+20261003100000_platform_config_hero_presentation_and_card_content.sql,yes,no,"absent hosted: platform_config.hero_card_content, platform_config.hero_presentation",Missing from hosted
+20261003113000_hero_visual_marketing_controls.sql,yes,no,absent hosted: platform_config.hero_presentation,Missing from hosted
+20261003120000_hero_visual_balance_cleanup.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261004110000_hero_clean_assets_and_mobile_balance.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261006150000_inspection_qa_report_versions.sql,yes,no,"absent hosted: report_corrections, report_versions",Missing from hosted
+20261006230000_escrow_live_settlement_completion_hardening.sql,yes,no,absent hosted: kayad_ensure_escrow_refund_payable,Missing from hosted
+20261006240000_escrow_marketplace_reconciliation_hardening.sql,yes,no,"absent hosted: kayad_ensure_dispute_refund_settlement_record, kayad_sync_purchase_outcome_from_escrow",Missing from hosted
+20261007120000_auction_rule_authority_convergence.sql,yes,no,absent hosted: kayad_start_scheduled_auction_atomic,Missing from hosted
+20261007170000_auction_bid_mutation_boundary.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261007180000_auction_financial_integrity_phase_a.sql,yes,no,"absent hosted: auction_security_holds, kayad_forfeit_auction_winner_security_holds_atomic, kayad_reconcile_auction_security_holds_atomic, kayad_settle_auction_security_hold_atomic, update_auction_security_hold_updated_at, auction_outcomes.commitment_applied_amount …",Missing from hosted
+20261007190000_auction_winner_payment_deadline_lock.sql,yes,no,"absent hosted: kayad_default_auction_winner_atomic, kayad_settle_auction_winner_payment_atomic",Missing from hosted
+20261007200000_inspection_domain_rls_enable.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20261008120000_escrow_seller_capability_authority.sql,yes,no,4 object(s) named; none flagged absent,Schema present but ledger missing
+20261008150000_platform_config_navigation.sql,yes,no,absent hosted: platform_config.navigation,Missing from hosted
+20261009120000_automotive_services_governance.sql,yes,no,"absent hosted: provider_service_capabilities, inspection_providers.cover_image_url, inspection_providers.response_time_minutes, inspection_providers.total_completed_inspections, inspection_providers.total_reviews, inspection_providers.verification_notes …",Missing from hosted
+20261009130000_escrow_custody_binding_and_purchase_eligibility.sql,yes,no,2 object(s) named; none flagged absent,Schema present but ledger missing
+20261009150000_support_resolution_hardening.sql,yes,no,"absent hosted: kayad_append_support_message, kayad_support_append_message, kayad_support_assign_ticket_number, kayad_support_create_case, kayad_support_is_staff_user, kayad_support_metrics …",Missing from hosted
+20261010130000_kayad_slate_teal_theme_convergence.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261010193000_chat_message_idempotency.sql,yes,no,"absent hosted: chat_message_idempotency, kayad_append_chat_message_idempotent",Missing from hosted
+20261011090000_users_security_state_columns.sql,yes,no,4 object(s) named; none flagged absent,Schema present but ledger missing
+20261011091000_chat_idempotent_append_ordering_and_replay.sql,yes,no,absent hosted: kayad_append_chat_message_idempotent,Missing from hosted
+20261011092000_idempotency_audit_logs.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20261011093000_revoke_client_execute_on_kayad_rpcs.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261011093100_enable_rls_remaining_public_tables.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261011100000_chat_message_outbox.sql,yes,no,"absent hosted: chat_message_outbox, kayad_append_chat_message_idempotent, kayad_chat_notification_exists, kayad_chat_outbox_stats, kayad_claim_chat_outbox, kayad_finish_chat_outbox …",Missing from hosted
+20261011120000_client_role_least_privilege.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261011121000_profiles_role_sync_repair.sql,yes,no,"absent hosted: sync_profile_role_from_user, profiles.updated_at",Missing from hosted
+20261011130000_cars_click_counter.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20261011210000_support_faq_content_and_seed.sql,yes,no,absent hosted: cms_faqs.next_step,Missing from hosted
+20261011220000_ledger_signed_balance_rebuild.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20261012103000_home_hero_showcase_pair_and_mobile_composition.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261012140000_dealer_onboarding_columns_r12.sql,yes,no,4 object(s) named; none flagged absent,Schema present but ledger missing
+20261012140100_dealer_verification_suspended_status_r14.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261020160000_private_seller_auction_custody_contract.sql,yes,no,"absent hosted: private_seller_auction_evidence_events, private_seller_auction_proposals, vehicle_custody_capabilities",Missing from hosted
+20261020170000_private_seller_auction_gate_enforcement.sql,yes,no,"absent hosted: vehicle_custody_capability_events, kayad_auction_setups_private_seller_backstop, kayad_cars_private_seller_backstop, kayad_private_seller_assert_eligible, kayad_private_seller_gate, kayad_private_seller_gate_batch …",Missing from hosted
+20261020180000_garage_organization_branch_membership.sql,yes,no,"absent hosted: kayad__org_actor, kayad__org_audit, kayad__org_can_manage_member, kayad__org_fail, kayad__org_release_assignments, kayad__org_valid_scope …",Missing from hosted
+20261025100000_private_seller_capability.sql,yes,no,absent hosted: private_seller_capabilities,Missing from hosted
+20261025113000_private_seller_listing_visibility.sql,yes,no,"absent hosted: private_seller_listing_visibility_events, apply_private_seller_listing_visibility",Missing from hosted
+20261025130000_private_seller_listing_visibility_hardening.sql,yes,no,"absent hosted: apply_private_seller_listing_visibility, enforce_private_seller_listing_visibility",Missing from hosted
+20261026100000_admin_alerts.sql,yes,no,absent hosted: admin_alerts,Missing from hosted
+20261101120000_visitor_analytics.sql,yes,no,3 object(s) named; none flagged absent,Schema present but ledger missing
+20261101200000_site_designs.sql,yes,no,"absent hosted: site_design_publications, site_designs",Missing from hosted
+20261102120000_dealer_team_custom_roles.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20261104120000_auction_wallet_refunds_dealer_custody.sql,yes,no,"absent hosted: dealer_payment_accounts, wallet_transactions, wallet_withdrawals, wallets, kayad_auction_refund_to_wallet_atomic, kayad_reconcile_auction_security_holds_atomic …",Missing from hosted
+20261104150000_auction_engagement.sql,yes,no,"absent hosted: auction_comment_reports, auction_comments, auction_daily_visits, auction_follows, auction_likes, auction_watch_peaks …",Missing from hosted
+20261106120000_featured_campaigns.sql,yes,no,"absent hosted: featured_vehicle_campaign_history, featured_vehicle_campaigns",Missing from hosted
+20261110120000_canonical_offer_negotiation_workflow.sql,yes,no,3 object(s) named; none flagged absent,Schema present but ledger missing
+20261110130000_inspection_payment_reject_cancelled_bookings.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20261110140000_private_seller_free_access_defaults.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20261112090000_dealer_business_name_uniqueness.sql,yes,no,"absent hosted: dealer_business_name_conflicts, dealers_missing_business_name, kayad_normalize_business_name",Missing from hosted
+20261114130000_auction_atomic_reaward.sql,yes,no,absent hosted: kayad_reaward_auction_outcome_atomic,Missing from hosted
+20261115120000_auction_financial_reaward_integrity.sql,yes,no,"absent hosted: kayad_forfeit_auction_winner_security_holds_atomic, kayad_reaward_auction_outcome_atomic, kayad_reconcile_auction_security_holds_atomic, kayad_settle_auction_security_hold_atomic",Missing from hosted
+20261116120000_personal_listing_lifecycle_atomic.sql,yes,no,2 object(s) named; none flagged absent,Schema present but ledger missing
+20261117090000_personal_listing_lifecycle_role_gate.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20261121090000_offer_action_replay_lookup_fix.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20261121100000_reconciliation_issue_rows.sql,yes,no,absent hosted: kayad_reconciliation_issue_rows,Missing from hosted
+20261121110000_offer_settlement_binding.sql,yes,no,12 object(s) named; none flagged absent,Schema present but ledger missing
+20261121140000_personal_listing_lifecycle_offer_settlement_lock.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20261121150000_brand_kayard_ke_seeded_customer_content.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261121160000_dealer_listing_lifecycle_and_numbers.sql,yes,no,12 object(s) named; none flagged absent,Schema present but ledger missing
+20261121170000_brand_kayard_ke_normalize_platform_config.sql,yes,no,"no table/function/column DDL detected (data, policy, grant or index only)",Requires investigation
+20261122120000_listing_creation_idempotency.sql,yes,no,"absent hosted: kayad_cars_creation_key_immutable, cars.creation_idempotency_key, cars.creation_request_hash",Missing from hosted
+20261122200000_restore_register_identity_atomic.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20261123200000_dealer_employment_and_staff_identity.sql,yes,no,16 object(s) named; none flagged absent,Schema present but ledger missing
+20261123210000_lead_create_find_before_insert.sql,yes,no,1 object(s) named; none flagged absent,Schema present but ledger missing
+20261123220000_dealer_temporary_duties.sql,yes,no,absent hosted: dealer_team_temporary_grants,Missing from hosted
+20261124100000_admin_customer_care_and_market_tables.sql,yes,no,"absent hosted: announcements, feedback, reports",Missing from hosted
+20261124120000_dealer_suspension_requests.sql,yes,no,absent hosted: dealer_suspension_requests,Missing from hosted
+20261124130000_dealer_reinstatement_requests.sql,yes,no,2 object(s) named; none flagged absent,Schema present but ledger missing

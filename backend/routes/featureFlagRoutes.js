@@ -22,6 +22,7 @@ import {
   evaluateFlagHandler,
 } from "../controllers/featureFlagController.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
@@ -48,16 +49,16 @@ router.get("/", protect, adminOnly, asyncHandler(getAllFlagsHandler));
 router.get("/:key", protect, adminOnly, asyncHandler(getFlagHandler));
 
 // Create new flag
-router.post("/", protect, adminOnly, asyncHandler(createFlagHandler));
+router.post("/", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), asyncHandler(createFlagHandler));
 
 // Update flag
-router.put("/:key", protect, adminOnly, asyncHandler(updateFlagHandler));
+router.put("/:key", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), asyncHandler(updateFlagHandler));
 
 // Delete flag
-router.delete("/:key", protect, adminOnly, asyncHandler(deleteFlagHandler));
+router.delete("/:key", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), asyncHandler(deleteFlagHandler));
 
 // Toggle flag
-router.post("/:key/toggle", protect, adminOnly, asyncHandler(toggleFlagHandler));
+router.post("/:key/toggle", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), asyncHandler(toggleFlagHandler));
 
 // Get flag statistics
 router.get("/:key/stats", protect, adminOnly, asyncHandler(getFlagStatsHandler));
@@ -75,6 +76,6 @@ router.get("/role/:role", protect, adminOnly, validateQuery(analyticsQuerySchema
 router.get("/meta/categories", protect, adminOnly, asyncHandler(getFlagCategoriesHandler));
 
 // Batch evaluate flags
-router.post("/batch/evaluate", protect, adminOnly, asyncHandler(batchEvaluateFlagsHandler));
+router.post("/batch/evaluate", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), asyncHandler(batchEvaluateFlagsHandler));
 
 export default router;

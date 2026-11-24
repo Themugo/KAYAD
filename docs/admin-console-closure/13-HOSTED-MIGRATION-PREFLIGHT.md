@@ -1,5 +1,7 @@
 # 13 — Hosted migration preflight (READ-ONLY)
 
+> **Updated 2026-11-24 (final closure):** the reconciliation table, the six-object check, the disposable restore rehearsal and the extended runbook are in doc 30. Where this document disagrees with doc 30, doc 30 wins (for example `transition_escrow` is not the hosted function name; `kayad_transition_escrow_atomic` exists).
+
 Project `ubvgixwhfybbyjuvxboj` (KAYARD KE, eu-central-1, Postgres 17.6, ACTIVE_HEALTHY). Only `get_project`, `list_migrations` and `SELECT` on catalogs were used. **Nothing was applied, written or reset.** Date of check: 2026-11-24.
 
 ## Observations

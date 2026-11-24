@@ -68,7 +68,8 @@ const errorHandler = (err, req, res, next) => {
     success: false,
     message: clientMessage,
     ...(requestId && { requestId }),
-    ...(err.details && { details: err.details }),
+    // 5xx details can carry internal state (query text, schema names); only 4xx details are intentional client feedback.
+    ...(err.details && (statusCode < 500 || isNonProduction) && { details: err.details }),
     // M-8 FIX: Default to production behavior (no stack traces) when NODE_ENV is unset.
     // Previously the default was "development", which would leak stack traces in production.
     ...(isNonProduction ? {

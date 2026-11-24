@@ -554,7 +554,12 @@ export async function getExperienceAnalytics(req, res) {
 }
 
 export async function trackExperienceEvent(req, res) {
-  const { experienceId, eventType, userId, metadata } = req.body;
+  const { experienceId, eventType, metadata } = req.body || {};
+  if (!experienceId || !eventType) {
+    return res.status(400).json({ success: false, message: "experienceId and eventType are required" });
+  }
+  // The actor comes from the authenticated session, never from the request body (a body userId would let a caller attribute events to someone else).
+  const userId = req.user?.id;
 
   const event = await ExperienceAnalytics.create({
     experienceId,

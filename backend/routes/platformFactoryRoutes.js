@@ -1,6 +1,7 @@
 import express from "express";
 import { validateWritePayload } from "../middleware/validateWritePayload.js";
 import { protect, adminOnly, allowRoles } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import {
   // Dashboard
@@ -93,7 +94,7 @@ router.get("/store", asyncHandler(getAppStore));
 router.post("/store/install", allowRoles("admin", "superadmin"), validateWritePayload, asyncHandler(installApp));
 
 // AI Designer
-router.post("/design", validateWritePayload, asyncHandler(designProduct));
+router.post("/design", requirePermission(PERMISSIONS.MANAGE_SETTINGS), validateWritePayload, asyncHandler(designProduct));
 router.get("/design/:designId/status", asyncHandler(getDesignStatus));
 
 // Monetization

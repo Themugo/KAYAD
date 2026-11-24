@@ -8,7 +8,7 @@ import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
 import protectAccount from "../middleware/protectAccount.js";
 import { authorize, requirePermission, hasPermission, PERMISSIONS } from "../middleware/role.js";
-import { ASSIGNABLE_PERMISSIONS, PERM_LABELS, ROLE_PERMISSIONS, STAFF_ROLES, getEffectivePermissions } from "../config/roles.js";
+import { ASSIGNABLE_PERMISSIONS, PERM_LABELS, PERMISSION_ROLE_ELIGIBILITY, isPermissionEligibleForRole, ROLE_PERMISSIONS, STAFF_ROLES, getEffectivePermissions } from "../config/roles.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validate, validateObjectId, validateQuery, userListQuerySchema, carListQuerySchema, paymentListQuerySchema, reviewListQuerySchema, chatListQuerySchema, messageListQuerySchema } from "../middleware/validate.js";
 import { auditLog } from "../middleware/auditLog.js";
@@ -1692,6 +1692,7 @@ router.get(
       label: PERM_LABELS[p]?.label || p,
       desc: PERM_LABELS[p]?.desc || "",
       group: PERM_LABELS[p]?.group || "Other",
+      ...(PERMISSION_ROLE_ELIGIBILITY[p] ? { eligibleRoles: PERMISSION_ROLE_ELIGIBILITY[p] } : {}),
     }));
     res.json({ success: true, catalog });
   }),
@@ -1768,6 +1769,18 @@ router.put(
     }
     if (!STAFF_GOVERNANCE_ROLES.includes(user.role)) {
       return res.status(409).json({ success: false, code: "STAFF_ACCOUNT_REQUIRED", message: "Permissions can only be assigned to an existing staff account." });
+    }
+
+    // Role-eligibility boundary (e.g. view_system_health is technical-only): a grant alone must not widen access.
+    const ineligible = grantedPermissions.filter((p) => !isPermissionEligibleForRole(user.role, p));
+    if (ineligible.length) {
+      return res.status(409).json({
+        success: false,
+        code: "PERMISSION_NOT_ELIGIBLE_FOR_ROLE",
+        message: `Permission(s) ${ineligible.join(", ")} cannot be granted to the ${user.role} role.`,
+        permissions: ineligible,
+        eligibleRoles: Object.fromEntries(ineligible.map((p) => [p, PERMISSION_ROLE_ELIGIBILITY[p]])),
+      });
     }
 
     const beforePerms = { granted: user.grantedPermissions || [], revoked: user.revokedPermissions || [] };

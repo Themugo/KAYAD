@@ -7,6 +7,7 @@
 import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import { validate } from "../middleware/validate.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
@@ -75,12 +76,12 @@ router.get("/:id", protect, asyncHandler(getDispute));
 // =============================
 // 🔄 TRANSITION STATE (admin)
 // =============================
-router.patch("/:id/status", protect, adminOnly, validate(transitionDisputeSchema), asyncHandler(transitionDisputeState));
+router.patch("/:id/status", protect, adminOnly, requirePermission(PERMISSIONS.OPERATE_ESCROW), validate(transitionDisputeSchema), asyncHandler(transitionDisputeState));
 
 // =============================
 // 🎯 ASSIGN DISPUTE (admin)
 // =============================
-router.post("/:id/assign", protect, adminOnly, validate(assignDisputeSchema), asyncHandler(assignDispute));
+router.post("/:id/assign", protect, adminOnly, requirePermission(PERMISSIONS.OPERATE_ESCROW), validate(assignDisputeSchema), asyncHandler(assignDispute));
 
 // =============================
 // 📎 EVIDENCE MANAGEMENT
@@ -101,24 +102,24 @@ router.post("/:id/evidence/:evidenceId/verify", protect, adminOnly, asyncHandler
 // =============================
 // 📝 INTERNAL NOTES (admin)
 // =============================
-router.post("/:id/notes", protect, adminOnly, validate(internalNoteSchema), asyncHandler(addInternalNote));
+router.post("/:id/notes", protect, adminOnly, requirePermission(PERMISSIONS.OPERATE_ESCROW), validate(internalNoteSchema), asyncHandler(addInternalNote));
 
 // =============================
 // ⚖️ MEDIATION (admin)
 // =============================
 router.post("/:id/mediation/start", protect, adminOnly, validate(mediationStartSchema), asyncHandler(startMediation));
-router.post("/:id/mediation/complete", protect, adminOnly, validate(mediationCompleteSchema), asyncHandler(completeMediation));
+router.post("/:id/mediation/complete", protect, adminOnly, requirePermission(PERMISSIONS.OPERATE_ESCROW), validate(mediationCompleteSchema), asyncHandler(completeMediation));
 
 // =============================
 // ⚖️ RESOLUTION (admin)
 // =============================
-router.post("/:id/resolve", protect, adminOnly, createLimiter, idempotencyCheck, validate(resolveDisputeSchema), asyncHandler(resolveDispute));
+router.post("/:id/resolve", protect, adminOnly, requirePermission(PERMISSIONS.OPERATE_ESCROW), createLimiter, idempotencyCheck, validate(resolveDisputeSchema), asyncHandler(resolveDispute));
 
 // =============================
 // 🔄 APPEAL
 // =============================
 router.post("/:id/appeal", protect, idempotencyCheck, validate(submitAppealSchema), asyncHandler(submitAppeal));
-router.post("/:id/appeal/review", protect, adminOnly, validate(reviewAppealSchema), asyncHandler(reviewAppeal));
+router.post("/:id/appeal/review", protect, adminOnly, requirePermission(PERMISSIONS.OPERATE_ESCROW), validate(reviewAppealSchema), asyncHandler(reviewAppeal));
 
 // =============================
 // 🚨 FALLBACK

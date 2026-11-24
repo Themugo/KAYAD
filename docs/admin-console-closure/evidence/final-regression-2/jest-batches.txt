@@ -1,0 +1,18 @@
+a exit=0
+r1 exit=0
+r2 exit=0
+r3 exit=0
+r4 exit=0
+top exit=0
+a.txt Test Suites: 1 skipped, 90 passed, 90 of 91 total
+a.txt Tests:       21 skipped, 1183 passed, 1204 total
+r1.txt Test Suites: 44 passed, 44 total
+r1.txt Tests:       966 passed, 966 total
+r2.txt Test Suites: 43 passed, 43 total
+r2.txt Tests:       631 passed, 631 total
+r3.txt Test Suites: 43 passed, 43 total
+r3.txt Tests:       845 passed, 845 total
+r4.txt Test Suites: 43 passed, 43 total
+r4.txt Tests:       679 passed, 679 total
+top.txt Test Suites: 4 passed, 4 total
+top.txt Tests:       62 passed, 62 total

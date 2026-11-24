@@ -1,6 +1,7 @@
 import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import { validateObjectId } from "../middleware/validate.js";
 import {
   createLoanApplication,
@@ -14,6 +15,6 @@ const router = express.Router();
 router.post("/", protect, asyncHandler(createLoanApplication));
 router.get("/my", protect, asyncHandler(getMyLoanApplications));
 router.get("/all", protect, adminOnly, asyncHandler(getAllLoanApplications));
-router.put("/:id/status", protect, adminOnly, validateObjectId, asyncHandler(updateLoanApplicationStatus));
+router.put("/:id/status", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_PAYMENTS), validateObjectId, asyncHandler(updateLoanApplicationStatus));
 
 export default router;

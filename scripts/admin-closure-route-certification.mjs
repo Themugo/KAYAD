@@ -5,7 +5,7 @@ import fs from 'node:fs';
 const root = new URL('../', import.meta.url);
 const surface = fs.readFileSync(new URL('src/components/admin/AdminRouteSurface.tsx', root), 'utf8');
 const routes = ['/admin', ...[...surface.matchAll(/'((?:\/admin)[^']*)': \{ component:/g)].map((m) => m[1])];
-const sweep = JSON.parse(fs.readFileSync(new URL('docs/admin-console-closure/evidence/sweep/sweep.json', root)));
+const sweep = JSON.parse(fs.readFileSync(new URL(process.env.SWEEP_JSON || 'docs/admin-console-closure/evidence/sweep/sweep.json', root)));
 const CLS = { W: 'Fully workflow verified', R: 'Read-only verified', S: 'Safely simulated', B: 'Blocked by missing dependency', D: 'Deliberately unavailable', N: 'Not yet verified' };
 // [class, evidence, limits]
 const T = {

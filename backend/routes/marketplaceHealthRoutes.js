@@ -15,6 +15,7 @@ import {
   getAllHealthRecords,
 } from "../controllers/marketplaceHealthController.js";
 import { protect, adminOnly, allowRoles } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 
@@ -43,13 +44,13 @@ router.get("/alerts", protect, healthViewers, asyncHandler(getAlertsHandler));
 // =============================
 
 // Resolve alert
-router.post("/alerts/:alertId/resolve", protect, adminOnly, validateObjectId, asyncHandler(resolveAlert));
+router.post("/alerts/:alertId/resolve", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), validateObjectId, asyncHandler(resolveAlert));
 
 // Get detailed metrics
 router.get("/metrics", protect, adminOnly, asyncHandler(getDetailedMetrics));
 
 // Regenerate health snapshot
-router.post("/regenerate", protect, adminOnly, asyncHandler(regenerateHealth));
+router.post("/regenerate", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), asyncHandler(regenerateHealth));
 
 // Get all health records
 router.get("/admin/all", protect, adminOnly, asyncHandler(getAllHealthRecords));

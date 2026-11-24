@@ -157,6 +157,7 @@ router.post(
   "/admin/:bidId/set-winner",
   protect,
   adminOnly,
+  requirePermission(PERMISSIONS.MANAGE_BIDS),
   validateObjectId,
   asyncHandler(async (req, res) => {
     const bid = await Bid.findById(req.params.bidId).lean();

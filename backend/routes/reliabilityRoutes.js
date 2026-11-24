@@ -5,6 +5,7 @@ import { Router } from "express";
 import { validateWritePayload } from "../middleware/validateWritePayload.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import {
   computeSli,
   computeAllSlis,
@@ -78,14 +79,14 @@ router.get("/error-budgets/:sloId", protect, adminOnly, asyncHandler(async (req,
 }));
 
 // POST /api/reliability/error-budgets/refresh — manually trigger budget update
-router.post("/error-budgets/refresh", protect, adminOnly, validateWritePayload, asyncHandler(async (req, res) => {
+router.post("/error-budgets/refresh", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), validateWritePayload, asyncHandler(async (req, res) => {
   const sliValues = computeAllSlis();
   const results = await updateErrorBudgets(sliValues);
   res.json({ success: true, data: results });
 }));
 
 // POST /api/reliability/alerts/evaluate — manually trigger alert policy evaluation
-router.post("/alerts/evaluate", protect, adminOnly, validateWritePayload, asyncHandler(async (req, res) => {
+router.post("/alerts/evaluate", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), validateWritePayload, asyncHandler(async (req, res) => {
   const results = await evaluateAllAlertPolicies();
   res.json({ success: true, data: results });
 }));

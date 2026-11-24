@@ -15,11 +15,11 @@ Evidence level: LOCAL / DISPOSABLE-DB only. Fixtures were created in throw-away 
 | Dealer payout-account review | **`POST /api/wallet/dealer-account/:id/review` now needs `manage_payments`** (was any staff); list already gated | invalid decision/unknown account → 4xx | not executed with a real account | — | existing | journey 34 W13–W15 |
 | Dealer suspension / reinstatement | Admin requests, Super Admin decides (doc 21) | yes | compare-and-swap | 4 simultaneous decisions → exactly 1 wins | `dealer_*_request_*` | journey 33 |
 
-## Hosted function drift (read-only check 2026-11-24)
-`transition_escrow` is absent from hosted `public`; `kayad_reconciliation_issue_rows` is absent (reconciliation issue reads on hosted will not work until the owner-authorised migration step). **Noted; not replaced** (standing owner rule).
+## Hosted function drift (read-only check 2026-11-24, updated in the final closure)
+The earlier wording "`transition_escrow` is absent" named the wrong object. Hosted `public` has no function called `transition_escrow`; the canonical function is `kayad_transition_escrow_atomic`, which **is present hosted (6 arguments; body not compared, financial logic frozen)**. `kayad_reconciliation_issue_rows` is absent hosted, as are `dealer_suspension_requests`, `reports`, `feedback` and `private_seller_capabilities` (evidence: `evidence/hosted-readonly/six-objects-20261124.txt`). **Noted; nothing replaced or created.**
 
-## Residual finding (owner decision needed)
-Other `adminOnly`-only (any-staff) write routes remain **outside** the 53 console pages' primary workflows (feature flags, hero slides, localization, organizations, regional config, queue/DLQ, notification-analytics retry, reliability, vehicle-analytics regenerate, dispute transitions, loan-application status, fraud status, dealer-health override, contact read-marking, listing-assistant batch, cache flush/metrics reset). Each may enforce more inside its controller; I did not audit all of them. Listed in doc 26 §5; they are the main reason the verdict is not "READY FOR RELEASE REVIEW".
+## Residual finding — CLOSED in the final closure (doc 28)
+The any-staff write routes listed here earlier (feature flags, hero, localization, organizations, regional config, queue/DLQ, notification retries, disputes, fraud, loans, dealer health score, auction integrity, reliability, metrics reset, cache flush and others) now require an **existing** permission. 63 routes that every staff role could pass became 9 (own-alert reads, idea board, automation task workflow = owner decision OD-5). One defect remains open because it touches the frozen auction flow: **UD-1** (anonymous `POST /api/bids/:id/bid` answers 200 "Processing" before authentication; no bid is placed).
 
 ## Not verified in this phase
 Live provider callbacks (M-Pesa etc.), real payout/refund flows, escrow transitions against hosted, auction settlement with real bids, NTSA live integration.

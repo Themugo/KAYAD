@@ -45,22 +45,58 @@ const PERSONAL = await makeUser({ tag: 'per33' });
 const D1 = await dealer('dl133'); const D2 = await dealer('dl233'); const D3 = await dealer('dl333'); const D4 = await dealer('dl433');
 const DSTAFF = await member(D1, 'viewer', 'dst33');
 
-// ===================== A. OD-1 system health =====================
+// ===================== A. OD-1 system health (final-closure Phase 1: technical-only ELIGIBILITY boundary) =====================
+// A permission grant alone must never admit a non-technical role. Eligible = Super Admin + technical_support WITH the grant.
 {
   const paths = ['/api/admin/system/health', '/api/ecp/health'];
+  const HR = await staff('hr', 'hr33'), ACC = await staff('accounts', 'acc33'), MKT = await staff('marketing', 'mkt33'), ESC = await staff('escrow_officer', 'esc33');
+  const HOSTILE = [['moderator', MODG], ['hr', HR], ['accounts', ACC], ['marketing', MKT], ['escrow_officer', ESC], ['ordinary admin', ADMIN2]];
+  // Hostile case: a forged grant written straight into the database for every non-technical role (bypasses the assignment API on purpose).
+  q(`update users set granted_permissions=array['view_system_health'] where id in ('${HR.id}','${ACC.id}','${MKT.id}','${ESC.id}','${ADMIN2.id}')`);
+  for (const u of [HR, ACC, MKT, ESC, ADMIN2]) await relogin(u);
   for (const p of paths) {
     check(`A1 ${p}: anonymous 401`, (await anon(p)) === 401);
-    for (const [name, u] of [['personal account', PERSONAL], ['dealer owner', D1], ['dealer staff', DSTAFF], ['moderator', MOD], ['ordinary admin', ADMIN], ['technical_support without the permission', TECH], ['technical_support whose grant was revoked', TECHR]]) {
+    for (const [name, u] of [['personal account', PERSONAL], ['dealer owner', D1], ['dealer staff', DSTAFF], ['moderator', MOD], ['hr', await staff('hr', 'hrn33')], ['accounts', await staff('accounts', 'accn33')], ['marketing', await staff('marketing', 'mktn33')], ['escrow officer', await staff('escrow_officer', 'escn33')], ['ordinary admin', ADMIN], ['technical_support without the permission', TECH], ['technical_support whose grant was revoked', TECHR]]) {
       const r = await u.raw(p); check(`A2 ${p}: ${name} refused (403), no data`, r.status === 403 && !r.j?.health && !r.j?.data, [r.status, Object.keys(r.j || {})]);
     }
-    for (const [name, u] of [['owner Super Admin', SA], ['second Super Admin', SA2], ['technical_support with the granted permission', TECHG], ['moderator WITH the granted permission (permission decides, not the role name)', MODG]]) {
+    for (const [name, u] of HOSTILE) {
+      const r = await u.raw(p); check(`A2b ${p}: ${name} WITH a forged database grant still refused (eligibility, not the grant, decides)`, r.status === 403 && !r.j?.health && !r.j?.data, [r.status]);
+    }
+    for (const [name, u] of [['owner Super Admin', SA], ['second Super Admin', SA2], ['technical_support with the granted permission', TECHG]]) {
       const r = await u.raw(p); check(`A3 ${p}: ${name} allowed (${r.status})`, r.status === 200, [r.status, r.j?.message]);
     }
   }
-  const perms = (await SA.raw('/api/admin/staff')).j; // the permission is part of the assignable set
+  // Assignment API: the System Owner cannot grant it to a non-technical role (409) but can to technical_support (200).
+  const put = (id, granted) => SA.raw(`/api/admin/staff/${id}/permissions`, { method: 'PUT', body: { grantedPermissions: granted, revokedPermissions: [], reason: 'ci eligibility check' } });
+  for (const [name, u] of [['moderator', MOD], ['hr', HR], ['accounts', ACC], ['marketing', MKT], ['escrow_officer', ESC], ['ordinary admin', ADMIN]]) {
+    const r = await put(u.id, ['view_system_health']);
+    check(`A6 owner attempt to grant view_system_health to ${name} → 409 PERMISSION_NOT_ELIGIBLE_FOR_ROLE`, r.status === 409 && r.j?.code === 'PERMISSION_NOT_ELIGIBLE_FOR_ROLE', [r.status, r.j?.code]);
+  }
+  check('A6b the refused grant was not persisted', q(`select coalesce(granted_permissions::text,'') from users where id='${MOD.id}'`).indexOf('view_system_health') === -1);
+  const TECHN = await staff('technical_support', 'techn33');
+  check('A7 before the grant: technical_support refused', (await TECHN.raw(paths[0])).status === 403);
+  const g = await put(TECHN.id, ['view_system_health']);
+  check('A7b owner may grant it to technical_support (200)', g.status === 200 && g.j?.permissions?.effectivePermissions?.includes('view_system_health'), [g.status, g.j?.message]);
+  for (const p of paths) check(`A7c ${p}: technical_support after the grant allowed`, (await TECHN.raw(p)).status === 200);
+  // Replay of a captured request after revocation
+  const rv = await put(TECHN.id, []);
+  check('A8 revoke via the API (200)', rv.status === 200 && !rv.j?.permissions?.effectivePermissions?.includes('view_system_health'), [rv.status]);
+  for (const p of paths) check(`A8b ${p}: replayed request after revoke refused`, (await TECHN.raw(p)).status === 403);
+  // Role change: a technical user with the grant who is moved to a non-technical role loses access at once; moved back, regains it.
+  q(`update users set granted_permissions=array['view_system_health'] where id='${TECHN.id}'`);
+  check('A9 granted technical user allowed', (await TECHN.raw(paths[0])).status === 200);
+  q(`update users set role='moderator' where id='${TECHN.id}'`);
+  check('A9b same session after a role change to moderator → refused', (await TECHN.raw(paths[0])).status === 403);
+  await relogin(TECHN);
+  check('A9c after re-login as moderator → refused', (await TECHN.raw(paths[0])).status === 403 && (await TECHN.raw(paths[1])).status === 403);
+  q(`update users set role='technical_support' where id='${TECHN.id}'`);
+  await relogin(TECHN);
+  check('A9d back in the technical role with the grant → allowed again', (await TECHN.raw(paths[0])).status === 200);
   const cfg = await import('../../backend/config/roles.js');
-  check('A4 view_system_health is assignable, labelled, and held by NO role by default', cfg.ASSIGNABLE_PERMISSIONS.includes('view_system_health') && !!cfg.PERM_LABELS?.view_system_health && Object.entries(cfg.ROLE_PERMISSIONS).every(([k, v]) => k === 'superadmin' || !v.includes('view_system_health')));
+  check('A4 view_system_health is assignable, labelled, held by NO role by default, and role-eligibility restricted', cfg.ASSIGNABLE_PERMISSIONS.includes('view_system_health') && !!cfg.PERM_LABELS?.view_system_health && Object.entries(cfg.ROLE_PERMISSIONS).every(([k, v]) => k === 'superadmin' || !v.includes('view_system_health')) && JSON.stringify(cfg.PERMISSION_ROLE_ELIGIBILITY.view_system_health) === JSON.stringify(['superadmin', 'technical_support']));
   check('A5 the audit/other technical permission (view_logs) does NOT unlock health', (await MOD.raw('/api/admin/system/health')).status === 403 && cfg.ROLE_PERMISSIONS.moderator.includes('view_logs'));
+  const cat = await SA.raw('/api/admin/staff/permissions/catalog');
+  check('A10 the permission catalog advertises the eligible roles', JSON.stringify(cat.j?.catalog?.find((c) => c.key === 'view_system_health')?.eligibleRoles) === JSON.stringify(['superadmin', 'technical_support']), [cat.status]);
 }
 
 // ===================== B/C. OD-2 reinstatement + OD-3 any Super Admin =====================

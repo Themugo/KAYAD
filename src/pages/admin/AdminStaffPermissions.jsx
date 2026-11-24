@@ -66,7 +66,11 @@ export default function AdminStaffPermissions() {
     setDraftPerms(new Set(member.effectivePermissions || []));
   }
 
+  const isEligible = (p, member) => !Array.isArray(p.eligibleRoles) || p.eligibleRoles.includes(member?.role);
+
   function toggle(permKey) {
+    const entry = catalog.find(c => c.key === permKey);
+    if (entry && !isEligible(entry, editing)) return;
     setDraftPerms(prev => {
       const next = new Set(prev);
       next.has(permKey) ? next.delete(permKey) : next.add(permKey);
@@ -205,11 +209,12 @@ export default function AdminStaffPermissions() {
                     {perms.map(p => {
                       const on = draftPerms.has(p.key);
                       const fromRole = (editing.rolePermissions || []).includes(p.key);
+                      const eligible = isEligible(p, editing);
                       return (
-                        <div key={p.key} onClick={() => toggle(p.key)}
+                        <div key={p.key} onClick={() => toggle(p.key)} aria-disabled={!eligible}
                           onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(p.key); } }}
-                          role="switch" aria-checked={on} tabIndex={0} aria-label={p.label}
-                          style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderRadius: 11, border: `1px solid ${on ? 'rgba(23, 107, 135, .3)' : 'var(--border)'}`, background: on ? 'var(--brand-glow)' : 'var(--surface)', cursor: 'pointer', transition: 'all .15s' }}>
+                          role="switch" aria-checked={on} tabIndex={eligible ? 0 : -1} aria-label={p.label}
+                          style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderRadius: 11, border: `1px solid ${on ? 'rgba(23, 107, 135, .3)' : 'var(--border)'}`, background: on ? 'var(--brand-glow)' : 'var(--surface)', cursor: eligible ? 'pointer' : 'not-allowed', opacity: eligible ? 1 : 0.6, transition: 'all .15s' }}>
                           <div style={{ width: 36, height: 20, borderRadius: 999, background: on ? 'var(--brand)' : 'var(--border-soft)', position: 'relative', flexShrink: 0, transition: 'background .15s' }}>
                             <div style={{ position: 'absolute', top: 2, left: on ? 18 : 2, width: 16, height: 16, borderRadius: '50%', background: on ? '#0a3340' : '#fff', transition: 'left .15s' }} />
                           </div>
@@ -217,7 +222,7 @@ export default function AdminStaffPermissions() {
                             <div style={{ fontSize: 13, fontWeight: 700, color: '#0a3340' }}>{p.label}
                               {fromRole && <span style={{ fontSize: 9, fontWeight: 700, color: 'var(--text-dim)', marginLeft: 8, textTransform: 'uppercase', letterSpacing: '.05em' }}>role default</span>}
                             </div>
-                            <div style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>{p.desc}</div>
+                            <div style={{ fontSize: 11.5, color: 'var(--text-muted)' }}>{p.desc}{!eligible && ` Not available to the ${editing.role} role (eligible: ${p.eligibleRoles.join(', ')}).`}</div>
                           </div>
                           {on
                             ? <Check size={16} style={{ color: 'var(--brand)', flexShrink: 0 }} />

@@ -1,0 +1,598 @@
+[
+ [
+  "PATCH",
+  "^/api/new\\-admin/auction\\-integrity/00000000\\-0000\\-4000\\-8000\\-0000000000aa/status$",
+  [
+   "admin"
+  ],
+  "auctionIntegrityRoutes via requirePermission(PERMISSIONS.MANAGE_AUCTIONS)"
+ ],
+ [
+  "POST",
+  "^/api/new\\-admin/auction\\-integrity/scan$",
+  [
+   "admin"
+  ],
+  "auctionIntegrityRoutes via requirePermission(PERMISSIONS.MANAGE_AUCTIONS)"
+ ],
+ [
+  "PATCH",
+  "^/api/contact/00000000\\-0000\\-4000\\-8000\\-0000000000aa/read$",
+  [
+   "technical_support",
+   "admin"
+  ],
+  "contactRoutes via requirePermission(PERMISSIONS.MANAGE_SUPPORT)"
+ ],
+ [
+  "POST",
+  "^/api/dealer\\-health\\-score/admin/recalculate/00000000\\-0000\\-4000\\-8000\\-0000000000aa$",
+  [
+   "hr",
+   "technical_support",
+   "admin"
+  ],
+  "dealerHealthScoreRoutes via requirePermission(PERMISSIONS.VERIFY_DEALER)"
+ ],
+ [
+  "POST",
+  "^/api/dealer\\-health\\-score/admin/recalculate\\-all$",
+  [
+   "hr",
+   "technical_support",
+   "admin"
+  ],
+  "dealerHealthScoreRoutes via requirePermission(PERMISSIONS.VERIFY_DEALER)"
+ ],
+ [
+  "PUT",
+  "^/api/dealer\\-health\\-score/admin/override/00000000\\-0000\\-4000\\-8000\\-0000000000aa$",
+  [
+   "hr",
+   "technical_support",
+   "admin"
+  ],
+  "dealerHealthScoreRoutes via requirePermission(PERMISSIONS.VERIFY_DEALER)"
+ ],
+ [
+  "PATCH",
+  "^/api/disputes/00000000\\-0000\\-4000\\-8000\\-0000000000aa/status$",
+  [
+   "escrow_officer",
+   "admin"
+  ],
+  "disputeRoutes via requirePermission(PERMISSIONS.OPERATE_ESCROW)"
+ ],
+ [
+  "POST",
+  "^/api/disputes/00000000\\-0000\\-4000\\-8000\\-0000000000aa/assign$",
+  [
+   "escrow_officer",
+   "admin"
+  ],
+  "disputeRoutes via requirePermission(PERMISSIONS.OPERATE_ESCROW)"
+ ],
+ [
+  "POST",
+  "^/api/disputes/00000000\\-0000\\-4000\\-8000\\-0000000000aa/notes$",
+  [
+   "escrow_officer",
+   "admin"
+  ],
+  "disputeRoutes via requirePermission(PERMISSIONS.OPERATE_ESCROW)"
+ ],
+ [
+  "POST",
+  "^/api/disputes/00000000\\-0000\\-4000\\-8000\\-0000000000aa/mediation/complete$",
+  [
+   "escrow_officer",
+   "admin"
+  ],
+  "disputeRoutes via requirePermission(PERMISSIONS.OPERATE_ESCROW)"
+ ],
+ [
+  "POST",
+  "^/api/disputes/00000000\\-0000\\-4000\\-8000\\-0000000000aa/resolve$",
+  [
+   "escrow_officer",
+   "admin"
+  ],
+  "disputeRoutes via requirePermission(PERMISSIONS.OPERATE_ESCROW)"
+ ],
+ [
+  "POST",
+  "^/api/disputes/00000000\\-0000\\-4000\\-8000\\-0000000000aa/appeal/review$",
+  [
+   "escrow_officer",
+   "admin"
+  ],
+  "disputeRoutes via requirePermission(PERMISSIONS.OPERATE_ESCROW)"
+ ],
+ [
+  "POST",
+  "^/api/feature\\-flags$",
+  [
+   "admin"
+  ],
+  "featureFlagRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "PUT",
+  "^/api/feature\\-flags/00000000\\-0000\\-4000\\-8000\\-0000000000aa$",
+  [
+   "admin"
+  ],
+  "featureFlagRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "DELETE",
+  "^/api/feature\\-flags/00000000\\-0000\\-4000\\-8000\\-0000000000aa$",
+  [
+   "admin"
+  ],
+  "featureFlagRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/feature\\-flags/00000000\\-0000\\-4000\\-8000\\-0000000000aa/toggle$",
+  [
+   "admin"
+  ],
+  "featureFlagRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/feature\\-flags/batch/evaluate$",
+  [
+   "admin"
+  ],
+  "featureFlagRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/fraud/check$",
+  [
+   "moderator",
+   "hr",
+   "technical_support",
+   "admin"
+  ],
+  "fraudRoutes via requireAnyPermission(PERMISSIONS.MANAGE_MODERATION, PERMISSIONS.MANAGE_USERS)"
+ ],
+ [
+  "PUT",
+  "^/api/fraud/00000000\\-0000\\-4000\\-8000\\-0000000000aa/status$",
+  [
+   "moderator",
+   "hr",
+   "technical_support",
+   "admin"
+  ],
+  "fraudRoutes via requireAnyPermission(PERMISSIONS.MANAGE_MODERATION, PERMISSIONS.MANAGE_USERS)"
+ ],
+ [
+  "POST",
+  "^/api/hero$",
+  [
+   "admin"
+  ],
+  "heroSlideRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "PUT",
+  "^/api/hero/00000000\\-0000\\-4000\\-8000\\-0000000000aa$",
+  [
+   "admin"
+  ],
+  "heroSlideRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "DELETE",
+  "^/api/hero/00000000\\-0000\\-4000\\-8000\\-0000000000aa$",
+  [
+   "admin"
+  ],
+  "heroSlideRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/listing\\-assistant/batch\\-analyze$",
+  [
+   "admin"
+  ],
+  "listingAssistantRoutes via requirePermission(PERMISSIONS.MANAGE_CARS)"
+ ],
+ [
+  "POST",
+  "^/api/listing\\-quality/car/00000000\\-0000\\-4000\\-8000\\-0000000000aa/recalculate$",
+  [
+   "admin"
+  ],
+  "listingQualityRoutes via requirePermission(PERMISSIONS.MANAGE_CARS)"
+ ],
+ [
+  "PUT",
+  "^/api/loans/00000000\\-0000\\-4000\\-8000\\-0000000000aa/status$",
+  [
+   "accounts",
+   "admin"
+  ],
+  "loanApplicationRoutes via requirePermission(PERMISSIONS.MANAGE_PAYMENTS)"
+ ],
+ [
+  "POST",
+  "^/api/v1/localization$",
+  [
+   "admin"
+  ],
+  "localizationRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "PATCH",
+  "^/api/v1/localization/00000000\\-0000\\-4000\\-8000\\-0000000000aa$",
+  [
+   "admin"
+  ],
+  "localizationRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "DELETE",
+  "^/api/v1/localization/00000000\\-0000\\-4000\\-8000\\-0000000000aa$",
+  [
+   "admin"
+  ],
+  "localizationRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/v1/localization/import$",
+  [
+   "admin"
+  ],
+  "localizationRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/marketplace\\-health/alerts/00000000\\-0000\\-4000\\-8000\\-0000000000aa/resolve$",
+  [
+   "admin"
+  ],
+  "marketplaceHealthRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/marketplace\\-health/regenerate$",
+  [
+   "admin"
+  ],
+  "marketplaceHealthRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/notification\\-analytics/retry/00000000\\-0000\\-4000\\-8000\\-0000000000aa$",
+  [
+   "admin"
+  ],
+  "notificationAnalyticsRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/notification\\-analytics/bulk\\-retry$",
+  [
+   "admin"
+  ],
+  "notificationAnalyticsRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/notification\\-analytics/process\\-retry\\-queue$",
+  [
+   "admin"
+  ],
+  "notificationAnalyticsRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/organizations$",
+  [
+   "admin"
+  ],
+  "organizationRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "DELETE",
+  "^/api/organizations/00000000\\-0000\\-4000\\-8000\\-0000000000aa$",
+  [
+   "admin"
+  ],
+  "organizationRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/admin/queue/dlq/retry/00000000\\-0000\\-4000\\-8000\\-0000000000aa$",
+  [
+   "admin"
+  ],
+  "queueRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "DELETE",
+  "^/api/admin/queue/dlq/delete/00000000\\-0000\\-4000\\-8000\\-0000000000aa$",
+  [
+   "admin"
+  ],
+  "queueRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/admin/queue/failures/00000000\\-0000\\-4000\\-8000\\-0000000000aa/resolve$",
+  [
+   "admin"
+  ],
+  "queueRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "PUT",
+  "^/api/countries/currency\\-rates$",
+  [
+   "admin"
+  ],
+  "regionalConfigurationRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "PATCH",
+  "^/api/countries/00000000\\-0000\\-4000\\-8000\\-0000000000aa/status$",
+  [
+   "admin"
+  ],
+  "regionalConfigurationRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/reliability/error\\-budgets/refresh$",
+  [
+   "admin"
+  ],
+  "reliabilityRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/reliability/alerts/evaluate$",
+  [
+   "admin"
+  ],
+  "reliabilityRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/analytics/market/regenerate$",
+  [
+   "admin"
+  ],
+  "vehicleAnalyticsRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/health/cache/flush$",
+  [
+   "admin"
+  ],
+  "healthRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/metrics/reset$",
+  [
+   "admin"
+  ],
+  "metricsRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/platform\\-factory/design$",
+  [
+   "admin"
+  ],
+  "platformFactoryRoutes via requirePermission(PERMISSIONS.MANAGE_SETTINGS)"
+ ],
+ [
+  "POST",
+  "^/api/bids/admin/00000000\\-0000\\-4000\\-8000\\-0000000000aa/set\\-winner$",
+  [
+   "admin"
+  ],
+  "bidRoutes via requirePermission(PERMISSIONS.MANAGE_BIDS)"
+ ],
+ [
+  "POST",
+  "^/api/automation/rules/evaluate$",
+  [
+   "admin"
+  ],
+  "automationRoutes via allowRoles(\"admin\", \"superadmin\")"
+ ],
+ [
+  "POST",
+  "^/api/automation/approvals/initiate$",
+  [
+   "admin"
+  ],
+  "automationRoutes via allowRoles(\"admin\", \"superadmin\")"
+ ],
+ [
+  "POST",
+  "^/api/automation/templates/notifications/preview$",
+  [
+   "admin"
+  ],
+  "automationRoutes via allowRoles(\"admin\", \"superadmin\")"
+ ],
+ [
+  "PUT",
+  "^/api/lowcode/objects/.*/permissions$",
+  [
+   "admin"
+  ],
+  "allowRoles admin before id validation"
+ ],
+ [
+  "POST",
+  "^/api/lowcode/objects/.*/fields$",
+  [
+   "admin"
+  ],
+  "allowRoles admin before id validation"
+ ],
+ [
+  "POST",
+  "^/api/lowcode/ai/suggest$",
+  [
+   "admin"
+  ],
+  "allowRoles admin"
+ ],
+ [
+  "POST",
+  "^/api/admin/alerts/00000000-0000-4000-8000-0000000000aa/read$",
+  [
+   "moderator",
+   "hr",
+   "accounts",
+   "marketing",
+   "escrow_officer",
+   "ad_manager",
+   "technical_support",
+   "ghost_checker",
+   "admin"
+  ],
+  "own-alert acknowledgement: any staff by design"
+ ],
+ [
+  "POST",
+  "^/api/admin/alerts/read-all$",
+  [
+   "moderator",
+   "hr",
+   "accounts",
+   "marketing",
+   "escrow_officer",
+   "ad_manager",
+   "technical_support",
+   "ghost_checker",
+   "admin"
+  ],
+  "own-alert acknowledgement: any staff by design"
+ ],
+ [
+  "POST",
+  "^/api/automation/tasks$",
+  [
+   "moderator",
+   "hr",
+   "accounts",
+   "marketing",
+   "escrow_officer",
+   "ad_manager",
+   "technical_support",
+   "ghost_checker",
+   "admin"
+  ],
+  "staff task workflow: any staff - OWNER DECISION OD-5"
+ ],
+ [
+  "PUT",
+  "^/api/automation/tasks/00000000-0000-4000-8000-0000000000aa$",
+  [
+   "moderator",
+   "hr",
+   "accounts",
+   "marketing",
+   "escrow_officer",
+   "ad_manager",
+   "technical_support",
+   "ghost_checker",
+   "admin"
+  ],
+  "staff task workflow - OD-5"
+ ],
+ [
+  "POST",
+  "^/api/automation/tasks/00000000-0000-4000-8000-0000000000aa/complete$",
+  [
+   "moderator",
+   "hr",
+   "accounts",
+   "marketing",
+   "escrow_officer",
+   "ad_manager",
+   "technical_support",
+   "ghost_checker",
+   "admin"
+  ],
+  "staff task workflow - OD-5"
+ ],
+ [
+  "POST",
+  "^/api/automation/tasks/00000000-0000-4000-8000-0000000000aa/escalate$",
+  [
+   "moderator",
+   "hr",
+   "accounts",
+   "marketing",
+   "escrow_officer",
+   "ad_manager",
+   "technical_support",
+   "ghost_checker",
+   "admin"
+  ],
+  "staff task workflow - OD-5"
+ ],
+ [
+  "POST",
+  "^/api/improvement/ideas$",
+  [
+   "moderator",
+   "hr",
+   "accounts",
+   "marketing",
+   "escrow_officer",
+   "ad_manager",
+   "technical_support",
+   "ghost_checker",
+   "admin"
+  ],
+  "staff idea board: any staff by design"
+ ],
+ [
+  "POST",
+  "^/api/improvement/ideas/00000000-0000-4000-8000-0000000000aa/vote$",
+  [
+   "moderator",
+   "hr",
+   "accounts",
+   "marketing",
+   "escrow_officer",
+   "ad_manager",
+   "technical_support",
+   "ghost_checker",
+   "admin"
+  ],
+  "staff idea board: any staff by design"
+ ],
+ [
+  "POST",
+  "^/api/improvement/assistant$",
+  [
+   "moderator",
+   "hr",
+   "accounts",
+   "marketing",
+   "escrow_officer",
+   "ad_manager",
+   "technical_support",
+   "ghost_checker",
+   "admin"
+  ],
+  "staff idea board assistant: any staff by design"
+ ]
+]

@@ -1,5 +1,7 @@
 # 27 — Final release-readiness matrix
 
+> **Superseded in part 2026-11-24 (final closure):** see docs 28 (write authorization register), 29 (security/governance closure), 30 (migration parity and restore) and 31 (gates and regression). Where this document disagrees, the newer document wins: System Health is now technical-only (OD-1 hardened), the any-staff write-route residual is closed except UD-1 and OD-5, and the earlier "transition_escrow absent" wording is corrected.
+
 ## Verdict: **CONDITIONALLY READY**
 
 The Admin Console as built in this working tree is ready for an **owner release review**, on the conditions below. It is **not** declared ready for production: nothing here was tested on hosted infrastructure, and several hosted prerequisites are outstanding.

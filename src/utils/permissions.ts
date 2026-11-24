@@ -126,6 +126,16 @@ export interface UserPermissions {
   platformRecovery?: boolean;
 }
 
+/** Mirrors backend PERMISSION_ROLE_ELIGIBILITY: a grant is effective only for these roles (server enforces it too). */
+export const PERMISSION_ROLE_ELIGIBILITY: Partial<Record<Permission, string[]>> = {
+  [PERM.VIEW_SYSTEM_HEALTH]: ["superadmin", "technical_support"],
+};
+
+export function isPermissionEligibleForRole(role: string | undefined, permission: Permission): boolean {
+  const eligible = PERMISSION_ROLE_ELIGIBILITY[permission];
+  return !eligible || eligible.includes(role || "");
+}
+
 export function getEffectivePermissions(user: UserPermissions | null | undefined): Permission[] {
   if (!user) return [];
   if (user.role === "superadmin") return Object.values(PERM);
@@ -133,7 +143,7 @@ export function getEffectivePermissions(user: UserPermissions | null | undefined
   for (const p of (user.grantedPermissions || [])) base.add(p as Permission);
   for (const p of (user.revokedPermissions || [])) base.delete(p as Permission);
   if (user.platformRecovery === true) base.add(PERM.PLATFORM_RECOVERY);
-  return [...base] as Permission[];
+  return ([...base] as Permission[]).filter((p) => isPermissionEligibleForRole(user.role, p));
 }
 
 export function userHasPermission(user: UserPermissions | null | undefined, permission: Permission): boolean {

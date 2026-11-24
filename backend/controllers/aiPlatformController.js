@@ -15,7 +15,11 @@ import { findAll } from "../db/index.js";
 // ============================================
 
 export async function processAICommand(req, res) {
-  const { command, context } = req.body;
+  const { command, context } = req.body || {};
+  if (typeof command !== "string" || !command.trim()) {
+    const body = { success: false, error: "command is required" };
+    return typeof res.status === "function" ? res.status(400).json(body) : res.json(body);
+  }
   const userId = req.user?.id;
   const userRole = req.user?.role;
 

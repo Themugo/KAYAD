@@ -1,6 +1,7 @@
 import express from "express";
 import { validateWritePayload } from "../middleware/validateWritePayload.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import {
   getTranslations,
@@ -48,15 +49,15 @@ router.get("/export", protect, adminOnly, asyncHandler(exportTranslations));
 // =============================
 
 // Create translation
-router.post("/", protect, adminOnly, validateWritePayload, asyncHandler(createTranslation));
+router.post("/", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), validateWritePayload, asyncHandler(createTranslation));
 
 // Update translation
-router.patch("/:translationId", protect, adminOnly, validateWritePayload, asyncHandler(updateTranslation));
+router.patch("/:translationId", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), validateWritePayload, asyncHandler(updateTranslation));
 
 // Delete translation
-router.delete("/:translationId", protect, adminOnly, validateWritePayload, asyncHandler(deleteTranslation));
+router.delete("/:translationId", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), validateWritePayload, asyncHandler(deleteTranslation));
 
 // Import translations (bulk)
-router.post("/import", protect, adminOnly, validateWritePayload, asyncHandler(importTranslations));
+router.post("/import", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), validateWritePayload, asyncHandler(importTranslations));
 
 export default router;

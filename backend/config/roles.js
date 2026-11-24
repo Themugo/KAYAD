@@ -273,9 +273,28 @@ export const PERM_LABELS = {
 };
 
 /**
+ * Role-eligibility boundary for permissions that must never reach non-eligible staff
+ * through a per-user grant. A permission listed here is effective ONLY when the holder's
+ * role is in the list (Super Admin / platform owner always qualify). Granting it to any
+ * other role is rejected at assignment time AND ignored when effective permissions are
+ * computed, so a stale grant, a role change or a direct database edit cannot widen access.
+ * Final-closure Phase 1: system health is technical-only (Super Admin + technical_support).
+ */
+export const PERMISSION_ROLE_ELIGIBILITY = {
+  [PERM.VIEW_SYSTEM_HEALTH]: ["superadmin", "technical_support"],
+};
+
+export const isPermissionEligibleForRole = (role, permission) => {
+  const eligible = PERMISSION_ROLE_ELIGIBILITY[permission];
+  if (!eligible) return true;
+  return role === WEBHOIST || eligible.includes(role);
+};
+
+/**
  * Compute a user's EFFECTIVE permissions:
  *   role defaults ∪ grantedPermissions − revokedPermissions
  * Superadmin and webhoist always receive the full permission set.
+ * Permissions with a role-eligibility boundary are dropped for non-eligible roles.
  */
 export const getEffectivePermissions = (user) => {
   if (!user) return [];
@@ -285,7 +304,7 @@ export const getEffectivePermissions = (user) => {
   const base = new Set(ROLE_PERMISSIONS[user.role] || []);
   for (const p of user.grantedPermissions || []) base.add(p);
   for (const p of user.revokedPermissions || []) base.delete(p);
-  return [...base];
+  return [...base].filter((p) => isPermissionEligibleForRole(user.role, p));
 };
 
 /**

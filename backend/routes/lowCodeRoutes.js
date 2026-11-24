@@ -84,7 +84,7 @@ router.get("/objects/:id/api", validateObjectId, asyncHandler(generateApi));
 // ============================================
 
 router.get("/objects/:objectId/fields", asyncHandler(getObjectFields));
-router.post("/objects/:objectId/fields", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(createObjectField));
+router.post("/objects/:objectId/fields", allowRoles("admin", "superadmin"), validateObjectId, asyncHandler(createObjectField));
 router.put("/fields/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(updateObjectField));
 router.delete("/fields/:id", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(deleteObjectField));
 router.post("/objects/:objectId/fields/reorder", allowRoles("admin", "superadmin"), asyncHandler(reorderObjectFields));
@@ -121,7 +121,7 @@ router.delete("/views/:id", validateObjectId, allowRoles("admin", "superadmin"),
 // ============================================
 
 router.get("/objects/:objectId/permissions", asyncHandler(getObjectPermissions));
-router.put("/objects/:objectId/permissions", validateObjectId, allowRoles("admin", "superadmin"), asyncHandler(updateObjectPermissions));
+router.put("/objects/:objectId/permissions", allowRoles("admin", "superadmin"), validateObjectId, asyncHandler(updateObjectPermissions));
 
 // ============================================
 // CUSTOM DASHBOARDS
@@ -143,7 +143,7 @@ router.post("/versions/:versionId/rollback", allowRoles("admin", "superadmin"), 
 // AI ASSISTANT
 // ============================================
 
-router.post("/ai/suggest", asyncHandler(suggestBusinessObject));
+router.post("/ai/suggest", allowRoles("admin", "superadmin"), asyncHandler(suggestBusinessObject));
 
 router.use(notProvisionedGuard("Low-code Studio"));
 

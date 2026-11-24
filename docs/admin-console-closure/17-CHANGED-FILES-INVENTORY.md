@@ -1,5 +1,7 @@
 # 17 — Changed files inventory (final closure, 2026-11-24)
 
+> **Superseded in part 2026-11-24 (final closure):** see docs 28 (write authorization register), 29 (security/governance closure), 30 (migration parity and restore) and 31 (gates and regression). Where this document disagrees, the newer document wins: System Health is now technical-only (OD-1 hardened), the any-staff write-route residual is closed except UD-1 and OD-5, and the earlier "transition_escrow absent" wording is corrected.
+
 Generated from `git status --short` against detached HEAD `5bbf2843` (nothing staged or committed by me) and from file times for the post-commit delta. Symlinked `node_modules` entries, `backend/data/uploads.sqlite` (test artefact) and `ci/db-journeys/out` are excluded.
 
 ## A. Delta since the owner's commit `9488526be` (files that must be staged for this closure)

@@ -15,6 +15,9 @@ describe('System Health permission (OD-1)', () => {
   });
   it('Super Admin always has it', () => { expect(can('superadmin')).toBe(true); });
   it('technical_support only with an individual grant', () => { expect(can('technical_support', ['view_system_health'])).toBe(true); });
+  it.each(['moderator', 'hr', 'marketing', 'accounts', 'admin', 'escrow_officer', 'ghost_checker', 'ad_manager'])('%s with a grant is STILL refused (technical-only eligibility)', (role) => {
+    expect(can(role, ['view_system_health'])).toBe(false);
+  });
   it('a revoke removes a grant', () => { expect(userHasPermission({ role: 'technical_support', grantedPermissions: ['view_system_health'], revokedPermissions: ['view_system_health'] } as any, PERM.VIEW_SYSTEM_HEALTH)).toBe(false); });
 });
 

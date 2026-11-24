@@ -17,6 +17,7 @@ import {
   getQualityBenchmarksHandler,
 } from "../controllers/listingQualityController.js";
 import { protect, adminOnly, dealerOnly, optionalAuth } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import { requireOwnDealerResource } from "../middleware/dealerIsolation.js"; // PHASE 13D (DI-3)
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
@@ -55,7 +56,7 @@ router.post(
 // =============================
 
 // Recalculate listing quality
-router.post("/car/:carId/recalculate", protect, adminOnly, validateObjectId, asyncHandler(recalculateListingQualityHandler));
+router.post("/car/:carId/recalculate", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_CARS), validateObjectId, asyncHandler(recalculateListingQualityHandler));
 
 // Get platform quality stats
 router.get("/platform/stats", protect, adminOnly, asyncHandler(getPlatformQualityStatsHandler));

@@ -1,0 +1,8 @@
+# Hosted project ubvgixwhfybbyjuvxboj, 2026-11-24, SELECT only (to_regclass, pg_class, pg_policies, information_schema, pg_proc)
+dealer_suspension_requests        table ABSENT (rls/policies/grants: n/a)
+reports                           table ABSENT
+feedback                          table ABSENT
+private_seller_capabilities       table ABSENT
+kayad_reconciliation_issue_rows   view  ABSENT
+transition_escrow                 function name ABSENT in public (the repo's canonical name is kayad_transition_escrow_atomic)
+kayad_transition_escrow_atomic    function PRESENT, 6 args (body not compared; financial logic frozen)

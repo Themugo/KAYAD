@@ -1,5 +1,7 @@
 # 14 — Production migration runbook
 
+> **Updated 2026-11-24 (final closure):** the reconciliation table, the six-object check, the disposable restore rehearsal and the extended runbook are in doc 30. Where this document disagrees with doc 30, doc 30 wins (for example `transition_escrow` is not the hosted function name; `kayad_transition_escrow_atomic` exists).
+
 # PREPARED FOR REVIEW — NOT AUTHORIZED FOR EXECUTION.
 
 Nothing here may be run without explicit written owner authorisation. This session did not and will not execute it.

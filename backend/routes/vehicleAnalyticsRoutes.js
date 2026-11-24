@@ -21,6 +21,7 @@ import {
   getAllAnalytics,
 } from "../controllers/vehicleAnalyticsController.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, requireAnyPermission, PERMISSIONS } from "../middleware/rbac.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateQuery, analyticsQuerySchema } from "../middleware/validate.js";
 
@@ -72,7 +73,7 @@ router.get("/market/dealer/:dealerId", protect, validateObjectId, asyncHandler(g
 // =============================
 
 // Regenerate analytics
-router.post("/market/regenerate", protect, adminOnly, asyncHandler(regenerateAnalytics));
+router.post("/market/regenerate", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), asyncHandler(regenerateAnalytics));
 
 // Get all analytics records
 router.get("/market/admin/all", protect, adminOnly, asyncHandler(getAllAnalytics));

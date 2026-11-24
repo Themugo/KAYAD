@@ -1,5 +1,7 @@
 # 25 — Hosted database preflight and restore readiness (READ-ONLY)
 
+> **Updated 2026-11-24 (final closure):** the reconciliation table, the six-object check, the disposable restore rehearsal and the extended runbook are in doc 30. Where this document disagrees with doc 30, doc 30 wins (for example `transition_escrow` is not the hosted function name; `kayad_transition_escrow_atomic` exists).
+
 Project `ubvgixwhfybbyjuvxboj` ("KAYARD KE", Postgres 17.6, ACTIVE_HEALTHY). Only `SELECT` statements and `list_projects` were used on 2026-11-24. **No migration, DDL, write, reset or branch operation was performed.**
 
 ## Observations

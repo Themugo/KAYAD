@@ -1,5 +1,5 @@
 // OD-1: view_system_health is narrow — assignable, labelled, held by no default role; superadmin keeps everything.
-import { PERM, ROLE_PERMISSIONS, ASSIGNABLE_PERMISSIONS, PERM_LABELS, getEffectivePermissions } from "../../config/roles.js";
+import { PERM, ROLE_PERMISSIONS, ASSIGNABLE_PERMISSIONS, PERM_LABELS, getEffectivePermissions, isPermissionEligibleForRole } from "../../config/roles.js";
 import { PERMISSIONS } from "../../middleware/rbac.js";
 
 describe("view_system_health (OD-1)", () => {
@@ -21,8 +21,18 @@ describe("view_system_health (OD-1)", () => {
     expect(tech).not.toContain("view_system_health");
   });
   it("is granted only individually and removed by a revoke", () => {
-    expect(getEffectivePermissions({ role: "moderator", grantedPermissions: ["view_system_health"] })).toContain("view_system_health");
+    expect(getEffectivePermissions({ role: "technical_support", grantedPermissions: ["view_system_health"] })).toContain("view_system_health");
     expect(getEffectivePermissions({ role: "technical_support", grantedPermissions: ["view_system_health"], revokedPermissions: ["view_system_health"] })).not.toContain("view_system_health");
     expect(getEffectivePermissions({ role: "superadmin" })).toContain("view_system_health");
+  });
+  // Final-closure Phase 1: a grant alone never admits a non-technical role (the earlier test asserted the opposite; intended behaviour changed).
+  it("is NOT effective for any non-technical role even when granted (eligibility boundary)", () => {
+    for (const role of ["moderator", "hr", "accounts", "marketing", "escrow_officer", "admin", "ad_manager", "ghost_checker", "user", "dealer"]) {
+      expect(getEffectivePermissions({ role, grantedPermissions: ["view_system_health"] })).not.toContain("view_system_health");
+      expect(isPermissionEligibleForRole(role, "view_system_health")).toBe(false);
+    }
+    expect(isPermissionEligibleForRole("technical_support", "view_system_health")).toBe(true);
+    expect(isPermissionEligibleForRole("superadmin", "view_system_health")).toBe(true);
+    expect(isPermissionEligibleForRole("moderator", "view_logs")).toBe(true); // other permissions are unaffected
   });
 });
