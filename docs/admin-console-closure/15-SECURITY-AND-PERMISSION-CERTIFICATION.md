@@ -15,7 +15,7 @@ All results: disposable local PostgreSQL + PostgREST + backend, direct HTTP (no 
 ## Defects found by the new tests and fixed (read-side, server)
 Moderator (any staff) could read: `/api/bids/admin/all`, `/api/ads/all`, `/api/ads/stats`, `/api/admin/referrals`, `/api/wallet/dealer-accounts` — all now require the permission the UI map names. NTSA queue tightened earlier.
 
-**Documented exception (owner decision OD-5, not changed):** `GET /api/admin/system/health` (read-only platform counts) remains readable by any staff role although the Panic Room page that consumes it is Super-Admin-only in the UI. A first attempt to restrict it was reverted because `stage5f5RoleRouteMatrix` records OD-5 as an owner decision. **Owner decision requested:** keep staff-wide, or restrict to Super Admin. Journey 32 T3 now passes.
+**Superseded by OD-1 (doc 21):** `GET /api/admin/system/health` (and `/api/ecp/health*`) now require `view_system_health` (Super Admin, or an individual grant). The earlier OD-5 staff-wide exception no longer applies. See doc 26 for the final matrix.
 
 ## Properties verified
 * Privilege escalation: personal/dealer accounts get 401/403 on every staff-looking endpoint (T1, T2); staff create/role writes refused for non-owner (29).

@@ -1,5 +1,6 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, PERMISSIONS } from "../middleware/rbac.js";
 import { requireDealerVerification } from "../middleware/dealerVerification.js";
 import { validateObjectId } from "../middleware/validate.js";
 import asyncHandler from "../middleware/asyncHandler.js";
@@ -92,7 +93,8 @@ router.get("/platform/policy", protect, adminOnly, asyncHandler(async (req, res)
   res.json({ success: true, policy: await getAuctionPlatformPolicy() });
 }));
 
-router.put("/platform/policy", protect, adminOnly, asyncHandler(async (req, res) => {
+// Changing the platform-wide auction policy was open to any staff role; it now needs manage_platform (admin, superadmin). Access control only; the policy service is unchanged.
+router.put("/platform/policy", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_SETTINGS), asyncHandler(async (req, res) => {
   const policy = await setAuctionPlatformPolicy({ config: req.body || {}, actorId: req.user.id });
   await logActionFromReq(req, "auction_platform_policy_updated", { target: policy.id, targetModel: "AuctionPlatformPolicy" });
   res.json({ success: true, policy });

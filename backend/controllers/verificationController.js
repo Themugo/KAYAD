@@ -163,6 +163,9 @@ export const approveVerification = (req, res) => transition(req, res, "approved"
 export const rejectVerification = (req, res) => transition(req, res, "rejected", {
   success: "Verification rejected", title: "Verification Rejected", body: (v) => `Your dealer verification was rejected: ${v.rejectionReason || "Please update your documents and resubmit."}`,
 });
+export const REINSTATE_MESSAGE = {
+  success: "Dealer reinstated successfully", title: "Account Reinstated", body: () => "Your dealer account has been reinstated. You can resume normal operations.",
+};
 export const suspendDealer = (req, res) => transition(req, res, "suspended", SUSPEND_MESSAGE);
 export const reinstateDealer = (req, res) => transition(req, res, "approved", {
   success: "Dealer reinstated successfully", title: "Account Reinstated", body: () => "Your dealer account has been reinstated. You can resume normal operations.",

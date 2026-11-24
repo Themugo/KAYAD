@@ -20,13 +20,13 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
    "GET 200 /api/admin/users",
-   "GET 200 /api/admin/cars",
    "GET 200 /api/ecp/health",
    "GET 200 /api/admin/audit-log",
+   "GET 200 /api/admin/cars",
    "GET 200 /api/admin/staff"
   ]
  },
@@ -74,8 +74,8 @@
   "failedApi": [],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
@@ -106,9 +106,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 200 /api/private-seller-capability/admin/accounts"
   ]
  },
@@ -154,15 +154,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpClient.ts",
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/cars"
   ]
  },
@@ -188,8 +188,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 200 /api/wallet/dealer-accounts",
    "GET 200 /api/auctions/admin/reported-comments"
   ]
@@ -217,9 +217,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/bids/admin/all",
    "GET 503 /api/bids/admin/suspicious"
   ]
@@ -245,9 +245,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/escrow",
    "GET 200 /api/escrow/operations/dashboard"
   ]
@@ -269,13 +269,13 @@
   "apiCalls": [
    "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
-   "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
+   "GET 200 /src/api/httpClient.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/reviews"
   ]
  },
@@ -300,9 +300,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/referrals"
   ]
  },
@@ -354,9 +354,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/reports/admin/all"
   ]
  },
@@ -385,8 +385,8 @@
    "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
    "GET 200 /api/support/staff/metrics",
-   "GET 200 /api/support/staff/queue",
-   "GET 200 /api/support/staff/team"
+   "GET 200 /api/support/staff/team",
+   "GET 200 /api/support/staff/queue"
   ]
  },
  {
@@ -410,8 +410,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
    "GET 200 /api/feedback/admin/all"
   ]
@@ -485,15 +485,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/ntsa-verification"
   ]
  },
@@ -518,11 +518,11 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications",
-   "GET 200 /api/inspections/available-inspectors",
-   "GET 200 /api/inspections"
+   "GET 200 /api/inspections",
+   "GET 200 /api/inspections/available-inspectors"
   ]
  },
  {
@@ -535,7 +535,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 513,
+  "textLen": 540,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": [],
@@ -546,9 +546,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/verification/admin/suspension-requests",
    "GET 200 /api/verification/admin/all"
   ]
@@ -575,8 +575,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 200 /api/inspector-applications"
   ]
  },
@@ -597,8 +597,8 @@
   "apiCalls": [
    "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
-   "GET 200 /src/api/api.exports.ts",
    "GET 200 /src/api/httpClient.ts",
+   "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/alerts",
@@ -656,8 +656,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
    "GET 200 /api/announcements"
   ]
@@ -677,15 +677,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpClient.ts",
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/config",
    "GET 200 /api/admin/audit-log"
   ]
@@ -711,11 +711,11 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/audit-log",
-   "GET 200 /api/ecp/health"
+   "GET 200 /api/ecp/health",
+   "GET 200 /api/admin/audit-log"
   ]
  },
  {
@@ -743,9 +743,9 @@
    "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
    "GET 200 /api/admin/staff/roles/catalog",
-   "GET 200 /api/admin/staff/permissions/catalog",
+   "GET 200 /api/admin/staff",
    "GET 200 /api/admin/staff/levels",
-   "GET 200 /api/admin/staff"
+   "GET 200 /api/admin/staff/permissions/catalog"
   ]
  },
  {
@@ -769,9 +769,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/staff/permissions/catalog",
    "GET 200 /api/admin/staff"
   ]
@@ -819,8 +819,8 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
@@ -854,8 +854,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/featured-campaigns"
   ]
  },
@@ -881,8 +881,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/system/maintenance/status",
    "GET 200 /api/admin/system/health"
   ]
@@ -908,9 +908,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/system/maintenance/status"
   ]
  },
@@ -963,8 +963,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/cms/pages",
    "GET 200 /api/cms/dashboard/stats"
   ]
@@ -988,14 +988,14 @@
   ],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 503 /api/automation/stats",
    "GET 503 /api/automation/workflows"
   ]
@@ -1023,8 +1023,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
    "GET 503 /api/config/stats"
   ]
@@ -1052,9 +1052,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts",
    "GET 503 /api/lowcode/stats"
   ]
  },
@@ -1075,8 +1075,8 @@
    "503 /api/vxp/stats"
   ],
   "apiCalls": [
-   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
@@ -1110,8 +1110,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
    "GET 503 /api/xos/dashboard"
   ]
@@ -1189,8 +1189,8 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
@@ -1228,9 +1228,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/notifications",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
+   "GET 200 /api/notifications",
    "GET 200 /api/integration/dashboard"
   ]
  },
@@ -1255,8 +1255,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
    "GET 200 /api/governance/dashboard",
    "GET 200 /api/governance/policies",
@@ -1292,9 +1292,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/executive-analytics/dashboard"
   ]
  },
@@ -1319,9 +1319,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/command-center/snapshot",
    "GET 200 /api/command-center/live-activity"
   ]
@@ -1347,8 +1347,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
    "GET 200 /api/improvement/opportunities",
    "GET 200 /api/improvement/dashboard"
@@ -1369,15 +1369,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/platform-factory/dashboard",
    "GET 200 /api/platform-factory/templates",
    "GET 200 /api/platform-factory/products",
@@ -1408,8 +1408,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
    "GET 200 /api/owner",
    "GET 200 /api/owner/mfa"
@@ -1430,8 +1430,8 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
@@ -1439,9 +1439,9 @@
    "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/communications/admin/analytics",
    "GET 200 /api/communications/admin/templates",
    "GET 200 /api/communications/admin/provider-health",
-   "GET 200 /api/communications/admin/analytics",
    "GET 200 /api/communications/admin/rollout",
    "GET 200 /api/communications/admin/history"
   ]
@@ -1468,8 +1468,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/inspection-governance/providers"
   ]
  },
@@ -1488,18 +1488,18 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
+   "GET 200 /api/support/staff/team",
    "GET 200 /api/support/staff/queue",
-   "GET 200 /api/support/staff/metrics",
-   "GET 200 /api/support/staff/team"
+   "GET 200 /api/support/staff/metrics"
   ]
  },
  {
@@ -1512,7 +1512,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 3605,
+  "textLen": 3606,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": [],
@@ -1523,11 +1523,11 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/users",
    "GET 200 /api/admin/cars",
+   "GET 200 /api/admin/users",
    "GET 200 /api/ecp/health",
    "GET 200 /api/admin/audit-log",
    "GET 200 /api/admin/staff"
@@ -1555,10 +1555,10 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/admin/users",
-   "GET 200 /api/admin/dealer-onboarding/readiness"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/dealer-onboarding/readiness",
+   "GET 200 /api/admin/users"
   ]
  },
  {
@@ -1577,14 +1577,14 @@
   "failedApi": [],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
-   "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/users"
   ]
  },
@@ -1610,8 +1610,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 200 /api/private-seller-capability/admin/accounts"
   ]
  },
@@ -1636,9 +1636,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/cars"
   ]
  },
@@ -1663,9 +1663,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/cars"
   ]
  },
@@ -1690,8 +1690,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/wallet/dealer-accounts",
    "GET 200 /api/auctions/admin/reported-comments"
@@ -1716,8 +1716,8 @@
   "apiCalls": [
    "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
-   "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
+   "GET 200 /src/api/httpClient.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
@@ -1776,8 +1776,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
    "GET 200 /api/admin/reviews"
   ]
@@ -1803,9 +1803,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/referrals"
   ]
  },
@@ -1830,9 +1830,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/chats"
   ]
  },
@@ -1858,8 +1858,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 200 /api/reports/admin/all"
   ]
  },
@@ -1878,8 +1878,8 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
@@ -1887,8 +1887,8 @@
    "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
-   "GET 200 /api/support/staff/metrics",
    "GET 200 /api/support/staff/queue",
+   "GET 200 /api/support/staff/metrics",
    "GET 200 /api/support/staff/team"
   ]
  },
@@ -1913,8 +1913,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
    "GET 200 /api/feedback/admin/all"
   ]
@@ -1940,8 +1940,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
    "GET 200 /api/admin/market-data"
   ]
@@ -1967,9 +1967,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/notifications",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/payments"
   ]
  },
@@ -1995,8 +1995,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 200 /api/ntsa-verification"
   ]
  },
@@ -2021,9 +2021,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/inspections/available-inspectors",
    "GET 200 /api/inspections"
   ]
@@ -2038,7 +2038,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 507,
+  "textLen": 534,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": [],
@@ -2072,14 +2072,14 @@
   "failedApi": [],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
-   "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.exports.ts",
+   "GET 200 /src/api/httpClient.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/inspector-applications"
   ]
  },
@@ -2153,15 +2153,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/announcements"
   ]
  },
@@ -2181,14 +2181,14 @@
   "failedApi": [],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
-   "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/config",
    "GET 200 /api/admin/audit-log"
   ]
@@ -2203,7 +2203,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 1377,
+  "textLen": 1378,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": [],
@@ -2243,11 +2243,11 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/staff/levels",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/staff/roles/catalog",
    "GET 200 /api/admin/staff/permissions/catalog",
+   "GET 200 /api/admin/staff/levels",
    "GET 200 /api/admin/staff"
   ]
  },
@@ -2272,8 +2272,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
    "GET 200 /api/admin/staff/permissions/catalog",
    "GET 200 /api/admin/staff"
@@ -2328,8 +2328,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
    "GET 200 /api/admin/site-designs/history",
    "GET 200 /api/admin/site-designs"
@@ -2384,8 +2384,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/system/health",
    "GET 200 /api/admin/system/maintenance/status"
   ]
@@ -2411,8 +2411,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
    "GET 200 /api/admin/system/maintenance/status"
   ]
@@ -2438,9 +2438,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/audit-log"
   ]
  },
@@ -2468,8 +2468,8 @@
    "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
-   "GET 200 /api/cms/pages",
-   "GET 200 /api/cms/dashboard/stats"
+   "GET 200 /api/cms/dashboard/stats",
+   "GET 200 /api/cms/pages"
   ]
  },
  {
@@ -2496,8 +2496,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
    "GET 503 /api/automation/stats",
    "GET 503 /api/automation/workflows"
@@ -2521,8 +2521,8 @@
   ],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
@@ -2549,14 +2549,14 @@
    "503 /api/lowcode/stats"
   ],
   "apiCalls": [
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
    "GET 503 /api/lowcode/stats"
   ]
@@ -2585,8 +2585,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 503 /api/vxp/stats"
   ]
  },
@@ -2608,14 +2608,14 @@
   ],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/stats",
    "GET 503 /api/xos/dashboard"
   ]
  },
@@ -2642,9 +2642,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 503 /api/ai/dashboard"
   ]
  },
@@ -2671,9 +2671,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
    "GET 503 /api/digital-twin/dashboard"
   ]
  },
@@ -2687,7 +2687,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 606,
+  "textLen": 607,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": [],
@@ -2731,8 +2731,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
    "GET 200 /api/integration/dashboard"
   ]
@@ -2795,8 +2795,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
    "GET 200 /api/executive-analytics/dashboard"
   ]
@@ -2816,15 +2816,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/command-center/snapshot",
    "GET 200 /api/command-center/live-activity"
   ]
@@ -2846,13 +2846,13 @@
   "apiCalls": [
    "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
-   "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
+   "GET 200 /src/api/httpClient.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/improvement/dashboard",
    "GET 200 /api/improvement/opportunities"
   ]
@@ -2879,8 +2879,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/platform-factory/dashboard",
    "GET 200 /api/platform-factory/templates",
    "GET 200 /api/platform-factory/products",
@@ -2911,8 +2911,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
    "GET 200 /api/owner",
    "GET 200 /api/owner/mfa"
@@ -2942,10 +2942,10 @@
    "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
-   "GET 200 /api/communications/admin/templates",
    "GET 200 /api/communications/admin/provider-health",
-   "GET 200 /api/communications/admin/history",
    "GET 200 /api/communications/admin/analytics",
+   "GET 200 /api/communications/admin/history",
+   "GET 200 /api/communications/admin/templates",
    "GET 200 /api/communications/admin/rollout"
   ]
  },
@@ -2997,12 +2997,12 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/support/staff/queue",
-   "GET 200 /api/support/staff/team",
-   "GET 200 /api/support/staff/metrics"
+   "GET 200 /api/support/staff/metrics",
+   "GET 200 /api/support/staff/team"
   ]
  },
  {
@@ -3015,7 +3015,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 2738,
+  "textLen": 2613,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": [],
@@ -3053,8 +3053,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications"
   ]
  },
@@ -3079,8 +3079,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications"
   ]
  },
@@ -3105,8 +3105,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications"
   ]
  },
@@ -3132,8 +3132,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts"
+   "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -3158,8 +3158,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts"
   ]
  },
  {
@@ -3183,8 +3183,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications"
   ]
  },
@@ -3209,8 +3209,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications"
   ]
  },
@@ -3235,9 +3235,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts"
   ]
  },
  {
@@ -3261,8 +3261,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
    "GET 200 /api/admin/reviews"
   ]
@@ -3314,9 +3314,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/chats"
   ]
  },
@@ -3341,9 +3341,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/reports/admin/all"
   ]
  },
@@ -3467,13 +3467,13 @@
   "failedApi": [],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
-   "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts"
   ]
  },
@@ -3498,8 +3498,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications"
   ]
  },
@@ -3520,13 +3520,13 @@
   "apiCalls": [
    "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
-   "GET 200 /src/api/api.exports.ts",
    "GET 200 /src/api/httpClient.ts",
+   "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts"
+   "GET 200 /api/admin/stats"
   ]
  },
  {
@@ -3545,14 +3545,14 @@
   "failedApi": [],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts"
   ]
  },
  {
@@ -3577,8 +3577,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/security-logs"
   ]
  },
@@ -3597,8 +3597,8 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
@@ -3625,12 +3625,12 @@
   "apiCalls": [
    "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
-   "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
+   "GET 200 /src/api/httpClient.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications"
   ]
  },
@@ -3655,9 +3655,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications"
+   "GET 200 /api/admin/stats"
   ]
  },
  {
@@ -3675,15 +3675,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications",
-   "GET 200 /api/admin/stats"
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -3701,8 +3701,8 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
@@ -3760,8 +3760,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts"
   ]
  },
  {
@@ -3786,8 +3786,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts"
   ]
  },
  {
@@ -3831,14 +3831,14 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications"
   ]
  },
@@ -3864,8 +3864,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts"
+   "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -3883,8 +3883,8 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
@@ -3915,9 +3915,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/cms/pages",
    "GET 200 /api/cms/dashboard/stats"
   ]
@@ -3974,9 +3974,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications",
-   "GET 200 /api/admin/stats"
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -4026,9 +4026,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts"
   ]
  },
  {
@@ -4073,14 +4073,14 @@
   "failedApi": [],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/api.exports.ts",
    "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
-   "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts"
+   "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -4098,15 +4098,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/stats"
   ]
  },
  {
@@ -4125,13 +4125,13 @@
   "failedApi": [],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications"
   ]
  },
@@ -4156,8 +4156,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications"
   ]
  },
@@ -4307,14 +4307,14 @@
   "failedApi": [],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts"
+   "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -4338,9 +4338,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/notifications",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/admin/stats"
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -4364,9 +4364,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts"
+   "GET 200 /api/admin/stats"
   ]
  },
  {
@@ -4390,8 +4390,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications"
   ]
  },
@@ -4405,7 +4405,7 @@
   "restricted": false,
   "notFound": false,
   "errorBoundary": false,
-  "textLen": 2732,
+  "textLen": 2607,
   "pageErrors": 0,
   "consoleErrors": 4,
   "failedApi": [],
@@ -4417,8 +4417,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/audit-log"
   ]
  },
@@ -4443,8 +4443,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications"
   ]
  },
@@ -4469,9 +4469,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications"
+   "GET 200 /api/admin/stats"
   ]
  },
  {
@@ -4491,13 +4491,13 @@
   "apiCalls": [
    "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
-   "GET 200 /src/api/api.exports.ts",
    "GET 200 /src/api/httpClient.ts",
+   "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts"
+   "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -4573,9 +4573,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications"
+   "GET 200 /api/admin/alerts"
   ]
  },
  {
@@ -4626,8 +4626,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts"
   ]
  },
  {
@@ -4672,15 +4672,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts"
+   "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats"
   ]
  },
  {
@@ -4732,8 +4732,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications",
    "GET 200 /api/reports/admin/all"
   ]
  },
@@ -4758,9 +4758,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts"
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -4778,15 +4778,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts"
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -4804,14 +4804,14 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications"
   ]
  },
@@ -4836,8 +4836,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications"
   ]
  },
@@ -4862,8 +4862,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts"
   ]
  },
@@ -4915,8 +4915,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts"
   ]
  },
  {
@@ -4987,15 +4987,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications"
+   "GET 200 /api/admin/alerts"
   ]
  },
  {
@@ -5045,9 +5045,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications",
-   "GET 200 /api/admin/stats"
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -5123,8 +5123,8 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications"
   ]
  },
@@ -5149,9 +5149,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts"
   ]
  },
  {
@@ -5169,15 +5169,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications",
-   "GET 200 /api/admin/stats"
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -5201,9 +5201,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/notifications",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications"
+   "GET 200 /api/admin/stats"
   ]
  },
  {
@@ -5221,15 +5221,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/notifications",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts"
+   "GET 200 /api/admin/alerts",
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -5280,8 +5280,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts"
   ]
  },
  {
@@ -5305,9 +5305,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/cms/pages",
    "GET 200 /api/cms/dashboard/stats"
   ]
@@ -5336,9 +5336,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
    "GET 200 /api/notifications",
-   "GET 200 /api/admin/stats",
    "GET 503 /api/automation/stats",
    "GET 503 /api/automation/workflows"
   ]
@@ -5358,14 +5358,14 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/stats",
    "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
    "GET 200 /api/notifications"
   ]
  },
@@ -5386,8 +5386,8 @@
   "apiCalls": [
    "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
-   "GET 200 /src/api/api.exports.ts",
    "GET 200 /src/api/httpClient.ts",
+   "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
@@ -5442,9 +5442,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts"
   ]
  },
  {
@@ -5463,8 +5463,8 @@
   "failedApi": [],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
-   "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
@@ -5489,9 +5489,9 @@
   "failedApi": [],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
@@ -5547,8 +5547,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications",
-   "GET 200 /api/admin/stats"
+   "GET 200 /api/admin/stats",
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -5572,9 +5572,9 @@
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts"
+   "GET 200 /api/notifications"
   ]
  },
  {
@@ -5592,15 +5592,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/alerts",
-   "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/stats"
   ]
  },
  {
@@ -5625,8 +5625,8 @@
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/admin/alerts",
-   "GET 200 /api/notifications"
+   "GET 200 /api/notifications",
+   "GET 200 /api/admin/alerts"
   ]
  },
  {
@@ -5671,9 +5671,9 @@
   "failedApi": [],
   "apiCalls": [
    "GET 200 /src/api/api.ts",
-   "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/api.exports.ts",
+   "GET 200 /src/api/httpClient.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
    "GET 200 /api/admin/stats",
@@ -5696,6 +5696,32 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
+   "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/api.ts",
+   "GET 200 /src/api/httpClient.ts",
+   "GET 200 /src/api/api.exports.ts",
+   "GET 200 /api/cars",
+   "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/alerts",
+   "GET 200 /api/admin/stats",
+   "GET 200 /api/notifications"
+  ]
+ },
+ {
+  "who": "moderator",
+  "width": 390,
+  "route": "/admin/communications",
+  "shell": true,
+  "heading": "Insufficient Permissions",
+  "overflow": false,
+  "restricted": true,
+  "notFound": false,
+  "errorBoundary": false,
+  "textLen": 137,
+  "pageErrors": 0,
+  "consoleErrors": 4,
+  "failedApi": [],
+  "apiCalls": [
    "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
    "GET 200 /src/api/httpClient.ts",
@@ -5710,7 +5736,7 @@
  {
   "who": "moderator",
   "width": 390,
-  "route": "/admin/communications",
+  "route": "/admin/provider-governance",
   "shell": true,
   "heading": "Insufficient Permissions",
   "overflow": false,
@@ -5736,32 +5762,6 @@
  {
   "who": "moderator",
   "width": 390,
-  "route": "/admin/provider-governance",
-  "shell": true,
-  "heading": "Insufficient Permissions",
-  "overflow": false,
-  "restricted": true,
-  "notFound": false,
-  "errorBoundary": false,
-  "textLen": 137,
-  "pageErrors": 0,
-  "consoleErrors": 4,
-  "failedApi": [],
-  "apiCalls": [
-   "GET 200 /src/api/api.ts",
-   "GET 200 /src/api/httpRequest.ts",
-   "GET 200 /src/api/httpClient.ts",
-   "GET 200 /src/api/api.exports.ts",
-   "GET 200 /api/cars",
-   "GET 200 /api/admin/public/config",
-   "GET 200 /api/admin/alerts",
-   "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications"
-  ]
- },
- {
-  "who": "moderator",
-  "width": 390,
   "route": "/admin/support",
   "shell": true,
   "heading": "Insufficient Permissions",
@@ -5774,15 +5774,15 @@
   "consoleErrors": 4,
   "failedApi": [],
   "apiCalls": [
-   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpRequest.ts",
+   "GET 200 /src/api/api.ts",
    "GET 200 /src/api/httpClient.ts",
    "GET 200 /src/api/api.exports.ts",
    "GET 200 /api/cars",
    "GET 200 /api/admin/public/config",
+   "GET 200 /api/admin/alerts",
    "GET 200 /api/admin/stats",
-   "GET 200 /api/notifications",
-   "GET 200 /api/admin/alerts"
+   "GET 200 /api/notifications"
   ]
  }
 ]

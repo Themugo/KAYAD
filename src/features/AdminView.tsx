@@ -72,7 +72,7 @@ import './admin-command-centre.css';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
 import { adminRoleLabel } from '../components/admin/adminRoleLabels';
-import { getEffectivePermissions, canOpenAdminPage } from '../utils/permissions';
+import { getEffectivePermissions, canOpenAdminPage, userHasPermission, PERM } from '../utils/permissions';
 
 interface AdminViewProps {
   vehicles: Vehicle[];
@@ -554,10 +554,12 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
                 {!pendingDealerUsers.length && <p className="kayad-command-empty">{loading ? 'Loading approval records…' : restricted.includes('pending dealer queue') || restricted.includes('user records') ? 'Dealer records are restricted for this role. Use the authorized dealer verification workspace.' : down('pending dealer queue') ? 'Approval records may be unavailable. Open the dealer verification queue for the authoritative list.' : 'No pending dealers returned by the server-filtered queue. View all to inspect the full queue.'}</p>}
               </div>
             </section>
-            <section className="kayad-command-panel" aria-labelledby="system-health-heading">
-              <header><h2 id="system-health-heading">System Health</h2>{canOpen('/admin/control-room') && <Link to="/admin/control-room">View All</Link>}</header>
-              <AdminSystemHealthPanel role={sessionUser?.role || ''} />
-            </section>
+            {userHasPermission(sessionUser as any, PERM.VIEW_SYSTEM_HEALTH) && (
+              <section className="kayad-command-panel" aria-labelledby="system-health-heading">
+                <header><h2 id="system-health-heading">System Health</h2>{canOpen('/admin/control-room') && <Link to="/admin/control-room">View All</Link>}</header>
+                <AdminSystemHealthPanel allowed />
+              </section>
+            )}
             <section className="kayad-command-panel" aria-labelledby="recent-submissions-heading">
               <header><h2 id="recent-submissions-heading">Recent Vehicle Submissions</h2>{canOpen('/admin/cars') && <Link to="/admin/cars">View All</Link>}</header>
               <div className="kayad-command-vehicles">

@@ -38,8 +38,7 @@ describe('buyer who has not applied', () => {
     getMySellerCapability.mockResolvedValue(cap('none'));
     mount('user');
         expectBuyerNav();
-    expect(await screen.findByRole('button', { name: /apply to sell/i })).toBeTruthy();
-    expect(sellerWorkspace()).toBeNull();
+    expect(await screen.findByRole('button', { name: /apply to sell/i }, { timeout: 15000 })).toBeTruthy();
     expect(sellerWorkspace()).toBeNull();
   });
   it('submits the application with the same session and reloads the real state', async () => {

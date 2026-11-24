@@ -1,0 +1,26 @@
+// Generates docs/admin-console-closure/23-ROUTE-WRITE-WORKFLOW-AND-SPECIALIST-RECONCILIATION.md route register (route-by-route) from:
+// the route registry, src/utils/permissions.ts (UI mirror of server policy), the browser sweep (APIs actually called) and route-classification.json.
+import fs from 'node:fs';
+const root = new URL('../', import.meta.url);
+const read = (p) => fs.readFileSync(new URL(p, root), 'utf8');
+const surface = read('src/components/admin/AdminRouteSurface.tsx');
+const routes = ['/admin', ...[...surface.matchAll(/'((?:\/admin)[^']*)': \{ component:/g)].map((m) => m[1])];
+const perms = read('src/utils/permissions.ts');
+const grab = (name) => { const m = perms.match(new RegExp(`${name}[^=]*= (?:new Set\\(\\[|\\{)([\\s\\S]*?)(?:\\]\\)|\\n\\};)`)); return m ? m[1] : ''; };
+const PAGE = Object.fromEntries([...grab('export const PAGE_PERMISSIONS').matchAll(/"(\/admin[^"]*)":\s*PERM\.(\w+)/g)].map((m) => [m[1], m[2].toLowerCase()]));
+const ANY = Object.fromEntries([...perms.matchAll(/"(\/admin\/[^"]+)":\s*\[(PERM\.[^\]]+)\]/g)].map((m) => [m[1], m[2].replace(/PERM\./g, '').toLowerCase()]));
+const ROLE_ONLY = new Set([...grab('export const ADMIN_ROLE_ONLY').matchAll(/"(\/admin[^"]*)"/g)].map((m) => m[1]));
+const SA_ONLY = new Set([...grab('export const SUPERADMIN_ONLY').matchAll(/"(\/admin[^"]*)"/g)].map((m) => m[1]));
+const sweep = JSON.parse(read('docs/admin-console-closure/evidence/sweep/sweep.json'));
+const cls = JSON.parse(read('docs/admin-console-closure/route-classification.json')).rows;
+const clsOf = Object.fromEntries(cls.map((r) => [r.route, r]));
+const apis = (r) => [...new Set((sweep.find((s) => s.who === 'superadmin' && s.width === 1440 && s.route === r)?.apiCalls || []).filter((c) => /^GET \d+ \/api\//.test(c)).map((c) => c.split(' ')[2].split('?')[0]))];
+const modRestricted = (r) => !!sweep.find((s) => s.who === 'moderator' && s.width === 1440 && s.route === r)?.restricted;
+const CRIT = new Set(['/admin/escrows', '/admin/transactions', '/admin/auctions', '/admin/bids', '/admin/ntsa-queue', '/admin/inspections', '/admin/inspector-applications', '/admin/dealer-verifications', '/admin/users', '/admin/sellers', '/admin/private-seller-applications', '/admin/staff', '/admin/staff-permissions', '/admin/settings', '/admin/panic-room', '/admin/platform-recovery', '/admin/ads', '/admin/featured-vehicles', '/admin/broadcast', '/admin/communications', '/admin/owners', '/admin/security-log', '/admin/control-room']);
+const WRITE_TEST = { '/admin/ads': 'journey 34 W1–W6 (ad slot create/edit/delete; permission now enforced)', '/admin/featured-vehicles': 'journey 34 W7–W12 (campaign create/validate/confirm/pause/audit)', '/admin/staff-permissions': 'journey 34 W18–W21 + 33 A (grant/revoke/unknown key/owner-only)', '/admin/staff': 'journeys 14, 22, 26, 29 (create/offboard/rank boundary)', '/admin/auctions': 'journey 34 W16–W17 (end-auction authorisation; no auction ended); 31 E6–E9', '/admin/bids': 'journey 34 W16–W17 (authorisation); read feed only otherwise', '/admin/transactions': 'authorisation only (journey 31 E); NO money movement executed', '/admin/escrows': 'authorisation only (journeys 05/09/31); NO escrow transition executed', '/admin/ntsa-queue': 'journeys 27 D4–D7, 31 E10 (internal queue only)', '/admin/inspections': 'authorisation (31 E10); provider actions NOT executed', '/admin/inspector-applications': 'authorisation (31 E10); decisions not executed', '/admin/dealer-verifications': 'journeys 12, 23, 24, 30, 33 (suspension/reinstatement workflows)', '/admin/sellers': 'journeys 23, 24, 30, 33', '/admin/communications': 'authorisation (journey 29); provider sends NOT executed', '/admin/panic-room': 'never executed (destructive)', '/admin/platform-recovery': 'never executed (destructive)', '/admin/owners': 'owner-only; writes not executed', '/admin/security-log': 'read-only by design', '/admin/control-room': 'read-only aggregate; system health tile gated by view_system_health (journey 33 A)' };
+const access = (r) => SA_ONLY.has(r) ? 'Super Admin only' : ROLE_ONLY.has(r) ? 'admin, superadmin (role-gated on server)' : ANY[r] ? `any of: ${ANY[r]}` : PAGE[r] ? `permission ${PAGE[r]}` : 'any staff (read surface)';
+const rows = routes.map((r) => ({ route: r, access: access(r), modDenied: modRestricted(r), cls: clsOf[r]?.label || '?', apis: apis(r), crit: CRIT.has(r) ? 'release-critical' : 'standard', write: WRITE_TEST[r] || (clsOf[r]?.class === 'W' || clsOf[r]?.class === 'S' ? clsOf[r].evidence : 'no release-critical write on this page') }));
+fs.writeFileSync(new URL('docs/admin-console-closure/route-register.json', root), JSON.stringify(rows, null, 1));
+const md = `| Route | Access (UI mirror of server policy) | Moderator | Class | Criticality | APIs read in the sweep | Write / workflow evidence |\n|---|---|---|---|---|---|---|\n${rows.map((r) => `| \`${r.route}\` | ${r.access} | ${r.modDenied ? 'denied' : 'allowed'} | ${r.cls} | ${r.crit} | ${r.apis.slice(0, 4).map((a) => `\`${a}\``).join(', ') || '—'}${r.apis.length > 4 ? ` +${r.apis.length - 4}` : ''} | ${r.write} |`).join('\n')}\n`;
+fs.writeFileSync(new URL('docs/admin-console-closure/route-register.md', root), md);
+console.log(rows.length, rows.filter((r) => r.crit === 'release-critical').length);

@@ -63,7 +63,7 @@ router.post(
 // =============================
 // 🏁 END AUCTION (ADMIN) - Idempotent to prevent duplicate auction endings
 // =============================
-router.post("/:id/end", protect, adminOnly, idempotencyCheck, validateObjectId, asyncHandler(endAuction));
+router.post("/:id/end", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_BIDS), idempotencyCheck, validateObjectId, asyncHandler(endAuction));
 
 // =============================
 // 🧠 ADMIN: ALL BIDS (PAGINATED + FILTERS)

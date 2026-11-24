@@ -148,7 +148,7 @@ export default function VisualExperienceStudio() {
               onClick={() => setDevicePreview('desktop')}
               aria-label="Desktop preview"
               aria-pressed={devicePreview === 'desktop'}
-              className={`p-2 rounded-lg ${devicePreview === 'desktop' ? 'bg-white shadow-sm' : 'hover:bg-white/50'}`}
+              className={`min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 rounded-lg ${devicePreview === 'desktop' ? 'bg-white shadow-sm' : 'hover:bg-white/50'}`}
             >
               <Monitor size={18} className={devicePreview === 'desktop' ? 'text-[#0A3340]' : 'text-[#64748B]'} />
             </button>
@@ -156,7 +156,7 @@ export default function VisualExperienceStudio() {
               onClick={() => setDevicePreview('tablet')}
               aria-label="Tablet preview"
               aria-pressed={devicePreview === 'tablet'}
-              className={`p-2 rounded-lg ${devicePreview === 'tablet' ? 'bg-white shadow-sm' : 'hover:bg-white/50'}`}
+              className={`min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 rounded-lg ${devicePreview === 'tablet' ? 'bg-white shadow-sm' : 'hover:bg-white/50'}`}
             >
               <Tablet size={18} className={devicePreview === 'tablet' ? 'text-[#0A3340]' : 'text-[#64748B]'} />
             </button>
@@ -164,20 +164,20 @@ export default function VisualExperienceStudio() {
               onClick={() => setDevicePreview('mobile')}
               aria-label="Mobile preview"
               aria-pressed={devicePreview === 'mobile'}
-              className={`p-2 rounded-lg ${devicePreview === 'mobile' ? 'bg-white shadow-sm' : 'hover:bg-white/50'}`}
+              className={`min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 rounded-lg ${devicePreview === 'mobile' ? 'bg-white shadow-sm' : 'hover:bg-white/50'}`}
             >
               <Smartphone size={18} className={devicePreview === 'mobile' ? 'text-[#0A3340]' : 'text-[#64748B]'} />
             </button>
           </div>
           <div className="flex items-center gap-1">
-            <button aria-label="Zoom out" className="p-2 hover:bg-[#EEF7F5] rounded-lg"><ZoomOut size={18} /></button>
+            <button aria-label="Zoom out" className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 hover:bg-[#EEF7F5] rounded-lg"><ZoomOut size={18} /></button>
             <span className="text-sm text-[#64748B] w-16 text-center">100%</span>
-            <button aria-label="Zoom in" className="p-2 hover:bg-[#EEF7F5] rounded-lg"><ZoomIn size={18} /></button>
+            <button aria-label="Zoom in" className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 hover:bg-[#EEF7F5] rounded-lg"><ZoomIn size={18} /></button>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button aria-label="Undo" className="p-2 hover:bg-[#EEF7F5] rounded-lg"><Undo size={18} /></button>
-          <button aria-label="Redo" className="p-2 hover:bg-[#EEF7F5] rounded-lg"><Redo size={18} /></button>
+          <button aria-label="Undo" className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 hover:bg-[#EEF7F5] rounded-lg"><Undo size={18} /></button>
+          <button aria-label="Redo" className="min-h-[44px] min-w-[44px] inline-flex items-center justify-center p-2 hover:bg-[#EEF7F5] rounded-lg"><Redo size={18} /></button>
           <div className="w-px h-6 bg-[#DDF4F0] mx-2" />
           <button
             onClick={() => setPreviewMode(!previewMode)}

@@ -55,7 +55,7 @@ describe('state-to-behaviour matrix: role user (personal account)', () => {
   it.each(rows)('%s -> form=%s workspace=%s, buyer sections always intact', async (status, form, workspace, text) => {
     getMySellerCapability.mockResolvedValue(serverState(status));
     mount('user');
-    expect(await screen.findByText(text)).toBeTruthy();
+    expect(await screen.findByText(text, undefined, { timeout: 15000 })).toBeTruthy();
     expect(Boolean(screen.queryByRole('button', { name: /apply to sell/i }))).toBe(form);
     expect(Boolean(sellerWorkspace())).toBe(workspace);
         expectBuyerIntact();

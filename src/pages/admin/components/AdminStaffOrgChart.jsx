@@ -5,12 +5,12 @@ const ORG = [
   { role: 'superadmin', title: 'Super Admin', icon: Crown, color: 'var(--brand)', bg: 'rgba(23, 107, 135, 0.1)', desc: 'Full platform control. Manages all staff, config, and financials.', level: 0, canCreate: false },
   { role: 'admin', title: 'Admin', icon: Settings, color: '#176B87', bg: 'rgba(23, 107, 135, 0.08)', desc: 'Platform-wide oversight — users, cars, auctions, transactions.', level: 1 },
   { role: 'hr', title: 'HR Manager', icon: Users, color: '#176b87', bg: 'rgba(19, 184, 166, 0.08)', desc: 'Approves dealers and brokers. Manages seller onboarding.', level: 2 },
-  { role: 'accounts', title: 'Accounts & Finance', icon: Wallet, color: '#22c55e', bg: 'rgba(34,197,94,0.08)', desc: 'Payments, escrows, reconciliation and financial reports.', level: 2 },
-  { role: 'escrow_officer', title: 'Escrow Officer', icon: Lock, color: '#13B8A6', bg: 'rgba(19,184,166,0.08)', desc: 'Manages escrow releases and personal-account seller payment oversight.', level: 2 },
-  { role: 'marketing', title: 'Marketing', icon: Megaphone, color: '#5aafa4', bg: 'rgba(139,92,246,0.08)', desc: 'Ad campaigns, banners, homepage content and promotions.', level: 2 },
-  { role: 'ad_manager', title: 'Ad Manager', icon: Target, color: '#5aafa4', bg: 'rgba(168,85,247,0.08)', desc: 'Creates and manages sponsored listings and banner ads.', level: 3 },
-  { role: 'technical_support', title: 'Tech Support', icon: Wrench, color: '#64748b', bg: 'rgba(100,116,139,0.08)', desc: 'User account management and car listing assistance.', level: 2 },
-  { role: 'moderator', title: 'Moderator', icon: ShieldCheck, color: '#64748b', bg: 'rgba(71,85,105,0.08)', desc: 'Content review, listing moderation and compliance.', level: 3 },
+  { role: 'accounts', title: 'Accounts & Finance', icon: Wallet, color: '#15803d', bg: 'rgba(34,197,94,0.08)', desc: 'Payments, escrows, reconciliation and financial reports.', level: 2 },
+  { role: 'escrow_officer', title: 'Escrow Officer', icon: Lock, color: '#0f766e', bg: 'rgba(19,184,166,0.08)', desc: 'Manages escrow releases and personal-account seller payment oversight.', level: 2 },
+  { role: 'marketing', title: 'Marketing', icon: Megaphone, color: '#1d6b62', bg: 'rgba(139,92,246,0.08)', desc: 'Ad campaigns, banners, homepage content and promotions.', level: 2 },
+  { role: 'ad_manager', title: 'Ad Manager', icon: Target, color: '#1d6b62', bg: 'rgba(168,85,247,0.08)', desc: 'Creates and manages sponsored listings and banner ads.', level: 3 },
+  { role: 'technical_support', title: 'Tech Support', icon: Wrench, color: '#475569', bg: 'rgba(100,116,139,0.08)', desc: 'User account management and car listing assistance.', level: 2 },
+  { role: 'moderator', title: 'Moderator', icon: ShieldCheck, color: '#475569', bg: 'rgba(71,85,105,0.08)', desc: 'Content review, listing moderation and compliance.', level: 3 },
   { role: 'ghost_checker', title: 'Ghost Checker', icon: ShieldCheck, color: '#0f766e', bg: 'rgba(15,118,110,0.08)', desc: 'Vehicle inspection and NTSA verification workflows.', level: 3 },
 ];
 

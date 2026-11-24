@@ -5,9 +5,9 @@ import { useToast } from '../../context/ToastContext';
 import { Shield, Check, X, Save, Search, Crown, Lock } from 'lucide-react';
 
 const ROLE_COLORS = {
-  superadmin: 'var(--brand)', admin: '#176B87', hr: '#176b87', accounts: '#22c55e',
-  moderator: '#5aafa4', escrow_officer: '#13B8A6', marketing: '#13B8A6',
-  ad_manager: '#13b8a6', technical_support: '#64748b',
+  superadmin: 'var(--brand)', admin: '#176B87', hr: '#176b87', accounts: '#15803d',
+  moderator: '#1d6b62', escrow_officer: '#0f766e', marketing: '#0f766e',
+  ad_manager: '#0f766e', technical_support: '#475569', // all >= 4.5:1 on their tinted chips (WCAG 1.4.3)
 };
 
 export default function AdminStaffPermissions() {

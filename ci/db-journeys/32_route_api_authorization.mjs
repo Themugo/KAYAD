@@ -17,7 +17,8 @@ const skip = /\/auth\/|\/csrf|\/public\//;
 const all = [...new Set(Object.values(routeEndpoints).flat())].filter((p) => !skip.test(p) && !/\/[0-9a-f]{8}-[0-9a-f]{4}-/.test(p));
 const usedByModAllowed = new Set([...modAllowed].flatMap((r) => routeEndpoints[r] || []));
 // Documented owner decision OD-5 (stage5f5RoleRouteMatrix): read-only aggregate feeds stay open to any staff role. Listed, not hidden.
-const DOCUMENTED_STAFF_WIDE = new Set(['/api/admin/system/health']);
+// OD-1: /api/admin/system/health now requires view_system_health (Super Admin or an individual grant); no staff-wide exceptions remain.
+const DOCUMENTED_STAFF_WIDE = new Set();
 const uniqueToRestricted = [...modRestricted].flatMap((r) => (routeEndpoints[r] || []).filter((p) => !usedByModAllowed.has(p) && !skip.test(p) && !DOCUMENTED_STAFF_WIDE.has(p)).map((p) => [r, p]));
 
 const mk = (role) => makeUser({ tag: role.slice(0, 5) + '32', dbRole: role });

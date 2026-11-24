@@ -1,0 +1,12 @@
+a: Test Suites: 1 skipped, 90 passed, 90 of 91 total
+a: Tests:       21 skipped, 1183 passed, 1204 total
+r1: Test Suites: 44 passed, 44 total
+r1: Tests:       965 passed, 965 total
+r2: Test Suites: 43 passed, 43 total
+r2: Tests:       631 passed, 631 total
+r3: Test Suites: 43 passed, 43 total
+r3: Tests:       845 passed, 845 total
+r4: Test Suites: 43 passed, 43 total
+r4: Tests:       679 passed, 679 total
+top: Test Suites: 4 passed, 4 total
+top: Tests:       62 passed, 62 total

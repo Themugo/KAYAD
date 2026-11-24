@@ -1,0 +1,5 @@
+tsc exit=0
+build exit=0
+vitest exit=0
+journeys exit=0
+closure done

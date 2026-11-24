@@ -25,11 +25,13 @@ const safeDate = (value: unknown): Date | null => {
 // Reads only the existing protected health contract (`/ecp/health`). A service is listed only if the
 // response names it; a status is shown only if the response states one; latency and the check time
 // appear only when they are genuinely measured. Nothing is inferred from configuration.
-/** Mirrors the server rule on /api/ecp/health (ecpRoutes allowRoles). Display only: the server stays authoritative. */
-export const HEALTH_READ_ROLES = ['admin', 'superadmin', 'engineer', 'manager'];
-
-export default function AdminSystemHealthPanel({ role }: { role?: string } = {}) {
-  const permitted = role === undefined || HEALTH_READ_ROLES.includes(role);
+/**
+ * OD-1: system health is for Super Admin and technical staff individually granted `view_system_health` (the same permission the
+ * server requires on /api/ecp/health and /api/admin/system/health). `allowed` is computed by the caller from the session's
+ * effective permissions. Display only: the server stays authoritative.
+ */
+export default function AdminSystemHealthPanel({ allowed }: { allowed?: boolean } = {}) {
+  const permitted = allowed === undefined || allowed === true;
   const [state, setState] = useState<PanelState>(permitted ? { status: 'loading' } : { status: 'restricted' });
 
   useEffect(() => {

@@ -60,7 +60,11 @@
   "ok": true
  },
  {
-  "name": "J16 moderator dashboard makes no /ecp/health request and shows an access boundary instead of an error",
+  "name": "J16 moderator dashboard (OD-1): no system-health request, the System Health tile is not rendered at all, and no error is shown",
+  "ok": true
+ },
+ {
+  "name": "J16b Super Admin dashboard shows the System Health tile (OD-1)",
   "ok": true
  },
  {

@@ -1,0 +1,181 @@
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A1 settings load (200, config + recordedOnly list truthfully exposed)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A2 an Admin saves a non-financial setting (200)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A3 reload: the value persisted (read by a different actor)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A4 the public feature that consumes the setting returns it (public config)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A5 invalid input is refused (400) and NOTHING from that request is saved (failed save leaves state unchanged)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A6 out-of-range dealerCommission=99 refused (400)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A6 out-of-range escrowReleaseDays=0 refused (400)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A6 out-of-range maxListingImages=500 refused (400)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A6 out-of-range fontSizePct=abc refused (400)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A7 personal cannot change settings (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A7 dealer cannot change settings (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A7 moderator cannot change settings (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A7 marketing cannot change settings (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A7 hr cannot change settings (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A7 technical_support cannot change settings (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A8 anonymous cannot read (401) or change (401/403 - CSRF or auth, whichever answers first) settings
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A9 no unauthorised write reached the database
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS A10 the settings response never carries payment secrets (blank + has* flags only)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS B1 a moderator can LIST reviews (staff read)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS B2 a moderator cannot CHANGE a review (adminOrSuper; read-only for moderators)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS B3 Admin approves a review; persisted with moderator attribution
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS B4 invalid status refused and unchanged
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS B5 Admin deletes a review; it is gone and the other is intact
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS B6 personal cannot list or change reviews
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS B6 dealer cannot list or change reviews
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS B7 anonymous 401
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS C1 create a draft design (201)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS C2 the new draft is in the list after reload
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS C3 delete without explicit confirmation is refused (400 CONFIRMATION_REQUIRED) and the draft survives
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS C4 personal cannot use site designs (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS C4 dealer cannot use site designs (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS C4 moderator cannot use site designs (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS C4 marketing cannot use site designs (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS C4 hr cannot use site designs (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS C5 confirmed delete removes only that draft
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS C6 the live public site was not touched (no publication created)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS D1 marketing (manage_ads) can read campaigns
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS D2 moderator is refused (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS D2 hr is refused (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS D2 technical_support is refused (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS D2 personal is refused (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS D2 dealer is refused (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS D3 an empty campaign is refused (4xx, nothing created)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS D4 anonymous 401
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E1 escrow list: allowed roles admin/superadmin/accounts/escrow_officer read it; every other actor is refused
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E1b escrow list: anonymous 401
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E1 escrow operations dashboard: allowed roles admin/superadmin/accounts/escrow_officer read it; every other actor is refused
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E1b escrow operations dashboard: anonymous 401
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E1 payments list: allowed roles admin/superadmin/accounts read it; every other actor is refused
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E1b payments list: anonymous 401
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E3 release on an unknown escrow is rejected with 4xx, never 500 or success (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E3 refund on an unknown escrow is rejected with 4xx, never 500 or success (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E3 close on an unknown escrow is rejected with 4xx, never 500 or success (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E4 no escrow, payment or wallet row was created or moved by any of these calls
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E5 personal cannot end an auction (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E5 dealer cannot end an auction (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E5 moderator cannot end an auction (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E5 marketing cannot end an auction (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E5 hr cannot end an auction (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E5 technical_support cannot end an auction (403)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E6 ending a vehicle with no live auction is idempotent (200 alreadyClosed or 4xx) and the vehicle is unchanged
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E7 extending a non-live auction is rejected (4xx)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E8 choosing a winner without a valid bid is rejected (4xx); no sale recorded
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E9 bid history for a fixture vehicle reads as an honest empty list
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E10 inspections: moderator/marketing/hr/personal/dealer are refused unless explicitly allowed (no protected rows)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E10b inspections: Admin and Super Admin can read (never 401/403/500)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E10c inspections: anonymous 401
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E10 inspector applications: moderator/marketing/hr/personal/dealer are refused unless explicitly allowed (no protected rows)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E10b inspector applications: Admin and Super Admin can read (never 401/403/500)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E10c inspector applications: anonymous 401
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E10 NTSA queue: moderator/marketing/hr/personal/dealer are refused unless explicitly allowed (no protected rows)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E10b NTSA queue: Admin and Super Admin can read (never 401/403/500)
+/tmp/claude-0/ad/final2/journeys/31_admin_workflow_closure.log:PASS E10c NTSA queue: anonymous 401
+/tmp/claude-0/ad/final2/journeys/32_route_api_authorization.log:PASS T1 anonymous reads no staff endpoint (96 endpoints; 1 publicly readable, none staff-looking)
+/tmp/claude-0/ad/final2/journeys/32_route_api_authorization.log:PASS T2 personal and dealer accounts read no staff endpoint
+/tmp/claude-0/ad/final2/journeys/32_route_api_authorization.log:PASS T3 moderator is refused on every endpoint unique to a moderator-restricted route (47 endpoints; documented OD-5 exceptions: )
+/tmp/claude-0/ad/final2/journeys/32_route_api_authorization.log:PASS T4 no 5xx for anonymous/personal/dealer/admin/moderator on any route read endpoint (provisioning 503 counted separately)
+/tmp/claude-0/ad/final2/journeys/32_route_api_authorization.log:PASS T5 4xx/5xx bodies for anonymous/personal/dealer carry no SQL or PostgREST internals
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A1 /api/admin/system/health: anonymous 401
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A2 /api/admin/system/health: personal account refused (403), no data
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A2 /api/admin/system/health: dealer owner refused (403), no data
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A2 /api/admin/system/health: dealer staff refused (403), no data
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A2 /api/admin/system/health: moderator refused (403), no data
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A2 /api/admin/system/health: ordinary admin refused (403), no data
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A2 /api/admin/system/health: technical_support without the permission refused (403), no data
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A2 /api/admin/system/health: technical_support whose grant was revoked refused (403), no data
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A3 /api/admin/system/health: owner Super Admin allowed (200)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A3 /api/admin/system/health: second Super Admin allowed (200)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A3 /api/admin/system/health: technical_support with the granted permission allowed (200)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A3 /api/admin/system/health: moderator WITH the granted permission (permission decides, not the role name) allowed (200)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A1 /api/ecp/health: anonymous 401
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A2 /api/ecp/health: personal account refused (403), no data
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A2 /api/ecp/health: dealer owner refused (403), no data
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A2 /api/ecp/health: dealer staff refused (403), no data
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A2 /api/ecp/health: moderator refused (403), no data
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A2 /api/ecp/health: ordinary admin refused (403), no data
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A2 /api/ecp/health: technical_support without the permission refused (403), no data
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A2 /api/ecp/health: technical_support whose grant was revoked refused (403), no data
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A3 /api/ecp/health: owner Super Admin allowed (200)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A3 /api/ecp/health: second Super Admin allowed (200)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A3 /api/ecp/health: technical_support with the granted permission allowed (200)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A3 /api/ecp/health: moderator WITH the granted permission (permission decides, not the role name) allowed (200)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A4 view_system_health is assignable, labelled, and held by NO role by default
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS A5 the audit/other technical permission (view_logs) does NOT unlock health
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS C1 Admin submits a suspension request (201) and the dealer is NOT suspended
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS C2 a SECOND Super Admin (not the owner) approves the suspension (200) and it takes effect
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS C3 the actual approving Super Admin is recorded
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS B1 Admin submits a reinstatement request (201) with reason, evidence, requester and time
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS B2 the dealer REMAINS suspended while the request is pending
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS B3 the request links to the original approved suspension record
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS B4 a second pending request for the same dealer is refused (409)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS B5 a suspension request for an already-suspended dealer is refused (409)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS B6 a reinstatement request for a dealer that is NOT suspended is refused (409)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS B7 a reason under 10 characters is refused (400)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D1 bypass refused: Admin direct reinstate (403)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D1 bypass refused: Admin "approve" on a suspended verification (403)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D1 bypass refused: Admin un-bans the dealer user (toggle-ban) (403)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D1 bypass refused: Admin approve-dealer (403)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D1 bypass refused: Admin decides the request (403)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D1 bypass refused: Moderator decides the request (403)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D1 bypass refused: Moderator submits a request (403)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D1 bypass refused: personal account decides (403)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D1 bypass refused: dealer owner reinstates itself (403)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D1 bypass refused: dealer owner decides its own request (403)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D1 bypass refused: dealer staff decides (403)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D1 bypass refused: dealer staff submits a request (403)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D1 bypass refused: technical staff decides (403)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D2 anonymous decision: refused (401)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D2 anonymous reinstate-request: refused (401)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D2 anonymous list: refused (401)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D3 after every bypass attempt the dealer is STILL suspended and the request still pending
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D4 an Admin sees only their OWN requests (not another Admin's)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D5 a Super Admin sees the pending reinstatement with its original suspension history link
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D6 another Admin cannot cancel someone else's request (403)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS B8 rejecting without a reason is refused (400) and nothing changes
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS C4 the second Super Admin approves the REINSTATEMENT (200); the dealer is restored through the existing status mechanism
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS C5 the approving Super Admin is recorded and the decision reason kept
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS C6 suspension history is NOT deleted: both request rows remain, the original suspension row is unchanged
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS C7 dealer, listings, team and user rows are untouched
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D7 replayed approval is refused (409) and a later reject cannot change the outcome
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS C8 owner Super Admin retains approval authority (suspension request by Admin, approved by the owner)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS B9 rejection leaves the dealer SUSPENDED with the reason recorded
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS B10 after a rejection the Admin may submit a NEW request (201)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS B11 the requester can cancel their own pending request (200) and the dealer stays suspended
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D8 four simultaneous decisions (two Super Admins, approve/reject): exactly ONE wins and the dealer state matches it
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D9 exactly one decision is recorded (a single decided_by)
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D10 audit trail records request, approval and rejection of reinstatements
+/tmp/claude-0/ad/final2/journeys/33_governance_decisions.log:PASS D11 no payment, escrow or amount changed during any governance action (snapshot before/after)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W1 anonymous cannot create an ad slot (401)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W2 moderator cannot create an ad slot (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W2 hr cannot create an ad slot (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W2 accounts cannot create an ad slot (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W2 personal account cannot create an ad slot (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W3 ad_manager (manage_ads) creates an ad slot (201) and it persists
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W4 invalid placement is rejected (400) and nothing is saved
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W5 moderator cannot edit or delete the slot (403) and it is unchanged
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W6 ad_manager edits (200) then deletes (200); the row is gone
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W7 moderator cannot create a featured campaign (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W8 invalid campaign body is rejected (400)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W9 ad_manager creates a campaign (201)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W10 ending/deleting without confirmation is refused (400 CONFIRMATION_REQUIRED) and the campaign survives
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W11 pause succeeds and a repeat is not a 5xx
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W12 audit trail records the campaign actions
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W13 anonymous cannot review a dealer payout account (401)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W14 moderator cannot review a dealer payout account (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W14 hr cannot review a dealer payout account (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W14 ad_manager cannot review a dealer payout account (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W14 personal account cannot review a dealer payout account (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W15 an authorised actor with an invalid decision / unknown account gets a 4xx, never a 5xx or a success
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W16 moderator, hr and ad_manager cannot end an auction (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W17 an authorised admin ending an unknown auction gets a 4xx (no state change, no 5xx)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W17b anonymous cannot change the auction platform policy (401)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W17c moderator cannot change the auction platform policy (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W17c hr cannot change the auction platform policy (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W17c ad_manager cannot change the auction platform policy (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W17c personal account cannot change the auction platform policy (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W17d an admin (manage_platform) is not refused by authorisation (any non-403 answer)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W18 Super Admin grants view_system_health (200) and it persists
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W19 an ordinary Admin cannot grant it (403)
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W20 an unknown permission is rejected (400/422) and nothing changes
+/tmp/claude-0/ad/final2/journeys/34_readonly_route_write_paths.log:PASS W21 the granted permission opens system health for that user (after re-login)

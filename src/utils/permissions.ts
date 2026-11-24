@@ -28,6 +28,7 @@ export const PERM = {
   MANAGE_FINANCE:     "manage_finance",
   MANAGE_STAFF:       "manage_staff",
   VIEW_LOGS:          "view_logs",
+  VIEW_SYSTEM_HEALTH: "view_system_health", // OD-1: held by no role by default; Super Admin implicit; granted individually
   VIEW_ANALYTICS:     "view_analytics",
   MANAGE_INSPECTIONS: "manage_inspections",
   MANAGE_PLATFORM:    "manage_platform",
@@ -71,7 +72,7 @@ export const ASSIGNABLE_PERMISSIONS: Permission[] = [
   PERM.SETTLE_ESCROW_PAYOUT, PERM.RECONCILE_ESCROW, PERM.CONFIGURE_ESCROW, PERM.VIEW_ESCROW_AUDIT,
   PERM.EMERGENCY_ESCROW_CONTROL,
   PERM.MANAGE_ADS, PERM.MANAGE_MODERATION, PERM.MANAGE_SUPPORT, PERM.SUPPORT_AGENT, PERM.SUPPORT_OVERSIGHT, PERM.MANAGE_FINANCE,
-  PERM.MANAGE_STAFF, PERM.VIEW_LOGS, PERM.VIEW_ANALYTICS, PERM.MANAGE_INSPECTIONS,
+  PERM.MANAGE_STAFF, PERM.VIEW_LOGS, PERM.VIEW_SYSTEM_HEALTH, PERM.VIEW_ANALYTICS, PERM.MANAGE_INSPECTIONS,
   PERM.MANAGE_PLATFORM, PERM.BYPASS_RATE_LIMIT, PERM.PLATFORM_RECOVERY,
 ];
 
@@ -105,6 +106,7 @@ export const PERM_LABELS: Record<Permission, PermLabel> = {
   [PERM.SUPPORT_AGENT]:      { label: "Support Agent",      desc: "Read and answer customer support conversations, including internal notes", group: "Operations" },
   [PERM.SUPPORT_OVERSIGHT]:  { label: "Support Oversight",  desc: "Read-only, audited, reason-required review of support cases (internal notes hidden)", group: "Operations" },
   [PERM.VIEW_LOGS]:          { label: "View Security Logs", desc: "Read audit and security logs",              group: "Operations" },
+  [PERM.VIEW_SYSTEM_HEALTH]: { label: "View System Health", desc: "Read platform and service health status (technical staff; granted individually)", group: "Operations" },
   [PERM.MANAGE_PLATFORM]:    { label: "Platform Settings",  desc: "Edit platform-wide settings",               group: "System" },
   [PERM.BYPASS_RATE_LIMIT]:  { label: "Bypass Rate Limit",  desc: "Exempt from API rate limiting",             group: "System" },
   [PERM.PLATFORM_RECOVERY]:  { label: "Platform Recovery",  desc: "Sign in during maintenance and end it (status + recover only; cannot start or scope maintenance)", group: "System" },

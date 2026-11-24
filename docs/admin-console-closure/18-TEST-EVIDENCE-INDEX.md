@@ -1,38 +1,22 @@
-# 18 — Test evidence index (2026-11-24)
+# 18 — Test evidence index (final closure, 2026-11-24)
 
-All results are local/disposable-stack. Exit codes are the real process exit statuses captured by the runner scripts.
+Levels: **LOCAL** (unit/component), **DISPOSABLE-DB** (real HTTP + PostgreSQL 16, PostgREST, loopback only), **BROWSER** (Playwright/Chromium against the disposable stack), **SIMULATED** (stubs for e-mail/SMS/Cloudinary), **HOSTED READ-ONLY** (SELECT only), **PRODUCTION** (none). Raw evidence: `evidence/final-regression/`, `evidence/sweep/`, `evidence/a11y/`, `evidence/screens/`.
 
-| Suite | Command | Result |
-|---|---|---|
-| TypeScript | `npx tsc --noEmit -p .` | exit 0 |
-| Frontend unit/integration | `npx vitest run` | exit 0 — 236 files, 2,057 passed, 1 skipped |
-| Production build | `npm run build` | exit 0 |
-| Backend Jest | `node --max-old-space-size=3072 --experimental-vm-modules jest --forceExit --maxWorkers=2` — a single full run is OOM-killed (exit 137) in this container, so it was executed **in 6 sequential batches covering every recognised suite** (266) | all batches exit 0; 3,199 tests passed, 21 skipped, 0 failed |
-| DB journeys (41 incl. legacy j1–j10, 03–32, 99 browser hold) | `ci/db-journeys/run.sh` on disposable DB | overall PASS, 0 failures; 862 checks summed from suite summaries |
-| Journey 30 personal accounts & dealer suspension | within run.sh | 62/62 |
-| Journey 31 admin workflow closure | within run.sh | 73/73 |
-| Journey 32 route API authorisation (96 endpoints) | within run.sh; rerun on final code | 5/5 |
-| Journey 29 permission matrix | within run.sh | 114/114 |
-| Browser closure journeys | `ci/browser/admin-closure.mjs` (final code) | 32/32 |
-| Browser sweep (53 routes × SA/moderator × 1440/390) | `ci/browser/admin-sweep.mjs` | 212 rows, 0 problems; now records API calls |
-| Accessibility/keyboard/responsive | `ci/browser/admin-a11y.mjs` | see 10 (4 open findings) |
-| Route classification | `node scripts/admin-closure-route-certification.mjs` | 53 routes classified, 0 self-check problems |
+| Check | Command | Result | Level |
+|---|---|---|---|
+| TypeScript | `npx tsc --noEmit -p .` | exit 0 (both runs) | LOCAL |
+| Production build | `npm run build` | exit 0 (both runs) | LOCAL |
+| Frontend unit/component | `npx vitest run` | **Run 1: 1 failure** (`darkThemeLayer`: generated dark-theme CSS stale after my colour-class changes). Fixed by `node scripts/generate-dark-theme.mjs`. **Run 2: 237 files passed; 2,068 tests passed, 1 skipped, 0 failed** | LOCAL |
+| Backend Jest (six batches; a single run is OOM-killed in this container, exit 137) | `jest` in batches `a, r1–r4, top` | all batches exit 0: 268 suites (267 passed, 1 skipped); **4,365 tests passed, 21 skipped, 0 failed** | LOCAL |
+| DB journeys, full gate (`ci/db-journeys/run.sh`) | one run | **Run 1: FAIL** — journey 33 check D11 was environment-dependent (it counted payments created by earlier journeys). Test corrected to a before/after snapshot. **Run 2: 43/43 journeys exit 0, overall PASS** (journeys 31: 73/73; 32: 5/5; 33: 70/70; 34: 33/33) | DISPOSABLE-DB |
+| Browser admin closure (J1–J22 + OD-1 checks) | `ci/browser/admin-closure.mjs` | **Run 1: 31/32** — J16 asserted old behaviour ("access boundary" text) that OD-1 intentionally removed (tile no longer rendered for unauthorised roles). Updated; added J16b. **Run 2: 33/33 passed** | BROWSER |
+| 53-route sweep (Super Admin/moderator, 1440 and 390 …) | `ci/browser/admin-sweep.mjs` | 53 routes, 212 rows, 0 problems | BROWSER |
+| Accessibility scan (axe) | `ci/browser/admin-a11y.mjs` | 53 routes × 390/1440: **0 serious/critical**, 0 axe errors; 0 overflow at 7 widths on 10 key routes | BROWSER |
+| Accessible names / history controls / live regions | `ci/browser/admin-a11y-extra.mjs` | 0 unnamed controls on 53 routes; Back/Dashboard keyboard-operable | BROWSER |
+| Dialog focus (open, trap, Escape, return) | vitest `DealerReinstatementWorkflow` | passed | LOCAL (jsdom) |
+| Route classification generator | `scripts/admin-closure-route-certification.mjs` | 13 / 28 / 5 / 0 / 7 / 0; 0 problems | LOCAL |
+| Hosted object checks | Supabase SELECT | doc 25 | HOSTED READ-ONLY |
 
-## Defects found during the closure run and their evidence
-* Review moderation/delete 22P02 — journey 31 B3/B5 failed → fixed → 73/73.
-* Moderator could read six staff endpoints — journey 32 T3 failed → five fixed (bids, ads×2, referrals, dealer payout accounts) → T3 passes; one (`system/health`) is a documented owner decision OD-5.
-* Backend matrix `stage5f5RoleRouteMatrix` caught an over-reach of my first fix (system/health) → reverted.
+Reruns and flakiness: the three failures above (vitest run 1, journey run 1, browser run 1) were each a **test defect or an intended behaviour change**, not intermittent; none was re-run until green without a change. No test was skipped or weakened to pass; one existing expectation (system health in `stage5f5RoleRouteMatrix`) was tightened.
 
-## Integrated journeys A–F (master prompt §16) — where each is evidenced
-| Journey | Evidence |
-|---|---|
-| A Super Admin: login → dashboard → users → dealer approvals → settings → logout | browser J1–J3, J6–J12; journey 31 A |
-| B Moderator: login → permitted pages → blocked direct URLs → no unauthorised API | browser J3, J13–J16; sweep; journey 32 T3 |
-| C Personal account: register/verify/list → admin sees correct state → suspend/restore | journeys 20, 07, 30 |
-| D Dealer suspension: request → separation of duties → approval/rejection → audit | journey 30, browser J20–J22 |
-| E Financial/marketplace: read-only + invalid transitions, no money movement | journeys 05, 19, 31 E |
-| F Settings: save → reload → effective behaviour | journey 31 A |
-These are composed from existing journeys rather than one continuous script; each step is real HTTP/browser evidence on the disposable stack.
-
-## Final-code rerun (after the last backend edit)
-Journeys 26 (22/22), 27 (47/47), 28 (16/16), 29 (114/114), 31 (73/73), 32 (5/5) and browser closure (32/32) were re-executed on the final code. tsc, vitest and build ran before the last backend-only edit (revert of one route guard; no frontend file changed afterwards); backend Jest ran after it.
+Caveats: single-run evidence per configuration; a11y/sweep were run before the last (CSS-only) dark-theme regeneration and the J16 script edit; no production, staging or hosted-DB test of any kind.

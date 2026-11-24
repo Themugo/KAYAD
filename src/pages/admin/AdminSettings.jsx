@@ -249,7 +249,7 @@ export default function AdminSettings() {
       <div className="container" style={{ paddingTop: 32, paddingBottom: 32, maxWidth: 900 }}>
         <div style={{ marginBottom: 24 }}>
           <div className="section-eyebrow">Admin</div>
-          <h2>Settings</h2>
+          <h1>Settings</h1>
           <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Platform config, payment gateways, reconciliation, and sub-admin management</p>
         </div>
 

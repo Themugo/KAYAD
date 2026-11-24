@@ -12,7 +12,7 @@
 |---|---|---|
 | `POST …/suspend` by Admin | direct suspend | Super Admin only, reason ≥10 |
 | `POST /api/admin/users/:id/toggle-ban` on a dealer | direct | 403 `SUSPENSION_REQUIRES_APPROVAL` for non-superadmin/non-owner |
-| reinstate | any admin | Super Admin only (**owner to confirm** this is the intended policy) |
+| reinstate | any admin | **SUPERSEDED by OD-2/OD-3 (doc 21):** Admin submits a reinstatement *request*; any Super Admin approves/rejects; direct reinstate is Super Admin only |
 | Pending-approval count/queue | included non-dealers | dealer-only |
 
 ## Finding

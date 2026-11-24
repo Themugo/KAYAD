@@ -1,5 +1,6 @@
 import express from "express";
 import { protect, allowRoles } from "../middleware/auth.js";
+import { requirePermission, PERMISSIONS } from "../middleware/rbac.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 import { createLimiter } from "../middleware/rateLimiter.js";
@@ -48,16 +49,19 @@ import {
 
 const router = express.Router();
 
-// All routes require authentication
+// OD-1: health reads are limited to Super Admin and individually granted technical staff. Declared BEFORE the role gate below so a
+// granted technical person who is not one of the enterprise roles is judged on the permission, not on a role name.
+router.get("/health", protect, requirePermission(PERMISSIONS.VIEW_SYSTEM_HEALTH), asyncHandler(getSystemHealth));
+router.get("/health/:serviceId", protect, requirePermission(PERMISSIONS.VIEW_SYSTEM_HEALTH), asyncHandler(checkServiceHealth));
+
+// All other routes require authentication
 router.use(protect, allowRoles("admin", "superadmin", "engineer", "manager"));
 
 // Executive Dashboard
 router.get("/dashboard", asyncHandler(getExecutiveDashboard));
 router.get("/executive", asyncHandler(getExecutiveDashboard));
 
-// System Health
-router.get("/health", asyncHandler(getSystemHealth));
-router.get("/health/:serviceId", asyncHandler(checkServiceHealth));
+// System Health: see the permission-gated routes declared above the role gate.
 
 // Business Health
 router.get("/business", asyncHandler(getBusinessHealth));

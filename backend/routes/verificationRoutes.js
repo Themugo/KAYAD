@@ -10,6 +10,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId } from "../middleware/validate.js";
 import { idempotencyCheck } from "../middleware/idempotency.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
+import { findById } from "../db/index.js";
 import { requireDecisionAuthority } from "../services/onboardingPolicy.service.js"; // STAGE 5
 import { submitRequest, listRequests, cancelRequest, decideRequest } from "../services/dealerSuspensionRequest.service.js";
 
@@ -25,6 +26,7 @@ import {
   suspendDealer,
   applyVerificationTransition,
   SUSPEND_MESSAGE,
+  REINSTATE_MESSAGE,
   reinstateDealer,
 } from "../controllers/verificationController.js";
 
@@ -89,19 +91,17 @@ router.get("/admin/all", allowRoles("admin", "superadmin"), asyncHandler(getAllV
 // ---- Dealer suspension: Admin staff REQUEST, Super Admin DECIDES --------------------------------------------------------------
 const reqFail = (res, e) => (e?.status ? res.status(e.status).json({ success: false, code: e.code, message: e.message }) : null);
 router.get("/admin/suspension-requests", allowRoles("admin", "superadmin"), asyncHandler(async (req, res) => {
-  try { res.json({ success: true, data: await listRequests({ actor: req.user, status: req.query.status, limit: req.query.limit }) }); } catch (e) { if (!reqFail(res, e)) throw e; }
+  try { res.json({ success: true, data: await listRequests({ actor: req.user, status: req.query.status, limit: req.query.limit, requestType: req.query.type }) }); } catch (e) { if (!reqFail(res, e)) throw e; }
 }));
 router.post("/admin/suspension-requests/:requestId/decision", allowRoles("superadmin"), asyncHandler(async (req, res) => {
   try {
     const decision = req.body?.decision;
-    // Honour the owner decision-authority setting for an APPROVAL exactly as for the other dealer decisions.
-    if (decision === "approve") {
-      const { getOnboardingPolicy, mayDecide } = await import("../services/onboardingPolicy.service.js");
-      if (typeof mayDecide === "function") { const result = await getOnboardingPolicy(); if (!mayDecide(req.user, "dealer", result)) return res.status(403).json({ success: false, code: "DECISION_AUTHORITY_REQUIRED", message: "Dealer decisions are reserved for the platform owner under the current onboarding settings." }); }
-    }
+    // OD-3: ANY Super Admin may approve or reject a suspension or reinstatement request (route is allowRoles("superadmin")). The owner-only
+    // decision-authority setting continues to govern dealer ONBOARDING approvals only. Separation of duties is enforced in the service + DB.
     const out = await decideRequest({ requestId: req.params.requestId, actor: req.user, decision, reason: req.body?.reason,
-      applySuspension: (verificationId, body) => applyVerificationTransition(verificationId, "suspended", req.user.id, body, SUSPEND_MESSAGE) });
-    await logActionFromReq(req, decision === "approve" ? "dealer_suspension_request_approved" : "dealer_suspension_request_rejected", {
+      applySuspension: (verificationId, body) => applyVerificationTransition(verificationId, "suspended", req.user.id, body, SUSPEND_MESSAGE),
+      applyReinstatement: (verificationId, body) => applyVerificationTransition(verificationId, "approved", req.user.id, body, REINSTATE_MESSAGE) });
+    await logActionFromReq(req, `dealer_${out.request.requestType === "reinstatement" ? "reinstatement" : "suspension"}_request_${decision === "approve" ? "approved" : "rejected"}`, {
       target: out.request.verificationId, targetModel: "DealerVerification", details: { requestId: req.params.requestId, requestedBy: out.request.requestedBy, reason: req.body?.reason || null },
     });
     res.json({ success: true, data: out });
@@ -112,6 +112,13 @@ router.post("/admin/suspension-requests/:requestId/cancel", allowRoles("admin", 
     const out = await cancelRequest({ requestId: req.params.requestId, actor: req.user });
     await logActionFromReq(req, "dealer_suspension_request_cancelled", { target: out.verificationId, targetModel: "DealerVerification", details: { requestId: out.id } });
     res.json({ success: true, data: out });
+  } catch (e) { if (!reqFail(res, e)) throw e; }
+}));
+router.post("/admin/:id/reinstate-request", allowRoles("admin"), validateObjectId, asyncHandler(async (req, res) => {
+  try {
+    const out = await submitRequest({ verificationId: req.params.id, actor: req.user, requestType: "reinstatement", reasonCategory: req.body?.reasonCategory, reason: req.body?.reason, evidenceReference: req.body?.evidenceReference });
+    await logActionFromReq(req, "dealer_reinstatement_requested", { target: req.params.id, targetModel: "DealerVerification", details: { requestId: out.id, reasonCategory: out.reasonCategory, relatedRequestId: out.relatedRequestId } });
+    res.status(201).json({ success: true, data: out });
   } catch (e) { if (!reqFail(res, e)) throw e; }
 }));
 router.post("/admin/:id/suspend-request", allowRoles("admin"), validateObjectId, asyncHandler(async (req, res) => {
@@ -131,6 +138,13 @@ router.post(
   allowRoles("admin", "superadmin"),
   requireDecisionAuthority("dealer"), // STAGE 5
   validateObjectId,
+  // OD-2: "approve" must never be a back door that lifts a suspension. Admin staff reinstate only through a reinstatement REQUEST.
+  asyncHandler(async (req, res, next) => {
+    if (req.user?.role === "superadmin") return next();
+    const v = await findById("dealer_verifications", req.params.id).catch(() => null);
+    if (v?.verificationStatus === "suspended") return res.status(403).json({ success: false, code: "REINSTATEMENT_REQUIRES_APPROVAL", message: "This dealer is suspended. Admin staff submit a reinstatement request; a Super Admin must approve it." });
+    return next();
+  }),
   idempotencyCheck,
   asyncHandler(async (req, res) => {
     const result = await approveVerification(req, res);
@@ -189,8 +203,7 @@ router.post(
 // POST /api/verification/admin/:id/reinstate - Reinstate dealer (admin only, idempotent)
 router.post(
   "/admin/:id/reinstate",
-  allowRoles("superadmin"), // restoring a suspension is a Super Admin decision; Admin staff cannot reverse an approved suspension
-  requireDecisionAuthority("dealer"), // STAGE 5
+  allowRoles("superadmin"), // OD-2/OD-3: Admin staff submit a reinstatement REQUEST; any Super Admin may reinstate/decide (owner-only setting no longer applies)
   validateObjectId,
   idempotencyCheck,
   asyncHandler(async (req, res) => {

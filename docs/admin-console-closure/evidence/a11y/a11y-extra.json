@@ -1,0 +1,30 @@
+{
+ "unnamed": [],
+ "history": {
+  "backPresent": true,
+  "forwardPresent": true,
+  "backWorks": true,
+  "afterBack": "/admin",
+  "forwardEnabledAfterBack": false,
+  "dashboardLink": true,
+  "afterDashboard": "/admin"
+ },
+ "dialog": {
+  "openerFound": false
+ },
+ "live": [
+  {
+   "route": "/admin/dealer-verifications",
+   "regions": 1
+  },
+  {
+   "route": "/admin/settings",
+   "regions": 1
+  },
+  {
+   "route": "/admin/reviews",
+   "regions": 1
+  }
+ ],
+ "navSnapshot": "- navigation \"Admin sections\":\n  - button \"Command Centre navigation\" [expanded]: Command Centre\n  - link \"Dashboard\":\n    - /url: /admin\n  - link \"Traffic Analytics\":\n    - /url: /admin/traffic-analytics\n  - button \"Marketplace navigation\" [expanded]: Marketplace\n  - link \"Listings\":\n    - /url: /admin/cars\n  - link \"Moderation\":\n    - /url: /admin/moderation\n  - link \"Featured Vehicles\":\n    - /url: /admin/featured-vehicles\n  - link \"Auctions\":\n    - /url: /admin/auctions\n  - link \"Bids\":\n    - /url: /admin/bids\n  - link \"Inspections\":\n    - /url: /admin/inspections\n  - link \"NTSA Queue\":\n    - /url: /admin/ntsa-queue\n  - button \"Accounts & Onboarding navigation\" [expanded]: Accounts & Onboarding\n  - link \"Users\":\n    - /url: /admin/users\n  - link \"Dealers\":\n    - /url: /admin/sellers\n  - link \"Dealer Verifications\":\n    - /url: /admin/dealer-verifications\n  - link \"Personal Accounts\":\n    - /url: /admin/private-seller-applications\n  - link \"Inspector Applications\":\n    - /url: /admin/inspector-applications\n  - button \"Finance navigation\" [expanded]: Finance\n  - link \"Escrows\":\n    - /url: /admin/escrows\n  - link \"Transactions\":\n    - /url: /admin/transactions\n  - button \"Customer Care navigation\" [expanded]: Customer Care\n  - link \"Support Tickets\":\n    - /url: /admin/support-tickets\n  - link \"Reports\":\n    - /url: /admin/reports\n  - link \"Chats\":\n    - /url: /admin/chats\n  - link \"Reviews\":\n    - /url: /admin/reviews\n  - link \"Feedback\":\n    - /url: /admin/feedback\n  - button \"Growth & Insight navigation\" [expanded]: Growth & Insight\n  - link \"Market Data\":\n    - /url: /admin/market-data\n  - link \"Ad Manager\":\n    - /url: /admin/ads\n  - link \"Broadcast\":\n    - /url: /admin/broadcast\n  - link \"Referrals\":\n    - /url: /admin/referrals\n  - button \"Platform & Security navigation\" [expanded]: Platform & Security\n  - link \"Security Log\":\n    - /url: /admin/security-log\n  - link \"Control Room\":\n    - /url: /admin/control-room\n  - link \"Staff\":\n    - /url: /admin/staff\n  - link \"Staff Permissions\":\n    - /url: /admin/staff-permissions\n  - link \"Panic Room\":\n    - /url: /admin/panic-room\n  - link \"Site Designs\":\n    - /url: /admin/site-designs\n  - link \"Platform Recovery\":\n    - /url: /admin/platform-recovery\n  - link \"System Overview\":\n    - /url: /admin/webhoist"
+}

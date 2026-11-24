@@ -54,7 +54,7 @@ describe('brand text', () => {
         if (e.name === '__tests__' || e.name === 'node_modules') continue;
         const p = path.join(d, e.name);
         if (e.isDirectory()) walk(p);
-        else if (/\.(tsx?|jsx?)$/.test(e.name) && /KAYAD EA\b/.test(fs.readFileSync(p, 'utf8'))) hits.push(path.relative(root, p));
+        else if (/\.(tsx?|jsx?)$/.test(e.name) && /KAYAD EA\b/.test(fs.readFileSync(p, 'utf8'))) hits.push(path.relative(root, p).split(path.sep).join('/'));
       }
     };
     walk(root);

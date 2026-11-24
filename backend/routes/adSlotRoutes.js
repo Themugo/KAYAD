@@ -24,8 +24,8 @@ router.get("/", asyncHandler(getAdSlots));
 router.get("/all", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_ADS), asyncHandler(getAllAdSlots));
 router.get("/stats", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_ADS), asyncHandler(getAdStats));
 router.post("/:id/events", asyncHandler(recordAdEvent));
-router.post("/", protect, adminOnly, asyncHandler(createAdSlot));
-router.put("/:id", protect, adminOnly, validateObjectId, asyncHandler(updateAdSlot));
-router.delete("/:id", protect, adminOnly, validateObjectId, asyncHandler(deleteAdSlot));
+router.post("/", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_ADS), asyncHandler(createAdSlot));
+router.put("/:id", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_ADS), validateObjectId, asyncHandler(updateAdSlot));
+router.delete("/:id", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_ADS), validateObjectId, asyncHandler(deleteAdSlot));
 
 export default router;

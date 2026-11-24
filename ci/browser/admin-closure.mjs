@@ -65,7 +65,8 @@ const path = (p) => new URL(p.url()).pathname + new URL(p.url()).search;
   const m = await session(seed.platform.moderator);
   m.net.length = 0;
   await m.p.goto(`${BASE}/admin`, { waitUntil: 'domcontentloaded' }); await m.p.waitForTimeout(3500); await shot(m.p, '04-moderator-dashboard');
-  rec('J16 moderator dashboard makes no /ecp/health request and shows an access boundary instead of an error', !m.net.some((x) => x.includes('/ecp/health')) && /not included in your role/.test(await m.p.locator('body').innerText()), m.net);
+  rec('J16 moderator dashboard (OD-1): no system-health request, the System Health tile is not rendered at all, and no error is shown', !m.net.some((x) => /\/health/.test(x)) && (await m.p.locator('#system-health-heading').count()) === 0 && !/could not|failed|403/i.test((await m.p.locator('.kayad-command-panel').allInnerTexts()).join(' ')), m.net);
+  { const sa = await session(seed.platform.superadmin); await sa.p.goto(`${BASE}/admin`, { waitUntil: 'domcontentloaded' }); await sa.p.waitForTimeout(3000); rec('J16b Super Admin dashboard shows the System Health tile (OD-1)', (await sa.p.locator('#system-health-heading').count()) === 1); }
   for (const r of ['/admin/users', '/admin/inspector-applications', '/admin/featured-vehicles', '/admin/config', '/admin/communications', '/admin/provider-governance', '/admin/feedback', '/admin/staff']) {
     const before = m.net.length; await m.p.goto(`${BASE}${r}`, { waitUntil: 'domcontentloaded' }); await m.p.waitForTimeout(2200);
     const body = await m.p.locator('#main-content').innerText().catch(() => '');

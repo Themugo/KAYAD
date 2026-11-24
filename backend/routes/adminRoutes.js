@@ -3069,6 +3069,7 @@ router.post(
 // =============================
 router.get(
   "/system/health",
+  requirePermission(PERMISSIONS.VIEW_SYSTEM_HEALTH), // OD-1: Super Admin (implicit) + individually granted technical staff only
   asyncHandler(async (req, res) => {
     const [userCount, carCount, liveAuctions, pendingEscrows, heldEscrows, pendingModeration, recentErrors] =
       await Promise.all([

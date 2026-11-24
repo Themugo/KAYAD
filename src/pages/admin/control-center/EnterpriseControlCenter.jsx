@@ -66,8 +66,14 @@ export default function EnterpriseControlCenter() {
       const { data: dashData } = await ecpApi.getExecutiveDashboard();
       setDashboard(dashData.data);
 
-      const { data: healthData } = await ecpApi.getSystemHealth();
-      setSystemHealth(healthData.data);
+      // OD-1: system health needs the narrow view_system_health permission; a refusal must not abort the rest of the page.
+      try {
+        const { data: healthData } = await ecpApi.getSystemHealth();
+        setSystemHealth(healthData.data);
+      } catch (healthError) {
+        if (healthError?.response?.status !== 403) console.error('System health unavailable:', healthError);
+        setSystemHealth(null);
+      }
 
       const { data: bizData } = await ecpApi.getBusinessHealth();
       setBusinessHealth(bizData.data);

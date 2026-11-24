@@ -1,0 +1,905 @@
+[
+ {
+  "route": "/admin",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/admin/stats",
+   "/api/admin/users",
+   "/api/admin/cars",
+   "/api/ecp/health",
+   "/api/admin/audit-log",
+   "/api/admin/staff"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/users",
+  "access": "permission manage_users",
+  "modDenied": true,
+  "cls": "Fully workflow verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/admin/users",
+   "/api/admin/dealer-onboarding/readiness"
+  ],
+  "crit": "release-critical",
+  "write": "journeys 26, 30 (suspend/restore, rank boundary, session revoke); vitest adminTables"
+ },
+ {
+  "route": "/admin/sellers",
+  "access": "permission manage_staff",
+  "modDenied": true,
+  "cls": "Fully workflow verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/admin/users"
+  ],
+  "crit": "release-critical",
+  "write": "journeys 23, 24, 30, 33"
+ },
+ {
+  "route": "/admin/private-seller-applications",
+  "access": "permission manage_users",
+  "modDenied": true,
+  "cls": "Fully workflow verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/notifications",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/private-seller-capability/admin/accounts"
+  ],
+  "crit": "release-critical",
+  "write": "journey 30 (personal accounts list/search/filter/pagination/suspend/restore; empty + table-absent); vitest AdminPersonalAccounts"
+ },
+ {
+  "route": "/admin/cars",
+  "access": "permission manage_cars",
+  "modDenied": true,
+  "cls": "Fully workflow verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/admin/cars"
+  ],
+  "crit": "standard",
+  "write": "journey 28 M6–M7; 07/09/11"
+ },
+ {
+  "route": "/admin/moderation",
+  "access": "permission manage_cars",
+  "modDenied": true,
+  "cls": "Fully workflow verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/admin/alerts",
+   "/api/admin/cars"
+  ],
+  "crit": "standard",
+  "write": "journey 28 M1–M5"
+ },
+ {
+  "route": "/admin/auctions",
+  "access": "permission manage_auctions",
+  "modDenied": true,
+  "cls": "Safely simulated",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/admin/alerts",
+   "/api/wallet/dealer-accounts",
+   "/api/auctions/admin/reported-comments"
+  ],
+  "crit": "release-critical",
+  "write": "journey 34 W16–W17 (end-auction authorisation; no auction ended); 31 E6–E9"
+ },
+ {
+  "route": "/admin/bids",
+  "access": "permission manage_auctions",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/alerts",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/bids/admin/all",
+   "/api/bids/admin/suspicious"
+  ],
+  "crit": "release-critical",
+  "write": "journey 34 W16–W17 (authorisation); read feed only otherwise"
+ },
+ {
+  "route": "/admin/escrows",
+  "access": "permission view_escrow",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/escrow",
+   "/api/escrow/operations/dashboard"
+  ],
+  "crit": "release-critical",
+  "write": "authorisation only (journeys 05/09/31); NO escrow transition executed"
+ },
+ {
+  "route": "/admin/reviews",
+  "access": "permission manage_moderation",
+  "modDenied": false,
+  "cls": "Fully workflow verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/admin/alerts",
+   "/api/admin/reviews"
+  ],
+  "crit": "standard",
+  "write": "journey 31 B1–B7 (approve/reject/delete persist; moderator read-only; fixes reviews dealer-id defect)"
+ },
+ {
+  "route": "/admin/referrals",
+  "access": "permission view_analytics",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/alerts",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/admin/referrals"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/chats",
+  "access": "permission manage_moderation",
+  "modDenied": false,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/admin/chats"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/reports",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Fully workflow verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/admin/alerts",
+   "/api/reports/admin/all"
+  ],
+  "crit": "standard",
+  "write": "journey 27 A1–A11; jest stage3aReportQueue"
+ },
+ {
+  "route": "/admin/support-tickets",
+  "access": "any of: support_agent, support_oversight",
+  "modDenied": true,
+  "cls": "Fully workflow verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/support/staff/metrics",
+   "/api/support/staff/queue",
+   "/api/support/staff/team"
+  ],
+  "crit": "standard",
+  "write": "journey 28 S1–S9"
+ },
+ {
+  "route": "/admin/feedback",
+  "access": "admin, superadmin (role-gated on server)",
+  "modDenied": true,
+  "cls": "Fully workflow verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/alerts",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/feedback/admin/all"
+  ],
+  "crit": "standard",
+  "write": "journey 27 B1–B5"
+ },
+ {
+  "route": "/admin/market-data",
+  "access": "permission view_analytics",
+  "modDenied": true,
+  "cls": "Fully workflow verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/admin/market-data"
+  ],
+  "crit": "standard",
+  "write": "journey 27 D1–D3"
+ },
+ {
+  "route": "/admin/transactions",
+  "access": "permission manage_finance",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/alerts",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/admin/payments"
+  ],
+  "crit": "release-critical",
+  "write": "authorisation only (journey 31 E); NO money movement executed"
+ },
+ {
+  "route": "/admin/ntsa-queue",
+  "access": "permission manage_inspections",
+  "modDenied": true,
+  "cls": "Safely simulated",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/ntsa-verification"
+  ],
+  "crit": "release-critical",
+  "write": "journeys 27 D4–D7, 31 E10 (internal queue only)"
+ },
+ {
+  "route": "/admin/inspections",
+  "access": "permission manage_inspections",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/inspections/available-inspectors",
+   "/api/inspections"
+  ],
+  "crit": "release-critical",
+  "write": "authorisation (31 E10); provider actions NOT executed"
+ },
+ {
+  "route": "/admin/dealer-verifications",
+  "access": "admin, superadmin (role-gated on server)",
+  "modDenied": true,
+  "cls": "Fully workflow verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/verification/admin/suspension-requests",
+   "/api/verification/admin/all"
+  ],
+  "crit": "release-critical",
+  "write": "journeys 12, 23, 24, 30, 33 (suspension/reinstatement workflows)"
+ },
+ {
+  "route": "/admin/inspector-applications",
+  "access": "permission manage_inspections",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/admin/alerts",
+   "/api/inspector-applications"
+  ],
+  "crit": "release-critical",
+  "write": "authorisation (31 E10); decisions not executed"
+ },
+ {
+  "route": "/admin/security-log",
+  "access": "permission view_logs",
+  "modDenied": false,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/alerts",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/security-logs"
+  ],
+  "crit": "release-critical",
+  "write": "read-only by design"
+ },
+ {
+  "route": "/admin/ads",
+  "access": "permission manage_ads",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/ads/all",
+   "/api/ads/stats"
+  ],
+  "crit": "release-critical",
+  "write": "journey 34 W1–W6 (ad slot create/edit/delete; permission now enforced)"
+ },
+ {
+  "route": "/admin/broadcast",
+  "access": "admin, superadmin (role-gated on server)",
+  "modDenied": true,
+  "cls": "Safely simulated",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/alerts",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/announcements"
+  ],
+  "crit": "release-critical",
+  "write": "journey 27 C1–C6 (authorisation, validation, audience preview)"
+ },
+ {
+  "route": "/admin/settings",
+  "access": "permission manage_platform",
+  "modDenied": true,
+  "cls": "Fully workflow verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/admin/alerts",
+   "/api/admin/config",
+   "/api/admin/audit-log"
+  ],
+  "crit": "release-critical",
+  "write": "journey 31 A1–A10 (save → reload → public consumer; invalid refused and nothing saved; unauthorised refused)"
+ },
+ {
+  "route": "/admin/control-room",
+  "access": "Super Admin only",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/alerts",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/admin/audit-log",
+   "/api/ecp/health"
+  ],
+  "crit": "release-critical",
+  "write": "read-only aggregate; system health tile gated by view_system_health (journey 33 A)"
+ },
+ {
+  "route": "/admin/staff",
+  "access": "Super Admin only",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/admin/staff/roles/catalog",
+   "/api/admin/staff/permissions/catalog",
+   "/api/admin/staff/levels",
+   "/api/admin/staff"
+  ],
+  "crit": "release-critical",
+  "write": "journeys 14, 22, 26, 29 (create/offboard/rank boundary)"
+ },
+ {
+  "route": "/admin/staff-permissions",
+  "access": "Super Admin only",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/notifications",
+   "/api/admin/alerts",
+   "/api/admin/stats",
+   "/api/admin/staff/permissions/catalog",
+   "/api/admin/staff"
+  ],
+  "crit": "release-critical",
+  "write": "journey 34 W18–W21 + 33 A (grant/revoke/unknown key/owner-only)"
+ },
+ {
+  "route": "/admin/traffic-analytics",
+  "access": "Super Admin only",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/admin/analytics/live",
+   "/api/admin/analytics/summary"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/site-designs",
+  "access": "permission manage_platform",
+  "modDenied": true,
+  "cls": "Safely simulated",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/admin/site-designs/history",
+   "/api/admin/site-designs"
+  ],
+  "crit": "standard",
+  "write": "journey 31 C1–C6 (draft create/list/confirmed-delete; live site untouched)"
+ },
+ {
+  "route": "/admin/featured-vehicles",
+  "access": "permission manage_ads",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/admin/featured-campaigns"
+  ],
+  "crit": "release-critical",
+  "write": "journey 34 W7–W12 (campaign create/validate/confirm/pause/audit)"
+ },
+ {
+  "route": "/admin/panic-room",
+  "access": "Super Admin only",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/admin/alerts",
+   "/api/admin/system/maintenance/status",
+   "/api/admin/system/health"
+  ],
+  "crit": "release-critical",
+  "write": "never executed (destructive)"
+ },
+ {
+  "route": "/admin/platform-recovery",
+  "access": "permission platform_recovery",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/admin/system/maintenance/status"
+  ],
+  "crit": "release-critical",
+  "write": "never executed (destructive)"
+ },
+ {
+  "route": "/admin/webhoist",
+  "access": "Super Admin only",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/admin/audit-log"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/cms",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Safely simulated",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/cms/pages",
+   "/api/cms/dashboard/stats"
+  ],
+  "crit": "standard",
+  "write": "journey 27 F4–F6, 29 matrix"
+ },
+ {
+  "route": "/admin/automation",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Deliberately unavailable",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/automation/stats",
+   "/api/automation/workflows"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/config",
+  "access": "admin, superadmin (role-gated on server)",
+  "modDenied": true,
+  "cls": "Deliberately unavailable",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/alerts",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/config/stats"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/lowcode",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Deliberately unavailable",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/admin/alerts",
+   "/api/lowcode/stats"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/vxp",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Deliberately unavailable",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/vxp/stats"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/xos",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Deliberately unavailable",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/xos/dashboard"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/ai",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Deliberately unavailable",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/alerts",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/ai/dashboard"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/digital-twin",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Deliberately unavailable",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/digital-twin/dashboard"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/control-center",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/ecp/dashboard",
+   "/api/ecp/health",
+   "/api/ecp/business",
+   "/api/ecp/incidents",
+   "/api/ecp/security",
+   "/api/ecp/performance",
+   "/api/ecp/self-healing/rules"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/integration",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/notifications",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/integration/dashboard"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/governance",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/governance/dashboard",
+   "/api/governance/policies",
+   "/api/governance/changes",
+   "/api/governance/risks",
+   "/api/governance/approvals",
+   "/api/governance/features",
+   "/api/governance/standards",
+   "/api/governance/releases",
+   "/api/governance/decisions",
+   "/api/governance/audit",
+   "/api/governance/compliance"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/intelligence",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/alerts",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/executive-analytics/dashboard"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/command-center",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/notifications",
+   "/api/admin/alerts",
+   "/api/admin/stats",
+   "/api/command-center/snapshot",
+   "/api/command-center/live-activity"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/improvement",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/improvement/opportunities",
+   "/api/improvement/dashboard"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/platform-factory",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/alerts",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/platform-factory/dashboard",
+   "/api/platform-factory/templates",
+   "/api/platform-factory/products",
+   "/api/platform-factory/components",
+   "/api/platform-factory/services",
+   "/api/platform-factory/brands",
+   "/api/platform-factory/health"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/owners",
+  "access": "any staff (read surface)",
+  "modDenied": false,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/owner",
+   "/api/owner/mfa"
+  ],
+  "crit": "release-critical",
+  "write": "owner-only; writes not executed"
+ },
+ {
+  "route": "/admin/communications",
+  "access": "any of: manage_platform, manage_support",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/communications/admin/templates",
+   "/api/communications/admin/provider-health",
+   "/api/communications/admin/analytics",
+   "/api/communications/admin/rollout",
+   "/api/communications/admin/history"
+  ],
+  "crit": "release-critical",
+  "write": "authorisation (journey 29); provider sends NOT executed"
+ },
+ {
+  "route": "/admin/provider-governance",
+  "access": "permission manage_inspections",
+  "modDenied": true,
+  "cls": "Read-only verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/notifications",
+   "/api/admin/alerts",
+   "/api/admin/inspection-governance/providers"
+  ],
+  "crit": "standard",
+  "write": "no release-critical write on this page"
+ },
+ {
+  "route": "/admin/support",
+  "access": "any of: support_agent, support_oversight",
+  "modDenied": true,
+  "cls": "Fully workflow verified",
+  "apis": [
+   "/api/cars",
+   "/api/admin/public/config",
+   "/api/admin/stats",
+   "/api/admin/alerts",
+   "/api/notifications",
+   "/api/support/staff/queue",
+   "/api/support/staff/metrics",
+   "/api/support/staff/team"
+  ],
+  "crit": "standard",
+  "write": "journey 28 (same workspace as support-tickets)"
+ }
+]

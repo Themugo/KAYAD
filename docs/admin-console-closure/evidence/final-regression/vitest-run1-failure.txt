@@ -1,0 +1,3 @@
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/__tests__/theme/darkThemeLayer.test.ts > dark theme layer > is up to date with the colour classes in src (regenerate with node scripts/generate-dark-theme.mjs)
+      Tests  1 failed | 2067 passed | 1 skipped (2069)

@@ -88,7 +88,8 @@ const MATRIX = [
   // ghost_checker is a field-inspection role: /stats uses staffRole, which deliberately excludes it (revenue/platform totals). Fail-closed is the owner-safe policy (defect D-11); widening it is a product decision, not a CI fix.
   ["GET", "/api/admin/stats", STAFF.filter((r) => r !== "ghost_checker")],
   ["GET", "/api/admin/alerts", STAFF],
-  ["GET", "/api/admin/system/health", STAFF],
+  // OD-1: view_system_health is held by no role by default (Super Admin/owner implicit); granted individually.
+  ["GET", "/api/admin/system/health", []],
   // staffRole list excludes ghost_checker by design:
   ["GET", "/api/admin/reviews", STAFF.filter((r) => r !== "ghost_checker")],
   // superadmin-class but NOT owner-only today (documented, OD-1):

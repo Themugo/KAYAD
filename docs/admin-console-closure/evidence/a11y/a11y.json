@@ -1,57 +1,7 @@
 {
  "summary": {
   "routes": 53,
-  "axeSeriousOrCritical": [
-   {
-    "width": 390,
-    "route": "/admin/staff",
-    "v": [
-     "color-contrastx1"
-    ]
-   },
-   {
-    "width": 390,
-    "route": "/admin/staff-permissions",
-    "v": [
-     "color-contrastx2"
-    ]
-   },
-   {
-    "width": 390,
-    "route": "/admin/vxp",
-    "v": [
-     "target-sizex4"
-    ]
-   },
-   {
-    "width": 390,
-    "route": "/admin/communications",
-    "v": [
-     "color-contrastx1"
-    ]
-   },
-   {
-    "width": 1440,
-    "route": "/admin/staff",
-    "v": [
-     "color-contrastx1"
-    ]
-   },
-   {
-    "width": 1440,
-    "route": "/admin/staff-permissions",
-    "v": [
-     "color-contrastx2"
-    ]
-   },
-   {
-    "width": 1440,
-    "route": "/admin/communications",
-    "v": [
-     "color-contrastx1"
-    ]
-   }
-  ],
+  "axeSeriousOrCritical": [],
   "axeErrors": 0,
   "overflow": [],
   "keyboard": [
@@ -111,7 +61,7 @@
     "route": "/admin/settings",
     "main": true,
     "nav": true,
-    "h1": 0,
+    "h1": 1,
     "skip": true,
     "lang": "en",
     "tabStops": 45,
@@ -256,26 +206,12 @@
   {
    "width": 390,
    "route": "/admin/staff",
-   "violations": [
-    {
-     "id": "color-contrast",
-     "impact": "serious",
-     "nodes": 1,
-     "help": "Elements must meet minimum color contrast ratio thresholds"
-    }
-   ]
+   "violations": []
   },
   {
    "width": 390,
    "route": "/admin/staff-permissions",
-   "violations": [
-    {
-     "id": "color-contrast",
-     "impact": "serious",
-     "nodes": 2,
-     "help": "Elements must meet minimum color contrast ratio thresholds"
-    }
-   ]
+   "violations": []
   },
   {
    "width": 390,
@@ -330,14 +266,7 @@
   {
    "width": 390,
    "route": "/admin/vxp",
-   "violations": [
-    {
-     "id": "target-size",
-     "impact": "serious",
-     "nodes": 4,
-     "help": "All touch targets must be 24px large, or leave sufficient space"
-    }
-   ]
+   "violations": []
   },
   {
    "width": 390,
@@ -397,14 +326,7 @@
   {
    "width": 390,
    "route": "/admin/communications",
-   "violations": [
-    {
-     "id": "color-contrast",
-     "impact": "serious",
-     "nodes": 1,
-     "help": "Elements must meet minimum color contrast ratio thresholds"
-    }
-   ]
+   "violations": []
   },
   {
    "width": 390,
@@ -549,26 +471,12 @@
   {
    "width": 1440,
    "route": "/admin/staff",
-   "violations": [
-    {
-     "id": "color-contrast",
-     "impact": "serious",
-     "nodes": 1,
-     "help": "Elements must meet minimum color contrast ratio thresholds"
-    }
-   ]
+   "violations": []
   },
   {
    "width": 1440,
    "route": "/admin/staff-permissions",
-   "violations": [
-    {
-     "id": "color-contrast",
-     "impact": "serious",
-     "nodes": 2,
-     "help": "Elements must meet minimum color contrast ratio thresholds"
-    }
-   ]
+   "violations": []
   },
   {
    "width": 1440,
@@ -683,14 +591,7 @@
   {
    "width": 1440,
    "route": "/admin/communications",
-   "violations": [
-    {
-     "id": "color-contrast",
-     "impact": "serious",
-     "nodes": 1,
-     "help": "Elements must meet minimum color contrast ratio thresholds"
-    }
-   ]
+   "violations": []
   },
   {
    "width": 1440,
@@ -1182,7 +1083,7 @@
    "route": "/admin/settings",
    "main": true,
    "nav": true,
-   "h1": 0,
+   "h1": 1,
    "skip": true,
    "lang": "en",
    "tabStops": 45,

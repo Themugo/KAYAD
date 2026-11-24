@@ -15,7 +15,7 @@ const all = (dir: string, out: string[] = []): string[] => {
 };
 describe('single EscrowTimeline implementation', () => {
   it('exactly one EscrowTimeline component file exists', () => {
-    expect(all(SRC).filter((f) => path.basename(f).startsWith('EscrowTimeline.') && !f.includes('__tests__')).map((f) => path.relative(SRC, f))).toEqual(['components/features/escrow/EscrowTimeline.tsx']);
+    expect(all(SRC).filter((f) => path.basename(f).startsWith('EscrowTimeline.') && !f.includes('__tests__')).map((f) => path.relative(SRC, f).split(path.sep).join('/'))).toEqual(['components/features/escrow/EscrowTimeline.tsx']);
   });
   it('every EscrowTimeline import resolves to a file that exists', () => {
     for (const f of all(SRC).filter((x) => !x.includes('__tests__'))) {

@@ -1,3 +1,5 @@
+> **Superseded by docs 20–27 (final closure, 2026-11-24).** The final verdict is in `27-FINAL-RELEASE-READINESS-MATRIX.md`.
+
 # 16 — Final Admin release readiness
 
 ## VERDICT: **CONDITIONALLY READY** (for release *review*; not for deployment)
@@ -8,10 +10,10 @@ The Admin Console code in this tree passed every local, isolated-database and br
 | Area | Verdict | Level reached | Open conditions |
 |---|---|---|---|
 | Login landing & navigation (01) | Ready for review | Locally + isolated-DB + browser | — |
-| Moderator/Admin guard (02) | Ready for review | Locally + isolated-DB + browser; server-side checked on 96 endpoints | OD-5 `system/health` staff-wide (owner decision) |
+| Moderator/Admin guard (02) | Ready for review | Locally + isolated-DB + browser; server-side checked on 96 endpoints | superseded by OD-1: `system/health` needs `view_system_health` (doc 21); see doc 27 for the final verdict |
 | Personal account & selling (03) | Ready for review | Isolated-DB | Purity not modified; hosted lacks `private_seller_capabilities` (page tolerant) |
 | Personal Accounts page/API (04) | Ready for review | Isolated-DB + browser | — |
-| Dealer suspension approval (05) | Ready for review | Isolated-DB + browser | **Needs migration `20261124120000` on hosted**; owner to confirm Super-Admin-only reinstate |
+| Dealer suspension approval (05) | Ready for review | Isolated-DB + browser | **Needs migrations `20261124120000` then `20261124130000` on hosted**; reinstatement policy decided (OD-2/OD-3, doc 21) |
 | 53-route workflow (06) | 13 workflow-verified, 28 read-only, 5 simulated, 7 deliberately unavailable, 0 unverified | Isolated-DB | Simulated/read-only rows have unexercised write paths |
 | Financial operations (07) | Read-only/authorization only | Isolated-DB | No money movement exercised; hosted `transition_escrow` drift noted |
 | Auction/inspection/NTSA (08) | Authorization + invalid transitions | Isolated-DB | NTSA is an internal queue only |

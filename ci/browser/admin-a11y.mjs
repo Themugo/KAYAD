@@ -26,7 +26,7 @@ for (const [w, h] of [[390, 844], [1440, 900]]) {
       await p.goto(`${BASE}${route}`, { waitUntil: 'domcontentloaded' });
       await p.waitForSelector('.kayad-admin-shell', { state: 'attached', timeout: 25000 }).catch(() => {}); await p.waitForTimeout(1800);
       await p.evaluate(axeSrc);
-      const r = await p.evaluate(async (tags) => { const x = await window.axe.run(document, { runOnly: { type: 'tag', values: tags }, resultTypes: ['violations'] }); return x.violations.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length, help: v.help.slice(0, 90) })); }, TAGS);
+      const r = await p.evaluate(async (tags) => { const x = await window.axe.run(document, { runOnly: { type: 'tag', values: tags }, resultTypes: ['violations'] }); return x.violations.map((v) => ({ id: v.id, impact: v.impact, nodes: v.nodes.length, help: v.help.slice(0, 90), targets: v.nodes.slice(0, 6).map((n) => ({ t: n.target.join(' ').slice(0, 140), s: (n.any[0]?.message || '').slice(0, 160), h: (n.html || '').slice(0, 200) })) })); }, TAGS);
       out.axe.push({ width: w, route, violations: r });
     } catch (e) { out.axe.push({ width: w, route, error: String(e.message).slice(0, 120) }); }
     await p.close();
