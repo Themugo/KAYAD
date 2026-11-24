@@ -17,16 +17,16 @@ for (const [who, email] of [['superadmin', seed.platform.superadmin], ['moderato
     const { ctx, newPage } = await login(email, w, w < 700 ? 844 : 900);
     for (const route of routes) {
       const p = await newPage(); // a fresh page per route keeps one heavy studio page from exhausting memory for the rest
-      const errs = [], failed = [], cons = [];
+      const errs = [], failed = [], cons = [], calls = [];
       const onErr = (e) => errs.push(e.message.slice(0, 160)); const onCons = (m) => { if (m.type() === 'error') cons.push(m.text().slice(0, 140)); };
-      const onResp = (r) => { if (r.status() >= 400 && r.url().includes('/api/') && !/\/auth\/(me|refresh)$/.test(new URL(r.url()).pathname)) failed.push(`${r.status()} ${new URL(r.url()).pathname}`); };
+      const onResp = (r) => { if (r.url().includes('/api/') && !/\/auth\/(me|refresh|csrf)$/.test(new URL(r.url()).pathname)) calls.push(`${r.request().method()} ${r.status()} ${new URL(r.url()).pathname}`); if (r.status() >= 400 && r.url().includes('/api/') && !/\/auth\/(me|refresh)$/.test(new URL(r.url()).pathname)) failed.push(`${r.status()} ${new URL(r.url()).pathname}`); };
       p.on('pageerror', onErr); p.on('console', onCons); p.on('response', onResp);
       let crashed = false;
       try { await p.goto(`${BASE}${route}`, { waitUntil: 'domcontentloaded' }); } catch (e) { crashed = true; }
       if (crashed) { rows.push({ who, width: w, route, shell: false, heading: null, overflow: false, restricted: false, errorBoundary: false, textLen: 0, pageErrors: 1, consoleErrors: 0, failedApi: [], crashed: true }); await p.close().catch(() => {}); continue; }
       await p.waitForSelector('.kayad-admin-shell', { state: 'attached', timeout: 25000 }).catch(() => {}); await p.waitForTimeout(w === 1440 ? 2200 : 1600);
       const info = await p.evaluate(() => { const main = document.querySelector('#main-content'); const h = main?.querySelector('h1,h2'); const text = (main?.innerText || '').replace(/\s+/g, ' ').trim(); return { shell: !!document.querySelector('.kayad-admin-shell'), heading: h?.textContent?.trim().slice(0, 70) || null, overflow: document.documentElement.scrollWidth > innerWidth + 1, restricted: /restricted to Super Admin|restricted to the platform superadmin|Superadmin Only|Insufficient Permissions|does not have access to this page|not authori[sz]ed|Access denied/i.test([...(main?.querySelectorAll('h1,h2') || [])].map((e) => e.textContent).join(' ') + ' ' + (main?.querySelector('.kayad-admin-denied,[data-admin-denied]')?.textContent || '')), notFound: /Admin page not found/i.test(text), errorBoundary: /something went wrong|unexpected error/i.test(text), textLen: text.length }; });
-      rows.push({ who, width: w, route, ...info, pageErrors: errs.length, consoleErrors: cons.length, failedApi: [...new Set(failed)] });
+      rows.push({ who, width: w, route, ...info, pageErrors: errs.length, consoleErrors: cons.length, failedApi: [...new Set(failed)], apiCalls: [...new Set(calls)] });
       if (w === 1440 && who === 'superadmin') await p.screenshot({ path: `${OUT}/${route.replace(/\//g, '_') || '_'}.png` }).catch(() => {});
       p.off('pageerror', onErr); p.off('console', onCons); p.off('response', onResp); await p.close().catch(() => {});
     }

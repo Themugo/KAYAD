@@ -367,7 +367,8 @@ router.get(
     if (req.query.pendingApproval === "true") {
       // STAGE 5F.5 (D-9): the "Pending dealers" tile counts role=dealer, so a dealer-scoped queue link must list exactly those rows;
       // without an explicit role the queue still covers both seller kinds, as before.
-      if (!(req.query.role === "dealer" || req.query.role === "individual_seller")) filter.role = { $in: ["dealer", "individual_seller"] };
+      // Closure: personal accounts (incl. legacy individual_seller) need no approval, so the default pending queue is dealers only.
+      if (!(req.query.role === "dealer" || req.query.role === "individual_seller")) filter.role = "dealer";
       filter.status = "pending"; // STAGE 5A: users.approved does not exist; status is the account gate
     }
 
@@ -398,7 +399,7 @@ router.get(
       User.countDocuments({ role: { $in: ["admin", "superadmin", "webhoist"] } }),
       User.countDocuments({ role: "dealer" }),
       User.countDocuments({ isBanned: true }),
-      User.countDocuments({ role: { $in: ["dealer", "individual_seller"] }, status: "pending" }),
+      User.countDocuments({ role: "dealer", status: "pending" }), // approval applies to dealer onboarding only; personal accounts need no approval
     ]);
 
     // STAGE 5A: `approved` / `verificationStatus` / `businessType` / `lastLogin` are not columns of `users` (selecting them made this
@@ -480,6 +481,12 @@ router.post(
         details: { outcome: "refused", targetUserId: String(user._id), targetRole: user.role },
       });
       return res.status(403).json({ success: false, code: "ADMIN_RANK_REQUIRED", message: "You do not have sufficient rank to change this account's ban status." });
+    }
+
+    // Dealer accounts are restricted only through the dealer suspension workflow (Admin requests, Super Admin approves). Banning or
+    // un-banning the dealer's login here would be an alternate route around that approval.
+    if (user.role === "dealer" && req.user.role !== "superadmin" && !requesterIsOwner) {
+      return res.status(403).json({ success: false, code: "SUSPENSION_REQUIRES_APPROVAL", message: "Dealer accounts are restricted through the dealer suspension request, which a Super Admin must approve." });
     }
 
     // Phase 15: the toggle was not idempotent (a stale screen or a double click inverted the intended action), returned no
@@ -2441,6 +2448,7 @@ router.get(
 router.get(
   "/referrals",
   staffRole,
+  requirePermission(PERMISSIONS.VIEW_ANALYTICS),
   asyncHandler(async (req, res) => {
     const allowedStatuses = new Set(["pending", "credited", "expired"]);
     const rawPage = req.query.page === undefined ? 1 : Number(req.query.page);

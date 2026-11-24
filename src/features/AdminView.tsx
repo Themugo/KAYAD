@@ -556,7 +556,7 @@ export const AdminView: React.FC<AdminViewProps> = ({ vehicles, onQuickViewVehic
             </section>
             <section className="kayad-command-panel" aria-labelledby="system-health-heading">
               <header><h2 id="system-health-heading">System Health</h2>{canOpen('/admin/control-room') && <Link to="/admin/control-room">View All</Link>}</header>
-              <AdminSystemHealthPanel />
+              <AdminSystemHealthPanel role={sessionUser?.role || ''} />
             </section>
             <section className="kayad-command-panel" aria-labelledby="recent-submissions-heading">
               <header><h2 id="recent-submissions-heading">Recent Vehicle Submissions</h2>{canOpen('/admin/cars') && <Link to="/admin/cars">View All</Link>}</header>

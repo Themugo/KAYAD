@@ -50,6 +50,8 @@ ALL.forEach((role) => {
 });
 const U = "00000000-0000-4000-8000-000000000001";
 users[U] = { _id: U, id: U, role: "dealer", status: "approved", email: "dealer@example.test" };
+const UP = "00000000-0000-4000-8000-000000000002"; // a PERSONAL account target: ban is an Admin decision; a DEALER target needs a Super Admin (suspension workflow)
+users[UP] = { _id: UP, id: UP, role: "user", status: "approved", email: "personal@example.test" };
 
 let server; let base;
 beforeAll(async () => {
@@ -76,7 +78,8 @@ const MATRIX = [
   ["GET", "/api/admin/chats", ["admin", "technical_support", "moderator"]],
   ["GET", "/api/admin/market-data", ["admin", "marketing", "ad_manager", "accounts"]],
   ["GET", "/api/admin/staff", []],
-  ["POST", `/api/admin/users/${U}/toggle-ban`, ["admin"]],
+  ["POST", `/api/admin/users/${UP}/toggle-ban`, ["admin"]],
+  ["POST", `/api/admin/users/${U}/toggle-ban`, []], // dealer target: Admin staff are refused (SUSPENSION_REQUIRES_APPROVAL); only superadmin/owner may act directly
   ["PATCH", `/api/admin/dealers/${U}/package`, ["accounts", "admin"]],
   ["POST", "/api/admin/zero-cost-onboarding", ["admin"]],
   ["POST", "/api/admin/audit-log", ["admin"]],

@@ -220,7 +220,7 @@ describe("approval is independent per account", () => {
   });
   test("each dealer stays independently bannable after the other is approved", async () => {
     seed(); await approve(A);
-    const ban = await call("POST", `/api/admin/users/${B}/toggle-ban`, "admin-1", { banned: true });
+    const ban = await call("POST", `/api/admin/users/${B}/toggle-ban`, "super-1", { banned: true }); // dealers are restricted by a Super Admin (Admin staff use the suspension request)
     expect([200, 500]).toContain(ban.status); // persistence of ban is mocked; the target must be B only
     expect(world.users[A].isBanned).not.toBe(true);
   });

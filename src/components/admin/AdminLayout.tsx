@@ -175,9 +175,13 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             {segments.map((segment, index) => (
               <span className="kayad-admin-header__crumb" key={`${segment}-${index}`}>
                 <ChevronRight size={13} aria-hidden="true" />
-                <span aria-current={index === segments.length - 1 ? 'page' : undefined} className={index === segments.length - 1 ? 'is-current' : ''}>
-                  {crumbLabel(segment)}
-                </span>
+                {index === 0 && segment === 'admin' && segments.length > 1 ? (
+                  <Link to="/admin">Dashboard</Link>
+                ) : (
+                  <span aria-current={index === segments.length - 1 ? 'page' : undefined} className={index === segments.length - 1 ? 'is-current' : ''}>
+                    {index === 0 && segment === 'admin' ? 'Dashboard' : crumbLabel(segment)}
+                  </span>
+                )}
               </span>
             ))}
           </nav>
@@ -196,7 +200,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           </div>
         </header>
         <main id="main-content" className="kayad-admin-shell__content">
-          <PageJourneyNavigation fallbackHref="/admin" />
+          <PageJourneyNavigation fallbackHref="/admin" dashboardHref="/admin" />
           {children}
         </main>
       </div>

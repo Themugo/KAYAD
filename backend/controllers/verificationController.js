@@ -118,6 +118,23 @@ export const getVerificationById = async (req, res) => {
   }
 };
 
+/** The single effective-restriction mechanism (verification status + dealers + users.status + notification). Used by the direct
+ *  Super Admin path AND by an approved suspension request, so there is one implementation of what "suspended" means. */
+export const applyVerificationTransition = async (verificationId, status, actorId, body, message) => {
+  const verification = await transitionDealerVerification(verificationId, status, actorId, body || {});
+  const targetUserId = verification.user;
+  if (targetUserId) {
+    const userStatus = status === "approved" ? "approved" : status === "rejected" ? "rejected" : status === "suspended" ? "suspended" : null;
+    if (userStatus) await updateMany("users", { id: targetUserId }, { status: userStatus });
+    await sendNotification({ userId: targetUserId, title: message.title, message: message.body(verification), type: "verification" }).catch((e) => logError("Verification notification failed", e));
+    if (status === "approved") await updateMany("cars", { dealer: targetUserId }, { isVerifiedDealer: true });
+  }
+  return verification;
+};
+export const SUSPEND_MESSAGE = {
+  success: "Dealer suspended successfully", title: "Account Suspended", body: (v) => `Your dealer account has been suspended: ${v.suspensionReason || "See your account for details."}`,
+};
+
 const transition = async (req, res, status, message) => {
   try {
     const verification = await transitionDealerVerification(req.params.id, status, req.user.id, req.body || {});
@@ -146,9 +163,7 @@ export const approveVerification = (req, res) => transition(req, res, "approved"
 export const rejectVerification = (req, res) => transition(req, res, "rejected", {
   success: "Verification rejected", title: "Verification Rejected", body: (v) => `Your dealer verification was rejected: ${v.rejectionReason || "Please update your documents and resubmit."}`,
 });
-export const suspendDealer = (req, res) => transition(req, res, "suspended", {
-  success: "Dealer suspended successfully", title: "Account Suspended", body: (v) => `Your dealer account has been suspended: ${v.suspensionReason || "See your account for details."}`,
-});
+export const suspendDealer = (req, res) => transition(req, res, "suspended", SUSPEND_MESSAGE);
 export const reinstateDealer = (req, res) => transition(req, res, "approved", {
   success: "Dealer reinstated successfully", title: "Account Reinstated", body: () => "Your dealer account has been reinstated. You can resume normal operations.",
 });

@@ -103,13 +103,13 @@ describe("D-9 pending dealer queue link", () => {
     expect(f.role).toBe("dealer");
     expect(f.status).toBe("pending");
   });
-  test("pendingApproval without a role keeps both seller kinds", async () => {
+  test("pendingApproval without a role is the dealer onboarding queue only (personal accounts need no approval)", async () => {
     await get("/api/admin/users?pendingApproval=true");
-    expect(userFilters.at(-1).role).toEqual({ $in: ["dealer", "individual_seller"] });
+    expect(userFilters.at(-1).role).toBe("dealer");
   });
   test("a non-seller role cannot widen the pending queue to arbitrary roles", async () => {
     const r = await get("/api/admin/users?pendingApproval=true&role=superadmin");
-    if (r.status === 200) expect(userFilters.at(-1).role).toEqual({ $in: ["dealer", "individual_seller"] });
+    if (r.status === 200) expect(userFilters.at(-1).role).toBe("dealer");
     else expect(r.status).toBe(400); // rejected by query validation — equally safe
     expect(userFilters.every((f) => f.role !== "superadmin" || f.status !== "pending")).toBe(true);
   });

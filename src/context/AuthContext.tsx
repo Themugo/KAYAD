@@ -20,6 +20,7 @@ import {
   getEffectivePermissions,
   userHasPermission,
   PAGE_PERMISSIONS,
+  PAGE_ANY_PERMISSIONS,
   SUPERADMIN_ONLY,
   type Permission,
 } from '../utils/permissions';
@@ -440,7 +441,7 @@ const ADMIN_PAGE_ROLES: Record<string, string[]> = {
   '/admin/settings':       ['superadmin', 'admin'],
   '/admin/site-designs':   ['superadmin', 'admin'],
   '/admin/security-log':   ['superadmin', 'admin'],
-  '/admin/users':          ['superadmin', 'admin', 'technical_support', 'hr', 'moderator'],
+  '/admin/users':          ['superadmin', 'admin', 'technical_support', 'hr'], // moderator removed: server needs MANAGE_USERS, which the moderator does not hold
   '/admin/private-seller-applications': ['superadmin', 'admin', 'technical_support', 'hr'],
   '/admin/transactions':   ['superadmin', 'admin', 'accounts', 'escrow_officer'],
   '/admin/escrows':        ['superadmin', 'admin', 'accounts', 'escrow_officer'],
@@ -457,6 +458,7 @@ const ADMIN_PAGE_ROLES: Record<string, string[]> = {
   '/admin/referrals':      ['superadmin', 'admin'],
   '/admin/chats':          ['superadmin', 'admin', 'moderator'],
   '/admin/feedback':       ['superadmin', 'admin'],
+  '/admin/config':         ['superadmin', 'admin'],
   '/admin/broadcast':      ['superadmin', 'admin'],
   '/admin/dealer-verifications': ['superadmin', 'admin'],
   '/admin/support-tickets': ['superadmin', 'admin', 'technical_support'],
@@ -495,8 +497,11 @@ export function RequireAdminPage({ children, roles }: RequireAdminPageProps) {
   // assigned the permission that unlocks this page.
   const allowedRoles = roles || ADMIN_PAGE_ROLES[path];
   const requiredPerm = PAGE_PERMISSIONS[path];
-  const roleAllows = !allowedRoles || allowedRoles.includes(user?.role || '');
-  const permAllows = requiredPerm ? can(requiredPerm) : false;
+  const anyOfPerms = PAGE_ANY_PERMISSIONS[path];
+  // A page that names a permission (or an any-of list) but has no role list used to be open to EVERY staff role. The permission is the rule.
+  const guardedByPermission = !!requiredPerm || !!anyOfPerms;
+  const roleAllows = allowedRoles ? allowedRoles.includes(user?.role || '') : !guardedByPermission;
+  const permAllows = anyOfPerms ? anyOfPerms.some((p) => can(p)) : requiredPerm ? can(requiredPerm) : false;
 
   if (!roleAllows && !permAllows) {
     return (

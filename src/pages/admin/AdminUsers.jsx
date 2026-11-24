@@ -9,8 +9,13 @@ import { formatDate, initials } from '../../utils/helpers';
 
 const ROLE_BADGE = { user: 'badge-blue', dealer: 'badge-gold', admin: 'badge-red', superadmin: 'badge-red', webhoist: 'badge-red', individual_seller: 'badge-blue' };
 const isBanned = (u) => Boolean(u.isBanned ?? u.is_banned);
+const isPersonal = (u) => u.role === 'user' || u.role === 'individual_seller';
+const ROLE_LABEL = { individual_seller: 'personal account (legacy)', user: 'personal account' };
 const getStatus = (u) => {
   if (isBanned(u)) return { label: 'Banned', className: 'badge-red' };
+  // Personal accounts buy and sell with no approval. A legacy users.status of pending/rejected on an old individual_seller is a
+  // historical record, not the account's current approval, so it is never shown as "Pending approval".
+  if (isPersonal(u)) return { label: 'Active', className: 'badge-green', note: u.role === 'individual_seller' && u.status && u.status !== 'approved' ? `Legacy record: ${u.status}` : undefined };
   if (u.status === 'rejected') return { label: 'Rejected', className: 'badge-red' };
   if (u.status === 'pending' || (u.role === 'dealer' && !u.approved)) return { label: 'Pending approval', className: 'badge-orange' };
   return { label: 'Active', className: 'badge-green' };
@@ -28,10 +33,10 @@ function UserRow({ user: u, onBan, onApprove, onPlan, actionId }) {
         <div className="kayad-user-subtle">{u.location || 'Location not provided'}</div>
       </td>
       <td className="kayad-user-email">{u.email || '—'}</td>
-      <td><span className={`badge ${ROLE_BADGE[u.role] || 'badge-muted'}`}>{(u.role || 'user').replaceAll('_', ' ')}</span></td>
+      <td><span className={`badge ${ROLE_BADGE[u.role] || 'badge-muted'}`}>{ROLE_LABEL[u.role] || (u.role || 'user').replaceAll('_', ' ')}</span></td>
       <td>{u.phone || '—'}</td>
       <td>{u.createdAt || u.created_at ? formatDate(u.createdAt || u.created_at) : '—'}</td>
-      <td><span className={`badge ${status.className}`}>{status.label}</span></td>
+      <td><span className={`badge ${status.className}`}>{status.label}</span>{status.note && <div className="kayad-user-subtle">{status.note}</div>}{isPersonal(u) && <div className="kayad-user-subtle">{u.emailVerified === true || u.email_verified === true ? 'Email verified' : 'Email not verified'}</div>}</td>
       <td>
         <div className="kayad-user-row-actions">
           {needsApproval && u.application?.blockers?.length > 0 && (

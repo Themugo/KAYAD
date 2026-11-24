@@ -617,7 +617,7 @@ function AppInner() {
         {/* The public marketplace home starts directly beneath the global navbar.
             Keep page-history controls on internal routes, but do not insert a
             second navigation band above the homepage hero. */}
-        {activeNav !== 'marketplace' && <PageJourneyNavigation />}
+        {activeNav !== 'marketplace' && <PageJourneyNavigation adminHref={isAdmin ? '/admin' : undefined} />}
         <Suspense fallback={
           <div className="min-h-[420px] flex items-center justify-center px-6" role="status" aria-live="polite">
             <div className="text-center">

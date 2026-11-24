@@ -87,3 +87,35 @@ export async function decidePrivateSellerApplication(userId: string, decision: S
   });
   return res.data;
 }
+
+export interface PersonalAccountRow {
+  id: string;
+  name: string | null;
+  email: string | null;
+  phone: string | null;
+  createdAt: string | null;
+  accountType: 'personal' | 'personal_legacy';
+  accountState: 'active' | 'restricted';
+  emailVerified: boolean;
+  /** Old users.status of a legacy individual_seller. A historical value, never a current approval gate. */
+  legacyRecordStatus: string | null;
+  listings: { total: number; published: number };
+  historicalApplication: PrivateSellerApplication | null;
+}
+export interface PersonalAccountsPage { accounts: PersonalAccountRow[]; page: number; limit: number; total: number }
+
+/** Personal accounts for staff review. Independent of historical seller applications. */
+export async function getPersonalAccounts(params: { q?: string; state?: 'all' | 'active' | 'restricted'; verified?: 'all' | 'true' | 'false'; page?: number; limit?: number } = {}): Promise<PersonalAccountsPage> {
+  const clean: Record<string, string | number> = {};
+  if (params.q?.trim()) clean.q = params.q.trim();
+  if (params.state && params.state !== 'all') clean.state = params.state;
+  if (params.verified && params.verified !== 'all') clean.verified = params.verified;
+  if (params.page) clean.page = params.page;
+  if (params.limit) clean.limit = params.limit;
+  const res = await request<Partial<Envelope<PersonalAccountsPage>> & { message?: string }>('/api/private-seller-capability/admin/accounts', { params: clean });
+  const data = res?.data;
+  if (res?.success !== true || !data || !Array.isArray(data.accounts) || !Number.isFinite(Number(data.total))) {
+    throw new HttpRequestError(typeof res?.message === 'string' ? res.message : 'The server returned an unexpected response while loading personal accounts.', undefined, res);
+  }
+  return data;
+}

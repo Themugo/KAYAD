@@ -6,7 +6,7 @@ import asyncHandler from "../middleware/asyncHandler.js";
 import { requirePermission, PERMISSIONS } from "../middleware/rbac.js";
 import { validate } from "../middleware/validate.js";
 import { logActionFromReq } from "../utils/securityLogger.js";
-import { getMySellerCapability, submitApplication, decideApplication, listApplications, DECISION_NAMES, SELLER_STATUSES } from "../services/privateSellerCapability.service.js";
+import { getMySellerCapability, submitApplication, decideApplication, listApplications, listPersonalAccounts, DECISION_NAMES, SELLER_STATUSES } from "../services/privateSellerCapability.service.js";
 
 const router = express.Router();
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -31,6 +31,12 @@ router.post("/apply", protect, validate(applySchema), asyncHandler(async (req, r
 router.get("/admin/applications", protect, requirePermission(PERMISSIONS.MANAGE_USERS), asyncHandler(async (req, res) => {
   const status = SELLER_STATUSES.includes(req.query.status) ? req.query.status : undefined;
   res.json({ success: true, data: await listApplications({ status, limit: req.query.limit }) });
+}));
+
+// Personal accounts themselves (not only historical applications). Same permission as the application review.
+router.get("/admin/accounts", protect, requirePermission(PERMISSIONS.MANAGE_USERS), asyncHandler(async (req, res) => {
+  const state = ["active", "restricted"].includes(req.query.state) ? req.query.state : "all";
+  res.json({ success: true, data: await listPersonalAccounts({ q: req.query.q, state, verified: req.query.verified, page: req.query.page, limit: req.query.limit }) });
 }));
 
 router.patch("/admin/:userId/decision", protect, requirePermission(PERMISSIONS.MANAGE_USERS), validate(decisionSchema), asyncHandler(async (req, res) => {

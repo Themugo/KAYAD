@@ -80,4 +80,29 @@ describe('getPostAuthPath', () => {
     expect(getPostAuthPath(u({ role: 'dealer', status: 'approved' }), '/')).toBe('/dealer');
     expect(getPostAuthPath(u({ role: 'dealer', status: 'pending' }), '/')).toBe('/dealer/onboarding');
   });
+
+  describe('role-aware landing (Super Admin -> My Account defect)', () => {
+    const staff = ['superadmin', 'admin', 'moderator', 'hr', 'marketing', 'technical_support'];
+    it.each(staff)('%s ignores a stale personal-workspace next and lands on the Admin Dashboard', (role) => {
+      for (const n of ['/dashboard', '/account', '/profile', '/portal', '/dashboard?tab=x', '/?nav=dashboard&section=my-vehicles']) {
+        expect(getPostAuthPath(u({ role }), n)).toBe('/admin');
+      }
+    });
+    it('super admin honours an explicit admin destination and public pages', () => {
+      expect(getPostAuthPath(u({ role: 'superadmin' }), '/admin/staff')).toBe('/admin/staff');
+      expect(getPostAuthPath(u({ role: 'superadmin' }), '/auctions/1')).toBe('/auctions/1');
+    });
+    it('a staff role is not sent to an admin page it cannot open', () => {
+      expect(getPostAuthPath(u({ role: 'moderator' }), '/admin/config')).toBe('/admin');
+      expect(getPostAuthPath(u({ role: 'moderator' }), '/admin/reports')).toBe('/admin/reports');
+    });
+    it('personal, seller and dealer accounts never land in Admin', () => {
+      expect(getPostAuthPath(u({ role: 'user', emailVerified: true }), '/admin/staff')).toBe('/dashboard');
+      expect(getPostAuthPath(u({ role: 'dealer', status: 'approved' }), '/admin')).toBe('/dealer');
+      expect(getPostAuthPath(u({ role: 'individual_seller', emailVerified: true }), '/admin/users')).toBe('/dashboard');
+    });
+    it('mustChangePassword still wins', () => {
+      expect(getPostAuthPath(u({ role: 'superadmin', mustChangePassword: true }), '/admin')).toBe('/force-password-change');
+    });
+  });
 });

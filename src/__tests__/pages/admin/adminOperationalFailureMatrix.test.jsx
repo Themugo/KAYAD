@@ -15,7 +15,7 @@ const m = vi.hoisted(() => ({
   adminPaymentsAPI: { list: vi.fn() },
   ntsaAPI: { list: vi.fn() },
   inspectionAPI: { list: vi.fn(), availableInspectors: vi.fn(), assign: vi.fn() },
-  adminVerificationAPI: { list: vi.fn() },
+  adminVerificationAPI: { list: vi.fn(), suspensionRequests: vi.fn() },
   bid: { fetchAdminBids: vi.fn(), fetchSuspiciousBids: vi.fn(), setBidWinner: vi.fn() },
   toast: { toast: vi.fn() },
 }));
@@ -79,6 +79,7 @@ const SCREENS = [
 
 function resetMocks() {
   vi.clearAllMocks();
+  m.adminVerificationAPI.suspensionRequests.mockResolvedValue({ data: [] }); // the Dealer Verifications screen now also loads suspension requests
   m.carsAPI.list.mockReset(); m.bid.fetchSuspiciousBids.mockResolvedValue({ bids: [] });
   m.escrowAPI.operationsDashboard.mockResolvedValue({ success: true, queues: { funded: { count: 1, amount: 5000 } } });
   m.inspectionAPI.availableInspectors.mockResolvedValue({ success: true, inspectors: [] });

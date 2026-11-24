@@ -1,6 +1,7 @@
 import express from "express";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, PERMISSIONS } from "../middleware/rbac.js";
 import { validateObjectId } from "../middleware/validate.js";
 import {
   getAdSlots,
@@ -20,8 +21,8 @@ router.get("/", asyncHandler(getAdSlots));
 
 // Admin-only - the Ad Manager panel's own reads/writes, including
 // hidden slots.
-router.get("/all", protect, adminOnly, asyncHandler(getAllAdSlots));
-router.get("/stats", protect, adminOnly, asyncHandler(getAdStats));
+router.get("/all", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_ADS), asyncHandler(getAllAdSlots));
+router.get("/stats", protect, adminOnly, requirePermission(PERMISSIONS.MANAGE_ADS), asyncHandler(getAdStats));
 router.post("/:id/events", asyncHandler(recordAdEvent));
 router.post("/", protect, adminOnly, asyncHandler(createAdSlot));
 router.put("/:id", protect, adminOnly, validateObjectId, asyncHandler(updateAdSlot));

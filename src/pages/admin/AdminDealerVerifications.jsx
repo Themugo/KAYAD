@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { adminVerificationAPI } from '../../api/api';
+import { useAuth } from '../../context/AuthContext';
 import AdminLoadNotice from '../../components/admin/AdminLoadNotice';
 import { ShieldCheck, Search, CheckCircle, XCircle, Eye, FileText, X, AlertTriangle } from 'lucide-react';
 
@@ -34,7 +35,80 @@ function Modal({ title, children, onClose }) {
   );
 }
 
+const REASON_CATEGORIES = [
+  ['policy_violation', 'Policy violation'], ['fraud_or_misrepresentation', 'Fraud or misrepresentation'], ['compliance_or_documents', 'Compliance or documents'],
+  ['customer_harm', 'Customer harm'], ['security', 'Security'], ['other', 'Other'],
+];
+const REQUEST_TONE = { pending: 'Awaiting Super Admin decision', approved: 'Approved — suspension in effect', rejected: 'Rejected — dealer stays active', cancelled: 'Cancelled' };
+const shortId = (id) => String(id || '').slice(0, 8);
+
+/** Admin staff see their own requests; the Super Admin sees every request and decides. A request is never a suspension until approved. */
+function SuspensionRequests({ isSuper, refreshKey, onDecided }) {
+  const [rows, setRows] = useState(null);
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState('');
+  const [reasons, setReasons] = useState({});
+  const [note, setNote] = useState('');
+  const load = useCallback(async () => {
+    try {
+      const res = await adminVerificationAPI.suspensionRequests(isSuper ? { status: 'pending' } : {});
+      setRows(Array.isArray(res?.data) ? res.data : []); setError('');
+    } catch (err) {
+      setRows(null);
+      setError(err?.response?.status === 503 ? 'Suspension requests are not provisioned in this environment. No request can be recorded and nothing is suspended.' : (err?.response?.data?.message || 'Suspension requests could not be loaded.'));
+    }
+  }, [isSuper]);
+  useEffect(() => { load(); }, [load, refreshKey]);
+  const decide = async (r, decision) => {
+    const reason = (reasons[r.id] || '').trim();
+    if (decision === 'reject' && reason.length < 3) { setNote('Enter a reason to reject the request.'); return; }
+    if (decision === 'approve' && !window.confirm('Approve this request? The dealer will be suspended immediately. Listings, staff and records are kept.')) return;
+    setBusy(r.id); setNote('');
+    try { await adminVerificationAPI.decideSuspension(r.id, { decision, reason: reason || undefined }); setNote(decision === 'approve' ? 'Request approved; the dealer is suspended.' : 'Request rejected; the dealer stays active.'); await load(); onDecided?.(); }
+    catch (err) { setNote(err?.response?.data?.message || 'The decision could not be saved.'); await load(); }
+    finally { setBusy(''); }
+  };
+  const cancel = async (r) => {
+    setBusy(r.id); setNote('');
+    try { await adminVerificationAPI.cancelSuspension(r.id); setNote('Request cancelled.'); await load(); } catch (err) { setNote(err?.response?.data?.message || 'The request could not be cancelled.'); } finally { setBusy(''); }
+  };
+  return (
+    <section aria-labelledby="suspension-requests-title" style={{ marginBottom: 24, border: '1px solid var(--admin-border)', borderRadius: 12, padding: 16 }}>
+      <h2 id="suspension-requests-title" style={{ fontSize: 15, margin: '0 0 6px' }}>{isSuper ? 'Dealer suspension requests awaiting your decision' : 'Your dealer suspension requests'}</h2>
+      <p style={{ margin: '0 0 10px', fontSize: 12, color: 'var(--admin-muted-content)' }}>A request does not suspend a dealer. Only a Super Admin approval makes a suspension effective.</p>
+      {error && <p role="alert" style={{ color: 'var(--admin-status-danger)', fontSize: 12 }}>{error}</p>}
+      {note && <p role="status" style={{ fontSize: 12 }}>{note}</p>}
+      {rows === null && !error && <p role="status" style={{ fontSize: 12 }}>Loading requests…</p>}
+      {rows && rows.length === 0 && <p style={{ fontSize: 12, margin: 0 }}>{isSuper ? 'No pending requests.' : 'You have not submitted any requests.'}</p>}
+      {rows && rows.map((r) => (
+        <article key={r.id} aria-label={`Suspension request ${shortId(r.id)}`} style={{ borderTop: '1px solid var(--admin-border)', padding: '10px 0', fontSize: 12 }}>
+          <div><strong>{(REASON_CATEGORIES.find(([k]) => k === r.reasonCategory) || [, r.reasonCategory])[1]}</strong> · dealer verification {shortId(r.verificationId)} · {REQUEST_TONE[r.status] || r.status}</div>
+          <div style={{ margin: '4px 0', whiteSpace: 'pre-wrap' }}>{r.reason}</div>
+          {r.evidenceReference && <div style={{ color: 'var(--admin-muted-content)' }}>Reference: {r.evidenceReference}</div>}
+          <div style={{ color: 'var(--admin-muted-content)' }}>Submitted {new Date(r.createdAt).toLocaleString('en-KE')}{r.decisionReason ? ` · Decision: ${r.decisionReason}` : ''}</div>
+          {r.status === 'pending' && isSuper && (
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', marginTop: 6 }}>
+              <label style={{ display: 'flex', flexDirection: 'column', fontSize: 11 }}>Decision reason (required to reject)
+                <input value={reasons[r.id] || ''} maxLength={500} onChange={(e) => setReasons((o) => ({ ...o, [r.id]: e.target.value }))} style={{ minWidth: 220, padding: 6 }} />
+              </label>
+              <button type="button" disabled={busy === r.id} onClick={() => decide(r, 'approve')} className="btn btn-sm">Approve suspension</button>
+              <button type="button" disabled={busy === r.id} onClick={() => decide(r, 'reject')} className="btn btn-sm btn-outline">Reject request</button>
+            </div>
+          )}
+          {r.status === 'pending' && !isSuper && <button type="button" disabled={busy === r.id} onClick={() => cancel(r)} className="btn btn-sm btn-outline" style={{ marginTop: 6 }}>Cancel request</button>}
+        </article>
+      ))}
+    </section>
+  );
+}
+
 export default function AdminDealerVerifications() {
+  const { user: sessionUser } = useAuth();
+  const isSuper = sessionUser?.role === 'superadmin';
+  const [requestsKey, setRequestsKey] = useState(0);
+  const [requestCategory, setRequestCategory] = useState('policy_violation');
+  const [requestEvidence, setRequestEvidence] = useState('');
+  const [requestAck, setRequestAck] = useState(false);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
@@ -88,12 +162,21 @@ export default function AdminDealerVerifications() {
     setActionModal({ id, action });
     setActionNotes('');
     setActionError('');
+    setRequestCategory('policy_violation'); setRequestEvidence(''); setRequestAck(false);
   };
 
   const handleAction = async () => {
     if (!actionModal) return;
-    if (['reject', 'suspend'].includes(actionModal.action) && !actionNotes.trim()) {
+    if (['reject', 'suspend', 'suspend_request'].includes(actionModal.action) && !actionNotes.trim()) {
       setActionError(actionModal.action === 'reject' ? 'A specific rejection reason is required.' : 'A specific suspension reason is required.');
+      return;
+    }
+    if (['suspend', 'suspend_request'].includes(actionModal.action) && actionNotes.trim().length < 10) {
+      setActionError('Describe the reason in detail (at least 10 characters).');
+      return;
+    }
+    if (actionModal.action === 'suspend_request' && !requestAck) {
+      setActionError('Confirm that you understand this submits a request and does not suspend the dealer.');
       return;
     }
     setActionError('');
@@ -106,6 +189,9 @@ export default function AdminDealerVerifications() {
         await adminVerificationAPI.reject(id, { rejectionReason: actionNotes.trim() });
       } else if (action === 'suspend') {
         await adminVerificationAPI.suspend(id, { suspensionReason: actionNotes.trim() });
+      } else if (action === 'suspend_request') {
+        await adminVerificationAPI.requestSuspension(id, { reasonCategory: requestCategory, reason: actionNotes.trim(), ...(requestEvidence.trim() ? { evidenceReference: requestEvidence.trim() } : {}) });
+        setRequestsKey((k) => k + 1);
       } else if (action === 'reinstate') {
         await adminVerificationAPI.reinstate(id);
       }
@@ -135,6 +221,7 @@ export default function AdminDealerVerifications() {
         <button type="button" className="btn btn-sm btn-outline" onClick={load} disabled={loading} aria-label="Refresh dealer verifications">{loading ? 'Refreshing…' : '↻ Refresh'}</button>
       </div>
 
+      <SuspensionRequests isSuper={isSuper} refreshKey={requestsKey} onDecided={load} />
       <AdminLoadNotice error={loadError} subject="Dealer verification records" hasData={items.length > 0} lastSuccessAt={lastSuccessAt} onRetry={load} retrying={loading} />
 
       {/* Stats */}
@@ -240,9 +327,9 @@ export default function AdminDealerVerifications() {
                           }}><XCircle size={12} /> Reject</button>
                         )}
                         {v.verificationStatus === 'approved' && (
-                          <button onClick={() => openAction(v.id || v._id, 'suspend')} style={{ padding: '6px 10px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 6, color: 'var(--admin-status-danger)', fontSize: 11, cursor: 'pointer' }}>Suspend</button>
+                          <button onClick={() => openAction(v.id || v._id, isSuper ? 'suspend' : 'suspend_request')} style={{ padding: '6px 10px', background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 6, color: 'var(--admin-status-danger)', fontSize: 11, cursor: 'pointer' }}>{isSuper ? 'Suspend' : 'Request suspension'}</button>
                         )}
-                        {v.verificationStatus === 'suspended' && (
+                        {v.verificationStatus === 'suspended' && isSuper && (
                           <button onClick={() => openAction(v.id || v._id, 'reinstate')} style={{ padding: '6px 10px', background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 6, color: 'var(--admin-status-success)', fontSize: 11, cursor: 'pointer' }}>Reinstate</button>
                         )}
                       </div>
@@ -324,12 +411,25 @@ export default function AdminDealerVerifications() {
 
       {/* Action Confirmation Modal */}
       {actionModal && (
-        <Modal title={`${({ approve: 'Approve', reject: 'Reject', suspend: 'Suspend', reinstate: 'Reinstate' })[actionModal.action]} Dealer Verification`} onClose={() => setActionModal(null)}>
+        <Modal title={actionModal.action === 'suspend_request' ? 'Request dealer suspension' : `${({ approve: 'Approve', reject: 'Reject', suspend: 'Suspend', reinstate: 'Reinstate' })[actionModal.action]} Dealer Verification`} onClose={() => setActionModal(null)}>
           <p style={{ color: 'var(--admin-body)', fontSize: 13, marginBottom: 16 }}>
-            {actionModal.action === 'approve' ? 'This approves the dealer verification and marks the dealer as verified. Listings remain subject to their own review workflow.' : actionModal.action === 'reject' ? 'This rejects the dealer application and notifies the dealer. A specific reason is required.' : actionModal.action === 'suspend' ? 'This suspends the approved dealer. Enter a clear reason for the audit trail.' : 'This reinstates the suspended dealer and restores approved verification status.'}
+            {actionModal.action === 'approve' ? 'This approves the dealer verification and marks the dealer as verified. Listings remain subject to their own review workflow.' : actionModal.action === 'reject' ? 'This rejects the dealer application and notifies the dealer. A specific reason is required.' : actionModal.action === 'suspend_request' ? 'This submits a request to the Super Admin. The dealer is NOT suspended unless a Super Admin approves it. Dealer records, listings and staff are kept either way.' : actionModal.action === 'suspend' ? 'This suspends the approved dealer. Enter a clear reason for the audit trail.' : 'This reinstates the suspended dealer and restores approved verification status.'}
           </p>
+          {actionModal.action === 'suspend_request' && (
+            <>
+              <label style={{ display: 'block', fontSize: 12, marginBottom: 10 }}>Reason category
+                <select value={requestCategory} onChange={(e) => setRequestCategory(e.target.value)} style={{ display: 'block', width: '100%', padding: 8, marginTop: 4 }}>
+                  {REASON_CATEGORIES.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
+                </select>
+              </label>
+              <label style={{ display: 'block', fontSize: 12, marginBottom: 10 }}>Supporting evidence or internal reference (optional)
+                <input value={requestEvidence} maxLength={500} onChange={(e) => setRequestEvidence(e.target.value)} style={{ display: 'block', width: '100%', padding: 8, marginTop: 4 }} />
+              </label>
+            </>
+          )}
           <textarea
-            placeholder={actionModal.action === 'approve' ? 'Optional admin notes...' : actionModal.action === 'reject' ? 'Reason for rejection (required)...' : actionModal.action === 'suspend' ? 'Reason for suspension (required)...' : 'Optional admin notes...'}
+            aria-label={actionModal.action === 'suspend_request' ? 'Detailed reason for the suspension request' : 'Decision notes'}
+            placeholder={actionModal.action === 'suspend_request' ? 'Detailed reason for the request (required, at least 10 characters)...' : actionModal.action === 'approve' ? 'Optional admin notes...' : actionModal.action === 'reject' ? 'Reason for rejection (required)...' : actionModal.action === 'suspend' ? 'Reason for suspension (required)...' : 'Optional admin notes...'}
             value={actionNotes}
             onChange={e => setActionNotes(e.target.value)}
             rows={3}
@@ -339,6 +439,12 @@ export default function AdminDealerVerifications() {
               borderRadius: 8, color: 'var(--admin-ink)', fontSize: 13, outline: 'none', resize: 'vertical',
             }}
           />
+          {actionModal.action === 'suspend_request' && (
+            <label style={{ display: 'flex', gap: 8, alignItems: 'flex-start', fontSize: 12, marginBottom: 12 }}>
+              <input type="checkbox" checked={requestAck} onChange={(e) => setRequestAck(e.target.checked)} />
+              <span>I confirm this submits a suspension request for Super Admin approval. It does not suspend the dealer.</span>
+            </label>
+          )}
           {actionError && <p role="alert" style={{ color: 'var(--admin-status-danger)', background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.3)', borderRadius: 8, padding: 10, fontSize: 12, marginBottom: 12 }}>{actionError}</p>}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
             <button onClick={() => setActionModal(null)} style={{
@@ -351,7 +457,7 @@ export default function AdminDealerVerifications() {
               color: 'var(--admin-surface)', fontSize: 12, fontWeight: 700, cursor: processing ? 'not-allowed' : 'pointer',
               opacity: processing ? 0.6 : 1,
             }}>
-              {processing ? 'Processing...' : ({ approve: 'Approve Verification', reject: 'Reject Application', suspend: 'Suspend Dealer', reinstate: 'Reinstate Dealer' })[actionModal.action]}
+              {processing ? 'Processing...' : ({ approve: 'Approve Verification', reject: 'Reject Application', suspend: 'Suspend Dealer', suspend_request: 'Submit request', reinstate: 'Reinstate Dealer' })[actionModal.action]}
             </button>
           </div>
         </Modal>

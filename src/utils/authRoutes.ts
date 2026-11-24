@@ -1,4 +1,5 @@
 import { safeNextPath } from './authIntent';
+import { canOpenAdminPage, getEffectivePermissions } from './permissions';
 
 export const STAFF_ROLES = [
   'admin',
@@ -60,10 +61,37 @@ export function safeRedirectPath(path: string, fallback = '/'): string {
  * seller whose account is not yet approved goes to the step that matches its
  * state rather than to a workspace it cannot use.
  */
+/** The personal-account workspace (My Account / personal dashboard). Staff never land here from sign-in. */
+export function isPersonalWorkspacePath(path: string): boolean {
+  const [pathAndSearch] = path.split('#');
+  const [pathname, search = ''] = pathAndSearch.split('?');
+  const clean = pathname.replace(/\/+$/, '') || '/';
+  if (['/dashboard', '/account', '/profile', '/portal'].some((p) => clean === p || clean.startsWith(`${p}/`))) return true;
+  if (clean === '/') {
+    const nav = new URLSearchParams(search).get('nav');
+    return nav === 'dashboard' || nav === 'profile' || nav === 'account';
+  }
+  return false;
+}
+
+const isAdminPath = (path: string) => /^\/admin(\/|\?|#|$)/.test(path);
+
 export function getPostAuthPath(user: User | undefined, fallback = '/'): string {
   const next = safeRedirectPath(fallback, '/');
-  const hasNext = next !== '/';
   if (user?.mustChangePassword) return '/force-password-change';
+  // Requested destination first, but only when it is one this identity may use. A saved or stale "next" must never
+  // send a staff member to the personal workspace (the Super Admin -> My Account defect), a non-staff account to /admin,
+  // or a staff member to an admin page their role/permissions do not open.
+  let hasNext = next !== '/';
+  if (hasNext && isStaffRole(user?.role)) {
+    if (isPersonalWorkspacePath(next)) hasNext = false;
+    else if (isAdminPath(next)) {
+      const adminPath = next.split(/[?#]/)[0].replace(/\/+$/, '') || '/admin';
+      if (user?.role !== 'superadmin' && !canOpenAdminPage(user as never, adminPath, getEffectivePermissions(user as never))) hasNext = false;
+    }
+  } else if (hasNext && isAdminPath(next)) {
+    hasNext = false;
+  }
   if (hasNext) return next;
   if (user?.role === 'ghost_checker') return '/inspector';
   if (isStaffRole(user?.role)) return '/admin';

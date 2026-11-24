@@ -1,0 +1,130 @@
+[
+ {
+  "name": "J1 Super Admin plain login lands on the Admin Dashboard",
+  "ok": true
+ },
+ {
+  "name": "J2 Super Admin with a stale My Account \"next\" still lands on /admin (defect fixed)",
+  "ok": true
+ },
+ {
+  "name": "J3 Moderator lands on /admin (an authorised destination)",
+  "ok": true
+ },
+ {
+  "name": "J4 Personal account with a requested /admin path is NOT sent to Admin",
+  "ok": true
+ },
+ {
+  "name": "J5 Dealer owner lands in the dealer workspace (app maps /dealer to ?nav=dealer-dashboard)",
+  "ok": true
+ },
+ {
+  "name": "J6 Back, Forward and Dashboard controls are present on an admin page",
+  "ok": true
+ },
+ {
+  "name": "J7 Dashboard shortcut returns to /admin",
+  "ok": true
+ },
+ {
+  "name": "J8 Back from the Dashboard returns to the previous ADMIN page",
+  "ok": true
+ },
+ {
+  "name": "J9 Forward uses real history (returns to the Dashboard)",
+  "ok": true
+ },
+ {
+  "name": "J10 Back with no admin history falls back to the Admin Dashboard (not marketplace/My Account)",
+  "ok": true
+ },
+ {
+  "name": "J11 refresh keeps the session and workspace",
+  "ok": true
+ },
+ {
+  "name": "J12 the Dashboard control is keyboard focusable",
+  "ok": true
+ },
+ {
+  "name": "J13 Super Admin on My Account sees an \"Admin Console\" route back",
+  "ok": true
+ },
+ {
+  "name": "J14 …and it opens the Admin Dashboard",
+  "ok": true
+ },
+ {
+  "name": "J15 no console page errors on the Super Admin journey",
+  "ok": true
+ },
+ {
+  "name": "J16 moderator dashboard makes no /ecp/health request and shows an access boundary instead of an error",
+  "ok": true
+ },
+ {
+  "name": "J17 moderator direct /admin/users: denial shown and no protected data requested (403s: 0)",
+  "ok": true
+ },
+ {
+  "name": "J17 moderator direct /admin/inspector-applications: denial shown and no protected data requested (403s: 0)",
+  "ok": true
+ },
+ {
+  "name": "J17 moderator direct /admin/featured-vehicles: denial shown and no protected data requested (403s: 0)",
+  "ok": true
+ },
+ {
+  "name": "J17 moderator direct /admin/config: denial shown and no protected data requested (403s: 0)",
+  "ok": true
+ },
+ {
+  "name": "J17 moderator direct /admin/communications: denial shown and no protected data requested (403s: 0)",
+  "ok": true
+ },
+ {
+  "name": "J17 moderator direct /admin/provider-governance: denial shown and no protected data requested (403s: 0)",
+  "ok": true
+ },
+ {
+  "name": "J17 moderator direct /admin/feedback: denial shown and no protected data requested (403s: 0)",
+  "ok": true
+ },
+ {
+  "name": "J17 moderator direct /admin/staff: denial shown and no protected data requested (403s: 0)",
+  "ok": true
+ },
+ {
+  "name": "J18 moderator still opens /admin/reports",
+  "ok": true
+ },
+ {
+  "name": "J18 moderator still opens /admin/reviews",
+  "ok": true
+ },
+ {
+  "name": "J18 moderator still opens /admin/chats",
+  "ok": true
+ },
+ {
+  "name": "J18 moderator still opens /admin/security-log",
+  "ok": true
+ },
+ {
+  "name": "J19 Personal Accounts loads real accounts with no server error",
+  "ok": true
+ },
+ {
+  "name": "J20 Historical applications tab loads without a server error",
+  "ok": true
+ },
+ {
+  "name": "J21 Dealer Verifications shows the Super Admin suspension-request queue",
+  "ok": true
+ },
+ {
+  "name": "J22 no failed API calls on those screens",
+  "ok": true
+ }
+]

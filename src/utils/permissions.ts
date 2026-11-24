@@ -159,6 +159,7 @@ export const PAGE_PERMISSIONS: Record<string, Permission> = {
   "/admin/ntsa-queue":    PERM.MANAGE_INSPECTIONS,
   "/admin/inspections":   PERM.MANAGE_INSPECTIONS,
   "/admin/inspector-applications": PERM.MANAGE_INSPECTIONS,
+  "/admin/provider-governance": PERM.MANAGE_INSPECTIONS, // server: /api/admin/inspection-governance/* falls under the inspection family
   "/admin/security-log":  PERM.VIEW_LOGS,
   "/admin/ads":           PERM.MANAGE_ADS,
   "/admin/settings":      PERM.MANAGE_PLATFORM,
@@ -174,12 +175,15 @@ export const ADMIN_ROLE_ONLY = new Set([
   "/admin/feedback",
   "/admin/broadcast",
   "/admin/dealer-verifications",
+  "/admin/config", // server: GET /api/config/stats is allowRoles("admin","superadmin")
 ]);
 
 // Pages the server opens to more than one permission (any-of). Support: agent (technical_support) or read-only oversight (admin, superadmin).
 export const PAGE_ANY_PERMISSIONS: Record<string, Permission[]> = {
   "/admin/support-tickets": [PERM.SUPPORT_AGENT, PERM.SUPPORT_OVERSIGHT],
   "/admin/support":         [PERM.SUPPORT_AGENT, PERM.SUPPORT_OVERSIGHT],
+  // server: communications.config.read = [MANAGE_PLATFORM, MANAGE_SUPPORT] (backend/config/staffAccessPolicy.js)
+  "/admin/communications":  [PERM.MANAGE_PLATFORM, PERM.MANAGE_SUPPORT],
 };
 
 /** Display/route-guard mirror of the server's page access. Superadmin always opens everything; the server still enforces every call. */

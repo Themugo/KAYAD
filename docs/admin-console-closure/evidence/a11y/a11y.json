@@ -1,0 +1,1195 @@
+{
+ "summary": {
+  "routes": 53,
+  "axeSeriousOrCritical": [
+   {
+    "width": 390,
+    "route": "/admin/staff",
+    "v": [
+     "color-contrastx1"
+    ]
+   },
+   {
+    "width": 390,
+    "route": "/admin/staff-permissions",
+    "v": [
+     "color-contrastx2"
+    ]
+   },
+   {
+    "width": 390,
+    "route": "/admin/vxp",
+    "v": [
+     "target-sizex4"
+    ]
+   },
+   {
+    "width": 390,
+    "route": "/admin/communications",
+    "v": [
+     "color-contrastx1"
+    ]
+   },
+   {
+    "width": 1440,
+    "route": "/admin/staff",
+    "v": [
+     "color-contrastx1"
+    ]
+   },
+   {
+    "width": 1440,
+    "route": "/admin/staff-permissions",
+    "v": [
+     "color-contrastx2"
+    ]
+   },
+   {
+    "width": 1440,
+    "route": "/admin/communications",
+    "v": [
+     "color-contrastx1"
+    ]
+   }
+  ],
+  "axeErrors": 0,
+  "overflow": [],
+  "keyboard": [
+   {
+    "route": "/admin",
+    "main": true,
+    "nav": true,
+    "h1": 1,
+    "skip": true,
+    "lang": "en",
+    "tabStops": 45,
+    "distinct": 45,
+    "focusVisible": 45,
+    "noIndicator": 0,
+    "trapped": false
+   },
+   {
+    "route": "/admin/users",
+    "main": true,
+    "nav": true,
+    "h1": 1,
+    "skip": true,
+    "lang": "en",
+    "tabStops": 45,
+    "distinct": 44,
+    "focusVisible": 45,
+    "noIndicator": 0,
+    "trapped": false
+   },
+   {
+    "route": "/admin/dealer-verifications",
+    "main": true,
+    "nav": true,
+    "h1": 1,
+    "skip": true,
+    "lang": "en",
+    "tabStops": 45,
+    "distinct": 44,
+    "focusVisible": 45,
+    "noIndicator": 0,
+    "trapped": false
+   },
+   {
+    "route": "/admin/private-seller-applications",
+    "main": true,
+    "nav": true,
+    "h1": 1,
+    "skip": true,
+    "lang": "en",
+    "tabStops": 45,
+    "distinct": 44,
+    "focusVisible": 45,
+    "noIndicator": 0,
+    "trapped": false
+   },
+   {
+    "route": "/admin/settings",
+    "main": true,
+    "nav": true,
+    "h1": 0,
+    "skip": true,
+    "lang": "en",
+    "tabStops": 45,
+    "distinct": 44,
+    "focusVisible": 45,
+    "noIndicator": 0,
+    "trapped": false
+   }
+  ]
+ },
+ "axe": [
+  {
+   "width": 390,
+   "route": "/admin",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/users",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/sellers",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/private-seller-applications",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/cars",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/moderation",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/auctions",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/bids",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/escrows",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/reviews",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/referrals",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/chats",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/reports",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/support-tickets",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/feedback",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/market-data",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/transactions",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/ntsa-queue",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/inspections",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/dealer-verifications",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/inspector-applications",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/security-log",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/ads",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/broadcast",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/settings",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/control-room",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/staff",
+   "violations": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "nodes": 1,
+     "help": "Elements must meet minimum color contrast ratio thresholds"
+    }
+   ]
+  },
+  {
+   "width": 390,
+   "route": "/admin/staff-permissions",
+   "violations": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "nodes": 2,
+     "help": "Elements must meet minimum color contrast ratio thresholds"
+    }
+   ]
+  },
+  {
+   "width": 390,
+   "route": "/admin/traffic-analytics",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/site-designs",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/featured-vehicles",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/panic-room",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/platform-recovery",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/webhoist",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/cms",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/automation",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/config",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/lowcode",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/vxp",
+   "violations": [
+    {
+     "id": "target-size",
+     "impact": "serious",
+     "nodes": 4,
+     "help": "All touch targets must be 24px large, or leave sufficient space"
+    }
+   ]
+  },
+  {
+   "width": 390,
+   "route": "/admin/xos",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/ai",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/digital-twin",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/control-center",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/integration",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/governance",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/intelligence",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/command-center",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/improvement",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/platform-factory",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/owners",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/communications",
+   "violations": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "nodes": 1,
+     "help": "Elements must meet minimum color contrast ratio thresholds"
+    }
+   ]
+  },
+  {
+   "width": 390,
+   "route": "/admin/provider-governance",
+   "violations": []
+  },
+  {
+   "width": 390,
+   "route": "/admin/support",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/users",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/sellers",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/private-seller-applications",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/cars",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/moderation",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/auctions",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/bids",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/escrows",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/reviews",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/referrals",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/chats",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/reports",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/support-tickets",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/feedback",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/market-data",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/transactions",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/ntsa-queue",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/inspections",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/dealer-verifications",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/inspector-applications",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/security-log",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/ads",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/broadcast",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/settings",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/control-room",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/staff",
+   "violations": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "nodes": 1,
+     "help": "Elements must meet minimum color contrast ratio thresholds"
+    }
+   ]
+  },
+  {
+   "width": 1440,
+   "route": "/admin/staff-permissions",
+   "violations": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "nodes": 2,
+     "help": "Elements must meet minimum color contrast ratio thresholds"
+    }
+   ]
+  },
+  {
+   "width": 1440,
+   "route": "/admin/traffic-analytics",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/site-designs",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/featured-vehicles",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/panic-room",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/platform-recovery",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/webhoist",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/cms",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/automation",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/config",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/lowcode",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/vxp",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/xos",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/ai",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/digital-twin",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/control-center",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/integration",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/governance",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/intelligence",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/command-center",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/improvement",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/platform-factory",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/owners",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/communications",
+   "violations": [
+    {
+     "id": "color-contrast",
+     "impact": "serious",
+     "nodes": 1,
+     "help": "Elements must meet minimum color contrast ratio thresholds"
+    }
+   ]
+  },
+  {
+   "width": 1440,
+   "route": "/admin/provider-governance",
+   "violations": []
+  },
+  {
+   "width": 1440,
+   "route": "/admin/support",
+   "violations": []
+  }
+ ],
+ "overflow": [
+  {
+   "width": 320,
+   "route": "/admin",
+   "overflow": 0,
+   "smallTargets": 14
+  },
+  {
+   "width": 320,
+   "route": "/admin/users",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 320,
+   "route": "/admin/private-seller-applications",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 320,
+   "route": "/admin/dealer-verifications",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 320,
+   "route": "/admin/settings",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 320,
+   "route": "/admin/reviews",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 320,
+   "route": "/admin/support-tickets",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 320,
+   "route": "/admin/cars",
+   "overflow": 0,
+   "smallTargets": 7
+  },
+  {
+   "width": 320,
+   "route": "/admin/escrows",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 320,
+   "route": "/admin/security-log",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 360,
+   "route": "/admin",
+   "overflow": 0,
+   "smallTargets": 15
+  },
+  {
+   "width": 360,
+   "route": "/admin/users",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 360,
+   "route": "/admin/private-seller-applications",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 360,
+   "route": "/admin/dealer-verifications",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 360,
+   "route": "/admin/settings",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 360,
+   "route": "/admin/reviews",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 360,
+   "route": "/admin/support-tickets",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 360,
+   "route": "/admin/cars",
+   "overflow": 0,
+   "smallTargets": 7
+  },
+  {
+   "width": 360,
+   "route": "/admin/escrows",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 360,
+   "route": "/admin/security-log",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 390,
+   "route": "/admin",
+   "overflow": 0,
+   "smallTargets": 15
+  },
+  {
+   "width": 390,
+   "route": "/admin/users",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 390,
+   "route": "/admin/private-seller-applications",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 390,
+   "route": "/admin/dealer-verifications",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 390,
+   "route": "/admin/settings",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 390,
+   "route": "/admin/reviews",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 390,
+   "route": "/admin/support-tickets",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 390,
+   "route": "/admin/cars",
+   "overflow": 0,
+   "smallTargets": 7
+  },
+  {
+   "width": 390,
+   "route": "/admin/escrows",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 390,
+   "route": "/admin/security-log",
+   "overflow": 0,
+   "smallTargets": 0
+  },
+  {
+   "width": 430,
+   "route": "/admin",
+   "overflow": 0,
+   "smallTargets": 15
+  },
+  {
+   "width": 430,
+   "route": "/admin/users",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 430,
+   "route": "/admin/private-seller-applications",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 430,
+   "route": "/admin/dealer-verifications",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 430,
+   "route": "/admin/settings",
+   "overflow": 0,
+   "smallTargets": 3
+  },
+  {
+   "width": 430,
+   "route": "/admin/reviews",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 430,
+   "route": "/admin/support-tickets",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 430,
+   "route": "/admin/cars",
+   "overflow": 0,
+   "smallTargets": 9
+  },
+  {
+   "width": 430,
+   "route": "/admin/escrows",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 430,
+   "route": "/admin/security-log",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 768,
+   "route": "/admin",
+   "overflow": 0,
+   "smallTargets": 15
+  },
+  {
+   "width": 768,
+   "route": "/admin/users",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 768,
+   "route": "/admin/private-seller-applications",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 768,
+   "route": "/admin/dealer-verifications",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 768,
+   "route": "/admin/settings",
+   "overflow": 0,
+   "smallTargets": 3
+  },
+  {
+   "width": 768,
+   "route": "/admin/reviews",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 768,
+   "route": "/admin/support-tickets",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 768,
+   "route": "/admin/cars",
+   "overflow": 0,
+   "smallTargets": 9
+  },
+  {
+   "width": 768,
+   "route": "/admin/escrows",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 768,
+   "route": "/admin/security-log",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 1280,
+   "route": "/admin",
+   "overflow": 0,
+   "smallTargets": 13
+  },
+  {
+   "width": 1280,
+   "route": "/admin/users",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 1280,
+   "route": "/admin/private-seller-applications",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 1280,
+   "route": "/admin/dealer-verifications",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 1280,
+   "route": "/admin/settings",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 1280,
+   "route": "/admin/reviews",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 1280,
+   "route": "/admin/support-tickets",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 1280,
+   "route": "/admin/cars",
+   "overflow": 0,
+   "smallTargets": 8
+  },
+  {
+   "width": 1280,
+   "route": "/admin/escrows",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 1280,
+   "route": "/admin/security-log",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 1920,
+   "route": "/admin",
+   "overflow": 0,
+   "smallTargets": 15
+  },
+  {
+   "width": 1920,
+   "route": "/admin/users",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 1920,
+   "route": "/admin/private-seller-applications",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 1920,
+   "route": "/admin/dealer-verifications",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 1920,
+   "route": "/admin/settings",
+   "overflow": 0,
+   "smallTargets": 2
+  },
+  {
+   "width": 1920,
+   "route": "/admin/reviews",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 1920,
+   "route": "/admin/support-tickets",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 1920,
+   "route": "/admin/cars",
+   "overflow": 0,
+   "smallTargets": 9
+  },
+  {
+   "width": 1920,
+   "route": "/admin/escrows",
+   "overflow": 0,
+   "smallTargets": 1
+  },
+  {
+   "width": 1920,
+   "route": "/admin/security-log",
+   "overflow": 0,
+   "smallTargets": 1
+  }
+ ],
+ "keyboard": [
+  {
+   "route": "/admin",
+   "main": true,
+   "nav": true,
+   "h1": 1,
+   "skip": true,
+   "lang": "en",
+   "tabStops": 45,
+   "distinct": 45,
+   "focusVisible": 45,
+   "noIndicator": 0,
+   "trapped": false
+  },
+  {
+   "route": "/admin/users",
+   "main": true,
+   "nav": true,
+   "h1": 1,
+   "skip": true,
+   "lang": "en",
+   "tabStops": 45,
+   "distinct": 44,
+   "focusVisible": 45,
+   "noIndicator": 0,
+   "trapped": false
+  },
+  {
+   "route": "/admin/dealer-verifications",
+   "main": true,
+   "nav": true,
+   "h1": 1,
+   "skip": true,
+   "lang": "en",
+   "tabStops": 45,
+   "distinct": 44,
+   "focusVisible": 45,
+   "noIndicator": 0,
+   "trapped": false
+  },
+  {
+   "route": "/admin/private-seller-applications",
+   "main": true,
+   "nav": true,
+   "h1": 1,
+   "skip": true,
+   "lang": "en",
+   "tabStops": 45,
+   "distinct": 44,
+   "focusVisible": 45,
+   "noIndicator": 0,
+   "trapped": false
+  },
+  {
+   "route": "/admin/settings",
+   "main": true,
+   "nav": true,
+   "h1": 0,
+   "skip": true,
+   "lang": "en",
+   "tabStops": 45,
+   "distinct": 44,
+   "focusVisible": 45,
+   "noIndicator": 0,
+   "trapped": false
+  }
+ ]
+}

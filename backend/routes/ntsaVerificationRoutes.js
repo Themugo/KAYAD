@@ -1,5 +1,6 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, PERMISSIONS } from "../middleware/rbac.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validate, validateQuery } from "../middleware/validate.js";
 import { queueNtsaVerificationSchema, listNtsaVerificationQuerySchema, processNtsaVerificationSchema, addNtsaDocumentSchema } from "../validation/ntsa.schema.js";
@@ -10,9 +11,12 @@ const router = express.Router();
 router.use(protect);
 
 // List all verification requests (admin)
+// Closure: the queue lists vehicle and requester details, so reading and deciding it follow the same rule as the console page
+// (manage_inspections: admin, superadmin, ghost_checker) instead of ANY staff role. The UI mirror already hid it from other staff.
 router.get(
   "/",
   adminOnly,
+  requirePermission(PERMISSIONS.MANAGE_INSPECTIONS),
   validateQuery(listNtsaVerificationQuerySchema),
   asyncHandler(async (req, res) => {
     const filter = {};
@@ -85,6 +89,7 @@ router.post(
 router.post(
   "/:id/process",
   adminOnly,
+  requirePermission(PERMISSIONS.MANAGE_INSPECTIONS),
   validateObjectId,
   validate(processNtsaVerificationSchema),
   asyncHandler(async (req, res) => {

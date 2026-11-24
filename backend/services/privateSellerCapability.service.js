@@ -155,8 +155,60 @@ export const listApplications = async ({ status, limit = 50 } = {}) => {
   let q = getSupabase().from(TABLE).select("*").order("submitted_at", { ascending: false }).limit(Math.min(Number(limit) || 50, 200));
   if (status && SELLER_STATUSES.includes(status)) q = q.eq("status", status);
   const { data, error } = await q;
+  // The historical-application table is optional (the free/no-approval policy does not need it). A confirmed missing table is an
+  // honestly EMPTY historical set, not a server error; any other database failure still propagates and fails closed.
+  if (error && isMissingCapabilityTable(error)) return [];
   if (error) throw error;
   return (data || []).map(map);
+};
+
+const PERSONAL_ROLES = ["user", "individual_seller"];
+const clean = (v) => String(v ?? "").replace(/[%,()*\\]/g, " ").trim().slice(0, 80);
+
+/** Personal accounts (one unified identity: buy + sell) for staff review. Does NOT depend on historical applications.
+ *  Reports account type, account status, email verification, listing count and, separately, any historical application record. */
+export const listPersonalAccounts = async ({ q, state = "all", verified, page = 1, limit = 25 } = {}) => {
+  const sb = getSupabase();
+  const pageNo = Math.max(1, Number.parseInt(page, 10) || 1);
+  const size = Math.min(50, Math.max(1, Number.parseInt(limit, 10) || 25));
+  let query = sb.from("users")
+    .select("id,name,email,role,status,email_verified,is_banned,phone,created_at", { count: "exact" })
+    .in("role", PERSONAL_ROLES)
+    .order("created_at", { ascending: false })
+    .range((pageNo - 1) * size, pageNo * size - 1);
+  const term = clean(q);
+  if (term) query = query.or(`name.ilike.%${term}%,email.ilike.%${term}%`);
+  if (state === "restricted") query = query.eq("is_banned", true);
+  else if (state === "active") query = query.or("is_banned.is.null,is_banned.eq.false");
+  if (verified === "true" || verified === true) query = query.eq("email_verified", true);
+  else if (verified === "false" || verified === false) query = query.or("email_verified.is.null,email_verified.eq.false");
+  const { data: users, error, count } = await query;
+  if (error) throw error;
+  const rows = users || [];
+  const ids = rows.map((u) => u.id);
+  const listings = new Map();
+  const apps = new Map();
+  if (ids.length) {
+    const { data: cars, error: carsError } = await sb.from("cars").select("dealer_id,status").in("dealer_id", ids).limit(5000);
+    if (carsError) throw carsError;
+    for (const c of cars || []) { const e = listings.get(c.dealer_id) || { total: 0, published: 0 }; e.total += 1; if (c.status === "available") e.published += 1; listings.set(c.dealer_id, e); }
+    const { data: capRows, error: capError } = await sb.from(TABLE).select("*").in("user_id", ids);
+    if (capError && !isMissingCapabilityTable(capError)) throw capError;
+    for (const r of capRows || []) apps.set(r.user_id, map(r));
+  }
+  return {
+    accounts: rows.map((u) => ({
+      id: u.id, name: u.name || null, email: u.email || null, phone: u.phone || null, createdAt: u.created_at || null,
+      accountType: u.role === "individual_seller" ? "personal_legacy" : "personal",
+      accountState: u.is_banned ? "restricted" : "active",
+      emailVerified: u.email_verified === true,
+      // Legacy users.status of an old individual_seller is a historical value, not a current approval gate.
+      legacyRecordStatus: u.role === "individual_seller" && u.status && u.status !== "approved" ? u.status : null,
+      listings: listings.get(u.id) || { total: 0, published: 0 },
+      historicalApplication: apps.get(u.id) || null,
+    })),
+    page: pageNo, limit: size, total: count ?? rows.length,
+  };
 };
 
 /** Keeps the capability row in step when the LEGACY admin approval endpoint approves an individual_seller.

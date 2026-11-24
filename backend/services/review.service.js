@@ -114,7 +114,8 @@ export async function moderateReview(reviewId, status, moderatorId) {
     moderatedBy: moderatorId,
     moderatedAt: new Date().toISOString(),
   });
-  await recalculateDealerRating(updated.dealerId);
+  // reviews rows map dealer_id -> `dealer` (fieldMap alias), so `dealerId` is undefined on the returned row.
+  await recalculateDealerRating(updated.dealerId || updated.dealer || review.dealerId || review.dealer);
   return (await enrichReviews([updated]))[0];
 }
 
@@ -122,7 +123,7 @@ export async function deleteReview(reviewId, actorId, isAdmin = false) {
   const review = await db.findById('reviews', normalizeId(reviewId));
   if (!review) throw Object.assign(new Error('Review not found'), { statusCode: 404 });
   if (!isAdmin && String(review.reviewerId) !== String(actorId)) throw Object.assign(new Error('Not authorized'), { statusCode: 403 });
-  const dealerId = review.dealerId;
+  const dealerId = review.dealerId || review.dealer;
   const { error } = await getSupabase().from('reviews').delete().eq('id', normalizeId(reviewId));
   if (error) throw error;
   await recalculateDealerRating(dealerId);

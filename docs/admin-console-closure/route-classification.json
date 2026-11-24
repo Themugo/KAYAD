@@ -1,0 +1,387 @@
+{
+ "generated": "2026-11-24T11:47:23.836Z",
+ "total": 53,
+ "counts": {
+  "W": 13,
+  "R": 28,
+  "S": 5,
+  "B": 0,
+  "D": 7,
+  "N": 0
+ },
+ "moderatorRestricted": 33,
+ "problems": [],
+ "rows": [
+  {
+   "route": "/admin",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/users",
+   "class": "W",
+   "label": "Fully workflow verified",
+   "evidence": "journeys 26, 30 (suspend/restore, rank boundary, session revoke); vitest adminTables",
+   "limits": "no hard delete exercised"
+  },
+  {
+   "route": "/admin/sellers",
+   "class": "W",
+   "label": "Fully workflow verified",
+   "evidence": "journeys 23, 24, 12, 22, 30 (dealer onboarding → pending → owner decision; suspension request)",
+   "limits": "live dealer data not touched"
+  },
+  {
+   "route": "/admin/private-seller-applications",
+   "class": "W",
+   "label": "Fully workflow verified",
+   "evidence": "journey 30 (personal accounts list/search/filter/pagination/suspend/restore; empty + table-absent); vitest AdminPersonalAccounts",
+   "limits": "legacy application table absent on hosted"
+  },
+  {
+   "route": "/admin/cars",
+   "class": "W",
+   "label": "Fully workflow verified",
+   "evidence": "journey 28 M6–M7; 07/09/11",
+   "limits": ""
+  },
+  {
+   "route": "/admin/moderation",
+   "class": "W",
+   "label": "Fully workflow verified",
+   "evidence": "journey 28 M1–M5",
+   "limits": ""
+  },
+  {
+   "route": "/admin/auctions",
+   "class": "S",
+   "label": "Safely simulated",
+   "evidence": "journey 31 E6–E9 (idempotent end, invalid extend/winner rejected, honest empty bid history); journeys 05/09 sale-vs-escrow",
+   "limits": "no live settlement executed (financial logic untouched)"
+  },
+  {
+   "route": "/admin/bids",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "bid history reads; suspicious-bid flagging 503 (not provisioned)"
+  },
+  {
+   "route": "/admin/escrows",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "no money movement exercised; hosted transition_escrow drift noted, not replaced"
+  },
+  {
+   "route": "/admin/reviews",
+   "class": "W",
+   "label": "Fully workflow verified",
+   "evidence": "journey 31 B1–B7 (approve/reject/delete persist; moderator read-only; fixes reviews dealer-id defect)",
+   "limits": ""
+  },
+  {
+   "route": "/admin/referrals",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/chats",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/reports",
+   "class": "W",
+   "label": "Fully workflow verified",
+   "evidence": "journey 27 A1–A11; jest stage3aReportQueue",
+   "limits": "hosted lacks reports table until migration authorised"
+  },
+  {
+   "route": "/admin/support-tickets",
+   "class": "W",
+   "label": "Fully workflow verified",
+   "evidence": "journey 28 S1–S9",
+   "limits": ""
+  },
+  {
+   "route": "/admin/feedback",
+   "class": "W",
+   "label": "Fully workflow verified",
+   "evidence": "journey 27 B1–B5",
+   "limits": "hosted lacks feedback table until migration authorised"
+  },
+  {
+   "route": "/admin/market-data",
+   "class": "W",
+   "label": "Fully workflow verified",
+   "evidence": "journey 27 D1–D3",
+   "limits": "hosted table exists"
+  },
+  {
+   "route": "/admin/transactions",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "read model only; payments list authorisation in journey 31 E"
+  },
+  {
+   "route": "/admin/ntsa-queue",
+   "class": "S",
+   "label": "Safely simulated",
+   "evidence": "journey 27 D4–D7, 31 E10; server now requires MANAGE_INSPECTIONS",
+   "limits": "internal queue only; no live NTSA call"
+  },
+  {
+   "route": "/admin/inspections",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "provider-dependent actions not executed"
+  },
+  {
+   "route": "/admin/dealer-verifications",
+   "class": "W",
+   "label": "Fully workflow verified",
+   "evidence": "journeys 12, 23, 24, 30 (suspension request/approve/reject/cancel/replay/duplicate)",
+   "limits": "hosted lacks dealer_suspension_requests until migration authorised"
+  },
+  {
+   "route": "/admin/inspector-applications",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "decisions not executed (journey 31 E10 authorisation)"
+  },
+  {
+   "route": "/admin/security-log",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/ads",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/broadcast",
+   "class": "S",
+   "label": "Safely simulated",
+   "evidence": "journey 27 C1–C6 (authorisation, validation, audience preview)",
+   "limits": "send intentionally NOT executed (no real broadcasts)"
+  },
+  {
+   "route": "/admin/settings",
+   "class": "W",
+   "label": "Fully workflow verified",
+   "evidence": "journey 31 A1–A10 (save → reload → public consumer; invalid refused and nothing saved; unauthorised refused)",
+   "limits": "financial/escrow keys are recorded-only and not changed here"
+  },
+  {
+   "route": "/admin/control-room",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/staff",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "create/offboard not executed here; journeys 14, 22, 26, 29 cover write matrix"
+  },
+  {
+   "route": "/admin/staff-permissions",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "authorisation verified (journeys 26, 29); edits not exercised here"
+  },
+  {
+   "route": "/admin/traffic-analytics",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/site-designs",
+   "class": "S",
+   "label": "Safely simulated",
+   "evidence": "journey 31 C1–C6 (draft create/list/confirmed-delete; live site untouched)",
+   "limits": "publish NOT exercised"
+  },
+  {
+   "route": "/admin/featured-vehicles",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/panic-room",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "destructive actions NEVER executed"
+  },
+  {
+   "route": "/admin/platform-recovery",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "recovery actions NEVER executed"
+  },
+  {
+   "route": "/admin/webhoist",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/cms",
+   "class": "S",
+   "label": "Safely simulated",
+   "evidence": "journey 27 F4–F6, 29 matrix",
+   "limits": "content publish NOT exercised"
+  },
+  {
+   "route": "/admin/automation",
+   "class": "D",
+   "label": "Deliberately unavailable",
+   "evidence": "journey 27 E: 503 FEATURE_NOT_PROVISIONED; sweep shows honest state",
+   "limits": "not provisioned"
+  },
+  {
+   "route": "/admin/config",
+   "class": "D",
+   "label": "Deliberately unavailable",
+   "evidence": "journey 27 E",
+   "limits": "not provisioned; overlaps /admin/settings"
+  },
+  {
+   "route": "/admin/lowcode",
+   "class": "D",
+   "label": "Deliberately unavailable",
+   "evidence": "journey 27 E",
+   "limits": "not provisioned"
+  },
+  {
+   "route": "/admin/vxp",
+   "class": "D",
+   "label": "Deliberately unavailable",
+   "evidence": "journey 27 E",
+   "limits": "not provisioned"
+  },
+  {
+   "route": "/admin/xos",
+   "class": "D",
+   "label": "Deliberately unavailable",
+   "evidence": "journey 27 E",
+   "limits": "not provisioned"
+  },
+  {
+   "route": "/admin/ai",
+   "class": "D",
+   "label": "Deliberately unavailable",
+   "evidence": "journey 27 E",
+   "limits": "not provisioned"
+  },
+  {
+   "route": "/admin/digital-twin",
+   "class": "D",
+   "label": "Deliberately unavailable",
+   "evidence": "journey 27 E",
+   "limits": "not provisioned"
+  },
+  {
+   "route": "/admin/control-center",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/integration",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/governance",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/intelligence",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/command-center",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/improvement",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/platform-factory",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/owners",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "owner-only; writes not executed"
+  },
+  {
+   "route": "/admin/communications",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "provider sends not executed"
+  },
+  {
+   "route": "/admin/provider-governance",
+   "class": "R",
+   "label": "Read-only verified",
+   "evidence": "sweep: Super Admin renders clean at 1440+390 with zero failed API; moderator guard per sweep; journey 32 T1–T5 on the endpoints this page calls (anonymous/personal/dealer refused, moderator consistent with UI, no 5xx, no SQL leakage)",
+   "limits": "write actions on this page not exercised"
+  },
+  {
+   "route": "/admin/support",
+   "class": "W",
+   "label": "Fully workflow verified",
+   "evidence": "journey 28 (same workspace as support-tickets)",
+   "limits": ""
+  }
+ ]
+}

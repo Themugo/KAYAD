@@ -569,6 +569,11 @@ export const adminVerificationAPI = {
   reject:      (id: string, body: any)  => api.post(`/verification/admin/${id}/reject`, body).then(unwrap),
   suspend:     (id: string, body: any)  => api.post(`/verification/admin/${id}/suspend`, body).then(unwrap),
   reinstate:   (id: string)    => api.post(`/verification/admin/${id}/reinstate`).then(unwrap),
+  // Dealer suspension is a reasoned request by Admin staff that a Super Admin decides. A pending request is not a suspension.
+  requestSuspension:  (id: string, body: { reasonCategory: string; reason: string; evidenceReference?: string }) => api.post(`/verification/admin/${id}/suspend-request`, body).then(unwrap),
+  suspensionRequests: (params?: { status?: string }) => api.get('/verification/admin/suspension-requests', { params }).then(unwrap),
+  decideSuspension:   (requestId: string, body: { decision: 'approve' | 'reject'; reason?: string }) => api.post(`/verification/admin/suspension-requests/${requestId}/decision`, body).then(unwrap),
+  cancelSuspension:   (requestId: string) => api.post(`/verification/admin/suspension-requests/${requestId}/cancel`).then(unwrap),
 };
 
 // ── VERIFICATION ──────────────────────────────────────

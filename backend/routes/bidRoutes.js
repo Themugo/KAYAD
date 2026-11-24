@@ -1,5 +1,6 @@
 import express from "express";
 import { protect, adminOnly } from "../middleware/auth.js";
+import { requirePermission, PERMISSIONS } from "../middleware/rbac.js";
 import asyncHandler from "../middleware/asyncHandler.js";
 import { validateObjectId, validateBid, validateResponse, bidResponseSchema, validateQuery, bidListQuerySchema } from "../middleware/validate.js";
 import { bidLimiter } from "../middleware/rateLimiter.js";
@@ -71,6 +72,7 @@ router.get(
   "/admin/all",
   protect,
   adminOnly,
+  requirePermission(PERMISSIONS.MANAGE_BIDS),
   asyncHandler(async (req, res) => {
     const { page, limit, skip } = getPagination(req);
 

@@ -85,3 +85,22 @@ describe('admin tables render every declared column and keep their actions reach
     expect(api.deleteCar).not.toHaveBeenCalled();
   });
 });
+
+describe('personal account status is never shown as a dealer-style approval (closure)', () => {
+  test('a legacy individual_seller with users.status=pending is Active with a legacy note, not "Pending approval"; dealers keep it', async () => {
+    api.users.mockResolvedValue({ users: [
+      { _id: 'l1', name: 'Legacy Seller', email: 'l@x.test', role: 'individual_seller', status: 'pending', emailVerified: true },
+      { _id: 'd9', name: 'New Dealer', email: 'n@x.test', role: 'dealer', status: 'pending' },
+    ], total: 2 });
+    render(<AdminUsers />);
+    const legacy = (await screen.findByText('Legacy Seller')).closest('tr');
+    expect(within(legacy).queryByText('Pending approval')).toBeNull();
+    expect(within(legacy).getByText('Active')).toBeTruthy();
+    expect(within(legacy).getByText(/Legacy record: pending/)).toBeTruthy();
+    expect(within(legacy).getByText('Email verified')).toBeTruthy();
+    expect(within(legacy).getByText('personal account (legacy)')).toBeTruthy();
+    expect(within(legacy).queryByText(/individual seller/i)).toBeNull();
+    const dealer = screen.getByText('New Dealer').closest('tr');
+    expect(within(dealer).getByText('Pending approval')).toBeTruthy();
+  });
+});
